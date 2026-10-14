@@ -1,0 +1,14 @@
+{
+  "name": "qa-spy",
+  "displayName": "QA Spy (observation only)",
+  "version": "0.0.1",
+  "publisher": "qa",
+  "engines": { "vscode": "^1.95.0" },
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "qaSpy.dump", "title": "QA Spy: Dump State" }
+    ]
+  }
+}

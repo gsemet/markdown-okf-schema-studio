@@ -1,0 +1,6101 @@
+import * as assert from "node:assert/strict";
+import { test } from "node:test";
+import * as vm from "node:vm";
+
+import {
+  createScrollSyncScript,
+  type PositionedSourceMapping,
+} from "../../src/webview/scrollSync";
+
+function mapping(sourceLine: number, top: number): PositionedSourceMapping {
+  return {
+    element: { getAttribute: () => null },
+    blockId: `block-${sourceLine}`,
+    sourceFile: "/workspace/active.md",
+    sourceLine,
+    documentId: "file:///active.md",
+    domOrder: sourceLine,
+    top,
+    height: 40,
+  };
+}
+
+type RuntimeListener = (event: unknown) => void;
+
+class RuntimeElement {
+  private readonly attributes: Record<string, string>;
+  private readonly listeners = new Map<string, RuntimeListener[]>();
+  private readonly styleValues = new Map<string, string>();
+  public readonly tagName: string;
+
+  public readonly style = {
+    height: "",
+    getPropertyValue: (name: string): string => this.styleValues.get(name) ?? "",
+    setProperty: (name: string, value: string): void => {
+      this.styleValues.set(name, value);
+    },
+  };
+
+  public constructor(
+    attributes: Record<string, string>,
+    private readonly windowState: { scrollY: number },
+    public top: number,
+    public height = 40,
+    tagName = "div",
+  ) {
+    this.attributes = attributes;
+    this.tagName = tagName.toUpperCase();
+  }
+
+  public scrollHeight = 2_000;
+  public scrollWidth = 0;
+  public clientWidth = 0;
+  public className = "";
+  public textContent = "";
+  public innerHTML = "";
+  public value = "";
+  public selectionStart = 0;
+  public selectionEnd = 0;
+  public type = "";
+  public step = "";
+  public checked = false;
+  public hidden = true;
+  public selected = false;
+  public colSpan = 0;
+  public disabled = false;
+  public rows: number | RuntimeElement[] = 2;
+  public cells: RuntimeElement[] = [];
+  public rowIndex = 0;
+  public cellIndex = 0;
+  public focusOptions: FocusOptions | undefined;
+  public selectionRange: [number, number] | undefined;
+  public parentElement: RuntimeElement | undefined;
+  public readonly childElements: RuntimeElement[] = [];
+  public readonly insertedElements: RuntimeElement[] = [];
+  public removed = false;
+  public rectProvider: (() => { top: number; height: number; bottom?: number }) | undefined;
+  public rectReadCount = 0;
+
+  public get childNodes(): RuntimeElement[] {
+    return this.childElements;
+  }
+
+  public getAttribute(name: string): string | null {
+    return this.attributes[name] ?? null;
+  }
+
+  public querySelector(selector: string): RuntimeElement | null {
+    if (selector === ".okf-name-cell") {
+      return this.childElements.find((child) => child.getAttribute("class") === "okf-name-cell") ?? null;
+    }
+    if (selector === "[data-okf-value-display]") {
+      return this.childElements.find((child) => child.getAttribute("data-okf-value-display") !== null) ?? null;
+    }
+    if (selector === "[data-okf-value-cell]") {
+      return this.childElements.find((child) => child.getAttribute("data-okf-value-cell") !== null) ?? null;
+    }
+    if (selector === '[data-okf-edit-cell="value"]') {
+      return this.childElements.find((child) => child.getAttribute("data-okf-edit-cell") === "value") ?? null;
+    }
+    if (selector === "[data-okf-list-item-input]") {
+      return this.querySelectorAll(selector)[0] ?? null;
+    }
+    return null;
+  }
+
+  public querySelectorAll(selector: string): RuntimeElement[] {
+    const matches = (element: RuntimeElement): boolean => {
+      if (selector === "[data-okf-list-item-input]") {
+        return element.getAttribute("data-okf-list-item-input") !== null;
+      }
+      if (selector === "input, button") {
+        return element.tagName === "INPUT" || element.tagName === "BUTTON";
+      }
+      if (selector === "th, td") {
+        return element.tagName === "TH" || element.tagName === "TD";
+      }
+      return false;
+    };
+    const descendants = (element: RuntimeElement): RuntimeElement[] => element.childElements
+      .flatMap((child) => [
+        ...(matches(child) ? [child] : []),
+        ...descendants(child),
+      ]);
+    return descendants(this);
+  }
+
+  public setAttribute(name: string, value: string): void {
+    this.attributes[name] = value;
+  }
+
+  public removeAttribute(name: string): void {
+    delete this.attributes[name];
+  }
+
+  public getBoundingClientRect(): { top: number; height: number; left?: number; bottom?: number; width?: number } {
+    this.rectReadCount += 1;
+    if (this.rectProvider) return this.rectProvider();
+    if (this.getAttribute("data-sphinx-preview-editing") === "true") {
+      return { top: 0, height: 0 };
+    }
+    const top = this.top - this.windowState.scrollY;
+    return { top, height: this.height, left: 0, bottom: top + this.height, width: 200 };
+  }
+
+  public closest(selector: string): RuntimeElement | null {
+    if (selector === "a") return null;
+    let current: RuntimeElement | undefined = this;
+    while (current) {
+      if (
+        (selector === "a.okf-frontmatter-link" && current.tagName === "A"
+          && current.getAttribute("class") === "okf-frontmatter-link")
+        || (selector === '.okf-frontmatter-link:not([data-okf-link-status="pending"])'
+          && (current.getAttribute("class") ?? "").split(" ").includes("okf-frontmatter-link")
+          && current.getAttribute("data-okf-link-status") !== "pending")
+        || (selector === "[data-okf-badge]" && current.getAttribute("data-okf-badge") !== null)
+        || (selector === "a[data-sphinx-preview-navigation]" && current.tagName === "A"
+          && current.getAttribute("data-sphinx-preview-navigation") !== null)
+        || (selector === 'a[data-sphinx-preview-navigation^="okf-link:"]' && current.tagName === "A"
+          && (current.getAttribute("data-sphinx-preview-navigation") ?? "").startsWith("okf-link:"))
+        || (selector === "[data-okf-edit-cell]" && current.getAttribute("data-okf-edit-cell") !== null)
+        || (selector === "[data-okf-description-toggle]" && current.getAttribute("data-okf-description-toggle") !== null)
+        || (selector === "[data-okf-frontmatter-editor]" && current.getAttribute("data-okf-frontmatter-editor") !== null)
+        || (selector === "[data-okf-frontmatter-menu]" && current.getAttribute("data-okf-frontmatter-menu") !== null)
+        || (selector === "tr[data-okf-field]" && current.tagName === "TR" && current.getAttribute("data-okf-field") !== null)
+        || (selector === "td, th" && ["TD", "TH"].includes(current.tagName))
+        || (selector === "table" && current.tagName === "TABLE")
+        || (selector === "ul, ol" && ["UL", "OL"].includes(current.tagName))
+        || (selector === "[data-sphinx-preview-block-editor]"
+          && current.getAttribute("data-sphinx-preview-block-editor") !== null)
+        || (selector === "pre" && current.tagName === "PRE")
+        || (selector === ".sphinx-preview-insert-point"
+          && current.className.split(" ").includes("sphinx-preview-insert-point"))
+        || (selector === "[data-okf-properties]" && current.getAttribute("data-okf-properties") !== null)
+        || (selector === "input.myst-checkbox" && current.tagName === "INPUT"
+          && current.getAttribute("class") === "myst-checkbox")
+        || (selector.includes("data-sphinx-source-line") && current.getAttribute("data-sphinx-source-line") !== null)
+      ) {
+        return current;
+      }
+      current = current.parentElement;
+    }
+    return null;
+  }
+
+  public addEventListener(type: string, listener: RuntimeListener): void {
+    const listeners = this.listeners.get(type) ?? [];
+    listeners.push(listener);
+    this.listeners.set(type, listeners);
+  }
+
+  public appendChild(child: RuntimeElement): RuntimeElement {
+    child.parentElement?.removeChild(child);
+    child.parentElement = this;
+    this.childElements.push(child);
+    if (this.tagName === "SELECT" && child.selected) this.value = child.value;
+    return child;
+  }
+
+  public insertBefore(child: RuntimeElement, reference: RuntimeElement | null): RuntimeElement {
+    child.parentElement?.removeChild(child);
+    child.parentElement = this;
+    const index = reference ? this.childElements.indexOf(reference) : -1;
+    if (index < 0) {
+      this.childElements.push(child);
+    } else {
+      this.childElements.splice(index, 0, child);
+    }
+    return child;
+  }
+
+  public removeChild(child: RuntimeElement): RuntimeElement {
+    const index = this.childElements.indexOf(child);
+    if (index >= 0) this.childElements.splice(index, 1);
+    child.parentElement = undefined;
+    return child;
+  }
+
+  public remove(): void {
+    this.removed = true;
+    this.parentElement?.removeChild(this);
+    this.onRemove?.();
+  }
+
+  public onRemove: (() => void) | undefined;
+  public adjacentHtmlHandler: ((position: string, markup: string) => void) | undefined;
+
+  public insertAdjacentHTML(position: string, markup: string): void {
+    this.adjacentHtmlHandler?.(position, markup);
+  }
+
+  public contains(candidate: RuntimeElement): boolean {
+    return this.childElements.some((child) => child === candidate || child.contains(candidate));
+  }
+
+  public insertAdjacentElement(_position: string, element: RuntimeElement): RuntimeElement {
+    element.parentElement = this.parentElement;
+    element.top = this.top;
+    this.insertedElements.push(element);
+    return element;
+  }
+
+  public focus(options?: FocusOptions): void {
+    this.focusOptions = options;
+    if (!options?.preventScroll) this.windowState.scrollY = this.top;
+  }
+
+  public setSelectionRange(start: number, end: number): void {
+    this.selectionStart = start;
+    this.selectionEnd = end;
+    this.selectionRange = [start, end];
+  }
+
+  public scrollIntoView(): void {
+    this.windowState.scrollY = Math.max(0, this.top - 20);
+  }
+
+  public dispatch(type: string, event: unknown = {}): void {
+    for (const listener of this.listeners.get(type) ?? []) {
+      listener(event);
+    }
+  }
+}
+
+// Edit mode also inserts zero-height insertion points after blocks; the editor is the inserted
+// element that carries the block-editor attribute.
+function blockEditorOf(block: RuntimeElement): RuntimeElement {
+  return block.insertedElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-block-editor") !== null) as RuntimeElement;
+}
+
+interface RuntimeHarness {
+  readonly anchor: RuntimeElement;
+  readonly image: RuntimeElement;
+  readonly mappings: RuntimeElement[];
+  readonly headings: RuntimeElement[];
+  readonly stickyHeadings: RuntimeElement;
+  readonly toolbar: RuntimeElement;
+  readonly previewContent: RuntimeElement;
+  readonly body: RuntimeElement;
+  readonly observedResizeTarget: RuntimeElement | undefined;
+  readonly themeButton: RuntimeElement;
+  readonly refreshButton: RuntimeElement;
+  readonly anchorButton: RuntimeElement;
+  readonly editModeButton: RuntimeElement;
+  readonly checkbox: RuntimeElement;
+  readonly descriptionButton: RuntimeElement;
+  readonly frontmatterNameCell: RuntimeElement;
+  readonly frontmatterNameDisplay: RuntimeElement;
+  readonly frontmatterValueCell: RuntimeElement;
+  readonly frontmatterValueDisplay: RuntimeElement;
+  readonly frontmatterRow: RuntimeElement;
+  readonly documentElement: RuntimeElement;
+  readonly createdElements: RuntimeElement[];
+  readonly contentTables: RuntimeElement[];
+  /** The status region the page was loaded with (null when the harness has none). */
+  readonly statusRegion: RuntimeElement | null;
+  /** The links of the content, as `a[data-sphinx-preview-navigation]` finds them. */
+  readonly contentLinks: RuntimeElement[];
+  /** The `details` elements of the content (each may carry an `open` property). */
+  readonly details: RuntimeElement[];
+  /** Links the fake IntersectionObserver was asked to observe (needs `intersectionObserver`). */
+  readonly observedLinks: RuntimeElement[];
+  /** Reports the observed link as visible, like the real observer would. */
+  intersect(link: RuntimeElement): void;
+  flushMicrotasks(): void;
+  /** Types of the events dispatched on the document. */
+  readonly dispatchedEvents: string[];
+  readonly messages: Array<Record<string, unknown>>;
+  readonly htmlInsertions: Array<{ position: string; markup: string }>;
+  readonly frontmatterProperties: RuntimeElement;
+  currentProperties(): RuntimeElement | null;
+  readonly windowState: { scrollY: number };
+  getWebviewState(): Record<string, unknown>;
+  dispatchDocument(type: string, event: unknown): void;
+  dispatchMessage(message: Record<string, unknown>): void;
+  dispatchVisualViewportResize(): void;
+  dispatchWindow(type: string, event?: unknown): void;
+  setVisibilityState(state: string): void;
+  flushFrames(): void;
+  flushTimers(): void;
+  pendingTimerCount(): number;
+  triggerResizeObserver(): void;
+}
+
+function createRuntimeHarness(configuration: Partial<{
+  scrollPreviewWithEditor: boolean;
+  scrollEditorWithPreview: boolean;
+  markEditorSelection: boolean;
+  doubleClickToSwitchToEditor: boolean;
+  stickyHeadingDepth: number;
+  toolbarBottom: number;
+  controlsHeight: number;
+  viewportHeight: number;
+  viewportWidth: number;
+  firstMappedSourceLine: number;
+  firstMappedTop: number;
+  frontmatterHeight: number;
+  mapFrontmatter: boolean;
+  initialState: { descriptionsCollapsed: boolean };
+  initialPin: { line: number; viewportTop: number };
+  initialAnchor: number;
+  savedDescriptionsCollapsed: boolean;
+  editingEnabled: boolean;
+  emptyBody: boolean;
+  propertiesMapped: boolean;
+  previewStatus: string;
+  requestId: number;
+  savedState: Record<string, unknown>;
+  frontmatterRowAttributes: Record<string, string>;
+  pairedTextEditor: boolean;
+  initialEditMode: boolean;
+  intersectionObserver: boolean;
+}> = {}, savedThemeMode?: string, sharedThemeMode?: "current" | "dark" | "white", savedAnchorMode?: boolean): RuntimeHarness {
+  const {
+    firstMappedSourceLine = 1,
+    firstMappedTop = 0,
+    frontmatterHeight = 0,
+    mapFrontmatter = false,
+    toolbarBottom = 0,
+    controlsHeight = 0,
+    savedDescriptionsCollapsed,
+    editingEnabled = true,
+    emptyBody = false,
+    propertiesMapped = false,
+    previewStatus,
+    savedState = {},
+    frontmatterRowAttributes = {},
+    intersectionObserver = false,
+    ...runtimeConfiguration
+  } = configuration;
+  const windowState = { scrollY: 0 };
+  const mappings = emptyBody ? [] : [
+    ...(frontmatterHeight > 0 ? [new RuntimeElement(
+      {
+        "data-sphinx-preview-document": "file:///active.md",
+        "data-sphinx-source-end-line": String(firstMappedSourceLine - 1),
+        "data-sphinx-source-file": "/workspace/active.md",
+        "data-sphinx-source-line": "1",
+      },
+      windowState,
+      0,
+      frontmatterHeight,
+      "section",
+    )] : []),
+    new RuntimeElement(
+      {
+        "data-sphinx-preview-document": "file:///active.md",
+        "data-sphinx-source-end-line": String(firstMappedSourceLine),
+        "data-sphinx-source-file": "/workspace/active.md",
+        "data-sphinx-source-line": String(firstMappedSourceLine),
+      },
+      windowState,
+      firstMappedTop,
+    ),
+    new RuntimeElement(
+      {
+        "data-sphinx-preview-document": "file:///active.md",
+        "data-sphinx-source-end-line": "52",
+        "data-sphinx-source-file": "/workspace/active.md",
+        "data-sphinx-source-line": "50",
+      },
+      windowState,
+      500,
+    ),
+    new RuntimeElement(
+      {
+        "data-sphinx-preview-document": "file:///active.md",
+        "data-sphinx-source-end-line": "100",
+        "data-sphinx-source-file": "/workspace/active.md",
+        "data-sphinx-source-line": "100",
+      },
+      windowState,
+      1_000,
+    ),
+  ];
+  const headings = [
+    new RuntimeElement({}, windowState, 10, 24, "h1"),
+    new RuntimeElement({}, windowState, 160, 24, "h2"),
+    new RuntimeElement({}, windowState, 300, 24, "h3"),
+    new RuntimeElement({}, windowState, 500, 24, "h2"),
+  ];
+  headings[0].textContent = "Chapter";
+  headings[1].textContent = "Section";
+  headings[2].textContent = "Topic";
+  headings[3].textContent = "Next section";
+  const image = new RuntimeElement({}, windowState, 0, 0);
+  const anchor = new RuntimeElement({}, windowState, 800, 40);
+  const themeButton = new RuntimeElement({ "data-theme-mode": "current" }, windowState, 0, 34);
+  const refreshButton = new RuntimeElement({}, windowState, 0, 30);
+  const anchorButton = new RuntimeElement({}, windowState, 0, 30);
+  const editModeButton = new RuntimeElement({}, windowState, 0, 30);
+  const toolbar = new RuntimeElement({}, windowState, 12, Math.max(0, toolbarBottom - 12));
+  toolbar.rectProvider = () => ({
+    top: 12,
+    height: toolbar.height,
+    bottom: 12 + toolbar.height,
+  });
+  const checkbox = new RuntimeElement({
+    class: "myst-checkbox",
+    "data-myst-checkbox-line": "51",
+    "data-myst-checkbox-column": "2",
+  }, windowState, 510, 14, "input");
+  if (mappings.length >= 2) mappings[mappings.length - 2].appendChild(checkbox);
+  const stickyHeadings = new RuntimeElement({}, windowState, 0, 0);
+  stickyHeadings.rectProvider = () => ({ top: 116, height: stickyHeadings.height, bottom: 116 + stickyHeadings.height });
+  const descriptionButton = new RuntimeElement({ "data-okf-description-toggle": "" }, windowState, 0, 24, "button");
+  const frontmatterRow = new RuntimeElement({
+    "data-okf-editable": "true",
+    "data-okf-enums": '["draft","active"]',
+    "data-okf-field": "lifecycle",
+    "data-okf-schema-found": "true",
+    "data-okf-type": "enum",
+    "data-okf-value": '"draft"',
+    "data-okf-value-yaml": "draft\n",
+    ...frontmatterRowAttributes,
+  }, windowState, 0, 30, "tr");
+  const frontmatterNameCell = new RuntimeElement({ "data-okf-edit-cell": "name" }, windowState, 0, 30, "th");
+  const frontmatterNameDisplay = new RuntimeElement({ class: "okf-name-cell" }, windowState, 0, 30, "span");
+  const frontmatterValueCell = new RuntimeElement({
+    "data-okf-edit-cell": "value",
+    "data-okf-value-cell": "true",
+  }, windowState, 0, 30, "td");
+  const frontmatterValueDisplay = new RuntimeElement({ "data-okf-value-display": "true" }, windowState, 0, 30, "span");
+  const frontmatterProperties = new RuntimeElement({
+    "data-okf-properties": "true",
+    "data-okf-available-keys": '["status","owner"]',
+    "data-okf-available-fields": '[{"name":"status","fieldType":"enum","enums":["draft","active"],"defaultValue":"draft"},{"name":"owner","fieldType":"text","enums":null,"defaultValue":""}]',
+    ...(mapFrontmatter ? {
+      "data-sphinx-preview-document": "file:///active.md",
+      "data-sphinx-source-file": "/workspace/active.md",
+      "data-sphinx-source-line": "1",
+    } : {}),
+  }, windowState, 0, mapFrontmatter ? 30 : 0, "section");
+  const frontmatterTable = new RuntimeElement({}, windowState, 0, 0, "table");
+  const frontmatterBody = new RuntimeElement({}, windowState, 0, 0, "tbody");
+  frontmatterNameCell.appendChild(frontmatterNameDisplay);
+  frontmatterValueCell.appendChild(frontmatterValueDisplay);
+  frontmatterRow.appendChild(frontmatterNameCell);
+  frontmatterRow.appendChild(frontmatterValueCell);
+  frontmatterProperties.appendChild(frontmatterTable);
+  frontmatterTable.appendChild(frontmatterBody);
+  frontmatterBody.appendChild(frontmatterRow);
+  const documentElement = new RuntimeElement({}, windowState, 0);
+  const body = new RuntimeElement({}, windowState, 0, 0, "body");
+  const previewContent = new RuntimeElement({}, windowState, 0, 1, "main");
+  // The properties section as the runtime finds it in the content. Markup inserted through
+  // insertAdjacentHTML becomes a new section whose edit cells are counted from the markup.
+  let currentProperties: RuntimeElement | null = frontmatterProperties;
+  let pendingReplacement: RuntimeElement | undefined;
+  const htmlInsertions: Array<{ position: string; markup: string }> = [];
+  const makeSection = (markup: string): RuntimeElement => {
+    const section = new RuntimeElement({ "data-okf-properties": "true" }, windowState, 0, 0, "section");
+    section.innerHTML = markup;
+    for (let index = 0; index < (markup.match(/data-okf-edit-cell/gu) ?? []).length; index += 1) {
+      section.appendChild(new RuntimeElement({ "data-okf-edit-cell": "value" }, windowState, 0, 30, "td"));
+    }
+    section.adjacentHtmlHandler = (position, inserted) => {
+      htmlInsertions.push({ position, markup: inserted });
+      if (position === "beforebegin") pendingReplacement = makeSection(inserted);
+    };
+    section.onRemove = () => {
+      if (currentProperties === section) currentProperties = pendingReplacement ?? null;
+      pendingReplacement = undefined;
+    };
+    return section;
+  };
+  frontmatterProperties.adjacentHtmlHandler = (position, markup) => {
+    htmlInsertions.push({ position, markup });
+    if (position === "beforebegin") pendingReplacement = makeSection(markup);
+  };
+  frontmatterProperties.onRemove = () => {
+    if (currentProperties === frontmatterProperties) currentProperties = pendingReplacement ?? null;
+    pendingReplacement = undefined;
+  };
+  previewContent.querySelector = (selector: string): RuntimeElement | null => (
+    selector === "[data-okf-properties]" ? currentProperties : null
+  );
+  previewContent.adjacentHtmlHandler = (position, markup) => {
+    htmlInsertions.push({ position, markup });
+    if (position === "afterbegin") currentProperties = makeSection(markup);
+  };
+  const statusElement = previewStatus
+    ? new RuntimeElement({ "data-sphinx-preview-status": previewStatus }, windowState, 0, 0, "aside")
+    : null;
+  const createdElements: RuntimeElement[] = [];
+  const contentTables: RuntimeElement[] = [];
+  const contentLinks: RuntimeElement[] = [];
+  const details: RuntimeElement[] = [];
+  const observedLinks: RuntimeElement[] = [];
+  const dispatchedEvents: string[] = [];
+  const microtaskQueue: Array<() => void> = [];
+  let intersectionCallback: ((entries: Array<{ isIntersecting: boolean; target: RuntimeElement }>) => void) | undefined;
+  const messages: Array<Record<string, unknown>> = [];
+  let webviewState: Record<string, unknown> = {
+    ...(savedDescriptionsCollapsed !== undefined
+      ? { documentId: "file:///active.md", descriptionsCollapsed: savedDescriptionsCollapsed } : {}),
+    ...(savedThemeMode ? { previewThemeMode: savedThemeMode } : {}),
+    ...(savedAnchorMode !== undefined ? { anchorToEditor: savedAnchorMode } : {}),
+    ...savedState,
+  };
+  const windowListeners = new Map<string, RuntimeListener[]>();
+  const documentListeners = new Map<string, RuntimeListener[]>();
+  const viewportListeners: RuntimeListener[] = [];
+  const frameQueue: Array<() => void> = [];
+  const timerQueue = new Map<number, () => void>();
+  let nextTimerId = 1;
+  let visibilityState = "visible";
+  let resizeObserverCallback: (() => void) | undefined;
+  let observedResizeTarget: RuntimeElement | undefined;
+
+  const addListener = (
+    listenerMap: Map<string, RuntimeListener[]>,
+    type: string,
+    listener: RuntimeListener,
+  ): void => {
+    const listeners = listenerMap.get(type) ?? [];
+    listeners.push(listener);
+    listenerMap.set(type, listeners);
+  };
+  const dispatch = (
+    listenerMap: Map<string, RuntimeListener[]>,
+    type: string,
+    event: unknown,
+  ): void => {
+    for (const listener of listenerMap.get(type) ?? []) {
+      listener(event);
+      if ((event as { immediatePropagationStopped?: boolean } | undefined)?.immediatePropagationStopped) break;
+    }
+  };
+
+  const window = {
+    getComputedStyle: () => ({
+      getPropertyValue: (name: string): string => name === "--sphinx-preview-controls-height"
+        ? String(controlsHeight) + "px" : "",
+    }),
+    get scrollY(): number {
+      return windowState.scrollY;
+    },
+    innerHeight: configuration.viewportHeight ?? 100,
+    innerWidth: configuration.viewportWidth ?? 360,
+    visualViewport: {
+      addEventListener: (type: string, listener: RuntimeListener): void => {
+        if (type === "resize") {
+          viewportListeners.push(listener);
+        }
+      },
+    },
+    addEventListener: (type: string, listener: RuntimeListener): void => {
+      addListener(windowListeners, type, listener);
+    },
+    requestAnimationFrame: (callback: () => void): number => {
+      frameQueue.push(callback);
+      return frameQueue.length;
+    },
+    setTimeout: (callback: () => void, _delay?: number): number => {
+      const id = nextTimerId;
+      nextTimerId += 1;
+      timerQueue.set(id, callback);
+      return id;
+    },
+    clearTimeout: (id: number | undefined): void => {
+      if (id !== undefined) timerQueue.delete(id);
+    },
+    scrollTo: ({ top }: { top: number }): void => {
+      windowState.scrollY = top;
+    },
+    queueMicrotask: (callback: () => void): void => {
+      microtaskQueue.push(callback);
+    },
+    ...(intersectionObserver ? {
+      IntersectionObserver: class {
+        public constructor(callback: (entries: Array<{ isIntersecting: boolean; target: RuntimeElement }>) => void) {
+          intersectionCallback = callback;
+        }
+
+        public observe(target: RuntimeElement): void {
+          observedLinks.push(target);
+        }
+
+        public unobserve(): void {}
+
+        public disconnect(): void {}
+      },
+    } : {}),
+  };
+  const document = {
+    get visibilityState(): string {
+      return visibilityState;
+    },
+    body,
+    documentElement,
+    getElementById: (id: string): RuntimeElement | null => (
+      id === "section" ? anchor
+        : id === "sphinx-myst-preview-content" ? previewContent
+          : null
+    ),
+    querySelector: (selector: string): RuntimeElement | null => {
+      if (selector === "[data-sphinx-preview-theme-toggle]") return themeButton;
+      if (selector === "[data-sphinx-preview-refresh]") return refreshButton;
+      if (selector === "[data-sphinx-preview-anchor]") return anchorButton;
+      if (selector === "[data-sphinx-preview-edit-toggle]") return editingEnabled ? editModeButton : null;
+      if (selector === "[data-sphinx-preview-toolbar]") return toolbar;
+      if (selector === "[data-sphinx-preview-sticky-headings]") return stickyHeadings;
+      if (selector === "[data-sphinx-preview-status]") {
+        // A status region the runtime built replaces the one of the page.
+        return body.childElements.find((child) => child.getAttribute("data-sphinx-preview-status") !== null)
+          ?? (statusElement && !statusElement.removed ? statusElement : null);
+      }
+      if (selector === "tr[data-okf-field].okf-error, tr[data-okf-field].okf-warning, tr[data-okf-field].okf-info") {
+        return (frontmatterRow.getAttribute("class") ?? "").split(" ")
+          .some((name) => ["okf-error", "okf-warning", "okf-info"].includes(name)) ? frontmatterRow : null;
+      }
+      return null;
+    },
+    addEventListener: (type: string, listener: RuntimeListener): void => {
+      addListener(documentListeners, type, listener);
+    },
+    createElement: (tagName: string): RuntimeElement => {
+      const element = new RuntimeElement({}, windowState, 0, 0, tagName);
+      createdElements.push(element);
+      return element;
+    },
+    dispatchEvent: (event: { type: string }): boolean => {
+      dispatchedEvents.push(event.type);
+      return true;
+    },
+    querySelectorAll: (selector: string): RuntimeElement[] => (
+      selector === "img" ? [image]
+        : selector === "input.myst-checkbox" ? [checkbox]
+        : selector === "[data-okf-description-toggle]" ? [descriptionButton]
+        : selector === ".okf-info-row th[colspan]" ? []
+        : selector === "#sphinx-myst-preview-content table" ? [frontmatterTable, ...contentTables]
+        : selector === "[data-okf-edit-cell]" ? (currentProperties === frontmatterProperties
+          ? [frontmatterNameCell, frontmatterValueCell]
+          : currentProperties?.childElements ?? [])
+        : selector === "tr[data-okf-field]" ? [frontmatterRow]
+          : selector === "details" ? details
+            : selector === "a[data-sphinx-preview-navigation]" ? contentLinks
+            : selector === "h1, h2, h3, h4, h5, h6" ? headings
+            : propertiesMapped ? [frontmatterProperties, ...mappings] : mappings
+    ),
+  };
+  class ResizeObserver {
+    public constructor(callback: () => void) {
+      resizeObserverCallback = callback;
+    }
+
+    public observe(target: RuntimeElement): void {
+      observedResizeTarget = target;
+    }
+  }
+  const context = {
+    acquireVsCodeApi: () => ({
+      getState: () => webviewState,
+      postMessage: (message: Record<string, unknown>): void => {
+        messages.push(message);
+      },
+      setState: (state: Record<string, unknown>): void => {
+        webviewState = state;
+      },
+    }),
+    document,
+    Element: RuntimeElement,
+    ResizeObserver,
+    CustomEvent: class {
+      public constructor(public readonly type: string) {}
+    },
+    window,
+  };
+  vm.runInNewContext(
+    createScrollSyncScript({
+      documentId: "file:///active.md",
+      documentVersion: 7,
+      requestId: 11,
+      activeSourceFile: "/workspace/active.md",
+      ...(sharedThemeMode ? { previewThemeMode: sharedThemeMode } : {}),
+      ...runtimeConfiguration,
+    }),
+    context,
+  );
+
+  return {
+    anchor,
+    image,
+    mappings,
+    headings,
+    stickyHeadings,
+    descriptionButton,
+    previewContent,
+    body,
+    observedResizeTarget,
+    toolbar,
+    themeButton,
+    refreshButton,
+    anchorButton,
+    editModeButton,
+    checkbox,
+    frontmatterNameCell,
+    frontmatterNameDisplay,
+    frontmatterValueCell,
+    frontmatterValueDisplay,
+    frontmatterRow,
+    documentElement,
+    createdElements,
+    contentTables,
+    statusRegion: statusElement,
+    contentLinks,
+    details,
+    observedLinks,
+    intersect: (link: RuntimeElement) => intersectionCallback?.([{ isIntersecting: true, target: link }]),
+    flushMicrotasks: () => {
+      for (let round = 0; microtaskQueue.length > 0; round += 1) {
+        assert.ok(round < 100, "Webview microtasks did not settle");
+        microtaskQueue.splice(0).forEach((callback) => callback());
+      }
+    },
+    dispatchedEvents,
+    messages,
+    htmlInsertions,
+    currentProperties: () => currentProperties,
+    frontmatterProperties,
+    windowState,
+    getWebviewState: () => webviewState,
+    dispatchDocument: (type, event) => dispatch(documentListeners, type, event),
+    dispatchMessage: (message) => dispatch(windowListeners, "message", { data: message }),
+    dispatchVisualViewportResize: () => {
+      for (const listener of viewportListeners) {
+        listener({});
+      }
+    },
+    dispatchWindow: (type, event = {}) => dispatch(windowListeners, type, event),
+    setVisibilityState: (state: string) => {
+      visibilityState = state;
+    },
+    flushFrames: () => {
+      for (let frame = 0; frameQueue.length > 0; frame += 1) {
+        assert.ok(frame < 100, "Webview animation frames did not settle");
+        const callbacks = frameQueue.splice(0);
+        for (const callback of callbacks) {
+          callback();
+        }
+      }
+    },
+    flushTimers: () => {
+      for (let round = 0; timerQueue.size > 0; round += 1) {
+        assert.ok(round < 100, "Webview timers did not settle");
+        const callbacks = [...timerQueue.values()];
+        timerQueue.clear();
+        for (const callback of callbacks) {
+          callback();
+        }
+      }
+    },
+    pendingTimerCount: () => timerQueue.size,
+    triggerResizeObserver: () => resizeObserverCallback?.(),
+  };
+}
+
+test("latest saved Description visibility wins over an older enrichment snapshot", () => {
+  for (const collapsed of [true, false]) {
+    const harness = createRuntimeHarness({ viewportWidth: 900,
+      initialState: { descriptionsCollapsed: !collapsed }, savedDescriptionsCollapsed: collapsed });
+    assert.equal(harness.descriptionButton.getAttribute("aria-expanded"), String(!collapsed));
+    assert.equal(harness.getWebviewState().descriptionsCollapsed, collapsed);
+  }
+});
+
+test("Description column toggles persist and restore both states", () => {
+  const harness = createRuntimeHarness({ viewportWidth: 900 });
+  assert.equal(harness.descriptionButton.getAttribute("aria-expanded"), "true");
+  harness.dispatchDocument("click", { target: harness.descriptionButton });
+  assert.equal(harness.documentElement.getAttribute("data-okf-descriptions-collapsed"), "true");
+  assert.equal(harness.descriptionButton.getAttribute("aria-expanded"), "false");
+  assert.equal(harness.getWebviewState().descriptionsCollapsed, true);
+  assert.equal(harness.messages.at(-1)?.descriptionsCollapsed, true);
+  for (const collapsed of [true, false]) {
+    const restored = createRuntimeHarness({ initialState: { descriptionsCollapsed: collapsed } });
+    assert.equal(restored.documentElement.getAttribute("data-okf-descriptions-collapsed"), String(collapsed));
+    assert.equal(restored.descriptionButton.getAttribute("aria-expanded"), String(!collapsed));
+    assert.equal(restored.getWebviewState().descriptionsCollapsed, collapsed);
+  }
+  harness.dispatchDocument("click", { target: harness.descriptionButton });
+  assert.equal(harness.getWebviewState().descriptionsCollapsed, false);
+});
+
+test("narrow previews default to collapsed descriptions without overriding an explicit choice", () => {
+  const narrow = createRuntimeHarness({ viewportWidth: 471 });
+  assert.equal(narrow.descriptionButton.getAttribute("aria-expanded"), "false");
+  const expanded = createRuntimeHarness({ viewportWidth: 471, initialState: { descriptionsCollapsed: false } });
+  assert.equal(expanded.descriptionButton.getAttribute("aria-expanded"), "true");
+});
+
+test("does not shift sticky headings down when the floating toolbar grows", () => {
+  const harness = createRuntimeHarness({ toolbarBottom: 50 });
+  harness.toolbar.rectProvider = () => ({ top: 12, height: 38, bottom: 50, width: 130 });
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(harness.stickyHeadings.style.getPropertyValue("inset-block-start"), "");
+  assert.equal(harness.stickyHeadings.style.getPropertyValue("--sphinx-preview-toolbar-bottom"), "");
+  assert.equal(harness.stickyHeadings.style.getPropertyValue("--sphinx-preview-toolbar-width"), "152px");
+
+  harness.toolbar.rectProvider = () => ({ top: 12, height: 56, bottom: 68, width: 186 });
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(harness.stickyHeadings.style.getPropertyValue("inset-block-start"), "");
+  assert.equal(harness.stickyHeadings.style.getPropertyValue("--sphinx-preview-toolbar-bottom"), "");
+  assert.equal(harness.stickyHeadings.style.getPropertyValue("--sphinx-preview-toolbar-width"), "208px");
+});
+
+test("anchors source scrolling below a top-aligned sticky band without a toolbar row", () => {
+  const harness = createRuntimeHarness({ scrollEditorWithPreview: false, toolbarBottom: 50 });
+  harness.stickyHeadings.height = 40;
+  harness.stickyHeadings.rectProvider = () => ({ top: 0, height: 40, bottom: 40 });
+  harness.windowState.scrollY = 350;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 50,
+  });
+  harness.flushFrames();
+
+  assert.equal(harness.windowState.scrollY, 435);
+  assert.equal(harness.mappings[1].getBoundingClientRect().top, 65);
+});
+
+test("the top-aligned sticky band grows and shrinks with the active heading hierarchy", () => {
+  for (const depth of [1, 2, 3]) {
+    const harness = createRuntimeHarness({ stickyHeadingDepth: depth });
+    harness.stickyHeadings.rectProvider = () => {
+      const height = harness.stickyHeadings.hidden ? 0 : harness.stickyHeadings.textContent.split("\n").length * 20 + 5;
+      return { top: 0, height, bottom: height };
+    };
+    for (const [scrollTop, headingCount] of [[50, 1], [200, 2], [350, 3], [550, 2], [0, 0]]) {
+      harness.windowState.scrollY = scrollTop;
+      harness.dispatchWindow("scroll");
+      harness.flushFrames();
+      const count = Math.min(headingCount, depth);
+      assert.equal(harness.stickyHeadings.hidden, count === 0);
+      assert.equal(harness.stickyHeadings.textContent ? harness.stickyHeadings.textContent.split("\n").length : 0, count);
+      assert.equal(harness.stickyHeadings.getBoundingClientRect().top, 0);
+      assert.equal(harness.stickyHeadings.getBoundingClientRect().height, count ? count * 20 + 5 : 0);
+    }
+  }
+});
+
+test("sticks to the active Markdown heading hierarchy in up to three lines", () => {
+  const harness = createRuntimeHarness();
+  harness.stickyHeadings.height = 50;
+  harness.windowState.scrollY = 250;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+
+  assert.equal(harness.stickyHeadings.hidden, false);
+  assert.equal(harness.stickyHeadings.textContent, "# Chapter\n## Section\n### Topic");
+
+  harness.windowState.scrollY = 550;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(harness.stickyHeadings.textContent, "# Chapter\n## Next section");
+
+  harness.windowState.scrollY = 0;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(harness.stickyHeadings.hidden, true);
+  assert.equal(harness.stickyHeadings.textContent, "");
+  assert.equal(harness.body.getAttribute("data-sphinx-preview-sticky-headings-active"), null);
+});
+
+test("caps sticky heading convergence at three passes", () => {
+  const harness = createRuntimeHarness();
+  let layoutPass = 0;
+  harness.headings.forEach((heading, index) => {
+    heading.rectProvider = () => {
+      if (index === 0) layoutPass += 1;
+      const activeIndex = layoutPass % 2 === 1 ? 0 : 1;
+      return { top: index === activeIndex ? -1 : 100, height: 24 };
+    };
+    heading.rectReadCount = 0;
+  });
+
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+
+  assert.equal(harness.headings[0].rectReadCount, 3);
+});
+
+test("maps the frontmatter table for stable top and mid-table scroll round-trips", () => {
+  const harness = createRuntimeHarness({
+    firstMappedSourceLine: 12,
+    firstMappedTop: 420,
+    frontmatterHeight: 380,
+  });
+
+  assert.equal(harness.messages.at(-1)?.type, "previewReady");
+  assert.equal(harness.messages.at(-1)?.sourceLine, 1);
+
+  harness.windowState.scrollY = 180;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(harness.messages.at(-1)?.type, "previewScroll");
+  const reportedLine = Number(harness.messages.at(-1)?.line);
+  assert.ok(reportedLine > 1 && reportedLine < 12);
+
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: Math.round(reportedLine),
+  });
+  harness.flushFrames();
+
+  assert.ok(harness.windowState.scrollY > 0);
+  assert.ok(harness.windowState.scrollY < 420);
+
+  harness.windowState.scrollY = 0;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(harness.messages.at(-1)?.line, 1);
+
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 1,
+  });
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 0);
+});
+
+test("preserves preview scroll when layout changes during sticky heading activation", () => {
+  const harness = createRuntimeHarness({ viewportHeight: 800 });
+  harness.stickyHeadings.height = 50;
+  harness.windowState.scrollY = 50;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+
+  assert.equal(harness.stickyHeadings.hidden, false);
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+
+  assert.equal(harness.windowState.scrollY, 50);
+});
+
+test("uses the configured sticky heading depth", () => {
+  const headings = [
+    { depth: 1, expected: "### Topic" },
+    { depth: 2, expected: "## Section\n### Topic" },
+    { depth: 3, expected: "# Chapter\n## Section\n### Topic" },
+  ];
+
+  for (const { depth, expected } of headings) {
+    const harness = createRuntimeHarness({ stickyHeadingDepth: depth });
+    harness.windowState.scrollY = 350;
+    harness.dispatchWindow("scroll");
+    harness.flushFrames();
+
+    assert.equal(harness.stickyHeadings.textContent, expected);
+    assert.equal(harness.stickyHeadings.style.getPropertyValue("--sphinx-preview-sticky-heading-depth"), "");
+  }
+});
+
+test("anchors the editor source line below the sticky heading band without reverse sync", () => {
+  const harness = createRuntimeHarness({ scrollEditorWithPreview: false });
+  harness.stickyHeadings.height = 40;
+  harness.windowState.scrollY = 350;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+
+  assert.equal(harness.stickyHeadings.hidden, false);
+  assert.equal(harness.messages.some((message) => message.type === "previewScroll"), false);
+
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 50,
+  });
+  harness.flushFrames();
+
+  // The fake sticky band starts at 116 px, so its visible bottom is the reading line.
+  assert.equal(harness.windowState.scrollY, 344);
+  assert.equal(harness.mappings[1].getBoundingClientRect().top, 156);
+});
+
+test("source anchoring does not reserve a row for floating controls", () => {
+  const harness = createRuntimeHarness({ controlsHeight: 116 });
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 50,
+  });
+  harness.flushFrames();
+  assert.equal(harness.mappings[1].getBoundingClientRect().top, 65);
+});
+
+test("runtime script cannot terminate its containing script element", () => {
+  const script = createScrollSyncScript({
+    documentId: "file:///active.md</script><script>alert(1)</script>",
+    documentVersion: 7,
+    requestId: 11,
+    activeSourceFile: "/workspace/active.md</script>",
+  });
+
+  assert.doesNotMatch(script, /<\/script>/iu);
+});
+
+test("observes preview content instead of the document body", () => {
+  const harness = createRuntimeHarness();
+
+  assert.equal(harness.observedResizeTarget, harness.previewContent);
+  assert.notEqual(harness.observedResizeTarget, harness.body);
+});
+
+test("cycles preview theme modes and restores the saved selection", () => {
+  const harness = createRuntimeHarness();
+
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "current");
+  assert.equal(harness.themeButton.getAttribute("aria-label"), "Preview theme: Current theme");
+  assert.equal(harness.themeButton.getAttribute("data-tooltip"), "Current theme (click for dark theme)");
+  harness.themeButton.dispatch("click");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "dark");
+  assert.equal(harness.themeButton.getAttribute("title"), "Dark theme (click for white theme)");
+  assert.equal(harness.themeButton.getAttribute("data-tooltip"), "Dark theme (click for white theme)");
+  assert.equal(harness.getWebviewState().previewThemeMode, "dark");
+  assert.equal(harness.messages.at(-1)?.type, "previewThemeModeChanged");
+  assert.equal(harness.messages.at(-1)?.previewThemeMode, "dark");
+
+  harness.themeButton.dispatch("click");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "white");
+  harness.themeButton.dispatch("click");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "current");
+
+  const restored = createRuntimeHarness({}, "white");
+  assert.equal(restored.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "white");
+  assert.equal(restored.themeButton.getAttribute("aria-label"), "Preview theme: White theme");
+
+  const shared = createRuntimeHarness({}, "white", "dark");
+  assert.equal(shared.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "dark");
+});
+
+test("frontmatter tooltips preserve exact safe text and restore accessible metadata on dismissal", () => {
+  for (const dismissal of ["leave", "blur", "scroll", "resize", "outside", "Escape", "refresh", "pagehide", "beforeunload"]) {
+    const harness = createRuntimeHarness({ viewportHeight: 600, controlsHeight: 116 });
+    const title = "fields.path: <script>alert('unsafe')</script>\nFull stakeholder fields";
+    const link = new RuntimeElement({
+      class: "okf-frontmatter-link", title, "aria-describedby": "existing-description",
+    }, harness.windowState, 90, 20, "a");
+    link.getBoundingClientRect = () => ({ top: 90, bottom: 110, left: 340, width: 20, height: 20 });
+    harness.dispatchDocument(dismissal === "leave" ? "mouseover" : "focusin", { target: link });
+    const tooltip = harness.createdElements.find((element) => element.className === "sphinx-preview-link-tooltip");
+    assert.ok(tooltip);
+    assert.equal(tooltip.getAttribute("role"), "tooltip");
+    assert.equal(tooltip.textContent, title);
+    assert.equal(tooltip.innerHTML, "");
+    assert.equal(link.getAttribute("title"), null);
+    assert.equal(link.getAttribute("aria-describedby"), "existing-description " + tooltip.getAttribute("id"));
+    assert.equal(tooltip.parentElement, harness.body);
+    assert.equal(tooltip.style.getPropertyValue("top"), "124px");
+    assert.equal(tooltip.style.getPropertyValue("left"), "152px");
+    assert.equal(tooltip.style.getPropertyValue("max-width"), "344px");
+    assert.equal(tooltip.style.getPropertyValue("max-height"), "468px");
+    harness.dispatchDocument("mouseover", { target: link });
+    assert.equal(harness.createdElements.filter((element) => element.className === tooltip.className).length, 1);
+    if (dismissal === "leave") harness.dispatchDocument("mouseout", { target: link });
+    else if (dismissal === "blur") harness.dispatchDocument("focusout", { target: link });
+    else if (dismissal === "outside") harness.dispatchDocument("pointerdown", { target: harness.body });
+    else if (dismissal === "Escape") harness.dispatchDocument("keydown", { key: "Escape" });
+    else if (dismissal === "refresh") harness.refreshButton.dispatch("click");
+    else harness.dispatchWindow(dismissal);
+    assert.equal(link.getAttribute("title"), title, dismissal);
+    assert.equal(link.getAttribute("aria-describedby"), "existing-description", dismissal);
+    assert.ok(!harness.body.contains(tooltip), dismissal);
+  }
+});
+
+test("an invalid link span shows its full message in a tooltip on keyboard focus", () => {
+  const harness = createRuntimeHarness({ viewportHeight: 600, controlsHeight: 116 });
+  const title = "[E10] target 'missing.py' does not resolve to a file";
+  const span = new RuntimeElement({
+    class: "okf-frontmatter-link okf-link-invalid", "data-okf-link-status": "invalid", tabindex: "0", title,
+  }, harness.windowState, 160, 20, "span");
+  harness.dispatchDocument("focusin", { target: span });
+  const tooltip = harness.createdElements.at(-1)!;
+  assert.equal(tooltip.getAttribute("role"), "tooltip");
+  assert.equal(tooltip.textContent, title);
+  assert.equal(span.getAttribute("title"), null);
+  harness.dispatchDocument("focusout", { target: span });
+  assert.equal(span.getAttribute("title"), title);
+  assert.ok(!harness.body.contains(tooltip));
+});
+
+test("a pending link never opens a tooltip", () => {
+  const harness = createRuntimeHarness({ viewportHeight: 600, controlsHeight: 116 });
+  const span = new RuntimeElement({
+    class: "okf-frontmatter-link okf-link-pending", "data-okf-link-status": "pending", title: "Loading linked file",
+  }, harness.windowState, 160, 20, "span");
+  const before = harness.createdElements.length;
+  harness.dispatchDocument("focusin", { target: span });
+  assert.equal(harness.createdElements.length, before);
+});
+
+test("the badge click scrolls to and focuses the first issue row and highlights it briefly", () => {
+  const harness = createRuntimeHarness({ viewportHeight: 600 });
+  harness.frontmatterRow.setAttribute("class", "okf-error okf-known");
+  const badge = new RuntimeElement({ "data-okf-badge": "" }, harness.windowState, 0, 20, "button");
+  let prevented = false;
+  harness.windowState.scrollY = 900;
+  harness.dispatchDocument("click", { target: badge, preventDefault: () => { prevented = true; } });
+  assert.ok(prevented);
+  assert.equal(harness.frontmatterValueCell.getAttribute("data-okf-issue-highlight"), "true");
+  assert.equal(harness.frontmatterValueCell.focusOptions !== undefined || harness.windowState.scrollY !== 900, true);
+  harness.flushTimers();
+  assert.equal(harness.frontmatterValueCell.getAttribute("data-okf-issue-highlight"), null);
+});
+
+test("switching frontmatter tooltip links removes the old tooltip and absent ARIA metadata", () => {
+  const harness = createRuntimeHarness({ viewportHeight: 600, controlsHeight: 116 });
+  const first = new RuntimeElement({ class: "okf-frontmatter-link", title: "First fields" },
+    harness.windowState, 160, 20, "a");
+  const second = new RuntimeElement({ class: "okf-frontmatter-link", title: "Second fields" },
+    harness.windowState, 590, 20, "a");
+  harness.dispatchDocument("mouseover", { target: first });
+  const firstTooltip = harness.createdElements.at(-1)!;
+  harness.dispatchDocument("focusin", { target: second });
+  const secondTooltip = harness.createdElements.at(-1)!;
+  assert.ok(!harness.body.contains(firstTooltip));
+  assert.equal(first.getAttribute("title"), "First fields");
+  assert.equal(first.getAttribute("aria-describedby"), null);
+  assert.equal(secondTooltip.textContent, "Second fields");
+  assert.equal(secondTooltip.style.getPropertyValue("top"), "582px");
+  harness.dispatchDocument("focusout", { target: second });
+  assert.equal(second.getAttribute("aria-describedby"), null);
+  assert.ok(!harness.body.contains(secondTooltip));
+});
+
+test("refresh preserves viewport state while reverse synchronization stays disabled", () => {
+  const harness = createRuntimeHarness({ scrollEditorWithPreview: false });
+  harness.windowState.scrollY = 320;
+  assert.equal(harness.anchorButton.getAttribute("aria-pressed"), "true");
+
+  harness.refreshButton.dispatch("click");
+  const refresh = harness.messages.at(-1);
+  assert.equal(refresh?.type, "previewRefresh");
+  assert.equal(refresh?.scrollTop, 320);
+  assert.equal(typeof refresh?.sourceLine, "number");
+
+  const sourceScroll = {
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 50,
+  };
+  harness.dispatchMessage(sourceScroll);
+  harness.flushFrames();
+  assert.notEqual(harness.windowState.scrollY, 320);
+  assert.equal(harness.getWebviewState().anchorToEditor, true);
+
+  const messageCount = harness.messages.length;
+  harness.windowState.scrollY = 320;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(
+    harness.messages.slice(messageCount).some((message) => message.type === "previewScroll"),
+    false,
+  );
+
+  harness.anchorButton.dispatch("click");
+  const anchor = harness.messages.at(-1);
+  assert.equal(harness.anchorButton.getAttribute("aria-pressed"), "false");
+  assert.equal(anchor?.type, "previewAnchorModeChanged");
+  assert.equal(anchor?.anchorToEditor, false);
+
+  const positionWhenDisabled = harness.windowState.scrollY;
+  harness.dispatchMessage(sourceScroll);
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, positionWhenDisabled);
+
+  const disabledMessageCount = harness.messages.length;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(
+    harness.messages.slice(disabledMessageCount).some((message) => message.type === "previewScroll"),
+    false,
+  );
+});
+
+test("disabling editor anchoring stops preview-to-editor scrolling", () => {
+  const harness = createRuntimeHarness({ scrollEditorWithPreview: true });
+
+  harness.windowState.scrollY = 250;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.deepEqual(harness.messages.map((message) => message.type), ["previewReady", "previewScroll"]);
+
+  const messageCount = harness.messages.length;
+  harness.anchorButton.dispatch("click");
+  harness.windowState.scrollY = 300;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(
+    harness.messages.slice(messageCount).some((message) => message.type === "previewScroll"),
+    false,
+  );
+});
+
+test("preview can revisit its last reported line after the source editor scrolls elsewhere", () => {
+  const harness = createRuntimeHarness();
+  harness.windowState.scrollY = 250;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  const firstLine = harness.messages.at(-1)?.line;
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 50,
+  });
+  harness.flushFrames();
+  harness.windowState.scrollY = 250;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(harness.messages.at(-1)?.type, "previewScroll");
+  assert.equal(harness.messages.at(-1)?.line, firstLine);
+});
+
+test("source scrolling remains bidirectional while a block editor is open", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "Editable paragraph.\n",
+  });
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 50,
+  });
+  harness.flushFrames();
+  assert.ok(harness.windowState.scrollY > 0);
+  const alignedTop = harness.windowState.scrollY;
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, alignedTop);
+  harness.windowState.scrollY = 0;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(harness.messages.at(-1)?.type, "previewScroll");
+  assert.equal(harness.messages.at(-1)?.line, 1);
+});
+
+test("refreshes source anchor geometry after a block editor changes document flow", () => {
+  const harness = createRuntimeHarness({ scrollEditorWithPreview: false });
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "Editable paragraph.\n",
+  });
+
+  harness.mappings[2].top += 60;
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 100,
+  });
+  harness.flushFrames();
+
+  assert.equal(harness.windowState.scrollY, 1_000 + 60 - 65);
+});
+
+test("restores saved editor anchoring when the configured preference changed", () => {
+  const harness = createRuntimeHarness({ scrollPreviewWithEditor: false }, undefined, undefined, true);
+
+  assert.equal(harness.anchorButton.getAttribute("aria-pressed"), "true");
+  assert.equal(
+    harness.messages.some((message) =>
+      message.type === "previewAnchorModeChanged" && message.anchorToEditor === true),
+    true,
+  );
+});
+
+test("activating a centered block editor preserves scroll before and after layout stabilization", () => {
+  const harness = createRuntimeHarness();
+  harness.windowState.scrollY = 200;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  const scrollBeforeEditing = harness.windowState.scrollY;
+  const blockTop = harness.mappings[1].getBoundingClientRect().top;
+
+  harness.editModeButton.dispatch("click");
+  assert.equal(harness.windowState.scrollY, scrollBeforeEditing);
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  assert.equal(harness.windowState.scrollY, scrollBeforeEditing);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "A paragraph centered in the viewport.\n",
+  });
+
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.focusOptions?.preventScroll, true);
+  assert.equal(harness.windowState.scrollY, scrollBeforeEditing);
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, scrollBeforeEditing);
+  assert.equal(blockEditorOf(harness.mappings[1]).getBoundingClientRect().top, blockTop);
+});
+
+test("fenced Markdown editors sit outside the rendered pre and preserve source when saving", () => {
+  const harness = createRuntimeHarness();
+  const code = harness.mappings[1];
+  const pre = new RuntimeElement({}, harness.windowState, 500, 200, "pre");
+  pre.appendChild(code);
+  const originalText = [
+    "```md",
+    "Implementation completed: <tasks-number> tasks",
+    "",
+    "Tasks:",
+    "- <task-1>: completed",
+    "- <task-2>: completed (1 reworks)",
+    "- <task-3>: completed",
+    "",
+    "```",
+    "",
+  ].join("\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: code, preventDefault: () => undefined });
+  const editor = blockEditorOf(pre);
+  assert.ok(editor);
+  assert.equal(code.insertedElements.length, 0);
+  assert.equal(pre.contains(editor), false);
+  assert.equal(pre.getAttribute("data-sphinx-preview-editing"), "true");
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText,
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.parentElement, editor);
+  assert.equal(textarea.value, originalText.slice(0, -1));
+  textarea.value = textarea.value.replace("(1 reworks)", "(1 rework)");
+  textarea.dispatch("input");
+  harness.flushTimers();
+  assert.equal(harness.messages.at(-1)?.editedText, originalText.replace("(1 reworks)", "(1 rework)"));
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  // Escape commits like blur: a final save, closed by the re-render; never a cancel.
+  assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
+  assert.equal(harness.messages.at(-1)?.final, true);
+  assert.equal(
+    harness.messages.at(-1)?.editedText,
+    originalText.replace("(1 reworks)", "(1 rework)"),
+  );
+  assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+});
+
+test("without caretRangeFromPoint a click opens the editor with the caret at the end of the block", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.mappings[1],
+    clientX: 10,
+    clientY: 10,
+    preventDefault: () => undefined,
+  });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "First line\nSecond line\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.selectionStart, "First line\nSecond line".length);
+  assert.equal(textarea.selectionEnd, "First line\nSecond line".length);
+});
+
+test("active Markdown editors leave repeated spaces and Enter to native text input", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "- `compendium-jira-confluence`:\n  - `jira-skill`.        \n  - `derive-jira-issue-to-change-request`\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.parentElement = harness.mappings[1];
+  assert.equal(textarea.getAttribute("autocorrect"), "off");
+  assert.equal(textarea.getAttribute("autocapitalize"), "off");
+  assert.equal(textarea.getAttribute("autocomplete"), "off");
+  // The editor opens with the caret at the end of a list line, where Enter continues the list (D-03);
+  // this test checks Enter before the marker, which stays native.
+  textarea.setSelectionRange(0, 0);
+  const messageCount = harness.messages.length;
+  let prevented = 0;
+  for (const key of [" ", " ", " ", " ", "Enter"]) {
+    const event = { target: textarea, key, preventDefault: () => { prevented += 1; } };
+    textarea.dispatch("keydown", event);
+    harness.dispatchDocument("keydown", event);
+  }
+  assert.equal(prevented, 0);
+  assert.equal(harness.messages.length, messageCount);
+});
+
+test("Enter in a list item continues the list, and Shift+Enter stays native", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "- a\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.setSelectionRange(3, 3);
+  let prevented = 0;
+  textarea.dispatch("keydown", { key: "Enter", shiftKey: true, preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 0);
+  assert.equal(textarea.value, "- a");
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 1);
+  assert.equal(textarea.value, "- a\n- ");
+  assert.equal(textarea.selectionStart, 6);
+  assert.equal(textarea.selectionEnd, 6);
+  harness.flushTimers();
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.editedText, "- a\n- \n");
+});
+
+test("Tab and Shift+Tab indent the block editor without closing it", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "- a\n  - b\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.setSelectionRange(6, 6);
+  let prevented = 0;
+  textarea.dispatch("keydown", { key: "Tab", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 1);
+  assert.equal(textarea.value, "- a\n    - b");
+  harness.flushTimers();
+  const autosave = harness.messages.at(-1);
+  assert.equal(autosave?.type, "previewEditSave");
+  assert.equal(autosave?.editedText, "- a\n    - b\n");
+  textarea.dispatch("keydown", { key: "Tab", shiftKey: true, preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 2);
+  assert.equal(textarea.value, "- a\n  - b");
+  textarea.setSelectionRange(0, 0);
+  textarea.dispatch("keydown", { key: "Tab", shiftKey: true, preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 3);
+  assert.equal(textarea.value, "- a\n  - b");
+  harness.flushTimers();
+  assert.equal(
+    harness.messages.some((message) => message.type === "previewEditSave" && message.final === true),
+    false,
+  );
+  assert.ok(harness.createdElements.includes(textarea));
+});
+
+test("Enter on an empty list item empties the line and Enter in plain text stays native", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "- a\n- \n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.setSelectionRange(6, 6);
+  let prevented = 0;
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 1);
+  assert.equal(textarea.value, "- a\n");
+  assert.equal(textarea.selectionStart, 4);
+  textarea.value = "plain";
+  textarea.setSelectionRange(5, 5);
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 1);
+  assert.equal(textarea.value, "plain");
+});
+
+test("block textareas resize on input and preview layout changes", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "A long paragraph. ".repeat(500),
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.style.height, `${textarea.scrollHeight}px`);
+  for (const [height, resize] of [
+    [3_000, () => textarea.dispatch("input")],
+    [4_000, () => harness.dispatchWindow("resize")],
+    [5_000, () => harness.dispatchVisualViewportResize()],
+    [2_500, () => harness.triggerResizeObserver()],
+  ] as const) {
+    textarea.scrollHeight = height;
+    resize();
+    harness.flushFrames();
+    assert.equal(textarea.style.height, `${height}px`);
+  }
+});
+
+test("edit mode loads raw Markdown and saves changes when the block loses focus", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  const request = harness.messages.at(-1);
+  const editId = request?.editId;
+  const originalText = "**Raw line one**\n\nRaw line two\n";
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId,
+    originalText,
+  });
+
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.value, "**Raw line one**\n\nRaw line two");
+  assert.equal(textarea.rows, 1);
+  const lastContentPosition = originalText.trimEnd().length;
+  assert.deepEqual(textarea.selectionRange, [lastContentPosition, lastContentPosition]);
+  assert.equal(harness.createdElements.some((element) =>
+    element.getAttribute("aria-label") === "Save Markdown block"
+    || element.getAttribute("aria-label") === "Cancel Markdown edit"), false);
+  assert.equal(harness.createdElements.some((element) =>
+    element.tagName === "BUTTON" && element.getAttribute("aria-label") === "Done editing"), true);
+  assert.equal(harness.createdElements.some((element) =>
+    element.tagName === "BUTTON"
+    && element.getAttribute("aria-label") === "Revert block to its original text"), true);
+  textarea.value = "**Edited line one**\n\nRaw line two";
+  textarea.dispatch("input");
+  textarea.dispatch("blur");
+
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.originalText, originalText);
+  assert.equal(save?.editedText, textarea.value + "\n");
+  assert.equal(save?.line, 50);
+  assert.equal(save?.endLine, 52);
+});
+
+function openRawEditor(harness: RuntimeHarness): RuntimeElement {
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "Raw line one\nRaw line two\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  return textarea;
+}
+
+function findButton(harness: RuntimeHarness, label: string): RuntimeElement {
+  const button = harness.createdElements.find((element) =>
+    element.tagName === "BUTTON" && element.getAttribute("aria-label") === label);
+  assert.ok(button, "missing button " + label);
+  return button;
+}
+
+test("edit mode hover marks the whole list that a click would edit", () => {
+  for (const editMode of [true, false]) {
+    const harness = createRuntimeHarness();
+    if (editMode) harness.editModeButton.dispatch("click");
+    const list = new RuntimeElement({
+      "data-sphinx-preview-document": "file:///active.md",
+      "data-sphinx-source-end-line": "8",
+      "data-sphinx-source-file": "/workspace/active.md",
+      "data-sphinx-source-line": "5",
+    }, harness.windowState, 0, 40, "ul");
+    const item = new RuntimeElement({
+      "data-sphinx-preview-document": "file:///active.md",
+      "data-sphinx-source-end-line": "6",
+      "data-sphinx-source-file": "/workspace/active.md",
+      "data-sphinx-source-line": "6",
+    }, harness.windowState, 0, 20, "li");
+    list.appendChild(item);
+    harness.dispatchDocument("mouseover", { target: item });
+    assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), editMode ? "true" : null);
+    assert.equal(item.getAttribute("data-sphinx-preview-edit-hover"), null);
+    if (editMode) {
+      harness.dispatchDocument("mouseout", { target: item, relatedTarget: undefined });
+      assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null);
+      harness.dispatchDocument("focusin", { target: item });
+      assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), "true");
+      harness.dispatchDocument("focusout", { target: item });
+      assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null);
+      harness.dispatchDocument("mouseover", { target: item });
+      harness.editModeButton.dispatch("click");
+      assert.equal(list.getAttribute("data-sphinx-preview-edit-hover"), null);
+    }
+  }
+});
+
+test("an opened block editor shows its line range, Done and a disabled Revert", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openRawEditor(harness);
+  const editor = textarea.parentElement;
+  assert.ok(editor);
+  const status = editor.childElements.find((child) =>
+    child.getAttribute("data-sphinx-preview-edit-status") !== null);
+  assert.ok(status);
+  assert.match(status.textContent, /^Lines 50\u201352 \u00b7 Enter: new line \u00b7 Tab: indent \u00b7 Esc or /u);
+  assert.match(status.textContent, /(?:\u2318\u21a9|Ctrl\+Enter): done$/u);
+  assert.equal(findButton(harness, "Done editing").textContent, "Done");
+  assert.equal(findButton(harness, "Revert block to its original text").disabled, true);
+});
+
+test("Revert enables on change and cancels only what reached the document", () => {
+  const withAutosave = createRuntimeHarness();
+  let textarea = openRawEditor(withAutosave);
+  let revert = findButton(withAutosave, "Revert block to its original text");
+  textarea.value = "Changed";
+  textarea.dispatch("input");
+  assert.equal(revert.disabled, false);
+  withAutosave.flushTimers();
+  assert.equal(withAutosave.messages.at(-1)?.final, false);
+  revert.dispatch("click");
+  assert.equal(withAutosave.messages.at(-1)?.type, "previewEditCancel");
+
+  const withoutAutosave = createRuntimeHarness();
+  textarea = openRawEditor(withoutAutosave);
+  revert = findButton(withoutAutosave, "Revert block to its original text");
+  textarea.value = "Changed";
+  textarea.dispatch("input");
+  assert.equal(revert.disabled, false);
+  const before = withoutAutosave.messages.length;
+  revert.dispatch("click");
+  textarea.dispatch("blur");
+  assert.equal(withoutAutosave.messages.length, before);
+  assert.equal(withoutAutosave.pendingTimerCount(), 0);
+});
+
+test("Done posts a final save and both buttons keep the textarea focused on press", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openRawEditor(harness);
+  textarea.value = "Changed";
+  textarea.dispatch("input");
+  for (const label of ["Done editing", "Revert block to its original text"]) {
+    let prevented = false;
+    findButton(harness, label).dispatch("mousedown", { preventDefault: () => { prevented = true; } });
+    assert.equal(prevented, true, label);
+  }
+  findButton(harness, "Done editing").dispatch("click");
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.final, true);
+  assert.equal(save?.editedText, "Changed\n");
+});
+
+test("raw Markdown block edits autosave on input without disabling the textarea", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  const editId = harness.messages.at(-1)?.editId;
+  const originalText = "Raw line one\nRaw line two\n";
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId,
+    originalText,
+  });
+
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.value = "First keystroke";
+  textarea.dispatch("input");
+  harness.flushTimers();
+  let save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.final, false);
+  assert.equal(save?.editedText, "First keystroke\n");
+  assert.equal(textarea.disabled, false);
+
+  textarea.value = "Continued typing";
+  textarea.dispatch("input");
+  harness.flushTimers();
+  save = harness.messages.at(-1);
+  assert.equal(save?.final, false);
+  assert.equal(save?.editedText, "Continued typing\n");
+  assert.equal(textarea.disabled, false);
+
+  textarea.dispatch("blur");
+  save = harness.messages.at(-1);
+  assert.equal(save?.final, true);
+  assert.equal(save?.editedText, "Continued typing\n");
+});
+
+test("arrow boundaries transfer block editing in every direction", () => {
+  const cases = [
+    { key: "ArrowLeft", position: 0, line: 1, source: "Previous block\n", caret: "end" },
+    { key: "ArrowRight", position: "end", line: 100, source: "Next block\n", caret: "start" },
+    { key: "ArrowUp", position: 0, line: 1, source: "Previous block\n", caret: "end" },
+    { key: "ArrowDown", position: "end", line: 100, source: "Next block\n", caret: "start" },
+  ] as const;
+
+  for (const testCase of cases) {
+    const harness = createRuntimeHarness();
+    harness.editModeButton.dispatch("click");
+    harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+    const request = harness.messages.at(-1);
+    harness.dispatchMessage({
+      type: "previewEditSource",
+      documentId: "file:///active.md",
+      documentVersion: 7,
+      requestId: 11,
+      editId: request?.editId,
+      originalText: "Current block\n",
+    });
+    const textarea = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1);
+    assert.ok(textarea);
+    const position = testCase.position === "end" ? textarea.value.length : testCase.position;
+    textarea.setSelectionRange(position, position);
+    let prevented = false;
+    textarea.dispatch("keydown", {
+      key: testCase.key,
+      preventDefault: () => { prevented = true; },
+    });
+
+    assert.equal(prevented, true, testCase.key);
+    const navigationRequest = harness.messages.at(-1);
+    assert.equal(navigationRequest?.type, "previewEditOpen", testCase.key);
+    assert.equal(navigationRequest?.line, testCase.line, testCase.key);
+    harness.dispatchMessage({
+      type: "previewEditSource",
+      documentId: "file:///active.md",
+      documentVersion: 7,
+      requestId: 11,
+      editId: navigationRequest?.editId,
+      originalText: testCase.source,
+    });
+    const nextTextarea = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1);
+    assert.ok(nextTextarea);
+    const expectedPosition = testCase.caret === "start"
+      ? 0
+      : testCase.source.trimEnd().length;
+    assert.deepEqual(nextTextarea.selectionRange, [expectedPosition, expectedPosition], testCase.key);
+  }
+});
+
+test("table cell editing exposes row and column operations and saves the edited table", () => {
+  const harness = createRuntimeHarness();
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+  row.rowIndex = 1;
+  const cell = new RuntimeElement({}, harness.windowState, 100, 30, "td");
+  cell.cellIndex = 1;
+  const renderedContent = new RuntimeElement({}, harness.windowState, 100, 30, "strong");
+  renderedContent.textContent = "y";
+  cell.appendChild(renderedContent);
+  table.appendChild(row);
+  row.appendChild(cell);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const request = harness.messages.at(-1);
+  assert.equal(request?.type, "previewEditOpen");
+  assert.equal(request?.line, 20);
+  assert.equal(request?.endLine, 23);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: request?.editId,
+    originalText: "| A | B |\n| --- | :---: |\n| x | y |\n| p | q |\n",
+  });
+
+  let input = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+  assert.ok(input);
+  assert.equal(input.tagName, "TEXTAREA");
+  assert.equal(input.value, "y");
+  const cellEditor = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-table-cell-editor") === "true");
+  assert.ok(cellEditor);
+  assert.equal(cellEditor.parentElement, cell);
+  const hiddenContent = cell.childElements.find((element) =>
+    element.getAttribute("data-sphinx-table-cell-content") === "true");
+  assert.ok(hiddenContent);
+  assert.equal(renderedContent.parentElement, hiddenContent);
+  assert.equal(hiddenContent.getAttribute("aria-hidden"), "true");
+  const tableMenu = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-table-menu") === "true");
+  assert.ok(tableMenu);
+  tableMenu.height = 40;
+  cell.rectProvider = () => ({
+    top: cell.top - harness.windowState.scrollY,
+    bottom: cell.top - harness.windowState.scrollY + cell.height,
+    height: cell.height,
+    left: 120,
+    width: 200,
+  });
+  harness.dispatchWindow("resize");
+  // The toolbar is in the document flow (no body placement, no floating coordinates); its parent
+  // here is the detached test table's parent, i.e. the body fallback.
+  assert.equal(tableMenu.getAttribute("role"), "toolbar");
+  assert.equal(tableMenu.getAttribute("data-placement"), null);
+  assert.equal(tableMenu.style.getPropertyValue("--sphinx-preview-table-menu-top"), "");
+  assert.equal(tableMenu.style.getPropertyValue("--sphinx-preview-table-menu-left"), "");
+  cell.top = 100;
+  assert.equal(
+    tableMenu.childElements.filter((element) => element.tagName === "BUTTON").length,
+    4,
+  );
+  const operationButtons = harness.createdElements.filter((element) =>
+    element.getAttribute("data-sphinx-table-operation") !== null);
+  assert.equal(operationButtons.length, 4);
+  assert.ok(operationButtons.every((button) =>
+    button.innerHTML.includes("<svg") && button.getAttribute("title") !== null));
+  assert.equal(harness.createdElements.filter((element) =>
+    element.getAttribute("data-sphinx-preview-table-save") !== null
+    || element.getAttribute("data-sphinx-preview-table-cancel") !== null).length, 0);
+  input.value = "new";
+  input.dispatch("input");
+  harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Insert row after selected row").at(-1)?.dispatch("click");
+  input = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+  assert.ok(input);
+  input.value = "new row";
+  input.dispatch("input");
+  harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Insert column after selected column").at(-1)?.dispatch("click");
+  input = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+  assert.ok(input);
+  input.value = "new column";
+  input.dispatch("input");
+  input.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.originalText, "| A | B |\n| --- | :---: |\n| x | y |\n| p | q |\n");
+  assert.equal(save?.editedText, [
+    "| A | B |  |",
+    "| --- | :---: | --- |",
+    "| x | new |  |",
+    "|  | new row | new column |",
+    "| p | q |  |",
+    "",
+  ].join("\n"));
+  input.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  // Escape commits like blur and never cancels; the re-render closes the finished edit.
+  assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
+  assert.equal(harness.messages.at(-1)?.final, true);
+  assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+});
+
+test("table toolbar sits in the flow above the table with text labels and a position status", () => {
+  const harness = createRuntimeHarness();
+  const section = new RuntimeElement({}, harness.windowState, 0, 300, "section");
+  harness.body.appendChild(section);
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  section.appendChild(table);
+  const cells = [0, 1, 2].map((rowIndex) => {
+    const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+    row.rowIndex = rowIndex;
+    table.appendChild(row);
+    return [0, 1].map((columnIndex) => {
+      const cell = new RuntimeElement({}, harness.windowState, 100, 30, rowIndex === 0 ? "th" : "td");
+      cell.cellIndex = columnIndex;
+      row.appendChild(cell);
+      return cell;
+    });
+  });
+  const click = (cell: RuntimeElement): void => harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  harness.editModeButton.dispatch("click");
+  click(cells[1][1]);
+  const request = harness.messages.at(-1);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: request?.editId,
+    originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
+  });
+  const menu = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-table-menu") === "true");
+  assert.ok(menu);
+  assert.equal(menu.parentElement, section);
+  assert.equal(section.childElements.indexOf(menu) + 1, section.childElements.indexOf(table));
+  assert.equal(menu.getAttribute("data-placement"), null);
+  assert.equal(menu.style.getPropertyValue("--sphinx-preview-table-menu-top"), "");
+  const labels = menu.childElements.filter((element) => element.tagName === "BUTTON")
+    .map((button) => button.childElements.find((child) =>
+      child.className === "sphinx-preview-table-menu-label")?.textContent);
+  assert.deepEqual(labels, ["Row +", "Row \u2212", "Col +", "Col \u2212"]);
+  assert.equal(menu.childElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-edit-status") !== null)?.textContent,
+  "Row 1 of 2 \u00b7 column 2 of 2");
+  click(cells[0][0]);
+  assert.equal(menu.childElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-edit-status") !== null)?.textContent,
+  "Header \u00b7 column 1 of 2");
+  assert.equal(menu.parentElement, section);
+  const input = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+  assert.ok(input);
+  input.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(menu.parentElement, undefined);
+  assert.equal(section.childElements.includes(menu), false);
+});
+
+function openTableForToolbarReveal(options: { cellTop: number; barTop: number; scrollY: number }) {
+  const harness = createRuntimeHarness({ viewportHeight: 600 });
+  const section = new RuntimeElement({}, harness.windowState, 0, 2000, "section");
+  harness.body.appendChild(section);
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  section.appendChild(table);
+  const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+  row.rowIndex = 1;
+  table.appendChild(row);
+  const cell = new RuntimeElement({}, harness.windowState, options.cellTop, 30, "td");
+  cell.cellIndex = 0;
+  row.appendChild(cell);
+  const insertBefore = section.insertBefore.bind(section);
+  const bar = { top: options.barTop, height: 76 };
+  section.insertBefore = (child: RuntimeElement, reference: RuntimeElement | null): RuntimeElement => {
+    if (child.getAttribute("data-sphinx-table-menu") === "true") {
+      // The toolbar's viewport top is fixed by the test, as after the R7 anchor restore.
+      child.rectProvider = () => ({
+        top: bar.top, bottom: bar.top + bar.height, height: bar.height, left: 0, width: 200,
+      });
+    }
+    return insertBefore(child, reference);
+  };
+  harness.editModeButton.dispatch("click");
+  harness.windowState.scrollY = options.scrollY;
+  harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const scrolls: number[] = [];
+  const request = harness.messages.at(-1);
+  const beforeScroll = harness.windowState.scrollY;
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: request?.editId,
+    originalText: "| A |\n| --- |\n| x |\n",
+  });
+  scrolls.push(beforeScroll, harness.windowState.scrollY);
+  return { harness, cell, scrolls, bar };
+}
+
+test("a toolbar that appears above the reading offset is scrolled into view by the exact delta", () => {
+  // Reading offset is 65 in the harness; the bar top is -28, so the page scrolls up by 93.
+  const { scrolls } = openTableForToolbarReveal({ cellTop: 340, barTop: -28, scrollY: 300 });
+  assert.deepEqual(scrolls, [300, 300 - 93]);
+});
+
+test("a toolbar that is already visible causes no extra scroll", () => {
+  const { scrolls } = openTableForToolbarReveal({ cellTop: 340, barTop: 80, scrollY: 300 });
+  assert.deepEqual(scrolls, [300, 300]);
+});
+
+test("the toolbar is not revealed when that would push the selected cell out of the viewport", () => {
+  // The cell sits near the bottom of the 600 px viewport, so a 93 px reveal would push it out.
+  const { scrolls } = openTableForToolbarReveal({ cellTop: 860, barTop: -28, scrollY: 300 });
+  assert.deepEqual(scrolls, [300, 300]);
+});
+
+test("a later layout change that pushes the toolbar above the reading offset is revealed again", () => {
+  // The bar first appears visible (top 80). The status line then wraps: the bar grows and the anchor
+  // restore leaves its top at 20, under the 65 px sticky band, so the page scrolls up by 45.
+  const { harness, scrolls, bar } = openTableForToolbarReveal({ cellTop: 340, barTop: 80, scrollY: 300 });
+  assert.deepEqual(scrolls, [300, 300]);
+  bar.top = 20;
+  bar.height = 100;
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 300 - 45);
+  // Unchanged bar size: a deliberate user scroll is not undone by a further layout pass.
+  bar.top = 10;
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 300 - 45);
+});
+
+test("table editing switches cells without losing changes and finalizes before leaving the table", () => {
+  const harness = createRuntimeHarness();
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const cells = [0, 1, 2].map((rowIndex) => {
+    const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+    row.rowIndex = rowIndex;
+    table.appendChild(row);
+    return [0, 1].map((columnIndex) => {
+      const cell = new RuntimeElement({}, harness.windowState, 100, 30, rowIndex === 0 ? "th" : "td");
+      cell.cellIndex = columnIndex;
+      const content = new RuntimeElement({}, harness.windowState, 100, 30, "strong");
+      content.textContent = `${rowIndex}-${columnIndex}`;
+      cell.appendChild(content);
+      row.appendChild(cell);
+      return cell;
+    });
+  });
+  const click = (cell: RuntimeElement): void => harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+  });
+  const input = (): RuntimeElement => {
+    const control = harness.createdElements.filter((element) =>
+      element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+    assert.ok(control);
+    return control;
+  };
+  harness.editModeButton.dispatch("click");
+  click(cells[1][0]);
+  const editId = harness.messages.at(-1)?.editId;
+  click(harness.mappings[2]);
+  assert.equal(harness.messages.at(-1)?.editId, editId);
+  assert.equal(harness.getWebviewState().pendingBlockNavigation, undefined);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId,
+    originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
+  });
+  input().value = "edited x";
+  input().dispatch("input");
+  click(cells[2][1]);
+  assert.equal(input().value, "q");
+  assert.equal(cells[1][0].getAttribute("data-sphinx-preview-table-cell-selected"), null);
+  assert.equal(cells[1][0].childElements[0].tagName, "STRONG");
+  input().value = "edited q";
+  input().dispatch("input");
+  click(cells[0][1]);
+  assert.equal(input().value, "B");
+  input().value = "edited B";
+  input().dispatch("input");
+  click(cells[1][0]);
+  assert.equal(input().value, "edited x");
+  assert.equal(harness.messages.filter((message) => message.type === "previewEditOpen").length, 1);
+  const saves = harness.messages.filter((message) => message.type === "previewEditSave");
+  assert.ok(saves.every((message) => message.editId === editId && message.final === false));
+  assert.equal(saves.at(-1)?.editedText, "| A | edited B |\n| --- | --- |\n| edited x | y |\n| p | edited q |\n");
+  click(harness.mappings[2]);
+  assert.equal(harness.messages.at(-1)?.final, true);
+  assert.equal(harness.getWebviewState().pendingBlockNavigation !== undefined, true);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId,
+    error: "The save could not be applied.",
+  });
+  assert.equal(harness.getWebviewState().pendingBlockNavigation, undefined);
+  click(cells[2][1]);
+  assert.equal(input().value, "edited q");
+  input().dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  // Escape commits the edited cell like blur; the re-render closes the editor.
+  assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
+  assert.equal(harness.messages.at(-1)?.final, true);
+  assert.match(String(harness.messages.at(-1)?.editedText), /edited q/u);
+  assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+});
+
+function openTableCellEditorForTab(harness: ReturnType<typeof createRuntimeHarness>) {
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const rows: RuntimeElement[] = [];
+  const cells = [0, 1, 2].map((rowIndex) => {
+    const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+    row.rowIndex = rowIndex;
+    table.appendChild(row);
+    rows.push(row);
+    return [0, 1].map((columnIndex) => {
+      const cell = new RuntimeElement({}, harness.windowState, 100, 30, rowIndex === 0 ? "th" : "td");
+      cell.cellIndex = columnIndex;
+      row.appendChild(cell);
+      row.cells.push(cell);
+      return cell;
+    });
+  });
+  table.rows = rows;
+  harness.editModeButton.dispatch("click");
+  const click = (cell: RuntimeElement): void => harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+  });
+  click(cells[1][0]);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
+  });
+  const input = (): RuntimeElement => {
+    const control = harness.createdElements.filter((element) =>
+      element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+    assert.ok(control);
+    return control;
+  };
+  return { cells, click, input };
+}
+
+test("Tab and Shift+Tab move between table cells, wrapping across rows", () => {
+  const harness = createRuntimeHarness();
+  const { cells, input } = openTableCellEditorForTab(harness);
+  let prevented = 0;
+  const tab = (shiftKey = false): void => input().dispatch("keydown", {
+    key: "Tab", shiftKey, preventDefault: () => { prevented += 1; },
+  });
+  assert.equal(input().value, "x");
+  tab();
+  assert.equal(input().value, "y");
+  assert.equal(harness.createdElements.filter((element) =>
+    element.getAttribute("data-sphinx-preview-table-cell-editor") === "true")[0].parentElement, cells[1][1]);
+  input().value = "yy";
+  input().dispatch("input");
+  tab();
+  assert.equal(input().value, "p");
+  assert.equal(prevented, 2);
+  tab(true);
+  assert.equal(input().value, "yy");
+  tab(true);
+  assert.equal(input().value, "x");
+  assert.equal(harness.messages.filter((message) => message.type === "previewEditOpen").length, 1);
+  assert.equal(harness.messages.some((message) => message.final === true), false);
+});
+
+test("Shift+Tab on the first header cell does nothing", () => {
+  const harness = createRuntimeHarness();
+  const { cells, click, input } = openTableCellEditorForTab(harness);
+  click(cells[0][0]);
+  assert.equal(input().value, "A");
+  const count = harness.messages.length;
+  let prevented = false;
+  input().dispatch("keydown", { key: "Tab", shiftKey: true, preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(harness.messages.length, count);
+  assert.equal(input().value, "A");
+});
+
+test("Tab on the last cell inserts a row and resumes in its first cell", () => {
+  const harness = createRuntimeHarness();
+  const { cells, click, input } = openTableCellEditorForTab(harness);
+  click(cells[2][1]);
+  assert.equal(input().value, "q");
+  input().value = "qq";
+  input().dispatch("input");
+  input().dispatch("keydown", { key: "Tab", preventDefault: () => undefined });
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.final, true);
+  assert.match(String(save?.editedText), /^\| A \| B \|\n\| --- \| --- \|\n\| x \| y \|\n\| p \| qq \|\n\|\s*\|\s*\|\n$/u);
+  const pending = harness.getWebviewState().pendingBlockNavigation as Record<string, unknown> | undefined;
+  assert.equal(pending?.tableRowIndex, 3);
+  assert.equal(pending?.tableColumnIndex, 0);
+  assert.equal(pending?.sourceLine, 20);
+});
+
+test("the table cell editor commits on blur unless a pointer press is in progress", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  input().value = "typed";
+  input().dispatch("input");
+  const control = input();
+  harness.dispatchDocument("pointerdown", { target: harness.mappings[2] });
+  control.dispatch("blur");
+  harness.flushTimers();
+  assert.equal(harness.messages.some((message) => message.final === true), false);
+});
+
+test("the table cell editor commits and closes when focus leaves without a click", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  input().value = "typed";
+  input().dispatch("input");
+  input().dispatch("blur");
+  harness.flushTimers();
+  const last = harness.messages.at(-1);
+  assert.equal(last?.type, "previewEditSave");
+  assert.equal(last?.final, true);
+  assert.match(String(last?.editedText), /typed/u);
+});
+
+test("Escape commits a table cell even when focus is outside the cell editor", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  input().value = "typed";
+  input().dispatch("input");
+  harness.dispatchDocument("keydown", { key: "Escape", target: harness.body });
+  const finals = harness.messages.filter((message) => message.final === true);
+  assert.equal(finals.length, 1);
+  assert.match(String(finals[0].editedText), /typed/u);
+});
+
+function openBlockEditorWithSource(harness: ReturnType<typeof createRuntimeHarness>) {
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "Second paragraph.\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  return textarea;
+}
+
+test("Escape in a changed Markdown block editor saves the text and never cancels", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Second paragraph. KEEP ME PLEASE.";
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  const last = harness.messages.at(-1);
+  assert.equal(last?.type, "previewEditSave");
+  assert.equal(last?.final, true);
+  assert.equal(last?.editedText, "Second paragraph. KEEP ME PLEASE.\n");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+});
+
+test("undo and redo shortcuts stop at the block textarea and keep the native undo", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const messageCount = harness.messages.length;
+  const cases: Array<[Record<string, unknown>, boolean]> = [
+    [{ key: "z", keyCode: 90, metaKey: true }, true],
+    [{ key: "z", keyCode: 90, ctrlKey: true }, true],
+    [{ key: "Z", keyCode: 90, metaKey: true, shiftKey: true }, true],
+    [{ key: "y", keyCode: 89, ctrlKey: true }, true],
+    [{ key: "z", keyCode: 90 }, false],
+    [{ key: "y", keyCode: 89 }, false],
+    [{ key: "s", keyCode: 83, metaKey: true }, false],
+    [{ key: "z", keyCode: 90, metaKey: true, altKey: true }, false],
+  ];
+  for (const [init, intercepted] of cases) {
+    let stopped = 0;
+    let prevented = 0;
+    textarea.dispatch("keydown", {
+      target: textarea,
+      ...init,
+      stopPropagation: () => { stopped += 1; },
+      preventDefault: () => { prevented += 1; },
+    });
+    assert.equal(stopped, intercepted ? 1 : 0, JSON.stringify(init));
+    assert.equal(prevented, 0, JSON.stringify(init));
+  }
+  assert.equal(harness.messages.length, messageCount);
+});
+
+test("Escape in an unchanged Markdown block editor closes it without a message", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const messageCount = harness.messages.length;
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(harness.messages.length, messageCount);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null);
+  assert.equal(harness.mappings[1].contains(textarea.parentElement as RuntimeElement), false);
+});
+
+function openTableCellEditor(harness: ReturnType<typeof createRuntimeHarness>) {
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+  row.rowIndex = 1;
+  const cell = new RuntimeElement({}, harness.windowState, 100, 30, "td");
+  cell.cellIndex = 1;
+  table.appendChild(row);
+  row.appendChild(cell);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "| A | B |\n| --- | --- |\n| x | y |\n",
+  });
+  const input = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+  assert.ok(input);
+  return input;
+}
+
+test("Escape in a changed table cell saves the table and never cancels", () => {
+  const harness = createRuntimeHarness();
+  const input = openTableCellEditor(harness);
+  input.value = "y2";
+  input.dispatch("input");
+  input.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  const last = harness.messages.at(-1);
+  assert.equal(last?.type, "previewEditSave");
+  assert.equal(last?.final, true);
+  assert.match(String(last?.editedText), /\| x \| y2 \|/u);
+  assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+});
+
+test("turning edit mode off saves a changed block editor and ignores an unchanged one", () => {
+  const changed = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(changed);
+  textarea.value = "Second paragraph. B";
+  changed.editModeButton.dispatch("click");
+  const last = changed.messages.at(-1);
+  assert.equal(last?.type, "previewEditSave");
+  assert.equal(last?.final, true);
+  assert.equal(last?.editedText, "Second paragraph. B\n");
+  assert.equal(changed.messages.some((message) => message.type === "previewEditCancel"), false);
+
+  const unchanged = createRuntimeHarness();
+  openBlockEditorWithSource(unchanged);
+  const messageCount = unchanged.messages.length;
+  unchanged.editModeButton.dispatch("click");
+  assert.deepEqual(
+    unchanged.messages.slice(messageCount).map((message) => message.type),
+    ["previewEditModeChanged"],
+  );
+  assert.equal(unchanged.messages.some((message) => message.type === "previewEditCancel"), false);
+  assert.equal(unchanged.mappings[1].getAttribute("data-sphinx-preview-editing"), null);
+});
+
+test("table header cannot be deleted from the cell toolbar", () => {
+  const harness = createRuntimeHarness();
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+  row.rowIndex = 0;
+  const cell = new RuntimeElement({}, harness.windowState, 100, 30, "th");
+  cell.cellIndex = 0;
+  table.appendChild(row);
+  row.appendChild(cell);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const request = harness.messages.at(-1);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: request?.editId,
+    originalText: "| A | B |\n| --- | --- |\n| x | y |\n",
+  });
+
+  const deleteButton = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Delete selected row");
+  assert.ok(deleteButton);
+  assert.equal(deleteButton.disabled, true);
+});
+
+test("table toolbar cannot delete the last body row", () => {
+  const harness = createRuntimeHarness();
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "22",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+  row.rowIndex = 1;
+  const cell = new RuntimeElement({}, harness.windowState, 100, 30, "td");
+  cell.cellIndex = 0;
+  table.appendChild(row);
+  row.appendChild(cell);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const request = harness.messages.at(-1);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: request?.editId,
+    originalText: "| A |\n| --- |\n| x |\n",
+  });
+
+  const deleteButton = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Delete selected row");
+  assert.ok(deleteButton);
+  assert.equal(deleteButton.disabled, true);
+});
+
+test("edit mode opens mapped figures and admonition titles at their source ranges", () => {
+  const figureHarness = createRuntimeHarness();
+  figureHarness.editModeButton.dispatch("click");
+  const figure = new RuntimeElement({
+    "data-sphinx-source-line": "20",
+    "data-sphinx-source-end-line": "24",
+  }, figureHarness.windowState, 100, 80, "figure");
+  figureHarness.dispatchDocument("click", {
+    target: figure,
+    preventDefault: () => undefined,
+  });
+  const figureRequest = figureHarness.messages.at(-1);
+  assert.equal(figureRequest?.type, "previewEditOpen");
+  assert.equal(figureRequest?.line, 20);
+  assert.equal(figureRequest?.endLine, 24);
+
+  const admonitionHarness = createRuntimeHarness();
+  admonitionHarness.editModeButton.dispatch("click");
+  const admonition = new RuntimeElement({
+    "data-sphinx-source-line": "30",
+    "data-sphinx-source-end-line": "34",
+  }, admonitionHarness.windowState, 100, 80, "aside");
+  const title = new RuntimeElement({}, admonitionHarness.windowState, 100, 20, "p");
+  admonition.appendChild(title);
+  admonitionHarness.dispatchDocument("click", {
+    target: title,
+    preventDefault: () => undefined,
+  });
+  const admonitionRequest = admonitionHarness.messages.at(-1);
+  assert.equal(admonitionRequest?.type, "previewEditOpen");
+  assert.equal(admonitionRequest?.line, 30);
+  assert.equal(admonitionRequest?.endLine, 34);
+});
+
+test("frontmatter name cells open a schema-suggesting key editor and save on blur", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterNameCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const keyInput = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter key lifecycle");
+  assert.ok(keyInput);
+  assert.equal(harness.messages.some((message) => message.type === "previewEditOpen"), false);
+  assert.equal(keyInput.value, "lifecycle");
+  assert.equal(harness.frontmatterNameDisplay.getAttribute("hidden"), "");
+  const datalist = harness.createdElements.find((element) => element.tagName === "DATALIST");
+  assert.ok(datalist);
+  assert.equal(keyInput.getAttribute("list"), datalist.getAttribute("id"));
+  assert.deepEqual(
+    datalist.childElements.map((option) => option.getAttribute("value")),
+    ["status", "owner"],
+  );
+  const fieldMenu = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-menu") === "true");
+  assert.ok(fieldMenu);
+  assert.deepEqual(
+    harness.createdElements
+      .filter((element) => element.getAttribute("data-okf-frontmatter-operation") !== null)
+      .map((element) => element.getAttribute("data-okf-frontmatter-operation")),
+    ["add", "remove", "confirm-add"],
+  );
+  keyInput.value = "stage";
+  keyInput.dispatch("blur");
+
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(save?.fieldName, "lifecycle");
+  assert.equal(save?.newFieldName, "stage");
+  assert.equal(save?.fieldValue, "draft");
+  assert.equal(harness.refreshButton.disabled, true);
+});
+
+test("Escape cancels an unsaved frontmatter key edit", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterNameCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const keyInput = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter key lifecycle");
+  assert.ok(keyInput);
+  keyInput.value = "stage";
+  let prevented = false;
+  keyInput.dispatch("keydown", {
+    key: "Escape",
+    preventDefault: () => { prevented = true; },
+  });
+  keyInput.dispatch("blur");
+
+  assert.equal(prevented, true);
+  assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+  assert.equal(harness.frontmatterNameDisplay.getAttribute("hidden"), null);
+  assert.equal(harness.frontmatterNameCell.getAttribute("data-okf-key-editing"), null);
+  assert.equal(harness.refreshButton.disabled, false);
+});
+
+test("edit mode exposes schema enum controls and saves the selected value", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  assert.equal(harness.frontmatterNameCell.getAttribute("tabindex"), null);
+  assert.equal(harness.frontmatterValueCell.getAttribute("tabindex"), null);
+  harness.editModeButton.dispatch("click");
+  assert.equal(harness.frontmatterNameCell.getAttribute("tabindex"), "0");
+  assert.equal(harness.frontmatterValueCell.getAttribute("tabindex"), "0");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const select = harness.createdElements.find((element) => element.tagName === "SELECT");
+  assert.ok(select);
+  assert.equal(select.parentElement?.parentElement, harness.frontmatterValueCell);
+  assert.deepEqual(select.childElements.map((option) => option.value), ["", "draft", "active"]);
+  assert.equal(select.getAttribute("data-okf-empty-select"), "false");
+  assert.equal(harness.frontmatterValueDisplay.getAttribute("hidden"), "");
+  assert.ok(harness.createdElements.some((element) =>
+    element.getAttribute("data-okf-frontmatter-operation") === "remove"));
+  select.value = "active";
+  select.dispatch("blur");
+
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(save?.fieldName, "lifecycle");
+  assert.equal(save?.fieldValue, "active");
+  assert.equal(harness.refreshButton.disabled, true);
+  harness.dispatchMessage({
+    type: "previewFrontmatterResult",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: save?.editId,
+    saved: true,
+  });
+  assert.equal(
+    harness.createdElements.find((element) => element.getAttribute("role") === "status")?.textContent,
+    "Saved. Refreshing preview…",
+  );
+});
+
+test("boolean frontmatter values use a checkbox and save on change", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.frontmatterRow.setAttribute("data-okf-type", "checkbox");
+  harness.frontmatterRow.setAttribute("data-okf-value", "false");
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "false\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("keydown", {
+    key: "Enter",
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+  });
+
+  const checkbox = harness.createdElements.find((element) => element.type === "checkbox");
+  assert.ok(checkbox);
+  assert.equal(checkbox.checked, false);
+  assert.equal(checkbox.className, "okf-value-checkbox");
+  assert.equal(checkbox.disabled, false);
+  const checkboxValueLabel = harness.createdElements.find((element) =>
+    element.className === "okf-boolean-value");
+  assert.ok(checkboxValueLabel);
+  assert.equal(checkboxValueLabel.textContent, "false");
+  checkbox.checked = true;
+  checkbox.dispatch("change");
+  assert.equal(checkboxValueLabel.textContent, "true");
+
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(save?.fieldValue, true);
+});
+
+test("one click on a boolean value cell toggles and saves it", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.frontmatterRow.setAttribute("data-okf-type", "checkbox");
+  harness.frontmatterRow.setAttribute("data-okf-value", "false");
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "false\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(save?.fieldValue, true);
+  const label = harness.createdElements.find((element) => element.className === "okf-boolean-value");
+  assert.equal(label?.textContent, "true");
+  const status = harness.createdElements.find((element) =>
+    element.getAttribute("role") === "status" && element.textContent === "Saving frontmatter\u2026");
+  assert.ok(status);
+});
+
+test("one click on a true boolean value cell saves false", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.frontmatterRow.setAttribute("data-okf-type", "checkbox");
+  harness.frontmatterRow.setAttribute("data-okf-value", "true");
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "true\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  assert.equal(harness.messages.at(-1)?.fieldValue, false);
+});
+
+test("clicking a boolean name cell still opens the key editor and reading mode does nothing", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.frontmatterRow.setAttribute("data-okf-type", "checkbox");
+  harness.frontmatterRow.setAttribute("data-okf-value", "false");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterNameCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  assert.ok(harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter key lifecycle"));
+  assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+});
+
+test("frontmatter list editor supports add, reorder, remove, and direct array saves", () => {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-type", "list");
+  harness.frontmatterRow.setAttribute("data-okf-value", '["one","two","three"]');
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "- one\n- two\n- three\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") === "true");
+  assert.ok(editor);
+  const listEditor = editor.childElements.find((element) =>
+    element.className === "okf-list-editor");
+  assert.ok(listEditor);
+  const itemList = listEditor.childElements.find((element) =>
+    element.className === "okf-list-editor-items");
+  assert.ok(itemList);
+  assert.equal(itemList.childElements.length, 3);
+  const firstHandle = itemList.childElements[0]?.childElements[0];
+  assert.equal(firstHandle?.getAttribute("draggable"), "true");
+
+  const inputs = () => itemList.childElements.map((row) =>
+    row.querySelector("[data-okf-list-item-input]"));
+  inputs()[0]!.value = "one updated";
+  firstHandle?.dispatch("keydown", {
+    key: "ArrowDown",
+    preventDefault: () => undefined,
+  });
+  assert.deepEqual(inputs().map((input) => input?.value), ["two", "one updated", "three"]);
+
+  const addButton = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Add list item");
+  assert.ok(addButton);
+  addButton.dispatch("click");
+  const addedInput = inputs().at(-1);
+  assert.ok(addedInput);
+  addedInput.value = "four";
+  assert.equal(harness.createdElements.some((element) =>
+    element.textContent === "Save" || element.textContent === "Cancel"), false);
+
+  editor.dispatch("focusout", { relatedTarget: null });
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(JSON.stringify(save?.fieldValue), '["two","one updated","three","four"]');
+});
+
+test("list dragging shows the insertion boundary, reorders items, and suppresses drag blur saves", () => {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-type", "list");
+  harness.frontmatterRow.setAttribute("data-okf-value", '["one","two","three"]');
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") === "true");
+  const itemList = harness.createdElements.find((element) =>
+    element.className === "okf-list-editor-items");
+  assert.ok(editor);
+  assert.ok(itemList);
+  const listEditor = itemList.parentElement;
+  assert.ok(listEditor);
+  const [first, second, third] = itemList.childElements;
+  first.top = 100;
+  second.top = 150;
+  third.top = 200;
+  for (const row of [first, second, third]) row.height = 40;
+  harness.windowState.scrollY = 0;
+  const handle = first.childElements[0];
+  let dragPayload = "";
+  const dataTransfer = {
+    effectAllowed: "",
+    dropEffect: "",
+    setData: (_format: string, value: string) => { dragPayload = value; },
+  };
+  handle.dispatch("dragstart", { dataTransfer });
+  assert.equal(dataTransfer.effectAllowed, "move");
+  assert.ok(dragPayload);
+  assert.equal(first.getAttribute("data-okf-list-dragging"), "true");
+  editor.dispatch("focusout", { relatedTarget: null });
+  assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+  assert.equal(handle.disabled, false);
+
+  let acceptedDrop = false;
+  const hover = (clientY: number) => ({
+    clientY,
+    dataTransfer,
+    preventDefault: () => { acceptedDrop = true; },
+    stopPropagation: () => undefined,
+  });
+  third.dispatch("dragover", hover(205));
+  assert.equal(acceptedDrop, true);
+  assert.equal(dataTransfer.dropEffect, "move");
+  assert.equal(third.getAttribute("data-okf-list-drop"), "before");
+  third.dispatch("dragover", hover(235));
+  assert.equal(third.getAttribute("data-okf-list-drop"), "after");
+  third.dispatch("drop", hover(235));
+  handle.dispatch("dragend");
+  const values = () => itemList.childElements.map((row) =>
+    row.querySelector("[data-okf-list-item-input]")?.value);
+  assert.deepEqual(values(), ["two", "three", "one"]);
+  assert.ok(itemList.childElements.every((row) => row.getAttribute("data-okf-list-drop") === null));
+  assert.equal(first.getAttribute("data-okf-list-dragging"), null);
+
+  handle.dispatch("dragstart", { dataTransfer });
+  harness.windowState.scrollY = 0;
+  second.dispatch("dragover", hover(155));
+  assert.equal(second.getAttribute("data-okf-list-drop"), "before");
+  second.dispatch("drop", hover(155));
+  handle.dispatch("dragend");
+  assert.deepEqual(values(), ["one", "two", "three"]);
+
+  handle.dispatch("dragstart", { dataTransfer });
+  harness.windowState.scrollY = 0;
+  listEditor.dispatch("dragover", hover(195));
+  assert.equal(third.getAttribute("data-okf-list-drop"), "before");
+  listEditor.dispatch("dragleave", { relatedTarget: third.childElements[1] });
+  assert.equal(third.getAttribute("data-okf-list-drop"), "before");
+  listEditor.dispatch("dragleave", { relatedTarget: null });
+  assert.ok(itemList.childElements.every((row) => row.getAttribute("data-okf-list-drop") === null));
+  third.dispatch("dragover", hover(235));
+  handle.dispatch("dragend");
+  assert.deepEqual(values(), ["one", "two", "three"]);
+  assert.ok(itemList.childElements.every((row) => row.getAttribute("data-okf-list-drop") === null));
+  acceptedDrop = false;
+  listEditor.dispatch("dragover", hover(195));
+  assert.equal(acceptedDrop, false);
+
+  handle.dispatch("dragstart", { dataTransfer });
+  harness.windowState.scrollY = 0;
+  third.dispatch("drop", hover(235));
+  handle.dispatch("dragend");
+  editor.dispatch("focusout", { relatedTarget: null });
+  assert.equal(JSON.stringify(harness.messages.at(-1)?.fieldValue), '["two","three","one"]');
+});
+
+test("nullable list editor can set its value as null", () => {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-type", "list");
+  harness.frontmatterRow.setAttribute("data-okf-nullable", "true");
+  harness.frontmatterRow.setAttribute("data-okf-value", '["one"]');
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "- one\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const setNullButton = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-list-set-null") === "true");
+  assert.ok(setNullButton);
+  assert.equal(setNullButton.textContent, "Set to null");
+  setNullButton.dispatch("click", { stopPropagation: () => undefined });
+
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(Object.prototype.hasOwnProperty.call(save ?? {}, "fieldValue"), true);
+  assert.equal(save?.fieldValue, null);
+});
+
+test("nullable scalar editor can set its value to null", () => {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-type", "text");
+  harness.frontmatterRow.setAttribute("data-okf-nullable", "true");
+  harness.frontmatterRow.setAttribute("data-okf-value", '"reason"');
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "reason\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const setNullButton = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-set-null") === "true");
+  assert.ok(setNullButton);
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") === "true");
+  assert.ok(editor?.childElements.includes(setNullButton));
+  assert.equal(setNullButton.textContent, "Set to null");
+  setNullButton.dispatch("click", { stopPropagation: () => undefined });
+
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(save?.fieldValue, null);
+});
+
+test("frontmatter list editor adds from empty and saves after removing every item", () => {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-type", "list");
+  harness.frontmatterRow.setAttribute("data-okf-value", "[]");
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "[]\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") === "true");
+  assert.ok(editor);
+  const listEditor = editor.childElements.find((element) =>
+    element.className === "okf-list-editor");
+  assert.ok(listEditor);
+  const itemList = listEditor.childElements.find((element) =>
+    element.className === "okf-list-editor-items");
+  assert.ok(itemList);
+  assert.equal(itemList.childElements.length, 0);
+  const addButton = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Add list item");
+  assert.ok(addButton);
+
+  addButton.dispatch("click");
+  assert.equal(itemList.childElements.length, 1);
+  const firstRemoveButton = itemList.childElements[0]?.childElements[2];
+  assert.ok(firstRemoveButton);
+  let clickStopped = false;
+  let mouseDownPrevented = false;
+  firstRemoveButton.dispatch("mousedown", { preventDefault: () => { mouseDownPrevented = true; } });
+  assert.equal(mouseDownPrevented, true);
+  firstRemoveButton.dispatch("click", { stopPropagation: () => { clickStopped = true; } });
+  assert.equal(clickStopped, true);
+  assert.equal(itemList.childElements.length, 0);
+
+  editor.dispatch("focusout", { relatedTarget: null });
+  assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+
+  const removeHarness = createRuntimeHarness();
+  removeHarness.frontmatterRow.setAttribute("data-okf-type", "list");
+  removeHarness.frontmatterRow.setAttribute("data-okf-value", '["only"]');
+  removeHarness.frontmatterRow.setAttribute("data-okf-value-yaml", "- only\n");
+  removeHarness.editModeButton.dispatch("click");
+  removeHarness.dispatchDocument("click", {
+    target: removeHarness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const removeEditor = removeHarness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") === "true");
+  assert.ok(removeEditor);
+  const removeListEditor = removeEditor.childElements.find((element) =>
+    element.className === "okf-list-editor");
+  assert.ok(removeListEditor);
+  const removeItemList = removeListEditor.childElements.find((element) =>
+    element.className === "okf-list-editor-items");
+  assert.ok(removeItemList);
+  removeItemList.childElements[0]?.childElements[2]?.dispatch("click");
+  removeEditor.dispatch("focusout", { relatedTarget: null });
+  const removeSave = removeHarness.messages.at(-1);
+  assert.equal(JSON.stringify(removeSave?.fieldValue), "[]");
+});
+
+test("frontmatter list editor keeps invalid edits open and Escape cancels them", () => {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-type", "list");
+  harness.frontmatterRow.setAttribute("data-okf-value", '["one"]');
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "- one\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") === "true");
+  assert.ok(editor);
+  const listEditor = editor.childElements.find((element) =>
+    element.className === "okf-list-editor");
+  assert.ok(listEditor);
+  const itemList = listEditor.childElements.find((element) =>
+    element.className === "okf-list-editor-items");
+  assert.ok(itemList);
+  const input = itemList.childElements[0]?.querySelector("[data-okf-list-item-input]");
+  assert.ok(input);
+  input.value = "invalid";
+  editor.dispatch("focusout", { relatedTarget: null });
+  const save = harness.messages.at(-1);
+  const status = harness.createdElements.find((element) => element.getAttribute("role") === "status");
+  assert.ok(status);
+  harness.dispatchMessage({
+    type: "previewFrontmatterResult",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: save?.editId,
+    error: "Schema validation failed: invalid list item",
+  });
+  assert.equal(status.getAttribute("data-visible"), "true");
+  assert.equal(input.disabled, false);
+  const listControl = editor.childElements.find((element) =>
+    element.className === "okf-list-editor");
+  assert.ok(listControl);
+  listControl.dispatch("keydown", {
+    key: "Escape",
+    preventDefault: () => undefined,
+  });
+  assert.equal(harness.messages.filter((message) => message.type === "previewFrontmatterSave").length, 1);
+  assert.equal(harness.frontmatterValueDisplay.getAttribute("hidden"), null);
+});
+
+test("frontmatter validation errors show an explicit error state", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const select = harness.createdElements.find((element) => element.tagName === "SELECT");
+  assert.ok(select);
+  select.value = "invalid";
+  select.dispatch("blur");
+  const save = harness.messages.at(-1);
+  const status = harness.createdElements.find((element) => element.getAttribute("role") === "status");
+  assert.ok(status);
+
+  harness.dispatchMessage({
+    type: "previewFrontmatterResult",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: save?.editId,
+    error: "Schema validation failed: must NOT have fewer than 1 characters",
+  });
+  assert.equal(status.getAttribute("data-state"), "error");
+  assert.equal(status.getAttribute("data-visible"), "true");
+  assert.equal(status.textContent, "Schema validation failed: must NOT have fewer than 1 characters");
+});
+
+test("frontmatter field actions render inside the edited row", () => {
+  for (const fieldCell of ["name", "value"] as const) {
+    const harness = createRuntimeHarness({ mapFrontmatter: true, viewportWidth: 460, viewportHeight: 600 });
+    const anchor = fieldCell === "name" ? harness.frontmatterNameCell : harness.frontmatterValueCell;
+    harness.editModeButton.dispatch("click");
+    harness.dispatchDocument("click", {
+      target: anchor,
+      preventDefault: () => undefined,
+      stopPropagation: () => undefined,
+    });
+    const menu = harness.createdElements.find((element) => element.getAttribute("data-okf-frontmatter-menu") === "true");
+    assert.ok(menu, fieldCell);
+    const editor = harness.createdElements.find((element) => element.getAttribute("data-okf-frontmatter-editor") !== null);
+    assert.ok(editor, fieldCell);
+    assert.equal(menu.parentElement, editor, fieldCell);
+    assert.equal(editor.childElements[editor.childElements.length - 1], menu, fieldCell);
+    assert.notEqual(menu.parentElement, harness.body, fieldCell);
+    assert.equal(menu.getAttribute("data-placement"), null, fieldCell);
+    assert.equal(menu.style.getPropertyValue("--sphinx-preview-frontmatter-menu-top"), "", fieldCell);
+    assert.equal(menu.style.getPropertyValue("--sphinx-preview-frontmatter-menu-left"), "", fieldCell);
+    const labels = harness.createdElements
+      .filter((element) => element.className === "sphinx-preview-frontmatter-menu-label")
+      .map((element) => element.textContent);
+    assert.deepEqual(labels, ["Add field", "Remove field", "Add"], fieldCell);
+    harness.windowState.scrollY = 50;
+    harness.dispatchWindow("scroll");
+    harness.dispatchWindow("resize");
+    assert.equal(menu.style.getPropertyValue("--sphinx-preview-frontmatter-menu-top"), "", fieldCell);
+    assert.equal(menu.parentElement, editor, fieldCell);
+  }
+});
+
+test("frontmatter blur toward the field actions does not save", () => {
+  type Harness = ReturnType<typeof createRuntimeHarness>;
+  const saves = (harness: Harness) =>
+    harness.messages.filter((message) => message.type === "previewFrontmatterSave");
+  const open = (harness: Harness, target: unknown) => {
+    harness.editModeButton.dispatch("click");
+    harness.dispatchDocument("click", {
+      target,
+      preventDefault: () => undefined,
+      stopPropagation: () => undefined,
+    });
+  };
+  const operation = (harness: Harness, name: string) =>
+    harness.createdElements.find((element) =>
+      element.getAttribute("data-okf-frontmatter-operation") === name);
+
+  // value editor
+  const valueHarness = createRuntimeHarness({ mapFrontmatter: true });
+  valueHarness.frontmatterRow.setAttribute("data-okf-type", "text");
+  valueHarness.frontmatterRow.setAttribute("data-okf-value", '"Core"');
+  open(valueHarness, valueHarness.frontmatterValueCell);
+  const valueControl = valueHarness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  const valueEditor = valueHarness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null);
+  const valueAdd = operation(valueHarness, "add");
+  assert.ok(valueControl && valueEditor && valueAdd);
+  valueControl.value = "Changed";
+  valueControl.dispatch("blur", { relatedTarget: valueAdd });
+  assert.equal(saves(valueHarness).length, 0);
+  assert.equal(valueAdd.parentElement?.parentElement, valueEditor);
+  valueControl.dispatch("blur", { relatedTarget: null });
+  assert.equal(saves(valueHarness).length, 1);
+
+  // key editor
+  const keyHarness = createRuntimeHarness({ mapFrontmatter: true });
+  open(keyHarness, keyHarness.frontmatterNameCell);
+  const keyInput = keyHarness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter key lifecycle");
+  const keyAdd = operation(keyHarness, "add");
+  assert.ok(keyInput && keyAdd);
+  keyInput.value = "stage";
+  keyInput.dispatch("blur", { relatedTarget: keyAdd });
+  assert.equal(saves(keyHarness).length, 0);
+  keyInput.dispatch("blur", { relatedTarget: null });
+  assert.equal(saves(keyHarness).length, 1);
+
+  // list editor: focusout toward the picker
+  const listHarness = createRuntimeHarness({ mapFrontmatter: true });
+  listHarness.frontmatterRow.setAttribute("data-okf-type", "list");
+  listHarness.frontmatterRow.setAttribute("data-okf-value", '["one","two"]');
+  listHarness.frontmatterRow.setAttribute("data-okf-value-yaml", "- one\n- two\n");
+  open(listHarness, listHarness.frontmatterValueCell);
+  const listEditor = listHarness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null);
+  const picker = listHarness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter field to add");
+  const firstItem = listHarness.createdElements.find((element) =>
+    element.getAttribute("data-okf-list-item-input") !== null);
+  assert.ok(listEditor && picker && firstItem);
+  firstItem.value = "one updated";
+  listEditor.dispatch("focusout", { relatedTarget: picker });
+  assert.equal(saves(listHarness).length, 0);
+  listEditor.dispatch("focusout", { relatedTarget: null });
+  assert.equal(saves(listHarness).length, 1);
+});
+
+test("frontmatter text values open a one-row textarea", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.frontmatterRow.setAttribute("data-okf-type", "text");
+  harness.frontmatterRow.setAttribute("data-okf-value", '"Core"');
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.getAttribute("data-okf-text-value"), "true");
+  assert.equal(textarea.rows, 1);
+});
+
+test("frontmatter field toolbar adds and removes fields", () => {
+  const addHarness = createRuntimeHarness({ mapFrontmatter: true });
+  addHarness.editModeButton.dispatch("click");
+  addHarness.dispatchDocument("click", {
+    target: addHarness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const addButton = addHarness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-operation") === "add");
+  assert.ok(addButton);
+  assert.equal(addButton.getAttribute("title"), "Add frontmatter field");
+  assert.equal(addButton.getAttribute("data-tooltip"), "Add frontmatter field");
+  const menu = addHarness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-menu") === "true");
+  assert.ok(menu);
+  assert.equal(menu.getAttribute("data-placement"), null);
+  assert.equal(menu.style.getPropertyValue("--sphinx-preview-frontmatter-menu-top"), "");
+  const fieldPicker = addHarness.createdElements.find((element) =>
+    element.className === "sphinx-preview-frontmatter-picker");
+  assert.ok(fieldPicker);
+  assert.equal(fieldPicker.getAttribute("hidden"), "");
+  addButton.dispatch("click");
+  assert.equal(fieldPicker.getAttribute("hidden"), null);
+  const fieldControl = addHarness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter field to add");
+  assert.ok(fieldControl);
+  assert.equal(fieldControl.tagName, "SELECT");
+  assert.deepEqual(fieldControl.childElements.map((option) => option.value), ["", "status", "owner", "__custom__"]);
+  fieldControl.value = "status";
+  fieldControl.dispatch("change");
+  const confirmAdd = addHarness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-operation") === "confirm-add");
+  assert.ok(confirmAdd);
+  assert.equal(confirmAdd.getAttribute("title"), "Add selected frontmatter field");
+  assert.equal(confirmAdd.getAttribute("data-tooltip"), "Add selected frontmatter field");
+  assert.equal(confirmAdd.disabled, false);
+  confirmAdd.dispatch("click");
+  const addMessage = addHarness.messages.at(-1);
+  assert.equal(addMessage?.frontmatterAction, "add");
+  assert.equal(addMessage?.fieldName, "status");
+  assert.equal(addMessage?.fieldValue, "draft");
+
+  const removeHarness = createRuntimeHarness({ mapFrontmatter: true });
+  removeHarness.editModeButton.dispatch("click");
+  removeHarness.dispatchDocument("click", {
+    target: removeHarness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const removeButton = removeHarness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-operation") === "remove");
+  assert.ok(removeButton);
+  assert.equal(removeButton.getAttribute("title"), "Remove frontmatter field");
+  assert.equal(removeButton.getAttribute("data-tooltip"), "Remove frontmatter field");
+  removeButton.dispatch("click");
+  const removeMessage = removeHarness.messages.at(-1);
+  assert.equal(removeMessage?.frontmatterAction, "remove");
+  assert.equal(removeMessage?.fieldName, "lifecycle");
+  assert.equal(Object.prototype.hasOwnProperty.call(removeMessage ?? {}, "fieldValue"), false);
+});
+
+test("empty enum values show an explicit placeholder", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.frontmatterRow.setAttribute("data-okf-value", "null");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const select = harness.createdElements.find((element) => element.tagName === "SELECT");
+  assert.ok(select);
+  assert.equal(select.getAttribute("data-okf-empty-select"), "true");
+  assert.equal(select.childElements[0]?.textContent, "Choose a value...");
+});
+
+test("schema-free frontmatter values use a generic YAML editor", () => {
+  const harness = createRuntimeHarness();
+  const valueYaml = "owner: platform\nlabels:\n  - alpha\n";
+  harness.frontmatterRow.setAttribute("data-okf-schema-found", "false");
+  harness.frontmatterRow.setAttribute("data-okf-type", "unknown");
+  harness.frontmatterRow.setAttribute("data-okf-value", '{"owner":"platform","labels":["alpha"]}');
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", valueYaml);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.value, valueYaml);
+  assert.equal(textarea.rows, 4);
+  assert.ok(harness.createdElements.some((element) =>
+    element.getAttribute("data-okf-frontmatter-operation") === "add"));
+  let enterPrevented = false;
+  textarea.dispatch("keydown", {
+    key: "Enter",
+    preventDefault: () => { enterPrevented = true; },
+  });
+  assert.equal(enterPrevented, false);
+  assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+  textarea.value = "owner: experience\nlabels:\n  - beta\n";
+  textarea.dispatch("blur");
+
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(save?.fieldValueFormat, "yaml");
+  assert.equal(save?.fieldValue, textarea.value);
+
+  let prevented = false;
+  harness.dispatchDocument("keydown", {
+    key: "Enter",
+    target: textarea,
+    preventDefault: () => { prevented = true; },
+  });
+  assert.equal(prevented, false);
+});
+
+test("text frontmatter values use a wrapping textarea that grows with its content", () => {
+  const harness = createRuntimeHarness();
+  const longValue = "A long frontmatter value that needs to wrap. ".repeat(20);
+  harness.frontmatterRow.setAttribute("data-okf-type", "text");
+  harness.frontmatterRow.setAttribute("data-okf-value", JSON.stringify(longValue));
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", `${longValue}\n`);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.value, longValue);
+  assert.equal(textarea.getAttribute("data-okf-text-value"), "true");
+  assert.equal(textarea.style.height, `${textarea.scrollHeight}px`);
+
+  textarea.scrollHeight = 3_000;
+  textarea.dispatch("input");
+  assert.equal(textarea.style.height, "3000px");
+
+  textarea.scrollHeight = 4_000;
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(textarea.style.height, "4000px");
+});
+
+function openTextFieldEditor(value: string): {
+  harness: ReturnType<typeof createRuntimeHarness>;
+  textarea: ReturnType<typeof createRuntimeHarness>["createdElements"][number];
+} {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-type", "text");
+  harness.frontmatterRow.setAttribute("data-okf-value", JSON.stringify(value));
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", `${value}\n`);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  return { harness, textarea };
+}
+
+function frontmatterSaves(harness: ReturnType<typeof createRuntimeHarness>): Array<Record<string, unknown>> {
+  return harness.messages.filter((message) => message.type === "previewFrontmatterSave");
+}
+
+test("Enter saves a one-line frontmatter text field and Shift+Enter does not", () => {
+  const { harness, textarea } = openTextFieldEditor("Alpha");
+  assert.equal(textarea.getAttribute("aria-keyshortcuts"), "Enter Shift+Enter");
+  assert.equal(textarea.getAttribute("title"), "Enter saves \u00b7 Shift+Enter adds a line");
+
+  textarea.value = "Beta";
+  let shiftPrevented = false;
+  textarea.dispatch("keydown", {
+    key: "Enter",
+    shiftKey: true,
+    preventDefault: () => { shiftPrevented = true; },
+  });
+  assert.equal(shiftPrevented, false);
+  assert.equal(frontmatterSaves(harness).length, 0);
+
+  let prevented = false;
+  textarea.dispatch("keydown", {
+    key: "Enter",
+    preventDefault: () => { prevented = true; },
+  });
+  assert.equal(prevented, true);
+  const saves = frontmatterSaves(harness);
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0]?.fieldValue, "Beta");
+});
+
+test("Enter in a multi-line frontmatter text value inserts a line; Cmd/Ctrl+Enter saves", () => {
+  const { harness, textarea } = openTextFieldEditor("Alpha");
+  textarea.value = "a\nb";
+  let prevented = false;
+  textarea.dispatch("keydown", {
+    key: "Enter",
+    preventDefault: () => { prevented = true; },
+  });
+  assert.equal(prevented, false);
+  assert.equal(frontmatterSaves(harness).length, 0);
+
+  textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
+  const saves = frontmatterSaves(harness);
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0]?.fieldValue, "a\nb");
+});
+
+test("saving a frontmatter text field strips trailing line breaks unless the original had one", () => {
+  const { harness, textarea } = openTextFieldEditor("Alpha");
+  textarea.value = "Beta\n";
+  textarea.dispatch("blur", {});
+  const saves = frontmatterSaves(harness);
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0]?.fieldValue, "Beta");
+
+  const kept = openTextFieldEditor("Alpha\n");
+  kept.textarea.value = "Beta\n";
+  kept.textarea.dispatch("blur", {});
+  assert.equal(frontmatterSaves(kept.harness)[0]?.fieldValue, "Beta\n");
+});
+
+test("Enter in the YAML frontmatter editor inserts a line; Cmd/Ctrl+Enter saves", () => {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-type", "unknown");
+  harness.frontmatterRow.setAttribute("data-okf-value", JSON.stringify({ a: 1 }));
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "a: 1\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.value = "a: 2\n";
+  let prevented = false;
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, false);
+  assert.equal(frontmatterSaves(harness).length, 0);
+
+  textarea.dispatch("keydown", { key: "Enter", ctrlKey: true, preventDefault: () => undefined });
+  const saves = frontmatterSaves(harness);
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0]?.fieldValueFormat, "yaml");
+});
+
+test("Escape cancels an unsaved frontmatter value edit", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+
+  const select = harness.createdElements.find((element) => element.tagName === "SELECT");
+  assert.ok(select);
+  select.value = "active";
+  select.dispatch("change");
+  assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+  let prevented = false;
+  select.dispatch("keydown", {
+    key: "Escape",
+    preventDefault: () => { prevented = true; },
+  });
+  select.dispatch("blur");
+
+  assert.equal(prevented, true);
+  assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+  assert.equal(harness.frontmatterValueDisplay.getAttribute("hidden"), null);
+  assert.equal(harness.refreshButton.disabled, false);
+});
+
+test("frontmatter cells open their field editor with the keyboard in edit mode", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.editModeButton.dispatch("click");
+  let prevented = false;
+  harness.dispatchDocument("keydown", {
+    key: "Enter",
+    target: harness.frontmatterNameCell,
+    preventDefault: () => { prevented = true; },
+  });
+
+  assert.equal(prevented, true);
+  assert.ok(harness.createdElements.some((element) =>
+    element.getAttribute("aria-label") === "Frontmatter key lifecycle"));
+});
+
+test("executes source and preview synchronization across layout changes", () => {
+  const harness = createRuntimeHarness({ scrollEditorWithPreview: false });
+  harness.stickyHeadings.rectProvider = () => ({
+    top: 0,
+    height: harness.stickyHeadings.height,
+    bottom: harness.stickyHeadings.height,
+  });
+  const messageTypes = (): unknown[] => harness.messages
+    .map((message) => message.type)
+    .filter((type) => type !== "previewState");
+  // Reading offset: 3 sticky lines x 20 px fallback line height + 5 px chrome.
+  const readingOffset = 65;
+
+  assert.deepEqual(messageTypes(), ["previewReady"]);
+
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 50,
+  });
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 500 - readingOffset);
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.deepEqual(messageTypes(), ["previewReady"]);
+
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 10,
+  });
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 90,
+  });
+  harness.flushFrames();
+  // Line 90 lies between the end of the 50-52 block (y 540, line 53) and line 100 (y 1000).
+  assert.equal(harness.windowState.scrollY, 540 + (460 * 37) / 47 - readingOffset);
+
+  harness.windowState.scrollY = 250;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.deepEqual(messageTypes(), ["previewReady"]);
+
+  // The preview now owns the anchor; every layout change keeps it at the reading line.
+  for (const mapping of harness.mappings) {
+    mapping.top += 100;
+  }
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 350);
+
+  for (const mapping of harness.mappings) {
+    mapping.top += 50;
+  }
+  harness.image.dispatch("load");
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 400);
+
+  for (const mapping of harness.mappings) {
+    mapping.top += 40;
+  }
+  harness.dispatchVisualViewportResize();
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 440);
+
+  harness.mappings[1].top += 25;
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  // The anchor sat 275/460 of the way from line 2 (y 230) to line 50, whose block moved to 715.
+  assert.equal(harness.windowState.scrollY, 230 + (485 * 275) / 460 - readingOffset);
+
+  harness.dispatchDocument("click", { target: harness.mappings[1] });
+  assert.equal(harness.messages.at(-1)?.type, "previewReveal");
+  assert.equal(harness.messages.at(-1)?.line, 50);
+  harness.dispatchDocument("dblclick", { target: harness.mappings[1] });
+  assert.equal(harness.messages.at(-1)?.activation, "click");
+
+  const enabledHarness = createRuntimeHarness({ doubleClickToSwitchToEditor: true });
+  enabledHarness.dispatchDocument("dblclick", { target: enabledHarness.mappings[1] });
+  assert.equal(enabledHarness.messages.at(-1)?.activation, "double-click");
+
+  harness.dispatchDocument("keydown", {
+    key: "Enter",
+    target: harness.mappings[1],
+    preventDefault: () => undefined,
+  });
+  assert.equal(harness.messages.at(-1)?.activation, "keyboard");
+
+  const messageCount = harness.messages.length;
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///other.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 1,
+  });
+  harness.flushFrames();
+  assert.equal(harness.messages.length, messageCount);
+});
+
+test("marks editor selection without moving the preview when following is disabled", () => {
+  const sourceOnlyHarness = createRuntimeHarness({
+    scrollPreviewWithEditor: false,
+    markEditorSelection: true,
+  });
+  sourceOnlyHarness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    line: 50,
+    selectionLine: 50,
+  });
+  sourceOnlyHarness.flushFrames();
+  assert.equal(sourceOnlyHarness.windowState.scrollY, 0);
+  assert.equal(sourceOnlyHarness.mappings[1].getAttribute("data-sphinx-preview-current"), "true");
+
+});
+
+test("source scrolling rejects stale identities and invalid line numbers", async (context) => {
+  for (const [name, override] of Object.entries({
+    "other document": { documentId: "file:///other.md" },
+    "old document version": { documentVersion: 6 },
+    "old render request": { requestId: 10 },
+    "zero line": { line: 0 },
+    "non-finite line": { line: Number.NaN },
+  })) {
+    await context.test(name, () => {
+      const harness = createRuntimeHarness();
+      const messageCount = harness.messages.length;
+      harness.dispatchMessage({
+        type: "sourceScroll",
+        documentId: "file:///active.md",
+        documentVersion: 7,
+        requestId: 11,
+        line: 50,
+        ...override,
+      });
+      harness.flushFrames();
+      assert.equal(harness.windowState.scrollY, 0);
+      assert.equal(harness.messages.length, messageCount);
+    });
+  }
+});
+
+test("scrolls to host-approved anchors and ignores invalid or stale requests", () => {
+  const harness = createRuntimeHarness();
+
+  harness.dispatchMessage({
+    type: "navigateAnchor",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    value: "#section",
+  });
+  assert.equal(harness.windowState.scrollY, 735);
+
+  harness.dispatchMessage({
+    type: "navigateAnchor",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    value: "#Caf%C3%A9",
+    sourceLine: 50,
+  });
+  assert.equal(harness.windowState.scrollY, 435);
+
+  harness.dispatchMessage({
+    type: "navigateAnchor",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    value: "#unmapped-heading",
+    sourceLine: 51,
+  });
+  assert.equal(harness.windowState.scrollY, 500 + (40 / 3) - 65);
+
+  harness.dispatchMessage({
+    type: "navigateAnchor",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    value: "#unmapped-final-heading",
+    sourceLine: 100,
+  });
+  assert.equal(harness.windowState.scrollY, 935);
+
+  harness.dispatchMessage({
+    type: "navigateAnchor",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    value: "#invalid anchor",
+  });
+  assert.equal(harness.windowState.scrollY, 935);
+
+  harness.dispatchMessage({
+    type: "navigateAnchor",
+    documentId: "file:///other.md",
+    documentVersion: 7,
+    requestId: 11,
+    value: "#section",
+  });
+  assert.equal(harness.windowState.scrollY, 935);
+});
+
+interface ClickEvent {
+  target: RuntimeElement;
+  defaultPrevented: boolean;
+  immediatePropagationStopped: boolean;
+  preventDefault(): void;
+  stopImmediatePropagation(): void;
+}
+
+function clickEvent(target: RuntimeElement): ClickEvent {
+  return {
+    target,
+    defaultPrevented: false,
+    immediatePropagationStopped: false,
+    preventDefault() {
+      this.defaultPrevented = true;
+    },
+    stopImmediatePropagation() {
+      this.immediatePropagationStopped = true;
+    },
+  };
+}
+
+test("clicking a checkbox posts a source toggle instead of revealing the block", () => {
+  const harness = createRuntimeHarness();
+  const messageCount = harness.messages.length;
+  harness.checkbox.checked = true; // the browser flips the box before dispatching the click
+  const event = clickEvent(harness.checkbox);
+  harness.dispatchDocument("click", event);
+
+  assert.equal(event.defaultPrevented, false);
+  assert.equal(event.immediatePropagationStopped, true);
+  const posted = harness.messages.slice(messageCount);
+  assert.deepEqual(posted.map((message) => message.type), ["previewCheckboxToggle"]);
+  assert.equal(posted[0].line, 51);
+  assert.equal(posted[0].endLine, 51);
+  assert.equal(posted[0].column, 2);
+  assert.equal(posted[0].checked, true);
+  assert.equal(posted[0].documentVersion, 7);
+  assert.equal(harness.checkbox.getAttribute("aria-busy"), "true");
+
+  harness.dispatchMessage({
+    type: "previewCheckboxResult",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: posted[0].editId,
+    saved: true,
+  });
+  assert.equal(harness.checkbox.getAttribute("aria-busy"), null);
+  assert.equal(harness.checkbox.checked, true);
+});
+
+test("a rejected checkbox toggle reverts the box and explains why", () => {
+  const harness = createRuntimeHarness();
+  harness.checkbox.checked = true;
+  harness.dispatchDocument("click", clickEvent(harness.checkbox));
+  harness.dispatchMessage({
+    type: "previewCheckboxResult",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    error: "The preview is out of date. Try again once it has refreshed.",
+  });
+  assert.equal(harness.checkbox.checked, false);
+  assert.equal(harness.checkbox.getAttribute("aria-busy"), null);
+  assert.match(harness.checkbox.getAttribute("title") ?? "", /out of date/u);
+});
+
+test("in edit mode a checkbox click toggles the box without opening a block editor", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  const messageCount = harness.messages.length;
+  harness.checkbox.checked = true;
+  harness.dispatchDocument("click", clickEvent(harness.checkbox));
+  assert.deepEqual(harness.messages.slice(messageCount).map((message) => message.type), ["previewCheckboxToggle"]);
+  assert.equal(
+    harness.createdElements.some((element) => element.getAttribute("data-sphinx-preview-block-editor") !== null),
+    false,
+  );
+});
+
+test("a checkbox click is refused while a block editor is open", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  const messageCount = harness.messages.length;
+  harness.checkbox.checked = true;
+  const event = clickEvent(harness.checkbox);
+  harness.dispatchDocument("click", event);
+  assert.equal(event.defaultPrevented, true, "the browser must undo the visual toggle");
+  assert.equal(harness.messages.length, messageCount);
+  const status = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-edit-status") !== null);
+  assert.match(status?.textContent ?? "", /before toggling a checkbox/u);
+});
+
+test("checkboxes are disabled when the preview cannot edit the document", () => {
+  const harness = createRuntimeHarness({ editingEnabled: false });
+  assert.equal(harness.checkbox.disabled, true);
+  assert.match(harness.checkbox.getAttribute("title") ?? "", /trusted workspace/u);
+  const messageCount = harness.messages.length;
+  const event = clickEvent(harness.checkbox);
+  harness.dispatchDocument("click", event);
+  assert.equal(event.defaultPrevented, true);
+  assert.equal(harness.messages.length, messageCount);
+});
+
+test("typing is saved once after the autosave delay, carrying the last text", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  for (const text of ["S", "Se", "Sec", "Seco", "Second"]) {
+    textarea.value = text;
+    textarea.dispatch("input");
+  }
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditSave"), false);
+  harness.flushTimers();
+  const saves = harness.messages.slice(before).filter((message) => message.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0].final, false);
+  assert.equal(saves[0].editedText, "Second\n");
+});
+
+test("pagehide flushes a pending autosave without waiting for the timer", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  textarea.value = "Typed";
+  textarea.dispatch("input");
+  harness.dispatchWindow("pagehide");
+  const saves = harness.messages.slice(before).filter((message) => message.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0].final, false);
+  assert.equal(saves[0].editedText, "Typed\n");
+  assert.equal(harness.pendingTimerCount(), 0);
+});
+
+test("visibilitychange to hidden flushes a pending autosave without waiting for the timer", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  textarea.value = "Typed";
+  textarea.dispatch("input");
+  harness.setVisibilityState("hidden");
+  harness.dispatchDocument("visibilitychange", {});
+  const saves = harness.messages.slice(before).filter((message) => message.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0].final, false);
+  assert.equal(saves[0].editedText, "Typed\n");
+  assert.equal(harness.pendingTimerCount(), 0);
+});
+
+test("hide events post nothing when no edit is pending or the page stays visible", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  harness.dispatchWindow("pagehide");
+  harness.setVisibilityState("hidden");
+  harness.dispatchDocument("visibilitychange", {});
+  textarea.value = "Typed";
+  textarea.dispatch("input");
+  harness.setVisibilityState("visible");
+  harness.dispatchDocument("visibilitychange", {});
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditSave"), false);
+  harness.flushTimers();
+});
+
+test("blur after typing posts one final save and clears the autosave timer", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  textarea.value = "Typed";
+  textarea.dispatch("input");
+  textarea.dispatch("blur");
+  assert.equal(harness.pendingTimerCount(), 0);
+  harness.flushTimers();
+  const saves = harness.messages.slice(before).filter((message) => message.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0].final, true);
+  assert.equal(saves[0].editedText, "Typed\n");
+});
+
+test("switching table cells posts the pending change immediately", () => {
+  const harness = createRuntimeHarness();
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const cells = [0, 1, 2].map((rowIndex) => {
+    const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+    row.rowIndex = rowIndex;
+    table.appendChild(row);
+    return [0, 1].map((columnIndex) => {
+      const cell = new RuntimeElement({}, harness.windowState, 100, 30, rowIndex === 0 ? "th" : "td");
+      cell.cellIndex = columnIndex;
+      row.appendChild(cell);
+      return cell;
+    });
+  });
+  const click = (cell: RuntimeElement): void => harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+  });
+  const input = (): RuntimeElement => {
+    const control = harness.createdElements.filter((element) =>
+      element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+    assert.ok(control);
+    return control;
+  };
+  harness.editModeButton.dispatch("click");
+  click(cells[1][0]);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
+  });
+  input().value = "edited x";
+  input().dispatch("input");
+  const before = harness.messages.length;
+  click(cells[2][1]);
+  const saves = harness.messages.slice(before).filter((message) => message.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0].final, false);
+  assert.match(String(saves[0].editedText), /\| edited x \| y \|/u);
+  assert.equal(harness.pendingTimerCount(), 0);
+});
+
+test("markWideTables marks short cells and the overflow of a wide table, never the properties table", () => {
+  const harness = createRuntimeHarness();
+  const table = new RuntimeElement({}, harness.windowState, 0, 100, "table");
+  const row = new RuntimeElement({}, harness.windowState, 0, 20, "tr");
+  const shortCell = new RuntimeElement({}, harness.windowState, 0, 20, "td");
+  shortCell.textContent = " nw-02 ";
+  const spacedCell = new RuntimeElement({}, harness.windowState, 0, 20, "td");
+  spacedCell.textContent = "North Pole";
+  const longCell = new RuntimeElement({}, harness.windowState, 0, 20, "th");
+  longCell.textContent = "a".repeat(25);
+  table.appendChild(row);
+  for (const cell of [shortCell, spacedCell, longCell]) row.appendChild(cell);
+  table.scrollWidth = 900;
+  table.clientWidth = 400;
+  harness.contentTables.push(table);
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  assert.equal(table.getAttribute("data-sphinx-table-overflow"), "true");
+  assert.equal(shortCell.getAttribute("data-sphinx-short-cell"), "true");
+  assert.equal(spacedCell.getAttribute("data-sphinx-short-cell"), null);
+  assert.equal(longCell.getAttribute("data-sphinx-short-cell"), null);
+  assert.equal(harness.frontmatterRow.getAttribute("data-sphinx-short-cell"), null);
+  assert.equal(harness.frontmatterNameCell.getAttribute("data-sphinx-short-cell"), null);
+  assert.equal(harness.frontmatterValueCell.getAttribute("data-sphinx-short-cell"), null);
+});
+
+test("markWideTables sets the overflow attribute only past a one pixel tolerance and is idempotent", () => {
+  const harness = createRuntimeHarness();
+  const table = new RuntimeElement({}, harness.windowState, 0, 100, "table");
+  const cell = new RuntimeElement({}, harness.windowState, 0, 20, "td");
+  cell.textContent = "North";
+  table.appendChild(cell);
+  harness.contentTables.push(table);
+  table.scrollWidth = 401;
+  table.clientWidth = 400;
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  assert.equal(table.getAttribute("data-sphinx-table-overflow"), null, "one pixel is not an overflow");
+  table.scrollWidth = 402;
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  assert.equal(table.getAttribute("data-sphinx-table-overflow"), "true");
+  let writes = 0;
+  for (const element of [table, cell]) {
+    const original = element.setAttribute.bind(element);
+    element.setAttribute = (name: string, value: string): void => { writes += 1; original(name, value); };
+    const originalRemove = element.removeAttribute.bind(element);
+    element.removeAttribute = (name: string): void => { writes += 1; originalRemove(name); };
+  }
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  assert.equal(writes, 0, "a second pass must not touch any attribute");
+  table.scrollWidth = 400;
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  assert.equal(table.getAttribute("data-sphinx-table-overflow"), null, "the cue goes away when the table fits");
+});
+
+function addOkfLink(harness: RuntimeHarness): RuntimeElement {
+  const link = new RuntimeElement(
+    { "data-sphinx-preview-navigation": "okf-link:abc", class: "okf-frontmatter-link" },
+    harness.windowState, 0, 20, "a");
+  harness.frontmatterValueDisplay.appendChild(link);
+  return link;
+}
+
+function t21ClickEvent(target: RuntimeElement, extra: Record<string, unknown> = {}): Record<string, unknown> {
+  const event: Record<string, unknown> = {
+    target,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+    stopImmediatePropagation: () => { event.immediatePropagationStopped = true; },
+    ...extra,
+  };
+  return event;
+}
+
+function openedFrontmatterEditors(harness: RuntimeHarness): RuntimeElement[] {
+  return harness.createdElements.filter((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") === "true");
+}
+
+test("T21: in edit mode a plain click on an okf link opens the field editor and does not navigate", () => {
+  const harness = createRuntimeHarness();
+  const link = addOkfLink(harness);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", t21ClickEvent(link));
+  assert.equal(openedFrontmatterEditors(harness).length, 1);
+  assert.equal(harness.messages.some((message) => message.type === "previewLink"), false);
+});
+
+test("T21: Cmd or Ctrl click on an okf link in edit mode still navigates", () => {
+  for (const modifier of [{ metaKey: true }, { ctrlKey: true }]) {
+    const harness = createRuntimeHarness();
+    const link = addOkfLink(harness);
+    harness.editModeButton.dispatch("click");
+    harness.dispatchDocument("click", t21ClickEvent(link, modifier));
+    assert.equal(openedFrontmatterEditors(harness).length, 0);
+    assert.equal(harness.messages.filter((message) => message.type === "previewLink").length, 1);
+  }
+});
+
+test("T21: in reading mode a click on an okf link navigates", () => {
+  const harness = createRuntimeHarness();
+  const link = addOkfLink(harness);
+  harness.dispatchDocument("click", t21ClickEvent(link));
+  assert.equal(openedFrontmatterEditors(harness).length, 0);
+  const posted = harness.messages.find((message) => message.type === "previewLink");
+  assert.equal(posted?.request, "okf-link:abc");
+});
+
+interface ListHarness {
+  harness: RuntimeHarness;
+  rows: () => RuntimeElement[];
+  inputs: () => RuntimeElement[];
+  editor: RuntimeElement;
+  addButton: RuntimeElement;
+}
+
+function openListEditor(values: string, suggestions?: string): ListHarness {
+  const harness = createRuntimeHarness();
+  if (suggestions !== undefined) harness.frontmatterRow.setAttribute("data-okf-link-suggestions", suggestions);
+  harness.frontmatterRow.setAttribute("data-okf-type", "list");
+  harness.frontmatterRow.setAttribute("data-okf-value", values);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", t21ClickEvent(harness.frontmatterValueCell));
+  const editor = openedFrontmatterEditors(harness)[0];
+  assert.ok(editor);
+  const itemList = harness.createdElements.find((element) => element.className === "okf-list-editor-items");
+  assert.ok(itemList);
+  const addButton = harness.createdElements.find((element) => element.getAttribute("aria-label") === "Add list item");
+  assert.ok(addButton);
+  return {
+    harness,
+    editor,
+    addButton,
+    rows: () => itemList.childElements,
+    inputs: () => itemList.childElements.map((row) => row.querySelector("[data-okf-list-item-input]")!),
+  };
+}
+
+function recordFocus<T>(body: (focused: RuntimeElement[]) => T): T {
+  const focused: RuntimeElement[] = [];
+  const original = RuntimeElement.prototype.focus;
+  RuntimeElement.prototype.focus = function (this: RuntimeElement, options?: FocusOptions): void {
+    focused.push(this);
+    original.call(this, options);
+  };
+  try {
+    return body(focused);
+  } finally {
+    RuntimeElement.prototype.focus = original;
+  }
+}
+
+const noop = (): void => undefined;
+
+test("T21: Enter in a list item inserts an empty item after it, focuses it, and does not save", () => {
+  recordFocus((focused) => {
+    const list = openListEditor('["one","two"]');
+    focused.length = 0;
+    list.inputs()[0]!.dispatch("keydown", { key: "Enter", preventDefault: noop });
+    assert.deepEqual(list.inputs().map((input) => input.value), ["one", "", "two"]);
+    assert.equal(focused.at(-1), list.inputs()[1]);
+    assert.equal(list.harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+    assert.equal(list.inputs()[1]!.getAttribute("aria-label"), "List item 2");
+    assert.equal(list.inputs()[2]!.getAttribute("aria-label"), "List item 3");
+  });
+});
+
+test("T21: Enter in an empty last list item removes it and saves the list", () => {
+  const list = openListEditor('["one"]');
+  list.inputs()[0]!.dispatch("keydown", { key: "Enter", preventDefault: noop });
+  list.inputs()[1]!.value = "two";
+  list.inputs()[1]!.dispatch("keydown", { key: "Enter", preventDefault: noop });
+  assert.equal(list.inputs().length, 3);
+  list.inputs()[2]!.dispatch("keydown", { key: "Enter", preventDefault: noop });
+  const save = list.harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(JSON.stringify(save?.fieldValue), '["one","two"]');
+});
+
+test("T21: Backspace in an empty middle list item removes it and focuses the previous input", () => {
+  recordFocus((focused) => {
+    const list = openListEditor('["one","","three"]');
+    const [first, middle, last] = list.inputs();
+    focused.length = 0;
+    middle!.selectionStart = 0;
+    middle!.dispatch("keydown", { key: "Backspace", preventDefault: noop });
+    assert.deepEqual(list.inputs().map((input) => input.value), ["one", "three"]);
+    assert.equal(focused[0], first);
+    assert.deepEqual(first!.selectionRange, [3, 3]);
+    assert.equal(list.harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
+    assert.equal(list.inputs()[1], last);
+  });
+});
+
+test("T21: Backspace in an empty first item focuses the next input, and in the only item the add button", () => {
+  recordFocus((focused) => {
+    const list = openListEditor('["","two"]');
+    const [first, second] = list.inputs();
+    focused.length = 0;
+    first!.dispatch("keydown", { key: "Backspace", preventDefault: noop });
+    assert.equal(focused[0], second);
+    second!.value = "";
+    focused.length = 0;
+    second!.dispatch("keydown", { key: "Backspace", preventDefault: noop });
+    assert.equal(focused[0], list.addButton);
+    assert.equal(list.inputs().length, 0);
+  });
+});
+
+test("T21: Backspace in a non-empty list item is left to the browser", () => {
+  const list = openListEditor('["one","two"]');
+  let prevented = false;
+  list.inputs()[1]!.dispatch("keydown", { key: "Backspace", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, false);
+  assert.equal(list.inputs().length, 2);
+});
+
+test("T21: Cmd or Ctrl+Enter in a list item saves the list", () => {
+  for (const modifier of [{ metaKey: true }, { ctrlKey: true }]) {
+    const list = openListEditor('["one"]');
+    list.inputs()[0]!.value = "uno";
+    list.inputs()[0]!.dispatch("keydown", { key: "Enter", preventDefault: noop, ...modifier });
+    const save = list.harness.messages.at(-1);
+    assert.equal(save?.type, "previewFrontmatterSave");
+    assert.equal(JSON.stringify(save?.fieldValue), '["uno"]');
+  }
+});
+
+test("T21: Enter while composing or with Shift does not touch the list", () => {
+  const list = openListEditor('["one"]');
+  list.inputs()[0]!.dispatch("keydown", { key: "Enter", isComposing: true, preventDefault: noop });
+  list.inputs()[0]!.dispatch("keydown", { key: "Enter", shiftKey: true, preventDefault: noop });
+  assert.equal(list.inputs().length, 1);
+});
+
+function listStatus(list: ListHarness): RuntimeElement {
+  const status = list.harness.createdElements.find((element) => element.getAttribute("role") === "status");
+  assert.ok(status);
+  return status;
+}
+
+test("T22: list inputs get the datalist of link suggestions, new items included", () => {
+  const list = openListEditor('["StRS-A"]', '["StRS-A","StRS-B"]');
+  const datalist = list.harness.createdElements.find((element) => element.tagName === "DATALIST"
+    && element.getAttribute("id")?.startsWith("okf-frontmatter-link-options-"));
+  assert.ok(datalist);
+  assert.deepEqual(datalist.childElements.map((option) => option.getAttribute("value")), ["StRS-A", "StRS-B"]);
+  assert.equal(list.inputs()[0]!.getAttribute("list"), datalist.getAttribute("id"));
+  list.addButton.dispatch("click");
+  assert.equal(list.inputs()[1]!.getAttribute("list"), datalist.getAttribute("id"));
+});
+
+test("T22: without or with an invalid suggestions attribute the inputs have no list", () => {
+  for (const suggestions of [undefined, "not json", "{}", "[]"]) {
+    const list = openListEditor('["a"]', suggestions);
+    assert.equal(list.inputs()[0]!.getAttribute("list"), null);
+  }
+});
+
+test("T22: an unknown value warns, a known or empty value clears the warning", () => {
+  const list = openListEditor('[""]', '["StRS-B"]');
+  const input = list.inputs()[0]!;
+  const status = listStatus(list);
+  input.value = "StRS-BX";
+  input.dispatch("input", {});
+  assert.equal(input.getAttribute("aria-invalid"), "true");
+  assert.equal(status.getAttribute("data-state"), "warning");
+  assert.equal(status.getAttribute("data-visible"), "true");
+  assert.equal(status.textContent, 'No Markdown file named "StRS-BX.md" was found. It will be saved as typed.');
+  input.value = "StRS-B";
+  input.dispatch("input", {});
+  assert.equal(input.getAttribute("aria-invalid"), null);
+  assert.equal(status.getAttribute("data-state"), null);
+  assert.equal(status.getAttribute("data-visible"), null);
+  input.value = "X";
+  input.dispatch("input", {});
+  assert.equal(status.getAttribute("data-state"), "warning");
+  input.value = "";
+  input.dispatch("input", {});
+  assert.equal(input.getAttribute("aria-invalid"), null);
+  assert.equal(status.getAttribute("data-state"), null);
+});
+
+test("T22: saving a list with an unknown value still posts the save", () => {
+  const list = openListEditor('["StRS-B"]', '["StRS-B"]');
+  const input = list.inputs()[0]!;
+  input.value = "StRS-BX";
+  input.dispatch("input", {});
+  input.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: noop });
+  const save = list.harness.messages.at(-1);
+  assert.equal(save?.type, "previewFrontmatterSave");
+  assert.equal(JSON.stringify(save?.fieldValue), '["StRS-BX"]');
+});
+
+function openFrontmatterValueEditor(harness: ReturnType<typeof createRuntimeHarness>): void {
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+}
+
+test("T24: Remove field is disabled with a tooltip on a required row", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.frontmatterRow.setAttribute("data-okf-required", "true");
+  openFrontmatterValueEditor(harness);
+  const removeButton = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-operation") === "remove");
+  assert.ok(removeButton);
+  const tooltip = "Required by the schema; it cannot be removed";
+  assert.equal(removeButton.disabled, true);
+  assert.equal(removeButton.getAttribute("title"), tooltip);
+  assert.equal(removeButton.getAttribute("aria-label"), tooltip);
+  assert.equal(removeButton.getAttribute("data-tooltip"), tooltip);
+});
+
+test("T24: Remove field stays enabled on an optional row", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  openFrontmatterValueEditor(harness);
+  const removeButton = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-operation") === "remove");
+  assert.ok(removeButton);
+  assert.notEqual(removeButton.disabled, true);
+  assert.equal(removeButton.getAttribute("title"), "Remove frontmatter field");
+});
+
+test("T24: choosing a field in the picker adds it right after the open row", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  openFrontmatterValueEditor(harness);
+  const select = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter field to add");
+  assert.ok(select);
+  select.value = "owner";
+  select.dispatch("change");
+  const message = harness.messages.at(-1);
+  assert.equal(message?.type, "previewFrontmatterSave");
+  assert.equal(message?.frontmatterAction, "add");
+  assert.equal(message?.fieldName, "owner");
+  assert.equal(message?.fieldValue, "");
+  assert.equal(message?.afterField, "lifecycle");
+  const confirm = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-operation") === "confirm-add");
+  assert.equal(confirm?.hidden, true);
+});
+
+test("T24: the text-input picker adds on Enter with afterField", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.frontmatterRow.closest("[data-okf-properties]")?.setAttribute("data-okf-available-fields", "[]");
+  openFrontmatterValueEditor(harness);
+  const input = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter field to add");
+  assert.ok(input);
+  assert.equal(input.tagName, "INPUT");
+  input.value = "custom";
+  let prevented = false;
+  input.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented = true; } });
+  const message = harness.messages.at(-1);
+  assert.equal(message?.frontmatterAction, "add");
+  assert.equal(message?.fieldName, "custom");
+  assert.equal(message?.afterField, "lifecycle");
+  assert.equal(prevented, true);
+});
+
+function customKeyHarness(attributes: Record<string, string> = {}) {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  const section = harness.frontmatterRow.closest("[data-okf-properties]");
+  for (const [name, value] of Object.entries(attributes)) section?.setAttribute(name, value);
+  openFrontmatterValueEditor(harness);
+  const select = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter field to add");
+  assert.ok(select);
+  const options = () => harness.createdElements.filter((element) =>
+    element.tagName === "OPTION" && element.parentElement === select);
+  const customInput = () => harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "New field name");
+  const status = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-status") !== null
+    || element.getAttribute("role") === "status");
+  return { harness, select, options, customInput, status };
+}
+
+test("T25: the picker offers Custom key only when additional properties are allowed", () => {
+  const allowed = customKeyHarness();
+  assert.deepEqual(allowed.options().map((option) => option.value).slice(-1), ["__custom__"]);
+  assert.equal(allowed.options().at(-1)?.textContent, "Custom key\u2026");
+  const forbidden = customKeyHarness({ "data-okf-additional-properties": "false" });
+  assert.equal(forbidden.options().some((option) => option.value === "__custom__"), false);
+});
+
+test("T25: choosing Custom key shows the name input and posts nothing", () => {
+  const { harness, select, customInput } = customKeyHarness();
+  const before = harness.messages.length;
+  select.value = "__custom__";
+  select.dispatch("change");
+  assert.ok(customInput());
+  assert.equal(harness.messages.length, before);
+});
+
+test("T25: Enter in the custom key input adds the field with an empty value", () => {
+  const { harness, select, customInput } = customKeyHarness();
+  select.value = "__custom__";
+  select.dispatch("change");
+  const input = customInput()!;
+  input.value = "reviewer";
+  input.dispatch("keydown", { key: "Enter", preventDefault: noop });
+  const message = harness.messages.at(-1);
+  assert.equal(message?.type, "previewFrontmatterSave");
+  assert.equal(message?.frontmatterAction, "add");
+  assert.equal(message?.fieldName, "reviewer");
+  assert.equal(message?.fieldValue, "");
+  assert.equal(message?.afterField, "lifecycle");
+  assert.equal(JSON.stringify(harness.getWebviewState().pendingFrontmatterEdit), '{"fieldName":"reviewer","requestId":11}');
+});
+
+test("T25: an invalid custom key shows an error and posts nothing", () => {
+  for (const name of ["", "  ", " lead", "trail ", "two\nlines", "lifecycle"]) {
+    const { harness, select, customInput } = customKeyHarness();
+    select.value = "__custom__";
+    select.dispatch("change");
+    const before = harness.messages.length;
+    const input = customInput()!;
+    input.value = name;
+    input.dispatch("keydown", { key: "Enter", preventDefault: noop });
+    assert.equal(harness.messages.length, before, JSON.stringify(name));
+    const errors = harness.createdElements.filter((element) =>
+      element.getAttribute("data-state") === "error" && element.textContent.length > 0);
+    assert.equal(errors.length, 1, JSON.stringify(name));
+    assert.equal(harness.getWebviewState().pendingFrontmatterEdit, undefined);
+  }
+});
+
+test("T25: a pending frontmatter edit opens the editor of the new field and clears the state once it closes", () => {
+  const harness = createRuntimeHarness({
+    mapFrontmatter: true,
+    savedState: { editMode: true, pendingFrontmatterEdit: { fieldName: "lifecycle" } },
+  });
+  const select = harness.createdElements.find((element) => element.tagName === "SELECT"
+    && element.getAttribute("aria-label") !== "Frontmatter field to add");
+  assert.ok(select, "the editor of the new field is open");
+  assert.equal(JSON.stringify(harness.getWebviewState().pendingFrontmatterEdit), '{"fieldName":"lifecycle"}',
+    "kept while the editor is open, so that a repeated load of the same render opens it again");
+  select.dispatch("keydown", { key: "Escape", preventDefault: noop });
+  select.dispatch("blur");
+  assert.equal(harness.getWebviewState().pendingFrontmatterEdit, undefined);
+});
+
+test("T25: a pending frontmatter edit outside edit mode or for a missing row is dropped", () => {
+  for (const savedState of [
+    { editMode: false, pendingFrontmatterEdit: { fieldName: "lifecycle" } },
+    { editMode: true, pendingFrontmatterEdit: { fieldName: "missing" } },
+  ]) {
+    const harness = createRuntimeHarness({ mapFrontmatter: true, savedState });
+    assert.equal(harness.createdElements.some((element) =>
+      element.getAttribute("data-okf-frontmatter-editor") !== null), false);
+    assert.equal(harness.getWebviewState().pendingFrontmatterEdit, undefined);
+  }
+});
+
+test("T25: an error result clears the pending frontmatter edit", () => {
+  const { harness, select, customInput } = customKeyHarness();
+  select.value = "__custom__";
+  select.dispatch("change");
+  const input = customInput()!;
+  input.value = "reviewer";
+  input.dispatch("keydown", { key: "Enter", preventDefault: noop });
+  const message = harness.messages.at(-1)!;
+  harness.dispatchMessage({
+    type: "previewFrontmatterResult",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: message.editId,
+    saved: false,
+    error: "nope",
+  });
+  assert.equal(harness.getWebviewState().pendingFrontmatterEdit, undefined);
+});
+
+test("T25: a reload of the render that posted the add keeps the pending edit for the next render", () => {
+  const harness = createRuntimeHarness({
+    mapFrontmatter: true,
+    savedState: { editMode: true, pendingFrontmatterEdit: { fieldName: "lifecycle", requestId: 11 } },
+  });
+  assert.equal(harness.createdElements.some((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null), false);
+  assert.equal(JSON.stringify(harness.getWebviewState().pendingFrontmatterEdit),
+    '{"fieldName":"lifecycle","requestId":11}');
+});
+
+test("T25: saving a value from the pending edit's editor consumes the pending edit", () => {
+  const harness = createRuntimeHarness({
+    mapFrontmatter: true,
+    savedState: { editMode: true, pendingFrontmatterEdit: { fieldName: "lifecycle", requestId: "old" } },
+  });
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null);
+  assert.ok(editor, "the editor of the new field is open");
+  const control = harness.createdElements.find((element) => element.tagName === "SELECT"
+    && element.getAttribute("aria-label") !== "Frontmatter field to add")!;
+  control.value = "active";
+  control.dispatch("blur");
+  assert.ok(harness.messages.some((message) => message.type === "previewFrontmatterSave"),
+    "the value was posted");
+  assert.equal(harness.getWebviewState().pendingFrontmatterEdit, undefined);
+});
+
+test("T25: a later render does not reopen an editor that was already opened for the pending edit", () => {
+  const first = createRuntimeHarness({
+    mapFrontmatter: true,
+    savedState: { editMode: true, pendingFrontmatterEdit: { fieldName: "lifecycle", requestId: "old" } },
+  });
+  assert.ok(first.createdElements.some((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null), "opened on the new render");
+  const state = first.getWebviewState();
+  const second = createRuntimeHarness({
+    mapFrontmatter: true,
+    savedState: state,
+    requestId: 99,
+  });
+  assert.equal(second.createdElements.some((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null), false);
+  assert.equal(second.getWebviewState().pendingFrontmatterEdit, undefined);
+});
+
+// T28: block insertion points.
+const INSERT_POINT_CLASS = "sphinx-preview-insert-point";
+
+function insertPointsOf(harness: RuntimeHarness): RuntimeElement[] {
+  return harness.createdElements.filter((element) =>
+    element.className.split(" ").includes(INSERT_POINT_CLASS) && !element.removed);
+}
+
+function insertPointAfterLine(harness: RuntimeHarness, line: number): RuntimeElement {
+  const point = insertPointsOf(harness).find((element) =>
+    element.getAttribute("data-sphinx-insert-after-line") === String(line));
+  assert.ok(point, `an insertion point after line ${line}`);
+  return point;
+}
+
+function sourceReply(harness: RuntimeHarness, originalText: string, extra: Record<string, unknown> = {}) {
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText,
+    ...extra,
+  });
+}
+
+test("T28: edit mode adds one insertion point after each top-level block, reading mode none", () => {
+  const harness = createRuntimeHarness();
+  assert.equal(insertPointsOf(harness).length, 0);
+  harness.editModeButton.dispatch("click");
+  assert.deepEqual(
+    insertPointsOf(harness).map((point) => point.getAttribute("data-sphinx-insert-after-line")),
+    ["1", "52", "100"],
+  );
+  harness.mappings.forEach((block, index) => {
+    assert.equal(block.insertedElements.length, 1);
+    assert.equal(block.insertedElements[0], insertPointsOf(harness)[index]);
+  });
+  const button = insertPointAfterLine(harness, 52).childElements[0];
+  assert.equal(button.tagName, "BUTTON");
+  assert.equal(button.getAttribute("aria-label"), "Insert a block here");
+  assert.equal(button.getAttribute("type"), "button");
+  assert.equal(button.textContent, "+");
+  const first = insertPointsOf(harness);
+  harness.editModeButton.dispatch("click");
+  assert.equal(insertPointsOf(harness).length, 0);
+  assert.ok(first.every((point) => point.removed));
+  harness.editModeButton.dispatch("click");
+  assert.equal(insertPointsOf(harness).length, 3, "recreated, not duplicated");
+});
+
+test("T28: a render that starts in edit mode builds the insertion points at init", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  assert.equal(insertPointsOf(harness).length, 3);
+});
+
+test("T28: the properties section gets an insertion point after line 0", () => {
+  const harness = createRuntimeHarness({
+    mapFrontmatter: true,
+    propertiesMapped: true,
+    savedState: { editMode: true },
+  });
+  assert.deepEqual(
+    insertPointsOf(harness).map((point) => point.getAttribute("data-sphinx-insert-after-line")),
+    ["0", "1", "52", "100"],
+  );
+});
+
+test("T28: an empty body shows a single Start writing point after line 0", () => {
+  const harness = createRuntimeHarness({
+    emptyBody: true,
+    previewStatus: "success",
+    savedState: { editMode: true },
+  });
+  const points = insertPointsOf(harness);
+  assert.equal(points.length, 1);
+  assert.equal(points[0].getAttribute("data-sphinx-insert-after-line"), "0");
+  assert.equal(points[0].childElements[0].textContent, "Start writing");
+  assert.equal(points[0].parentElement, harness.previewContent);
+  harness.editModeButton.dispatch("click");
+  assert.equal(insertPointsOf(harness).length, 0, "reading mode removes it");
+});
+
+test("T28: a frontmatter-only document gets one Start writing point", () => {
+  const harness = createRuntimeHarness({
+    emptyBody: true,
+    mapFrontmatter: true,
+    propertiesMapped: true,
+    previewStatus: "success",
+    savedState: { editMode: true },
+  });
+  const points = insertPointsOf(harness);
+  assert.equal(points.length, 1);
+  assert.equal(points[0].getAttribute("data-sphinx-insert-after-line"), "0");
+  assert.equal(points[0].childElements[0].textContent, "Start writing");
+});
+
+test("T28: a failed render offers no Start writing point", () => {
+  const harness = createRuntimeHarness({
+    emptyBody: true,
+    previewStatus: "error",
+    savedState: { editMode: true },
+  });
+  assert.equal(insertPointsOf(harness).length, 0);
+});
+
+test("T28: clicking a point posts previewEditOpen with insertAfterLine", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  insertPointAfterLine(harness, 52).childElements[0].dispatch("click", {
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const open = harness.messages.at(-1);
+  assert.equal(open?.type, "previewEditOpen");
+  assert.equal(open?.line, 52);
+  assert.equal(open?.endLine, 52);
+  assert.equal(open?.insertAfterLine, 52);
+});
+
+test("T28: Start writing opens at line 1 with insertAfterLine 0", () => {
+  const harness = createRuntimeHarness({
+    emptyBody: true,
+    previewStatus: "success",
+    savedState: { editMode: true },
+  });
+  insertPointAfterLine(harness, 0).childElements[0].dispatch("click", {
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const open = harness.messages.at(-1);
+  assert.equal(open?.type, "previewEditOpen");
+  assert.equal(open?.line, 1);
+  assert.equal(open?.endLine, 1);
+  assert.equal(open?.insertAfterLine, 0);
+});
+
+test("T28: document-level click and keydown on an insertion point never open a block editor", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const point = insertPointAfterLine(harness, 52);
+  const button = point.childElements[0];
+  const before = harness.messages.length;
+  harness.dispatchDocument("click", { target: button, preventDefault: () => undefined });
+  harness.dispatchDocument("keydown", { key: "Enter", target: point, preventDefault: () => undefined });
+  harness.dispatchDocument("keydown", { key: " ", target: button, preventDefault: () => undefined });
+  assert.equal(
+    harness.messages.slice(before).some((message) =>
+      message.type === "previewEditOpen" || message.type === "revealSource"),
+    false,
+  );
+  assert.equal(harness.createdElements.some((element) =>
+    element.getAttribute("data-sphinx-preview-block-editor") !== null), false);
+});
+
+test("T28: an empty source reply opens an empty textarea with a placeholder; Done saves the insertion", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  insertPointAfterLine(harness, 52).childElements[0].dispatch("click", {
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  sourceReply(harness, "", { insertAfterLine: 52 });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.value, "");
+  assert.equal(
+    textarea.getAttribute("placeholder"),
+    'Type Markdown, for example "## Heading" or "- item"',
+  );
+  const done = harness.createdElements.find((element) =>
+    element.tagName === "BUTTON" && element.textContent === "Done");
+  const revert = harness.createdElements.find((element) =>
+    element.tagName === "BUTTON" && element.textContent === "Revert");
+  assert.ok(done && revert);
+  assert.ok(harness.createdElements.some((element) =>
+    element.tagName === "P" && /Enter: new line/u.test(element.textContent)), "hint is shown");
+  textarea.value = "## New section";
+  textarea.dispatch("input");
+  done.dispatch("click");
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.insertAfterLine, 52);
+  assert.equal(save?.originalText, "");
+  assert.equal(save?.editedText, "## New section");
+  assert.equal(save?.final, true);
+});
+
+test("T28: Done on an untouched empty insertion closes without saving", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  insertPointAfterLine(harness, 1).childElements[0].dispatch("click", {
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  sourceReply(harness, "", { insertAfterLine: 1 });
+  const done = harness.createdElements.find((element) =>
+    element.tagName === "BUTTON" && element.textContent === "Done");
+  assert.ok(done);
+  done.dispatch("click");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave"), false);
+});
+
+test("T28: autosave and Revert carry insertAfterLine", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  insertPointAfterLine(harness, 100).childElements[0].dispatch("click", {
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  sourceReply(harness, "", { insertAfterLine: 100 });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.value = "- check logs";
+  textarea.dispatch("input");
+  harness.flushTimers();
+  const autosave = harness.messages.at(-1);
+  assert.equal(autosave?.type, "previewEditSave");
+  assert.equal(autosave?.final, false);
+  assert.equal(autosave?.insertAfterLine, 100);
+  const revert = harness.createdElements.find((element) =>
+    element.tagName === "BUTTON" && element.textContent === "Revert");
+  assert.ok(revert);
+  revert.disabled = false;
+  revert.dispatch("click");
+  const cancel = harness.messages.at(-1);
+  assert.equal(cancel?.type, "previewEditCancel");
+  assert.equal(cancel?.insertAfterLine, 100);
+});
+
+test("T28: ordinary block edits never carry insertAfterLine", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  assert.equal("insertAfterLine" in (harness.messages.at(-1) as object), false);
+  sourceReply(harness, "Editable paragraph.\n");
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(textarea.getAttribute("placeholder"), null);
+  textarea.value = "Changed.";
+  textarea.dispatch("input");
+  harness.flushTimers();
+  assert.equal("insertAfterLine" in (harness.messages.at(-1) as object), false);
+});
+
+test("a final block save carries the edited element's pin; an autosave does not", () => {
+  const harness = createRuntimeHarness();
+  harness.windowState.scrollY = 200;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "A paragraph centered in the viewport.\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.value = "A paragraph, edited.";
+  textarea.dispatch("input");
+  harness.flushTimers();
+  const autosave = harness.messages.at(-1);
+  assert.equal(autosave?.type, "previewEditSave");
+  assert.equal(autosave?.final, false);
+  assert.equal("pinLine" in (autosave ?? {}), false);
+  assert.equal("pinViewportTop" in (autosave ?? {}), false);
+
+  const editorTop = blockEditorOf(harness.mappings[1]).getBoundingClientRect().top;
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.final, true);
+  assert.equal(save?.pinLine, 50);
+  assert.equal(save?.pinViewportTop, editorTop);
+  assert.equal(editorTop, 300);
+});
+
+test("restoreState puts the pinned block's top at the pinned viewport position", () => {
+  const exact = createRuntimeHarness({ initialPin: { line: 50, viewportTop: 120 } });
+  assert.equal(exact.windowState.scrollY, 380);
+  assert.equal(exact.mappings[1].getBoundingClientRect().top, 120);
+
+  const between = createRuntimeHarness({ initialPin: { line: 60, viewportTop: 120 } });
+  assert.equal(between.windowState.scrollY, 380, "the last entry at or before the line is used");
+
+  const pinWins = createRuntimeHarness({ initialPin: { line: 50, viewportTop: 120 }, initialState: { descriptionsCollapsed: false } });
+  assert.equal(pinWins.windowState.scrollY, 380);
+
+  const clampedLow = createRuntimeHarness({ initialPin: { line: 50, viewportTop: 5_000 } });
+  assert.equal(clampedLow.windowState.scrollY, 0);
+  const clampedHigh = createRuntimeHarness({ initialPin: { line: 100, viewportTop: -5_000 } });
+  assert.equal(clampedHigh.windowState.scrollY, 1_900);
+});
+
+test("previewReady reports the pinned anchor only when the load restored a pin", () => {
+  const pinned = createRuntimeHarness({ initialPin: { line: 50, viewportTop: 120 } });
+  const ready = pinned.messages.find((message) => message.type === "previewReady");
+  assert.ok(ready);
+  assert.equal(pinned.windowState.scrollY, 380);
+  // The block at line 50 sits at the top of the viewport band after the pin, so the reading line
+  // anchor is a real source line (not the stale pre-save anchor) and is reported to the host.
+  assert.equal(typeof ready.anchorLine, "number");
+  assert.ok(Number(ready.anchorLine) >= 1);
+
+  const plain = createRuntimeHarness();
+  const plainReady = plain.messages.find((message) => message.type === "previewReady");
+  assert.ok(plainReady);
+  assert.equal("anchorLine" in plainReady, false, "a load without a pin sends no anchorLine");
+});
+
+const NO_EDITOR_TOOLTIP = "No text editor shows this file";
+
+test("T38: an unpaired preview disables the anchor button and a previewPairing message re-enables it", () => {
+  const harness = createRuntimeHarness({ pairedTextEditor: false });
+  assert.equal(harness.anchorButton.disabled, true);
+  for (const name of ["title", "data-tooltip", "aria-label"]) {
+    assert.equal(harness.anchorButton.getAttribute(name), NO_EDITOR_TOOLTIP);
+  }
+  harness.dispatchMessage({
+    type: "previewPairing",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    pairedTextEditor: true,
+  });
+  assert.equal(harness.anchorButton.disabled, false);
+  assert.equal(harness.anchorButton.getAttribute("title"), "Preview and text editor scroll together");
+  harness.dispatchMessage({
+    type: "previewPairing",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    pairedTextEditor: false,
+  });
+  assert.equal(harness.anchorButton.disabled, true);
+  assert.equal(harness.anchorButton.getAttribute("title"), NO_EDITOR_TOOLTIP);
+});
+
+test("T38: a paired preview keeps the anchor button enabled, and a foreign previewPairing is ignored", () => {
+  const harness = createRuntimeHarness();
+  assert.equal(harness.anchorButton.disabled, false);
+  harness.dispatchMessage({
+    type: "previewPairing",
+    documentId: "file:///other.md",
+    documentVersion: 7,
+    requestId: 11,
+    pairedTextEditor: false,
+  });
+  assert.equal(harness.anchorButton.disabled, false);
+});
+
+test("T38: edit mode starts from the workspace choice unless the webview has saved state", () => {
+  const remembered = createRuntimeHarness({ initialEditMode: true });
+  assert.equal(remembered.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "on");
+  assert.equal(remembered.editModeButton.getAttribute("aria-pressed"), "true");
+
+  const saved = createRuntimeHarness({ initialEditMode: true, savedState: { editMode: false } });
+  assert.equal(saved.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
+
+  const plain = createRuntimeHarness();
+  assert.equal(plain.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
+});
+
+test("T38: a read-only preview never starts in edit mode", () => {
+  const harness = createRuntimeHarness({ initialEditMode: true, editingEnabled: false });
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
+});
+
+test("T38: toggling edit mode posts previewEditModeChanged", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  const on = harness.messages.filter((message) => message.type === "previewEditModeChanged").at(-1);
+  assert.equal(on?.editMode, true);
+  assert.equal(on?.documentId, "file:///active.md");
+  harness.editModeButton.dispatch("click");
+  const off = harness.messages.filter((message) => message.type === "previewEditModeChanged").at(-1);
+  assert.equal(off?.editMode, false);
+});
+
+function newCustomKeyHarness() {
+  const harness = createRuntimeHarness({
+    mapFrontmatter: true,
+    savedState: { editMode: true, pendingFrontmatterEdit: { fieldName: "approver", requestId: "old" } },
+    frontmatterRowAttributes: {
+      class: "okf-unknown",
+      "data-okf-field": "approver",
+      "data-okf-type": "unknown",
+      "data-okf-value": '""',
+      "data-okf-value-yaml": '""\n',
+    },
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea, "the editor of the new custom key is a text area");
+  return { harness, textarea };
+}
+
+test("T41: a new custom key opens a one-line text editor, not the YAML editor", () => {
+  const { textarea } = newCustomKeyHarness();
+  assert.equal(textarea.getAttribute("data-okf-text-value"), "true");
+  assert.equal(textarea.getAttribute("aria-keyshortcuts"), "Enter Shift+Enter");
+  assert.equal(textarea.value, "");
+});
+
+test("T41: Enter saves a new custom key as plain text and Shift+Enter adds a line", () => {
+  const { harness, textarea } = newCustomKeyHarness();
+  textarea.value = "Ann";
+  let shiftPrevented = false;
+  textarea.dispatch("keydown", {
+    key: "Enter",
+    shiftKey: true,
+    preventDefault: () => { shiftPrevented = true; },
+  });
+  assert.equal(shiftPrevented, false);
+  assert.equal(frontmatterSaves(harness).length, 0);
+  let prevented = false;
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  const saves = frontmatterSaves(harness);
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0]?.fieldName, "approver");
+  assert.equal(saves[0]?.fieldValue, "Ann");
+  assert.equal(saves[0]?.fieldValueFormat, undefined);
+  assert.equal(saves[0]?.fieldValueStyle, "plain");
+});
+
+test("T41: an existing field's save does not ask for a plain scalar", () => {
+  const { harness, textarea } = openTextFieldEditor("Alpha");
+  textarea.value = "Beta";
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: noop });
+  assert.equal(frontmatterSaves(harness)[0]?.fieldValueStyle, undefined);
+});
+
+test("T41: Escape on the field picker cancels the open frontmatter edit", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  openFrontmatterValueEditor(harness);
+  const control = harness.createdElements.find((element) => element.tagName === "SELECT"
+    && element.getAttribute("aria-label") !== "Frontmatter field to add");
+  assert.ok(control);
+  const addButton = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-operation") === "add")!;
+  addButton.dispatch("click", {});
+  const picker = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Frontmatter field to add")!;
+  const before = harness.messages.length;
+  let prevented = false;
+  harness.dispatchDocument("keydown", {
+    key: "Escape",
+    target: picker,
+    preventDefault: () => { prevented = true; },
+  });
+  assert.equal(prevented, true);
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null);
+  assert.equal(editor?.parentElement, undefined, "the editor is removed");
+  // A blur of the removed control must not save anything.
+  control.value = "active";
+  control.dispatch("blur", {});
+  assert.equal(harness.messages.length, before);
+});
+
+test("T41: Escape outside the properties section does not touch an open frontmatter edit", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  openFrontmatterValueEditor(harness);
+  const outside = harness.createdElements.find((element) => element.tagName === "SELECT"
+    && element.getAttribute("aria-label") !== "Frontmatter field to add")!;
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null)!;
+  harness.dispatchDocument("keydown", { key: "Escape", target: harness.editModeButton, preventDefault: noop });
+  assert.ok(editor.parentElement, "the editor stays open");
+  assert.ok(outside);
+});
+
+function overlayMessage(extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    type: "previewPendingOverlay",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    visible: true,
+    label: "Preview pending",
+    message: "Rendering the active buffer.",
+    ...extra,
+  };
+}
+
+function pendingOverlays(harness: RuntimeHarness): RuntimeElement[] {
+  return harness.createdElements.filter((element) =>
+    element.getAttribute("data-sphinx-preview-pending-overlay") !== null && !element.removed);
+}
+
+test("T43: the pending overlay message creates one overlay, outside the content", () => {
+  const harness = createRuntimeHarness();
+  const contentBefore = [...harness.previewContent.childElements];
+  harness.dispatchMessage(overlayMessage());
+  const overlays = pendingOverlays(harness);
+  assert.equal(overlays.length, 1);
+  const overlay = overlays[0]!;
+  assert.equal(overlay.getAttribute("role"), "status");
+  assert.equal(overlay.getAttribute("aria-live"), "polite");
+  assert.equal(overlay.parentElement, harness.body);
+  assert.equal(overlay.childElements[0]?.tagName, "STRONG");
+  assert.equal(overlay.childElements[0]?.textContent, "Preview pending");
+  assert.equal(overlay.childElements[1]?.tagName, "SPAN");
+  assert.equal(overlay.childElements[1]?.textContent, "Rendering the active buffer.");
+  assert.deepEqual(harness.previewContent.childElements, contentBefore, "content children are unchanged");
+  assert.equal(harness.previewContent.insertedElements.length, 0);
+});
+
+test("T43: a second pending overlay message updates the overlay instead of duplicating it", () => {
+  const harness = createRuntimeHarness();
+  harness.dispatchMessage(overlayMessage());
+  harness.dispatchMessage(overlayMessage({ message: "Waiting for the latest edit." }));
+  const overlays = pendingOverlays(harness);
+  assert.equal(overlays.length, 1);
+  assert.equal(overlays[0]!.childElements[1]?.textContent, "Waiting for the latest edit.");
+});
+
+test("T43: visible false removes the pending overlay", () => {
+  const harness = createRuntimeHarness();
+  harness.dispatchMessage(overlayMessage());
+  harness.dispatchMessage(overlayMessage({ visible: false }));
+  assert.equal(pendingOverlays(harness).length, 0);
+  // Showing it again after a removal creates a fresh one.
+  harness.dispatchMessage(overlayMessage());
+  assert.equal(pendingOverlays(harness).length, 1);
+});
+
+test("T43: invalid or foreign pending overlay messages are ignored", () => {
+  const harness = createRuntimeHarness();
+  harness.dispatchMessage(overlayMessage({ requestId: 12 }));
+  harness.dispatchMessage(overlayMessage({ documentVersion: 8 }));
+  harness.dispatchMessage(overlayMessage({ visible: "yes" }));
+  harness.dispatchMessage(overlayMessage({ label: 3 }));
+  harness.dispatchMessage(overlayMessage({ message: undefined }));
+  harness.dispatchMessage(overlayMessage({ label: "x".repeat(501) }));
+  assert.equal(pendingOverlays(harness).length, 0);
+  harness.dispatchMessage(overlayMessage());
+  harness.dispatchMessage(overlayMessage({ requestId: 12, visible: false }));
+  harness.dispatchMessage(overlayMessage({ visible: 0 }));
+  assert.equal(pendingOverlays(harness).length, 1, "invalid hides do not remove the overlay");
+});
+
+function propertiesMessage(markup: string, extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    type: "previewPropertiesTable",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    markup,
+    ...extra,
+  };
+}
+
+function cellMarkup(label: string): string {
+  return '<section data-okf-properties><td data-okf-edit-cell="value">' + label + "</td></section>";
+}
+
+test("T30: previewPropertiesTable replaces the properties section in place", () => {
+  const harness = createRuntimeHarness();
+  const old = harness.currentProperties();
+  assert.ok(old);
+  assert.equal(old, harness.frontmatterProperties);
+  const contentBefore = [...harness.previewContent.childElements];
+  harness.dispatchMessage(propertiesMessage(cellMarkup("fresh")));
+  const current = harness.currentProperties();
+  assert.ok(current && current !== old, "a new section replaced the old one");
+  assert.equal(old.removed, true);
+  assert.deepEqual(harness.htmlInsertions.map((entry) => entry.position), ["beforebegin"]);
+  assert.equal(current.innerHTML, cellMarkup("fresh"));
+  assert.deepEqual(harness.previewContent.childElements, contentBefore, "nothing else in the content moved");
+});
+
+test("T30: previewPropertiesTable inserts the section when it is absent and removes it on empty markup", () => {
+  const harness = createRuntimeHarness();
+  harness.dispatchMessage(propertiesMessage(""));
+  assert.equal(harness.currentProperties(), null, "an empty markup removes the section");
+  assert.equal(harness.frontmatterProperties.removed, true);
+  assert.equal(harness.htmlInsertions.length, 0, "nothing is inserted for an empty markup");
+  harness.dispatchMessage(propertiesMessage(""));
+  assert.equal(harness.currentProperties(), null, "removing an absent section is harmless");
+  harness.dispatchMessage(propertiesMessage(cellMarkup("again")));
+  assert.deepEqual(harness.htmlInsertions.map((entry) => entry.position), ["afterbegin"]);
+  assert.equal(harness.currentProperties()?.innerHTML, cellMarkup("again"));
+});
+
+test("T30: previewPropertiesTable is ignored for another request, version, document or a non-string markup", () => {
+  const harness = createRuntimeHarness();
+  const old = harness.currentProperties();
+  harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { requestId: 12 }));
+  harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { documentVersion: 8 }));
+  harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { documentId: "file:///other.md" }));
+  harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { markup: 3 }));
+  harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { markup: undefined }));
+  assert.equal(harness.currentProperties(), old);
+  assert.equal(harness.htmlInsertions.length, 0);
+});
+
+test("T30: previewPropertiesTable is deferred while a frontmatter editor is open, then applied on close", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  openFrontmatterValueEditor(harness);
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null)!;
+  assert.ok(editor.parentElement, "the editor is open");
+  harness.dispatchMessage(propertiesMessage(cellMarkup("first")));
+  harness.dispatchMessage(propertiesMessage(cellMarkup("second")));
+  assert.equal(harness.currentProperties(), harness.frontmatterProperties, "the section is not touched");
+  assert.equal(harness.htmlInsertions.length, 0);
+  harness.dispatchDocument("keydown", {
+    key: "Escape",
+    target: harness.frontmatterValueCell,
+    preventDefault: noop,
+  });
+  assert.equal(editor.parentElement, undefined, "Escape closed the editor");
+  const current = harness.currentProperties();
+  assert.ok(current && current !== harness.frontmatterProperties, "the latest deferred markup was applied");
+  assert.equal(current.innerHTML, cellMarkup("second"));
+  assert.deepEqual(harness.htmlInsertions.map((entry) => entry.position), ["beforebegin"]);
+});
+
+test("T30: a replaced section gets edit-cell tabindex in edit mode and none outside it", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchMessage(propertiesMessage(
+    cellMarkup("a").replace("</section>", '<th data-okf-edit-cell="name">n</th></section>')));
+  const cells = harness.currentProperties()?.childElements ?? [];
+  assert.equal(cells.length, 2);
+  for (const cell of cells) assert.equal(cell.getAttribute("tabindex"), "0");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchMessage(propertiesMessage(cellMarkup("c")));
+  for (const cell of harness.currentProperties()?.childElements ?? []) {
+    assert.equal(cell.getAttribute("tabindex"), null);
+  }
+});
+
+test("T30: a replacement closes the link tooltip, re-measures and keeps the description state", () => {
+  const harness = createRuntimeHarness({ viewportWidth: 900 });
+  harness.dispatchDocument("click", { target: harness.descriptionButton });
+  assert.equal(harness.documentElement.getAttribute("data-okf-descriptions-collapsed"), "true");
+  const link = new RuntimeElement({
+    class: "okf-frontmatter-link", "data-okf-link-status": "valid", title: "target\ndescription: x",
+  }, harness.windowState, 0, 10, "a");
+  harness.dispatchDocument("mouseover", { target: link });
+  const tooltips = () => harness.createdElements.filter((element) =>
+    element.className === "sphinx-preview-link-tooltip" && element.parentElement !== undefined);
+  assert.equal(tooltips().length, 1, "the tooltip is open");
+  const rectReads = harness.mappings.reduce((count, mapping) => count + mapping.rectReadCount, 0);
+  harness.dispatchMessage(propertiesMessage(cellMarkup("fresh")));
+  assert.equal(tooltips().length, 0, "the tooltip closed");
+  assert.equal(link.getAttribute("title"), "target\ndescription: x", "the title was restored");
+  assert.ok(harness.mappings.reduce((count, mapping) => count + mapping.rectReadCount, 0) > rectReads,
+    "the layout was measured again");
+  assert.equal(harness.documentElement.getAttribute("data-okf-descriptions-collapsed"), "true");
+  assert.equal(harness.descriptionButton.getAttribute("aria-expanded"), "false");
+});
+
+// T33: the startup sequence of the runtime. The content-bound initialization moves into a function
+// that a later task calls again on replaced content; the order of observable effects at startup
+// (element mutations, then the messages posted) must not change. Listener registration on the
+// toolbar buttons and the theme attributes of the root element do not depend on the content, so
+// they are left out of the trace.
+function traceStartup(
+  configuration: Parameters<typeof createRuntimeHarness>[0],
+  savedAnchorMode?: boolean,
+): { effects: string[]; messageTypes: unknown[]; scrollY: number } {
+  const entries: Array<{ element: RuntimeElement; method: string; args: unknown[]; text: string }> = [];
+  const prototype = RuntimeElement.prototype as unknown as Record<string, (...args: unknown[]) => unknown>;
+  const original = new Map<string, (...args: unknown[]) => unknown>();
+  const describe = (element: RuntimeElement): string => {
+    const identity = element.getAttribute("data-okf-field") ?? element.getAttribute("class")
+      ?? element.getAttribute("data-sphinx-source-line") ?? element.className;
+    return element.tagName.toLowerCase() + (identity ? "[" + identity + "]" : "");
+  };
+  const format = (value: unknown): string => (
+    value instanceof RuntimeElement ? "<" + describe(value) + ">"
+      : typeof value === "function" ? "fn" : String(value)
+  );
+  for (const method of ["setAttribute", "removeAttribute", "addEventListener", "appendChild",
+    "insertBefore", "insertAdjacentElement", "insertAdjacentHTML", "remove", "focus"]) {
+    const before = prototype[method];
+    original.set(method, before);
+    prototype[method] = function traced(this: RuntimeElement, ...args: unknown[]): unknown {
+      entries.push({
+        element: this,
+        method,
+        args,
+        text: describe(this) + "." + method + "(" + args.map(format).join(",") + ")",
+      });
+      return before.apply(this, args);
+    };
+  }
+  try {
+    const harness = createRuntimeHarness(configuration, undefined, undefined, savedAnchorMode);
+    const toolbar = [harness.themeButton, harness.refreshButton, harness.anchorButton, harness.editModeButton];
+    const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion"];
+    return {
+      effects: entries
+        .filter((entry) => !(entry.method === "addEventListener" && toolbar.includes(entry.element)))
+        .filter((entry) => !(entry.element === harness.documentElement
+          && entry.method === "setAttribute" && themeAttributes.includes(String(entry.args[0]))))
+        .map((entry) => entry.text),
+      messageTypes: harness.messages.map((message) => message.type),
+      scrollY: harness.windowState.scrollY,
+    };
+  } finally {
+    for (const [method, before] of original) prototype[method] = before;
+  }
+}
+
+test("T33: the startup sequence of effects and messages is stable", () => {
+  const scenarios: Array<[string, Parameters<typeof createRuntimeHarness>[0], boolean | undefined]> = [
+    ["reading mode", {}, undefined],
+    ["edit mode", { savedState: { editMode: true }, mapFrontmatter: true, frontmatterHeight: 30 }, undefined],
+    ["untrusted workspace", { editingEnabled: false }, undefined],
+    ["saved anchor mode differs from the setting", {}, false],
+    ["pinned position", { initialPin: { line: 50, viewportTop: 120 } }, undefined],
+    ["pending block navigation", {
+      previewStatus: "success",
+      savedState: { editMode: true, pendingBlockNavigation: { sourceLine: 50, caretPosition: "end" } },
+    }, undefined],
+    ["pending new field", {
+      previewStatus: "success",
+      savedState: { editMode: true, pendingFrontmatterEdit: { fieldName: "lifecycle" } },
+    }, undefined],
+  ];
+  const observed: Record<string, unknown> = {};
+  for (const [name, configuration, savedAnchorMode] of scenarios) {
+    observed[name] = traceStartup(configuration, savedAnchorMode);
+  }
+  assert.deepEqual(observed, EXPECTED_STARTUP_TRACE);
+});
+
+const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
+  "reading mode": {
+    effects: [
+      "div[50].appendChild(<input[myst-checkbox]>)",
+      "th.appendChild(<span[okf-name-cell]>)",
+      "td.appendChild(<span>)",
+      "tr[lifecycle].appendChild(<th>)",
+      "tr[lifecycle].appendChild(<td>)",
+      "section.appendChild(<table>)",
+      "table.appendChild(<tbody>)",
+      "tbody.appendChild(<tr[lifecycle]>)",
+      "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
+      "div.setAttribute(data-sphinx-preview-document-version,7)",
+      "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-theme-mode,current)",
+      "div.setAttribute(data-theme-mode,current)",
+      "div.setAttribute(aria-label,Preview theme: Current theme)",
+      "div.setAttribute(title,Current theme (click for dark theme))",
+      "div.setAttribute(data-tooltip,Current theme (click for dark theme))",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(aria-label,Anchor preview to text editor)",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(data-sphinx-preview-edit-mode,off)",
+      "div.setAttribute(data-edit-mode,off)",
+      "div.setAttribute(aria-pressed,false)",
+      "div.setAttribute(title,Edit mode)",
+      "div.setAttribute(data-tooltip,Edit mode)",
+      "th.removeAttribute(tabindex)",
+      "td.removeAttribute(tabindex)",
+      "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
+      "div.setAttribute(data-okf-descriptions-collapsed,true)",
+      "button.setAttribute(aria-expanded,false)",
+      "button.setAttribute(aria-label,Expand Description column)",
+      "button.setAttribute(title,Expand Description column)",
+      "div.addEventListener(load,fn,[object Object])",
+    ],
+    messageTypes: ["previewReady"],
+    scrollY: 0,
+  },
+  "edit mode": {
+    effects: [
+      "div[50].appendChild(<input[myst-checkbox]>)",
+      "th.appendChild(<span[okf-name-cell]>)",
+      "td.appendChild(<span>)",
+      "tr[lifecycle].appendChild(<th>)",
+      "tr[lifecycle].appendChild(<td>)",
+      "section[1].appendChild(<table>)",
+      "table.appendChild(<tbody>)",
+      "tbody.appendChild(<tr[lifecycle]>)",
+      "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
+      "div.setAttribute(data-sphinx-preview-document-version,7)",
+      "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-theme-mode,current)",
+      "div.setAttribute(data-theme-mode,current)",
+      "div.setAttribute(aria-label,Preview theme: Current theme)",
+      "div.setAttribute(title,Current theme (click for dark theme))",
+      "div.setAttribute(data-tooltip,Current theme (click for dark theme))",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(aria-label,Anchor preview to text editor)",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(data-sphinx-preview-edit-mode,on)",
+      "div.setAttribute(data-edit-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Exit edit mode)",
+      "div.setAttribute(data-tooltip,Exit edit mode)",
+      "th.setAttribute(tabindex,0)",
+      "td.setAttribute(tabindex,0)",
+      "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,1)",
+      "button.setAttribute(type,button)",
+      "button.setAttribute(aria-label,Insert a block here)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "div[1].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
+      "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,52)",
+      "button.setAttribute(type,button)",
+      "button.setAttribute(aria-label,Insert a block here)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "div[50].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
+      "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,100)",
+      "button.setAttribute(type,button)",
+      "button.setAttribute(aria-label,Insert a block here)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "div[100].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
+      "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
+      "div.setAttribute(data-okf-descriptions-collapsed,true)",
+      "button.setAttribute(aria-expanded,false)",
+      "button.setAttribute(aria-label,Expand Description column)",
+      "button.setAttribute(title,Expand Description column)",
+      "div.addEventListener(load,fn,[object Object])",
+    ],
+    messageTypes: ["previewReady"],
+    scrollY: 0,
+  },
+  "untrusted workspace": {
+    effects: [
+      "div[50].appendChild(<input[myst-checkbox]>)",
+      "th.appendChild(<span[okf-name-cell]>)",
+      "td.appendChild(<span>)",
+      "tr[lifecycle].appendChild(<th>)",
+      "tr[lifecycle].appendChild(<td>)",
+      "section.appendChild(<table>)",
+      "table.appendChild(<tbody>)",
+      "tbody.appendChild(<tr[lifecycle]>)",
+      "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
+      "div.setAttribute(data-sphinx-preview-document-version,7)",
+      "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-theme-mode,current)",
+      "div.setAttribute(data-theme-mode,current)",
+      "div.setAttribute(aria-label,Preview theme: Current theme)",
+      "div.setAttribute(title,Current theme (click for dark theme))",
+      "div.setAttribute(data-tooltip,Current theme (click for dark theme))",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(aria-label,Anchor preview to text editor)",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(data-sphinx-preview-edit-mode,off)",
+      "th.removeAttribute(tabindex)",
+      "td.removeAttribute(tabindex)",
+      "input[myst-checkbox].setAttribute(title,Editing requires a trusted workspace.)",
+      "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
+      "div.setAttribute(data-okf-descriptions-collapsed,true)",
+      "button.setAttribute(aria-expanded,false)",
+      "button.setAttribute(aria-label,Expand Description column)",
+      "button.setAttribute(title,Expand Description column)",
+      "div.addEventListener(load,fn,[object Object])",
+    ],
+    messageTypes: ["previewReady"],
+    scrollY: 0,
+  },
+  "saved anchor mode differs from the setting": {
+    effects: [
+      "div[50].appendChild(<input[myst-checkbox]>)",
+      "th.appendChild(<span[okf-name-cell]>)",
+      "td.appendChild(<span>)",
+      "tr[lifecycle].appendChild(<th>)",
+      "tr[lifecycle].appendChild(<td>)",
+      "section.appendChild(<table>)",
+      "table.appendChild(<tbody>)",
+      "tbody.appendChild(<tr[lifecycle]>)",
+      "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
+      "div.setAttribute(data-sphinx-preview-document-version,7)",
+      "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-theme-mode,current)",
+      "div.setAttribute(data-theme-mode,current)",
+      "div.setAttribute(aria-label,Preview theme: Current theme)",
+      "div.setAttribute(title,Current theme (click for dark theme))",
+      "div.setAttribute(data-tooltip,Current theme (click for dark theme))",
+      "div.setAttribute(data-anchor-mode,off)",
+      "div.setAttribute(aria-pressed,false)",
+      "div.setAttribute(title,Preview and text editor scroll independently)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll independently)",
+      "div.setAttribute(aria-label,Anchor preview to text editor)",
+      "div.setAttribute(data-anchor-mode,off)",
+      "div.setAttribute(aria-pressed,false)",
+      "div.setAttribute(title,Preview and text editor scroll independently)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll independently)",
+      "div.setAttribute(data-sphinx-preview-edit-mode,off)",
+      "div.setAttribute(data-edit-mode,off)",
+      "div.setAttribute(aria-pressed,false)",
+      "div.setAttribute(title,Edit mode)",
+      "div.setAttribute(data-tooltip,Edit mode)",
+      "th.removeAttribute(tabindex)",
+      "td.removeAttribute(tabindex)",
+      "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
+      "div.setAttribute(data-okf-descriptions-collapsed,true)",
+      "button.setAttribute(aria-expanded,false)",
+      "button.setAttribute(aria-label,Expand Description column)",
+      "button.setAttribute(title,Expand Description column)",
+      "div.addEventListener(load,fn,[object Object])",
+    ],
+    messageTypes: ["previewAnchorModeChanged", "previewReady"],
+    scrollY: 0,
+  },
+  "pinned position": {
+    effects: [
+      "div[50].appendChild(<input[myst-checkbox]>)",
+      "th.appendChild(<span[okf-name-cell]>)",
+      "td.appendChild(<span>)",
+      "tr[lifecycle].appendChild(<th>)",
+      "tr[lifecycle].appendChild(<td>)",
+      "section.appendChild(<table>)",
+      "table.appendChild(<tbody>)",
+      "tbody.appendChild(<tr[lifecycle]>)",
+      "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
+      "div.setAttribute(data-sphinx-preview-document-version,7)",
+      "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-theme-mode,current)",
+      "div.setAttribute(data-theme-mode,current)",
+      "div.setAttribute(aria-label,Preview theme: Current theme)",
+      "div.setAttribute(title,Current theme (click for dark theme))",
+      "div.setAttribute(data-tooltip,Current theme (click for dark theme))",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(aria-label,Anchor preview to text editor)",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(data-sphinx-preview-edit-mode,off)",
+      "div.setAttribute(data-edit-mode,off)",
+      "div.setAttribute(aria-pressed,false)",
+      "div.setAttribute(title,Edit mode)",
+      "div.setAttribute(data-tooltip,Edit mode)",
+      "th.removeAttribute(tabindex)",
+      "td.removeAttribute(tabindex)",
+      "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
+      "div.setAttribute(data-okf-descriptions-collapsed,true)",
+      "button.setAttribute(aria-expanded,false)",
+      "button.setAttribute(aria-label,Expand Description column)",
+      "button.setAttribute(title,Expand Description column)",
+      "div.addEventListener(load,fn,[object Object])",
+    ],
+    messageTypes: ["previewReady"],
+    scrollY: 380,
+  },
+  "pending block navigation": {
+    effects: [
+      "div[50].appendChild(<input[myst-checkbox]>)",
+      "th.appendChild(<span[okf-name-cell]>)",
+      "td.appendChild(<span>)",
+      "tr[lifecycle].appendChild(<th>)",
+      "tr[lifecycle].appendChild(<td>)",
+      "section.appendChild(<table>)",
+      "table.appendChild(<tbody>)",
+      "tbody.appendChild(<tr[lifecycle]>)",
+      "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
+      "div.setAttribute(data-sphinx-preview-document-version,7)",
+      "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-theme-mode,current)",
+      "div.setAttribute(data-theme-mode,current)",
+      "div.setAttribute(aria-label,Preview theme: Current theme)",
+      "div.setAttribute(title,Current theme (click for dark theme))",
+      "div.setAttribute(data-tooltip,Current theme (click for dark theme))",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(aria-label,Anchor preview to text editor)",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(data-sphinx-preview-edit-mode,on)",
+      "div.setAttribute(data-edit-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Exit edit mode)",
+      "div.setAttribute(data-tooltip,Exit edit mode)",
+      "th.setAttribute(tabindex,0)",
+      "td.setAttribute(tabindex,0)",
+      "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,1)",
+      "button.setAttribute(type,button)",
+      "button.setAttribute(aria-label,Insert a block here)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "div[1].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
+      "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,52)",
+      "button.setAttribute(type,button)",
+      "button.setAttribute(aria-label,Insert a block here)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "div[50].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
+      "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,100)",
+      "button.setAttribute(type,button)",
+      "button.setAttribute(aria-label,Insert a block here)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "div[100].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
+      "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
+      "div.setAttribute(data-okf-descriptions-collapsed,true)",
+      "button.setAttribute(aria-expanded,false)",
+      "button.setAttribute(aria-label,Expand Description column)",
+      "button.setAttribute(title,Expand Description column)",
+      "div.addEventListener(load,fn,[object Object])",
+      "div[sphinx-preview-block-editor].setAttribute(data-sphinx-preview-block-editor,true)",
+      "div[sphinx-preview-block-editor].setAttribute(role,region)",
+      "div[sphinx-preview-block-editor].setAttribute(aria-label,Raw Markdown editor)",
+      "p.setAttribute(data-sphinx-preview-edit-status,)",
+      "p.setAttribute(role,status)",
+      "div[sphinx-preview-block-editor].addEventListener(click,fn)",
+      "div[50].setAttribute(data-sphinx-preview-editing,true)",
+      "div[50].insertAdjacentElement(afterend,<div[sphinx-preview-block-editor]>)",
+    ],
+    messageTypes: ["previewEditOpen", "previewReady"],
+    scrollY: 480,
+  },
+  "pending new field": {
+    effects: [
+      "div[50].appendChild(<input[myst-checkbox]>)",
+      "th.appendChild(<span[okf-name-cell]>)",
+      "td.appendChild(<span>)",
+      "tr[lifecycle].appendChild(<th>)",
+      "tr[lifecycle].appendChild(<td>)",
+      "section.appendChild(<table>)",
+      "table.appendChild(<tbody>)",
+      "tbody.appendChild(<tr[lifecycle]>)",
+      "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
+      "div.setAttribute(data-sphinx-preview-document-version,7)",
+      "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-theme-mode,current)",
+      "div.setAttribute(data-theme-mode,current)",
+      "div.setAttribute(aria-label,Preview theme: Current theme)",
+      "div.setAttribute(title,Current theme (click for dark theme))",
+      "div.setAttribute(data-tooltip,Current theme (click for dark theme))",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(aria-label,Anchor preview to text editor)",
+      "div.setAttribute(data-anchor-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Preview and text editor scroll together)",
+      "div.setAttribute(data-tooltip,Preview and text editor scroll together)",
+      "div.setAttribute(data-sphinx-preview-edit-mode,on)",
+      "div.setAttribute(data-edit-mode,on)",
+      "div.setAttribute(aria-pressed,true)",
+      "div.setAttribute(title,Exit edit mode)",
+      "div.setAttribute(data-tooltip,Exit edit mode)",
+      "th.setAttribute(tabindex,0)",
+      "td.setAttribute(tabindex,0)",
+      "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,1)",
+      "button.setAttribute(type,button)",
+      "button.setAttribute(aria-label,Insert a block here)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "div[1].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
+      "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,52)",
+      "button.setAttribute(type,button)",
+      "button.setAttribute(aria-label,Insert a block here)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "div[50].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
+      "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,100)",
+      "button.setAttribute(type,button)",
+      "button.setAttribute(aria-label,Insert a block here)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "div[100].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
+      "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
+      "div.setAttribute(data-okf-descriptions-collapsed,true)",
+      "button.setAttribute(aria-expanded,false)",
+      "button.setAttribute(aria-label,Expand Description column)",
+      "button.setAttribute(title,Expand Description column)",
+      "div.addEventListener(load,fn,[object Object])",
+      "div[sphinx-preview-frontmatter-editor sphinx-preview-frontmatter-value-editor].setAttribute(data-okf-frontmatter-editor,true)",
+      "select.setAttribute(aria-label,Frontmatter lifecycle)",
+      "select.appendChild(<option>)",
+      "select.setAttribute(data-okf-empty-select,false)",
+      "select.appendChild(<option>)",
+      "select.appendChild(<option>)",
+      "p.setAttribute(role,status)",
+      "p.setAttribute(aria-live,polite)",
+      "select.addEventListener(keydown,fn)",
+      "select.addEventListener(blur,fn)",
+      "div[sphinx-preview-frontmatter-editor sphinx-preview-frontmatter-value-editor].appendChild(<select>)",
+      "div[sphinx-preview-frontmatter-editor sphinx-preview-frontmatter-value-editor].appendChild(<p>)",
+      "td.setAttribute(data-okf-editing,true)",
+      "span.setAttribute(hidden,)",
+      "td.appendChild(<div[sphinx-preview-frontmatter-editor sphinx-preview-frontmatter-value-editor]>)",
+      "div[sphinx-preview-frontmatter-menu].setAttribute(role,toolbar)",
+      "div[sphinx-preview-frontmatter-menu].setAttribute(aria-label,Frontmatter field actions)",
+      "div[sphinx-preview-frontmatter-menu].setAttribute(data-okf-frontmatter-menu,true)",
+      "button.setAttribute(aria-label,Add frontmatter field)",
+      "button.setAttribute(title,Add frontmatter field)",
+      "button.setAttribute(data-tooltip,Add frontmatter field)",
+      "button.setAttribute(data-okf-frontmatter-operation,add)",
+      "button.appendChild(<span[sphinx-preview-frontmatter-menu-label]>)",
+      "div[sphinx-preview-frontmatter-menu].appendChild(<button>)",
+      "button.setAttribute(aria-label,Remove frontmatter field)",
+      "button.setAttribute(title,Remove frontmatter field)",
+      "button.setAttribute(data-tooltip,Remove frontmatter field)",
+      "button.setAttribute(data-okf-frontmatter-operation,remove)",
+      "button.appendChild(<span[sphinx-preview-frontmatter-menu-label]>)",
+      "div[sphinx-preview-frontmatter-menu].appendChild(<button>)",
+      "div[sphinx-preview-frontmatter-picker].setAttribute(hidden,)",
+      "div[sphinx-preview-frontmatter-picker].setAttribute(role,group)",
+      "div[sphinx-preview-frontmatter-picker].setAttribute(aria-label,Add frontmatter field)",
+      "select.setAttribute(aria-label,Frontmatter field to add)",
+      "select.appendChild(<option>)",
+      "select.appendChild(<option>)",
+      "select.appendChild(<option>)",
+      "select.appendChild(<option>)",
+      "button.setAttribute(aria-label,Add selected frontmatter field)",
+      "button.setAttribute(title,Add selected frontmatter field)",
+      "button.setAttribute(data-tooltip,Add selected frontmatter field)",
+      "button.setAttribute(data-okf-frontmatter-operation,confirm-add)",
+      "button.appendChild(<span[sphinx-preview-frontmatter-menu-label]>)",
+      "select.addEventListener(change,fn)",
+      "select.addEventListener(input,fn)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-frontmatter-picker].appendChild(<select>)",
+      "div[sphinx-preview-frontmatter-picker].appendChild(<button>)",
+      "div[sphinx-preview-frontmatter-menu].appendChild(<div[sphinx-preview-frontmatter-picker]>)",
+      "button.addEventListener(click,fn)",
+      "button.addEventListener(click,fn)",
+      "div[sphinx-preview-frontmatter-editor sphinx-preview-frontmatter-value-editor].appendChild(<div[sphinx-preview-frontmatter-menu]>)",
+      "select.focus([object Object])",
+    ],
+    messageTypes: ["previewReady"],
+    scrollY: 0,
+  },
+};
+
+// T34: the host replaces the content of the loaded page with a message instead of loading a new
+// document. The page keeps its runtime; the identifiers move to the new render.
+function patchMessage(extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    type: "previewContentPatch",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    next: { documentVersion: 8, requestId: 12 },
+    contentHtml: "<p>fresh</p>",
+    status: "success",
+    label: "Preview ready",
+    diagnostics: [],
+    ...extra,
+  };
+}
+
+const NEXT_IDENTIFIERS = { documentId: "file:///active.md", documentVersion: 8, requestId: 12 };
+
+function messagesAfter(harness: RuntimeHarness, count: number): Array<Record<string, unknown>> {
+  return harness.messages.slice(count);
+}
+
+test("T34: a content patch replaces the content, moves the identifiers and posts previewReady", () => {
+  const harness = createRuntimeHarness();
+  const before = harness.messages.length;
+  harness.dispatchMessage(patchMessage());
+  assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-document-version"), "8");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-request-id"), "12");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-document-id"), "file:///active.md");
+  const ready = messagesAfter(harness, before).filter((message) => message.type === "previewReady");
+  assert.equal(ready.length, 1, "exactly one previewReady");
+  assert.deepEqual(
+    { documentId: ready[0]!.documentId, documentVersion: ready[0]!.documentVersion, requestId: ready[0]!.requestId },
+    NEXT_IDENTIFIERS,
+  );
+  assert.equal(typeof ready[0]!.descriptionsCollapsed, "boolean");
+  assert.ok(harness.dispatchedEvents.includes("studio:content-replaced"), "Mermaid is told to render the new content");
+});
+
+test("T34: after a patch the page answers to the new identifiers only", () => {
+  const harness = createRuntimeHarness();
+  harness.dispatchMessage(patchMessage());
+  harness.windowState.scrollY = 300;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  const scroll = harness.messages.at(-1)!;
+  assert.deepEqual(
+    { documentId: scroll.documentId, documentVersion: scroll.documentVersion, requestId: scroll.requestId },
+    NEXT_IDENTIFIERS,
+  );
+  harness.dispatchMessage(propertiesMessage(cellMarkup("old identifiers")));
+  assert.equal(harness.htmlInsertions.length, 0, "a message of the previous render is ignored");
+  harness.dispatchMessage(propertiesMessage(cellMarkup("new identifiers"), {
+    documentVersion: 8,
+    requestId: 12,
+  }));
+  assert.equal(harness.htmlInsertions.length, 1, "a message of the new render is applied");
+  // The next patch is addressed to the identifiers the previous one introduced.
+  harness.dispatchMessage(patchMessage({ contentHtml: "<p>stale</p>" }));
+  assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>", "a repeated patch for the old render is ignored");
+  harness.dispatchMessage(patchMessage({
+    documentVersion: 8,
+    requestId: 12,
+    next: { documentVersion: 9, requestId: 13 },
+    contentHtml: "<p>third</p>",
+  }));
+  assert.equal(harness.previewContent.innerHTML, "<p>third</p>");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-request-id"), "13");
+});
+
+test("T34: a patch with stale or malformed fields is ignored", () => {
+  const variants: Array<[string, Record<string, unknown>]> = [
+    ["another request", { requestId: 12 }],
+    ["another version", { documentVersion: 8 }],
+    ["another document", { documentId: "file:///other.md" }],
+    ["numeric content", { contentHtml: 3 }],
+    ["missing content", { contentHtml: undefined }],
+    ["oversized content", { contentHtml: "x".repeat(20 * 1024 * 1024 + 1) }],
+    ["missing next", { next: undefined }],
+    ["null next", { next: null }],
+    ["string next version", { next: { documentVersion: "8", requestId: 12 } }],
+    ["fractional next request", { next: { documentVersion: 8, requestId: 12.5 } }],
+    ["unsafe next version", { next: { documentVersion: 2 ** 60, requestId: 12 } }],
+    ["string anchor", { next: { documentVersion: 8, requestId: 12, initialAnchor: "3" } }],
+    ["infinite anchor", { next: { documentVersion: 8, requestId: 12, initialAnchor: Infinity } }],
+    ["malformed pin", { next: { documentVersion: 8, requestId: 12, initialPin: { line: "1", viewportTop: 2 } } }],
+    ["unknown status", { status: "weird" }],
+    ["numeric label", { label: 3 }],
+    ["long label", { label: "x".repeat(501) }],
+    ["numeric message", { message: 3 }],
+    ["non-array diagnostics", { diagnostics: "none" }],
+    ["diagnostic without text", { diagnostics: [{ severity: "error" }] }],
+    ["diagnostic with numeric severity", { diagnostics: [{ severity: 1, text: "a" }] }],
+    ["too many diagnostics", { diagnostics: Array.from({ length: 501 }, () => ({ severity: "error", text: "a" })) }],
+  ];
+  for (const [name, extra] of variants) {
+    const harness = createRuntimeHarness();
+    const before = harness.messages.length;
+    harness.dispatchMessage(patchMessage(extra));
+    assert.equal(harness.previewContent.innerHTML, "", name + ": the content is untouched");
+    assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-request-id"), "11", name);
+    assert.equal(harness.messages.length, before, name + ": nothing is posted");
+    assert.equal(harness.dispatchedEvents.length, 0, name + ": nothing is announced");
+  }
+});
+
+test("T34: an open block editor is closed without a cancel or a save", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openRawEditor(harness);
+  assert.ok(textarea.parentElement, "the editor is open");
+  const before = harness.messages.length;
+  harness.dispatchMessage(patchMessage());
+  const posted = messagesAfter(harness, before).map((message) => message.type);
+  assert.deepEqual(posted, ["previewReady"], "only the ready report is posted");
+  const editors = harness.createdElements.filter((element) =>
+    element.getAttribute("data-sphinx-preview-block-editor") !== null);
+  assert.ok(editors.length > 0 && editors.every((element) => element.removed), "the editor is gone");
+  assert.equal(harness.refreshButton.disabled, false, "the refresh button works again");
+  assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>");
+});
+
+test("T34: an open frontmatter editor is closed and a deferred properties update is dropped", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  openFrontmatterValueEditor(harness);
+  const editor = harness.createdElements.find((element) =>
+    element.getAttribute("data-okf-frontmatter-editor") !== null)!;
+  assert.ok(editor.parentElement, "the editor is open");
+  harness.dispatchMessage(propertiesMessage(cellMarkup("deferred")));
+  const before = harness.messages.length;
+  harness.dispatchMessage(patchMessage());
+  assert.equal(editor.parentElement, undefined, "the editor closed");
+  assert.equal(harness.htmlInsertions.length, 0, "the deferred markup was not applied to the old section");
+  assert.deepEqual(messagesAfter(harness, before).map((message) => message.type), ["previewReady"]);
+  harness.dispatchMessage(propertiesMessage(cellMarkup("late"), { documentVersion: 8, requestId: 12 }));
+  assert.equal(harness.htmlInsertions.length, 1, "the next update is applied at once, nothing is deferred");
+});
+
+test("T34: the patch removes the pending overlay and the link tooltip", () => {
+  const harness = createRuntimeHarness();
+  harness.dispatchMessage(overlayMessage());
+  assert.equal(pendingOverlays(harness).length, 1);
+  const link = new RuntimeElement({
+    class: "okf-frontmatter-link", "data-okf-link-status": "valid", title: "target",
+  }, harness.windowState, 0, 10, "a");
+  harness.dispatchDocument("mouseover", { target: link });
+  const tooltips = () => harness.createdElements.filter((element) =>
+    element.className === "sphinx-preview-link-tooltip" && element.parentElement !== undefined);
+  assert.equal(tooltips().length, 1);
+  harness.dispatchMessage(patchMessage());
+  assert.equal(pendingOverlays(harness).length, 0, "the overlay is gone");
+  assert.equal(tooltips().length, 0, "the tooltip is gone");
+  assert.equal(link.getAttribute("title"), "target", "the link title was restored");
+});
+
+test("T34: the patch rebuilds the status region from plain text", () => {
+  const harness = createRuntimeHarness({ previewStatus: "success" });
+  const old = harness.statusRegion!;
+  assert.ok(old);
+  harness.dispatchMessage(patchMessage({
+    status: "stale",
+    label: "Preview is stale",
+    message: "Render <b>failed</b>",
+    diagnostics: [
+      { severity: "error", text: "inline.md:3:1: bad <script>alert(1)</script>" },
+      { severity: "warning", text: "second" },
+    ],
+  }));
+  assert.equal(old.removed, true, "the previous region was replaced");
+  const region = harness.body.childElements.find((child) =>
+    child.getAttribute("data-sphinx-preview-status") !== null)!;
+  assert.ok(region, "a new region is in the body");
+  assert.equal(region.tagName, "ASIDE");
+  assert.equal(region.getAttribute("data-sphinx-preview-status"), "stale");
+  assert.equal(region.getAttribute("role"), "status");
+  assert.equal(region.getAttribute("aria-live"), "polite");
+  const [label, message, list] = region.childElements;
+  assert.equal(label?.tagName, "STRONG");
+  assert.equal(label?.textContent, "Preview is stale");
+  assert.equal(message?.tagName, "SPAN");
+  assert.notEqual(message?.getAttribute("data-sphinx-preview-status-message"), null);
+  assert.equal(message?.textContent, "Render <b>failed</b>");
+  assert.equal(list?.tagName, "UL");
+  assert.notEqual(list?.getAttribute("data-sphinx-preview-diagnostics"), null);
+  assert.deepEqual(list?.childElements.map((item) => [
+    item.tagName,
+    item.getAttribute("data-sphinx-preview-diagnostic-severity"),
+    item.textContent,
+  ]), [
+    ["LI", "error", "inline.md:3:1: bad <script>alert(1)</script>"],
+    ["LI", "warning", "second"],
+  ]);
+  for (const element of harness.createdElements) {
+    assert.equal(element.innerHTML, "", "no status field goes through innerHTML");
+  }
+  // A status without message and diagnostics has neither element.
+  harness.dispatchMessage(patchMessage({
+    documentVersion: 8,
+    requestId: 12,
+    next: { documentVersion: 9, requestId: 13 },
+    status: "success",
+    label: "Preview ready",
+  }));
+  assert.equal(region.removed, true);
+  const next = harness.body.childElements.find((child) =>
+    child.getAttribute("data-sphinx-preview-status") !== null && !child.removed)!;
+  assert.equal(next.getAttribute("data-sphinx-preview-status"), "success");
+  assert.deepEqual(next.childElements.map((child) => child.tagName), ["STRONG"]);
+});
+
+test("T34: a page loaded without a status region gets one as the first child of the body", () => {
+  const harness = createRuntimeHarness();
+  assert.equal(harness.statusRegion, null);
+  harness.dispatchMessage(patchMessage({ status: "recovery", label: "Preview recovered" }));
+  const regions = harness.body.childElements.filter((child) =>
+    child.getAttribute("data-sphinx-preview-status") !== null);
+  assert.equal(regions.length, 1);
+  assert.equal(regions[0]!.getAttribute("data-sphinx-preview-status"), "recovery");
+});
+
+test("T34: open disclosures of the old content are open again in the new content", () => {
+  const harness = createRuntimeHarness();
+  const make = (): RuntimeElement[] => [0, 1, 2].map(() => {
+    const element = new RuntimeElement({}, harness.windowState, 0, 10, "details");
+    (element as unknown as { open: boolean }).open = false;
+    return element;
+  });
+  const asOpen = (element: RuntimeElement): boolean => (element as unknown as { open: boolean }).open;
+  const old = make();
+  (old[0] as unknown as { open: boolean }).open = true;
+  (old[2] as unknown as { open: boolean }).open = true;
+  harness.details.push(...old);
+  const fresh = make();
+  Object.defineProperty(harness.previewContent, "innerHTML", {
+    configurable: true,
+    get: () => "",
+    set: () => { harness.details.splice(0, harness.details.length, ...fresh); },
+  });
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(fresh.map(asOpen), [true, false, true]);
+});
+
+test("T34: a patch with an anchor or a pin positions the page like a loaded page", () => {
+  const anchored = createRuntimeHarness({ initialAnchor: 50 });
+  assert.ok(anchored.windowState.scrollY > 0, "the reference page scrolls to the anchor");
+  const patched = createRuntimeHarness();
+  assert.equal(patched.windowState.scrollY, 0);
+  patched.dispatchMessage(patchMessage({ next: { documentVersion: 8, requestId: 12, initialAnchor: 50 } }));
+  assert.equal(patched.windowState.scrollY, anchored.windowState.scrollY);
+
+  const pinned = createRuntimeHarness({ initialPin: { line: 50, viewportTop: 120 } });
+  const pinnedReady = pinned.messages.find((message) => message.type === "previewReady")!;
+  assert.equal(typeof pinnedReady.anchorLine, "number", "the reference page reports the pinned anchor");
+  const patchedPin = createRuntimeHarness();
+  const before = patchedPin.messages.length;
+  patchedPin.dispatchMessage(patchMessage({
+    next: { documentVersion: 8, requestId: 12, initialPin: { line: 50, viewportTop: 120 } },
+  }));
+  assert.equal(patchedPin.windowState.scrollY, pinned.windowState.scrollY);
+  const ready = messagesAfter(patchedPin, before).find((message) => message.type === "previewReady")!;
+  assert.equal(ready.anchorLine, pinnedReady.anchorLine);
+
+  // The pin is for one render: the next patch without one does not report a pinned anchor.
+  const before2 = patchedPin.messages.length;
+  patchedPin.dispatchMessage(patchMessage({
+    documentVersion: 8,
+    requestId: 12,
+    next: { documentVersion: 9, requestId: 13 },
+  }));
+  const ready2 = messagesAfter(patchedPin, before2).find((message) => message.type === "previewReady")!;
+  assert.equal(ready2.anchorLine, undefined);
+});
+
+test("T34: a patch keeps the scroll position when the host sends no anchor", () => {
+  const harness = createRuntimeHarness();
+  harness.windowState.scrollY = 240;
+  harness.dispatchMessage(patchMessage());
+  assert.equal(harness.windowState.scrollY, 240);
+});
+
+test("T34: a pending checkbox toggle of the old content cannot revert the new content", () => {
+  const harness = createRuntimeHarness();
+  harness.checkbox.checked = true;
+  harness.dispatchDocument("click", { target: harness.checkbox, stopImmediatePropagation: noop, preventDefault: noop });
+  const toggle = harness.messages.find((message) => message.type === "previewCheckboxToggle")!;
+  assert.ok(toggle, "the toggle was posted");
+  harness.dispatchMessage(patchMessage());
+  harness.dispatchMessage({
+    type: "previewCheckboxResult",
+    ...NEXT_IDENTIFIERS,
+    editId: toggle.editId,
+    error: "late failure",
+  });
+  assert.equal(harness.checkbox.checked, true, "the late result did not touch a checkbox");
+});
+
+function linkElement(harness: RuntimeHarness, request: string, attributes: Record<string, string> = {}): RuntimeElement {
+  return new RuntimeElement({ "data-sphinx-preview-navigation": request, ...attributes },
+    harness.windowState, 0, 10, "a");
+}
+
+test("T34: links of the new content keep known target hints and discover new targets", () => {
+  const harness = createRuntimeHarness({ intersectionObserver: true });
+  const known = linkElement(harness, "Known", {
+    "data-sphinx-preview-link-state": "available",
+    title: "/ws/Known.md",
+  });
+  const unavailable = linkElement(harness, "Missing", {
+    "data-sphinx-preview-link-state": "unavailable",
+    title: "not found",
+  });
+  harness.contentLinks.push(known, unavailable);
+  const freshKnown = linkElement(harness, "Known");
+  const freshMissing = linkElement(harness, "Missing");
+  const typed = linkElement(harness, "Typed");
+  Object.defineProperty(harness.previewContent, "innerHTML", {
+    configurable: true,
+    get: () => "",
+    set: () => { harness.contentLinks.splice(0, harness.contentLinks.length, freshKnown, freshMissing, typed); },
+  });
+  harness.dispatchMessage(patchMessage());
+  assert.equal(freshKnown.getAttribute("data-sphinx-preview-link-state"), "available");
+  assert.equal(freshKnown.getAttribute("title"), "/ws/Known.md");
+  assert.equal(freshMissing.getAttribute("data-sphinx-preview-link-state"), "unavailable");
+  assert.equal(freshMissing.getAttribute("title"), "not found");
+  assert.equal(typed.getAttribute("data-sphinx-preview-link-state"), null, "a new link has no hint yet");
+  assert.ok(harness.observedLinks.includes(typed), "the new link is observed for discovery");
+
+  const before = harness.messages.length;
+  harness.intersect(typed);
+  harness.flushMicrotasks();
+  const discover = messagesAfter(harness, before).find((message) => message.type === "previewLinkDiscover")!;
+  assert.ok(discover, "entering the viewport asks the host for the target");
+  assert.deepEqual(Array.from(discover.requests as string[]), ["Typed"]);
+  assert.equal(discover.documentVersion, 8);
+  assert.equal(discover.requestId, 12);
+  harness.dispatchMessage({
+    type: "previewLinkTargets",
+    ...NEXT_IDENTIFIERS,
+    targets: [{ request: "Typed", kind: "local", path: "/ws/Typed.md" }],
+  });
+  assert.equal(typed.getAttribute("data-sphinx-preview-link-state"), "local");
+  assert.equal(typed.getAttribute("title"), "/ws/Typed.md");
+});
+
+test("T34: edit mode rebuilds the insertion points for the new content", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  const insertedBefore = harness.mappings.reduce((count, mapping) => count + mapping.insertedElements.length, 0);
+  assert.ok(insertedBefore > 0, "edit mode has insertion points");
+  harness.dispatchMessage(patchMessage());
+  const insertedAfter = harness.mappings.reduce((count, mapping) => count + mapping.insertedElements.length, 0);
+  assert.equal(insertedAfter, insertedBefore * 2, "the points were built again for the (new) blocks");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "on", "edit mode stays on");
+});
+
+test("T34: pending block navigation resumes after a content patch", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: noop });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "Current block\n",
+  });
+  const textarea = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
+  assert.ok(textarea);
+  // A changed block is saved before the editing moves on, so the navigation has to wait for the render.
+  textarea.value = "Current block, changed\n";
+  textarea.dispatch("input");
+  const end = textarea.value.length;
+  textarea.setSelectionRange(end, end);
+  let prevented = false;
+  textarea.dispatch("keydown", { key: "ArrowDown", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
+  assert.equal(harness.messages.at(-1)?.final, true);
+  const pending = harness.getWebviewState().pendingBlockNavigation as Record<string, unknown> | undefined;
+  assert.equal(pending?.sourceLine, 100);
+  assert.equal(pending?.caretPosition, "start");
+
+  // The render of the saved block arrives as a patch.
+  const before = harness.messages.length;
+  harness.dispatchMessage(patchMessage());
+  const open = messagesAfter(harness, before).find((message) => message.type === "previewEditOpen");
+  assert.ok(open, "the next block is opened after the patch");
+  assert.equal(open.line, 100);
+  assert.deepEqual(
+    { documentId: open.documentId, documentVersion: open.documentVersion, requestId: open.requestId },
+    NEXT_IDENTIFIERS,
+  );
+  assert.equal(harness.getWebviewState().pendingBlockNavigation, undefined, "the navigation is spent");
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    ...NEXT_IDENTIFIERS,
+    editId: open.editId,
+    originalText: "Next block\n",
+  });
+  const next = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
+  assert.notEqual(next, textarea, "a new editor is open");
+  assert.deepEqual(next.selectionRange, [0, 0], "the caret is at the start");
+});
+
+test("T34: patches sent before the page acknowledged the previous one apply in order", () => {
+  const harness = createRuntimeHarness();
+  const before = harness.messages.length;
+  // The host addresses the second patch to the identifiers the first one introduces.
+  harness.dispatchMessage(patchMessage({ contentHtml: "<p>one</p>" }));
+  harness.dispatchMessage(patchMessage({
+    documentVersion: 8,
+    requestId: 12,
+    next: { documentVersion: 9, requestId: 13 },
+    contentHtml: "<p>two</p>",
+  }));
+  harness.dispatchMessage(patchMessage({
+    documentVersion: 9,
+    requestId: 13,
+    next: { documentVersion: 10, requestId: 14 },
+    contentHtml: "<p>three</p>",
+  }));
+  assert.equal(harness.previewContent.innerHTML, "<p>three</p>");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-request-id"), "14");
+  const ready = messagesAfter(harness, before).filter((message) => message.type === "previewReady");
+  assert.deepEqual(ready.map((message) => message.requestId), [12, 13, 14], "one ready report per patch, in order");
+});
+
+test("T34: when a patch of a chain is rejected, the later ones are ignored and nothing is acknowledged", () => {
+  const harness = createRuntimeHarness();
+  const before = harness.messages.length;
+  harness.dispatchMessage(patchMessage({ status: "weird", contentHtml: "<p>rejected</p>" }));
+  harness.dispatchMessage(patchMessage({
+    documentVersion: 8,
+    requestId: 12,
+    next: { documentVersion: 9, requestId: 13 },
+    contentHtml: "<p>orphan</p>",
+  }));
+  assert.equal(harness.previewContent.innerHTML, "");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-request-id"), "11");
+  assert.equal(messagesAfter(harness, before).length, 0, "no ready report, so the host's 2 s fallback loads the page");
+});

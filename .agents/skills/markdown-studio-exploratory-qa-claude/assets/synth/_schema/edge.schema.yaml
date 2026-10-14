@@ -1,0 +1,52 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: edge.schema.yaml
+title: Edge-case profile for QA
+type: object
+properties:
+  type:
+    const: edge
+  title:
+    type: string
+    minLength: 1
+    description: One-line title.
+  summary:
+    type: string
+    description: Folded multi-line summary.
+  notes:
+    type: string
+    description: Literal block that must keep its line breaks.
+  status:
+    type: string
+    enum: [draft, review, approved, retired]
+    description: Lifecycle status.
+  priority:
+    type: integer
+    minimum: 1
+    maximum: 5
+  published:
+    type: boolean
+  reviewed_on:
+    type: string
+    format: date
+  tags:
+    type: array
+    items:
+      type: string
+  related:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: filename-stem
+        syntax: plain
+        tooltip_shows_fields: [title]
+        preview_shows_fields: [status]
+  owner:
+    type: object
+    properties:
+      name:
+        type: string
+      team:
+        type: string
+required: [type, title, status]
+additionalProperties: true

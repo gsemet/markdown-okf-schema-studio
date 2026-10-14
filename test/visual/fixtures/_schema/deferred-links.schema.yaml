@@ -1,0 +1,24 @@
+type: object
+required:
+  - type
+  - title
+  - references
+properties:
+  type:
+    const: deferred-links
+    description: Document type for the deferred-link visual fixture.
+  title:
+    type: string
+    description: Fixture title.
+  references:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: document-relative
+        syntax: plain
+        tooltip_shows_fields: [description]
+        preview_shows_fields: [description]
+        show_line_number: true
+        basename_marker: "@tests_req"
+    description: Files inspected after the first preview paint.

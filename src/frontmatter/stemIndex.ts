@@ -1,0 +1,165 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
+
+const EXCLUDED_DIRECTORY_NAMES = new Set([
+  "node_modules",
+  ".git",
+  "_build",
+  ".venv",
+  "out",
+  "dist",
+  "output",
+]);
+
+export interface MarkdownStemLookup {
+  paths: readonly string[];
+  escaped: boolean;
+  unavailable: boolean;
+}
+
+function canonicalRoot(candidate: string): string {
+  const resolved = path.resolve(candidate);
+  try {
+    return fs.realpathSync(resolved);
+  } catch {
+    return resolved;
+  }
+}
+
+function isWithin(root: string, candidate: string): boolean {
+  const relative = path.relative(root, candidate);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+function isExcludedDirectory(name: string): boolean {
+  return name.startsWith(".") || EXCLUDED_DIRECTORY_NAMES.has(name);
+}
+
+/** An eagerly-built index of Markdown filename stems under one root set. */
+export class MarkdownStemIndex {
+  readonly roots: readonly string[];
+
+  private readonly candidatesByStem = new Map<string, { path: string; root: string }[]>();
+  private readonly pathsByStem = new Map<string, string[]>();
+
+  constructor(roots: readonly string[]) {
+    this.roots = [...new Set(roots.map(canonicalRoot))];
+    this.build();
+  }
+
+  get(stem: string): readonly string[] {
+    return this.lookup(stem).paths;
+  }
+
+  /** Returns the indexed stems, sorted, at most `limit`. Read-only: no file system access. */
+  stems(limit: number): string[] {
+    const max = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : 0;
+    return [...this.candidatesByStem.keys()].sort().slice(0, max);
+  }
+
+  pathsForStem(stem: string): readonly string[] {
+    return this.get(stem);
+  }
+
+  lookup(stem: string): MarkdownStemLookup {
+    const candidates = this.candidatesByStem.get(stem) ?? [];
+    const matches: string[] = [];
+    let escaped = false;
+    let unavailable = false;
+    for (const candidate of candidates) {
+      try {
+        const realPath = fs.realpathSync(candidate.path);
+        if (!fs.statSync(realPath).isFile()) continue;
+        if (!isWithin(candidate.root, realPath)) {
+          escaped = true;
+          continue;
+        }
+        if (!matches.includes(realPath)) matches.push(realPath);
+      } catch {
+        unavailable = true;
+      }
+    }
+    this.pathsByStem.set(stem, matches);
+    return {
+      paths: matches,
+      escaped,
+      unavailable,
+    };
+  }
+
+  private build(): void {
+    for (const root of this.roots) {
+      this.visit(root, root);
+    }
+  }
+
+  private visit(directory: string, realRoot: string): void {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(directory, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const candidate = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        if (isExcludedDirectory(entry.name)) continue;
+        this.visit(candidate, realRoot);
+        continue;
+      }
+      const stem = path.basename(entry.name, ".md");
+      if ((!entry.isFile() && !entry.isSymbolicLink())
+        || path.extname(entry.name) !== ".md"
+        || stem !== entry.name.slice(0, -3)) {
+        continue;
+      }
+      const matches = this.candidatesByStem.get(stem) ?? [];
+      matches.push({ path: candidate, root: realRoot });
+      this.candidatesByStem.set(stem, matches);
+    }
+  }
+}
+
+interface CachedStemIndex {
+  index: MarkdownStemIndex;
+  revision: string;
+}
+
+const cachedIndexes = new Map<string, CachedStemIndex>();
+
+function cacheKey(roots: readonly string[]): string {
+  return [...new Set(roots.map(canonicalRoot))].sort().join("\u0000");
+}
+
+function rootRevision(roots: readonly string[]): string {
+  return [...new Set(roots.map(canonicalRoot))].sort().map((root) => {
+    try {
+      const stat = fs.statSync(root);
+      return `${root}:${stat.mtimeMs}:${stat.ctimeMs}:${stat.size}`;
+    } catch {
+      return `${root}:unavailable`;
+    }
+  }).join("\u0000");
+}
+
+export function getCachedMarkdownStemIndex(roots: readonly string[]): MarkdownStemIndex {
+  const key = cacheKey(roots);
+  const revision = rootRevision(roots);
+  const cached = cachedIndexes.get(key);
+  if (cached?.revision === revision) return cached.index;
+  const index = new MarkdownStemIndex(roots);
+  cachedIndexes.set(key, { index, revision });
+  return index;
+}
+
+/** Invalidates cached indexes containing a root, or all cached indexes when omitted. */
+export function invalidateStemIndex(root?: string): void {
+  if (root === undefined) {
+    cachedIndexes.clear();
+    return;
+  }
+  const canonical = canonicalRoot(root);
+  for (const [key, cached] of cachedIndexes) {
+    if (cached.index.roots.includes(canonical)) cachedIndexes.delete(key);
+  }
+}

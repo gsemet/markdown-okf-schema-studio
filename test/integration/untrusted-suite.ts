@@ -1,0 +1,46 @@
+import * as assert from "node:assert/strict";
+import * as vscode from "vscode";
+
+import {
+  COMMAND_ID,
+  disposeActivePreviewForTests,
+  EDITOR_VIEW_TYPE,
+  getActivePreviewForTests,
+} from "./extensionApi";
+
+async function waitForPreview(): Promise<void> {
+  const deadline = Date.now() + 10_000;
+  while (Date.now() < deadline) {
+    const preview = getActivePreviewForTests();
+    if (preview?.phase === "ready" && preview.status === "success") {
+      return;
+    }
+    await new Promise<void>((resolve) => setTimeout(resolve, 50));
+  }
+  throw new Error("Timed out waiting for the untrusted preview to render.");
+}
+
+export async function run(): Promise<void> {
+  assert.equal(vscode.workspace.isTrusted, false);
+  try {
+    const fixturePath = vscode.Uri.file(
+      vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, "test/integration/fixtures/preview.md").fsPath,
+    );
+    const document = await vscode.workspace.openTextDocument(fixturePath);
+    await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+    await vscode.commands.executeCommand(COMMAND_ID);
+    await waitForPreview();
+    const commandPreview = getActivePreviewForTests();
+    assert.ok(commandPreview);
+    assert.equal(commandPreview.readOnly, true);
+    assert.doesNotMatch(commandPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+    await vscode.commands.executeCommand("vscode.openWith", document.uri, EDITOR_VIEW_TYPE);
+    await waitForPreview();
+    const editorPreview = getActivePreviewForTests();
+    assert.ok(editorPreview);
+    assert.equal(editorPreview.readOnly, true);
+    assert.doesNotMatch(editorPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+  } finally {
+    disposeActivePreviewForTests();
+  }
+}

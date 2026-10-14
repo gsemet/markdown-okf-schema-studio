@@ -1,0 +1,26 @@
+type: object
+properties:
+  type:
+    const: finding
+  status:
+    type: string
+    enum: [draft, active, resolved]
+    description: Lifecycle state of this synthetic finding.
+  summary:
+    type: string
+    description: Short description of the finding.
+  tags:
+    type: array
+    items:
+      type: string
+  metadata:
+    type: object
+    properties:
+      owner:
+        type: string
+      revision:
+        type: integer
+    required: [owner, revision]
+    additionalProperties: false
+required: [type, status, summary, metadata]
+additionalProperties: false

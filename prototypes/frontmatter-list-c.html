@@ -1,0 +1,615 @@
+<!-- PROTOTYPE - DO NOT MERGE -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frontmatter list editor - Option C</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #ffffff;
+      --surface: #fbfbfb;
+      --name-column: #f1f1f1;
+      --header: #e9e9e9;
+      --border: #c8c8c8;
+      --border-strong: #b3b3b3;
+      --text: #333333;
+      --muted: #6b6b6b;
+      --quiet: #8a8a8a;
+      --blue: #006ab1;
+      --blue-soft: #e8f3fb;
+      --danger: #a12622;
+      --focus: #007acc;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--page);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .page {
+      width: min(100% - 48px, 980px);
+      margin: 34px auto 72px;
+    }
+
+    .prototype-bar {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .prototype-name {
+      color: var(--text);
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .prototype-note {
+      color: var(--quiet);
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    h1 {
+      display: inline-block;
+      margin: 0 0 28px;
+      padding-bottom: 9px;
+      border-bottom: 2px solid var(--border);
+      color: #3c3c3c;
+      font-size: 27px;
+      font-weight: 600;
+      line-height: 1.15;
+    }
+
+    .properties-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      border: 1px solid var(--border);
+    }
+
+    .properties-table th,
+    .properties-table td {
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .properties-table thead th {
+      padding: 8px 14px;
+      background: var(--header);
+      color: #5e5e5e;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .properties-table thead th:first-child {
+      width: 29%;
+    }
+
+    .properties-table tbody th {
+      padding: 10px 14px;
+      background: var(--name-column);
+      color: #3c3c3c;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .properties-table tbody td {
+      position: relative;
+      padding: 0;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .scalar-value,
+    .empty-list {
+      display: block;
+      padding: 10px 14px;
+      min-height: 40px;
+    }
+
+    .scalar-value {
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .false-value {
+      color: #795e00;
+    }
+
+    .null-value {
+      color: var(--quiet);
+    }
+
+    .list-cell {
+      display: block;
+      width: 100%;
+      min-height: 40px;
+      margin: 0;
+      padding: 8px 14px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .list-cell:hover {
+      background: #f4f8fb;
+    }
+
+    .list-cell:focus-visible,
+    .more-button:focus-visible,
+    .icon-button:focus-visible,
+    .text-action:focus-visible,
+    .add-item:focus-visible,
+    .item-input:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: -2px;
+    }
+
+    .preview-list {
+      display: grid;
+      gap: 2px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .preview-item {
+      display: flex;
+      align-items: baseline;
+      gap: 9px;
+      min-height: 20px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .preview-item::before {
+      flex: 0 0 auto;
+      width: 4px;
+      height: 4px;
+      margin-left: 2px;
+      border-radius: 50%;
+      background: #666666;
+      content: "";
+    }
+
+    .more-button {
+      display: inline-block;
+      margin: 3px 0 0 15px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--blue);
+      font: inherit;
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .more-button:hover,
+    .text-action:hover,
+    .add-item:hover {
+      text-decoration: underline;
+    }
+
+    .empty-list {
+      color: var(--quiet);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .list-editor {
+      padding: 8px 10px 9px;
+      background: #ffffff;
+    }
+
+    .editor-items {
+      display: grid;
+      gap: 4px;
+    }
+
+    .editor-item {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr) 24px;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+    }
+
+    .editor-bullet {
+      width: 4px;
+      height: 4px;
+      margin-left: 3px;
+      border-radius: 50%;
+      background: #666666;
+    }
+
+    .item-input {
+      width: 100%;
+      height: 28px;
+      padding: 4px 7px;
+      border: 1px solid var(--border-strong);
+      border-radius: 2px;
+      background: #ffffff;
+      color: var(--text);
+      font: inherit;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .item-input:focus {
+      border-color: var(--focus);
+      outline: 1px solid var(--focus);
+    }
+
+    .icon-button {
+      display: inline-grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .icon-button:hover {
+      border-color: #d5d5d5;
+      background: #f3f3f3;
+      color: var(--danger);
+    }
+
+    .icon-button svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.7;
+    }
+
+    .add-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 5px 0 1px 17px;
+      padding: 2px 0;
+      border: 0;
+      background: transparent;
+      color: var(--blue);
+      font: inherit;
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .add-item svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-width: 1.8;
+    }
+
+    .editor-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 7px 0 0 17px;
+      padding-top: 7px;
+      border-top: 1px solid #e4e4e4;
+    }
+
+    .text-action {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--blue);
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .text-action.cancel {
+      color: var(--muted);
+    }
+
+    .status-line {
+      min-height: 20px;
+      margin: 12px 0 0;
+      color: var(--quiet);
+      font-size: 12px;
+    }
+
+    .status-line[data-kind="saved"] {
+      color: #4f6f38;
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        width: min(100% - 24px, 980px);
+        margin-top: 22px;
+      }
+
+      .prototype-bar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        font-size: 23px;
+      }
+
+      .properties-table thead th:first-child {
+        width: 36%;
+      }
+
+      .properties-table thead th,
+      .properties-table tbody th,
+      .list-cell,
+      .scalar-value,
+      .empty-list {
+        padding-left: 9px;
+        padding-right: 9px;
+      }
+
+      .list-editor {
+        padding-left: 6px;
+        padding-right: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="prototype-bar">
+      <span class="prototype-name">Option C · Bullet editor</span>
+      <span class="prototype-note">frontmatter properties / light</span>
+    </div>
+
+    <h1>Properties</h1>
+
+    <table class="properties-table">
+      <thead>
+        <tr>
+          <th scope="col">Names</th>
+          <th scope="col">Values</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">derived_by</th>
+          <td>
+            <div class="list-view" data-key="derived_by" data-values="[]"></div>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">annotation_exemption</th>
+          <td>
+            <span class="scalar-value false-value">false</span>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">exemption_reason</th>
+          <td>
+            <span class="scalar-value">n</span>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">implemented_in_files</th>
+          <td>
+            <div class="list-view" data-key="implemented_in_files" data-values='["src/okf_schema/okfkb/finding.py","src/okf_schema/okfkb/cli.py"]'></div>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">tested_in_files</th>
+          <td>
+            <div class="list-view" data-key="tested_in_files" data-values='["tests/test_kb_finding.py"]'></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="status-line" id="status" aria-live="polite"></p>
+  </main>
+
+  <script>
+    (() => {
+      const visibleItemCount = 1;
+      const statusLine = document.getElementById("status");
+      const listViews = document.querySelectorAll(".list-view");
+
+      function createIcon(name) {
+        if (name === "remove") {
+          return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 5.25h9M6 5.25V3.5h4v1.75M5.25 6.75v5.75h5.5V6.75M7 8.25v2.75M9 8.25v2.75"></path></svg>';
+        }
+        return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg>';
+      }
+
+      function setStatus(message, kind) {
+        statusLine.textContent = message;
+        statusLine.dataset.kind = kind || "";
+      }
+
+      function renderPreview(view, values, expanded) {
+        view.replaceChildren();
+        view.className = "list-view";
+        view.dataset.values = JSON.stringify(values);
+
+        const trigger = document.createElement("div");
+        trigger.className = "list-cell";
+        trigger.setAttribute("role", "group");
+        trigger.setAttribute("tabindex", "0");
+        trigger.title = "Edit list values";
+        trigger.setAttribute("aria-label", `Edit ${view.dataset.key} list`);
+        trigger.addEventListener("click", () => openEditor(view));
+        trigger.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openEditor(view);
+          }
+        });
+
+        if (values.length === 0) {
+          const empty = document.createElement("span");
+          empty.className = "empty-list";
+          empty.textContent = "[]";
+          trigger.append(empty);
+          view.append(trigger);
+          return;
+        }
+
+        const list = document.createElement("ul");
+        list.className = "preview-list";
+        const itemsToShow = expanded ? values : values.slice(0, visibleItemCount);
+        itemsToShow.forEach((value) => {
+          const item = document.createElement("li");
+          item.className = "preview-item";
+          item.textContent = value;
+          list.append(item);
+        });
+        trigger.append(list);
+
+        if (!expanded && values.length > visibleItemCount) {
+          const more = document.createElement("button");
+          more.className = "more-button";
+          more.type = "button";
+          more.textContent = `+ ${values.length - visibleItemCount} more`;
+          more.title = "Show remaining list items";
+          more.setAttribute("aria-label", `Show ${values.length - visibleItemCount} more items`);
+          more.setAttribute("aria-expanded", "false");
+          more.addEventListener("click", (event) => {
+            event.stopPropagation();
+            renderPreview(view, values, true);
+          });
+          trigger.append(more);
+        }
+
+        view.append(trigger);
+      }
+
+      function openEditor(view) {
+        const originalValues = JSON.parse(view.dataset.values);
+        const editor = document.createElement("div");
+        editor.className = "list-editor";
+        editor.setAttribute("aria-label", `Edit ${view.dataset.key}`);
+
+        const itemList = document.createElement("div");
+        itemList.className = "editor-items";
+        editor.append(itemList);
+
+        const addButton = document.createElement("button");
+        addButton.className = "add-item";
+        addButton.type = "button";
+        addButton.title = "Add a list item";
+        addButton.setAttribute("aria-label", "Add list item");
+        addButton.innerHTML = `${createIcon("add")}<span>Add item</span>`;
+        addButton.addEventListener("click", () => {
+          appendEditorItem(itemList, "");
+          const inputs = itemList.querySelectorAll(".item-input");
+          inputs[inputs.length - 1].focus();
+        });
+        editor.append(addButton);
+
+        const actions = document.createElement("div");
+        actions.className = "editor-actions";
+        const saveButton = document.createElement("button");
+        saveButton.className = "text-action";
+        saveButton.type = "button";
+        saveButton.textContent = "Save";
+        saveButton.title = "Save list changes";
+        saveButton.setAttribute("aria-label", "Save list changes");
+        saveButton.addEventListener("click", () => {
+          const values = Array.from(itemList.querySelectorAll(".item-input"), (input) => input.value.trim()).filter(Boolean);
+          renderPreview(view, values, values.length <= visibleItemCount);
+          setStatus(`${view.dataset.key} updated`, "saved");
+        });
+
+        const cancelButton = document.createElement("button");
+        cancelButton.className = "text-action cancel";
+        cancelButton.type = "button";
+        cancelButton.textContent = "Cancel";
+        cancelButton.title = "Cancel list changes";
+        cancelButton.setAttribute("aria-label", "Cancel list changes");
+        cancelButton.addEventListener("click", () => {
+          renderPreview(view, originalValues, false);
+          setStatus("Changes cancelled");
+        });
+        actions.append(saveButton, cancelButton);
+        editor.append(actions);
+
+        originalValues.forEach((value) => appendEditorItem(itemList, value));
+        view.replaceChildren(editor);
+        const firstInput = itemList.querySelector(".item-input");
+        if (firstInput) firstInput.focus();
+      }
+
+      function appendEditorItem(itemList, value) {
+        const row = document.createElement("div");
+        row.className = "editor-item";
+
+        const bullet = document.createElement("span");
+        bullet.className = "editor-bullet";
+        bullet.setAttribute("aria-hidden", "true");
+
+        const input = document.createElement("input");
+        input.className = "item-input";
+        input.type = "text";
+        input.value = value;
+        input.setAttribute("aria-label", "List item");
+
+        const removeButton = document.createElement("button");
+        removeButton.className = "icon-button";
+        removeButton.type = "button";
+        removeButton.title = "Remove list item";
+        removeButton.setAttribute("aria-label", "Remove list item");
+        removeButton.innerHTML = createIcon("remove");
+        removeButton.addEventListener("click", () => {
+          row.remove();
+          if (!itemList.children.length) {
+            appendEditorItem(itemList, "");
+            itemList.querySelector(".item-input").focus();
+          }
+        });
+
+        row.append(bullet, input, removeButton);
+        itemList.append(row);
+      }
+
+      listViews.forEach((view) => {
+        renderPreview(view, JSON.parse(view.dataset.values), false);
+      });
+    })();
+  </script>
+</body>
+</html>
