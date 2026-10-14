@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Runs the QA driver with the extension's pinned Node version (its .nvmrc).
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo="$(cd "$here/../../../.." && pwd)"
+cd "$repo"
+exec fnm exec -- node "$here/qa.mjs" "$@"

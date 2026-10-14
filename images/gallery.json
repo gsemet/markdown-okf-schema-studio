@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-10-14T20:11:23.175Z",
+  "sourceDirectory": "out/reports/e2e/screenshots/real-input-N9ZNzs",
+  "captures": [
+    {
+      "image": "images/01-paragraph-blur-commit.png",
+      "source": "out/reports/e2e/screenshots/real-input-N9ZNzs/01-paragraph-blur-commit.png",
+      "capturedAt": "2026-10-14T20:08:13.177Z",
+      "bytes": 81250,
+      "mediaType": "image",
+      "mimeType": "image/png",
+      "title": "Commit an edited paragraph",
+      "description": "A real preview edit is committed into the VS Code document buffer."
+    },
+    {
+      "image": "images/21-edit-hover.png",
+      "source": "out/reports/e2e/screenshots/real-input-N9ZNzs/21-edit-hover.png",
+      "capturedAt": "2026-10-14T20:08:43.177Z",
+      "bytes": 62908,
+      "mediaType": "image",
+      "mimeType": "image/png",
+      "title": "Reveal the edit affordance",
+      "description": "A real hover state shows which rendered block will be edited."
+    },
+    {
+      "image": "images/38-edit-mode-remembered.png",
+      "source": "out/reports/e2e/screenshots/real-input-N9ZNzs/38-edit-mode-remembered.png",
+      "capturedAt": "2026-10-14T20:09:24.708Z",
+      "bytes": 163634,
+      "mediaType": "image",
+      "mimeType": "image/png",
+      "title": "MyST and diagrams on white",
+      "description": "A white preview renders nested MyST admonitions, a Mermaid flowchart, and a local SVG with edit mode restored."
+    }
+  ]
+}

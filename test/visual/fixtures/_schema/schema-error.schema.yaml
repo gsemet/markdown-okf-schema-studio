@@ -1,0 +1,19 @@
+type: invalid-studio-schema-type
+x-studio-unsupported: true
+properties:
+  type:
+    const: schema-error
+    description: Document type.
+  title:
+    type: string
+    description: Finding title.
+  implemented_in_files:
+    type: array
+    items:
+      type: string
+    description: Generated source paths.
+  tested_in_files:
+    type: array
+    items:
+      type: string
+    description: Generated test paths.

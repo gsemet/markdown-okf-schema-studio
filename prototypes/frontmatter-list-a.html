@@ -1,0 +1,690 @@
+<!-- PROTOTYPE - DO NOT MERGE -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frontmatter list prototype | Option A</title>
+  <style>
+    :root {
+      --page: #ffffff;
+      --surface: #fbfbfb;
+      --header: #eeeeee;
+      --name-column: #f5f5f5;
+      --border: #c8c8c8;
+      --border-strong: #aaaaaa;
+      --text: #383838;
+      --muted: #747474;
+      --faint: #969696;
+      --accent: #0f6ead;
+      --accent-soft: #eaf4fb;
+      --focus: #1a85c0;
+      --chip: #fafafa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--page);
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--page);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    button,
+    input {
+      color: inherit;
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+    }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 1px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .preview-shell {
+      width: min(100% - 96px, 1080px);
+      margin: 0 auto;
+      padding: 35px 0 72px;
+    }
+
+    .prototype-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 32px;
+      margin-bottom: 25px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.01em;
+    }
+
+    .prototype-context {
+      margin: 0 0 9px;
+    }
+
+    .variant-label {
+      margin: 0;
+      padding: 0 0 9px;
+      color: #4b4b4b;
+      font-weight: 600;
+    }
+
+    .properties-heading {
+      width: max-content;
+      margin: 0 0 29px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #cdcdcd;
+      color: #3d3d3d;
+      font-size: 30px;
+      font-weight: 650;
+      letter-spacing: 0;
+      line-height: 1.1;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .frontmatter-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: var(--page);
+    }
+
+    .frontmatter-table col.name-column {
+      width: 25%;
+    }
+
+    .frontmatter-table col.value-column {
+      width: 45%;
+    }
+
+    .frontmatter-table col.description-column {
+      width: 30%;
+    }
+
+    .frontmatter-table th,
+    .frontmatter-table td {
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .frontmatter-table thead th {
+      padding: 8px 14px;
+      background: var(--header);
+      color: #666666;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .frontmatter-table tbody th {
+      padding: 10px 14px;
+      background: var(--name-column);
+      color: #424242;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .frontmatter-table tbody td {
+      padding: 9px 14px;
+      background: var(--page);
+    }
+
+    .value-cell {
+      min-height: 43px;
+      color: #3d3d3d;
+    }
+
+    .scalar-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+    }
+
+    .boolean-value {
+      color: #595959;
+    }
+
+    .description {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .type-hint {
+      color: var(--faint);
+      font-size: 12px;
+    }
+
+    .type-hint::after {
+      content: " · ";
+      color: #c3c3c3;
+    }
+
+    .value-actions {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .list-display {
+      display: flex;
+      flex: 1 1 auto;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+      min-height: 24px;
+      padding: 0;
+      background: transparent;
+      color: #3c3c3c;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .list-display:hover .list-chip,
+    .list-display:focus-visible .list-chip {
+      border-color: #8e8e8e;
+      background: #f4f4f4;
+    }
+
+    .list-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      max-width: 100%;
+      padding: 1px 7px;
+      border: 1px solid #b9b9b9;
+      border-radius: 3px;
+      background: var(--chip);
+      color: #3f3f3f;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 18px;
+      overflow-wrap: anywhere;
+    }
+
+    .list-empty {
+      color: #777777;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+    }
+
+    .icon-button {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      width: 25px;
+      height: 25px;
+      padding: 0;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      background: transparent;
+      color: #737373;
+      cursor: pointer;
+    }
+
+    .icon-button:hover {
+      border-color: var(--border);
+      background: #f3f3f3;
+      color: #444444;
+    }
+
+    .icon {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.7;
+    }
+
+    .list-editor {
+      display: grid;
+      gap: 8px;
+    }
+
+    .editor-items {
+      display: grid;
+      gap: 5px;
+    }
+
+    .editor-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .editor-item input {
+      width: 100%;
+      min-width: 0;
+      height: 28px;
+      padding: 3px 7px;
+      border: 1px solid #a9a9a9;
+      border-radius: 2px;
+      background: #ffffff;
+      color: #353535;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+    }
+
+    .remove-item {
+      width: 24px;
+      height: 24px;
+      color: #777777;
+    }
+
+    .remove-item:hover {
+      color: #4a4a4a;
+    }
+
+    .empty-editor {
+      color: var(--faint);
+      font-size: 12px;
+    }
+
+    .editor-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 2px;
+    }
+
+    .add-item,
+    .text-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 25px;
+      padding: 2px 5px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .add-item {
+      color: var(--accent);
+    }
+
+    .add-item:hover,
+    .text-button:hover {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .save-cancel {
+      display: flex;
+      gap: 5px;
+    }
+
+    .text-button {
+      color: #5e5e5e;
+    }
+
+    .text-button.save {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .document-preview {
+      margin-top: 33px;
+      padding-top: 22px;
+      border-top: 1px solid #d5d5d5;
+    }
+
+    .document-preview h1 {
+      margin: 0 0 11px;
+      color: #3b3b3b;
+      font-size: 27px;
+      font-weight: 650;
+      line-height: 1.2;
+    }
+
+    .document-preview p {
+      max-width: 790px;
+      margin: 0;
+      color: #4d4d4d;
+      font-size: 15px;
+    }
+
+    @media (max-width: 760px) {
+      .preview-shell {
+        width: min(100% - 32px, 1080px);
+        padding-top: 24px;
+      }
+
+      .prototype-bar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 2px;
+        padding-bottom: 8px;
+      }
+
+      .prototype-context {
+        margin-bottom: 0;
+      }
+
+      .variant-label {
+        padding-bottom: 7px;
+      }
+
+      .properties-heading {
+        margin-bottom: 22px;
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="preview-shell">
+    <header class="prototype-bar">
+      <p class="prototype-context">Markdown OKF-Schema Studio / Preview</p>
+      <p class="variant-label">Option A · Inline chips</p>
+    </header>
+
+    <h1 class="properties-heading">Properties</h1>
+
+    <div class="table-wrap">
+      <table class="frontmatter-table">
+        <caption class="sr-only">Frontmatter properties for an OKF finding</caption>
+        <colgroup>
+          <col class="name-column">
+          <col class="value-column">
+          <col class="description-column">
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Names</th>
+            <th scope="col">Values</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">derived_by</th>
+            <td class="value-cell" data-value-for="derived_by" data-list-key="derived_by">
+              <div class="value-actions">
+                <button class="list-display" type="button" aria-label="Edit derived_by list" title="Edit list">
+                  <span class="list-empty">[]</span>
+                </button>
+                <button class="icon-button" type="button" aria-label="Edit derived_by" title="Edit list">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+            <td class="description"><span class="type-hint">list</span>source finding references</td>
+          </tr>
+          <tr>
+            <th scope="row">annotation_exemption</th>
+            <td class="value-cell scalar-value boolean-value">false</td>
+            <td class="description"><span class="type-hint">boolean</span>annotation is exempt</td>
+          </tr>
+          <tr>
+            <th scope="row">exemption_reason</th>
+            <td class="value-cell scalar-value">n</td>
+            <td class="description"><span class="type-hint">text</span>reason for the exemption</td>
+          </tr>
+          <tr>
+            <th scope="row">implemented_in_files</th>
+            <td class="value-cell" data-value-for="implemented_in_files" data-list-key="implemented_in_files">
+              <div class="value-actions">
+                <button class="list-display" type="button" aria-label="Edit implemented_in_files list" title="Edit list">
+                  <span class="list-chip">src/okf_schema/okfkb/finding.py</span>
+                  <span class="list-chip">src/okf_schema/okfkb/cli.py</span>
+                </button>
+                <button class="icon-button" type="button" aria-label="Edit implemented_in_files" title="Edit list">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+            <td class="description"><span class="type-hint">list</span>implementation locations</td>
+          </tr>
+          <tr>
+            <th scope="row">tested_in_files</th>
+            <td class="value-cell" data-value-for="tested_in_files" data-list-key="tested_in_files">
+              <div class="value-actions">
+                <button class="list-display" type="button" aria-label="Edit tested_in_files list" title="Edit list">
+                  <span class="list-chip">tests/test_kb_finding.py</span>
+                </button>
+                <button class="icon-button" type="button" aria-label="Edit tested_in_files" title="Edit list">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+            <td class="description"><span class="type-hint">list</span>test coverage locations</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <section class="document-preview" aria-label="Document preview">
+      <h1>Finding</h1>
+      <p>Observed behavior remains readable below the frontmatter properties table.</p>
+    </section>
+  </main>
+
+  <script>
+    const listValues = {
+      derived_by: [],
+      implemented_in_files: [
+        "src/okf_schema/okfkb/finding.py",
+        "src/okf_schema/okfkb/cli.py"
+      ],
+      tested_in_files: ["tests/test_kb_finding.py"]
+    };
+
+    const iconPaths = {
+      edit: '<path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>',
+      plus: '<path d="M12 5v14"></path><path d="M5 12h14"></path>',
+      remove: '<path d="M6 6l12 12"></path><path d="M18 6 6 18"></path>'
+    };
+
+    function createIcon(name) {
+      const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("class", "icon");
+      icon.setAttribute("viewBox", "0 0 24 24");
+      icon.setAttribute("aria-hidden", "true");
+      icon.innerHTML = iconPaths[name];
+      return icon;
+    }
+
+    function getValueCell(key) {
+      return document.querySelector(`[data-value-for="${key}"]`);
+    }
+
+    function createEditButton(key) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "icon-button";
+      button.setAttribute("aria-label", `Edit ${key}`);
+      button.title = "Edit list";
+      button.append(createIcon("edit"));
+      button.addEventListener("click", () => openEditor(key));
+      return button;
+    }
+
+    function renderListValue(key) {
+      const valueCell = getValueCell(key);
+      if (!valueCell) return;
+
+      valueCell.classList.remove("is-editing");
+      valueCell.replaceChildren();
+
+      const actions = document.createElement("div");
+      actions.className = "value-actions";
+
+      const display = document.createElement("button");
+      display.type = "button";
+      display.className = "list-display";
+      display.setAttribute("aria-label", `Edit ${key} list`);
+      display.title = "Edit list";
+      display.addEventListener("click", () => openEditor(key));
+
+      if (listValues[key].length === 0) {
+        const empty = document.createElement("span");
+        empty.className = "list-empty";
+        empty.textContent = "[]";
+        display.append(empty);
+      } else {
+        listValues[key].forEach((item) => {
+          const chip = document.createElement("span");
+          chip.className = "list-chip";
+          chip.textContent = item;
+          display.append(chip);
+        });
+      }
+
+      actions.append(display, createEditButton(key));
+      valueCell.append(actions);
+    }
+
+    function createEditorItem(key, value, index, items, emptyState) {
+      const item = document.createElement("div");
+      item.className = "editor-item";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = value;
+      input.setAttribute("aria-label", `${key} item ${index + 1}`);
+      input.autocomplete = "off";
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "icon-button remove-item";
+      remove.setAttribute("aria-label", `Remove ${key} item ${index + 1}`);
+      remove.title = "Remove item";
+      remove.append(createIcon("remove"));
+      remove.addEventListener("click", () => {
+        item.remove();
+        if (items.children.length === 0) {
+          items.append(emptyState);
+        }
+      });
+
+      item.append(input, remove);
+      return item;
+    }
+
+    function openEditor(key) {
+      const valueCell = getValueCell(key);
+      if (!valueCell || valueCell.classList.contains("is-editing")) return;
+
+      valueCell.classList.add("is-editing");
+      valueCell.replaceChildren();
+
+      const editor = document.createElement("div");
+      editor.className = "list-editor";
+
+      const items = document.createElement("div");
+      items.className = "editor-items";
+
+      const emptyState = document.createElement("div");
+      emptyState.className = "empty-editor";
+      emptyState.textContent = "No items";
+
+      listValues[key].forEach((value, index) => {
+        items.append(createEditorItem(key, value, index, items, emptyState));
+      });
+      if (listValues[key].length === 0) {
+        items.append(emptyState);
+      }
+
+      const add = document.createElement("button");
+      add.type = "button";
+      add.className = "add-item";
+      add.setAttribute("aria-label", `Add item to ${key}`);
+      add.title = "Add item";
+      add.append(createIcon("plus"), document.createTextNode("Add item"));
+      add.addEventListener("click", () => {
+        if (items.contains(emptyState)) emptyState.remove();
+        const nextIndex = items.querySelectorAll("input").length;
+        const nextItem = createEditorItem(key, "", nextIndex, items, emptyState);
+        items.append(nextItem);
+        nextItem.querySelector("input").focus();
+      });
+
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "text-button";
+      cancel.textContent = "Cancel";
+      cancel.addEventListener("click", () => renderListValue(key));
+
+      const save = document.createElement("button");
+      save.type = "button";
+      save.className = "text-button save";
+      save.textContent = "Save";
+      save.addEventListener("click", () => {
+        listValues[key] = [...items.querySelectorAll("input")]
+          .map((input) => input.value.trim())
+          .filter(Boolean);
+        renderListValue(key);
+      });
+
+      const editorActions = document.createElement("div");
+      editorActions.className = "editor-actions";
+      const saveCancel = document.createElement("div");
+      saveCancel.className = "save-cancel";
+      saveCancel.append(cancel, save);
+      editorActions.append(add, saveCancel);
+
+      editor.append(items, editorActions);
+      valueCell.append(editor);
+
+      const firstInput = items.querySelector("input");
+      if (firstInput) firstInput.focus();
+      editor.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") renderListValue(key);
+      });
+    }
+
+    document.querySelectorAll("[data-list-key]").forEach((valueCell) => {
+      const key = valueCell.dataset.listKey;
+      if (!key) return;
+      valueCell.querySelector(".list-display")?.addEventListener("click", () => openEditor(key));
+      valueCell.querySelector(".icon-button")?.addEventListener("click", () => openEditor(key));
+    });
+  </script>
+</body>
+</html>

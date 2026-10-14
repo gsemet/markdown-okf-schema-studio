@@ -1,0 +1,214 @@
+{
+  "name": "markdown-okf-schema-studio",
+  "displayName": "Markdown OKF-Schema Studio",
+  "description": "Schema-aware Markdown editor and live preview for OKF bundles.",
+  "version": "0.1.0",
+  "publisher": "GaetanSemet",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gsemet/markdown-okf-schema-studio"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "activationEvents": [
+    "onCommand:markdown-okf-schema-studio.openPreview",
+    "onCommand:markdown-okf-schema-studio.refreshPreview",
+    "onCustomEditor:markdown-okf-schema-studio.editor",
+    "onWebviewPanel:markdown-okf-schema-studio.preview"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/bundle/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "markdown-okf-schema-studio.editor",
+        "displayName": "Markdown OKF-Schema Studio",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "commands": [
+      {
+        "command": "markdown-okf-schema-studio.openPreview",
+        "title": "Open Preview to Side",
+        "category": "Markdown OKF-Schema Studio",
+        "icon": "$(book)",
+        "enablement": "resourceExtname == .md"
+      },
+      {
+        "command": "markdown-okf-schema-studio.refreshPreview",
+        "title": "Refresh Preview",
+        "category": "Markdown OKF-Schema Studio",
+        "enablement": "resourceExtname == .md"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "markdown-okf-schema-studio.openPreview",
+          "when": "resourceExtname == .md"
+        },
+        {
+          "command": "markdown-okf-schema-studio.refreshPreview",
+          "when": "resourceExtname == .md"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "markdown-okf-schema-studio.openPreview",
+          "when": "resourceExtname == .md && activeEditor == workbench.editors.files.textFileEditor",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "markdown-okf-schema-studio.openPreview",
+          "when": "resourceExtname == .md",
+          "group": "navigation"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "markdown-okf-schema-studio.openPreview",
+        "key": "ctrl+k shift+v",
+        "mac": "cmd+k shift+v",
+        "when": "editorTextFocus && resourceExtname == .md"
+      }
+    ],
+    "configuration": {
+      "title": "Markdown OKF-Schema Studio",
+      "properties": {
+        "markdownOkfSchemaStudio.preview.scrollPreviewWithEditor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Follow the editor viewport from the MyST preview."
+        },
+        "markdownOkfSchemaStudio.preview.scrollEditorWithPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Reveal the source line represented by the MyST preview viewport."
+        },
+        "markdownOkfSchemaStudio.preview.markEditorSelection": {
+          "type": "boolean",
+          "default": false,
+          "description": "Mark the active source line in the MyST preview."
+        },
+        "markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor": {
+          "type": "boolean",
+          "default": false,
+          "description": "Reveal the mapped source line when rendered content is double-clicked."
+        },
+        "markdownOkfSchemaStudio.preview.maxContentWidth": {
+          "type": "number",
+          "default": 960,
+          "minimum": 0,
+          "maximum": 2400,
+          "step": 50,
+          "description": "Maximum width of the preview content column, in pixels. Set to 0 to use the full preview width."
+        },
+        "markdownOkfSchemaStudio.preview.stickyHeadingDepth": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 6,
+          "step": 1,
+          "description": "Number of Markdown heading levels to keep visible in the preview."
+        },
+        "markdownOkfSchemaStudio.preview.incrementalUpdates": {
+          "type": "boolean",
+          "default": true,
+          "description": "Update the preview content in place while typing instead of reloading the page. Turn off if the preview misbehaves."
+        },
+        "markdownOkfSchemaStudio.plantuml.jarPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to plantuml.jar used for PlantUML previews. Leave empty to use the plantuml executable from PATH."
+        },
+        "markdownOkfSchemaStudio.frontmatter.propertiesTable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the frontmatter properties table at the top of the MyST preview."
+        },
+        "markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties": {
+          "type": "boolean",
+          "default": false,
+          "description": "Warn on frontmatter fields that are not present in the matching OKF schema."
+        },
+        "markdownOkfSchemaStudio.frontmatter.bundleRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Explicit bundle root for x-okf-link values. Relative paths are resolved from the first workspace folder."
+        },
+        "markdownOkfSchemaStudio.frontmatter.projectRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Explicit project root for x-okf-link values. Relative paths are resolved from the first workspace folder."
+        },
+        "markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow document-relative x-okf-link values to resolve outside workspace folders."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "postinstall": "node scripts/patch-myst-imports.mjs",
+    "compile": "tsc -p .",
+    "bundle": "node esbuild.mjs",
+    "check-types": "tsc --noEmit -p .",
+    "watch": "tsc -watch -p .",
+    "test": "npm run compile && npm run test:unit && npm run test:contracts && npm run test:security",
+    "test:unit": "mkdir -p out/reports/unit && node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=out/reports/unit/tests-unit.xml out/test/build/*.test.js out/test/configuration/*.test.js out/test/frontmatter/*.test.js out/test/mapping/*.test.js out/test/navigation/*.test.js out/test/rendering/*.test.js out/test/site/*.test.js out/test/state/*.test.js out/test/webview/*.test.js",
+    "test:contracts": "mkdir -p out/reports/contract && node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=out/reports/contract/tests-contract.xml out/test/rendering/*.contract.js",
+    "test:security": "mkdir -p out/reports/security && node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=out/reports/security/tests-security.xml out/test/security/*.test.js",
+    "test:integration": "npm run compile && npm run bundle && node out/test/integration/run-tests.js",
+    "review:begin": "npm run compile && node out/test/integration/review-index.js --begin",
+    "review:finish": "node out/test/integration/review-index.js",
+    "test:e2e": "node scripts/run-e2e.mjs",
+    "test:scroll": "npm run compile && npm run bundle && node out/test/integration/run-tests.js --scroll-only",
+    "test:reload": "npm run compile && npm run bundle && node out/test/integration/run-tests.js --reload-only",
+    "test:browser": "npm run test:visual",
+    "visual:render": "npm run compile && npm run bundle && node out/test/visual/renderFixtures.js",
+    "test:visual": "npm run visual:render && uv run --no-sync --group docs python test/visual/capture.py",
+    "gallery:generate": "npm run compile && node scripts/generate-gallery.mjs",
+    "site:gallery": "npm run gallery:generate",
+    "site": "npm run compile && node out/test/site/buildSite.js",
+    "package": "npm run compile && npm run bundle && mkdir -p out/reports/package && vsce package --out out/reports/package/markdown-okf-schema-studio.vsix --skip-license --baseContentUrl https://github.com/gsemet/markdown-okf-schema-studio/blob/main/"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "highlight.js": "^11.12.0",
+    "katex": "^0.19.0",
+    "mermaid": "^12.2.0",
+    "myst-parser": "^1.7.4",
+    "myst-to-html": "^1.7.4",
+    "parse5": "^8.0.1",
+    "yaml": "^2.9.1"
+  },
+  "overrides": {
+    "csv-parse": "^7.0.3",
+    "linkify-it": "^5.0.2",
+    "markdown-it": "^14.3.1"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.8",
+    "@types/node": "^24.19.2",
+    "@types/vscode": "^1.95.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "playwright-core": "^1.64.1",
+    "typescript": "^7.0.2"
+  }
+}

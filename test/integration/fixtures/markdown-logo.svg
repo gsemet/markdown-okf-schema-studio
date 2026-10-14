@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <title>Markdown logo</title>
+  <rect x="6" y="23" width="84" height="50" rx="4" fill="#fff" stroke="#202124" stroke-width="4"/>
+  <path fill="#202124" d="M17 61V35h7l10 13 10-13h7v26h-8V48L34 59 25 48v13zM66 35h8v14h9L70 63 57 49h9z"/>
+</svg>

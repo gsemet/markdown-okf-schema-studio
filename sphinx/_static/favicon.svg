@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Markdown OKF-Schema Studio">
+  <rect width="64" height="64" rx="12" fill="#0b5563"/>
+  <path d="M12 18h40v28H12z" fill="#f4f8f7"/>
+  <path d="M18 25h17v5H18zm0 9h28v5H18z" fill="#0b5563"/>
+  <path d="m40 24 7 7-7 7" fill="none" stroke="#0b5563" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

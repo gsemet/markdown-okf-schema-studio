@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    env:
+      STUDIO_NPM: npm --registry=https://registry.npmjs.org/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v2
+      - name: Install PlantUML and Graphviz
+        run: sudo -n apt-get update && sudo -n apt-get install --yes --no-install-recommends plantuml graphviz
+      - run: npm ci
+      - run: uv sync --group docs
+      - run: uv run --no-sync --group docs playwright install --with-deps chromium
+      - name: Run full preflight
+        run: xvfb-run --auto-servernum just preflight
+      - name: Ensure justfile formatting is clean
+        run: |
+          just format
+          git diff --exit-code -- justfile
+      - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-reports
+          path: out/reports/
+          if-no-files-found: warn

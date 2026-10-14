@@ -1,0 +1,263 @@
+import * as assert from "node:assert/strict";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import { afterEach, test } from "node:test";
+
+import { createContentSecurityPolicy } from "../../src/security/csp";
+import {
+  injectContentSecurityPolicy,
+  rewriteSphinxHtml,
+  sanitizeCss,
+} from "../../src/security/html-sanitizer";
+import { ResourcePolicy } from "../../src/security/resource-policy";
+
+const temporaryDirectories: string[] = [];
+
+afterEach(() => {
+  for (const directory of temporaryDirectories.splice(0)) {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("rewrites local resources and removes active HTML content", () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
+  temporaryDirectories.push(output);
+  for (const file of ["theme.css", "theme.js", "image.png", "font.woff2", "movie.mp4", "chapter.html"]) {
+    fs.writeFileSync(path.join(output, file), file);
+  }
+  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const resolveResource = (request: string, baseDirectory: string) => {
+    const resourcePath = policy.resolveResource(request, baseDirectory);
+    return resourcePath ? { path: resourcePath, uri: `webview://${path.basename(resourcePath)}` } : undefined;
+  };
+  const result = rewriteSphinxHtml(
+    "<!doctype html><html><head><link rel=\"stylesheet\" href=\"theme.css\"><script src=\"theme.js\"></script></head><body onload=\"run()\"><svg onload=\"run()\"><g><script>alert(1)</script><foreignObject>bad</foreignObject></g></svg><img src=\"image.png\" srcset=\"image.png 1x, data:image/png;base64,AAAA 2x\" onclick=\"run()\"><video poster=\"image.png\"><source src=\"movie.mp4\"></video><a href=\"chapter.html\">chapter</a><a href=\"javascript:alert(1)\">bad</a><iframe src=\"image.png\"></iframe></body></html>",
+    {
+      outputRoot: output,
+      policy,
+      nonce: "unit-nonce",
+      resolveResource,
+      resolveNavigation: (request, baseDirectory) => {
+        const navigation = policy.resolveNavigation(request, baseDirectory);
+        if (navigation.kind === "local") {
+          return { path: navigation.path, uri: `webview://${path.basename(navigation.path)}` };
+        }
+        return navigation;
+      },
+    },
+  );
+
+  assert.match(result.html, /webview:\/\/theme\.css/);
+  assert.match(result.html, /webview:\/\/image\.png/);
+  assert.match(result.html, /webview:\/\/movie\.mp4/);
+  assert.match(result.html, /nonce=\"unit-nonce\"/);
+  assert.doesNotMatch(result.html, /onclick|onload|href="javascript:|foreignObject|<iframe/iu);
+  assert.doesNotMatch(result.html, /href="webview:\/\/chapter\.html"/u);
+  assert.match(result.html, /href="#"[^>]+data-sphinx-preview-navigation="chapter\.html"/u);
+  assert.match(result.html, /data-sphinx-preview-navigation="javascript:alert\(1\)"/u);
+  assert.match(result.html, /srcset=\"webview:\/\/image\.png 1x\"/);
+  assert.ok(
+    result.diagnostics.some((entry) =>
+      entry.code === "blocked-inline-script" || entry.code === "blocked-svg-content",
+    ),
+  );
+});
+
+test("reduced previews remove external scripts while retaining contained media", () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
+  temporaryDirectories.push(output);
+  fs.writeFileSync(path.join(output, "theme.js"), "alert(1)");
+  fs.writeFileSync(path.join(output, "image.png"), "image");
+  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const result = rewriteSphinxHtml(
+    '<html><body><script src="theme.js"></script><img src="image.png" alt="image"></body></html>',
+    {
+      outputRoot: output,
+      policy,
+      nonce: "unit-nonce",
+      allowExternalScripts: false,
+      resolveResource: (request, baseDirectory) => {
+        const resourcePath = policy.resolveResource(request, baseDirectory);
+        return resourcePath ? { path: resourcePath, uri: `webview://${path.basename(resourcePath)}` } : undefined;
+      },
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+
+  assert.doesNotMatch(result.html, /<script/u);
+  assert.match(result.html, /webview:\/\/image\.png/u);
+  assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-script"));
+});
+
+test("maps rendered source lines to the active preview document", () => {
+  const result = rewriteSphinxHtml(
+    '<html><body><main><h1 data-line="1">Title</h1><p data-line="4" data-end-line="6">Body</p><p>Unmapped</p></main></body></html>',
+    {
+      outputRoot: "/workspace",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      sourceMapping: { sourceFile: "/workspace/active.md", documentId: "preview-1" },
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+
+  assert.match(result.html, /<h1 data-line="1"[^>]*data-sphinx-source-file="\/workspace\/active\.md"[^>]*data-sphinx-source-line="1"[^>]*data-sphinx-preview-document="preview-1"[^>]*data-sphinx-preview-block="source-block-1"[^>]*tabindex="0"/u);
+  assert.match(result.html, /<p data-line="4" data-end-line="6"[^>]*data-sphinx-source-end-line="6"[^>]*data-sphinx-preview-block="source-block-2"[^>]*tabindex="0">Body<\/p>/u);
+  assert.match(result.html, /<p>Unmapped<\/p>/u);
+});
+
+test("rewrites sanitized table styles into a nonce-bearing stylesheet", () => {
+  const result = rewriteSphinxHtml(
+    '<html><head></head><body><table><tr>'
+    + '<th data-myst-table-style="background: -webkit-linear-gradient(20deg, #09009f, #e743d9); '
+    + '-webkit-background-clip: text; -webkit-text-fill-color: transparent">Gradient</th>'
+    + '<td data-myst-table-style="background-color: red; color: white; position: fixed; '
+    + 'background-image: url(javascript:alert(1))">Difference</td>'
+    + '</tr></table><p data-myst-table-style="color: red">Not a table cell</p>'
+    + '<p style="color: red">Direct style</p></body></html>',
+    {
+      outputRoot: "/tmp",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+
+  assert.match(result.html, /<style nonce="unit-nonce" data-sphinx-preview-table-styles="">/u);
+  assert.match(result.html, /\.myst-inline-table-style-1\s*\{[^}]*-webkit-background-clip: text/u);
+  assert.match(result.html, /\.myst-inline-table-style-2\s*\{[^}]*background-color: red; color: white/u);
+  assert.doesNotMatch(result.html, /data-myst-table-style|style="|javascript:|position:\s*fixed/u);
+});
+
+test("blocks hostile CSS imports, schemes, and URLs while preserving local assets", () => {
+  const css = [
+    "@import url('https://example.test/remote.css');",
+    '@import "https://example.test/no-semicolon.css" screen',
+    "@font-face { src: url('font.woff2'); }",
+    ".remote { background: url(data:image/png;base64,AAAA); }",
+    ".script { background: url(javascript:alert(1)); }",
+  ].join("\n");
+  const sanitized = sanitizeCss(css, (request) => (request === "font.woff2" ? "font.woff2" : undefined));
+
+  assert.match(sanitized, /@import url\("about:blank"\)|blocked @import/);
+  assert.match(sanitized, /url\("font\.woff2"\)/);
+  assert.doesNotMatch(sanitized, /https:\/\/example|data:image|javascript:/iu);
+});
+
+test("generates a restrictive nonce-bearing CSP", () => {
+  const csp = createContentSecurityPolicy("vscode-webview://unit", "nonce-value");
+
+  assert.match(csp, /default-src 'none'/);
+  assert.match(csp, /script-src vscode-webview:\/\/unit 'nonce-nonce-value'/);
+  assert.match(csp, /img-src vscode-webview:\/\/unit data:/);
+  assert.doesNotMatch(csp, /\*/);
+  assert.doesNotMatch(csp, /unsafe-inline|unsafe-eval/);
+});
+
+test("adds the CSP as a head meta without retaining a weaker policy", () => {
+  const html = injectContentSecurityPolicy(
+    "<html><head><meta http-equiv=\"Content-Security-Policy\" content=\"default-src *\"></head><body>ok</body></html>",
+    "default-src 'none'; img-src vscode-webview://unit",
+  );
+
+  assert.equal((html.match(/Content-Security-Policy/gu) ?? []).length, 1);
+  assert.doesNotMatch(html, /default-src \*/u);
+  assert.match(html, /img-src vscode-webview:\/\/unit/);
+});
+
+test("removes refresh metadata with surrounding whitespace", () => {
+  const result = rewriteSphinxHtml(
+    '<html><head><meta http-equiv=" refresh " content="0;url=https://evil.test"></head><body>ok</body></html>',
+    {
+      outputRoot: "/tmp",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+
+  assert.doesNotMatch(result.html, /http-equiv/iu);
+});
+
+test("keeps deferred relative navigation inert and host-routable", () => {
+  const result = rewriteSphinxHtml(
+    '<html><body><h1 data-sphinx-source-file="/workspace/active.md" data-sphinx-source-line="4" data-sphinx-preview-block="heading">Title</h1><img src="image.png"><a href="chapter-two.md">Next</a></body></html>',
+    {
+      outputRoot: "/tmp",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "deferred", value: "chapter-two.md" }),
+    },
+  );
+
+  assert.match(result.html, /<main[^>]+aria-label="Markdown OKF-Schema Studio preview content"/u);
+  assert.match(result.html, /data-sphinx-source-line="4"[^>]+tabindex="0"/u);
+  assert.match(result.html, /<img[^>]+alt=""/u);
+  assert.match(result.html, /href="#"[^>]+data-sphinx-preview-navigation="chapter-two\.md"/u);
+});
+
+test("resolves parent-relative figure images through the workspace root", () => {
+  const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-figure-test-"));
+  temporaryDirectories.push(workspace);
+  const documentDirectory = path.join(workspace, "book", "chapters");
+  const images = path.join(workspace, "book", "external-img");
+  fs.mkdirSync(documentDirectory, { recursive: true });
+  fs.mkdirSync(images, { recursive: true });
+  const figure = path.join(images, "figure.svg");
+  fs.writeFileSync(figure, "<svg/>");
+
+  // Mirrors buildPreviewWebviewHtml's policy composition: the document directory is
+  // the base for relative resolution, the workspace root bounds what may leave it.
+  const policy = new ResourcePolicy([
+    { label: "preview document directory", directory: documentDirectory },
+    { label: "workspace root", directory: workspace },
+  ]);
+  const resolveResource = (request: string, baseDirectory: string) => {
+    const resourcePath = policy.resolveResource(request, baseDirectory);
+    return resourcePath ? { path: resourcePath, uri: `webview://${resourcePath}` } : undefined;
+  };
+  const html = `<figure><img src="../external-img/figure.svg" alt="figure"></figure>`;
+  const rewritten = rewriteSphinxHtml(html, {
+    outputRoot: documentDirectory,
+    policy,
+    nonce: "figure-test",
+    resolveResource,
+    resolveNavigation: () => ({ kind: "blocked" }),
+  });
+
+  assert.match(rewritten.html, /src="webview:\/\/[^"]*external-img\/figure\.svg"/u);
+  assert.doesNotMatch(rewritten.html, /blocked-resource/u);
+  assert.ok(!rewritten.diagnostics.some((diagnostic) => diagnostic.code === "blocked-resource"));
+});
+
+test("strips figure images that escape even the workspace root", () => {
+  const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-figure-test-"));
+  temporaryDirectories.push(workspace);
+  const documentDirectory = path.join(workspace, "book", "chapters");
+  fs.mkdirSync(documentDirectory, { recursive: true });
+
+  const policy = new ResourcePolicy([
+    { label: "preview document directory", directory: documentDirectory },
+    { label: "workspace root", directory: workspace },
+  ]);
+  const resolveResource = (request: string, baseDirectory: string) => {
+    const resourcePath = policy.resolveResource(request, baseDirectory);
+    return resourcePath ? { path: resourcePath, uri: `webview://${resourcePath}` } : undefined;
+  };
+  const html = `<figure><img src="../../../etc/hostname" alt="escape"></figure>`;
+  const rewritten = rewriteSphinxHtml(html, {
+    outputRoot: documentDirectory,
+    policy,
+    nonce: "figure-test",
+    resolveResource,
+    resolveNavigation: () => ({ kind: "blocked" }),
+  });
+
+  assert.doesNotMatch(rewritten.html, /\ssrc=/u);
+  assert.ok(rewritten.diagnostics.some((diagnostic) => diagnostic.code === "blocked-resource"));
+});

@@ -1,0 +1,39 @@
+# Markdown OKF-Schema Studio
+
+This repository is the standalone source for the Markdown OKF-Schema Studio VS Code extension.
+It is MIT licensed and is developed independently from the Agentic Coding White Paper repository.
+
+## Structure
+
+- `src/` contains the TypeScript extension implementation.
+- `test/` contains unit, contract, integration, and visual tests.
+- `sphinx/` contains the minimal package-owned Sphinx configuration and source-mapping extension.
+- `tests/fixtures/` contains the Python Sphinx contract fixtures.
+- `justfile` contains the package-local development and release checks.
+
+## Required workflow
+
+- Use Node.js 24 from `.nvmrc`.
+- Run `just dev` to install Node.js, JavaScript and Python dependencies, and Playwright Chromium.
+- Install JavaScript dependencies with `fnm exec -- npm ci`.
+- Use `uv run` for Python commands; dependencies use official PyPI and npm registries.
+
+## Main targets
+
+- Set up or restore the development environment: `just dev` (`just install` is also supported)
+- Upgrade dependencies and refresh the development environment: `just update`
+- Format the justfile: `just format`
+- Build the extension: `just compile`
+- Run formatting, TypeScript, unit, contract, and security checks: `just check`
+- Run the Python Sphinx source-mapping contract: `just sphinx-check`
+- Run end-to-end tests: `just e2e`
+- Package a VSIX: `just package`
+- Run the complete validation and site-generation pipeline: `just preflight`
+
+## Completion gate
+
+Run `just preflight` after making changes and before considering a task complete. A task is not
+complete until preflight passes.
+
+Do not add references from maintained source or tests back to the white-paper repository. Do not
+commit `node_modules/`, `out/`, or Python virtual-environment files.

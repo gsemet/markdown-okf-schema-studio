@@ -1,0 +1,59 @@
+type: object
+title: Software Requirement
+additionalProperties: true
+required:
+  - type
+  - title
+  - status
+  - owner
+  - annotation_exemption
+properties:
+  type:
+    const: swrs
+    description: Document type of the OKF entry.
+  title:
+    type: string
+    minLength: 1
+    description: Short requirement title.
+  status:
+    enum:
+      - active
+      - draft
+      - retired
+    description: Lifecycle status of the requirement.
+  owner:
+    type: string
+    description: Team accountable for this requirement.
+  priority:
+    type: integer
+    description: Numeric priority, 1 (highest) to 5 (lowest).
+  annotation_exemption:
+    type: boolean
+    description: True when this requirement is exempt from coverage annotations.
+  exemption_reason:
+    type: [string, "null"]
+    minLength: 1
+    description: Justification required when coverage is exempted.
+  reviewed_on:
+    type: string
+    format: date
+    description: Date of the last review.
+  derives_from:
+    type: [array, "null"]
+    items:
+      type: string
+    description: Upstream requirement IDs this one is derived from.
+  description:
+    type: string
+    description: Free-form summary of the requirement.
+  summary:
+    type: string
+    description: Optional short summary.
+allOf:
+  - if:
+      properties:
+        annotation_exemption: {const: true}
+    then:
+      required: [exemption_reason]
+      properties:
+        exemption_reason: {type: string, minLength: 1}

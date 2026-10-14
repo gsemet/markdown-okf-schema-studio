@@ -1,0 +1,17 @@
+{
+  "name": "smoke",
+  "file": "synth/tables.md",
+  "steps": [
+    {"open": "${file}"},
+    {"palette": "Markdown OKF-Schema Studio: Open Preview to Side", "wait": 4000},
+    {"waitFor": "D.querySelector('#sphinx-myst-preview-content h1')", "timeout": 15000, "label": "rendered preview"},
+    {"check": "inViewport", "selector": "[data-sphinx-preview-toolbar]"},
+    {"editMode": true},
+    {"check": "feval", "expr": "D.documentElement.getAttribute('data-sphinx-preview-edit-mode')", "equals": "on"},
+    {"editMode": false},
+    {"check": "editor", "visible": "${file}"},
+    {"check": "errors"},
+    {"check": "notifs", "none": true},
+    {"shot": "smoke", "clip": "preview"}
+  ]
+}
