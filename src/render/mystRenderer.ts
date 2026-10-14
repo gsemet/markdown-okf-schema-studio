@@ -391,7 +391,7 @@ function normalizeContextTagContainers(node: MystNode): void {
 
 /** Rewrites alert blockquotes, including optional titles, into MyST admonitions. */
 function expandGithubAlerts(text: string): string {
-  const lines = text.split("\n");
+  const lines = text.split(/\r?\n/u);
   const output: string[] = [];
   let fence: MarkdownFence | undefined;
 

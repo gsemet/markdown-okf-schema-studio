@@ -1152,7 +1152,8 @@ export function effectiveProperties(
   schema: Record<string, unknown>,
   frontmatter: Record<string, unknown> = {},
 ): EffectiveSchema {
-  const properties: Record<string, unknown> = {};
+  // Null prototype: a field named `constructor` or `toString` must not read an inherited member.
+  const properties: Record<string, unknown> = Object.create(null);
   const order: string[] = [];
   const required = new Set<string>();
   const nullable = new Set<string>();
@@ -1173,7 +1174,7 @@ export function effectiveProperties(
         branches.push(...composed);
       }
     }
-    if ("if" in record) {
+    if (Object.hasOwn(record, "if")) {
       let matches: boolean | undefined;
       try {
         matches = validateWithCachedValidator(record.if, frontmatter);
@@ -1189,7 +1190,7 @@ export function effectiveProperties(
         if (schemaAllowsNull(property)) {
           nullable.add(name);
         }
-        if (!(name in properties)) {
+        if (!Object.hasOwn(properties, name)) {
           order.push(name);
         }
         const existing = properties[name];
@@ -1219,7 +1220,7 @@ function enumsOf(property: unknown): string[] | null {
   if (Array.isArray(record.enum)) {
     values.push(...record.enum.map((item) => String(item)));
   }
-  if ("const" in record && record.const !== undefined && record.const !== null) {
+  if (Object.hasOwn(record, "const") && record.const !== undefined && record.const !== null) {
     values.push(String(record.const));
   }
   return values.length > 0 ? values : null;
@@ -1405,7 +1406,9 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
   }
 
   const effective = effectiveProperties(schema, frontmatter);
-  const missingRequiredFields = [...effective.required].filter((name) => !(name in frontmatter));
+  const missingRequiredFields = [...effective.required].filter(
+    (name) => !Object.hasOwn(frontmatter, name),
+  );
   const linkInspectionOptions: FileLinkInspectionOptions = {
     filePath: options.filePath,
     ...(options.bundleRoot ? { bundleRoot: options.bundleRoot } : {}),
@@ -1495,7 +1498,7 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
         doc: property ? docOf(property) : null,
         enums: property ? enumsOf(property) : null,
         issues: [...issues],
-        known: name in effective.properties,
+        known: Object.hasOwn(effective.properties, name),
         ...(effective.required.has(name) ? { required: true } : {}),
       });
     }
@@ -1582,12 +1585,12 @@ function fieldsFromYaml(
   };
   if (effective) {
     for (const name of effective.order) {
-      if (name in frontmatter) {
+      if (Object.hasOwn(frontmatter, name)) {
         emit(name, true);
       }
     }
     for (const name of Object.keys(frontmatter)) {
-      if (!(name in effective.properties)) {
+      if (!Object.hasOwn(effective.properties, name)) {
         emit(name, false);
       }
     }

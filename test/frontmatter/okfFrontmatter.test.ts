@@ -1397,3 +1397,34 @@ test("T41: beforeField on the first key inserts after leading comment lines", ()
   assert.ok(crlfPatch);
   assert.equal(crlf.slice(0, crlfPatch.start) + crlfPatch.text + crlf.slice(crlfPatch.end), '---\r\n# header\r\na: ""\r\ntitle: x\r\n---\r\n');
 });
+
+test("inherited Object.prototype names are not treated as present or declared fields", () => {
+  const fsRoot = makeSyntheticFs({
+    "_schema/note.schema.yaml": [
+      "type: object",
+      "properties:",
+      "  type: { type: string }",
+      "  constructor: { type: string }",
+      "  toString: { type: string }",
+      "required: [type, constructor, toString]",
+    ].join("\n"),
+    "docs/D.md": "---\ntype: note\n---\nBody.\n",
+  });
+  try {
+    const result = analyzeFrontmatter({
+      filePath: path.join(fsRoot.root, "docs/D.md"),
+      sourceText: "---\ntype: note\n---\nBody.\n",
+      stopDir: fsRoot.root,
+      strictAdditionalProperties: false,
+    });
+    assert.deepEqual(result.missingRequiredFields, ["constructor", "toString"]);
+    for (const name of ["constructor", "toString"]) {
+      assert.ok(result.fields.find((field) => field.name === name)?.issues.some(
+        (issue) => issue.severity === "error",
+      ));
+    }
+    assert.equal(Object.hasOwn(effectiveProperties({ properties: { a: {} } }).properties, "toString"), false);
+  } finally {
+    fs.rmSync(fsRoot.root, { recursive: true, force: true });
+  }
+});

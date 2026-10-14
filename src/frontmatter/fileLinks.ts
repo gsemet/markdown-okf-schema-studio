@@ -205,7 +205,7 @@ function iterAnnotations(
   }
   if (isRecord(schema.properties) && isRecord(value)) {
     for (const [name, child] of Object.entries(schema.properties)) {
-      if (name in value) {
+      if (Object.hasOwn(value, name)) {
         results.push(...iterAnnotations(
           child, value[name], [...pathParts, name], rootSchema, activeRefs,
         ));
