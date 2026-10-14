@@ -1,3 +1,5 @@
+import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
+
 export interface InsertionPlan {
   /** UTF-16 offset in the document text where the inserted text starts. */
   offset: number;
@@ -5,8 +7,6 @@ export interface InsertionPlan {
   suffix: string;
   lineEnding: string;
 }
-
-const FRONTMATTER = /^---\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/u;
 
 /** Where and how to insert a new block after `afterLine` (0 = start of the body). */
 export function planInsertion(text: string, afterLine: number): InsertionPlan | undefined {
@@ -16,7 +16,7 @@ export function planInsertion(text: string, afterLine: number): InsertionPlan | 
   const lineEnding = text.includes("\r\n") ? "\r\n" : "\n";
   let anchorLine = afterLine;
   if (afterLine === 0) {
-    const frontmatter = FRONTMATTER.exec(text);
+    const frontmatter = matchFrontmatterBlock(text);
     if (!frontmatter) {
       const firstBreak = text.search(/\r?\n/u);
       const firstLine = firstBreak === -1 ? text : text.slice(0, firstBreak);
@@ -28,7 +28,7 @@ export function planInsertion(text: string, afterLine: number): InsertionPlan | 
         lineEnding,
       };
     }
-    const closed = frontmatter[0].replace(/\r?\n$/u, "");
+    const closed = text.slice(0, frontmatter.length).replace(/\r?\n$/u, "");
     anchorLine = closed.split("\n").length;
   }
   // Locate the end of `anchorLine` (before its line break).

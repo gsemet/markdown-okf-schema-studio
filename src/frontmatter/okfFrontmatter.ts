@@ -272,28 +272,56 @@ function updateYamlSequence(
   });
 }
 
+/** The frontmatter block at the start of a document, with the offsets needed to patch it. */
+export interface FrontmatterBlock {
+  /** Length of the opening fence line, including its line break. */
+  openLength: number;
+  /** The YAML text between the fences, without the break before the closing fence. */
+  body: string;
+  /** Length of the whole block, up to and including the closing fence line. */
+  length: number;
+  lineEnding: "\n" | "\r\n";
+}
+
+/**
+ * The single frontmatter fence matcher. The closing `---` or `...` must stand on its own line, so
+ * a value ending in `...` or `---` does not close the block. An empty block (`---\n---`) is valid.
+ */
+const FRONTMATTER_FENCE = /^(---[ \t]*\r?\n)(?:([\s\S]*?)\r?\n)?(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/u;
+
+export function matchFrontmatterBlock(source: string): FrontmatterBlock | undefined {
+  const match = FRONTMATTER_FENCE.exec(source);
+  if (!match) return undefined;
+  return {
+    openLength: match[1].length,
+    body: match[2] ?? "",
+    length: match[0].length,
+    lineEnding: match[1].endsWith("\r\n") ? "\r\n" : "\n",
+  };
+}
+
 function createFrontmatterDocumentPatch(
   source: string,
   document: YamlDocument,
 ): FrontmatterFieldPatch | undefined {
-  const match = /^(---\r?\n)([\s\S]*?)(?:\r?\n)?(---|\.\.\.)[ \t]*(?:\r?\n|$)/u.exec(source);
+  const match = matchFrontmatterBlock(source);
   if (!match) return undefined;
-  const lineEnding = match[1].endsWith("\r\n") ? "\r\n" : "\n";
+  const lineEnding = match.lineEnding;
   const text = document
     .toString({ lineWidth: 0 })
     .replace(/\r\n|\r|\n/gu, lineEnding)
     .replace(/(?:\r\n|\r|\n)$/u, "");
-  const start = match[1].length;
-  return { start, end: start + match[2].length, text };
+  const start = match.openLength;
+  return { start, end: start + match.body.length, text };
 }
 
 /** Extracts the frontmatter block the way MyST does: leading `---` fence. */
 export function extractFrontmatter(source: string): FrontmatterExtraction {
-  const match = /^---\r?\n([\s\S]*?)(?:\r?\n)?(?:---|\.\.\.)\s*(?:\r?\n|$)/u.exec(source);
+  const match = matchFrontmatterBlock(source);
   if (!match) {
     return { present: false, text: "", frontmatter: undefined, document: undefined, error: undefined };
   }
-  const text = match[1];
+  const text = match.body;
   try {
     const document = parseDocument(text, { keepSourceTokens: true });
     if (document.errors.length > 0) {
@@ -540,11 +568,11 @@ function minimalPairPatch(
   expected: Record<string, unknown>,
   plainScalar = false,
 ): FrontmatterFieldPatch | undefined {
-  const fence = /^---\r?\n/u.exec(source);
+  const fence = matchFrontmatterBlock(source);
   if (!fence) return undefined;
   const text = extraction.text;
-  const yamlStart = fence[0].length;
-  const lineEnding = fence[0].endsWith("\r\n") ? "\r\n" : "\n";
+  const yamlStart = fence.openLength;
+  const lineEnding = fence.lineEnding;
 
   // The original document gives the source ranges and styles; `pair` holds the new values.
   const original = parseDocument(text, { keepSourceTokens: true });
@@ -604,10 +632,10 @@ function minimalRenamePatch(
   currentName: string,
   newName: string,
 ): FrontmatterFieldPatch | undefined {
-  const fence = /^---\r?\n/u.exec(source);
+  const fence = matchFrontmatterBlock(source);
   if (!fence || !extraction.frontmatter) return undefined;
   const text = extraction.text;
-  const yamlStart = fence[0].length;
+  const yamlStart = fence.openLength;
   const original = parseDocument(text, { keepSourceTokens: true });
   const root = original.contents;
   if (!isMap(root)) return undefined;
@@ -631,10 +659,10 @@ function minimalRemovePatch(
   extraction: FrontmatterExtraction,
   name: string,
 ): FrontmatterFieldPatch | undefined {
-  const fence = /^---\r?\n/u.exec(source);
+  const fence = matchFrontmatterBlock(source);
   if (!fence || !extraction.frontmatter) return undefined;
   const text = extraction.text;
-  const yamlStart = fence[0].length;
+  const yamlStart = fence.openLength;
   const original = parseDocument(text, { keepSourceTokens: true });
   const root = original.contents;
   if (!isMap(root)) return undefined;
@@ -674,11 +702,11 @@ function minimalAddPatch(
   afterField: string | undefined,
   beforeField?: string,
 ): FrontmatterFieldPatch | undefined {
-  const fence = /^---\r?\n/u.exec(source);
+  const fence = matchFrontmatterBlock(source);
   if (!fence) return undefined;
   const text = extraction.text;
-  const yamlStart = fence[0].length;
-  const lineEnding = fence[0].endsWith("\r\n") ? "\r\n" : "\n";
+  const yamlStart = fence.openLength;
+  const lineEnding = fence.lineEnding;
   const base = text === "" ? {} : extraction.frontmatter;
   if (!base) return undefined;
   const original = parseDocument(text, { keepSourceTokens: true });
@@ -783,14 +811,53 @@ export function frontmatterAddPlacement(
   return next !== undefined ? { beforeField: next } : {};
 }
 
+/**
+ * Refuses a patch whose patched document does not parse to exactly the expected key set: a key of
+ * the original block is missing, duplicated, or the block no longer parses.
+ */
+export function guardedPatch(
+  source: string,
+  patch: FrontmatterFieldPatch | undefined,
+  expectedKeys: readonly string[],
+): FrontmatterFieldPatch | undefined {
+  if (!patch) return undefined;
+  const patched = source.slice(0, patch.start) + patch.text + source.slice(patch.end);
+  const after = extractFrontmatter(patched);
+  const empty = after.present && after.text.trim() === "" && expectedKeys.length === 0;
+  if (empty) return patch;
+  if (after.error || !after.frontmatter) return undefined;
+  const keys = Object.keys(after.frontmatter);
+  const same = keys.length === expectedKeys.length
+    && expectedKeys.every((key) => keys.includes(key));
+  return same ? patch : undefined;
+}
+
+function originalKeys(source: string): string[] {
+  return Object.keys(extractFrontmatter(source).frontmatter ?? {});
+}
+
 export function createFrontmatterFieldPatch(
   source: string,
   name: string,
   value: unknown,
   options?: { afterField?: string; beforeField?: string; plainScalar?: boolean },
 ): FrontmatterFieldPatch | undefined {
+  const keys = originalKeys(source);
+  return guardedPatch(
+    source,
+    buildFrontmatterFieldPatch(source, name, value, options),
+    keys.includes(name) ? keys : [...keys, name],
+  );
+}
+
+function buildFrontmatterFieldPatch(
+  source: string,
+  name: string,
+  value: unknown,
+  options?: { afterField?: string; beforeField?: string; plainScalar?: boolean },
+): FrontmatterFieldPatch | undefined {
   const extraction = extractFrontmatter(source);
-  const match = /^(---\r?\n)([\s\S]*?)(?:\r?\n)?(---|\.\.\.)[ \t]*(?:\r?\n|$)/u.exec(source);
+  const match = matchFrontmatterBlock(source);
   // An empty frontmatter block parses to null, which extractFrontmatter reports as an error.
   const emptyFrontmatter = extraction.present && extraction.text === "";
   if (!name || !extraction.document || (extraction.error && !emptyFrontmatter) || !match) {
@@ -858,6 +925,18 @@ export function createFrontmatterFieldRenamePatch(
   currentName: string,
   newName: string,
 ): FrontmatterFieldPatch | undefined {
+  return guardedPatch(
+    source,
+    buildFrontmatterFieldRenamePatch(source, currentName, newName),
+    originalKeys(source).map((key) => (key === currentName ? newName : key)),
+  );
+}
+
+function buildFrontmatterFieldRenamePatch(
+  source: string,
+  currentName: string,
+  newName: string,
+): FrontmatterFieldPatch | undefined {
   const extraction = extractFrontmatter(source);
   if (
     !currentName
@@ -885,6 +964,17 @@ export function createFrontmatterFieldRenamePatch(
 }
 
 export function createFrontmatterFieldRemovePatch(
+  source: string,
+  name: string,
+): FrontmatterFieldPatch | undefined {
+  return guardedPatch(
+    source,
+    buildFrontmatterFieldRemovePatch(source, name),
+    originalKeys(source).filter((key) => key !== name),
+  );
+}
+
+function buildFrontmatterFieldRemovePatch(
   source: string,
   name: string,
 ): FrontmatterFieldPatch | undefined {

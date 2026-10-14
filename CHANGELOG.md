@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fixed frontmatter values ending in `...` or `---` closing the block early, which dropped keys and
+  made properties-table edits corrupt the file. Edits that would lose or duplicate a key are now
+  refused.
 - Fixed GitHub alerts (`> [!NOTE]`) rendering as plain blockquotes in CRLF documents.
 - Fixed schema fields named like `Object.prototype` members (`constructor`, `toString`) being
   treated as present.

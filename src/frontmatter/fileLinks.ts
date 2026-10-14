@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { parseDocument } from "yaml";
 import { markdownMarkerLine } from "../navigation/previewNavigation";
+import { matchFrontmatterBlock } from "./okfFrontmatter";
 import { getCachedBranchValidator } from "./schemaValidator";
 import {
   getCachedMarkdownStemIndex,
@@ -354,7 +355,7 @@ function linkedFileDetails(
     && !annotation.showLineNumber) return {};
   try {
     const source = fs.readFileSync(targetPath, "utf8");
-    const yaml = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/u.exec(source)?.[1];
+    const yaml = matchFrontmatterBlock(source.replace(/^\uFEFF/u, ""))?.body;
     const document = yaml === undefined ? undefined : parseDocument(yaml);
     const metadata: unknown = document && document.errors.length === 0 ? document.toJS() : undefined;
     const fields = (names: readonly string[] | undefined): Record<string, string> => {

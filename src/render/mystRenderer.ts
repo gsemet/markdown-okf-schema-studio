@@ -1,6 +1,6 @@
 import { html as parse5Html, parseFragment, serialize } from "parse5";
 
-import { extractFrontmatter } from "../frontmatter/okfFrontmatter";
+import { extractFrontmatter, matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { sanitizeTableStyle } from "../security/html-sanitizer";
 import {
   type CheckboxMarker,
@@ -1349,6 +1349,6 @@ function stripFrontmatter(source: string): string {
   if (!extraction.present || !extraction.text) {
     return source;
   }
-  const match = /^---\r?\n[\s\S]*?(?:\r?\n)?(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/u.exec(source);
-  return match ? source.slice(match[0].length) : source;
+  const match = matchFrontmatterBlock(source);
+  return match ? source.slice(match.length) : source;
 }
