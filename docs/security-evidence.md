@@ -41,17 +41,12 @@ scheme, canonical-root, and symlink validation.
 
 ## Package Supply Chain
 
-The nested package uses the checked-in `.npmrc` with:
 
-```text
-registry=https://artifactory.tls.renault.fr/artifactory/api/npm/npm/
-noproxy=artifactory.tls.renault.fr,localhost,127.0.0.1
-strict-ssl=false
-```
+
+
 
 `npm ci` ran with Node v24.21.0 and installed 317 packages with zero reported vulnerabilities. The
-lock audit at `out/reports/security/` found 325 resolved package entries, one
-resolved host (`artifactory.tls.renault.fr`), zero non-Artifactory resolved URLs, zero credential
+lock audit at `out/reports/security/` found 325 resolved package entries, zero credential
 URLs, and zero raw public-registry matches. Funding and homepage URLs were not classified as package
 registries.
 
