@@ -41,8 +41,18 @@ test("rejects a message the validator refuses", () => {
   assert.equal(check({ ...valid, text: "no" }), false);
 });
 
-test("the shipped registry accepts nothing yet", () => {
+test("the shipped registry rejects an unregistered type", () => {
   assert.equal(isRegisteredPreviewMessage(valid), false);
+});
+
+test("previewCopyText accepts text up to 1 MB and rejects anything else", () => {
+  const copy = { type: "previewCopyText", documentId: "doc", documentVersion: 1, requestId: 1, text: "code" };
+  assert.equal(isRegisteredPreviewMessage(copy), true);
+  assert.equal(isRegisteredPreviewMessage({ ...copy, text: "" }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...copy, text: "x".repeat(1_000_000) }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...copy, text: "x".repeat(1_000_001) }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...copy, text: 5 }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...copy, text: undefined }), false);
 });
 
 test("field helpers respect their boundaries", () => {

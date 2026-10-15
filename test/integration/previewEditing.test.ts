@@ -1351,6 +1351,15 @@ export async function run(): Promise<void> {
       await waitFor("the changed include to render after the edit ends", () =>
         getActivePreviewForTests()?.html.includes("Changed lock include text") ?? false);
     }
+    // The copy button of a code block asks the host to put the raw code on the clipboard.
+    const copyText = "const answer = 42;\n\tindented \u00e9\n";
+    await vscode.env.clipboard.writeText("");
+    await sendPreviewMessageForTests({
+      type: "previewCopyText",
+      ...currentContext(document),
+      text: copyText,
+    });
+    assert.equal(await vscode.env.clipboard.readText(), copyText);
     const referenceDirectory = path.join(directory, "references");
     fs.mkdirSync(referenceDirectory, { recursive: true });
     const referencePath = path.join(referenceDirectory, "PROPERTIES.md");

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Pointing at any code block shows a copy button at its top right; one click copies the raw code and
+  the icon turns into a check mark for a moment.
 - Every setting now explains what it does and what each value changes, in a grouped order; the
   scroll and PlantUML jar path descriptions are corrected.
 

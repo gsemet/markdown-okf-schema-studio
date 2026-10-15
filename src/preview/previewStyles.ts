@@ -345,6 +345,39 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   stroke-width: 1.7;
 }
 
+[data-sphinx-preview-code-copy] {
+  position: fixed;
+  z-index: 1050;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.45));
+  border-radius: 4px;
+  background: var(--vscode-editorWidget-background, #252526);
+  color: var(--vscode-icon-foreground, var(--vscode-editor-foreground, inherit));
+  cursor: pointer;
+}
+
+[data-sphinx-preview-code-copy][hidden] {
+  display: none;
+}
+
+[data-sphinx-preview-code-copy]:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+}
+
+[data-sphinx-preview-code-copy] > svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
 [data-sphinx-preview-toolbar] button:disabled {
   cursor: not-allowed;
   opacity: 0.5;

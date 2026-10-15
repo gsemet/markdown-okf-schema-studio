@@ -56,6 +56,11 @@ export function createPreviewMessageChecker(
   };
 }
 
-export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {};
+const MAX_COPY_TEXT_LENGTH = 1_000_000;
+
+export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
+  // Raw code of a code block, copied to the clipboard by the host.
+  previewCopyText: (message) => isBoundedString(message.text, MAX_COPY_TEXT_LENGTH),
+};
 
 export const isRegisteredPreviewMessage = createPreviewMessageChecker(REGISTERED_PREVIEW_MESSAGES);
