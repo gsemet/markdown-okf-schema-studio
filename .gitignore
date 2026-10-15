@@ -13,3 +13,4 @@ __pycache__/
 .npmrc
 npm-debug.log*
 .playwright-*/
+/test/integration/fixtures/frontmatter-edit-*/

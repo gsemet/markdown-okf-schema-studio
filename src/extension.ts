@@ -2620,6 +2620,11 @@ function refreshReferencedPath(preview: ActivePreview, filePath: string): void {
     }
     return;
   }
+  if (preview.document && [...preview.linkedTargetWatchers?.keys() ?? []]
+    .some((target) => canonicalPath(target) === candidate)) {
+    // Per-target watchers arm asynchronously; the preview-wide watcher backs them up (debounced).
+    scheduleLinkEnrichment(preview, preview.documentUri, preview.document.version);
+  }
   if (!preview.queue.dependsOn(filePath) || !preview.document || !sourceAvailable(preview)) {
     return;
   }

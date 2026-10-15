@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1 - 2026-10-15
+
+- Linked-file metadata in the properties table refreshes reliably when a linked target is saved,
+  even if the per-target file watcher is not armed yet.
+- Releases deploy GitHub Pages together with the VS Code Marketplace publication.
+- The UI fixes for Windows from 0.3.0, which was never published, ship in this release.
+
 ## 0.2.1 - 2026-10-15
 
 - Release and GitHub Pages deployments now run from version tags matching the package version.
