@@ -254,6 +254,13 @@ test("the block editor status is not pushed up by the paragraph margin", () => {
   );
 });
 
+test("the block editor status uses compact text", () => {
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /\.sphinx-preview-block-editor \[data-sphinx-preview-edit-status\]\s*\{[^}]*font-size: 0\.8em;/u,
+  );
+});
+
 test("active paragraph editors share the rendered paragraph spacing", () => {
   assert.match(
     PREVIEW_THEME_CSS,

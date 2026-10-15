@@ -29,10 +29,11 @@ function contrast(foreground: string, background: string): number {
   return (light + 0.05) / (dark + 0.05);
 }
 
-test("cream is an accepted preview theme mode with its own toolbar icon", () => {
+test("cream is an accepted preview theme mode with its own coffee toolbar icon", () => {
   assert.equal(isPreviewThemeMode("cream"), true);
   assert.equal(isPreviewThemeMode("sepia"), false);
   assert.match(renderPreviewToolbar(), /data-theme-icon="cream"/u);
+  assert.match(renderPreviewToolbar(), /M8 6c0-1\.2 1-1\.2 1-2\.5/u);
   assert.match(PREVIEW_THEME_CSS, /data-theme-mode="cream"\] \[data-theme-icon="cream"\]/u);
 });
 
