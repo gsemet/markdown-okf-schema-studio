@@ -1,4 +1,4 @@
-"""Update npm versions using Python Commitizen, without committing or tagging."""
+"""Update npm versions and create a signed-off version commit without tagging."""
 
 from __future__ import annotations
 
@@ -120,11 +120,26 @@ def main() -> int:
             raise ValueError(f"Version must be newer than {baseline}: {next_version}")
         if git("tag", "--list", f"v{next_version}"):
             raise ValueError(f"Tag v{next_version} already exists")
+        if git("status", "--porcelain", "--", "package.json", "package-lock.json"):
+            raise ValueError(
+                "Commit or stash existing npm manifest edits before changing the version"
+            )
+        git("var", "GIT_AUTHOR_IDENT")
+        git("var", "GIT_COMMITTER_IDENT")
         NpmProvider(read_cfg()).set_version(next_version)
         print(f"Updated npm versions: {current} -> {next_version}")
-        print(
-            "Review and commit package.json and package-lock.json; CI creates the tag after merge."
+        git(
+            "commit",
+            "--only",
+            "-s",
+            "-m",
+            f"chore: version {next_version}",
+            "--",
+            "package.json",
+            "package-lock.json",
         )
+        print(f"Created signed-off commit: chore: version {next_version}")
+        print("CI creates the tag after merge.")
         return 0
     except (ValueError, subprocess.CalledProcessError) as error:
         print(getattr(error, "stderr", None) or str(error), file=sys.stderr)
