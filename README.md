@@ -1,5 +1,7 @@
 # Markdown OKF-Schema Studio
 
+![Markdown OKF-Schema Studio logo](images/logo.png)
+
 [![CI](https://github.com/gsemet/markdown-okf-schema-studio/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/gsemet/markdown-okf-schema-studio/actions/workflows/ci.yml) [![Latest release](https://img.shields.io/github/v/release/gsemet/markdown-okf-schema-studio?display_name=tag&sort=semver)](https://github.com/gsemet/markdown-okf-schema-studio/releases) [![License](https://img.shields.io/github/license/gsemet/markdown-okf-schema-studio)](LICENSE)
 
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio) | [Screenshot report/gallery](https://gsemet.github.io/markdown-okf-schema-studio/gallery.html) | [Reports index](https://gsemet.github.io/markdown-okf-schema-studio/reports/)
@@ -15,13 +17,17 @@ Markdown flavours and extensions:
 
 ## What This Extension Adds
 
+| Titled and nested MyST admonitions | Mermaid diagrams and captioned MyST figures |
+| --- | --- |
+| [![A titled tip containing a nested warning admonition](images/readme/myst-admonitions.png)](images/38-edit-mode-remembered.png) | [![A Mermaid flowchart followed by a MyST figure with a local SVG and caption](images/readme/myst-diagrams-and-figure.png)](images/38-edit-mode-remembered.png) |
+
 | Schema-aware properties | Direct metadata editing | Inline Markdown editing |
 | --- | --- | --- |
 | [![JSON Schema-aware OKF properties table](images/readme/schema-properties.png)](images/readme/schema-properties.png) | [![Editing an OKF frontmatter property in place](images/readme/edit-frontmatter.png)](images/readme/edit-frontmatter.png) | [![Edit affordance on rendered Markdown](images/readme/inline-editing.png)](images/readme/inline-editing.png) |
 
 - **MyST rendering:** directives, admonitions, tables, math, Mermaid, PlantUML, images, media,
   anchors, and permitted external links render in the preview.
-- **OKF-Schema properties:** frontmatter is shown as a schema-aware properties table,
+- **OpenKnowledge Format and OKF-Schema properties:** frontmatter field can be shown as a schema-aware properties table,
   with validation diagnostics, enum controls, typed scalar editors,
   and YAML editors for arrays and objects.
 - **Inline editing:** click a rendered block to edit its source Markdown. Save with Done
@@ -54,15 +60,13 @@ remembered per workspace. These three captures use the same document, viewport, 
 
 ## See It In Use
 
-These captures are real Studio views from the end-to-end campaign, showing an edited paragraph,
-the edit hover affordance, and a white-background preview with nested MyST admonitions,
-a Mermaid flowchart, and a local SVG.
+These captures are real Studio views from the end-to-end campaign. The fleet-dispatch document
+shows Markdown source beside nested MyST admonitions, a Mermaid flowchart, and a captioned SVG
+figure. The second capture shows the edit hover affordance.
 
-[![A paragraph edited in the Studio side preview and committed to the Markdown buffer](images/01-paragraph-blur-commit.png)](images/01-paragraph-blur-commit.png)
+[![Fleet-dispatch Markdown source beside a white Studio preview with nested MyST admonitions, a Mermaid flowchart, and a captioned SVG figure](images/38-edit-mode-remembered.png)](images/38-edit-mode-remembered.png)
 
 [![The Studio edit affordance revealed by hovering over rendered content](images/21-edit-hover.png)](images/21-edit-hover.png)
-
-[![White Studio preview with nested MyST admonitions, a Mermaid flowchart, and an SVG fleet diagram](images/38-edit-mode-remembered.png)](images/38-edit-mode-remembered.png)
 
 ## Install
 

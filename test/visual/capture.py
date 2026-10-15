@@ -1800,11 +1800,15 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
       const editorSize = parseFloat(getComputedStyle(document.body).fontSize);
       return { sTop: s.top, sBottom: s.bottom, sRight: s.right, sLeft: s.left, bTop: b.top,
         bBottom: b.bottom, bLeft: b.left, bRight: b.right, rRight: r.right, area: parseFloat(area),
+        statusSize: parseFloat(getComputedStyle(status).fontSize),
+        statusParentSize: parseFloat(getComputedStyle(status.parentElement).fontSize),
         body: editorSize };
     }""")
     if layout is None:
       failures.append(Failure(page_name, "status line is not inside the Done/Cancel row"))
     else:
+      if abs(layout["statusSize"] / layout["statusParentSize"] - 0.75) > 0.01:
+        failures.append(Failure(page_name, f"status text is not 75% of its parent font size: {layout}"))
       sideBySide = layout["sBottom"] > layout["bTop"] and layout["sTop"] < layout["bBottom"]
       if sideBySide and layout["sRight"] > layout["bLeft"] + 0.5:
         failures.append(Failure(page_name, f"status text overlaps the buttons: {layout}"))
@@ -3148,6 +3152,46 @@ def check_tooltip_contrast(page: Page, scenario: dict, failures: list[Failure]) 
         page.mouse.move(scenario["width"] - 1, scenario["height"] - 1)
 
 
+def check_mermaid_theme_switch(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  if scenario["id"] != "mermaid-map-dark":
+    return
+  original_mode = page.locator("html").get_attribute("data-sphinx-preview-theme-mode")
+  original_labels = None
+  for mode in ("dark", "white", "cream", original_mode):
+    previous = page.locator("img.myst-mermaid-image").first.get_attribute("src")
+    page.evaluate("mode => document.documentElement.setAttribute('data-sphinx-preview-theme-mode', mode)", mode)
+    page.wait_for_function(
+      "previous => { const image = document.querySelector('img.myst-mermaid-image'); "
+      "return image && image.src !== previous && image.complete && image.naturalWidth > 0; }",
+      arg=previous,
+    )
+    state = page.evaluate("""() => {
+      const image = document.querySelector('img.myst-mermaid-image');
+      const svg = new DOMParser().parseFromString(decodeURIComponent(image.src.split(',')[1]), 'image/svg+xml');
+      const host = document.createElement('div');
+      host.style.cssText = 'position:fixed;left:-10000px;visibility:hidden';
+      host.appendChild(document.importNode(svg.documentElement, true));
+      document.body.appendChild(host);
+      const expected = document.createElement('span');
+      expected.style.backgroundColor = getComputedStyle(document.body).getPropertyValue('--vscode-textCodeBlock-background');
+      host.appendChild(expected);
+      const state = {
+        expected: getComputedStyle(expected).backgroundColor,
+        fills: [...host.querySelectorAll('.node rect, .node polygon, .node circle, .node path')]
+          .filter(node => !node.style.fill).map(node => getComputedStyle(node).fill),
+        labels: [...host.querySelectorAll('.nodeLabel')].map(node => node.textContent),
+      };
+      host.remove();
+      return state;
+    }""")
+    if not state["fills"] or any(fill != state["expected"] for fill in state["fills"]):
+      failures.append(Failure(scenario["page"], f"Mermaid theme {mode} node colors do not match preview: {state}"))
+    if original_labels is None:
+      original_labels = state["labels"]
+    if not state["labels"] or state["labels"] != original_labels:
+      failures.append(Failure(scenario["page"], f"Mermaid theme {mode} lost diagram labels"))
+
+
 def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: dict) -> str:
   expected_mermaid = count_mermaid_blocks(scenario["fixture"])
   if expected_mermaid:
@@ -3212,7 +3256,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   ):
     checks = checks.replace(placeholder, str(value))
   for check in (
-    check_forced_white_theme, check_forced_cream_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
+    check_mermaid_theme_switch, check_forced_white_theme, check_forced_cream_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
     check_generic_skill_frontmatter, check_okf_schema_rendering, check_preview_toolbar,
     check_math_rendering, check_bare_urls, check_inline_code, check_inline_code_narrow, check_content_contracts,
   ):

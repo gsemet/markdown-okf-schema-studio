@@ -257,7 +257,7 @@ test("the block editor status is not pushed up by the paragraph margin", () => {
 test("the block editor status uses compact text", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-block-editor \[data-sphinx-preview-edit-status\]\s*\{[^}]*font-size: 0\.8em;/u,
+    /#sphinx-myst-preview-content \.sphinx-preview-block-editor \.sphinx-preview-block-editor-actions \[data-sphinx-preview-edit-status\]\s*\{[^}]*font-size: 0\.75em;[^}]*line-height: 1\.4;/u,
   );
 });
 

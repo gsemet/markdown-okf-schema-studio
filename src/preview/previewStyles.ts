@@ -565,6 +565,8 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   align-self: center;
   min-width: 0;
   margin: 0;
+  font-size: 0.75em;
+  line-height: 1.4;
 }
 
 .sphinx-preview-block-editor-buttons button {
@@ -586,7 +588,7 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
 .sphinx-preview-block-editor [data-sphinx-preview-edit-status] {
   margin: 6px 0 0;
   color: var(--vscode-descriptionForeground, GrayText);
-  font-size: 0.8em;
+  font-size: 0.75em;
 }
 
 [data-sphinx-preview-table-cell-selected="true"] {

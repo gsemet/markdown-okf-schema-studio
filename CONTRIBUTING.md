@@ -84,6 +84,11 @@ image on the right; on narrow screens the sidecar appears above the image. Histo
 remain visible with their original metadata and are not certified as part of the latest passing
 campaign.
 
+The shared logo source is [images/logo.svg](images/logo.svg).
+After editing it, run `fnm exec -- npm run logo:generate` to regenerate the PNG used by the README
+and VS Code Marketplace, and the Sphinx favicon. Chromium must be installed through `just dev`.
+The generated site uses the SVG directly for its header and favicon.
+
 The static-site URL tests cover rendered Markdown documents, the repository's `out/reports/` path,
 copied assets with query and fragment suffixes, and absolute URLs. The site publisher maps local
 report artifacts into the published `reports/` tree without relativizing external URLs.
@@ -137,6 +142,16 @@ The artifact is written to:
 ```text
 out/reports/package/markdown-okf-schema-studio.vsix
 ```
+
+Packaging uses `vsce` to rewrite relative README links only inside the VSIX. Image URLs target
+`https://media.githubusercontent.com/media/gsemet/markdown-okf-schema-studio/v<VERSION>/`, and document
+links target the same tag on GitHub. The source README keeps its relative paths for GitHub.
+Commit the README images before creating the matching release tag: Marketplace loads them
+anonymously from GitHub, not from the images bundled inside the VSIX. Local packages whose tag
+has not been pushed can therefore show broken images in the extension details page.
+Screenshots use Git LFS: the media endpoint serves image bytes rather than raw LFS pointer files.
+Push the LFS objects along with the tag. Publishing a new version containing the images is required
+to repair an already published release.
 
 Install or update the default VS Code profile with:
 

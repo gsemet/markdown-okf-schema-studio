@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title description">
+  <title id="title">Frontmatter Document - Markdown OKF-Schema Studio</title>
+  <desc id="description">A teal document with orange YAML delimiters and metadata above the MyST M and brace. Proposal using the MyST favicon from https://github.com/jupyter-book/mystmd/blob/main/docs/public/favicon.svg; not an endorsement by MyST.</desc>
+  <defs>
+    <symbol id="myst" viewBox="0 0 81.78 73.9">
+      <path fill="#25383d" d="M14.66,41.7V38.09l4.67-.79V4.44l-4.67-.8V0h12.2L40.3,31.66h.17L53.47,0H66.05V3.64l-4.67.8V37.3l4.67.79V41.7h-15V38.09L56,37.3V7.7l-.15,0L42.3,40.22H38.55l-14-32.49-.14,0,.18,17.43V37.3l5.05.79V41.7Z"/>
+      <path fill="#f37726" d="M37.88,73.9q0-8.82-10.13-8.82H19.33q-7.83,0-12.53-3.79T0,50.25l4.8-1.63q2.7,8.46,13.78,8.75h9.17q9.63,0,13.13,7.53Q44.3,57.37,54,57.37h8.45q11.76,0,14.55-8.72l4.78,1.6Q79.71,57.61,75,61.33T62.63,65.08H53.88q-10,0-10,8.82"/>
+    </symbol>
+  </defs>
+  <path d="M56 16h116l36 36v172a16 16 0 0 1-16 16H56a16 16 0 0 1-16-16V32a16 16 0 0 1 16-16Z" fill="#f4f8f7" stroke="#0b5563" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M172 16v36h36" fill="#d5e7e7" stroke="#0b5563" stroke-width="8" stroke-linejoin="round"/>
+  <g fill="none" stroke="#f37726" stroke-width="7" stroke-linecap="round">
+    <path d="M65 48h12m12 0h12m12 0h12M65 116h12m12 0h12m12 0h12"/>
+  </g>
+  <g fill="none" stroke="#0b5563" stroke-width="7" stroke-linecap="round">
+    <path d="M65 70h31m18 0h42M65 93h43m18 0h57"/>
+  </g>
+  <g fill="#f37726">
+    <circle cx="104" cy="67" r="2"/><circle cx="104" cy="74" r="2"/>
+    <circle cx="117" cy="90" r="2"/><circle cx="117" cy="97" r="2"/>
+  </g>
+  <use href="#myst" x="80" y="139" width="96" height="87"/>
+</svg>

@@ -4,6 +4,7 @@
   "description": "Schema-aware Markdown editor and live preview for OKF bundles.",
   "version": "0.1.1",
   "publisher": "GaetanSemet",
+  "icon": "images/logo.png",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -183,7 +184,8 @@
     "gallery:generate": "npm run compile && node scripts/generate-gallery.mjs",
     "site:gallery": "npm run gallery:generate",
     "site": "npm run compile && node out/test/site/buildSite.js",
-    "package": "npm run compile && npm run bundle && mkdir -p out/reports/package && vsce package --out out/reports/package/markdown-okf-schema-studio.vsix --skip-license --baseContentUrl https://github.com/gsemet/markdown-okf-schema-studio/blob/main/ --baseImagesUrl https://raw.githubusercontent.com/gsemet/markdown-okf-schema-studio/main/"
+    "logo:generate": "node scripts/generate-logo.mjs",
+    "package": "npm run compile && npm run bundle && node scripts/package-extension.mjs"
   },
   "dependencies": {
     "ajv": "^8.20.0",
