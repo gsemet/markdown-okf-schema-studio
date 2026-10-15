@@ -60,8 +60,11 @@ interface MystNode {
   url?: string;
 }
 
+/** Parser options shared by every `mystParse` call so all parse sites agree. */
+const MYST_PARSE_OPTIONS = { extensions: { strikethrough: true } };
+
 interface MystEngine {
-  mystParse: (source: string) => MystNode;
+  mystParse: (source: string, options?: typeof MYST_PARSE_OPTIONS) => MystNode;
   mystToHtml: (ast: MystNode) => string;
 }
 
@@ -339,7 +342,7 @@ function splitGroupedContextTagHtml(
   const sourceLine = node.position?.start?.line;
   const endLine = node.position?.end?.line
     ?? (sourceLine === undefined ? undefined : sourceLine + lines.length - 1);
-  const body = mystParse(expandGithubAlerts(lines.slice(1, -1).join("\n")));
+  const body = mystParse(expandGithubAlerts(lines.slice(1, -1).join("\n")), MYST_PARSE_OPTIONS);
   repairGroupedContextTagHtml(body, mystParse);
   if (sourceLine !== undefined) {
     offsetNodeLines(body, sourceLine);
@@ -749,7 +752,7 @@ function expandIncludes(
       dependencies.add(included.path);
       let parsedAst = budget.parsed.get(included.path);
       if (!parsedAst) {
-        parsedAst = mystParse(expandGithubAlerts(stripFrontmatter(included.source)));
+        parsedAst = mystParse(expandGithubAlerts(stripFrontmatter(included.source)), MYST_PARSE_OPTIONS);
         budget.parsed.set(included.path, parsedAst);
       }
       // The expansion below mutates the tree, so every use works on its own copy.
@@ -1233,7 +1236,7 @@ function expandVersionAdmonitions(
     const name = child.name?.toLowerCase();
     const title = name ? VERSION_ADMONITION_TITLES[name] : undefined;
     if (child.type === "mystDirective" && name && title) {
-      const body = mystParse(child.value ?? "");
+      const body = mystParse(child.value ?? "", MYST_PARSE_OPTIONS);
       offsetNodeLines(body, child.position?.start?.line ?? 0);
       child.type = "admonition";
       child.kind = name;
@@ -1477,7 +1480,7 @@ export async function renderMyst(
   const removedPrefix = source.slice(0, source.length - markdown.length);
   const lineOffset = removedPrefix.match(/\r\n|\r|\n/gu)?.length ?? 0;
   const checkboxes = prepareCheckboxMarkers(markdown, lineOffset + 1);
-  const ast = mystParse(expandGithubAlerts(checkboxes.text));
+  const ast = mystParse(expandGithubAlerts(checkboxes.text), MYST_PARSE_OPTIONS);
   shiftSourcePositions(ast, lineOffset);
   repairGroupedContextTagHtml(ast, mystParse);
   if (context?.sourcePath) {

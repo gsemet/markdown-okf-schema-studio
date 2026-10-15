@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `~~text~~` now renders struck through in the preview, like on GitHub.
 - Editing a block that comes from an included file now opens the `{include}` directive in the
   host document instead of unrelated lines.
 - Pointing at any code block shows a copy button at its top right; one click copies the raw code and
