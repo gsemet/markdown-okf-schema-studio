@@ -9,6 +9,7 @@ export const {
   EDITOR_VIEW_TYPE,
   getActivePreviewForTests,
   getActivePreviewPanelForTests,
+  getLivePreviewRolesForTests,
   PANEL_VIEW_TYPE,
   REFRESH_COMMAND_ID,
   resetPreviewThemeModeForTests,

@@ -6,6 +6,7 @@ import {
   disposeActivePreviewForTests,
   deserializePreviewPanelForTests,
   getActivePreviewForTests,
+  getLivePreviewRolesForTests,
   PANEL_VIEW_TYPE,
 } from "./extensionApi";
 
@@ -79,5 +80,38 @@ export async function run(): Promise<void> {
   } finally {
     disposeActivePreviewForTests();
     missingPanel.dispose();
+  }
+
+  // STAB-05: two restored panels coexist; each keeps a live session and only the newest follows.
+  const firstPanel = vscode.window.createWebviewPanel(
+    PANEL_VIEW_TYPE,
+    "Restored one",
+    vscode.ViewColumn.Beside,
+    { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] },
+  );
+  const secondPanel = vscode.window.createWebviewPanel(
+    PANEL_VIEW_TYPE,
+    "Restored two",
+    vscode.ViewColumn.Beside,
+    { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] },
+  );
+  try {
+    await deserializePreviewPanelForTests(firstPanel, {
+      documentId: document.uri.toString(),
+      sourceFile: fixturePath,
+    });
+    await deserializePreviewPanelForTests(secondPanel, {
+      documentId: document.uri.toString(),
+      sourceFile: fixturePath,
+    });
+    const roles = getLivePreviewRolesForTests();
+    assert.equal(roles.length, 2, "both restored panels keep a live preview session");
+    assert.deepEqual(roles.map((role) => role.followsActiveEditor), [false, true]);
+    assert.doesNotMatch(roles[0].title, /^Studio/u, "the older panel is a fixed preview");
+    assert.match(roles[1].title, /^Studio/u);
+  } finally {
+    disposeActivePreviewForTests();
+    firstPanel.dispose();
+    secondPanel.dispose();
   }
 }

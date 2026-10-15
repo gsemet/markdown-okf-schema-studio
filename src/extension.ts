@@ -76,6 +76,13 @@ import {
   setRenderOverrideForTests,
 } from "./render/renderPipeline";
 import { injectPlantUmlDiagrams } from "./render/plantUmlRenderer";
+import {
+  BoundedMap,
+  loadCollapsedMap,
+  MAX_DOCUMENT_STATES,
+  migrateLegacyCollapsedKeys,
+  saveCollapsedMap,
+} from "./state/boundedState";
 import { EditLock, isUnchangedSave } from "./state/editLock";
 import { preloadMystEngine } from "./render/mystRenderer";
 import { createNonce } from "./security/csp";
@@ -192,7 +199,7 @@ interface ActivePreview {
   echoGuard: EditorEchoGuard;
   /** The single scroll anchor of this preview (see docs/scroll-anchoring.md). */
   anchor?: ScrollAnchor & { documentId: string };
-  states: Map<string, PreviewPanelState>;
+  states: BoundedMap<PreviewPanelState>;
   state?: PreviewPanelState;
   status: PreviewStatus;
   configuration: PreviewConfiguration;
@@ -270,6 +277,8 @@ let extensionRootUri: vscode.Uri | undefined;
 let sessionPreviewThemeMode: PreviewThemeMode | undefined;
 let previewThemeModeStorage: PreviewThemeModeStorage | undefined;
 let previewDescriptionStorage: vscode.Memento | undefined;
+/** Bounded per-document `descriptionsCollapsed` memory, persisted under one workspaceState key. */
+let collapsedDescriptions = new BoundedMap<boolean>();
 let editModeStorage: vscode.Memento | undefined;
 const EDIT_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.editMode";
 interface StemRootWatcher {
@@ -1301,10 +1310,10 @@ function recordPreviewState(preview: ActivePreview, message: PreviewSyncMessage)
   }
   preview.state = state;
   preview.states.set(preview.documentUri, state);
-  if (typeof state.descriptionsCollapsed === "boolean") {
-    const key = `descriptionsCollapsed:${preview.documentUri}`;
-    if (previewDescriptionStorage?.get(key) !== state.descriptionsCollapsed) {
-      void previewDescriptionStorage?.update(key, state.descriptionsCollapsed);
+  if (typeof state.descriptionsCollapsed === "boolean" && previewDescriptionStorage) {
+    if (collapsedDescriptions.peek(preview.documentUri) !== state.descriptionsCollapsed) {
+      collapsedDescriptions.set(preview.documentUri, state.descriptionsCollapsed);
+      void saveCollapsedMap(previewDescriptionStorage, collapsedDescriptions);
     }
   }
 }
@@ -2755,7 +2764,7 @@ function createPreview(
   if (!sourcePath) {
     throw new Error("The preview source path is unavailable.");
   }
-  const savedDescriptions = previewDescriptionStorage?.get<unknown>(`descriptionsCollapsed:${documentUri}`);
+  const savedDescriptions = collapsedDescriptions.get(documentUri);
   if (restoredState?.descriptionsCollapsed === undefined && typeof savedDescriptions === "boolean") {
     restoredState = { ...restoredState, documentId: documentUri, sourceFile: sourcePath,
       descriptionsCollapsed: savedDescriptions };
@@ -2832,7 +2841,10 @@ function createPreview(
       nonce: "",
     },
     echoGuard: new EditorEchoGuard(),
-    states: new Map(restoredState ? [[documentUri, restoredState]] : []),
+    states: new BoundedMap<PreviewPanelState>(
+      MAX_DOCUMENT_STATES,
+      restoredState ? [[documentUri, restoredState]] : [],
+    ),
     state: restoredState,
     status: initialStatus,
     configuration: readPreviewConfiguration(
@@ -3145,9 +3157,13 @@ async function deserializePreviewPanel(
     ));
     return;
   }
-  const existingSidePreview = latestPreview((preview) => preview.followsActiveEditor);
-  if (existingSidePreview) {
-    disposePreview(existingSidePreview, false);
+  // Earlier restored panels stay open with their live session; only the newest one follows the
+  // active editor, so each older one becomes a fixed preview of the document it shows.
+  for (const earlier of activePreviews) {
+    if (earlier.followsActiveEditor && !earlier.disposed) {
+      earlier.followsActiveEditor = false;
+      earlier.panel.title = previewTitle(earlier, earlier.document?.uri.fsPath ?? vscode.Uri.parse(earlier.documentUri).fsPath);
+    }
   }
   let document: vscode.TextDocument | undefined;
   try {
@@ -3211,6 +3227,10 @@ export function activate(context: vscode.ExtensionContext): void {
   preloadMystEngine();
   previewThemeModeStorage = context.workspaceState;
   previewDescriptionStorage = context.workspaceState;
+  collapsedDescriptions = loadCollapsedMap(context.workspaceState);
+  void migrateLegacyCollapsedKeys(context.workspaceState, collapsedDescriptions).catch((error: unknown) => {
+    console.error("Failed to migrate the per-document description state.", error);
+  });
   editModeStorage = context.workspaceState;
   sessionPreviewThemeMode = readPreviewThemeMode(previewThemeModeStorage);
   for (const folder of vscode.workspace.workspaceFolders ?? []) {
@@ -3395,6 +3415,15 @@ export function getActivePreviewForTests():
     pendingOverlayVisible: activePreview.pendingOverlayVisible,
     pendingOverlayShown: activePreview.pendingOverlayShown,
   };
+}
+
+/** Live previews and whether each follows the active editor, oldest first. */
+export function getLivePreviewRolesForTests(): { documentUri: string; followsActiveEditor: boolean; title: string }[] {
+  return [...activePreviews].filter((preview) => !preview.disposed).map((preview) => ({
+    documentUri: preview.documentUri,
+    followsActiveEditor: preview.followsActiveEditor,
+    title: preview.panel.title,
+  }));
 }
 
 export function getActivePreviewPanelForTests(): vscode.WebviewPanel | undefined {

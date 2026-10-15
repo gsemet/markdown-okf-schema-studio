@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- When VS Code restores several preview panels after a reload, every panel stays interactive:
+  only the newest follows the active editor, the others become fixed previews of their document.
+  The remembered collapsed-descriptions state is now bounded to the 200 most recent documents and
+  stored under one key (existing entries are migrated).
 - Editing a block in the preview no longer breaks after the preview reloads: the edit lock is
   released when a new page loads or when the preview closes.
   Saving an unchanged buffer no longer re-renders the preview, and saves, PlantUML diagrams and
