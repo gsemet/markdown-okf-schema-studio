@@ -34,6 +34,7 @@ It is MIT licensed and is developed independently from the Agentic Coding White 
 
 - When creating a git commit in this project: [.github/guidelines/git-commit-message.guidelines.md](.github/guidelines/git-commit-message.guidelines.md)
 - Allowed Conventional commit scopes: [.github/guidelines/git-commit-allowed-scopes.md](.github/guidelines/git-commit-allowed-scopes.md)
+- Shared vocabulary (UI and code terms): [.agents/glossary/common.md](.agents/glossary/common.md). Use these words in code, tests, commits and docs; add new terms there.
 
 ## Completion gate
 
