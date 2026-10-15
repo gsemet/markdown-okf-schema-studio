@@ -2418,6 +2418,40 @@ async function scenarioInsertBlocksFromPreview(page: Page, evidence: Evidence): 
 }
 
 /**
+ * RI-T28b: a block is inserted after a figure that is the last block of the document, with and
+ * without a final line break, and lands after the closing fence with one blank line.
+ */
+async function scenarioInsertAfterFinalFigure(page: Page, evidence: Evidence): Promise<void> {
+  const DONE = "button[aria-label='Done editing']";
+  const figure = ":::{figure} figure.svg\n:alt: A figure\n\nCaption.\n:::";
+  const variants: Array<[string, string]> = [["with-newline", figure + "\n"], ["without-newline", figure]];
+  for (const [name, text] of variants) {
+    await withDocument("realinput-t28b-" + name, "# Figures\n\n" + text, async (source) => {
+      await openStudioEditor(source.uri);
+      await waitForRender(source);
+      await setEditMode(page, true);
+      await withCurrentFrame(page, async (frame) => {
+        await frame.locator("figure[data-sphinx-source-line]").first().hover();
+        await frame.locator("figure[data-sphinx-source-line] + .sphinx-preview-insert-point button").click();
+      });
+      await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+      await captureAfter(evidence, page, "25b-insert-after-figure-" + name,
+        "Edit mode on; the + after the final figure opened an empty editor below it.");
+      await typeText(page, "After the figure.");
+      await withCurrentFrame(page, (frame) => frame.locator(DONE).click());
+      const expected = "# Figures\n\n" + figure + "\n\nAfter the figure.\n";
+      try {
+        await waitFor("the paragraph to be inserted after the figure", () =>
+          bufferText(source).replace(/\n$/u, "") === expected.replace(/\n$/u, ""));
+      } catch (error) {
+        throw new Error(String(error) + " Buffer: " + JSON.stringify(bufferText(source)));
+      }
+      await waitForNoBlockEditor(page, "the block editor to close after Done");
+    });
+  }
+}
+
+/**
  * RI-T35: deleting the source shows the missing-source page with its title and message on two
  * lines; restoring the file brings the preview back.
  */
@@ -3046,6 +3080,7 @@ export async function run(): Promise<void> {
     await scenarioAddFieldPositionAndEscape(page, evidence);
     await scenarioReadableLinkDiagnostics(page, evidence);
     await scenarioInsertBlocksFromPreview(page, evidence);
+    await scenarioInsertAfterFinalFigure(page, evidence);
     await scenarioFocusChangeKeepsPreviewStill(page, evidence);
     await scenarioHiddenPreviewCatchesUp(page, evidence);
     await scenarioSaveKeepsBlockInPlace(page, evidence);

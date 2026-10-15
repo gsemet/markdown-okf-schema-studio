@@ -42,7 +42,7 @@ ADMONITION_DIRECTIVE = re.compile(
     r"^[ \t]*(?:`{3,}|:{3,})\{(admonition|attention|caution|danger|error|hint|important|note|seealso|tip|warning|versionadded|versionchanged|deprecated)\}",
     re.MULTILINE,
 )
-FIGURE_DIRECTIVE = re.compile(r"^`{3,}\{figure\}\s+\S+", re.MULTILINE)
+FIGURE_DIRECTIVE = re.compile(r"^(?:`{3,}|:{3,})\{figure\}\s+\S+", re.MULTILINE)
 MERMAID_BLOCK = re.compile(r"^`{3,}(?:\{)?mermaid(?:\})?(?:\s|$)", re.MULTILINE)
 PLANTUML_BLOCK = re.compile(r"^`{3,}(?:\{)?plantuml(?:\})?(?:\s|$)", re.MULTILINE)
 CONTEXT_TAG_OPEN = re.compile(
@@ -1430,6 +1430,42 @@ def check_editor_keyboard(page: Page, scenario: dict, failures: list[Failure]) -
   page.keyboard.press(redo)
   if not editor.input_value().startswith("**Wrapped** "):
     failures.append(Failure(page_name, f"redo did not reapply the wraps: {editor.input_value()[:24]!r}"))
+
+
+def check_insert_after_figure(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The + after a figure that ends the document opens an empty editor after the closing fence."""
+  if not scenario.get("insertAfterFigureChecks"):
+    return
+  page_name = scenario["page"]
+  page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
+  block = scenario.get("insertAfterBlock") or {"selector": "main figure[data-sphinx-source-line]", "line": 9}
+  figure = page.locator(block["selector"])
+  if figure.count() != 1:
+    failures.append(Failure(page_name, f"expected one mapped block, found {figure.count()}"))
+    return
+  figure.scroll_into_view_if_needed()
+  figure.hover()
+  point = figure.locator("xpath=following-sibling::*[1][contains(@class, 'sphinx-preview-insert-point')]")
+  if point.count() != 1:
+    failures.append(Failure(page_name, "no insertion point follows the final figure"))
+    return
+  point.locator("button").click()
+  editor = page.locator(".sphinx-preview-block-editor textarea")
+  editor.wait_for(state="visible")
+  opened = page.evaluate(
+    "window.visualMessages.filter(m => m.type === 'previewEditOpen' && m.insertAfterLine !== undefined).at(-1)")
+  # Figure fixture: lines 5-9, line 9 is the closing colon fence; image fixture: line 5.
+  if not opened or opened.get("insertAfterLine") != block["line"]:
+    failures.append(Failure(page_name, f"insertion did not carry the block's last line {block['line']}: {opened}"))
+  if editor.input_value() != "":
+    failures.append(Failure(page_name, "the new block editor is not empty"))
+  below = page.evaluate("""selector => {
+    const figure = document.querySelector(selector).getBoundingClientRect();
+    const editor = document.querySelector('.sphinx-preview-block-editor').getBoundingClientRect();
+    return editor.top >= figure.bottom - 1;
+  }""", block["selector"])
+  if not below:
+    failures.append(Failure(page_name, "the new block editor is not below the figure"))
 
 
 def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) -> None:
@@ -2916,7 +2952,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_edit_affordances, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

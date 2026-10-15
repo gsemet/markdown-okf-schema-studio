@@ -167,7 +167,10 @@ window.acquireVsCodeApi = () => ({
   postMessage: (message) => {
     window.visualMessages.push(message);
     if (message.type !== "previewEditOpen") return;
-    const range = sourceRangeForLines(visualSource, Number(message.line), Number(message.endLine));
+    // An insertion opens an empty editor, like the host reply for \`insertAfterLine\`.
+    const range = message.insertAfterLine !== undefined
+      ? undefined
+      : sourceRangeForLines(visualSource, Number(message.line), Number(message.endLine));
     window.dispatchEvent(new MessageEvent("message", { data: {
       ...message,
       type: "previewEditSource",

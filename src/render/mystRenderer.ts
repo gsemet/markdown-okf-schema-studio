@@ -1166,6 +1166,26 @@ function expandVersionAdmonitions(
   }
 }
 
+/**
+ * MyST lifts a paragraph that holds only an image to a bare block-level image (as does an `{image}`
+ * directive), which would render as an unmapped `<img>`; wrapping it back keeps its source lines for editing and insertion.
+ */
+function wrapBareBlockImages(root: MystNode): void {
+  const wrap = (image: MystNode, position: MystNode["position"]): MystNode =>
+    ({ type: "paragraph", position, children: [image] });
+  root.children = root.children?.map((child): MystNode => {
+    if (child.type === "image" && child.position) {
+      return wrap(child, child.position);
+    }
+    // An `{image}` directive holds a position-less image; it takes the directive's line range.
+    if (child.type === "mystDirective" && child.name === "image" && child.position
+      && child.children?.length === 1 && child.children[0].type === "image") {
+      child.children = [wrap(child.children[0], child.position)];
+    }
+    return child;
+  });
+}
+
 function walk(node: MystNode, diagnostics: RenderDiagnostic[], inheritedLine?: number): void {
   normalizeNode(node, diagnostics, inheritedLine);
   // Directives synthesise their content nodes without positions, so the directive's own
@@ -1330,6 +1350,7 @@ export async function renderMyst(
     convertCheckboxPlaceholders(ast, checkboxes.markers);
   }
   normalizeContextTagContainers(ast);
+  wrapBareBlockImages(ast);
   walk(ast, diagnostics);
   const tableAlignments: Array<TableAlignmentSpec | undefined> = [];
   collectTableAlignments(ast, tableAlignments);

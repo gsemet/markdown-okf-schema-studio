@@ -61,3 +61,33 @@ test("out of range lines have no plan", () => {
   assert.equal(planInsertion("A", 2), undefined);
   assert.equal(planInsertion("A", -1), undefined);
 });
+
+const FIGURE_SHAPES: Array<[string, string, number]> = [
+  ["colon-fence figure", ":::{figure} a.svg\n:alt: x\n\nCaption\n:::", 5],
+  ["backtick-fence figure", "```{figure} a.svg\n\nCaption\n```", 4],
+  ["plain image", "![alt](a.png)", 1],
+];
+
+for (const [name, figure, closingLine] of FIGURE_SHAPES) {
+  test(`inserting after a ${name}: middle, last block, with and without a final line break`, () => {
+    const lead = "Intro\n\n";
+    const leadLines = 2;
+    const after = leadLines + closingLine;
+    assert.equal(
+      insert(`${lead}${figure}\n\nOutro\n`, after, "NEW"),
+      `${lead}${figure}\n\nNEW\n\nOutro\n`,
+    );
+    assert.equal(insert(`${lead}${figure}\n`, after, "NEW"), `${lead}${figure}\n\nNEW\n`);
+    assert.equal(insert(`${lead}${figure}`, after, "NEW"), `${lead}${figure}\n\nNEW`);
+    const crlf = (text: string): string => text.replace(/\n/gu, "\r\n");
+    assert.equal(
+      insert(crlf(`${lead}${figure}\n`), after, "NEW"),
+      crlf(`${lead}${figure}\n\nNEW\n`),
+    );
+    // Directly followed by text (no blank line): the new block is separated from both sides.
+    assert.equal(
+      insert(`${lead}${figure}\nOutro\n`, after, "NEW"),
+      `${lead}${figure}\n\nNEW\n\nOutro\n`,
+    );
+  });
+}

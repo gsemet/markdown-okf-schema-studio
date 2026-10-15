@@ -46,6 +46,10 @@ export interface Scenario {
   editorKeyboardChecks?: boolean;
   /** Hover outline, then an open paragraph editor with frame, hint and buttons (T15). */
   editAffordances?: boolean;
+  /** Click the + after the final figure; the insertion message must carry the closing fence line. */
+  insertAfterFigureChecks?: boolean;
+  /** Last block of the fixture, the line the insertion must follow, and its selector. */
+  insertAfterBlock?: { selector: string; line: number };
   expectStickyGrowth?: boolean;
   /** Geometry checks (test/shared/geometry-checks.js) that fail this scenario when applicable and failing. */
   machineChecks?: string[];
@@ -715,6 +719,35 @@ export const SCENARIOS: Scenario[] = [
     description:
       "Edit mode on, light theme. Hovering a list reveals the round + insertion button in the left "
       + "gutter below it (the -hover PNG); the insertion points add no height to the page.",
+  },
+  {
+    id: "edit-insert-after-final-figure",
+    fixture: "18-figure-at-end",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "bottom" },
+    editMode: true,
+    insertAfterFigureChecks: true,
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Edit mode on, light theme, a document that ends with a figure. After hovering the figure "
+      + "and clicking the round + below it, an empty block editor is open directly under the "
+      + "figure caption; the insertion message carried the line of the closing fence.",
+  },
+  {
+    id: "edit-insert-after-final-image",
+    fixture: "19-image-at-end",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "bottom" },
+    editMode: true,
+    insertAfterFigureChecks: true,
+    insertAfterBlock: { selector: "main p[data-sphinx-source-line]:has(img)", line: 5 },
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Edit mode on, light theme, a document that ends with a plain Markdown image. After hovering "
+      + "the image and clicking the round + below it, an empty block editor is open directly under "
+      + "the image; the insertion message carried the image's line (5).",
   },
   {
     id: "edit-list-narrow",

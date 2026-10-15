@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fixed the missing insertion point (+) after a plain Markdown image paragraph: a lone image is
+  now a source-mapped block, so a block can be inserted after it, also at the end of the document.
+  Figure directives already offered it; tests now pin insertion after every figure shape.
 - Fixed three keyboard bugs in the inline block and table-cell editors: ArrowUp/ArrowDown inside a
   wrapped paragraph now move the caret between visual lines and only leave the block (or cell) from
   the first or last visual line; typing `*`, `_`, a backtick or `~` over a selection wraps it (and

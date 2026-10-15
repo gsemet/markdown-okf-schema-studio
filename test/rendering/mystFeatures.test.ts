@@ -1090,3 +1090,46 @@ test("an untrusted workspace refuses to render", async () => {
     /trusted/u,
   );
 });
+
+test("figures and plain images are mapped blocks with their closing source line", async () => {
+  const source = "Intro\n\n:::{figure} a.svg\n:alt: x\n\nCap\n:::\n\n"
+    + "```{figure} b.svg\n\nCap2\n```\n\n![alt](c.png)\n";
+  const result = await renderPreviewDocument({
+    document: inlineDocument(source),
+    workspaceRoot,
+    requestId: 3,
+    isWorkspaceTrusted: () => true,
+  });
+  const html = parseHtml(result.html);
+  const figures = findElements(html, isTag("figure"));
+  assert.deepEqual(
+    figures.map((figure) => [attribute(figure, "data-line"), attribute(figure, "data-end-line")]),
+    [["3", "7"], ["9", "12"]],
+  );
+  // A lone image paragraph is lifted to a bare <img> by MyST; it must stay a mapped block so the
+  // preview can offer an insertion point after it (also as the last block of the document).
+  const plain = findElement(html, (element) =>
+    element.tagName === "img" && attribute(element, "alt") === "alt");
+  assert.ok(plain, "the plain image was not rendered");
+  const block = findElement(html, (element) => attribute(element, "data-line") === "14"
+    && findElement(element, (child) => child === plain) !== undefined);
+  assert.ok(block, "the plain image paragraph carries no source line");
+  assert.equal(attribute(block, "data-end-line"), "14");
+});
+
+test("image directives are mapped blocks spanning the directive's source lines", async () => {
+  const source = "Intro\n\n```{image} b.png\n:alt: x\n```\n\n:::{image} d.png\n:::\n";
+  const result = await renderPreviewDocument({
+    document: inlineDocument(source),
+    workspaceRoot,
+    requestId: 4,
+    isWorkspaceTrusted: () => true,
+  });
+  const html = parseHtml(result.html);
+  const blocks = findElements(html, (element) => attribute(element, "data-line") !== undefined
+    && findElement(element, isTag("img")) !== undefined);
+  assert.deepEqual(
+    blocks.map((block) => [attribute(block, "data-line"), attribute(block, "data-end-line")]),
+    [["3", "5"], ["7", "8"]],
+  );
+});
