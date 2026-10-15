@@ -8,6 +8,8 @@ import { RenderDiagnostic } from "./mystRenderer";
 
 const MAX_PLANTUML_SOURCE_LENGTH = 1024 * 1024;
 const MAX_PLANTUML_OUTPUT_LENGTH = 8 * 1024 * 1024;
+const MAX_PLANTUML_STDERR_LENGTH = 64 * 1024;
+export const PLANTUML_TIMEOUT_MS = 30_000;
 
 interface HtmlAttribute {
   name: string;
@@ -60,6 +62,31 @@ export function setPlantUmlProcessSpawnerForTests(spawner: PlantUmlProcessSpawne
 
 export function resetPlantUmlProcessSpawnerForTests(): void {
   processSpawner = defaultProcessSpawner;
+}
+
+let timeoutMs = PLANTUML_TIMEOUT_MS;
+
+export function setPlantUmlTimeoutForTests(milliseconds: number): void {
+  timeoutMs = milliseconds;
+}
+
+export function resetPlantUmlTimeoutForTests(): void {
+  timeoutMs = PLANTUML_TIMEOUT_MS;
+}
+
+// Wrapper scripts (plantuml shell launcher) may leave the JVM running if only the wrapper is
+// signalled, so on POSIX the child leads its own process group and the whole group is killed.
+function killProcessTree(child: childProcess.ChildProcess): void {
+  const exited = child.exitCode != null || child.signalCode != null;
+  if (!exited && process.platform !== "win32" && child.pid !== undefined) {
+    try {
+      process.kill(-child.pid, "SIGTERM");
+      return;
+    } catch {
+      // Fall back to killing the direct child.
+    }
+  }
+  child.kill("SIGTERM");
 }
 
 function attr(node: HtmlNode, name: string): HtmlAttribute | undefined {
@@ -179,18 +206,28 @@ function renderSource(
       child = processSpawner.spawn(
         command,
         args,
-        { cwd: workspaceRoot, stdio: ["pipe", "pipe", "pipe"] },
+        {
+          cwd: workspaceRoot,
+          stdio: ["pipe", "pipe", "pipe"],
+          detached: process.platform !== "win32",
+        },
       );
     } catch (error) {
       reject(error);
       return;
     }
 
-    let stdout = "";
+    const stdoutChunks: Buffer[] = [];
+    let stdoutLength = 0;
     let stderr = "";
+    let stderrTruncated = false;
     let settled = false;
+    let timer: NodeJS.Timeout | undefined;
     const cleanup = (): void => {
       signal?.removeEventListener("abort", abort);
+      if (timer) {
+        clearTimeout(timer);
+      }
     };
     const finish = (callback: () => void): void => {
       if (settled) {
@@ -204,39 +241,56 @@ function renderSource(
       if (settled) {
         return;
       }
-      child.kill("SIGTERM");
+      killProcessTree(child);
       finish(() => reject(new Error("PlantUML rendering was canceled.")));
     };
-    const appendOutput = (target: "stdout" | "stderr", chunk: Buffer | string): void => {
-      const value = chunk.toString();
-      if (target === "stdout") {
-        stdout += value;
-        if (stdout.length > MAX_PLANTUML_OUTPUT_LENGTH) {
-          child.kill("SIGTERM");
-          finish(() => reject(new Error("PlantUML SVG output exceeds the 8 MiB preview limit.")));
-        }
-      } else {
-        stderr += value;
+    const appendStdout = (chunk: Buffer | string): void => {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      stdoutChunks.push(buffer);
+      stdoutLength += buffer.length;
+      if (stdoutLength > MAX_PLANTUML_OUTPUT_LENGTH) {
+        killProcessTree(child);
+        finish(() => reject(new Error("PlantUML SVG output exceeds the 8 MiB preview limit.")));
+      }
+    };
+    const appendStderr = (chunk: Buffer | string): void => {
+      if (stderr.length >= MAX_PLANTUML_STDERR_LENGTH) {
+        stderrTruncated = true;
+        return;
+      }
+      stderr += chunk.toString();
+      if (stderr.length > MAX_PLANTUML_STDERR_LENGTH) {
+        stderr = stderr.slice(0, MAX_PLANTUML_STDERR_LENGTH);
+        stderrTruncated = true;
       }
     };
 
-    child.stdout?.on("data", (chunk: Buffer | string) => appendOutput("stdout", chunk));
-    child.stderr?.on("data", (chunk: Buffer | string) => appendOutput("stderr", chunk));
+    child.stdout?.on("data", appendStdout);
+    child.stderr?.on("data", appendStderr);
     child.once("error", (error) => finish(() => reject(error)));
+    // The child may exit without reading stdin (EPIPE); report it through the normal diagnostics.
+    child.stdin?.on("error", (error) => finish(() => reject(error)));
     child.once("close", (code, signalName) => finish(() => {
       if (code !== 0) {
-        const detail = stderr.trim() || "PlantUML returned no diagnostic.";
+        const detail = (stderr.trim() || "PlantUML returned no diagnostic.")
+          + (stderrTruncated ? "\n[stderr truncated at 64 KiB]" : "");
         reject(new Error(
           `PlantUML exited with ${signalName ? `signal ${signalName}` : `code ${code}`}: ${detail}`,
         ));
         return;
       }
       try {
-        resolve(svgOutput(stdout));
+        resolve(svgOutput(Buffer.concat(stdoutChunks).toString("utf8")));
       } catch (error) {
         reject(error);
       }
     }));
+    timer = setTimeout(() => {
+      killProcessTree(child);
+      finish(() => reject(new Error(
+        `PlantUML did not finish within ${timeoutMs / 1000} s.`,
+      )));
+    }, timeoutMs);
     signal?.addEventListener("abort", abort, { once: true });
     child.stdin?.end(source);
   });

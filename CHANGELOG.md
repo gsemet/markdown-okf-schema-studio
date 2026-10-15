@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- PlantUML rendering now times out after 30 s, caps stderr at 64 KiB, kills the whole process
+  group on cancel or timeout, and no longer crashes the extension host when the process exits
+  before reading its input.
 - Inline code is now a subtle pill: a tint and hairline border derived from the text colour, 4px
   radius, slightly smaller monospace, wrapping with padding on every line and never growing the
   line height. It scales in headings, follows link colours and stays compact in tables.
