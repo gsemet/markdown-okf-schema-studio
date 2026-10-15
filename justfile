@@ -13,7 +13,7 @@ format:
 dev:
     fnm install
     {{ npm }} ci
-    uv sync --group docs
+    uv sync --group docs --group release
     uv run --no-sync --group docs playwright install chromium
 
 # Upgrade dependencies from npmjs.org and PyPI and refresh the development environment.
@@ -24,7 +24,7 @@ update:
     {{ npm }} install --package-lock-only --ignore-scripts
     {{ npm }} install --save-dev @types/node@24 --package-lock-only --ignore-scripts
     {{ npm }} ci
-    uv sync --upgrade --group docs
+    uv sync --upgrade --group docs --group release
     uv run --no-sync --group docs playwright install chromium
 
 update-guidelines:
@@ -61,7 +61,15 @@ contracts:
     {{ npm }} run test:contracts
 
 # Format the justfile and run TypeScript, unit, contract, and security checks.
-check: format compile unit contracts security
+check: format compile unit contracts security release-tests
+
+# Test version updates, automatic tagging, and release-note validation in isolation.
+release-tests:
+    uv run --group docs --group release pytest test/build/test_release.py
+
+# Generate user-facing notes for an exact Git range with gh copilot.
+release-notes FROM_REF TO_REF OUTPUT="release-notes.md":
+    uv run python scripts/release_notes.py --from-ref "{{ FROM_REF }}" --to-ref "{{ TO_REF }}" --output "{{ OUTPUT }}"
 
 # Run security tests.
 security:
@@ -114,6 +122,14 @@ preflight: clean format
 # Package the extension as a VSIX.
 package:
     {{ npm }} run package
+
+# Update npm versions from conventional commits without creating a commit or tag.
+bump-version:
+    uv run --group release python scripts/version.py
+
+# Set an explicit X.Y.Z npm version without creating a commit or tag.
+version VERSION:
+    uv run --group release python scripts/version.py "{{ VERSION }}"
 
 # Package and optionally install the VSIX in VS Code.
 install-vsix PROFILE="": package

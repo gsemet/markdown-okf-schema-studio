@@ -168,3 +168,99 @@ just install-vsix "My Profile"
 The install recipe reports the VSIX path and the VS Code **Install from VSIX...** action when the
 `code` CLI is unavailable. After installation or an update, reload the current VS Code window
 manually.
+
+## How to Release
+
+Releases start with a committed version change, not a manually created tag.
+The extension version lives in `package.json`; `package-lock.json` must match it.
+The Python project's version is tooling metadata and is not the extension release version.
+
+1. Fetch release tags and commit the changes to include in the release:
+
+	```bash
+	git fetch origin --tags
+	```
+
+2. Calculate the next version with Python Commitizen:
+
+	```bash
+	just bump-version
+	```
+
+	`feat:` commits produce a minor bump. A `!` before the colon or a
+	`BREAKING CHANGE:` footer produces a major bump, including before version 1.0.
+	Fixes, documentation, maintenance, other changes, and an empty release range produce
+	a patch bump. Classification uses committed history since the baseline release tag;
+	uncommitted feature changes do not count. The baseline is the newer of the current
+	manifest version and the latest reachable stable release tag.
+
+	To choose a version instead:
+
+	```bash
+	just version 1.2.3
+	```
+
+	Both commands update the npm manifest and lockfile without creating a commit or tag.
+	Explicit versions must be stable `X.Y.Z`, newer than the baseline, and not already tagged.
+
+3. Validate and commit the version change, then merge it into `main`:
+
+	```bash
+	just preflight
+	git add package.json package-lock.json
+	git commit -m "chore(release): bump version to 1.2.3"
+	```
+
+	Use the actual version in the commit message. Keep release images and their Git LFS
+	objects committed and pushed, since Marketplace image URLs use the release tag.
+
+4. After successful main-branch CI, the tagging job checks whether the pushed version
+	changed and whether `vX.Y.Z` exists remotely. It verifies matching lockfile versions
+	and an increasing version, then tags the exact tested commit. Ordinary pushes and
+	existing tags are left unchanged. It never commits files back to `main`.
+
+5. CI calls **Release VSIX** explicitly with that tag. A tag pushed by `GITHUB_TOKEN`
+	does not trigger another push workflow, so this call is required. The release job
+	verifies the tag, manifest, and default-branch ancestry, generates user-facing notes
+	from the previous reachable release's Git diff through `gh copilot`, packages the
+	extension, publishes to Marketplace, and attaches the VSIX and notes to a GitHub release.
+	A first release uses all history. Note generation must succeed before publication.
+
+### GitHub Configuration
+
+Create a GitHub environment named `release`, allowing releases from the default branch
+and `v*` tags. Configure these secrets in that environment or at repository level:
+
+- `VSCE_PAT`: a Marketplace publisher token authorized for `GaetanSemet`.
+- `COPILOT_GITHUB_TOKEN`: a GitHub token with Copilot access for `gh copilot`.
+  The workflow's normal `GITHUB_TOKEN` is used for tags and GitHub releases, not Copilot.
+
+The runner must provide `gh` with Copilot CLI support for `gh copilot --`.
+GitHub-hosted Ubuntu runners supply `gh`; authentication uses the Copilot secret above.
+Repository rules must permit the CI token to create version tags. Environment approval
+rules, when configured, pause publication after tagging. All committed dependency settings
+and GitHub jobs use public PyPI and npm registries; corporate proxy and CA settings belong
+only in the developer's local environment, never in workflow files or lockfile URLs.
+
+### Recovery and Release Notes
+
+If tagging succeeded but publication failed, rerun the failed release job or dispatch
+**Release VSIX** with the existing `vX.Y.Z` tag. Do not move the tag or bump again just
+to retry. Marketplace publication skips an already published version, allowing a retry
+to finish the GitHub release. Manual pushes of valid `vX.Y.Z` tags also run this workflow.
+
+To generate notes without publishing the extension, dispatch **Generate release notes
+(manual)** from the default branch with an existing tag reachable from that branch.
+It uploads the validated Markdown and creates a draft GitHub release, refusing to overwrite
+an existing release. A later **Release VSIX** run publishes that draft with the VSIX.
+
+Local generation uses the same diff-grounded generator:
+
+```bash
+just release-notes v0.1.0 v0.1.1
+uv run python scripts/release_notes.py --validate release-notes.md
+```
+
+Set `COPILOT_GITHUB_TOKEN` locally before generation. `release-notes.md` contains only
+validated final-answer Markdown, not Copilot progress or tool output. The generator retries
+invalid output up to three times and fails closed rather than substituting invented notes.
