@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -49,7 +50,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload Pages site
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && success()
         uses: actions/upload-pages-artifact@v3
         with:
           path: out/site
@@ -57,7 +58,7 @@ jobs:
   deploy-pages:
     name: Deploy GitHub Pages
     needs: checks
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.checks.result == 'success'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && needs.checks.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       pages: write
