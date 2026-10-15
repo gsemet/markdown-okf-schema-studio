@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { EditLock, isUnchangedSave } from "../../src/state/editLock";
+import { EditLock, isUnchangedSave, needsRefresh } from "../../src/state/editLock";
 
 test("a previewReady with another requestId releases the lock (STAB-02)", () => {
   const lock = new EditLock();
@@ -68,4 +68,19 @@ test("a ready of the same render that reports no open editor releases the lock",
   assert.equal(lock.onPreviewReady(3).released, false, "a message without the field keeps the old rule");
   assert.equal(lock.onPreviewReady(3, false).released, true);
   assert.equal(lock.isHeld, false);
+});
+
+test("a changed dependency always re-renders, whatever version the stage shows", () => {
+  const rendered = { shownStatus: "success", documentVersion: 7, stageVersion: 7 };
+  assert.equal(needsRefresh({ ...rendered, isDependencyChange: true }), true, "include target changed");
+  assert.equal(needsRefresh({ ...rendered, shownStatus: "recovery", isDependencyChange: true }), true);
+});
+
+test("a save of the already rendered buffer is skipped (PERF-06), any other state renders", () => {
+  const rendered = { isDependencyChange: false, shownStatus: "success", documentVersion: 7, stageVersion: 7 };
+  assert.equal(needsRefresh(rendered), false);
+  assert.equal(needsRefresh({ ...rendered, shownStatus: "recovery" }), false);
+  assert.equal(needsRefresh({ ...rendered, stageVersion: 6 }), true, "buffer changed since the render");
+  assert.equal(needsRefresh({ ...rendered, stageVersion: undefined }), true);
+  assert.equal(needsRefresh({ ...rendered, shownStatus: "error" }), true, "the shown error is retried");
 });

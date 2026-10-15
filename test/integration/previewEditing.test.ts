@@ -1309,6 +1309,38 @@ export async function run(): Promise<void> {
         editedText: "Saving first line\nAutosaved second line\n", final: true,
       });
       await waitForCurrentPreview(document, savingContext.requestId);
+
+      // 4. A changed `{include}` target re-renders, but only after an open block edit ends.
+      const includePath = path.join(directory, "lock-include.md");
+      fs.writeFileSync(includePath, "# Lock include\n\nInitial lock include text\n", "utf8");
+      const withInclude = `${document.getText().replace(/\n*$/u, "")}\n\n\`\`\`{include} lock-include.md\n\`\`\`\n`;
+      assert.equal(await vscode.workspace.applyEdit(replaceDocument(document, withInclude)), true);
+      await waitFor("the include to be rendered", () =>
+        getActivePreviewForTests()?.html.includes("Initial lock include text") ?? false);
+      await waitForCurrentPreview(document);
+      const includeContext = currentContext(document);
+      const includeEditId = "integration-lock-include";
+      const includeOriginal = "Saving first line\nAutosaved second line\n";
+      const includeEdited = "Include edit first line\nAutosaved second line\n";
+      await sendPreviewMessageForTests({ type: "previewEditOpen", ...includeContext, editId: includeEditId, ...blockA });
+      // The host takes the lock with the first save of the edit.
+      await sendPreviewMessageForTests({
+        type: "previewEditSave", ...includeContext, editId: includeEditId, ...blockA,
+        originalText: includeOriginal, editedText: includeEdited, final: false,
+      });
+      await waitFor("the autosave of the include scenario block", () =>
+        document.getText().includes(includeEdited));
+      const includeLockedRequestId = getActivePreviewForTests()?.requestId;
+      fs.writeFileSync(includePath, "# Lock include\n\nChanged lock include text\n", "utf8");
+      await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+      assert.equal(getActivePreviewForTests()?.requestId, includeLockedRequestId,
+        "the include change waits for the open edit");
+      await sendPreviewMessageForTests({
+        type: "previewEditSave", ...includeContext, editId: includeEditId, ...blockA,
+        originalText: includeOriginal, editedText: includeEdited, final: true,
+      });
+      await waitFor("the changed include to render after the edit ends", () =>
+        getActivePreviewForTests()?.html.includes("Changed lock include text") ?? false);
     }
     const referenceDirectory = path.join(directory, "references");
     fs.mkdirSync(referenceDirectory, { recursive: true });

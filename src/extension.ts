@@ -83,7 +83,7 @@ import {
   migrateLegacyCollapsedKeys,
   saveCollapsedMap,
 } from "./state/boundedState";
-import { EditLock, isUnchangedSave } from "./state/editLock";
+import { EditLock, isUnchangedSave, needsRefresh } from "./state/editLock";
 import { preloadMystEngine } from "./render/mystRenderer";
 import { createNonce } from "./security/csp";
 import { parsePreviewPanelState, PreviewPanelState } from "./state/previewState";
@@ -2577,11 +2577,15 @@ function deferWhileEditing(preview: ActivePreview, key: string, work: () => void
   work();
 }
 
-function refreshOpenDocument(preview: ActivePreview): void {
+function refreshOpenDocument(preview: ActivePreview, isDependencyChange = false): void {
   const shown = preview.status === "pending" ? preview.shownStatus : preview.status;
   if (!preview.disposed && preview.document && sourceAvailable(preview)
-    && !((shown === "success" || shown === "recovery")
-      && preview.stage?.activeDocumentVersion === preview.document.version)) {
+    && needsRefresh({
+      isDependencyChange,
+      shownStatus: shown,
+      documentVersion: preview.document.version,
+      stageVersion: preview.stage?.activeDocumentVersion,
+    })) {
     void refreshPreviewDocument(preview, preview.document);
   }
 }
@@ -2619,7 +2623,7 @@ function refreshReferencedPath(preview: ActivePreview, filePath: string): void {
   if (!preview.queue.dependsOn(filePath) || !preview.document || !sourceAvailable(preview)) {
     return;
   }
-  deferWhileEditing(preview, "render", () => refreshOpenDocument(preview));
+  deferWhileEditing(preview, "render", () => refreshOpenDocument(preview, true));
 }
 
 function recoverMissingSource(preview: ActivePreview): void {

@@ -72,3 +72,21 @@ export function isUnchangedSave(state: {
     && state.documentVersion !== undefined
     && state.documentVersion === state.stageVersion;
 }
+
+/**
+ * Whether a refresh of the open document has to render. Only a save of the active document may be
+ * skipped, when its buffer is already the rendered one (PERF-06); a changed dependency (an
+ * `{include}` target, an image...) never changes the document version and always re-renders.
+ */
+export function needsRefresh(state: {
+  isDependencyChange: boolean;
+  shownStatus: string | undefined;
+  documentVersion: number | undefined;
+  stageVersion: number | undefined;
+}): boolean {
+  if (state.isDependencyChange) {
+    return true;
+  }
+  return !((state.shownStatus === "success" || state.shownStatus === "recovery")
+    && state.stageVersion === state.documentVersion);
+}
