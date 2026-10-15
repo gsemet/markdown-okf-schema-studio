@@ -93,6 +93,16 @@ test("cream text and background pairs meet WCAG AA 4.5:1", () => {
   }
 });
 
+test("explicit themes override the same host colors, including the floating toolbar", () => {
+  const cream = creamVariables();
+  for (const mode of ["dark", "white"]) {
+    const block = new RegExp(`html\\[data-sphinx-preview-theme-mode="${mode}"\\] body\\s*\\{([^}]*)\\}`, "u")
+      .exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+    const names = [...block.matchAll(/(--[\w-]+):/gu)].map((match) => match[1]);
+    assert.deepEqual(names.sort(), Object.keys(cream).sort(), `${mode} must not leak host theme colors`);
+  }
+});
+
 test("cream mirrors the white-mode code colouring", () => {
   assert.match(
     PREVIEW_THEME_CSS,

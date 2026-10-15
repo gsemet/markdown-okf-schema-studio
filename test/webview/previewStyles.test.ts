@@ -25,6 +25,12 @@ test("typography is driven by VS Code markdown preview variables", () => {
   }
 });
 
+test("shared borders resolve against the body palette rather than inherited host root colors", () => {
+  assert.match(PREVIEW_THEME_CSS, /(?:^|\})\s*body\s*\{\s*--sphinx-preview-border: var\(--vscode-widget-border, var\(--vscode-panel-border, rgba\(128, 128, 128, 0\.35\)\)\);/u);
+  const root = /:root\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  assert.doesNotMatch(root, /--sphinx-preview-border:/u);
+});
+
 test("scrollbar tracks and thumbs follow the preview theme", () => {
   assert.match(PREVIEW_THEME_CSS, /scrollbar-color: var\(--sphinx-preview-scrollbar-thumb\) var\(--vscode-editor-background, Canvas\);/u);
   assert.match(PREVIEW_THEME_CSS, /::-webkit-scrollbar-track,\s*::-webkit-scrollbar-corner \{\s*background: var\(--vscode-editor-background, Canvas\);/u);
