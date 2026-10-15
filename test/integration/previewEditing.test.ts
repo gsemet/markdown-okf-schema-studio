@@ -1327,6 +1327,17 @@ export async function run(): Promise<void> {
       await waitFor("the include to be rendered", () =>
         getActivePreviewForTests()?.html.includes("Initial lock include text") ?? false);
       await waitForCurrentPreview(document);
+      // An included block maps to the `{include}` directive lines and carries the marker.
+      const includeDirectiveLine = withInclude.split("\n").indexOf("```{include} lock-include.md") + 1;
+      const includedBlock = getActivePreviewForTests()?.html.match(
+        /<p\b[^>]*>Initial lock include text<\/p>/u,
+      )?.[0] ?? "";
+      assert.ok(
+        includedBlock.includes(`data-sphinx-source-line="${includeDirectiveLine}"`)
+          && includedBlock.includes(`data-sphinx-source-end-line="${includeDirectiveLine + 1}"`)
+          && includedBlock.includes('data-sphinx-preview-included="true"'),
+        `the included block maps to the directive lines: ${includedBlock}`,
+      );
       const includeContext = currentContext(document);
       const includeEditId = "integration-lock-include";
       const includeOriginal = "Saving first line\nAutosaved second line\n";

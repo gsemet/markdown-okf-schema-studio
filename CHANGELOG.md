@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Editing a block that comes from an included file now opens the `{include}` directive in the
+  host document instead of unrelated lines.
 - Pointing at any code block shows a copy button at its top right; one click copies the raw code and
   the icon turns into a check mark for a moment.
 - Every setting now explains what it does and what each value changes, in a grouped order; the

@@ -478,13 +478,14 @@ function mergeProperties(node: MystNode, properties: Record<string, unknown>): v
   };
 }
 
-function sourcePositionProperties(node: MystNode, line?: number): Record<string, number> {
+function sourcePositionProperties(node: MystNode, line?: number): Record<string, number | string> {
   if (line === undefined) {
     return {};
   }
   const endLine = node.position?.end?.line;
   return {
     "data-line": line,
+    ...(node.data?.included === true ? { "data-sphinx-preview-included": "true" } : {}),
     ...(endLine !== undefined && endLine >= line ? { "data-end-line": endLine } : {}),
   };
 }
@@ -642,13 +643,19 @@ function takeAdmonitionTitle(children: MystNode[]): { title: MystNode; body: Mys
   return undefined;
 }
 
-function setIncludedSourceLine(node: MystNode, line: number): void {
+/**
+ * Maps every node of an included tree to the `{include}` directive's own lines in the host
+ * document and flags it as included, so the editor never targets unrelated host lines.
+ */
+function setIncludedSourceLine(node: MystNode, line: number, endLine: number): void {
   node.position = {
     ...(node.position ?? {}),
     start: { ...(node.position?.start ?? {}), line },
+    end: { ...(node.position?.end ?? {}), line: endLine },
   };
+  node.data = { ...(node.data ?? {}), included: true };
   for (const child of node.children ?? []) {
-    setIncludedSourceLine(child, line);
+    setIncludedSourceLine(child, line, endLine);
   }
 }
 
@@ -749,7 +756,7 @@ function expandIncludes(
       const includedAst = structuredClone(parsedAst);
       const includeLine = child.position?.start?.line;
       if (includeLine !== undefined) {
-        setIncludedSourceLine(includedAst, includeLine);
+        setIncludedSourceLine(includedAst, includeLine, child.position?.end?.line ?? includeLine);
       }
       const nestedStack = new Set(includeStack);
       nestedStack.add(included.path);

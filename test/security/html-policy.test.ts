@@ -108,6 +108,22 @@ test("maps rendered source lines to the active preview document", () => {
   assert.match(result.html, /<p>Unmapped<\/p>/u);
 });
 
+test("keeps the included-block marker next to the source mapping", () => {
+  const result = rewriteSphinxHtml(
+    '<html><body><main><p data-line="3" data-end-line="4" data-sphinx-preview-included="true">In</p></main></body></html>',
+    {
+      outputRoot: "/workspace",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      sourceMapping: { sourceFile: "/workspace/active.md", documentId: "preview-1" },
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+  assert.match(result.html, /data-sphinx-preview-included="true"/u);
+  assert.match(result.html, /data-sphinx-source-line="3"[^>]*data-sphinx-source-end-line="4"/u);
+});
+
 test("rewrites sanitized table styles into a nonce-bearing stylesheet", () => {
   const result = rewriteSphinxHtml(
     '<html><head></head><body><table><tr>'
