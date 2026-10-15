@@ -64,6 +64,7 @@ import {
   runtimeContextKey,
   type RuntimeContextSettings,
 } from "./preview/contentPatch";
+import { isRegisteredPreviewMessage, type RegisteredPreviewMessage } from "./preview/previewMessages";
 import {
   PreviewDiagnostic,
   PreviewDocument,
@@ -404,7 +405,7 @@ function sourceAvailable(preview: ActivePreview): boolean {
 }
 
 function isPreviewSyncMessage(value: unknown): value is PreviewSyncMessage {
-  if (!value || typeof value !== "object") {
+  if (!value || typeof value !== "object" || isRegisteredPreviewMessage(value)) {
     return false;
   }
   const message = value as Partial<PreviewSyncMessage>;
@@ -580,7 +581,13 @@ function scrollContext(
 
 function matchesCurrentPreview(
   preview: ActivePreview,
-  message: PreviewSyncMessage,
+  message: {
+    type: string;
+    documentId: string;
+    documentVersion: number;
+    requestId: number;
+    editId?: string;
+  },
 ): boolean {
   const stage = preview.stage;
   const activeBlockEdit = preview.activeBlockEdit;
@@ -2231,7 +2238,6 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
     documentId: stage.activeDocumentIdentity,
     documentVersion: stage.activeDocumentVersion,
     requestId: stage.requestId,
-    request,
   })) {
     return;
   }
@@ -2313,7 +2319,19 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
   }
 }
 
+const registeredMessageHandlers = new Map<
+  string,
+  (preview: ActivePreview, message: RegisteredPreviewMessage) => Thenable<void> | void
+>();
+
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
+  if (isRegisteredPreviewMessage(value)) {
+    const handler = registeredMessageHandlers.get(value.type);
+    if (!handler || !matchesCurrentPreview(preview, value)) {
+      return;
+    }
+    return Promise.resolve(handler(preview, value));
+  }
   if (!isPreviewSyncMessage(value)) {
     return;
   }

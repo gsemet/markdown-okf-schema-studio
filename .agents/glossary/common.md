@@ -18,7 +18,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Insertion editor**: block editor opened from an insert point or from "Start writing".
 - **Mapped block**: rendered element carrying its source location (`[data-sphinx-source-file][data-sphinx-source-line]`).
 - **Margin mode (planned)**: layout mode that uses the page margins for side content.
-- **Message registry (planned)**: single list of webview-to-host message types (`src/preview/previewMessages.ts`).
+- **Message registry**: map from a webview-to-host message type to its validator and host handler (`src/preview/previewMessages.ts`).
 - **Open-With editor**: the custom editor offered through "Open With" (`markdown-okf-schema-studio.editor`).
 - **Palette mode (planned)**: the set of states of the edition palette.
 - **Preview panel**: the webview panel that shows the rendered preview.
