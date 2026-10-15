@@ -1442,10 +1442,26 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   font-size: 0.92em;
 }
 
+/*
+ * Inline code is a quiet pill: a tint and a hairline derived from the text colour, so it sits on
+ * any page colour (current theme, dark, white, cream) without a hard-coded box. Sizes are in em
+ * so the span scales inside headings, and vertical padding never grows the line box.
+ */
 #sphinx-myst-preview-content :not(pre) > code {
-  padding: 0.15em 0.35em;
-  background: var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.15));
-  word-break: break-word;
+  padding: 0.1em 0.35em;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  border-radius: 4px;
+  background: rgba(128, 128, 128, 0.14);
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  font-size: 0.875em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  overflow-wrap: break-word;
+}
+
+#sphinx-myst-preview-content :is(td, th) > code {
+  padding: 0.05em 0.3em;
 }
 
 html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content :not(pre) > code,

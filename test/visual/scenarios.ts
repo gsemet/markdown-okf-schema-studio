@@ -40,6 +40,10 @@ export interface Scenario {
   mathRenderingChecks?: boolean;
   /** Bare URLs in a paragraph, list item and table cell are links; the one in inline code is not. */
   bareUrlChecks?: boolean;
+  /** Inline code geometry: no line-height jump, rounded corners, translucent tint. */
+  inlineCodeChecks?: boolean;
+  /** Table-cell identifiers stay on one line; the long paragraph identifier wraps without overflow. */
+  inlineCodeNarrowChecks?: boolean;
   frontmatterLinkState?: "loading" | "loaded";
   hideDescriptionColumn?: boolean;
   contextTagChecks?: boolean;
@@ -1234,6 +1238,33 @@ export const SCENARIOS: Scenario[] = [
     description: "Bare URLs typed without Markdown link syntax in a paragraph, a list item and a table cell "
       + "are rendered as ordinary underlined links (trailing punctuation left outside the link); the URL "
       + "inside inline code stays plain code text.",
+  },
+  ...(["dark", "light", "white", "cream"] as const).map((mode) => ({
+    id: `inline-code-${mode}`,
+    fixture: "22-inline-code",
+    theme: mode === "light" ? "light" : "dark",
+    ...(mode === "white" || mode === "cream" ? { previewThemeMode: mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    inlineCodeChecks: true,
+    description: "Inline code in a heading, paragraphs, a wrapped long identifier, links, a list, an "
+      + "admonition and a table. Each span is a subtle tinted pill with a hairline border and rounded "
+      + "corners, slightly smaller than the text, never a heavy black box; paragraph lines with code are "
+      + "as tall as lines without; code inside links keeps the link colour and underline.",
+  })),
+  {
+    id: "inline-code-narrow",
+    fixture: "22-inline-code",
+    theme: "dark",
+    ...NARROW,
+    scroll: { kind: "top" },
+    fullPage: true,
+    inlineCodeChecks: true,
+    inlineCodeNarrowChecks: true,
+    description: "Inline code at 460px. Identifiers in the squeezed table cells are not split mid-word "
+      + "(the table scrolls or widens instead), while the long REGIONAL_ARBITER identifier in the "
+      + "paragraph wraps without causing horizontal page overflow.",
   },
   ...["white", "dark"].flatMap((mode) => [WIDE, NARROW].map((viewport) => ({
     id: `frontmatter-link-details-${mode}-${viewport.width}`,

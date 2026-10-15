@@ -828,6 +828,67 @@ def check_bare_urls(page: Page, scenario: dict, failures: list[Failure]) -> None
         failures.append(Failure(scenario["page"], "the URL in inline code was linkified"))
 
 
+def check_inline_code(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    if not scenario.get("inlineCodeChecks"):
+        return
+    found = page.evaluate("""() => {
+      const root = document.querySelector('#sphinx-myst-preview-content');
+      const paragraph = (start) => [...root.querySelectorAll('p')].find(p => p.textContent.startsWith(start));
+      const plain = paragraph('Control line without');
+      const withCode = paragraph('Control line with ');
+      const code = withCode.querySelector('code');
+      const style = getComputedStyle(code);
+      const inLink = root.querySelector('a code');
+      const heading = root.querySelector('h1 code');
+      return {
+        plainHeight: plain.getBoundingClientRect().height,
+        codeHeight: withCode.getBoundingClientRect().height,
+        radius: parseFloat(style.borderTopLeftRadius),
+        background: style.backgroundColor,
+        linkColor: inLink ? [getComputedStyle(inLink).color, getComputedStyle(inLink.closest('a')).color] : null,
+        headingRatio: heading ? parseFloat(getComputedStyle(heading).fontSize) / parseFloat(getComputedStyle(heading.parentElement).fontSize) : null,
+        overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    }""")
+    page_name = scenario["page"]
+    if abs(found["plainHeight"] - found["codeHeight"]) > 1:
+        failures.append(Failure(page_name, f"a line with inline code is {found['codeHeight']}px tall, a line without {found['plainHeight']}px"))
+    if found["radius"] < 3:
+        failures.append(Failure(page_name, f"inline code border radius is {found['radius']}px, expected at least 3px"))
+    alpha = re.match(r"rgba?\(([^)]*)\)", found["background"])
+    parts = [part.strip() for part in alpha.group(1).split(",")] if alpha else []
+    if len(parts) < 4 and "color(" not in found["background"] and "/" not in found["background"]:
+        failures.append(Failure(page_name, f"inline code background {found['background']} is opaque"))
+    if found["linkColor"] and found["linkColor"][0] != found["linkColor"][1]:
+        failures.append(Failure(page_name, f"code in a link is {found['linkColor'][0]}, link is {found['linkColor'][1]}"))
+    if found["overflow"]:
+        failures.append(Failure(page_name, "a long inline identifier overflows the page horizontally"))
+
+
+def check_inline_code_narrow(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    if not scenario.get("inlineCodeNarrowChecks"):
+        return
+    found = page.evaluate("""() => {
+      const root = document.querySelector('#sphinx-myst-preview-content');
+      const cells = [...root.querySelectorAll('td code, th code')].map(code => ({
+        text: code.textContent, rects: code.getClientRects().length }));
+      const long = [...root.querySelectorAll('p code')].find(code => code.textContent.startsWith('REGIONAL_ARBITER'));
+      return {
+        cells,
+        longRects: long.getClientRects().length,
+        longRight: Math.max(...[...long.getClientRects()].map(rect => rect.right)),
+        viewport: document.documentElement.clientWidth,
+        overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    }""")
+    page_name = scenario["page"]
+    split = [cell["text"] for cell in found["cells"] if cell["rects"] != 1]
+    if split or not found["cells"]:
+        failures.append(Failure(page_name, f"table-cell inline code split across lines: {split}"))
+    if found["longRects"] < 2 or found["longRight"] > found["viewport"] or found["overflow"]:
+        failures.append(Failure(page_name, f"long identifier did not wrap cleanly: {found}"))
+
+
 def machine_check_lines(checks: list[dict] | None) -> list[str]:
     """One PASS, FAIL or n/a line per geometry check; says so when the final frame was unavailable."""
     if checks is None:
@@ -1041,7 +1102,6 @@ def check_forced_cream_theme(page: Page, scenario: dict, failures: list[Failure]
       ("pageBackground", "rgb(245, 241, 232)"),
       ("pageForeground", "rgb(43, 42, 39)"),
       ("noteForeground", "rgb(43, 42, 39)"),
-      ("codeBackground", "rgb(237, 230, 218)"),
       ("codeForeground", "rgb(161, 78, 50)"),
       ("blockBackground", "rgb(237, 230, 218)"),
       ("linkForeground", "rgb(161, 78, 50)"),
@@ -1050,6 +1110,11 @@ def check_forced_cream_theme(page: Page, scenario: dict, failures: list[Failure]
             failures.append(
                 Failure(page_name, f"forced cream {key} is {colors[key]}, expected {expected}")
             )
+    # Inline code is a translucent tint of its own (clay) text colour, not an opaque paper box.
+    code_tint = _rgb_channels(colors["codeBackground"]) if colors["codeBackground"] else None
+    if code_tint is not None and (len(re.findall(r"\d+(?:\.\d+)?", colors["codeBackground"])) < 4
+                                  or any(abs(a - b) > 1 for a, b in zip(code_tint, [161, 78, 50]))):
+        failures.append(Failure(page_name, f"forced cream codeBackground is {colors['codeBackground']}, expected a translucent clay tint"))
     if colors["colorScheme"] != "light":
         failures.append(Failure(page_name, f"forced cream color-scheme is {colors['colorScheme']}"))
     for foreground, background in (
@@ -3149,7 +3214,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   for check in (
     check_forced_white_theme, check_forced_cream_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
     check_generic_skill_frontmatter, check_okf_schema_rendering, check_preview_toolbar,
-    check_math_rendering, check_bare_urls, check_content_contracts,
+    check_math_rendering, check_bare_urls, check_inline_code, check_inline_code_narrow, check_content_contracts,
   ):
     try:
       check(page, scenario, failures)

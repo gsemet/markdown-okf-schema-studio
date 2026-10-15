@@ -415,7 +415,7 @@ test("white mode keeps code backgrounds soft and code text readable blue", () =>
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /#sphinx-myst-preview-content :not\(pre\) > code\s*\{[^}]*background: var\(--vscode-textCodeBlock-background/u,
+    /#sphinx-myst-preview-content :not\(pre\) > code\s*\{[^}]*background: color-mix\(in srgb, currentColor \d+%, transparent\)/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,

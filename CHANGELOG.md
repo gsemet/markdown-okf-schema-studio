@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Inline code is now a subtle pill: a tint and hairline border derived from the text colour, 4px
+  radius, slightly smaller monospace, wrapping with padding on every line and never growing the
+  line height. It scales in headings, follows link colours and stays compact in tables.
 - The preview theme button now also offers a light "Cream" theme (warm paper background, warm
   near-black text, clay links, darker-cream code blocks); the loop is current, dark, white, cream.
   All text and background pairs meet WCAG AA 4.5:1.
