@@ -244,7 +244,10 @@ class RuntimeElement {
     if (!options?.preventScroll) this.windowState.scrollY = this.top;
   }
 
-  public setSelectionRange(start: number, end: number): void {
+  public selectionDirection = "none";
+
+  public setSelectionRange(start: number, end: number, direction = "none"): void {
+    this.selectionDirection = direction;
     this.selectionStart = start;
     this.selectionEnd = end;
     this.selectionRange = [start, end];
@@ -2305,6 +2308,65 @@ test("Shift+Tab on the first header cell does nothing", () => {
   assert.equal(prevented, true);
   assert.equal(harness.messages.length, count);
   assert.equal(input().value, "A");
+});
+
+function homeEndKeys(
+  control: RuntimeElement,
+  harness: ReturnType<typeof createRuntimeHarness>,
+  value: string,
+): void {
+  control.value = value;
+  const end = value.replace(/[\r\n]+$/u, "").length;
+  const press = (key: string, init: Record<string, unknown> = {}): boolean => {
+    let prevented = false;
+    harness.windowState.scrollY = 77;
+    control.dispatch("keydown", { key, ...init, preventDefault: () => { prevented = true; } });
+    assert.equal(harness.windowState.scrollY, 77, key + " must not scroll the preview");
+    return prevented;
+  };
+  control.setSelectionRange(4, 4);
+  assert.equal(press("Home"), true);
+  assert.deepEqual(control.selectionRange, [0, 0]);
+  assert.equal(press("End"), true);
+  assert.deepEqual(control.selectionRange, [end, end]);
+  control.setSelectionRange(4, 4);
+  assert.equal(press("End", { shiftKey: true }), true);
+  assert.deepEqual(control.selectionRange, [4, end]);
+  control.setSelectionRange(4, 4);
+  assert.equal(press("Home", { shiftKey: true }), true);
+  assert.deepEqual(control.selectionRange, [0, 4]);
+  assert.equal(control.selectionDirection, "backward");
+  // Extending a backward selection keeps its anchor at the original caret.
+  assert.equal(press("End", { shiftKey: true }), true);
+  assert.deepEqual(control.selectionRange, [4, end]);
+  // Cmd+arrow stays native, Cmd+Home is not ours, IME composition is ignored.
+  control.setSelectionRange(4, 4);
+  assert.equal(press("End", { metaKey: true }), false);
+  assert.equal(press("Home", { isComposing: true }), false);
+  assert.deepEqual(control.selectionRange, [4, 4]);
+}
+
+test("Home and End move the caret inside the block textarea instead of scrolling the preview", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "first line\nsecond line\n",
+  });
+  const textarea = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1);
+  assert.ok(textarea);
+  homeEndKeys(textarea, harness, "first line\nsecond line\n");
+});
+
+test("Home and End move the caret inside the table cell input instead of scrolling the table", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  homeEndKeys(input(), harness, "a very wide table cell value");
 });
 
 test("Tab on the last cell inserts a row and resumes in its first cell", () => {

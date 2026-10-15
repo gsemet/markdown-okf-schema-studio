@@ -1398,6 +1398,49 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
         failures.append(Failure(page_name, f"editor text is not smaller than the body text: {layout}"))
 
 
+def check_cell_end_key(page: Page, page_name: str, cell_input, failures: list[Failure]) -> None:
+    """Real End key in a focused table-cell editor: caret to the end, default prevented, no scroll.
+
+    On macOS the native End scrolls the preview or shifts a wide table horizontally; headless
+    Chromium on Linux moves the caret natively, so the scroll assertions only bite on macOS while
+    the defaultPrevented assertion is platform independent.
+    """
+    cell_input.evaluate("""element => {
+      element.focus({ preventScroll: true });
+      element.setSelectionRange(0, 0);
+      window.__okfEndKey = undefined;
+      element.addEventListener("keydown", event => {
+        if (event.key === "End") window.__okfEndKey = event.defaultPrevented;
+      }, { once: true });
+      // Capture-phase listener on window runs first; read defaultPrevented after the editor ran.
+      window.addEventListener("keydown", event => {
+        if (event.key !== "End") return;
+        setTimeout(() => { window.__okfEndPrevented = event.defaultPrevented; }, 0);
+      }, { capture: true, once: true });
+    }""")
+    measure = """() => {
+      const cell = document.querySelector('[data-sphinx-preview-table-cell-selected="true"]');
+      const lefts = [];
+      for (let node = cell.closest('table'); node; node = node.parentElement) lefts.push(node.scrollLeft);
+      return { y: window.scrollY, lefts };
+    }"""
+    before = page.evaluate(measure)
+    page.keyboard.press("End")
+    page.wait_for_function("() => window.__okfEndPrevented !== undefined", timeout=2000)
+    after = page.evaluate(measure)
+    prevented = page.evaluate("() => window.__okfEndPrevented")
+    caret_at_end = cell_input.evaluate(
+      "element => element.selectionStart === element.selectionEnd"
+      " && element.selectionEnd === element.value.replace(/[\\r\\n]+$/, '').length"
+    )
+    if not prevented or not caret_at_end or after != before:
+      failures.append(Failure(
+        page_name,
+        f"End in a table cell did not move the caret to the end without scrolling: "
+        f"prevented={prevented} caret_at_end={caret_at_end} {before} -> {after}",
+      ))
+
+
 def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure]) -> None:
     if not scenario.get("editMode"):
         return
@@ -1483,6 +1526,8 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       target = page.locator("main ul > li").nth(1)
     elif edit_target == "table-cell":
       target = page.locator("main table:not(.okf-properties) tbody td:nth-child(3)").first
+    elif edit_target == "table-cell-wide":
+      target = page.locator("main table:not(.okf-properties) tbody td:last-child").first
     elif edit_target == "frontmatter-key":
       target = page.locator('[data-okf-field="status"] th[data-okf-edit-cell="name"]')
     elif edit_target == "frontmatter-value":
@@ -1703,6 +1748,27 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
           failures.append(Failure(page_name, "wrapped list source is clipped when the editor opens"))
       return
 
+    if edit_target == "table-cell-wide":
+      # The table is wider than its wrapper: End must not shift it horizontally.
+      target.scroll_into_view_if_needed()
+      if not target.evaluate("""cell => {
+        for (let node = cell.closest('table'); node; node = node.parentElement) {
+          if (node.scrollWidth > node.clientWidth + 1
+            && ['auto', 'scroll'].includes(getComputedStyle(node).overflowX)) return true;
+        }
+        return false;
+      }"""):
+        failures.append(Failure(page_name, "wide-table fixture does not overflow its wrapper"))
+      target.click()
+      wide_input = page.locator("[data-sphinx-preview-table-cell-editor] textarea")
+      if wide_input.count() != 1:
+        failures.append(Failure(page_name, "clicking a far-right table cell did not open its editor"))
+        return
+      check_cell_end_key(page, page_name, wide_input, failures)
+      page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-end.png"), caret="initial")
+      wide_input.press("Escape")
+      return
+
     if edit_target == "table-cell":
       editor = page.locator("[data-sphinx-preview-table-cell-editor]")
       if editor.count() != 1 or not editor.is_visible():
@@ -1888,6 +1954,8 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
           && new Set(saves.map(message => message.editId)).size === 1;
       }"""):
         failures.append(Failure(page_name, "multi-cell autosave did not preserve all changes in one table edit session"))
+      check_cell_end_key(page, page_name, cell_input, failures)
+      page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-end.png"), caret="initial")
       # The scenario's final frame is taken after Escape closed the editor; keep the open state too.
       page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-open.png"), caret="initial")
       cell_input.press("Escape")

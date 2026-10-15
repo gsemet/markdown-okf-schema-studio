@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fixed Home and End in the inline block editor and table-cell editor: they now move the caret to
+  the start or end of the edited text (Shift extends the selection) instead of scrolling the
+  preview or shifting a wide table on macOS.
 - Changed the inline block editor: `Revert` is now `Cancel`, Escape cancels (in blocks and table
   cells) instead of keeping the text, Cmd/Ctrl+Enter still finishes, the status line shares one row
   with the Done and Cancel buttons, and the editor text is one size smaller.

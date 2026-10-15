@@ -1291,6 +1291,27 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     return undefined;
   }
 
+  // Home/End jump to the start/end of the edited text. On macOS the native keys scroll the nearest
+  // scrollable ancestor (the whole preview, or a wide table horizontally) instead of moving the
+  // caret, so they are handled here; Cmd+Left/Right keep their native line behaviour.
+  function homeEndInControl(event, control) {
+    if ((event.key !== "Home" && event.key !== "End") || event.isComposing) return false;
+    if (event.ctrlKey || event.metaKey || event.altKey) return false;
+    if (typeof control.setSelectionRange !== "function") return false;
+    event.preventDefault?.();
+    // Block sources end with a line break; End stops before it rather than on an empty last line.
+    const target = event.key === "Home" ? 0 : String(control.value ?? "").replace(/[\\r\\n]+$/u, "").length;
+    if (!event.shiftKey) {
+      control.setSelectionRange(target, target);
+      return true;
+    }
+    const backward = control.selectionDirection === "backward";
+    const anchor = Number(backward ? control.selectionEnd : control.selectionStart);
+    if (target < anchor) control.setSelectionRange(target, anchor, "backward");
+    else control.setSelectionRange(anchor, target, "forward");
+    return true;
+  }
+
   function keepUndoInControl(event) {
     const mod = event.metaKey || event.ctrlKey;
     const code = event.keyCode;
@@ -2453,6 +2474,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         return;
       }
       if (navigateBlockEdit(event, input)) return;
+      if (homeEndInControl(event, input)) return;
       if (event.key === "Escape" && !event.isComposing) {
         event.preventDefault?.();
         cancelBlockEdit();
@@ -2591,6 +2613,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     textarea.addEventListener("keydown", (event) => {
       if (keepUndoInControl(event)) return;
       if (navigateBlockEdit(event, textarea)) return;
+      if (homeEndInControl(event, textarea)) return;
       if (
         event.key === "Enter"
         && !event.shiftKey && !event.altKey && !event.metaKey && !event.ctrlKey

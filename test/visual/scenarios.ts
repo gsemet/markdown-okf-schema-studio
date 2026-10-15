@@ -28,7 +28,7 @@ export interface Scenario {
   expectedStickyHeadings?: string;
   expectedContentWidth?: number;
   editMode?: boolean;
-  editTarget?: "title" | "paragraph" | "admonition" | "list" | "table-cell" | "frontmatter-key" | "frontmatter-value" | "frontmatter-list" | "frontmatter-boolean";
+  editTarget?: "title" | "paragraph" | "admonition" | "list" | "table-cell" | "table-cell-wide" | "frontmatter-key" | "frontmatter-value" | "frontmatter-list" | "frontmatter-boolean";
   width: number;
   height: number;
   scroll: ScrollMode;
@@ -711,6 +711,19 @@ export const SCENARIOS: Scenario[] = [
     editTarget: "list",
     description:
       "Clicking one item opens the complete list, including a wrapped continuation line, in the editor.",
+  },
+  {
+    id: "edit-table-wide-end-dark",
+    fixture: "04-code-and-tables",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "selector", value: "table", offset: 72 },
+    editMode: true,
+    editTarget: "table-cell-wide",
+    description:
+      "Edit mode on a sixteen-column table wider than the preview. After pressing End in the "
+      + "far-right cell editor (the -end PNG) the caret is at the end of the cell text and the "
+      + "table has not shifted horizontally.",
   },
   {
     id: "edit-table-cell-dark",
