@@ -170,7 +170,7 @@ export const SCENARIOS: Scenario[] = [
     description:
       "The OKF properties table at the top of a cream page. Field names, values and the header "
       + "band are readable and inline code uses clay text on the darker cream code background; "
-      + "the toolbar theme button shows the cream sheet icon.",
+      + "the toolbar theme button shows a steaming coffee cup icon.",
   },
   {
     id: "edit-paragraph-forced-cream",
