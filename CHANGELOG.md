@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Every setting now explains what it does and what each value changes, in a grouped order; the
+  scroll and PlantUML jar path descriptions are corrected.
+
 ## 0.3.1 - 2026-10-15
 
 - Linked-file metadata in the properties table refreshes reliably when a linked target is saved,
