@@ -31,6 +31,7 @@ import {
   type FileLinkInspectionOptions,
   type FrontmatterLinkResult,
 } from "./fileLinks";
+import { getResolvedSchema, resetSchemaRegistryForTests, type SchemaDependencyCheck } from "./schemaRegistry";
 import {
   getCachedValidator,
   validateWithCachedValidator,
@@ -1073,13 +1074,25 @@ let fileReader: ((schemaPath: string) => string) | undefined;
 
 export function setSchemaFileReaderForTests(reader: ((schemaPath: string) => string) | undefined): void {
   fileReader = reader;
+  resetSchemaRegistryForTests();
 }
 
+
+// While a schema is being resolved, every file read and `$ref` probe registers a re-check here so
+// the registry can tell whether the cached result is still exact.
+let activeDependencies: SchemaDependencyCheck[] | undefined;
+
 function readSchemaFile(schemaPath: string): string {
-  if (fileReader) {
-    return fileReader(schemaPath);
-  }
-  return fs.readFileSync(schemaPath, "utf8");
+  const read = (): string => (fileReader ? fileReader(schemaPath) : fs.readFileSync(schemaPath, "utf8"));
+  const text = read();
+  activeDependencies?.push(() => {
+    try {
+      return read() === text;
+    } catch {
+      return false;
+    }
+  });
+  return text;
 }
 
 function stripJson5Comments(source: string): string {
@@ -1144,11 +1157,25 @@ function refTargetExists(schemaDir: string, ref: string): string | undefined {
   }
   for (const suffix of REF_SUFFIX_FALLBACKS) {
     const candidate = path.resolve(schemaDir, `${base}${suffix}`);
-    if (isFile(candidate)) {
+    const exists = isFile(candidate);
+    activeDependencies?.push(() => isFile(candidate) === exists);
+    if (exists) {
       return candidate;
     }
   }
   return undefined;
+}
+
+function resolveCandidateSchema(candidate: SchemaCandidate): Record<string, unknown> {
+  return getResolvedSchema(candidate.path, (dependencies) => {
+    const outer = activeDependencies;
+    activeDependencies = dependencies;
+    try {
+      return resolveSchemaRefs(parseSchemaFile(candidate), path.dirname(candidate.path));
+    } finally {
+      activeDependencies = outer;
+    }
+  });
 }
 
 function isFile(candidate: string): boolean {
@@ -1482,7 +1509,7 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
   }
   let schema: Record<string, unknown>;
   try {
-    schema = resolveSchemaRefs(parseSchemaFile(candidate), path.dirname(candidate.path));
+    schema = resolveCandidateSchema(candidate);
   } catch (error) {
     return {
       present: true,

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Long editing sessions no longer accumulate memory from schema validation: resolved schemas and
+  their compiled validators are reused until a schema file changes.
 - PlantUML rendering now times out after 30 s, caps stderr at 64 KiB, kills the whole process
   group on cancel or timeout, and no longer crashes the extension host when the process exits
   before reading its input.
