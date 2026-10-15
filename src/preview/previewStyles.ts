@@ -519,8 +519,10 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   margin-inline-start: auto;
 }
 
-.sphinx-preview-block-editor .sphinx-preview-block-editor-actions [data-sphinx-preview-edit-status] {
+/* The id selector beats the "#sphinx-myst-preview-content p" rule, whose bottom margin pushed the text up. */
+#sphinx-myst-preview-content .sphinx-preview-block-editor .sphinx-preview-block-editor-actions [data-sphinx-preview-edit-status] {
   flex: 1 1 14em;
+  align-self: center;
   min-width: 0;
   margin: 0;
 }

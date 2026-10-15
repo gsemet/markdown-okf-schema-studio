@@ -1594,6 +1594,13 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
       sideBySide = layout["sBottom"] > layout["bTop"] and layout["sTop"] < layout["bBottom"]
       if sideBySide and layout["sRight"] > layout["bLeft"] + 0.5:
         failures.append(Failure(page_name, f"status text overlaps the buttons: {layout}"))
+      status_centre = (layout["sTop"] + layout["sBottom"]) / 2
+      button_centre = (layout["bTop"] + layout["bBottom"]) / 2
+      if sideBySide and abs(status_centre - button_centre) > 2:
+        failures.append(Failure(
+          page_name,
+          f"status text centre is {button_centre - status_centre:.1f}px above the buttons' centre: {layout}",
+        ))
       if layout["bRight"] > layout["rRight"] + 0.5:
         failures.append(Failure(page_name, f"buttons overflow the editor row: {layout}"))
       if layout["bLeft"] <= layout["sLeft"]:

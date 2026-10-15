@@ -246,6 +246,14 @@ test("the block editor status and its buttons share one wrapping row", () => {
   );
 });
 
+test("the block editor status is not pushed up by the paragraph margin", () => {
+  // The id selector of `#sphinx-myst-preview-content p` outweighs a class-only margin reset.
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /#sphinx-myst-preview-content \.sphinx-preview-block-editor \.sphinx-preview-block-editor-actions \[data-sphinx-preview-edit-status\]\s*\{[^}]*flex: 1 1 14em;[^}]*align-self: center;[^}]*margin: 0;/u,
+  );
+});
+
 test("active paragraph editors share the rendered paragraph spacing", () => {
   assert.match(
     PREVIEW_THEME_CSS,
