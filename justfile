@@ -27,6 +27,9 @@ update:
     uv sync --upgrade --group docs
     uv run --no-sync --group docs playwright install chromium
 
+update-guidelines:
+    guidelines update
+
 # Set up the development environment (compatibility entry point).
 install: dev
 

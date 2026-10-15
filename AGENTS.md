@@ -30,6 +30,11 @@ It is MIT licensed and is developed independently from the Agentic Coding White 
 - Package a VSIX: `just package`
 - Run the complete validation and site-generation pipeline: `just preflight`
 
+## Guidelines
+
+- When creating a git commit in this project: [.github/guidelines/git-commit-message.guidelines.md](.github/guidelines/git-commit-message.guidelines.md)
+- Allowed Conventional commit scopes: [.github/guidelines/git-commit-allowed-scopes.md](.github/guidelines/git-commit-allowed-scopes.md)
+
 ## Completion gate
 
 Run `just preflight` after making changes and before considering a task complete. A task is not

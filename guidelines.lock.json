@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "manager": "ai-guidelines",
+  "lock_format": "ai-guidelines",
+  "lock_format_version": 1,
+  "manager_version": "0.1.0",
+  "generated_at": "2026-10-15T07:53:19Z",
+  "guidelines": [
+    {
+      "expression": "gsemet/ai-guidelines-registry",
+      "name": "Git_Commit_Message",
+      "source": "https://github.com/gsemet/ai-guidelines-registry/SWE/Git/Git_Commit_Message",
+      "source_type": "github",
+      "path": "SWE/Git/Git_Commit_Message",
+      "reference_kind": "branch",
+      "commit": "24bb548a42d2659eaaa61baf0ef0e38c383d77fb",
+      "captured_at": "2026-10-15T07:53:19Z",
+      "target_path": ".github/guidelines",
+      "files": [
+        {
+          "source_path": "git-commit-message.guidelines.md",
+          "target_path": ".github/guidelines/git-commit-message.guidelines.md",
+          "sha256": "b1845de3e9a205b532db208a68c59f2e6ec1579b52675ba0c2ce2824183db9c1"
+        }
+      ]
+    }
+  ]
+}

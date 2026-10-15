@@ -1,0 +1,4 @@
+version: 1
+guidelines:
+- source: gsemet/ai-guidelines-registry
+  path: SWE/Git/Git_Commit_Message
