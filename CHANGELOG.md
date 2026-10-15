@@ -1,11 +1,8 @@
 # Changelog
 
-## 0.1.1 - 2026-10-15
+## 0.2.1 - 2026-10-15
 
-- Published the extension to the VS Code Marketplace and added its canonical install link.
-- Added manual recovery paths for Marketplace releases and GitHub Pages deployments.
-
-## Unreleased
+- Release and GitHub Pages deployments now run from version tags matching the package version.
 
 - When VS Code restores several preview panels after a reload, every panel stays interactive:
   only the newest follows the active editor, the others become fixed previews of their document.
@@ -64,6 +61,11 @@
 - Fixed GitHub alerts (`> [!NOTE]`) rendering as plain blockquotes in CRLF documents.
 - Fixed schema fields named like `Object.prototype` members (`constructor`, `toString`) being
   treated as present.
+
+## 0.1.1 - 2026-10-15
+
+- Published the extension to the VS Code Marketplace and added its canonical install link.
+- Added manual recovery paths for Marketplace releases and GitHub Pages deployments.
 
 ## 0.1.0 - 2026-09-25
 

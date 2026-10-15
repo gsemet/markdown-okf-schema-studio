@@ -15,8 +15,8 @@ import {
 } from "./extensionApi";
 import { E2E_SCREENSHOT_ROOT } from "../reportPaths";
 
-async function waitFor(description: string, predicate: () => boolean): Promise<void> {
-  const deadline = Date.now() + 5_000;
+async function waitFor(description: string, predicate: () => boolean, timeoutMs = 5_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (predicate()) return;
     await new Promise<void>((resolve) => setTimeout(resolve, 25));
@@ -489,9 +489,18 @@ export async function run(): Promise<void> {
       await captureLinkState(page, frame, artifacts, `links-${theme}-hover`,
         "Action: hover the related link. Expected: visible target path and description: Original target description, with readable text, preserved line breaks and no viewport clipping.", true);
     }
-    fs.writeFileSync(path.join(directory, "references/frontmatter-target.md"), "---\ndescription: Updated target description\n---\n# Target\n\n## Supported\n", "utf8");
-    await waitFor("linked target metadata to refresh after a saved change", () =>
-      /class="okf-link-excerpt"[^>]*>Updated target description<\/span>/u.test(getActivePreviewForTests()?.html ?? ""));
+    const updatedTarget = () =>
+      /class="okf-link-excerpt"[^>]*>Updated target description<\/span>/u.test(getActivePreviewForTests()?.html ?? "");
+    // File watchers arm asynchronously and can miss the first write on loaded CI runners.
+    for (let attempt = 1; ; attempt += 1) {
+      fs.writeFileSync(path.join(directory, "references/frontmatter-target.md"), "---\ndescription: Updated target description\n---\n# Target\n\n## Supported\n", "utf8");
+      try {
+        await waitFor("linked target metadata to refresh after a saved change", updatedTarget, 10_000);
+        break;
+      } catch (error) {
+        if (attempt >= 3) throw error;
+      }
+    }
     await waitForCurrentPreview(document);
     for (const theme of ["white", "dark"] as const) {
       const frame = await previewFrame(page, "Updated target description");
