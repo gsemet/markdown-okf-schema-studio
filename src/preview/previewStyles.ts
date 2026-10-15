@@ -113,7 +113,6 @@ export const PREVIEW_THEME_CSS = `
   --sphinx-preview-font: var(--vscode-markdown-font-family, var(--vscode-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, sans-serif));
   --sphinx-preview-font-size: var(--vscode-markdown-font-size, 14px);
   --sphinx-preview-line-height: var(--vscode-markdown-line-height, 1.6);
-  --sphinx-preview-border: var(--vscode-widget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
   --sphinx-preview-content-max-width: ${DEFAULT_PREVIEW_CONTENT_WIDTH}px;
   --sphinx-preview-controls-height: 116px;
   --sphinx-preview-content-gutter: clamp(16px, 8vw, 78px);
@@ -121,6 +120,10 @@ export const PREVIEW_THEME_CSS = `
   --sphinx-preview-diff-deletion: var(--vscode-charts-red, #cf222e);
   --sphinx-preview-scrollbar-thumb: var(--vscode-scrollbarSlider-background, rgba(128, 128, 128, 0.4));
   --sphinx-preview-scrollbar-hover: var(--vscode-scrollbarSlider-hoverBackground, rgba(128, 128, 128, 0.7));
+}
+
+body {
+  --sphinx-preview-border: var(--vscode-widget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
 }
 
 * {
@@ -152,6 +155,17 @@ html[data-sphinx-preview-theme-mode="dark"] body {
   --sphinx-preview-scrollbar-hover: #9e9e9e;
   --vscode-editor-background: #1e1e1e;
   --vscode-editor-foreground: #d4d4d4;
+  --vscode-foreground: #d4d4d4;
+  --vscode-editorWidget-background: #252526;
+  --vscode-editorWidget-border: #454545;
+  --vscode-icon-foreground: #d4d4d4;
+  --vscode-toolbar-hoverBackground: rgba(255, 255, 255, 0.1);
+  --vscode-input-background: #3c3c3c;
+  --vscode-input-foreground: #d4d4d4;
+  --vscode-input-border: #454545;
+  --vscode-button-background: #0e639c;
+  --vscode-button-foreground: #ffffff;
+  --vscode-errorForeground: #f48771;
   --vscode-descriptionForeground: #9d9d9d;
   --vscode-textLink-foreground: #3794ff;
   --vscode-focusBorder: #007fd4;
@@ -181,6 +195,17 @@ html[data-sphinx-preview-theme-mode="white"] body {
   --sphinx-preview-scrollbar-hover: #808080;
   --vscode-editor-background: #ffffff;
   --vscode-editor-foreground: #1f1f1f;
+  --vscode-foreground: #1f1f1f;
+  --vscode-editorWidget-background: #f3f3f3;
+  --vscode-editorWidget-border: #c8c8c8;
+  --vscode-icon-foreground: #333333;
+  --vscode-toolbar-hoverBackground: rgba(0, 0, 0, 0.08);
+  --vscode-input-background: #ffffff;
+  --vscode-input-foreground: #1f1f1f;
+  --vscode-input-border: #c8c8c8;
+  --vscode-button-background: #005fb8;
+  --vscode-button-foreground: #ffffff;
+  --vscode-errorForeground: #b5200d;
   --vscode-descriptionForeground: #5f5f5f;
   --vscode-textLink-foreground: #006ab1;
   --vscode-focusBorder: #005fb8;

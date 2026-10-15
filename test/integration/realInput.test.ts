@@ -2767,6 +2767,71 @@ async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<voi
       return current !== undefined
         && await current.locator("html").getAttribute("data-sphinx-preview-edit-mode") === "on";
     });
+    const workbench = vscode.workspace.getConfiguration("workbench");
+    const originalTheme = workbench.inspect<string>("colorTheme")?.workspaceValue;
+    const palettes = {
+      dark: ["rgb(30, 30, 30)", "rgb(37, 37, 38)", "rgb(212, 212, 212)", "rgb(14, 99, 156)"],
+      white: ["rgb(255, 255, 255)", "rgb(243, 243, 243)", "rgb(51, 51, 51)", "rgb(0, 95, 184)"],
+      cream: ["rgb(245, 241, 232)", "rgb(251, 248, 241)", "rgb(74, 70, 61)", "rgb(154, 74, 42)"],
+    };
+    try {
+      for (const host of ["Dark", "Light"] as const) {
+        await workbench.update("colorTheme", `Default ${host} Modern`, vscode.ConfigurationTarget.Workspace);
+        await waitFor(`the ${host} host theme to reach the webview`, async () => {
+          const current = await findCurrentFrame(page);
+          return current !== undefined && await current.locator("body").evaluate(
+            (body, kind) => body.classList.contains(`vscode-${kind}`), host.toLowerCase());
+        });
+        for (const mode of ["current", "dark", "white", "cream"] as const) {
+          await withCurrentFrame(page, async (frame) => {
+            const toggle = frame.locator("[data-sphinx-preview-theme-toggle]");
+            for (let attempt = 0; attempt < 4; attempt += 1) {
+              if (await toggle.getAttribute("data-theme-mode") === mode) break;
+              await toggle.click();
+            }
+          });
+          await page.mouse.move(10, 10);
+          await waitFor(`${mode} toolbar colors on the ${host} host`, async () => {
+            const current = await findCurrentFrame(page);
+            if (current === undefined) return false;
+            return current.evaluate(({ mode, palettes }) => {
+              if (window.document.documentElement.getAttribute("data-sphinx-preview-theme-mode") !== mode) return false;
+              const toolbar = window.document.querySelector<HTMLElement>("[data-sphinx-preview-toolbar]");
+              const active = toolbar?.querySelector<HTMLElement>('button[aria-pressed="true"]');
+              if (!toolbar || !active) return false;
+              const bodyStyle = getComputedStyle(window.document.body);
+              const toolbarStyle = getComputedStyle(toolbar);
+              const activeStyle = getComputedStyle(active);
+              const actual = [bodyStyle.backgroundColor, toolbarStyle.backgroundColor,
+                toolbarStyle.color, activeStyle.backgroundColor];
+              if (mode !== "current") {
+                const borders = { dark: "rgb(69, 69, 69)", white: "rgb(200, 200, 200)", cream: "rgb(214, 205, 189)" };
+                const panels = [toolbar, ...window.document.querySelectorAll<HTMLElement>(".admonition")];
+                return actual.every((color, index) => color === palettes[mode][index])
+                  && panels.every((panel) => {
+                    const style = getComputedStyle(panel);
+                    return [style.borderTopColor, style.borderRightColor, style.borderBottomColor]
+                      .every((color) => color === borders[mode]);
+                  });
+              }
+              const probe = window.document.createElement("span");
+              window.document.body.append(probe);
+              const expected = ["--vscode-editor-background", "--vscode-editorWidget-background",
+                "--vscode-icon-foreground", "--vscode-button-background"].map((variable) => {
+                probe.style.color = `var(${variable})`;
+                return getComputedStyle(probe).color;
+              });
+              probe.remove();
+              return actual.every((color, index) => color === expected[index]);
+            }, { mode, palettes });
+          });
+          await captureAfter(evidence, page, `38-toolbar-${host.toLowerCase()}-${mode}`,
+            `${mode} preview mode updates the document and floating toolbar on the ${host} VS Code theme.`);
+        }
+      }
+    } finally {
+      await workbench.update("colorTheme", originalTheme, vscode.ConfigurationTarget.Workspace);
+    }
     await withCurrentFrame(page, async (frame) => {
       const themeButton = frame.locator("[data-sphinx-preview-theme-toggle]");
       for (let attempt = 0; attempt < 3; attempt += 1) {

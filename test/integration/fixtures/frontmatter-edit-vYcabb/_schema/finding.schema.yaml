@@ -1,0 +1,93 @@
+type: object
+properties:
+  type:
+    const: finding
+    description: Document type.
+  id:
+    type: string
+    description: Stable finding identity.
+  status:
+    type: string
+    enum: [draft, active]
+    description: Review lifecycle state.
+  summary:
+    type: string
+    description: Summary provided by the renamed schema property.
+  related:
+    type: string
+    description: Supporting source document.
+    x-okf-link:
+      resolution: document-relative
+      syntax: plain
+      tooltip_shows_fields: [description]
+      preview_shows_fields: [description]
+  implemented_in_files:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: project-relative
+        syntax: plain
+        basename_marker: '@implements_req'
+        id_marker: id
+        show_line_number: true
+  tested_in_files:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: project-relative
+        syntax: plain
+        basename_marker: '@tests_req'
+        id_marker: id
+        show_line_number: true
+  count:
+    type: integer
+  annotation_exemption:
+    type: boolean
+  exemption_reason:
+    type: [string, "null"]
+    minLength: 1
+  tags:
+    type: [array, "null"]
+    items:
+      type: string
+  metadata:
+    type: object
+    properties:
+      owner:
+        type: string
+      revision:
+        type: integer
+      target:
+        type: string
+        x-okf-link: { resolution: document-relative, syntax: plain }
+    required: [owner, revision]
+    additionalProperties: false
+  stem_target:
+    type: string
+    x-okf-link: { resolution: filename-stem, syntax: plain }
+  bundle_target:
+    type: string
+    x-okf-link: { resolution: bundle-relative, syntax: plain }
+  array_targets:
+    type: array
+    items:
+      type: string
+      x-okf-link: { resolution: document-relative, syntax: plain }
+  non_markdown_target:
+    type: string
+    x-okf-link: { resolution: document-relative, syntax: plain }
+  outside_target:
+    type: string
+    x-okf-link: { resolution: document-relative, syntax: plain }
+required: [type, status, metadata]
+additionalProperties: false
+allOf:
+  - if:
+      properties:
+        annotation_exemption: { const: true }
+    then:
+      required: [exemption_reason]
+      properties:
+        exemption_reason: { type: string, minLength: 1 }

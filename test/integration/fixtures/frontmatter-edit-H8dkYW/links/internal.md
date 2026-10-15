@@ -1,0 +1,1 @@
+/tmp/studio-symlink-outside-fdnCMy/outside.md
