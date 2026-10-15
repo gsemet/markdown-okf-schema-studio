@@ -2228,8 +2228,12 @@ test("table editing switches cells without losing changes and finalizes before l
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
 });
 
-function openTableCellEditorForTab(harness: ReturnType<typeof createRuntimeHarness>) {
+function openTableCellEditorForTab(
+  harness: ReturnType<typeof createRuntimeHarness>,
+  options: { mapped?: boolean } = {},
+) {
   const table = new RuntimeElement({
+    "data-sphinx-preview-document": "file:///active.md",
     "data-sphinx-source-end-line": "23",
     "data-sphinx-source-file": "/workspace/active.md",
     "data-sphinx-source-line": "20",
@@ -2249,6 +2253,7 @@ function openTableCellEditorForTab(harness: ReturnType<typeof createRuntimeHarne
     });
   });
   table.rows = rows;
+  if (options.mapped) harness.mappings.push(table);
   harness.editModeButton.dispatch("click");
   const click = (cell: RuntimeElement): void => harness.dispatchDocument("click", {
     target: cell,
@@ -2308,6 +2313,162 @@ test("Shift+Tab on the first header cell does nothing", () => {
   assert.equal(prevented, true);
   assert.equal(harness.messages.length, count);
   assert.equal(input().value, "A");
+});
+
+function descendantsOf(element: RuntimeElement): RuntimeElement[] {
+  return element.childElements.flatMap((child) => [child, ...descendantsOf(child)]);
+}
+
+function cellEditorOf(harness: ReturnType<typeof createRuntimeHarness>): RuntimeElement {
+  const editor = harness.createdElements.filter((element) =>
+    element.getAttribute("data-sphinx-preview-table-cell-editor") === "true").at(-1);
+  assert.ok(editor);
+  return editor;
+}
+
+test("arrow keys move the table cell editor cell to cell in every direction", () => {
+  const harness = createRuntimeHarness();
+  const { cells, input } = openTableCellEditorForTab(harness);
+  const press = (key: string, position: number | "end", init: Record<string, unknown> = {}): boolean => {
+    const at = position === "end" ? input().value.length : position;
+    input().setSelectionRange(at, at);
+    let prevented = false;
+    input().dispatch("keydown", { key, ...init, preventDefault: () => { prevented = true; } });
+    return prevented;
+  };
+  assert.equal(input().value, "x");
+  // Mid-text caret: native caret movement, nothing happens.
+  input().value = "xx";
+  assert.equal(press("ArrowRight", 1), false);
+  assert.equal(cellEditorOf(harness).parentElement, cells[1][0]);
+  assert.equal(press("ArrowRight", "end"), true);
+  assert.equal(cellEditorOf(harness).parentElement, cells[1][1]);
+  assert.equal(input().value, "y");
+  assert.deepEqual(input().selectionRange, [0, 0]);
+  assert.equal(press("ArrowDown", "end"), true);
+  assert.equal(cellEditorOf(harness).parentElement, cells[2][1]);
+  assert.equal(input().value, "q");
+  assert.equal(press("ArrowLeft", 0), true);
+  assert.equal(cellEditorOf(harness).parentElement, cells[2][0]);
+  assert.equal(input().value, "p");
+  assert.deepEqual(input().selectionRange, [1, 1]);
+  assert.equal(press("ArrowUp", 0), true);
+  assert.equal(cellEditorOf(harness).parentElement, cells[1][0]);
+  // The edited first cell was committed by the move, like Tab: autosave, no final save, one edit.
+  assert.equal(input().value, "xx");
+  assert.equal(harness.messages.filter((message) => message.type === "previewEditOpen").length, 1);
+  assert.equal(harness.messages.some((message) => message.final === true), false);
+  assert.match(String(harness.messages.at(-1)?.editedText), /\| xx \| y \|/u);
+});
+
+test("table cell arrows behave natively with a selection, modifiers, IME or a caret inside a multi-line cell", () => {
+  const harness = createRuntimeHarness();
+  const { cells, input } = openTableCellEditorForTab(harness);
+  const count = harness.messages.length;
+  const attempt = (key: string, start: number, end: number, init: Record<string, unknown> = {}): void => {
+    input().setSelectionRange(start, end);
+    let prevented = false;
+    input().dispatch("keydown", { key, ...init, preventDefault: () => { prevented = true; } });
+    assert.equal(prevented, false, key + JSON.stringify(init));
+  };
+  input().value = "ab";
+  attempt("ArrowRight", 0, 2);
+  attempt("ArrowLeft", 0, 2);
+  for (const modifier of ["shiftKey", "altKey", "metaKey", "ctrlKey"]) {
+    attempt("ArrowRight", 2, 2, { [modifier]: true });
+    attempt("ArrowLeft", 0, 0, { [modifier]: true });
+  }
+  input().value = "one\ntwo";
+  attempt("ArrowDown", 1, 1);
+  attempt("ArrowUp", 5, 5);
+  assert.equal(cellEditorOf(harness).parentElement, cells[1][0]);
+  assert.equal(harness.messages.length, count);
+});
+
+test("table cell arrows fall back to block navigation only when no cell lies in that direction", () => {
+  const harness = createRuntimeHarness();
+  const { cells, click, input } = openTableCellEditorForTab(harness, { mapped: true });
+  click(cells[0][0]);
+  assert.equal(input().value, "A");
+  input().setSelectionRange(0, 0);
+  let prevented = false;
+  input().dispatch("keydown", { key: "ArrowUp", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(harness.messages.at(-1)?.type, "previewEditOpen");
+  assert.equal(harness.messages.at(-1)?.line, 1);
+});
+
+test("a table cell arrow without a matching model cell is not swallowed", () => {
+  const harness = createRuntimeHarness();
+  const { cells, input } = openTableCellEditorForTab(harness);
+  // The rendered table has a third column in the row below that the Markdown model lacks.
+  const extra = new RuntimeElement({}, harness.windowState, 100, 30, "td");
+  extra.cellIndex = 2;
+  cells[1][1].parentElement?.appendChild(extra);
+  (cells[1][1].parentElement as unknown as { cells: RuntimeElement[] }).cells.push(extra);
+  input().dispatch("keydown", { key: "Tab", preventDefault: () => undefined });
+  assert.equal(input().value, "y");
+  input().setSelectionRange(1, 1);
+  let prevented = false;
+  input().dispatch("keydown", { key: "ArrowRight", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, false);
+  assert.equal(cellEditorOf(harness).parentElement, cells[1][1]);
+});
+
+test("the table cell field is re-fitted when the preview is resized", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  const field = input();
+  const heights: number[] = [];
+  Object.defineProperty(field, "scrollHeight", { get: () => 77, configurable: true });
+  field.style.height = "5px";
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  heights.push(parseFloat(String(field.style.height)));
+  assert.deepEqual(heights, [77]);
+});
+
+test("the table cell editor has Done and Cancel but no status hint", () => {
+  const harness = createRuntimeHarness();
+  const { cells, input } = openTableCellEditorForTab(harness);
+  const editor = cellEditorOf(harness);
+  const buttons = descendantsOf(editor).filter((element) => element.tagName === "BUTTON");
+  assert.deepEqual(buttons.map((button) => button.textContent), ["Done", "Cancel"]);
+  assert.equal(descendantsOf(editor).filter((element) =>
+    element.getAttribute("data-sphinx-preview-edit-status") !== null).length, 0);
+  assert.equal(descendantsOf(editor).filter((element) =>
+    element.className === "sphinx-preview-block-editor-buttons").length, 1);
+  assert.equal(editor.childElements.at(-1)?.className, "sphinx-preview-block-editor-actions");
+  // The status stays on the toolbar.
+  const menu = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-table-menu") === "true");
+  assert.ok(menu?.childElements.some((element) =>
+    element.getAttribute("data-sphinx-preview-edit-status") !== null));
+  // Done commits the cell, like Enter; the buttons never take the focus from the field.
+  input().value = "typed";
+  input().dispatch("input");
+  let prevented = false;
+  buttons[0].dispatch("mousedown", { preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  buttons[0].dispatch("click");
+  assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
+  assert.equal(harness.messages.at(-1)?.final, true);
+  assert.match(String(harness.messages.at(-1)?.editedText), /typed/u);
+  assert.equal(cellEditorOf(harness).parentElement, cells[1][0]);
+});
+
+test("Cancel in the table cell editor does what Escape does", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  input().value = "typed";
+  input().dispatch("input");
+  harness.flushTimers();
+  const buttons = descendantsOf(cellEditorOf(harness)).filter((element) => element.tagName === "BUTTON");
+  buttons[1].dispatch("click");
+  assert.equal(harness.messages.at(-1)?.type, "previewEditCancel");
+  assert.equal(harness.createdElements.filter((element) =>
+    element.getAttribute("data-sphinx-preview-table-cell-editor") === "true"
+    && element.parentElement !== undefined).length, 0);
 });
 
 function homeEndKeys(

@@ -210,6 +210,31 @@ test("raw Markdown and YAML editors use the editor font, text fields keep the pr
   );
 });
 
+test("the table cell editor shares the block editor textarea rule and grows with its content", () => {
+  // One rule carries the font family, size and line-height for both editors (no duplicated values).
+  const shared = PREVIEW_THEME_CSS.match(
+    /([^{}]*\.sphinx-preview-table-cell-editor textarea[^{}]*)\{([^}]*)\}/u,
+  );
+  assert.ok(shared);
+  assert.match(shared[1], /\.sphinx-preview-block-editor textarea/u);
+  assert.match(shared[2], /font-family: var\(--vscode-editor-font-family, ui-monospace/u);
+  assert.match(shared[2], /font-size: calc\(var\(--vscode-editor-font-size, 0\.95em\) - 1px\);/u);
+  assert.match(shared[2], /line-height: inherit;/u);
+  const cellEditor = PREVIEW_THEME_CSS.match(/\.sphinx-preview-table-cell-editor\s*\{([^}]*)\}/u)?.[1] ?? "";
+  assert.doesNotMatch(cellEditor, /position: absolute;/u);
+  assert.doesNotMatch(
+    PREVIEW_THEME_CSS.match(/\.sphinx-preview-table-cell-editor textarea\s*\{([^}]*)\}/u)?.[1] ?? "",
+    /font(-family|-size)?:/u,
+  );
+});
+
+test("the table toolbar status is not pushed up by the paragraph margin", () => {
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /#sphinx-myst-preview-content \.sphinx-preview-table-menu \[data-sphinx-preview-edit-status\]\s*\{[^}]*margin: 0 4px;/u,
+  );
+});
+
 test("the block editor status and its buttons share one wrapping row", () => {
   const row = PREVIEW_THEME_CSS.match(/\.sphinx-preview-block-editor-actions\s*\{([^}]*)\}/u)?.[1] ?? "";
   assert.match(row, /display: flex;/u);

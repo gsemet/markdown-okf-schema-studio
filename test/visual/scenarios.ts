@@ -723,7 +723,8 @@ export const SCENARIOS: Scenario[] = [
     description:
       "Edit mode on a sixteen-column table wider than the preview. After pressing End in the "
       + "far-right cell editor (the -end PNG) the caret is at the end of the cell text and the "
-      + "table has not shifted horizontally.",
+      + "table has not shifted horizontally. Done and Cancel sit inside the cell without widening "
+      + "the column and the toolbar status is centred with its buttons.",
   },
   {
     id: "edit-table-cell-dark",
@@ -740,7 +741,10 @@ export const SCENARIOS: Scenario[] = [
     editTarget: "table-cell",
     machineChecks: ["overlay-covers-text", "overlay-clipped"],
     description:
-      "The selected table cell is edited in place with a row and column action bar above the table.",
+      "The selected table cell is edited in place with a row and column action bar above the table. "
+      + "The cell editor uses the block editor font, shows Done and Cancel under the field inside "
+      + "the cell (no status hint), and the toolbar status is vertically centred with its buttons. "
+      + "The -arrowdown PNG shows the editor moved to the cell below after ArrowDown.",
   },
   ...["light", "dark"].flatMap((theme) => [WIDE, NARROW].map((viewport) => ({
     id: `edit-table-wrapped-${theme}-${viewport.width}`,
@@ -751,7 +755,9 @@ export const SCENARIOS: Scenario[] = [
     editMode: true,
     editTarget: "table-cell" as const,
     machineChecks: ["overlay-covers-text", "overlay-clipped"],
-    description: "Long table-cell source wraps without overlapping rendered text or changing cell dimensions.",
+    description: "Long table-cell source wraps inside the cell in the block editor font, with Done and "
+      + "Cancel under the field inside the cell and unchanged column widths; the -arrowdown PNG shows "
+      + "the editor moved to the cell below.",
   }))),
   {
     id: "edit-frontmatter-key-dark",

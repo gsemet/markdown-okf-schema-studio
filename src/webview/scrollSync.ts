@@ -2278,6 +2278,32 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (cell) switchTableCell(edit, cell, "end");
   }
 
+  // Arrow keys at the edge of the field move to the neighbouring rendered cell (same row for
+  // Left/Right, same column for Up/Down) through the same switch as Tab. With no cell in that
+  // direction the event is left to the block-to-block navigation.
+  function arrowThroughTableCells(edit, event, control) {
+    if (event.isComposing || edit.finishing || !edit.tableModel || !edit.selectedCell) return false;
+    const navigation = boundaryNavigation(control, event);
+    if (!navigation) return false;
+    const rows = edit.selectedCell.closest?.("table")?.rows;
+    if (!rows || typeof rows.length !== "number") return false;
+    let rowIndex = edit.tableRowIndex;
+    let columnIndex = edit.tableColumnIndex;
+    if (event.key === "ArrowLeft") columnIndex -= 1;
+    else if (event.key === "ArrowRight") columnIndex += 1;
+    else if (event.key === "ArrowUp") rowIndex -= 1;
+    else if (event.key === "ArrowDown") rowIndex += 1;
+    else return false;
+    const cell = rows[rowIndex]?.cells?.[columnIndex];
+    if (!cell) return false;
+    // Same validity test as switchTableCell, so a cell missing from the model row falls back.
+    const modelRow = edit.tableModel.rows[rowIndex === 0 ? 0 : rowIndex + 1];
+    if (!modelRow || columnIndex >= modelRow.length) return false;
+    event.preventDefault?.();
+    switchTableCell(edit, cell, navigation.caretPosition);
+    return true;
+  }
+
   // A cell editor must never stay open without focus. A pointer press in the last 500 ms means a
   // click is in progress and the click handlers decide what happens.
   let lastPointerDownAt = 0;
@@ -2377,11 +2403,17 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     input.setAttribute("spellcheck", "false");
     input.setAttribute("aria-label", "Markdown table cell");
     input.value = row[edit.tableColumnIndex];
+    // The cell grows with its text: the field has no scrollbar and the buttons sit beneath it.
+    const resizeInput = () => {
+      input.style.height = "auto";
+      input.style.height = input.scrollHeight + "px";
+    };
     const rememberCellValue = () => {
       const selectedRow = edit.tableRowIndex === 0 ? 0 : edit.tableRowIndex + 1;
       edit.tableModel.rows[selectedRow][edit.tableColumnIndex] = input.value;
     };
     input.addEventListener("input", () => {
+      resizeInput();
       rememberCellValue();
       autosaveBlockEdit();
     });
@@ -2463,6 +2495,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       : "Row " + edit.tableRowIndex + " of " + (edit.tableModel.rows.length - 2) + " \u00b7 " + columnText;
     menu.appendChild(edit.status);
     edit.element.appendChild(input);
+    // Done and Cancel under the field, without the status hint (the toolbar carries the position).
+    const cellActions = document.createElement("div");
+    cellActions.className = "sphinx-preview-block-editor-actions";
+    cellActions.appendChild(createEditorButtons(edit));
+    edit.element.appendChild(cellActions);
+    resizeInput();
+    // stabilizeLayout (window and content resize) re-fits the field when the width changes.
+    edit.resizeTextarea = resizeInput;
     edit.tableInput = input;
     edit.actionButtons = actionButtons;
     input.addEventListener("blur", () => commitCellEditorOnFocusLoss(edit, input));
@@ -2473,6 +2513,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         tabThroughTableCells(edit, Boolean(event.shiftKey));
         return;
       }
+      if (arrowThroughTableCells(edit, event, input)) return;
       if (navigateBlockEdit(event, input)) return;
       if (homeEndInControl(event, input)) return;
       if (event.key === "Escape" && !event.isComposing) {
@@ -2503,6 +2544,33 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       : "Line " + edit.line;
     return lines + " \u00b7 Enter: new line \u00b7 Tab: indent \u00b7 Esc: cancel \u00b7 "
       + (applePlatform ? "\u2318\u21a9" : "Ctrl+Enter") + ": done";
+  }
+
+  // Done and Cancel, shared by the block editor and the table-cell editor. The mousedown default is
+  // prevented to keep the focus in the field, so its blur commit does not run before the click.
+  function createEditorButtons(edit) {
+    const doneButton = document.createElement("button");
+    doneButton.setAttribute("type", "button");
+    doneButton.setAttribute("aria-label", "Done editing");
+    doneButton.textContent = "Done";
+    const cancelButton = document.createElement("button");
+    cancelButton.setAttribute("type", "button");
+    cancelButton.setAttribute("aria-label", "Cancel editing and restore the original text");
+    cancelButton.setAttribute("title", "Cancel (Esc)");
+    cancelButton.textContent = "Cancel";
+    const keepFocus = (event) => event.preventDefault?.();
+    doneButton.addEventListener("mousedown", keepFocus);
+    cancelButton.addEventListener("mousedown", keepFocus);
+    doneButton.addEventListener("click", () => saveBlockEdit());
+    cancelButton.addEventListener("click", () => {
+      if (activeBlockEdit !== edit) return;
+      cancelBlockEdit();
+    });
+    const buttons = document.createElement("div");
+    buttons.className = "sphinx-preview-block-editor-buttons";
+    buttons.appendChild(doneButton);
+    buttons.appendChild(cancelButton);
+    return buttons;
   }
 
   function receiveBlockEditSource(message) {
@@ -2571,28 +2639,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const hint = blockEditHint(edit);
     const actions = document.createElement("div");
     actions.className = "sphinx-preview-block-editor-actions";
-    const doneButton = document.createElement("button");
-    doneButton.setAttribute("type", "button");
-    doneButton.setAttribute("aria-label", "Done editing");
-    doneButton.textContent = "Done";
-    const cancelButton = document.createElement("button");
-    cancelButton.setAttribute("type", "button");
-    cancelButton.setAttribute("aria-label", "Cancel editing and restore the original text");
-    cancelButton.setAttribute("title", "Cancel (Esc)");
-    cancelButton.textContent = "Cancel";
-    // Keep the focus in the textarea so its blur commit does not run before the click.
-    const keepFocus = (event) => event.preventDefault?.();
-    doneButton.addEventListener("mousedown", keepFocus);
-    cancelButton.addEventListener("mousedown", keepFocus);
-    doneButton.addEventListener("click", () => saveBlockEdit());
-    cancelButton.addEventListener("click", () => {
-      if (activeBlockEdit !== edit) return;
-      cancelBlockEdit();
-    });
-    const buttons = document.createElement("div");
-    buttons.className = "sphinx-preview-block-editor-buttons";
-    buttons.appendChild(doneButton);
-    buttons.appendChild(cancelButton);
+    const buttons = createEditorButtons(edit);
     actions.appendChild(edit.status);
     actions.appendChild(buttons);
     textarea.addEventListener("input", () => {

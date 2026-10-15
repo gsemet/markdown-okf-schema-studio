@@ -462,6 +462,7 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   color: inherit;
 }
 
+.sphinx-preview-table-cell-editor textarea,
 .sphinx-preview-block-editor textarea {
   display: block;
   box-sizing: border-box;
@@ -537,40 +538,62 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   z-index: 2;
 }
 
+/* The rendered cell content keeps its width (so columns do not move) but no height: the editor
+   below is in the flow and the cell grows with the field and its buttons. */
 [data-sphinx-table-cell-content="true"] {
   display: block;
+  height: 0;
+  overflow: hidden;
   visibility: hidden;
 }
 
+/* contain: inline-size keeps the editor out of the column width calculation. */
 .sphinx-preview-table-cell-editor {
-  position: absolute;
-  inset: 0;
+  position: relative;
   z-index: 3;
-  display: flex;
-  align-items: stretch;
+  display: block;
+  contain: inline-size;
   margin: 0;
-  padding: inherit;
+  padding: 0;
   background: transparent;
   color: var(--vscode-editor-foreground, CanvasText);
 }
 
+/* Font family, size and line-height come from the block editor rule above. */
 .sphinx-preview-table-cell-editor textarea {
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
+  height: auto;
   min-width: 0;
-  padding: 0;
   border: 0;
-  border-radius: 0;
   outline: none;
   background: transparent;
   color: var(--vscode-editor-foreground, CanvasText);
-  font: inherit;
-  line-height: inherit;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  overflow: auto;
+  overflow: hidden;
   resize: none;
+}
+
+.sphinx-preview-table-cell-editor .sphinx-preview-block-editor-actions {
+  margin-block-start: 4px;
+  gap: 4px;
+}
+
+.sphinx-preview-table-cell-editor .sphinx-preview-block-editor-buttons {
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  margin-inline-start: 0;
+}
+
+.sphinx-preview-table-cell-editor .sphinx-preview-block-editor-buttons button {
+  min-width: 0;
+  max-width: 100%;
+  padding: 1px 6px;
+  overflow: hidden;
+  font-size: 0.8em;
+  line-height: 1.4;
 }
 
 .sphinx-preview-table-menu {
@@ -639,9 +662,11 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   content: "";
 }
 
-.sphinx-preview-table-menu [data-sphinx-preview-edit-status] {
+/* The id selector beats the paragraph margin, which would push the text above the buttons' centre. */
+#sphinx-myst-preview-content .sphinx-preview-table-menu [data-sphinx-preview-edit-status] {
   align-self: center;
   margin: 0 4px;
+  line-height: 1.2;
   color: var(--vscode-descriptionForeground, GrayText);
   font-size: 0.85em;
 }

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Changed the table-cell editor to match the block editor: same editor font, size and line height,
+  compact Done and Cancel buttons under the field inside the cell (the cell grows vertically, columns
+  keep their width), and the arrow keys now move cell to cell (Left/Right at the text edges, Up/Down
+  on the first/last line) before falling back to block-to-block navigation. The table toolbar status
+  is now vertically centred with its buttons.
 - Fixed Home and End in the inline block editor and table-cell editor: they now move the caret to
   the start or end of the edited text (Shift extends the selection) instead of scrolling the
   preview or shifting a wide table on macOS.

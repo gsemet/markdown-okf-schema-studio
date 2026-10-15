@@ -1398,6 +1398,82 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
         failures.append(Failure(page_name, f"editor text is not smaller than the body text: {layout}"))
 
 
+def check_cell_editor_chrome(page: Page, page_name: str, target, original_bounds, failures: list[Failure]) -> None:
+    """Done/Cancel live inside the cell, the columns keep their width, the toolbar status is centred."""
+    info = page.evaluate("""() => {
+      const cell = document.querySelector('[data-sphinx-preview-table-cell-selected="true"]');
+      const editor = cell && cell.querySelector('[data-sphinx-preview-table-cell-editor]');
+      const menu = document.querySelector('[data-sphinx-table-menu]');
+      if (!cell || !editor || !menu) return null;
+      const cellRect = cell.getBoundingClientRect();
+      const buttons = Array.from(editor.querySelectorAll('button')).map(button => {
+        const rect = button.getBoundingClientRect();
+        return {
+          text: button.textContent,
+          visible: rect.width > 0 && rect.height > 0 && getComputedStyle(button).visibility !== 'hidden',
+          inside: rect.left >= cellRect.left - 1 && rect.right <= cellRect.right + 1
+            && rect.top >= cellRect.top - 1 && rect.bottom <= cellRect.bottom + 1,
+          top: rect.top,
+        };
+      });
+      const textarea = editor.querySelector('textarea');
+      const reference = document.createElement('div');
+      reference.className = 'sphinx-preview-block-editor';
+      reference.innerHTML = '<textarea></textarea>';
+      document.body.appendChild(reference);
+      const referenceStyle = getComputedStyle(reference.querySelector('textarea'));
+      const cellStyle = getComputedStyle(textarea);
+      const font = {
+        same: cellStyle.fontFamily === referenceStyle.fontFamily
+          && cellStyle.fontSize === referenceStyle.fontSize
+          && cellStyle.lineHeight === referenceStyle.lineHeight,
+        cell: [cellStyle.fontFamily, cellStyle.fontSize, cellStyle.lineHeight],
+        block: [referenceStyle.fontFamily, referenceStyle.fontSize, referenceStyle.lineHeight],
+      };
+      reference.remove();
+      const status = menu.querySelector('[data-sphinx-preview-edit-status]');
+      const centre = rect => rect.top + rect.height / 2;
+      const operation = menu.querySelector('[data-sphinx-table-operation]');
+      const area = textarea.getBoundingClientRect();
+      return {
+        buttons,
+        font,
+        cellStatus: editor.querySelectorAll('[data-sphinx-preview-edit-status]').length,
+        fieldAboveButtons: buttons.every(button => button.top >= area.bottom - 1),
+        // A status that wrapped onto its own line (narrow widths) has no button row to centre on.
+        statusDelta: status && operation
+          ? (status.getBoundingClientRect().top >= operation.getBoundingClientRect().bottom - 1
+            ? 0
+            : Math.abs(centre(status.getBoundingClientRect()) - centre(operation.getBoundingClientRect())))
+          : null,
+        cellWidth: cellRect.width,
+        cellHeight: cellRect.height,
+      };
+    }""")
+    if info is None:
+        failures.append(Failure(page_name, "table cell editor, cell or toolbar missing for the chrome checks"))
+        return
+    if [button["text"] for button in info["buttons"]] != ["Done", "Cancel"]:
+        failures.append(Failure(page_name, f"table cell editor buttons are not Done and Cancel: {info['buttons']}"))
+    elif not all(button["visible"] and button["inside"] for button in info["buttons"]):
+        failures.append(Failure(page_name, f"table cell Done/Cancel are hidden or outside the cell: {info}"))
+    if not info["fieldAboveButtons"]:
+        failures.append(Failure(page_name, f"table cell buttons are not under the field: {info}"))
+    if info["cellStatus"] != 0:
+        failures.append(Failure(page_name, "table cell editor still shows the status hint"))
+    if not info["font"]["same"]:
+        failures.append(Failure(page_name, f"table cell font differs from the block editor: {info['font']}"))
+    if info["statusDelta"] is None or info["statusDelta"] > 2:
+        failures.append(Failure(page_name, f"toolbar status is not vertically centred with the buttons: {info['statusDelta']}"))
+    if original_bounds and abs(info["cellWidth"] - original_bounds["width"]) > 1:
+        failures.append(Failure(
+            page_name,
+            f"table column width changed while editing: {original_bounds['width']} -> {info['cellWidth']}",
+        ))
+    if original_bounds and info["cellHeight"] < original_bounds["height"] - 1:
+        failures.append(Failure(page_name, f"table cell shrank while editing: {original_bounds['height']} -> {info['cellHeight']}"))
+
+
 def check_cell_end_key(page: Page, page_name: str, cell_input, failures: list[Failure]) -> None:
     """Real End key in a focused table-cell editor: caret to the end, default prevented, no scroll.
 
@@ -1549,7 +1625,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
         failures.append(Failure(page_name, f"frontmatter list preview shows {preview_items.count()} items, expected 4"))
       if page.locator('[data-okf-field="derives_from"] .okf-list-more').count() != 0:
         failures.append(Failure(page_name, "frontmatter list preview truncates a list below the 20-item cap"))
-    original_cell_bounds = target.bounding_box() if edit_target == "table-cell" else None
+    original_cell_bounds = target.bounding_box() if edit_target in {"table-cell", "table-cell-wide"} else None
     original_cell_html = target.inner_html() if edit_target == "table-cell" else None
     clicked_word = None
     if edit_target in {"title", "paragraph", "admonition", "list"}:
@@ -1764,6 +1840,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       if wide_input.count() != 1:
         failures.append(Failure(page_name, "clicking a far-right table cell did not open its editor"))
         return
+      check_cell_editor_chrome(page, page_name, target, original_cell_bounds, failures)
       check_cell_end_key(page, page_name, wide_input, failures)
       page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-end.png"), caret="initial")
       wide_input.press("Escape")
@@ -1796,12 +1873,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
         getComputedStyle(element).visibility === "hidden" && element.getAttribute("aria-hidden") === "true"
       """):
         failures.append(Failure(page_name, "rendered table-cell text remains visible beneath the editor"))
-      cell_bounds = target.bounding_box()
-      if not cell_bounds or not original_cell_bounds or any(
-        abs(cell_bounds[dimension] - original_cell_bounds[dimension]) > 1
-        for dimension in ("width", "height")
-      ):
-        failures.append(Failure(page_name, f"table-cell dimensions changed during editing: {original_cell_bounds} -> {cell_bounds}"))
+      check_cell_editor_chrome(page, page_name, target, original_cell_bounds, failures)
       if not editor.locator("textarea").evaluate("""element => {
         const style = getComputedStyle(element);
         const input = element.getBoundingClientRect();
@@ -1958,6 +2030,30 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-end.png"), caret="initial")
       # The scenario's final frame is taken after Escape closed the editor; keep the open state too.
       page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-open.png"), caret="initial")
+      # ArrowDown on the last line moves the editor to the cell below in the same column.
+      before = cell_input.evaluate("""element => {
+        const cell = element.closest('td, th');
+        const end = element.value.length;
+        element.setSelectionRange(end, end);
+        return { row: cell.parentElement.rowIndex, column: cell.cellIndex };
+      }""")
+      cell_input.press("ArrowDown")
+      moved = page.evaluate("""() => {
+        const cell = document.querySelector('[data-sphinx-preview-table-cell-selected="true"]');
+        return cell ? {
+          row: cell.parentElement.rowIndex,
+          column: cell.cellIndex,
+          editors: document.querySelectorAll('[data-sphinx-preview-table-cell-editor]').length,
+          focused: document.activeElement === cell.querySelector('textarea'),
+        } : null;
+      }""")
+      if not moved or moved["row"] != before["row"] + 1 or moved["column"] != before["column"] \
+          or moved["editors"] != 1 or not moved["focused"]:
+        failures.append(Failure(page_name, f"ArrowDown did not move the cell editor to the cell below: {before} -> {moved}"))
+      else:
+        check_cell_editor_chrome(page, page_name, None, None, failures)
+      page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-arrowdown.png"), caret="initial")
+      cell_input = page.locator("[data-sphinx-preview-table-cell-editor] textarea")
       cell_input.press("Escape")
       if not page.evaluate("""() => {
         const saves = window.visualMessages.filter(message => message.type === "previewEditSave");
