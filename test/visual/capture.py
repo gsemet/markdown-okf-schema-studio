@@ -1737,6 +1737,50 @@ def check_top_spacing(page: Page, scenario: dict, failures: list[Failure]) -> No
     failures.append(Failure(page_name, f"{selector} overlaps the floating toolbar"))
 
 
+def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The copy button follows the hovered code block and posts its raw code."""
+  if not scenario.get("codeCopyChecks"):
+    return
+  page_name = scenario["page"]
+  button = page.locator("[data-sphinx-preview-code-copy]")
+  if button.count() != 0:
+    failures.append(Failure(page_name, "a copy button exists before any block is hovered"))
+  block = page.locator("#sphinx-myst-preview-content pre").first
+  block.hover(position={"x": 120, "y": 40})
+  page.wait_for_timeout(120)
+  if button.count() != 1 or not button.is_visible():
+    failures.append(Failure(page_name, "hovering a code block did not show the copy button"))
+    return
+  geometry = page.evaluate("""() => {
+    const pre = document.querySelector('#sphinx-myst-preview-content pre').getBoundingClientRect();
+    const rect = document.querySelector('[data-sphinx-preview-code-copy]').getBoundingClientRect();
+    const bar = document.querySelector('[data-sphinx-preview-toolbar]')?.getBoundingClientRect();
+    return {
+      pre: { top: pre.top, right: pre.right, left: pre.left },
+      rect: { top: rect.top, right: rect.right, width: rect.width, height: rect.height },
+      overlaps: !!bar && rect.left < bar.right && rect.right > bar.left && rect.top < bar.bottom && rect.bottom > bar.top,
+    };
+  }""")
+  rect, pre = geometry["rect"], geometry["pre"]
+  if abs(rect["width"] - 26) > 1 or abs(rect["height"] - 26) > 1:
+    failures.append(Failure(page_name, f"copy button is {rect['width']}x{rect['height']}, expected 26x26"))
+  if abs((pre["right"] - rect["right"]) - 6) > 2 or abs((rect["top"] - pre["top"]) - 6) > 2:
+    failures.append(Failure(page_name, f"copy button is not 6px inside the block's top right: {geometry}"))
+  if geometry["overlaps"]:
+    failures.append(Failure(page_name, "the copy button overlaps the floating toolbar"))
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-hover.png"), caret="hide")
+  expected = block.locator("code").evaluate("element => element.textContent")
+  button.click()
+  copied = page.evaluate(
+    "window.visualMessages.filter(m => m.type === 'previewCopyText').at(-1)")
+  if not copied or copied.get("text") != expected:
+    failures.append(Failure(page_name, "clicking the copy button did not post the exact code text"))
+  if button.get_attribute("aria-label") != "Copied":
+    failures.append(Failure(page_name, "the copy button did not show the check mark after the click"))
+  if page.locator(".sphinx-preview-block-editor").count() != 0:
+    failures.append(Failure(page_name, "clicking the copy button opened a block editor"))
+
+
 def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """T15: hover outline on a list, then a framed paragraph editor with hint and buttons."""
   if not scenario.get("editAffordances"):
@@ -3274,7 +3318,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

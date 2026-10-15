@@ -61,6 +61,8 @@ export interface Scenario {
    * "empty-start" the Start writing button, "empty-open" the editor after pressing Enter.
    */
   topSpacingChecks?: "first-block" | "empty-start" | "empty-open";
+  /** Hovering the first code block shows the copy button in its top right; a click posts the code. */
+  codeCopyChecks?: boolean;
   expectStickyGrowth?: boolean;
   /** Geometry checks (test/shared/geometry-checks.js) that fail this scenario when applicable and failing. */
   machineChecks?: string[];
@@ -406,6 +408,19 @@ export const SCENARIOS: Scenario[] = [
     description:
       "A missing PlantUML executable shows an actionable settings message and preserves the source.",
   },
+  ...(["light", "dark", "cream"] as const).map((mode) => ({
+    id: `code-copy-button-${mode}`,
+    fixture: "04-code-and-tables",
+    theme: mode === "light" ? "light" : "dark",
+    ...(mode === "cream" ? { previewThemeMode: "cream" as const } : {}),
+    ...WIDE,
+    height: 900,
+    scroll: { kind: "top" as const },
+    codeCopyChecks: true,
+    description:
+      "Pointing at the first code block shows a 26 px copy button inside its top right corner, clear of "
+      + "the floating toolbar; clicking it posts the raw code and turns the icon into a check mark.",
+  })),
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",

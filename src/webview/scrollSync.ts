@@ -6,6 +6,7 @@ import {
 import { createAnchorPolicy } from "./anchorPolicy";
 import { createMarkdownTableTools } from "./markdownTable";
 import { createTextEditingTools } from "./textEditing";
+import { installCodeCopy } from "./codeCopy";
 import { installLinkNavigation } from "./linkNavigation";
 import type { PreviewThemeMode } from "../state/previewTheme";
 import type { PreviewPanelState } from "../state/previewState";
@@ -83,6 +84,13 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     openFrontmatterEditor(row);
   }, true);
   const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context);
+  const codeCopy = (${installCodeCopy.toString()})(document, window, (text) => vscode.postMessage({
+    type: "previewCopyText",
+    documentId: context.documentId,
+    documentVersion: context.documentVersion,
+    requestId: context.requestId,
+    text,
+  }));
   const themeModes = ["current", "dark", "white", "cream"];
   const themeLabels = { current: "Current theme", dark: "Dark theme", white: "White theme", cream: "Cream theme" };
   const themeButton = document.querySelector?.("[data-sphinx-preview-theme-toggle]");
@@ -272,6 +280,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     closeFrontmatterEditor();
     closeBlockEdit(false);
     closeLinkTooltip();
+    codeCopy.hide();
     setEditHover(undefined);
     pendingCheckboxToggles.clear();
     applyPendingOverlay({ visible: false, label: "", message: "" });

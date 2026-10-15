@@ -2324,6 +2324,10 @@ const registeredMessageHandlers = new Map<
   (preview: ActivePreview, message: RegisteredPreviewMessage) => Thenable<void> | void
 >();
 
+// Copies the raw code of a code block. It does not edit anything, so a read-only preview allows it.
+registeredMessageHandlers.set("previewCopyText", (_preview, message) =>
+  vscode.env.clipboard.writeText(message.text as string));
+
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
   if (isRegisteredPreviewMessage(value)) {
     const handler = registeredMessageHandlers.get(value.type);
