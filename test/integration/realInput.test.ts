@@ -1220,14 +1220,20 @@ async function scenarioTableTab(page: Page, evidence: Evidence): Promise<void> {
 /** RI-T18: the table toolbar sits above the table, never covers a cell, and the cell does not jump. */
 async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<void> {
   const CELL = "[data-sphinx-preview-table-cell-editor] textarea";
+  const TARGET_CELL = "tbody tr:first-child td:nth-child(2)";
   await withSmokeDocument("realinput-t18", async (document) => {
     await openSidePreview(document);
     await waitForRender(document);
     await setEditMode(page, true);
+    await waitFor("the smoke table cell `one` to render", async () => {
+      const current = await findCurrentFrame(page);
+      return current !== undefined
+        && await current.locator(TARGET_CELL).count() === 1;
+    });
     const cellTop = async (): Promise<number> => await withCurrentFrame(page, (frame) =>
-      frame.locator("td").filter({ hasText: /^one$/u }).evaluate((element) => element.getBoundingClientRect().top));
+      frame.locator(TARGET_CELL).evaluate((element) => element.getBoundingClientRect().top));
     const before = await cellTop();
-    await withCurrentFrame(page, (frame) => frame.locator("td").filter({ hasText: /^one$/u }).click());
+    await withCurrentFrame(page, (frame) => frame.locator(TARGET_CELL).click());
     await waitForEditor(page, CELL);
     await waitFor("the table toolbar to appear above the table", async () => {
       const current = await findCurrentFrame(page);
@@ -2513,6 +2519,7 @@ async function scenarioStatusPageTwoLines(page: Page, evidence: Evidence): Promi
 
 /** RI-T31: moving focus between the editor and the preview does not move the preview. */
 async function scenarioFocusChangeKeepsPreviewStill(page: Page, evidence: Evidence): Promise<void> {
+  const TRACKER_CELL = "table tbody tr:first-child td:nth-child(2)";
   const chapter = fs.readFileSync(
     path.resolve(__dirname, "../../..", "test", "visual", "fixtures", "05-long-chapter.md"), "utf8");
   await withDocument("realinput-t31", chapter, async (document) => {
@@ -2551,14 +2558,18 @@ async function scenarioFocusChangeKeepsPreviewStill(page: Page, evidence: Eviden
     // Case B: click a table cell in edit mode. The in-flow toolbar legitimately scrolls the page
     // (R7), so the clicked cell's viewport top is the measure, not scrollY.
     await setEditMode(page, true);
+    await waitFor("the observability table cell", async () => {
+      const current = await findCurrentFrame(page);
+      return current !== undefined && await current.locator(TRACKER_CELL).count() === 1;
+    });
     await wheelPreview(400);
     const cellTop = (): Promise<number | undefined> => withCurrentFrame(page, async (frame) => {
-      const box = await frame.locator("td").filter({ hasText: /^tracker$/u }).boundingBox();
+      const box = await frame.locator(TRACKER_CELL).boundingBox();
       const host = await (await frame.frameElement()).boundingBox();
       return box === null || host === null ? undefined : box.y - host.y;
     });
     const cellPoint = (): Promise<{ x: number; y: number } | undefined> => withCurrentFrame(page, async (frame) => {
-      const box = await frame.locator("td").filter({ hasText: /^tracker$/u }).boundingBox();
+      const box = await frame.locator(TRACKER_CELL).boundingBox();
       return box === null ? undefined : { x: box.x + box.width / 2, y: box.y + box.height / 2 };
     });
     const tableTop = (): Promise<number | undefined> => withCurrentFrame(page, async (frame) => {
