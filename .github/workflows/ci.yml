@@ -78,3 +78,15 @@ jobs:
     with:
       tag: ${{ needs.tag-release.outputs.tag }}
     secrets: inherit
+
+  # Tags pushed with GITHUB_TOKEN do not trigger tag workflows, so deploy Pages from here.
+  pages:
+    needs: tag-release
+    if: needs.tag-release.outputs.tag != ''
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
+    with:
+      tag: ${{ needs.tag-release.outputs.tag }}

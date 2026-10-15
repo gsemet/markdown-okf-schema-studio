@@ -1,6 +1,12 @@
 name: Deploy GitHub Pages
 
 on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Existing version tag to deploy"
+        required: true
+        type: string
   push:
     tags:
       - "v*.*.*"
@@ -16,12 +22,11 @@ permissions:
 
 jobs:
   deploy-pages:
-    if: >-
-      github.ref_type == 'tag' &&
-      (github.event_name == 'push' || github.ref_name == inputs.tag)
+    if: inputs.tag != '' || github.ref_type == 'tag'
     runs-on: ubuntu-latest
     env:
       STUDIO_NPM: npm --registry=https://registry.npmjs.org/
+      DEPLOYMENT_TAG: ${{ inputs.tag || github.ref_name }}
     permissions:
       contents: read
       pages: write
@@ -32,6 +37,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.tag || github.ref_name }}
+          fetch-depth: 0
           lfs: true
       - name: Fetch Git LFS objects
         run: git lfs pull
@@ -52,16 +59,18 @@ jobs:
       - run: uv run --no-sync --group docs playwright install --with-deps chromium
       - name: Verify deployment tag
         shell: bash
-        env:
-          DEPLOYMENT_TAG: ${{ github.ref_name }}
         run: |
+          set -euo pipefail
+          [[ "$DEPLOYMENT_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/$DEPLOYMENT_TAG^{commit}")"
+          git merge-base --is-ancestor HEAD "origin/${{ github.event.repository.default_branch }}"
           expected_tag="v$(node -p "require('./package.json').version")"
           if [[ "$DEPLOYMENT_TAG" != "$expected_tag" ]]; then
             echo "Deployment tag $DEPLOYMENT_TAG does not match package version $expected_tag" >&2
             exit 1
           fi
       - name: Build Pages site
-        run: just site
+        run: xvfb-run --auto-servernum just site
       - name: Upload Pages site
         uses: actions/upload-pages-artifact@v3
         with:
