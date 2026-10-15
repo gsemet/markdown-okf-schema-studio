@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 - 2026-10-15
+
+- Published the extension to the VS Code Marketplace and added its canonical install link.
+- Added manual recovery paths for Marketplace releases and GitHub Pages deployments.
+
 ## Unreleased
 
 - When VS Code restores several preview panels after a reload, every panel stays interactive:
