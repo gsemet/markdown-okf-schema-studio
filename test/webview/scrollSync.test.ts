@@ -1415,8 +1415,8 @@ test("fenced Markdown editors sit outside the rendered pre and preserve source w
   textarea.dispatch("input");
   harness.flushTimers();
   assert.equal(harness.messages.at(-1)?.editedText, originalText.replace("(1 reworks)", "(1 rework)"));
-  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
-  // Escape commits like blur: a final save, closed by the re-render; never a cancel.
+  textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
+  // Cmd+Enter commits like blur: a final save, closed by the re-render; never a cancel.
   assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
   assert.equal(harness.messages.at(-1)?.final, true);
   assert.equal(
@@ -1633,7 +1633,9 @@ test("edit mode loads raw Markdown and saves changes when the block loses focus"
     element.tagName === "BUTTON" && element.getAttribute("aria-label") === "Done editing"), true);
   assert.equal(harness.createdElements.some((element) =>
     element.tagName === "BUTTON"
-    && element.getAttribute("aria-label") === "Revert block to its original text"), true);
+    && element.getAttribute("aria-label") === "Cancel editing and restore the original text"), true);
+  assert.equal(harness.createdElements.some((element) =>
+    element.tagName === "BUTTON" && element.textContent === "Revert"), false);
   textarea.value = "**Edited line one**\n\nRaw line two";
   textarea.dispatch("input");
   textarea.dispatch("blur");
@@ -1703,40 +1705,63 @@ test("edit mode hover marks the whole list that a click would edit", () => {
   }
 });
 
-test("an opened block editor shows its line range, Done and a disabled Revert", () => {
+test("an opened block editor shows its line range, Done and Cancel on one row", () => {
   const harness = createRuntimeHarness();
   const textarea = openRawEditor(harness);
   const editor = textarea.parentElement;
   assert.ok(editor);
-  const status = editor.childElements.find((child) =>
-    child.getAttribute("data-sphinx-preview-edit-status") !== null);
+  const status = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-edit-status") !== null);
   assert.ok(status);
-  assert.match(status.textContent, /^Lines 50\u201352 \u00b7 Enter: new line \u00b7 Tab: indent \u00b7 Esc or /u);
+  assert.match(status.textContent, /^Lines 50\u201352 \u00b7 Enter: new line \u00b7 Tab: indent \u00b7 Esc: cancel \u00b7 /u);
   assert.match(status.textContent, /(?:\u2318\u21a9|Ctrl\+Enter): done$/u);
   assert.equal(findButton(harness, "Done editing").textContent, "Done");
-  assert.equal(findButton(harness, "Revert block to its original text").disabled, true);
+  const cancel = findButton(harness, "Cancel editing and restore the original text");
+  assert.equal(cancel.textContent, "Cancel");
+  assert.equal(cancel.disabled, false);
 });
 
-test("Revert enables on change and cancels only what reached the document", () => {
+test("the status line shares one row with the Done and Cancel buttons", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openRawEditor(harness);
+  const editor = textarea.parentElement;
+  assert.ok(editor);
+  const row = editor.childElements.find((child) =>
+    child.getAttribute("class") === "sphinx-preview-block-editor-actions"
+    || child.className === "sphinx-preview-block-editor-actions");
+  assert.ok(row, "the actions row is a direct child of the editor");
+  const status = row.childElements.find((child) =>
+    child.getAttribute("data-sphinx-preview-edit-status") !== null);
+  assert.ok(status, "the status element lives inside the actions row");
+  assert.equal(editor.childElements.includes(status), false);
+  const done = findButton(harness, "Done editing");
+  const cancel = findButton(harness, "Cancel editing and restore the original text");
+  const buttons = row.childElements.find((child) => child.childElements.includes(done));
+  assert.ok(buttons);
+  assert.equal(buttons.childElements.includes(cancel), true);
+  assert.equal(row.childElements.indexOf(status) < row.childElements.indexOf(buttons), true);
+});
+
+test("Cancel cancels only what reached the document", () => {
   const withAutosave = createRuntimeHarness();
   let textarea = openRawEditor(withAutosave);
-  let revert = findButton(withAutosave, "Revert block to its original text");
+  let cancel = findButton(withAutosave, "Cancel editing and restore the original text");
   textarea.value = "Changed";
   textarea.dispatch("input");
-  assert.equal(revert.disabled, false);
+  assert.equal(cancel.disabled, false);
   withAutosave.flushTimers();
   assert.equal(withAutosave.messages.at(-1)?.final, false);
-  revert.dispatch("click");
+  cancel.dispatch("click");
   assert.equal(withAutosave.messages.at(-1)?.type, "previewEditCancel");
 
   const withoutAutosave = createRuntimeHarness();
   textarea = openRawEditor(withoutAutosave);
-  revert = findButton(withoutAutosave, "Revert block to its original text");
+  cancel = findButton(withoutAutosave, "Cancel editing and restore the original text");
   textarea.value = "Changed";
   textarea.dispatch("input");
-  assert.equal(revert.disabled, false);
+  assert.equal(cancel.disabled, false);
   const before = withoutAutosave.messages.length;
-  revert.dispatch("click");
+  cancel.dispatch("click");
   textarea.dispatch("blur");
   assert.equal(withoutAutosave.messages.length, before);
   assert.equal(withoutAutosave.pendingTimerCount(), 0);
@@ -1747,7 +1772,7 @@ test("Done posts a final save and both buttons keep the textarea focused on pres
   const textarea = openRawEditor(harness);
   textarea.value = "Changed";
   textarea.dispatch("input");
-  for (const label of ["Done editing", "Revert block to its original text"]) {
+  for (const label of ["Done editing", "Cancel editing and restore the original text"]) {
     let prevented = false;
     findButton(harness, label).dispatch("mousedown", { preventDefault: () => { prevented = true; } });
     assert.equal(prevented, true, label);
@@ -2192,8 +2217,8 @@ test("table editing switches cells without losing changes and finalizes before l
   assert.equal(harness.getWebviewState().pendingBlockNavigation, undefined);
   click(cells[2][1]);
   assert.equal(input().value, "edited q");
-  input().dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
-  // Escape commits the edited cell like blur; the re-render closes the editor.
+  input().dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  // Enter commits the edited cell like blur; the re-render closes the editor.
   assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
   assert.equal(harness.messages.at(-1)?.final, true);
   assert.match(String(harness.messages.at(-1)?.editedText), /edited q/u);
@@ -2325,15 +2350,16 @@ test("the table cell editor commits and closes when focus leaves without a click
   assert.match(String(last?.editedText), /typed/u);
 });
 
-test("Escape commits a table cell even when focus is outside the cell editor", () => {
+test("Escape cancels a table cell even when focus is outside the cell editor", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness);
   input().value = "typed";
   input().dispatch("input");
+  harness.flushTimers();
+  assert.equal(harness.messages.at(-1)?.final, false);
   harness.dispatchDocument("keydown", { key: "Escape", target: harness.body });
-  const finals = harness.messages.filter((message) => message.final === true);
-  assert.equal(finals.length, 1);
-  assert.match(String(finals[0].editedText), /typed/u);
+  assert.equal(harness.messages.filter((message) => message.final === true).length, 0);
+  assert.equal(harness.messages.at(-1)?.type, "previewEditCancel");
 });
 
 function openBlockEditorWithSource(harness: ReturnType<typeof createRuntimeHarness>) {
@@ -2352,16 +2378,60 @@ function openBlockEditorWithSource(harness: ReturnType<typeof createRuntimeHarne
   return textarea;
 }
 
-test("Escape in a changed Markdown block editor saves the text and never cancels", () => {
+test("Escape in a changed Markdown block editor cancels and never saves a final text", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
-  textarea.value = "Second paragraph. KEEP ME PLEASE.";
+  textarea.value = "Second paragraph. DROP ME.";
+  textarea.dispatch("input");
   textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
-  const last = harness.messages.at(-1);
-  assert.equal(last?.type, "previewEditSave");
-  assert.equal(last?.final, true);
-  assert.equal(last?.editedText, "Second paragraph. KEEP ME PLEASE.\n");
+  // Nothing reached the document yet: the editor closes without any message.
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave"), false);
+  assert.equal(harness.pendingTimerCount(), 0);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null);
+  textarea.dispatch("blur");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave"), false);
+});
+
+test("Escape after an autosave restores the block with previewEditCancel", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Second paragraph. DROP ME.";
+  textarea.dispatch("input");
+  harness.flushTimers();
+  assert.equal(harness.messages.at(-1)?.final, false);
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(harness.messages.at(-1)?.type, "previewEditCancel");
+  assert.equal(harness.messages.some((message) => message.final === true), false);
+  textarea.dispatch("blur");
+  assert.equal(harness.messages.at(-1)?.type, "previewEditCancel");
+  assert.equal(harness.messages.some((message) => message.final === true), false);
+});
+
+test("Escape during IME composition neither cancels nor saves a block edit", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Second paragraph. ime";
+  textarea.dispatch("input");
+  harness.flushTimers();
+  const count = harness.messages.length;
+  textarea.dispatch("keydown", { key: "Escape", isComposing: true, preventDefault: () => undefined });
+  assert.equal(harness.messages.length, count);
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+  assert.equal(harness.messages.some((message) => message.final === true), false);
+});
+
+test("Cmd+Enter and Ctrl+Enter finish the block editor like Done", () => {
+  for (const modifier of [{ metaKey: true }, { ctrlKey: true }]) {
+    const harness = createRuntimeHarness();
+    const textarea = openBlockEditorWithSource(harness);
+    textarea.value = "Second paragraph. KEEP ME PLEASE.";
+    textarea.dispatch("keydown", { key: "Enter", ...modifier, preventDefault: () => undefined });
+    const last = harness.messages.at(-1);
+    assert.equal(last?.type, "previewEditSave");
+    assert.equal(last?.final, true);
+    assert.equal(last?.editedText, "Second paragraph. KEEP ME PLEASE.\n");
+    assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+  }
 });
 
 test("undo and redo shortcuts stop at the block textarea and keep the native undo", () => {
@@ -2435,17 +2505,54 @@ function openTableCellEditor(harness: ReturnType<typeof createRuntimeHarness>) {
   return input;
 }
 
-test("Escape in a changed table cell saves the table and never cancels", () => {
+test("Escape in a changed table cell cancels and never saves a final table", () => {
   const harness = createRuntimeHarness();
   const input = openTableCellEditor(harness);
   input.value = "y2";
   input.dispatch("input");
   input.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave"), false);
+  assert.equal(harness.pendingTimerCount(), 0);
+  input.dispatch("blur");
+  harness.flushTimers();
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave"), false);
+});
+
+test("Escape during IME composition neither cancels nor saves a table cell", () => {
+  const harness = createRuntimeHarness();
+  const input = openTableCellEditor(harness);
+  input.value = "y2";
+  input.dispatch("input");
+  harness.flushTimers();
+  const count = harness.messages.length;
+  input.dispatch("keydown", { key: "Escape", isComposing: true, preventDefault: () => undefined });
+  assert.equal(harness.messages.length, count);
+  assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+  assert.equal(harness.messages.some((message) => message.final === true), false);
+});
+
+test("Escape in a table cell after an autosave restores the table with previewEditCancel", () => {
+  const harness = createRuntimeHarness();
+  const input = openTableCellEditor(harness);
+  input.value = "y2";
+  input.dispatch("input");
+  harness.flushTimers();
+  assert.equal(harness.messages.at(-1)?.final, false);
+  input.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(harness.messages.at(-1)?.type, "previewEditCancel");
+  assert.equal(harness.messages.some((message) => message.final === true), false);
+});
+
+test("Enter in a changed table cell saves the table", () => {
+  const harness = createRuntimeHarness();
+  const input = openTableCellEditor(harness);
+  input.value = "y2";
+  input.dispatch("input");
+  input.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
   const last = harness.messages.at(-1);
   assert.equal(last?.type, "previewEditSave");
   assert.equal(last?.final, true);
   assert.match(String(last?.editedText), /\| x \| y2 \|/u);
-  assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
 });
 
 test("turning edit mode off saves a changed block editor and ignores an unchanged one", () => {
@@ -4671,9 +4778,9 @@ test("T28: an empty source reply opens an empty textarea with a placeholder; Don
   );
   const done = harness.createdElements.find((element) =>
     element.tagName === "BUTTON" && element.textContent === "Done");
-  const revert = harness.createdElements.find((element) =>
-    element.tagName === "BUTTON" && element.textContent === "Revert");
-  assert.ok(done && revert);
+  const cancel = harness.createdElements.find((element) =>
+    element.tagName === "BUTTON" && element.textContent === "Cancel");
+  assert.ok(done && cancel);
   assert.ok(harness.createdElements.some((element) =>
     element.tagName === "P" && /Enter: new line/u.test(element.textContent)), "hint is shown");
   textarea.value = "## New section";
@@ -4701,7 +4808,7 @@ test("T28: Done on an untouched empty insertion closes without saving", () => {
   assert.equal(harness.messages.some((message) => message.type === "previewEditSave"), false);
 });
 
-test("T28: autosave and Revert carry insertAfterLine", () => {
+test("T28: autosave and Cancel carry insertAfterLine", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   insertPointAfterLine(harness, 100).childElements[0].dispatch("click", {
     preventDefault: () => undefined,
@@ -4717,11 +4824,10 @@ test("T28: autosave and Revert carry insertAfterLine", () => {
   assert.equal(autosave?.type, "previewEditSave");
   assert.equal(autosave?.final, false);
   assert.equal(autosave?.insertAfterLine, 100);
-  const revert = harness.createdElements.find((element) =>
-    element.tagName === "BUTTON" && element.textContent === "Revert");
-  assert.ok(revert);
-  revert.disabled = false;
-  revert.dispatch("click");
+  const cancelButton = harness.createdElements.find((element) =>
+    element.tagName === "BUTTON" && element.textContent === "Cancel");
+  assert.ok(cancelButton);
+  cancelButton.dispatch("click");
   const cancel = harness.messages.at(-1);
   assert.equal(cancel?.type, "previewEditCancel");
   assert.equal(cancel?.insertAfterLine, 100);
@@ -4769,7 +4875,7 @@ test("a final block save carries the edited element's pin; an autosave does not"
   assert.equal("pinViewportTop" in (autosave ?? {}), false);
 
   const editorTop = blockEditorOf(harness.mappings[1]).getBoundingClientRect().top;
-  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
   const save = harness.messages.at(-1);
   assert.equal(save?.type, "previewEditSave");
   assert.equal(save?.final, true);

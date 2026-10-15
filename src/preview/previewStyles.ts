@@ -476,7 +476,7 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   background: transparent;
   color: inherit;
   font-family: var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: var(--vscode-editor-font-size, 0.95em);
+  font-size: calc(var(--vscode-editor-font-size, 0.95em) - 1px);
   tab-size: 4;
   line-height: inherit;
   white-space: pre-wrap;
@@ -490,12 +490,27 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
 
 .sphinx-preview-block-editor-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
   margin-block-start: 8px;
 }
 
-.sphinx-preview-block-editor-actions button {
+.sphinx-preview-block-editor-buttons {
+  display: flex;
+  flex: none;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+.sphinx-preview-block-editor .sphinx-preview-block-editor-actions [data-sphinx-preview-edit-status] {
+  flex: 1 1 14em;
+  min-width: 0;
+  margin: 0;
+}
+
+.sphinx-preview-block-editor-buttons button {
   min-width: 64px;
   padding: 4px 10px;
   border: 1px solid var(--sphinx-preview-border);
@@ -505,7 +520,7 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   cursor: pointer;
 }
 
-.sphinx-preview-block-editor-actions button:first-child {
+.sphinx-preview-block-editor-buttons button:first-child {
   border-color: transparent;
   background: var(--vscode-button-background, Highlight);
   color: var(--vscode-button-foreground, HighlightText);

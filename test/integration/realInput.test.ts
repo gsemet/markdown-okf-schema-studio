@@ -547,8 +547,11 @@ async function scenarioEnterCommitsTextField(page: Page, evidence: Evidence): Pr
   }, REQ_SCHEMA);
 }
 
-/** RI-T08: Escape and leaving edit mode keep the typed text; they never revert it. */
-async function scenarioEscapeKeepsText(page: Page, evidence: Evidence): Promise<void> {
+/**
+ * RI-T08: Escape cancels (block and table cell), also after an autosave reached the buffer;
+ * Cmd/Ctrl+Enter and leaving edit mode keep the typed text.
+ */
+async function scenarioEscapeCancels(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t08", async (document) => {
     await openSidePreview(document);
     await waitForRender(document);
@@ -556,18 +559,40 @@ async function scenarioEscapeKeepsText(page: Page, evidence: Evidence): Promise<
     await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
     await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
     await press(page, "End");
-    await typeText(page, " KEEP ME PLEASE.");
+    await typeText(page, " DROP ME.");
     await press(page, "Escape");
+    await waitForNoBlockEditor(page, "the block editor to close after Escape");
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    assert.equal(bufferText(document), SMOKE, "Escape cancels the block edit");
 
-    const kept = SMOKE.replace("Second paragraph.", "Second paragraph. KEEP ME PLEASE.");
-    await waitFor("the Escape commit to keep the typed text in the source buffer", () =>
-      bufferText(document) === kept);
+    // Autosave (400 ms debounce) already wrote the text: Escape must restore the original block.
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    await press(page, "End");
+    await typeText(page, " DROP ME TOO.");
+    await waitFor("the autosave to reach the source buffer", () =>
+      bufferText(document).includes("Second paragraph. DROP ME TOO."));
+    await press(page, "Escape");
+    await waitFor("Escape to restore the original buffer after an autosave", () =>
+      bufferText(document) === SMOKE);
     await waitForRender(document);
     await waitForNoBlockEditor(page, "the block editor to close after Escape");
+    assert.equal(bufferText(document), SMOKE);
+    await captureAfter(evidence, page, "13-escape-cancels-block",
+      "Edit mode on; ` DROP ME TOO.` was typed (and autosaved) in the paragraph and Escape closed "
+      + "the editor. The preview and the source buffer show the original text again.");
+
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    await press(page, "End");
+    await typeText(page, " KEEP ME PLEASE.");
+    await press(page, process.platform === "darwin" ? "Meta+Enter" : "Control+Enter");
+    const kept = SMOKE.replace("Second paragraph.", "Second paragraph. KEEP ME PLEASE.");
+    await waitFor("the Cmd/Ctrl+Enter commit to keep the typed text in the source buffer", () =>
+      bufferText(document) === kept);
+    await waitForRender(document);
+    await waitForNoBlockEditor(page, "the block editor to close after Cmd/Ctrl+Enter");
     assert.equal(bufferText(document), kept);
-    await captureAfter(evidence, page, "13-escape-keeps-text",
-      "Edit mode on; ` KEEP ME PLEASE.` was typed in the paragraph and Escape closed the editor. "
-      + "The text stays in the preview and in the source buffer.");
 
     await withCurrentFrame(page, (frame) =>
       frame.locator("p", { hasText: "Second paragraph. KEEP ME PLEASE." }).click());
@@ -586,19 +611,21 @@ async function scenarioEscapeKeepsText(page: Page, evidence: Evidence): Promise<
     await waitForEditor(page, "[data-sphinx-preview-table-cell-editor] textarea");
     await press(page, "End");
     await typeText(page, "2");
-    await press(page, "Escape");
-    await waitFor("the table cell Escape commit to reach the source buffer", () =>
+    await waitFor("the table cell autosave to reach the source buffer", () =>
       bufferText(document).includes("| beta | two2 |"));
+    await press(page, "Escape");
+    await waitFor("the table cell Escape to restore the original cell", () =>
+      !bufferText(document).includes("two2"));
     await waitForRender(document);
     await waitFor("the table cell editor to close after Escape", async () => {
       const current = await findCurrentFrame(page);
       return current !== undefined
         && await current.locator("[data-sphinx-preview-table-cell-editor]").count() === 0;
     });
-    assert.ok(bufferText(document).includes("| beta | two2 |"));
-    await captureAfter(evidence, page, "14-escape-keeps-table-cell",
-      "Edit mode on; the cell `two` gained `2` and Escape closed the editor. The buffer contains "
-      + "`| beta | two2 |`.");
+    assert.equal(bufferText(document), withB);
+    await captureAfter(evidence, page, "14-escape-cancels-table-cell",
+      "Edit mode on; the cell `two` gained `2` (autosaved) and Escape closed the editor. The cell "
+      + "reads `two` again in the preview and in the buffer.");
   });
 }
 
@@ -1040,10 +1067,10 @@ async function scenarioCaretAtClick(page: Page, evidence: Evidence): Promise<voi
   });
 }
 
-/** RI-T15: hover outlines what a click edits; Done keeps and Revert restores the block text. */
+/** RI-T15: hover outlines what a click edits; Done keeps and Cancel restores the block text. */
 async function scenarioEditAffordances(page: Page, evidence: Evidence): Promise<void> {
   const DOCUMENT = "# Affordance document\n\n- outer one\n  - inner a\n  - inner b\n- outer two\n\nAlpha paragraph.\n";
-  const REVERT = "button[aria-label='Revert block to its original text']";
+  const CANCEL = "button[aria-label='Cancel editing and restore the original text']";
   const DONE = "button[aria-label='Done editing']";
   await withDocument("realinput-t15", DOCUMENT, async (source) => {
     await openSidePreview(source);
@@ -1063,10 +1090,10 @@ async function scenarioEditAffordances(page: Page, evidence: Evidence): Promise<
     await typeText(page, " R");
     await new Promise((resolve) => setTimeout(resolve, 600));
     await captureAfter(evidence, page, "22-editor-frame-and-buttons",
-      "A paragraph editor is open and ` R` was typed: framed editor, monospace text, hint line, Done and Revert.");
-    await withCurrentFrame(page, (frame) => frame.locator(REVERT).click());
-    await waitForNoBlockEditor(page, "the block editor to close after Revert");
-    await waitFor("Revert to restore the original buffer", () => bufferText(source) === DOCUMENT);
+      "A paragraph editor is open and ` R` was typed: framed editor, monospace text, status line with Done and Cancel on one row.");
+    await withCurrentFrame(page, (frame) => frame.locator(CANCEL).click());
+    await waitForNoBlockEditor(page, "the block editor to close after Cancel");
+    await waitFor("Cancel to restore the original buffer", () => bufferText(source) === DOCUMENT);
     assert.equal(bufferText(source), DOCUMENT);
     await waitForRender(source);
 
@@ -2998,7 +3025,7 @@ export async function run(): Promise<void> {
     await scenarioFrontmatterValueMinimalPatch(page, evidence);
     await scenarioFrontmatterStructuralMinimalPatch(page, evidence);
     await scenarioEnterCommitsTextField(page, evidence);
-    await scenarioEscapeKeepsText(page, evidence);
+    await scenarioEscapeCancels(page, evidence);
     await scenarioTypingUndoGrouping(page, evidence);
     await scenarioUndoStaysInEditor(page, evidence, "side");
     await scenarioUndoStaysInEditor(page, evidence, "open-with");

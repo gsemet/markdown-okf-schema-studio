@@ -823,8 +823,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     edit.renderedCellContent = undefined;
   }
 
-  // The cancel branch is used only by the Revert button when something reached the document;
-  // Escape, Done and leaving edit mode commit the text instead.
+  // The cancel branch is used by Cancel and Escape when something reached the document;
+  // Done, Cmd/Ctrl+Enter and leaving edit mode commit the text instead.
   function closeBlockEdit(cancel = false) {
     const edit = activeBlockEdit;
     if (!edit) return;
@@ -2187,6 +2187,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     postBlockEditSave(true);
   }
 
+  // Cancel button and Escape: close without saving, and restore the block when an autosave already
+  // reached the document.
+  function cancelBlockEdit() {
+    const edit = activeBlockEdit;
+    if (!edit || edit.finishing) return;
+    closeBlockEdit(edit.hasAutosavedChange === true);
+  }
+
   function switchTableCell(edit, selectedCell, caretPosition) {
     if (edit.finishing || !edit.tableModel || edit.selectedCell === selectedCell) return;
     const rowIndex = selectedCell.parentElement.rowIndex;
@@ -2291,7 +2299,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       && (edit.element === node || edit.element.contains?.(node));
     if (inside(event.target) || inside(document.activeElement)) return;
     event.preventDefault?.();
-    saveBlockEdit();
+    cancelBlockEdit();
   });
 
   // The top of the strip of the viewport where the table toolbar is fully usable: below the sticky
@@ -2445,9 +2453,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         return;
       }
       if (navigateBlockEdit(event, input)) return;
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !event.isComposing) {
         event.preventDefault?.();
-        saveBlockEdit();
+        cancelBlockEdit();
       } else if (event.key === "Enter") {
         event.preventDefault?.();
         saveBlockEdit();
@@ -2471,7 +2479,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       : edit.endLine > edit.line
       ? "Lines " + edit.line + "\u2013" + edit.endLine
       : "Line " + edit.line;
-    return lines + " \u00b7 Enter: new line \u00b7 Tab: indent \u00b7 Esc or "
+    return lines + " \u00b7 Enter: new line \u00b7 Tab: indent \u00b7 Esc: cancel \u00b7 "
       + (applePlatform ? "\u2318\u21a9" : "Ctrl+Enter") + ": done";
   }
 
@@ -2545,26 +2553,29 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     doneButton.setAttribute("type", "button");
     doneButton.setAttribute("aria-label", "Done editing");
     doneButton.textContent = "Done";
-    const revertButton = document.createElement("button");
-    revertButton.setAttribute("type", "button");
-    revertButton.setAttribute("aria-label", "Revert block to its original text");
-    revertButton.textContent = "Revert";
-    revertButton.disabled = true;
+    const cancelButton = document.createElement("button");
+    cancelButton.setAttribute("type", "button");
+    cancelButton.setAttribute("aria-label", "Cancel editing and restore the original text");
+    cancelButton.setAttribute("title", "Cancel (Esc)");
+    cancelButton.textContent = "Cancel";
     // Keep the focus in the textarea so its blur commit does not run before the click.
     const keepFocus = (event) => event.preventDefault?.();
     doneButton.addEventListener("mousedown", keepFocus);
-    revertButton.addEventListener("mousedown", keepFocus);
+    cancelButton.addEventListener("mousedown", keepFocus);
     doneButton.addEventListener("click", () => saveBlockEdit());
-    revertButton.addEventListener("click", () => {
-      if (activeBlockEdit !== edit || revertButton.disabled) return;
-      closeBlockEdit(edit.hasAutosavedChange === true);
+    cancelButton.addEventListener("click", () => {
+      if (activeBlockEdit !== edit) return;
+      cancelBlockEdit();
     });
-    actions.appendChild(doneButton);
-    actions.appendChild(revertButton);
+    const buttons = document.createElement("div");
+    buttons.className = "sphinx-preview-block-editor-buttons";
+    buttons.appendChild(doneButton);
+    buttons.appendChild(cancelButton);
+    actions.appendChild(edit.status);
+    actions.appendChild(buttons);
     textarea.addEventListener("input", () => {
       resizeTextarea();
       autosaveBlockEdit();
-      revertButton.disabled = textarea.value === displayText && edit.hasAutosavedChange !== true;
       if (edit.hintReplaced) {
         edit.hintReplaced = false;
         edit.status.textContent = hint;
@@ -2573,7 +2584,6 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     textarea.addEventListener("blur", saveBlockEdit);
     edit.status.textContent = hint;
     edit.element.appendChild(textarea);
-    edit.element.appendChild(edit.status);
     edit.element.appendChild(actions);
     edit.textarea = textarea;
     edit.resizeTextarea = resizeTextarea;
@@ -2605,7 +2615,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         && !event.altKey && !event.metaKey && !event.ctrlKey
         && !event.isComposing
       ) {
-        // Tab never leaves the editor; Escape is the keyboard exit route.
+        // Tab never leaves the editor; Escape (cancel) and Cmd/Ctrl+Enter (done) are the exits.
         event.preventDefault?.();
         const indentation = textEditing.indentSelection(
           textarea.value,
@@ -2621,9 +2631,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         }
         return;
       }
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !event.isComposing) {
         event.preventDefault?.();
-        saveBlockEdit();
+        cancelBlockEdit();
       } else if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault?.();
         saveBlockEdit();

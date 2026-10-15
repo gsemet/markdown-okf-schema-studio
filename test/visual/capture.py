@@ -1361,14 +1361,41 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
   if frame["tab"] != "4":
     failures.append(Failure(page_name, f"block editor tab-size is {frame['tab']}, expected 4"))
   status = editor.locator("[data-sphinx-preview-edit-status]").text_content() or ""
-  if not re.match(r"^Lines? \d+(\u2013\d+)? \u00b7 Enter: new line \u00b7 Tab: indent \u00b7 Esc or ", status):
+  if not re.match(r"^Lines? \d+(\u2013\d+)? \u00b7 Enter: new line \u00b7 Tab: indent \u00b7 Esc: cancel \u00b7 (\u2318\u21a9|Ctrl\+Enter): done$", status):
     failures.append(Failure(page_name, f"block editor hint is wrong: {status!r}"))
   done = editor.locator("button[aria-label='Done editing']")
-  revert = editor.locator("button[aria-label='Revert block to its original text']")
-  if done.count() != 1 or revert.count() != 1 or not done.is_visible() or not revert.is_visible():
-    failures.append(Failure(page_name, "Done and Revert buttons are not both visible"))
-  elif not revert.is_disabled():
-    failures.append(Failure(page_name, "Revert is enabled before any change"))
+  cancel = editor.locator("button[aria-label='Cancel editing and restore the original text']")
+  if done.count() != 1 or cancel.count() != 1 or not done.is_visible() or not cancel.is_visible():
+    failures.append(Failure(page_name, "Done and Cancel buttons are not both visible"))
+  elif (cancel.text_content() or "").strip() != "Cancel":
+    failures.append(Failure(page_name, "the second button is not labelled Cancel"))
+  else:
+    layout = editor.evaluate("""element => {
+      const row = element.querySelector('.sphinx-preview-block-editor-actions');
+      const status = row && row.querySelector('[data-sphinx-preview-edit-status]');
+      const buttons = row && row.querySelector('.sphinx-preview-block-editor-buttons');
+      if (!status || !buttons) return null;
+      const s = status.getBoundingClientRect();
+      const b = buttons.getBoundingClientRect();
+      const r = row.getBoundingClientRect();
+      const area = getComputedStyle(element.querySelector('textarea')).fontSize;
+      const editorSize = parseFloat(getComputedStyle(document.body).fontSize);
+      return { sTop: s.top, sBottom: s.bottom, sRight: s.right, sLeft: s.left, bTop: b.top,
+        bBottom: b.bottom, bLeft: b.left, bRight: b.right, rRight: r.right, area: parseFloat(area),
+        body: editorSize };
+    }""")
+    if layout is None:
+      failures.append(Failure(page_name, "status line is not inside the Done/Cancel row"))
+    else:
+      sideBySide = layout["sBottom"] > layout["bTop"] and layout["sTop"] < layout["bBottom"]
+      if sideBySide and layout["sRight"] > layout["bLeft"] + 0.5:
+        failures.append(Failure(page_name, f"status text overlaps the buttons: {layout}"))
+      if layout["bRight"] > layout["rRight"] + 0.5:
+        failures.append(Failure(page_name, f"buttons overflow the editor row: {layout}"))
+      if layout["bLeft"] <= layout["sLeft"]:
+        failures.append(Failure(page_name, f"buttons are not right of the status text: {layout}"))
+      if not layout["area"] < layout["body"]:
+        failures.append(Failure(page_name, f"editor text is not smaller than the body text: {layout}"))
 
 
 def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure]) -> None:
@@ -1861,14 +1888,15 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
           && new Set(saves.map(message => message.editId)).size === 1;
       }"""):
         failures.append(Failure(page_name, "multi-cell autosave did not preserve all changes in one table edit session"))
+      # The scenario's final frame is taken after Escape closed the editor; keep the open state too.
+      page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-open.png"), caret="initial")
       cell_input.press("Escape")
       if not page.evaluate("""() => {
         const saves = window.visualMessages.filter(message => message.type === "previewEditSave");
-        const latest = saves[saves.length - 1];
-        return latest && latest.final === true && latest.editedText.includes("journey-3")
-          && !window.visualMessages.some(message => message.type === "previewEditCancel");
+        return saves.length > 0 && saves.every(message => message.final !== true)
+          && window.visualMessages.some(message => message.type === "previewEditCancel");
       }"""):
-        failures.append(Failure(page_name, "Escape in a table cell did not commit the edit with a final save"))
+        failures.append(Failure(page_name, "Escape in a table cell did not cancel the edit"))
       return
 
     editor = page.locator("[data-okf-frontmatter-editor]")

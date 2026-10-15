@@ -672,7 +672,21 @@ export const SCENARIOS: Scenario[] = [
     machineChecks: ["overlay-clipped"],
     description:
       "Edit mode on. A hovered list is outlined with a dashed line (a second PNG, -hover, is kept); "
-      + "the final frame shows a paragraph editor with its frame, line-range hint, Done and Revert.",
+      + "the final frame shows a paragraph editor with its frame, line-range hint, and the status line on one row with the Done and Cancel buttons "
+      + "(status left, buttons right, smaller editor text).",
+  },
+  {
+    id: "edit-affordances-narrow",
+    fixture: "04-code-and-tables",
+    theme: "dark",
+    ...NARROW,
+    scroll: { kind: "top" },
+    editMode: true,
+    editAffordances: true,
+    machineChecks: ["overlay-clipped"],
+    description:
+      "460 px preview: the paragraph editor's status line wraps onto its own lines without "
+      + "overlapping the Done and Cancel buttons, which stay right-aligned on the same row or below.",
   },
   {
     id: "edit-insert-point-hover",

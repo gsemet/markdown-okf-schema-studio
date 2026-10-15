@@ -198,7 +198,7 @@ test("edit mode outlines the hovered block without moving the layout", () => {
 test("raw Markdown and YAML editors use the editor font, text fields keep the preview font", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-block-editor textarea\s*\{[^}]*font-family: var\(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace\);[^}]*font-size: var\(--vscode-editor-font-size, 0\.95em\);[^}]*tab-size: 4;/u,
+    /\.sphinx-preview-block-editor textarea\s*\{[^}]*font-family: var\(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace\);[^}]*font-size: calc\(var\(--vscode-editor-font-size, 0\.95em\) - 1px\);[^}]*tab-size: 4;/u,
   );
   assert.doesNotMatch(
     PREVIEW_THEME_CSS.match(/\.sphinx-preview-block-editor textarea\s*\{([^}]*)\}/u)?.[1] ?? "",
@@ -207,6 +207,17 @@ test("raw Markdown and YAML editors use the editor font, text fields keep the pr
   assert.match(
     PREVIEW_THEME_CSS,
     /\[data-okf-frontmatter-editor\] > textarea:not\(\[data-okf-text-value\]\)\s*\{[^}]*font-family: var\(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace\);[^}]*font-size: var\(--vscode-editor-font-size, 0\.95em\);[^}]*tab-size: 4;/u,
+  );
+});
+
+test("the block editor status and its buttons share one wrapping row", () => {
+  const row = PREVIEW_THEME_CSS.match(/\.sphinx-preview-block-editor-actions\s*\{([^}]*)\}/u)?.[1] ?? "";
+  assert.match(row, /display: flex;/u);
+  assert.match(row, /flex-wrap: wrap;/u);
+  assert.match(row, /justify-content: space-between;/u);
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /\.sphinx-preview-block-editor-buttons\s*\{[^}]*flex: none;[^}]*margin-inline-start: auto;/u,
   );
 });
 

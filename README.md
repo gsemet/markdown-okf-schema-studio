@@ -31,8 +31,8 @@ or
 - **OKF-Schema properties:** frontmatter is shown as a schema-aware properties table,
   with validation diagnostics, enum controls, typed scalar editors,
   and YAML editors for arrays and objects.
-- **Inline editing:** click a rendered block to edit its source Markdown. Save with Done,
-  Escape, or Cmd/Ctrl+Enter; Revert restores the original block. Tables and frontmatter support
+- **Inline editing:** click a rendered block to edit its source Markdown. Save with Done
+  or Cmd/Ctrl+Enter; Cancel or Escape restores the original block. Tables and frontmatter support
   keyboard navigation, row creation, and focused field editing.
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)
   annotations can show target metadata and source line numbers for implementation
