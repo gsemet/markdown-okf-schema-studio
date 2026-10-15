@@ -91,22 +91,26 @@
         "markdownOkfSchemaStudio.preview.scrollPreviewWithEditor": {
           "type": "boolean",
           "default": true,
-          "description": "Follow the editor viewport from the MyST preview."
+          "markdownDescription": "Makes the preview follow the editor: scrolling the source editor scrolls the preview to the same place. **On**: the preview follows. **Off**: the preview stays where it is. The toolbar anchor button in each preview panel overrides this setting for that panel.",
+          "order": 30
         },
         "markdownOkfSchemaStudio.preview.scrollEditorWithPreview": {
           "type": "boolean",
           "default": true,
-          "description": "Reveal the source line represented by the MyST preview viewport."
+          "markdownDescription": "Makes the editor follow the preview: scrolling or clicking in the preview reveals the matching source line in the editor. **On**: the editor follows. **Off**: the editor is never moved by the preview, and `#markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor#` has no effect.",
+          "order": 31
         },
         "markdownOkfSchemaStudio.preview.markEditorSelection": {
           "type": "boolean",
           "default": false,
-          "description": "Mark the active source line in the MyST preview."
+          "markdownDescription": "Marks, in the preview, the block that holds the editor cursor line; the marker refreshes when the editor scrolls or the preview re-renders, not on every cursor move. **On**: the matching block is marked. **Off**: no marker. Works even when `#markdownOkfSchemaStudio.preview.scrollPreviewWithEditor#` is off.",
+          "order": 32
         },
         "markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor": {
           "type": "boolean",
           "default": false,
-          "description": "Reveal the mapped source line when rendered content is double-clicked."
+          "markdownDescription": "Lets you double-click rendered content in the preview to jump to its source line in the editor. **On**: double-click reveals the source line. **Off**: double-click does nothing special. Requires `#markdownOkfSchemaStudio.preview.scrollEditorWithPreview#` to be on, and is ignored while a block is being edited in the preview.",
+          "order": 33
         },
         "markdownOkfSchemaStudio.preview.maxContentWidth": {
           "type": "number",
@@ -114,7 +118,8 @@
           "minimum": 0,
           "maximum": 2400,
           "step": 50,
-          "description": "Maximum width of the preview content column, in pixels. Set to 0 to use the full preview width."
+          "markdownDescription": "Sets the maximum width of the preview text column, in pixels. A value up to 2400 limits the column to that width and centers it. **0**: use the full width of the preview panel.",
+          "order": 10
         },
         "markdownOkfSchemaStudio.preview.stickyHeadingDepth": {
           "type": "number",
@@ -122,42 +127,50 @@
           "minimum": 1,
           "maximum": 6,
           "step": 1,
-          "description": "Number of Markdown heading levels to keep visible in the preview."
+          "markdownDescription": "Sets how many heading levels stay pinned at the top of the preview while you scroll. **1**: only the top-level heading. **3** (default): up to three levels. **6**: every level.",
+          "order": 11
         },
         "markdownOkfSchemaStudio.preview.incrementalUpdates": {
           "type": "boolean",
           "default": true,
-          "description": "Update the preview content in place while typing instead of reloading the page. Turn off if the preview misbehaves."
+          "markdownDescription": "Controls how the preview refreshes while you type. **On**: the changed parts of the page are updated in place, so scroll position and open sections are kept. **Off**: the whole page reloads on every change; turn this off if the preview shows stale or broken content.",
+          "order": 20
         },
         "markdownOkfSchemaStudio.plantuml.jarPath": {
           "type": "string",
           "default": "",
-          "description": "Absolute path to plantuml.jar used for PlantUML previews. Leave empty to use the plantuml executable from PATH."
+          "markdownDescription": "Path to `plantuml.jar` used to render PlantUML diagrams. A relative path is resolved from the workspace folder. **Empty**: the `plantuml` command found on your PATH is used.",
+          "order": 80
         },
         "markdownOkfSchemaStudio.frontmatter.propertiesTable": {
           "type": "boolean",
           "default": true,
-          "description": "Show the frontmatter properties table at the top of the MyST preview."
+          "markdownDescription": "Shows the frontmatter properties table at the top of the preview. **On**: the table is shown. **Off**: the frontmatter is not displayed.",
+          "order": 60
         },
         "markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties": {
           "type": "boolean",
           "default": false,
-          "description": "Warn on frontmatter fields that are not present in the matching OKF schema."
+          "markdownDescription": "Controls warnings for frontmatter fields that the matching OKF schema does not declare. **On**: such fields are reported as warnings. **Off**: they are accepted silently.",
+          "order": 61
         },
         "markdownOkfSchemaStudio.frontmatter.bundleRoot": {
           "type": "string",
           "default": "",
-          "description": "Explicit bundle root for x-okf-link values. Relative paths are resolved from the first workspace folder."
+          "markdownDescription": "Folder used as the bundle root when resolving `x-okf-link` values. A relative path is resolved from the first workspace folder. **Empty**: the parent folder of the schema folder is used when it contains the document and has an `index.md` or `log.md`; otherwise bundle-relative links cannot be resolved.",
+          "order": 62
         },
         "markdownOkfSchemaStudio.frontmatter.projectRoot": {
           "type": "string",
           "default": "",
-          "description": "Explicit project root for x-okf-link values. Relative paths are resolved from the first workspace folder."
+          "markdownDescription": "Folder used as the project root when resolving `x-okf-link` values. A relative path is resolved from the first workspace folder. **Empty**: the git root of the document is used when it is inside the workspace; otherwise project-relative links cannot be resolved.",
+          "order": 63
         },
         "markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks": {
           "type": "boolean",
           "default": false,
-          "description": "Allow document-relative x-okf-link values to resolve outside workspace folders."
+          "markdownDescription": "Controls document-relative `x-okf-link` values that point outside the workspace folders. **On**: such links are resolved. **Off**: they are reported as errors.",
+          "order": 64
         }
       }
     }

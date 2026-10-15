@@ -133,3 +133,28 @@ test("pins Node 24 and keeps the lockfile on the official npm registry", () => {
   }
   assert.doesNotMatch(lockfile, /_authToken|password\s*:/iu);
 });
+
+test("every contributed setting is explained with a markdownDescription and a unique order", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
+    contributes: { configuration: { properties: Record<string, Record<string, unknown>> } };
+  };
+  const properties = packageJson.contributes.configuration.properties;
+  const orders: number[] = [];
+  for (const [key, property] of Object.entries(properties)) {
+    const text = property.markdownDescription;
+    assert.equal(typeof text, "string", `${key} needs a markdownDescription`);
+    assert.ok((text as string).trim().length > 0, `${key} markdownDescription is empty`);
+    assert.ok((text as string).length <= 700, `${key} markdownDescription exceeds 700 characters`);
+    assert.ok(Number.isInteger(property.order), `${key} needs an integer order`);
+    assert.equal(property.description, undefined, `${key} must not keep a plain description`);
+    orders.push(property.order as number);
+  }
+  assert.equal(new Set(orders).size, orders.length, "orders must be unique");
+
+  const jarText = properties["markdownOkfSchemaStudio.plantuml.jarPath"].markdownDescription as string;
+  assert.ok(!jarText.includes("Absolute"), "jarPath text must not claim the path is absolute");
+  assert.ok(jarText.includes("PATH"), "jarPath text must mention PATH");
+  const doubleClick = properties["markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor"]
+    .markdownDescription as string;
+  assert.ok(doubleClick.includes("scrollEditorWithPreview"));
+});

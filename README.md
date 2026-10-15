@@ -136,13 +136,25 @@ without it, marker matching uses the current document's filename stem.
 
 The preview settings are available under **Markdown OKF-Schema Studio** in VS Code settings.
 
-- `scrollPreviewWithEditor` and `scrollEditorWithPreview` control each scroll direction and default
-  to `true`.
-- `markEditorSelection` and `doubleClickToSwitchToEditor` are independent and default to `false`.
-- `incrementalUpdates` keeps the page in place while the document changes and defaults to `true`.
-- `maxContentWidth` and `stickyHeadingDepth` control the reading layout.
-- Frontmatter settings control the properties table, strict additional-property warnings, and
-  workspace-bound link resolution.
+- `preview.maxContentWidth` (default 960): width of the text column in pixels; `0` is full width.
+- `preview.stickyHeadingDepth` (default 3): heading levels pinned at the top while scrolling (1-6).
+- `preview.incrementalUpdates` (default on): update changed parts in place; off reloads the page.
+- `preview.scrollPreviewWithEditor` (default on): editor scrolling moves the preview; the toolbar
+  anchor button overrides it per panel.
+- `preview.scrollEditorWithPreview` (default on): preview scrolling and clicks reveal the source.
+- `preview.markEditorSelection` (default off): mark the cursor's source line in the preview.
+- `preview.doubleClickToSwitchToEditor` (default off): double-click rendered content to reveal its
+  source; needs `scrollEditorWithPreview`.
+- `frontmatter.propertiesTable` (default on): show the properties table above the preview.
+- `frontmatter.strictAdditionalProperties` (default off): warn on fields the OKF schema omits.
+- `frontmatter.bundleRoot` and `frontmatter.projectRoot` (default empty): roots for `x-okf-link`
+  values; relative paths resolve from the first workspace folder. Empty bundle root: the schema
+  folder's parent if it holds the document and an `index.md` or `log.md`; empty project root: the
+  git root inside the workspace; otherwise such links cannot be resolved.
+- `frontmatter.allowOutsideWorkspaceLinks` (default off): resolve document-relative links that
+  leave the workspace.
+- `plantuml.jarPath` (default empty): path to `plantuml.jar`, relative to the workspace folder;
+  empty uses `plantuml` from PATH.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, validation, packaging, and release
 evidence procedures.
