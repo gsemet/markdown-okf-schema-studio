@@ -48,24 +48,3 @@ jobs:
           name: studio-reports
           path: out/reports/
           if-no-files-found: warn
-
-      - name: Upload Pages site
-        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && success()
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: out/site
-
-  deploy-pages:
-    name: Deploy GitHub Pages
-    needs: checks
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && needs.checks.result == 'success'
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
