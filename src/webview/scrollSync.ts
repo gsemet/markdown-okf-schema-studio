@@ -1155,6 +1155,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         customInput.setAttribute("placeholder", "New field name");
         customInput.setAttribute("data-okf-custom-key", "true");
         customInput.addEventListener("keydown", (event) => {
+          if (keepUndoInControl(event)) return;
           if (event.key !== "Enter") return;
           event.preventDefault?.();
           addCustomKey();
@@ -1282,13 +1283,95 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     const firstLineEnd = value.indexOf("\\n");
     const lastLineStart = value.lastIndexOf("\\n") + 1;
-    if (event.key === "ArrowUp" && position <= (firstLineEnd < 0 ? value.length : firstLineEnd)) {
+    // Up/Down leave only from the first/last VISUAL line: a long logical line wraps in the field
+    // and the native caret movement must run first.
+    if (
+      event.key === "ArrowUp"
+      && position <= (firstLineEnd < 0 ? value.length : firstLineEnd)
+      && onVisualEdge(control, "first")
+    ) {
       return { step: -1, caretPosition: "end" };
     }
-    if (event.key === "ArrowDown" && position >= lastLineStart) {
+    if (event.key === "ArrowDown" && position >= lastLineStart && onVisualEdge(control, "last")) {
       return { step: 1, caretPosition: "start" };
     }
     return undefined;
+  }
+
+  const visualMirrorStyles = [
+    "fontFamily", "fontSize", "fontWeight", "fontStyle", "fontVariant", "fontStretch",
+    "letterSpacing", "lineHeight", "textTransform", "textIndent", "wordSpacing", "tabSize",
+    "wordBreak", "direction", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
+  ];
+
+  // Measures whether the caret of a text field sits on its first and on its last visual (wrapped)
+  // line. A hidden mirror with the field's font, padding and width lays out the same text; the
+  // offsetTop of a marker at the caret is compared with a marker at the very start and the very
+  // end. Returns undefined when the layout cannot be measured, which callers treat as "edge".
+  function measureCaretVisualLine(control) {
+    let mirror;
+    try {
+      const style = window.getComputedStyle(control);
+      const value = String(control.value ?? "");
+      const position = Number(control.selectionStart);
+      const width = Number(control.clientWidth);
+      if (!style || !(width > 0) || !Number.isSafeInteger(position)) return undefined;
+      mirror = document.createElement("div");
+      for (const name of visualMirrorStyles) mirror.style[name] = style[name];
+      mirror.style.position = "absolute";
+      mirror.style.visibility = "hidden";
+      mirror.style.top = "0";
+      mirror.style.left = "-9999px";
+      mirror.style.boxSizing = "border-box";
+      mirror.style.width = width + "px";
+      mirror.style.border = "0";
+      mirror.style.whiteSpace = "pre-wrap";
+      mirror.style.overflowWrap = "break-word";
+      const marker = () => {
+        const element = document.createElement("span");
+        // U+2060 WORD JOINER: zero width and no line-break opportunity, so a marker inside a word
+        // cannot split a word that the textarea wraps whole.
+        element.textContent = "\u2060";
+        return element;
+      };
+      const first = marker();
+      const caret = marker();
+      const last = marker();
+      mirror.appendChild(first);
+      mirror.appendChild(document.createTextNode(value.slice(0, position)));
+      mirror.appendChild(caret);
+      mirror.appendChild(document.createTextNode(value.slice(position)));
+      mirror.appendChild(last);
+      document.body.appendChild(mirror);
+      const top = Number(caret.offsetTop);
+      const firstTop = Number(first.offsetTop);
+      const lastTop = Number(last.offsetTop);
+      if (![top, firstTop, lastTop].every(Number.isFinite)) return undefined;
+      return { first: Math.abs(top - firstTop) < 1, last: Math.abs(top - lastTop) < 1 };
+    } catch {
+      return undefined;
+    } finally {
+      try {
+        mirror?.remove?.();
+      } catch {
+        // The mirror is detached with its document.
+      }
+    }
+  }
+
+  // The visual-line probe is replaceable through window.okfCaretLineProbe. This is a test-only seam
+  // for the fake-DOM tests, which cannot measure layout: content scripts cannot define it under the
+  // nonce CSP, so it is never set in a real preview.
+  function onVisualEdge(control, edge) {
+    let line;
+    try {
+      line = typeof window.okfCaretLineProbe === "function"
+        ? window.okfCaretLineProbe(control)
+        : measureCaretVisualLine(control);
+    } catch {
+      line = undefined;
+    }
+    return !line || line[edge] !== false;
   }
 
   // Home/End jump to the start/end of the edited text. On macOS the native keys scroll the nearest
@@ -1315,11 +1398,32 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   function keepUndoInControl(event) {
     const mod = event.metaKey || event.ctrlKey;
     const code = event.keyCode;
-    if (mod && !event.altKey && (code === 90 || code === 89)) {
+    const letter = typeof event.key === "string" ? event.key.toLowerCase() : "";
+    if (mod && !event.altKey && (code === 90 || code === 89 || letter === "z" || letter === "y")) {
       event.stopPropagation?.();
       return true;
     }
     return false;
+  }
+
+  // Typing *, _, backtick or ~ over a selection wraps it (as one native, undoable edit) and keeps the text
+  // selected, so a second press wraps again. No selection, modifiers and IME stay native.
+  function wrapSelectionInControl(event, control, onFallbackInput) {
+    // AltGr reports ctrlKey and altKey together; French and German layouts type ~ and backtick so.
+    const altGraph = event.getModifierState?.("AltGraph") === true;
+    if (event.isComposing || event.metaKey) return false;
+    if (!altGraph && (event.ctrlKey || event.altKey)) return false;
+    if (typeof event.key !== "string" || event.key.length !== 1) return false;
+    const edit = textEditing.wrapSelection(
+      String(control.value ?? ""),
+      Number(control.selectionStart),
+      Number(control.selectionEnd),
+      event.key,
+    );
+    if (!edit) return false;
+    event.preventDefault?.();
+    applyTextEdit(control, edit, onFallbackInput);
+    return true;
   }
 
   function navigateBlockEdit(event, control) {
@@ -1774,6 +1878,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         });
         input.addEventListener("keydown", (event) => {
           if (event.isComposing) return;
+          if (keepUndoInControl(event)) return;
           if (event.key === "Enter") {
             if (event.shiftKey || event.altKey) return;
             event.preventDefault?.();
@@ -2508,6 +2613,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     input.addEventListener("blur", () => commitCellEditorOnFocusLoss(edit, input));
     input.addEventListener("keydown", (event) => {
       if (keepUndoInControl(event)) return;
+      if (wrapSelectionInControl(event, input, () => {
+        resizeInput();
+        rememberCellValue();
+        autosaveBlockEdit();
+      })) return;
       if (event.key === "Tab" && !event.metaKey && !event.ctrlKey && !event.altKey) {
         event.preventDefault?.();
         tabThroughTableCells(edit, Boolean(event.shiftKey));
@@ -2659,6 +2769,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     resizeTextarea();
     textarea.addEventListener("keydown", (event) => {
       if (keepUndoInControl(event)) return;
+      if (wrapSelectionInControl(event, textarea, () => {
+        resizeTextarea();
+        autosaveBlockEdit();
+      })) return;
       if (navigateBlockEdit(event, textarea)) return;
       if (homeEndInControl(event, textarea)) return;
       if (

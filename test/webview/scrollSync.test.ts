@@ -313,6 +313,9 @@ interface RuntimeHarness {
   readonly frontmatterProperties: RuntimeElement;
   currentProperties(): RuntimeElement | null;
   readonly windowState: { scrollY: number };
+  /** The fake `window` / `document`: tests stub measurement and `execCommand` on them. */
+  readonly window: Record<string, unknown>;
+  readonly document: Record<string, unknown>;
   getWebviewState(): Record<string, unknown>;
   dispatchDocument(type: string, event: unknown): void;
   dispatchMessage(message: Record<string, unknown>): void;
@@ -763,6 +766,8 @@ function createRuntimeHarness(configuration: Partial<{
     currentProperties: () => currentProperties,
     frontmatterProperties,
     windowState,
+    window,
+    document,
     getWebviewState: () => webviewState,
     dispatchDocument: (type, event) => dispatch(documentListeners, type, event),
     dispatchMessage: (message) => dispatch(windowListeners, "message", { data: message }),
@@ -6427,4 +6432,199 @@ test("T34: when a patch of a chain is rejected, the later ones are ignored and n
   assert.equal(harness.previewContent.innerHTML, "");
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-request-id"), "11");
   assert.equal(messagesAfter(harness, before).length, 0, "no ready report, so the host's 2 s fallback loads the page");
+});
+
+
+// Editor keyboard bugs (hotkey-editing backlog): wrapped-line Up/Down, undo, wrapping markers.
+
+function arrowAt(
+  control: RuntimeElement,
+  key: string,
+  position: number,
+): { prevented: boolean } {
+  control.setSelectionRange(position, position);
+  const result = { prevented: false };
+  control.dispatch("keydown", { key, preventDefault: () => { result.prevented = true; } });
+  return result;
+}
+
+test("ArrowUp/ArrowDown inside a wrapped logical line move the caret instead of leaving the block", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "one very long paragraph that wraps over several visual lines in the editor";
+  let probed: RuntimeElement | undefined;
+  harness.window.okfCaretLineProbe = (control: RuntimeElement) => {
+    probed = control;
+    return { first: false, last: false };
+  };
+  const count = harness.messages.length;
+  assert.equal(arrowAt(textarea, "ArrowUp", 40).prevented, false);
+  assert.equal(arrowAt(textarea, "ArrowDown", 40).prevented, false);
+  assert.equal(arrowAt(textarea, "ArrowUp", 0).prevented, false, "first logical line, not first visual line");
+  assert.equal(arrowAt(textarea, "ArrowDown", textarea.value.length).prevented, false);
+  assert.equal(probed, textarea);
+  assert.equal(harness.messages.length, count, "no navigation message");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditOpen" && message.line === 1), false);
+});
+
+test("ArrowUp/ArrowDown leave the block only on the first/last visual line", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "one very long paragraph that wraps over several visual lines in the editor";
+  harness.window.okfCaretLineProbe = () => ({ first: true, last: false });
+  const up = arrowAt(textarea, "ArrowUp", 10);
+  assert.equal(up.prevented, true);
+  assert.equal(harness.messages.at(-1)?.type, "previewEditSave", "the unchanged block moves on");
+});
+
+test("a table cell arrow inside a wrapped cell does not move to another cell", () => {
+  const harness = createRuntimeHarness();
+  const { cells, input } = openTableCellEditorForTab(harness);
+  input().value = "a long cell that wraps";
+  harness.window.okfCaretLineProbe = () => ({ first: false, last: false });
+  const count = harness.messages.length;
+  assert.equal(arrowAt(input(), "ArrowDown", 22).prevented, false);
+  assert.equal(arrowAt(input(), "ArrowUp", 0).prevented, false);
+  assert.equal(cellEditorOf(harness).parentElement, cells[1][0]);
+  assert.equal(harness.messages.length, count);
+  harness.window.okfCaretLineProbe = () => ({ first: false, last: true });
+  assert.equal(arrowAt(input(), "ArrowDown", 22).prevented, true);
+  assert.equal(cellEditorOf(harness).parentElement, cells[2][0]);
+});
+
+type ExecCall = { command: string; text?: string };
+
+/** Emulates the browser's insertText/delete on the textarea in focus, recording the calls. */
+function stubExecCommand(harness: ReturnType<typeof createRuntimeHarness>, control: RuntimeElement): ExecCall[] {
+  const calls: ExecCall[] = [];
+  harness.document.execCommand = (command: string, _ui: boolean, text?: string): boolean => {
+    calls.push({ command, text });
+    const start = control.selectionStart;
+    const end = control.selectionEnd;
+    const inserted = command === "delete" ? "" : String(text);
+    control.value = control.value.slice(0, start) + inserted + control.value.slice(end);
+    control.setSelectionRange(start + inserted.length, start + inserted.length);
+    control.dispatch("input");
+    return true;
+  };
+  return calls;
+}
+
+function typeKey(control: RuntimeElement, key: string, init: Record<string, unknown> = {}): boolean {
+  let prevented = false;
+  control.dispatch("keydown", { key, ...init, preventDefault: () => { prevented = true; } });
+  return prevented;
+}
+
+test("typing * or _ on a selection wraps it, keeps it selected and wraps again on a second press", () => {
+  for (const marker of ["*", "_", "`", "~"]) {
+    const harness = createRuntimeHarness();
+    const textarea = openBlockEditorWithSource(harness);
+    const calls = stubExecCommand(harness, textarea);
+    textarea.value = "say foo now";
+    textarea.setSelectionRange(4, 7);
+    assert.equal(typeKey(textarea, marker), true, marker);
+    assert.equal(textarea.value, "say " + marker + "foo" + marker + " now");
+    assert.deepEqual(textarea.selectionRange, [5, 8], "foo stays selected");
+    assert.equal(typeKey(textarea, marker), true);
+    assert.equal(textarea.value, "say " + marker + marker + "foo" + marker + marker + " now");
+    assert.deepEqual(textarea.selectionRange, [6, 9]);
+    assert.equal(calls.length, 2, "one undoable native edit per wrap");
+    assert.equal(calls[0].command, "insertText");
+  }
+});
+
+test("marker wrapping falls back to a direct edit and autosaves when execCommand is unavailable", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "foo";
+  textarea.setSelectionRange(0, 3);
+  assert.equal(typeKey(textarea, "*"), true);
+  assert.equal(textarea.value, "*foo*");
+  assert.deepEqual(textarea.selectionRange, [1, 4]);
+  harness.flushTimers();
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.editedText, "*foo*\n");
+});
+
+test("marker keys stay native without a selection, with modifiers or during IME composition", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "foo";
+  textarea.setSelectionRange(1, 1);
+  assert.equal(typeKey(textarea, "*"), false, "caret only");
+  textarea.setSelectionRange(0, 3);
+  assert.equal(typeKey(textarea, "*", { isComposing: true }), false);
+  assert.equal(typeKey(textarea, "*", { ctrlKey: true }), false);
+  assert.equal(typeKey(textarea, "*", { metaKey: true }), false);
+  assert.equal(typeKey(textarea, "a"), false);
+  assert.equal(typeKey(textarea, "Dead"), false);
+  assert.equal(textarea.value, "foo");
+});
+
+test("a table cell wraps its selection with the marker too", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  const calls = stubExecCommand(harness, input());
+  input().value = "a foo b";
+  input().setSelectionRange(2, 5);
+  assert.equal(typeKey(input(), "_"), true);
+  assert.equal(input().value, "a _foo_ b");
+  assert.deepEqual(input().selectionRange, [3, 6]);
+  assert.equal(calls.length, 1);
+  harness.flushTimers();
+  assert.match(String(harness.messages.at(-1)?.editedText ?? ""), /_foo_/u);
+});
+
+test("Enter continuation and Tab indentation use the undo-preserving execCommand path", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "- a";
+  textarea.setSelectionRange(3, 3);
+  assert.equal(typeKey(textarea, "Enter"), true);
+  assert.equal(textarea.value, "- a\n- ");
+  assert.equal(typeKey(textarea, "Tab"), true);
+  assert.equal(calls.length, 2);
+  assert.ok(calls.every((call) => call.command === "insertText"));
+});
+
+test("undo and redo keys stop at the table cell editor and reach no window listener", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  let windowSaw = 0;
+  (harness.window.addEventListener as (type: string, listener: () => void) => void)("keydown", () => { windowSaw += 1; });
+  for (const init of [
+    { key: "z", keyCode: 90, metaKey: true },
+    { key: "Z", keyCode: 90, ctrlKey: true, shiftKey: true },
+    { key: "y", ctrlKey: true },
+  ]) {
+    let stopped = 0;
+    let prevented = 0;
+    input().dispatch("keydown", {
+      ...init,
+      stopPropagation: () => { stopped += 1; },
+      preventDefault: () => { prevented += 1; },
+    });
+    assert.equal(stopped, 1, JSON.stringify(init));
+    assert.equal(prevented, 0, JSON.stringify(init));
+  }
+  assert.equal(windowSaw, 0);
+});
+
+test("AltGr (ctrlKey and altKey with AltGraph) still wraps the selection, plain Ctrl+Alt does not", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "foo";
+  textarea.setSelectionRange(0, 3);
+  assert.equal(typeKey(textarea, "~", { ctrlKey: true, altKey: true }), false);
+  assert.equal(typeKey(textarea, "~", { ctrlKey: true, altKey: true, getModifierState: () => false }), false);
+  assert.equal(textarea.value, "foo");
+  assert.equal(typeKey(textarea, "~", {
+    ctrlKey: true,
+    altKey: true,
+    getModifierState: (name: string) => name === "AltGraph",
+  }), true);
+  assert.equal(textarea.value, "~foo~");
 });

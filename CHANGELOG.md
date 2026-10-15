@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Fixed three keyboard bugs in the inline block and table-cell editors: ArrowUp/ArrowDown inside a
+  wrapped paragraph now move the caret between visual lines and only leave the block (or cell) from
+  the first or last visual line; typing `*`, `_`, a backtick or `~` over a selection wraps it (and
+  keeps it selected, so a second press wraps again) as one undoable step; and undo/redo shortcuts
+  keep working in every inline field without reaching the VS Code document.
 - Changed the table-cell editor to match the block editor: same editor font, size and line height,
   compact Done and Cancel buttons under the field inside the cell (the cell grows vertically, columns
   keep their width), and the arrow keys now move cell to cell (Left/Right at the text edges, Up/Down

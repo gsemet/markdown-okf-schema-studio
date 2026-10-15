@@ -167,6 +167,31 @@ export function createTextEditingTools() {
   }
 
   /**
+   * Returns the edit that typing a Markdown emphasis marker (`*`, `_`, backtick or `~`) applies
+   * to a non-empty selection: the marker goes on both sides and the text stays selected, so
+   * typing the marker again wraps once more. Returns `undefined` for anything else, which leaves
+   * the key to the native textarea.
+   */
+  function wrapSelection(
+    value: string,
+    selectionStart: number,
+    selectionEnd: number,
+    marker: string,
+  ): TextEdit | undefined {
+    if (marker.length !== 1 || !"*_`~".includes(marker)) return undefined;
+    if (selectionStart < 0 || selectionEnd > value.length || selectionStart >= selectionEnd) {
+      return undefined;
+    }
+    return {
+      start: selectionStart,
+      end: selectionEnd,
+      text: marker + value.slice(selectionStart, selectionEnd) + marker,
+      selectionStart: selectionStart + 1,
+      selectionEnd: selectionEnd + 1,
+    };
+  }
+
+  /**
    * Maps a click in the rendered text to a caret offset in the Markdown `source`. `before` and
    * `after` are the rendered characters on each side of the click. Returns `undefined` when no
    * unique match exists, so the caller can fall back to the end of the block.
@@ -246,5 +271,5 @@ export function createTextEditingTools() {
     return undefined;
   }
 
-  return { continueOnEnter, indentSelection, mapRenderedCaret };
+  return { continueOnEnter, indentSelection, wrapSelection, mapRenderedCaret };
 }

@@ -1319,6 +1319,119 @@ def check_nested_list_typing(page: Page, scenario: dict, failures: list[Failure]
     failures.append(Failure(scenario["page"], "nested list autosave did not retain spaces and newline exactly"))
 
 
+def check_editor_keyboard(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """Up/Down on wrapped lines stay in the editor, * wraps a selection, and native undo works."""
+  if not scenario.get("editorKeyboardChecks"):
+    return
+  page_name = scenario["page"]
+  page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
+  if page.locator("html").get_attribute("data-sphinx-preview-edit-mode") != "on":
+    page.locator("[data-sphinx-preview-edit-toggle]").click()
+  page.locator("main p", has_text="Wrapped paragraphs keep").click()
+  editor = page.locator('textarea[aria-label="Raw Markdown block"]')
+  editor.wait_for(state="visible")
+  original = editor.input_value()
+  opens = lambda: page.evaluate("window.visualMessages.filter(m => m.type === 'previewEditOpen').length")
+  opened = opens()
+  # A: put the caret on the second visual line with a real click, then press ArrowUp.
+  metrics = editor.evaluate("""element => {
+    const box = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return { x: box.x, y: box.y, paddingTop: parseFloat(style.paddingTop),
+      paddingLeft: parseFloat(style.paddingLeft),
+      lineHeight: parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.2,
+      height: box.height };
+  }""")
+  if metrics["height"] < metrics["lineHeight"] * 3:
+    failures.append(Failure(page_name, f"the long paragraph does not wrap onto 3+ lines: {metrics}"))
+    return
+  page.mouse.click(metrics["x"] + metrics["paddingLeft"] + 30,
+                   metrics["y"] + metrics["paddingTop"] + metrics["lineHeight"] * 1.5)
+  second_line_caret = editor.evaluate("element => element.selectionStart")
+  if second_line_caret <= 0:
+    failures.append(Failure(page_name, "clicking the second visual line left the caret at the start"))
+  page.keyboard.press("ArrowUp")
+  first_line_caret = editor.evaluate("element => element.selectionStart")
+  if page.locator('textarea[aria-label="Raw Markdown block"]').count() != 1 or opens() != opened:
+    failures.append(Failure(page_name, "ArrowUp on the second visual line left the block editor"))
+  elif editor.input_value() != original or not (0 <= first_line_caret < second_line_caret):
+    failures.append(Failure(page_name, f"ArrowUp did not move the caret up a visual line: {second_line_caret} -> {first_line_caret}"))
+  else:
+    page.keyboard.press("ArrowDown")
+    if editor.evaluate("element => element.selectionStart") <= first_line_caret or opens() != opened:
+      failures.append(Failure(page_name, "ArrowDown on the first visual line did not move down within the editor"))
+  # Real-layout probe checks: a word that wraps whole onto line 2 must not make the caret look
+  # like it is on line 1, and a caret on a trailing empty line is on the last visual line only.
+  line_two = page.evaluate("""() => {
+    const element = document.querySelector('textarea[aria-label="Raw Markdown block"]');
+    const style = getComputedStyle(element);
+    const box = element.getBoundingClientRect();
+    return { x: box.x + parseFloat(style.paddingLeft) + 1,
+      y: box.y + parseFloat(style.paddingTop) + (parseFloat(style.lineHeight) || 20) * 1.5 };
+  }""")
+  page.mouse.click(line_two["x"], line_two["y"])
+  line_two_start = editor.evaluate("element => element.selectionStart")
+  word_end = original.find(" ", line_two_start)
+  if line_two_start <= 0 or word_end - line_two_start < 4:
+    failures.append(Failure(page_name, f"could not find a word starting line 2: {line_two_start}, {word_end}"))
+  else:
+    for offset in (1, 2, word_end - line_two_start - 1):
+      editor.evaluate("(element, at) => element.setSelectionRange(at, at)", line_two_start + offset)
+      page.keyboard.press("ArrowUp")
+      stayed = page.locator('textarea[aria-label="Raw Markdown block"]').count() == 1 and opens() == opened
+      moved = editor.evaluate("element => element.selectionStart") < line_two_start + offset
+      if not (stayed and moved):
+        failures.append(Failure(page_name, f"ArrowUp inside the first word of line 2 (+{offset}) left the editor or did not move the caret"))
+  editor.evaluate("element => element.setSelectionRange(element.value.length, element.value.length)")
+  page.keyboard.press("Enter")
+  page.keyboard.press("ArrowUp")
+  if (page.locator('textarea[aria-label="Raw Markdown block"]').count() != 1 or opens() != opened
+      or editor.evaluate("element => element.selectionStart") >= len(original) + 1):
+    failures.append(Failure(page_name, "ArrowUp from the empty line after a trailing newline left the editor"))
+  page.keyboard.press("Escape")
+  page.locator("main p", has_text="Wrapped paragraphs keep").click()
+  editor.wait_for(state="visible")
+  if editor.input_value() != original:
+    failures.append(Failure(page_name, "Escape after the probe checks did not restore the paragraph"))
+    return
+  # The first visual line still hands over to the previous block.
+  editor.evaluate("element => element.setSelectionRange(0, 0)")
+  page.keyboard.press("ArrowUp")
+  page.wait_for_function(
+    "count => window.visualMessages.filter(m => m.type === 'previewEditOpen').length > count", arg=opened)
+  if "earlier paragraph" not in page.locator('textarea[aria-label="Raw Markdown block"]').input_value():
+    failures.append(Failure(page_name, "ArrowUp on the first visual line did not open the previous block"))
+  page.keyboard.press("Escape")
+  page.locator("main p", has_text="Wrapped paragraphs keep").click()
+  editor = page.locator('textarea[aria-label="Raw Markdown block"]')
+  editor.wait_for(state="visible")
+  if editor.input_value() != original:
+    failures.append(Failure(page_name, "reopening the long paragraph did not restore its text"))
+    return
+  # C: select the first word and type * twice with the real keyboard.
+  editor.evaluate("element => { element.focus(); element.setSelectionRange(0, 7); }")
+  page.keyboard.type("*")
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-selected.png"), caret="hide")
+  if not editor.input_value().startswith("*Wrapped* "):
+    failures.append(Failure(page_name, f"typing * on a selection did not wrap it: {editor.input_value()[:20]!r}"))
+  page.keyboard.type("*")
+  value = editor.input_value()
+  selection = editor.evaluate("element => [element.selectionStart, element.selectionEnd]")
+  if not value.startswith("**Wrapped** ") or selection != [2, 9]:
+    failures.append(Failure(page_name, f"second * did not give **Wrapped** with the word selected: {value[:20]!r} {selection}"))
+  # B: the native undo reverts the two wraps, redo applies them again.
+  undo = "Meta+Z" if sys.platform == "darwin" else "Control+Z"
+  redo = "Meta+Shift+Z" if sys.platform == "darwin" else "Control+Shift+Z"
+  page.keyboard.press(undo)
+  page.keyboard.press(undo)
+  if editor.input_value() != original:
+    failures.append(Failure(page_name, f"undo did not restore the paragraph text: {editor.input_value()[:24]!r}"))
+  page.keyboard.press(redo)
+  page.keyboard.press(redo)
+  if not editor.input_value().startswith("**Wrapped** "):
+    failures.append(Failure(page_name, f"redo did not reapply the wraps: {editor.input_value()[:24]!r}"))
+
+
 def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """T15: hover outline on a list, then a framed paragraph editor with hint and buttons."""
   if not scenario.get("editAffordances"):
@@ -2803,7 +2916,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_edit_affordances, check_nested_list_typing, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_edit_affordances, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

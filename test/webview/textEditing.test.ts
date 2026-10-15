@@ -132,3 +132,23 @@ for (const [name, source, before, after, expected] of caretCases) {
     }
   });
 }
+
+test("wrapSelection wraps a non-empty selection with the marker and keeps it selected", () => {
+  for (const marker of ["*", "_", "`", "~"]) {
+    const edit = tools.wrapSelection("a foo b", 2, 5, marker);
+    assert.deepEqual(edit, {
+      start: 2,
+      end: 5,
+      text: marker + "foo" + marker,
+      selectionStart: 3,
+      selectionEnd: 6,
+    });
+  }
+});
+
+test("wrapSelection ignores a caret, other keys and invalid ranges", () => {
+  assert.equal(tools.wrapSelection("abc", 1, 1, "*"), undefined);
+  assert.equal(tools.wrapSelection("abc", 0, 3, "a"), undefined);
+  assert.equal(tools.wrapSelection("abc", 0, 3, "**"), undefined);
+  assert.equal(tools.wrapSelection("abc", 2, 9, "*"), undefined);
+});

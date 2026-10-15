@@ -42,6 +42,8 @@ export interface Scenario {
   hideDescriptionColumn?: boolean;
   contextTagChecks?: boolean;
   listTypingChecks?: boolean;
+  /** Real-keyboard checks in a wrapped paragraph editor: Up/Down on wrapped lines, marker wrapping, undo. */
+  editorKeyboardChecks?: boolean;
   /** Hover outline, then an open paragraph editor with frame, hint and buttons (T15). */
   editAffordances?: boolean;
   expectStickyGrowth?: boolean;
@@ -220,6 +222,19 @@ export const SCENARIOS: Scenario[] = [
     description: "Edit the user's nested plugin list with six literal spaces, Enter, and a new list item. "
       + "Check exact text, caret, focus, and autosave without period substitution or blocked newlines.",
   }]),
+  {
+    id: "editor-keyboard-wrapped-narrow",
+    fixture: "17-wrapped-editing",
+    theme: "dark",
+    ...NARROW,
+    scroll: { kind: "top" },
+    editMode: true,
+    editorKeyboardChecks: true,
+    description:
+      "460 px preview with a long wrapping paragraph open in its editor. ArrowUp on the second wrapped "
+      + "line moved the caret to the first line without leaving the editor; typing * twice on the selected "
+      + "word Wrapped shows **Wrapped** in the textarea, and undo and redo restored the text.",
+  },
   ...["dark", "light"].flatMap((theme) => [
     {
       id: `context-tags-${theme}-wide`,
