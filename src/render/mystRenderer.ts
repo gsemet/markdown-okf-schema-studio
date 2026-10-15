@@ -1239,6 +1239,69 @@ function expandWikiLinks(node: MystNode): void {
   });
 }
 
+// Bare `http(s)://` and `www.` URLs in prose, GFM autolink-literal style. Everything that already
+// carries its own meaning stays literal: code, math, raw HTML, existing links, roles and references.
+// mystRole and mystTarget are kept as a guard: their content is literal markup, not prose.
+const AUTOLINK_SKIP_PARENTS = new Set([
+  "link", "linkReference", "image", "imageReference", "crossReference", "cite", "footnoteReference",
+  "code", "inlineCode", "math", "inlineMath", "html", "mystRole", "mystTarget",
+]);
+const BARE_URL = /(?:https?:\/\/|www\.)[^\s<>\uE000-\uF8FF]+/giu;
+const BARE_URL_HOST = /^(?:https?:\/\/[\p{L}\p{N}]|www\.[\p{L}\p{N}_-]+(?:\.[\p{L}\p{N}_-]+)+)/iu;
+
+/** Drops trailing sentence punctuation and unbalanced closing parentheses from a URL candidate. */
+function trimBareUrl(url: string): string {
+  let opens = 0;
+  let closes = 0;
+  for (let index = 0; index < url.length; index += 1) {
+    if (url[index] === "(") opens += 1;
+    else if (url[index] === ")") closes += 1;
+  }
+  let end = url.length;
+  while (end > 0) {
+    const last = url[end - 1];
+    if (last === ")") {
+      if (closes <= opens) break;
+      closes -= 1;
+      end -= 1;
+    } else if ("?!.,:;*_~'\"".includes(last)) {
+      end -= 1;
+    } else {
+      break;
+    }
+  }
+  return url.slice(0, end);
+}
+
+function autolinkBareUrls(node: MystNode): void {
+  if (AUTOLINK_SKIP_PARENTS.has(node.type) || !node.children) return;
+  node.children = node.children.flatMap((child): MystNode[] => {
+    if (child.type !== "text" || !child.value) {
+      autolinkBareUrls(child);
+      return [child];
+    }
+    const value = child.value;
+    const fragments: MystNode[] = [];
+    let offset = 0;
+    for (const match of value.matchAll(BARE_URL)) {
+      const before = match.index > 0 ? value[match.index - 1] : "";
+      if (before && /[\p{L}\p{N}_@/.-]/u.test(before)) continue;
+      const text = trimBareUrl(match[0]);
+      if (!BARE_URL_HOST.test(text)) continue;
+      if (match.index > offset) fragments.push({ type: "text", value: value.slice(offset, match.index) });
+      fragments.push({
+        type: "link",
+        url: /^www\./iu.test(text) ? `https://${text}` : text,
+        children: [{ type: "text", value: text }],
+      });
+      offset = match.index + text.length;
+    }
+    if (!fragments.length) return [child];
+    if (offset < value.length) fragments.push({ type: "text", value: value.slice(offset) });
+    return fragments;
+  });
+}
+
 // Inside these nodes a marker is literal text: a checkbox inside link text would compete with
 // the link for the click.
 const INERT_CHECKBOX_PARENTS = new Set([
@@ -1349,6 +1412,7 @@ export async function renderMyst(
   if (checkboxes.markers.length > 0) {
     convertCheckboxPlaceholders(ast, checkboxes.markers);
   }
+  autolinkBareUrls(ast);
   normalizeContextTagContainers(ast);
   wrapBareBlockImages(ast);
   walk(ast, diagnostics);

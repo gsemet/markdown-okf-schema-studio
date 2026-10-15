@@ -38,6 +38,8 @@ export interface Scenario {
   editActivationScroll?: boolean;
   editActivationSelector?: string;
   mathRenderingChecks?: boolean;
+  /** Bare URLs in a paragraph, list item and table cell are links; the one in inline code is not. */
+  bareUrlChecks?: boolean;
   frontmatterLinkState?: "loading" | "loaded";
   hideDescriptionColumn?: boolean;
   contextTagChecks?: boolean;
@@ -1159,6 +1161,17 @@ export const SCENARIOS: Scenario[] = [
     description:
       "The same standalone SKILL.md metadata on a light theme, with the nested YAML "
       + "code block and generic two-column table remaining legible.",
+  },
+  {
+    id: "bare-urls-light-wide",
+    fixture: "21-bare-urls",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    bareUrlChecks: true,
+    description: "Bare URLs typed without Markdown link syntax in a paragraph, a list item and a table cell "
+      + "are rendered as ordinary underlined links (trailing punctuation left outside the link); the URL "
+      + "inside inline code stays plain code text.",
   },
   ...["white", "dark"].flatMap((mode) => [WIDE, NARROW].map((viewport) => ({
     id: `frontmatter-link-details-${mode}-${viewport.width}`,

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Bare `http://`, `https://` and `www.` URLs in prose, lists and table cells now render as links
+  (GFM autolink-literal rules: trailing punctuation stays outside, balanced parentheses stay in;
+  `www.` links open as `https://`). Code, math, existing links and emails are untouched, the links
+  use the same navigation policy as Markdown links, and editing still shows the raw URL text.
 - The inline editor of the document's first block and the "Start writing" button of an empty
   document no longer stick to the top edge of the preview: the first-block editor gets a 56 px top
   margin so its frame clears the floating toolbar (the owner asked for 20–40 px; 24 px left a wide

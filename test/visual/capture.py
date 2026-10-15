@@ -799,6 +799,35 @@ def check_math_rendering(page: Page, scenario: dict, failures: list[Failure]) ->
         failures.append(Failure(scenario["page"], "KaTeX layout styles are missing or require unsafe inline CSS"))
 
 
+def check_bare_urls(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    if not scenario.get("bareUrlChecks"):
+        return
+    found = page.evaluate("""() => ({
+      links: [...document.querySelectorAll('#sphinx-myst-preview-content a')].map(a => ({
+        text: a.textContent,
+        target: a.getAttribute('data-sphinx-preview-navigation') || a.getAttribute('href'),
+        underline: getComputedStyle(a).textDecorationLine,
+      })),
+      code: [...document.querySelectorAll('#sphinx-myst-preview-content code')].map(code => ({
+        text: code.textContent, inLink: Boolean(code.closest('a')),
+      })),
+    })""")
+    expected = {
+        "https://example.com/docs?q=1#top": "https://example.com/docs?q=1#top",
+        "www.example.org/guide": "https://www.example.org/guide",
+        "https://example.com/end": "https://example.com/end",
+        "http://example.net/list-item": "http://example.net/list-item",
+        "https://example.com/table-cell": "https://example.com/table-cell",
+    }
+    actual = {link["text"]: link["target"] for link in found["links"]}
+    if actual != expected:
+        failures.append(Failure(scenario["page"], f"bare URL links are {actual}, expected {expected}"))
+    if any(link["text"] == "https://example.com/in-code" for link in found["links"]) or not any(
+        code["text"] == "https://example.com/in-code" and not code["inLink"] for code in found["code"]
+    ):
+        failures.append(Failure(scenario["page"], "the URL in inline code was linkified"))
+
+
 def machine_check_lines(checks: list[dict] | None) -> list[str]:
     """One PASS, FAIL or n/a line per geometry check; says so when the final frame was unavailable."""
     if checks is None:
@@ -3000,7 +3029,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   for check in (
     check_forced_white_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
     check_generic_skill_frontmatter, check_okf_schema_rendering, check_preview_toolbar,
-    check_math_rendering, check_content_contracts,
+    check_math_rendering, check_bare_urls, check_content_contracts,
   ):
     try:
       check(page, scenario, failures)
