@@ -200,18 +200,20 @@ The Python project's version is tooling metadata and is not the extension releas
 	just version 1.2.3
 	```
 
-	Both commands update the npm manifest and lockfile without creating a commit or tag.
+	Both commands update the npm manifest and lockfile and create a signed-off commit
+	with subject `chore: version X.Y.Z`, using `git commit -s`. Neither creates a local tag.
+	Only these two files are committed; unrelated staged work stays staged.
+	Commit or stash existing edits to either npm version file before running the command.
 	Explicit versions must be stable `X.Y.Z`, newer than the baseline, and not already tagged.
 
-3. Validate and commit the version change, then merge it into `main`:
+3. Validate the version commit, then push it and merge it into `main`:
 
 	```bash
 	just preflight
-	git add package.json package-lock.json
-	git commit -m "chore(release): bump version to 1.2.3"
+	git show --stat HEAD
 	```
 
-	Use the actual version in the commit message. Keep release images and their Git LFS
+	Keep release images and their Git LFS
 	objects committed and pushed, since Marketplace image URLs use the release tag.
 
 4. After successful main-branch CI, the tagging job checks whether the pushed version

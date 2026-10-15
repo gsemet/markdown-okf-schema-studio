@@ -101,7 +101,7 @@ def repository(tmp_path: Path) -> Path:
 def test_automatic_version(
     repository: Path, message: str | None, expected: str
 ) -> None:
-    """Classify commits without creating a commit or tag."""
+    """Classify commits and create a signed-off version commit without a tag."""
     if message:
         subprocess.run(
             ["git", "commit", "--allow-empty", "--quiet", "-m", message],
@@ -112,7 +112,7 @@ def test_automatic_version(
 
 
 def assert_version(repository: Path, arguments: list[str], expected: str) -> None:
-    """Check synchronized versions and unchanged Git history."""
+    """Check synchronized versions and the isolated signed-off commit."""
     before = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository)
     result = subprocess.run(
         [sys.executable, str(ROOT / "scripts/version.py"), *arguments],
@@ -125,8 +125,19 @@ def assert_version(repository: Path, arguments: list[str], expected: str) -> Non
     lock = json.loads((repository / "package-lock.json").read_text())
     assert lock["version"] == lock["packages"][""]["version"] == expected
     assert (
-        subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository) == before
+        subprocess.check_output(["git", "rev-parse", "HEAD^"], cwd=repository) == before
     )
+    message = subprocess.check_output(
+        ["git", "log", "-1", "--format=%B"], cwd=repository, text=True
+    )
+    assert message.splitlines()[0] == f"chore: version {expected}"
+    assert "Signed-off-by: Release Test <test@example.com>" in message
+    changed = subprocess.check_output(
+        ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"],
+        cwd=repository,
+        text=True,
+    ).splitlines()
+    assert changed == ["package-lock.json", "package.json"]
     assert subprocess.check_output(["git", "tag"], cwd=repository).strip() == b"v0.2.0"
 
 
@@ -135,9 +146,59 @@ def test_explicit_version(repository: Path) -> None:
     assert_version(repository, ["2.3.4"], "2.3.4")
 
 
+@pytest.mark.parametrize("arguments, expected", [([], "0.2.1"), (["2.3.4"], "2.3.4")])
+def test_version_preserves_unrelated_work(
+    repository: Path, arguments: list[str], expected: str
+) -> None:
+    """Keep unrelated staged and untracked work out of either version commit."""
+    (repository / "unrelated.txt").write_text("Staged work")
+    subprocess.run(["git", "add", "unrelated.txt"], cwd=repository, check=True)
+    (repository / "untracked.txt").write_text("Unstaged work")
+    assert_version(repository, arguments, expected)
+    assert (
+        subprocess.check_output(
+            ["git", "diff", "--cached", "--name-only"], cwd=repository
+        ).strip()
+        == b"unrelated.txt"
+    )
+    assert (repository / "untracked.txt").read_text() == "Unstaged work"
+
+
+@pytest.mark.parametrize("arguments", [[], ["2.3.4"]])
+@pytest.mark.parametrize("staged", [False, True])
+def test_version_rejects_existing_manifest_edits(
+    repository: Path, arguments: list[str], staged: bool
+) -> None:
+    """Refuse to include pre-existing npm edits in the version commit."""
+    manifest = repository / "package.json"
+    manifest.write_text(json.dumps({"version": "0.2.0", "description": "User work"}))
+    if staged:
+        subprocess.run(["git", "add", "package.json"], cwd=repository, check=True)
+    before = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository)
+    original = manifest.read_bytes()
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/version.py"), *arguments],
+        cwd=repository,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert "existing npm manifest edits" in result.stderr
+    assert manifest.read_bytes() == original
+    assert (
+        subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository) == before
+    )
+
+
 def test_stale_manifest(repository: Path) -> None:
     """Use the latest reachable release when the manifest is behind."""
     (repository / "package.json").write_text(json.dumps({"version": "0.1.1"}))
+    subprocess.run(["git", "add", "package.json"], cwd=repository, check=True)
+    subprocess.run(
+        ["git", "commit", "--quiet", "-m", "chore: stale manifest"],
+        cwd=repository,
+        check=True,
+    )
     assert_version(repository, [], "0.2.1")
 
 
@@ -179,14 +240,6 @@ def test_tag_bump_and_rerun(repository: Path, tmp_path: Path) -> None:
     assert unchanged.returncode == 0
     assert not output.exists()
     assert_version(repository, ["0.3.0"], "0.3.0")
-    subprocess.run(
-        ["git", "add", "package.json", "package-lock.json"], cwd=repository, check=True
-    )
-    subprocess.run(
-        ["git", "commit", "--quiet", "-m", "chore: release 0.3.0"],
-        cwd=repository,
-        check=True,
-    )
     released = subprocess.run(
         command, cwd=repository, env=environment, text=True, capture_output=True
     )
