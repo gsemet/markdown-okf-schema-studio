@@ -16,12 +16,17 @@ permissions:
 
 jobs:
   package:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' &&
+      github.ref_type == 'tag' &&
+      github.ref_name == inputs.tag)
     environment: release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ github.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -30,7 +35,7 @@ jobs:
       - name: Verify release tag
         shell: bash
         env:
-          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           expected_tag="v$(node -p "require('./package.json').version")"
           if [[ "$RELEASE_TAG" != "$expected_tag" ]]; then
