@@ -1133,3 +1133,31 @@ test("image directives are mapped blocks spanning the directive's source lines",
     [["3", "5"], ["7", "8"]],
   );
 });
+
+test("tilde pairs render as struck-through text only in prose", async () => {
+  const includedPath = path.join(fixtureDirectory, "included-strike.md");
+  fs.writeFileSync(includedPath, "Included ~~gone~~ text.\n");
+  try {
+    const document = inlineDocument(
+      "Para ~~gone~~ here and single ~x~ stays.\n\n"
+      + "- item ~~gone~~\n\n"
+      + "| A |\n| - |\n| ~~gone~~ |\n\n"
+      + "`~~code~~`\n\n```text\n~~fenced~~\n```\n\n"
+      + "```{include} included-strike.md\n```\n",
+    );
+    const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+      documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+    const root = parseHtml(result.html);
+    const dels = findElements(root, isTag("del"));
+    assert.deepEqual(dels.map((del) => textContent(del)), ["gone", "gone", "gone", "gone"]);
+    const parents = dels.map((del) => findElement(root, (el) =>
+      el.tagName !== "del" && findElements(el, (c) => c === del).length > 0
+      && ["p", "li", "td"].includes(el.tagName)));
+    assert.deepEqual(parents.map((p) => p?.tagName), ["p", "li", "td", "p"]);
+    assert.ok(result.html.includes("~~code~~"), "inline code must stay literal");
+    assert.ok(result.html.includes("~~fenced~~"), "fenced code must stay literal");
+    assert.ok(result.html.includes("~x~"), "single tilde must stay literal");
+  } finally {
+    fs.rmSync(includedPath, { force: true });
+  }
+});
