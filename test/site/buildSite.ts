@@ -57,7 +57,7 @@ function walkMarkdown(directory: string): string[] {
   return files;
 }
 
-function pageDocument(title: string, currentPage: string, body: string): string {
+export function pageDocument(title: string, currentPage: string, body: string): string {
   const rootLink = relativeSitePath(currentPage, "index.html");
   const contributingLink = relativeSitePath(currentPage, "contributing.html");
   const galleryLink = relativeSitePath(currentPage, "gallery.html");
@@ -75,6 +75,9 @@ body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.65 u
 header { border-bottom: 1px solid var(--line); background: var(--panel); }
 nav { display: flex; flex-wrap: wrap; gap: 1.2rem; max-width: 1120px; margin: 0 auto; padding: 1rem 1.25rem; align-items: center; }
 nav strong { margin-right: auto; letter-spacing: .02em; }
+.site-brand { display: flex; align-items: center; gap: .75rem; margin-right: auto; min-width: 0; color: var(--ink); }
+.site-brand img { flex: 0 0 44px; width: 44px; height: 44px; }
+.site-brand strong { margin: 0; letter-spacing: 0; overflow-wrap: anywhere; }
 a { color: var(--accent-strong); }
 nav a { text-decoration: none; font-size: .94rem; }
 main { max-width: 920px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
@@ -136,7 +139,7 @@ footer { max-width: 920px; margin: 0 auto; padding: 0 1.25rem 3rem; color: var(-
 </style>
 </head>
 <body>
-<header><nav><strong>Markdown OKF-Schema Studio</strong><a href="${rootLink}">Home</a><a href="${contributingLink}">Contributing</a><a href="${galleryLink}">Gallery</a></nav></header>
+<header><nav><a class="site-brand" href="${rootLink}"><img src="${relativeSitePath(currentPage, "images/logo.svg")}" alt="" width="44" height="44"><strong>Markdown OKF-Schema Studio</strong></a><a href="${rootLink}">Home</a><a href="${contributingLink}">Contributing</a><a href="${galleryLink}">Gallery</a></nav></header>
 <main>${body}</main>
 <footer>Generated from the repository README and current local reports.</footer>
 </body>
@@ -330,7 +333,7 @@ async function main(): Promise<void> {
   if (fs.existsSync(imageRoot)) {
     fs.cpSync(imageRoot, path.join(siteRoot, "images"), { recursive: true, errorOnExist: false, force: true });
   }
-  fs.copyFileSync(path.join(EXTENSION_ROOT, "sphinx", "_static", "favicon.svg"), path.join(siteRoot, "favicon.svg"));
+  fs.copyFileSync(path.join(EXTENSION_ROOT, "images", "logo.svg"), path.join(siteRoot, "favicon.svg"));
   if (fs.existsSync(REPORTS_ROOT)) {
     fs.cpSync(REPORTS_ROOT, path.join(siteRoot, "reports"), { recursive: true, errorOnExist: false, force: true });
   }

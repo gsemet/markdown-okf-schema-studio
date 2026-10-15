@@ -1,6 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Markdown OKF-Schema Studio">
-  <rect width="64" height="64" rx="12" fill="#0b5563"/>
-  <path d="M12 18h40v28H12z" fill="#f4f8f7"/>
-  <path d="M18 25h17v5H18zm0 9h28v5H18z" fill="#0b5563"/>
-  <path d="m40 24 7 7-7 7" fill="none" stroke="#0b5563" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title description">
+  <title id="title">Markdown OKF-Schema Studio</title>
+  <desc id="description">A teal metadata seal combines YAML frontmatter with the white MyST M and orange brace. Adapted from the MyST favicon at https://github.com/jupyter-book/mystmd/blob/main/docs/public/favicon.svg; not an endorsement by MyST.</desc>
+  <defs>
+    <symbol id="myst" viewBox="0 0 81.78 73.9">
+      <path fill="#ffffff" d="M14.66,41.7V38.09l4.67-.79V4.44l-4.67-.8V0h12.2L40.3,31.66h.17L53.47,0H66.05V3.64l-4.67.8V37.3l4.67.79V41.7h-15V38.09L56,37.3V7.7l-.15,0L42.3,40.22H38.55l-14-32.49-.14,0,.18,17.43V37.3l5.05.79V41.7Z"/>
+      <path fill="#f37726" d="M37.88,73.9q0-8.82-10.13-8.82H19.33q-7.83,0-12.53-3.79T0,50.25l4.8-1.63q2.7,8.46,13.78,8.75h9.17q9.63,0,13.13,7.53Q44.3,57.37,54,57.37h8.45q11.76,0,14.55-8.72l4.78,1.6Q79.71,57.61,75,61.33T62.63,65.08H53.88q-10,0-10,8.82"/>
+    </symbol>
+  </defs>
+  <circle cx="128" cy="128" r="120" fill="#0b5563"/>
+  <g fill="none" stroke-width="8" stroke-linecap="round">
+    <path d="M88 48h16m16 0h16m16 0h16M88 108h16m16 0h16m16 0h16" stroke="#f37726"/>
+    <path d="M79 78h27m20 0h51" stroke="#f4f8f7"/>
+  </g>
+  <g fill="#f37726"><circle cx="116" cy="73" r="3"/><circle cx="116" cy="83" r="3"/></g>
+  <use href="#myst" x="72" y="132" width="112" height="101"/>
 </svg>

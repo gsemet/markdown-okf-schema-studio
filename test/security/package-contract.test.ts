@@ -5,6 +5,19 @@ import { test } from "node:test";
 
 const extensionRoot = path.resolve(__dirname, "../../..");
 
+test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the shared logo", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as { icon: string };
+  assert.equal(manifest.icon, "images/logo.png");
+  const icon = fs.readFileSync(path.join(extensionRoot, manifest.icon));
+  assert.deepEqual(icon.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  assert.equal(icon.readUInt32BE(16), 256);
+  assert.equal(icon.readUInt32BE(20), 256);
+  assert.equal(
+    fs.readFileSync(path.join(extensionRoot, "sphinx/_static/favicon.svg"), "utf8"),
+    fs.readFileSync(path.join(extensionRoot, "images/logo.svg"), "utf8"),
+  );
+});
+
 test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     name: string;

@@ -1,9 +1,19 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { pageDocument } from "./buildSite";
 import { rewriteLinkTarget } from "./siteLinks";
 
 const renderedPages = new Set(["README.md", "CONTRIBUTING.md", "docs/guide.md"]);
+
+test("site branding resolves from root and nested pages", () => {
+  for (const [currentPage, prefix] of [["index.html", ""], ["docs/guide.html", "../"]]) {
+    const document = pageDocument("Studio", currentPage, "<h1>Studio</h1>");
+    assert.ok(document.includes(`href="${prefix}favicon.svg" type="image/svg+xml"`));
+    assert.ok(document.includes(`src="${prefix}images/logo.svg" alt="" width="44" height="44"`));
+    assert.ok(document.includes(`class="site-brand" href="${prefix}index.html"`));
+  }
+});
 
 test("rewrites rendered Markdown documents and preserves fragments", () => {
   assert.equal(

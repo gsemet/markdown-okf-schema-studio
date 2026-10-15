@@ -56,9 +56,11 @@ def main() -> None:
         Crop(SCREENSHOTS / "okf-schema-dark.png", "schema-properties.png", (120, 20, 1680, 1100), 720),
         Crop(SCREENSHOTS / "edit-frontmatter-value-dark.png", "edit-frontmatter.png", (120, 20, 1680, 1110), 720),
         Crop(real_input / "22-editor-frame-and-buttons.png", "inline-editing.png", (700, 40, 1390, 410), 720),
-        Crop(SCREENSHOTS / "handbook-dark-top.png", "theme-dark.png", (90, 20, 1710, 930), 720),
-        Crop(SCREENSHOTS / "handbook-forced-white.png", "theme-white.png", (90, 20, 1710, 930), 720),
-        Crop(SCREENSHOTS / "handbook-forced-cream.png", "theme-cream.png", (90, 20, 1710, 930), 720),
+        Crop(real_input / "38-edit-mode-remembered.png", "myst-admonitions.png", (790, 140, 1315, 445), 720),
+        Crop(real_input / "38-edit-mode-remembered.png", "myst-diagrams-and-figure.png", (790, 460, 1315, 860), 720),
+        Crop(SCREENSHOTS / "handbook-dark-top.png", "theme-dark.png", (0, 20, 1800, 930), 720),
+        Crop(SCREENSHOTS / "handbook-forced-white.png", "theme-white.png", (0, 20, 1800, 930), 720),
+        Crop(SCREENSHOTS / "handbook-forced-cream.png", "theme-cream.png", (0, 20, 1800, 930), 720),
     ]
     for crop in crops:
         render(crop)
