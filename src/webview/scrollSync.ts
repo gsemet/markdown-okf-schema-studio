@@ -2193,6 +2193,12 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     element.className = selectedCell
       ? "sphinx-preview-table-cell-editor"
       : "sphinx-preview-block-editor";
+    // Nothing above the document's first block: the frame gets room before the top edge.
+    if (!selectedCell && !propertiesSection()
+      && (target.className?.split?.(" ").includes("sphinx-preview-insert-point--first")
+        || topLevelMappedBlocks()[0] === target)) {
+      element.className += " sphinx-preview-block-editor--first";
+    }
     element.setAttribute("data-sphinx-preview-block-editor", "true");
     element.setAttribute("role", "region");
     element.setAttribute("aria-label", selectedCell ? "Markdown table cell editor" : "Raw Markdown editor");
@@ -2884,9 +2890,41 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     insertPoints = [];
   }
 
+  function propertiesSection() {
+    return topLevelMappedBlocks().find((block) => block.getAttribute("data-okf-properties") !== null)
+      ?? document.querySelector?.("[data-okf-properties]");
+  }
+
+  function openInsertPoint(point, afterLine) {
+    openBlockEditor(
+      point,
+      undefined,
+      { line: Math.max(1, afterLine), endLine: Math.max(1, afterLine), insertAfterLine: afterLine },
+      "end",
+    );
+  }
+
+  // Enter on an empty document opens the "Start writing" editor, like clicking the button.
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || !editMode || activeBlockEdit || activeFrontmatterEdit) return;
+    if (event.shiftKey || event.altKey || event.metaKey || event.ctrlKey || event.isComposing) return;
+    const target = event.target;
+    if (target instanceof Element
+      && (["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"].includes(target.tagName)
+        || target.isContentEditable
+        || target.closest("[data-okf-properties], [data-sphinx-preview-block-editor]"))) return;
+    const start = insertPoints.find((point) =>
+      point.className.split(" ").includes("sphinx-preview-insert-point--start"));
+    if (!start) return;
+    event.preventDefault?.();
+    openInsertPoint(start, 0);
+  });
+
   function createInsertPoint(afterLine, label, standalone) {
     const point = document.createElement("div");
-    point.className = "sphinx-preview-insert-point" + (standalone ? " sphinx-preview-insert-point--start" : "");
+    point.className = "sphinx-preview-insert-point"
+      + (standalone ? " sphinx-preview-insert-point--start" : "")
+      + (standalone && !propertiesSection() ? " sphinx-preview-insert-point--first" : "");
     point.setAttribute("data-sphinx-insert-after-line", String(afterLine));
     const button = document.createElement("button");
     button.setAttribute("type", "button");
@@ -2895,12 +2933,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     button.addEventListener("click", (event) => {
       event.preventDefault?.();
       event.stopPropagation?.();
-      openBlockEditor(
-        point,
-        undefined,
-        { line: Math.max(1, afterLine), endLine: Math.max(1, afterLine), insertAfterLine: afterLine },
-        "end",
-      );
+      openInsertPoint(point, afterLine);
     });
     point.appendChild(button);
     return point;

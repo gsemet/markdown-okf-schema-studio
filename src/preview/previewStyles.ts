@@ -440,6 +440,11 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   margin: 0 0 1em;
 }
 
+/* Nothing sits above the first block: keep the button off the preview's top edge. */
+.sphinx-preview-insert-point--start.sphinx-preview-insert-point--first {
+  margin-top: 24px;
+}
+
 .sphinx-preview-insert-point--start button {
   position: static;
   display: inline-flex;
@@ -460,6 +465,15 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   padding: 6px 8px;
   background: var(--vscode-editor-background, Canvas);
   color: inherit;
+}
+
+/*
+ * The editor of the document's first block keeps its frame and focus ring off the top edge and
+ * below the floating toolbar (fixed, 12px from the top and 38px tall), which a wide frame would
+ * otherwise sit under.
+ */
+.sphinx-preview-block-editor--first {
+  margin-top: 56px;
 }
 
 .sphinx-preview-table-cell-editor textarea,

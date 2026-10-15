@@ -639,6 +639,17 @@ test("T28: insertion points are zero-height, hover-revealed gutter buttons", () 
   );
 });
 
+test("top spacing: the first block's editor clears the toolbar (56px) and the empty-document button keeps 24px", () => {
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /\.sphinx-preview-block-editor--first\s*\{\s*margin-top: 56px;/u,
+  );
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /\.sphinx-preview-insert-point--start\.sphinx-preview-insert-point--first\s*\{\s*margin-top: 24px;/u,
+  );
+});
+
 test("status titles and messages are block-level only on status pages and non-pending banners", () => {
   const selectors: string[] = [];
   for (const match of PREVIEW_ACCESSIBILITY_CSS.matchAll(/([^{}]+)\{([^}]*)\}/gu)) {

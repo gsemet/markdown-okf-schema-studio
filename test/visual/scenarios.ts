@@ -50,6 +50,11 @@ export interface Scenario {
   insertAfterFigureChecks?: boolean;
   /** Last block of the fixture, the line the insertion must follow, and its selector. */
   insertAfterBlock?: { selector: string; line: number };
+  /**
+   * Top-spacing geometry (T-top): "first-block" an open editor on the document's first block,
+   * "empty-start" the Start writing button, "empty-open" the editor after pressing Enter.
+   */
+  topSpacingChecks?: "first-block" | "empty-start" | "empty-open";
   expectStickyGrowth?: boolean;
   /** Geometry checks (test/shared/geometry-checks.js) that fail this scenario when applicable and failing. */
   machineChecks?: string[];
@@ -748,6 +753,57 @@ export const SCENARIOS: Scenario[] = [
       "Edit mode on, light theme, a document that ends with a plain Markdown image. After hovering "
       + "the image and clicking the round + below it, an empty block editor is open directly under "
       + "the image; the insertion message carried the image's line (5).",
+  },
+  {
+    id: "edit-first-block-top-wide",
+    fixture: "17-wrapped-editing",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    editTarget: "title",
+    topSpacingChecks: "first-block",
+    description:
+      "Edit mode on, light theme, a document without frontmatter whose first block is the heading. "
+      + "The heading's editor is open and its frame sits at least 20 px below the top edge of the "
+      + "preview, clear of the floating toolbar; the paragraph below it is still visible.",
+  },
+  {
+    id: "edit-first-block-top-narrow",
+    fixture: "17-wrapped-editing",
+    theme: "dark",
+    ...NARROW,
+    scroll: { kind: "top" },
+    editMode: true,
+    editTarget: "title",
+    topSpacingChecks: "first-block",
+    description:
+      "Same as the wide first-block case on a narrow dark preview: the open heading editor keeps a "
+      + "visible gap above its frame and does not touch the floating toolbar.",
+  },
+  {
+    id: "edit-empty-document-start-writing",
+    fixture: "20-empty-document",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    topSpacingChecks: "empty-start",
+    description:
+      "Edit mode on with an empty file: the Start writing button is shown at least 20 px below the "
+      + "top edge of the preview, not stuck against it.",
+  },
+  {
+    id: "edit-empty-document-enter-opens-editor",
+    fixture: "20-empty-document",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    topSpacingChecks: "empty-open",
+    description:
+      "Edit mode on with an empty file after pressing Enter in the preview: the new-block editor is "
+      + "open with its caret in it, replacing the Start writing button, with at least 20 px above its frame.",
   },
   {
     id: "edit-list-narrow",

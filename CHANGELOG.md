@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- The inline editor of the document's first block and the "Start writing" button of an empty
+  document no longer stick to the top edge of the preview: the first-block editor gets a 56 px top
+  margin so its frame clears the floating toolbar (the owner asked for 20–40 px; 24 px left a wide
+  frame under the toolbar) and the button gets a 24 px margin. In edit mode on an empty document,
+  pressing Enter in the preview opens the new-block editor like "Start writing" (Cmd/Ctrl+Enter
+  saves, Esc cancels).
 - Fixed the missing insertion point (+) after a plain Markdown image paragraph: a lone image is
   now a source-mapped block, so a block can be inserted after it, also at the end of the document.
   Figure directives already offered it; tests now pin insertion after every figure shape.

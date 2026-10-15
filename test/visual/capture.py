@@ -1468,6 +1468,61 @@ def check_insert_after_figure(page: Page, scenario: dict, failures: list[Failure
     failures.append(Failure(page_name, "the new block editor is not below the figure"))
 
 
+TOP_SPACING_MINIMUM = 20
+
+
+def check_top_spacing(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The first block's editor frame and the Start writing button keep room above them."""
+  mode = scenario.get("topSpacingChecks")
+  if not mode:
+    return
+  page_name = scenario["page"]
+  if mode == "empty-open":
+    if page.locator(".sphinx-preview-block-editor").count() != 0:
+      failures.append(Failure(page_name, "an editor was open before Enter was pressed"))
+    # The edit toggle holds the focus after it was clicked; Enter belongs to the preview itself.
+    page.mouse.click(300, 700)
+    page.keyboard.press("Enter")
+    page.locator(".sphinx-preview-block-editor textarea").wait_for(state="visible", timeout=2000)
+    opened = page.evaluate(
+      "window.visualMessages.filter(m => m.type === 'previewEditOpen').at(-1)")
+    if not opened or opened.get("insertAfterLine") != 0:
+      failures.append(Failure(page_name, f"Enter did not open the new-block editor: {opened}"))
+    if page.locator(".sphinx-preview-insert-point--start button").is_visible():
+      failures.append(Failure(page_name, "Start writing is still visible under the open editor"))
+    if not page.evaluate(
+      "() => document.activeElement === document.querySelector('.sphinx-preview-block-editor textarea')"
+    ):
+      failures.append(Failure(page_name, "the new-block editor does not hold the focus"))
+    selector = ".sphinx-preview-block-editor"
+  elif mode == "empty-start":
+    selector = ".sphinx-preview-insert-point--start button"
+  else:
+    selector = ".sphinx-preview-block-editor"
+  target = page.locator(selector)
+  if target.count() != 1 or not target.is_visible():
+    failures.append(Failure(page_name, f"{selector} is not visible exactly once"))
+    return
+  geometry = target.evaluate("""element => {
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    const outline = style.outlineStyle === 'none' ? 0
+      : (parseFloat(style.outlineWidth) || 0) + (parseFloat(style.outlineOffset) || 0);
+    const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+    const bar = toolbar ? toolbar.getBoundingClientRect() : null;
+    const overlaps = bar !== null
+      && rect.left < bar.right && rect.right > bar.left && rect.top < bar.bottom && rect.bottom > bar.top;
+    return { top: rect.top + window.scrollY - Math.max(0, outline), overlaps };
+  }""")
+  if geometry["top"] < TOP_SPACING_MINIMUM:
+    failures.append(Failure(
+      page_name,
+      f"{selector} starts {geometry['top']:.1f}px from the top, expected at least {TOP_SPACING_MINIMUM}px",
+    ))
+  if geometry["overlaps"]:
+    failures.append(Failure(page_name, f"{selector} overlaps the floating toolbar"))
+
+
 def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """T15: hover outline on a list, then a framed paragraph editor with hint and buttons."""
   if not scenario.get("editAffordances"):
@@ -1676,6 +1731,8 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
         failures.append(Failure(page_name, "edit mode toggle did not become active"))
     if page.locator("html").get_attribute("data-sphinx-preview-edit-mode") != "on":
         failures.append(Failure(page_name, "edit mode state was not applied to the preview"))
+    if scenario.get("topSpacingChecks") in {"empty-start", "empty-open"}:
+      return
     if scenario.get("fixture") == "08-okf-schema":
       edit_buttons = page.locator("[data-okf-edit-field], [data-okf-properties] tbody button")
       if edit_buttons.count() > 0:
@@ -2702,7 +2759,7 @@ def check_final_frame(page: Page, scenario: dict, failures: list[Failure]) -> di
           .map(item => item.getBoundingClientRect().bottom));
         if (bounds.top < reserved - 1) errors.push('final editor text collides with toolbar/sticky overlay');
       }
-      const visibleContent = [...(main?.querySelectorAll('p, pre, figure, table, textarea') || [])].filter(visible);
+      const visibleContent = [...(main?.querySelectorAll('p, pre, figure, table, textarea, .sphinx-preview-insert-point--start button') || [])].filter(visible);
       if (!visibleContent.length) errors.push('final viewport contains no visible content landmark');
       return {
         errors, scrollY: Math.round(scrollY), editMode: document.documentElement.dataset.sphinxPreviewEditMode || 'off',
@@ -2952,7 +3009,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

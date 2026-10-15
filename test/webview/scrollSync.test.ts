@@ -6628,3 +6628,180 @@ test("AltGr (ctrlKey and altKey with AltGraph) still wraps the selection, plain 
   }), true);
   assert.equal(textarea.value, "~foo~");
 });
+
+const FIRST_EDITOR_CLASS = "sphinx-preview-block-editor--first";
+const FIRST_START_CLASS = "sphinx-preview-insert-point--first";
+
+function openBlockEditorElement(harness: RuntimeHarness): RuntimeElement | undefined {
+  return harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-block-editor") === "true" && !element.removed);
+}
+
+function openEmptyDocumentEditor(harness: RuntimeHarness): void {
+  harness.dispatchDocument("keydown", {
+    key: "Enter",
+    target: harness.previewContent,
+    preventDefault: () => undefined,
+  });
+}
+
+test("top spacing: the editor of the first block of the document carries the first-block class", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  harness.dispatchDocument("click", { target: harness.mappings[0], preventDefault: () => undefined });
+  sourceReply(harness, "# Title\n");
+  const editor = openBlockEditorElement(harness);
+  assert.ok(editor);
+  assert.ok(editor.className.split(" ").includes(FIRST_EDITOR_CLASS), editor.className);
+});
+
+test("top spacing: the editor of a later block does not carry the first-block class", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  sourceReply(harness, "Editable paragraph.\n");
+  const editor = openBlockEditorElement(harness);
+  assert.ok(editor);
+  assert.equal(editor.className.split(" ").includes(FIRST_EDITOR_CLASS), false);
+});
+
+test("top spacing: an insertion editor below another block is not the first-block editor", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  insertPointAfterLine(harness, 52).childElements[0].dispatch("click", {
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  sourceReply(harness, "", { insertAfterLine: 52 });
+  const editor = openBlockEditorElement(harness);
+  assert.ok(editor);
+  assert.equal(editor.className.split(" ").includes(FIRST_EDITOR_CLASS), false);
+});
+
+test("top spacing: the first body block below a properties table is not the first-block editor", () => {
+  const harness = createRuntimeHarness({
+    mapFrontmatter: true,
+    propertiesMapped: true,
+    savedState: { editMode: true },
+  });
+  const properties = harness.mappings.find((block) => block.getAttribute("data-okf-properties") !== null);
+  const first = harness.mappings.find((block) => block !== properties);
+  assert.ok(first);
+  harness.dispatchDocument("click", { target: first, preventDefault: () => undefined });
+  sourceReply(harness, "First block.\n");
+  const editor = openBlockEditorElement(harness);
+  assert.ok(editor);
+  assert.equal(editor.className.split(" ").includes(FIRST_EDITOR_CLASS), false);
+});
+
+test("top spacing: Start writing of an empty document carries the first class, below properties not", () => {
+  const empty = createRuntimeHarness({
+    emptyBody: true,
+    previewStatus: "success",
+    savedState: { editMode: true },
+  });
+  assert.ok(insertPointsOf(empty)[0].className.split(" ").includes(FIRST_START_CLASS));
+  const withProperties = createRuntimeHarness({
+    emptyBody: true,
+    mapFrontmatter: true,
+    propertiesMapped: true,
+    previewStatus: "success",
+    savedState: { editMode: true },
+  });
+  assert.equal(insertPointsOf(withProperties)[0].className.split(" ").includes(FIRST_START_CLASS), false);
+});
+
+test("top spacing: the editor opened from Start writing carries the first-block class", () => {
+  const harness = createRuntimeHarness({
+    emptyBody: true,
+    previewStatus: "success",
+    savedState: { editMode: true },
+  });
+  insertPointAfterLine(harness, 0).childElements[0].dispatch("click", {
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  sourceReply(harness, "", { insertAfterLine: 0 });
+  const editor = openBlockEditorElement(harness);
+  assert.ok(editor);
+  assert.ok(editor.className.split(" ").includes(FIRST_EDITOR_CLASS), editor.className);
+});
+
+test("empty document: Enter in edit mode opens the new-block editor like Start writing", () => {
+  const harness = createRuntimeHarness({
+    emptyBody: true,
+    previewStatus: "success",
+    savedState: { editMode: true },
+  });
+  let prevented = false;
+  harness.dispatchDocument("keydown", {
+    key: "Enter",
+    target: harness.previewContent,
+    preventDefault: () => { prevented = true; },
+  });
+  const open = harness.messages.at(-1);
+  assert.equal(open?.type, "previewEditOpen");
+  assert.equal(open?.line, 1);
+  assert.equal(open?.endLine, 1);
+  assert.equal(open?.insertAfterLine, 0);
+  assert.equal(prevented, true);
+});
+
+test("empty document: Enter with a modifier, in a field, outside edit mode or on a filled document does nothing", () => {
+  const opens = (harness: RuntimeHarness, event: Record<string, unknown>): boolean => {
+    const before = harness.messages.length;
+    harness.dispatchDocument("keydown", {
+      key: "Enter",
+      target: harness.previewContent,
+      preventDefault: () => undefined,
+      ...event,
+    });
+    return harness.messages.slice(before).some((message) => message.type === "previewEditOpen");
+  };
+  const emptyOptions = { emptyBody: true, previewStatus: "success", savedState: { editMode: true } };
+  for (const modifier of ["shiftKey", "altKey", "metaKey", "ctrlKey"]) {
+    assert.equal(opens(createRuntimeHarness(emptyOptions), { [modifier]: true }), false, modifier);
+  }
+  assert.equal(opens(createRuntimeHarness(emptyOptions), { isComposing: true }), false);
+  assert.equal(opens(createRuntimeHarness(emptyOptions), { target: new RuntimeElement({}, { scrollY: 0 }, 0, 20, "textarea") }), false);
+  assert.equal(opens(createRuntimeHarness(emptyOptions), { target: new RuntimeElement({}, { scrollY: 0 }, 0, 20, "input") }), false);
+  assert.equal(opens(createRuntimeHarness({ emptyBody: true, previewStatus: "success" }), {}), false, "reading mode");
+  assert.equal(opens(createRuntimeHarness({ emptyBody: true, previewStatus: "error", savedState: { editMode: true } }), {}), false, "failed render");
+  assert.equal(opens(createRuntimeHarness({ savedState: { editMode: true } }), {}), false, "document with blocks");
+  const harness = createRuntimeHarness(emptyOptions);
+  assert.equal(opens(harness, {}), true);
+  assert.equal(opens(harness, {}), false, "an editor is already open");
+});
+
+test("empty document: Cmd/Ctrl+Enter saves the new block and Escape cancels back to Start writing", () => {
+  const save = createRuntimeHarness({
+    emptyBody: true,
+    previewStatus: "success",
+    savedState: { editMode: true },
+  });
+  openEmptyDocumentEditor(save);
+  sourceReply(save, "", { insertAfterLine: 0 });
+  const textarea = save.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.value = "# Hello";
+  textarea.dispatch("input");
+  textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
+  const saved = save.messages.at(-1);
+  assert.equal(saved?.type, "previewEditSave");
+  assert.equal(saved?.final, true);
+  assert.equal(saved?.insertAfterLine, 0);
+  assert.equal(saved?.editedText, "# Hello");
+
+  const cancel = createRuntimeHarness({
+    emptyBody: true,
+    previewStatus: "success",
+    savedState: { editMode: true },
+  });
+  openEmptyDocumentEditor(cancel);
+  sourceReply(cancel, "", { insertAfterLine: 0 });
+  const field = cancel.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(field);
+  field.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(cancel.messages.some((message) => message.type === "previewEditSave"), false);
+  const point = insertPointsOf(cancel)[0];
+  assert.ok(point, "Start writing is still there");
+  assert.equal(point.getAttribute("data-sphinx-preview-editing"), null);
+  assert.equal(openBlockEditorElement(cancel), undefined);
+});

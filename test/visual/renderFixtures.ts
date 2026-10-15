@@ -145,7 +145,14 @@ async function renderPage(
       (opening) => `${opening}${markup}`,
     )
     : withPlantUml;
-  const withToolbar = withPlantUmlAndTable.replace(
+  // The host reports a successful render even for an empty file; the runtime offers "Start writing" only then.
+  const withStatus = source.trim() === ""
+    ? withPlantUmlAndTable.replace(
+      /(<body(?:\s[^>]*)?>)/iu,
+      (opening) => `${opening}<aside data-sphinx-preview-status="success" hidden></aside>`,
+    )
+    : withPlantUmlAndTable;
+  const withToolbar = withStatus.replace(
     /(<body(?:\s[^>]*)?>)/iu,
     (opening) => `${opening}${renderPreviewToolbar()}${renderPreviewStickyHeadings()}`,
   );
