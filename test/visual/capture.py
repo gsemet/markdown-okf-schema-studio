@@ -127,7 +127,7 @@ PAGE_CHECKS = """
     if (blockStyle.borderTopLeftRadius !== expectedRadius) {
       failures.push(`fenced code panel radius is ${blockStyle.borderTopLeftRadius}, expected ${expectedRadius}`);
     }
-    const forcedWhiteYaml = document.documentElement.dataset.sphinxPreviewThemeMode === 'white'
+    const forcedWhiteYaml = ['white', 'cream'].includes(document.documentElement.dataset.sphinxPreviewThemeMode)
       && code.classList.contains('language-yaml');
     if (!forcedWhiteYaml && codeStyle.color !== blockStyle.color) {
       failures.push('fenced code does not inherit the editor foreground');
@@ -961,6 +961,122 @@ def check_forced_white_theme(page: Page, scenario: dict, failures: list[Failure]
         )
 
 
+def _rgb_channels(value: str | None, backdrop: list[float] | None = None) -> list[float]:
+    """Parse rgb()/rgba()/color(srgb ...) to 0-255 channels, flattened over a backdrop if translucent."""
+    numbers = [float(item) for item in re.findall(r"\d+(?:\.\d+)?", value or "")]
+    channels = numbers[:3]
+    if (value or "").startswith("color(srgb"):
+        channels = [item * 255 for item in channels]
+    alpha = numbers[3] if len(numbers) > 3 else 1.0
+    if backdrop is not None and len(channels) == 3 and alpha < 1:
+        channels = [c * alpha + b * (1 - alpha) for c, b in zip(channels, backdrop)]
+    return channels
+
+
+def _relative_luminance(channels: list[float]) -> float:
+    linear = [
+        (v / 255 / 12.92) if v / 255 <= 0.03928 else (((v / 255) + 0.055) / 1.055) ** 2.4
+        for v in channels
+    ]
+    return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+
+
+def _contrast_ratio(first: list[float], second: list[float]) -> float:
+    high, low = sorted((_relative_luminance(first), _relative_luminance(second)), reverse=True)
+    return (high + 0.05) / (low + 0.05)
+
+
+FORCED_CREAM_CHECKS = """
+() => {
+  const body = document.body;
+  const main = document.getElementById('sphinx-myst-preview-content');
+  const style = (element) => (element ? getComputedStyle(element) : null);
+  const note = main?.querySelector('.admonition');
+  const code = main?.querySelector('p code, li code');
+  const block = main?.querySelector('pre');
+  const link = main?.querySelector('p a[href]');
+  const table = main?.querySelector('table th, table td');
+  const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+  return {
+    mode: document.documentElement.dataset.sphinxPreviewThemeMode,
+    pageBackground: style(body).backgroundColor,
+    pageForeground: style(body).color,
+    noteBackground: style(note)?.backgroundColor ?? null,
+    noteForeground: style(note)?.color ?? null,
+    codeBackground: style(code)?.backgroundColor ?? null,
+    codeForeground: style(code)?.color ?? null,
+    blockBackground: style(block)?.backgroundColor ?? null,
+    blockForeground: style(block)?.color ?? null,
+    linkForeground: style(link)?.color ?? null,
+    tableForeground: style(table)?.color ?? null,
+    toolbarBackground: style(toolbar)?.backgroundColor ?? null,
+    toolbarForeground: style(toolbar)?.color ?? null,
+    colorScheme: style(document.documentElement).colorScheme,
+  };
+}
+"""
+
+
+def check_forced_cream_theme(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    if scenario.get("previewThemeMode") != "cream":
+        return
+
+    page_name = scenario["page"]
+    # Drive the real toolbar button so the mode, tooltip and icon match what a user sees.
+    for _ in range(4):
+        if page.evaluate(
+            'document.querySelector("[data-sphinx-preview-theme-toggle]")?.dataset.themeMode'
+        ) == "cream":
+            break
+        page.evaluate('document.querySelector("[data-sphinx-preview-theme-toggle]").click()')
+    icons = page.evaluate(
+        """() => [...document.querySelectorAll('[data-sphinx-preview-theme-toggle] [data-theme-icon]')]
+          .filter((icon) => getComputedStyle(icon).display !== 'none')
+          .map((icon) => icon.dataset.themeIcon)"""
+    )
+    if icons != ["cream"]:
+        failures.append(Failure(page_name, f"forced cream visible theme icons are {icons}, expected ['cream']"))
+    colors = page.evaluate(FORCED_CREAM_CHECKS)
+    for key, expected in (
+      ("pageBackground", "rgb(245, 241, 232)"),
+      ("pageForeground", "rgb(43, 42, 39)"),
+      ("noteForeground", "rgb(43, 42, 39)"),
+      ("codeBackground", "rgb(237, 230, 218)"),
+      ("codeForeground", "rgb(161, 78, 50)"),
+      ("blockBackground", "rgb(237, 230, 218)"),
+      ("linkForeground", "rgb(161, 78, 50)"),
+    ):
+        if colors[key] is not None and colors[key] != expected:
+            failures.append(
+                Failure(page_name, f"forced cream {key} is {colors[key]}, expected {expected}")
+            )
+    if colors["colorScheme"] != "light":
+        failures.append(Failure(page_name, f"forced cream color-scheme is {colors['colorScheme']}"))
+    for foreground, background in (
+      ("pageForeground", "pageBackground"),
+      ("noteForeground", "noteBackground"),
+      ("codeForeground", "codeBackground"),
+      ("blockForeground", "blockBackground"),
+      ("linkForeground", "pageBackground"),
+      ("toolbarForeground", "toolbarBackground"),
+    ):
+        if colors[foreground] is None or colors[background] is None:
+            continue
+        page_bg = _rgb_channels(colors["pageBackground"])
+        bg = _rgb_channels(colors[background], page_bg)
+        fg = _rgb_channels(colors[foreground], bg)
+        if len(fg) != 3 or len(bg) != 3:
+            continue
+        ratio = _contrast_ratio(fg, bg)
+        if ratio < 4.5:
+            failures.append(
+                Failure(
+                    page_name,
+                    f"forced cream {foreground} on {background} contrast is {ratio:.2f}:1, expected >= 4.5:1",
+                )
+            )
+
+
 def check_frontmatter_rendering(page: Page, scenario: dict, failures: list[Failure]) -> None:
     if scenario.get("fixture") != "07-frontmatter":
         return
@@ -983,7 +1099,9 @@ def check_frontmatter_rendering(page: Page, scenario: dict, failures: list[Failu
     if rendered["inlineCodeText"] != "plugin.yml":
         failures.append(Failure(page_name, "inline code after frontmatter is missing"))
     expected_code_color = "rgb(0, 106, 177)"
-    if scenario.get("previewThemeMode") != "white":
+    if scenario.get("previewThemeMode") == "cream":
+      expected_code_color = "rgb(161, 78, 50)"
+    elif scenario.get("previewThemeMode") != "white":
       expected_code_color = page.evaluate("() => getComputedStyle(document.body).color")
     if rendered["inlineCodeColor"] != expected_code_color:
         failures.append(
@@ -1295,7 +1413,9 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         ('[data-sphinx-preview-refresh]', "Refresh preview"),
         ('[data-sphinx-preview-anchor]', "Anchor preview to text editor"),
         ('[data-sphinx-preview-edit-toggle]', "Toggle edit mode"),
-        ('[data-sphinx-preview-theme-toggle]', "Preview theme: Current theme"),
+        ('[data-sphinx-preview-theme-toggle]',
+         "Preview theme: Cream theme" if scenario.get("previewThemeMode") == "cream"
+         else "Preview theme: Current theme"),
     )
     for selector, label in controls:
         button = toolbar.locator(selector)
@@ -3027,7 +3147,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   ):
     checks = checks.replace(placeholder, str(value))
   for check in (
-    check_forced_white_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
+    check_forced_white_theme, check_forced_cream_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
     check_generic_skill_frontmatter, check_okf_schema_rendering, check_preview_toolbar,
     check_math_rendering, check_bare_urls, check_content_contracts,
   ):

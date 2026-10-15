@@ -1085,6 +1085,13 @@ test("cycles preview theme modes and restores the saved selection", () => {
 
   harness.themeButton.dispatch("click");
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "white");
+  assert.equal(harness.themeButton.getAttribute("data-tooltip"), "White theme (click for cream theme)");
+  harness.themeButton.dispatch("click");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "cream");
+  assert.equal(harness.themeButton.getAttribute("aria-label"), "Preview theme: Cream theme");
+  assert.equal(harness.themeButton.getAttribute("data-tooltip"), "Cream theme (click for current theme)");
+  assert.equal(harness.getWebviewState().previewThemeMode, "cream");
+  assert.equal(harness.messages.at(-1)?.previewThemeMode, "cream");
   harness.themeButton.dispatch("click");
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "current");
 

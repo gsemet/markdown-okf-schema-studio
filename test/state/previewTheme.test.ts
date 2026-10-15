@@ -30,6 +30,10 @@ test("accepts only complete theme-mode change messages", () => {
     type: "previewThemeModeChanged",
     previewThemeMode: "sepia",
   }), false);
+  assert.equal(isPreviewThemeModeChangedMessage({
+    type: "previewThemeModeChanged",
+    previewThemeMode: "cream",
+  }), true);
   assert.equal(isPreviewThemeModeChangedMessage({ type: "previewThemeModeChanged" }), false);
 });
 
@@ -42,4 +46,11 @@ test("restores a valid workspace theme mode and ignores invalid stored values", 
 
   await storage.update(PREVIEW_THEME_MODE_STORAGE_KEY, "sepia");
   assert.equal(readPreviewThemeMode(storage), undefined);
+});
+
+test("restores a stored cream theme mode", async () => {
+  const storage = createMemoryStorage();
+
+  await writePreviewThemeMode(storage, "cream");
+  assert.equal(readPreviewThemeMode(storage), "cream");
 });

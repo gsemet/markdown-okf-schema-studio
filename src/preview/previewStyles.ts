@@ -203,6 +203,46 @@ html[data-sphinx-preview-theme-mode="white"] body {
   --vscode-charts-orange: #a65e00;
 }
 
+html[data-sphinx-preview-theme-mode="cream"],
+html[data-sphinx-preview-theme-mode="cream"] body {
+  color-scheme: light;
+  --sphinx-preview-scrollbar-thumb: #cfc5b2;
+  --sphinx-preview-scrollbar-hover: #a89d89;
+  --vscode-editor-background: #f5f1e8;
+  --vscode-editor-foreground: #2b2a27;
+  --vscode-foreground: #2b2a27;
+  --vscode-descriptionForeground: #5e5850;
+  --vscode-textLink-foreground: #a14e32;
+  --vscode-focusBorder: #b05a3c;
+  --vscode-editor-findMatchHighlightBackground: #e6c36a80;
+  --vscode-list-hoverBackground: rgba(43, 42, 39, 0.07);
+  --vscode-widget-border: #d6cdbd;
+  --vscode-editorWidget-background: #fbf8f1;
+  --vscode-editorWidget-border: #d6cdbd;
+  --vscode-editorHoverWidget-background: #ede6da;
+  --vscode-editorHoverWidget-foreground: #2b2a27;
+  --vscode-editorHoverWidget-border: #d6cdbd;
+  --vscode-panel-border: #e2dacb;
+  --vscode-textBlockQuote-background: #efe9dd;
+  --vscode-textCodeBlock-background: #ede6da;
+  --vscode-icon-foreground: #4a463d;
+  --vscode-toolbar-hoverBackground: rgba(43, 42, 39, 0.09);
+  --vscode-input-background: #fbf8f1;
+  --vscode-input-foreground: #2b2a27;
+  --vscode-input-border: #cfc5b2;
+  --vscode-button-background: #9a4a2a;
+  --vscode-button-foreground: #ffffff;
+  --vscode-button-secondaryBackground: #e8e0d2;
+  --vscode-button-secondaryForeground: #3a372f;
+  --vscode-errorForeground: #b3261e;
+  --vscode-charts-blue: #2f6690;
+  --vscode-charts-green: #34703f;
+  --vscode-charts-purple: #6b4a8a;
+  --vscode-charts-yellow: #7d5500;
+  --vscode-charts-red: #ae3a2a;
+  --vscode-charts-orange: #94500c;
+}
+
 [data-sphinx-preview-toolbar] {
   position: fixed;
   inset-block-start: 12px;
@@ -1134,7 +1174,8 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
 
 [data-sphinx-preview-theme-toggle][data-theme-mode="current"] [data-theme-icon="current"],
 [data-sphinx-preview-theme-toggle][data-theme-mode="dark"] [data-theme-icon="dark"],
-[data-sphinx-preview-theme-toggle][data-theme-mode="white"] [data-theme-icon="white"] {
+[data-sphinx-preview-theme-toggle][data-theme-mode="white"] [data-theme-icon="white"],
+[data-sphinx-preview-theme-toggle][data-theme-mode="cream"] [data-theme-icon="cream"] {
   display: block;
 }
 
@@ -1407,6 +1448,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   word-break: break-word;
 }
 
+html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content :not(pre) > code,
 html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(pre) > code {
   color: var(--vscode-textLink-foreground, #006ab1);
 }
@@ -1558,7 +1600,9 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 }
 
 html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content pre > code.language-yaml,
-html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content pre > code.language-yaml * {
+html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content pre > code.language-yaml *,
+html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > code.language-yaml,
+html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > code.language-yaml * {
   color: var(--vscode-textLink-foreground, #006ab1);
 }
 

@@ -23,7 +23,7 @@ export interface Scenario {
   plantumlExpectation?: "success" | "executable-not-found" | "unconfigured";
   linkDetailsChecks?: boolean;
   horizontalOverflow?: boolean;
-  previewThemeMode?: "white";
+  previewThemeMode?: "white" | "cream";
   stickyHeadingDepth?: number;
   expectedStickyHeadings?: string;
   expectedContentWidth?: number;
@@ -118,6 +118,68 @@ export const SCENARIOS: Scenario[] = [
     description:
       "Forced white preview while the VS Code host remains dark. The page, text and note panel "
       + "must all use the light palette.",
+  },
+  {
+    id: "handbook-forced-cream",
+    fixture: "01-handbook-overview",
+    theme: "dark",
+    previewThemeMode: "cream",
+    ...WIDE,
+    scroll: { kind: "top" },
+    description:
+      "Forced cream preview while the VS Code host remains dark. Warm light paper page, "
+      + "warm near-black text, clay-coloured links and a note panel that stays distinct from "
+      + "the page. Nothing may look dark, yellow or washed out.",
+  },
+  {
+    id: "admonitions-forced-cream-full",
+    fixture: "02-admonition-gallery",
+    theme: "dark",
+    previewThemeMode: "cream",
+    ...WIDE,
+    scroll: { kind: "top" },
+    fullPage: true,
+    description:
+      "Every admonition variant on the cream page. Each accent must stay distinguishable from "
+      + "its neighbours and every title and body must stay readable on its tinted panel.",
+  },
+  {
+    id: "code-tables-forced-cream",
+    fixture: "04-code-and-tables",
+    theme: "dark",
+    previewThemeMode: "cream",
+    ...WIDE,
+    scroll: { kind: "top" },
+    fullPage: true,
+    description:
+      "Code blocks, inline code and tables on cream. Code sits on a slightly darker cream with "
+      + "a warm border, syntax colours use the light palette and table borders and header bands "
+      + "are warm grey rather than cold grey.",
+  },
+  {
+    id: "frontmatter-forced-cream",
+    fixture: "07-frontmatter",
+    theme: "dark",
+    previewThemeMode: "cream",
+    ...WIDE,
+    scroll: { kind: "top" },
+    description:
+      "The OKF properties table at the top of a cream page. Field names, values and the header "
+      + "band are readable and inline code uses clay text on the darker cream code background; "
+      + "the toolbar theme button shows the cream sheet icon.",
+  },
+  {
+    id: "edit-paragraph-forced-cream",
+    fixture: "08-okf-schema",
+    theme: "dark",
+    previewThemeMode: "cream",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    editTarget: "paragraph",
+    description:
+      "An open paragraph editor in edit mode on the cream page: the editor frame, textarea, "
+      + "caret, hint and Save/Cancel buttons all use the cream palette and stay readable.",
   },
   {
     id: "handbook-light-failures",

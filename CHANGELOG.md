@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The preview theme button now also offers a light "Cream" theme (warm paper background, warm
+  near-black text, clay links, darker-cream code blocks); the loop is current, dark, white, cream.
+  All text and background pairs meet WCAG AA 4.5:1.
 - Bare `http://`, `https://` and `www.` URLs in prose, lists and table cells now render as links
   (GFM autolink-literal rules: trailing punctuation stays outside, balanced parentheses stay in;
   `www.` links open as `https://`). Code, math, existing links and emails are untouched, the links

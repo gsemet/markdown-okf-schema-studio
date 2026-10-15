@@ -83,8 +83,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     openFrontmatterEditor(row);
   }, true);
   const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context);
-  const themeModes = ["current", "dark", "white"];
-  const themeLabels = { current: "Current theme", dark: "Dark theme", white: "White theme" };
+  const themeModes = ["current", "dark", "white", "cream"];
+  const themeLabels = { current: "Current theme", dark: "Dark theme", white: "White theme", cream: "Cream theme" };
   const themeButton = document.querySelector?.("[data-sphinx-preview-theme-toggle]");
   const refreshButton = document.querySelector?.("[data-sphinx-preview-refresh]");
   const anchorButton = document.querySelector?.("[data-sphinx-preview-anchor]");

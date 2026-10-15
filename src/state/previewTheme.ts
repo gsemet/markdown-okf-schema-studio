@@ -1,4 +1,4 @@
-export type PreviewThemeMode = "current" | "dark" | "white";
+export type PreviewThemeMode = "current" | "dark" | "white" | "cream";
 
 export const PREVIEW_THEME_MODE_STORAGE_KEY = "previewThemeMode";
 
@@ -13,7 +13,7 @@ export interface PreviewThemeModeChangedMessage {
 }
 
 export function isPreviewThemeMode(value: unknown): value is PreviewThemeMode {
-  return value === "current" || value === "dark" || value === "white";
+  return value === "current" || value === "dark" || value === "white" || value === "cream";
 }
 
 export function isPreviewThemeModeChangedMessage(

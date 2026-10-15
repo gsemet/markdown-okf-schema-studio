@@ -49,6 +49,12 @@ or
 Checkboxes in task lists, paragraphs, and table cells are editable in place. In an untrusted
 workspace they remain read-only until the workspace is trusted.
 
+## Preview Themes
+
+The theme button in the floating preview toolbar cycles through four looks: the current VS Code
+theme, dark, white, and cream (a warm, light, low-glare paper palette with clay-coloured links).
+The choice is remembered per workspace.
+
 ## See It In Use
 
 These captures are real Studio views from the end-to-end campaign, showing an edited paragraph,
