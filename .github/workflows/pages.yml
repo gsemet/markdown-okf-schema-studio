@@ -1,0 +1,70 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing version tag to deploy"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-pages:
+    if: >-
+      github.ref_type == 'tag' &&
+      (github.event_name == 'push' || github.ref_name == inputs.tag)
+    runs-on: ubuntu-latest
+    env:
+      STUDIO_NPM: npm --registry=https://registry.npmjs.org/
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Fetch Git LFS objects
+        run: git lfs pull
+      - name: Verify Git LFS objects
+        run: git lfs fsck
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v2
+      - name: Install PlantUML and Graphviz
+        run: sudo -n apt-get update && sudo -n apt-get install --yes --no-install-recommends plantuml graphviz
+      - run: npm ci
+      - run: uv sync --group docs
+      - run: uv run --no-sync --group docs playwright install --with-deps chromium
+      - name: Verify deployment tag
+        shell: bash
+        env:
+          DEPLOYMENT_TAG: ${{ github.ref_name }}
+        run: |
+          expected_tag="v$(node -p "require('./package.json').version")"
+          if [[ "$DEPLOYMENT_TAG" != "$expected_tag" ]]; then
+            echo "Deployment tag $DEPLOYMENT_TAG does not match package version $expected_tag" >&2
+            exit 1
+          fi
+      - name: Build Pages site
+        run: just site
+      - name: Upload Pages site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out/site
+      - id: deployment
+        uses: actions/deploy-pages@v4
