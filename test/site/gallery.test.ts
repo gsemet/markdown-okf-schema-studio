@@ -27,7 +27,14 @@ test("gallery includes every nested screenshot, structured summaries and complet
     assert.ok(html.includes("Wrapped editor &lt;visible&gt; &amp; readable"));
     assert.ok(html.includes("No clipped controls"));
     assert.ok(html.includes("Legacy expected content"));
-    assert.ok(html.includes('aria-label="Complete screenshot sidecar"'));
+    assert.ok(html.includes('data-capture-previous'));
+    assert.ok(html.includes('data-capture-next'));
+    assert.ok(html.includes('data-capture-position'));
+    assert.ok(html.includes('class="capture-meta"'));
+    assert.ok(html.includes("technical.className = 'capture-technical'"));
+    assert.ok(html.includes("event.key === 'ArrowLeft'"));
+    assert.ok(html.includes("event.key === 'ArrowRight'"));
+    assert.ok(html.includes("pre.setAttribute('aria-label', 'Complete screenshot sidecar')"));
     assert.ok(html.includes("viewer.showModal()"));
     assert.ok(html.includes(".content.textContent"));
   } finally {
