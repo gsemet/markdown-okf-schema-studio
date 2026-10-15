@@ -1,0 +1,47 @@
+<h1 data-line="1" data-end-line="1">Main</h1>
+<p data-line="3">Part paragraph with <strong>bold</strong>.</p>
+<ul data-line="3" data-end-line="5">
+<li data-line="3" data-end-line="4">
+<p data-line="3">item one</p>
+</li>
+<li data-line="3" data-end-line="5">
+<p data-line="3">item two</p>
+</li>
+</ul>
+<p data-line="6" data-end-line="6">Between includes.</p>
+<p data-line="8">Part paragraph with <strong>bold</strong>.</p>
+<ul data-line="8">
+<li data-line="8">
+<p data-line="8">item one</p>
+</li>
+<li data-line="8">
+<p data-line="8">item two</p>
+</li>
+</ul>
+<h2 data-line="11">Nested</h2>
+<p data-line="11">Part paragraph with <strong>bold</strong>.</p>
+<ul data-line="11">
+<li data-line="11">
+<p data-line="11">item one</p>
+</li>
+<li data-line="11">
+<p data-line="11">item two</p>
+</li>
+</ul>
+<p data-line="11">After nested.</p>
+<div class="myst-unresolved myst-directive" data-line="14" data-end-line="15"><p class="myst-directive-name">{include} missing.md</p></div>
+<p data-line="17">Cycle A</p>
+<p data-line="17">Cycle B</p>
+<div class="myst-unresolved myst-directive" data-line="17"><p class="myst-directive-name">{include} cycle-a.md</p></div>
+<p data-line="20">Part paragraph with <strong>bold</strong>.</p>
+<ul data-line="20">
+<li data-line="20">
+<p data-line="20">item one</p>
+</li>
+<li data-line="20">
+<p data-line="20">item two</p>
+</li>
+</ul>
+<div class="myst-unresolved myst-directive" data-line="24" data-end-line="26"><p class="myst-directive-name">{include} part.md</p></div>
+<div class="myst-unresolved myst-directive" data-line="28" data-end-line="30"><p class="myst-directive-name">{include} part.md</p></div>
+<!--{"diagnostics":[{"message":"Directive {include} is not available outside a full build.","severity":"warning","line":14},{"message":"Directive {include} is not available outside a full build.","severity":"warning","line":17},{"message":"Directive {include} is not available outside a full build.","severity":"warning","line":24},{"message":"Directive {include} is not available outside a full build.","severity":"warning","line":28}],"dependencies":["/virtual/cycle-a.md","/virtual/cycle-b.md","/virtual/part.md","/virtual/sub/nested.md"]}-->

@@ -1,3 +1,4 @@
+import * as path from "node:path";
 import { html as parse5Html, parseFragment, serialize } from "parse5";
 
 import { extractFrontmatter, matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
@@ -130,6 +131,10 @@ const ALERT_MARKER = /^(\s*)>\s*\[!([A-Za-z]+)\](?:[ \t]+(\S(?:.*?\S)?))?[ \t]*$
 const GITHUB_BOLD_ALERT_MARKER = /^(\s*)>\s*\*\*(Note|Important|Warning)\*\*[ \t]*$/iu;
 const TABLE_ALIGNMENTS = new Set(["left", "center", "right"]);
 const MAX_INCLUDE_DEPTH = 8;
+/** Per-render ceilings on include expansion; beyond them includes stay placeholders. */
+export const INCLUDE_BUDGET_MAX_EXPANSIONS = 2000;
+/** Counts UTF-16 code units of included source text (`string.length`), not encoded bytes. */
+export const INCLUDE_BUDGET_MAX_CHARS = 10 * 1024 * 1024;
 const SAFE_HTML_TABLE_TAGS = new Set([
   "b", "br", "caption", "code", "col", "colgroup", "div", "em", "i", "li", "ol", "p",
   "span", "strong", "sub", "sup", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "ul",
@@ -647,6 +652,36 @@ function setIncludedSourceLine(node: MystNode, line: number): void {
   }
 }
 
+/** Shared by every `expandIncludes` call of one render. */
+interface IncludeBudget {
+  expansions: number;
+  bytes: number;
+  exhausted: boolean;
+  /** `resolveInclude` results by directory and request; `null` records an unresolved include. */
+  resolved: Map<string, MystIncludeSource | null>;
+  /** Parsed, not yet expanded ASTs by canonical path; cloned on every use. */
+  parsed: Map<string, MystNode>;
+}
+
+function createIncludeBudget(): IncludeBudget {
+  return { expansions: 0, bytes: 0, exhausted: false, resolved: new Map(), parsed: new Map() };
+}
+
+function resolveIncludeOnce(
+  budget: IncludeBudget,
+  context: MystRenderContext,
+  request: string,
+  sourcePath: string,
+): MystIncludeSource | undefined {
+  const key = `${path.dirname(sourcePath)}\0${request}`;
+  let entry = budget.resolved.get(key);
+  if (entry === undefined) {
+    entry = context.resolveInclude(request, sourcePath) ?? null;
+    budget.resolved.set(key, entry);
+  }
+  return entry ?? undefined;
+}
+
 function expandIncludes(
   node: MystNode,
   sourcePath: string,
@@ -655,6 +690,7 @@ function expandIncludes(
   diagnostics: RenderDiagnostic[],
   dependencies: Set<string>,
   includeStack: Set<string>,
+  budget: IncludeBudget,
 ): void {
   if (!node.children) {
     return;
@@ -667,20 +703,50 @@ function expandIncludes(
       const request = child.args?.trim() ?? includeNode?.file ?? "";
       const unsupportedOptions = Object.keys(child.options ?? {})
         .some((name) => name !== "class" && name !== "label");
-      const included = !includeNode?.literal
+      const expandable = !includeNode?.literal
         && !unsupportedOptions
         && includeStack.size < MAX_INCLUDE_DEPTH
-        && request
-        ? context.resolveInclude(request, sourcePath)
-        : undefined;
+        && Boolean(request);
+      if (expandable && budget.exhausted) {
+        child.data = { ...child.data, includeBudgetExhausted: true };
+        expandedChildren.push(child);
+        continue;
+      }
+      const included = expandable ? resolveIncludeOnce(budget, context, request, sourcePath) : undefined;
 
       if (!included || includeStack.has(included.path)) {
         expandedChildren.push(child);
         continue;
       }
 
+      if (
+        budget.expansions >= INCLUDE_BUDGET_MAX_EXPANSIONS
+        || budget.bytes + included.source.length > INCLUDE_BUDGET_MAX_CHARS
+      ) {
+        budget.exhausted = true;
+        diagnostics.push({
+          message: "Include budget exhausted: "
+            + `at most ${INCLUDE_BUDGET_MAX_EXPANSIONS} includes or `
+            + `${Math.round(INCLUDE_BUDGET_MAX_CHARS / (1024 * 1024))} Mi characters of included text are `
+            + "expanded per render; the remaining includes are shown as placeholders.",
+          severity: "warning",
+          ...(child.position?.start?.line === undefined ? {} : { line: child.position.start.line }),
+        });
+        child.data = { ...child.data, includeBudgetExhausted: true };
+        expandedChildren.push(child);
+        continue;
+      }
+      budget.expansions += 1;
+      budget.bytes += included.source.length;
+
       dependencies.add(included.path);
-      const includedAst = mystParse(expandGithubAlerts(stripFrontmatter(included.source)));
+      let parsedAst = budget.parsed.get(included.path);
+      if (!parsedAst) {
+        parsedAst = mystParse(expandGithubAlerts(stripFrontmatter(included.source)));
+        budget.parsed.set(included.path, parsedAst);
+      }
+      // The expansion below mutates the tree, so every use works on its own copy.
+      const includedAst = structuredClone(parsedAst);
       const includeLine = child.position?.start?.line;
       if (includeLine !== undefined) {
         setIncludedSourceLine(includedAst, includeLine);
@@ -695,12 +761,22 @@ function expandIncludes(
         diagnostics,
         dependencies,
         nestedStack,
+        budget,
       );
       expandedChildren.push(...(includedAst.children ?? []));
       continue;
     }
 
-    expandIncludes(child, sourcePath, context, mystParse, diagnostics, dependencies, includeStack);
+    expandIncludes(
+      child,
+      sourcePath,
+      context,
+      mystParse,
+      diagnostics,
+      dependencies,
+      includeStack,
+      budget,
+    );
     expandedChildren.push(child);
   }
   node.children = expandedChildren;
@@ -1092,11 +1168,14 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
       return;
     }
     const name = node.name ?? "unknown";
-    diagnostics.push({
-      message: `Directive {${name}} is not available outside a full build.`,
-      severity: "warning",
-      ...(line === undefined ? {} : { line }),
-    });
+    // `includeBudgetExhausted` is set in expandIncludes. Includes skipped by the budget are covered by the single budget diagnostic.
+    if (!node.data?.includeBudgetExhausted) {
+      diagnostics.push({
+        message: `Directive {${name}} is not available outside a full build.`,
+        severity: "warning",
+        ...(line === undefined ? {} : { line }),
+      });
+    }
     const body = (node.value ?? "").trim();
     // The stock writer crashes on a body-less unknown directive, so render the placeholder here.
     setHast(node, "div", { class: "myst-unresolved myst-directive", ...sourcePositionProperties(node, line) }, [
@@ -1395,6 +1474,7 @@ export async function renderMyst(
   shiftSourcePositions(ast, lineOffset);
   repairGroupedContextTagHtml(ast, mystParse);
   if (context?.sourcePath) {
+    const includeBudget = createIncludeBudget();
     expandIncludes(
       ast,
       context.sourcePath,
@@ -1403,6 +1483,7 @@ export async function renderMyst(
       diagnostics,
       dependencies,
       new Set([context.sourcePath]),
+      includeBudget,
     );
   }
   normalizeFigureCaptions(ast);

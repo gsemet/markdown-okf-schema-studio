@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Documents with very many includes (more than 2000 expansions or 10 Mi characters of included
+  text per render) now show one warning and the includes beyond the budget appear as placeholders instead of freezing
+  the editor; repeated includes of the same file are read and parsed once per render.
 - Long editing sessions no longer accumulate memory from schema validation: resolved schemas and
   their compiled validators are reused until a schema file changes.
 - PlantUML rendering now times out after 30 s, caps stderr at 64 KiB, kills the whole process
