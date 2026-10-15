@@ -3641,6 +3641,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       ...(readyState.selectedText ? { selectedText: readyState.selectedText } : {}),
       ...(readyState.openDisclosures ? { openDisclosures: readyState.openDisclosures } : {}),
       descriptionsCollapsed,
+      // The host holds its edit lock only while this page has an editor open.
+      blockEditOpen: activeBlockEdit !== undefined,
     });
   }
   initializeContent({ restore: true });

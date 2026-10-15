@@ -6037,6 +6037,33 @@ test("T34: a content patch replaces the content, moves the identifiers and posts
   assert.ok(harness.dispatchedEvents.includes("studio:content-replaced"), "Mermaid is told to render the new content");
 });
 
+test("STAB-02: previewReady reports that no block editor is open on a fresh page", () => {
+  const harness = createRuntimeHarness();
+  const ready = harness.messages.find((message) => message.type === "previewReady");
+  assert.ok(ready);
+  assert.equal(ready.blockEditOpen, false);
+});
+
+test("STAB-02: a patch that closes an open block editor reports blockEditOpen false", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "- a\n",
+  });
+  assert.ok(harness.createdElements.some((element) => element.tagName === "TEXTAREA"), "an editor is open");
+  const before = harness.messages.length;
+  harness.dispatchMessage(patchMessage());
+  const ready = messagesAfter(harness, before).filter((message) => message.type === "previewReady");
+  assert.equal(ready.length, 1);
+  assert.equal(ready[0]!.blockEditOpen, false, "the patch closed the editor before reporting ready");
+});
+
 test("T34: after a patch the page answers to the new identifiers only", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage(patchMessage());

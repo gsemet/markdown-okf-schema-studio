@@ -9,6 +9,7 @@ import {
   COMMAND_ID,
   disposeActivePreviewForTests,
   getActivePreviewForTests,
+  REFRESH_COMMAND_ID,
   sendPreviewMessageForTests,
   setRenderDelayForTests,
 } from "./extensionApi";
@@ -1231,6 +1232,83 @@ export async function run(): Promise<void> {
         type: "previewEditSave", ...emptyBase, originalText: "", editedText: "  \n", final: true,
       });
       assert.equal(document.getText(), withBlock, "empty insertion text inserts nothing");
+    }
+    // Edit lock and save-triggered renders (STAB-02, PERF-06, STAB-03): a reload must not leave the
+    // preview unable to open another block, and a plain save must not render again.
+    {
+      await waitForCurrentPreview(document);
+      const lockLines = document.getText().split(/\r?\n/u);
+      const blockAStart = lockLines.indexOf("Autosaved final line") + 1;
+      const blockBStart = lockLines.indexOf("| A | edited B |") + 1;
+      assert.ok(blockAStart > 0 && blockBStart > 0, "both blocks used by the lock scenarios exist");
+      const blockAText = "Autosaved final line\nAutosaved second line\n";
+      const blockBText = "| A | edited B |\n| --- | --- |\n| edited x | y |\n| p | edited q |\n";
+      const blockA = { line: blockAStart, endLine: blockAStart + 1 };
+      const blockB = { line: blockBStart, endLine: blockBStart + 3 };
+
+      // 1. Open a block, autosave once, let the preview render again, then open another block.
+      const lockContext = currentContext(document);
+      const lockEditId = "integration-lock-a";
+      await sendPreviewMessageForTests({ type: "previewEditOpen", ...lockContext, editId: lockEditId, ...blockA });
+      await sendPreviewMessageForTests({
+        type: "previewEditSave", ...lockContext, editId: lockEditId, ...blockA,
+        originalText: blockAText, editedText: "Lock first line\nAutosaved second line\n", final: false,
+      });
+      await waitFor("the autosave of the first locked block", () =>
+        document.getText().includes("Lock first line\nAutosaved second line\n"));
+      await vscode.commands.executeCommand(REFRESH_COMMAND_ID);
+      await waitForCurrentPreview(document, lockContext.requestId);
+      // The reloaded page reports ready for its own render; the real webview does this by itself.
+      await sendPreviewMessageForTests({ type: "previewReady", ...currentContext(document) });
+      const secondContext = currentContext(document);
+      const secondEditId = "integration-lock-b";
+      await sendPreviewMessageForTests({ type: "previewEditOpen", ...secondContext, editId: secondEditId, ...blockB });
+      await sendPreviewMessageForTests({
+        type: "previewEditSave", ...secondContext, editId: secondEditId, ...blockB,
+        originalText: blockBText, editedText: blockBText.replace("edited x", "lock x"), final: true,
+      });
+      await waitFor("the second block to be editable after a reload", () =>
+        document.getText().includes("| lock x | y |"));
+      await waitForCurrentPreview(document);
+
+      // 2. Saving an unchanged buffer creates no new render request.
+      const probeText = `${document.getText().replace(/\n*$/u, "")}\n\nSave probe.\n`;
+      assert.equal(await vscode.workspace.applyEdit(replaceDocument(document, probeText)), true);
+      await waitForCurrentPreview(document);
+      const beforeSave = getActivePreviewForTests();
+      assert.ok(beforeSave);
+      assert.equal(await document.save(), true);
+      await waitFor("the file watcher to report the save", () =>
+        (getActivePreviewForTests()?.activePathChanges ?? 0) > beforeSave.activePathChanges);
+      await new Promise<void>((resolve) => setTimeout(resolve, 500));
+      const afterSave = getActivePreviewForTests();
+      assert.equal(afterSave?.requestId, beforeSave.requestId, "a save of the rendered buffer must not render again");
+      assert.equal(afterSave?.renderedStages, beforeSave.renderedStages);
+
+      // 3. A save while a block edit is open does not render until the edit ends.
+      const savingContext = currentContext(document);
+      const savingEditId = "integration-lock-save";
+      await sendPreviewMessageForTests({ type: "previewEditOpen", ...savingContext, editId: savingEditId, ...blockA });
+      await sendPreviewMessageForTests({
+        type: "previewEditSave", ...savingContext, editId: savingEditId, ...blockA,
+        originalText: "Lock first line\nAutosaved second line\n",
+        editedText: "Saving first line\nAutosaved second line\n", final: false,
+      });
+      await waitFor("the autosave of the saving block", () =>
+        document.getText().includes("Saving first line\nAutosaved second line\n"));
+      const changesBeforeSave = getActivePreviewForTests()?.activePathChanges ?? 0;
+      assert.equal(await document.save(), true);
+      await waitFor("the file watcher to report the save during the edit", () =>
+        (getActivePreviewForTests()?.activePathChanges ?? 0) > changesBeforeSave);
+      await new Promise<void>((resolve) => setTimeout(resolve, 500));
+      assert.equal(getActivePreviewForTests()?.requestId, savingContext.requestId,
+        "the save-triggered render waits for the open edit");
+      await sendPreviewMessageForTests({
+        type: "previewEditSave", ...savingContext, editId: savingEditId, ...blockA,
+        originalText: "Lock first line\nAutosaved second line\n",
+        editedText: "Saving first line\nAutosaved second line\n", final: true,
+      });
+      await waitForCurrentPreview(document, savingContext.requestId);
     }
     const referenceDirectory = path.join(directory, "references");
     fs.mkdirSync(referenceDirectory, { recursive: true });

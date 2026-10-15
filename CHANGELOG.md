@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Editing a block in the preview no longer breaks after the preview reloads: the edit lock is
+  released when a new page loads or when the preview closes.
+  Saving an unchanged buffer no longer re-renders the preview, and saves, PlantUML diagrams and
+  link updates wait for an open block edit to finish instead of closing it.
 - Documents with very many includes (more than 2000 expansions or 10 Mi characters of included
   text per render) now show one warning and the includes beyond the budget appear as placeholders instead of freezing
   the editor; repeated includes of the same file are read and parsed once per render.

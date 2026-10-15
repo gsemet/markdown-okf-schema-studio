@@ -76,6 +76,7 @@ import {
   setRenderOverrideForTests,
 } from "./render/renderPipeline";
 import { injectPlantUmlDiagrams } from "./render/plantUmlRenderer";
+import { EditLock, isUnchangedSave } from "./state/editLock";
 import { preloadMystEngine } from "./render/mystRenderer";
 import { createNonce } from "./security/csp";
 import { parsePreviewPanelState, PreviewPanelState } from "./state/previewState";
@@ -140,6 +141,8 @@ interface PreviewSyncMessage {
   selectedText?: string;
   openDisclosures?: number[];
   descriptionsCollapsed?: boolean;
+  /** previewReady only: true while the page has an inline block editor open. */
+  blockEditOpen?: boolean;
   request?: string;
   requests?: string[];
   selectionLine?: number;
@@ -203,11 +206,15 @@ interface ActivePreview {
   frontmatterDocumentVersion?: number;
   frontmatterLinkResultsVersion?: number;
   enrichmentGeneration: number;
+  /** Test hook: how many watcher events for the active document refreshReferencedPath saw. */
+  activePathChanges: number;
   /** Test hook: how many times restorePreviewState ran for this preview. */
   restoreCalls: number;
   hadFailure: boolean;
   disposed: boolean;
   activeBlockEdit?: ActiveBlockEdit;
+  /** Release and deferral decisions of the inline block-edit lock (STAB-02, STAB-03). */
+  editLock: EditLock;
   /** Edited element position carried across the render that follows a final save (R7). */
   pendingPin?: {
     documentId: string;
@@ -457,6 +464,8 @@ function isPreviewSyncMessage(value: unknown): value is PreviewSyncMessage {
       || message.type === "previewEditCancel")
       && Number.isSafeInteger(message.insertAfterLine)
       && (message.insertAfterLine as number) >= 0);
+  const validBlockEditOpen = message.blockEditOpen === undefined
+    || (message.type === "previewReady" && typeof message.blockEditOpen === "boolean");
   const validEditPayload = message.type !== "previewEditSave"
     || (typeof message.originalText === "string" && typeof message.editedText === "string");
   const validEditFinal = message.final === undefined
@@ -504,6 +513,7 @@ function isPreviewSyncMessage(value: unknown): value is PreviewSyncMessage {
     && validEditMode
     && validEditRequest
     && validInsertAfterLine
+    && validBlockEditOpen
     && validEditPayload
     && validEditFinal
     && validFrontmatterPayload
@@ -608,18 +618,28 @@ function assignWebviewHtml(target: ActivePreview | vscode.WebviewPanel, html: st
   // VS Code ignores an assignment of the identical string, so no new document is loaded and no
   // new ready report will come; only a changed string replaces the document (and is counted).
   const changed = target.panel.webview.html !== html;
+  // Work that waited for the edit runs once the page is assigned, so it sees the new document.
+  let queuedAfterAssign: Array<() => void> | undefined;
   if (changed) {
     target.htmlAssignments += 1;
     target.readyRequestId = undefined;
     target.assignedRequestId = target.stage?.requestId;
     target.recordKeepsLoadedNonce = false;
     target.patchedRequestId = undefined;
+    // A full page replacement always destroys the inline editor, whatever the stage.
+    if (target.activeBlockEdit) {
+      target.activeBlockEdit = undefined;
+      queuedAfterAssign = target.editLock.release();
+    }
     // A new document supersedes a patch that was waiting for its acknowledgement.
     clearContentPatchTimer(target);
     // The replaced document takes its overlay with it; the new one is not pending until told so.
     clearPendingOverlay(target);
   }
   target.panel.webview.html = html;
+  if (queuedAfterAssign && !target.disposed) {
+    queuedAfterAssign.forEach((work) => work());
+  }
 }
 
 function postPendingOverlay(preview: ActivePreview, visible: boolean): void {
@@ -1049,45 +1069,54 @@ function scheduleDeferredPreviewWork(preview: ActivePreview, result: RenderResul
       return;
     }
     void result.resolvePlantUml().then((plantUml) => {
-      if (!isCurrentRender(preview, result, generation)) {
-        return;
-      }
-      const diagnostics = plantUml.diagnostics.map((diagnostic) => ({
-        ...diagnostic,
-        code: "plantuml-render",
-        file: result.stage.activeDocumentPath,
-      }));
-      const injected = injectPlantUmlDiagrams(preview.webview.html, plantUml.diagrams);
-      if (injected === preview.webview.html && diagnostics.length === 0) {
-        return;
-      }
-      // While a render is pending over this page, the page still shows the status it had.
-      const shownStatus = preview.shownStatus ?? preview.status;
-      const statusDiagnostics = [...result.diagnostics, ...diagnostics];
-      const html = setPreviewStatus(injected, shownStatus, undefined, statusDiagnostics);
-      const nextDiagnostics = [...preview.webview.diagnostics, ...diagnostics];
-      // A page that is ready for this stage takes the diagrams in place; the stage does not change.
-      const statusLines = statusDiagnostics.map(formatStatusDiagnostic);
-      const contentPatch = preview.configuration.incrementalUpdates
-        && preview.readyRequestId === result.stage.requestId
-        && diagnosticsFitPatch(statusLines)
-        ? planContentPatch(preview.webview.html, html)
-        : undefined;
-      if (contentPatch) {
-        preview.webview = { ...preview.webview, html, diagnostics: nextDiagnostics };
-        // The page removes its pending overlay when it applies a patch, as a reload would; the next
-        // ready report shows it again while a render is still pending.
-        clearPendingOverlay(preview);
-        postContentPatch(preview, result.stage, result.stage, {
-          contentHtml: contentPatch.contentHtml,
-          status: shownStatus,
-          diagnostics: statusLines,
-        });
-        return;
-      }
-      setPanelHtml(preview, html, nextDiagnostics);
+      deferWhileEditing(preview, "plantuml", () => applyPlantUml(preview, result, generation, plantUml));
     });
   }, 0);
+}
+
+function applyPlantUml(
+  preview: ActivePreview,
+  result: RenderResult,
+  generation: number,
+  plantUml: Awaited<ReturnType<RenderResult["resolvePlantUml"]>>,
+): void {
+  if (!isCurrentRender(preview, result, generation)) {
+    return;
+  }
+  const diagnostics = plantUml.diagnostics.map((diagnostic) => ({
+    ...diagnostic,
+    code: "plantuml-render",
+    file: result.stage.activeDocumentPath,
+  }));
+  const injected = injectPlantUmlDiagrams(preview.webview.html, plantUml.diagrams);
+  if (injected === preview.webview.html && diagnostics.length === 0) {
+    return;
+  }
+  // While a render is pending over this page, the page still shows the status it had.
+  const shownStatus = preview.shownStatus ?? preview.status;
+  const statusDiagnostics = [...result.diagnostics, ...diagnostics];
+  const html = setPreviewStatus(injected, shownStatus, undefined, statusDiagnostics);
+  const nextDiagnostics = [...preview.webview.diagnostics, ...diagnostics];
+  // A page that is ready for this stage takes the diagrams in place; the stage does not change.
+  const statusLines = statusDiagnostics.map(formatStatusDiagnostic);
+  const contentPatch = preview.configuration.incrementalUpdates
+    && preview.readyRequestId === result.stage.requestId
+    && diagnosticsFitPatch(statusLines)
+    ? planContentPatch(preview.webview.html, html)
+    : undefined;
+  if (contentPatch) {
+    preview.webview = { ...preview.webview, html, diagnostics: nextDiagnostics };
+    // The page removes its pending overlay when it applies a patch, as a reload would; the next
+    // ready report shows it again while a render is still pending.
+    clearPendingOverlay(preview);
+    postContentPatch(preview, result.stage, result.stage, {
+      contentHtml: contentPatch.contentHtml,
+      status: shownStatus,
+      diagnostics: statusLines,
+    });
+    return;
+  }
+  setPanelHtml(preview, html, nextDiagnostics);
 }
 
 function scheduleDeferredFrontmatterLinks(
@@ -1152,7 +1181,14 @@ function scheduleLinkEnrichment(
       documentId: stage.activeDocumentIdentity,
       activeSourceFile: stage.activeDocumentPath,
     } : undefined;
-    patchPropertiesTable(preview, frontmatter, sourceMapping);
+    deferWhileEditing(preview, "links", () => {
+      if (!preview.disposed
+        && preview.document === current
+        && current.version === documentVersion
+        && preview.stage === stage) {
+        patchPropertiesTable(preview, frontmatter, sourceMapping);
+      }
+    });
   }, LINK_ENRICHMENT_DEBOUNCE_MS);
 }
 
@@ -1658,16 +1694,44 @@ function activeBlockEditSource(
   };
 }
 
+function beginActiveBlockEdit(preview: ActivePreview, edit: ActiveBlockEdit): void {
+  preview.activeBlockEdit = edit;
+  preview.editLock.acquire(edit.requestId);
+}
+
+/**
+ * Ends the lock and runs the PlantUML, link-enrichment and render work that waited for it.
+ * `renderFollows`: the caller refreshes the document itself, so a queued render is dropped.
+ */
+function releaseActiveBlockEdit(
+  preview: ActivePreview,
+  renderFollows = false,
+  alreadyReleased?: Array<() => void>,
+): void {
+  preview.activeBlockEdit = undefined;
+  if (renderFollows) {
+    preview.editLock.drop("render");
+  }
+  const queued = alreadyReleased ?? preview.editLock.release();
+  if (!preview.disposed) {
+    queued.forEach((work) => work());
+  }
+}
+
 function completeActiveBlockEdit(preview: ActivePreview, edit: ActiveBlockEdit): void {
   if (preview.activeBlockEdit !== edit) {
     return;
   }
-  preview.activeBlockEdit = undefined;
+  const refreshes = edit.hasAppliedEdit
+    && preview.document !== undefined
+    && sourceAvailable(preview)
+    && preview.document.version !== preview.stage?.activeDocumentVersion;
   if (preview.pendingPin && preview.document) {
     // Every apply of this edit has resolved: only a render of this version or later shows it.
     preview.pendingPin.minVersion = Math.max(preview.pendingPin.minVersion, preview.document.version);
   }
-  if (edit.hasAppliedEdit && preview.document && sourceAvailable(preview)) {
+  releaseActiveBlockEdit(preview, refreshes);
+  if (refreshes && preview.document) {
     void refreshPreviewDocument(preview, preview.document);
   }
 }
@@ -1688,7 +1752,7 @@ function drainActiveBlockEdit(preview: ActivePreview, edit: ActiveBlockEdit): vo
   const source = activeBlockEditSource(preview, edit);
   if (!source || source.document.getText(source.range) !== edit.lastSavedText) {
     postEditSourceError(preview, edit.lastMessage, "The source block changed while it was being edited.");
-    preview.activeBlockEdit = undefined;
+    releaseActiveBlockEdit(preview);
     return;
   }
   const replacement = minimalReplacement(edit.lastSavedText, editedText);
@@ -1764,7 +1828,7 @@ function handlePreviewEditSave(preview: ActivePreview, message: PreviewSyncMessa
       hasAppliedEdit: false,
       lastMessage: message,
     };
-    preview.activeBlockEdit = edit;
+    beginActiveBlockEdit(preview, edit);
   } else if (!edit) {
     const source = currentSourceEdit(preview, message);
     if (!source || message.originalText === undefined || message.editedText === undefined) {
@@ -1792,7 +1856,7 @@ function handlePreviewEditSave(preview: ActivePreview, message: PreviewSyncMessa
       hasAppliedEdit: false,
       lastMessage: message,
     };
-    preview.activeBlockEdit = edit;
+    beginActiveBlockEdit(preview, edit);
   }
   if (edit.cancelRequested
     || message.editId !== edit.editId
@@ -2350,6 +2414,14 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
   }
   if (value.type === "previewReady") {
     preview.readyRequestId = value.requestId;
+    if (preview.activeBlockEdit) {
+      // A page of another render, or one that reports no open editor, has no inline editor: the
+      // lock would block every later edit (STAB-02).
+      const outcome = preview.editLock.onPreviewReady(value.requestId, value.blockEditOpen);
+      if (outcome.released) {
+        releaseActiveBlockEdit(preview, false, outcome.flush);
+      }
+    }
     if (preview.status === "pending" && preview.shownStatus !== undefined && !preview.pendingOverlayVisible) {
       if (preview.pendingOverlayDue) {
         showPendingOverlay(preview);
@@ -2487,6 +2559,24 @@ function isIgnoredWatchPath(filePath: string): boolean {
   return filePath.split(path.sep).some((segment) => IGNORED_WATCH_SEGMENTS.has(segment));
 }
 
+/** Runs `work` now, or after the open inline block edit ends: the work would replace its page. */
+function deferWhileEditing(preview: ActivePreview, key: string, work: () => void): void {
+  if (preview.editLock.shouldDeferReload()) {
+    preview.editLock.defer(key, work);
+    return;
+  }
+  work();
+}
+
+function refreshOpenDocument(preview: ActivePreview): void {
+  const shown = preview.status === "pending" ? preview.shownStatus : preview.status;
+  if (!preview.disposed && preview.document && sourceAvailable(preview)
+    && !((shown === "success" || shown === "recovery")
+      && preview.stage?.activeDocumentVersion === preview.document.version)) {
+    void refreshPreviewDocument(preview, preview.document);
+  }
+}
+
 function refreshReferencedPath(preview: ActivePreview, filePath: string): void {
   if (!preview || preview.disposed || isIgnoredWatchPath(filePath)) {
     return;
@@ -2494,8 +2584,24 @@ function refreshReferencedPath(preview: ActivePreview, filePath: string): void {
   const activePath = preview.document?.uri.fsPath ?? vscode.Uri.parse(preview.documentUri).fsPath;
   const candidate = canonicalPath(filePath);
   if (candidate === canonicalPath(activePath)) {
+    preview.activePathChanges += 1;
+    if (preview.document
+      && preview.status !== "missing-source"
+      && sourceAvailable(preview)
+      && ["success", "recovery"].includes(
+        (preview.status === "pending" ? preview.shownStatus : preview.status) ?? "")
+      && isUnchangedSave({
+        isActiveDocument: true,
+        documentVersion: preview.document.version,
+        stageVersion: preview.stage?.activeDocumentIdentity === preview.documentUri
+          ? preview.stage.activeDocumentVersion
+          : undefined,
+      })) {
+      // A save of the buffer that is already rendered changes nothing on screen (PERF-06).
+      return;
+    }
     if (sourceAvailable(preview) && preview.document) {
-      void refreshPreviewDocument(preview, preview.document);
+      deferWhileEditing(preview, "render", () => refreshOpenDocument(preview));
     } else {
       setMissingSource(preview);
     }
@@ -2504,7 +2610,7 @@ function refreshReferencedPath(preview: ActivePreview, filePath: string): void {
   if (!preview.queue.dependsOn(filePath) || !preview.document || !sourceAvailable(preview)) {
     return;
   }
-  void refreshPreviewDocument(preview, preview.document);
+  deferWhileEditing(preview, "render", () => refreshOpenDocument(preview));
 }
 
 function recoverMissingSource(preview: ActivePreview): void {
@@ -2607,6 +2713,8 @@ function disposePreview(preview: ActivePreview, disposePanel: boolean): void {
   preview.disposed = true;
   clearPendingOverlay(preview);
   clearContentPatchTimer(preview);
+  preview.activeBlockEdit = undefined;
+  preview.editLock.release();
   if (disposePanel) {
     releasePreviewGroupLock(preview);
   }
@@ -2737,6 +2845,8 @@ function createPreview(
       vscode.workspace.getConfiguration(FRONTMATTER_CONFIGURATION_SECTION),
     ),
     enrichmentGeneration: 0,
+    activePathChanges: 0,
+    editLock: new EditLock(),
     restoreCalls: 0,
     hadFailure: false,
     htmlAssignments: 0,
@@ -3068,7 +3178,7 @@ function refreshPreview(document: vscode.TextDocument): void {
         if (preview.activeBlockEdit.applying) {
           continue;
         }
-        preview.activeBlockEdit = undefined;
+        releaseActiveBlockEdit(preview, true);
       }
       if (sourceAvailable(preview)) {
         refreshFrontmatter(preview, document);
@@ -3239,6 +3349,8 @@ export function getActivePreviewForTests():
     restorePreviewStateCalls: number;
     htmlAssignments: number;
     renderedStages: number;
+    /** How many watcher events for the active document were seen (a save is one). */
+    activePathChanges: number;
     /** How many renders and deferred updates were applied as an in-place content patch. */
     contentPatches: number;
     /** The preview.incrementalUpdates setting as the preview currently holds it. */
@@ -3275,6 +3387,7 @@ export function getActivePreviewForTests():
     restorePreviewStateCalls: activePreview.restoreCalls,
     htmlAssignments: activePreview.htmlAssignments,
     renderedStages: activePreview.renderedStages,
+    activePathChanges: activePreview.activePathChanges,
     contentPatches: activePreview.contentPatches,
     incrementalUpdates: activePreview.configuration.incrementalUpdates,
     webviewReady: activePreview.stage !== undefined
