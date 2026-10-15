@@ -4,27 +4,20 @@
 
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio) | [Screenshot report/gallery](https://gsemet.github.io/markdown-okf-schema-studio/gallery.html) | [Reports index](https://gsemet.github.io/markdown-okf-schema-studio/reports/)
 
-Markdown OKF-Schema Studio is a Beautiful Markdown editor for VS Code
-that supports several popular Markdown flavors and extension:
+Markdown OKF-Schema Studio is a visual Markdown editor for VS Code that supports several popular
+Markdown flavours and extensions:
+
 - [CommonMark](https://commonmark.org/)
 - [GitHub Flavored Markdown (GFM)](https://github.github.com/gfm/)
 - [Sphinx MyST](https://myst-parser.readthedocs.io/)
 - [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
-- [OKF-Schema](https://okf-schema.readthedocs.io/en/latest/)
-
-## Install
-
-- Run **Markdown OKF-Schema Studio: Open Preview to Side** from the Command Palette.
-
-or
-
-- Use **Open With...** on a Markdown tab and select **Markdown OKF-Schema Studio**.
-
-or
-
-- Open a Markdown file and select **Markdown OKF-Schema Studio - Markdown OKF-Schema Studio** from the editor title bar.
+- [OKF-Schema](https://github.com/gsemet/okf-schema)
 
 ## What This Extension Adds
+
+| Schema-aware properties | Direct metadata editing | Inline Markdown editing |
+| --- | --- | --- |
+| [![JSON Schema-aware OKF properties table](images/readme/schema-properties.png)](images/readme/schema-properties.png) | [![Editing an OKF frontmatter property in place](images/readme/edit-frontmatter.png)](images/readme/edit-frontmatter.png) | [![Edit affordance on rendered Markdown](images/readme/inline-editing.png)](images/readme/inline-editing.png) |
 
 - **MyST rendering:** directives, admonitions, tables, math, Mermaid, PlantUML, images, media,
   anchors, and permitted external links render in the preview.
@@ -39,7 +32,7 @@ or
   and test evidence.
   Saved target files refresh their displayed metadata.
 - **Source navigation:** relative links, heading fragments,
-  through VS Code and select the corresponding source location.
+  and linked files open through VS Code and select the corresponding source location.
 - **Scroll synchronization:** the preview and source editor can follow one another, preserve the
   current reading position while rendering, and show configurable sticky headings.
 - **Safe edition:** wrapping and non-destructive editing operation are applied
@@ -51,9 +44,13 @@ workspace they remain read-only until the workspace is trusted.
 
 ## Preview Themes
 
-The theme button in the floating preview toolbar cycles through four looks: the current VS Code
-theme, dark, white, and cream (a warm, light, low-glare paper palette with clay-coloured links).
-The choice is remembered per workspace.
+The theme button in the floating preview toolbar cycles through the current VS Code theme, dark,
+white, and cream. Cream is a warm, low-glare paper palette with clay-coloured links. The choice is
+remembered per workspace. These three captures use the same document, viewport, and scroll state.
+
+| Dark | White | Cream |
+| --- | --- | --- |
+| [![Handbook title and admonitions in the dark preview theme](images/readme/theme-dark.png)](images/readme/theme-dark.png) | [![Handbook title and admonitions in the white preview theme](images/readme/theme-white.png)](images/readme/theme-white.png) | [![Handbook title and admonitions in the cream preview theme](images/readme/theme-cream.png)](images/readme/theme-cream.png) |
 
 ## See It In Use
 
@@ -61,11 +58,45 @@ These captures are real Studio views from the end-to-end campaign, showing an ed
 the edit hover affordance, and a white-background preview with nested MyST admonitions,
 a Mermaid flowchart, and a local SVG.
 
-![A paragraph edited in the Studio side preview and committed to the Markdown buffer](images/01-paragraph-blur-commit.png)
+[![A paragraph edited in the Studio side preview and committed to the Markdown buffer](images/01-paragraph-blur-commit.png)](images/01-paragraph-blur-commit.png)
 
-![The Studio edit affordance revealed by hovering over rendered content](images/21-edit-hover.png)
+[![The Studio edit affordance revealed by hovering over rendered content](images/21-edit-hover.png)](images/21-edit-hover.png)
 
-![White Studio preview with nested MyST admonitions, a Mermaid flowchart, and an SVG fleet diagram](images/38-edit-mode-remembered.png)
+[![White Studio preview with nested MyST admonitions, a Mermaid flowchart, and an SVG fleet diagram](images/38-edit-mode-remembered.png)](images/38-edit-mode-remembered.png)
+
+## Install
+
+Install **Markdown OKF-Schema Studio** from the
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio),
+or open the Extensions view in VS Code, search for `Markdown OKF-Schema Studio`, and select
+**Install**.
+
+### Open Studio
+
+Use **Open With...** on a Markdown tab and select **Markdown OKF-Schema Studio**.
+
+[![Studio opened as the custom editor for a Markdown file](images/readme/open-with-editor.png)](images/readme/open-with-editor.png)
+
+For a side-by-side source and preview, select the book icon in the editor title bar or run
+**Markdown OKF-Schema Studio: Open Preview to Side** from the Command Palette.
+
+| Editor title action | Source and preview |
+| --- | --- |
+| [![Open Preview to Side action in the VS Code editor title](images/readme/open-preview-to-side.png)](images/readme/open-preview-to-side.png) | [![Markdown source beside the Studio preview](images/readme/preview-beside-editor.png)](images/readme/preview-beside-editor.png) |
+
+Every image in this README opens at full size when selected.
+
+## Open Kownledge Format
+
+[Open Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
+is an open standard for knowledge documents: readable Markdown content plus structured YAML
+frontmatter. [OKF-Schema](https://github.com/gsemet/okf-schema) extends that model with JSON Schema
+validation, so a bundle can define which frontmatter fields exist, which values are valid, and which
+fields are required.
+
+Studio makes that metadata comfortable to use. It turns frontmatter into a properties table, shows
+schema descriptions and diagnostics beside each field, and lets you edit typed values without
+manually navigating raw YAML. The Markdown body remains a live, editable MyST preview.
 
 ## Linked-File Annotations
 

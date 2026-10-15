@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-14T20:11:23.175Z",
-  "sourceDirectory": "out/reports/e2e/screenshots/real-input-N9ZNzs",
+  "generatedAt": "2026-10-15T13:05:14.675Z",
+  "sourceDirectory": "out/reports/e2e/screenshots/real-input-VbDUmL",
   "captures": [
     {
       "image": "images/01-paragraph-blur-commit.png",
-      "source": "out/reports/e2e/screenshots/real-input-N9ZNzs/01-paragraph-blur-commit.png",
-      "capturedAt": "2026-10-14T20:08:13.177Z",
-      "bytes": 81250,
+      "source": "out/reports/e2e/screenshots/real-input-VbDUmL/01-paragraph-blur-commit.png",
+      "capturedAt": "2026-10-15T13:02:19.015Z",
+      "bytes": 78452,
       "mediaType": "image",
       "mimeType": "image/png",
       "title": "Commit an edited paragraph",
@@ -14,9 +14,9 @@
     },
     {
       "image": "images/21-edit-hover.png",
-      "source": "out/reports/e2e/screenshots/real-input-N9ZNzs/21-edit-hover.png",
-      "capturedAt": "2026-10-14T20:08:43.177Z",
-      "bytes": 62908,
+      "source": "out/reports/e2e/screenshots/real-input-VbDUmL/21-edit-hover.png",
+      "capturedAt": "2026-10-15T13:02:48.473Z",
+      "bytes": 58980,
       "mediaType": "image",
       "mimeType": "image/png",
       "title": "Reveal the edit affordance",
@@ -24,9 +24,9 @@
     },
     {
       "image": "images/38-edit-mode-remembered.png",
-      "source": "out/reports/e2e/screenshots/real-input-N9ZNzs/38-edit-mode-remembered.png",
-      "capturedAt": "2026-10-14T20:09:24.708Z",
-      "bytes": 163634,
+      "source": "out/reports/e2e/screenshots/real-input-VbDUmL/38-edit-mode-remembered.png",
+      "capturedAt": "2026-10-15T13:03:29.200Z",
+      "bytes": 155607,
       "mediaType": "image",
       "mimeType": "image/png",
       "title": "MyST and diagrams on white",

@@ -16,6 +16,16 @@ if (!fs.existsSync(helper)) {
   if (result.error) {
     console.error(result.error);
     process.exitCode = 1;
+  } else if (result.status === 0) {
+    const readmeImages = spawnSync("uv", [
+      "run", "--no-sync", "--group", "docs", "python", "scripts/generate-readme-images.py",
+    ], {
+      cwd: extensionRoot,
+      stdio: "inherit",
+      env: process.env,
+    });
+    if (readmeImages.error) console.error(readmeImages.error);
+    process.exitCode = readmeImages.status ?? 1;
   } else {
     process.exitCode = result.status ?? 1;
   }

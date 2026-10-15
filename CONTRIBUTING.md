@@ -73,13 +73,16 @@ just site
 ```
 
 `just gallery` runs the complete E2E campaign and copies the three selected real-input captures
-into `images/`. It only overwrites those selected filenames and `images/gallery.json`; unrelated
-manual images and future video assets remain untouched. `just site` builds the E2E evidence, gallery,
-and static Pages tree. The published `out/site/gallery.html` includes every screenshot recursively
-from `out/reports/e2e/screenshots/`, not just the three README selections. Each caption shows the
-sidecar summary. Selecting an image opens the full sidecar on the left and the image on the right;
-on narrow screens the sidecar appears above the image. Historical captures remain visible with
-their original metadata and are not certified as part of the latest passing campaign.
+into `images/`. It also runs `scripts/generate-readme-images.py`, which uses Pillow to derive the
+compact install, feature, and theme images under `images/readme/` from passing visual and real VS
+Code captures. It only overwrites those selected and derived filenames plus `images/gallery.json`;
+unrelated manual images and future video assets remain untouched. `just site` builds the E2E
+evidence, gallery, and static Pages tree. The published `out/site/gallery.html` includes every
+screenshot recursively from `out/reports/e2e/screenshots/`, not just the README selections. Each
+caption shows the sidecar summary. Selecting an image opens the full sidecar on the left and the
+image on the right; on narrow screens the sidecar appears above the image. Historical captures
+remain visible with their original metadata and are not certified as part of the latest passing
+campaign.
 
 The static-site URL tests cover rendered Markdown documents, the repository's `out/reports/` path,
 copied assets with query and fragment suffixes, and absolute URLs. The site publisher maps local
