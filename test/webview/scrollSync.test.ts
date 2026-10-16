@@ -41,7 +41,7 @@ class RuntimeElement {
 
   public constructor(
     attributes: Record<string, string>,
-    private readonly windowState: { scrollY: number; paletteHeight?: number },
+    private readonly windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number },
     public top: number,
     public height = 40,
     tagName = "div",
@@ -224,6 +224,10 @@ class RuntimeElement {
     if (child.className === "sphinx-preview-edit-palette" && this.windowState.paletteHeight) {
       for (const sibling of this.childElements) sibling.top += this.windowState.paletteHeight;
     }
+    // The link panel is laid out the same way, and its removal gives the height back.
+    if (child.className === "sphinx-preview-link-panel" && this.windowState.panelHeight) {
+      for (const sibling of this.childElements) sibling.top += this.windowState.panelHeight;
+    }
     const index = reference ? this.childElements.indexOf(reference) : -1;
     if (index < 0) {
       this.childElements.push(child);
@@ -242,6 +246,11 @@ class RuntimeElement {
 
   public remove(): void {
     this.removed = true;
+    if (this.className === "sphinx-preview-link-panel" && this.windowState.panelHeight) {
+      for (const sibling of this.parentElement?.childElements ?? []) {
+        if (sibling !== this) sibling.top -= this.windowState.panelHeight;
+      }
+    }
     this.parentElement?.removeChild(this);
     this.onRemove?.();
   }
@@ -343,7 +352,7 @@ interface RuntimeHarness {
   readonly htmlInsertions: Array<{ position: string; markup: string }>;
   readonly frontmatterProperties: RuntimeElement;
   currentProperties(): RuntimeElement | null;
-  readonly windowState: { scrollY: number; paletteHeight?: number };
+  readonly windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number };
   /** The fake `window` / `document`: tests stub measurement and `execCommand` on them. */
   readonly window: Record<string, unknown>;
   readonly document: Record<string, unknown>;
@@ -7361,7 +7370,7 @@ test("T21: the palette is the first child of the block editor frame, above the t
   assert.equal(editor.childElements.indexOf(palette) < editor.childElements.indexOf(textarea), true);
   assert.deepEqual(
     palette.childElements.map((child) => child.getAttribute("data-edit-action")),
-    ["heading", "bold", "italic", "strikethrough", "codeFence", "quote", "rule", "todo"],
+    ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "todo"],
   );
 });
 
@@ -7403,7 +7412,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 8);
+  assert.equal(controls.length, 9);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
@@ -7592,4 +7601,420 @@ test("T21: opening scrolls down by the bar height and every close path scrolls b
     assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null, name);
     assert.equal(harness.windowState.scrollY, 200, name + ": the scroll is restored");
   }
+});
+
+// T22: the link panel opened by the Link button and Cmd/Ctrl+K.
+function linkPanelOf(harness: RuntimeHarness): RuntimeElement | undefined {
+  return harness.createdElements.find((element) =>
+    element.getAttribute("role") === "dialog" && !element.removed);
+}
+
+function linkField(harness: RuntimeHarness, name: "text" | "url"): RuntimeElement {
+  const field = harness.createdElements.find((element) =>
+    element.tagName === "INPUT" && element.getAttribute("data-link-field") === name);
+  assert.ok(field, "link field " + name);
+  return field;
+}
+
+function linkButton(harness: RuntimeHarness, name: "insert" | "cancel"): RuntimeElement {
+  const button = harness.createdElements.find((element) =>
+    element.tagName === "BUTTON" && element.getAttribute("data-link-action") === name);
+  assert.ok(button, "link button " + name);
+  return button;
+}
+
+/** Records which element took the focus last, since the fake has no active element. */
+function trackFocus(harness: RuntimeHarness): { last: () => RuntimeElement | undefined } {
+  let last: RuntimeElement | undefined;
+  const wrap = (element: RuntimeElement): void => {
+    const original = element.focus.bind(element);
+    element.focus = (options?: FocusOptions): void => {
+      last = element;
+      original(options);
+    };
+  };
+  harness.createdElements.forEach(wrap);
+  const create = harness.document.createElement as (tagName: string) => RuntimeElement;
+  harness.document.createElement = (tagName: string): RuntimeElement => {
+    const element = create(tagName);
+    wrap(element);
+    return element;
+  };
+  return { last: () => last };
+}
+
+const linkModifier = new WeakMap<RuntimeHarness, Record<string, boolean>>();
+
+function openLinkPanel(harness: RuntimeHarness, textarea: RuntimeElement, selection: [number, number], value = "say foo now") {
+  textarea.value = value;
+  textarea.setSelectionRange(selection[0], selection[1]);
+  const key = linkModifier.get(harness) ?? { ctrlKey: true };
+  let prevented = false;
+  let stopped = false;
+  textarea.dispatch("keydown", {
+    key: "k",
+    code: "KeyK",
+    ...key,
+    preventDefault: () => { prevented = true; },
+    stopPropagation: () => { stopped = true; },
+  });
+  return { prevented, stopped };
+}
+
+function linkHarness(platform?: string) {
+  const harness = createRuntimeHarness(platform === undefined ? {} : { platform });
+  const focus = trackFocus(harness);
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  linkModifier.set(harness, platform === undefined ? { ctrlKey: true } : { metaKey: true });
+  return { harness, textarea, calls, focus };
+}
+
+test("T22: Ctrl+K opens the link panel under the palette with the selection as the text", () => {
+  const { harness, textarea, focus } = linkHarness();
+  const result = openLinkPanel(harness, textarea, [4, 7]);
+  assert.equal(result.prevented, true);
+  assert.equal(result.stopped, true);
+  const panel = linkPanelOf(harness);
+  assert.ok(panel, "the panel opens");
+  assert.equal(panel.getAttribute("aria-label"), "Insert link");
+  const frame = textarea.parentElement!;
+  assert.equal(panel.parentElement, frame);
+  assert.equal(frame.childElements.indexOf(panel), frame.childElements.indexOf(paletteOf(harness)!) + 1);
+  assert.equal(linkField(harness, "text").value, "foo");
+  assert.equal(linkField(harness, "url").value, "");
+  assert.equal(focus.last(), linkField(harness, "url"), "focus goes to the first empty field");
+});
+
+test("T22: Cmd+K on macOS opens the panel and Ctrl+K there does not", () => {
+  const mac = linkHarness("MacIntel");
+  assert.equal(openLinkPanel(mac.harness, mac.textarea, [4, 7]).prevented, true);
+  assert.ok(linkPanelOf(mac.harness));
+  const other = linkHarness("MacIntel");
+  linkModifier.set(other.harness, { ctrlKey: true });
+  assert.equal(openLinkPanel(other.harness, other.textarea, [4, 7]).prevented, false);
+  assert.equal(linkPanelOf(other.harness), undefined);
+});
+
+test("T22: a selected URL fills the URL field and focus goes to the empty text", () => {
+  const { harness, textarea, focus } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 23], "see https://example.org ok");
+  assert.equal(linkField(harness, "url").value, "https://example.org");
+  assert.equal(linkField(harness, "text").value, "");
+  assert.equal(focus.last(), linkField(harness, "text"));
+});
+
+test("T22: with no selection both fields are empty and the text takes the focus", () => {
+  const { harness, textarea, focus } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 4]);
+  assert.equal(linkField(harness, "text").value, "");
+  assert.equal(linkField(harness, "url").value, "");
+  assert.equal(focus.last(), linkField(harness, "text"));
+});
+
+test("T22: the Link button opens the same panel and keeps the focus rule", () => {
+  const { harness, textarea } = linkHarness();
+  textarea.value = "say foo now";
+  textarea.setSelectionRange(4, 7);
+  const button = paletteButton(harness, "link");
+  assert.equal(button.getAttribute("title"), "Link (Ctrl+K)");
+  assert.equal(button.getAttribute("aria-label"), "Link");
+  button.dispatch("click", { preventDefault: () => undefined });
+  assert.ok(linkPanelOf(harness));
+  assert.equal(linkField(harness, "text").value, "foo");
+  // A second click on the button leaves a single panel.
+  button.dispatch("click", { preventDefault: () => undefined });
+  assert.equal(harness.createdElements.filter((e) => e.getAttribute("role") === "dialog" && !e.removed).length, 1);
+});
+
+test("T22: the panel has labelled fields, Insert and Cancel in the tab order", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  assert.equal(linkField(harness, "text").getAttribute("aria-label"), "Text");
+  assert.equal(linkField(harness, "url").getAttribute("aria-label"), "URL");
+  assert.equal(linkButton(harness, "insert").textContent, "Insert");
+  assert.equal(linkButton(harness, "cancel").textContent, "Cancel");
+  const order = linkPanelOf(harness)!.childElements.flatMap((child) => [child, ...child.childElements])
+    .filter((e) => e.tagName === "INPUT" || e.tagName === "BUTTON");
+  assert.deepEqual(order.map((e) => e.getAttribute("data-link-field") ?? e.getAttribute("data-link-action")),
+    ["text", "url", "insert", "cancel"]);
+});
+
+test("T22: Enter in the URL field inserts [text](url) as one undo step and returns to the text box", () => {
+  const { harness, textarea, calls, focus } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  linkField(harness, "url").value = "https://x.org";
+  const before = harness.messages.length;
+  let prevented = false;
+  linkField(harness, "url").dispatch("keydown", { key: "Enter", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(textarea.value, "say [foo](https://x.org) now");
+  assert.equal(textarea.selectionStart, 24, "caret after the link");
+  assert.equal(textarea.selectionEnd, 24);
+  assert.equal(calls.length, 1, "one native step");
+  assert.equal(focus.last(), textarea);
+  assert.equal(linkPanelOf(harness), undefined, "the panel closes");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(harness.messages.length, before, "no save yet");
+  harness.flushTimers();
+  assert.equal(harness.messages.filter((m) => m.type === "previewEditSave" && m.final === true).length, 0);
+  assert.equal(harness.messages.filter((m) => m.type === "previewEditSave").length, 1, "one autosave");
+});
+
+test("T22: Enter in the Text field and the Insert button also insert", () => {
+  const viaText = linkHarness();
+  openLinkPanel(viaText.harness, viaText.textarea, [4, 7]);
+  linkField(viaText.harness, "text").value = "bar";
+  linkField(viaText.harness, "url").value = "u";
+  linkField(viaText.harness, "text").dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  assert.equal(viaText.textarea.value, "say [bar](u) now");
+
+  const viaButton = linkHarness();
+  openLinkPanel(viaButton.harness, viaButton.textarea, [4, 7]);
+  linkField(viaButton.harness, "url").value = "u";
+  linkButton(viaButton.harness, "insert").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(viaButton.textarea.value, "say [foo](u) now");
+  assert.equal(linkPanelOf(viaButton.harness), undefined);
+});
+
+test("T22: an empty URL inserts [text]() with the caret inside the parentheses", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  linkField(harness, "text").dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  assert.equal(textarea.value, "say [foo]() now");
+  assert.equal(textarea.selectionStart, 10);
+  assert.equal(textarea.selectionEnd, 10);
+});
+
+test("T22: an IME composition Enter does not insert", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  linkField(harness, "url").dispatch("keydown", { key: "Enter", isComposing: true, preventDefault: () => undefined });
+  assert.equal(textarea.value, "say foo now");
+  assert.ok(linkPanelOf(harness));
+});
+
+test("T22: a selection inside an existing link prefills both fields and replaces that link", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [8, 8], "a [label](https://old.org) b");
+  assert.equal(linkField(harness, "text").value, "label");
+  assert.equal(linkField(harness, "url").value, "https://old.org");
+  linkField(harness, "url").value = "https://new.org";
+  linkField(harness, "url").dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  assert.equal(textarea.value, "a [label](https://new.org) b");
+});
+
+test("T22: Escape in the panel returns to the text box without any change and keeps the editor", () => {
+  const { harness, textarea, calls, focus } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  linkField(harness, "url").value = "typed";
+  textarea.setSelectionRange(0, 0);
+  let prevented = false;
+  let stopped = false;
+  linkField(harness, "url").dispatch("keydown", {
+    key: "Escape",
+    preventDefault: () => { prevented = true; },
+    stopPropagation: () => { stopped = true; },
+  });
+  assert.equal(prevented, true);
+  assert.equal(stopped, true, "the editor does not see this Escape");
+  assert.equal(textarea.value, "say foo now");
+  assert.deepEqual(textarea.selectionRange, [4, 7], "the selection is restored");
+  assert.equal(calls.length, 0);
+  assert.equal(focus.last(), textarea);
+  assert.equal(linkPanelOf(harness), undefined);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(harness.messages.some((m) => m.type === "previewEditSave" || m.type === "previewEditCancel"), false);
+  harness.flushTimers();
+  assert.equal(harness.messages.some((m) => m.type === "previewEditSave"), false, "nothing changed, nothing saved");
+});
+
+test("T22: Cancel behaves like Escape", () => {
+  const { harness, textarea, focus } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  linkButton(harness, "cancel").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(linkPanelOf(harness), undefined);
+  assert.equal(focus.last(), textarea);
+  assert.deepEqual(textarea.selectionRange, [4, 7]);
+  assert.equal(textarea.value, "say foo now");
+});
+
+test("T22: Tab cycles Text, URL, Insert, Cancel and back, and Shift+Tab goes the other way", () => {
+  const { harness, textarea, focus } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 4]);
+  const text = linkField(harness, "text");
+  const url = linkField(harness, "url");
+  const insert = linkButton(harness, "insert");
+  const cancel = linkButton(harness, "cancel");
+  let prevented = false;
+  cancel.dispatch("keydown", { key: "Tab", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(focus.last(), text, "Tab on Cancel wraps to Text");
+  prevented = false;
+  text.dispatch("keydown", { key: "Tab", shiftKey: true, preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(focus.last(), cancel, "Shift+Tab on Text wraps to Cancel");
+  prevented = false;
+  url.dispatch("keydown", { key: "Tab", preventDefault: () => { prevented = true; } });
+  insert.dispatch("keydown", { key: "Tab", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, false, "the browser moves between the inner stops");
+});
+
+test("T22: a press on the panel's padding or buttons keeps the focus, a press on a field focuses it", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  const press = (target: RuntimeElement | undefined): boolean => {
+    let prevented = false;
+    linkPanelOf(harness)!.dispatch("mousedown", { target, preventDefault: () => { prevented = true; } });
+    return prevented;
+  };
+  assert.equal(press(undefined), true, "padding");
+  assert.equal(press(linkButton(harness, "insert")), true, "button");
+  assert.equal(press(linkField(harness, "url")), false, "the field needs its default so it takes the focus");
+});
+
+test("T22: moving the focus from the text box into the panel does not save", () => {
+  const { harness, textarea } = linkHarness();
+  textarea.value = "say foo now";
+  textarea.setSelectionRange(4, 7);
+  openLinkPanel(harness, textarea, [4, 7]);
+  const before = harness.messages.length;
+  textarea.dispatch("blur", { relatedTarget: linkField(harness, "url") });
+  textarea.dispatch("blur", { relatedTarget: paletteButton(harness, "bold") });
+  assert.equal(harness.messages.length, before);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+});
+
+test("T22: the text box blur with no target or a target outside the frame still saves", () => {
+  for (const outside of ["none", "null", "body"]) {
+    const harness = createRuntimeHarness();
+    const relatedTarget = outside === "none" ? undefined : outside === "null" ? null : harness.body;
+    const textarea = openBlockEditorWithSource(harness);
+    textarea.value = "Second paragraph. changed";
+    textarea.dispatch("blur", { relatedTarget });
+    const saves = harness.messages.filter((m) => m.type === "previewEditSave");
+    assert.equal(saves.length, 1, outside);
+    assert.equal(saves[0].final, true);
+  }
+});
+
+test("T22: focus leaving the panel for outside the frame runs the final save once", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  textarea.value = "say foo now!";
+  const before = harness.messages.length;
+  linkField(harness, "url").dispatch("blur", { relatedTarget: null });
+  const saves = harness.messages.slice(before).filter((m) => m.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0].final, true);
+  assert.equal(saves[0].editedText, "say foo now!\n");
+});
+
+test("T22: focus moving between the panel fields or back to the text box does not save", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  const before = harness.messages.length;
+  linkField(harness, "url").dispatch("blur", { relatedTarget: linkField(harness, "text") });
+  linkField(harness, "text").dispatch("blur", { relatedTarget: linkButton(harness, "insert") });
+  linkButton(harness, "insert").dispatch("blur", { relatedTarget: textarea });
+  assert.equal(harness.messages.length, before);
+});
+
+test("T22: closing the panel never produces a blur save, whatever blur the browser fires", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  const url = linkField(harness, "url");
+  url.value = "u";
+  const before = harness.messages.length;
+  url.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  url.dispatch("blur", { relatedTarget: null });
+  textarea.dispatch("blur", { relatedTarget: null });
+  // The textarea blur above is a real focus loss and saves once; the panel added no second save.
+  const saves = harness.messages.slice(before).filter((m) => m.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+});
+
+test("T22: the panel is removed with the editor", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  const panel = linkPanelOf(harness)!;
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null);
+  assert.equal(panel.removed, true);
+});
+
+test("T22: opening and closing the panel keep the edited text in place", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openCompensatedEditor(harness);
+  stubExecCommand(harness, textarea);
+  textarea.value = "say foo now";
+  textarea.setSelectionRange(4, 7);
+  assert.equal(harness.windowState.scrollY, 244);
+  harness.windowState.panelHeight = 30;
+  paletteButton(harness, "link").dispatch("click", { preventDefault: () => undefined });
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 274, "the page scrolled by the panel height");
+  linkButton(harness, "cancel").dispatch("click", { preventDefault: () => undefined });
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 244, "closing the panel scrolls back");
+  paletteButton(harness, "link").dispatch("click", { preventDefault: () => undefined });
+  harness.flushFrames();
+  assert.equal(harness.windowState.scrollY, 274);
+  // Escape in the text box closes the editor and the panel with it; the page returns to 200.
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  harness.flushFrames();
+  assert.equal(linkPanelOf(harness), undefined);
+  assert.equal(harness.windowState.scrollY, 200);
+});
+
+test("T22: typing in the text box closes the panel and a later Insert cannot corrupt the text", () => {
+  const { harness, textarea, calls } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  const url = linkField(harness, "url");
+  const insert = linkButton(harness, "insert");
+  url.value = "https://x.org";
+  textarea.value = "NEW say foo now";
+  textarea.setSelectionRange(8, 8);
+  textarea.dispatch("input");
+  assert.equal(linkPanelOf(harness), undefined, "the panel closed on input");
+  assert.deepEqual(textarea.selectionRange, [8, 8], "the caret of the text box was not restored over");
+  insert.dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "NEW say foo now");
+  assert.equal(calls.length, 0);
+});
+
+test("T22: a mousedown in the text box closes the panel without touching the selection", () => {
+  const { harness, textarea } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  textarea.setSelectionRange(1, 1);
+  textarea.dispatch("mousedown", {});
+  assert.equal(linkPanelOf(harness), undefined);
+  assert.deepEqual(textarea.selectionRange, [1, 1]);
+});
+
+test("T22: Insert on a text that changed without an input event aborts without editing", () => {
+  const { harness, textarea, calls } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 7]);
+  linkField(harness, "url").value = "u";
+  textarea.value = "other text";
+  linkButton(harness, "insert").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "other text");
+  assert.equal(calls.length, 0);
+  assert.equal(linkPanelOf(harness), undefined);
+});
+
+test("T22: Cmd/Ctrl+K inside a panel field is consumed and moves to the URL field", () => {
+  const { harness, textarea, focus } = linkHarness();
+  openLinkPanel(harness, textarea, [4, 4]);
+  let prevented = false;
+  let stopped = false;
+  linkField(harness, "text").dispatch("keydown", {
+    key: "k",
+    ctrlKey: true,
+    preventDefault: () => { prevented = true; },
+    stopPropagation: () => { stopped = true; },
+  });
+  assert.equal(prevented && stopped, true);
+  assert.equal(focus.last(), linkField(harness, "url"));
+  assert.ok(linkPanelOf(harness), "the panel stays open");
 });

@@ -14,6 +14,8 @@ export interface EditPaletteDeps {
   getControl(): EditPaletteControl;
   /** Runs an edit as one native, undoable step in the control (and autosaves). */
   applyTextEdit(edit: TextEdit): void;
+  /** Opens the small panel of an action that has one (the Link button). */
+  openPanel?(action: EditAction): void;
   mode: EditActionMode;
   /** Shows Cmd instead of Ctrl in the tooltips. */
   apple?: boolean;
@@ -59,6 +61,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     strikethrough: glyph("strikethrough", "S"),
     code: svg("M8 7l-5 5 5 5M16 7l5 5-5 5M14 5l-4 14") + caret,
     quote: svg("M5 11h4v6H5zM5 11c0-3 1-5 4-6M14 11h4v6h-4zM14 11c0-3 1-5 4-6"),
+    link: svg("M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"),
     rule: svg("M3 12h18M8 7h8M8 17h8"),
     todo: svg("M5 4v17M5 5h12l-2 4 2 4H5"),
   };
@@ -176,6 +179,10 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
           return;
         }
         closePopover();
+        if (action.panel) {
+          deps.openPanel?.(action);
+          return;
+        }
         run(action);
       });
       root.appendChild(button);

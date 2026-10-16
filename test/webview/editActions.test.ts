@@ -147,7 +147,7 @@ test("the todo toggle is its own inverse", () => {
 test("the registry lists the actions with metadata and indexes them by id", () => {
   assert.deepEqual(
     registry.actions.map((action) => action.id),
-    ["heading", "bold", "italic", "strikethrough", "codeFence", "quote", "rule", "todo"],
+    ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "todo"],
   );
   for (const action of registry.actions) {
     assert.equal(registry.byId.get(action.id), action);
@@ -199,7 +199,7 @@ test("shortcutFor ignores plain keys, other modifiers, composition and AltGr", (
   assert.equal(key({ ctrlKey: true, code: "KeyB", key: "b", altKey: true }), undefined);
   assert.equal(key({ ctrlKey: true, code: "KeyB", key: "b", isComposing: true }), undefined);
   assert.equal(key({ ctrlKey: true, altKey: true, code: "Slash", key: "/" }), undefined);
-  assert.equal(key({ ctrlKey: true, code: "KeyK", key: "k" }), undefined);
+  assert.equal(key({ ctrlKey: true, code: "KeyJ", key: "j" }), undefined);
 });
 
 test("a selection cutting into a marker run on one side produces no edit", () => {
@@ -351,4 +351,130 @@ test("shortcutLabel shows Cmd on macOS and Ctrl elsewhere", () => {
   assert.equal(registry.shortcutLabel(registry.byId.get("todo")!, false), "Ctrl+/");
   assert.equal(registry.shortcutLabel(registry.byId.get("todo")!, true), "Cmd+/");
   assert.equal(registry.shortcutLabel(registry.byId.get("rule")!, false), "");
+});
+
+// T22: the link action and the helpers behind the link panel.
+function ctxOf(input: string): { value: string; selectionStart: number; selectionEnd: number; scope: "block" } {
+  const caret = input.indexOf("|");
+  if (caret !== -1) {
+    return { value: input.replace("|", ""), selectionStart: caret, selectionEnd: caret, scope: "block" };
+  }
+  return {
+    value: input.replace("[", "").replace("]", ""),
+    selectionStart: input.indexOf("["),
+    selectionEnd: input.indexOf("]") - 1,
+    scope: "block",
+  };
+}
+
+function link(input: string, text: string, url: string): string {
+  const ctx = ctxOf(input);
+  const edit = registry.linkEdit(ctx, text, url);
+  const result = ctx.value.slice(0, edit.start) + edit.text + ctx.value.slice(edit.end);
+  assert.equal(edit.selectionStart, edit.selectionEnd);
+  return result.slice(0, edit.selectionStart) + "|" + result.slice(edit.selectionStart);
+}
+
+test("link is a strict action for blocks and cells that opens the link panel", () => {
+  const action = registry.byId.get("link");
+  assert.ok(action);
+  assert.deepEqual(action.modes, ["strict"]);
+  assert.deepEqual(action.scopes, ["block", "cell"]);
+  assert.equal(action.panel, "link");
+  assert.equal(registry.shortcutLabel(action, false), "Ctrl+K");
+  assert.equal(registry.shortcutLabel(action, true), "Cmd+K");
+});
+
+test("Cmd+K on macOS and Ctrl+K elsewhere find the link action, matched on key before code", () => {
+  assert.equal(registry.shortcutFor({ key: "k", code: "KeyK", metaKey: true }, true)?.id, "link");
+  assert.equal(registry.shortcutFor({ key: "k", code: "KeyK", ctrlKey: true }, false)?.id, "link");
+  assert.equal(registry.shortcutFor({ key: "k", code: "KeyK", ctrlKey: true }, true), undefined);
+  assert.equal(registry.shortcutFor({ key: "k", code: "KeyK", metaKey: true }, false), undefined);
+  // Dvorak: the physical K key types "t", which is not a link shortcut.
+  assert.equal(registry.shortcutFor({ key: "t", code: "KeyK", ctrlKey: true }, false), undefined);
+  // Cyrillic layout: the Latin code is the fallback.
+  assert.equal(registry.shortcutFor({ key: "л", code: "KeyK", ctrlKey: true }, false)?.id, "link");
+  assert.equal(registry.shortcutFor({ key: "k", code: "KeyK", ctrlKey: true, shiftKey: true }, false), undefined);
+  assert.equal(registry.shortcutFor({ key: "k", code: "KeyK", ctrlKey: true, isComposing: true }, false), undefined);
+});
+
+test("linkDraft prefills the text from the selection and the URL when the selection is one", () => {
+  assert.deepEqual(registry.linkDraft(ctxOf("say [foo] now")), { text: "foo", url: "", start: 4, end: 7 });
+  assert.deepEqual(registry.linkDraft(ctxOf("see |here")), { text: "", url: "", start: 4, end: 4 });
+  const url = registry.linkDraft(ctxOf("see [https://example.com/a?b=1] now"));
+  assert.equal(url.text, "");
+  assert.equal(url.url, "https://example.com/a?b=1");
+  assert.equal(registry.linkDraft(ctxOf("[mailto:me@example.com]")).url, "mailto:me@example.com");
+  assert.equal(registry.linkDraft(ctxOf("[www.example.com]")).url, "www.example.com");
+  // A phrase that merely contains a URL is text.
+  assert.equal(registry.linkDraft(ctxOf("[go to https://example.com]")).text, "go to https://example.com");
+});
+
+test("linkDraft takes the existing link around the selection or the caret", () => {
+  const draft = registry.linkDraft(ctxOf("a [lab|el](https://x.org) b"));
+  assert.deepEqual(draft, { text: "label", url: "https://x.org", start: 2, end: 24 });
+  const selected = registry.linkDraft({
+    value: "a [label](https://x.org) b",
+    selectionStart: 3,
+    selectionEnd: 8,
+    scope: "block",
+  });
+  assert.equal(selected.text, "label");
+  assert.equal(selected.url, "https://x.org");
+  const withTitle = registry.linkDraft(ctxOf('a [l|](u "t") b'));
+  assert.equal(withTitle.url, "u");
+  // An image is not a link to rewrite.
+  assert.equal(registry.linkDraft(ctxOf("![al|t](p.png)")).url, "");
+  // A caret after the link is outside it.
+  assert.equal(registry.linkDraft(ctxOf("[a](b)|")).text, "");
+});
+
+const linkCases: [string, string, string, string][] = [
+  ["say [foo] now", "foo", "https://x.org", "say [foo](https://x.org)| now"],
+  ["say [foo] now", "bar", "u", "say [bar](u)| now"],
+  ["see |here", "docs", "https://x.org", "see [docs](https://x.org)|here"],
+  // A URL selection becomes the link target.
+  ["go [https://x.org] now", "site", "https://x.org", "go [site](https://x.org)| now"],
+  // Replaces an existing link as a whole.
+  ["a [lab|el](old) b", "new", "https://n.org", "a [new](https://n.org)| b"],
+  // O13: an empty URL keeps `[text]()` with the caret inside the parentheses.
+  ["say [foo] now", "foo", "", "say [foo](|) now"],
+  // Empty text falls back to the URL; both empty leaves an empty link.
+  ["x |y", "", "https://x.org", "x [https://x.org](https://x.org)|y"],
+  ["x |y", "", "", "x [](|)y"],
+  // A target with spaces needs angle brackets.
+  ["[a]", "a", "my file.md", "[a](<my file.md>)|"],
+  // Whitespace around the typed values is dropped.
+  ["[a]", " a ", " u ", "[a](u)|"],
+];
+for (const [input, text, url, expected] of linkCases) {
+  test("linkEdit " + JSON.stringify([input, text, url]), () => {
+    assert.equal(link(input, text, url), expected);
+  });
+}
+
+test("the link action applies the argument as the target of the selected text", () => {
+  assert.equal(run("link", "say [foo] now", "https://x.org"), "say [foo](https://x.org)| now");
+  assert.equal(run("link", "say [foo] now"), "say [foo](|) now");
+});
+
+test("linkEdit escapes brackets in the text and reads escaped text back", () => {
+  assert.equal(link("[a]", "a]b [c", "u"), "[a\\]b \\[c](u)|");
+  const draft = registry.linkDraft(ctxOf("x [a\\]b|](u) y"));
+  assert.equal(draft.text, "a]b");
+  assert.equal(draft.url, "u");
+  assert.equal(draft.end - draft.start, "[a\\]b](u)".length);
+});
+
+test("linkEdit never breaks the target: < and > are encoded, spaces get angle brackets", () => {
+  assert.equal(link("[a]", "a", "http://x/<b>"), "[a](http://x/%3Cb%3E)|");
+  assert.equal(link("[a]", "a", "my file>.md"), "[a](<my file%3E.md>)|");
+});
+
+test("replacing an existing link keeps its title", () => {
+  assert.equal(link('a [l|](u "t") b', "new", "v"), 'a [new](v "t")| b');
+  assert.equal(registry.linkDraft(ctxOf('a [l|](u "t") b')).title, '"t"');
+  assert.equal(registry.linkDraft(ctxOf("a [l|](u) b")).title, undefined);
+  // The empty-URL caret stays inside the parentheses even with a title.
+  assert.equal(link('a [l|](u "t") b', "new", ""), 'a [new](| "t") b');
 });

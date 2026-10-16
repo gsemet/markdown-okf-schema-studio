@@ -20,6 +20,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Incoming-change mark**: green left bar on a block changed since HEAD (`data-sphinx-preview-changed`), from `src/webview/incomingChanges.ts`; ranges come from `src/mapping/lineDiff.ts` and `src/git/headBaseline.ts`.
 - **Insert point**: "+" bar after each top-level block that opens an insertion editor (`.sphinx-preview-insert-point`).
 - **Insertion editor**: block editor opened from an insert point or from "Start writing".
+- **Link panel**: two-field Text/URL panel under the palette, opened by the Link button or Cmd/Ctrl+K (`src/webview/linkPanel.ts`).
 - **Mapped block**: rendered element carrying its source location (`[data-sphinx-source-file][data-sphinx-source-line]`).
 - **Margin mode (planned)**: layout mode that uses the page margins for side content.
 - **Message registry**: map from a webview-to-host message type to its validator and host handler (`src/preview/previewMessages.ts`).

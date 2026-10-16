@@ -929,6 +929,74 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   cursor: pointer;
 }
 
+/* Link panel: Text and URL fields under the palette, in the flow of the editor frame. */
+.sphinx-preview-link-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px 8px;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 0 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border-radius: 8px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
+  color: var(--vscode-editor-foreground, CanvasText);
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
+  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  font-size: 0.85em;
+}
+
+.sphinx-preview-link-panel-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sphinx-preview-link-panel-row > input {
+  box-sizing: border-box;
+  width: 16em;
+  max-width: 100%;
+  padding: 3px 6px;
+  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border-radius: 4px;
+  background: var(--vscode-input-background, var(--vscode-editor-background, Canvas));
+  color: var(--vscode-input-foreground, var(--vscode-editor-foreground, CanvasText));
+  font: inherit;
+}
+
+.sphinx-preview-link-panel-row > input:focus {
+  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline-offset: -1px;
+}
+
+.sphinx-preview-link-panel-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.sphinx-preview-link-panel-actions > button {
+  padding: 3px 10px;
+  border: 1px solid var(--vscode-button-border, var(--sphinx-preview-border));
+  border-radius: 4px;
+  background: var(--vscode-button-secondaryBackground, transparent);
+  color: var(--vscode-button-secondaryForeground, inherit);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sphinx-preview-link-panel-actions > button[data-link-action="insert"] {
+  background: var(--vscode-button-background, Highlight);
+  color: var(--vscode-button-foreground, HighlightText);
+}
+
+.sphinx-preview-link-panel-actions > button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline-offset: 1px;
+}
+
 .sphinx-preview-frontmatter-menu {
   position: static;
   display: flex;
