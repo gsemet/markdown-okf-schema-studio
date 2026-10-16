@@ -69,6 +69,8 @@ export interface Scenario {
   widthModeChecks?: boolean;
   /** Opens the TOC column and measures it against the toolbar, the content, the width modes and zoom. */
   tocChecks?: boolean;
+  /** Opens and closes the comment chips, keeps the reading line, and turns the gray chips off and on. */
+  commentChipChecks?: boolean;
   firstElementGap?: "element" | "empty" | "wide-margin" | "properties";
   /** Hovering the first code block shows the copy button in its top right; a click posts the code. */
   codeCopyChecks?: boolean;
@@ -1349,6 +1351,24 @@ export const SCENARIOS: Scenario[] = [
     description: "The TOC button opens a column of h1-h4 headings right of the content and below the "
       + "toolbar. It never overlaps the content or the table, Auto and Full width respect it, zoom "
       + "200 % keeps it usable, a click scrolls to the heading, and a pane under 760 px hides it.",
+  })),
+  ...([
+    ["light", undefined],
+    ["dark", undefined],
+    ["dark", "cream"],
+  ] as const).map(([theme, mode]) => ({
+    id: `comment-chips-${theme}-${mode ?? "theme"}`,
+    fixture: "31-comments",
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    commentChipChecks: true,
+    description: "Gray comment chips and a green TODO chip. A click opens the comment as a box with "
+      + "an accent bar and a Comment or TODO title, a second click closes it, opening a chip above "
+      + "the reading line does not move the text being read, and turning preview.showComments off "
+      + "hides the gray chips (not the TODO chips) without a new render. The capture shows both "
+      + "boxes open.",
   })),
   ...[WIDE, NARROW].map((viewport) => ({
     id: `first-element-gap-empty-${viewport.width}`,

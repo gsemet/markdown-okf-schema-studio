@@ -17,6 +17,8 @@ export interface PreviewConfiguration {
   stickyHeadingDepth: number;
   /** Patch the preview content in place instead of reloading the page (kill switch, T34). */
   incrementalUpdates: boolean;
+  /** Show the gray chips of HTML comments; TODO chips always show (T15). */
+  showComments: boolean;
 }
 
 export const DEFAULT_PREVIEW_CONFIGURATION: PreviewConfiguration = {
@@ -27,6 +29,7 @@ export const DEFAULT_PREVIEW_CONFIGURATION: PreviewConfiguration = {
   maxContentWidth: DEFAULT_PREVIEW_CONTENT_WIDTH,
   stickyHeadingDepth: DEFAULT_STICKY_HEADING_DEPTH,
   incrementalUpdates: true,
+  showComments: true,
 };
 
 export function normalizePreviewContentWidth(value: number): number {
@@ -77,5 +80,6 @@ export function readPreviewConfiguration(
       "incrementalUpdates",
       DEFAULT_PREVIEW_CONFIGURATION.incrementalUpdates,
     ),
+    showComments: source.get("showComments", DEFAULT_PREVIEW_CONFIGURATION.showComments),
   };
 }

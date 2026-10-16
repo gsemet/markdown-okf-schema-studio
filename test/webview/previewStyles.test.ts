@@ -750,3 +750,11 @@ test("the TOC column is hidden by default, reserves 256px when open and hides on
   assert.match(media, /nav\[data-sphinx-preview-toc\] \{[^}]*position: fixed;[^}]*inset-block-start: var\(--sphinx-preview-toc-top[^}]*inset-block-end: 16px;[^}]*width: 240px;/u);
   assert.match(css, /\[data-sphinx-preview-sticky-headings\] \{[^}]*max-width: calc\(100% - var\(--sphinx-preview-toc-reserve, 0px\)\)/u);
 });
+
+test("T15: an open comment is an admonition-like box and showComments off hides the gray chips only", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /\.okf-comment > \.okf-comment-body:not\(\[hidden\]\) \{[^}]*border-inline-start: 4px solid/u);
+  assert.match(css, /\.okf-comment\[data-okf-comment-kind="todo"\] > \.okf-comment-body:not\(\[hidden\]\)::before \{\s*content: "TODO";/u);
+  assert.match(css, /html\[data-okf-show-comments="false"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="comment"\] \{\s*display: none;/u);
+  assert.doesNotMatch(css, /data-okf-show-comments="false"\][^{]*kind="todo"/u);
+});

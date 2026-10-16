@@ -1572,6 +1572,45 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   display: none;
 }
 
+/* An opened comment reads like an admonition: accent bar, tinted panel and a title (Comment or
+   TODO) taken from the comment kind. The text is a plain text node, so line breaks are kept. */
+#sphinx-myst-preview-content .okf-comment > .okf-comment-body:not([hidden]) {
+  --sphinx-preview-accent: var(--vscode-descriptionForeground, #717171);
+  display: block;
+  margin: 0.4em 0;
+  padding: 0.6em 1em;
+  border: 1px solid var(--sphinx-preview-border);
+  border-inline-start: 4px solid var(--sphinx-preview-accent);
+  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
+  background: color-mix(in srgb, var(--sphinx-preview-accent) 14%, var(--vscode-editor-background, Canvas));
+  color: var(--vscode-editor-foreground, CanvasText);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+#sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="todo"] > .okf-comment-body:not([hidden]) {
+  --sphinx-preview-accent: var(--vscode-charts-green, #16825d);
+}
+
+#sphinx-myst-preview-content .okf-comment > .okf-comment-body:not([hidden])::before {
+  content: "Comment";
+  display: block;
+  margin-bottom: 0.3em;
+  color: var(--sphinx-preview-accent);
+  font-weight: 600;
+  white-space: normal;
+}
+
+#sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="todo"] > .okf-comment-body:not([hidden])::before {
+  content: "TODO";
+}
+
+/* preview.showComments off: the gray comment chips go away at once, without a new render. TODO
+   chips stay. */
+html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="comment"] {
+  display: none;
+}
+
 #sphinx-myst-preview-content img {
   max-width: 100%;
   height: auto;

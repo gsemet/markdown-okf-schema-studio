@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A comment or TODO chip now opens into a box with the comment text when you click it (or press
+  Enter or Space on it) and closes again on a second click; what is open stays open while you type.
+  The new `preview.showComments` setting (default on) hides the gray comment chips, at once and in
+  open previews. TODO chips always show.
 - HTML comments now show as a small gray `<!--` chip where they sit, and the word TODO, or a
   `<!-- TODO ... -->` comment, as a green chip. The chip's tooltip holds the comment text. Tool
   comments (`markdownlint-*`, `prettier-ignore`, `toc`, `cspell:`, `vale`) stay hidden.

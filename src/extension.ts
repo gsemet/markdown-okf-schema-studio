@@ -586,6 +586,7 @@ function scrollContext(
     markEditorSelection: configuration.markEditorSelection,
     doubleClickToSwitchToEditor: configuration.doubleClickToSwitchToEditor,
     stickyHeadingDepth: configuration.stickyHeadingDepth,
+    showComments: configuration.showComments,
     themeKind: vscode.window.activeColorTheme.kind,
     ...(toolbarState ?? {}),
     ...(sessionPreviewThemeMode ? { previewThemeMode: sessionPreviewThemeMode } : {}),
@@ -2293,6 +2294,19 @@ function postHistoryState(preview: ActivePreview): void {
   });
 }
 
+/** Tells the page whether the gray comment chips show. Stale ids are dropped by the page. */
+function postShowComments(preview: ActivePreview): void {
+  const stage = preview.stage;
+  if (preview.disposed || !stage) return;
+  void preview.panel.webview.postMessage({
+    type: "previewShowComments",
+    showComments: preview.configuration.showComments,
+    documentId: stage.activeDocumentIdentity,
+    documentVersion: stage.activeDocumentVersion,
+    requestId: stage.requestId,
+  });
+}
+
 /** Records the place being left and the target of a followed link. */
 function recordNavigation(preview: ActivePreview, target: NavigationEntry): void {
   const history = historyOf(preview);
@@ -2607,6 +2621,7 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     markEditorSelectionInPreview(preview);
     // The page starts with both buttons disabled: tell it what the history of this panel allows.
     postHistoryState(preview);
+    postShowComments(preview);
     return;
   }
   if (value.type === "previewLink" && value.request) {
@@ -3446,6 +3461,8 @@ export function activate(context: vscode.ExtensionContext): void {
           preview.configuration = readPreviewConfiguration(
             vscode.workspace.getConfiguration(PREVIEW_CONFIGURATION_SECTION),
           );
+          // The switch needs no re-render: the open page follows it at once.
+          postShowComments(preview);
         }
         if (plantUmlConfigurationChanged) {
           preview.plantUmlConfiguration = readPlantUmlConfiguration(

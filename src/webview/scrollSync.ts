@@ -11,6 +11,7 @@ import { installFirstClearance } from "./firstClearance";
 import { installLinkNavigation } from "./linkNavigation";
 import { installHistoryControls } from "./historyControls";
 import { installTocColumn } from "./tocColumn";
+import { installChipToggle } from "./chipToggle";
 import { installViewControls } from "./viewControls";
 import { installWidthMode } from "./widthMode";
 import type { ViewPreferences } from "../state/previewViewPreferences";
@@ -38,6 +39,8 @@ export interface PreviewRuntimeContext extends ScrollContext {
   markEditorSelection?: boolean;
   doubleClickToSwitchToEditor?: boolean;
   stickyHeadingDepth?: number;
+  /** False hides the gray comment chips (preview.showComments). */
+  showComments?: boolean;
   themeKind?: number;
   /** False when no visible text editor shows the previewed document. */
   pairedTextEditor?: boolean;
@@ -120,6 +123,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     }
     stabilizeLayout();
   };
+  // Expanding a chip changes the height of the content: keep the reading line like zoom does.
+  const chipToggle = (${installChipToggle.toString()})(document, vscode, context, keepReadingLine);
   const historyControls = (${installHistoryControls.toString()})(document, vscode, context);
   const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
   // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.
@@ -216,6 +221,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       viewWidthMode: widthMode.mode(),
       viewToc: tocColumn.open(),
       tocCollapsed: tocColumn.collapsed(),
+      expandedChips: chipToggle.expanded(),
     };
     vscode.setState?.(state);
     return state;
@@ -3363,6 +3369,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     widthMode.update();
     firstClearance.update();
     tocColumn.refresh();
+    chipToggle.apply();
     measure();
     if (options.restore) {
       restoreState();
@@ -3481,6 +3488,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     if (sameContext(message) && message.type === "themeChanged") {
       applyTheme(message.themeKind);
+      return;
+    }
+    if (sameContext(message) && message.type === "previewShowComments") {
+      chipToggle.setShowComments(message.showComments !== false);
       return;
     }
     if (sameContext(message) && message.type === "previewHistoryState") {
@@ -3645,8 +3656,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   });
   document.addEventListener("click", (event) => {
     if (event.target instanceof Element && event.target.closest(".sphinx-preview-insert-point")) return;
-    // The chip of a block comment is reserved for expanding it; the rest of the block edits.
-    if (event.target instanceof Element && event.target.closest("div.okf-comment > .okf-chip")) return;
+    // A chip is reserved for expanding its comment; the rest of the block edits.
+    if (event.target instanceof Element && event.target.closest(".okf-chip")) return;
     const target = event.target instanceof Element
       ? event.target.closest(mappingsSelector)
       : undefined;
@@ -3688,7 +3699,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (event.target instanceof Element
       && event.target.closest("[data-okf-description-toggle]")) return;
     if (event.target instanceof Element
-      && event.target.closest("div.okf-comment > .okf-chip")) return;
+      && event.target.closest(".okf-chip")) return;
     if (event.target instanceof Element
       && event.target.closest('a[data-sphinx-preview-navigation^="okf-link:"]')) return;
     const frontmatterEditor = event.target instanceof Element

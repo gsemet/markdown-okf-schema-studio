@@ -144,6 +144,9 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
   remembered per workspace, hidden on panes narrower than 760 px); click an entry to scroll there,
   fold sections with the twisty; the current section is highlighted.
 - `preview.stickyHeadingDepth` (default 3): heading levels pinned at the top while scrolling (1-6).
+- `preview.showComments` (default on): show HTML comments as gray chips; click one (or press Enter
+  or Space on it) to open the comment text in a box under the line. Off hides the gray chips in
+  open previews at once. TODO chips always show.
 - `preview.incrementalUpdates` (default on): update changed parts in place; off reloads the page.
 - `preview.scrollPreviewWithEditor` (default on): editor scrolling moves the preview; the toolbar
   anchor button overrides it per panel.

@@ -2055,6 +2055,119 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
     page.evaluate("window.scrollTo(0, 0)")
 
 
+def check_comment_chips(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """Chips open into a box and close again; the reading line holds; the gray chips can be turned off."""
+  if not scenario.get("commentChipChecks"):
+    return
+  page_name = scenario["page"]
+  gray = "div.okf-comment[data-okf-comment-kind='comment'] > .okf-chip"
+  todo_block = "div.okf-comment[data-okf-comment-kind='todo'] > .okf-chip"
+  measure = """selector => {
+    const chip = document.querySelector(selector);
+    if (!chip) return null;
+    const body = chip.parentElement.querySelector('.okf-comment-body');
+    const box = body.getBoundingClientRect();
+    const style = getComputedStyle(body);
+    const shown = style.display !== 'none';
+    const root = document.documentElement;
+    return {
+      expanded: chip.getAttribute('aria-expanded'),
+      shown,
+      title: shown ? getComputedStyle(body, '::before').content : null,
+      top: box.top + window.scrollY,
+      bottom: box.bottom + window.scrollY,
+      chipBottom: chip.getBoundingClientRect().bottom + window.scrollY,
+      background: style.backgroundColor,
+      barWidth: style.borderInlineStartWidth,
+      right: box.right,
+      pane: root.clientWidth,
+      overflowX: root.scrollWidth - root.clientWidth,
+      text: body.textContent,
+    };
+  }"""
+  visible = """selector => { const chip = document.querySelector(selector); return !!chip && chip.getClientRects().length > 0; }"""
+  try:
+    page.evaluate("window.scrollTo(0, 0)")
+    closed = page.evaluate(measure, gray)
+    if not closed or closed["shown"] or closed["expanded"] != "false":
+      failures.append(Failure(page_name, f"a comment must start closed: {closed}"))
+      return
+    page.locator(gray).first.click()
+    page.wait_for_timeout(150)
+    opened = page.evaluate(measure, gray)
+    if opened["expanded"] != "true" or not opened["shown"]:
+      failures.append(Failure(page_name, "a click on the gray chip did not open the comment"))
+      return
+    if opened["title"] != '"Comment"':
+      failures.append(Failure(page_name, f"the open comment must be titled Comment: {opened['title']}"))
+    if opened["top"] < opened["chipBottom"] - 1:
+      failures.append(Failure(page_name, "the open comment must sit under the chip line"))
+    if opened["barWidth"] != "4px" or opened["background"] in ("rgba(0, 0, 0, 0)", "transparent"):
+      failures.append(Failure(page_name, f"the open comment needs an accent bar and a panel: {opened['barWidth']} {opened['background']}"))
+    if "Second line of the block comment." not in opened["text"] or opened["right"] > opened["pane"] or opened["overflowX"] > 0:
+      failures.append(Failure(page_name, "the open comment overflows or lost its text"))
+    page.locator(gray).first.click()
+    page.wait_for_timeout(150)
+    if page.evaluate(measure, gray)["shown"]:
+      failures.append(Failure(page_name, "a second click did not close the comment"))
+    page.locator(gray).first.focus()
+    page.keyboard.press("Enter")
+    page.wait_for_timeout(150)
+    if not page.evaluate(measure, gray)["shown"]:
+      failures.append(Failure(page_name, "Enter on the chip did not open the comment"))
+    page.keyboard.press("Space")
+    page.wait_for_timeout(150)
+    if page.evaluate(measure, gray)["shown"]:
+      failures.append(Failure(page_name, "Space on the chip did not close the comment"))
+
+    # Reading line: the target stays where it is when a chip above it opens.
+    page.evaluate("document.querySelectorAll('#sphinx-myst-preview-content h2')[1].scrollIntoView()")
+    page.wait_for_timeout(500)
+    target = "document.querySelectorAll('#sphinx-myst-preview-content h2')[1].getBoundingClientRect().top"
+    before = page.evaluate(target)
+    page.evaluate(f"document.querySelector(\"{gray}\").click()")
+    page.wait_for_timeout(500)
+    after = page.evaluate(target)
+    if abs(after - before) > 2:
+      failures.append(Failure(page_name, f"opening a chip above moved the reading line by {after - before:.0f}px"))
+    page.evaluate(f"document.querySelector(\"{gray}\").click()")
+    page.wait_for_timeout(500)
+    if abs(page.evaluate(target) - before) > 2:
+      failures.append(Failure(page_name, "closing a chip above moved the reading line"))
+
+    # The setting: gray chips off, TODO chips stay, then on again, with no new render.
+    send = """show => {
+      const root = document.documentElement;
+      window.postMessage({
+        type: 'previewShowComments', showComments: show,
+        documentId: root.getAttribute('data-sphinx-preview-document-id'),
+        documentVersion: Number(root.getAttribute('data-sphinx-preview-document-version')),
+        requestId: Number(root.getAttribute('data-sphinx-preview-request-id')),
+      }, '*');
+    }"""
+    page.evaluate("window.scrollTo(0, 0)")
+    page.evaluate(send, False)
+    page.wait_for_timeout(300)
+    if page.evaluate(visible, gray) or page.evaluate("document.querySelectorAll('.okf-comment[data-okf-comment-kind=comment]').length && [...document.querySelectorAll('.okf-comment[data-okf-comment-kind=comment]')].some(e => e.getClientRects().length > 0)"):
+      failures.append(Failure(page_name, "a gray comment chip is still visible with showComments off"))
+    if not page.evaluate(visible, todo_block) or not page.evaluate("[...document.querySelectorAll('.okf-chip--todo')].every(e => e.getClientRects().length > 0)"):
+      failures.append(Failure(page_name, "TODO chips must stay with showComments off"))
+    page.evaluate(send, True)
+    page.wait_for_timeout(300)
+    if not page.evaluate(visible, gray):
+      failures.append(Failure(page_name, "the gray chip did not come back with showComments on"))
+  finally:
+    page.evaluate("window.scrollTo(0, 0)")
+  # The capture shows both boxes open.
+  for selector in (gray, todo_block):
+    if page.evaluate(measure, selector)["expanded"] != "true":
+      page.locator(selector).first.click()
+  page.wait_for_timeout(200)
+  todo = page.evaluate(measure, todo_block)
+  if todo["title"] != '"TODO"':
+    failures.append(Failure(page_name, f"the open TODO comment must be titled TODO: {todo['title']}"))
+
+
 FIRST_ELEMENT_GAP = 40
 FIRST_ELEMENT_TOLERANCE = 2
 
@@ -3743,7 +3856,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, check_toc_column, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, check_toc_column, check_comment_chips, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:
