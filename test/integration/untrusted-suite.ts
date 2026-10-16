@@ -7,6 +7,7 @@ import {
   EDITOR_VIEW_TYPE,
   getActivePreviewForTests,
 } from "./extensionApi";
+import { runUntrusted as runMystDiagnostics } from "./mystDiagnostics.test";
 
 async function waitForPreview(): Promise<void> {
   const deadline = Date.now() + 10_000;
@@ -40,6 +41,8 @@ export async function run(): Promise<void> {
     assert.ok(editorPreview);
     assert.equal(editorPreview.readOnly, true);
     assert.doesNotMatch(editorPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+    disposeActivePreviewForTests();
+    await runMystDiagnostics();
   } finally {
     disposeActivePreviewForTests();
   }

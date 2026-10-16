@@ -16,6 +16,7 @@ import { run as runIncomingChanges } from "./incomingChanges.test";
 import { run as runPreviewHistory } from "./previewHistory.test";
 import { run as runRealInput } from "./realInput.test";
 import { run as runLifecycle } from "./lifecycle.test";
+import { run as runMystDiagnostics } from "./mystDiagnostics.test";
 import { run as runProjectFeatures } from "./projectFeatures.test";
 import { run as runSerializer } from "./serializer.test";
 import { run as runSourceMapping } from "./sourceMapping.test";
@@ -103,6 +104,7 @@ export async function run(): Promise<void> {
   await runDirtySnapshots();
   await runSourceMapping();
   await runLifecycle();
+  await runMystDiagnostics();
   await runSerializer();
   await runWorkspaceDisposal();
 }

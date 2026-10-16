@@ -25,7 +25,7 @@ import {
   invalidateStemIndex,
   resolveFrontmatterLinkRoots,
 } from "./frontmatter/fileLinks";
-import { invalidateConfCache } from "./myst/confLocator";
+import { invalidateConfCache, locateConfFor } from "./myst/confLocator";
 import { renderPropertiesTable, replacePropertiesTableHtml } from "./frontmatter/propertiesTable";
 import { checkboxToggleEdit } from "./render/checkboxMarkers";
 import { sourceRangeForLines, type SourceMappingOptions } from "./mapping/sourceMapping";
@@ -1034,6 +1034,7 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
     ? planContentPatch(previousHtml, html)
     : undefined;
   preview.stage = result.stage;
+  publishMystDiagnostics(preview, result);
   preview.renderedStages += 1;
   preview.webview = {
     ...webview,
@@ -2814,7 +2815,9 @@ function switchPreviewDocument(preview: ActivePreview, document: vscode.TextDocu
   }
   preview.queue.cancel();
   preview.queue.clearLastGood();
+  const previousDocumentUri = preview.documentUri;
   preview.documentUri = documentKey(document);
+  clearMystDiagnostics(previousDocumentUri);
   preview.document = document;
   preview.state = preview.states.get(preview.documentUri);
   preview.panel.title = previewTitle(preview, document.uri.fsPath);
@@ -2995,6 +2998,73 @@ function notifyTheme(preview: ActivePreview): void {
   }
 }
 
+let mystDiagnostics: vscode.DiagnosticCollection | undefined;
+
+const MYST_DIAGNOSTIC_SOURCE = "Markdown OKF-Schema Studio";
+
+/** Shows a document's MyST extension warnings in the Problems panel; trusted workspaces only. */
+function publishMystDiagnostics(preview: ActivePreview, result: RenderResult): void {
+  const document = preview.document;
+  if (!mystDiagnostics || !document || !vscode.workspace.isTrusted
+    || documentKey(document) !== result.stage.activeDocumentIdentity) {
+    return;
+  }
+  const entries = result.diagnostics
+    .filter((diagnostic) => diagnostic.code === "myst-extension" && diagnostic.line !== undefined)
+    .map((diagnostic) => {
+      const line = Math.min(Math.max(diagnostic.line! - 1, 0), Math.max(document.lineCount - 1, 0));
+      const entry = new vscode.Diagnostic(
+        document.lineAt(line).range,
+        diagnostic.message,
+        vscode.DiagnosticSeverity.Warning,
+      );
+      entry.source = MYST_DIAGNOSTIC_SOURCE;
+      entry.code = "myst-extension";
+      return entry;
+    });
+  if (entries.length > 0 || mystDiagnostics.has(document.uri)) {
+    mystDiagnostics.set(document.uri, entries);
+  }
+}
+
+/** Drops the entries of a document that no live preview shows any more. */
+function clearMystDiagnostics(documentUri: string): void {
+  if (!mystDiagnostics) {
+    return;
+  }
+  for (const preview of activePreviews) {
+    if (!preview.disposed && preview.documentUri === documentUri) {
+      return;
+    }
+  }
+  mystDiagnostics.delete(vscode.Uri.parse(documentUri));
+}
+
+function sameFile(a: string | undefined, b: string): boolean {
+  return a !== undefined && canonicalPath(a) === canonicalPath(b);
+}
+
+/**
+ * A conf.py event refreshes only the previews whose governing conf.py is that file, before or
+ * after the event (a created or deleted file can change which one governs). Other previews and
+ * unrelated conf.py files are left alone; an open block edit defers the refresh.
+ */
+function onConfFileEvent(uri: vscode.Uri): void {
+  if (isIgnoredWatchPath(uri.fsPath)) {
+    return;
+  }
+  const candidates = [...activePreviews].filter((preview) => preview.document && !preview.disposed);
+  const locate = (preview: ActivePreview): string | undefined =>
+    locateConfFor(preview.document!.uri.fsPath, preview.workspaceRoot);
+  const before = new Map(candidates.map((preview) => [preview, locate(preview)]));
+  invalidateConfCache();
+  for (const preview of candidates) {
+    if (sameFile(before.get(preview), uri.fsPath) || sameFile(locate(preview), uri.fsPath)) {
+      deferWhileEditing(preview, "render", () => refreshOpenDocument(preview, true));
+    }
+  }
+}
+
 function disposePreview(preview: ActivePreview, disposePanel: boolean): void {
   if (preview.disposed) {
     if (disposePanel) {
@@ -3026,6 +3096,7 @@ function disposePreview(preview: ActivePreview, disposePanel: boolean): void {
   }
   preview.dependencyWatcher.dispose();
   preview.queue.dispose();
+  clearMystDiagnostics(preview.documentUri);
   if (disposePanel) {
     preview.panel.dispose();
   }
@@ -3079,28 +3150,17 @@ function createPreview(
   const dependencyWatcher = vscode.workspace.createFileSystemWatcher(
     new vscode.RelativePattern(vscode.Uri.file(resourceRoot), "**/*"),
   );
-  const refreshForConf = (filePath: string): void => {
-    if (path.basename(filePath) === "conf.py") {
-      invalidateConfCache();
-      if (preview?.document && !preview.disposed) {
-        deferWhileEditing(preview, "render", () => refreshOpenDocument(preview));
-      }
-    }
-  };
   const dependencyWatcherSubscriptions = [
     dependencyWatcher.onDidChange((uri) => {
-      refreshForConf(uri.fsPath);
       refreshReferencedPath(preview, uri.fsPath);
     }),
     dependencyWatcher.onDidCreate((uri) => {
-      refreshForConf(uri.fsPath);
       refreshReferencedPath(preview, uri.fsPath);
       if (preview?.status === "missing-source") {
         recoverMissingSource(preview);
       }
     }),
     dependencyWatcher.onDidDelete((uri) => {
-      refreshForConf(uri.fsPath);
       const activePath = preview?.document?.uri.fsPath
         ?? (preview ? vscode.Uri.parse(preview.documentUri).fsPath : "");
       if (preview && canonicalPath(uri.fsPath) === canonicalPath(activePath)) {
@@ -3538,7 +3598,16 @@ export function activate(context: vscode.ExtensionContext): void {
   for (const folder of vscode.workspace.workspaceFolders ?? []) {
     watchStemRoot(folder.uri.fsPath);
   }
+  mystDiagnostics = vscode.languages.createDiagnosticCollection("markdownOkfSchemaStudio.myst");
+  // The single conf.py watcher: it also sees the workspace-root fallbacks of decision D29.
+  const confWatcher = vscode.workspace.createFileSystemWatcher("**/conf.py");
   context.subscriptions.push(
+    mystDiagnostics,
+    confWatcher,
+    confWatcher.onDidChange(onConfFileEvent),
+    confWatcher.onDidCreate(onConfFileEvent),
+    confWatcher.onDidDelete(onConfFileEvent),
+    vscode.workspace.onDidCloseTextDocument((document) => clearMystDiagnostics(documentKey(document))),
     vscode.commands.registerCommand(COMMAND_ID, openPreview),
     vscode.window.registerCustomEditorProvider(EDITOR_VIEW_TYPE, {
       resolveCustomTextEditor: resolvePreviewEditor,
@@ -3641,6 +3710,8 @@ export function deactivate(): void {
   for (const preview of [...activePreviews]) {
     disposePreview(preview, false);
   }
+  mystDiagnostics?.dispose();
+  mystDiagnostics = undefined;
   disposeStemRootWatchers();
   extensionRootUri = undefined;
   previewThemeModeStorage = undefined;

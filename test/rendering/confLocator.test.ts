@@ -135,3 +135,18 @@ test("D29: a document outside the workspace folder does not get the fallback", (
   context.after(() => fs.rmSync(outside, { recursive: true, force: true }));
   assert.equal(createConfLocator().enabledMystExtensions(path.join(outside, "x.md"), root), undefined);
 });
+
+test("locate names the governing conf.py, ancestor first, then the D29 fallback", (context) => {
+  const { root, clean } = workspace();
+  context.after(clean);
+  const chapters = path.join(root, "book", "chapters");
+  fs.mkdirSync(chapters, { recursive: true });
+  fs.mkdirSync(path.join(root, "sphinx"), { recursive: true });
+  fs.writeFileSync(path.join(root, "sphinx", "conf.py"), CONF);
+  const locator = createConfLocator();
+  const document = path.join(chapters, "x.md");
+  assert.equal(locator.locate(document, root), path.join(root, "sphinx", "conf.py"));
+  fs.writeFileSync(path.join(root, "book", "conf.py"), CONF);
+  locator.invalidate();
+  assert.equal(locator.locate(document, root), path.join(root, "book", "conf.py"));
+});
