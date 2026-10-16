@@ -33,6 +33,8 @@ Markdown flavours and extensions:
 - **Inline editing:** click a rendered block to edit its source Markdown. Save with Done
   or Cmd/Ctrl+Enter; Cancel or Escape restores the original block. Tables and frontmatter support
   keyboard navigation, row creation, and focused field editing.
+  In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
+  toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)
   annotations can show target metadata and source line numbers for implementation
   and test evidence.

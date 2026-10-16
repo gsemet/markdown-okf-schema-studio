@@ -11,6 +11,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Comment thread (planned)**: a conversation attached to a block or range of a document.
 - **Content patch**: in-place replacement of the content container `#sphinx-myst-preview-content` instead of a full page reload (`src/preview/contentPatch.ts`).
 - **Copy button**: floating button over a hovered code block that copies its raw code (`data-sphinx-preview-code-copy`, `src/webview/codeCopy.ts`).
+- **Edit action**: one registered editing operation (`src/webview/editActions.ts`) used by shortcuts and the palette.
 - **Edit lock**: host-side record that an inline edit is open, deferring work that would replace the page (`src/state/editLock.ts`).
 - **Edit mode**: toolbar toggle that makes preview blocks editable (`data-sphinx-preview-edit-toggle`).
 - **Edition palette (planned)**: palette of the actions available while editing.

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- In the block editor, Cmd/Ctrl+B toggles **bold**, Cmd/Ctrl+I toggles *italic* and Ctrl+/ (Cmd+/)
+  toggles a `<!-- TODO: … -->` comment around the current line or the selected lines. Each is one
+  undo step.
 - Tables and figures narrower than the text column are now centred in every width mode. In Auto,
   a wide table or figure takes the width it needs, up to the space left of the table of contents,
   and is centred on that space. Code blocks keep their behaviour.

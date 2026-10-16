@@ -5,6 +5,7 @@ import {
 } from "../mapping/sourceMapping";
 import { createAnchorPolicy } from "./anchorPolicy";
 import { createMarkdownTableTools } from "./markdownTable";
+import { createEditActions } from "./editActions";
 import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
 import { installFirstClearance } from "./firstClearance";
@@ -69,6 +70,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
   const tableTools = (${createMarkdownTableTools.toString()})();
   const textEditing = (${createTextEditingTools.toString()})();
+  const editActions = (${createEditActions.toString()})();
   const anchorPolicy = (${createAnchorPolicy.toString()})();
   const settings = {
     scrollPreviewWithEditor: context.scrollPreviewWithEditor !== false,
@@ -1510,6 +1512,24 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     return true;
   }
 
+  // Cmd/Ctrl+B, +I and +/ run a registered edit action on the block text box as one native edit.
+  // The key is consumed even when the action has nothing to change, so the host editor never
+  // sees it (Cmd+B would toggle the side bar).
+  function paletteShortcut(event, control, onFallbackInput) {
+    const action = editActions.shortcutFor(event, isApplePlatform());
+    if (!action || !action.scopes.includes("block")) return false;
+    event.preventDefault?.();
+    event.stopPropagation?.();
+    const edit = action.apply({
+      value: String(control.value ?? ""),
+      selectionStart: Number(control.selectionStart),
+      selectionEnd: Number(control.selectionEnd),
+      scope: "block",
+    });
+    if (edit) applyTextEdit(control, edit, onFallbackInput);
+    return true;
+  }
+
   function navigateBlockEdit(event, control) {
     const edit = activeBlockEdit;
     if (!edit || edit.finishing) return false;
@@ -2727,16 +2747,19 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     focusTextControlAtLastContent(input, edit.initialCaretPosition);
   }
 
-  function blockEditHint(edit) {
-    let applePlatform = false;
+  function isApplePlatform() {
     try {
       const platform = typeof navigator === "undefined"
         ? ""
         : String((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "");
-      applePlatform = /mac|iphone|ipad/iu.test(platform);
+      return /mac|iphone|ipad/iu.test(platform);
     } catch {
-      applePlatform = false;
+      return false;
     }
+  }
+
+  function blockEditHint(edit) {
+    const applePlatform = isApplePlatform();
     const lines = edit.insertAfterLine !== undefined
       ? "New block"
       : edit.endLine > edit.line
@@ -2859,6 +2882,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     resizeTextarea();
     textarea.addEventListener("keydown", (event) => {
       if (keepUndoInControl(event)) return;
+      if (paletteShortcut(event, textarea, () => {
+        resizeTextarea();
+        autosaveBlockEdit();
+      })) return;
       if (wrapSelectionInControl(event, textarea, () => {
         resizeTextarea();
         autosaveBlockEdit();
