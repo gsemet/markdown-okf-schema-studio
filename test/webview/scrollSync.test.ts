@@ -6699,6 +6699,69 @@ test("a table cell wraps its selection with the marker too", () => {
   assert.match(String(harness.messages.at(-1)?.editedText ?? ""), /_foo_/u);
 });
 
+test("Cmd/Ctrl+B, Cmd/Ctrl+I and Ctrl+/ edit the block text box in one native step without saving", () => {
+  const cases: [Record<string, unknown>, string, [number, number], string][] = [
+    [{ ctrlKey: true, code: "KeyB", key: "b" }, "say foo now", [4, 7], "say **foo** now"],
+    [{ ctrlKey: true, code: "KeyI", key: "i" }, "say foo now", [4, 7], "say *foo* now"],
+    [{ ctrlKey: true, code: "Slash", key: "/" }, "say foo", [0, 0], "<!-- TODO: say foo -->"],
+    [{ metaKey: true, code: "Slash", key: "/" }, "say foo", [0, 0], "<!-- TODO: say foo -->"],
+  ];
+  for (const [init, value, [start, end], expected] of cases) {
+    const harness = createRuntimeHarness();
+    const textarea = openBlockEditorWithSource(harness);
+    const calls = stubExecCommand(harness, textarea);
+    textarea.value = value;
+    textarea.setSelectionRange(start, end);
+    const count = harness.messages.length;
+    let stopped = false;
+    let prevented = false;
+    textarea.dispatch("keydown", {
+      ...init,
+      preventDefault: () => { prevented = true; },
+      stopPropagation: () => { stopped = true; },
+    });
+    assert.equal(prevented, true, JSON.stringify(init));
+    assert.equal(stopped, true, "the shortcut stays out of the host editor");
+    assert.equal(textarea.value, expected);
+    assert.equal(calls.length, 1, "one undoable native edit");
+    assert.equal(calls[0].command, "insertText");
+    assert.equal(harness.messages.length, count, "no immediate save or commit");
+    harness.flushTimers();
+    const save = harness.messages.at(-1);
+    assert.equal(save?.type, "previewEditSave");
+    assert.equal(String(save?.editedText).startsWith(expected), true, "autosave carries the edit");
+  }
+});
+
+test("editing shortcuts are ignored while composing, with AltGr or with Shift", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "foo";
+  textarea.setSelectionRange(0, 3);
+  for (const init of [
+    { metaKey: true, code: "KeyB", key: "b", isComposing: true },
+    { ctrlKey: true, altKey: true, code: "Slash", key: "/" },
+    { ctrlKey: true, shiftKey: true, code: "KeyI", key: "i" },
+    { metaKey: true, code: "KeyB", key: "b" },
+  ]) {
+    assert.equal(typeKey(textarea, String(init.key), init), false, JSON.stringify(init));
+  }
+  assert.equal(textarea.value, "foo");
+  assert.equal(calls.length, 0);
+});
+
+test("the editing shortcuts do not touch the table cell editor", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  const calls = stubExecCommand(harness, input());
+  input().value = "a foo b";
+  input().setSelectionRange(2, 5);
+  assert.equal(typeKey(input(), "b", { metaKey: true, code: "KeyB" }), false);
+  assert.equal(input().value, "a foo b");
+  assert.equal(calls.length, 0);
+});
+
 test("Enter continuation and Tab indentation use the undo-preserving execCommand path", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);

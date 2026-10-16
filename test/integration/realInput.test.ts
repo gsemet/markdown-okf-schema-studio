@@ -744,6 +744,55 @@ async function scenarioUndoStaysInEditor(
   });
 }
 
+/** RI-T20: Cmd/Ctrl+B and Ctrl+/ edit the text box, and one Cmd/Ctrl+Z undoes each of them. */
+async function scenarioShortcuts(page: Page, evidence: Evidence): Promise<void> {
+  await withSmokeDocument("realinput-t20", async (source) => {
+    await openSidePreview(source);
+    await waitForRender(source);
+    await setEditMode(page, true);
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    const readEditor = async (): Promise<{ tag: string | undefined; value: string | undefined }> => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return { tag: undefined, value: undefined };
+      return current.evaluate(() => {
+        const element = document.activeElement;
+        return {
+          tag: element?.tagName,
+          value: element instanceof HTMLTextAreaElement ? element.value : undefined,
+        };
+      });
+    };
+    const expectValue = async (description: string, expected: string): Promise<void> => {
+      try {
+        await waitFor(description, async () => (await readEditor()).value === expected);
+      } catch (error) {
+        throw new Error(String(error) + " Editor state: " + JSON.stringify(await readEditor()));
+      }
+    };
+    const original = "Second paragraph.";
+    await press(page, "End");
+    await press(page, "ArrowLeft");
+    for (let index = 0; index < "paragraph".length; index += 1) await press(page, "Shift+ArrowLeft");
+
+    await press(page, MOD + "+b");
+    await expectValue("Cmd/Ctrl+B to bold the selected word", "Second **paragraph**.");
+    assert.equal((await readEditor()).tag, "TEXTAREA", "the shortcut keeps the focus in the editor");
+    await press(page, MOD + "+z");
+    await expectValue("one undo to restore the word", original);
+
+    await press(page, "Control+/");
+    await expectValue("Ctrl+/ to wrap the line in a TODO comment", "<!-- TODO: " + original + " -->");
+    await press(page, MOD + "+z");
+    await expectValue("one undo to restore the line", original);
+    await captureAfter(evidence, page, "t20-shortcuts",
+      "Edit mode on; Cmd/Ctrl+B bolded the selected word and Ctrl+/ wrapped the line in a TODO "
+      + "comment, each undone by a single Cmd/Ctrl+Z with the focus staying in the text box.");
+    await press(page, "Escape");
+    await waitForNoBlockEditor(page, "the block editor to close after Escape");
+  });
+}
+
 /** RI-T11: Enter in a nested list continues the list at the same indentation. */
 async function scenarioEnterContinuesList(page: Page, evidence: Evidence): Promise<void> {
   const LIST_DOCUMENT = [
@@ -3212,6 +3261,7 @@ export async function run(): Promise<void> {
     await scenarioUndoStaysInEditor(page, evidence, "open-with");
     await scenarioEnterContinuesList(page, evidence);
     await scenarioTabIndents(page, evidence);
+    await scenarioShortcuts(page, evidence);
     await scenarioPreviewKeepsMarkdown(page, evidence);
     await scenarioCaretAtClick(page, evidence);
     await scenarioEditAffordances(page, evidence);
