@@ -132,7 +132,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     firstClearance.update();
     widthMode.update();
     keepReadingLine();
-  });
+  }, () => readingOffsetValue);
   const themeModes = ["current", "dark", "white", "cream"];
   const themeLabels = { current: "Current theme", dark: "Dark theme", white: "White theme", cream: "Cream theme" };
   const themeButton = document.querySelector?.("[data-sphinx-preview-theme-toggle]");
@@ -214,6 +214,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       descriptionsCollapsed,
       viewZoom: viewControls.zoom(),
       viewWidthMode: widthMode.mode(),
+      viewToc: tocColumn.open(),
+      tocCollapsed: tocColumn.collapsed(),
     };
     vscode.setState?.(state);
     return state;
@@ -718,6 +720,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   function postScroll() {
     frame = undefined;
     updateStickyHeadings();
+    tocColumn.track();
     const scrollTop = window.scrollY;
     if (expectedScroll && Date.now() <= expectedScroll.until
       && Math.abs(scrollTop - expectedScroll.top) <= 2) return;
@@ -782,6 +785,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       measure();
       applyAnchor();
       updateStickyHeadings();
+      tocColumn.remeasure();
     });
   }
 

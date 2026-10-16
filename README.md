@@ -141,7 +141,8 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
   figures, images and code blocks wider than the column break out to the pane width) and Full width;
   with the setting at `0` all three look the same. The choice is remembered per workspace.
   The TOC button next to it shows or hides a column of h1-h4 headings on the right (off by default,
-  remembered per workspace, hidden on panes narrower than 760 px); click an entry to scroll there.
+  remembered per workspace, hidden on panes narrower than 760 px); click an entry to scroll there,
+  fold sections with the twisty; the current section is highlighted.
 - `preview.stickyHeadingDepth` (default 3): heading levels pinned at the top while scrolling (1-6).
 - `preview.incrementalUpdates` (default on): update changed parts in place; off reloads the page.
 - `preview.scrollPreviewWithEditor` (default on): editor scrolling moves the preview; the toolbar

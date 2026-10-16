@@ -4,7 +4,8 @@
 
 - A TOC button on the second toolbar row shows a column on the right, below the toolbar, with the
   h1 to h4 headings of the document; clicking an entry scrolls to the heading. It is off by default,
-  remembered per workspace and hidden on panes narrower than 760 px.
+  remembered per workspace and hidden on panes narrower than 760 px. Entries with sub-entries fold
+  with a twisty, and the entry of the section you are reading is highlighted and kept in view.
 - Back and Next buttons at the start of the second toolbar row return to the place before a followed
   link and forward again, across documents and in-page anchors; external links are not recorded,
   and each preview panel keeps its own history.

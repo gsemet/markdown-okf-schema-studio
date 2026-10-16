@@ -7070,3 +7070,15 @@ test("T11: a previewHistoryState of another document version is ignored", () => 
   assert.equal(harness.backButton.disabled, true);
   assert.equal(harness.nextButton.disabled, true);
 });
+
+test("T13: a state snapshot keeps the TOC visibility and the folded sections", () => {
+  const harness = createRuntimeHarness({
+    viewportWidth: 900,
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: true, incomingChanges: true },
+  });
+  harness.dispatchDocument("click", { target: harness.descriptionButton });
+  const state = harness.getWebviewState();
+  assert.equal(state.viewToc, true);
+  assert.equal((state.tocCollapsed as string[]).length, 0);
+  assert.equal(state.viewZoom, 100);
+});

@@ -23,6 +23,7 @@ class FakeElement {
   }
   setAttribute(name: string, value: string) { this.attrs.set(name, value); }
   getAttribute(name: string) { return this.attrs.get(name) ?? null; }
+  removeAttribute(name: string) { this.attrs.delete(name); }
   hasAttribute(name: string) { return this.attrs.has(name); }
   addEventListener(type: string, handler: Handler) {
     this.listeners.set(type, [...(this.listeners.get(type) ?? []), handler]);
@@ -93,6 +94,7 @@ function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?:
   };
   const windowListeners = new Map<string, Handler[]>();
   const window = {
+    scrollY: 0,
     addEventListener: (type: string, handler: Handler) => {
       windowListeners.set(type, [...(windowListeners.get(type) ?? []), handler]);
     },
@@ -111,11 +113,13 @@ function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?:
     { documentId: "doc", documentVersion: 1, requestId: 2, initialViewPreferences: { toc: options.toc } },
     (target) => scrolled.push(target as never),
     () => { changes += 1; },
+    () => 40,
   );
   const flush = () => { while (frames.length) frames.shift()!(); };
   const nav = () => body.children.find((child) => child.attrs.has("data-sphinx-preview-toc"))!;
-  const entries = () => nav().all("button");
-  return { toc, content, body, root, button, posted, scrolled, flush, nav, entries, getState: () => state, changes: () => changes, frames };
+  const entries = () => nav().all("button").filter((entry) => !entry.attrs.has("data-sphinx-preview-toc-twisty"));
+  const twisties = () => nav().all("button").filter((entry) => entry.attrs.has("data-sphinx-preview-toc-twisty"));
+  return { toc, window, twisties, content, body, root, button, posted, scrolled, flush, nav, entries, getState: () => state, changes: () => changes, frames };
 }
 
 test("the TOC is off by default and the page is marked closed", () => {
@@ -229,4 +233,163 @@ test("the toggle opens the TOC, posts the preference, remembers it and builds th
 test("the column starts 8 px below the toolbar", () => {
   const { nav } = setup({ toc: true });
   assert.equal(nav().styles.get("--sphinx-preview-toc-top"), "92px");
+});
+
+function outline(content: FakeElement) {
+  const tops: Array<[string, string, number]> = [
+    ["h1", "Intro", 0], ["h2", "Setup", 300], ["h3", "Install", 500], ["h2", "Usage", 900], ["h1", "End", 1400],
+  ];
+  return tops.map(([tag, text, top]) => {
+    const element = content.appendChild(heading(tag, text));
+    element.rect = { ...element.rect, top, height: 30 };
+    return element;
+  });
+}
+const hiddenOf = (entry: FakeElement) => entry.parent!.hasAttribute("hidden");
+
+test("only parent entries get a twisty with aria-expanded", () => {
+  const { content, toc, flush, twisties } = setup({ toc: true });
+  outline(content);
+  toc.refresh();
+  flush();
+  assert.equal(twisties().length, 2);
+  assert.deepEqual(twisties().map((twisty) => twisty.getAttribute("aria-expanded")), ["true", "true"]);
+});
+
+test("collapsing a parent hides its descendants, and a rebuild keeps it collapsed", () => {
+  const { content, toc, flush, twisties, entries, getState } = setup({ toc: true });
+  outline(content);
+  toc.refresh();
+  flush();
+  twisties()[0].fire("click");
+  assert.equal(twisties()[0].getAttribute("aria-expanded"), "false");
+  assert.deepEqual(entries().map(hiddenOf), [false, true, true, true, false]);
+  assert.equal((getState() as { tocCollapsed?: string[] }).tocCollapsed?.length, 1);
+  content.children = [];
+  outline(content);
+  toc.refresh();
+  flush();
+  assert.deepEqual(entries().map(hiddenOf), [false, true, true, true, false]);
+  assert.equal(twisties()[0].getAttribute("aria-expanded"), "false");
+  twisties()[0].fire("click");
+  assert.deepEqual(entries().map(hiddenOf), [false, false, false, false, false]);
+});
+
+test("collapsing a middle parent hides only its own subtree", () => {
+  const { content, toc, flush, twisties, entries } = setup({ toc: true });
+  outline(content);
+  toc.refresh();
+  flush();
+  twisties()[1].fire("click");
+  assert.deepEqual(entries().map(hiddenOf), [false, false, true, false, false]);
+});
+
+test("the current entry follows the reading line and is marked aria-current", () => {
+  const { content, toc, window, flush, entries } = setup({ toc: true });
+  outline(content);
+  toc.refresh();
+  flush();
+  const current = () => entries().map((entry) => entry.getAttribute("aria-current"));
+  assert.deepEqual(current(), ["location", null, null, null, null]);
+  window.scrollY = 700; // reading line at 740: after Install (500), before Usage (900)
+  toc.track();
+  assert.deepEqual(current(), [null, null, "location", null, null]);
+  assert.equal(entries()[2].parent!.hasAttribute("data-sphinx-preview-toc-current"), true);
+  assert.equal(entries()[0].parent!.hasAttribute("data-sphinx-preview-toc-current"), false);
+  window.scrollY = 1500;
+  toc.track();
+  assert.deepEqual(current(), [null, null, null, null, "location"]);
+});
+
+test("a collapsed parent carries the highlight of a hidden current section", () => {
+  const { content, toc, window, flush, entries, twisties } = setup({ toc: true });
+  outline(content);
+  toc.refresh();
+  flush();
+  window.scrollY = 700;
+  toc.track();
+  twisties()[0].fire("click");
+  assert.deepEqual(entries().map((entry) => entry.getAttribute("aria-current")), ["location", null, null, null, null]);
+  twisties()[0].fire("click");
+  assert.equal(entries()[2].getAttribute("aria-current"), "location");
+});
+
+test("the scroll tracking reads no layout: tops are cached until remeasure", () => {
+  const { content, toc, window, flush, entries } = setup({ toc: true });
+  const headings = outline(content);
+  toc.refresh();
+  flush();
+  let reads = 0;
+  for (const element of headings) {
+    const original = element.getBoundingClientRect.bind(element);
+    element.getBoundingClientRect = () => { reads += 1; return original(); };
+  }
+  window.scrollY = 700;
+  toc.track();
+  toc.track();
+  assert.equal(reads, 0);
+  // Zoom or width mode moved Usage up to 600; rects are viewport-relative at scrollY 700.
+  const moved = [0, 300, 500, 600, 1400];
+  headings.forEach((element, index) => { element.rect = { ...element.rect, top: moved[index] - 700 }; });
+  toc.track();
+  assert.equal(entries()[2].getAttribute("aria-current"), "location");
+  toc.remeasure();
+  assert.equal(reads, headings.length);
+  assert.equal(entries()[3].getAttribute("aria-current"), "location");
+});
+
+test("the TOC scrolls itself, not the page, to keep the current entry visible", () => {
+  const { content, toc, window, flush, nav, entries } = setup({ toc: true });
+  outline(content);
+  toc.refresh();
+  flush();
+  nav().rect = { top: 0, left: 0, right: 240, bottom: 200, width: 240, height: 200 };
+  (nav() as any).scrollTop = 0;
+  entries()[4].parent!.rect = { top: 260, left: 0, right: 240, bottom: 290, width: 240, height: 30 };
+  window.scrollY = 1500;
+  toc.track();
+  assert.equal((nav() as any).scrollTop, 90);
+});
+
+test("a click right after a content patch scrolls to the live heading", () => {
+  const { content, toc, flush, entries, scrolled } = setup({ toc: true });
+  outline(content);
+  toc.refresh();
+  flush();
+  const old = content.children.slice();
+  content.children = [];
+  const fresh = outline(content);
+  toc.refresh(); // the rebuild waits for the next frame
+  entries()[1].fire("click");
+  assert.equal(scrolled[0], fresh[1]);
+  assert.notEqual(scrolled[0], old[1]);
+});
+
+test("a repeated heading text is told apart by its occurrence", () => {
+  const { content, toc, flush, entries, scrolled } = setup({ toc: true });
+  const first = content.appendChild(heading("h2", "Notes"));
+  const second = content.appendChild(heading("h2", "Notes"));
+  toc.refresh();
+  flush();
+  content.children = [];
+  const freshFirst = content.appendChild(heading("h2", "Notes"));
+  const freshSecond = content.appendChild(heading("h2", "Notes"));
+  entries()[1].fire("click");
+  assert.equal(scrolled[0], freshSecond);
+  assert.notEqual(scrolled[0], second);
+  assert.notEqual(freshFirst, first);
+});
+
+test("a heading revealed at the reading line becomes current despite a fractional top", () => {
+  const { content, toc, window, flush, entries } = setup({ toc: true });
+  const headings = outline(content);
+  toc.refresh();
+  flush();
+  headings.forEach((element, index) => {
+    element.rect = { ...element.rect, top: [0, 300.4, 500.3, 900.4, 1400][index] };
+  });
+  toc.remeasure();
+  window.scrollY = 860; // reading line at 900; Usage sits at 900.4
+  toc.track();
+  assert.equal(entries()[3].getAttribute("aria-current"), "location");
 });
