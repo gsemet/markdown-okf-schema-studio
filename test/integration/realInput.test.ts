@@ -2584,7 +2584,9 @@ async function scenarioFocusChangeKeepsPreviewStill(page: Page, evidence: Eviden
     // Case A: click into the source editor, then type.
     const restoreCallsBefore = getActivePreviewForTests()?.restorePreviewStateCalls;
     assert.ok(restoreCallsBefore !== undefined, "the restore-call counter is exposed");
-    const editorBox = await page.locator(".monaco-editor .view-lines").first().boundingBox();
+    // The visible editor viewport, not `.view-lines`: that element is as tall as the whole document
+    // and moves with the editor's scroll, so a fraction of it can land on the title bar or a tab.
+    const editorBox = await page.locator(".monaco-editor:visible").first().boundingBox();
     assert.ok(editorBox, "the source editor has a bounding box");
     await page.mouse.click(editorBox.x + editorBox.width / 3, editorBox.y + editorBox.height * 0.3);
     await new Promise((resolve) => setTimeout(resolve, 600));

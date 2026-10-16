@@ -14,6 +14,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Edit lock**: host-side record that an inline edit is open, deferring work that would replace the page (`src/state/editLock.ts`).
 - **Edit mode**: toolbar toggle that makes preview blocks editable (`data-sphinx-preview-edit-toggle`).
 - **Edition palette (planned)**: palette of the actions available while editing.
+- **First-element gap**: fixed 40 px space above the first rendered element; `--sphinx-preview-first-clearance` (`src/webview/firstClearance.ts`) adds room only under the toolbar.
 - **Included block**: rendered block that comes from an `{include}`; maps to the directive lines and carries `data-sphinx-preview-included`.
 - **Incoming-change mark (planned)**: visual mark on content changed by another source while the preview is open.
 - **Insert point**: "+" bar after each top-level block that opens an insertion editor (`.sphinx-preview-insert-point`).

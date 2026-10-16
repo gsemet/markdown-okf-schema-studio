@@ -549,11 +549,6 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   margin: 0 0 1em;
 }
 
-/* Nothing sits above the first block: keep the button off the preview's top edge. */
-.sphinx-preview-insert-point--start.sphinx-preview-insert-point--first {
-  margin-top: 24px;
-}
-
 .sphinx-preview-insert-point--start button {
   position: static;
   display: inline-flex;
@@ -574,15 +569,6 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   padding: 6px 8px;
   background: var(--vscode-editor-background, Canvas);
   color: inherit;
-}
-
-/*
- * The editor of the document's first block keeps its frame and focus ring off the top edge and
- * below the floating toolbar (fixed, 12px from the top and about 70px tall with its two rows), which a wide frame would
- * otherwise sit under.
- */
-.sphinx-preview-block-editor--first {
-  margin-top: 96px;
 }
 
 .sphinx-preview-table-cell-editor textarea,
@@ -1268,6 +1254,8 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 }
 
 #sphinx-myst-preview-content {
+  /* Contains the first element's top margin, so the column itself never moves. */
+  display: flow-root;
   box-sizing: border-box;
   width: 100%;
   max-width: var(--sphinx-preview-column-width, ${DEFAULT_PREVIEW_CONTENT_WIDTH}px);
@@ -1297,8 +1285,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 /* Match the preview-wide font reset's ID specificity so it cannot override
   the OKF table sizing rules. */
 #sphinx-myst-preview-content [data-okf-properties] {
-  /* The top margin keeps the Description toggle below the second toolbar row. */
-  margin: 32px 0 1.5em;
+  margin: 0 0 1.5em;
   padding: 0;
   border: none;
   background: none;
@@ -1335,9 +1322,30 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 #sphinx-myst-preview-content h3 { font-size: 1.25em; }
 #sphinx-myst-preview-content h4 { font-size: 1em; }
 
+/*
+ * The first-element gap: whatever opens the page starts 40px below the top. This is a margin on
+ * the first child, not padding on the column, so the column's own top never moves. It follows
+ * every rule above that sets a top margin (headings, the properties table, blocks).
+ */
+#sphinx-myst-preview-content > :first-child {
+  margin-top: 40px;
+}
+
 #sphinx-myst-preview-content p,
 #sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor {
   margin: 0 0 1em;
+}
+
+/*
+ * An open first-block editor, the Start writing button and a leading properties table (it has
+ * clickable controls) add the runtime's clearance, measured
+ * only where the floating toolbar and the column share horizontal space (0 otherwise).
+ */
+#sphinx-myst-preview-content > [data-okf-properties]:first-child,
+#sphinx-myst-preview-content .sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content .sphinx-preview-insert-point--first {
+  margin-top: calc(40px + var(--sphinx-preview-first-clearance, 0px));
 }
 
 #sphinx-myst-preview-content :where(ul, ol) {
