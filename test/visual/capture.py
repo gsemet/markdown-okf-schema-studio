@@ -1892,6 +1892,132 @@ def check_width_modes(page: Page, scenario: dict, failures: list[Failure]) -> No
       page.wait_for_timeout(150)
 
 
+def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The TOC button opens a right column below the toolbar; wide panes only."""
+  if not scenario.get("tocChecks"):
+    return
+  page_name = scenario["page"]
+  toggle = page.locator("[data-sphinx-preview-toc-toggle]")
+  if toggle.count() != 1:
+    failures.append(Failure(page_name, "the TOC button is missing"))
+    return
+  measure = """() => {
+    const root = document.documentElement;
+    const rect = element => { const r = element.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width }; };
+    const nav = document.querySelector('nav[data-sphinx-preview-toc]');
+    const content = document.getElementById('sphinx-myst-preview-content');
+    const style = getComputedStyle(content);
+    const box = content.getBoundingClientRect();
+    const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+    const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+    return {
+      state: root.getAttribute('data-sphinx-preview-toc'),
+      shown: !!nav && getComputedStyle(nav).display !== 'none',
+      nav: nav ? rect(nav) : null,
+      toolbar: rect(toolbar),
+      contentRight: box.right,
+      pane: root.clientWidth,
+      columnRight: box.right - parseFloat(style.paddingRight),
+      tables: [...content.querySelectorAll(':scope > table')].map(rect),
+      entries: [...document.querySelectorAll('nav[data-sphinx-preview-toc] li[data-level]')].map(item => ({ level: item.getAttribute('data-level'), text: item.textContent })),
+      bandRight: band && !band.hidden ? band.getBoundingClientRect().right : null,
+      overflowX: root.scrollWidth - root.clientWidth,
+      scrollY: window.scrollY,
+    };
+  }"""
+  wide_pane = scenario["width"] >= 760
+  try:
+    page.evaluate("window.scrollTo(0, 0)")
+    closed = page.evaluate(measure)
+    if closed["state"] != "closed" or closed["shown"]:
+      failures.append(Failure(page_name, f"the TOC must start closed: {closed['state']}"))
+    toggle.click()
+    page.wait_for_timeout(300)
+    opened = page.evaluate(measure)
+    if opened["state"] != "open":
+      failures.append(Failure(page_name, "the TOC button did not open the column"))
+      return
+    if not wide_pane:
+      if opened["shown"]:
+        failures.append(Failure(page_name, "the TOC column must be hidden on a pane under 760px"))
+      if abs(opened["contentRight"] - closed["contentRight"]) > 1:
+        failures.append(Failure(page_name, "a hidden TOC column must not narrow the content"))
+      if toggle.get_attribute("aria-pressed") != "true":
+        failures.append(Failure(page_name, "the TOC button must still reflect the preference"))
+      return
+    if not opened["shown"] or not opened["nav"]:
+      failures.append(Failure(page_name, "the TOC column is not shown on a wide pane"))
+      return
+    nav = opened["nav"]
+    if nav["top"] < opened["toolbar"]["bottom"] + 7:
+      failures.append(Failure(page_name, f"the TOC column starts at {nav['top']:.0f}px, under the toolbar bottom {opened['toolbar']['bottom']:.0f}px"))
+    if nav["right"] > opened["pane"] + 1 or nav["left"] < opened["columnRight"]:
+      failures.append(Failure(page_name, "the TOC column overlaps the content column"))
+    for table in opened["tables"]:
+      if table["right"] > nav["left"] + 1:
+        failures.append(Failure(page_name, "the TOC column overlaps a table"))
+    if opened["bandRight"] is not None and opened["bandRight"] > nav["left"] + 1:
+      failures.append(Failure(page_name, "the sticky heading band runs under the TOC column"))
+    if opened["overflowX"] > 1:
+      failures.append(Failure(page_name, f"horizontal page scroll of {opened['overflowX']}px with the TOC open"))
+    levels = sorted({entry["level"] for entry in opened["entries"]})
+    if levels != ["1", "2", "3", "4"]:
+      failures.append(Failure(page_name, f"the TOC lists levels {levels}, expected 1 to 4"))
+    if any("Too deep" in entry["text"] for entry in opened["entries"]):
+      failures.append(Failure(page_name, "the TOC lists an h5"))
+    width_button = page.locator("[data-sphinx-preview-width-toggle]")
+    for expected in ("auto", "full"):
+      for _ in range(3):
+        if page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-width')") == expected:
+          break
+        width_button.click()
+        page.wait_for_timeout(250)
+      state = page.evaluate(measure)
+      nav = state["nav"]
+      if state["overflowX"] > 1:
+        failures.append(Failure(page_name, f"{expected}: horizontal page scroll of {state['overflowX']}px with the TOC open"))
+      if state["columnRight"] > nav["left"] + 1:
+        failures.append(Failure(page_name, f"{expected}: the content column runs under the TOC column"))
+      for table in state["tables"]:
+        if table["right"] > nav["left"] + 1:
+          failures.append(Failure(page_name, f"{expected}: a table runs under the TOC column"))
+    for _ in range(3):
+      if page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-width')") == "margin":
+        break
+      width_button.click()
+      page.wait_for_timeout(150)
+    zoom_in = page.locator("[data-sphinx-preview-zoom-in]")
+    for _ in range(10):
+      if zoom_in.is_enabled():
+        zoom_in.click()
+    page.wait_for_timeout(300)
+    zoomed = page.evaluate(measure)
+    if zoomed["nav"] and (zoomed["columnRight"] > zoomed["nav"]["left"] + 1 or zoomed["overflowX"] > 1):
+      failures.append(Failure(page_name, "zoom 200%: the content overlaps the TOC column or scrolls horizontally"))
+    zoom_out = page.locator("[data-sphinx-preview-zoom-out]")
+    for _ in range(10):
+      if zoom_out.is_enabled():
+        zoom_out.click()
+    page.wait_for_timeout(200)
+    for _ in range(3):
+      if page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-zoom')") == "100":
+        break
+      zoom_in.click()
+    page.wait_for_timeout(200)
+    page.evaluate("window.scrollTo(0, 0)")
+    before = page.evaluate("window.scrollY")
+    page.locator("nav[data-sphinx-preview-toc] li[data-level] button").nth(8).click()
+    page.wait_for_timeout(400)
+    after = page.evaluate(measure)
+    if after["scrollY"] <= before + 50:
+      failures.append(Failure(page_name, "clicking a TOC entry did not scroll to its heading"))
+  finally:
+    if toggle.get_attribute("aria-pressed") == "true":
+      toggle.click()
+      page.wait_for_timeout(150)
+    page.evaluate("window.scrollTo(0, 0)")
+
+
 FIRST_ELEMENT_GAP = 40
 FIRST_ELEMENT_TOLERANCE = 2
 
@@ -3580,7 +3706,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, check_toc_column, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

@@ -5562,13 +5562,16 @@ function traceStartup(
     const harness = createRuntimeHarness(configuration, undefined, undefined, savedAnchorMode);
     const toolbar = [harness.themeButton, harness.refreshButton, harness.anchorButton, harness.editModeButton];
     const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion",
-      "data-sphinx-preview-zoom", "data-sphinx-preview-width"];
+      "data-sphinx-preview-zoom", "data-sphinx-preview-width", "data-sphinx-preview-toc"];
     // The zoom buttons and the zoom of the root do not depend on the content (T08).
     const zoomButtons = [harness.zoomOutButton, harness.zoomInButton, harness.widthButton];
     return {
       effects: entries
         .filter((entry) => !(entry.method === "addEventListener" && toolbar.includes(entry.element)))
         .filter((entry) => !zoomButtons.includes(entry.element))
+        // The TOC column is runtime UI that does not depend on the content (T12).
+        .filter((entry) => entry.element.tagName !== "NAV"
+          && !(entry.method === "appendChild" && (entry.args[0] as RuntimeElement | undefined)?.tagName === "NAV"))
         .filter((entry) => !(entry.element === harness.documentElement
           && entry.method === "setAttribute" && themeAttributes.includes(String(entry.args[0]))))
         .map((entry) => entry.text),
