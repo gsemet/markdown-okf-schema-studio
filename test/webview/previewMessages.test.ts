@@ -67,3 +67,28 @@ test("field helpers respect their boundaries", () => {
   assert.equal(isOneOf("c", ["a", "b"] as const), false);
   assert.equal(isOneOf(1, ["a", "b"] as const), false);
 });
+
+test("previewViewPreferenceChanged validates the value per preference", () => {
+  const base = { type: "previewViewPreferenceChanged", documentId: "doc", documentVersion: 1, requestId: 1 };
+  const ok = (preference: unknown, value: unknown): boolean =>
+    isRegisteredPreviewMessage({ ...base, preference, value });
+  assert.equal(ok("zoom", 70), true);
+  assert.equal(ok("zoom", 130), true);
+  assert.equal(ok("zoom", 200), true);
+  assert.equal(ok("zoom", 60), false);
+  assert.equal(ok("zoom", 210), false);
+  assert.equal(ok("zoom", 1.2), false);
+  assert.equal(ok("zoom", "100"), false);
+  assert.equal(ok("zoom", Number.NaN), false);
+  assert.equal(ok("widthMode", "margin"), true);
+  assert.equal(ok("widthMode", "auto"), true);
+  assert.equal(ok("widthMode", "full"), true);
+  assert.equal(ok("widthMode", "wide"), false);
+  assert.equal(ok("toc", true), true);
+  assert.equal(ok("toc", "yes"), false);
+  assert.equal(ok("incomingChanges", false), true);
+  assert.equal(ok("incomingChanges", 0), false);
+  assert.equal(ok("other", true), false);
+  assert.equal(ok(undefined, true), false);
+  assert.equal(ok("__proto__", true), false);
+});

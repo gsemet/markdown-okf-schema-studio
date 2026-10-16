@@ -57,7 +57,7 @@ const webview = {
 
 let nextRequestId = 1;
 
-async function page(markdown: string, options: { requestId?: number; version?: number } = {}): Promise<string> {
+async function page(markdown: string, options: { requestId?: number; version?: number; zoom?: number } = {}): Promise<string> {
   const requestId = options.requestId ?? nextRequestId++;
   const version = options.version ?? requestId;
   const sourcePath = path.join(fixtureDirectory, "inline.md");
@@ -82,6 +82,9 @@ async function page(markdown: string, options: { requestId?: number; version?: n
       requestId,
       activeSourceFile: result.stage.activeDocumentPath,
       ...(requestId % 2 === 0 ? { initialAnchor: 3 } : {}),
+      ...(options.zoom !== undefined
+        ? { initialViewPreferences: { zoom: options.zoom, widthMode: "margin", toc: false, incomingChanges: true } }
+        : {}),
     },
     workspaceRoot,
     undefined,
@@ -278,4 +281,18 @@ test("T34: reuseNonce swaps every occurrence, in the policy tokens and in the at
   assert.equal(swapped.match(/'nonce-NEW456'/gu)?.length, 2);
   assert.equal(swapped.match(/nonce="NEW456"/gu)?.length, 3);
   assert.equal(swapped.replaceAll("NEW456", "OLD123"), html);
+});
+
+test("T08: two renders with different zoom have the same shell key and the same context key", async () => {
+  const first = await page("# Title\n\nText.\n", { requestId: 21, version: 21, zoom: 100 });
+  const second = await page("# Title\n\nText.\n", { requestId: 23, version: 23, zoom: 130 });
+  assert.match(first, /data-sphinx-preview-zoom-out/u);
+  assert.match(first, /data-sphinx-preview-toolbar-row="view"/u);
+  assert.equal(shellKey(first), shellKey(second));
+  assert.equal(canPatch(first, second), true);
+  const base = { documentId: "file:///a.md", activeSourceFile: "/a.md" };
+  assert.equal(
+    runtimeContextKey({ ...base, initialViewPreferences: { zoom: 100 } } as never),
+    runtimeContextKey({ ...base, initialViewPreferences: { zoom: 130 } } as never),
+  );
 });

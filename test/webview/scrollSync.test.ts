@@ -1,3 +1,4 @@
+import type { ViewPreferences } from "../../src/state/previewViewPreferences";
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 import * as vm from "node:vm";
@@ -283,6 +284,8 @@ interface RuntimeHarness {
   readonly observedResizeTarget: RuntimeElement | undefined;
   readonly themeButton: RuntimeElement;
   readonly refreshButton: RuntimeElement;
+  readonly zoomOutButton: RuntimeElement;
+  readonly zoomInButton: RuntimeElement;
   readonly anchorButton: RuntimeElement;
   readonly editModeButton: RuntimeElement;
   readonly checkbox: RuntimeElement;
@@ -355,6 +358,7 @@ function createRuntimeHarness(configuration: Partial<{
   frontmatterRowAttributes: Record<string, string>;
   pairedTextEditor: boolean;
   initialEditMode: boolean;
+  initialViewPreferences: ViewPreferences;
   intersectionObserver: boolean;
 }> = {}, savedThemeMode?: string, sharedThemeMode?: "current" | "dark" | "white", savedAnchorMode?: boolean): RuntimeHarness {
   const {
@@ -433,6 +437,8 @@ function createRuntimeHarness(configuration: Partial<{
   const anchor = new RuntimeElement({}, windowState, 800, 40);
   const themeButton = new RuntimeElement({ "data-theme-mode": "current" }, windowState, 0, 34);
   const refreshButton = new RuntimeElement({}, windowState, 0, 30);
+  const zoomOutButton = new RuntimeElement({}, windowState, 0, 30, "button");
+  const zoomInButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const anchorButton = new RuntimeElement({}, windowState, 0, 30);
   const editModeButton = new RuntimeElement({}, windowState, 0, 30);
   const toolbar = new RuntimeElement({}, windowState, 12, Math.max(0, toolbarBottom - 12));
@@ -643,6 +649,8 @@ function createRuntimeHarness(configuration: Partial<{
     querySelector: (selector: string): RuntimeElement | null => {
       if (selector === "[data-sphinx-preview-theme-toggle]") return themeButton;
       if (selector === "[data-sphinx-preview-refresh]") return refreshButton;
+      if (selector === "[data-sphinx-preview-zoom-out]") return zoomOutButton;
+      if (selector === "[data-sphinx-preview-zoom-in]") return zoomInButton;
       if (selector === "[data-sphinx-preview-anchor]") return anchorButton;
       if (selector === "[data-sphinx-preview-edit-toggle]") return editingEnabled ? editModeButton : null;
       if (selector === "[data-sphinx-preview-toolbar]") return toolbar;
@@ -738,6 +746,8 @@ function createRuntimeHarness(configuration: Partial<{
     toolbar,
     themeButton,
     refreshButton,
+    zoomOutButton,
+    zoomInButton,
     anchorButton,
     editModeButton,
     checkbox,
@@ -5535,10 +5545,14 @@ function traceStartup(
   try {
     const harness = createRuntimeHarness(configuration, undefined, undefined, savedAnchorMode);
     const toolbar = [harness.themeButton, harness.refreshButton, harness.anchorButton, harness.editModeButton];
-    const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion"];
+    const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion",
+      "data-sphinx-preview-zoom"];
+    // The zoom buttons and the zoom of the root do not depend on the content (T08).
+    const zoomButtons = [harness.zoomOutButton, harness.zoomInButton];
     return {
       effects: entries
         .filter((entry) => !(entry.method === "addEventListener" && toolbar.includes(entry.element)))
+        .filter((entry) => !zoomButtons.includes(entry.element))
         .filter((entry) => !(entry.element === harness.documentElement
           && entry.method === "setAttribute" && themeAttributes.includes(String(entry.args[0]))))
         .map((entry) => entry.text),
@@ -6868,4 +6882,59 @@ test("ArrowUp from the first body block under a properties table keeps the edito
   assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditOpen"), false);
   assert.equal(harness.messages.length, before, "no message is posted");
   assert.equal(first.getAttribute("data-sphinx-preview-editing"), "true", "the editor stays open");
+});
+
+test("T08: zoom buttons set the zoom variable, post the preference and keep the state", () => {
+  const harness = createRuntimeHarness();
+  const root = harness.documentElement;
+  assert.equal(root.style.getPropertyValue("--sphinx-preview-zoom"), "1");
+  assert.equal(root.getAttribute("data-sphinx-preview-zoom"), "100");
+  assert.equal(harness.zoomInButton.getAttribute("data-tooltip"), "Zoom in (110 %)");
+  assert.equal(harness.zoomOutButton.getAttribute("data-tooltip"), "Zoom out (90 %)");
+
+  const before = harness.messages.length;
+  harness.zoomInButton.dispatch("click");
+  assert.equal(root.style.getPropertyValue("--sphinx-preview-zoom"), "1.1");
+  assert.equal(root.getAttribute("data-sphinx-preview-zoom"), "110");
+  assert.equal(harness.zoomOutButton.getAttribute("data-tooltip"), "Zoom out (100 %)");
+  const posted = harness.messages.slice(before).filter((m) => m.type === "previewViewPreferenceChanged");
+  assert.equal(posted.length, 1);
+  assert.equal(posted[0].preference, "zoom");
+  assert.equal(posted[0].value, 110);
+  assert.equal(posted[0].documentId, "file:///active.md");
+  assert.equal(harness.getWebviewState().viewZoom, 110);
+  harness.zoomOutButton.dispatch("click");
+  harness.zoomOutButton.dispatch("click");
+  assert.equal(root.getAttribute("data-sphinx-preview-zoom"), "90");
+  assert.equal(harness.messages.at(-1)?.value, 90);
+});
+
+test("T08: the zoom limits disable the buttons and post nothing more", () => {
+  const low = createRuntimeHarness({ initialViewPreferences: { zoom: 80, widthMode: "margin", toc: false, incomingChanges: true } });
+  assert.equal(low.zoomOutButton.disabled, false);
+  low.zoomOutButton.dispatch("click");
+  assert.equal(low.documentElement.getAttribute("data-sphinx-preview-zoom"), "70");
+  assert.equal(low.zoomOutButton.disabled, true);
+  assert.equal(low.zoomInButton.disabled, false);
+  const count = low.messages.length;
+  low.zoomOutButton.dispatch("click");
+  assert.equal(low.documentElement.getAttribute("data-sphinx-preview-zoom"), "70");
+  assert.equal(low.messages.length, count);
+
+  const high = createRuntimeHarness({ initialViewPreferences: { zoom: 200, widthMode: "margin", toc: false, incomingChanges: true } });
+  assert.equal(high.zoomInButton.disabled, true);
+  assert.equal(high.zoomOutButton.disabled, false);
+  assert.equal(high.documentElement.style.getPropertyValue("--sphinx-preview-zoom"), "2");
+});
+
+test("T08: saved webview state wins over the initial context", () => {
+  const harness = createRuntimeHarness({
+    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true },
+    savedState: { viewZoom: 120 },
+  });
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-zoom"), "120");
+  const initialOnly = createRuntimeHarness({
+    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true },
+  });
+  assert.equal(initialOnly.documentElement.getAttribute("data-sphinx-preview-zoom"), "150");
 });

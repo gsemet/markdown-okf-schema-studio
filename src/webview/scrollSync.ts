@@ -8,6 +8,8 @@ import { createMarkdownTableTools } from "./markdownTable";
 import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
 import { installLinkNavigation } from "./linkNavigation";
+import { installViewControls } from "./viewControls";
+import type { ViewPreferences } from "../state/previewViewPreferences";
 import type { PreviewThemeMode } from "../state/previewTheme";
 import type { PreviewPanelState } from "../state/previewState";
 
@@ -25,6 +27,8 @@ export interface PositionedSourceMapping extends SourceBlockMapping {
 export interface PreviewRuntimeContext extends ScrollContext {
   activeSourceFile: string;
   previewThemeMode?: PreviewThemeMode;
+  /** The per-workspace view preferences; the webview's own saved state wins (zoom). */
+  initialViewPreferences?: ViewPreferences;
   scrollPreviewWithEditor?: boolean;
   scrollEditorWithPreview?: boolean;
   markEditorSelection?: boolean;
@@ -103,6 +107,14 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     requestId: context.requestId,
     text,
   }));
+  // Zoom changes layout only: keep the source line at the reading line across it.
+  const viewControls = (${installViewControls.toString()})(document, vscode, context, () => {
+    if (!anchor) {
+      const line = lineAtScroll(window.scrollY);
+      if (line !== undefined) anchor = { line, owner: "preview" };
+    }
+    stabilizeLayout();
+  });
   const themeModes = ["current", "dark", "white", "cream"];
   const themeLabels = { current: "Current theme", dark: "Dark theme", white: "White theme", cream: "Cream theme" };
   const themeButton = document.querySelector?.("[data-sphinx-preview-theme-toggle]");
@@ -182,6 +194,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       anchorToEditor,
       editMode,
       descriptionsCollapsed,
+      viewZoom: viewControls.zoom(),
     };
     vscode.setState?.(state);
     return state;

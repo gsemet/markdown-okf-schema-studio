@@ -97,6 +97,15 @@ import {
   type PreviewThemeModeStorage,
   writePreviewThemeMode,
 } from "./state/previewTheme";
+import {
+  applyViewPreference,
+  DEFAULT_VIEW_PREFERENCES,
+  readViewPreferences,
+  writeViewPreferences,
+  type ViewPreferenceKey,
+  type ViewPreferences,
+  type ViewPreferencesStorage,
+} from "./state/previewViewPreferences";
 import type { PreviewRuntimeContext } from "./webview/scrollSync";
 import {
   EditorEchoGuard,
@@ -277,6 +286,8 @@ let activePreview: ActivePreview | undefined;
 let extensionRootUri: vscode.Uri | undefined;
 let sessionPreviewThemeMode: PreviewThemeMode | undefined;
 let previewThemeModeStorage: PreviewThemeModeStorage | undefined;
+let sessionViewPreferences: ViewPreferences = { ...DEFAULT_VIEW_PREFERENCES };
+let viewPreferencesStorage: ViewPreferencesStorage | undefined;
 let previewDescriptionStorage: vscode.Memento | undefined;
 /** Bounded per-document `descriptionsCollapsed` memory, persisted under one workspaceState key. */
 let collapsedDescriptions = new BoundedMap<boolean>();
@@ -343,6 +354,17 @@ function setSessionPreviewThemeMode(mode: PreviewThemeMode): void {
   }
   void writePreviewThemeMode(storage, mode).then(undefined, (error: unknown) => {
     console.error("Failed to persist the Markdown preview theme mode.", error);
+  });
+}
+
+function setSessionViewPreference(key: ViewPreferenceKey, value: unknown): void {
+  sessionViewPreferences = applyViewPreference(sessionViewPreferences, key, value);
+  const storage = viewPreferencesStorage;
+  if (!storage) {
+    return;
+  }
+  void writeViewPreferences(storage, sessionViewPreferences).then(undefined, (error: unknown) => {
+    console.error("Failed to persist the Markdown preview view preferences.", error);
   });
 }
 
@@ -564,6 +586,7 @@ function scrollContext(
     themeKind: vscode.window.activeColorTheme.kind,
     ...(toolbarState ?? {}),
     ...(sessionPreviewThemeMode ? { previewThemeMode: sessionPreviewThemeMode } : {}),
+    initialViewPreferences: sessionViewPreferences,
     ...(state && state.documentId === stage.activeDocumentIdentity
       ? {
         initialState: {
@@ -2328,6 +2351,12 @@ const registeredMessageHandlers = new Map<
 registeredMessageHandlers.set("previewCopyText", (_preview, message) =>
   vscode.env.clipboard.writeText(message.text as string));
 
+// A view preference only changes how the preview looks (workspace state, no document edit), so a
+// read-only or untrusted preview accepts it; the value is validated by the registry.
+registeredMessageHandlers.set("previewViewPreferenceChanged", (_preview, message) => {
+  setSessionViewPreference(message.preference as ViewPreferenceKey, message.value);
+});
+
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
   if (isRegisteredPreviewMessage(value)) {
     const handler = registeredMessageHandlers.get(value.type);
@@ -3264,6 +3293,8 @@ export function activate(context: vscode.ExtensionContext): void {
   });
   editModeStorage = context.workspaceState;
   sessionPreviewThemeMode = readPreviewThemeMode(previewThemeModeStorage);
+  viewPreferencesStorage = context.workspaceState;
+  sessionViewPreferences = readViewPreferences(viewPreferencesStorage);
   for (const folder of vscode.workspace.workspaceFolders ?? []) {
     watchStemRoot(folder.uri.fsPath);
   }
@@ -3367,6 +3398,7 @@ export function deactivate(): void {
   disposeStemRootWatchers();
   extensionRootUri = undefined;
   previewThemeModeStorage = undefined;
+  viewPreferencesStorage = undefined;
   editModeStorage = undefined;
   resetRenderHooksForTests();
 }

@@ -56,11 +56,22 @@ export function createPreviewMessageChecker(
   };
 }
 
+const VIEW_PREFERENCE_VALIDATORS: Record<string, (value: unknown) => boolean> = {
+  zoom: (value) => Number.isSafeInteger(value) && (value as number) >= 70 && (value as number) <= 200,
+  widthMode: (value) => isOneOf(value, ["margin", "auto", "full"] as const),
+  toc: (value) => typeof value === "boolean",
+  incomingChanges: (value) => typeof value === "boolean",
+};
+
 const MAX_COPY_TEXT_LENGTH = 1_000_000;
 
 export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   // Raw code of a code block, copied to the clipboard by the host.
   previewCopyText: (message) => isBoundedString(message.text, MAX_COPY_TEXT_LENGTH),
+  // A view preference of toolbar row 2 (zoom, width mode, TOC, incoming changes).
+  previewViewPreferenceChanged: (message) => typeof message.preference === "string"
+    && Object.hasOwn(VIEW_PREFERENCE_VALIDATORS, message.preference)
+    && VIEW_PREFERENCE_VALIDATORS[message.preference](message.value),
 };
 
 export const isRegisteredPreviewMessage = createPreviewMessageChecker(REGISTERED_PREVIEW_MESSAGES);

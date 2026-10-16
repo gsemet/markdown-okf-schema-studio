@@ -1488,11 +1488,79 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
             failures.append(Failure(page_name, f"toolbar control is missing or mislabeled: {label}"))
         elif button.is_hidden():
             failures.append(Failure(page_name, f"toolbar control is hidden: {label}"))
-    button_count = toolbar.evaluate(
-      "element => [...element.children].filter(child => child.tagName === 'BUTTON').length"
+    for selector, label in (
+        ('[data-sphinx-preview-zoom-out]', "Zoom out"),
+        ('[data-sphinx-preview-zoom-in]', "Zoom in"),
+    ):
+        button = toolbar.locator(selector)
+        if button.count() != 1 or button.get_attribute("aria-label") != label:
+            failures.append(Failure(page_name, f"toolbar control is missing or mislabeled: {label}"))
+        elif button.is_hidden():
+            failures.append(Failure(page_name, f"toolbar control is hidden: {label}"))
+    rows = toolbar.evaluate(
+        """element => [...element.children].map(child => ({
+          row: child.getAttribute('data-sphinx-preview-toolbar-row'),
+          buttons: [...child.children].filter(item => item.tagName === 'BUTTON').length,
+          rect: (({top, bottom, left, right}) => ({top, bottom, left, right}))(child.getBoundingClientRect()),
+        }))"""
     )
-    if button_count != 4:
-      failures.append(Failure(page_name, "toolbar actions are not four peer buttons in one chip"))
+    expected_main = 4 if toolbar.locator('[data-sphinx-preview-edit-toggle]').count() else 3
+    if [row["row"] for row in rows] != ["main", "view"]:
+        failures.append(Failure(page_name, f"toolbar is not two rows (main, view): {rows}"))
+        return
+    if rows[0]["buttons"] != expected_main:
+        failures.append(Failure(page_name, f"toolbar row 1 does not hold {expected_main} buttons: {rows[0]['buttons']}"))
+    if rows[1]["buttons"] < 2:
+        failures.append(Failure(page_name, "toolbar row 2 has fewer than two buttons"))
+    if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5:
+        failures.append(Failure(page_name, "toolbar rows overlap"))
+    # At the zoom limits the toolbar stays put and covers neither the sticky band text nor the page.
+    zoom_in = toolbar.locator('[data-sphinx-preview-zoom-in]')
+    zoom_out = toolbar.locator('[data-sphinx-preview-zoom-out]')
+    try:
+        for target, button in ((70, zoom_out), (200, zoom_in)):
+            for _ in range(14):
+                if button.is_disabled():
+                    break
+                button.click()
+            # Let the runtime re-apply the reading line before the next click or scroll.
+            page.wait_for_timeout(150)
+            zoom = page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-zoom')")
+            if zoom != str(target):
+                failures.append(Failure(page_name, f"zoom did not reach {target} %: {zoom}"))
+                continue
+            if not button.is_disabled():
+                failures.append(Failure(page_name, f"the zoom button is not disabled at {target} %"))
+            geometry = page.evaluate(
+                """() => {
+                  const toolbar = document.querySelector('[data-sphinx-preview-toolbar]').getBoundingClientRect();
+                  const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+                  let bandOverlap = false;
+                  if (band && !band.hidden) {
+                    const range = document.createRange();
+                    range.selectNodeContents(band);
+                    for (const rect of range.getClientRects()) {
+                      if (rect.width > 0 && rect.left < toolbar.right && rect.right > toolbar.left
+                        && rect.top < toolbar.bottom && rect.bottom > toolbar.top) bandOverlap = true;
+                    }
+                  }
+                  return {
+                    bandOverlap,
+                    inside: toolbar.left >= 0 && toolbar.right <= innerWidth && toolbar.top >= 0,
+                  };
+                }"""
+            )
+            if geometry["bandOverlap"]:
+                failures.append(Failure(page_name, f"toolbar overlaps the sticky heading band at {target} %"))
+            if not geometry["inside"]:
+                failures.append(Failure(page_name, f"toolbar leaves the viewport at {target} %"))
+    finally:
+        for _ in range(14):
+            current = int(page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-zoom')"))
+            if current == 100:
+                break
+            (zoom_out if current > 100 else zoom_in).click()
+        page.wait_for_timeout(150)
 
 def check_nested_list_typing(page: Page, scenario: dict, failures: list[Failure]) -> None:
   if not scenario.get("listTypingChecks"):

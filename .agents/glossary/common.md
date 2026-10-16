@@ -39,5 +39,6 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Theme mode**: preview colour scheme, one of `current`, `dark`, `white`, `cream` (`PreviewThemeMode` in `src/state/previewTheme.ts`).
 - **TOC column (planned)**: side column showing the table of contents.
 - **Toolbar**: the controls bar at the top of the preview (`[data-sphinx-preview-toolbar]`).
+- **Toolbar row**: `data-sphinx-preview-toolbar-row` `main` (Refresh/Anchor/Edit/Theme) or `view`.
 - **Top-level block**: mapped block that is a direct child of the content container (`topLevelMappedBlocks` in `src/webview/scrollSync.ts`).
-- **View preference (planned)**: a remembered per-user choice about how the preview is displayed.
+- **View preference**: per-workspace preview setting changed from toolbar row 2 (zoom, width mode, TOC, incoming changes), `src/state/previewViewPreferences.ts`.

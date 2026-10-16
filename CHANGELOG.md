@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The preview toolbar has a second row with Zoom - and Zoom + (70 % to 200 %, 10 % steps); the text
+  and the column scale together, and the zoom is remembered per workspace.
 - In edit mode, clicking an image inside a link (Cmd/Ctrl+click still follows it) or a raw
   `<img>` block now edits it, and ArrowUp from the first block no longer closes the editor.
 - `~~text~~` now renders struck through in the preview, like on GitHub.
