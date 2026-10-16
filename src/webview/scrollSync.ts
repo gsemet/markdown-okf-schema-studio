@@ -83,6 +83,18 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     event.stopImmediatePropagation?.();
     openFrontmatterEditor(row);
   }, true);
+  // Edit mode: a plain click on an image inside a link edits its block instead of following the
+  // link; Cmd/Ctrl+click still follows it. Registered before the link navigation (see above).
+  document.addEventListener("click", (event) => {
+    if (!editMode || event.metaKey || event.ctrlKey || !(event.target instanceof Element)) return;
+    if (event.target.tagName !== "IMG" || !event.target.closest("a")) return;
+    if (event.target.closest("[data-okf-properties]") || event.target.closest("[data-sphinx-preview-block-editor]")) return;
+    const block = event.target.closest(mappingsSelector);
+    if (!block) return;
+    event.preventDefault?.();
+    event.stopImmediatePropagation?.();
+    openMappedEditor(block, event.target, "end");
+  }, true);
   const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context);
   const codeCopy = (${installCodeCopy.toString()})(document, window, (text) => vscode.postMessage({
     type: "previewCopyText",
@@ -1275,7 +1287,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const blocks = topLevelMappedBlocks();
     const index = blocks.indexOf(edit.target);
     if (index < 0) return undefined;
-    return blocks[index + step];
+    // The properties table has its own editor: stepping onto it would only close this one.
+    for (let next = index + step; next >= 0 && next < blocks.length; next += step) {
+      if (blocks[next].getAttribute("data-okf-properties") === null) return blocks[next];
+    }
+    return undefined;
   }
 
   function boundaryNavigation(control, event) {

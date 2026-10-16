@@ -6839,3 +6839,33 @@ test("empty document: Cmd/Ctrl+Enter saves the new block and Escape cancels back
   assert.equal(point.getAttribute("data-sphinx-preview-editing"), null);
   assert.equal(openBlockEditorElement(cancel), undefined);
 });
+
+test("ArrowUp from the first body block under a properties table keeps the editor open", () => {
+  const harness = createRuntimeHarness({
+    firstMappedSourceLine: 5,
+    mapFrontmatter: true,
+    propertiesMapped: true,
+    savedState: { editMode: true },
+  });
+  const first = harness.mappings[0];
+  harness.dispatchDocument("click", { target: first, preventDefault: () => undefined });
+  const request = harness.messages.at(-1);
+  assert.equal(request?.type, "previewEditOpen");
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: request?.editId,
+    originalText: "Current block\n",
+  });
+  const textarea = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1);
+  assert.ok(textarea);
+  textarea.setSelectionRange(0, 0);
+  const before = harness.messages.length;
+  textarea.dispatch("keydown", { key: "ArrowUp", preventDefault: () => undefined });
+  assert.equal(harness.messages.slice(before).some((message) => message.final === true), false);
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditOpen"), false);
+  assert.equal(harness.messages.length, before, "no message is posted");
+  assert.equal(first.getAttribute("data-sphinx-preview-editing"), "true", "the editor stays open");
+});
