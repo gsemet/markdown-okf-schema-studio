@@ -16,7 +16,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Edition palette (planned)**: palette of the actions available while editing.
 - **First-element gap**: fixed 40 px space above the first rendered element; `--sphinx-preview-first-clearance` (`src/webview/firstClearance.ts`) adds room only under the toolbar.
 - **Included block**: rendered block that comes from an `{include}`; maps to the directive lines and carries `data-sphinx-preview-included`.
-- **Incoming-change mark (planned)**: visual mark on content changed by another source while the preview is open.
+- **Incoming-change mark**: green left bar on a block changed since HEAD (`data-sphinx-preview-changed`), from `src/webview/incomingChanges.ts`; ranges come from `src/mapping/lineDiff.ts` and `src/git/headBaseline.ts`.
 - **Insert point**: "+" bar after each top-level block that opens an insertion editor (`.sphinx-preview-insert-point`).
 - **Insertion editor**: block editor opened from an insert point or from "Start writing".
 - **Mapped block**: rendered element carrying its source location (`[data-sphinx-source-file][data-sphinx-source-line]`).

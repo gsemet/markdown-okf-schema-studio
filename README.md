@@ -147,6 +147,10 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
 - `preview.showComments` (default on): show HTML comments as gray chips; click one (or press Enter
   or Space on it) to open the comment text in a box under the line. Off hides the gray chips in
   open previews at once. TODO chips always show.
+- `preview.showIncomingChanges` (default on): mark blocks changed since the last Git commit
+  (unsaved edits included) with a green bar on the left, like the editor gutter. Needs the built-in
+  Git extension; files that are not in Git, and untrusted workspaces, show nothing. Off turns the
+  marks, and their toolbar toggle, off.
 - `preview.incrementalUpdates` (default on): update changed parts in place; off reloads the page.
 - `preview.scrollPreviewWithEditor` (default on): editor scrolling moves the preview; the toolbar
   anchor button overrides it per panel.

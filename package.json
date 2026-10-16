@@ -142,6 +142,12 @@
           "markdownDescription": "Shows HTML comments (`<!-- ... -->`) in the preview as small gray chips that open into a box with the comment text when clicked. **On**: the gray comment chips show. **Off**: they are hidden at once in open previews. Green TODO chips always show, and comments used by tools (such as `markdownlint-*` or `prettier-ignore`) are always hidden.",
           "order": 21
         },
+        "markdownOkfSchemaStudio.preview.showIncomingChanges": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Marks the blocks you changed since the last Git commit with a green bar on their left, like the editor gutter. It compares the file, unsaved edits included, with the version in `HEAD` using the built-in Git extension. **On**: changed blocks are marked and the toolbar toggle for the marks is shown. **Off**: no marks and no toggle. Files that are not in Git show nothing.",
+          "order": 22
+        },
         "markdownOkfSchemaStudio.plantuml.jarPath": {
           "type": "string",
           "default": "",

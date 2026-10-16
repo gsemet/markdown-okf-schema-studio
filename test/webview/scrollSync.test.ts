@@ -7093,6 +7093,18 @@ test("T15: previewShowComments sets the show-comments attribute of the page, sta
   assert.equal(harness.documentElement.getAttribute("data-okf-show-comments"), "true");
 });
 
+test("T16: previewIncomingChanges marks blocks and reports enabled, stale ids are ignored", () => {
+  const harness = createRuntimeHarness();
+  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), null);
+  harness.dispatchMessage({ type: "previewIncomingChanges", ...ids, requestId: 3, enabled: false, ranges: [] });
+  assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), null);
+  harness.dispatchMessage({ type: "previewIncomingChanges", ...ids, enabled: false, ranges: [] });
+  assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), "false");
+  harness.dispatchMessage({ type: "previewIncomingChanges", ...ids, enabled: true, ranges: [{ start: 1, end: 2 }] });
+  assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), "true");
+});
+
 test("T11: a previewHistoryState of another document version is ignored", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage({

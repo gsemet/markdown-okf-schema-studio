@@ -758,3 +758,9 @@ test("T15: an open comment is an admonition-like box and showComments off hides 
   assert.match(css, /html\[data-okf-show-comments="false"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="comment"\] \{\s*display: none;/u);
   assert.doesNotMatch(css, /data-okf-show-comments="false"\][^{]*kind="todo"/u);
 });
+
+test("T16: a changed block gets an inset green bar without layout shift", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /\[data-sphinx-preview-changed\] \{[^}]*box-shadow: inset 3px 0 0 var\(--vscode-editorGutter-addedBackground, #2ea043\)/u);
+  assert.doesNotMatch(css, /\[data-sphinx-preview-changed\] \{[^}]*(?:margin|padding|border|width)/u);
+});

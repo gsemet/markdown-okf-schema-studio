@@ -19,6 +19,8 @@ export interface PreviewConfiguration {
   incrementalUpdates: boolean;
   /** Show the gray chips of HTML comments; TODO chips always show (T15). */
   showComments: boolean;
+  /** Mark blocks changed since the last commit with a green bar (T16). */
+  showIncomingChanges: boolean;
 }
 
 export const DEFAULT_PREVIEW_CONFIGURATION: PreviewConfiguration = {
@@ -30,6 +32,7 @@ export const DEFAULT_PREVIEW_CONFIGURATION: PreviewConfiguration = {
   stickyHeadingDepth: DEFAULT_STICKY_HEADING_DEPTH,
   incrementalUpdates: true,
   showComments: true,
+  showIncomingChanges: true,
 };
 
 export function normalizePreviewContentWidth(value: number): number {
@@ -81,5 +84,9 @@ export function readPreviewConfiguration(
       DEFAULT_PREVIEW_CONFIGURATION.incrementalUpdates,
     ),
     showComments: source.get("showComments", DEFAULT_PREVIEW_CONFIGURATION.showComments),
+    showIncomingChanges: source.get(
+      "showIncomingChanges",
+      DEFAULT_PREVIEW_CONFIGURATION.showIncomingChanges,
+    ),
   };
 }

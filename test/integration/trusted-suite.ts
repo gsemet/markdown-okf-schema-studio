@@ -12,6 +12,7 @@ import { run as runCheckboxToggle } from "./checkboxToggle.test";
 import { run as runDirtySnapshots } from "./dirtySnapshots.test";
 import { run as runGenericMarkdown } from "./genericMarkdown.test";
 import { run as runPreviewEditing } from "./previewEditing.test";
+import { run as runIncomingChanges } from "./incomingChanges.test";
 import { run as runPreviewHistory } from "./previewHistory.test";
 import { run as runRealInput } from "./realInput.test";
 import { run as runLifecycle } from "./lifecycle.test";
@@ -97,6 +98,7 @@ export async function run(): Promise<void> {
     throw error;
   }
   await runPreviewHistory();
+  await runIncomingChanges();
   await runGenericMarkdown();
   await runDirtySnapshots();
   await runSourceMapping();

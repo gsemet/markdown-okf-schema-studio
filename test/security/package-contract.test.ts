@@ -107,6 +107,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.preview.scrollEditorWithPreview",
       "markdownOkfSchemaStudio.preview.scrollPreviewWithEditor",
       "markdownOkfSchemaStudio.preview.showComments",
+      "markdownOkfSchemaStudio.preview.showIncomingChanges",
       "markdownOkfSchemaStudio.preview.stickyHeadingDepth",
     ],
   );
@@ -117,6 +118,13 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(showComments.default, true);
   assert.equal(showComments.order, 21);
   assert.match(showComments.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
+  const showIncomingChanges = packageJson.contributes.configuration.properties[
+    "markdownOkfSchemaStudio.preview.showIncomingChanges"
+  ] as { type: string; default: boolean; order: number; markdownDescription: string };
+  assert.equal(showIncomingChanges.type, "boolean");
+  assert.equal(showIncomingChanges.default, true);
+  assert.equal(showIncomingChanges.order, 22);
+  assert.match(showIncomingChanges.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
   assert.equal(
     packageJson.contributes.configuration.properties["markdown.preview.scrollPreviewWithEditor"],
     undefined,
