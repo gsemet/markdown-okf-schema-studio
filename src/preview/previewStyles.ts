@@ -1605,6 +1605,12 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   content: "TODO";
 }
 
+/* Incoming-change mark: a green bar on the left edge of a block changed since the last commit,
+   drawn inside the box so nothing moves. */
+#sphinx-myst-preview-content [data-sphinx-preview-changed] {
+  box-shadow: inset 3px 0 0 var(--vscode-editorGutter-addedBackground, #2ea043);
+}
+
 /* preview.showComments off: the gray comment chips go away at once, without a new render. TODO
    chips stay. */
 html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="comment"] {

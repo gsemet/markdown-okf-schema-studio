@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Blocks you changed since the last Git commit, unsaved edits included, now show a green bar on
+  their left, like the editor gutter. Files that are not in Git show nothing. The new
+  `preview.showIncomingChanges` setting (default on) turns the marks off.
 - A comment or TODO chip now opens into a box with the comment text when you click it (or press
   Enter or Space on it) and closes again on a second click; what is open stays open while you type.
   The new `preview.showComments` setting (default on) hides the gray comment chips, at once and in

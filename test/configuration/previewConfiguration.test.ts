@@ -16,6 +16,7 @@ test("reads independent studio preview settings without stock configuration keys
     ["maxContentWidth", 1120],
     ["stickyHeadingDepth", 2],
     ["showComments", false],
+    ["showIncomingChanges", false],
   ]);
   const sections: string[] = [];
   const configuration = readPreviewConfiguration({
@@ -34,6 +35,7 @@ test("reads independent studio preview settings without stock configuration keys
     stickyHeadingDepth: 2,
     incrementalUpdates: true,
     showComments: false,
+    showIncomingChanges: false,
   });
   assert.deepEqual(new Set(sections), new Set([
     "scrollPreviewWithEditor",
@@ -44,6 +46,7 @@ test("reads independent studio preview settings without stock configuration keys
     "stickyHeadingDepth",
     "incrementalUpdates",
     "showComments",
+    "showIncomingChanges",
   ]));
   assert.match(PREVIEW_CONFIGURATION_SECTION, /^markdownOkfSchemaStudio\.preview$/u);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.scrollPreviewWithEditor, true);
@@ -54,6 +57,7 @@ test("reads independent studio preview settings without stock configuration keys
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.stickyHeadingDepth, 3);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.incrementalUpdates, true);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.showComments, true);
+  assert.equal(DEFAULT_PREVIEW_CONFIGURATION.showIncomingChanges, true);
 });
 
 test("comment chips are shown by default and can be turned off", () => {

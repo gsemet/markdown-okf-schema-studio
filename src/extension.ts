@@ -107,6 +107,8 @@ import {
   type ViewPreferences,
   type ViewPreferencesStorage,
 } from "./state/previewViewPreferences";
+import { createHeadBaseline, type GitExtensionLike } from "./git/headBaseline";
+import { changedLineRanges } from "./mapping/lineDiff";
 import type { PreviewRuntimeContext } from "./webview/scrollSync";
 import {
   EditorEchoGuard,
@@ -244,6 +246,18 @@ interface ActivePreview {
   };
   lastSourceScrollLine?: number;
   lastRevealedSourceLine?: number;
+  /** Debounce timer of the incoming-change marks (T16). */
+  incomingTimer?: NodeJS.Timeout;
+  /** Watch on the HEAD commit of the repository of the shown file, and the file it was made for. */
+  incomingWatch?: { path: string; subscription: { dispose(): void } };
+  /** The page may show marks (ranges were posted and not cleared since the page loaded). */
+  incomingMarksShown: boolean;
+  /** The "enabled" value last posted to the page; the page starts with true. */
+  incomingEnabledPosted: boolean;
+  /** Test hook: how many previewIncomingChanges messages were posted. */
+  incomingPosts: number;
+  /** Test hook: the last previewIncomingChanges posted to the page. */
+  lastIncomingChanges?: { enabled: boolean; ranges: { start: number; end: number }[] };
   /** Test hook: the last previewHistoryState posted to the page. */
   lastHistoryState?: { canBack: boolean; canForward: boolean };
   linkDiscoveries?: Map<string, Promise<readonly string[]>>;
@@ -1049,6 +1063,7 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
     preview.loadedContext = nextContext;
   }
   scheduleDeferredPreviewWork(preview, result);
+  scheduleIncomingChanges(preview);
 }
 
 function isCurrentRender(
@@ -2307,6 +2322,74 @@ function postShowComments(preview: ActivePreview): void {
   });
 }
 
+const INCOMING_CHANGES_DEBOUNCE_MS = 300;
+const headBaseline = createHeadBaseline<vscode.Uri>(() =>
+  vscode.extensions.getExtension("vscode.git") as unknown as GitExtensionLike<vscode.Uri> | undefined);
+
+/**
+ * Tells the page which source lines differ from HEAD (T16). Nothing is posted for a file Git does
+ * not know, unless marks or a different "enabled" value must be taken back. Stale ids are dropped by
+ * the page; a result for a stage that is no longer current is dropped here.
+ */
+async function postIncomingChanges(preview: ActivePreview): Promise<void> {
+  const stage = preview.stage;
+  if (preview.disposed || !stage) return;
+  const enabled = preview.configuration.showIncomingChanges;
+  let ranges: { start: number; end: number }[] = [];
+  if (enabled && sessionViewPreferences.incomingChanges && vscode.workspace.isTrusted
+    && preview.documentUri.startsWith("file:")) {
+    const uri = vscode.Uri.file(stage.activeDocumentPath);
+    const base = await headBaseline.read(uri, stage.sourceText.length);
+    if (preview.disposed || preview.stage !== stage) return;
+    if (base) {
+      ranges = changedLineRanges(base.text, stage.sourceText);
+      watchIncomingBaseline(preview, uri);
+    }
+  }
+  if (ranges.length === 0 && !preview.incomingMarksShown && enabled === preview.incomingEnabledPosted) {
+    return;
+  }
+  preview.incomingMarksShown = ranges.length > 0;
+  preview.incomingEnabledPosted = enabled;
+  preview.incomingPosts += 1;
+  preview.lastIncomingChanges = { enabled, ranges };
+  void preview.panel.webview.postMessage({
+    type: "previewIncomingChanges",
+    enabled,
+    ranges,
+    documentId: stage.activeDocumentIdentity,
+    documentVersion: stage.activeDocumentVersion,
+    requestId: stage.requestId,
+  });
+}
+
+/** Posts again when the HEAD commit of the repository changes (commit, checkout, pull). */
+function watchIncomingBaseline(preview: ActivePreview, uri: vscode.Uri): void {
+  if (preview.incomingWatch?.path === uri.fsPath) return;
+  preview.incomingWatch?.subscription.dispose();
+  preview.incomingWatch = undefined;
+  const subscription = headBaseline.watch(uri, () => scheduleIncomingChanges(preview, 0));
+  if (subscription) preview.incomingWatch = { path: uri.fsPath, subscription };
+}
+
+function scheduleIncomingChanges(preview: ActivePreview, delay = INCOMING_CHANGES_DEBOUNCE_MS): void {
+  if (preview.disposed) return;
+  if (preview.incomingTimer) clearTimeout(preview.incomingTimer);
+  preview.incomingTimer = setTimeout(() => {
+    preview.incomingTimer = undefined;
+    void postIncomingChanges(preview).catch((error: unknown) => {
+      console.error("Failed to mark the incoming changes.", error);
+    });
+  }, delay);
+}
+
+function clearIncomingChanges(preview: ActivePreview): void {
+  if (preview.incomingTimer) clearTimeout(preview.incomingTimer);
+  preview.incomingTimer = undefined;
+  preview.incomingWatch?.subscription.dispose();
+  preview.incomingWatch = undefined;
+}
+
 /** Records the place being left and the target of a followed link. */
 function recordNavigation(preview: ActivePreview, target: NavigationEntry): void {
   const history = historyOf(preview);
@@ -2479,8 +2562,11 @@ registeredMessageHandlers.set("previewCopyText", (_preview, message) =>
 registeredMessageHandlers.set("previewHistoryGo", (preview, message) =>
   handlePreviewHistoryGo(preview, message.direction as "back" | "forward"));
 
-registeredMessageHandlers.set("previewViewPreferenceChanged", (_preview, message) => {
+registeredMessageHandlers.set("previewViewPreferenceChanged", (preview, message) => {
   setSessionViewPreference(message.preference as ViewPreferenceKey, message.value);
+  if (message.preference === "incomingChanges") {
+    scheduleIncomingChanges(preview, 0);
+  }
 });
 
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
@@ -2622,6 +2708,13 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     // The page starts with both buttons disabled: tell it what the history of this panel allows.
     postHistoryState(preview);
     postShowComments(preview);
+    // A freshly loaded page has no marks and assumes the marks are enabled; a patched page keeps
+    // what it shows.
+    if (preview.patchedRequestId === undefined) {
+      preview.incomingMarksShown = false;
+      preview.incomingEnabledPosted = true;
+    }
+    scheduleIncomingChanges(preview, 0);
     return;
   }
   if (value.type === "previewLink" && value.request) {
@@ -2911,6 +3004,7 @@ function disposePreview(preview: ActivePreview, disposePanel: boolean): void {
   preview.disposed = true;
   clearPendingOverlay(preview);
   clearContentPatchTimer(preview);
+  clearIncomingChanges(preview);
   preview.activeBlockEdit = undefined;
   preview.editLock.release();
   if (disposePanel) {
@@ -3058,6 +3152,9 @@ function createPreview(
     pendingOverlayVisible: false,
     pendingOverlayMessage: "",
     pendingOverlayShown: 0,
+    incomingMarksShown: false,
+    incomingEnabledPosted: true,
+    incomingPosts: 0,
     disposed: false,
   };
   panel.webview.options = {
@@ -3448,6 +3545,9 @@ export function activate(context: vscode.ExtensionContext): void {
         refreshPreview(event.document);
       }
     }),
+    vscode.workspace.onDidGrantWorkspaceTrust(() => {
+      for (const preview of activePreviews) scheduleIncomingChanges(preview, 0);
+    }),
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (activePreviews.size === 0
         || (!event.affectsConfiguration(PREVIEW_CONFIGURATION_SECTION)
@@ -3463,6 +3563,7 @@ export function activate(context: vscode.ExtensionContext): void {
           );
           // The switch needs no re-render: the open page follows it at once.
           postShowComments(preview);
+          scheduleIncomingChanges(preview, 0);
         }
         if (plantUmlConfigurationChanged) {
           preview.plantUmlConfiguration = readPlantUmlConfiguration(
@@ -3573,6 +3674,7 @@ export function getActivePreviewForTests():
     webviewReady: boolean;
     pendingOverlayVisible: boolean;
     pendingOverlayShown: number;
+    incomingChanges: { posts: number; last?: { enabled: boolean; ranges: { start: number; end: number }[] } };
     /** Navigation history of the panel and the last state posted to the page. */
     history: {
       entries: { uri: string; line: number }[];
@@ -3614,6 +3716,7 @@ export function getActivePreviewForTests():
       && activePreview.readyRequestId === activePreview.stage.requestId,
     pendingOverlayVisible: activePreview.pendingOverlayVisible,
     pendingOverlayShown: activePreview.pendingOverlayShown,
+    incomingChanges: { posts: activePreview.incomingPosts, last: activePreview.lastIncomingChanges },
     history: {
       ...historyOf(activePreview).snapshot(),
       posted: activePreview.lastHistoryState,

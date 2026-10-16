@@ -12,6 +12,7 @@ import { installLinkNavigation } from "./linkNavigation";
 import { installHistoryControls } from "./historyControls";
 import { installTocColumn } from "./tocColumn";
 import { installChipToggle } from "./chipToggle";
+import { installIncomingChanges } from "./incomingChanges";
 import { installViewControls } from "./viewControls";
 import { installWidthMode } from "./widthMode";
 import type { ViewPreferences } from "../state/previewViewPreferences";
@@ -125,6 +126,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   };
   // Expanding a chip changes the height of the content: keep the reading line like zoom does.
   const chipToggle = (${installChipToggle.toString()})(document, vscode, context, keepReadingLine);
+  // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
+  const incomingChanges = (${installIncomingChanges.toString()})(document);
   const historyControls = (${installHistoryControls.toString()})(document, vscode, context);
   const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
   // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.
@@ -3370,6 +3373,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     firstClearance.update();
     tocColumn.refresh();
     chipToggle.apply();
+    incomingChanges.apply();
     measure();
     if (options.restore) {
       restoreState();
@@ -3492,6 +3496,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     if (sameContext(message) && message.type === "previewShowComments") {
       chipToggle.setShowComments(message.showComments !== false);
+      return;
+    }
+    if (sameContext(message) && message.type === "previewIncomingChanges") {
+      incomingChanges.setEnabled(message.enabled !== false);
+      incomingChanges.setRanges(message.ranges);
       return;
     }
     if (sameContext(message) && message.type === "previewHistoryState") {
