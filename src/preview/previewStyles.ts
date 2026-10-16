@@ -1291,13 +1291,49 @@ nav[data-sphinx-preview-toc] ol {
 }
 
 nav[data-sphinx-preview-toc] li {
+  display: flex;
+  align-items: flex-start;
   margin: 0;
   padding-inline-start: calc(var(--sphinx-preview-toc-depth, 0) * 12px);
 }
 
+nav[data-sphinx-preview-toc] li[hidden] {
+  display: none;
+}
+
+/* Entries without sub-entries line up with the ones that have a twisty. */
+nav[data-sphinx-preview-toc] li:not([data-sphinx-preview-toc-parent]) {
+  padding-inline-start: calc(var(--sphinx-preview-toc-depth, 0) * 12px + 20px);
+}
+
+nav[data-sphinx-preview-toc] li button[data-sphinx-preview-toc-twisty] {
+  flex: none;
+  width: 20px;
+  padding: 3px 0;
+  text-align: center;
+  opacity: 0.75;
+}
+
+nav[data-sphinx-preview-toc] li button[data-sphinx-preview-toc-twisty]::before {
+  content: "\\25BE";
+}
+
+nav[data-sphinx-preview-toc] li button[data-sphinx-preview-toc-twisty][aria-expanded="false"]::before {
+  content: "\\25B8";
+}
+
+/* The section at the reading line: a tint of the text colour plus a bar, readable in the light,
+   dark and cream themes alike. */
+nav[data-sphinx-preview-toc] li[data-sphinx-preview-toc-current] > button:not([data-sphinx-preview-toc-twisty]) {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  box-shadow: inset 3px 0 0 var(--vscode-focusBorder, Highlight);
+  font-weight: 600;
+}
+
 nav[data-sphinx-preview-toc] li button {
   display: block;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   margin: 0;
   padding: 3px 6px;
   border: 0;

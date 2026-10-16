@@ -11,7 +11,10 @@ export interface TocColumnContext {
  * outside it. The column is runtime UI appended to the body (never part of the page shell) and is
  * built only while it is open. `scrollToHeading` reveals a heading at the reading line; `onChange`
  * runs after the column opened or closed, because that changes the available width. CSS reserves
- * the width and hides the column on narrow panes.
+ * the width and hides the column on narrow panes. Parent entries fold with a twisty (the folded
+ * keys, level + occurrence + text, live in the webview state and survive rebuilds). `track` marks
+ * the entry of the section at the reading line from heading tops cached per rebuild; `remeasure`
+ * refreshes those tops after a layout change (zoom, width mode, resize, content patch).
  */
 export function installTocColumn(
   document: Document,
@@ -24,13 +27,22 @@ export function installTocColumn(
   context: TocColumnContext,
   scrollToHeading: (heading: Element) => void,
   onChange: () => void,
-): { open(): boolean; refresh(): void; rebuild(): void; layout(): void } {
+  readingLine: () => number = () => 0,
+): {
+  open(): boolean;
+  refresh(): void;
+  rebuild(): void;
+  layout(): void;
+  track(): void;
+  remeasure(): void;
+  collapsed(): string[];
+} {
   const contentId = "sphinx-myst-preview-content";
   const headingSelector = "h1, h2, h3, h4";
   const excluded = "[data-okf-properties], .admonition, div[class*=\"admonition-\"], "
     + "[data-sphinx-preview-block-editor], [data-sphinx-preview-sticky-headings]";
   const button = document.querySelector("[data-sphinx-preview-toc-toggle]");
-  const saved = vscode.getState?.() as { viewToc?: unknown } | undefined;
+  const saved = vscode.getState?.() as { viewToc?: unknown; tocCollapsed?: unknown } | undefined;
   let open = typeof saved?.viewToc === "boolean"
     ? saved.viewToc
     : context.initialViewPreferences?.toc === true;
@@ -58,16 +70,103 @@ export function installTocColumn(
     return text.replace(/\s+/gu, " ").trim();
   };
 
-  const rebuild = (): void => {
-    dirty = false;
+  interface Entry {
+    heading: Element;
+    level: number;
+    text: string;
+    key: string;
+    item: HTMLElement;
+    target: HTMLElement;
+    twisty?: HTMLElement;
+    parent: number;
+    top: number;
+  }
+  let entries: Entry[] = [];
+  let represent: number[] = [];
+  let shown = -1;
+  const collapsedKeys = new Set<string>(
+    Array.isArray(saved?.tocCollapsed)
+      ? (saved.tocCollapsed as unknown[]).filter((key): key is string => typeof key === "string")
+      : [],
+  );
+
+  const collect = (): Array<{ heading: Element; level: number; text: string; key: string }> => {
     const content = document.getElementById(contentId);
-    const found: Array<{ heading: Element; level: number; text: string }> = [];
+    const found: Array<{ heading: Element; level: number; text: string; key: string }> = [];
+    const seen = new Map<string, number>();
     for (const heading of Array.from(content?.querySelectorAll(headingSelector) ?? [])) {
       if (heading.closest?.(excluded)) continue;
       const text = headingText(heading);
       if (!text) continue;
-      found.push({ heading, level: Number(heading.tagName.slice(1)), text });
+      const level = Number(heading.tagName.slice(1));
+      const base = level + "|" + text;
+      const occurrence = seen.get(base) ?? 0;
+      seen.set(base, occurrence + 1);
+      found.push({ heading, level, text, key: base + "|" + occurrence });
     }
+    return found;
+  };
+
+  const scrollTop = (): number => (Number.isFinite(window.scrollY) ? window.scrollY : 0);
+
+  const measureTops = (): void => {
+    const offset = scrollTop();
+    for (const entry of entries) {
+      const top = entry.heading.getBoundingClientRect?.().top;
+      entry.top = (Number.isFinite(top) ? top : 0) + offset;
+    }
+  };
+
+  const keepVisible = (item: HTMLElement): void => {
+    const area = nav.getBoundingClientRect?.();
+    const box = item.getBoundingClientRect?.();
+    if (!area || !box || !Number.isFinite(area.top) || !Number.isFinite(box.top)) return;
+    if (box.bottom > area.bottom) nav.scrollTop += box.bottom - area.bottom;
+    else if (box.top < area.top) nav.scrollTop -= area.top - box.top;
+  };
+
+  // Marks the entry of the section at the reading line from the cached tops; no layout read.
+  const track = (force = false): void => {
+    if (!open || entries.length === 0) return;
+    const line = scrollTop() + readingLine();
+    let current = -1;
+    for (let index = 0; index < entries.length; index += 1) {
+      // 1 px of tolerance: a heading revealed at the reading line can sit a fraction below it.
+      if (entries[index].top <= line + 1) current = index;
+      else break;
+    }
+    const next = current < 0 ? -1 : represent[current];
+    if (next === shown && !force) return;
+    if (shown >= 0 && entries[shown]) {
+      entries[shown].target.removeAttribute("aria-current");
+      entries[shown].item.removeAttribute("data-sphinx-preview-toc-current");
+    }
+    shown = next;
+    if (next < 0) return;
+    entries[next].target.setAttribute("aria-current", "location");
+    entries[next].item.setAttribute("data-sphinx-preview-toc-current", "");
+    keepVisible(entries[next].item);
+  };
+
+  const applyCollapse = (): void => {
+    const hidden: boolean[] = [];
+    represent = [];
+    entries.forEach((entry, index) => {
+      const parent = entry.parent;
+      hidden[index] = parent >= 0 && (collapsedKeys.has(entries[parent].key) || hidden[parent]);
+      represent[index] = hidden[index]
+        ? (hidden[parent] ? represent[parent] : parent)
+        : index;
+      if (hidden[index]) entry.item.setAttribute("hidden", "");
+      else entry.item.removeAttribute("hidden");
+      entry.twisty?.setAttribute("aria-expanded", collapsedKeys.has(entry.key) ? "false" : "true");
+    });
+    track(true);
+  };
+
+  const rebuild = (): void => {
+    dirty = false;
+    const found = collect();
     list?.remove();
     const next = document.createElement("ol");
     if (found.length === 0) {
@@ -77,24 +176,61 @@ export function installTocColumn(
       next.appendChild(empty);
     }
     const shallowest = Math.min(...found.map((entry) => entry.level));
-    for (const entry of found) {
+    entries = [];
+    shown = -1;
+    for (const [position, entry] of found.entries()) {
       const item = document.createElement("li");
       item.setAttribute("data-sphinx-preview-toc-entry", "");
       item.setAttribute("data-level", String(entry.level));
       item.style.setProperty("--sphinx-preview-toc-depth", String(entry.level - shallowest));
+      let parent = entries.length - 1;
+      while (parent >= 0 && entries[parent].level >= entry.level) parent = entries[parent].parent;
+      const key = entry.key;
+      const hasChildren = (found[position + 1]?.level ?? 0) > entry.level;
+      let twisty: HTMLElement | undefined;
+      if (hasChildren) {
+        twisty = document.createElement("button");
+        twisty.setAttribute("type", "button");
+        twisty.setAttribute("data-sphinx-preview-toc-twisty", "");
+        twisty.setAttribute("aria-label", "Fold " + entry.text);
+        twisty.addEventListener("click", (event) => {
+          event.preventDefault?.();
+          if (collapsedKeys.has(key)) collapsedKeys.delete(key);
+          else collapsedKeys.add(key);
+          const state = vscode.getState?.();
+          vscode.setState?.({
+            ...(state && typeof state === "object" ? state : {}),
+            tocCollapsed: Array.from(collapsedKeys),
+          });
+          applyCollapse();
+        });
+        item.setAttribute("data-sphinx-preview-toc-parent", "");
+        item.appendChild(twisty);
+      }
       const target = document.createElement("button");
       target.setAttribute("type", "button");
       target.textContent = entry.text;
       target.addEventListener("click", (event) => {
         event.preventDefault?.();
-        scrollToHeading(entry.heading);
+        // Resolved at click time: a content patch may have replaced the heading since the build.
+        const live = collect().find((candidate) => candidate.key === entry.key);
+        scrollToHeading(live ? live.heading : entry.heading);
       });
       item.appendChild(target);
+      entries.push({ ...entry, item, target, twisty, parent, top: 0 });
       next.appendChild(item);
     }
     nav.appendChild(next);
     list = next;
     layout();
+    measureTops();
+    applyCollapse();
+  };
+
+  const remeasure = (): void => {
+    if (!open || dirty || entries.length === 0) return;
+    measureTops();
+    track();
   };
 
   const refresh = (): void => {
@@ -145,5 +281,13 @@ export function installTocColumn(
     onChange();
   });
   window.addEventListener?.("resize", layout, { passive: true });
-  return { open: () => open, refresh, rebuild, layout };
+  return {
+    open: () => open,
+    refresh,
+    rebuild,
+    layout,
+    track: () => track(),
+    remeasure,
+    collapsed: () => Array.from(collapsedKeys),
+  };
 }

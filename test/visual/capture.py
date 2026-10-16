@@ -2006,11 +2006,48 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
     page.wait_for_timeout(200)
     page.evaluate("window.scrollTo(0, 0)")
     before = page.evaluate("window.scrollY")
-    page.locator("nav[data-sphinx-preview-toc] li[data-level] button").nth(8).click()
+    page.locator("nav[data-sphinx-preview-toc] li[data-level] button:not([data-sphinx-preview-toc-twisty])").nth(8).click()
     page.wait_for_timeout(400)
     after = page.evaluate(measure)
     if after["scrollY"] <= before + 50:
       failures.append(Failure(page_name, "clicking a TOC entry did not scroll to its heading"))
+    current = page.evaluate("""() => {
+      const nav = document.querySelector('nav[data-sphinx-preview-toc]');
+      const marked = [...nav.querySelectorAll('[aria-current="location"]')];
+      if (marked.length !== 1) return { count: marked.length };
+      const button = marked[0];
+      const parse = value => (value.match(/[\\d.]+/g) || []).slice(0, 3).map(Number);
+      const luminance = rgb => {
+        const [r, g, b] = rgb.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      };
+      const text = parse(getComputedStyle(button).color);
+      const base = parse(getComputedStyle(nav).backgroundColor);
+      // The highlight is a 14 % tint of the text colour over the column background.
+      const tinted = base.map((v, i) => v * 0.86 + text[i] * 0.14);
+      const hi = Math.max(luminance(text), luminance(tinted)) + 0.05;
+      const lo = Math.min(luminance(text), luminance(tinted)) + 0.05;
+      const box = button.getBoundingClientRect();
+      const area = nav.getBoundingClientRect();
+      return { count: 1, contrast: hi / lo, visible: box.top >= area.top - 1 && box.bottom <= area.bottom + 1 };
+    }""")
+    if current["count"] != 1:
+      failures.append(Failure(page_name, f"the TOC must mark exactly one current entry, found {current['count']}"))
+    else:
+      if current["contrast"] < 4.5:
+        failures.append(Failure(page_name, f"the current TOC entry contrast is {current['contrast']:.2f}, expected at least 4.5"))
+      if not current["visible"]:
+        failures.append(Failure(page_name, "the current TOC entry is scrolled out of the TOC column"))
+    twisty = page.locator("nav[data-sphinx-preview-toc] button[data-sphinx-preview-toc-twisty]").first
+    if twisty.count():
+      twisty.click()
+      page.wait_for_timeout(100)
+      folded = page.evaluate("document.querySelectorAll('nav[data-sphinx-preview-toc] li[hidden]').length")
+      twisty.click()
+      page.wait_for_timeout(100)
+      unfolded = page.evaluate("document.querySelectorAll('nav[data-sphinx-preview-toc] li[hidden]').length")
+      if folded < 1 or unfolded != 0:
+        failures.append(Failure(page_name, f"a TOC twisty must hide and show its sub-entries ({folded} hidden, then {unfolded})"))
   finally:
     if toggle.get_attribute("aria-pressed") == "true":
       toggle.click()
