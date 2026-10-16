@@ -115,6 +115,10 @@ class RuntimeElement {
       if (selector === "th, td") {
         return element.tagName === "TH" || element.tagName === "TD";
       }
+      if (selector === "table, figure, img, pre, .myst-mermaid-diagram") {
+        return ["TABLE", "FIGURE", "IMG", "PRE"].includes(element.tagName)
+          || element.className.split(" ").includes("myst-mermaid-diagram");
+      }
       return false;
     };
     const descendants = (element: RuntimeElement): RuntimeElement[] => element.childElements
@@ -286,6 +290,7 @@ interface RuntimeHarness {
   readonly refreshButton: RuntimeElement;
   readonly zoomOutButton: RuntimeElement;
   readonly zoomInButton: RuntimeElement;
+  readonly widthButton: RuntimeElement;
   readonly anchorButton: RuntimeElement;
   readonly editModeButton: RuntimeElement;
   readonly checkbox: RuntimeElement;
@@ -439,6 +444,7 @@ function createRuntimeHarness(configuration: Partial<{
   const refreshButton = new RuntimeElement({}, windowState, 0, 30);
   const zoomOutButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const zoomInButton = new RuntimeElement({}, windowState, 0, 30, "button");
+  const widthButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const anchorButton = new RuntimeElement({}, windowState, 0, 30);
   const editModeButton = new RuntimeElement({}, windowState, 0, 30);
   const toolbar = new RuntimeElement({}, windowState, 12, Math.max(0, toolbarBottom - 12));
@@ -651,6 +657,7 @@ function createRuntimeHarness(configuration: Partial<{
       if (selector === "[data-sphinx-preview-refresh]") return refreshButton;
       if (selector === "[data-sphinx-preview-zoom-out]") return zoomOutButton;
       if (selector === "[data-sphinx-preview-zoom-in]") return zoomInButton;
+      if (selector === "[data-sphinx-preview-width-toggle]") return widthButton;
       if (selector === "[data-sphinx-preview-anchor]") return anchorButton;
       if (selector === "[data-sphinx-preview-edit-toggle]") return editingEnabled ? editModeButton : null;
       if (selector === "[data-sphinx-preview-toolbar]") return toolbar;
@@ -748,6 +755,7 @@ function createRuntimeHarness(configuration: Partial<{
     refreshButton,
     zoomOutButton,
     zoomInButton,
+    widthButton,
     anchorButton,
     editModeButton,
     checkbox,
@@ -5546,9 +5554,9 @@ function traceStartup(
     const harness = createRuntimeHarness(configuration, undefined, undefined, savedAnchorMode);
     const toolbar = [harness.themeButton, harness.refreshButton, harness.anchorButton, harness.editModeButton];
     const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion",
-      "data-sphinx-preview-zoom"];
+      "data-sphinx-preview-zoom", "data-sphinx-preview-width"];
     // The zoom buttons and the zoom of the root do not depend on the content (T08).
-    const zoomButtons = [harness.zoomOutButton, harness.zoomInButton];
+    const zoomButtons = [harness.zoomOutButton, harness.zoomInButton, harness.widthButton];
     return {
       effects: entries
         .filter((entry) => !(entry.method === "addEventListener" && toolbar.includes(entry.element)))
@@ -6937,4 +6945,74 @@ test("T08: saved webview state wins over the initial context", () => {
     initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true },
   });
   assert.equal(initialOnly.documentElement.getAttribute("data-sphinx-preview-zoom"), "150");
+});
+
+function widthModeFixture(initial?: string) {
+  const harness = createRuntimeHarness(initial
+    ? { initialViewPreferences: { zoom: 100, widthMode: initial as "auto", toc: false, incomingChanges: true } }
+    : {});
+  harness.previewContent.clientWidth = 700;
+  harness.documentElement.clientWidth = 1000;
+  const make = (tag: string, scrollWidth: number): RuntimeElement => {
+    const element = new RuntimeElement({}, harness.windowState, 0, 40, tag);
+    element.scrollWidth = scrollWidth;
+    harness.previewContent.appendChild(element);
+    return element;
+  };
+  return { harness, wide: make("table", 900), small: make("table", 400), huge: make("pre", 1600) };
+}
+
+test("T10: the width button cycles margin, auto, full width and posts widthMode", () => {
+  const { harness } = widthModeFixture();
+  const root = harness.documentElement;
+  assert.equal(root.getAttribute("data-sphinx-preview-width"), "margin");
+  assert.equal(harness.widthButton.getAttribute("aria-label"), "Width: Margin");
+  const before = harness.messages.length;
+  const seen: string[] = [];
+  for (let click = 0; click < 3; click += 1) {
+    harness.widthButton.dispatch("click");
+    seen.push(String(root.getAttribute("data-sphinx-preview-width")));
+  }
+  assert.deepEqual(seen, ["auto", "full", "margin"]);
+  const posted = harness.messages.slice(before).filter((m) => m.type === "previewViewPreferenceChanged");
+  assert.deepEqual(posted.map((m) => [m.preference, m.value]),
+    [["widthMode", "auto"], ["widthMode", "full"], ["widthMode", "margin"]]);
+  assert.equal(posted[0].documentId, "file:///active.md");
+  harness.widthButton.dispatch("click");
+  assert.equal(harness.widthButton.getAttribute("aria-label"), "Width: Auto");
+  assert.equal(harness.widthButton.getAttribute("data-tooltip"), "Width: Auto");
+  harness.widthButton.dispatch("click");
+  assert.equal(harness.widthButton.getAttribute("aria-label"), "Width: Full width");
+  assert.equal(harness.getWebviewState().viewWidthMode, "full");
+});
+
+test("T10: only elements wider than the column are flagged, and only in Auto", () => {
+  const { harness, wide, small, huge } = widthModeFixture();
+  assert.equal(wide.getAttribute("data-sphinx-preview-wide"), null, "margin: nothing flagged");
+  harness.widthButton.dispatch("click");
+  assert.equal(wide.getAttribute("data-sphinx-preview-wide"), "");
+  assert.equal(wide.style.getPropertyValue("--sphinx-preview-breakout"), "200px");
+  assert.equal(small.getAttribute("data-sphinx-preview-wide"), null);
+  // Never wider than the pane minus a 16 px gutter on each side.
+  assert.equal(huge.style.getPropertyValue("--sphinx-preview-breakout"), "268px");
+  harness.widthButton.dispatch("click");
+  assert.equal(wide.getAttribute("data-sphinx-preview-wide"), null, "full: cleared");
+  harness.widthButton.dispatch("click");
+  harness.widthButton.dispatch("click");
+  assert.equal(wide.getAttribute("data-sphinx-preview-wide"), "");
+  harness.widthButton.dispatch("click");
+  assert.equal(huge.getAttribute("data-sphinx-preview-wide"), null);
+});
+
+test("T10: the saved width mode applies at startup and an edited element keeps the column", () => {
+  const { harness, wide } = widthModeFixture("auto");
+  harness.dispatchMessage({ type: "noop" });
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-width"), "auto");
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(wide.getAttribute("data-sphinx-preview-wide"), "");
+  wide.setAttribute("data-sphinx-preview-editing", "true");
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(wide.getAttribute("data-sphinx-preview-wide"), null);
 });

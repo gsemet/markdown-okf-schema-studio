@@ -1491,6 +1491,7 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
     for selector, label in (
         ('[data-sphinx-preview-zoom-out]', "Zoom out"),
         ('[data-sphinx-preview-zoom-in]', "Zoom in"),
+        ('[data-sphinx-preview-width-toggle]', "Width: Margin"),
     ):
         button = toolbar.locator(selector)
         if button.count() != 1 or button.get_attribute("aria-label") != label:
@@ -1510,8 +1511,8 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         return
     if rows[0]["buttons"] != expected_main:
         failures.append(Failure(page_name, f"toolbar row 1 does not hold {expected_main} buttons: {rows[0]['buttons']}"))
-    if rows[1]["buttons"] < 2:
-        failures.append(Failure(page_name, "toolbar row 2 has fewer than two buttons"))
+    if rows[1]["buttons"] < 3:
+        failures.append(Failure(page_name, "toolbar row 2 has fewer than three buttons"))
     if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5:
         failures.append(Failure(page_name, "toolbar rows overlap"))
     # At the zoom limits the toolbar stays put and covers neither the sticky band text nor the page.
@@ -1803,6 +1804,92 @@ def check_top_spacing(page: Page, scenario: dict, failures: list[Failure]) -> No
     ))
   if geometry["overlaps"]:
     failures.append(Failure(page_name, f"{selector} overlaps the floating toolbar"))
+
+
+def check_width_modes(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The Width button cycles margin, auto and full; only Auto lets wide blocks leave the column."""
+  if not scenario.get("widthModeChecks"):
+    return
+  page_name = scenario["page"]
+  button = page.locator("[data-sphinx-preview-width-toggle]")
+  if button.count() != 1:
+    failures.append(Failure(page_name, "the Width button is missing"))
+    return
+  measure = """() => {
+    const content = document.getElementById('sphinx-myst-preview-content');
+    const style = getComputedStyle(content);
+    const box = content.getBoundingClientRect();
+    const columnLeft = box.left + parseFloat(style.paddingLeft);
+    const columnRight = box.right - parseFloat(style.paddingRight);
+    const pane = document.documentElement.clientWidth;
+    const rect = element => { const r = element.getBoundingClientRect(); return { left: r.left, right: r.right, width: r.width }; };
+    const tables = [...content.querySelectorAll(':scope > table')].map(rect);
+    const figure = content.querySelector(':scope > figure');
+    const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+    return {
+      mode: document.documentElement.getAttribute('data-sphinx-preview-width'),
+      columnLeft, columnRight, pane,
+      tables,
+      figure: figure ? rect(figure) : null,
+      overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      bandPadding: band ? parseFloat(getComputedStyle(band).paddingLeft) : 0,
+    };
+  }"""
+  def settle() -> None:
+    page.wait_for_timeout(250)
+  try:
+    seen = {}
+    for expected in ("margin", "auto", "full"):
+      for _ in range(3):
+        if page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-width')") == expected:
+          break
+        button.click()
+        settle()
+      state = page.evaluate(measure)
+      seen[expected] = state
+      if state["mode"] != expected:
+        failures.append(Failure(page_name, f"the Width button did not reach {expected}: {state['mode']}"))
+        continue
+      if state["overflowX"] > 1:
+        failures.append(Failure(page_name, f"{expected}: horizontal page scroll of {state['overflowX']}px"))
+      if len(state["tables"]) < 2:
+        failures.append(Failure(page_name, "the fixture tables are missing"))
+        continue
+      small, wide = state["tables"][0], state["tables"][1]
+      column = state["columnRight"] - state["columnLeft"]
+      inside = lambda r: r["left"] >= state["columnLeft"] - 1.5 and r["right"] <= state["columnRight"] + 1.5
+      if not inside(small):
+        failures.append(Failure(page_name, f"{expected}: the small table leaves the column"))
+      gutter_ok = lambda r: r["left"] >= 15 and r["right"] <= state["pane"] - 15
+      if expected == "margin":
+        if not inside(wide):
+          failures.append(Failure(page_name, "margin: the wide table leaves the column"))
+        if state["figure"] and not inside(state["figure"]):
+          failures.append(Failure(page_name, "margin: the figure leaves the column"))
+      if expected == "auto":
+        if state["pane"] - 32 > column + 4:
+          if wide["width"] <= column + 4:
+            failures.append(Failure(page_name, f"auto: the wide table did not break out ({wide['width']:.0f}px, column {column:.0f}px)"))
+          if not gutter_ok(wide):
+            failures.append(Failure(page_name, "auto: the wide table leaves the pane gutters"))
+          if abs((wide["left"] + wide["right"]) / 2 - state["pane"] / 2) > 3:
+            failures.append(Failure(page_name, "auto: the wide table is not centred on the pane"))
+          if state["figure"] and state["figure"]["width"] <= column + 4:
+            failures.append(Failure(page_name, "auto: the wide figure did not break out"))
+          if state["figure"] and not gutter_ok(state["figure"]):
+            failures.append(Failure(page_name, "auto: the wide figure leaves the pane gutters"))
+      if expected == "full":
+        if abs(column - (state["pane"] - 2 * (state["columnLeft"] - 0))) > 40 and column < state["pane"] - 80:
+          failures.append(Failure(page_name, f"full: the column ({column:.0f}px) does not span the pane ({state['pane']}px)"))
+    margin, full = seen.get("margin"), seen.get("full")
+    if margin and full and (full["columnRight"] - full["columnLeft"]) + 1 < (margin["columnRight"] - margin["columnLeft"]):
+      failures.append(Failure(page_name, "full: the column is narrower than in margin"))
+  finally:
+    for _ in range(3):
+      if page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-width')") == "margin":
+        break
+      button.click()
+      page.wait_for_timeout(150)
 
 
 FIRST_ELEMENT_GAP = 40
@@ -3493,7 +3580,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

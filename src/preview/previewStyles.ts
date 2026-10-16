@@ -1236,6 +1236,30 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   display: block;
 }
 
+[data-sphinx-preview-width-toggle] svg {
+  display: none;
+}
+
+[data-sphinx-preview-width-toggle][data-width-mode="margin"] [data-width-icon="margin"],
+[data-sphinx-preview-width-toggle][data-width-mode="auto"] [data-width-icon="auto"],
+[data-sphinx-preview-width-toggle][data-width-mode="full"] [data-width-icon="full"] {
+  display: block;
+}
+
+/* Full width: no column limit. A large pixel width keeps the sticky band padding math valid. */
+html[data-sphinx-preview-width="full"] {
+  --sphinx-preview-column-width: 100000px;
+}
+
+/* Auto: a table, figure, image or code block wider than the column breaks out, centred on the
+   pane. The runtime sets the extra width; an element under edit keeps the column width. */
+html[data-sphinx-preview-width="auto"] #sphinx-myst-preview-content > [data-sphinx-preview-wide]:not([data-sphinx-preview-editing="true"]) {
+  box-sizing: border-box;
+  width: calc(100% + var(--sphinx-preview-breakout, 0px));
+  max-width: none;
+  margin-inline: calc(var(--sphinx-preview-breakout, 0px) / -2);
+}
+
 html, body {
   font-family: var(--sphinx-preview-font);
   font-size: var(--sphinx-preview-zoomed-font-size);

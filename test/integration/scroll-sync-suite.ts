@@ -584,6 +584,32 @@ export async function run(): Promise<void> {
       }
     }
     assert.equal(document.getText(), fs.readFileSync(filePath, "utf8"), "scrolling must not edit the document");
+    scenario = "width-cycle-reading-line";
+    {
+      const widthFrame = await previewFrame(page);
+      await widthFrame.evaluate(() => window.scrollTo(0, Math.floor(window.document.documentElement.scrollHeight / 2)));
+      await settle();
+      const probe = (): Promise<{ id: string; top: number }> => widthFrame.evaluate(() => {
+        const heading = [...window.document.querySelectorAll("#sphinx-myst-preview-content h2")]
+          .find((candidate) => candidate.getBoundingClientRect().top >= 160);
+        return { id: heading?.textContent ?? "", top: heading?.getBoundingClientRect().top ?? -1 };
+      });
+      const before = await probe();
+      assert.ok(before.id.length > 0, "a heading is visible at mid-document");
+      const widthButton = widthFrame.locator("[data-sphinx-preview-width-toggle]");
+      for (const expected of ["auto", "full", "margin"]) {
+        await widthButton.click();
+        await settle();
+        assert.equal(await widthFrame.locator("html").getAttribute("data-sphinx-preview-width"), expected);
+        const heading = await widthFrame.evaluate((text) => {
+          const match = [...window.document.querySelectorAll("#sphinx-myst-preview-content h2")]
+            .find((candidate) => candidate.textContent === text);
+          return match ? match.getBoundingClientRect().top : -1;
+        }, before.id);
+        assert.ok(Math.abs(heading - before.top) <= 40, `${expected}: the reading line moved from ${before.top} to ${heading}`);
+      }
+    }
+    passedScenarios.push(scenario);
     scenario = "keyboard-navigation";
     await runBlockNavigation(page, directory, async (keyboardFrame, keyboardDocument, value) => {
       assert.equal(await keyboardFrame.locator("[data-sphinx-preview-edit-toggle]").getAttribute("aria-pressed"), "true");

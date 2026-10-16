@@ -390,13 +390,13 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 test("preview toolbar provides refresh, editor anchoring, edit mode and theme controls", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
-  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 6);
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 7);
   const [mainRow, viewRow] = toolbar.split('<div data-sphinx-preview-toolbar-row="view">');
   assert.match(mainRow, /data-sphinx-preview-toolbar-row="main"/u);
   assert.equal((mainRow.match(/<button\b/gu) ?? []).length, 4);
   assert.equal((mainRow.match(/<\/button><button\b/gu) ?? []).length, 3);
-  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 2);
-  assert.match(viewRow, /data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in/u);
+  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 3);
+  assert.match(viewRow, /data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in[\s\S]*data-sphinx-preview-width-toggle/u);
   assert.doesNotMatch(toolbar, /style=/u);
   assert.doesNotMatch(toolbar, /data-sphinx-preview-mode-controls|role="group"/u);
   for (const control of [
@@ -407,7 +407,7 @@ test("preview toolbar provides refresh, editor anchoring, edit mode and theme co
   ]) {
     assert.ok(toolbar.includes(control), `expected toolbar control ${control}`);
   }
-  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 6);
+  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 7);
   assert.match(
     PREVIEW_THEME_CSS,
     /button\[data-tooltip\]::after\s*\{[^}]*content: attr\(data-tooltip\);[^}]*visibility: hidden;[^}]*opacity: 0;/u,
@@ -727,4 +727,16 @@ test("T08: zoom scales the content font size and the column width together", () 
   );
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar-row\]\s*\{[^}]*display: flex;/u);
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 96px;/u);
+});
+
+test("T10: full width lifts the column limit and auto lets flagged elements break out", () => {
+  assert.match(PREVIEW_THEME_CSS,
+    /html\[data-sphinx-preview-width="full"\]\s*\{[^}]*--sphinx-preview-column-width: 100000px;/u);
+  const rule = /html\[data-sphinx-preview-width="auto"\] #sphinx-myst-preview-content > \[data-sphinx-preview-wide\][^{]*\{([^}]*)\}/u
+    .exec(PREVIEW_THEME_CSS);
+  assert.ok(rule, "the auto breakout rule exists");
+  assert.match(rule[1]!, /width: calc\(100% \+ var\(--sphinx-preview-breakout, 0px\)\);/u);
+  assert.match(rule[1]!, /max-width: none;/u);
+  assert.match(PREVIEW_THEME_CSS,
+    /\[data-sphinx-preview-width-toggle\]\[data-width-mode="auto"\] \[data-width-icon="auto"\]/u);
 });

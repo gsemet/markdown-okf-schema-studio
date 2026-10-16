@@ -65,6 +65,8 @@ export interface Scenario {
    * First-element gap (T09): in the preview the first element sits 40 px below the top; in edit
    * mode an open first-block editor and the Start writing button are never under the toolbar.
    */
+  /** Cycles the Width button through margin, auto and full width and measures the column and the wide elements. */
+  widthModeChecks?: boolean;
   firstElementGap?: "element" | "empty" | "wide-margin" | "properties";
   /** Hovering the first code block shows the copy button in its top right; a click posts the code. */
   codeCopyChecks?: boolean;
@@ -1315,6 +1317,22 @@ export const SCENARIOS: Scenario[] = [
       + "the top, or lower only so that its header and Description toggle never sit under the "
       + "toolbar (preview and edit mode).",
   })),
+  ...([
+    ["light", undefined],
+    ["dark", undefined],
+    ["light", "cream" as const],
+  ] as const).flatMap(([theme, mode]) => [WIDE, XLARGE].map((viewport) => ({
+    id: `width-modes-${mode ?? theme}-${viewport.width}`,
+    fixture: "29-width-modes",
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...viewport,
+    scroll: { kind: "top" as const },
+    widthModeChecks: true,
+    description: "The Width button cycles Margin, Auto and Full width. Margin keeps every block in the "
+      + "column; Auto lets the wide table and the wide image break out, centred on the pane, while the "
+      + "small table keeps the column; Full width removes the column limit. No horizontal page scroll.",
+  }))),
   ...[WIDE, NARROW].map((viewport) => ({
     id: `first-element-gap-empty-${viewport.width}`,
     fixture: "20-empty-document",
