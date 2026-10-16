@@ -61,6 +61,11 @@ export interface Scenario {
    * "empty-start" the Start writing button, "empty-open" the editor after pressing Enter.
    */
   topSpacingChecks?: "first-block" | "empty-start" | "empty-open";
+  /**
+   * First-element gap (T09): in the preview the first element sits 40 px below the top; in edit
+   * mode an open first-block editor and the Start writing button are never under the toolbar.
+   */
+  firstElementGap?: "element" | "empty" | "wide-margin" | "properties";
   /** Hovering the first code block shows the copy button in its top right; a click posts the code. */
   codeCopyChecks?: boolean;
   expectStickyGrowth?: boolean;
@@ -1280,6 +1285,55 @@ export const SCENARIOS: Scenario[] = [
     description: "Inline code at 460px. Identifiers in the squeezed table cells are not split mid-word "
       + "(the table scrolls or widens instead), while the long REGIONAL_ARBITER identifier in the "
       + "paragraph wraps without causing horizontal page overflow.",
+  },
+  ...([
+    ["paragraph", "23-first-paragraph"],
+    ["h1", "17-wrapped-editing"],
+    ["h2", "24-first-h2"],
+    ["h3", "25-first-h3"],
+    ["table", "26-first-table"],
+    ["image", "27-first-image"],
+    ["admonition", "28-first-admonition"],
+  ] as const).flatMap(([name, fixture]) => [WIDE, NARROW].map((viewport) => ({
+    id: `first-element-gap-${name}-${viewport.width}`,
+    fixture,
+    theme: "light",
+    ...viewport,
+    scroll: { kind: "top" as const },
+    firstElementGap: "element" as const,
+    description: `The first element is a ${name}: it starts 40 px below the top of the preview, `
+      + "in the preview and in edit mode; an open first-block editor stays clear of the toolbar.",
+  }))),
+  ...[WIDE, NARROW, XLARGE].map((viewport) => ({
+    id: `first-element-gap-properties-${viewport.width}`,
+    fixture: "07-frontmatter",
+    theme: "light",
+    ...viewport,
+    scroll: { kind: "top" as const },
+    firstElementGap: "properties" as const,
+    description: "The properties table comes first and has clickable controls: it starts 40 px below "
+      + "the top, or lower only so that its header and Description toggle never sit under the "
+      + "toolbar (preview and edit mode).",
+  })),
+  ...[WIDE, NARROW].map((viewport) => ({
+    id: `first-element-gap-empty-${viewport.width}`,
+    fixture: "20-empty-document",
+    theme: "dark",
+    ...viewport,
+    scroll: { kind: "top" as const },
+    firstElementGap: "empty" as const,
+    description: "An empty document: in edit mode the Start writing button starts 40 px below the "
+      + "top, or lower only to stay clear of the toolbar.",
+  })),
+  {
+    id: "first-element-gap-wide-margin-1600",
+    fixture: "23-first-paragraph",
+    theme: "light",
+    ...XLARGE,
+    scroll: { kind: "top" },
+    firstElementGap: "wide-margin",
+    description: "A wide pane with the column far from the toolbar: the clearance is 0 and the "
+      + "first-block editor frame starts exactly 40 px below the top.",
   },
   ...["white", "dark"].flatMap((mode) => [WIDE, NARROW].map((viewport) => ({
     id: `frontmatter-link-details-${mode}-${viewport.width}`,

@@ -7,6 +7,7 @@ import { createAnchorPolicy } from "./anchorPolicy";
 import { createMarkdownTableTools } from "./markdownTable";
 import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
+import { installFirstClearance } from "./firstClearance";
 import { installLinkNavigation } from "./linkNavigation";
 import { installViewControls } from "./viewControls";
 import type { ViewPreferences } from "../state/previewViewPreferences";
@@ -100,6 +101,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     openMappedEditor(block, event.target, "end");
   }, true);
   const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context);
+  const firstClearance = (${installFirstClearance.toString()})(document, window);
   const codeCopy = (${installCodeCopy.toString()})(document, window, (text) => vscode.postMessage({
     type: "previewCopyText",
     documentId: context.documentId,
@@ -3325,6 +3327,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       image.decode?.().then(stabilizeLayout).catch(() => undefined);
     });
     markWideTables();
+    firstClearance.update();
     measure();
     if (options.restore) {
       restoreState();

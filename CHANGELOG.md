@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Every preview now starts its first element 40 px below the top, whatever it is (text, heading,
+  table, properties, image, empty page); an open first-block editor only moves lower to clear the
+  toolbar.
 - The preview toolbar has a second row with Zoom - and Zoom + (70 % to 200 %, 10 % steps); the text
   and the column scale together, and the zoom is remembered per workspace.
 - In edit mode, clicking an image inside a link (Cmd/Ctrl+click still follows it) or a raw

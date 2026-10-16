@@ -666,14 +666,19 @@ test("T28: insertion points are zero-height, hover-revealed gutter buttons", () 
   );
 });
 
-test("top spacing: the first block's editor clears the two-row toolbar (96px) and the empty-document button keeps 24px", () => {
+test("first-element gap: 40px on the first child, clearance only on the first editor and the Start writing button", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-block-editor--first\s*\{\s*margin-top: 96px;/u,
+    /#sphinx-myst-preview-content > :first-child\s*\{\s*margin-top: 40px;/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-insert-point--start\.sphinx-preview-insert-point--first\s*\{\s*margin-top: 24px;/u,
+    /\[data-okf-properties\]:first-child,[^{]*\.sphinx-preview-block-editor--first,[^{]*\.sphinx-preview-insert-point--first\s*\{\s*margin-top: calc\(40px \+ var\(--sphinx-preview-first-clearance, 0px\)\);/u,
+  );
+  // The gap is a margin: padding on the column would move its content box and the scroll anchoring.
+  assert.doesNotMatch(
+    PREVIEW_THEME_CSS,
+    /#sphinx-myst-preview-content \{[^}]*padding: 40px/u,
   );
 });
 

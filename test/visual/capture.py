@@ -1805,6 +1805,110 @@ def check_top_spacing(page: Page, scenario: dict, failures: list[Failure]) -> No
     failures.append(Failure(page_name, f"{selector} overlaps the floating toolbar"))
 
 
+FIRST_ELEMENT_GAP = 40
+FIRST_ELEMENT_TOLERANCE = 2
+
+
+def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """Every page starts its first element 40px below the top; open editors clear the toolbar."""
+  mode = scenario.get("firstElementGap")
+  if not mode:
+    return
+  page_name = scenario["page"]
+  measure = """selector => {
+    const element = document.querySelector(selector);
+    if (!element) return null;
+    const rect = element.getBoundingClientRect();
+    const bar = document.querySelector('[data-sphinx-preview-toolbar]')?.getBoundingClientRect();
+    const overlaps = !!bar && rect.left < bar.right && rect.right > bar.left
+      && rect.top < bar.bottom && rect.bottom > bar.top;
+    const clearance = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--sphinx-preview-first-clearance')) || 0;
+    return { top: rect.top + window.scrollY, overlaps, clearance };
+  }"""
+  first = "#sphinx-myst-preview-content > :first-child"
+  if mode == "properties":
+    props = """() => {
+      const section = document.querySelector('#sphinx-myst-preview-content > [data-okf-properties]');
+      if (!section) return null;
+      const bar = document.querySelector('[data-sphinx-preview-toolbar]').getBoundingClientRect();
+      const hit = r => r.width > 0 && r.height > 0 && r.left < bar.right && r.right > bar.left
+        && r.top < bar.bottom && r.bottom > bar.top;
+      const controls = [...section.querySelectorAll('thead th, [data-okf-description-toggle], .okf-column-heading')]
+        .filter(e => e.getBoundingClientRect().width > 0 && hit(e.getBoundingClientRect()));
+      const clearance = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--sphinx-preview-first-clearance')) || 0;
+      return { top: section.getBoundingClientRect().top + window.scrollY, hits: controls.length, clearance };
+    }"""
+    for state in ("preview", "edit"):
+      if state == "edit":
+        page.locator("[data-sphinx-preview-edit-toggle]").click()
+        page.wait_for_timeout(150)
+      got = page.evaluate(props)
+      if not got:
+        failures.append(Failure(page_name, "no properties table is first"))
+        return
+      expected = FIRST_ELEMENT_GAP + got["clearance"]
+      if abs(got["top"] - expected) > FIRST_ELEMENT_TOLERANCE:
+        failures.append(Failure(
+          page_name,
+          f"[{state}] the properties table starts {got['top']:.1f}px from the top, expected {expected:.1f}px "
+          f"(40px + clearance {got['clearance']:.1f}px)"))
+      if got["hits"]:
+        failures.append(Failure(page_name, f"[{state}] the properties header or Description toggle sits under the toolbar"))
+      if page.viewport_size["width"] >= 1600 and (got["clearance"] != 0 or abs(got["top"] - FIRST_ELEMENT_GAP) > FIRST_ELEMENT_TOLERANCE):
+        failures.append(Failure(page_name, f"[{state}] wide pane: expected exactly 40px and no clearance, got {got}"))
+    return
+  if mode != "empty":
+    preview = page.evaluate(measure, first)
+    if not preview:
+      failures.append(Failure(page_name, "the preview has no first element"))
+      return
+    if abs(preview["top"] - FIRST_ELEMENT_GAP) > FIRST_ELEMENT_TOLERANCE:
+      failures.append(Failure(
+        page_name,
+        f"the first element starts {preview['top']:.1f}px from the top in the preview, expected {FIRST_ELEMENT_GAP}px",
+      ))
+  page.locator("[data-sphinx-preview-edit-toggle]").click()
+  page.wait_for_timeout(150)
+  if mode == "empty":
+    selector = ".sphinx-preview-insert-point--start button"
+  else:
+    selector = first
+    after = page.evaluate(measure, first)
+    if abs(after["top"] - FIRST_ELEMENT_GAP) > FIRST_ELEMENT_TOLERANCE:
+      failures.append(Failure(
+        page_name,
+        f"the first element moved to {after['top']:.1f}px when edit mode was switched on",
+      ))
+    tag = page.evaluate("selector => document.querySelector(selector).tagName", first)
+    kind = page.evaluate("selector => document.querySelector(selector).hasAttribute('data-okf-properties')", first)
+    if tag in {"TABLE"} or kind or page.evaluate(
+      "selector => !!document.querySelector(selector).querySelector('table')", first
+    ):
+      return
+    page.locator(first).click(position={"x": 12, "y": 6})
+    page.locator(".sphinx-preview-block-editor textarea").wait_for(state="visible", timeout=2000)
+    selector = ".sphinx-preview-block-editor"
+  geometry = page.evaluate(measure, selector)
+  if not geometry:
+    failures.append(Failure(page_name, f"{selector} is not in the page"))
+    return
+  if geometry["overlaps"]:
+    failures.append(Failure(page_name, f"{selector} overlaps the floating toolbar"))
+  if geometry["top"] < FIRST_ELEMENT_GAP - FIRST_ELEMENT_TOLERANCE:
+    failures.append(Failure(page_name, f"{selector} starts {geometry['top']:.1f}px from the top, expected at least {FIRST_ELEMENT_GAP}px"))
+  expected = FIRST_ELEMENT_GAP + geometry["clearance"]
+  if abs(geometry["top"] - expected) > FIRST_ELEMENT_TOLERANCE:
+    failures.append(Failure(
+      page_name,
+      f"{selector} starts {geometry['top']:.1f}px from the top, expected {expected:.1f}px "
+      f"(40px + clearance {geometry['clearance']:.1f}px)",
+    ))
+  if mode == "wide-margin" and geometry["clearance"] != 0:
+    failures.append(Failure(page_name, f"a wide pane needs no clearance, found {geometry['clearance']}px"))
+
+
 def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The copy button follows the hovered code block and posts its raw code."""
   if not scenario.get("codeCopyChecks"):
@@ -3092,8 +3196,11 @@ def check_final_frame(page: Page, scenario: dict, failures: list[Failure]) -> di
         if (bounds.left < -1 || bounds.right > innerWidth + 1 || bounds.top < 0 || bounds.bottom > innerHeight + 1) {
           errors.push(`final editor is clipped: ${element.getAttribute('aria-label')}`);
         }
+        // The toolbar only reserves room for text that shares horizontal space with it.
         const reserved = Math.max(0, ...[toolbar, sticky].filter(item => item && visible(item))
-          .map(item => item.getBoundingClientRect().bottom));
+          .map(item => item.getBoundingClientRect())
+          .filter(box => bounds.left < box.right && bounds.right > box.left)
+          .map(box => box.bottom));
         if (bounds.top < reserved - 1) errors.push('final editor text collides with toolbar/sticky overlay');
       }
       const visibleContent = [...(main?.querySelectorAll('p, pre, figure, table, textarea, .sphinx-preview-insert-point--start button') || [])].filter(visible);
@@ -3386,7 +3493,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:
