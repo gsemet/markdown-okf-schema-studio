@@ -57,7 +57,7 @@ const webview = {
 
 let nextRequestId = 1;
 
-async function page(markdown: string, options: { requestId?: number; version?: number; zoom?: number } = {}): Promise<string> {
+async function page(markdown: string, options: { requestId?: number; version?: number; zoom?: number; incoming?: boolean } = {}): Promise<string> {
   const requestId = options.requestId ?? nextRequestId++;
   const version = options.version ?? requestId;
   const sourcePath = path.join(fixtureDirectory, "inline.md");
@@ -82,8 +82,8 @@ async function page(markdown: string, options: { requestId?: number; version?: n
       requestId,
       activeSourceFile: result.stage.activeDocumentPath,
       ...(requestId % 2 === 0 ? { initialAnchor: 3 } : {}),
-      ...(options.zoom !== undefined
-        ? { initialViewPreferences: { zoom: options.zoom, widthMode: "margin", toc: false, incomingChanges: true } }
+      ...(options.zoom !== undefined || options.incoming !== undefined
+        ? { initialViewPreferences: { zoom: options.zoom ?? 100, widthMode: "margin", toc: false, incomingChanges: options.incoming ?? true } }
         : {}),
     },
     workspaceRoot,
@@ -123,6 +123,15 @@ test("T34: two renders of one document type have equal shell keys despite other 
   assert.equal(shellKey(second), key);
   assert.equal(canPatch(first, second), true);
   assert.equal(planContentPatch(first, second)?.contentHtml, extractMainContent(second)?.inner);
+});
+
+test("T17: the shell key is equal whatever the incoming-changes preference, and the Diff button is in both", async () => {
+  const on = await page("# Title\n\nText.\n", { requestId: 1, version: 1, incoming: true });
+  const off = await page("# Title\n\nText.\n", { requestId: 2, version: 2, incoming: false });
+  for (const html of [on, off]) assert.match(html, /data-sphinx-preview-diff-toggle/u);
+  assert.ok(shellKey(on));
+  assert.equal(shellKey(off), shellKey(on));
+  assert.equal(canPatch(on, off), true);
 });
 
 test("T34: the shell key ignores the status region and the runtime script, and nothing else", async () => {

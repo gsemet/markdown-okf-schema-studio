@@ -18,9 +18,11 @@ const WIDTH_BUTTON = `<button type="button" data-sphinx-preview-width-toggle dat
 
 const TOC_BUTTON = `<button type="button" data-sphinx-preview-toc-toggle aria-pressed="false" aria-label="Show table of contents" title="Show table of contents" data-tooltip="Show table of contents"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h2M10 6h10M4 12h2M10 12h10M4 18h2M10 18h10"></path></svg></button>`;
 
+const DIFF_BUTTON = `<button type="button" data-sphinx-preview-diff-toggle aria-pressed="true" aria-label="Hide changes since last commit" title="Hide changes since last commit" data-tooltip="Hide changes since last commit"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 4v12M8 16a2.5 2.5 0 1 0 0 .01M16 20V8M16 8a2.5 2.5 0 1 0 0-.01M13.5 5.5 16 8l2.5-2.5"></path></svg></button>`;
+
 export function renderPreviewToolbar(editingEnabled = true): string {
   const mainRow = `<div data-sphinx-preview-toolbar-row="main">${REFRESH_BUTTON}${ANCHOR_BUTTON}${editingEnabled ? EDIT_BUTTON : ""}${THEME_BUTTON}</div>`;
-  const viewRow = `<div data-sphinx-preview-toolbar-row="view">${BACK_BUTTON}${NEXT_BUTTON}${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}${WIDTH_BUTTON}${TOC_BUTTON}</div>`;
+  const viewRow = `<div data-sphinx-preview-toolbar-row="view">${BACK_BUTTON}${NEXT_BUTTON}${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}${WIDTH_BUTTON}${TOC_BUTTON}${DIFF_BUTTON}</div>`;
   return `<div data-sphinx-preview-toolbar role="toolbar" aria-label="Preview controls">${mainRow}${viewRow}</div>`;
 }
 

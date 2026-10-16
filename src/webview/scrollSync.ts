@@ -13,6 +13,7 @@ import { installHistoryControls } from "./historyControls";
 import { installTocColumn } from "./tocColumn";
 import { installChipToggle } from "./chipToggle";
 import { installIncomingChanges } from "./incomingChanges";
+import { installIncomingToggle } from "./incomingToggle";
 import { installViewControls } from "./viewControls";
 import { installWidthMode } from "./widthMode";
 import type { ViewPreferences } from "../state/previewViewPreferences";
@@ -128,6 +129,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const chipToggle = (${installChipToggle.toString()})(document, vscode, context, keepReadingLine);
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
   const incomingChanges = (${installIncomingChanges.toString()})(document);
+  const incomingToggle = (${installIncomingToggle.toString()})(document, vscode, context);
   const historyControls = (${installHistoryControls.toString()})(document, vscode, context);
   const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
   // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.

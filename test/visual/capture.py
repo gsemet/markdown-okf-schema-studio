@@ -1468,6 +1468,47 @@ def check_okf_schema_rendering(page: Page, scenario: dict, failures: list[Failur
                 Failure(page_name, "description text is not smaller than value text")
             )
 
+def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
+    """The Diff button is last in row 2, shows both states, and hides with the setting."""
+    diff = toolbar.locator('[data-sphinx-preview-diff-toggle]')
+    if diff.count() != 1:
+        return
+    order = toolbar.evaluate(
+        """element => [...element.querySelector('[data-sphinx-preview-toolbar-row="view"]').children]
+          .map(item => item.getAttribute('aria-label'))"""
+    )
+    if not order or order[-1] != "Hide changes since last commit":
+        failures.append(Failure(page_name, f"the Diff button is not the last of row 2: {order}"))
+    root = "document.documentElement.getAttribute('data-sphinx-preview-incoming')"
+    try:
+        if diff.get_attribute("aria-pressed") != "true" or page.evaluate(root) != "on":
+            failures.append(Failure(page_name, "the Diff button must start pressed"))
+        pressed = diff.evaluate("element => getComputedStyle(element).backgroundColor")
+        diff.click()
+        page.wait_for_timeout(100)
+        if diff.get_attribute("aria-pressed") != "false" or page.evaluate(root) != "off":
+            failures.append(Failure(page_name, "the Diff button did not switch the marks off"))
+        if diff.get_attribute("data-tooltip") != "Show changes since last commit":
+            failures.append(Failure(page_name, "the unpressed Diff button has the wrong tooltip"))
+        unpressed = diff.evaluate("element => getComputedStyle(element).backgroundColor")
+        if pressed == unpressed:
+            failures.append(Failure(page_name, "the Diff button looks the same pressed and unpressed"))
+        hidden = page.evaluate(
+            """() => {
+              document.documentElement.setAttribute('data-okf-incoming-changes', 'false');
+              const hidden = getComputedStyle(document.querySelector('[data-sphinx-preview-diff-toggle]')).display === 'none';
+              document.documentElement.removeAttribute('data-okf-incoming-changes');
+              return hidden;
+            }"""
+        )
+        if not hidden:
+            failures.append(Failure(page_name, "the Diff button stays visible when the setting is off"))
+    finally:
+        if diff.get_attribute("aria-pressed") != "true":
+            diff.click()
+            page.wait_for_timeout(100)
+
+
 def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -> None:
     page_name = scenario["page"]
     toolbar = page.locator('[data-sphinx-preview-toolbar][role="toolbar"]')
@@ -1492,6 +1533,7 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         ('[data-sphinx-preview-zoom-out]', "Zoom out"),
         ('[data-sphinx-preview-zoom-in]', "Zoom in"),
         ('[data-sphinx-preview-width-toggle]', "Width: Margin"),
+        ('[data-sphinx-preview-diff-toggle]', "Hide changes since last commit"),
     ):
         button = toolbar.locator(selector)
         if button.count() != 1 or button.get_attribute("aria-label") != label:
@@ -1511,8 +1553,9 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         return
     if rows[0]["buttons"] != expected_main:
         failures.append(Failure(page_name, f"toolbar row 1 does not hold {expected_main} buttons: {rows[0]['buttons']}"))
-    if rows[1]["buttons"] < 3:
-        failures.append(Failure(page_name, "toolbar row 2 has fewer than three buttons"))
+    if rows[1]["buttons"] != 7:
+        failures.append(Failure(page_name, f"toolbar row 2 does not hold 7 buttons: {rows[1]['buttons']}"))
+    check_diff_toggle(page, toolbar, page_name, failures)
     if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5:
         failures.append(Failure(page_name, "toolbar rows overlap"))
     # At the zoom limits the toolbar stays put and covers neither the sticky band text nor the page.
@@ -2638,12 +2681,24 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
     original_cell_bounds = target.bounding_box() if edit_target in {"table-cell", "table-cell-wide"} else None
     original_cell_html = target.inner_html() if edit_target == "table-cell" else None
     clicked_word = None
+    click_offset = None
     if edit_target in {"title", "paragraph", "admonition", "list"}:
       target.scroll_into_view_if_needed()
-      clicked_word = target.evaluate("""element => {
+      # The centre of the block, unless the floating toolbar covers it (a 460 px pane): then the
+      # point moves left, out from under the toolbar. The word probe and the click share it.
+      click_offset = target.evaluate("""element => {
         const box = element.getBoundingClientRect();
-        const x = box.left + box.width / 2;
-        const y = box.top + box.height / 2;
+        const bar = document.querySelector('[data-sphinx-preview-toolbar]').getBoundingClientRect();
+        const y = box.height / 2;
+        let x = box.width / 2;
+        const covered = box.left + x >= bar.left && box.top + y >= bar.top && box.top + y <= bar.bottom;
+        if (covered) x = Math.max(4, Math.min(x, bar.left - box.left - 8) / 2);
+        return { x, y };
+      }""")
+      clicked_word = target.evaluate("""(element, point) => {
+        const box = element.getBoundingClientRect();
+        const x = box.left + point.x;
+        const y = box.top + point.y;
         const range = document.caretRangeFromPoint ? document.caretRangeFromPoint(x, y) : null;
         const node = range && range.startContainer;
         if (!node || node.nodeType !== 3 || !element.contains(node)) return null;
@@ -2663,11 +2718,13 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
         while (end < text.length && isWord(text.charAt(end))) end += 1;
         const word = text.slice(start, end);
         return word.length >= 3 ? word : null;
-      }""")
+      }""", click_offset)
     if edit_target == "frontmatter-boolean":
       # A click toggles a boolean directly (T20); the keyboard opens the editor.
       target.focus()
       page.keyboard.press("Enter")
+    elif click_offset is not None:
+      target.click(position=click_offset)
     else:
       target.click()
 
