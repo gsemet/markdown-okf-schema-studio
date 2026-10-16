@@ -183,6 +183,10 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
 - `preview.markEditorSelection` (default off): mark the cursor's source line in the preview.
 - `preview.doubleClickToSwitchToEditor` (default off): double-click rendered content to reveal its
   source; needs `scrollEditorWithPreview`.
+- `editing.defaultPaletteMode` (default `myst`): buttons the edition palette shows in a workspace
+  that has not chosen yet: `strict` (plain Markdown), `gfm` (strict plus GitHub Flavored Markdown)
+  or `myst` (GFM plus MyST). The select at the start of the palette changes it and the choice is
+  remembered per workspace; it changes the buttons only, never the rendering.
 - `frontmatter.propertiesTable` (default on): show the properties table above the preview.
 - `frontmatter.strictAdditionalProperties` (default off): warn on fields the OKF schema omits.
 - `frontmatter.bundleRoot` and `frontmatter.projectRoot` (default empty): roots for `x-okf-link`

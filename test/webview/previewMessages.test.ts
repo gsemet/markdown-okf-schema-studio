@@ -100,3 +100,14 @@ test("previewHistoryGo accepts only back or forward", () => {
   assert.equal(isRegisteredPreviewMessage({ ...base, direction: "up" }), false);
   assert.equal(isRegisteredPreviewMessage({ ...base }), false);
 });
+
+test("previewPaletteModeChanged accepts only strict, gfm or myst", () => {
+  const base = { type: "previewPaletteModeChanged", documentId: "doc", documentVersion: 1, requestId: 1 };
+  for (const mode of ["strict", "gfm", "myst"]) {
+    assert.equal(isRegisteredPreviewMessage({ ...base, mode }), true, mode);
+  }
+  assert.equal(isRegisteredPreviewMessage({ ...base, mode: "html" }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, mode: "" }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, mode: true }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base }), false);
+});

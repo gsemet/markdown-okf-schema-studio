@@ -27,7 +27,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **MyST autodetect**: check of used MyST syntax against `myst_enable_extensions` in the nearest `conf.py` (`src/myst/`).
 - **Navigation history**: per-panel Back/Next stack of followed links (`src/state/navigationHistory.ts`).
 - **Open-With editor**: the custom editor offered through "Open With" (`markdown-okf-schema-studio.editor`).
-- **Palette mode (planned)**: the set of states of the edition palette.
+- **Palette mode**: Strict / GFM / MyST button set of the edition palette, per workspace (`PALETTE_MODE_STORAGE_KEY` in `src/extension.ts`, select in `src/webview/editPalette.ts`).
 - **Preview panel**: the webview panel that shows the rendered preview.
 - **Properties table**: rendered frontmatter table at the top of a document (`[data-okf-properties]`).
 - **Reading offset**: strip at the top of the viewport reserved for the sticky heading band (`refreshReadingOffset`, `docs/scroll-anchoring.md`).

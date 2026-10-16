@@ -38,6 +38,12 @@ import {
   readPreviewConfiguration,
 } from "./configuration/previewConfiguration";
 import {
+  EDITING_CONFIGURATION_SECTION,
+  isPaletteMode,
+  PaletteMode,
+  readEditingConfiguration,
+} from "./configuration/editingConfiguration";
+import {
   PLANTUML_CONFIGURATION_SECTION,
   PlantUmlConfiguration,
   readPlantUmlConfiguration,
@@ -311,6 +317,7 @@ let previewDescriptionStorage: vscode.Memento | undefined;
 let collapsedDescriptions = new BoundedMap<boolean>();
 let editModeStorage: vscode.Memento | undefined;
 const EDIT_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.editMode";
+const PALETTE_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.paletteMode";
 interface StemRootWatcher {
   watcher: vscode.FileSystemWatcher;
   subscriptions: vscode.Disposable[];
@@ -587,7 +594,7 @@ function scrollContext(
   configuration: PreviewConfiguration = DEFAULT_PREVIEW_CONFIGURATION,
   initialAnchor?: number,
   initialPin?: { line: number; viewportTop: number },
-  toolbarState?: { pairedTextEditor: boolean; initialEditMode: boolean },
+  toolbarState?: { pairedTextEditor: boolean; initialEditMode: boolean; initialPaletteMode: PaletteMode },
 ): PreviewRuntimeContext {
   return {
     documentId: stage.activeDocumentIdentity,
@@ -964,6 +971,7 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
     {
       pairedTextEditor: visibleEditorFor(preview) !== undefined,
       initialEditMode: !preview.readOnly && editModeStorage?.get(EDIT_MODE_STORAGE_KEY) === true,
+      initialPaletteMode: initialPaletteMode(),
     },
   );
   const localResourceRoots = [vscode.Uri.file(preview.workspaceRoot)];
@@ -2570,6 +2578,24 @@ registeredMessageHandlers.set("previewViewPreferenceChanged", (preview, message)
     scheduleIncomingChanges(preview, 0);
   }
 });
+
+// The palette mode is a workspace choice like the edit mode: it changes buttons only, never the
+// rendering, so it is saved from the page and only a document edit needs a writable preview.
+registeredMessageHandlers.set("previewPaletteModeChanged", (preview, message) => {
+  if (!preview.readOnly && isPaletteMode(message.mode)) {
+    void editModeStorage?.update(PALETTE_MODE_STORAGE_KEY, message.mode);
+  }
+});
+
+function initialPaletteMode(): PaletteMode {
+  const stored = editModeStorage?.get(PALETTE_MODE_STORAGE_KEY);
+  if (isPaletteMode(stored)) {
+    return stored;
+  }
+  return readEditingConfiguration(
+    vscode.workspace.getConfiguration(EDITING_CONFIGURATION_SECTION),
+  ).defaultPaletteMode;
+}
 
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
   if (isRegisteredPreviewMessage(value)) {

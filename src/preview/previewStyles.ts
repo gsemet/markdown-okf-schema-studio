@@ -815,6 +815,21 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   line-height: 1.2;
 }
 
+.sphinx-preview-edit-palette > select.sphinx-preview-edit-palette-mode {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  height: 26px;
+  margin-inline: 2px 6px;
+  padding: 0 4px;
+  border: 1px solid var(--vscode-dropdown-border, var(--sphinx-preview-border));
+  border-radius: 13px;
+  background: var(--vscode-dropdown-background, transparent);
+  color: var(--vscode-dropdown-foreground, inherit);
+  font: inherit;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
 .sphinx-preview-edit-palette > button {
   position: relative;
   display: inline-flex;

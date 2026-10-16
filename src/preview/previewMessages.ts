@@ -65,6 +65,8 @@ const VIEW_PREFERENCE_VALIDATORS: Record<string, (value: unknown) => boolean> = 
 
 const MAX_COPY_TEXT_LENGTH = 1_000_000;
 
+const PALETTE_MODES = ["strict", "gfm", "myst"] as const;
+
 export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   // Raw code of a code block, copied to the clipboard by the host.
   previewCopyText: (message) => isBoundedString(message.text, MAX_COPY_TEXT_LENGTH),
@@ -74,6 +76,8 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   previewViewPreferenceChanged: (message) => typeof message.preference === "string"
     && Object.hasOwn(VIEW_PREFERENCE_VALIDATORS, message.preference)
     && VIEW_PREFERENCE_VALIDATORS[message.preference](message.value),
+  // The palette mode select of the edition palette: strict, GFM or MyST buttons (workspace state).
+  previewPaletteModeChanged: (message) => isOneOf(message.mode, PALETTE_MODES),
 };
 
 export const isRegisteredPreviewMessage = createPreviewMessageChecker(REGISTERED_PREVIEW_MESSAGES);

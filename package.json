@@ -148,6 +148,22 @@
           "markdownDescription": "Marks the blocks you changed since the last Git commit with a green bar on their left, like the editor gutter. It compares the file, unsaved edits included, with the version in `HEAD` using the built-in Git extension. **On**: changed blocks are marked and the toolbar toggle for the marks is shown. **Off**: no marks and no toggle. Files that are not in Git show nothing.",
           "order": 22
         },
+        "markdownOkfSchemaStudio.editing.defaultPaletteMode": {
+          "type": "string",
+          "enum": [
+            "strict",
+            "gfm",
+            "myst"
+          ],
+          "enumDescriptions": [
+            "Strict Markdown: only buttons for plain Markdown syntax.",
+            "GitHub Flavored Markdown: the strict buttons plus the GFM ones.",
+            "MyST Markdown: the GFM buttons plus the MyST ones."
+          ],
+          "default": "myst",
+          "markdownDescription": "Chooses which buttons the edition palette shows in a workspace that has not picked a mode yet. The select at the start of the palette changes it for the workspace and is remembered. **strict**: plain Markdown only. **gfm**: strict plus GitHub Flavored Markdown. **myst**: GFM plus MyST (the default). The mode only changes the buttons, never how the preview renders.",
+          "order": 40
+        },
         "markdownOkfSchemaStudio.plantuml.jarPath": {
           "type": "string",
           "default": "",
