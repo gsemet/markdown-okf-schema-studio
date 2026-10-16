@@ -101,11 +101,16 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
     if (await frame.locator("[data-okf-description-toggle]:visible").getAttribute("aria-expanded") === "true") await frame.locator("[data-okf-description-toggle]:visible").click();
     for (let step = 0; step < 3; step += 1) await frame.locator("[data-sphinx-preview-zoom-in]").click();
     assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "130");
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-incoming"), "on");
+    await frame.locator("[data-sphinx-preview-diff-toggle]").click();
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-incoming"), "off");
     await capture("01-before-window-reload", frame, "Collapse Description and zoom to 130 % before invoking Developer: Reload Window.");
     const nonce = await frame.evaluate(() => document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce);
     await command(page, "Developer: Reload Window");
     frame = await frameForDocument(nonce);
     assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "130", "zoom survives the window reload");
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-incoming"), "off", "the Diff off state survives the window reload");
+    assert.equal(await frame.locator("[data-sphinx-preview-diff-toggle]").getAttribute("aria-pressed"), "false");
     await capture("02-after-window-reload", frame, "Invoke Developer: Reload Window; wait for a restored visible preview with a new script nonce.");
     const restoredNonce = await frame.evaluate(() => document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce);
     const previewTab = page.locator('.tab[data-resource-name^="webview-markdown-okf-schema-studio.preview-"]')
@@ -117,6 +122,7 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
     await command(page, "Markdown OKF-Schema Studio: Open Preview to Side");
     frame = await frameForDocument(restoredNonce);
     assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "130", "zoom survives closing and reopening");
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-incoming"), "off", "the Diff off state survives closing and reopening");
     for (let step = 0; step < 3; step += 1) await frame.locator("[data-sphinx-preview-zoom-out]").click();
     assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "100");
     await capture("03-after-close-reopen", frame, "Close the restored preview and open a new preview for the same document.");

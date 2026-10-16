@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 import * as vm from "node:vm";
 
+import { PREVIEW_THEME_CSS } from "../../src/preview/previewStyles";
 import {
   createScrollSyncScript,
   type PositionedSourceMapping,
@@ -291,6 +292,7 @@ interface RuntimeHarness {
   readonly zoomOutButton: RuntimeElement;
   readonly zoomInButton: RuntimeElement;
   readonly widthButton: RuntimeElement;
+  readonly diffButton: RuntimeElement;
   readonly backButton: RuntimeElement;
   readonly nextButton: RuntimeElement;
   readonly anchorButton: RuntimeElement;
@@ -447,6 +449,7 @@ function createRuntimeHarness(configuration: Partial<{
   const zoomOutButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const zoomInButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const widthButton = new RuntimeElement({}, windowState, 0, 30, "button");
+  const diffButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const backButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const nextButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const anchorButton = new RuntimeElement({}, windowState, 0, 30);
@@ -662,6 +665,7 @@ function createRuntimeHarness(configuration: Partial<{
       if (selector === "[data-sphinx-preview-zoom-out]") return zoomOutButton;
       if (selector === "[data-sphinx-preview-zoom-in]") return zoomInButton;
       if (selector === "[data-sphinx-preview-width-toggle]") return widthButton;
+      if (selector === "[data-sphinx-preview-diff-toggle]") return diffButton;
       if (selector === "[data-sphinx-preview-back]") return backButton;
       if (selector === "[data-sphinx-preview-next]") return nextButton;
       if (selector === "[data-sphinx-preview-anchor]") return anchorButton;
@@ -762,6 +766,7 @@ function createRuntimeHarness(configuration: Partial<{
     zoomOutButton,
     zoomInButton,
     widthButton,
+    diffButton,
     backButton,
     nextButton,
     anchorButton,
@@ -5582,9 +5587,10 @@ function traceStartup(
     const toolbar = [harness.themeButton, harness.refreshButton, harness.anchorButton, harness.editModeButton];
     const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion",
       "data-sphinx-preview-zoom", "data-sphinx-preview-width", "data-sphinx-preview-toc",
-      "data-okf-show-comments"];
-    // The zoom buttons and the zoom of the root do not depend on the content (T08).
-    const zoomButtons = [harness.zoomOutButton, harness.zoomInButton, harness.widthButton];
+      "data-okf-show-comments", "data-sphinx-preview-incoming"];
+    // The zoom buttons and the zoom of the root do not depend on the content (T08); the Diff
+    // button of row 2 does not either (T17).
+    const zoomButtons = [harness.zoomOutButton, harness.zoomInButton, harness.widthButton, harness.diffButton];
     return {
       effects: entries
         .filter((entry) => !(entry.method === "addEventListener" && toolbar.includes(entry.element)))
@@ -7103,6 +7109,53 @@ test("T16: previewIncomingChanges marks blocks and reports enabled, stale ids ar
   assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), "false");
   harness.dispatchMessage({ type: "previewIncomingChanges", ...ids, enabled: true, ranges: [{ start: 1, end: 2 }] });
   assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), "true");
+});
+
+test("T17: the Diff button flips the marks, posts the preference and keeps the state", () => {
+  const harness = createRuntimeHarness();
+  const root = harness.documentElement;
+  assert.equal(root.getAttribute("data-sphinx-preview-incoming"), "on");
+  assert.equal(harness.diffButton.getAttribute("aria-pressed"), "true");
+  assert.equal(harness.diffButton.getAttribute("data-tooltip"), "Hide changes since last commit");
+  const before = harness.messages.length;
+  harness.diffButton.dispatch("click");
+  assert.equal(root.getAttribute("data-sphinx-preview-incoming"), "off");
+  assert.equal(harness.diffButton.getAttribute("aria-pressed"), "false");
+  assert.equal(harness.diffButton.getAttribute("title"), "Show changes since last commit");
+  assert.equal(harness.diffButton.getAttribute("data-tooltip"), "Show changes since last commit");
+  const posted = harness.messages.slice(before).filter((m) => m.type === "previewViewPreferenceChanged");
+  assert.equal(posted.length, 1);
+  assert.equal(posted[0].preference, "incomingChanges");
+  assert.equal(posted[0].value, false);
+  assert.equal(posted[0].documentId, "file:///active.md");
+  assert.equal(harness.getWebviewState().viewIncomingChanges, false);
+  harness.diffButton.dispatch("click");
+  assert.equal(root.getAttribute("data-sphinx-preview-incoming"), "on");
+  assert.equal(harness.messages.at(-1)?.value, true);
+});
+
+test("T17: the initial preference and the saved webview state decide the pressed state", () => {
+  const off = createRuntimeHarness({
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false },
+  });
+  assert.equal(off.documentElement.getAttribute("data-sphinx-preview-incoming"), "off");
+  assert.equal(off.diffButton.getAttribute("aria-pressed"), "false");
+  const saved = createRuntimeHarness({
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false },
+    savedState: { viewIncomingChanges: true },
+  });
+  assert.equal(saved.documentElement.getAttribute("data-sphinx-preview-incoming"), "on");
+});
+
+test("T17: the Diff button is hidden through the document attribute when the setting is off", () => {
+  const harness = createRuntimeHarness();
+  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  harness.dispatchMessage({ type: "previewIncomingChanges", ...ids, enabled: false, ranges: [] });
+  assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), "false");
+  assert.match(PREVIEW_THEME_CSS,
+    /html\[data-okf-incoming-changes="false"\] \[data-sphinx-preview-diff-toggle\] \{\s*display: none;/u);
+  assert.match(PREVIEW_THEME_CSS,
+    /html\[data-sphinx-preview-incoming="off"\] #sphinx-myst-preview-content \[data-sphinx-preview-changed\] \{\s*box-shadow: none;/u);
 });
 
 test("T11: a previewHistoryState of another document version is ignored", () => {
