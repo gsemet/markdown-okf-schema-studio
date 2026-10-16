@@ -1121,7 +1121,7 @@ export const SCENARIOS: Scenario[] = [
     stickyHeadingDepth: 3,
     expectStickyGrowth: true,
     ...NARROW,
-    scroll: { kind: "stickyHeading", value: 'h3[data-line="5"]' },
+    scroll: { kind: "stickyHeading", value: 'h3[data-line="21"]' },
     expectedStickyHeadings: "# Operating a cross-functional vehicle software verification programme across several engineering domains\n"
       + "## Maintaining evidence traceability while upstream and downstream requirements evolve continuously\n"
       + "### Checking the complete dependency graph after each asynchronous validation and review",

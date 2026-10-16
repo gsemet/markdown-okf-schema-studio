@@ -9,6 +9,7 @@ import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
 import { installFirstClearance } from "./firstClearance";
 import { installLinkNavigation } from "./linkNavigation";
+import { installHistoryControls } from "./historyControls";
 import { installViewControls } from "./viewControls";
 import { installWidthMode } from "./widthMode";
 import type { ViewPreferences } from "../state/previewViewPreferences";
@@ -118,6 +119,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     }
     stabilizeLayout();
   };
+  const historyControls = (${installHistoryControls.toString()})(document, vscode, context);
   const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
   // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.
   const widthMode = (${installWidthMode.toString()})(document, window, vscode, context, () => {
@@ -3428,6 +3430,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     if (sameContext(message) && message.type === "themeChanged") {
       applyTheme(message.themeKind);
+      return;
+    }
+    if (sameContext(message) && message.type === "previewHistoryState") {
+      historyControls.apply(message);
       return;
     }
     if (sameContext(message) && message.type === "navigateAnchor") {

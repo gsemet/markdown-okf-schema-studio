@@ -92,3 +92,11 @@ test("previewViewPreferenceChanged validates the value per preference", () => {
   assert.equal(ok(undefined, true), false);
   assert.equal(ok("__proto__", true), false);
 });
+
+test("previewHistoryGo accepts only back or forward", () => {
+  const base = { type: "previewHistoryGo", documentId: "doc", documentVersion: 1, requestId: 1 };
+  assert.equal(isRegisteredPreviewMessage({ ...base, direction: "back" }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, direction: "forward" }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, direction: "up" }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base }), false);
+});

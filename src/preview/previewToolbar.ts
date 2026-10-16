@@ -6,6 +6,10 @@ const ANCHOR_BUTTON = `<button type="button" data-sphinx-preview-anchor data-anc
 
 const EDIT_BUTTON = `<button type="button" data-sphinx-preview-edit-toggle data-edit-mode="off" aria-pressed="false" aria-label="Toggle edit mode" title="Edit mode" data-tooltip="Edit mode"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>`;
 
+const BACK_BUTTON = `<button type="button" data-sphinx-preview-back disabled aria-label="Back" title="Back" data-tooltip="Back"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></button>`;
+
+const NEXT_BUTTON = `<button type="button" data-sphinx-preview-next disabled aria-label="Next" title="Next" data-tooltip="Next"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>`;
+
 const ZOOM_OUT_BUTTON = `<button type="button" data-sphinx-preview-zoom-out aria-label="Zoom out" title="Zoom out" data-tooltip="Zoom out"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4M8 11h6"></path></svg></button>`;
 
 const ZOOM_IN_BUTTON = `<button type="button" data-sphinx-preview-zoom-in aria-label="Zoom in" title="Zoom in" data-tooltip="Zoom in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4M8 11h6M11 8v6"></path></svg></button>`;
@@ -14,7 +18,7 @@ const WIDTH_BUTTON = `<button type="button" data-sphinx-preview-width-toggle dat
 
 export function renderPreviewToolbar(editingEnabled = true): string {
   const mainRow = `<div data-sphinx-preview-toolbar-row="main">${REFRESH_BUTTON}${ANCHOR_BUTTON}${editingEnabled ? EDIT_BUTTON : ""}${THEME_BUTTON}</div>`;
-  const viewRow = `<div data-sphinx-preview-toolbar-row="view">${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}${WIDTH_BUTTON}</div>`;
+  const viewRow = `<div data-sphinx-preview-toolbar-row="view">${BACK_BUTTON}${NEXT_BUTTON}${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}${WIDTH_BUTTON}</div>`;
   return `<div data-sphinx-preview-toolbar role="toolbar" aria-label="Preview controls">${mainRow}${viewRow}</div>`;
 }
 

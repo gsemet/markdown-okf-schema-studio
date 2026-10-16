@@ -291,6 +291,8 @@ interface RuntimeHarness {
   readonly zoomOutButton: RuntimeElement;
   readonly zoomInButton: RuntimeElement;
   readonly widthButton: RuntimeElement;
+  readonly backButton: RuntimeElement;
+  readonly nextButton: RuntimeElement;
   readonly anchorButton: RuntimeElement;
   readonly editModeButton: RuntimeElement;
   readonly checkbox: RuntimeElement;
@@ -445,6 +447,8 @@ function createRuntimeHarness(configuration: Partial<{
   const zoomOutButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const zoomInButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const widthButton = new RuntimeElement({}, windowState, 0, 30, "button");
+  const backButton = new RuntimeElement({}, windowState, 0, 30, "button");
+  const nextButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const anchorButton = new RuntimeElement({}, windowState, 0, 30);
   const editModeButton = new RuntimeElement({}, windowState, 0, 30);
   const toolbar = new RuntimeElement({}, windowState, 12, Math.max(0, toolbarBottom - 12));
@@ -658,6 +662,8 @@ function createRuntimeHarness(configuration: Partial<{
       if (selector === "[data-sphinx-preview-zoom-out]") return zoomOutButton;
       if (selector === "[data-sphinx-preview-zoom-in]") return zoomInButton;
       if (selector === "[data-sphinx-preview-width-toggle]") return widthButton;
+      if (selector === "[data-sphinx-preview-back]") return backButton;
+      if (selector === "[data-sphinx-preview-next]") return nextButton;
       if (selector === "[data-sphinx-preview-anchor]") return anchorButton;
       if (selector === "[data-sphinx-preview-edit-toggle]") return editingEnabled ? editModeButton : null;
       if (selector === "[data-sphinx-preview-toolbar]") return toolbar;
@@ -756,6 +762,8 @@ function createRuntimeHarness(configuration: Partial<{
     zoomOutButton,
     zoomInButton,
     widthButton,
+    backButton,
+    nextButton,
     anchorButton,
     editModeButton,
     checkbox,
@@ -5609,6 +5617,8 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "button.addEventListener(click,fn)",
+      "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
       "div.setAttribute(data-theme-mode,current)",
       "div.setAttribute(aria-label,Preview theme: Current theme)",
@@ -5653,6 +5663,8 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "button.addEventListener(click,fn)",
+      "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
       "div.setAttribute(data-theme-mode,current)",
       "div.setAttribute(aria-label,Preview theme: Current theme)",
@@ -5715,6 +5727,8 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "button.addEventListener(click,fn)",
+      "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
       "div.setAttribute(data-theme-mode,current)",
       "div.setAttribute(aria-label,Preview theme: Current theme)",
@@ -5756,6 +5770,8 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "button.addEventListener(click,fn)",
+      "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
       "div.setAttribute(data-theme-mode,current)",
       "div.setAttribute(aria-label,Preview theme: Current theme)",
@@ -5800,6 +5816,8 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "button.addEventListener(click,fn)",
+      "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
       "div.setAttribute(data-theme-mode,current)",
       "div.setAttribute(aria-label,Preview theme: Current theme)",
@@ -5844,6 +5862,8 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "button.addEventListener(click,fn)",
+      "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
       "div.setAttribute(data-theme-mode,current)",
       "div.setAttribute(aria-label,Preview theme: Current theme)",
@@ -5914,6 +5934,8 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "button.addEventListener(click,fn)",
+      "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
       "div.setAttribute(data-theme-mode,current)",
       "div.setAttribute(aria-label,Preview theme: Current theme)",
@@ -7015,4 +7037,33 @@ test("T10: the saved width mode applies at startup and an edited element keeps t
   harness.dispatchWindow("resize");
   harness.flushFrames();
   assert.equal(wide.getAttribute("data-sphinx-preview-wide"), null);
+});
+
+test("T11: Back and Next post previewHistoryGo and follow previewHistoryState", () => {
+  const harness = createRuntimeHarness();
+  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  harness.dispatchMessage({ type: "previewHistoryState", ...ids, canBack: true, canForward: false });
+  assert.equal(harness.backButton.disabled, false);
+  assert.equal(harness.nextButton.disabled, true);
+  const before = harness.messages.length;
+  harness.backButton.dispatch("click");
+  const posted = harness.messages.slice(before).filter((m) => m.type === "previewHistoryGo");
+  assert.equal(posted.length, 1);
+  assert.equal(posted[0].direction, "back");
+  assert.equal(posted[0].documentId, "file:///active.md");
+  harness.dispatchMessage({ type: "previewHistoryState", ...ids, canBack: false, canForward: true });
+  assert.equal(harness.backButton.disabled, true);
+  assert.equal(harness.nextButton.disabled, false);
+  harness.nextButton.dispatch("click");
+  assert.equal(harness.messages.at(-1)?.direction, "forward");
+});
+
+test("T11: a previewHistoryState of another document version is ignored", () => {
+  const harness = createRuntimeHarness();
+  harness.dispatchMessage({
+    type: "previewHistoryState", documentId: "file:///active.md", documentVersion: 99, requestId: 11,
+    canBack: true, canForward: true,
+  });
+  assert.equal(harness.backButton.disabled, true);
+  assert.equal(harness.nextButton.disabled, true);
 });
