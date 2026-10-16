@@ -765,3 +765,16 @@ test("T16: a changed block gets an inset green bar without layout shift", () => 
   assert.match(css, /\[data-sphinx-preview-changed\] \{[^}]*box-shadow: inset 3px 0 0 var\(--vscode-editorGutter-addedBackground, #2ea043\)/u);
   assert.doesNotMatch(css, /\[data-sphinx-preview-changed\] \{[^}]*(?:margin|padding|border|width)/u);
 });
+
+test("T21: the edition palette is a wrapping pill bar with an in-frame popover and no inline style", () => {
+  const bar = /\.sphinx-preview-edit-palette\s*\{[^}]*\}/u.exec(PREVIEW_THEME_CSS)?.[0] ?? "";
+  assert.match(bar, /position: relative;/u);
+  assert.match(bar, /flex-wrap: wrap;/u);
+  assert.match(bar, /max-width: 100%;/u);
+  assert.match(bar, /border-radius: 18px;/u);
+  assert.doesNotMatch(bar, /position: fixed/u);
+  const menu = /\.sphinx-preview-edit-palette-menu\s*\{[^}]*\}/u.exec(PREVIEW_THEME_CSS)?.[0] ?? "";
+  assert.match(menu, /position: absolute;/u);
+  assert.match(menu, /max-height: 15em;/u);
+  assert.match(menu, /overflow-y: auto;/u);
+});

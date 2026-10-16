@@ -4,6 +4,7 @@ import { test } from "node:test";
 import * as vm from "node:vm";
 
 import { PREVIEW_THEME_CSS } from "../../src/preview/previewStyles";
+import { highlightLanguageNames } from "../../src/render/highlight";
 import {
   createScrollSyncScript,
   type PositionedSourceMapping,
@@ -40,7 +41,7 @@ class RuntimeElement {
 
   public constructor(
     attributes: Record<string, string>,
-    private readonly windowState: { scrollY: number },
+    private readonly windowState: { scrollY: number; paletteHeight?: number },
     public top: number,
     public height = 40,
     tagName = "div",
@@ -217,6 +218,12 @@ class RuntimeElement {
   public insertBefore(child: RuntimeElement, reference: RuntimeElement | null): RuntimeElement {
     child.parentElement?.removeChild(child);
     child.parentElement = this;
+    // Inserted children sit where their parent sits (the fake has no layout of its own).
+    if (child.top === 0 && child.tagName === "DIV") child.top = this.top;
+    // Opt-in layout for the edition palette: it pushes the siblings below it down.
+    if (child.className === "sphinx-preview-edit-palette" && this.windowState.paletteHeight) {
+      for (const sibling of this.childElements) sibling.top += this.windowState.paletteHeight;
+    }
     const index = reference ? this.childElements.indexOf(reference) : -1;
     if (index < 0) {
       this.childElements.push(child);
@@ -336,7 +343,7 @@ interface RuntimeHarness {
   readonly htmlInsertions: Array<{ position: string; markup: string }>;
   readonly frontmatterProperties: RuntimeElement;
   currentProperties(): RuntimeElement | null;
-  readonly windowState: { scrollY: number };
+  readonly windowState: { scrollY: number; paletteHeight?: number };
   /** The fake `window` / `document`: tests stub measurement and `execCommand` on them. */
   readonly window: Record<string, unknown>;
   readonly document: Record<string, unknown>;
@@ -382,6 +389,8 @@ function createRuntimeHarness(configuration: Partial<{
   initialEditMode: boolean;
   initialViewPreferences: ViewPreferences;
   intersectionObserver: boolean;
+  /** `navigator.platform` of the page (absent: no navigator, like a non-Apple platform). */
+  platform: string;
 }> = {}, savedThemeMode?: string, sharedThemeMode?: "current" | "dark" | "white", savedAnchorMode?: boolean): RuntimeHarness {
   const {
     firstMappedSourceLine = 1,
@@ -399,6 +408,7 @@ function createRuntimeHarness(configuration: Partial<{
     savedState = {},
     frontmatterRowAttributes = {},
     intersectionObserver = false,
+    platform,
     ...runtimeConfiguration
   } = configuration;
   const windowState = { scrollY: 0 };
@@ -747,6 +757,7 @@ function createRuntimeHarness(configuration: Partial<{
     }),
     document,
     Element: RuntimeElement,
+    ...(platform === undefined ? {} : { navigator: { platform } }),
     ResizeObserver,
     CustomEvent: class {
       public constructor(public readonly type: string) {}
@@ -7316,4 +7327,269 @@ test("T13: a state snapshot keeps the TOC visibility and the folded sections", (
   assert.equal(state.viewToc, true);
   assert.equal((state.tocCollapsed as string[]).length, 0);
   assert.equal(state.viewZoom, 100);
+});
+
+// T21: the edition palette above an open block editor.
+const PALETTE_CLASS = "sphinx-preview-edit-palette";
+
+function paletteOf(harness: RuntimeHarness): RuntimeElement | undefined {
+  return harness.createdElements.find((element) =>
+    element.getAttribute("class") === PALETTE_CLASS || element.className === PALETTE_CLASS);
+}
+
+function paletteButton(harness: RuntimeHarness, id: string): RuntimeElement {
+  const button = harness.createdElements.find((element) =>
+    element.tagName === "BUTTON" && element.getAttribute("data-edit-action") === id);
+  assert.ok(button, "palette button " + id);
+  return button;
+}
+
+function paletteMenu(harness: RuntimeHarness): RuntimeElement | undefined {
+  return harness.createdElements.find((element) =>
+    element.getAttribute("role") === "menu" && !element.removed
+    && element.parentElement !== undefined);
+}
+
+test("T21: the palette is the first child of the block editor frame, above the text box", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const palette = paletteOf(harness);
+  assert.ok(palette, "a palette exists while editing");
+  assert.equal(palette.getAttribute("role"), "toolbar");
+  const editor = textarea.parentElement!;
+  assert.equal(editor.childElements[0], palette);
+  assert.equal(editor.childElements.indexOf(palette) < editor.childElements.indexOf(textarea), true);
+  assert.deepEqual(
+    palette.childElements.map((child) => child.getAttribute("data-edit-action")),
+    ["heading", "bold", "italic", "strikethrough", "codeFence", "quote", "rule", "todo"],
+  );
+});
+
+test("T21: no palette before the source arrives and none after the editor closes", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  assert.equal(paletteOf(harness), undefined, "edit mode alone shows no palette");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  assert.equal(paletteOf(harness), undefined, "still waiting for the source");
+  sourceReply(harness, "Second paragraph.\n");
+  const palette = paletteOf(harness)!;
+  assert.ok(palette);
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA")!;
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(palette.removed, true, "the palette leaves with the editor");
+});
+
+test("T21: the palette buttons show the real shortcut in their tooltip", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  assert.equal(paletteButton(harness, "bold").getAttribute("title"), "Bold (Ctrl+B)");
+  assert.equal(paletteButton(harness, "italic").getAttribute("title"), "Italic (Ctrl+I)");
+  assert.equal(
+    paletteButton(harness, "todo").getAttribute("title"),
+    "Toggle TODO comment (Ctrl+/)",
+  );
+  assert.equal(paletteButton(harness, "rule").getAttribute("title"), "Horizontal rule");
+  const mac = createRuntimeHarness({ platform: "MacIntel" });
+  openBlockEditorWithSource(mac);
+  assert.equal(paletteButton(mac, "bold").getAttribute("title"), "Bold (Cmd+B)");
+  assert.equal(
+    paletteButton(mac, "todo").getAttribute("title"),
+    "Toggle TODO comment (Cmd+/)",
+  );
+});
+
+test("T21: every palette control keeps the focus in the text box on mousedown", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  const controls = harness.createdElements.filter((element) =>
+    element.getAttribute("data-edit-action") !== null);
+  assert.equal(controls.length, 8);
+  for (const control of controls) {
+    let prevented = false;
+    control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
+    assert.equal(prevented, true, String(control.getAttribute("data-edit-action")));
+  }
+});
+
+test("T21: clicking Bold edits the text in one native step and keeps the editor open", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "say foo now";
+  textarea.setSelectionRange(4, 7);
+  const count = harness.messages.length;
+  paletteButton(harness, "bold").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "say **foo** now");
+  assert.deepEqual(textarea.selectionRange, [6, 9]);
+  assert.equal(calls.length, 1, "one undo step");
+  assert.equal(calls[0].command, "insertText");
+  assert.equal(harness.messages.length, count, "no commit, no blur save");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(paletteOf(harness)!.removed, false);
+  assert.equal(textarea.focusOptions?.preventScroll, true, "focus returns to the text box");
+  harness.flushTimers();
+  assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
+  assert.equal(harness.messages.at(-1)?.final, false, "autosave, not a final save");
+});
+
+test("T21: the heading list opens as a menu and choosing a level replaces the prefix", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "# Title";
+  textarea.setSelectionRange(3, 3);
+  assert.equal(paletteMenu(harness), undefined);
+  paletteButton(harness, "heading").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness);
+  assert.ok(menu, "the popover opens");
+  assert.equal(menu.parentElement, paletteOf(harness));
+  assert.deepEqual(
+    menu.childElements.map((item) => item.textContent),
+    ["Paragraph", "Heading 1", "Heading 2", "Heading 3", "Heading 4", "Heading 5"],
+  );
+  let prevented = false;
+  menu.childElements[0].dispatch("mousedown", { preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  menu.childElements[3].dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "### Title");
+  assert.equal(calls.length, 1);
+  assert.equal(paletteMenu(harness), undefined, "choosing closes the popover");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+});
+
+test("T21: Escape closes an open popover first and only then cancels the editor", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  paletteButton(harness, "heading").dispatch("click", { preventDefault: () => undefined });
+  assert.ok(paletteMenu(harness));
+  let prevented = false;
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(paletteMenu(harness), undefined, "the popover is closed");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(paletteOf(harness)!.removed, false, "the editor is still open");
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null);
+  assert.equal(paletteOf(harness)!.removed, true);
+});
+
+test("T21: opening one popover closes the other and a second click closes it", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  paletteButton(harness, "heading").dispatch("click", { preventDefault: () => undefined });
+  paletteButton(harness, "codeFence").dispatch("click", { preventDefault: () => undefined });
+  const open = harness.createdElements.filter((element) =>
+    element.getAttribute("role") === "menu" && element.parentElement !== undefined);
+  assert.equal(open.length, 1);
+  assert.equal(open[0].getAttribute("data-edit-popover"), "language");
+  paletteButton(harness, "codeFence").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(paletteMenu(harness), undefined);
+});
+
+test("T21: the code language list is text plus the highlighter languages and aliases", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "x = 1";
+  textarea.setSelectionRange(0, 5);
+  paletteButton(harness, "codeFence").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness)!;
+  const shown = menu.childElements.map((item) => item.getAttribute("data-edit-option"));
+  assert.deepEqual(shown, ["text", ...highlightLanguageNames()]);
+  assert.ok(shown.includes("python") && shown.includes("py") && shown.includes("yaml"));
+  const python = menu.childElements.find((item) => item.getAttribute("data-edit-option") === "python")!;
+  python.dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "```python\nx = 1\n```");
+  assert.equal(calls.length, 1);
+  assert.equal(paletteMenu(harness), undefined);
+});
+
+test("T21: the palette appears in the insertion editor", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  insertPointAfterLine(harness, 52).childElements[0].dispatch("click", {
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  sourceReply(harness, "");
+  const palette = paletteOf(harness);
+  assert.ok(palette);
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA")!;
+  assert.equal(textarea.parentElement!.childElements[0], palette);
+});
+
+test("T21: the table cell editor and the frontmatter editors get no palette", () => {
+  const cell = createRuntimeHarness();
+  openTableCellEditorForTab(cell);
+  assert.equal(paletteOf(cell), undefined);
+
+  const frontmatter = createRuntimeHarness({ mapFrontmatter: true });
+  frontmatter.editModeButton.dispatch("click");
+  frontmatter.dispatchDocument("click", {
+    target: frontmatter.frontmatterNameCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  assert.ok(frontmatter.createdElements.some((element) =>
+    element.getAttribute("aria-label") === "Frontmatter key lifecycle"));
+  assert.equal(paletteOf(frontmatter), undefined);
+});
+
+test("T21: the palette stays reachable by a content patch because it lives in the frame", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const palette = paletteOf(harness)!;
+  assert.equal(palette.parentElement, textarea.parentElement);
+  assert.equal(palette.parentElement!.getAttribute("data-sphinx-preview-block-editor"), "true");
+});
+
+test("T21: the palette root cancels mousedown so a press on its padding keeps the focus", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  let prevented = false;
+  paletteOf(harness)!.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+});
+
+function openCompensatedEditor(harness: RuntimeHarness): RuntimeElement {
+  harness.windowState.scrollY = 200;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  harness.windowState.paletteHeight = 44;
+  return openBlockEditorWithSource(harness);
+}
+
+test("T21: opening scrolls down by the bar height and every close path scrolls back", () => {
+  const closers: [string, (harness: RuntimeHarness, textarea: RuntimeElement) => void][] = [
+    ["Escape", (_harness, textarea) => {
+      textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+    }],
+    ["Cancel button", (harness) => {
+      findButton(harness, "Cancel editing and restore the original text").dispatch("click");
+    }],
+    ["Done without a change", (harness) => {
+      findButton(harness, "Done editing").dispatch("click");
+    }],
+    ["Cmd+Enter without a change", (_harness, textarea) => {
+      textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
+    }],
+    ["blur without a change", (_harness, textarea) => {
+      textarea.dispatch("blur");
+    }],
+    ["Escape after an autosave", (harness, textarea) => {
+      textarea.value = "Second paragraph. more";
+      textarea.dispatch("input");
+      harness.flushTimers();
+      textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+    }],
+  ];
+  for (const [name, close] of closers) {
+    const harness = createRuntimeHarness();
+    const textarea = openCompensatedEditor(harness);
+    assert.equal(harness.windowState.scrollY, 244, name + ": the page scrolled by the bar height");
+    close(harness, textarea);
+    harness.flushFrames();
+    assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null, name);
+    assert.equal(harness.windowState.scrollY, 200, name + ": the scroll is restored");
+  }
 });

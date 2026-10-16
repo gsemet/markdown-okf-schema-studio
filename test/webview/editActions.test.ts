@@ -9,7 +9,7 @@ const registry = createEditActions();
  * `[` and `]` mark a selection, `|` a caret; the result is shown in the same notation, or
  * `undefined` when the action returns no edit.
  */
-function run(id: string, input: string): string | undefined {
+function run(id: string, input: string, arg?: string): string | undefined {
   const caret = input.indexOf("|");
   let start: number;
   let end: number;
@@ -25,7 +25,13 @@ function run(id: string, input: string): string | undefined {
   }
   const action = registry.byId.get(id);
   assert.ok(action, "action " + id);
-  const edit = action.apply({ value, selectionStart: start, selectionEnd: end, scope: "block" });
+  const edit = action.apply({
+    value,
+    selectionStart: start,
+    selectionEnd: end,
+    scope: "block",
+    ...(arg === undefined ? {} : { arg }),
+  });
   if (!edit) return undefined;
   const result = value.slice(0, edit.start) + edit.text + value.slice(edit.end);
   const a = edit.selectionStart;
@@ -139,7 +145,10 @@ test("the todo toggle is its own inverse", () => {
 });
 
 test("the registry lists the actions with metadata and indexes them by id", () => {
-  assert.deepEqual(registry.actions.map((action) => action.id), ["bold", "italic", "todo"]);
+  assert.deepEqual(
+    registry.actions.map((action) => action.id),
+    ["heading", "bold", "italic", "strikethrough", "codeFence", "quote", "rule", "todo"],
+  );
   for (const action of registry.actions) {
     assert.equal(registry.byId.get(action.id), action);
     assert.ok(action.label.length > 0 && action.icon.length > 0 && action.group.length > 0);
@@ -204,4 +213,142 @@ test("a line containing --> is never wrapped in a TODO comment", () => {
     run("todo", "[a\nb --> c]"),
     "[<!-- TODO: a -->\nb --> c]",
   );
+});
+
+const headingCases: [string, string, string | undefined][] = [
+  ["2", "a|bc", "## a|bc"],
+  ["1", "## a|bc", "# a|bc"],
+  ["0", "### a|bc", "a|bc"],
+  ["0", "plain|", undefined],
+  ["3", "#nospace|", "### #nospace|"],
+  ["5", "####### seven|", "##### ####### seven|"],
+  ["1", "|", "# |"],
+  ["0", "# |", "|"],
+  ["2", "x\n# a|bc\ny", "x\n## a|bc\ny"],
+  ["2", "[a\nb]", "[## a\n## b]"],
+  ["0", "[# a\n## b]", "[a\nb]"],
+  ["2", "[a\n\nb]", "[## a\n\n## b]"],
+];
+
+for (const [arg, input, expected] of headingCases) {
+  test("editActions heading " + arg + " " + JSON.stringify(input), () => {
+    assert.equal(run("heading", input, arg), expected);
+  });
+}
+
+test("heading without a change or with an unknown level returns no edit", () => {
+  assert.equal(run("heading", "## a|bc", "2"), undefined);
+  assert.equal(run("heading", "a|bc", "9"), undefined);
+  assert.equal(run("heading", "a|bc", "x"), undefined);
+  assert.equal(run("heading", "a|bc"), undefined);
+});
+
+const strikeCases: [string, string][] = [
+  ["say [foo] now", "say ~~[foo]~~ now"],
+  ["say ~~[foo]~~ now", "say [foo] now"],
+  ["say [~~foo~~] now", "say [foo] now"],
+  ["say ~~fo|o~~ now", "say fo|o now"],
+  ["say | now", "say ~~|~~ now"],
+  ["x ~~|~~ y", "x | y"],
+  ["a[ foo ]b", "a ~~[foo]~~ b"],
+  ["[a\nb]", "~~[a\nb]~~"],
+];
+
+for (const [input, expected] of strikeCases) {
+  test("editActions strikethrough " + JSON.stringify(input), () => {
+    assert.equal(run("strikethrough", input), expected);
+  });
+}
+
+const quoteCases: [string, string][] = [
+  ["a|bc", "> a|bc"],
+  ["> a|bc", "a|bc"],
+  ["[- a\n- b]", "[> - a\n> - b]"],
+  ["[> - a\n> - b]", "[- a\n- b]"],
+  ["[1. a\n   2. b]", "[> 1. a\n>    2. b]"],
+  ["x\n[a\nb]\ny", "x\n[> a\n> b]\ny"],
+  ["[a\n\nb]", "[> a\n>\n> b]"],
+  ["[a\n> b]", "[> a\n> > b]"],
+  ["|", "> |"],
+  ["> |", "|"],
+  [">> a|", "> a|"],
+  ["[a\n]b", "[> a\n]b"],
+];
+
+for (const [input, expected] of quoteCases) {
+  test("editActions quote " + JSON.stringify(input), () => {
+    assert.equal(run("quote", input), expected);
+  });
+}
+
+const fenceCases: [string, string, string][] = [
+  ["python", "[x = 1]", "```python\n[x = 1]\n```"],
+  ["text", "[a\nb]", "```text\n[a\nb]\n```"],
+  ["python", "ab[c\nd]ef", "```python\n[abc\ndef]\n```"],
+  ["json", "|", "```json\n|\n```"],
+  ["json", "para|", "para\n\n```json\n|\n```"],
+  ["json", "  |", "```json\n|\n```"],
+  ["bash", "[echo ```x```]", "````bash\n[echo ```x```]\n````"],
+  ["text", "x\n[a]\ny", "x\n```text\n[a]\n```\ny"],
+];
+
+for (const [arg, input, expected] of fenceCases) {
+  test("editActions codeFence " + arg + " " + JSON.stringify(input), () => {
+    assert.equal(run("codeFence", input, arg), expected);
+  });
+}
+
+test("codeFence without a language writes a bare fence", () => {
+  assert.equal(run("codeFence", "[x]"), "```\n[x]\n```");
+});
+
+const ruleCases: [string, string][] = [
+  ["para|", "para\n\n---\n\n|"],
+  ["pa|ra", "para\n\n---\n\n|"],
+  ["a|\nb", "a\n\n---\n\n|b"],
+  ["|", "---\n\n|"],
+  ["a\n|", "a\n\n---\n\n|"],
+  ["a\n\n|", "a\n\n---\n\n|"],
+  ["[a\nb]", "a\nb\n\n---\n\n|"],
+];
+
+for (const [input, expected] of ruleCases) {
+  test("editActions rule " + JSON.stringify(input), () => {
+    assert.equal(run("rule", input), expected);
+  });
+}
+
+test("the palette actions declare their popovers, options and tooltips", () => {
+  const heading = registry.byId.get("heading")!;
+  assert.equal(heading.popover, "heading");
+  assert.deepEqual(
+    heading.options?.map((option) => [option.value, option.label]),
+    [
+      ["0", "Paragraph"],
+      ["1", "Heading 1"],
+      ["2", "Heading 2"],
+      ["3", "Heading 3"],
+      ["4", "Heading 4"],
+      ["5", "Heading 5"],
+    ],
+  );
+  const code = registry.byId.get("codeFence")!;
+  assert.equal(code.popover, "language");
+  assert.equal(code.options?.[0].value, "text");
+  assert.equal(registry.byId.get("todo")!.title, "Toggle TODO comment");
+});
+
+test("the code languages are the highlighter's registrations and aliases, plus text", () => {
+  const withLanguages = createEditActions(["zeta", "alpha", "text", "beta"]);
+  const values = withLanguages.byId.get("codeFence")!.options!.map((option) => option.value);
+  assert.deepEqual(values, ["text", "alpha", "beta", "zeta"]);
+});
+
+test("shortcutLabel shows Cmd on macOS and Ctrl elsewhere", () => {
+  assert.equal(registry.shortcutLabel(registry.byId.get("bold")!, true), "Cmd+B");
+  assert.equal(registry.shortcutLabel(registry.byId.get("bold")!, false), "Ctrl+B");
+  assert.equal(registry.shortcutLabel(registry.byId.get("italic")!, false), "Ctrl+I");
+  assert.equal(registry.shortcutLabel(registry.byId.get("todo")!, false), "Ctrl+/");
+  assert.equal(registry.shortcutLabel(registry.byId.get("todo")!, true), "Cmd+/");
+  assert.equal(registry.shortcutLabel(registry.byId.get("rule")!, false), "");
 });

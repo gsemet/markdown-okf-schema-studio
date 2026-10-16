@@ -793,6 +793,70 @@ async function scenarioShortcuts(page: Page, evidence: Evidence): Promise<void> 
   });
 }
 
+/** RI-T21: palette buttons edit the text box without closing it, and one undo reverts each. */
+async function scenarioPalette(page: Page, evidence: Evidence): Promise<void> {
+  await withSmokeDocument("realinput-t21", async (source) => {
+    await openSidePreview(source);
+    await waitForRender(source);
+    await setEditMode(page, true);
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    const readEditor = async (): Promise<{ tag: string | undefined; value: string | undefined }> => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return { tag: undefined, value: undefined };
+      return current.evaluate(() => {
+        const element = document.activeElement;
+        return {
+          tag: element?.tagName,
+          value: element instanceof HTMLTextAreaElement ? element.value : undefined,
+        };
+      });
+    };
+    const expectValue = async (description: string, expected: string): Promise<void> => {
+      try {
+        await waitFor(description, async () => (await readEditor()).value === expected);
+      } catch (error) {
+        throw new Error(String(error) + " Editor state: " + JSON.stringify(await readEditor()));
+      }
+    };
+    const count = async (selector: string): Promise<number> => {
+      const current = await findCurrentFrame(page);
+      return current === undefined ? -1 : current.locator(selector).count();
+    };
+    await press(page, "End");
+
+    // Click Bold, then type: the text lands between the markers and the focus never left.
+    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='bold']").click());
+    await expectValue("Bold to insert an empty pair at the caret", "Second paragraph.****");
+    assert.equal((await readEditor()).tag, "TEXTAREA", "clicking Bold keeps the focus in the editor");
+    await typeText(page, "xy");
+    await expectValue("typing after Bold to land inside the markers", "Second paragraph.**xy**");
+
+    // A heading level from the list; one Cmd/Ctrl+Z reverts it.
+    await press(page, "Home");
+    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='heading']").click());
+    await waitFor("the heading list", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
+    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-option='2']").click());
+    await expectValue("Heading 2 to prefix the line", "## Second paragraph.**xy**");
+    assert.equal(await count(".sphinx-preview-edit-palette-menu"), 0, "choosing closes the list");
+    await press(page, MOD + "+z");
+    await expectValue("one undo to remove the heading prefix", "Second paragraph.**xy**");
+    assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
+
+    // Escape closes the open list first, and only the next Escape closes the editor.
+    await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='codeFence']").click());
+    await waitFor("the language list", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
+    await press(page, "Escape");
+    await waitFor("Escape to close the list", async () => await count(".sphinx-preview-edit-palette-menu") === 0);
+    assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
+    await captureAfter(evidence, page, "t21-palette",
+      "Edit mode on; Bold then typing wrote inside the markers, Heading 2 was undone by one Cmd/Ctrl+Z "
+      + "and Escape closed the language list while the editor stayed open.");
+    await press(page, "Escape");
+    await waitForNoBlockEditor(page, "the block editor to close after the second Escape");
+  });
+}
+
 /** RI-T11: Enter in a nested list continues the list at the same indentation. */
 async function scenarioEnterContinuesList(page: Page, evidence: Evidence): Promise<void> {
   const LIST_DOCUMENT = [
@@ -3262,6 +3326,7 @@ export async function run(): Promise<void> {
     await scenarioEnterContinuesList(page, evidence);
     await scenarioTabIndents(page, evidence);
     await scenarioShortcuts(page, evidence);
+    await scenarioPalette(page, evidence);
     await scenarioPreviewKeepsMarkdown(page, evidence);
     await scenarioCaretAtClick(page, evidence);
     await scenarioEditAffordances(page, evidence);

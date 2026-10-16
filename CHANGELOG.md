@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- An edition palette now sits above the text box of an open block editor, also when you insert a
+  new block: heading level (Paragraph, H1 to H5), bold, italic, strikethrough, code block with a
+  language list, blockquote, horizontal rule and TODO. Buttons never close the editor, each is one
+  undo step, and the tooltips show the shortcut of your platform.
 - In the block editor, Cmd/Ctrl+B toggles **bold**, Cmd/Ctrl+I toggles *italic* and Ctrl+/ (Cmd+/)
   toggles a `<!-- TODO: … -->` comment around the current line or the selected lines. Each is one
   undo step.

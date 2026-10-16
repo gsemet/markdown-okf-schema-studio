@@ -794,6 +794,141 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   opacity: 0.55;
 }
 
+/* Edition palette: the pill bar above an open block editor, first child of the editor frame. */
+.sphinx-preview-edit-palette {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 0 6px;
+  padding: 3px;
+  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border-radius: 18px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
+  color: var(--vscode-icon-foreground, var(--vscode-editor-foreground, CanvasText));
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
+  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  line-height: 1.2;
+}
+
+.sphinx-preview-edit-palette > button {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  gap: 2px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.sphinx-preview-edit-palette > button:hover,
+.sphinx-preview-edit-palette-menu > button:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+}
+
+.sphinx-preview-edit-palette > button:active {
+  background: var(--vscode-toolbar-activeBackground, rgba(128, 128, 128, 0.35));
+}
+
+.sphinx-preview-edit-palette > button[aria-expanded="true"] {
+  background: var(--vscode-toolbar-activeBackground, rgba(128, 128, 128, 0.35));
+}
+
+.sphinx-preview-edit-palette > button[data-edit-group-start="true"] {
+  margin-inline-start: 4px;
+}
+
+.sphinx-preview-edit-palette > button[data-edit-group-start="true"]::before {
+  position: absolute;
+  inset-block: 6px;
+  inset-inline-start: -4px;
+  width: 1px;
+  background: var(--sphinx-preview-border);
+  content: "";
+}
+
+.sphinx-preview-edit-palette > button > svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.sphinx-preview-edit-palette > button > svg.sphinx-preview-edit-palette-caret {
+  width: 10px;
+  height: 10px;
+}
+
+.sphinx-preview-edit-palette-glyph {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.sphinx-preview-edit-palette-glyph[data-glyph="bold"] {
+  font-weight: 800;
+}
+
+.sphinx-preview-edit-palette-glyph[data-glyph="italic"] {
+  font-style: italic;
+}
+
+.sphinx-preview-edit-palette-glyph[data-glyph="strikethrough"] {
+  text-decoration: line-through;
+}
+
+.sphinx-preview-edit-palette-menu {
+  position: absolute;
+  inset-block-start: calc(100% + 4px);
+  inset-inline-start: 0;
+  z-index: 1300;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: 9em;
+  max-width: 100%;
+  max-height: 15em;
+  overflow-y: auto;
+  padding: 3px;
+  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border-radius: 8px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
+  color: var(--vscode-editor-foreground, CanvasText);
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.25);
+}
+
+.sphinx-preview-edit-palette-menu > button {
+  display: block;
+  flex: none;
+  width: 100%;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.85em;
+  text-align: start;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
 .sphinx-preview-frontmatter-menu {
   position: static;
   display: flex;

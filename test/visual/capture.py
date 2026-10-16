@@ -750,6 +750,7 @@ def check_edit_activation_scroll(page: Page, scenario: dict, failures: list[Fail
         return dispatch(event);
       };
     }""")
+    text_before = paragraph.evaluate("element => element.getBoundingClientRect().top")
     paragraph.click()
     editor = page.locator(".sphinx-preview-block-editor textarea")
     editor.wait_for(state="visible")
@@ -762,12 +763,37 @@ def check_edit_activation_scroll(page: Page, scenario: dict, failures: list[Fail
       window.editActivationPositions.push(window.scrollY);
       resolve(window.editActivationPositions);
     }, 2500))""")
-    maximum_jump = max(abs(position - positions[0]) for position in positions)
-    if positions[0] <= 0 or maximum_jump > 2:
+    # The edition palette adds its height above the text box, so the page scrolls by exactly that
+    # much to keep the clicked text where it was (T21). It must do so once and settle: no scroll
+    # beyond the compensation, no overshoot and no oscillation while the layout stabilises.
+    geometry = page.evaluate("""() => {
+      const area = document.querySelector('.sphinx-preview-block-editor textarea');
+      const frame = area.closest('.sphinx-preview-block-editor');
+      const bar = frame.querySelector('.sphinx-preview-edit-palette');
+      const barBox = bar ? bar.getBoundingClientRect() : null;
+      const margin = bar ? parseFloat(getComputedStyle(bar).marginBottom) || 0 : 0;
+      return {
+        inset: area.getBoundingClientRect().top - frame.getBoundingClientRect().top
+          - (barBox ? barBox.height + margin : 0),
+        barHeight: barBox ? barBox.height + margin : 0,
+        textTop: area.getBoundingClientRect().top,
+      };
+    }""")
+    compensation = positions[-1] - positions[0]
+    low, high = min(positions[0], positions[-1]) - 2, max(positions[0], positions[-1]) + 2
+    text_moved = geometry["textTop"] - geometry["inset"] - text_before
+    if (
+        positions[0] <= 0
+        or compensation < -2
+        or compensation > geometry["barHeight"] + 2
+        or any(position < low or position > high for position in positions)
+        or abs(text_moved) > 2
+    ):
         failures.append(Failure(
             scenario["page"],
-            f"opening paragraph editor changed scroll by {maximum_jump:.1f}px "
-            f"(initial={positions[0]:.1f}, final={positions[-1]:.1f})",
+            f"opening paragraph editor changed scroll by {compensation:.1f}px "
+            f"(initial={positions[0]:.1f}, final={positions[-1]:.1f}, bar={geometry['barHeight']:.1f}px) "
+            f"and moved the text by {text_moved:.1f}px",
         ))
 
 
@@ -2521,6 +2547,149 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
         failures.append(Failure(page_name, f"editor text is not smaller than the body text: {layout}"))
 
 
+def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """T21: the edition palette above an open block editor."""
+  if not scenario.get("editPalette"):
+    return
+  page_name = scenario["page"]
+  page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
+  paragraph = page.locator("main > p[data-sphinx-source-line]").nth(3)
+  paragraph.evaluate("element => element.scrollIntoView({ block: 'center' })")
+  page.wait_for_timeout(150)
+  before = paragraph.evaluate("element => element.getBoundingClientRect().top")
+  paragraph.click()
+  editor = page.locator(".sphinx-preview-block-editor")
+  page.wait_for_timeout(250)
+  if editor.count() != 1 or not editor.is_visible():
+    failures.append(Failure(page_name, "clicking a paragraph did not open its framed editor"))
+    return
+  palette = editor.locator(".sphinx-preview-edit-palette")
+  if palette.count() != 1 or not palette.is_visible():
+    failures.append(Failure(page_name, "the open editor shows no edition palette"))
+    return
+  geometry = editor.evaluate("""element => {
+    const bar = element.querySelector('.sphinx-preview-edit-palette');
+    const area = element.querySelector('textarea');
+    const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+    const frame = element.getBoundingClientRect();
+    const b = bar.getBoundingClientRect();
+    const a = area.getBoundingClientRect();
+    const t = toolbar ? toolbar.getBoundingClientRect() : null;
+    const buttons = [...bar.querySelectorAll(':scope > button')].map((button) => {
+      const r = button.getBoundingClientRect();
+      return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+    });
+    return {
+      first: element.firstElementChild === bar,
+      barTop: b.top, barBottom: b.bottom, barLeft: b.left, barRight: b.right, barHeight: b.height,
+      areaTop: a.top, frameLeft: frame.left, frameRight: frame.right, frameTop: frame.top,
+      toolbarBottom: t ? t.bottom : 0, toolbarLeft: t ? t.left : 0, toolbarRight: t ? t.right : 0,
+      buttons, scrollWidth: bar.scrollWidth, clientWidth: bar.clientWidth,
+      labels: [...bar.querySelectorAll(':scope > button')].map((button) => button.dataset.editAction),
+    };
+  }""")
+  if not geometry["first"]:
+    failures.append(Failure(page_name, "the palette is not the first child of the editor frame"))
+  expected = ["heading", "bold", "italic", "strikethrough", "codeFence", "quote", "rule", "todo"]
+  if geometry["labels"] != expected:
+    failures.append(Failure(page_name, f"palette buttons are {geometry['labels']}, expected {expected}"))
+  if geometry["barBottom"] > geometry["areaTop"] + 0.5:
+    failures.append(Failure(page_name, f"the palette is not above the text box: {geometry}"))
+  overlaps_toolbar_row = (
+    geometry["barLeft"] < geometry["toolbarRight"] and geometry["barRight"] > geometry["toolbarLeft"]
+  )
+  if overlaps_toolbar_row and geometry["barTop"] < geometry["toolbarBottom"] - 0.5:
+    failures.append(Failure(page_name, f"the palette is under the toolbar: {geometry}"))
+  if geometry["barRight"] > geometry["frameRight"] + 0.5 or geometry["scrollWidth"] > geometry["clientWidth"] + 1:
+    failures.append(Failure(page_name, f"the palette overflows the editor frame: {geometry}"))
+  for button in geometry["buttons"]:
+    if button["right"] > geometry["frameRight"] + 0.5 or button["left"] < geometry["frameLeft"] - 0.5:
+      failures.append(Failure(page_name, f"a palette button leaves the frame: {button}"))
+      break
+  if scenario["width"] <= 400:
+    rows = {round(button["top"]) for button in geometry["buttons"]}
+    if len(rows) < 2:
+      failures.append(Failure(page_name, f"the palette did not wrap at {scenario['width']} px: {geometry}"))
+  # The clicked text keeps its place: only the frame border and padding separate it from the
+  # old paragraph top, never the height of the bar.
+  moved = geometry["areaTop"] - before
+  if abs(moved) > 12:
+    failures.append(Failure(
+      page_name,
+      f"opening the editor moved the text by {moved:.1f}px (bar height {geometry['barHeight']:.1f}px)",
+    ))
+
+  # A press on the bar's own padding keeps the editor open.
+  palette.click(position={"x": 1.5, "y": geometry["barHeight"] / 2})
+  page.wait_for_timeout(150)
+  if editor.count() != 1 or not editor.locator("textarea").is_visible():
+    failures.append(Failure(page_name, "clicking the palette's edge closed the editor"))
+    return
+
+  # A button keeps the editor open and the focus in the text box.
+  area = editor.locator("textarea")
+  area.focus()
+  area.press("ControlOrMeta+a")
+  palette.locator("button[data-edit-action='bold']").click()
+  page.wait_for_timeout(150)
+  state = page.evaluate("""() => {
+    const area = document.querySelector('.sphinx-preview-block-editor textarea');
+    return { open: Boolean(area), focused: document.activeElement === area,
+      value: area ? area.value : '' };
+  }""")
+  if not state["open"] or not state["focused"]:
+    failures.append(Failure(page_name, f"clicking Bold closed the editor or lost the focus: {state}"))
+  elif not (state["value"].startswith("**") and state["value"].rstrip().endswith("**")):
+    failures.append(Failure(page_name, f"clicking Bold did not wrap the text: {state['value'][:60]!r}"))
+  area.press("ControlOrMeta+z")
+  page.wait_for_timeout(100)
+  if editor.locator("textarea").input_value().startswith("**"):
+    failures.append(Failure(page_name, "Undo after Bold did not restore the text"))
+  page.mouse.move(2, 2)
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-bar.png"), caret="hide")
+
+  # The heading list opens inside the frame, Escape closes it and leaves the editor open.
+  palette.locator("button[data-edit-action='heading']").click()
+  menu = editor.locator(".sphinx-preview-edit-palette-menu")
+  page.wait_for_timeout(150)
+  if menu.count() != 1 or not menu.is_visible():
+    failures.append(Failure(page_name, "the heading list did not open"))
+  else:
+    box = menu.evaluate("""element => {
+      const r = element.getBoundingClientRect();
+      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      return { left: r.left, right: r.right, frameLeft: f.left, frameRight: f.right };
+    }""")
+    if box["left"] < box["frameLeft"] - 0.5 or box["right"] > box["frameRight"] + 0.5:
+      failures.append(Failure(page_name, f"the heading list leaves the editor frame: {box}"))
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-menu.png"), caret="hide")
+  page.keyboard.press("Escape")
+  page.wait_for_timeout(100)
+  if editor.locator(".sphinx-preview-edit-palette-menu").count() != 0:
+    failures.append(Failure(page_name, "Escape did not close the heading list"))
+  if editor.count() != 1:
+    failures.append(Failure(page_name, "Escape with a heading list open closed the editor"))
+    return
+
+  # Closing puts the block back where it was before the editor opened (no jump by the bar height).
+  page.keyboard.press("Escape")
+  page.wait_for_timeout(500)
+  if page.locator(".sphinx-preview-block-editor").count() != 0:
+    failures.append(Failure(page_name, "Escape did not close the editor"))
+    return
+  after = page.locator("main > p[data-sphinx-source-line]").nth(3).evaluate(
+    "element => element.getBoundingClientRect().top"
+  )
+  if abs(after - before) > 2:
+    failures.append(Failure(
+      page_name,
+      f"closing the editor moved the paragraph from {before:.1f}px to {after:.1f}px",
+    ))
+  # Reopen so the scenario's own screenshot shows the editor.
+  page.locator("main > p[data-sphinx-source-line]").nth(3).click()
+  page.wait_for_timeout(250)
+
+
 def check_cell_editor_chrome(page: Page, page_name: str, target, original_bounds, failures: list[Failure]) -> None:
     """Done/Cancel live inside the cell, the columns keep their width, the toolbar status is centred."""
     info = page.evaluate("""() => {
@@ -3985,7 +4154,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_comment_chips, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

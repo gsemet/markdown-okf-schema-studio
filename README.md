@@ -35,6 +35,8 @@ Markdown flavours and extensions:
   keyboard navigation, row creation, and focused field editing.
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
+  An edition palette above the text box adds headings, strikethrough, code blocks with a language,
+  blockquotes and horizontal rules.
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)
   annotations can show target metadata and source line numbers for implementation
   and test evidence.

@@ -105,6 +105,42 @@ function decodeEntities(value: string): string {
   });
 }
 
+const LANGUAGE_ALIASES: Record<string, string> = {
+  "c++": "cpp",
+  cs: "csharp",
+  console: "shell",
+  dockerfile: "dockerfile",
+  docker: "dockerfile",
+  html: "xml",
+  js: "javascript",
+  jsonc: "json",
+  md: "markdown",
+  myst: "markdown",
+  node: "javascript",
+  py: "python",
+  rs: "rust",
+  sh: "bash",
+  "shell-session": "shell",
+  tex: "latex",
+  toml: "ini",
+  patch: "diff",
+  ts: "typescript",
+  tsx: "typescript",
+  jsx: "javascript",
+  ipython: "python",
+  ipython3: "python",
+  svg: "xml",
+  zsh: "bash",
+};
+
+/**
+ * Names a fence info string can use for a language the preview highlights: the registered
+ * grammars and their aliases, sorted. The edition palette offers exactly these.
+ */
+export function highlightLanguageNames(): string[] {
+  return [...new Set([...Object.keys(LANGUAGES), ...Object.keys(LANGUAGE_ALIASES)])].sort();
+}
+
 /**
  * Resolves a fence info string to a registered grammar.
  *
@@ -116,34 +152,7 @@ function resolveLanguage(raw: string): string | undefined {
   if (!token) {
     return undefined;
   }
-  const aliases: Record<string, string> = {
-    "c++": "cpp",
-    cs: "csharp",
-    console: "shell",
-    dockerfile: "dockerfile",
-    docker: "dockerfile",
-    html: "xml",
-    js: "javascript",
-    jsonc: "json",
-    md: "markdown",
-    myst: "markdown",
-    node: "javascript",
-    py: "python",
-    rs: "rust",
-    sh: "bash",
-    "shell-session": "shell",
-    tex: "latex",
-    toml: "ini",
-    patch: "diff",
-    ts: "typescript",
-    tsx: "typescript",
-    jsx: "javascript",
-    ipython: "python",
-    ipython3: "python",
-    svg: "xml",
-    zsh: "bash",
-  };
-  const name = aliases[token] ?? token;
+  const name = LANGUAGE_ALIASES[token] ?? token;
   return hljs.getLanguage(name) ? name : undefined;
 }
 
