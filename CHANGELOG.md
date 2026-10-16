@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Back and Next buttons at the start of the second toolbar row return to the place before a followed
+  link and forward again, across documents and in-page anchors; external links are not recorded,
+  and each preview panel keeps its own history.
 - A Width button on the second toolbar row cycles Margin (the `maxContentWidth` column), Auto (wide
   tables, figures, images and code blocks break out to the pane width) and Full width, remembered
   per workspace.

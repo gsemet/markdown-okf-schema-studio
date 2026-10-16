@@ -87,6 +87,7 @@ import {
 import { EditLock, isUnchangedSave, needsRefresh } from "./state/editLock";
 import { preloadMystEngine } from "./render/mystRenderer";
 import { createNonce } from "./security/csp";
+import { NavigationHistory, type NavigationEntry } from "./state/navigationHistory";
 import { parsePreviewPanelState, PreviewPanelState } from "./state/previewState";
 import {
   clearPreviewThemeMode,
@@ -243,6 +244,8 @@ interface ActivePreview {
   };
   lastSourceScrollLine?: number;
   lastRevealedSourceLine?: number;
+  /** Test hook: the last previewHistoryState posted to the page. */
+  lastHistoryState?: { canBack: boolean; canForward: boolean };
   linkDiscoveries?: Map<string, Promise<readonly string[]>>;
   /** Number of webview document replacements, i.e. assignments of a changed string (test hook and render-churn budget). */
   htmlAssignments: number;
@@ -2254,6 +2257,106 @@ async function handlePreviewLinkDiscovery(preview: ActivePreview, message: Previ
   }
 }
 
+/** One navigation history per preview panel; it outlives the ActivePreview a document switch recreates. */
+const navigationHistories = new WeakMap<vscode.WebviewPanel, NavigationHistory>();
+
+function historyOf(preview: ActivePreview): NavigationHistory {
+  let history = navigationHistories.get(preview.panel);
+  if (!history) {
+    history = new NavigationHistory();
+    navigationHistories.set(preview.panel, history);
+  }
+  return history;
+}
+
+/** Where the reader is in the shown document; the line is undefined until the page reported one. */
+function currentPlace(preview: ActivePreview): { uri: string; line?: number } {
+  const line = preview.anchor && preview.anchor.documentId === preview.documentUri
+    ? preview.anchor.line
+    : preview.lastSourceScrollLine ?? preview.state?.sourceLine;
+  return { uri: preview.documentUri, ...(line === undefined ? {} : { line: Math.max(1, Math.floor(line)) }) };
+}
+
+/** Tells the page which of Back and Next can go anywhere. Stale ids are dropped by the page. */
+function postHistoryState(preview: ActivePreview): void {
+  const stage = preview.stage;
+  if (preview.disposed || !stage) return;
+  const history = historyOf(preview);
+  const state = { canBack: history.canBack(), canForward: history.canForward() };
+  preview.lastHistoryState = state;
+  void preview.panel.webview.postMessage({
+    type: "previewHistoryState",
+    ...state,
+    documentId: stage.activeDocumentIdentity,
+    documentVersion: stage.activeDocumentVersion,
+    requestId: stage.requestId,
+  });
+}
+
+/** Records the place being left and the target of a followed link. */
+function recordNavigation(preview: ActivePreview, target: NavigationEntry): void {
+  const history = historyOf(preview);
+  history.depart(currentPlace(preview));
+  history.push(target);
+  postHistoryState(preview);
+}
+
+async function openLocalDocument(targetUri: vscode.Uri, selection?: vscode.Range): Promise<void> {
+  const existingGroup = vscode.window.tabGroups.all.find((group) => group.tabs.some((tab) =>
+    tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === targetUri.fsPath));
+  await vscode.commands.executeCommand("vscode.open", targetUri, {
+    viewColumn: existingGroup?.viewColumn ?? vscode.ViewColumn.One,
+    preview: false,
+    ...(selection ? { selection } : {}),
+  });
+}
+
+async function handlePreviewHistoryGo(preview: ActivePreview, direction: "back" | "forward"): Promise<void> {
+  const stage = preview.stage;
+  if (!stage) return;
+  if (preview.activeBlockEdit) {
+    vscode.window.setStatusBarMessage("Finish the open block edit before going back or forward.", 3000);
+    return;
+  }
+  const history = historyOf(preview);
+  const available = direction === "back" ? history.canBack() : history.canForward();
+  if (!available) {
+    postHistoryState(preview);
+    return;
+  }
+  history.depart(currentPlace(preview));
+  const target = direction === "back" ? history.back() : history.forward();
+  if (!target) {
+    postHistoryState(preview);
+    return;
+  }
+  postHistoryState(preview);
+  if (target.uri === preview.documentUri) {
+    preview.lastSourceScrollLine = target.line;
+    // The stored line is now the reader's place: a stale anchor must not overwrite it on the next jump.
+    preview.anchor = { line: target.line, owner: "editor", documentId: preview.documentUri };
+    void preview.panel.webview.postMessage({
+      type: "sourceScroll",
+      documentId: stage.activeDocumentIdentity,
+      documentVersion: stage.activeDocumentVersion,
+      requestId: stage.requestId,
+      line: target.line,
+    });
+    return;
+  }
+  try {
+    const targetUri = vscode.Uri.parse(target.uri);
+    const document = await vscode.workspace.openTextDocument(targetUri);
+    const lineIndex = Math.min(Math.max(0, target.line - 1), Math.max(0, document.lineCount - 1));
+    const selection = new vscode.Range(lineIndex, 0, lineIndex, document.lineAt(lineIndex).text.length);
+    await openLocalDocument(targetUri, selection);
+  } catch (error) {
+    void vscode.window.showWarningMessage(
+      `Markdown OKF-Schema Studio could not go ${direction}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
 async function handlePreviewLink(preview: ActivePreview, request: string): Promise<void> {
   const stage = preview.stage;
   if (!stage || !matchesCurrentPreview(preview, {
@@ -2283,6 +2386,9 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
     const fragmentRange = activeDocument
       ? markdownFragmentRange(activeDocument.getText(), navigation.value)
       : undefined;
+    if (fragmentRange) {
+      recordNavigation(preview, { uri: preview.documentUri, line: fragmentRange.startLine });
+    }
     void preview.panel.webview.postMessage({
       type: "navigateAnchor",
       value: navigation.value,
@@ -2328,13 +2434,15 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
     }
     if (preview.disposed || preview.stage !== stage) return;
     const targetUri = vscode.Uri.file(navigation.path);
-    const existingGroup = vscode.window.tabGroups.all.find((group) => group.tabs.some((tab) =>
-      tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === targetUri.fsPath));
-    await vscode.commands.executeCommand("vscode.open", targetUri, {
-      viewColumn: existingGroup?.viewColumn ?? vscode.ViewColumn.One,
-      preview: false,
-      ...(selection ? { selection } : {}),
-    });
+    if (preview.followsActiveEditor) {
+      // A locked preview does not follow the opened file, so only anchor jumps are recorded.
+      const opened = await vscode.workspace.openTextDocument(targetUri).then((document) => document, () => undefined);
+      if (preview.disposed || preview.stage !== stage) return;
+      if (opened && isDocumentEligible(opened)) {
+        recordNavigation(preview, { uri: documentKey(opened), line: (selection?.start.line ?? 0) + 1 });
+      }
+    }
+    await openLocalDocument(targetUri, selection);
   } catch (error) {
     void vscode.window.showWarningMessage(
       `Markdown OKF-Schema Studio could not open ${navigation.path}: ${error instanceof Error ? error.message : String(error)}`,
@@ -2353,6 +2461,10 @@ registeredMessageHandlers.set("previewCopyText", (_preview, message) =>
 
 // A view preference only changes how the preview looks (workspace state, no document edit), so a
 // read-only or untrusted preview accepts it; the value is validated by the registry.
+// Back / Next walk the navigation history of the panel. Only navigation, no document edit.
+registeredMessageHandlers.set("previewHistoryGo", (preview, message) =>
+  handlePreviewHistoryGo(preview, message.direction as "back" | "forward"));
+
 registeredMessageHandlers.set("previewViewPreferenceChanged", (_preview, message) => {
   setSessionViewPreference(message.preference as ViewPreferenceKey, message.value);
 });
@@ -2493,6 +2605,8 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     // The webview already applied the anchor passed at render time; only refresh the
     // selection marker so a re-render never triggers a second scroll.
     markEditorSelectionInPreview(preview);
+    // The page starts with both buttons disabled: tell it what the history of this panel allows.
+    postHistoryState(preview);
     return;
   }
   if (value.type === "previewLink" && value.request) {
@@ -3442,6 +3556,12 @@ export function getActivePreviewForTests():
     webviewReady: boolean;
     pendingOverlayVisible: boolean;
     pendingOverlayShown: number;
+    /** Navigation history of the panel and the last state posted to the page. */
+    history: {
+      entries: { uri: string; line: number }[];
+      index: number;
+      posted?: { canBack: boolean; canForward: boolean };
+    };
   }
   | undefined {
   if (!activePreview) {
@@ -3477,6 +3597,10 @@ export function getActivePreviewForTests():
       && activePreview.readyRequestId === activePreview.stage.requestId,
     pendingOverlayVisible: activePreview.pendingOverlayVisible,
     pendingOverlayShown: activePreview.pendingOverlayShown,
+    history: {
+      ...historyOf(activePreview).snapshot(),
+      posted: activePreview.lastHistoryState,
+    },
   };
 }
 

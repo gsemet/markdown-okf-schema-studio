@@ -390,13 +390,13 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 test("preview toolbar provides refresh, editor anchoring, edit mode and theme controls", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
-  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 7);
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 9);
   const [mainRow, viewRow] = toolbar.split('<div data-sphinx-preview-toolbar-row="view">');
   assert.match(mainRow, /data-sphinx-preview-toolbar-row="main"/u);
   assert.equal((mainRow.match(/<button\b/gu) ?? []).length, 4);
   assert.equal((mainRow.match(/<\/button><button\b/gu) ?? []).length, 3);
-  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 3);
-  assert.match(viewRow, /data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in[\s\S]*data-sphinx-preview-width-toggle/u);
+  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 5);
+  assert.match(viewRow, /data-sphinx-preview-back[\s\S]*data-sphinx-preview-next[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in[\s\S]*data-sphinx-preview-width-toggle/u);
   assert.doesNotMatch(toolbar, /style=/u);
   assert.doesNotMatch(toolbar, /data-sphinx-preview-mode-controls|role="group"/u);
   for (const control of [
@@ -407,7 +407,7 @@ test("preview toolbar provides refresh, editor anchoring, edit mode and theme co
   ]) {
     assert.ok(toolbar.includes(control), `expected toolbar control ${control}`);
   }
-  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 7);
+  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 9);
   assert.match(
     PREVIEW_THEME_CSS,
     /button\[data-tooltip\]::after\s*\{[^}]*content: attr\(data-tooltip\);[^}]*visibility: hidden;[^}]*opacity: 0;/u,
