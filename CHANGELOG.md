@@ -5,8 +5,10 @@
 - For a document in a Sphinx project, the preview now warns when the document uses MyST syntax
   that needs an extension missing from `myst_enable_extensions` in the nearest `conf.py`
   (for example `:::` fences without `colon_fence`). One warning per extension names the first
-  line, in the preview status area. Nothing is warned without a `conf.py` or when its lists
-  cannot be read as plain strings, and the rendering itself does not change.
+  line, in the preview status area and in the Problems panel (with a squiggle on that line).
+  Editing, creating or deleting a `conf.py` updates open previews without reopening them.
+  Nothing is warned without a `conf.py` or when its lists cannot be read as plain strings,
+  and the rendering itself does not change.
 - Blocks you changed since the last Git commit, unsaved edits included, now show a green bar on
   their left, like the editor gutter. Files that are not in Git show nothing. The Diff button at
   the end of the second toolbar row shows or hides the marks (remembered per workspace). The new

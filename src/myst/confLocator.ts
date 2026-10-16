@@ -50,6 +50,8 @@ export interface ConfLocator {
    * no `conf.py`, a file that cannot be read with certainty, or a project without a MyST parser.
    */
   enabledMystExtensions(documentPath: string, workspaceRoot: string): ReadonlySet<string> | undefined;
+  /** The `conf.py` that governs the document (ancestor walk, then the D29 fallback), if any. */
+  locate(documentPath: string, workspaceRoot: string): string | undefined;
   invalidate(): void;
 }
 
@@ -131,6 +133,9 @@ export function createConfLocator(options: ConfLocatorOptions = {}): ConfLocator
       }
       return new Set(conf.mystExtensions);
     },
+    locate(documentPath, workspaceRoot) {
+      return findConf(path.dirname(path.resolve(documentPath)), path.resolve(workspaceRoot)) ?? undefined;
+    },
     invalidate() {
       directories.clear();
       files.clear();
@@ -146,6 +151,11 @@ export function enabledMystExtensionsFor(
   workspaceRoot: string,
 ): ReadonlySet<string> | undefined {
   return sharedLocator.enabledMystExtensions(documentPath, workspaceRoot);
+}
+
+/** The `conf.py` that governs a document, from the shared (cached) lookup. */
+export function locateConfFor(documentPath: string, workspaceRoot: string): string | undefined {
+  return sharedLocator.locate(documentPath, workspaceRoot);
 }
 
 /** Drops every cached lookup; called when a `conf.py` is created, changed or deleted. */
