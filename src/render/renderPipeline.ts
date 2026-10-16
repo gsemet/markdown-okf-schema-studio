@@ -7,6 +7,7 @@ import {
   renderPlantUmlDiagrams,
   type PlantUmlRenderResult,
 } from "./plantUmlRenderer";
+import { enabledMystExtensionsFor } from "../myst/confLocator";
 import { createPreviewResourcePolicy } from "../security/resource-policy";
 
 export interface PreviewDocument {
@@ -161,6 +162,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
       ? await renderOverride(options.document.getText())
       : await renderMyst(options.document.getText(), {
         sourcePath: stage.activeDocumentPath,
+        enabledMystExtensions: enabledMystExtensionsFor(stage.activeDocumentPath, options.workspaceRoot),
         resolveInclude: (request, sourcePath) => {
           const includePath = resourcePolicy.resolveResource(request, path.dirname(sourcePath));
           if (!includePath) {
@@ -190,7 +192,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
       }
     }
     for (const diagnostic of rendered.diagnostics ?? []) {
-      diagnostics.push({ ...diagnostic, code: "myst-diagnostic", file: stage.activeDocumentPath });
+      diagnostics.push({ ...diagnostic, code: diagnostic.code === "myst-extension" ? diagnostic.code : "myst-diagnostic", file: stage.activeDocumentPath });
     }
     if (!renderOverride) {
       let plantUmlPromise: Promise<PlantUmlRenderResult> | undefined;

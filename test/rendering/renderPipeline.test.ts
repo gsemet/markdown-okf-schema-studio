@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { invalidateConfCache } from "../../src/myst/confLocator";
 import {
   renderPreviewDocument,
   RenderCanceledError,
@@ -85,4 +86,43 @@ test("cancellation while rendering rejects a late successful result", async (con
   controller.abort();
   finish({ html: "<p>Late result</p>" });
   await assert.rejects(render, RenderCanceledError);
+});
+
+test("MyST syntax missing from the nearest conf.py warns once per extension, rendering unchanged", async (context) => {
+  context.after(resetRenderHooksForTests);
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "myst-autodetect-"));
+  context.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const source = "# T\n\nIntro\n\n:::{note}\nhi\n:::\n\nTerm\n: Definition\n\nsome ~~gone~~ text\n";
+  const render = (): ReturnType<typeof renderPreviewDocument> => renderPreviewDocument({
+    ...options(),
+    document: {
+      uri: { scheme: "file", fsPath: path.join(root, "doc.md") },
+      languageId: "markdown",
+      getText: () => source,
+    },
+    workspaceRoot: root,
+  });
+  const without = await render();
+  assert.deepEqual(without.diagnostics.filter((entry) => entry.code === "myst-extension"), []);
+
+  fs.writeFileSync(path.join(root, "conf.py"), [
+    "extensions = ['myst_parser']",
+    "myst_enable_extensions = ['deflist', 'dollarmath']",
+  ].join("\n"));
+  invalidateConfCache();
+  const warned = await render();
+  const warnings = warned.diagnostics.filter((entry) => entry.code === "myst-extension");
+  assert.deepEqual(warnings.map((entry) => [entry.severity, entry.line, entry.message]), [
+    ["warning", 5, "Warning: `:::` is used but this needs the MyST extension `colon_fence`, which is not enabled in your conf.py. Add \"colon_fence\" to `myst_enable_extensions`."],
+    ["warning", 12, "Warning: `~~` is used but this needs the MyST extension `strikethrough`, which is not enabled in your conf.py. Add \"strikethrough\" to `myst_enable_extensions`."],
+  ]);
+  assert.equal(warned.html, without.html);
+
+  fs.writeFileSync(path.join(root, "conf.py"), "extensions = ['myst_parser']\nmyst_enable_extensions = load()\n");
+  invalidateConfCache();
+  const uncertain = await render();
+  assert.deepEqual(uncertain.diagnostics.filter((entry) => entry.code === "myst-extension"), []);
 });

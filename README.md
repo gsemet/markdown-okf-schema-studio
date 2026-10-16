@@ -132,6 +132,17 @@ x-okf-link:
 Use `@tests_req` for test evidence. `id_marker` selects the current document's identity field;
 without it, marker matching uses the current document's filename stem.
 
+## Sphinx Projects
+
+When the Markdown file sits inside a Sphinx project (a `conf.py` in its folder or any folder up to
+the workspace root; failing that, the single `conf.py` among `docs/`, `doc/`, `sphinx/`,
+`source/` and `docs/source/` at the workspace root) that loads `myst_parser` or `myst_nb`, the preview compares the syntax you use
+with `myst_enable_extensions`. Syntax whose extension is missing (`colon_fence`, `dollarmath`,
+`amsmath`, `deflist`, `fieldlist`, `tasklist`, `strikethrough`, `substitution`, `attrs_inline`,
+`html_image`, `html_admonition`) gets one warning per extension, with the first line using it.
+The file is only read, never run: if a list is computed rather than written as plain strings, or
+there is no `conf.py`, nothing is reported. The preview itself renders the same either way.
+
 ## Settings
 
 The preview settings are available under **Markdown OKF-Schema Studio** in VS Code settings.
