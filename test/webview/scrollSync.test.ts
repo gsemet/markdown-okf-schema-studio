@@ -5581,7 +5581,8 @@ function traceStartup(
     const harness = createRuntimeHarness(configuration, undefined, undefined, savedAnchorMode);
     const toolbar = [harness.themeButton, harness.refreshButton, harness.anchorButton, harness.editModeButton];
     const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion",
-      "data-sphinx-preview-zoom", "data-sphinx-preview-width", "data-sphinx-preview-toc"];
+      "data-sphinx-preview-zoom", "data-sphinx-preview-width", "data-sphinx-preview-toc",
+      "data-okf-show-comments"];
     // The zoom buttons and the zoom of the root do not depend on the content (T08).
     const zoomButtons = [harness.zoomOutButton, harness.zoomInButton, harness.widthButton];
     return {
@@ -7078,6 +7079,18 @@ test("T11: Back and Next post previewHistoryGo and follow previewHistoryState", 
   assert.equal(harness.nextButton.disabled, false);
   harness.nextButton.dispatch("click");
   assert.equal(harness.messages.at(-1)?.direction, "forward");
+});
+
+test("T15: previewShowComments sets the show-comments attribute of the page, stale ids are ignored", () => {
+  const harness = createRuntimeHarness();
+  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  assert.equal(harness.documentElement.getAttribute("data-okf-show-comments"), "true");
+  harness.dispatchMessage({ type: "previewShowComments", ...ids, showComments: false });
+  assert.equal(harness.documentElement.getAttribute("data-okf-show-comments"), "false");
+  harness.dispatchMessage({ type: "previewShowComments", ...ids, requestId: 3, showComments: true });
+  assert.equal(harness.documentElement.getAttribute("data-okf-show-comments"), "false");
+  harness.dispatchMessage({ type: "previewShowComments", ...ids, showComments: true });
+  assert.equal(harness.documentElement.getAttribute("data-okf-show-comments"), "true");
 });
 
 test("T11: a previewHistoryState of another document version is ignored", () => {

@@ -106,9 +106,17 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.preview.maxContentWidth",
       "markdownOkfSchemaStudio.preview.scrollEditorWithPreview",
       "markdownOkfSchemaStudio.preview.scrollPreviewWithEditor",
+      "markdownOkfSchemaStudio.preview.showComments",
       "markdownOkfSchemaStudio.preview.stickyHeadingDepth",
     ],
   );
+  const showComments = packageJson.contributes.configuration.properties[
+    "markdownOkfSchemaStudio.preview.showComments"
+  ] as { type: string; default: boolean; order: number; markdownDescription: string };
+  assert.equal(showComments.type, "boolean");
+  assert.equal(showComments.default, true);
+  assert.equal(showComments.order, 21);
+  assert.match(showComments.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
   assert.equal(
     packageJson.contributes.configuration.properties["markdown.preview.scrollPreviewWithEditor"],
     undefined,
