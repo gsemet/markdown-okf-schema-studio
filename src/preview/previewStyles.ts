@@ -1532,6 +1532,46 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   margin-inline-start: -1.4em;
 }
 
+/* Comment and TODO chips: gray for an HTML comment, green for TODO. The chip never changes the line
+   height; the comment text lives in a hidden body that expansion reveals. */
+#sphinx-myst-preview-content .okf-chip {
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 0 0.15em;
+  padding: 0 0.5em;
+  border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.4));
+  border-radius: 0.75em;
+  background: var(--vscode-editorWidget-background, rgba(128, 128, 128, 0.12));
+  color: var(--vscode-descriptionForeground, #717171);
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 0.78em;
+  font-weight: 600;
+  line-height: 1.4;
+  vertical-align: baseline;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#sphinx-myst-preview-content .okf-chip--todo {
+  border-color: var(--vscode-charts-green, #16825d);
+  background: color-mix(in srgb, var(--vscode-charts-green, #16825d) 16%, transparent);
+  color: var(--vscode-charts-green, #16825d);
+}
+
+#sphinx-myst-preview-content .okf-chip:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: 1px;
+}
+
+#sphinx-myst-preview-content div.okf-comment {
+  margin: 0.4em 0;
+  line-height: 1.4;
+}
+
+#sphinx-myst-preview-content .okf-comment-body[hidden] {
+  display: none;
+}
+
 #sphinx-myst-preview-content img {
   max-width: 100%;
   height: auto;

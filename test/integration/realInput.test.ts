@@ -1289,6 +1289,30 @@ const BOOLEAN_SCHEMA = [
   "",
 ].join("\n");
 
+/** T14: in edit mode a click on a block comment (not its chip) opens the block editor on its raw lines. */
+async function scenarioCommentBlockEdit(page: Page, evidence: Evidence): Promise<void> {
+  const source = ["# Notes", "", "<!--", "keep this", "-->", "", "TODO write the rest.", ""].join("\n");
+  await withDocument("realinput-comment", source, async (document) => {
+    await openSidePreview(document);
+    await waitForRender(document);
+    await setEditMode(page, true);
+    await withCurrentFrame(page, async (frame) => {
+      assert.equal(await frame.locator("div.okf-comment > .okf-chip").count(), 1);
+      assert.equal(await frame.locator("p .okf-chip--todo").count(), 1);
+      // The chip is reserved for expansion: it must not open an editor.
+      await frame.locator("div.okf-comment > .okf-chip").click();
+      assert.equal(await frame.locator("[data-sphinx-preview-block-editor]").count(), 0);
+      await frame.locator("div.okf-comment").click({ position: { x: 300, y: 4 } });
+    });
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    await withCurrentFrame(page, async (frame) => {
+      assert.equal(await frame.locator("[data-sphinx-preview-block-editor] textarea").inputValue(), "<!--\nkeep this\n-->");
+    });
+    await captureAfter(evidence, page, "comment-block-edit",
+      "Edit mode on; a click on the comment block (not its chip) opened the block editor on the three raw comment lines.");
+  });
+}
+
 /** RI-T20: one click on a boolean value toggles and saves it. */
 async function scenarioBooleanOneClick(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t20", BOOLEAN_DOCUMENT, async (document) => {
@@ -3173,6 +3197,7 @@ export async function run(): Promise<void> {
       return;
     }
     await scenarioParagraphBlurCommit(page, evidence);
+    await scenarioCommentBlockEdit(page, evidence);
     await scenarioCtrlEnterCommit(page, evidence);
     await scenarioArrowNavigation(page, evidence);
     await scenarioTableCellEnter(page, evidence);

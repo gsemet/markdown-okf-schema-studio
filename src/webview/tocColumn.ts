@@ -63,8 +63,14 @@ export function installTocColumn(
   };
 
   const headingText = (heading: Element): string => {
-    let text = heading.textContent ?? "";
-    const permalink = heading.querySelector?.("a.headerlink, .headerlink");
+    // A comment chip and its hidden body are not part of the heading's wording.
+    let source: Element = heading;
+    if (typeof heading.cloneNode === "function" && heading.querySelector?.(".okf-comment")) {
+      source = heading.cloneNode(true) as Element;
+      source.querySelectorAll?.(".okf-comment").forEach((comment) => comment.remove());
+    }
+    let text = source.textContent ?? "";
+    const permalink = source.querySelector?.("a.headerlink, .headerlink");
     const glyph = permalink?.textContent;
     if (glyph) text = text.split(glyph).join("");
     return text.replace(/\s+/gu, " ").trim();

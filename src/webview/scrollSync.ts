@@ -658,6 +658,17 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     refreshReadingOffset();
   }
 
+
+  // A comment chip and its hidden body are not part of a heading's wording.
+  function headingLabel(heading) {
+    if (typeof heading.cloneNode !== "function" || !heading.querySelector?.(".okf-comment")) {
+      return heading.textContent;
+    }
+    const copy = heading.cloneNode(true);
+    copy.querySelectorAll(".okf-comment").forEach((comment) => comment.remove());
+    return copy.textContent;
+  }
+
   function updateStickyHeadings() {
     if (!stickyHeadings) return;
     refreshStickyHeadingPosition();
@@ -696,13 +707,13 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       ) {
         const heading = headings[index];
         const level = Number(heading.tagName.slice(1));
-        const text = heading.textContent.trim();
+        const text = headingLabel(heading).trim();
         if (level < childLevel && text) {
           labels.unshift("#".repeat(level) + " " + text);
           childLevel = level;
         }
       }
-      const activeText = active.textContent.trim();
+      const activeText = headingLabel(active).trim();
       if (activeText) labels.push("#".repeat(activeLevel) + " " + activeText);
       stickyHeadings.textContent = labels.join("\\n");
       stickyHeadings.hidden = labels.length === 0;
@@ -3634,6 +3645,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   });
   document.addEventListener("click", (event) => {
     if (event.target instanceof Element && event.target.closest(".sphinx-preview-insert-point")) return;
+    // The chip of a block comment is reserved for expanding it; the rest of the block edits.
+    if (event.target instanceof Element && event.target.closest("div.okf-comment > .okf-chip")) return;
     const target = event.target instanceof Element
       ? event.target.closest(mappingsSelector)
       : undefined;
@@ -3674,6 +3687,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         || event.target.isContentEditable)) return;
     if (event.target instanceof Element
       && event.target.closest("[data-okf-description-toggle]")) return;
+    if (event.target instanceof Element
+      && event.target.closest("div.okf-comment > .okf-chip")) return;
     if (event.target instanceof Element
       && event.target.closest('a[data-sphinx-preview-navigation^="okf-link:"]')) return;
     const frontmatterEditor = event.target instanceof Element

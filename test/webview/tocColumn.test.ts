@@ -50,6 +50,12 @@ class FakeElement {
       ...child.all(selector),
     ]);
   }
+  cloneNode(deep: boolean): FakeElement {
+    const copy = new FakeElement(this.tagName, [...this.classes]);
+    copy.ownText = this.ownText;
+    if (deep) for (const child of this.children) copy.appendChild(child.cloneNode(true));
+    return copy;
+  }
   querySelectorAll(selector: string) { return this.all(selector); }
   querySelector(selector: string) { return this.all(selector)[0] ?? null; }
   fire(type: string) {
@@ -392,4 +398,22 @@ test("a heading revealed at the reading line becomes current despite a fractiona
   window.scrollY = 860; // reading line at 900; Usage sits at 900.4
   toc.track();
   assert.equal(entries()[3].getAttribute("aria-current"), "location");
+});
+
+test("a comment chip and its hidden body stay out of the entry label, a TODO word chip stays in", () => {
+  const { content, toc, flush, entries } = setup({ toc: true });
+  const comment = new FakeElement("span", ["okf-comment"]);
+  const chip = new FakeElement("span", ["okf-chip", "okf-chip--todo"]);
+  chip.ownText = "TODO";
+  const body = new FakeElement("span", ["okf-comment-body"]);
+  body.ownText = "TODO fix later";
+  comment.appendChild(chip);
+  comment.appendChild(body);
+  const word = new FakeElement("span", ["okf-chip", "okf-chip--todo"]);
+  word.ownText = "TODO";
+  content.appendChild(heading("h2", "Plan ", comment));
+  content.appendChild(heading("h2", "Ship ", word));
+  toc.refresh?.();
+  flush();
+  assert.deepEqual(entries().map((entry) => entry.textContent), ["Plan", "Ship TODO"]);
 });

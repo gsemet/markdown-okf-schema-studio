@@ -7,7 +7,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Anchor button**: toolbar toggle that ties preview scrolling to the editor (`data-sphinx-preview-anchor`).
 - **Block editor**: raw Markdown text box that replaces a mapped block in edit mode (`.sphinx-preview-block-editor`, `openBlockEditor` in `src/webview/scrollSync.ts`).
 - **Block selection (planned)**: selecting whole blocks in the preview, for example to comment on them.
-- **Chip (planned)**: small inline badge rendered for a value in the preview.
+- **Chip**: small inline marker in the preview, gray for an HTML comment and green for TODO (`.okf-chip`, `src/render/commentMarkers.ts`).
 - **Comment thread (planned)**: a conversation attached to a block or range of a document.
 - **Content patch**: in-place replacement of the content container `#sphinx-myst-preview-content` instead of a full page reload (`src/preview/contentPatch.ts`).
 - **Copy button**: floating button over a hovered code block that copies its raw code (`data-sphinx-preview-code-copy`, `src/webview/codeCopy.ts`).
