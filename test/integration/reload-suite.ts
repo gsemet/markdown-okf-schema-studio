@@ -99,10 +99,13 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
     }
     let frame = await frameForDocument();
     if (await frame.locator("[data-okf-description-toggle]:visible").getAttribute("aria-expanded") === "true") await frame.locator("[data-okf-description-toggle]:visible").click();
-    await capture("01-before-window-reload", frame, "Collapse Description before invoking Developer: Reload Window.");
+    for (let step = 0; step < 3; step += 1) await frame.locator("[data-sphinx-preview-zoom-in]").click();
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "130");
+    await capture("01-before-window-reload", frame, "Collapse Description and zoom to 130 % before invoking Developer: Reload Window.");
     const nonce = await frame.evaluate(() => document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce);
     await command(page, "Developer: Reload Window");
     frame = await frameForDocument(nonce);
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "130", "zoom survives the window reload");
     await capture("02-after-window-reload", frame, "Invoke Developer: Reload Window; wait for a restored visible preview with a new script nonce.");
     const restoredNonce = await frame.evaluate(() => document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce);
     const previewTab = page.locator('.tab[data-resource-name^="webview-markdown-okf-schema-studio.preview-"]')
@@ -113,6 +116,9 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
     assert.equal(await page.locator('.tab[data-resource-name="reload-evidence.md"]').count(), 1);
     await command(page, "Markdown OKF-Schema Studio: Open Preview to Side");
     frame = await frameForDocument(restoredNonce);
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "130", "zoom survives closing and reopening");
+    for (let step = 0; step < 3; step += 1) await frame.locator("[data-sphinx-preview-zoom-out]").click();
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "100");
     await capture("03-after-close-reopen", frame, "Close the restored preview and open a new preview for the same document.");
     fs.writeFileSync(path.join(output, "INDEX.md"), "# Reload and Reopen Review\n\n1. [Before window reload](01-before-window-reload.png) / [notes](01-before-window-reload.json)\n2. [After actual window reload](02-after-window-reload.png) / [notes](02-after-window-reload.json)\n3. [After close and reopen](03-after-close-reopen.png) / [notes](03-after-close-reopen.json)\n");
     passed = true;

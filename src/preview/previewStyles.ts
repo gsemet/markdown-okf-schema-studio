@@ -114,6 +114,10 @@ export const PREVIEW_THEME_CSS = `
   --sphinx-preview-font-size: var(--vscode-markdown-font-size, 14px);
   --sphinx-preview-line-height: var(--vscode-markdown-line-height, 1.6);
   --sphinx-preview-content-max-width: ${DEFAULT_PREVIEW_CONTENT_WIDTH}px;
+  /* Set by the runtime (toolbar Zoom - / +); text and column scale together. */
+  --sphinx-preview-zoom: 1;
+  --sphinx-preview-zoomed-font-size: calc(var(--sphinx-preview-font-size) * var(--sphinx-preview-zoom, 1));
+  --sphinx-preview-column-width: calc(var(--sphinx-preview-content-max-width) * var(--sphinx-preview-zoom, 1));
   --sphinx-preview-controls-height: 116px;
   --sphinx-preview-content-gutter: clamp(16px, 8vw, 78px);
   --sphinx-preview-diff-addition: var(--vscode-charts-green, #2da44e);
@@ -274,20 +278,27 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   inset-inline-end: 14px;
   z-index: 1100;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--sphinx-preview-border);
-  border-radius: 18px;
+  border-radius: 14px;
   background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
   color: var(--vscode-icon-foreground, var(--vscode-editor-foreground, CanvasText));
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
 }
 
+[data-sphinx-preview-toolbar-row] {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 /* Shown by the runtime when a render stays pending; fixed and pointer-transparent, so no content moves. */
 [data-sphinx-preview-pending-overlay] {
   position: fixed;
-  inset-block-start: 58px;
+  inset-block-start: 96px;
   inset-inline-end: 14px;
   z-index: 1099;
   box-sizing: border-box;
@@ -453,15 +464,15 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   width: 100%;
   margin: 0;
   padding-block: 0 4px;
-  padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-content-max-width)) / 2 + var(--sphinx-preview-content-gutter)));
-  padding-inline-end: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-content-max-width)) / 2 + var(--sphinx-preview-content-gutter)), var(--sphinx-preview-toolbar-width, 0px));
+  padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)));
+  padding-inline-end: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)), var(--sphinx-preview-toolbar-width, 0px));
   border: 0;
   border-bottom: 1px solid var(--sphinx-preview-border);
   border-radius: 0;
   background: var(--vscode-editor-background, Canvas);
   color: var(--vscode-editor-foreground, CanvasText);
   font-family: var(--sphinx-preview-font);
-  font-size: calc(var(--sphinx-preview-font-size) + 2px);
+  font-size: calc(var(--sphinx-preview-zoomed-font-size) + 2px);
   font-weight: 700;
   line-height: var(--sphinx-preview-line-height);
   white-space: pre-wrap;
@@ -567,11 +578,11 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
 
 /*
  * The editor of the document's first block keeps its frame and focus ring off the top edge and
- * below the floating toolbar (fixed, 12px from the top and 38px tall), which a wide frame would
+ * below the floating toolbar (fixed, 12px from the top and about 70px tall with its two rows), which a wide frame would
  * otherwise sit under.
  */
 .sphinx-preview-block-editor--first {
-  margin-top: 56px;
+  margin-top: 96px;
 }
 
 .sphinx-preview-table-cell-editor textarea,
@@ -1241,7 +1252,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
 
 html, body {
   font-family: var(--sphinx-preview-font);
-  font-size: var(--sphinx-preview-font-size);
+  font-size: var(--sphinx-preview-zoomed-font-size);
   line-height: var(--sphinx-preview-line-height);
 }
 
@@ -1259,7 +1270,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 #sphinx-myst-preview-content {
   box-sizing: border-box;
   width: 100%;
-  max-width: var(--sphinx-preview-content-max-width, ${DEFAULT_PREVIEW_CONTENT_WIDTH}px);
+  max-width: var(--sphinx-preview-column-width, ${DEFAULT_PREVIEW_CONTENT_WIDTH}px);
   margin-inline: auto;
   padding: 0 var(--sphinx-preview-content-gutter) min(80vh, max(24px, calc(100vh - var(--sphinx-preview-reading-offset, 0px) - 40px)));
 }
@@ -1286,7 +1297,8 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 /* Match the preview-wide font reset's ID specificity so it cannot override
   the OKF table sizing rules. */
 #sphinx-myst-preview-content [data-okf-properties] {
-  margin: 0 0 1.5em;
+  /* The top margin keeps the Description toggle below the second toolbar row. */
+  margin: 32px 0 1.5em;
   padding: 0;
   border: none;
   background: none;
@@ -1295,7 +1307,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 
 #sphinx-myst-preview-content :where(p, li, dd, dt, td, th, blockquote, figcaption, .caption-text) {
   font-family: var(--sphinx-preview-font);
-  font-size: var(--sphinx-preview-font-size);
+  font-size: var(--sphinx-preview-zoomed-font-size);
   line-height: var(--sphinx-preview-line-height);
 }
 

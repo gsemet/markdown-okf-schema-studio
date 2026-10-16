@@ -67,7 +67,7 @@ test("sticky headings align with content and emphasize text in a full-width band
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*width: 100%;/u);
   assert.match(
     PREVIEW_THEME_CSS,
-    /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*font-size: calc\(var\(--sphinx-preview-font-size\) \+ 2px\);/u,
+    /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*font-size: calc\(var\(--sphinx-preview-zoomed-font-size\) \+ 2px\);/u,
   );
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*font-weight: 700;/u);
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*white-space: pre-wrap;/u);
@@ -85,7 +85,7 @@ test("sticky headings align with content and emphasize text in a full-width band
   );
   assert.ok(
     PREVIEW_THEME_CSS.includes(
-      "padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-content-max-width)) / 2 + var(--sphinx-preview-content-gutter)));",
+      "padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)));",
     ),
   );
   const headingBorder = PREVIEW_THEME_CSS.match(
@@ -123,7 +123,7 @@ test("the theme neutralises Shibuya page gutters", () => {
   assert.match(PREVIEW_THEME_CSS, /--sphinx-preview-content-gutter: clamp\(16px, 8vw, 78px\);/u);
   assert.match(
     PREVIEW_THEME_CSS,
-    /#sphinx-myst-preview-content \{[^}]*max-width: var\(--sphinx-preview-content-max-width, 960px\);[^}]*margin-inline: auto;[^}]*padding: 0 var\(--sphinx-preview-content-gutter\) min\(80vh, max\(24px, calc\(100vh - var\(--sphinx-preview-reading-offset, 0px\) - 40px\)\)\);/u,
+    /#sphinx-myst-preview-content \{[^}]*max-width: var\(--sphinx-preview-column-width, 960px\);[^}]*margin-inline: auto;[^}]*padding: 0 var\(--sphinx-preview-content-gutter\) min\(80vh, max\(24px, calc\(100vh - var\(--sphinx-preview-reading-offset, 0px\) - 40px\)\)\);/u,
   );
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*inset-block-start: 0;/u);
   assert.doesNotMatch(PREVIEW_THEME_CSS, /body::before\s*\{/u);
@@ -372,7 +372,7 @@ test("images never overflow the preview column", () => {
 
 test("floating preview toolbar supports forced dark and white palettes", () => {
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar\]\s*\{\s*position: fixed;/u);
-  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar\]\s*\{[^}]*display: flex;[^}]*border-radius: 18px;/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar\]\s*\{[^}]*display: flex;[^}]*border-radius: 14px;/u);
   assert.match(
     PREVIEW_THEME_CSS,
     /html\[data-sphinx-preview-theme-mode="dark"\]\s*,\s*html\[data-sphinx-preview-theme-mode="dark"\] body\s*\{[^}]*--vscode-editor-background: #1e1e1e;/u,
@@ -390,8 +390,14 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 test("preview toolbar provides refresh, editor anchoring, edit mode and theme controls", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
-  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 4);
-  assert.equal((toolbar.match(/<\/button><button\b/gu) ?? []).length, 3);
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 6);
+  const [mainRow, viewRow] = toolbar.split('<div data-sphinx-preview-toolbar-row="view">');
+  assert.match(mainRow, /data-sphinx-preview-toolbar-row="main"/u);
+  assert.equal((mainRow.match(/<button\b/gu) ?? []).length, 4);
+  assert.equal((mainRow.match(/<\/button><button\b/gu) ?? []).length, 3);
+  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 2);
+  assert.match(viewRow, /data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in/u);
+  assert.doesNotMatch(toolbar, /style=/u);
   assert.doesNotMatch(toolbar, /data-sphinx-preview-mode-controls|role="group"/u);
   for (const control of [
     'data-sphinx-preview-refresh aria-label="Refresh preview" title="Refresh preview" data-tooltip="Refresh preview"',
@@ -401,7 +407,7 @@ test("preview toolbar provides refresh, editor anchoring, edit mode and theme co
   ]) {
     assert.ok(toolbar.includes(control), `expected toolbar control ${control}`);
   }
-  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 4);
+  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 6);
   assert.match(
     PREVIEW_THEME_CSS,
     /button\[data-tooltip\]::after\s*\{[^}]*content: attr\(data-tooltip\);[^}]*visibility: hidden;[^}]*opacity: 0;/u,
@@ -660,10 +666,10 @@ test("T28: insertion points are zero-height, hover-revealed gutter buttons", () 
   );
 });
 
-test("top spacing: the first block's editor clears the toolbar (56px) and the empty-document button keeps 24px", () => {
+test("top spacing: the first block's editor clears the two-row toolbar (96px) and the empty-document button keeps 24px", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-block-editor--first\s*\{\s*margin-top: 56px;/u,
+    /\.sphinx-preview-block-editor--first\s*\{\s*margin-top: 96px;/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
@@ -702,4 +708,18 @@ test("T43: the pending overlay is fixed, pointer-transparent and never in flow",
   assert.match(rule[1]!, /max-width: [^;]*;/u);
   assert.match(PREVIEW_THEME_CSS,
     /\[data-sphinx-preview-pending-overlay\] > (strong|span)[^{]*\{[^}]*display: block;/u);
+});
+
+test("T08: zoom scales the content font size and the column width together", () => {
+  assert.match(PREVIEW_THEME_CSS, /--sphinx-preview-zoom: 1;/u);
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /--sphinx-preview-zoomed-font-size: calc\(var\(--sphinx-preview-font-size\) \* var\(--sphinx-preview-zoom, 1\)\);/u,
+  );
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /--sphinx-preview-column-width: calc\(var\(--sphinx-preview-content-max-width\) \* var\(--sphinx-preview-zoom, 1\)\);/u,
+  );
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar-row\]\s*\{[^}]*display: flex;/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 96px;/u);
 });
