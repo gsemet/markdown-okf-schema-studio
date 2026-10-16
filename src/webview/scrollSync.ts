@@ -6,6 +6,8 @@ import {
 import { createAnchorPolicy } from "./anchorPolicy";
 import { createMarkdownTableTools } from "./markdownTable";
 import { createEditActions } from "./editActions";
+import { createEditPalette } from "./editPalette";
+import { highlightLanguageNames } from "../render/highlight";
 import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
 import { installFirstClearance } from "./firstClearance";
@@ -70,7 +72,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
   const tableTools = (${createMarkdownTableTools.toString()})();
   const textEditing = (${createTextEditingTools.toString()})();
-  const editActions = (${createEditActions.toString()})();
+  const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())});
+  const createEditPalette = ${createEditPalette.toString()};
   const anchorPolicy = (${createAnchorPolicy.toString()})();
   const settings = {
     scrollPreviewWithEditor: context.scrollPreviewWithEditor !== false,
@@ -567,6 +570,12 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
           editing.tableMenuHeight = barHeight;
           revealTableToolbar(editing.tableMenu, editing.selectedCell);
         }
+      } else if (editing?.palette && editing.textarea) {
+        const barHeight = editing.palette.element.getBoundingClientRect?.()?.height;
+        if (barHeight !== editing.paletteHeight) {
+          editing.paletteHeight = barHeight;
+          revealTableToolbar(editing.palette.element, editing.textarea);
+        }
       }
       return;
     }
@@ -587,10 +596,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // Final saves carry the edited element's source line and viewport top, so the render that
   // follows can put the element back at the same screen position (rule R7). A hidden rendered
   // element has an empty rect; the editor element then stands in for it.
-  function pinFields(line, element, fallback) {
+  function pinFields(line, element, fallback, fallbackOffset = 0) {
     let rect = element?.getBoundingClientRect?.();
-    if (!rect || !(rect.height > 0)) rect = fallback?.getBoundingClientRect?.();
-    const top = rect?.top;
+    let offset = 0;
+    if (!rect || !(rect.height > 0)) {
+      rect = fallback?.getBoundingClientRect?.();
+      offset = fallbackOffset;
+    }
+    const top = rect?.top + offset;
     if (!Number.isSafeInteger(line) || line < 1 || !Number.isFinite(top) || Math.abs(top) > 100000) {
       return {};
     }
@@ -608,7 +621,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       ? Math.max(1, edit.insertAfterLine + 1)
       : edit.line;
     const table = edit.selectedCell?.closest?.("table");
-    return pinFields(line, table || edit.renderedTarget || edit.target, edit.element);
+    // The edition palette pushed the frame up (paletteShift) to keep the text still: the
+    // element comes back where the frame stood before that.
+    return pinFields(line, table || edit.renderedTarget || edit.target, edit.element, edit.paletteShift ?? 0);
   }
 
   function pinEntryFor(line) {
@@ -933,6 +948,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       window.removeEventListener?.("resize", edit.tableMenuPositionListener);
     }
     edit.tableMenu?.remove?.();
+    edit.palette?.destroy();
     restoreTableCellContent(edit);
     if (edit.selectedCell) {
       edit.selectedCell.removeAttribute("data-sphinx-preview-table-cell-selected");
@@ -940,6 +956,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       (edit.renderedTarget || edit.target).removeAttribute("data-sphinx-preview-editing");
     }
     edit.element.remove?.();
+    // Opening scrolled the page down by paletteShift to keep the text still; the frame is gone
+    // now, so scroll back and the rendered block stays where the user last saw the text.
+    if (edit.paletteShift > 0 && !edit.selectedCell) {
+      const target = Math.max(0, Math.min(maxScrollTop(), window.scrollY - edit.paletteShift));
+      programmaticScroll(target);
+      const restoredLine = lineAtScroll(target);
+      if (restoredLine !== undefined) anchor = { line: restoredLine, owner: anchor?.owner ?? "preview" };
+    }
     if (!activeFrontmatterEdit) editAnchor = undefined;
     if (refreshButton) refreshButton.disabled = false;
   }
@@ -2880,7 +2904,46 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     edit.textarea = textarea;
     edit.resizeTextarea = resizeTextarea;
     resizeTextarea();
+    // The edition palette is the frame's first child. The text line the user clicked stays where
+    // it was: the anchor keeps the frame, moved up by the height the bar adds above the text, but
+    // never so far that the bar would end under the sticky band or the preview controls, and not
+    // at all on a page scrolled to its very top.
+    const textTopBefore = textarea.getBoundingClientRect?.().top;
+    const palette = createEditPalette(document, {
+      actions: editActions,
+      getControl: () => textarea,
+      applyTextEdit: (paletteEdit) => applyTextEdit(textarea, paletteEdit, () => {
+        resizeTextarea();
+        autosaveBlockEdit();
+      }),
+      mode: "strict",
+      apple: isApplePlatform(),
+    });
+    edit.palette = palette;
+    edit.element.insertBefore(palette.element, edit.element.firstElementChild);
+    const textTopAfter = textarea.getBoundingClientRect?.().top;
+    // A page at its very top stays there: the first block has its own reserved clearance.
+    if (
+      window.scrollY > 0
+      && editAnchor?.element
+      && Number.isFinite(textTopBefore)
+      && Number.isFinite(textTopAfter)
+    ) {
+      const frame = edit.element.getBoundingClientRect?.();
+      const room = frame && Number.isFinite(frame.top)
+        ? Math.max(0, frame.top - toolbarUsableTop(frame))
+        : 0;
+      const shift = Math.min(textTopAfter - textTopBefore, room);
+      if (shift > 0) {
+        editAnchor.viewportTop -= shift;
+        edit.paletteShift = shift;
+      }
+    }
+    applyAnchor();
+    textarea.addEventListener("mousedown", () => palette.closePopover());
+    textarea.addEventListener("input", () => palette.closePopover());
     textarea.addEventListener("keydown", (event) => {
+      if (palette.handleKey(event)) return;
       if (keepUndoInControl(event)) return;
       if (paletteShortcut(event, textarea, () => {
         resizeTextarea();

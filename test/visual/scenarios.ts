@@ -52,6 +52,12 @@ export interface Scenario {
   editorKeyboardChecks?: boolean;
   /** Hover outline, then an open paragraph editor with frame, hint and buttons (T15). */
   editAffordances?: boolean;
+  /**
+   * Edition palette (T21): a paragraph deep in the page is opened in edit mode. The bar sits above
+   * the text box and not under the toolbar, the clicked text stays put, a button keeps the editor
+   * open and a second PNG (-menu) keeps the heading list open.
+   */
+  editPalette?: boolean;
   /** Click the + after the final figure; the insertion message must carry the closing fence line. */
   insertAfterFigureChecks?: boolean;
   /** Last block of the fixture, the line the insertion must follow, and its selector. */
@@ -807,6 +813,57 @@ export const SCENARIOS: Scenario[] = [
     description:
       "460 px preview: the paragraph editor's status line wraps onto its own lines without "
       + "overlapping the Done and Cancel buttons, which stay right-aligned on the same row or below.",
+  },
+  {
+    id: "edit-palette-light",
+    fixture: "05-long-chapter",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    editPalette: true,
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Edit mode on, light theme, a paragraph in the middle of the chapter open in its editor: the "
+      + "edition palette (heading, bold, italic, strikethrough, code, quote, rule, TODO) sits above the "
+      + "text box, the clicked text keeps its screen position, and the -menu PNG shows the heading list.",
+  },
+  {
+    id: "edit-palette-dark",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    editPalette: true,
+    machineChecks: ["overlay-clipped"],
+    description: "The edition palette above an open paragraph editor on a dark theme.",
+  },
+  {
+    id: "edit-palette-cream",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    previewThemeMode: "cream",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    editPalette: true,
+    machineChecks: ["overlay-clipped"],
+    description: "The edition palette above an open paragraph editor on the cream page.",
+  },
+  {
+    id: "edit-palette-narrow-360",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    width: 360,
+    height: 800,
+    scroll: { kind: "top" },
+    editMode: true,
+    editPalette: true,
+    machineChecks: ["overlay-clipped"],
+    description:
+      "360 px preview: the palette wraps onto a second row inside the editor frame instead of "
+      + "overflowing it, and its heading list stays inside the frame.",
   },
   {
     id: "edit-insert-point-hover",
