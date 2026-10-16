@@ -67,6 +67,8 @@ export interface Scenario {
    */
   /** Cycles the Width button through margin, auto and full width and measures the column and the wide elements. */
   widthModeChecks?: boolean;
+  /** Switches the Width button to Auto before the screenshot (README capture of the margin break). */
+  widthModeShot?: "auto";
   /** Opens the TOC column and measures it against the toolbar, the content, the width modes and zoom. */
   tocChecks?: boolean;
   /** Opens and closes the comment chips, keeps the reading line, and turns the gray chips off and on. */
@@ -1337,6 +1339,18 @@ export const SCENARIOS: Scenario[] = [
       + "column; Auto lets the wide table and the wide image break out, centred on the pane, while the "
       + "small table keeps the column; Full width removes the column limit. No horizontal page scroll.",
   }))),
+  {
+    id: "readme-margin-break-cream",
+    fixture: "32-readme-margin-break",
+    theme: "light",
+    previewThemeMode: "cream",
+    width: 1200,
+    height: 1000,
+    scroll: { kind: "top" as const },
+    widthModeShot: "auto" as const,
+    description: "README capture, cream theme, Auto width: the reading column stays narrow while the wide "
+      + "table and the wide figure break out of it, centred on the pane.",
+  },
   ...([
     ["light", WIDE],
     ["dark", XLARGE],

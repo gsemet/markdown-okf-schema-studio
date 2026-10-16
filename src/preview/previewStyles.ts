@@ -1363,12 +1363,30 @@ html[data-sphinx-preview-width="full"] {
 }
 
 /* Auto: a table, figure, image or code block wider than the column breaks out, centred on the
-   pane. The runtime sets the extra width; an element under edit keeps the column width. */
+   available area (pane minus the TOC column and gutters), never wider than it. The runtime sets the extra width and the centring shift; an element under
+   edit keeps the column width. */
 html[data-sphinx-preview-width="auto"] #sphinx-myst-preview-content > [data-sphinx-preview-wide]:not([data-sphinx-preview-editing="true"]) {
   box-sizing: border-box;
   width: calc(100% + var(--sphinx-preview-breakout, 0px));
   max-width: none;
-  margin-inline: calc(var(--sphinx-preview-breakout, 0px) / -2);
+  margin-inline-start: calc(var(--sphinx-preview-breakout, 0px) / -2 + var(--sphinx-preview-breakout-shift, 0px));
+  margin-inline-end: 0;
+}
+
+/* The runtime lifts the column cap for a moment to read the natural width of a wide table. */
+html[data-sphinx-preview-width="auto"] #sphinx-myst-preview-content > :where(table, .table-wrapper)[data-sphinx-preview-measuring] {
+  max-width: none;
+}
+
+/* Tables and figures narrower than the column are centred in every width mode, at their own
+   width. The caption is a centred paragraph inside the figure; code blocks stay left. */
+#sphinx-myst-preview-content > table,
+#sphinx-myst-preview-content > .table-wrapper {
+  margin-inline: auto;
+}
+
+#sphinx-myst-preview-content > p[data-sphinx-preview-figure] {
+  text-align: center;
 }
 
 html, body {

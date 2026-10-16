@@ -1867,9 +1867,21 @@ def check_width_modes(page: Page, scenario: dict, failures: list[Failure]) -> No
     const pane = document.documentElement.clientWidth;
     const rect = element => { const r = element.getBoundingClientRect(); return { left: r.left, right: r.right, width: r.width }; };
     const tables = [...content.querySelectorAll(':scope > table')].map(rect);
-    const figure = content.querySelector(':scope > figure');
+    const figures = [...content.querySelectorAll(':scope > figure')];
+    const figure = figures[0];
+    const narrow = figures[1];
     const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+    const captionOf = box => {
+      const caption = box && box.querySelector('figcaption p, figcaption, :scope > p:last-child');
+      if (!caption) return null;
+      const range = document.createRange();
+      range.selectNodeContents(caption);
+      const r = range.getBoundingClientRect();
+      return { centre: (r.left + r.right) / 2, align: getComputedStyle(caption).textAlign };
+    };
+    const imageOf = box => { const i = box && box.querySelector('img'); return i ? rect(i) : null; };
     return {
+      narrowFigure: narrow ? { ...rect(narrow), image: imageOf(narrow), caption: captionOf(narrow) } : null,
       mode: document.documentElement.getAttribute('data-sphinx-preview-width'),
       columnLeft, columnRight, pane,
       tables,
@@ -1904,6 +1916,22 @@ def check_width_modes(page: Page, scenario: dict, failures: list[Failure]) -> No
       if not inside(small):
         failures.append(Failure(page_name, f"{expected}: the small table leaves the column"))
       gutter_ok = lambda r: r["left"] >= 15 and r["right"] <= state["pane"] - 15
+      # U22: a table or figure narrower than the column is centred on it, at its own width.
+      column_centre = (state["columnLeft"] + state["columnRight"]) / 2
+      if small["width"] < column - 20 and abs((small["left"] + small["right"]) / 2 - column_centre) > 2:
+        failures.append(Failure(page_name, f"{expected}: the narrow table is not centred in the column"))
+      narrow_figure = state["narrowFigure"]
+      if not narrow_figure or not narrow_figure["image"]:
+        failures.append(Failure(page_name, "the narrow figure is missing"))
+      else:
+        picture = narrow_figure["image"]
+        if picture["width"] > column - 20:
+          failures.append(Failure(page_name, f"{expected}: the narrow figure fills the column ({picture['width']:.0f}px)"))
+        elif abs(picture["left"] - state["columnLeft"] - (state["columnRight"] - picture["right"])) > 2:
+          failures.append(Failure(page_name, f"{expected}: the narrow figure is not centred (gaps {picture['left'] - state['columnLeft']:.1f} and {state['columnRight'] - picture['right']:.1f}px)"))
+        caption = narrow_figure["caption"]
+        if not caption or caption["align"] != "center" or abs(caption["centre"] - (picture["left"] + picture["right"]) / 2) > 2:
+          failures.append(Failure(page_name, f"{expected}: the narrow figure caption is not centred under it"))
       if expected == "margin":
         if not inside(wide):
           failures.append(Failure(page_name, "margin: the wide table leaves the column"))
@@ -1935,6 +1963,43 @@ def check_width_modes(page: Page, scenario: dict, failures: list[Failure]) -> No
       page.wait_for_timeout(150)
 
 
+def apply_width_shot(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """Leaves the page in the width mode the screenshot is meant to show (README capture)."""
+  wanted = scenario.get("widthModeShot")
+  if not wanted:
+    return
+  button = page.locator("[data-sphinx-preview-width-toggle]")
+  for _ in range(3):
+    if page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-width')") == wanted:
+      break
+    button.click()
+    page.wait_for_timeout(250)
+  state = page.evaluate("""() => {
+    const content = document.getElementById('sphinx-myst-preview-content');
+    const style = getComputedStyle(content);
+    const box = content.getBoundingClientRect();
+    const column = box.width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    const rect = element => { const r = element.getBoundingClientRect(); return { left: r.left, right: r.right, width: r.width }; };
+    return { column, pane: document.documentElement.clientWidth,
+      table: rect(content.querySelector(':scope > table')), figure: rect(content.querySelector(':scope > figure')) };
+  }""")
+  wrapped = page.evaluate("""() => [...document.querySelectorAll('#sphinx-myst-preview-content > table :where(th, td)')].filter(cell => {
+    const range = document.createRange();
+    range.selectNodeContents(cell);
+    const style = getComputedStyle(cell);
+    const line = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.6;
+    return range.getBoundingClientRect().height > line * 1.4;
+  }).map(cell => cell.textContent)""")
+  if wrapped:
+    failures.append(Failure(scenario["page"], f"{wanted}: the table fits the pane but cells wrap: {wrapped[:4]}"))
+  for name in ("table", "figure"):
+    item = state[name]
+    if item["width"] <= state["column"] + 4:
+      failures.append(Failure(scenario["page"], f"{wanted}: the {name} did not break out of the column"))
+    if abs((item["left"] + item["right"]) / 2 - state["pane"] / 2) > 3:
+      failures.append(Failure(scenario["page"], f"{wanted}: the {name} is not centred on the pane"))
+
+
 def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The TOC button opens a right column below the toolbar; wide panes only."""
   if not scenario.get("tocChecks"):
@@ -1960,6 +2025,7 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
       toolbar: rect(toolbar),
       contentRight: box.right,
       pane: root.clientWidth,
+      columnLeft: box.left + parseFloat(style.paddingLeft),
       columnRight: box.right - parseFloat(style.paddingRight),
       tables: [...content.querySelectorAll(':scope > table')].map(rect),
       entries: [...document.querySelectorAll('nav[data-sphinx-preview-toc] li[data-level]')].map(item => ({ level: item.getAttribute('data-level'), text: item.textContent })),
@@ -2024,6 +2090,12 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
       for table in state["tables"]:
         if table["right"] > nav["left"] + 1:
           failures.append(Failure(page_name, f"{expected}: a table runs under the TOC column"))
+        # U22: in Auto a table wider than the column is centred on the area left of the TOC column.
+        if expected == "auto" and table["width"] > state["columnRight"] - state["columnLeft"] + 4:
+          if abs((table["left"] + table["right"]) / 2 - nav["left"] / 2) > 3:
+            failures.append(Failure(page_name, "auto: the wide table is not centred on the area left of the TOC column"))
+          if table["left"] < 15:
+            failures.append(Failure(page_name, "auto: the wide table leaves the pane on the left"))
     for _ in range(3):
       if page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-width')") == "margin":
         break
@@ -3913,7 +3985,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, check_toc_column, check_comment_chips, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_comment_chips, check_code_copy, check_edit_affordances, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:
