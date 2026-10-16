@@ -17,6 +17,16 @@ export interface EditPaletteDeps {
   /** Opens the small panel of an action that has one (the Link button). */
   openPanel?(action: EditAction): void;
   mode: EditActionMode;
+  /** Called once when the user picks another mode in the select (not by `setMode`). */
+  onModeChange?(mode: EditActionMode): void;
+  /** Focus left the editor frame from the select: the caller runs the normal final save. */
+  onLeave?(): void;
+  /** True for a node inside the editor frame (the select's blur then keeps the editor open). */
+  isInsideFrame?(node: unknown): boolean;
+  /** Cmd/Ctrl+Enter on the select: the caller finishes the edit like the text box does. */
+  onDone?(): void;
+  /** Tooltip text of the keyboard path to the select, for example "Cmd+Shift+M". */
+  modeShortcut?: string;
   /** Shows Cmd instead of Ctrl in the tooltips. */
   apple?: boolean;
 }
@@ -25,6 +35,10 @@ export interface EditPalette {
   element: HTMLElement;
   /** Rebuilds the buttons from the registry and the current mode. */
   refresh(): void;
+  /** Moves the focus to the mode select (keyboard path); Enter or Escape there goes back. */
+  focusModeSelect(): void;
+  /** Shows the buttons of another mode and updates the select; does not call `onModeChange`. */
+  setMode(mode: EditActionMode): void;
   /** Removes the palette; the caller owns the text box and its listeners. */
   destroy(): void;
   /** Closes the open popover on Escape and reports whether it consumed the key. */
@@ -78,6 +92,85 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
 
   let openMenu: HTMLElement | undefined;
   let openButton: HTMLElement | undefined;
+  let mode: EditActionMode = deps.mode;
+  let buttons: HTMLElement[] = [];
+
+  // The mode select starts the bar. Unlike the buttons it must receive the press itself (a
+  // cancelled mousedown would keep the native list from opening); focus moving to it stays inside
+  // the editor frame, so the blur of the text box does not save.
+  const modeSelect = document.createElement("select");
+  modeSelect.className = "sphinx-preview-edit-palette-mode";
+  modeSelect.setAttribute("aria-label", "Palette buttons");
+  modeSelect.setAttribute("title", "Palette buttons" + (deps.modeShortcut ? " (" + deps.modeShortcut + ")" : ""));
+  modeSelect.setAttribute("data-edit-palette-mode-select", "true");
+  const MODE_LABELS: Array<[EditActionMode, string]> = [
+    ["strict", "Strict Markdown"],
+    ["gfm", "GitHub (GFM)"],
+    ["myst", "MyST (includes GFM)"],
+  ];
+  for (const [value, label] of MODE_LABELS) {
+    const option = document.createElement("option");
+    option.setAttribute("value", value);
+    option.textContent = label;
+    modeSelect.appendChild(option);
+  }
+  modeSelect.addEventListener("mousedown", (event) => event.stopPropagation?.());
+  // A native list gives no event when it closes without a change. Focus entering the select
+  // starts "closed"; each click then toggles the list, so the click that closes it hands the
+  // focus back to the text box (otherwise the editor would be stuck with the focus in the select).
+  let listOpen = false;
+  const backToText = (): void => deps.getControl().focus({ preventScroll: true });
+  modeSelect.addEventListener("focus", () => { listOpen = false; });
+  modeSelect.addEventListener("click", () => {
+    if (listOpen) {
+      listOpen = false;
+      backToText();
+    } else {
+      listOpen = true;
+    }
+  });
+  modeSelect.addEventListener("blur", (event?: { relatedTarget?: unknown }) => {
+    listOpen = false;
+    const next = event?.relatedTarget;
+    if (next && deps.isInsideFrame?.(next)) return;
+    deps.onLeave?.();
+  });
+  modeSelect.addEventListener("keydown", (event: {
+    key?: string;
+    metaKey?: boolean;
+    ctrlKey?: boolean;
+    isComposing?: boolean;
+    preventDefault?: () => void;
+    stopPropagation?: () => void;
+  }) => {
+    if (event.isComposing) return;
+    if (event.key === "Escape") {
+      // First Escape returns to the text box; a second one there cancels the editor.
+      event.preventDefault?.();
+      event.stopPropagation?.();
+      listOpen = false;
+      backToText();
+    } else if (event.key === "Enter") {
+      event.preventDefault?.();
+      event.stopPropagation?.();
+      listOpen = false;
+      if (event.metaKey || event.ctrlKey) deps.onDone?.();
+      else backToText();
+    }
+  });
+  modeSelect.addEventListener("change", () => {
+    const chosen = String(modeSelect.value);
+    if (!MODE_LABELS.some(([value]) => value === chosen)) {
+      modeSelect.value = mode;
+      return;
+    }
+    listOpen = false;
+    if (chosen === mode) return;
+    setMode(chosen as EditActionMode);
+    deps.onModeChange?.(mode);
+    deps.getControl().focus({ preventScroll: true });
+  });
+  root.appendChild(modeSelect);
 
   function closePopover(): boolean {
     if (!openMenu) return false;
@@ -142,15 +235,23 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     return (action.title ?? action.label) + (shortcut ? " (" + shortcut + ")" : "");
   }
 
+  function setMode(next: EditActionMode): void {
+    mode = next;
+    build();
+  }
+
   function build(): void {
     closePopover();
-    root.textContent = "";
-    const mode = MODE_RANK[deps.mode] ?? 0;
+    for (const old of buttons) old.remove();
+    buttons = [];
+    modeSelect.value = mode;
+    root.setAttribute("data-palette-mode", mode);
+    const rank = MODE_RANK[mode] ?? 0;
     let previousGroup = "";
     for (const action of deps.actions.actions) {
       if (!action.scopes.includes("block")) continue;
       // Modes are additive: an action listed for a lower mode shows in every higher one.
-      if (!action.modes.some((candidate) => (MODE_RANK[candidate] ?? 0) <= mode)) continue;
+      if (!action.modes.some((candidate) => (MODE_RANK[candidate] ?? 0) <= rank)) continue;
       const button = document.createElement("button");
       button.setAttribute("type", "button");
       button.setAttribute("tabindex", "-1");
@@ -186,6 +287,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
         run(action);
       });
       root.appendChild(button);
+      buttons.push(button);
     }
   }
 
@@ -194,6 +296,11 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   return {
     element: root,
     refresh: build,
+    setMode,
+    focusModeSelect() {
+      closePopover();
+      modeSelect.focus({ preventScroll: true });
+    },
     destroy() {
       closePopover();
       root.remove();

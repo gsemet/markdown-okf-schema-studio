@@ -396,6 +396,7 @@ function createRuntimeHarness(configuration: Partial<{
   frontmatterRowAttributes: Record<string, string>;
   pairedTextEditor: boolean;
   initialEditMode: boolean;
+  initialPaletteMode: "strict" | "gfm" | "myst";
   initialViewPreferences: ViewPreferences;
   intersectionObserver: boolean;
   /** `navigator.platform` of the page (absent: no navigator, like a non-Apple platform). */
@@ -7368,8 +7369,9 @@ test("T21: the palette is the first child of the block editor frame, above the t
   const editor = textarea.parentElement!;
   assert.equal(editor.childElements[0], palette);
   assert.equal(editor.childElements.indexOf(palette) < editor.childElements.indexOf(textarea), true);
+  assert.equal(palette.childElements[0].tagName, "SELECT", "the mode select starts the bar");
   assert.deepEqual(
-    palette.childElements.map((child) => child.getAttribute("data-edit-action")),
+    palette.childElements.slice(1).map((child) => child.getAttribute("data-edit-action")),
     ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "todo"],
   );
 });
@@ -8017,4 +8019,159 @@ test("T22: Cmd/Ctrl+K inside a panel field is consumed and moves to the URL fiel
   assert.equal(prevented && stopped, true);
   assert.equal(focus.last(), linkField(harness, "url"));
   assert.ok(linkPanelOf(harness), "the panel stays open");
+});
+
+// T23: the palette mode select, its persistence and its message.
+function paletteSelect(harness: RuntimeHarness): RuntimeElement {
+  const select = paletteOf(harness)!.childElements.find((child) => child.tagName === "SELECT");
+  assert.ok(select, "the palette has a mode select");
+  return select;
+}
+
+function choosePaletteMode(harness: RuntimeHarness, mode: string): void {
+  const select = paletteSelect(harness);
+  select.value = mode;
+  select.dispatch("change");
+}
+
+test("T23: the palette mode starts as MyST without a stored value or saved state", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  assert.equal(paletteOf(harness)!.getAttribute("data-palette-mode"), "myst");
+  assert.equal(paletteSelect(harness).value, "myst");
+});
+
+test("T23: the stored workspace mode is used, and the saved webview state wins over it", () => {
+  const stored = createRuntimeHarness({ initialPaletteMode: "strict" });
+  openBlockEditorWithSource(stored);
+  assert.equal(paletteOf(stored)!.getAttribute("data-palette-mode"), "strict");
+
+  const saved = createRuntimeHarness({ initialPaletteMode: "strict", savedState: { paletteMode: "gfm" } });
+  openBlockEditorWithSource(saved);
+  assert.equal(paletteOf(saved)!.getAttribute("data-palette-mode"), "gfm");
+
+  const invalid = createRuntimeHarness({ initialPaletteMode: "bogus" as "strict", savedState: { paletteMode: 3 } });
+  openBlockEditorWithSource(invalid);
+  assert.equal(paletteOf(invalid)!.getAttribute("data-palette-mode"), "myst");
+});
+
+test("T23: choosing a mode posts previewPaletteModeChanged once and keeps the editor open", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const count = harness.messages.length;
+  choosePaletteMode(harness, "gfm");
+  const posted = harness.messages.slice(count);
+  assert.equal(posted.length, 1);
+  assert.equal(posted[0].type, "previewPaletteModeChanged");
+  assert.equal(posted[0].mode, "gfm");
+  assert.equal(posted[0].documentId, "file:///active.md");
+  assert.equal(posted[0].documentVersion, 7);
+  assert.equal(posted[0].requestId, 11);
+  assert.equal(paletteOf(harness)!.getAttribute("data-palette-mode"), "gfm");
+  assert.equal(harness.getWebviewState().paletteMode, "gfm");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(textarea.focusOptions?.preventScroll, true, "focus returns to the text box");
+  choosePaletteMode(harness, "gfm");
+  assert.equal(harness.messages.length, count + 1, "choosing the same mode again posts nothing");
+});
+
+test("T23: a mode change does not save the block, and the next editor opens in the new mode", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  choosePaletteMode(harness, "strict");
+  harness.flushTimers();
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave"), false);
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA")!;
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  sourceReply(harness, "Second paragraph.\n");
+  const palettes = harness.createdElements.filter((element) =>
+    element.className === PALETTE_CLASS && !element.removed);
+  assert.equal(palettes.at(-1)?.getAttribute("data-palette-mode"), "strict");
+});
+
+test("T23: a read-only preview has no palette and never posts the message", () => {
+  const harness = createRuntimeHarness({ editingEnabled: false, initialPaletteMode: "strict" });
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  assert.equal(paletteOf(harness), undefined);
+  assert.equal(harness.messages.some((message) => message.type === "previewPaletteModeChanged"), false);
+});
+
+// T23 round 2: the select must never strand the focus.
+function finalSaves(harness: RuntimeHarness): number {
+  return harness.messages.filter((message) =>
+    message.type === "previewEditSave" && message.final === true).length;
+}
+
+test("T23: opening and dismissing the select without a change hands the focus back", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const select = paletteSelect(harness);
+  textarea.value = "Second paragraph, changed.";
+  const count = harness.messages.length;
+  select.dispatch("blur", { relatedTarget: select });
+  textarea.dispatch("blur", { relatedTarget: select });
+  select.dispatch("focus");
+  select.dispatch("click");
+  textarea.focusOptions = undefined;
+  assert.equal(textarea.focusOptions, undefined, "the open list keeps the focus in the select");
+  select.dispatch("click");
+  assert.equal((textarea.focusOptions as FocusOptions | undefined)?.preventScroll, true, "closing the list returns to the text box");
+  assert.equal(harness.messages.length, count, "nothing posted, nothing saved");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  // Back in the text box, leaving the frame saves as usual: the editor is not stuck.
+  textarea.dispatch("blur", { relatedTarget: null });
+  assert.equal(finalSaves(harness), 1);
+});
+
+test("T23: focus leaving the frame from the select runs one final save; moving inside does not", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const select = paletteSelect(harness);
+  textarea.value = "Second paragraph, changed.";
+  select.dispatch("focus");
+  select.dispatch("blur", { relatedTarget: textarea });
+  assert.equal(finalSaves(harness), 0, "focus moving to the text box keeps the editor open");
+  select.dispatch("blur", { relatedTarget: null });
+  assert.equal(finalSaves(harness), 1, "focus leaving the frame saves once");
+});
+
+test("T23: Escape on the select returns to the text box, Cmd/Ctrl+Enter finishes the edit", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const select = paletteSelect(harness);
+  textarea.value = "Second paragraph, changed.";
+  select.dispatch("focus");
+  textarea.focusOptions = undefined;
+  let prevented = false;
+  select.dispatch("keydown", { key: "Escape", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal((textarea.focusOptions as FocusOptions | undefined)?.preventScroll, true);
+  assert.equal(finalSaves(harness), 0);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  textarea.focusOptions = undefined;
+  select.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  assert.equal((textarea.focusOptions as FocusOptions | undefined)?.preventScroll, true, "plain Enter returns to the text box");
+  assert.equal(finalSaves(harness), 0);
+  select.dispatch("keydown", { key: "Enter", ctrlKey: true, preventDefault: () => undefined });
+  assert.equal(finalSaves(harness), 1);
+});
+
+test("T23: Ctrl+Shift+M focuses the select, Cmd+Shift+M on macOS, and the tooltip shows it", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const select = paletteSelect(harness);
+  textarea.value = "Second paragraph, changed.";
+  assert.equal(select.getAttribute("title"), "Palette buttons (Ctrl+Shift+M)");
+  select.focusOptions = undefined;
+  textarea.dispatch("keydown", { key: "M", code: "KeyM", ctrlKey: true, shiftKey: true, preventDefault: () => undefined });
+  assert.equal((select.focusOptions as FocusOptions | undefined)?.preventScroll, true);
+  const mac = createRuntimeHarness({ platform: "MacIntel" });
+  const macArea = openBlockEditorWithSource(mac);
+  const macSelect = paletteSelect(mac);
+  assert.equal(macSelect.getAttribute("title"), "Palette buttons (Cmd+Shift+M)");
+  macArea.dispatch("keydown", { key: "M", code: "KeyM", ctrlKey: true, shiftKey: true, preventDefault: () => undefined });
+  assert.equal(macSelect.focusOptions, undefined, "Ctrl does nothing on macOS");
+  macArea.dispatch("keydown", { key: "M", code: "KeyM", metaKey: true, shiftKey: true, preventDefault: () => undefined });
+  assert.equal((macSelect.focusOptions as FocusOptions | undefined)?.preventScroll, true);
 });

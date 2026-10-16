@@ -126,6 +126,42 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
     for (let step = 0; step < 3; step += 1) await frame.locator("[data-sphinx-preview-zoom-out]").click();
     assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "100");
     await capture("03-after-close-reopen", frame, "Close the restored preview and open a new preview for the same document.");
+    // The palette mode is a workspace choice: it survives a window reload and a reopened panel.
+    async function openParagraphEditor(target: Frame): Promise<void> {
+      if (await target.locator("html").getAttribute("data-sphinx-preview-edit-mode") !== "on") {
+        await target.locator("[data-sphinx-preview-edit-toggle]").click();
+      }
+      await target.locator("main > p[data-sphinx-source-line]").first().click();
+      await target.locator(".sphinx-preview-edit-palette select").waitFor();
+    }
+    async function paletteMode(target: Frame): Promise<string> {
+      return await target.locator(".sphinx-preview-edit-palette").getAttribute("data-palette-mode") ?? "";
+    }
+    await openParagraphEditor(frame);
+    assert.equal(await paletteMode(frame), "myst", "a workspace with no choice starts in MyST");
+    await frame.locator(".sphinx-preview-edit-palette select").selectOption("strict");
+    assert.equal(await paletteMode(frame), "strict");
+    assert.equal(await frame.locator("main .sphinx-preview-block-editor").count(), 1, "choosing a mode keeps the editor open");
+    await frame.locator("main .sphinx-preview-block-editor textarea").press("Escape");
+    await frame.locator(".sphinx-preview-edit-palette").waitFor({ state: "detached" });
+    const modeNonce = await frame.evaluate(() => document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce);
+    await command(page, "Developer: Reload Window");
+    frame = await frameForDocument(modeNonce);
+    await openParagraphEditor(frame);
+    assert.equal(await paletteMode(frame), "strict", "the palette mode survives the window reload");
+    await frame.locator("main .sphinx-preview-block-editor textarea").press("Escape");
+    await frame.locator(".sphinx-preview-edit-palette").waitFor({ state: "detached" });
+    const reloadedNonce = await frame.evaluate(() => document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce);
+    const modeTab = page.locator('.tab[data-resource-name^="webview-markdown-okf-schema-studio.preview-"]')
+      .filter({ has: page.locator('.tab-label[aria-label="Studio · reload-evidence.md"]') });
+    await modeTab.hover();
+    await modeTab.locator('.tab-actions [role="button"][aria-label^="Close"]').click();
+    await modeTab.waitFor({ state: "detached" });
+    await command(page, "Markdown OKF-Schema Studio: Open Preview to Side");
+    frame = await frameForDocument(reloadedNonce);
+    await openParagraphEditor(frame);
+    assert.equal(await paletteMode(frame), "strict", "a new panel starts in the stored palette mode");
+    await frame.locator("main .sphinx-preview-block-editor textarea").press("Escape");
     fs.writeFileSync(path.join(output, "INDEX.md"), "# Reload and Reopen Review\n\n1. [Before window reload](01-before-window-reload.png) / [notes](01-before-window-reload.json)\n2. [After actual window reload](02-after-window-reload.png) / [notes](02-after-window-reload.json)\n3. [After close and reopen](03-after-close-reopen.png) / [notes](03-after-close-reopen.json)\n");
     passed = true;
     fs.writeFileSync(path.join(E2E_REPORT_ROOT, "RELOAD-LATEST.md"), `# Latest Reload Evidence\n\n[Ordered captures](screenshots/${path.basename(output)}/INDEX.md)\n\n[Suite result](screenshots/${path.basename(output)}/manifest.json)\n`);

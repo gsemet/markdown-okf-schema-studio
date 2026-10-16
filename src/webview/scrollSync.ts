@@ -52,6 +52,8 @@ export interface PreviewRuntimeContext extends ScrollContext {
   pairedTextEditor?: boolean;
   /** The workspace-wide edit mode choice, used when the webview has no saved state. */
   initialEditMode?: boolean;
+  /** The workspace's palette mode (stored choice, else the setting); saved state wins on load. */
+  initialPaletteMode?: "strict" | "gfm" | "myst";
   /** Fractional source line to show at the preview reading line on load (see anchorPolicy). */
   initialAnchor?: number;
   /** Set after an inline save: the edited element's source line and viewport top (rule R7). */
@@ -172,6 +174,10 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   let editMode = editModeButton
     ? (typeof savedState?.editMode === "boolean" ? savedState.editMode : context.initialEditMode === true)
     : false;
+  const paletteModes = ["strict", "gfm", "myst"];
+  let paletteMode = paletteModes.includes(savedState?.paletteMode)
+    ? savedState.paletteMode
+    : paletteModes.includes(context.initialPaletteMode) ? context.initialPaletteMode : "myst";
   let activeBlockEdit;
   let activeFrontmatterEdit;
   // Latest properties-table markup the host sent while a frontmatter editor was open (T30).
@@ -228,6 +234,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       previewThemeMode,
       anchorToEditor,
       editMode,
+      paletteMode,
       descriptionsCollapsed,
       viewZoom: viewControls.zoom(),
       viewWidthMode: widthMode.mode(),
@@ -3026,7 +3033,30 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
           });
         }
       },
-      mode: "strict",
+      mode: paletteMode,
+      modeShortcut: (isApplePlatform() ? "Cmd" : "Ctrl") + "+Shift+M",
+      isInsideFrame: (node) => Boolean(node) && (node === edit.element || edit.element.contains(node)),
+      onLeave: () => {
+        if (activeBlockEdit === edit && !edit.finishing) saveBlockEdit();
+      },
+      onDone: () => {
+        if (activeBlockEdit === edit) saveBlockEdit();
+      },
+      onModeChange: (nextMode) => {
+        paletteMode = nextMode;
+        vscode.postMessage({
+          type: "previewPaletteModeChanged",
+          documentId: context.documentId,
+          documentVersion: context.documentVersion,
+          requestId: context.requestId,
+          mode: nextMode,
+        });
+        const state = vscode.getState?.();
+        vscode.setState?.({
+          ...(state && typeof state === "object" ? state : {}),
+          paletteMode,
+        });
+      },
       apple: isApplePlatform(),
     });
     edit.palette = palette;
@@ -3044,6 +3074,17 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     });
     textarea.addEventListener("keydown", (event) => {
       if (palette.handleKey(event)) return;
+      // Cmd/Ctrl+Shift+M: keyboard path to the palette mode select.
+      if (
+        (event.key === "m" || event.key === "M" || event.code === "KeyM")
+        && event.shiftKey && !event.altKey && !event.isComposing
+        && (isApplePlatform() ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey)
+      ) {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        palette.focusModeSelect();
+        return;
+      }
       if (keepUndoInControl(event)) return;
       if (paletteShortcut(event, textarea, () => {
         resizeTextarea();

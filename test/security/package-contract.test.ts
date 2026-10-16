@@ -94,6 +94,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.deepEqual(
     Object.keys(packageJson.contributes.configuration.properties).sort(),
     [
+      "markdownOkfSchemaStudio.editing.defaultPaletteMode",
       "markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks",
       "markdownOkfSchemaStudio.frontmatter.bundleRoot",
       "markdownOkfSchemaStudio.frontmatter.projectRoot",
@@ -125,6 +126,25 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(showIncomingChanges.default, true);
   assert.equal(showIncomingChanges.order, 22);
   assert.match(showIncomingChanges.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
+  const paletteMode = packageJson.contributes.configuration.properties[
+    "markdownOkfSchemaStudio.editing.defaultPaletteMode"
+  ] as {
+    type: string;
+    default: string;
+    order: number;
+    enum: string[];
+    enumDescriptions: string[];
+    markdownDescription: string;
+  };
+  assert.equal(paletteMode.type, "string");
+  assert.equal(paletteMode.default, "myst");
+  assert.equal(paletteMode.order, 40);
+  assert.deepEqual(paletteMode.enum, ["strict", "gfm", "myst"]);
+  assert.equal(paletteMode.enumDescriptions.length, paletteMode.enum.length);
+  for (const description of paletteMode.enumDescriptions) {
+    assert.ok(description.trim().length > 0);
+  }
+  assert.match(paletteMode.markdownDescription, /\*\*strict\*\*.*\*\*gfm\*\*.*\*\*myst\*\*/u);
   assert.equal(
     packageJson.contributes.configuration.properties["markdown.preview.scrollPreviewWithEditor"],
     undefined,

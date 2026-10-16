@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A select at the start of the edition palette chooses its buttons: Strict Markdown, GitHub (GFM)
+  or MyST (includes GFM). The choice is remembered per workspace and the new setting
+  `editing.defaultPaletteMode` (default MyST) gives the starting mode; rendering is unchanged.
 - The block editor gets a Link button and Cmd/Ctrl+K. A small panel with Text and URL fields opens
   under the palette, prefilled from the selection (a selected URL fills the URL, a selected link is
   read back); Enter inserts `[text](url)` as one undo step and Escape returns to the text box.

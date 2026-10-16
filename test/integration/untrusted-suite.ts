@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 
 import {
   COMMAND_ID,
+  sendPreviewMessageForTests,
   disposeActivePreviewForTests,
   EDITOR_VIEW_TYPE,
   getActivePreviewForTests,
@@ -35,11 +36,20 @@ export async function run(): Promise<void> {
     assert.ok(commandPreview);
     assert.equal(commandPreview.readOnly, true);
     assert.doesNotMatch(commandPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+    // A read-only preview does not store a palette mode (the page cannot post it; the host refuses).
+    await sendPreviewMessageForTests({
+      type: "previewPaletteModeChanged",
+      documentId: commandPreview.documentUri,
+      documentVersion: commandPreview.documentVersion,
+      requestId: commandPreview.requestId,
+      mode: "strict",
+    });
     await vscode.commands.executeCommand("vscode.openWith", document.uri, EDITOR_VIEW_TYPE);
     await waitForPreview();
     const editorPreview = getActivePreviewForTests();
     assert.ok(editorPreview);
     assert.equal(editorPreview.readOnly, true);
+    assert.match(editorPreview.html, /"initialPaletteMode":"myst"/u, "the refused message stored nothing");
     assert.doesNotMatch(editorPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
     disposeActivePreviewForTests();
     await runMystDiagnostics();
