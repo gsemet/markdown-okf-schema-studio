@@ -12,8 +12,11 @@ import {
 } from "./checkboxMarkers";
 import { convertCommentMarkers } from "./commentMarkers";
 import { highlightCodeBlocks } from "./highlight";
+import { detectMystSyntax, MAX_EXTENSION_WARNINGS, mystExtensionWarning } from "./mystSyntaxDetect";
 
 export interface RenderDiagnostic {
+  /** Set for MyST extension warnings; every other diagnostic gets the pipeline's default code. */
+  code?: string;
   message: string;
   line?: number;
   severity: "warning" | "error";
@@ -33,6 +36,12 @@ export interface MystIncludeSource {
 export interface MystRenderContext {
   sourcePath?: string;
   resolveInclude: (request: string, sourcePath: string) => MystIncludeSource | undefined;
+  /**
+   * MyST extensions the document's Sphinx project enables, when that is known for certain.
+   * Set: syntax that needs a missing extension is reported as a warning (rendering is unchanged).
+   * Unset: no check.
+   */
+  enabledMystExtensions?: ReadonlySet<string>;
 }
 
 interface MystNode {
@@ -84,6 +93,12 @@ async function loadEngine(): Promise<MystEngine> {
     })();
   }
   return enginePromise;
+}
+
+/** Parses source with the same options the renderer uses; for tests of tree-based checks. */
+export async function parseMystSource(source: string): Promise<MystNode> {
+  const { mystParse } = await loadEngine();
+  return mystParse(source, MYST_PARSE_OPTIONS);
 }
 
 /** Warms the engine so the first keystroke does not pay the module-load cost. */
@@ -1503,6 +1518,18 @@ export async function renderMyst(
   const ast = mystParse(expandGithubAlerts(checkboxes.text), MYST_PARSE_OPTIONS);
   shiftSourcePositions(ast, lineOffset);
   repairGroupedContextTagHtml(ast, mystParse);
+  if (context?.enabledMystExtensions) {
+    const enabled = context.enabledMystExtensions;
+    detectMystSyntax(ast, source)
+      .filter((use) => !enabled.has(use.ext))
+      .slice(0, MAX_EXTENSION_WARNINGS)
+      .forEach((use) => diagnostics.push({
+        code: "myst-extension",
+        severity: "warning",
+        line: use.line,
+        message: mystExtensionWarning(use),
+      }));
+  }
   if (context?.sourcePath) {
     const includeBudget = createIncludeBudget();
     expandIncludes(

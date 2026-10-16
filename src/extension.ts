@@ -25,6 +25,7 @@ import {
   invalidateStemIndex,
   resolveFrontmatterLinkRoots,
 } from "./frontmatter/fileLinks";
+import { invalidateConfCache } from "./myst/confLocator";
 import { renderPropertiesTable, replacePropertiesTableHtml } from "./frontmatter/propertiesTable";
 import { checkboxToggleEdit } from "./render/checkboxMarkers";
 import { sourceRangeForLines, type SourceMappingOptions } from "./mapping/sourceMapping";
@@ -3078,15 +3079,28 @@ function createPreview(
   const dependencyWatcher = vscode.workspace.createFileSystemWatcher(
     new vscode.RelativePattern(vscode.Uri.file(resourceRoot), "**/*"),
   );
+  const refreshForConf = (filePath: string): void => {
+    if (path.basename(filePath) === "conf.py") {
+      invalidateConfCache();
+      if (preview?.document && !preview.disposed) {
+        deferWhileEditing(preview, "render", () => refreshOpenDocument(preview));
+      }
+    }
+  };
   const dependencyWatcherSubscriptions = [
-    dependencyWatcher.onDidChange((uri) => refreshReferencedPath(preview, uri.fsPath)),
+    dependencyWatcher.onDidChange((uri) => {
+      refreshForConf(uri.fsPath);
+      refreshReferencedPath(preview, uri.fsPath);
+    }),
     dependencyWatcher.onDidCreate((uri) => {
+      refreshForConf(uri.fsPath);
       refreshReferencedPath(preview, uri.fsPath);
       if (preview?.status === "missing-source") {
         recoverMissingSource(preview);
       }
     }),
     dependencyWatcher.onDidDelete((uri) => {
+      refreshForConf(uri.fsPath);
       const activePath = preview?.document?.uri.fsPath
         ?? (preview ? vscode.Uri.parse(preview.documentUri).fsPath : "");
       if (preview && canonicalPath(uri.fsPath) === canonicalPath(activePath)) {
