@@ -52,7 +52,7 @@ export function installFirstClearance(
   if (typeof MutationObserver !== "undefined") {
     const toolbar = document.querySelector("[data-sphinx-preview-toolbar]");
     if (toolbar) new MutationObserver(update).observe(toolbar, { childList: true, subtree: true, attributes: true });
-    new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class", "data-sphinx-preview-edit-mode", "data-sphinx-preview-zoom"] });
+    new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class", "data-sphinx-preview-edit-mode", "data-sphinx-preview-zoom", "data-sphinx-preview-width"] });
   }
   update();
   return { update, value: () => Math.max(0, current) };

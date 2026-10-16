@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A Width button on the second toolbar row cycles Margin (the `maxContentWidth` column), Auto (wide
+  tables, figures, images and code blocks break out to the pane width) and Full width, remembered
+  per workspace.
 - Every preview now starts its first element 40 px below the top, whatever it is (text, heading,
   table, properties, image, empty page); an open first-block editor only moves lower to clear the
   toolbar.

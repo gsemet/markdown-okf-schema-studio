@@ -10,6 +10,7 @@ import { installCodeCopy } from "./codeCopy";
 import { installFirstClearance } from "./firstClearance";
 import { installLinkNavigation } from "./linkNavigation";
 import { installViewControls } from "./viewControls";
+import { installWidthMode } from "./widthMode";
 import type { ViewPreferences } from "../state/previewViewPreferences";
 import type { PreviewThemeMode } from "../state/previewTheme";
 import type { PreviewPanelState } from "../state/previewState";
@@ -110,12 +111,18 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     text,
   }));
   // Zoom changes layout only: keep the source line at the reading line across it.
-  const viewControls = (${installViewControls.toString()})(document, vscode, context, () => {
+  const keepReadingLine = () => {
     if (!anchor) {
       const line = lineAtScroll(window.scrollY);
       if (line !== undefined) anchor = { line, owner: "preview" };
     }
     stabilizeLayout();
+  };
+  const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
+  // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.
+  const widthMode = (${installWidthMode.toString()})(document, window, vscode, context, () => {
+    firstClearance.update();
+    keepReadingLine();
   });
   const themeModes = ["current", "dark", "white", "cream"];
   const themeLabels = { current: "Current theme", dark: "Dark theme", white: "White theme", cream: "Cream theme" };
@@ -197,6 +204,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       editMode,
       descriptionsCollapsed,
       viewZoom: viewControls.zoom(),
+      viewWidthMode: widthMode.mode(),
     };
     vscode.setState?.(state);
     return state;
@@ -761,6 +769,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       activeBlockEdit?.resizeTextarea?.();
       activeFrontmatterEdit?.resizeTextarea?.();
       markWideTables();
+      widthMode.update();
       measure();
       applyAnchor();
       updateStickyHeadings();
@@ -3327,6 +3336,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       image.decode?.().then(stabilizeLayout).catch(() => undefined);
     });
     markWideTables();
+    widthMode.update();
     firstClearance.update();
     measure();
     if (options.restore) {

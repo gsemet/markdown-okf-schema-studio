@@ -10,9 +10,11 @@ const ZOOM_OUT_BUTTON = `<button type="button" data-sphinx-preview-zoom-out aria
 
 const ZOOM_IN_BUTTON = `<button type="button" data-sphinx-preview-zoom-in aria-label="Zoom in" title="Zoom in" data-tooltip="Zoom in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4M8 11h6M11 8v6"></path></svg></button>`;
 
+const WIDTH_BUTTON = `<button type="button" data-sphinx-preview-width-toggle data-width-mode="margin" aria-label="Width: Margin" title="Width: Margin" data-tooltip="Width: Margin"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-width-icon="margin"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M8 8v8M16 8v8"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-width-icon="auto"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M8 8v8M16 8v8M3.5 12H11M13 12h7.5M9 10.5 7.5 12 9 13.5M15 10.5l1.5 1.5-1.5 1.5"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-width-icon="full"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M7 12h10M9.5 9.5 7 12l2.5 2.5M14.5 9.5 17 12l-2.5 2.5"></path></svg></button>`;
+
 export function renderPreviewToolbar(editingEnabled = true): string {
   const mainRow = `<div data-sphinx-preview-toolbar-row="main">${REFRESH_BUTTON}${ANCHOR_BUTTON}${editingEnabled ? EDIT_BUTTON : ""}${THEME_BUTTON}</div>`;
-  const viewRow = `<div data-sphinx-preview-toolbar-row="view">${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}</div>`;
+  const viewRow = `<div data-sphinx-preview-toolbar-row="view">${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}${WIDTH_BUTTON}</div>`;
   return `<div data-sphinx-preview-toolbar role="toolbar" aria-label="Preview controls">${mainRow}${viewRow}</div>`;
 }
 

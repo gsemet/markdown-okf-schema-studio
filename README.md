@@ -137,6 +137,9 @@ without it, marker matching uses the current document's filename stem.
 The preview settings are available under **Markdown OKF-Schema Studio** in VS Code settings.
 
 - `preview.maxContentWidth` (default 960): width of the text column in pixels; `0` is full width.
+  The Width button on the second toolbar row switches between Margin (this column), Auto (tables,
+  figures, images and code blocks wider than the column break out to the pane width) and Full width;
+  with the setting at `0` all three look the same. The choice is remembered per workspace.
 - `preview.stickyHeadingDepth` (default 3): heading levels pinned at the top while scrolling (1-6).
 - `preview.incrementalUpdates` (default on): update changed parts in place; off reloads the page.
 - `preview.scrollPreviewWithEditor` (default on): editor scrolling moves the preview; the toolbar
