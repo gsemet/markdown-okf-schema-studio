@@ -857,6 +857,79 @@ async function scenarioPalette(page: Page, evidence: Evidence): Promise<void> {
   });
 }
 
+/** RI-T22: Cmd/Ctrl+K opens the link panel, Enter inserts [text](url) and one undo reverts it. */
+async function scenarioLinkPanel(page: Page, evidence: Evidence): Promise<void> {
+  await withSmokeDocument("realinput-t22", async (source) => {
+    await openSidePreview(source);
+    await waitForRender(source);
+    await setEditMode(page, true);
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    const readEditor = async (): Promise<{ tag: string | undefined; field: string | null | undefined; value: string | undefined }> => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return { tag: undefined, field: undefined, value: undefined };
+      return current.evaluate(() => {
+        const element = document.activeElement;
+        return {
+          tag: element?.tagName,
+          field: element?.getAttribute("data-link-field"),
+          value: element instanceof HTMLTextAreaElement ? element.value : undefined,
+        };
+      });
+    };
+    const expectValue = async (description: string, expected: string): Promise<void> => {
+      try {
+        await waitFor(description, async () => (await readEditor()).value === expected);
+      } catch (error) {
+        throw new Error(String(error) + " Editor state: " + JSON.stringify(await readEditor()));
+      }
+    };
+    const count = async (selector: string): Promise<number> => {
+      const current = await findCurrentFrame(page);
+      return current === undefined ? -1 : current.locator(selector).count();
+    };
+    const original = "Second paragraph.";
+    await press(page, "End");
+    await press(page, "ArrowLeft");
+    for (let index = 0; index < "paragraph".length; index += 1) await press(page, "Shift+ArrowLeft");
+
+    // The panel opens with the word as its text and the focus in the empty URL field.
+    await press(page, MOD + "+k");
+    await waitFor("the link panel", async () => await count("[role='dialog'][aria-label='Insert link']") === 1);
+    await waitFor("the focus in the URL field", async () => (await readEditor()).field === "url");
+    assert.equal(
+      await (await findCurrentFrame(page))!.locator("[data-link-field='text']").inputValue(),
+      "paragraph",
+      "the text is prefilled from the selection",
+    );
+
+    // Escape returns to the text box without changing anything, and the editor stays open.
+    await press(page, "Escape");
+    await waitFor("the panel to close", async () => await count("[role='dialog']") === 0);
+    await expectValue("the text to be unchanged after Escape", original);
+    assert.equal((await readEditor()).tag, "TEXTAREA", "Escape returns the focus to the text box");
+    assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
+
+    // The selection was restored: open again, type the URL, Enter inserts the link.
+    await press(page, MOD + "+k");
+    await waitFor("the link panel again", async () => await count("[role='dialog']") === 1);
+    await waitFor("the focus in the URL field", async () => (await readEditor()).field === "url");
+    await typeText(page, "https://example.org");
+    await press(page, "Enter");
+    await expectValue("Enter to insert the link", "Second [paragraph](https://example.org).");
+    assert.equal((await readEditor()).tag, "TEXTAREA", "the focus is back in the text box");
+    assert.equal(await count("[role='dialog']"), 0, "the panel closed");
+    assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
+    await press(page, MOD + "+z");
+    await expectValue("one undo to remove the link", original);
+    await captureAfter(evidence, page, "t22-link-panel",
+      "Edit mode on; Cmd/Ctrl+K opened the link panel with the selected word as its text, Escape closed it "
+      + "unchanged, and a second round with a typed URL inserted [paragraph](https://example.org), undone by one Cmd/Ctrl+Z.");
+    await press(page, "Escape");
+    await waitForNoBlockEditor(page, "the block editor to close after Escape");
+  });
+}
+
 /** RI-T11: Enter in a nested list continues the list at the same indentation. */
 async function scenarioEnterContinuesList(page: Page, evidence: Evidence): Promise<void> {
   const LIST_DOCUMENT = [
@@ -3327,6 +3400,7 @@ export async function run(): Promise<void> {
     await scenarioTabIndents(page, evidence);
     await scenarioShortcuts(page, evidence);
     await scenarioPalette(page, evidence);
+    await scenarioLinkPanel(page, evidence);
     await scenarioPreviewKeepsMarkdown(page, evidence);
     await scenarioCaretAtClick(page, evidence);
     await scenarioEditAffordances(page, evidence);

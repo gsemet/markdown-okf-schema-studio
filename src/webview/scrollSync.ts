@@ -7,6 +7,7 @@ import { createAnchorPolicy } from "./anchorPolicy";
 import { createMarkdownTableTools } from "./markdownTable";
 import { createEditActions } from "./editActions";
 import { createEditPalette } from "./editPalette";
+import { createLinkPanel } from "./linkPanel";
 import { highlightLanguageNames } from "../render/highlight";
 import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
@@ -74,6 +75,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const textEditing = (${createTextEditingTools.toString()})();
   const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())});
   const createEditPalette = ${createEditPalette.toString()};
+  const createLinkPanel = ${createLinkPanel.toString()};
   const anchorPolicy = (${createAnchorPolicy.toString()})();
   const settings = {
     scrollPreviewWithEditor: context.scrollPreviewWithEditor !== false,
@@ -948,6 +950,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       window.removeEventListener?.("resize", edit.tableMenuPositionListener);
     }
     edit.tableMenu?.remove?.();
+    edit.linkPanel?.destroy();
+    edit.linkPanel = undefined;
     edit.palette?.destroy();
     restoreTableCellContent(edit);
     if (edit.selectedCell) {
@@ -1544,6 +1548,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (!action || !action.scopes.includes("block")) return false;
     event.preventDefault?.();
     event.stopPropagation?.();
+    if (action.panel === "link") {
+      openLinkPanel(control, onFallbackInput);
+      return true;
+    }
     const edit = action.apply({
       value: String(control.value ?? ""),
       selectionStart: Number(control.selectionStart),
@@ -2820,6 +2828,94 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     return buttons;
   }
 
+  // After a row (the palette, the link panel) was added above the text box, the page scrolls down
+  // by the height it added so the text the user is editing stays where it was. Returns the shift
+  // applied: none on a page at its very top, and never more than the room under the sticky band.
+  function keepTextInPlace(edit, textTopBefore) {
+    const textTopAfter = edit.textarea.getBoundingClientRect?.().top;
+    if (
+      !(window.scrollY > 0)
+      || !editAnchor?.element
+      || !Number.isFinite(textTopBefore)
+      || !Number.isFinite(textTopAfter)
+    ) return 0;
+    const frame = edit.element.getBoundingClientRect?.();
+    const room = frame && Number.isFinite(frame.top)
+      ? Math.max(0, frame.top - toolbarUsableTop(frame))
+      : 0;
+    const shift = Math.min(textTopAfter - textTopBefore, room);
+    if (!(shift > 0)) return 0;
+    editAnchor.viewportTop -= shift;
+    return shift;
+  }
+
+  // The link panel (Cmd/Ctrl+K and the palette's Link button): Text and URL fields under the
+  // palette. The text box selection is remembered on open and restored on every way out; the
+  // blur commit of the text box ignores the move into the panel.
+  function openLinkPanel(control, onFallbackInput) {
+    const edit = activeBlockEdit;
+    if (!edit || edit.finishing || edit.textarea !== control || !edit.palette) return;
+    if (edit.linkPanel) {
+      edit.linkPanel.focusFirst();
+      return;
+    }
+    edit.palette.closePopover();
+    const selection = {
+      value: String(control.value ?? ""),
+      selectionStart: Number(control.selectionStart),
+      selectionEnd: Number(control.selectionEnd),
+      scope: "block",
+    };
+    const draft = editActions.linkDraft(selection);
+    // "restore" is false when the user went back to the text box: its caret and text are theirs.
+    const closePanel = (restore = true) => {
+      const panel = edit.linkPanel;
+      if (!panel) return;
+      edit.linkPanel = undefined;
+      edit.closeLinkPanel = undefined;
+      panel.destroy();
+      if (restore) {
+        control.focus({ preventScroll: true });
+        control.setSelectionRange(selection.selectionStart, selection.selectionEnd);
+      }
+      const shift = edit.linkPanelShift ?? 0;
+      edit.linkPanelShift = 0;
+      if (shift > 0 && activeBlockEdit === edit && editAnchor) {
+        edit.paletteShift = Math.max(0, (edit.paletteShift ?? 0) - shift);
+        editAnchor.viewportTop += shift;
+        applyAnchor();
+      }
+    };
+    const panel = createLinkPanel(document, {
+      text: draft.text,
+      url: draft.url,
+      onSubmit: (text, url) => {
+        if (activeBlockEdit !== edit || edit.finishing) return;
+        // The offsets were taken when the panel opened; a changed text makes them meaningless.
+        if (String(control.value ?? "") !== selection.value) {
+          closePanel(false);
+          return;
+        }
+        closePanel();
+        applyTextEdit(control, editActions.linkEdit(selection, text, url), onFallbackInput);
+      },
+      onCancel: () => closePanel(),
+      onLeave: () => {
+        if (activeBlockEdit === edit) saveBlockEdit();
+      },
+      isInsideFrame: (node) => Boolean(node) && (node === edit.element || edit.element.contains(node)),
+    });
+    edit.linkPanel = panel;
+    edit.closeLinkPanel = closePanel;
+    const textTopBefore = control.getBoundingClientRect?.().top;
+    edit.element.insertBefore(panel.element, control);
+    const shift = keepTextInPlace(edit, textTopBefore);
+    edit.linkPanelShift = shift;
+    if (shift > 0) edit.paletteShift = (edit.paletteShift ?? 0) + shift;
+    applyAnchor();
+    panel.focusFirst();
+  }
+
   function receiveBlockEditSource(message) {
     const edit = activeBlockEdit;
     if (!edit || message.editId !== edit.editId) return;
@@ -2897,7 +2993,13 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         edit.status.textContent = hint;
       }
     });
-    textarea.addEventListener("blur", saveBlockEdit);
+    // Focus moving into the palette or a panel of the same frame is not leaving the editor; only
+    // a focus that goes outside the frame (or nowhere) commits.
+    textarea.addEventListener("blur", (event) => {
+      const next = event && event.relatedTarget;
+      if (next && edit.element.contains(next)) return;
+      saveBlockEdit();
+    });
     edit.status.textContent = hint;
     edit.element.appendChild(textarea);
     edit.element.appendChild(actions);
@@ -2916,32 +3018,30 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         resizeTextarea();
         autosaveBlockEdit();
       }),
+      openPanel: (action) => {
+        if (action.panel === "link") {
+          openLinkPanel(textarea, () => {
+            resizeTextarea();
+            autosaveBlockEdit();
+          });
+        }
+      },
       mode: "strict",
       apple: isApplePlatform(),
     });
     edit.palette = palette;
     edit.element.insertBefore(palette.element, edit.element.firstElementChild);
-    const textTopAfter = textarea.getBoundingClientRect?.().top;
-    // A page at its very top stays there: the first block has its own reserved clearance.
-    if (
-      window.scrollY > 0
-      && editAnchor?.element
-      && Number.isFinite(textTopBefore)
-      && Number.isFinite(textTopAfter)
-    ) {
-      const frame = edit.element.getBoundingClientRect?.();
-      const room = frame && Number.isFinite(frame.top)
-        ? Math.max(0, frame.top - toolbarUsableTop(frame))
-        : 0;
-      const shift = Math.min(textTopAfter - textTopBefore, room);
-      if (shift > 0) {
-        editAnchor.viewportTop -= shift;
-        edit.paletteShift = shift;
-      }
-    }
+    const shift = keepTextInPlace(edit, textTopBefore);
+    if (shift > 0) edit.paletteShift = shift;
     applyAnchor();
-    textarea.addEventListener("mousedown", () => palette.closePopover());
-    textarea.addEventListener("input", () => palette.closePopover());
+    textarea.addEventListener("mousedown", () => {
+      palette.closePopover();
+      edit.closeLinkPanel?.(false);
+    });
+    textarea.addEventListener("input", () => {
+      palette.closePopover();
+      edit.closeLinkPanel?.(false);
+    });
     textarea.addEventListener("keydown", (event) => {
       if (palette.handleKey(event)) return;
       if (keepUndoInControl(event)) return;

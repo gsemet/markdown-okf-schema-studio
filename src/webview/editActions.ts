@@ -51,6 +51,11 @@ export interface EditAction {
   popover?: string;
   /** What the popover lists: `value` becomes `ctx.arg`, `label` is shown. */
   options?: EditActionOption[];
+  /**
+   * Name of the small panel the palette button and the shortcut open instead of running `apply`
+   * directly; the panel collects the values and the page then runs the edit.
+   */
+  panel?: string;
   apply(ctx: EditActionContext): TextEdit | undefined;
 }
 
@@ -66,9 +71,23 @@ export interface EditActionKeyEvent {
   getModifierState?: (name: string) => boolean;
 }
 
+/** What the link panel starts with, and the part of the text a link insertion replaces. */
+export interface LinkDraft {
+  text: string;
+  url: string;
+  start: number;
+  end: number;
+  /** The quoted title of an existing link (kept when the link is replaced); absent otherwise. */
+  title?: string;
+}
+
 export interface EditActionRegistry {
   actions: EditAction[];
   byId: Map<string, EditAction>;
+  /** The link panel's initial values for the selection (an existing link is read back). */
+  linkDraft(ctx: EditActionContext): LinkDraft;
+  /** The edit that writes `[text](url)` over the draft's range; see `linkDraft`. */
+  linkEdit(ctx: EditActionContext, text: string, url: string): TextEdit;
   /**
    * The action bound to this key event, or `undefined` (composition and AltGr never match).
    * `mac` selects the primary modifier: Cmd on macOS, Ctrl elsewhere.
@@ -493,6 +512,64 @@ export function createEditActions(languages: string[] = []): EditActionRegistry 
     return { start, end, text, selectionStart: caret, selectionEnd: caret };
   }
 
+  const LINK_PATTERN =
+    /\[((?:\\.|[^\]\\\n])*)\]\(\s*(<[^>\n]*>|[^)\s\n]*)(?:\s+("[^"\n]*"))?\s*\)/gu;
+  const URL_SELECTION = /^(?:https?:\/\/|mailto:|www\.)\S+$/iu;
+
+  /**
+   * Starting values of the link panel. A selection inside an existing `[text](url)` (or a caret
+   * within it) reads that link back and replaces all of it; a selected URL becomes the target
+   * with an empty text; any other selection becomes the text.
+   */
+  function linkDraft(ctx: EditActionContext): LinkDraft {
+    const { value, selectionStart, selectionEnd } = ctx;
+    const collapsed = selectionStart === selectionEnd;
+    for (const match of value.matchAll(LINK_PATTERN)) {
+      const start = match.index ?? 0;
+      const end = start + match[0].length;
+      if (start > 0 && value.charAt(start - 1) === "!") continue;
+      const inside = collapsed
+        ? selectionStart > start && selectionStart < end
+        : selectionStart >= start && selectionEnd <= end;
+      if (!inside) continue;
+      const target = match[2];
+      const url = target.startsWith("<") ? target.slice(1, -1) : target;
+      const text = match[1].replace(/\\([[\]])/gu, "$1");
+      return match[3] === undefined ? { text, url, start, end } : { text, url, start, end, title: match[3] };
+    }
+    const selected = value.slice(selectionStart, selectionEnd);
+    if (URL_SELECTION.test(selected)) {
+      return { text: "", url: selected, start: selectionStart, end: selectionEnd };
+    }
+    return { text: selected, url: "", start: selectionStart, end: selectionEnd };
+  }
+
+  function linkEdit(ctx: EditActionContext, text: string, url: string): TextEdit {
+    const draft = linkDraft(ctx);
+    // `<` and `>` cannot be written even inside `<...>`, so they are percent-encoded.
+    const target = url.trim().replace(/</gu, "%3C").replace(/>/gu, "%3E");
+    const label = (text.trim() === "" ? target : text.trim()).replace(/([[\]])/gu, "\\$1");
+    let depth = 0;
+    let balanced = true;
+    for (const char of target) {
+      if (char === "(") depth += 1;
+      if (char === ")") depth -= 1;
+      if (depth < 0) balanced = false;
+    }
+    const written = /\s/u.test(target) || !balanced || depth !== 0 ? "<" + target + ">" : target;
+    const prefix = "[" + label + "](";
+    // An empty target leaves the caret inside the parentheses to type it there.
+    const caret = draft.start + prefix.length + (target === "" ? 0 : written.length + 1
+      + (draft.title === undefined ? 0 : draft.title.length + 1));
+    return {
+      start: draft.start,
+      end: draft.end,
+      text: prefix + written + (draft.title === undefined ? "" : " " + draft.title) + ")",
+      selectionStart: caret,
+      selectionEnd: caret,
+    };
+  }
+
   const HEADING_OPTIONS: EditActionOption[] = [
     { value: "0", label: "Paragraph" },
     ...[1, 2, 3, 4, 5].map((level) => ({ value: String(level), label: "Heading " + level })),
@@ -546,6 +623,18 @@ export function createEditActions(languages: string[] = []): EditActionRegistry 
       modes: ["strict"],
       scopes: ["block", "cell"],
       apply: toggleStrikethrough,
+    },
+    {
+      id: "link",
+      label: "Link",
+      title: "Link",
+      icon: "link",
+      group: "inline",
+      modes: ["strict"],
+      scopes: ["block", "cell"],
+      shortcut: { codes: ["KeyK"], keys: ["k"] },
+      panel: "link",
+      apply: (ctx) => linkEdit(ctx, linkDraft(ctx).text, ctx.arg ?? ""),
     },
     {
       id: "codeFence",
@@ -623,5 +712,5 @@ export function createEditActions(languages: string[] = []): EditActionRegistry 
     return (mac === true ? "Cmd" : "Ctrl") + "+" + key.toUpperCase();
   }
 
-  return { actions, byId, shortcutFor, shortcutLabel };
+  return { actions, byId, linkDraft, linkEdit, shortcutFor, shortcutLabel };
 }
