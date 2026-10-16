@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- In edit mode, clicking an image inside a link (Cmd/Ctrl+click still follows it) or a raw
+  `<img>` block now edits it, and ArrowUp from the first block no longer closes the editor.
 - `~~text~~` now renders struck through in the preview, like on GitHub.
 - Editing a block that comes from an included file now opens the `{include}` directive in the
   host document instead of unrelated lines.

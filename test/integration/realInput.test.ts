@@ -2458,6 +2458,50 @@ async function scenarioInsertAfterFinalFigure(page: Page, evidence: Evidence): P
 }
 
 /**
+ * RI-T07: a plain image, an image inside a link and a raw `<img>` all open their block editor on a
+ * click; ArrowUp from the paragraph below reaches the raw image; each image has a "+" after it.
+ */
+async function scenarioImageEditing(page: Page, evidence: Evidence): Promise<void> {
+  const text = "First paragraph.\n\n![a](img.png)\n\n[![b](img.png)](https://example.com)\n\n"
+    + "<img src=\"img.png\" alt=\"c\">\n\nLast paragraph.\n";
+  await withDocument("realinput-t07-images", text, async (source) => {
+    await openStudioEditor(source.uri);
+    await waitForRender(source);
+    await setEditMode(page, true);
+    const editorValue = async (): Promise<string | undefined> => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return undefined;
+      const textarea = current.locator("[data-sphinx-preview-block-editor] textarea");
+      return await textarea.count() === 1 ? await textarea.inputValue() : undefined;
+    };
+    const images: Array<[string, string]> = [
+      ["img[alt='a']", "![a](img.png)"],
+      ["img[alt='b']", "[![b](img.png)](https://example.com)"],
+      ["img[alt='c']", "<img src=\"img.png\" alt=\"c\">"],
+    ];
+    for (const [selector, source_] of images) {
+      await withCurrentFrame(page, (frame) => frame.locator(selector).first().click({ force: true }));
+      await waitFor("the editor for " + source_, async () => (await editorValue())?.trim() === source_);
+      await press(page, "Escape");
+      await waitForNoBlockEditor(page, "the editor to close after Escape");
+      await withCurrentFrame(page, async (frame) => {
+        const following = frame.locator(selector).first()
+          .locator("xpath=ancestor-or-self::*[@data-sphinx-source-line][1]/following-sibling::*[1]");
+        assert.ok((await following.getAttribute("class"))?.includes("sphinx-preview-insert-point"),
+          "a + follows " + source_);
+      });
+    }
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Last paragraph." }).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    await press(page, "ArrowUp");
+    await waitFor("the raw image editor after ArrowUp", async () =>
+      (await editorValue())?.trim() === images[2][1]);
+    await captureAfter(evidence, page, "07-image-editing",
+      "Edit mode on; ArrowUp from the last paragraph reached the raw <img> block editor.");
+  });
+}
+
+/**
  * RI-T35: deleting the source shows the missing-source page with its title and message on two
  * lines; restoring the file brings the preview back.
  */
@@ -3157,6 +3201,7 @@ export async function run(): Promise<void> {
     await scenarioReadableLinkDiagnostics(page, evidence);
     await scenarioInsertBlocksFromPreview(page, evidence);
     await scenarioInsertAfterFinalFigure(page, evidence);
+    await scenarioImageEditing(page, evidence);
     await scenarioFocusChangeKeepsPreviewStill(page, evidence);
     await scenarioHiddenPreviewCatchesUp(page, evidence);
     await scenarioSaveKeepsBlockInPlace(page, evidence);

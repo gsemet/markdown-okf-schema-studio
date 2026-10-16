@@ -1255,6 +1255,20 @@ function expandVersionAdmonitions(
   }
 }
 
+/** The image node of a value holding only `<img …>` (optionally inside `<p>`), else undefined. */
+function rawImageNode(value: string): MystNode | undefined {
+  const match = /^\s*(?:<p(?:\s[^>]*)?>\s*)?(<img\s[^>]*>)\s*(?:<\/p>\s*)?$/iu.exec(value);
+  if (!match) return undefined;
+  const fragment = parseFragment(match[1]) as unknown as RawHtmlNode;
+  const element = (fragment.childNodes ?? []).find((child) => child.tagName?.toLowerCase() === "img");
+  const attr = (name: string): string | undefined =>
+    element?.attrs?.find((candidate) => candidate.name.toLowerCase() === name)?.value;
+  const src = attr("src")?.trim();
+  if (!src) return undefined;
+  const title = attr("title");
+  return { type: "image", url: src, alt: attr("alt") ?? "", ...(title ? { title } : {}) } as MystNode;
+}
+
 /**
  * MyST lifts a paragraph that holds only an image to a bare block-level image (as does an `{image}`
  * directive), which would render as an unmapped `<img>`; wrapping it back keeps its source lines for editing and insertion.
@@ -1265,6 +1279,11 @@ function wrapBareBlockImages(root: MystNode): void {
   root.children = root.children?.map((child): MystNode => {
     if (child.type === "image" && child.position) {
       return wrap(child, child.position);
+    }
+    // A raw `<img …>` block is dropped by the HTML writer; it becomes a regular image block.
+    const rawImage = child.type === "html" && child.position ? rawImageNode(child.value ?? "") : undefined;
+    if (rawImage) {
+      return wrap(rawImage, child.position);
     }
     // An `{image}` directive holds a position-less image; it takes the directive's line range.
     if (child.type === "mystDirective" && child.name === "image" && child.position

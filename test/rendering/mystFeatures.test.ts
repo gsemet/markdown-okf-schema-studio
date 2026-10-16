@@ -1161,3 +1161,21 @@ test("tilde pairs render as struck-through text only in prose", async () => {
     fs.rmSync(includedPath, { force: true });
   }
 });
+
+test("a lone raw <img> block is a mapped block with a source line", async () => {
+  const result = await renderPreviewDocument({
+    document: inlineDocument("Before.\n\n<img src=\"img.png\" alt=\"c\">\n\nAfter.\n"),
+    workspaceRoot,
+    requestId: 3,
+    isWorkspaceTrusted: () => true,
+  });
+  const html = parseHtml(result.html);
+  const image = findElement(html, (element) =>
+    element.tagName === "img" && attribute(element, "alt") === "c");
+  assert.ok(image, "the raw image was not rendered");
+  assert.equal(attribute(image, "src"), "img.png");
+  const mapped = findElement(html, (element) =>
+    attribute(element, "data-line") === "3"
+    && findElement(element, (child) => child.tagName === "img") !== undefined);
+  assert.ok(mapped, "the raw <img> block carries its source line");
+});
