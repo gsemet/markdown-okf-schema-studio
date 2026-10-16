@@ -67,6 +67,8 @@ export interface Scenario {
    */
   /** Cycles the Width button through margin, auto and full width and measures the column and the wide elements. */
   widthModeChecks?: boolean;
+  /** Opens the TOC column and measures it against the toolbar, the content, the width modes and zoom. */
+  tocChecks?: boolean;
   firstElementGap?: "element" | "empty" | "wide-margin" | "properties";
   /** Hovering the first code block shows the copy button in its top right; a click posts the code. */
   codeCopyChecks?: boolean;
@@ -1333,6 +1335,21 @@ export const SCENARIOS: Scenario[] = [
       + "column; Auto lets the wide table and the wide image break out, centred on the pane, while the "
       + "small table keeps the column; Full width removes the column limit. No horizontal page scroll.",
   }))),
+  ...([
+    ["light", WIDE],
+    ["dark", XLARGE],
+    ["light", NARROW],
+  ] as const).map(([theme, viewport]) => ({
+    id: `toc-column-${theme}-${viewport.width}`,
+    fixture: "30-toc",
+    theme,
+    ...viewport,
+    scroll: { kind: "top" as const },
+    tocChecks: true,
+    description: "The TOC button opens a column of h1-h4 headings right of the content and below the "
+      + "toolbar. It never overlaps the content or the table, Auto and Full width respect it, zoom "
+      + "200 % keeps it usable, a click scrolls to the heading, and a pane under 760 px hides it.",
+  })),
   ...[WIDE, NARROW].map((viewport) => ({
     id: `first-element-gap-empty-${viewport.width}`,
     fixture: "20-empty-document",

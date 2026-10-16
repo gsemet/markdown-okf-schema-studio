@@ -462,10 +462,11 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   z-index: 999;
   box-sizing: border-box;
   width: 100%;
+  max-width: calc(100% - var(--sphinx-preview-toc-reserve, 0px));
   margin: 0;
   padding-block: 0 4px;
-  padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)));
-  padding-inline-end: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)), var(--sphinx-preview-toolbar-width, 0px));
+  padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-toc-reserve, 0px) - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)));
+  padding-inline-end: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-toc-reserve, 0px) - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)), calc(var(--sphinx-preview-toolbar-width, 0px) - var(--sphinx-preview-toc-reserve, 0px)));
   border: 0;
   border-bottom: 1px solid var(--sphinx-preview-border);
   border-radius: 0;
@@ -1244,6 +1245,80 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
 [data-sphinx-preview-width-toggle][data-width-mode="auto"] [data-width-icon="auto"],
 [data-sphinx-preview-width-toggle][data-width-mode="full"] [data-width-icon="full"] {
   display: block;
+}
+
+/* TOC column (runtime-created nav, filled by the page script). Off by default; when open and the
+   pane is at least 760px wide it takes 240px plus a 16px gap from the right of the pane, so the
+   content and the sticky band narrow by 256px. Narrower panes hide it whatever the preference. */
+nav[data-sphinx-preview-toc] {
+  display: none;
+}
+
+@media (min-width: 760px) {
+  html[data-sphinx-preview-toc="open"] {
+    --sphinx-preview-toc-reserve: 256px;
+  }
+
+  html[data-sphinx-preview-toc="open"] body {
+    padding-inline-end: var(--sphinx-preview-toc-reserve);
+  }
+
+  html[data-sphinx-preview-toc="open"] nav[data-sphinx-preview-toc] {
+    position: fixed;
+    inset-block-start: var(--sphinx-preview-toc-top, 96px);
+    inset-block-end: 16px;
+    inset-inline-end: 16px;
+    z-index: 1000;
+    box-sizing: border-box;
+    display: block;
+    width: 240px;
+    overflow-y: auto;
+    padding: 8px 6px;
+    border: 1px solid var(--sphinx-preview-border);
+    border-radius: 8px;
+    background: var(--vscode-editor-background, Canvas);
+    color: var(--vscode-editor-foreground, CanvasText);
+    font-family: var(--sphinx-preview-font);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+}
+
+nav[data-sphinx-preview-toc] ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav[data-sphinx-preview-toc] li {
+  margin: 0;
+  padding-inline-start: calc(var(--sphinx-preview-toc-depth, 0) * 12px);
+}
+
+nav[data-sphinx-preview-toc] li button {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+nav[data-sphinx-preview-toc] li button:hover,
+nav[data-sphinx-preview-toc] li button:focus-visible {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.18));
+}
+
+nav[data-sphinx-preview-toc] [data-sphinx-preview-toc-empty] {
+  margin: 0;
+  padding: 3px 6px;
+  opacity: 0.7;
 }
 
 /* Full width: no column limit. A large pixel width keeps the sticky band padding math valid. */

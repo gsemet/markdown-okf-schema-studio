@@ -85,7 +85,7 @@ test("sticky headings align with content and emphasize text in a full-width band
   );
   assert.ok(
     PREVIEW_THEME_CSS.includes(
-      "padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)));",
+      "padding-inline: max(var(--sphinx-preview-content-gutter), calc((100% - var(--sphinx-preview-toc-reserve, 0px) - var(--sphinx-preview-column-width)) / 2 + var(--sphinx-preview-content-gutter)));",
     ),
   );
   const headingBorder = PREVIEW_THEME_CSS.match(
@@ -390,13 +390,13 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 test("preview toolbar provides refresh, editor anchoring, edit mode and theme controls", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
-  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 9);
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 10);
   const [mainRow, viewRow] = toolbar.split('<div data-sphinx-preview-toolbar-row="view">');
   assert.match(mainRow, /data-sphinx-preview-toolbar-row="main"/u);
   assert.equal((mainRow.match(/<button\b/gu) ?? []).length, 4);
   assert.equal((mainRow.match(/<\/button><button\b/gu) ?? []).length, 3);
-  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 5);
-  assert.match(viewRow, /data-sphinx-preview-back[\s\S]*data-sphinx-preview-next[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in[\s\S]*data-sphinx-preview-width-toggle/u);
+  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 6);
+  assert.match(viewRow, /data-sphinx-preview-back[\s\S]*data-sphinx-preview-next[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in[\s\S]*data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"/u);
   assert.doesNotMatch(toolbar, /style=/u);
   assert.doesNotMatch(toolbar, /data-sphinx-preview-mode-controls|role="group"/u);
   for (const control of [
@@ -407,7 +407,7 @@ test("preview toolbar provides refresh, editor anchoring, edit mode and theme co
   ]) {
     assert.ok(toolbar.includes(control), `expected toolbar control ${control}`);
   }
-  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 9);
+  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 10);
   assert.match(
     PREVIEW_THEME_CSS,
     /button\[data-tooltip\]::after\s*\{[^}]*content: attr\(data-tooltip\);[^}]*visibility: hidden;[^}]*opacity: 0;/u,
@@ -739,4 +739,14 @@ test("T10: full width lifts the column limit and auto lets flagged elements brea
   assert.match(rule[1]!, /max-width: none;/u);
   assert.match(PREVIEW_THEME_CSS,
     /\[data-sphinx-preview-width-toggle\]\[data-width-mode="auto"\] \[data-width-icon="auto"\]/u);
+});
+
+test("the TOC column is hidden by default, reserves 256px when open and hides on narrow panes", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /nav\[data-sphinx-preview-toc\] \{\s*display: none;/u);
+  const media = css.match(/@media \(min-width: 760px\) \{[\s\S]*?\n\}\n/u)?.[0] ?? "";
+  assert.match(media, /html\[data-sphinx-preview-toc="open"\] \{\s*--sphinx-preview-toc-reserve: 256px;/u);
+  assert.match(media, /html\[data-sphinx-preview-toc="open"\] body \{\s*padding-inline-end: var\(--sphinx-preview-toc-reserve\)/u);
+  assert.match(media, /nav\[data-sphinx-preview-toc\] \{[^}]*position: fixed;[^}]*inset-block-start: var\(--sphinx-preview-toc-top[^}]*inset-block-end: 16px;[^}]*width: 240px;/u);
+  assert.match(css, /\[data-sphinx-preview-sticky-headings\] \{[^}]*max-width: calc\(100% - var\(--sphinx-preview-toc-reserve, 0px\)\)/u);
 });

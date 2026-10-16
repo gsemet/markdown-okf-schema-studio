@@ -10,6 +10,7 @@ import { installCodeCopy } from "./codeCopy";
 import { installFirstClearance } from "./firstClearance";
 import { installLinkNavigation } from "./linkNavigation";
 import { installHistoryControls } from "./historyControls";
+import { installTocColumn } from "./tocColumn";
 import { installViewControls } from "./viewControls";
 import { installWidthMode } from "./widthMode";
 import type { ViewPreferences } from "../state/previewViewPreferences";
@@ -124,6 +125,12 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.
   const widthMode = (${installWidthMode.toString()})(document, window, vscode, context, () => {
     firstClearance.update();
+    keepReadingLine();
+  });
+  // The TOC column changes the available width: re-measure Auto and keep the reading line.
+  const tocColumn = (${installTocColumn.toString()})(document, window, vscode, context, (heading) => revealElement(heading), () => {
+    firstClearance.update();
+    widthMode.update();
     keepReadingLine();
   });
   const themeModes = ["current", "dark", "white", "cream"];
@@ -3340,6 +3347,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     markWideTables();
     widthMode.update();
     firstClearance.update();
+    tocColumn.refresh();
     measure();
     if (options.restore) {
       restoreState();
@@ -3354,6 +3362,34 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       initializedDetails.add(element);
       element.addEventListener("toggle", () => stateSnapshot(anchor?.line ?? lineAtScroll(window.scrollY)));
     });
+  }
+
+  // Scrolls to a document position and takes it as the new anchor (navigation, TOC entries).
+  function revealAt(targetTop) {
+    programmaticScroll(targetTop);
+    const line = lineAtScroll(targetTop);
+    if (line === undefined) return;
+    anchor = { line, owner: "preview" };
+    const sourceLine = anchorPolicy.editorTopLine(line);
+    if (anchorToEditor && settings.scrollEditorWithPreview && sourceLine !== lastPostedLine) {
+      lastPostedLine = sourceLine;
+      vscode.postMessage({
+        type: "previewScroll",
+        documentId: context.documentId,
+        documentVersion: context.documentVersion,
+        requestId: context.requestId,
+        line: sourceLine,
+        anchorLine: line,
+        scrollTop: targetTop,
+      });
+    }
+  }
+
+  // Puts an element at the reading line, below the sticky heading band.
+  function revealElement(target) {
+    const rectangle = target.getBoundingClientRect?.();
+    if (!rectangle) return;
+    revealAt(anchorPolicy.scrollTopForY(rectangle.top + window.scrollY, readingOffsetValue, maxScrollTop()));
   }
 
   // Announces replaced content to scripts that render it themselves (Mermaid).
@@ -3475,23 +3511,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
           readingOffsetValue,
           maxScrollTop(),
         );
-      programmaticScroll(targetTop);
-      const line = lineAtScroll(targetTop);
-      if (line === undefined) return;
-      anchor = { line, owner: "preview" };
-      const sourceLine = anchorPolicy.editorTopLine(line);
-      if (anchorToEditor && settings.scrollEditorWithPreview && sourceLine !== lastPostedLine) {
-        lastPostedLine = sourceLine;
-        vscode.postMessage({
-          type: "previewScroll",
-          documentId: context.documentId,
-          documentVersion: context.documentVersion,
-          requestId: context.requestId,
-          line: sourceLine,
-          anchorLine: line,
-          scrollTop: targetTop,
-        });
-      }
+      revealAt(targetTop);
       return;
     }
     if (sameContext(message) && message.type === "previewEditSource") {

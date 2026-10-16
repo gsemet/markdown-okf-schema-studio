@@ -73,7 +73,11 @@ export function installWidthMode(
     const column = content.clientWidth
       - (parseFloat(style?.paddingLeft ?? "") || 0) - (parseFloat(style?.paddingRight ?? "") || 0);
     const pane = document.documentElement.clientWidth || window.innerWidth;
-    const available = pane - gutter * 2;
+    // The open TOC column takes its width from the pane (CSS publishes 0 when it is closed or hidden).
+    const reserved = parseFloat(
+      window.getComputedStyle?.(document.documentElement)?.getPropertyValue?.("--sphinx-preview-toc-reserve") ?? "",
+    ) || 0;
+    const available = pane - reserved - gutter * 2;
     const widths = wrappers.map((wrapper) => {
       const image = wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img");
       // An image is capped by the column, so its own size is the natural width: the pixel width

@@ -39,7 +39,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Table bar**: menu shown on a table in edit mode (`.sphinx-preview-table-menu`).
 - **Table-cell editor**: block editor opened on one table cell ("Markdown table cell editor").
 - **Theme mode**: preview colour scheme, one of `current`, `dark`, `white`, `cream` (`PreviewThemeMode` in `src/state/previewTheme.ts`).
-- **TOC column (planned)**: side column showing the table of contents.
+- **TOC column**: runtime-created right column listing h1-h4 headings (`[data-sphinx-preview-toc]`), built by `src/webview/tocColumn.ts`.
 - **Toolbar**: the controls bar at the top of the preview (`[data-sphinx-preview-toolbar]`).
 - **Toolbar row**: `data-sphinx-preview-toolbar-row` `main` (Refresh/Anchor/Edit/Theme) or `view`.
 - **Top-level block**: mapped block that is a direct child of the content container (`topLevelMappedBlocks` in `src/webview/scrollSync.ts`).
