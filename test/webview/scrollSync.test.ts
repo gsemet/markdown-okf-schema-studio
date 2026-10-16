@@ -945,6 +945,25 @@ test("sticks to the active Markdown heading hierarchy in up to three lines", () 
   assert.equal(harness.body.getAttribute("data-sphinx-preview-sticky-headings-active"), null);
 });
 
+test("the sticky band label leaves out comment chips and their hidden bodies", () => {
+  const harness = createRuntimeHarness();
+  const section = harness.headings[1] as unknown as Record<string, unknown> & { textContent: string };
+  section.textContent = "Section TODOTODO fix later";
+  section.querySelector = () => ({});
+  section.cloneNode = () => {
+    const copy = {
+      textContent: section.textContent,
+      querySelectorAll: () => [{ remove: () => { copy.textContent = "Section "; } }],
+    };
+    return copy;
+  };
+  harness.stickyHeadings.height = 50;
+  harness.windowState.scrollY = 250;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(harness.stickyHeadings.textContent, "# Chapter\n## Section\n### Topic");
+});
+
 test("caps sticky heading convergence at three passes", () => {
   const harness = createRuntimeHarness();
   let layoutPass = 0;

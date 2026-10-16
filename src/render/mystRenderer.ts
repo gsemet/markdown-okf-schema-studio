@@ -10,6 +10,7 @@ import {
   restoreCheckboxPlaceholders,
   splitCheckboxPlaceholders,
 } from "./checkboxMarkers";
+import { convertCommentMarkers } from "./commentMarkers";
 import { highlightCodeBlocks } from "./highlight";
 
 export interface RenderDiagnostic {
@@ -1523,6 +1524,7 @@ export async function renderMyst(
     convertCheckboxPlaceholders(ast, checkboxes.markers);
   }
   autolinkBareUrls(ast);
+  convertCommentMarkers(ast, (comment) => sourcePositionProperties(comment, comment.position?.start?.line));
   normalizeContextTagContainers(ast);
   wrapBareBlockImages(ast);
   walk(ast, diagnostics);

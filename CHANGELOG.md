@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- HTML comments now show as a small gray `<!--` chip where they sit, and the word TODO, or a
+  `<!-- TODO ... -->` comment, as a green chip. The chip's tooltip holds the comment text. Tool
+  comments (`markdownlint-*`, `prettier-ignore`, `toc`, `cspell:`, `vale`) stay hidden.
 - A TOC button on the second toolbar row shows a column on the right, below the toolbar, with the
   h1 to h4 headings of the document; clicking an entry scrolls to the heading. It is off by default,
   remembered per workspace and hidden on panes narrower than 760 px. Entries with sub-entries fold
