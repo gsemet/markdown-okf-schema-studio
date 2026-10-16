@@ -58,6 +58,15 @@ remembered per workspace. These three captures use the same document, viewport, 
 | --- | --- | --- |
 | [![Handbook title and admonitions in the dark preview theme](images/readme/theme-dark.png)](images/readme/theme-dark.png) | [![Handbook title and admonitions in the white preview theme](images/readme/theme-white.png)](images/readme/theme-white.png) | [![Handbook title and admonitions in the cream preview theme](images/readme/theme-cream.png)](images/readme/theme-cream.png) |
 
+## Wide Tables and Figures
+
+With the Width button on Auto, the text stays in a comfortable narrow column while a table or a
+figure wider than the column breaks out of it, takes the width it needs (up to the space left of
+the table of contents) and is centred. Narrower tables and figures are centred in the column.
+The capture uses the cream theme.
+
+[![Cream preview in Auto width: a narrow text column with a wide table and a wide figure breaking out of it, centred](images/readme/margin-break-cream.png)](images/readme/margin-break-cream.png)
+
 ## See It In Use
 
 These captures are real Studio views from the end-to-end campaign. The fleet-dispatch document
@@ -149,7 +158,8 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
 
 - `preview.maxContentWidth` (default 960): width of the text column in pixels; `0` is full width.
   The Width button on the second toolbar row switches between Margin (this column), Auto (tables,
-  figures, images and code blocks wider than the column break out to the pane width) and Full width;
+  figures, images and code blocks wider than the column break out, centred, up to the free pane width;
+  narrower tables and figures are centred) and Full width;
   with the setting at `0` all three look the same. The choice is remembered per workspace.
   The TOC button next to it shows or hides a column of h1-h4 headings on the right (off by default,
   remembered per workspace, hidden on panes narrower than 760 px); click an entry to scroll there,

@@ -7,7 +7,8 @@ export interface WidthModeContext {
 
 /**
  * Width button of toolbar row 2: Margin (the configured column), Auto (the column stays, but
- * tables, figures, images and code blocks wider than it break out to the pane width) and Full
+ * tables, figures, images and code blocks wider than it break out, up to the available width and
+ * centred on it; code blocks stay in the list and are not centred when narrow) and Full
  * width (no column limit). Injected into the page script with `.toString()`, so the body must not
  * use anything defined outside it. `onChange` runs after the mode changed and lets the page keep
  * its reading line; `update()` re-measures the wide elements (Auto only).
@@ -28,6 +29,8 @@ export function installWidthMode(
   const contentId = "sphinx-myst-preview-content";
   const wideAttribute = "data-sphinx-preview-wide";
   const breakoutProperty = "--sphinx-preview-breakout";
+  const shiftProperty = "--sphinx-preview-breakout-shift";
+  const figureAttribute = "data-sphinx-preview-figure";
   const gutter = 16;
   const button = document.querySelector("[data-sphinx-preview-width-toggle]");
   const saved = vscode.getState?.() as { viewWidthMode?: unknown } | undefined;
@@ -36,11 +39,13 @@ export function installWidthMode(
   );
   let mode = pick(saved?.viewWidthMode) ?? pick(context.initialViewPreferences?.widthMode) ?? "margin";
   const marked = new Set<Element>();
+  const figures = new Set<Element>();
 
   const clear = (): void => {
     for (const element of marked) {
       element.removeAttribute(wideAttribute);
       (element as HTMLElement).style.setProperty(breakoutProperty, "");
+      (element as HTMLElement).style.setProperty(shiftProperty, "");
     }
     marked.clear();
   };
@@ -59,7 +64,30 @@ export function installWidthMode(
   const update = (): void => {
     clear();
     const content = document.getElementById(contentId);
-    if (mode !== "auto" || !content) return;
+    if (!content) return;
+    // A paragraph holding only an image is a figure: CSS centres it in every width mode. Only the
+    // top-level blocks are looked at, and only the difference is written, so a re-measure of a long
+    // document is cheap and causes no attribute churn.
+    const holders = new Set<Element>();
+    for (const child of Array.from(content.children)) {
+      const only = child.childElementCount === 1 ? child.firstElementChild : null;
+      if (child.tagName === "P" && only && only.tagName === "IMG" && (child.textContent ?? "").trim() === "") {
+        holders.add(child);
+      }
+    }
+    for (const holder of figures) {
+      if (!holders.has(holder)) {
+        holder.removeAttribute(figureAttribute);
+        figures.delete(holder);
+      }
+    }
+    for (const holder of holders) {
+      if (!figures.has(holder)) {
+        holder.setAttribute(figureAttribute, "");
+        figures.add(holder);
+      }
+    }
+    if (mode !== "auto") return;
     const wrappers: Element[] = [];
     for (const element of Array.from(content.querySelectorAll("table, figure, img, pre, .myst-mermaid-diagram"))) {
       const wrapper = wrapperOf(element, content);
@@ -78,18 +106,31 @@ export function installWidthMode(
       window.getComputedStyle?.(document.documentElement)?.getPropertyValue?.("--sphinx-preview-toc-reserve") ?? "",
     ) || 0;
     const available = pane - reserved - gutter * 2;
+    // A wide element is centred on the available area (the pane without the TOC column), which is
+    // normally also the centre of the column; the shift covers the case where it is not.
+    const box = content.getBoundingClientRect?.();
+    const columnCentre = (box?.left ?? 0) + (parseFloat(style?.paddingLeft ?? "") || 0) + column / 2;
+    const shift = Math.round((pane - reserved) / 2 - columnCentre);
+    // A table is capped at the column, which wraps its cells: measure it uncapped, then restore.
+    const measuring = "data-sphinx-preview-measuring";
+    for (const wrapper of wrappers) wrapper.setAttribute(measuring, "");
     const widths = wrappers.map((wrapper) => {
       const image = wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img");
       // An image is capped by the column, so its own size is the natural width: the pixel width
       // attribute when it has one (an SVG has no intrinsic size), else the intrinsic width.
       const declared = parseFloat(image?.getAttribute("width") ?? "") || 0;
-      return Math.max(wrapper.scrollWidth, declared, (image as HTMLImageElement | null)?.naturalWidth ?? 0);
+      // scrollWidth is rounded down: a table of 1038.2px given 1038px would squeeze its cells and
+      // wrap them, so the fractional box width counts too and the result is rounded up.
+      const box = wrapper.getBoundingClientRect?.()?.width ?? 0;
+      return Math.ceil(Math.max(wrapper.scrollWidth, declared, (image as HTMLImageElement | null)?.naturalWidth ?? 0, box));
     });
+    for (const wrapper of wrappers) wrapper.removeAttribute(measuring);
     wrappers.forEach((wrapper, index) => {
-      const extra = Math.floor(Math.min(widths[index], available) - column);
+      const extra = widths[index] <= available ? Math.ceil(widths[index] - column) : Math.floor(available - column);
       if (extra <= 1) return;
       wrapper.setAttribute(wideAttribute, "");
       (wrapper as HTMLElement).style.setProperty(breakoutProperty, extra + "px");
+      (wrapper as HTMLElement).style.setProperty(shiftProperty, shift + "px");
       marked.add(wrapper);
     });
   };

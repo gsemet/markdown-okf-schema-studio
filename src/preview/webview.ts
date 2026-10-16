@@ -135,10 +135,10 @@ export function buildStatusWebviewHtml(
 function injectScrollSyncScript(html: string, script: string, nonce: string): string {
   const tag = `<script nonce="${nonce}" data-sphinx-preview-scroll-sync>${script}</script>`;
   if (/<\/body>/iu.test(html)) {
-    return html.replace(/<\/body>/iu, `${tag}</body>`);
+    return html.replace(/<\/body>/iu, () => `${tag}</body>`);
   }
   if (/<\/html>/iu.test(html)) {
-    return html.replace(/<\/html>/iu, `${tag}</html>`);
+    return html.replace(/<\/html>/iu, () => `${tag}</html>`);
   }
   return `${html}${tag}`;
 }
@@ -146,7 +146,7 @@ function injectScrollSyncScript(html: string, script: string, nonce: string): st
 function injectMermaidRenderer(html: string, rendererUri: string, nonce: string): string {
   const tag = `<script nonce="${escapeHtml(nonce)}" src="${escapeHtml(rendererUri)}" defer data-sphinx-preview-mermaid></script>`;
   if (/<\/body>/iu.test(html)) {
-    return html.replace(/<\/body>/iu, `${tag}</body>`);
+    return html.replace(/<\/body>/iu, () => `${tag}</body>`);
   }
   return `${html}${tag}`;
 }
@@ -154,7 +154,7 @@ function injectMermaidRenderer(html: string, rendererUri: string, nonce: string)
 function injectAccessibilityStyles(html: string, css: string, nonce: string): string {
   const style = `<style nonce="${escapeHtml(nonce)}" data-sphinx-preview-accessibility>${css}</style>`;
   if (/<\/head>/iu.test(html)) {
-    return html.replace(/<\/head>/iu, `${style}</head>`);
+    return html.replace(/<\/head>/iu, () => `${style}</head>`);
   }
   return html;
 }

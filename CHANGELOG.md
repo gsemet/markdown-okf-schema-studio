@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Tables and figures narrower than the text column are now centred in every width mode. In Auto,
+  a wide table or figure takes the width it needs, up to the space left of the table of contents,
+  and is centred on that space. Code blocks keep their behaviour.
 - For a document in a Sphinx project, the preview now warns when the document uses MyST syntax
   that needs an extension missing from `myst_enable_extensions` in the nearest `conf.py`
   (for example `:::` fences without `colon_fence`). One warning per extension names the first

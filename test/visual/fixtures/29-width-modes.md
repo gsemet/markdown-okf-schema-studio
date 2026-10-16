@@ -23,4 +23,13 @@ A wide image breaks out in Auto.
 Fleet operating loop.
 ```
 
+A narrow image with a caption stays centred in every mode.
+
+```{figure} ../external-img/depot-graph.svg
+:width: 240px
+:alt: Depot graph
+
+Depot graph.
+```
+
 A closing paragraph.

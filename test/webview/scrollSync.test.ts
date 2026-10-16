@@ -75,11 +75,23 @@ class RuntimeElement {
   public readonly childElements: RuntimeElement[] = [];
   public readonly insertedElements: RuntimeElement[] = [];
   public removed = false;
-  public rectProvider: (() => { top: number; height: number; bottom?: number }) | undefined;
+  public rectProvider: (() => { top: number; height: number; bottom?: number; left?: number; width?: number }) | undefined;
   public rectReadCount = 0;
 
   public get childNodes(): RuntimeElement[] {
     return this.childElements;
+  }
+
+  public get children(): RuntimeElement[] {
+    return this.childElements;
+  }
+
+  public get childElementCount(): number {
+    return this.childElements.length;
+  }
+
+  public get firstElementChild(): RuntimeElement | null {
+    return this.childElements[0] ?? null;
   }
 
   public getAttribute(name: string): string | null {
@@ -348,6 +360,7 @@ function createRuntimeHarness(configuration: Partial<{
   stickyHeadingDepth: number;
   toolbarBottom: number;
   controlsHeight: number;
+  tocReserve: number;
   viewportHeight: number;
   viewportWidth: number;
   firstMappedSourceLine: number;
@@ -377,6 +390,7 @@ function createRuntimeHarness(configuration: Partial<{
     mapFrontmatter = false,
     toolbarBottom = 0,
     controlsHeight = 0,
+    tocReserve = 0,
     savedDescriptionsCollapsed,
     editingEnabled = true,
     emptyBody = false,
@@ -596,7 +610,8 @@ function createRuntimeHarness(configuration: Partial<{
   const window = {
     getComputedStyle: () => ({
       getPropertyValue: (name: string): string => name === "--sphinx-preview-controls-height"
-        ? String(controlsHeight) + "px" : "",
+        ? String(controlsHeight) + "px"
+        : name === "--sphinx-preview-toc-reserve" ? String(tocReserve) + "px" : "",
     }),
     get scrollY(): number {
       return windowState.scrollY;
@@ -7053,6 +7068,66 @@ test("T10: only elements wider than the column are flagged, and only in Auto", (
   assert.equal(wide.getAttribute("data-sphinx-preview-wide"), "");
   harness.widthButton.dispatch("click");
   assert.equal(huge.getAttribute("data-sphinx-preview-wide"), null);
+});
+
+test("T10b: a wide element is centred on the available area, not on the column", () => {
+  const { harness, wide, huge } = widthModeFixture();
+  // The column starts 120 px right of the pane edge, so it is 30 px off the pane centre (500).
+  harness.previewContent.rectProvider = () => ({ top: 0, height: 100, left: 120, width: 700 });
+  harness.widthButton.dispatch("click");
+  // column centre 470, available-area centre 500: shift 30.
+  assert.equal(wide.style.getPropertyValue("--sphinx-preview-breakout-shift"), "30px");
+  assert.equal(wide.style.getPropertyValue("--sphinx-preview-breakout"), "200px");
+  assert.equal(huge.style.getPropertyValue("--sphinx-preview-breakout"), "268px");
+});
+
+test("T10b: with the TOC open the available area, its centre and the cap exclude the TOC column", () => {
+  const harness = createRuntimeHarness({
+    tocReserve: 256,
+    initialViewPreferences: { zoom: 100, widthMode: "auto", toc: true, incomingChanges: true },
+  });
+  harness.previewContent.clientWidth = 400;
+  harness.documentElement.clientWidth = 1000;
+  harness.previewContent.rectProvider = () => ({ top: 0, height: 100, left: 100, width: 400 });
+  const table = new RuntimeElement({}, harness.windowState, 0, 40, "table");
+  table.scrollWidth = 1600;
+  harness.previewContent.appendChild(table);
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  // available = 1000 - 256 - 32 = 712 -> breakout 312; centre (1000 - 256) / 2 = 372 vs column 300.
+  assert.equal(table.style.getPropertyValue("--sphinx-preview-breakout"), "312px");
+  assert.equal(table.style.getPropertyValue("--sphinx-preview-breakout-shift"), "72px");
+});
+
+test("T10b: a narrow element is not flagged and the shift is cleared outside Auto", () => {
+  const { harness, wide, small } = widthModeFixture();
+  harness.previewContent.rectProvider = () => ({ top: 0, height: 100, left: 150, width: 700 });
+  harness.widthButton.dispatch("click");
+  assert.equal(small.getAttribute("data-sphinx-preview-wide"), null);
+  assert.equal(small.style.getPropertyValue("--sphinx-preview-breakout-shift"), "");
+  harness.widthButton.dispatch("click");
+  assert.equal(wide.style.getPropertyValue("--sphinx-preview-breakout-shift"), "");
+});
+
+test("T10b: a paragraph holding only an image is marked as a figure in every width mode", () => {
+  const { harness } = widthModeFixture();
+  const paragraph = new RuntimeElement({}, harness.windowState, 0, 40, "p");
+  const image = new RuntimeElement({}, harness.windowState, 0, 40, "img");
+  paragraph.appendChild(image);
+  harness.previewContent.appendChild(paragraph);
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(paragraph.getAttribute("data-sphinx-preview-figure"), "", "margin");
+  harness.widthButton.dispatch("click");
+  assert.equal(paragraph.getAttribute("data-sphinx-preview-figure"), "", "auto");
+});
+
+test("T10b: a wide table gets its fractional max-content width rounded up, so no cell wraps", () => {
+  const { harness, wide } = widthModeFixture();
+  // scrollWidth is an integer (900); the real box is 900.4 px wide: 900 px would squeeze the cells.
+  wide.rectProvider = () => ({ top: 0, height: 40, left: 0, width: 900.4 });
+  harness.widthButton.dispatch("click");
+  assert.equal(wide.style.getPropertyValue("--sphinx-preview-breakout"), "201px");
 });
 
 test("T10: the saved width mode applies at startup and an edited element keeps the column", () => {

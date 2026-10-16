@@ -305,3 +305,20 @@ test("T08: two renders with different zoom have the same shell key and the same 
     runtimeContextKey({ ...base, initialViewPreferences: { zoom: 130 } } as never),
   );
 });
+
+test("the page script is injected verbatim even when it contains replacement patterns", () => {
+  // A minified script uses `$` as an identifier, so `$&`, "$'" and "$$" occur in real pages.
+  const tricky = "/tmp/a$&b$'c$$d$`e.md";
+  const built = buildPreviewWebviewHtml(
+    "<html><head></head><body><main>x</main></body></html>",
+    "/tmp/out",
+    webview as never,
+    { documentId: "file:///a.md", documentVersion: 1, requestId: 1, activeSourceFile: tricky },
+    undefined,
+    undefined,
+    960,
+    extensionUri as never,
+  );
+  assert.ok(built.html.includes(JSON.stringify(tricky)), "the source path reaches the page script unchanged");
+  assert.equal(built.html.split("</body>").length, 2, "the closing tag is not duplicated by a replacement pattern");
+});
