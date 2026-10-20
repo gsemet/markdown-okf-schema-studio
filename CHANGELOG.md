@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Text and background colours set with `<span style="color: #c00; background-color: rgb(…)">` now
+  render coloured. Only hex (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`) and `rgb()`/`rgba()` values
+  are kept; named colours, `var()`, `url()`, `!important` and other properties are still removed.
 - Edit mode shows an Edit figure button over a hovered figure. It opens the block editor with a
   form above the text box: Source (with Browse), Alt text, Caption, Legend, Width, Align and Name.
   Apply rewrites the `{figure}` directive as one undo step and keeps every option the form does

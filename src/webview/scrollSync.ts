@@ -18,6 +18,7 @@ import { installLabelRename } from "./labelRename";
 import { installHostRequests } from "./hostRequests";
 import { installFirstClearance } from "./firstClearance";
 import { applyFigureSizes } from "./figureSizes";
+import { applySpanColors, isSafeOkfColor } from "./spanColors";
 import { installLinkNavigation } from "./linkNavigation";
 import { installHistoryControls } from "./historyControls";
 import { installTocColumn } from "./tocColumn";
@@ -129,6 +130,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context);
   const firstClearance = (${installFirstClearance.toString()})(document, window);
   const applyFigureSizes = ${applyFigureSizes.toString()};
+  const isSafeOkfColor = ${isSafeOkfColor.toString()};
+  const applySpanColors = ${applySpanColors.toString()};
   const codeCopy = (${installCodeCopy.toString()})(document, window, (text) => vscode.postMessage({
     type: "previewCopyText",
     documentId: context.documentId,
@@ -3786,6 +3789,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     updateStickyHeadings();
     applyDescriptionVisibility();
     applyFigureSizes(document);
+    applySpanColors(document, isSafeOkfColor);
     document.querySelectorAll("img").forEach((image) => {
       if (initializedImages.has(image)) return;
       initializedImages.add(image);

@@ -297,3 +297,38 @@ test("data-okf-width keeps a plain length and nothing else", () => {
     ["60%", "12.5em", "300"]);
   assert.doesNotMatch(result.html, /position:fixed|url\(x\)/u);
 });
+
+test("span style keeps only hex and rgb colour and background-color as data attributes", () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
+  temporaryDirectories.push(output);
+  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const run = (body: string) => rewriteSphinxHtml(`<body><main>${body}</main></body>`, {
+    outputRoot: output,
+    policy,
+    nonce: "unit-nonce",
+    resolveResource: () => undefined,
+    resolveNavigation: () => ({ kind: "blocked" }) as never,
+  });
+  const kept = run("<span style=\"color: #c00; background-color: rgba(1, 2, 3, 0.5)\">a</span>");
+  assert.match(kept.html, /<span data-okf-color="#c00" data-okf-background="rgba\(1, 2, 3, 0\.5\)">a<\/span>/u);
+  assert.doesNotMatch(kept.html, /style=/u);
+  assert.equal(kept.diagnostics.length, 0);
+
+  for (const style of [
+    "color: red", "color: url(x)", "color: expression(1)", "color: var(--x)", "color: #c00 !important",
+    "color: #c00 /* x */", "color: rgb(300,0,0)", "color: rgba(0,0,0,2)", "position: fixed",
+    "background: #c00", "color: #c00; position: fixed",
+  ]) {
+    const result = run(`<span style="${style}">a</span>`);
+    assert.doesNotMatch(result.html, /style=|url\(|expression|var\(|!important|\/\*|position/u, style);
+    assert.ok(result.diagnostics.length > 0, `diagnostic for ${style}`);
+    const colours = [...result.html.matchAll(/data-okf-(?:color|background)="([^"]*)"/gu)].map((match) => match[1]);
+    assert.deepEqual(colours, style === "color: #c00; position: fixed" ? ["#c00"] : [], style);
+  }
+
+  const other = run("<p style=\"color: #c00\">a</p><b style=\"color: #c00\">b</b><b data-okf-color=\"#c00\">c</b>"
+    + "<span data-okf-color=\"red\">d</span><span data-okf-background=\"#fff\">e</span>");
+  assert.doesNotMatch(other.html, /style=|data-okf-color="(?:#c00|red)"/u);
+  assert.match(other.html, /data-okf-background="#fff"/u);
+  assert.ok(other.diagnostics.length >= 4);
+});

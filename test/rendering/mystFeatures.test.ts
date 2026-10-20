@@ -1562,3 +1562,25 @@ test("T30: a {kbd} role inserted by the edition palette renders a kbd element", 
   assert.ok(key, "the {kbd} role was not rendered as a kbd element");
   assert.equal(textContent(key), "Ctrl+K");
 });
+
+test("a span with a colour style renders as data attributes, anything else is dropped", async () => {
+  const document = inlineDocument(
+    "A <span style=\"color: #c00; background-color: rgb(1, 2, 3)\">red **bold**</span> and "
+    + "<span style=\"color: red; position: fixed\">named</span> and "
+    + "<span style=\"color: url(x)\">bad</span>.\n",
+  );
+  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+  const rewritten = rewriteSphinxHtml(result.html, {
+    outputRoot: workspaceRoot,
+    policy: new ResourcePolicy([]),
+    nonce: "unit-nonce",
+    resolveResource: () => undefined,
+    resolveNavigation: () => ({ kind: "blocked" }),
+  });
+  const spans = findElements(parseHtml(rewritten.html), isTag("span"));
+  assert.deepEqual(spans.map((span) => [attribute(span, "data-okf-color"), attribute(span, "data-okf-background")]),
+    [["#c00", "rgb(1, 2, 3)"], [undefined, undefined], [undefined, undefined]]);
+  assert.doesNotMatch(rewritten.html, /\sstyle="color|position|url\(x\)/u);
+  assert.match(textContent(spans[0]!), /red bold/u);
+});

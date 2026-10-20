@@ -1,4 +1,5 @@
 import { parse, serialize, type DefaultTreeAdapterTypes } from "parse5";
+import { isSafeOkfColor } from "../webview/spanColors";
 
 import {
   relativeResourcePath,
@@ -237,6 +238,35 @@ function rewriteNode(
       if (!SAFE_OKF_WIDTH.test(attribute.value.trim())) {
         removeAttr(node, attribute.name);
         addDiagnostic(diagnostics, "blocked-okf-width", "Removed an unsupported figure width.");
+      }
+      continue;
+    }
+    if (name === "data-okf-color" || name === "data-okf-background") {
+      if (tagName !== "span" || !isSafeOkfColor(attribute.value)) {
+        removeAttr(node, attribute.name);
+        addDiagnostic(diagnostics, "blocked-inline-style", "Removed inline style from preview output.");
+      }
+      continue;
+    }
+    if (name === "style" && tagName === "span") {
+      removeAttr(node, attribute.name);
+      let dropped = false;
+      const kept = new Map<string, string>();
+      for (const declaration of attribute.value.split(";")) {
+        if (declaration.trim() === "") continue;
+        const separator = declaration.indexOf(":");
+        const property = separator < 0 ? "" : declaration.slice(0, separator).trim().toLowerCase();
+        const value = separator < 0 ? "" : declaration.slice(separator + 1).trim();
+        if ((property === "color" || property === "background-color") && isSafeOkfColor(value)) {
+          kept.set(property, value);
+        } else {
+          dropped = true;
+        }
+      }
+      if (kept.has("color")) setAttr(node, "data-okf-color", kept.get("color") ?? "");
+      if (kept.has("background-color")) setAttr(node, "data-okf-background", kept.get("background-color") ?? "");
+      if (dropped || kept.size === 0) {
+        addDiagnostic(diagnostics, "blocked-event-attribute", `Removed unsafe ${attribute.name} attribute.`);
       }
       continue;
     }

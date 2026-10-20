@@ -1777,6 +1777,11 @@ async function scenarioListEditorClickAndKeys(page: Page, evidence: Evidence): P
       await captureAfter(evidence, page, "28-list-enter-adds",
         "Enter added an item, `StRS-B` was typed, Enter again and Enter on the empty item saved the list.");
 
+      // The re-render shows the links unresolved first; the host resolves them asynchronously.
+      await waitFor("the StRS-A link resolved again after the re-render", async () => {
+        const current = await findCurrentFrame(page);
+        return current !== undefined && await current.locator(linkSelector).count() >= 1;
+      });
       const box = await withCurrentFrame(page, (frame) =>
         frame.locator(linkSelector).first().boundingBox());
       assert.ok(box, "the StRS-A link has a box");

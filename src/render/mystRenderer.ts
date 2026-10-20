@@ -1387,7 +1387,8 @@ function rawDetailsNode(
  * `<details>` (optionally `open`, with a plain `<summary>`) becomes a details element: either a
  * head block, the Markdown between, and a closing `</details>` block (the form the edition
  * palette writes), or one block holding all of it. `<kbd>` without attributes wraps the inline
- * content up to its `</kbd>`. Any other raw HTML stays dropped, as before.
+ * content up to its `</kbd>`. `<span style="…">` keeps its style for the sanitizer, which retains
+ * only restricted colours. Any other raw HTML stays dropped, as before.
  */
 function normalizeRawDetailsAndKbd(node: MystNode, mystParse: MystEngine["mystParse"]): void {
   if (!node.children) {
@@ -1449,6 +1450,34 @@ function normalizeRawDetailsAndKbd(node: MystNode, mystParse: MystEngine["mystPa
           children: source.slice(index + 1, close),
         };
         output.push(key);
+        index = close;
+        continue;
+      }
+    }
+    const colourSpan = /^<span\s+style\s*=\s*(?:"([^"<>]*)"|'([^'<>]*)')\s*>$/iu.exec(value);
+    if (colourSpan) {
+      let depth = 1;
+      let close = -1;
+      for (let scan = index + 1; scan < source.length && close === -1; scan += 1) {
+        const text = source[scan].type === "html" ? (source[scan].value ?? "").trim() : "";
+        if (/^<span(?:\s[^<>]*)?>$/iu.test(text)) {
+          depth += 1;
+        } else if (/^<\/span>$/iu.test(text)) {
+          depth -= 1;
+          if (depth === 0) {
+            close = scan;
+          }
+        }
+      }
+      if (close !== -1) {
+        // The sanitizer keeps only restricted colours from the style (data-okf-color/-background).
+        const colours: MystNode = {
+          type: "rawColourSpan",
+          data: { hName: "span", hProperties: { style: colourSpan[1] ?? colourSpan[2] ?? "" } },
+          children: source.slice(index + 1, close),
+        };
+        normalizeRawDetailsAndKbd(colours, mystParse);
+        output.push(colours);
         index = close;
         continue;
       }
