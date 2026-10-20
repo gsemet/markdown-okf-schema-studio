@@ -107,6 +107,9 @@ function safeTableStyleValue(property: string, value: string): string | undefine
   return undefined;
 }
 
+/** The only value the page script applies as a width: a number with an optional unit. */
+const SAFE_OKF_WIDTH = /^\d+(?:\.\d+)?(?:px|%|em|rem)?$/u;
+
 function attr(node: HtmlNode, name: string): HtmlAttribute | undefined {
   return node.attrs?.find((candidate) => candidate.name === name);
 }
@@ -227,6 +230,13 @@ function rewriteNode(
           "blocked-inline-table-style",
           "Removed an unsupported inline table style.",
         );
+      }
+      continue;
+    }
+    if (name === "data-okf-width") {
+      if (!SAFE_OKF_WIDTH.test(attribute.value.trim())) {
+        removeAttr(node, attribute.name);
+        addDiagnostic(diagnostics, "blocked-okf-width", "Removed an unsupported figure width.");
       }
       continue;
     }

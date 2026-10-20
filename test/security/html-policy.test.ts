@@ -277,3 +277,23 @@ test("strips figure images that escape even the workspace root", () => {
   assert.doesNotMatch(rewritten.html, /\ssrc=/u);
   assert.ok(rewritten.diagnostics.some((diagnostic) => diagnostic.code === "blocked-resource"));
 });
+
+test("data-okf-width keeps a plain length and nothing else", () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
+  temporaryDirectories.push(output);
+  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const result = rewriteSphinxHtml(
+    "<body><main><img data-okf-width=\"60%\"><img data-okf-width=\"12.5em\"><img data-okf-width=\"300\">"
+    + "<img data-okf-width=\"60%;position:fixed\"><img data-okf-width=\"url(x)\"><img data-okf-width=\"\"></main></body>",
+    {
+      outputRoot: output,
+      policy,
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }) as never,
+    },
+  );
+  assert.deepEqual([...result.html.matchAll(/data-okf-width="([^"]*)"/gu)].map((match) => match[1]),
+    ["60%", "12.5em", "300"]);
+  assert.doesNotMatch(result.html, /position:fixed|url\(x\)/u);
+});

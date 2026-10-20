@@ -5,6 +5,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 "(planned)" do not exist in the code yet; drop the marker when one is built.
 
 - **Alert**: GitHub `> [!TYPE]` callout; inserted by the Alert button of the GFM group, whose type list opens at the caret (`popoverAtCaret` in `src/webview/editActions.ts`).
+- **Anchor icon**: marker rendered for a MyST `(label)=` target (`span.okf-anchor`, tooltip "Anchor: name"; first child of the next paragraph or heading, else in a `div.okf-anchor-row`).
 - **Anchor button**: toolbar toggle that ties preview scrolling to the editor (`data-sphinx-preview-anchor`).
 - **Block editor**: raw Markdown text box that replaces a mapped block in edit mode (`.sphinx-preview-block-editor`, `openBlockEditor` in `src/webview/scrollSync.ts`).
 - **Block selection (planned)**: selecting whole blocks in the preview, for example to comment on them.

@@ -2196,6 +2196,108 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
     page.evaluate("window.scrollTo(0, 0)")
 
 
+def check_figure_anchors(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """Figure width and alignment follow data-okf-width and the align class; label anchors are visible and targetable."""
+  if not scenario.get("figureAnchorChecks"):
+    return
+  page_name = scenario["page"]
+  found = page.evaluate("""() => {
+    const root = document.querySelector('#sphinx-myst-preview-content');
+    const rect = (element) => { const box = element.getBoundingClientRect(); return {left: box.left, right: box.right, top: box.top + scrollY, bottom: box.bottom + scrollY, width: box.width}; };
+    const column = rect(root);
+    const padding = parseFloat(getComputedStyle(root).paddingLeft) || 0;
+    const content = {left: column.left + padding, right: column.right - (parseFloat(getComputedStyle(root).paddingRight) || 0)};
+    const half = root.querySelector('figure#fig-half');
+    const right = [...root.querySelectorAll('figure')].find(figure => figure.classList.contains('align-right'));
+    const wrapped = right ? right.nextElementSibling : null;
+    const anchor = (label) => {
+      const span = root.querySelector('.okf-anchor[data-okf-label="' + label + '"]');
+      if (!span) return null;
+      const box = span.getBoundingClientRect();
+      const style = getComputedStyle(span, '::before');
+      return {
+        visible: box.width > 0 && box.height > 0, left: box.left, right: box.right, top: box.top + scrollY,
+        title: span.getAttribute('title'), id: span.id, icon: style.content,
+        host: span.parentElement.tagName.toLowerCase() + (span.parentElement.className ? '.' + span.parentElement.className : ''),
+        hostLeft: span.parentElement.getBoundingClientRect().left,
+        hostTop: span.parentElement.getBoundingClientRect().top + scrollY,
+        hostText: span.parentElement.textContent.trim().slice(0, 20),
+        opacity: getComputedStyle(span).opacity,
+      };
+    };
+    return {
+      content,
+      half: half ? {figure: rect(half), image: rect(half.querySelector('img')), width: half.querySelector('img').style.width} : null,
+      right: right ? {figure: rect(right), image: rect(right.querySelector('img')), float: getComputedStyle(right).cssFloat, width: right.style.width} : null,
+      wrapped: wrapped ? rect(wrapped) : null,
+      anchors: {intro: anchor('intro'), sized: anchor('sized-title'), steps: anchor('steps'), code: anchor('note-code'), last: anchor('last-label')},
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      ids: [...root.querySelectorAll('[id]')].map(e => e.id).filter((id, i, all) => all.indexOf(id) !== i),
+      sizedHeading: root.querySelector('h2#sized-title') ? root.querySelector('h2#sized-title').textContent : null,
+    };
+  }""")
+  content = found["content"]
+  column_width = content["right"] - content["left"]
+  half = found["half"]
+  if not half or abs(half["image"]["width"] - column_width * 0.5) > 2:
+    failures.append(Failure(page_name, f"the 50 % figure image is not half the column: {half and half['image']['width']} of {column_width}"))
+  elif abs((half["image"]["left"] + half["image"]["right"]) / 2 - (content["left"] + content["right"]) / 2) > 2:
+    failures.append(Failure(page_name, "the 50 % figure is not centred"))
+  right = found["right"]
+  if not right or right["float"] != "right":
+    failures.append(Failure(page_name, f"the right-aligned figure does not float right: {right}"))
+  else:
+    if abs(right["figure"]["width"] - column_width * 0.4) > 2 or abs(right["image"]["width"] - right["figure"]["width"]) > 2:
+      failures.append(Failure(page_name, f"the right figure is not 40 % of the column: {right['figure']['width']} of {column_width}"))
+    if abs(right["figure"]["right"] - content["right"]) > 2:
+      failures.append(Failure(page_name, "the right figure does not touch the right edge of the column"))
+    wrapped = found["wrapped"]
+    if not wrapped or wrapped["top"] > right["figure"]["bottom"] - 2:
+      failures.append(Failure(page_name, "the paragraph after the right figure does not wrap beside it"))
+  anchors = found["anchors"]
+  for name, anchor in anchors.items():
+    if not anchor or not anchor["visible"]:
+      failures.append(Failure(page_name, f"the {name} anchor icon is missing or invisible: {anchor}"))
+      continue
+    if anchor["title"] != "Anchor: " + {"intro": "intro", "sized": "sized-title", "steps": "steps", "code": "note-code", "last": "last-label"}[name]:
+      failures.append(Failure(page_name, f"the {name} anchor tooltip is {anchor['title']}"))
+    if anchor["left"] < 0 or anchor["right"] > content["left"] + 1:
+      failures.append(Failure(page_name, f"the {name} anchor is not in the left margin: {anchor}"))
+    if "\u2693" not in anchor["icon"]:
+      failures.append(Failure(page_name, f"the {name} anchor has no icon: {anchor['icon']}"))
+  intro = anchors["intro"]
+  if intro and abs(intro["hostLeft"] - content["left"]) > 1:
+    failures.append(Failure(page_name, "the anchor moved the labelled paragraph"))
+  if found["overflow"] > 0:
+    failures.append(Failure(page_name, f"the page scrolls horizontally by {found['overflow']}px"))
+  if found["ids"]:
+    failures.append(Failure(page_name, f"duplicate ids: {found['ids']}"))
+  if found["sizedHeading"] is None or found["sizedHeading"].strip() != "A labelled heading":
+    failures.append(Failure(page_name, f"the labelled heading text is {found['sizedHeading']!r}"))
+  # A reference to a label is an in-page link; the host answers it with navigateAnchor, which
+  # the page resolves by id, so the anchor icon is the scroll target.
+  page.evaluate("window.scrollTo(0, 0)")
+  page.wait_for_timeout(200)
+  link = page.locator('#sphinx-myst-preview-content a[data-sphinx-preview-navigation="#steps"]').first
+  if link.count() != 1:
+    failures.append(Failure(page_name, "the reference to the steps label is not an in-page link"))
+  page.evaluate("""() => {
+    const root = document.documentElement;
+    window.postMessage({
+      type: 'navigateAnchor', value: '#steps',
+      documentId: root.getAttribute('data-sphinx-preview-document-id'),
+      documentVersion: Number(root.getAttribute('data-sphinx-preview-document-version')),
+      requestId: Number(root.getAttribute('data-sphinx-preview-request-id')),
+    }, '*');
+  }""")
+  page.wait_for_timeout(700)
+  target_top = page.evaluate("document.querySelector('#sphinx-myst-preview-content [id=\"steps\"]').getBoundingClientRect().top")
+  if target_top < -2 or target_top > 400:
+    failures.append(Failure(page_name, f"navigating to the steps label left the anchor at {target_top:.0f}px"))
+  page.evaluate("window.scrollTo(0, 0)")
+  page.wait_for_timeout(200)
+
+
 def check_comment_chips(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Chips open into a box and close again; the reading line holds; the gray chips can be turned off."""
   if not scenario.get("commentChipChecks"):
@@ -4253,7 +4355,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

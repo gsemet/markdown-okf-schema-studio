@@ -9,6 +9,7 @@ import {
 } from "../../src/render/renderPipeline";
 import { createEditActions } from "../../src/webview/editActions";
 import { createMarkdownTableTools } from "../../src/webview/markdownTable";
+import { renderMathHtml } from "../../src/render/mathRenderer";
 import { rewriteSphinxHtml } from "../../src/security/html-sanitizer";
 import { ResourcePolicy } from "../../src/security/resource-policy";
 import {
@@ -1323,4 +1324,107 @@ test("a kbd element written by the edition palette is kept in the preview", asyn
   const key = findElement(html, isTag("kbd"));
   assert.ok(key, "the kbd element was stripped");
   assert.equal(textContent(key), "Ctrl");
+});
+
+// T27: amsmath environments, figure size and alignment, and label anchors.
+test("an amsmath align environment in a dollar block and in a math directive renders with KaTeX", async () => {
+  const environment = "\\begin{align}a&=b\\\\c&=d\\end{align}";
+  for (const written of [`$$\n${environment}\n$$`, "```{math}\n" + environment + "\n```"]) {
+    const { raw } = await renderPalette(written);
+    const typeset = parseHtml(renderMathHtml(raw, "katex.css", "nonce"));
+    const math = findElement(typeset, (element) => hasClass(element, "math-display"));
+    assert.ok(math, `no display math block for ${written}`);
+    assert.equal(attribute(math, "data-studio-math-error"), undefined, "the environment was rejected by KaTeX");
+    assert.equal(findElements(math, isTag("mtr")).length, 2, "the two aligned rows were not typeset");
+  }
+});
+
+test("a figure keeps its width and alignment as data attributes and classes", async () => {
+  const { html } = await renderPalette(":::{figure} img/a.png\n:width: 60%\n:align: center\n:alt: A\n\nCaption\n:::");
+  const figure = findElement(html, isTag("figure"))!;
+  const image = findElement(figure, isTag("img"))!;
+  assert.equal(attribute(image, "data-okf-width"), "60%");
+  assert.equal(attribute(image, "width"), undefined, "the legacy width attribute must not be left behind");
+  assert.ok(hasClass(image, "align-center"), "the image has no align-center class");
+  assert.ok(hasClass(figure, "align-center"), "the figure has no align-center class");
+  assert.equal(attribute(figure, "style"), undefined);
+});
+
+test("an image directive keeps its width and alignment", async () => {
+  const { html } = await renderPalette("```{image} img/a.png\n:width: 12.5em\n:align: right\n```");
+  const image = findElement(html, isTag("img"))!;
+  assert.equal(attribute(image, "data-okf-width"), "12.5em");
+  assert.ok(hasClass(image, "align-right"));
+});
+
+test("an invalid figure width or alignment is ignored", async () => {
+  const { html, raw } = await renderPalette(
+    ":::{figure} img/a.png\n:width: 60%;position:fixed\n:align: sideways\n\nCaption\n:::");
+  const image = findElement(html, isTag("img"))!;
+  assert.equal(attribute(image, "data-okf-width"), undefined);
+  assert.equal(attribute(image, "width"), undefined);
+  assert.doesNotMatch(raw, /align-sideways|position:fixed/u);
+});
+
+test("a label before a paragraph renders an anchor icon span that is the link target", async () => {
+  const { html } = await renderPalette("(intro)=\nA paragraph.\n\nSee {ref}`intro` and {ref}`Title <intro>`.");
+  const anchors = findElements(html, (element) => hasClass(element, "okf-anchor"));
+  assert.equal(anchors.length, 1);
+  assert.equal(attribute(anchors[0], "id"), "intro");
+  assert.equal(attribute(anchors[0], "data-okf-label"), "intro");
+  assert.equal(attribute(anchors[0], "title"), "Anchor: intro");
+  assert.equal(attribute(anchors[0], "data-line"), undefined);
+  const paragraph = findElement(html, isTag("p"))!;
+  assert.equal((paragraph.childNodes[0] as HtmlElement), anchors[0], "the anchor is not the first child");
+  assert.match(textContent(paragraph), /^A paragraph\./u);
+  const links = findElements(html, (element) => element.tagName === "a" && attribute(element, "href") === "#intro");
+  assert.deepEqual(links.map((link) => textContent(link)), ["intro", "Title"]);
+});
+
+test("a label before a heading keeps one element with the id and adds the icon inside it", async () => {
+  const { html, raw } = await renderPalette("(intro)=\n# Heading\n\nSee {ref}`intro`.");
+  const heading = findElement(html, isTag("h1"))!;
+  assert.equal(attribute(heading, "id"), "intro");
+  const anchor = findElement(heading, (element) => hasClass(element, "okf-anchor"))!;
+  assert.ok(anchor, "no anchor in the heading");
+  assert.equal(attribute(anchor, "data-okf-label"), "intro");
+  assert.equal(attribute(anchor, "title"), "Anchor: intro");
+  assert.equal((raw.match(/id="intro"/gu) ?? []).length, 1, "the label id is duplicated");
+  assert.equal(textContent(heading).trim(), "Heading");
+});
+
+test("a label before a list or at the end of the document renders its own anchor row", async () => {
+  const { html } = await renderPalette("(items)=\n- a\n- b\n\n(last)=");
+  const anchors = findElements(html, (element) => hasClass(element, "okf-anchor"));
+  assert.deepEqual(anchors.map((anchor) => attribute(anchor, "id")), ["items", "last"]);
+  assert.equal(findElements(html, isTag("ul")).length, 1);
+  assert.equal(findElement(html, isTag("ul"))!.childNodes.some((node) => "attrs" in node && hasClass(node as HtmlElement, "okf-anchor")), false);
+});
+
+test("an anchor icon is not a mapped block or Tab stop, while the labelled blocks keep their mapping", async () => {
+  const document = inlineDocument("(intro)=\nA paragraph.\n\n(sec)=\n# Heading\n\n(items)=\n- a\n");
+  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+  const rewritten = rewriteSphinxHtml(result.html, {
+    outputRoot: workspaceRoot,
+    policy: new ResourcePolicy([]),
+    nonce: "unit-nonce",
+    sourceMapping: { sourceFile: document.uri.fsPath, documentId: "preview-1" },
+    resolveResource: () => undefined,
+    resolveNavigation: () => ({ kind: "blocked" }),
+  });
+  const html = parseHtml(rewritten.html);
+  const anchors = findElements(html, (element) => hasClass(element, "okf-anchor"));
+  assert.equal(anchors.length, 3);
+  for (const anchor of anchors) {
+    assert.equal(attribute(anchor, "tabindex"), undefined);
+    assert.equal(attribute(anchor, "data-sphinx-preview-block"), undefined);
+    assert.equal(attribute(anchor, "data-line"), undefined);
+  }
+  const paragraph = findElement(html, isTag("p"))!;
+  const heading = findElement(html, isTag("h1"))!;
+  for (const block of [paragraph, heading]) {
+    assert.ok(attribute(block, "data-sphinx-preview-block"), "labelled block lost its mapping");
+    assert.equal(attribute(block, "tabindex"), "0");
+  }
 });

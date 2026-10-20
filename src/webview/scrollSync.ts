@@ -13,6 +13,7 @@ import { highlightLanguageNames } from "../render/highlight";
 import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
 import { installFirstClearance } from "./firstClearance";
+import { applyFigureSizes } from "./figureSizes";
 import { installLinkNavigation } from "./linkNavigation";
 import { installHistoryControls } from "./historyControls";
 import { installTocColumn } from "./tocColumn";
@@ -121,6 +122,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   }, true);
   const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context);
   const firstClearance = (${installFirstClearance.toString()})(document, window);
+  const applyFigureSizes = ${applyFigureSizes.toString()};
   const codeCopy = (${installCodeCopy.toString()})(document, window, (text) => vscode.postMessage({
     type: "previewCopyText",
     documentId: context.documentId,
@@ -3598,6 +3600,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     initializeCheckboxes();
     updateStickyHeadings();
     applyDescriptionVisibility();
+    applyFigureSizes(document);
     document.querySelectorAll("img").forEach((image) => {
       if (initializedImages.has(image)) return;
       initializedImages.add(image);

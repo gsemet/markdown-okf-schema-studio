@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The preview shows MyST figure size and alignment (`:width:` in px, %, em or rem; `:align:` left,
+  center or right, on `{figure}` and `{image}`), and a `(name)=` label now shows a faint anchor
+  icon in the left margin of the labelled block, with the tooltip "Anchor: name"; `{ref}` links to
+  it jump there. `\begin{align}` blocks in `$$` and `{math}` already render with KaTeX.
 - The edition palette gets five more GitHub (GFM) buttons, also shown in MyST mode. Collapsible
   wraps the lines in `<details><summary>`, Footnote adds `[^n]` at the caret and an empty `[^n]: `
   at the end, Mermaid inserts a flowchart fence, Column alignment (Left, Center, Right) rewrites

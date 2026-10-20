@@ -1976,6 +1976,81 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   text-align: center;
 }
 
+/* Figure and image alignment (MyST :align:) and size (:width:, applied by the page script from
+   data-okf-width). A figure floats beside the text; a lone image is centred or floats too. A
+   floating figure gets the width itself and its image fills it, so percentages stay relative to the
+   column. */
+#sphinx-myst-preview-content img.align-center {
+  display: block;
+  margin-inline: auto;
+}
+
+#sphinx-myst-preview-content :is(img, figure).align-left {
+  float: left;
+  max-width: 100%;
+  margin: 0.3em 1.4em 0.8em 0;
+}
+
+#sphinx-myst-preview-content :is(img, figure).align-right {
+  float: right;
+  max-width: 100%;
+  margin: 0.3em 0 0.8em 1.4em;
+}
+
+#sphinx-myst-preview-content figure > img.align-left,
+#sphinx-myst-preview-content figure > img.align-right {
+  float: none;
+  margin: 0;
+}
+
+#sphinx-myst-preview-content figure:is(.align-left, .align-right) > img[data-okf-width] {
+  width: 100%;
+}
+
+#sphinx-myst-preview-content > :is(h1, h2, h3, h4, h5, h6) {
+  clear: both;
+}
+
+/* The anchor icon of a (label)= target: it hangs in the left margin of the labelled block, so the
+   text does not move, and stays faint until hovered. Without a paragraph or heading to hold it, it
+   sits in a zero-height row before the block. */
+#sphinx-myst-preview-content .okf-anchor {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 1.1em;
+  margin-inline: -1.5em 0.4em;
+  color: var(--vscode-descriptionForeground, #717171);
+  font-size: 0.8em;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  vertical-align: baseline;
+  opacity: 0.55;
+  user-select: none;
+}
+
+#sphinx-myst-preview-content .okf-anchor::before {
+  content: "\\2693\\FE0E";
+}
+
+#sphinx-myst-preview-content .okf-anchor:hover {
+  opacity: 1;
+}
+
+#sphinx-myst-preview-content .okf-anchor-row {
+  position: relative;
+  height: 0;
+  margin: 0;
+}
+
+#sphinx-myst-preview-content .okf-anchor-row > .okf-anchor {
+  position: absolute;
+  top: 0.7em;
+  inset-inline-start: -1.5em;
+  margin: 0;
+}
+
 /* The MyST writer emits figure captions as a trailing paragraph, not a figcaption. */
 #sphinx-myst-preview-content figcaption,
 #sphinx-myst-preview-content figure > p:last-child {
