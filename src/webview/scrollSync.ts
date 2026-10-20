@@ -981,6 +981,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const edit = activeBlockEdit;
     if (!edit) return;
     activeBlockEdit = undefined;
+    document.documentElement?.removeAttribute?.("data-sphinx-preview-block-editing");
     hostRequests.cancelAll();
     if (edit.autosaveTimer !== undefined) {
       window.clearTimeout(edit.autosaveTimer);
@@ -2433,6 +2434,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       ...(selectedCell ? { selectedCell, renderedCellContent, tableRowIndex: rowIndex, tableColumnIndex: columnIndex } : {}),
       initialCaretPosition,
     };
+    document.documentElement?.setAttribute?.("data-sphinx-preview-block-editing", "true");
     if (refreshButton) refreshButton.disabled = true;
     vscode.postMessage({
       type: "previewEditOpen",
@@ -3511,7 +3513,85 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     openInsertPoint(start, 0);
   });
 
-  function createInsertPoint(afterLine, label, standalone) {
+  // The two move buttons of a body block's insert point (backlog move-block-up-down). The host
+  // swaps the block above the bar with its neighbour; it re-checks every range it is sent.
+  const moveButtonSpecs = [
+    { direction: "up", label: "Move the block above up", text: "\u2191" },
+    { direction: "down", label: "Move the block above down", text: "\u2193" },
+  ];
+  let moveStatusTimer;
+
+  function blockRange(block) {
+    const line = Number(block.getAttribute("data-sphinx-source-line"));
+    const endLine = Number(block.getAttribute("data-sphinx-source-end-line") || line);
+    return { line, endLine };
+  }
+
+  function isIncludedBlock(block) {
+    return block.getAttribute("data-sphinx-preview-included") !== null
+      || Boolean(block.closest?.("[data-sphinx-preview-included]"));
+  }
+
+  function postBlockMove(block, neighbour, direction) {
+    if (!editMode || activeBlockEdit || activeFrontmatterEdit) return;
+    const own = blockRange(block);
+    const other = blockRange(neighbour);
+    const top = (block.closest?.("pre") || block).getBoundingClientRect?.().top;
+    vscode.postMessage({
+      type: "previewBlockMove",
+      documentId: context.documentId,
+      documentVersion: context.documentVersion,
+      requestId: context.requestId,
+      line: own.line,
+      endLine: own.endLine,
+      neighbourLine: other.line,
+      neighbourEndLine: other.endLine,
+      direction,
+      ...(Number.isFinite(top) && Math.abs(top) <= 100000 ? { pinViewportTop: top } : {}),
+    });
+  }
+
+  function addMoveButtons(point, move) {
+    moveButtonSpecs.forEach((spec) => {
+      const neighbour = spec.direction === "up" ? move.previous : move.next;
+      const button = document.createElement("button");
+      button.className = "sphinx-preview-move sphinx-preview-move--" + spec.direction;
+      button.setAttribute("type", "button");
+      button.setAttribute("aria-label", spec.label);
+      button.setAttribute("data-sphinx-move", spec.direction);
+      button.textContent = spec.text;
+      if (!neighbour || isIncludedBlock(move.block) || isIncludedBlock(neighbour)) {
+        button.setAttribute("disabled", "");
+      }
+      button.addEventListener("click", (event) => {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        if (button.getAttribute("disabled") !== null || !neighbour) return;
+        postBlockMove(move.block, neighbour, spec.direction);
+        point.setAttribute("data-sphinx-move-pending", "true");
+      });
+      point.appendChild(button);
+    });
+  }
+
+  // A refused move says why next to the bar it came from; a done move re-renders the page.
+  function receiveBlockMoveResult(message) {
+    if (message.ok !== false || typeof message.reason !== "string") return;
+    const point = insertPoints.find((candidate) =>
+      candidate.getAttribute("data-sphinx-move-pending") === "true");
+    insertPoints.forEach((candidate) => candidate.removeAttribute("data-sphinx-move-pending"));
+    if (!point) return;
+    point.querySelector?.(".sphinx-preview-move-status")?.remove?.();
+    const status = document.createElement("span");
+    status.className = "sphinx-preview-move-status";
+    status.setAttribute("role", "status");
+    status.textContent = message.reason;
+    point.appendChild(status);
+    window.clearTimeout(moveStatusTimer);
+    moveStatusTimer = window.setTimeout(() => status.remove(), 6000);
+  }
+
+  function createInsertPoint(afterLine, label, standalone, move) {
     const point = document.createElement("div");
     point.className = "sphinx-preview-insert-point"
       + (standalone ? " sphinx-preview-insert-point--start" : "")
@@ -3527,6 +3607,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       openInsertPoint(point, afterLine);
     });
     point.appendChild(button);
+    if (move) addMoveButtons(point, move);
     return point;
   }
 
@@ -3556,11 +3637,15 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       return;
     }
     if (properties) place(properties, createInsertPoint(0, "+", false));
-    body.forEach((block) => {
+    body.forEach((block, index) => {
       const line = Number(block.getAttribute("data-sphinx-source-line"));
       const endLine = Number(block.getAttribute("data-sphinx-source-end-line") || line);
       if (!Number.isSafeInteger(endLine) || endLine < line) return;
-      place(block.closest?.("pre") || block, createInsertPoint(endLine, "+", false));
+      place(block.closest?.("pre") || block, createInsertPoint(endLine, "+", false, {
+        block,
+        previous: body[index - 1],
+        next: body[index + 1],
+      }));
     });
   }
 
@@ -4061,6 +4146,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       return;
     }
     if (message?.type === "previewLabelRenameResult" && labelRename.receive(message)) return;
+    if (message?.type === "previewBlockMoveResult" && sameContext(message)) {
+      receiveBlockMoveResult(message);
+      return;
+    }
     if (message && typeof message.type === "string" && message.type.endsWith("Result")
       && hostRequests.receive(message)) return;
     if (sameContext(message) && message.type === "previewEditSource") {

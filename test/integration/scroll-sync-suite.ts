@@ -115,6 +115,54 @@ async function dragSourceScrollbar(page: Page, down: boolean): Promise<void> {
     await page.mouse.up();
 }
 
+async function runBlockMove(page: Page, directory: string): Promise<void> {
+  const filePath = path.join(directory, "block-move.md");
+  const sentence = "A sentence long enough to wrap in the preview pane and give the block some height. ";
+  const paragraphs = Array.from({ length: 40 }, (_, index) =>
+    `Paragraph ${index + 1}: ${sentence.repeat((index % 3) + 1)}`);
+  fs.writeFileSync(filePath, `# Block move\n\n${paragraphs.join("\n\n")}\n`);
+  await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+  await vscode.commands.executeCommand("workbench.action.joinAllGroups");
+  const document = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
+  await vscode.commands.executeCommand(
+    "vscode.openWith", document.uri, "markdown-okf-schema-studio.editor", vscode.ViewColumn.One,
+  );
+  await waitFor("the block-move preview", () => getActivePreviewForTests()?.phase === "ready");
+  let frame = await previewFrame(page);
+  const editButton = frame.locator("[data-sphinx-preview-edit-toggle]");
+  if (await editButton.getAttribute("aria-pressed") !== "true") await editButton.click();
+  const paragraph = (number: number) => frame.locator(`p:has-text("Paragraph ${number}:")`);
+  await paragraph(20).scrollIntoViewIfNeeded();
+  await frame.evaluate(() => window.scrollBy(0, 150));
+  await settle();
+  const topOf = async (number: number): Promise<number> => {
+    frame = await previewFrame(page);
+    return paragraph(number).evaluate((element) => element.getBoundingClientRect().top);
+  };
+  const orderOf = (first: number, second: number): boolean => {
+    const text = document.getText();
+    return text.indexOf(`Paragraph ${first}:`) < text.indexOf(`Paragraph ${second}:`);
+  };
+  let before = await topOf(20);
+  assert.ok(before > 0, "paragraph 20 is in the viewport");
+  // Two clicks in a row on the bar under the moved block: the block stays under the pointer.
+  for (const passed of [21, 22]) {
+    const button = frame.locator(
+      `p:has-text("Paragraph 20:") + .sphinx-preview-insert-point button[data-sphinx-move="down"]`);
+    await button.click();
+    await waitFor(`paragraph 20 moved below paragraph ${passed}`, () => orderOf(passed, 20));
+    await settle();
+    const after = await topOf(20);
+    assert.ok(Math.abs(after - before) <= 3, `the moved block jumped from ${before} to ${after}`);
+    before = after;
+  }
+  assert.equal(document.getText().split("\n\n").length, paragraphs.length + 1, "no block was lost or merged");
+  await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+  await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+  await vscode.commands.executeCommand("undo");
+  assert.ok(orderOf(21, 20) && !orderOf(22, 20), "one undo restores one move");
+}
+
 async function runBlockNavigation(
   page: Page, directory: string,
   capture: (frame: Frame, document: vscode.TextDocument, value: string) => Promise<void>,
@@ -625,6 +673,9 @@ export async function run(): Promise<void> {
         "Edit first; ArrowRight to second; ArrowDown to third; ArrowUp to second; ArrowLeft to first",
         null, value);
     });
+    passedScenarios.push(scenario);
+    scenario = "block-move-keeps-position";
+    await runBlockMove(page, directory);
     passedScenarios.push(scenario);
     outcome = "pass";
   } catch (error) {

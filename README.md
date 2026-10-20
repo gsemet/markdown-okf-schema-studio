@@ -35,6 +35,8 @@ Markdown flavours and extensions:
 - **Inline editing:** click a rendered block to edit its source Markdown. Save with Done
   or Cmd/Ctrl+Enter; Cancel or Escape restores the original block. Tables and frontmatter support
   keyboard navigation, row creation, and focused field editing.
+  The "+" bar under a body block also has up and down arrows that swap the block above the bar
+  with its neighbour in one undo step; blocks from an included file are not moved.
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
   An edition palette above the text box adds headings, bold, italic, strikethrough, inline code,

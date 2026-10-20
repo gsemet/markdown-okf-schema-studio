@@ -14,6 +14,7 @@ import { run as runGenericMarkdown } from "./genericMarkdown.test";
 import { run as runPreviewEditing } from "./previewEditing.test";
 import { run as runImagePicker } from "./imagePicker.test";
 import { run as runIncomingChanges } from "./incomingChanges.test";
+import { run as runBlockMove } from "./blockMove.test";
 import { run as runLabelRename } from "./labelRename.test";
 import { run as runMystPickers } from "./mystPickers.test";
 import { run as runPaletteMode } from "./paletteMode.test";
@@ -105,6 +106,7 @@ export async function run(): Promise<void> {
   await runPreviewHistory();
   await runPaletteMode();
   await runLabelRename();
+  await runBlockMove();
   await runMystPickers();
   await runImagePicker();
   await runIncomingChanges();

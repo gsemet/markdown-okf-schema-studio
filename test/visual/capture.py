@@ -1801,7 +1801,7 @@ def check_insert_after_figure(page: Page, scenario: dict, failures: list[Failure
   if point.count() != 1:
     failures.append(Failure(page_name, "no insertion point follows the final figure"))
     return
-  point.locator("button").click()
+  point.locator("button[aria-label='Insert a block here']").click()
   editor = page.locator(".sphinx-preview-block-editor textarea")
   editor.wait_for(state="visible")
   opened = page.evaluate(

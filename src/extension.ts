@@ -31,6 +31,7 @@ import { checkboxToggleEdit } from "./render/checkboxMarkers";
 import { sourceRangeForLines, type SourceMappingOptions } from "./mapping/sourceMapping";
 import { insertionText, planInsertion, type InsertionPlan } from "./mapping/insertion";
 import { minimalReplacement } from "./mapping/textDiff";
+import { opensIncludeDirective, planBlockMove } from "./mapping/blockMove";
 import { countRefUses, renameLabelLine } from "./mapping/labelRename";
 import { IMAGE_EXTENSIONS, isImageFileName, relativeImageReference } from "./mapping/imageReference";
 import { docReference, documentTargets } from "./mapping/mystTargets";
@@ -1775,6 +1776,94 @@ function handleLabelRename(preview: ActivePreview, message: RegisteredPreviewMes
   });
 }
 
+function postBlockMoveResult(
+  preview: ActivePreview,
+  message: RegisteredPreviewMessage,
+  result: { ok: true } | { ok: false; reason: string },
+): void {
+  void preview.panel.webview.postMessage({
+    type: "previewBlockMoveResult",
+    documentId: message.documentId,
+    documentVersion: message.documentVersion,
+    requestId: message.requestId,
+    ...result,
+  });
+}
+
+/**
+ * Moves a body block past its neighbour from the "+" bar: the two blocks swap in one edit (one undo
+ * step). The page ranges are not trusted: the planner checks order, bounds, the frontmatter and the
+ * text between the blocks, and a block that opens an `{include}` directive is never moved.
+ */
+function handleBlockMove(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+  if (preview.readOnly) {
+    postBlockMoveResult(preview, message, { ok: false, reason: "Moving a block needs a trusted workspace." });
+    return undefined;
+  }
+  if (preview.activeBlockEdit) {
+    postBlockMoveResult(preview, message, {
+      ok: false,
+      reason: "Save or cancel the open Markdown edit before moving a block.",
+    });
+    return undefined;
+  }
+  const document = currentPreviewDocument(preview, message);
+  if (!document) {
+    postBlockMoveResult(preview, message, {
+      ok: false,
+      reason: "The preview is out of date. Try again once it has refreshed.",
+    });
+    return undefined;
+  }
+  const moving = { line: message.line as number, endLine: message.endLine as number };
+  const neighbour = { line: message.neighbourLine as number, endLine: message.neighbourEndLine as number };
+  const movesDown = message.direction === "down";
+  const first = movesDown ? moving : neighbour;
+  const second = movesDown ? neighbour : moving;
+  const plan = planBlockMove(document.getText(), first, second);
+  if ("refused" in plan) {
+    postBlockMoveResult(preview, message, { ok: false, reason: plan.refused });
+    return undefined;
+  }
+  if ([first, second].some((block) => opensIncludeDirective(document.lineAt(block.line - 1).text))) {
+    postBlockMoveResult(preview, message, {
+      ok: false,
+      reason: "A block that comes from an included file cannot be moved.",
+    });
+    return undefined;
+  }
+  const range = new vscode.Range(document.positionAt(plan.start), document.positionAt(plan.end));
+  const sourceEditor = visibleEditorFor(preview);
+  const applyEdit = sourceEditor
+    ? sourceEditor.edit((builder) => builder.replace(range, plan.text), {
+      undoStopBefore: true,
+      undoStopAfter: true,
+    })
+    : (() => {
+      const edit = new vscode.WorkspaceEdit();
+      edit.replace(document.uri, range, plan.text);
+      return vscode.workspace.applyEdit(edit);
+    })();
+  return applyEdit.then((applied) => {
+    if (!applied) {
+      postBlockMoveResult(preview, message, { ok: false, reason: "VS Code could not apply the move." });
+      return;
+    }
+    // The moved block keeps its screen position: pin its new first line at the viewport top it had.
+    storePendingPin(preview, {
+      documentId: message.documentId,
+      pinLine: movesDown ? plan.newStartLine : plan.newSecondStartLine,
+      pinViewportTop: message.pinViewportTop as number | undefined,
+    }, document.version);
+    postBlockMoveResult(preview, message, { ok: true });
+  }, (error: unknown) => {
+    postBlockMoveResult(preview, message, {
+      ok: false,
+      reason: error instanceof Error ? error.message : String(error),
+    });
+  });
+}
+
 type HostListAnswer =
   | { ok: true; items: Array<{ value: string; label: string; detail?: string }>; truncated: boolean }
   | { ok: false; reason: string };
@@ -2298,7 +2387,7 @@ function visibleEditorFor(preview: ActivePreview): vscode.TextEditor | undefined
 /** Remembers the pin of an accepted final save for the render that shows the saved text (R7). */
 function storePendingPin(
   preview: ActivePreview,
-  message: PreviewSyncMessage,
+  message: Pick<PreviewSyncMessage, "documentId" | "pinLine" | "pinViewportTop">,
   minVersion: number,
 ): void {
   if (
@@ -2817,6 +2906,7 @@ registeredMessageHandlers.set("previewPaletteModeChanged", (preview, message) =>
 });
 
 registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
+registeredMessageHandlers.set("previewBlockMove", handleBlockMove);
 registeredMessageHandlers.set("previewListTargets", handleListTargets);
 registeredMessageHandlers.set("previewListCitations", handleListCitations);
 registeredMessageHandlers.set("previewPickDocument", handlePickDocument);

@@ -138,3 +138,19 @@ test("T30: the list and pick messages carry an edit id and no other payload", ()
     assert.equal(isRegisteredPreviewMessage({ ...base, editId: 4 }), false, type);
   }
 });
+
+test("previewBlockMove validates both ranges, the direction and the optional pin", () => {
+  const move = {
+    type: "previewBlockMove", documentId: "doc", documentVersion: 1, requestId: 1,
+    line: 5, endLine: 6, neighbourLine: 1, neighbourEndLine: 3, direction: "up", pinViewportTop: 120.5,
+  };
+  assert.equal(isRegisteredPreviewMessage(move), true);
+  assert.equal(isRegisteredPreviewMessage({ ...move, direction: "down", pinViewportTop: undefined }), true);
+  for (const patch of [
+    { direction: "left" }, { direction: undefined }, { line: 0 }, { endLine: 1.5 }, { neighbourLine: "1" },
+    { neighbourEndLine: undefined }, { line: undefined }, { pinViewportTop: Number.NaN },
+    { pinViewportTop: 200000 }, { pinViewportTop: "10" },
+  ]) {
+    assert.equal(isRegisteredPreviewMessage({ ...move, ...patch }), false, JSON.stringify(patch));
+  }
+});

@@ -4981,6 +4981,106 @@ test("T28: edit mode adds one insertion point after each top-level block, readin
   assert.equal(insertPointsOf(harness).length, 3, "recreated, not duplicated");
 });
 
+// T36: move a block up or down from its insertion bar.
+const MOVE_LABELS = ["Move the block above up", "Move the block above down"];
+
+function moveButton(harness: RuntimeHarness, afterLine: number, direction: "up" | "down"): RuntimeElement {
+  const button = insertPointAfterLine(harness, afterLine).childElements.find((element) =>
+    element.getAttribute("data-sphinx-move") === direction);
+  assert.ok(button, `a ${direction} button after line ${afterLine}`);
+  return button;
+}
+
+const plainClick = () => ({ preventDefault: () => undefined, stopPropagation: () => undefined });
+
+test("T36: every body insertion point has up and down buttons, disabled at the ends", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  for (const line of [1, 52, 100]) {
+    const buttons = insertPointAfterLine(harness, line).childElements;
+    assert.deepEqual(buttons.map((button) => button.textContent), ["+", "\u2191", "\u2193"]);
+    assert.deepEqual(buttons.slice(1).map((button) => button.getAttribute("aria-label")), MOVE_LABELS);
+    assert.ok(buttons.slice(1).every((button) => button.getAttribute("type") === "button"));
+  }
+  const disabled = (line: number, direction: "up" | "down") =>
+    moveButton(harness, line, direction).getAttribute("disabled") !== null;
+  assert.deepEqual([disabled(1, "up"), disabled(1, "down")], [true, false]);
+  assert.deepEqual([disabled(52, "up"), disabled(52, "down")], [false, false]);
+  assert.deepEqual([disabled(100, "up"), disabled(100, "down")], [false, true]);
+});
+
+test("T36: the properties point and the Start writing point have no move buttons", () => {
+  const withProperties = createRuntimeHarness({
+    mapFrontmatter: true, propertiesMapped: true, savedState: { editMode: true },
+  });
+  assert.equal(insertPointAfterLine(withProperties, 0).childElements.length, 1);
+  const empty = createRuntimeHarness({ emptyBody: true, previewStatus: "success", savedState: { editMode: true } });
+  assert.equal(insertPointAfterLine(empty, 0).childElements.length, 1);
+});
+
+test("T36: a block from an included file disables its own buttons and the ones toward it", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  harness.mappings[1].setAttribute("data-sphinx-preview-included", "true");
+  harness.editModeButton.dispatch("click");
+  harness.editModeButton.dispatch("click");
+  const disabled = (line: number, direction: "up" | "down") =>
+    moveButton(harness, line, direction).getAttribute("disabled") !== null;
+  assert.deepEqual([disabled(1, "down"), disabled(52, "up"), disabled(52, "down"), disabled(100, "up")],
+    [true, true, true, true]);
+});
+
+test("T36: a click posts the ranges of the block above the bar and of its neighbour", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  moveButton(harness, 52, "down").dispatch("click", plainClick());
+  moveButton(harness, 52, "up").dispatch("click", plainClick());
+  const moves = harness.messages.slice(before).filter((message) => message.type === "previewBlockMove");
+  assert.equal(moves.length, 2);
+  assert.deepEqual(
+    { ...moves[0], pinViewportTop: typeof moves[0].pinViewportTop },
+    {
+      type: "previewBlockMove", documentId: "file:///active.md", documentVersion: 7, requestId: 11,
+      line: 50, endLine: 52, neighbourLine: 100, neighbourEndLine: 100, direction: "down",
+      pinViewportTop: "number",
+    },
+  );
+  assert.equal(moves[0].pinViewportTop, 500);
+  assert.deepEqual(
+    [moves[1].line, moves[1].endLine, moves[1].neighbourLine, moves[1].neighbourEndLine, moves[1].direction],
+    [50, 52, 1, 1, "up"],
+  );
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditOpen"), false);
+});
+
+test("T36: a disabled button posts nothing, and the buttons stand down while an editor is open", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  moveButton(harness, 1, "up").dispatch("click", plainClick());
+  moveButton(harness, 100, "down").dispatch("click", plainClick());
+  assert.equal(harness.messages.length, before);
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-block-editing"), null);
+  insertPointAfterLine(harness, 52).childElements[0].dispatch("click", plainClick());
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-block-editing"), "true");
+  const opened = harness.messages.length;
+  moveButton(harness, 52, "down").dispatch("click", plainClick());
+  assert.equal(harness.messages.slice(opened).some((message) => message.type === "previewBlockMove"), false);
+});
+
+test("T36: a refused move says why next to the bar; a result of another context is ignored", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  moveButton(harness, 52, "down").dispatch("click", plainClick());
+  const result = {
+    type: "previewBlockMoveResult", documentId: "file:///active.md", documentVersion: 7, requestId: 11,
+    ok: false, reason: "Text between the two blocks prevents the move.",
+  };
+  harness.dispatchMessage({ ...result, requestId: 99 });
+  const statusOf = () => insertPointAfterLine(harness, 52).childElements.find((element) =>
+    element.className.split(" ").includes("sphinx-preview-move-status"));
+  assert.equal(statusOf(), undefined);
+  harness.dispatchMessage(result);
+  assert.equal(statusOf()?.textContent, result.reason);
+  assert.equal(statusOf()?.getAttribute("role"), "status");
+});
+
 test("T28: a render that starts in edit mode builds the insertion points at init", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   assert.equal(insertPointsOf(harness).length, 3);
@@ -5756,18 +5856,49 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "button.setAttribute(aria-label,Insert a block here)",
       "button.addEventListener(click,fn)",
       "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(aria-label,Move the block above up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(data-sphinx-move,up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--up]>)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(aria-label,Move the block above down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(data-sphinx-move,down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--down]>)",
       "div[1].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
       "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,52)",
       "button.setAttribute(type,button)",
       "button.setAttribute(aria-label,Insert a block here)",
       "button.addEventListener(click,fn)",
       "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(aria-label,Move the block above up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(data-sphinx-move,up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--up]>)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(aria-label,Move the block above down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(data-sphinx-move,down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--down]>)",
       "div[50].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
       "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,100)",
       "button.setAttribute(type,button)",
       "button.setAttribute(aria-label,Insert a block here)",
       "button.addEventListener(click,fn)",
       "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(aria-label,Move the block above up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(data-sphinx-move,up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--up]>)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(aria-label,Move the block above down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(data-sphinx-move,down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(disabled,)",
+      "button[sphinx-preview-move sphinx-preview-move--down].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--down]>)",
       "div[100].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
       "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
       "div.setAttribute(data-okf-descriptions-collapsed,true)",
@@ -5955,18 +6086,50 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "button.setAttribute(aria-label,Insert a block here)",
       "button.addEventListener(click,fn)",
       "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(aria-label,Move the block above up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(data-sphinx-move,up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(disabled,)",
+      "button[sphinx-preview-move sphinx-preview-move--up].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--up]>)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(aria-label,Move the block above down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(data-sphinx-move,down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--down]>)",
       "div[1].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
       "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,52)",
       "button.setAttribute(type,button)",
       "button.setAttribute(aria-label,Insert a block here)",
       "button.addEventListener(click,fn)",
       "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(aria-label,Move the block above up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(data-sphinx-move,up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--up]>)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(aria-label,Move the block above down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(data-sphinx-move,down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--down]>)",
       "div[50].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
       "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,100)",
       "button.setAttribute(type,button)",
       "button.setAttribute(aria-label,Insert a block here)",
       "button.addEventListener(click,fn)",
       "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(aria-label,Move the block above up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(data-sphinx-move,up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--up]>)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(aria-label,Move the block above down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(data-sphinx-move,down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(disabled,)",
+      "button[sphinx-preview-move sphinx-preview-move--down].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--down]>)",
       "div[100].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
       "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
       "div.setAttribute(data-okf-descriptions-collapsed,true)",
@@ -5982,6 +6145,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div[sphinx-preview-block-editor].addEventListener(click,fn)",
       "div[50].setAttribute(data-sphinx-preview-editing,true)",
       "div[50].insertAdjacentElement(afterend,<div[sphinx-preview-block-editor]>)",
+      "div.setAttribute(data-sphinx-preview-block-editing,true)",
     ],
     messageTypes: ["previewEditOpen", "previewReady"],
     scrollY: 480,
@@ -6027,18 +6191,50 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "button.setAttribute(aria-label,Insert a block here)",
       "button.addEventListener(click,fn)",
       "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(aria-label,Move the block above up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(data-sphinx-move,up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(disabled,)",
+      "button[sphinx-preview-move sphinx-preview-move--up].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--up]>)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(aria-label,Move the block above down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(data-sphinx-move,down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--down]>)",
       "div[1].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
       "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,52)",
       "button.setAttribute(type,button)",
       "button.setAttribute(aria-label,Insert a block here)",
       "button.addEventListener(click,fn)",
       "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(aria-label,Move the block above up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(data-sphinx-move,up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--up]>)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(aria-label,Move the block above down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(data-sphinx-move,down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--down]>)",
       "div[50].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
       "div[sphinx-preview-insert-point].setAttribute(data-sphinx-insert-after-line,100)",
       "button.setAttribute(type,button)",
       "button.setAttribute(aria-label,Insert a block here)",
       "button.addEventListener(click,fn)",
       "div[sphinx-preview-insert-point].appendChild(<button>)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(aria-label,Move the block above up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].setAttribute(data-sphinx-move,up)",
+      "button[sphinx-preview-move sphinx-preview-move--up].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--up]>)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(type,button)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(aria-label,Move the block above down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(data-sphinx-move,down)",
+      "button[sphinx-preview-move sphinx-preview-move--down].setAttribute(disabled,)",
+      "button[sphinx-preview-move sphinx-preview-move--down].addEventListener(click,fn)",
+      "div[sphinx-preview-insert-point].appendChild(<button[sphinx-preview-move sphinx-preview-move--down]>)",
       "div[100].insertAdjacentElement(afterend,<div[sphinx-preview-insert-point]>)",
       "body.removeAttribute(data-sphinx-preview-sticky-headings-active)",
       "div.setAttribute(data-okf-descriptions-collapsed,true)",
