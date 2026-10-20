@@ -32,6 +32,8 @@ import { sourceRangeForLines, type SourceMappingOptions } from "./mapping/source
 import { insertionText, planInsertion, type InsertionPlan } from "./mapping/insertion";
 import { minimalReplacement } from "./mapping/textDiff";
 import { countRefUses, renameLabelLine } from "./mapping/labelRename";
+import { docReference, documentTargets } from "./mapping/mystTargets";
+import { scanBibKeys } from "./preview/bibScan";
 import {
   DEFAULT_PREVIEW_CONFIGURATION,
   PREVIEW_CONFIGURATION_SECTION,
@@ -1772,6 +1774,111 @@ function handleLabelRename(preview: ActivePreview, message: RegisteredPreviewMes
   });
 }
 
+type HostListAnswer =
+  | { ok: true; items: Array<{ value: string; label: string; detail?: string }>; truncated: boolean }
+  | { ok: false; reason: string };
+
+function postHostResult(
+  preview: ActivePreview,
+  message: RegisteredPreviewMessage,
+  result: HostListAnswer | { ok: true; path?: string; cancelled?: boolean } | { ok: false; reason: string },
+): void {
+  void preview.panel.webview.postMessage({
+    type: `${message.type}Result`,
+    documentId: message.documentId,
+    documentVersion: message.documentVersion,
+    requestId: message.requestId,
+    editId: message.editId,
+    ...result,
+  });
+}
+
+/** The `(label)=` targets of a text, as the palette's Reference list. */
+function targetChoices(text: string): HostListAnswer & { ok: true } {
+  const { items, truncated } = documentTargets(text);
+  return {
+    ok: true,
+    items: items.map((item) => ({ value: item.name, label: item.name, ...(item.title ? { detail: item.title } : {}) })),
+    truncated,
+  };
+}
+
+export function listDocumentTargetsForTests(documentUri: string): HostListAnswer & { ok: true } {
+  const document = vscode.workspace.textDocuments.find((candidate) => candidate.uri.toString() === documentUri);
+  return targetChoices(document?.getText() ?? "");
+}
+
+/** The citation keys of the workspace's `.bib` files (bounded scan), for the palette's Citation list. */
+export async function listCitationKeysForTests(documentUri: string): Promise<{
+  items: Array<{ key: string; title?: string }>;
+}> {
+  const { items } = await scanBibKeys(vscode.Uri.parse(documentUri));
+  return { items };
+}
+
+function handleListTargets(preview: ActivePreview, message: RegisteredPreviewMessage): void {
+  const document = currentPreviewDocument(preview, message);
+  if (!document) {
+    postHostResult(preview, message, { ok: false, reason: "The preview is out of date. Try again once it has refreshed." });
+    return;
+  }
+  postHostResult(preview, message, targetChoices(document.getText()));
+}
+
+function handleListCitations(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+  if (preview.readOnly) {
+    postHostResult(preview, message, { ok: false, reason: "Citations are read from the workspace, which needs trust." });
+    return undefined;
+  }
+  const document = currentPreviewDocument(preview, message);
+  if (!document) {
+    postHostResult(preview, message, { ok: false, reason: "The preview is out of date. Try again once it has refreshed." });
+    return undefined;
+  }
+  return scanBibKeys(document.uri).then((scan) => {
+    postHostResult(preview, message, {
+      ok: true,
+      items: scan.items.map((item) => ({ value: item.key, label: item.key, ...(item.title ? { detail: item.title } : {}) })),
+      truncated: scan.truncated,
+    });
+  }, (error: unknown) => {
+    postHostResult(preview, message, { ok: false, reason: error instanceof Error ? error.message : String(error) });
+  });
+}
+
+/** Native open dialog for a `{doc}` link: answers with the path relative to the document. */
+function handlePickDocument(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+  if (preview.readOnly) {
+    postHostResult(preview, message, { ok: false, reason: "Linking a document needs a trusted workspace." });
+    return undefined;
+  }
+  const document = currentPreviewDocument(preview, message);
+  if (!document || document.uri.scheme !== "file") {
+    postHostResult(preview, message, { ok: false, reason: "The preview is out of date, or the document is not a file." });
+    return undefined;
+  }
+  return Promise.resolve(vscode.window.showOpenDialog({
+    canSelectMany: false,
+    canSelectFiles: true,
+    canSelectFolders: false,
+    defaultUri: vscode.Uri.file(path.dirname(document.uri.fsPath)),
+    filters: { Markdown: ["md", "markdown"] },
+    openLabel: "Link document",
+  })).then((picked) => {
+    const file = picked?.[0];
+    if (!file) {
+      postHostResult(preview, message, { ok: true, cancelled: true });
+      return;
+    }
+    const reference = docReference(document.uri.fsPath, file.fsPath);
+    postHostResult(preview, message, reference === undefined
+      ? { ok: false, reason: "That file name cannot be written in a {doc} link." }
+      : { ok: true, path: reference });
+  }, (error: unknown) => {
+    postHostResult(preview, message, { ok: false, reason: error instanceof Error ? error.message : String(error) });
+  });
+}
+
 function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessage): void {
   if (preview.activeBlockEdit) {
     postEditSourceError(preview, message, "Another Markdown block is already being edited.");
@@ -2664,6 +2771,9 @@ registeredMessageHandlers.set("previewPaletteModeChanged", (preview, message) =>
 });
 
 registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
+registeredMessageHandlers.set("previewListTargets", handleListTargets);
+registeredMessageHandlers.set("previewListCitations", handleListCitations);
+registeredMessageHandlers.set("previewPickDocument", handlePickDocument);
 
 function initialPaletteMode(): PaletteMode {
   const stored = editModeStorage?.get(PALETTE_MODE_STORAGE_KEY);

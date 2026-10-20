@@ -13,6 +13,7 @@ import { highlightLanguageNames } from "../render/highlight";
 import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
 import { installLabelRename } from "./labelRename";
+import { installHostRequests } from "./hostRequests";
 import { installFirstClearance } from "./firstClearance";
 import { applyFigureSizes } from "./figureSizes";
 import { installLinkNavigation } from "./linkNavigation";
@@ -145,6 +146,18 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
       requestId: context.requestId,
       editId,
       ...rename,
+    }),
+  });
+  // Host round trips of the MyST palette (labels, citation keys, the {doc} file dialog). The answer
+  // is matched by edit id. While a native dialog is open the editor's blur handlers stand down:
+  // the dialog takes the focus, which is not leaving the editor.
+  const hostRequests = (${installHostRequests.toString()})(window, {
+    nextEditId: () => "host-" + context.requestId + "-" + (++editSequence),
+    post: (request) => vscode.postMessage({
+      ...request,
+      documentId: context.documentId,
+      documentVersion: context.documentVersion,
+      requestId: context.requestId,
     }),
   });
   // Zoom changes layout only: keep the source line at the reading line across it.
@@ -956,6 +969,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const edit = activeBlockEdit;
     if (!edit) return;
     activeBlockEdit = undefined;
+    hostRequests.cancelAll();
     if (edit.autosaveTimer !== undefined) {
       window.clearTimeout(edit.autosaveTimer);
       edit.autosaveTimer = undefined;
@@ -3026,6 +3040,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     textarea.addEventListener("blur", (event) => {
       const next = event && event.relatedTarget;
       if (next && edit.element.contains(next)) return;
+      // A native dialog of the host (the {doc} file picker) took the focus: not leaving.
+      if (hostRequests.isDialogOpen()) return;
       saveBlockEdit();
     });
     edit.status.textContent = hint;
@@ -3058,7 +3074,21 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       mode: paletteMode,
       modeShortcut: (isApplePlatform() ? "Cmd" : "Ctrl") + "+Shift+M",
       isInsideFrame: (node) => Boolean(node) && (node === edit.element || edit.element.contains(node)),
+      requestList: (kind, done) => hostRequests.ask(
+        kind === "targets" ? "previewListTargets" : "previewListCitations", {}, {},
+        (result) => done(result.ok === true && Array.isArray(result.items)
+          ? { items: result.items, truncated: result.truncated === true }
+          : { items: [], error: typeof result.reason === "string" ? result.reason : "The list could not be read." })),
+      pickHost: (kind, done) => hostRequests.ask(
+        "previewPickDocument", {}, { dialog: true },
+        (result) => {
+          done(result.ok === true && typeof result.path === "string" ? result.path : undefined);
+          if (result.ok !== true && activeBlockEdit === edit && typeof result.reason === "string") {
+            edit.status.textContent = result.reason;
+          }
+        }),
       onLeave: () => {
+        if (hostRequests.isDialogOpen()) return;
         if (activeBlockEdit === edit && !edit.finishing) saveBlockEdit();
       },
       onDone: () => {
@@ -3807,6 +3837,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       return;
     }
     if (message?.type === "previewLabelRenameResult" && labelRename.receive(message)) return;
+    if (message && typeof message.type === "string" && message.type.endsWith("Result")
+      && hostRequests.receive(message)) return;
     if (sameContext(message) && message.type === "previewEditSource") {
       receiveBlockEditSource(message);
       return;

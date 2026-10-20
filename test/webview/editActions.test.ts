@@ -152,6 +152,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
       "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
       "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
+      "ref", "doc", "cite", "dropdown", "tableCaption", "roleKbd",
     ],
   );
   for (const action of registry.actions) {
@@ -161,7 +162,8 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     const github = [
       "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     ].includes(action.id);
-    const myst = ["admonition", "deflist", "math", "sub", "sup", "label"].includes(action.id);
+    const myst = ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
+      "tableCaption", "roleKbd"].includes(action.id);
     assert.deepEqual(action.modes, myst ? ["myst"] : github ? ["gfm"] : ["strict"], action.id);
     assert.ok(action.scopes.includes("block"));
   }
@@ -961,4 +963,81 @@ test("T28: label inserts (name)= above the block with the name selected", () => 
   assert.equal(out.value, "(label-name)=\nPara\ntext");
   assert.equal(out.value.slice(...out.selection), "label-name");
   assert.equal(applyTo("label", "(x)=\nPara", [0, 0]), undefined, "already labelled");
+});
+
+// T30: MyST references, citations, dropdown, captioned table and key role.
+test("T30: ref, doc, cite, dropdown, tableCaption and roleKbd are myst-only without shortcut", () => {
+  for (const id of ["ref", "doc", "cite", "dropdown", "tableCaption", "roleKbd"]) {
+    const action = registry.byId.get(id)!;
+    assert.ok(action, id);
+    assert.deepEqual(action.modes, ["myst"], id);
+    assert.equal(action.shortcut, undefined, id);
+    assert.equal(action.group, "myst", id);
+  }
+  assert.equal(registry.byId.get("ref")!.hostList, "targets");
+  assert.equal(registry.byId.get("cite")!.hostList, "citations");
+  assert.equal(registry.byId.get("doc")!.hostDialog, "document");
+  assert.deepEqual(registry.byId.get("roleKbd")!.scopes, ["block", "cell"]);
+});
+
+test("T30: ref inserts {ref} with the chosen label and keeps a selection as the link text", () => {
+  assert.equal(run("ref", "see |", "intro"), "see {ref}`intro`|");
+  assert.equal(run("ref", "see [the intro] now", "intro"), "see {ref}`the intro <intro>`| now");
+  assert.equal(run("ref", "see |"), undefined, "no label chosen");
+  assert.equal(run("ref", "see |", "bad`label"), undefined);
+  assert.equal(run("ref", "see |", "a<b"), undefined);
+  assert.equal(run("ref", "see [two\nlines]", "x"), undefined, "a selection with a line break is refused");
+});
+
+test("T30: doc inserts {doc} with the picked path", () => {
+  assert.equal(run("doc", "read |", "../guide/setup"), "read {doc}`../guide/setup`|");
+  assert.equal(run("doc", "read [the setup] now", "setup"), "read {doc}`the setup <setup>`| now");
+  assert.equal(run("doc", "read |", "a`b"), undefined);
+  assert.equal(run("doc", "read |"), undefined);
+});
+
+test("T30: cite inserts {cite} with the chosen key", () => {
+  assert.equal(run("cite", "claim |", "smith2024"), "claim {cite}`smith2024`|");
+  assert.equal(run("cite", "claim [text]", "smith2024"), "claim {cite}`smith2024`|", "a selection is replaced");
+  assert.equal(run("cite", "claim |", "bad key"), undefined);
+  assert.equal(run("cite", "claim |"), undefined);
+});
+
+test("T30: dropdown inserts a note with :class: dropdown or wraps the touched lines", () => {
+  assert.equal(
+    run("dropdown", "intro|"),
+    "intro\n\n:::{note} [Title]\n:class: dropdown\n\nContent\n:::",
+  );
+  assert.equal(
+    run("dropdown", "[one\ntwo]"),
+    ":::{note} [Title]\n:class: dropdown\n\none\ntwo\n:::",
+  );
+  assert.equal(
+    run("dropdown", "[:::{tip}\nx\n:::]"),
+    "::::{note} [Title]\n:class: dropdown\n\n:::{tip}\nx\n:::\n::::",
+  );
+});
+
+test("T30: tableCaption wraps the pipe table at the caret, or inserts a new one", () => {
+  const table = "| A | B |\n| --- | --- |\n| 1 | 2 |";
+  const source = "before\n\n" + table + "\n\nafter";
+  const caret = source.indexOf("1 |");
+  const wrapped = applyTo("tableCaption", source, [caret, caret])!;
+  assert.equal(wrapped.value, "before\n\n:::{table} Caption\n\n" + table + "\n:::\n\nafter");
+  assert.equal(wrapped.value.slice(...wrapped.selection), "Caption");
+  const fresh = applyTo("tableCaption", "intro", [5, 5])!;
+  assert.equal(
+    fresh.value,
+    "intro\n\n:::{table} Caption\n\n| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n:::",
+  );
+  assert.equal(fresh.value.slice(...fresh.selection), "Caption");
+  const done = ":::{table} Old\n\n" + table + "\n:::";
+  assert.equal(applyTo("tableCaption", done, [done.indexOf("1 |"), done.indexOf("1 |")]), undefined,
+    "an already captioned table is left alone");
+});
+
+test("T30: roleKbd wraps the selection in {kbd}, or inserts a sample key", () => {
+  assert.equal(run("roleKbd", "press [Ctrl] now"), "press {kbd}`[Ctrl]` now");
+  assert.equal(run("roleKbd", "press | now"), "press {kbd}`[Ctrl+K]` now");
+  assert.equal(run("roleKbd", "press [a`b]"), undefined);
 });

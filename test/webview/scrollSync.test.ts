@@ -7376,6 +7376,7 @@ test("T21: the palette is the first child of the block editor frame, above the t
       "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
       "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
+      "ref", "doc", "cite", "dropdown", "tableCaption", "roleKbd",
     ],
   );
 });
@@ -7418,7 +7419,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 25);
+  assert.equal(controls.length, 31);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
@@ -8478,4 +8479,41 @@ test("T28: the MyST buttons show in MyST mode only", () => {
   const myst = createRuntimeHarness({ initialPaletteMode: "myst" });
   openBlockEditorWithSource(myst);
   for (const id of ids) assert.ok(paletteButton(myst, id), id);
+});
+
+test("T30: the editor stays open while the host's file dialog has the focus, and the answer is inserted", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Read ";
+  textarea.selectionStart = 5;
+  textarea.selectionEnd = 5;
+  paletteButton(harness, "doc").dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined });
+  const request = harness.messages.at(-1)!;
+  assert.equal(request.type, "previewPickDocument");
+  assert.equal(typeof request.editId, "string");
+  assert.equal(request.documentId, "file:///active.md");
+  // The native dialog takes the focus: the blur of the text box is not leaving.
+  textarea.dispatch("blur");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), false);
+  harness.dispatchMessage({
+    type: "previewPickDocumentResult", editId: request.editId, ok: true, path: "../guide/setup",
+    documentVersion: 99, requestId: 99,
+  });
+  assert.equal(textarea.value, "Read {doc}`../guide/setup`");
+  // Once answered, a real departure saves again.
+  textarea.dispatch("blur");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), true);
+});
+
+test("T30: a cancelled file dialog inserts nothing and the blur saves again", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Second paragraph. changed";
+  textarea.dispatch("input");
+  paletteButton(harness, "doc").dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined });
+  const request = harness.messages.at(-1)!;
+  harness.dispatchMessage({ type: "previewPickDocumentResult", editId: request.editId, ok: true, cancelled: true });
+  assert.equal(textarea.value.includes("{doc}"), false);
+  textarea.dispatch("blur");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), true);
 });

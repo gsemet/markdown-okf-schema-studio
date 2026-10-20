@@ -79,6 +79,13 @@ export interface EditAction {
    * then the dropdown changes its type).
    */
   popoverAtCaret?: boolean;
+  /**
+   * The button opens a filterable list the host fills (`targets`: labels of the document,
+   * `citations`: keys of the workspace `.bib` files); the chosen value becomes `ctx.arg`.
+   */
+  hostList?: "targets" | "citations";
+  /** The button asks the host for a native dialog (`document`: an open dialog); the answer is `ctx.arg`. */
+  hostDialog?: "document";
   apply(ctx: EditActionContext): TextEdit | undefined;
 }
 
@@ -1100,6 +1107,86 @@ export function createEditActions(
     };
   }
 
+  /** A MyST role argument: one line, no backtick or angle bracket, bounded. */
+  const roleArgument = (value: string | undefined): value is string =>
+    value !== undefined && value.length > 0 && value.length <= 200 && !/[`<>\r\n]/u.test(value);
+
+  /**
+   * Inserts `{role}` with the chosen target. A selection on one line becomes the link text
+   * (`{ref}`text <target>``); without one the target is the text.
+   */
+  function insertTargetRole(ctx: EditActionContext, role: string, textAllowed: boolean): TextEdit | undefined {
+    if (!validSelection(ctx) || !roleArgument(ctx.arg)) return undefined;
+    const selected = ctx.value.slice(ctx.selectionStart, ctx.selectionEnd);
+    if (/[`<>\r\n]/u.test(selected)) return undefined;
+    const body = textAllowed && selected.trim() !== "" ? selected.trim() + " <" + ctx.arg + ">" : ctx.arg;
+    const text = "{" + role + "}`" + body + "`";
+    const caret = ctx.selectionStart + text.length;
+    return { start: ctx.selectionStart, end: ctx.selectionEnd, text, selectionStart: caret, selectionEnd: caret };
+  }
+
+  /** A MyST dropdown: a note admonition with `:class: dropdown`; the touched lines become its body. */
+  function insertDropdown(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const selected = ctx.selectionStart !== ctx.selectionEnd;
+    const { firstStart, lastEnd, lines } = touchedLines(ctx);
+    let longest = 2;
+    if (selected) {
+      for (const line of lines) {
+        const fence = /^\s*(:{3,})/u.exec(line);
+        if (fence) longest = Math.max(longest, fence[1].length);
+      }
+    }
+    const colons = ":".repeat(longest + 1);
+    const head = colons + "{note} Title\n:class: dropdown\n\n";
+    const text = head + (selected ? lines.join("\n") : "Content") + "\n" + colons;
+    const titleAt = head.indexOf("Title");
+    if (selected) {
+      return { start: firstStart, end: lastEnd, text, selectionStart: firstStart + titleAt, selectionEnd: firstStart + titleAt + 5 };
+    }
+    return insertBlockAt(ctx, text, titleAt, 5);
+  }
+
+  /**
+   * Wraps the pipe table at the caret in `:::{table} Caption` (the caption selected), or inserts a
+   * new 2 x 2 captioned table. A table that is already inside a `{table}` directive is left alone.
+   */
+  function tableCaption(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    // Inside a `{table}` directive: its opener comes before the caret with no closing fence between.
+    const above = ctx.value.slice(0, ctx.selectionStart).split("\n");
+    for (let index = above.length - 1; index >= 0; index -= 1) {
+      if (/^\s*:{3,}\{table\}/u.test(above[index])) return undefined;
+      if (/^\s*:{3,}\s*$/u.test(above[index])) break;
+    }
+    const found = tableAtCaret(ctx);
+    const head = ":".repeat(3) + "{table} Caption\n\n";
+    if (found) {
+      const text = head + ctx.value.slice(found.start, found.end) + "\n" + ":".repeat(3);
+      return {
+        start: found.start, end: found.end, text,
+        selectionStart: found.start + head.indexOf("Caption"),
+        selectionEnd: found.start + head.indexOf("Caption") + 7,
+      };
+    }
+    const body = head + "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n" + ":".repeat(3);
+    return insertBlockAt(ctx, body, head.indexOf("Caption"), 7);
+  }
+
+  /** Wraps the selection in the `{kbd}` role, or inserts a sample key with the sample selected. */
+  function insertKbdRole(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    if (ctx.selectionStart === ctx.selectionEnd) {
+      const open = "{kbd}`";
+      const start = ctx.selectionStart + open.length;
+      return {
+        start: ctx.selectionStart, end: ctx.selectionEnd, text: open + "Ctrl+K`",
+        selectionStart: start, selectionEnd: start + "Ctrl+K".length,
+      };
+    }
+    return wrapRole(ctx, "kbd");
+  }
+
   /** A fenced Mermaid flowchart set apart after the selection, its first node label selected. */
   function insertMermaid(ctx: EditActionContext): TextEdit | undefined {
     if (!validSelection(ctx)) return undefined;
@@ -1440,6 +1527,76 @@ export function createEditActions(
       modes: ["myst"],
       scopes: ["block"],
       apply: insertLabel,
+    },
+    {
+      id: "ref",
+      label: "Reference",
+      title: "Reference to a label ({ref})",
+      icon: "ref",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      popover: "choices",
+      hostList: "targets",
+      apply: (ctx) => insertTargetRole(ctx, "ref", true),
+    },
+    {
+      id: "doc",
+      label: "Document link",
+      title: "Link to another document ({doc})",
+      icon: "doc",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      hostDialog: "document",
+      apply: (ctx) => insertTargetRole(ctx, "doc", true),
+    },
+    {
+      id: "cite",
+      label: "Citation",
+      title: "Citation from the workspace .bib files ({cite})",
+      icon: "cite",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      popover: "choices",
+      hostList: "citations",
+      apply: (ctx) => {
+        if (!validSelection(ctx) || !roleArgument(ctx.arg) || /[\s,]/u.test(ctx.arg)) return undefined;
+        const text = "{cite}`" + ctx.arg + "`";
+        const caret = ctx.selectionStart + text.length;
+        return { start: ctx.selectionStart, end: ctx.selectionEnd, text, selectionStart: caret, selectionEnd: caret };
+      },
+    },
+    {
+      id: "dropdown",
+      label: "Dropdown",
+      title: "Dropdown (collapsible admonition)",
+      icon: "dropdown",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      apply: insertDropdown,
+    },
+    {
+      id: "tableCaption",
+      label: "Table with caption",
+      title: "Table with caption (wraps the table at the caret)",
+      icon: "tableCaption",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      apply: tableCaption,
+    },
+    {
+      id: "roleKbd",
+      label: "Key (MyST)",
+      title: "Keyboard key ({kbd} role)",
+      icon: "kbd",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block", "cell"],
+      apply: insertKbdRole,
     },
   ];
 
