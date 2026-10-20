@@ -57,6 +57,8 @@ Filler paragraph 7. Text of the filler. Text of the filler. Text of the filler. 
 
 Filler paragraph 8. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. Text of the filler. 
 
+Coloured text: <span style="color: #c00">red</span>, <span style="background-color: rgba(255, 220, 0, 0.45)">highlighted</span>, <span style="color: red">named colours stay plain</span>.
+
 Back to {ref}`sized-title`, {ref}`steps` and {ref}`fig-half`.
 
 (last-label)=
