@@ -1009,6 +1009,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     edit.figurePanel?.destroy();
     edit.figurePanel = undefined;
     edit.palette?.destroy();
+    edit.cellPalette?.destroy();
     restoreTableCellContent(edit);
     if (edit.selectedCell) {
       edit.selectedCell.removeAttribute("data-sphinx-preview-table-cell-selected");
@@ -1600,8 +1601,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // The key is consumed even when the action has nothing to change, so the host editor never
   // sees it (Cmd+B would toggle the side bar).
   function paletteShortcut(event, control, onFallbackInput) {
+    const scope = activeBlockEdit?.selectedCell ? "cell" : "block";
     const action = editActions.shortcutFor(event, isApplePlatform());
-    if (!action || !action.scopes.includes("block")) return false;
+    if (!action || !action.scopes.includes(scope)) return false;
     event.preventDefault?.();
     event.stopPropagation?.();
     if (action.panel === "link") {
@@ -1612,7 +1614,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       value: String(control.value ?? ""),
       selectionStart: Number(control.selectionStart),
       selectionEnd: Number(control.selectionEnd),
-      scope: "block",
+      scope,
     });
     if (edit) applyTextEdit(control, edit, onFallbackInput);
     return true;
@@ -1637,7 +1639,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
 
   // Applies a text edit through the native editing path so the undo stack keeps the step; falls
   // back to a manual splice where execCommand is unavailable.
-  function applyTextEdit(control, edit, onFallbackInput) {
+  function applyTextEdit(control, rawEdit, onFallbackInput) {
+    // A table cell holds one line, and a bare pipe would split it: sanitize what is inserted.
+    const inCell = Boolean(activeBlockEdit?.selectedCell) && control === activeBlockEdit.tableInput;
+    const edit = inCell ? textEditing.cellSafeEdit(String(control.value ?? ""), rawEdit) : rawEdit;
     control.focus({ preventScroll: true });
     control.setSelectionRange(edit.start, edit.end);
     let done = false;
@@ -2699,6 +2704,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const modelRowIndex = edit.tableRowIndex === 0 ? 0 : edit.tableRowIndex + 1;
     const row = edit.tableModel.rows[modelRowIndex];
     edit.tableColumnIndex = Math.max(0, Math.min(edit.tableColumnIndex, row.length - 1));
+    // The panel and popover belong to the control that is about to be replaced.
+    edit.closeLinkPanel?.(false);
+    edit.cellPalette?.closePopover();
     edit.element.textContent = "";
 
     const input = document.createElement("textarea");
@@ -2791,6 +2799,55 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       if (nextColumn !== undefined) edit.tableColumnIndex = nextColumn;
     }, edit.tableModel.rows[0].length <= 1, "column");
 
+    // The inline buttons allowed in a cell join the bar after a separator; the same group object
+    // is kept for the whole edit and only moved into each rebuilt bar.
+    const rememberAndAutosave = () => {
+      resizeInput();
+      rememberCellValue();
+      autosaveBlockEdit();
+    };
+    edit.tableInput = input;
+    if (!edit.cellPalette) {
+      edit.cellPalette = createEditPalette(document, {
+        actions: editActions,
+        scope: "cell",
+        getControl: () => edit.tableInput,
+        getCaretRect: () => caretRectOf(document, window, edit.tableInput),
+        applyTextEdit: (paletteEdit) => applyTextEdit(edit.tableInput, paletteEdit, rememberAndAutosave),
+        openPanel: (action, panelName) => {
+          if ((panelName ?? action.panel) === "link") openLinkPanel(edit.tableInput, rememberAndAutosave);
+        },
+        caretInside: () => false,
+        mode: paletteMode,
+        isInsideFrame: (node) => Boolean(node)
+          && (node === edit.element || edit.element.contains(node)
+            || (Boolean(edit.tableMenu) && edit.tableMenu.contains(node))),
+        requestList: (kind, done) => hostRequests.ask(
+          kind === "targets" ? "previewListTargets" : "previewListCitations", {}, {},
+          (result) => done(result.ok === true && Array.isArray(result.items)
+            ? { items: result.items, truncated: result.truncated === true }
+            : { items: [], error: typeof result.reason === "string" ? result.reason : "The list could not be read." })),
+        pickHost: (kind, done) => hostRequests.ask(
+          kind === "image" ? "previewPickImage" : "previewPickDocument", {}, { dialog: true },
+          (result) => done(result.ok === true && typeof result.path === "string" ? result.path : undefined)),
+        onLeave: () => {
+          if (hostRequests.isDialogOpen()) return;
+          if (activeBlockEdit === edit && !edit.finishing) saveBlockEdit();
+        },
+        onDone: () => {
+          if (activeBlockEdit === edit) saveBlockEdit();
+        },
+        apple: isApplePlatform(),
+      });
+    }
+    edit.cellPalette.setMode(paletteMode);
+    const separator = document.createElement("span");
+    separator.setAttribute("role", "separator");
+    separator.setAttribute("aria-orientation", "vertical");
+    separator.className = "sphinx-preview-table-menu-separator";
+    menu.appendChild(separator);
+    menu.appendChild(edit.cellPalette.element);
+
     const columnCount = edit.tableModel.rows[0].length;
     const columnText = "column " + (edit.tableColumnIndex + 1) + " of " + columnCount;
     edit.status.textContent = edit.tableRowIndex === 0
@@ -2809,8 +2866,23 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     edit.tableInput = input;
     edit.actionButtons = actionButtons;
     input.addEventListener("blur", () => commitCellEditorOnFocusLoss(edit, input));
+    // Clicking or typing in the cell closes what the bar opened, as in a block editor.
+    input.addEventListener("mousedown", () => {
+      edit.cellPalette?.closePopover();
+      edit.closeLinkPanel?.(false);
+    });
+    input.addEventListener("input", () => {
+      edit.cellPalette?.closePopover();
+      edit.closeLinkPanel?.(false);
+      edit.cellPalette?.updateAvailability();
+    });
+    for (const kind of ["keyup", "mouseup", "select"]) {
+      input.addEventListener(kind, () => edit.cellPalette?.updateAvailability());
+    }
     input.addEventListener("keydown", (event) => {
+      if (edit.cellPalette?.handleKey(event)) return;
       if (keepUndoInControl(event)) return;
+      if (paletteShortcut(event, input, rememberAndAutosave)) return;
       if (wrapSelectionInControl(event, input, () => {
         resizeInput();
         rememberCellValue();
@@ -2910,17 +2982,20 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // blur commit of the text box ignores the move into the panel.
   function openLinkPanel(control, onFallbackInput) {
     const edit = activeBlockEdit;
-    if (!edit || edit.finishing || edit.textarea !== control || !edit.palette) return;
+    // In a table cell the panel sits inside the table bar, under the buttons.
+    const inCell = Boolean(edit?.selectedCell);
+    const palette = inCell ? edit?.cellPalette : edit?.palette;
+    if (!edit || edit.finishing || (inCell ? edit.tableInput : edit.textarea) !== control || !palette) return;
     if (edit.linkPanel) {
       edit.linkPanel.focusFirst();
       return;
     }
-    edit.palette.closePopover();
+    palette.closePopover();
     const selection = {
       value: String(control.value ?? ""),
       selectionStart: Number(control.selectionStart),
       selectionEnd: Number(control.selectionEnd),
-      scope: "block",
+      scope: inCell ? "cell" : "block",
     };
     const draft = editActions.linkDraft(selection);
     // "restore" is false when the user went back to the text box: its caret and text are theirs.
@@ -2959,13 +3034,16 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       onLeave: () => {
         if (activeBlockEdit === edit) saveBlockEdit();
       },
-      isInsideFrame: (node) => Boolean(node) && (node === edit.element || edit.element.contains(node)),
+      isInsideFrame: (node) => Boolean(node)
+        && (node === edit.element || edit.element.contains(node)
+          || (inCell && Boolean(edit.tableMenu) && edit.tableMenu.contains(node))),
     });
     edit.linkPanel = panel;
     edit.closeLinkPanel = closePanel;
     const textTopBefore = control.getBoundingClientRect?.().top;
-    edit.element.insertBefore(panel.element, control);
-    const shift = keepTextInPlace(edit, textTopBefore);
+    if (inCell) edit.tableMenu.appendChild(panel.element);
+    else edit.element.insertBefore(panel.element, control);
+    const shift = inCell ? 0 : keepTextInPlace(edit, textTopBefore);
     edit.linkPanelShift = shift;
     if (shift > 0) edit.paletteShift = (edit.paletteShift ?? 0) + shift;
     applyAnchor();

@@ -152,3 +152,33 @@ test("wrapSelection ignores a caret, other keys and invalid ranges", () => {
   assert.equal(tools.wrapSelection("abc", 0, 3, "**"), undefined);
   assert.equal(tools.wrapSelection("abc", 2, 9, "*"), undefined);
 });
+
+test("T35: cellSafeEdit escapes unescaped pipes, flattens newlines and moves the selection", () => {
+  const edit = tools.cellSafeEdit("see a|b", {
+    start: 4, end: 7, text: "[a|b](u\nv)", selectionStart: 14, selectionEnd: 14,
+  });
+  assert.equal(edit.text, "[a\\|b](u v)");
+  assert.equal(edit.selectionStart, 15);
+  assert.equal(edit.selectionEnd, 15);
+  assert.equal(edit.start, 4);
+  assert.equal(edit.end, 7);
+});
+
+test("T35: cellSafeEdit leaves escaped pipes and pipe-free text alone, and counts backslashes", () => {
+  const plain = { start: 0, end: 0, text: "**x**", selectionStart: 2, selectionEnd: 3 };
+  assert.deepEqual(tools.cellSafeEdit("", plain), plain);
+  assert.equal(tools.cellSafeEdit("", { ...plain, text: "a\\|b" }).text, "a\\|b");
+  assert.equal(tools.cellSafeEdit("", { ...plain, text: "a\\\\|b" }).text, "a\\\\\\|b");
+  assert.equal(tools.cellSafeEdit("x\\", { ...plain, start: 2, end: 2, text: "|b" }).text, "|b",
+    "a backslash before the insertion already escapes the first pipe");
+  assert.equal(tools.cellSafeEdit("", { ...plain, text: "a\r\nb\rc" }).text, "a b c");
+});
+
+test("T35: cellSafeEdit keeps a selection inside the inserted text on the same characters", () => {
+  const edit = tools.cellSafeEdit("", {
+    start: 0, end: 0, text: "**a|b**", selectionStart: 2, selectionEnd: 5,
+  });
+  assert.equal(edit.text, "**a\\|b**");
+  assert.equal(edit.selectionStart, 2);
+  assert.equal(edit.selectionEnd, 6);
+});

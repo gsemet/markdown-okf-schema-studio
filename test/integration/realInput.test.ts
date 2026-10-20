@@ -259,6 +259,36 @@ async function scenarioTableCellEnter(page: Page, evidence: Evidence): Promise<v
   });
 }
 
+/** RI-T35: Cmd/Ctrl+B in a table cell bolds the selection and Enter saves the cell. */
+async function scenarioTableCellBold(page: Page, evidence: Evidence): Promise<void> {
+  await withSmokeDocument("realinput-t35", async (document) => {
+    await openSidePreview(document);
+    await waitForRender(document);
+    await setEditMode(page, true);
+    await withCurrentFrame(page, (frame) => frame.locator("td").filter({ hasText: /^one$/u }).click());
+    await waitForEditor(page, "[data-sphinx-preview-table-cell-editor] textarea");
+    await press(page, "End");
+    for (let index = 0; index < "one".length; index += 1) await press(page, "Shift+ArrowLeft");
+    await press(page, `${MOD}+b`);
+    await waitFor("the bold shortcut to reach the table cell", async () => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return false;
+      return await current.locator("[data-sphinx-preview-table-cell-editor] textarea").inputValue() === "**one**";
+    });
+    await press(page, "Enter");
+    await waitFor("the bold table cell to reach the source buffer", () =>
+      bufferText(document).includes("| alpha | **one** |"));
+    await waitFor("the table cell editor to close after the re-render", async () => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return false;
+      return await current.locator("[data-sphinx-preview-table-cell-editor]").count() === 0;
+    });
+    await captureAfter(evidence, page, "t35-table-cell-bold",
+      "Edit mode on; the cell `one` was selected, bolded with Cmd/Ctrl+B and saved with Enter. The "
+      + "buffer contains `| alpha | **one** |`.");
+  });
+}
+
 /** RI-T04: one cell edit changes exactly one source line, in a padded and in a compact table. */
 async function scenarioTableMinimalDiff(page: Page, evidence: Evidence): Promise<void> {
   await withDocument("realinput-t04", TABLE_DOCUMENT, async (document) => {
@@ -3560,6 +3590,7 @@ export async function run(): Promise<void> {
     await scenarioCtrlEnterCommit(page, evidence);
     await scenarioArrowNavigation(page, evidence);
     await scenarioTableCellEnter(page, evidence);
+    await scenarioTableCellBold(page, evidence);
     await scenarioTableMinimalDiff(page, evidence);
     await scenarioOpenWithEditor(page, evidence);
     await scenarioFrontmatterValueMinimalPatch(page, evidence);
