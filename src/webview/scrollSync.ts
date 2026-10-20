@@ -1387,8 +1387,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.setState?.(nextState);
   }
 
-  function rememberPendingBlockNavigation(target, caretPosition, selectedCell, explicitIndices) {
+  function rememberPendingBlockNavigation(target, caretPosition, selectedCell, explicitIndices, thenMove) {
     pendingBlockNavigation = {
+      ...(thenMove ? { thenMove } : {}),
       blockId: target.getAttribute("data-sphinx-preview-block") || undefined,
       sourceLine: Number(target.getAttribute("data-sphinx-source-line")),
       caretPosition: typeof caretPosition === "string" ? caretPosition : "end",
@@ -1621,6 +1622,39 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     return true;
   }
 
+  // Cmd+Alt (Ctrl+Alt elsewhere) + Up/Down in the block text box: save the edit, move the block,
+  // reopen the editor on it with the caret where it was. Plain Option/Alt+arrow stays native.
+  // Handled chords are always consumed; a key repeat or a move in flight does nothing.
+  function moveBlockFromEditor(event, control) {
+    const direction = moveChordDirection(event, true);
+    if (!direction) return false;
+    event.preventDefault?.();
+    event.stopPropagation?.();
+    const edit = activeBlockEdit;
+    if (!edit || edit.finishing || event.repeat || blockMoveInFlight) return true;
+    if (edit.selectedCell || edit.insertAfterLine !== undefined || control !== edit.textarea) return true;
+    const target = edit.target;
+    if (!bodyBlockNeighbour(target, direction)) return true;
+    const offset = Number.isSafeInteger(control.selectionStart) ? control.selectionStart : 0;
+    const editedText = edit.textarea.value + (edit.trailingLineEnding || "");
+    if (editedText === edit.originalText && !edit.hasAutosavedChange) {
+      // Nothing to save: close (the host drops the edit) and move at once.
+      closeBlockEdit(true);
+      if (!requestBlockMove(target, direction, "edit", offset)) {
+        openMappedEditor(target, target, { offset }, false);
+      }
+      return true;
+    }
+    rememberPendingBlockNavigation(target, "end", undefined, undefined, { direction, caretOffset: offset });
+    if (!postBlockEditSave(true)) {
+      clearPendingBlockNavigation();
+      if (!requestBlockMove(target, direction, "edit", offset)) {
+        openMappedEditor(target, target, { offset }, false);
+      }
+    }
+    return true;
+  }
+
   function navigateBlockEdit(event, control) {
     const edit = activeBlockEdit;
     if (!edit || edit.finishing) return false;
@@ -1672,7 +1706,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (!supportsTextSelection || typeof control.setSelectionRange !== "function") return;
     const value = String(control.value ?? "");
     let position = caretPosition === "start" ? 0 : value.trimEnd().length;
-    if (caretPosition && typeof caretPosition === "object") {
+    if (caretPosition && typeof caretPosition === "object" && Number.isSafeInteger(caretPosition.offset)) {
+      position = Math.max(0, Math.min(value.length, caretPosition.offset));
+    } else if (caretPosition && typeof caretPosition === "object") {
       const mapped = textEditing.mapRenderedCaret(
         value,
         String(caretPosition.before ?? ""),
@@ -3241,6 +3277,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         return;
       }
       if (keepUndoInControl(event)) return;
+      if (moveBlockFromEditor(event, textarea)) return;
       if (paletteShortcut(event, textarea, () => {
         resizeTextarea();
         autosaveBlockEdit();
@@ -3478,9 +3515,12 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // never mapped blocks (no source attributes) and are rebuilt, not patched, on every toggle.
   let insertPoints = [];
 
+  const insertMoves = new Map();
+
   function removeInsertPoints() {
     insertPoints.forEach((point) => point.remove());
     insertPoints = [];
+    insertMoves.clear();
   }
 
   function propertiesSection() {
@@ -3533,7 +3573,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   }
 
   function postBlockMove(block, neighbour, direction) {
-    if (!editMode || activeBlockEdit || activeFrontmatterEdit) return;
+    if (!editMode || activeBlockEdit || activeFrontmatterEdit) return false;
     const own = blockRange(block);
     const other = blockRange(neighbour);
     const top = (block.closest?.("pre") || block).getBoundingClientRect?.().top;
@@ -3549,9 +3589,111 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       direction,
       ...(Number.isFinite(top) && Math.abs(top) <= 100000 ? { pinViewportTop: top } : {}),
     });
+    return true;
   }
 
+  // The keyboard path (Alt+Up/Down, and the text-box chord): one move at a time. The page keeps
+  // the old block ranges until the render of the move arrives, so a second request in between
+  // (key repeat) would be stale; it is dropped until the result and the render are in.
+  let blockMoveInFlight;
+
+  function clearBlockMoveInFlight() {
+    if (!blockMoveInFlight) return undefined;
+    const flight = blockMoveInFlight;
+    window.clearTimeout(flight.timer);
+    blockMoveInFlight = undefined;
+    return flight;
+  }
+
+  function bodyBlockNeighbour(block, direction) {
+    const body = topLevelMappedBlocks().filter((candidate) =>
+      candidate.getAttribute("data-okf-properties") === null);
+    const index = body.indexOf(block);
+    if (index < 0) return undefined;
+    const neighbour = body[index + (direction === "up" ? -1 : 1)];
+    if (!neighbour || isIncludedBlock(block) || isIncludedBlock(neighbour)) return undefined;
+    return neighbour;
+  }
+
+  function requestBlockMove(block, direction, mode, caretOffset) {
+    if (blockMoveInFlight) return false;
+    const neighbour = bodyBlockNeighbour(block, direction);
+    if (!neighbour || !postBlockMove(block, neighbour, direction)) return false;
+    blockMoveInFlight = {
+      mode,
+      caretOffset,
+      line: blockRange(block).line,
+      version: context.documentVersion,
+      timer: window.setTimeout(() => { blockMoveInFlight = undefined; }, 5000),
+    };
+    return true;
+  }
+
+  function bodyBlockAtLine(line) {
+    return topLevelMappedBlocks().find((block) =>
+      block.getAttribute("data-okf-properties") === null
+      && Number(block.getAttribute("data-sphinx-source-line")) === line);
+  }
+
+  function settleBlockMove(block, flight) {
+    if (!block) return;
+    if (flight.mode === "edit") {
+      openMappedEditor(block, block, { offset: flight.caretOffset }, false);
+      return;
+    }
+    block.setAttribute("tabindex", "-1");
+    block.focus?.({ preventScroll: true });
+  }
+
+  // The move is done and its render is in: focus or edit the block at its new place.
+  function resumeBlockMove() {
+    const flight = blockMoveInFlight;
+    if (!flight || flight.newLine === undefined || context.documentVersion === flight.version) return;
+    if (!editMode) return;
+    clearBlockMoveInFlight();
+    settleBlockMove(bodyBlockAtLine(flight.newLine), flight);
+  }
+
+  function moveChordDirection(event, inEditor) {
+    if (event.isComposing || event.shiftKey || !event.altKey) return undefined;
+    const key = event.key === "ArrowUp" || event.key === "ArrowDown" ? event.key
+      : (!event.key || event.key === "Unidentified" ? event.code : undefined);
+    const direction = key === "ArrowUp" ? "up" : key === "ArrowDown" ? "down" : undefined;
+    if (!direction) return undefined;
+    if (!inEditor) return event.ctrlKey || event.metaKey ? undefined : direction;
+    const apple = isApplePlatform();
+    return (apple ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey)
+      ? direction : undefined;
+  }
+
+  // Alt+Up/Down on a focused block or insertion bar moves the block like its arrow buttons.
+  document.addEventListener("keydown", (event) => {
+    const direction = moveChordDirection(event, false);
+    if (!direction || !editMode || activeBlockEdit || activeFrontmatterEdit) return;
+    const target = event.target;
+    if (!(target instanceof Element)
+      || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+      || target.isContentEditable
+      || target.closest("[data-sphinx-preview-block-editor], [data-okf-properties]")) return;
+    let block = insertMoves.get(target.closest(".sphinx-preview-insert-point"))?.block;
+    if (!block) {
+      const blocks = topLevelMappedBlocks();
+      for (let element = target.closest(mappingsSelector); element; element = element.parentElement) {
+        if (blocks.includes(element)) {
+          block = element;
+          break;
+        }
+      }
+    }
+    if (!block) return;
+    event.preventDefault?.();
+    event.stopPropagation?.();
+    if (event.repeat && blockMoveInFlight) return;
+    requestBlockMove(block, direction, "focus");
+  });
+
   function addMoveButtons(point, move) {
+    insertMoves.set(point, move);
     moveButtonSpecs.forEach((spec) => {
       const neighbour = spec.direction === "up" ? move.previous : move.next;
       const button = document.createElement("button");
@@ -3576,6 +3718,15 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
 
   // A refused move says why next to the bar it came from; a done move re-renders the page.
   function receiveBlockMoveResult(message) {
+    if (message.ok === true) {
+      if (blockMoveInFlight && Number.isSafeInteger(message.line)) {
+        blockMoveInFlight.newLine = message.line;
+        resumeBlockMove();
+      }
+      return;
+    }
+    const flight = clearBlockMoveInFlight();
+    if (flight) settleBlockMove(bodyBlockAtLine(flight.line), flight);
     if (message.ok !== false || typeof message.reason !== "string") return;
     const point = insertPoints.find((candidate) =>
       candidate.getAttribute("data-sphinx-move-pending") === "true");
@@ -3937,6 +4088,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     );
     clearPendingBlockNavigation();
     if (!target) return;
+    const then = pending.thenMove;
+    if (then && (then.direction === "up" || then.direction === "down")
+      && Number.isSafeInteger(then.caretOffset)) {
+      if (!requestBlockMove(target, then.direction, "edit", then.caretOffset)) {
+        openMappedEditor(target, target, { offset: then.caretOffset }, false);
+      }
+      return;
+    }
     const caretPosition = pending.caretPosition === "start" ? "start" : "end";
     const table = target.closest?.("table");
     const cell = table?.rows?.[pending.tableRowIndex]?.cells?.[pending.tableColumnIndex];
@@ -3977,7 +4136,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       // The startup scan of the link navigation already covered the first content.
       linkNavigation.rescan();
     }
-    if (hasRenderedPreview()) resumePendingBlockNavigation();
+    if (hasRenderedPreview()) {
+      resumePendingBlockNavigation();
+      resumeBlockMove();
+    }
     resumePendingFrontmatterEdit();
     document.querySelectorAll("details").forEach((element) => {
       if (initializedDetails.has(element)) return;

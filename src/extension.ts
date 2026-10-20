@@ -1779,7 +1779,7 @@ function handleLabelRename(preview: ActivePreview, message: RegisteredPreviewMes
 function postBlockMoveResult(
   preview: ActivePreview,
   message: RegisteredPreviewMessage,
-  result: { ok: true } | { ok: false; reason: string },
+  result: { ok: true; line: number } | { ok: false; reason: string },
 ): void {
   void preview.panel.webview.postMessage({
     type: "previewBlockMoveResult",
@@ -1850,12 +1850,13 @@ function handleBlockMove(preview: ActivePreview, message: RegisteredPreviewMessa
       return;
     }
     // The moved block keeps its screen position: pin its new first line at the viewport top it had.
+    const newLine = movesDown ? plan.newStartLine : plan.newSecondStartLine;
     storePendingPin(preview, {
       documentId: message.documentId,
-      pinLine: movesDown ? plan.newStartLine : plan.newSecondStartLine,
+      pinLine: newLine,
       pinViewportTop: message.pinViewportTop as number | undefined,
     }, document.version);
-    postBlockMoveResult(preview, message, { ok: true });
+    postBlockMoveResult(preview, message, { ok: true, line: newLine });
   }, (error: unknown) => {
     postBlockMoveResult(preview, message, {
       ok: false,

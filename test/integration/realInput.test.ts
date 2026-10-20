@@ -206,6 +206,67 @@ async function scenarioCtrlEnterCommit(page: Page, evidence: Evidence): Promise<
   });
 }
 
+/** T37: Alt+Up/Down on a focused block, and Cmd/Ctrl+Alt+Up/Down inside its text box. */
+async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Promise<void> {
+  const document3 = (order: string[]): string =>
+    ["# Move keys", "", ...order.flatMap((name) => [name.includes(" ") ? name : name + " paragraph.", ""])].join("\n");
+  await withDocument("realinput-move-keys", document3(["Alpha", "Beta", "Gamma"]), async (document) => {
+    await openSidePreview(document);
+    await waitForRender(document);
+    await setEditMode(page, true);
+    const activeText = (): Promise<string> => withCurrentFrame(page, (frame) =>
+      frame.evaluate(() => window.document.activeElement?.textContent ?? ""));
+    const expectOrder = async (order: string[], description: string): Promise<void> => {
+      await waitFor(description, () => bufferText(document) === document3(order));
+      await waitForRender(document);
+      await waitForNoBlockEditor(page, "no block editor after " + description);
+    };
+    // Focus the down arrow of Alpha's bar, then Alt+Down twice: each move waits for the render.
+    await withCurrentFrame(page, (frame) =>
+      frame.locator("[data-sphinx-insert-after-line] button[data-sphinx-move='down']").nth(1).focus());
+    await press(page, "Alt+ArrowDown");
+    await expectOrder(["Beta", "Alpha", "Gamma"], "the first Alt+Down to move Alpha below Beta");
+    await waitFor("the focus to follow Alpha", async () => (await activeText()).includes("Alpha"));
+    await press(page, "Alt+ArrowDown");
+    await expectOrder(["Beta", "Gamma", "Alpha"], "the second Alt+Down to move Alpha below Gamma");
+    await waitFor("the focus to stay on Alpha", async () => (await activeText()).includes("Alpha"));
+    // One undo step per move.
+    await captureAfter(evidence, page, "move-keys-01-alt-down",
+      "Edit mode on; Alt+Down was pressed twice on Alpha's block: the order is Beta, Gamma, Alpha.");
+
+    // In the text box: the chord saves, moves, and reopens on the block with the caret in place.
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Beta paragraph." }).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    await press(page, "Home");
+    await press(page, "ArrowRight");
+    await press(page, "ArrowRight");
+    await typeText(page, "!");
+    await press(page, MOD + "+Alt+ArrowDown");
+    await waitFor("the chord to save the edit and move the block", () =>
+      bufferText(document) === document3(["Gamma", "Be!ta paragraph.", "Alpha"]));
+    await waitForRender(document);
+    await waitFor("the editor to reopen on the moved block with the caret after `Be!`", async () => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return false;
+      const value = await current.locator("[data-sphinx-preview-block-editor] textarea")
+        .evaluateAll((areas) => areas.map((area) => (area as HTMLTextAreaElement).value));
+      const caret = await focusedCaret(current);
+      return value.length === 1 && value[0].startsWith("Be!ta paragraph.") && caret?.start === 3 && caret.end === 3;
+    });
+    await press(page, MOD + "+Alt+ArrowUp");
+    await waitFor("the chord to move the block back up", () =>
+      bufferText(document) === document3(["Be!ta paragraph.", "Gamma", "Alpha"]));
+    await waitForRender(document);
+    // Plain Alt+Arrow in the text box is not a move (macOS: word navigation).
+    const before = bufferText(document);
+    await press(page, "Alt+ArrowDown");
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    assert.equal(bufferText(document), before, "plain Alt+Arrow moved nothing");
+    await captureAfter(evidence, page, "move-keys-02-chord",
+      "The Cmd/Ctrl+Alt chord saved `Be!ta`, moved the block down and back up; the editor stays open on it.");
+  });
+}
+
 async function scenarioArrowNavigation(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-s3", async (document) => {
     await openSidePreview(document);
@@ -3623,6 +3684,7 @@ export async function run(): Promise<void> {
     await scenarioReadableLinkDiagnostics(page, evidence);
     await scenarioInsertBlocksFromPreview(page, evidence);
     await scenarioInsertAfterFinalFigure(page, evidence);
+    await scenarioBlockMoveKeys(page, evidence);
     await scenarioImageEditing(page, evidence);
     await scenarioFocusChangeKeepsPreviewStill(page, evidence);
     await scenarioHiddenPreviewCatchesUp(page, evidence);

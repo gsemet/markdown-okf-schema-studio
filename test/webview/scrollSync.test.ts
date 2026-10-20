@@ -5081,6 +5081,164 @@ test("T36: a refused move says why next to the bar; a result of another context 
   assert.equal(statusOf()?.getAttribute("role"), "status");
 });
 
+// T37: Alt+Up/Down moves the focused block; Cmd/Ctrl+Alt+Up/Down moves it from the text box.
+const MOVE_IDENTIFIERS = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+
+function moveMessages(harness: RuntimeHarness, from = 0): Array<Record<string, unknown>> {
+  return harness.messages.slice(from).filter((message) => message.type === "previewBlockMove");
+}
+
+function altKey(key: string, extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return { key, altKey: true, preventDefault: () => undefined, stopPropagation: () => undefined, ...extra };
+}
+
+function openMoveTextarea(harness: RuntimeHarness, original: string): RuntimeElement {
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource", ...MOVE_IDENTIFIERS, editId: harness.messages.at(-1)?.editId, originalText: original,
+  });
+  return harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
+}
+
+test("T37: Alt+ArrowDown on a focused block and Alt+ArrowUp on its bar button post the move", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  let prevented = 0;
+  const handled = altKey("ArrowDown", { target: harness.mappings[1], preventDefault: () => { prevented += 1; } });
+  harness.dispatchDocument("keydown", handled);
+  const moves = moveMessages(harness, before);
+  assert.equal(moves.length, 1);
+  assert.deepEqual(
+    [moves[0].line, moves[0].endLine, moves[0].neighbourLine, moves[0].neighbourEndLine, moves[0].direction],
+    [50, 52, 100, 100, "down"],
+  );
+  assert.equal(prevented, 1);
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: false, reason: "no" });
+  const button = insertPointAfterLine(harness, 52).childElements[0];
+  harness.dispatchDocument("keydown", altKey("ArrowUp", { target: button }));
+  const up = moveMessages(harness, before).at(-1)!;
+  assert.deepEqual([up.line, up.neighbourLine, up.direction], [50, 1, "up"]);
+});
+
+test("T37: other chords and other targets do not move a block", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  const target = harness.mappings[1];
+  harness.dispatchDocument("keydown", { key: "ArrowDown", target, preventDefault: () => undefined });
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target, ctrlKey: true }));
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target, metaKey: true }));
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target, shiftKey: true }));
+  harness.dispatchDocument("keydown", altKey("ArrowLeft", { target }));
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target: harness.createdElements[0] }));
+  harness.dispatchDocument("keydown", altKey("ArrowUp", { target: harness.mappings[0] }));
+  assert.deepEqual(moveMessages(harness, before), []);
+});
+
+test("T37: a key repeat during the round trip does not move twice; the block takes the focus", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  const target = harness.mappings[1];
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target }));
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target, repeat: true }));
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target, repeat: true }));
+  assert.equal(moveMessages(harness, before).length, 1);
+  // The result arrives before the render: still no second move.
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: true, line: 100 });
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target, repeat: true }));
+  assert.equal(moveMessages(harness, before).length, 1);
+  assert.equal((harness.mappings[2] as RuntimeElement).focusOptions === undefined, true);
+  harness.dispatchMessage(patchMessage());
+  assert.equal((harness.mappings[2] as RuntimeElement).focusOptions?.preventScroll, true, "the moved block has the focus");
+  assert.equal(harness.mappings[2].getAttribute("tabindex"), "-1");
+  harness.dispatchDocument("keydown", altKey("ArrowUp", { target: harness.mappings[2] }));
+  assert.equal(moveMessages(harness, before).length, 2, "once the render is in, the next move goes through");
+});
+
+test("T37: a refused keyboard move can be retried", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const target = harness.mappings[1];
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target }));
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: false, reason: "no" });
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target }));
+  assert.equal(moveMessages(harness).length, 2);
+});
+
+test("T37: plain Alt+Arrow in the text box stays native; the shortcut chord is the only one handled", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.value = "Current block, changed\n";
+  textarea.dispatch("input");
+  const before = harness.messages.length;
+  let prevented = false;
+  textarea.dispatch("keydown", altKey("ArrowDown", { preventDefault: () => { prevented = true; } }));
+  textarea.dispatch("keydown", altKey("ArrowDown", { metaKey: true, preventDefault: () => { prevented = true; } }));
+  assert.equal(prevented, false);
+  assert.equal(harness.messages.length, before);
+});
+
+test("T37: Ctrl+Alt+ArrowDown saves, moves, then reopens the editor with the caret in place", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.value = "Current block, changed\n";
+  textarea.dispatch("input");
+  textarea.setSelectionRange(7, 7);
+  const before = harness.messages.length;
+  let prevented = false;
+  textarea.dispatch("keydown", altKey("ArrowDown", { ctrlKey: true, preventDefault: () => { prevented = true; } }));
+  assert.equal(prevented, true);
+  const save = harness.messages.slice(before).find((message) => message.type === "previewEditSave");
+  assert.equal(save?.final, true);
+  assert.deepEqual(moveMessages(harness, before), [], "the move waits for the saved render");
+  // A repeat while the save is in flight does nothing.
+  textarea.dispatch("keydown", altKey("ArrowDown", { ctrlKey: true, repeat: true }));
+  assert.equal(harness.messages.slice(before).filter((m) => m.type === "previewEditSave").length, 1);
+  harness.dispatchMessage(patchMessage());
+  const moves = moveMessages(harness, before);
+  assert.equal(moves.length, 1);
+  assert.deepEqual([moves[0].line, moves[0].neighbourLine, moves[0].direction], [50, 100, "down"]);
+  assert.equal(moves[0].documentVersion, 8);
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...NEXT_IDENTIFIERS, ok: true, line: 100 });
+  assert.equal(
+    harness.messages.slice(before).some((message) => message.type === "previewEditOpen"),
+    false, "the editor waits for the render of the move",
+  );
+  harness.dispatchMessage(patchMessage({
+    documentVersion: 8, requestId: 12, next: { documentVersion: 9, requestId: 13 },
+  }));
+  const open = harness.messages.slice(before).find((message) => message.type === "previewEditOpen");
+  assert.ok(open, "the editor reopens on the moved block");
+  assert.equal(open.line, 100);
+  harness.dispatchMessage({
+    type: "previewEditSource", documentId: "file:///active.md", documentVersion: 9, requestId: 13,
+    editId: open.editId, originalText: "Current block, changed\n",
+  });
+  const reopened = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
+  assert.notEqual(reopened, textarea);
+  assert.deepEqual(reopened.selectionRange, [7, 7], "the caret is where it was");
+});
+
+test("T37: on macOS the chord is Cmd+Alt, and Ctrl+Alt does nothing special", () => {
+  const harness = createRuntimeHarness({ platform: "MacIntel", savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.value = "Current block, changed\n";
+  textarea.dispatch("input");
+  const before = harness.messages.length;
+  textarea.dispatch("keydown", altKey("ArrowUp", { ctrlKey: true }));
+  assert.equal(harness.messages.length, before);
+  textarea.dispatch("keydown", altKey("ArrowUp", { metaKey: true }));
+  assert.equal(harness.messages.slice(before).find((message) => message.type === "previewEditSave")?.final, true);
+});
+
+test("T37: with nothing to save the chord closes the editor and moves at once", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.setSelectionRange(3, 3);
+  const before = harness.messages.length;
+  textarea.dispatch("keydown", altKey("ArrowUp", { ctrlKey: true }));
+  const sent = harness.messages.slice(before).map((message) => message.type);
+  assert.deepEqual(sent, ["previewEditCancel", "previewBlockMove"]);
+});
+
 test("T28: a render that starts in edit mode builds the insertion points at init", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   assert.equal(insertPointsOf(harness).length, 3);

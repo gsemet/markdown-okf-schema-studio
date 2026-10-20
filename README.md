@@ -37,6 +37,7 @@ Markdown flavours and extensions:
   keyboard navigation, row creation, and focused field editing.
   The "+" bar under a body block also has up and down arrows that swap the block above the bar
   with its neighbour in one undo step; blocks from an included file are not moved.
+  Alt+Up/Down moves the focused block; Cmd/Ctrl+Alt+Up/Down does it from the block text box.
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
   An edition palette above the text box adds headings, bold, italic, strikethrough, inline code,
