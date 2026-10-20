@@ -43,7 +43,9 @@ Markdown flavours and extensions:
   table column alignment and `<kbd>` keys; MyST mode adds admonitions with a type list,
   definition lists, math (inline, display, aligned), subscript, superscript, `(name)=` labels,
   `{ref}` and `{doc}` references, `{cite}` citations from the workspace `.bib` files, dropdowns,
-  tables with a caption, figures and `{kbd}` keys.
+  tables with a caption, figures and `{kbd}` keys. In edit mode, hovering a figure shows Edit figure
+  (or press Figure with the caret in a `{figure}`): a form edits the source (with Browse), alt text,
+  caption, legend, width, alignment and name, and leaves every other option as it was.
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)
   annotations can show target metadata and source line numbers for implementation
   and test evidence.

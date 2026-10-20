@@ -930,6 +930,101 @@ async function scenarioLinkPanel(page: Page, evidence: Evidence): Promise<void> 
   });
 }
 
+const FIGURE_DOCUMENT = [
+  "# Figure document",
+  "",
+  ":::{figure} images/chip.svg",
+  ":alt: A chip",
+  ":width: 60%",
+  ":class: with-border",
+  "",
+  "The chip.",
+  ":::",
+  "",
+  "After the figure.",
+  "",
+].join("\n");
+
+const FIGURE_IMAGE = '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60"><rect width="120" height="60" fill="#789"/></svg>\n';
+
+/** RI-T32: the Edit figure button opens the form; Apply rewrites the directive, undo restores it, Cmd/Ctrl+Enter saves. */
+async function scenarioFigureEditor(page: Page, evidence: Evidence): Promise<void> {
+  const fixture = createFixture("realinput-t32", { "smoke.md": FIGURE_DOCUMENT, "images/chip.svg": FIGURE_IMAGE });
+  try {
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("smoke.md")));
+    try {
+      await openSidePreview(document);
+      await waitForRender(document);
+      await setEditMode(page, true);
+      const count = async (selector: string): Promise<number> => {
+        const current = await findCurrentFrame(page);
+        return current === undefined ? -1 : current.locator(selector).count();
+      };
+      const readText = async (): Promise<string | undefined> => {
+        const current = await findCurrentFrame(page);
+        if (current === undefined || await current.locator("[data-sphinx-preview-block-editor] textarea[aria-label='Raw Markdown block']").count() !== 1) return undefined;
+        return current.locator("[data-sphinx-preview-block-editor] textarea[aria-label='Raw Markdown block']").inputValue();
+      };
+      const original = FIGURE_DOCUMENT.split("\n").slice(2, 9).join("\n");
+
+      await withCurrentFrame(page, (frame) => frame.locator("figure").first().hover());
+      await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-figure-edit]").click());
+      await waitFor("the figure form", async () => await count("[role='dialog'][aria-label='Edit figure']") === 1);
+      assert.equal(await readText(), original, "the text box shows the directive");
+
+      // Change the width and the caption in the form, like a user: select the field, type.
+      await withCurrentFrame(page, (frame) => frame.locator("[data-figure-field='width']").click({ clickCount: 3 }));
+      await typeText(page, "40%");
+      await withCurrentFrame(page, (frame) => frame.locator("[data-figure-field='caption']").click({ clickCount: 3 }));
+      await typeText(page, "The chip, seen from above.");
+      await withCurrentFrame(page, (frame) => frame.locator("[data-figure-action='apply']").click());
+      const edited = original.replace(":width: 60%", ":width: 40%").replace("The chip.", "The chip, seen from above.");
+      try {
+        await waitFor("Apply to rewrite the directive", async () => (await readText()) === edited);
+      } catch (error) {
+        const current = await findCurrentFrame(page);
+        const state = current === undefined ? undefined : await current.evaluate(() => ({
+          text: globalThis.document.querySelector<HTMLTextAreaElement>("textarea[aria-label='Raw Markdown block']")?.value,
+          width: globalThis.document.querySelector<HTMLInputElement>("[data-figure-field='width']")?.value,
+          caption: globalThis.document.querySelector<HTMLTextAreaElement>("[data-figure-field='caption']")?.value,
+          errors: Array.from(globalThis.document.querySelectorAll("[data-figure-error]")).map((node) => node.textContent),
+          dialogs: globalThis.document.querySelectorAll("[role='dialog']").length,
+        }));
+        throw new Error(String(error) + " Editor state: " + JSON.stringify(state));
+      }
+      assert.equal(await count("[role='dialog']"), 0, "the form closed");
+
+      // One undo restores the whole directive.
+      await press(page, MOD + "+z");
+      await waitFor("one undo to restore the directive", async () => (await readText()) === original);
+
+      // Close the editor, open it again through the button, apply and save with Cmd/Ctrl+Enter.
+      await press(page, "Escape");
+      await waitForNoBlockEditor(page, "the block editor to close after Escape");
+      await waitFor("the document to be unchanged", () => bufferText(document) === FIGURE_DOCUMENT);
+      await withCurrentFrame(page, (frame) => frame.locator("figure").first().hover());
+      await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-figure-edit]").click());
+      await waitFor("the figure form again", async () => await count("[role='dialog'][aria-label='Edit figure']") === 1);
+      await withCurrentFrame(page, (frame) => frame.locator("[data-figure-field='width']").click({ clickCount: 3 }));
+      await typeText(page, "40%");
+      await press(page, "Enter");
+      await waitFor("the width to change", async () => (await readText())?.includes(":width: 40%") === true);
+      await press(page, MOD + "+Enter");
+      const expected = FIGURE_DOCUMENT.replace(":width: 60%", ":width: 40%");
+      await waitFor("the saved figure in the source buffer", () => bufferText(document) === expected);
+      await waitForNoBlockEditor(page, "the block editor to close after Cmd/Ctrl+Enter");
+      await captureAfter(evidence, page, "t32-figure-editor",
+        "Edit mode on; hovering the figure showed Edit figure, the form changed the width and the caption "
+        + "in one undoable edit, and a second round saved :width: 40% with every other line untouched.");
+    } finally {
+      await leaveEditModeOff();
+      await closeAllEditors();
+    }
+  } finally {
+    fixture.dispose();
+  }
+}
+
 /** RI-T25: the Alert button writes a GitHub alert and its type list changes it; undo steps back. */
 async function scenarioAlertDropdown(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t25", async (source) => {
@@ -3475,6 +3570,7 @@ export async function run(): Promise<void> {
     await scenarioPalette(page, evidence);
     await scenarioLinkPanel(page, evidence);
     await scenarioAlertDropdown(page, evidence);
+    await scenarioFigureEditor(page, evidence);
     await scenarioPreviewKeepsMarkdown(page, evidence);
     await scenarioCaretAtClick(page, evidence);
     await scenarioEditAffordances(page, evidence);

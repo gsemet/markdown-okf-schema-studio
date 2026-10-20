@@ -74,6 +74,11 @@ export interface EditAction {
    */
   panel?: string;
   /**
+   * With the caret inside syntax that already exists (`figure`: a `{figure}` directive or a lone
+   * Markdown image), the button opens the panel of that name instead of running its own action.
+   */
+  panelWhenInside?: "figure";
+  /**
    * The button and the shortcut first run `apply` without an argument, then open the popover at
    * the caret; choosing an option runs `apply` again with it (the Alert button inserts the alert,
    * then the dropdown changes its type).
@@ -1658,12 +1663,13 @@ export function createEditActions(
     {
       id: "figure",
       label: "Figure",
-      title: "Figure (pick an image file; MyST directive with a caption)",
+      title: "Figure (pick an image file; with the caret in a figure, edit it)",
       icon: "figure",
       group: "myst",
       modes: ["myst"],
       scopes: ["block"],
       hostDialog: "image",
+      panelWhenInside: "figure",
       apply: insertFigure,
     },
     {

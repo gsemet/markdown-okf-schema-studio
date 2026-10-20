@@ -8569,3 +8569,248 @@ test("T31: Done saves while the file dialog is still open, so the editor is neve
   textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
   assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), true);
 });
+
+// T32: the figure editor (form above the text box, palette Figure inside a figure, hover button).
+const figureSource = [
+  ":::{figure} images/chip.png",
+  ":alt: A chip",
+  ":width: 60%",
+  ":class: with-border",
+  "",
+  "The chip.",
+  ":::",
+].join("\n");
+
+function figureHarness(source: string, caret: number) {
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: source + "\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA")!;
+  assert.ok(textarea);
+  textarea.setSelectionRange(caret, caret);
+  const calls = stubExecCommand(harness, textarea);
+  return { harness, textarea, calls };
+}
+
+function figurePanelOf(harness: RuntimeHarness): RuntimeElement | undefined {
+  return harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-figure-panel") !== null && !element.removed);
+}
+
+function figureField(harness: RuntimeHarness, name: string): RuntimeElement {
+  const field = harness.createdElements.find((element) =>
+    element.getAttribute("data-figure-field") === name && !element.removed);
+  assert.ok(field, "figure field " + name);
+  return field;
+}
+
+function figureAction(harness: RuntimeHarness, name: string): RuntimeElement {
+  const button = harness.createdElements.find((element) =>
+    element.getAttribute("data-figure-action") === name && !element.removed);
+  assert.ok(button, "figure action " + name);
+  return button;
+}
+
+test("T32: the Figure button with the caret inside a figure opens the form, not the file dialog", () => {
+  const { harness, textarea } = figureHarness(figureSource, 5);
+  const before = harness.messages.length;
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewPickImage"), false);
+  const panel = figurePanelOf(harness);
+  assert.ok(panel, "the form opens");
+  const frame = textarea.parentElement!;
+  assert.equal(panel.parentElement, frame);
+  assert.equal(frame.childElements.indexOf(panel), frame.childElements.indexOf(paletteOf(harness)!) + 1);
+  assert.equal(figureField(harness, "source").value, "images/chip.png");
+  assert.equal(figureField(harness, "alt").value, "A chip");
+  assert.equal(figureField(harness, "width").value, "60%");
+  assert.equal(figureField(harness, "caption").value, "The chip.");
+  assert.equal(figureField(harness, "align").value, "");
+});
+
+test("T32: the Figure button outside any figure still picks an image", () => {
+  const { harness } = figureHarness("Just a paragraph.\n\n" + figureSource, 3);
+  const before = harness.messages.length;
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewPickImage"), true);
+  assert.equal(figurePanelOf(harness), undefined);
+});
+
+test("T32: Apply rewrites the directive in one edit and keeps untouched options byte for byte", () => {
+  const { harness, textarea, calls } = figureHarness(figureSource, 5);
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  figureField(harness, "width").value = "300px";
+  figureField(harness, "caption").value = "The chip, from above.";
+  figureField(harness, "align").value = "center";
+  figureAction(harness, "apply").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(calls.length, 1, "one native edit, so one undo step");
+  assert.equal(calls[0].command, "insertText");
+  assert.equal(textarea.value, [
+    ":::{figure} images/chip.png",
+    ":alt: A chip",
+    ":width: 300px",
+    ":class: with-border",
+    ":align: center",
+    "",
+    "The chip, from above.",
+    ":::",
+  ].join("\n"));
+  assert.equal(figurePanelOf(harness), undefined, "the form closes");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true", "the editor stays open");
+});
+
+test("T32: Apply without a change writes nothing", () => {
+  const { harness, textarea, calls } = figureHarness(figureSource, 5);
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  figureAction(harness, "apply").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(calls.length, 0);
+  assert.equal(textarea.value, figureSource);
+  assert.equal(figurePanelOf(harness), undefined);
+});
+
+test("T32: an invalid width shows an inline error and keeps the form open without editing", () => {
+  const { harness, textarea, calls } = figureHarness(figureSource, 5);
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  figureField(harness, "width").value = "wide";
+  figureAction(harness, "apply").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(calls.length, 0);
+  assert.ok(figurePanelOf(harness), "still open");
+  const error = harness.createdElements.find((element) =>
+    element.getAttribute("data-figure-error") === "width")!;
+  assert.equal(error.hidden, false);
+  assert.match(error.textContent, /px, %, em or rem/u);
+  assert.equal(textarea.value, figureSource);
+  figureField(harness, "width").value = "40%";
+  figureAction(harness, "apply").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(calls.length, 1);
+  assert.match(textarea.value, /:width: 40%/u);
+});
+
+test("T32: focus moves inside the editor frame keep the editor open; leaving it saves", () => {
+  const { harness, textarea } = figureHarness(figureSource, 5);
+  textarea.value = figureSource + "\nmore";
+  textarea.dispatch("input");
+  textarea.setSelectionRange(5, 5);
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  const saved = () => harness.messages.some((message) => message.type === "previewEditSave" && message.final === true);
+  figureField(harness, "alt").dispatch("blur", { relatedTarget: figureField(harness, "width") });
+  figureField(harness, "width").dispatch("blur", { relatedTarget: textarea });
+  assert.equal(saved(), false);
+  figureField(harness, "width").dispatch("blur", { relatedTarget: null });
+  assert.equal(saved(), true);
+});
+
+test("T32: Escape in the form closes it and gives the focus back to the text box", () => {
+  const { harness, textarea, calls } = figureHarness(figureSource, 5);
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  let prevented = false;
+  figureField(harness, "alt").dispatch("keydown", { key: "Escape", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(figurePanelOf(harness), undefined);
+  assert.equal(calls.length, 0);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.deepEqual(textarea.selectionRange, [5, 5]);
+});
+
+test("T32: Browse asks the host for an image, keeps the editor open, and fills Source", () => {
+  const { harness, textarea } = figureHarness(figureSource, 5);
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  figureAction(harness, "browse").dispatch("click", { preventDefault: () => undefined });
+  const request = harness.messages.at(-1)!;
+  assert.equal(request.type, "previewPickImage");
+  figureField(harness, "source").dispatch("blur", { relatedTarget: null });
+  textarea.dispatch("blur");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), false);
+  harness.dispatchMessage({
+    type: "previewPickImageResult", editId: request.editId, ok: true, path: "img/other.png",
+    documentVersion: 99, requestId: 99,
+  });
+  assert.equal(figureField(harness, "source").value, "img/other.png");
+  assert.ok(figurePanelOf(harness));
+  figureAction(harness, "apply").dispatch("click", { preventDefault: () => undefined });
+  assert.match(textarea.value, /^:::\{figure\} img\/other\.png\n/u);
+});
+
+test("T32: typing in the text box closes the form", () => {
+  const { harness, textarea } = figureHarness(figureSource, 5);
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  textarea.dispatch("input");
+  assert.equal(figurePanelOf(harness), undefined);
+});
+
+test("T32: a Markdown image alone in its paragraph converts to a figure", () => {
+  const { harness, textarea, calls } = figureHarness("![A chip](images/chip.png)", 4);
+  paletteButton(harness, "figure").dispatch("click", paletteClick);
+  assert.ok(figurePanelOf(harness));
+  assert.equal(figureField(harness, "alt").value, "A chip");
+  assert.equal(figureAction(harness, "apply").textContent, "Convert to figure");
+  figureField(harness, "caption").value = "Top view.";
+  figureAction(harness, "apply").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(calls.length, 1);
+  assert.equal(textarea.value, ":::{figure} images/chip.png\n:alt: A chip\n\nTop view.\n:::");
+});
+
+function hoverFigure(harness: RuntimeHarness): RuntimeElement {
+  const figure = new RuntimeElement({
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+    "data-sphinx-source-end-line": "26",
+  }, harness.windowState, 100, 80, "figure");
+  harness.dispatchDocument("mouseover", { target: figure });
+  return figure;
+}
+
+function editFigureButton(harness: RuntimeHarness): RuntimeElement | undefined {
+  return harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-figure-edit") !== null);
+}
+
+test("T32: hovering a figure in edit mode shows Edit figure; outside edit mode it does not", () => {
+  const off = createRuntimeHarness();
+  hoverFigure(off);
+  assert.equal(editFigureButton(off), undefined);
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  const figure = hoverFigure(harness);
+  const button = editFigureButton(harness)!;
+  assert.ok(button);
+  assert.equal(button.getAttribute("hidden"), null);
+  let prevented = false;
+  button.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true, "a press does not move the focus");
+  // Moving from the figure onto the button is not leaving the figure.
+  harness.dispatchDocument("mouseout", { target: figure, relatedTarget: button });
+  assert.equal(button.getAttribute("hidden"), null);
+  harness.dispatchDocument("mouseout", { target: figure, relatedTarget: harness.body });
+  assert.notEqual(button.getAttribute("hidden"), null);
+});
+
+test("T32: Edit figure opens the block editor and, once the source arrives, the form", () => {
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
+  harness.editModeButton.dispatch("click");
+  const figure = hoverFigure(harness);
+  editFigureButton(harness)!.dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined });
+  const open = harness.messages.at(-1)!;
+  assert.equal(open.type, "previewEditOpen");
+  assert.equal(open.line, 20);
+  assert.equal(figure.getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(figurePanelOf(harness), undefined, "nothing before the source arrives");
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: open.editId,
+    originalText: figureSource + "\n",
+  });
+  assert.ok(figurePanelOf(harness), "the form opens with the editor");
+  assert.equal(figureField(harness, "source").value, "images/chip.png");
+});
