@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- The edition palette gets an Image button in every mode and a Figure button in MyST mode. Both
+  open the system file dialog in the document's folder. Image writes `![name](path)` with the
+  name selected; Figure writes `:::{figure} path`, `:alt: name` and an empty caption line (the
+  selected lines become the caption). The path is relative with `/` separators, in `<…>` when it
+  has spaces or parentheses. The block editor stays open while the dialog is shown; Cancel changes
+  nothing. Files outside the workspace folders, on another drive, or that are not png, jpeg, gif,
+  webp or svg are refused, and so is a read-only or untrusted preview.
 - The edition palette gets six more MyST buttons. Reference lists the `(label)=` names of the
   document (with the heading or text after each) and writes `` {ref}`label` ``; with text
   selected it writes `` {ref}`text <label>` ``. Document link opens the system file dialog and

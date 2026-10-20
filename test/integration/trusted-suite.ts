@@ -12,6 +12,7 @@ import { run as runCheckboxToggle } from "./checkboxToggle.test";
 import { run as runDirtySnapshots } from "./dirtySnapshots.test";
 import { run as runGenericMarkdown } from "./genericMarkdown.test";
 import { run as runPreviewEditing } from "./previewEditing.test";
+import { run as runImagePicker } from "./imagePicker.test";
 import { run as runIncomingChanges } from "./incomingChanges.test";
 import { run as runLabelRename } from "./labelRename.test";
 import { run as runMystPickers } from "./mystPickers.test";
@@ -105,6 +106,7 @@ export async function run(): Promise<void> {
   await runPaletteMode();
   await runLabelRename();
   await runMystPickers();
+  await runImagePicker();
   await runIncomingChanges();
   await runGenericMarkdown();
   await runDirtySnapshots();

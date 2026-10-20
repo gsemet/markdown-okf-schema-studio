@@ -119,7 +119,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   const gfmReal = gfm.filter((id) => id !== "gfmOnly");
   assert.deepEqual(myst, [
     ...gfmReal, "admonition", "deflist", "math", "sub", "sup", "label",
-    "ref", "doc", "cite", "dropdown", "tableCaption", "roleKbd", "gfmOnly", "mystOnly",
+    "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd", "gfmOnly", "mystOnly",
   ]);
 });
 
@@ -772,4 +772,18 @@ test("T30: Document asks the host for a file and inserts the path; a cancelled p
   done!(undefined);
   assert.equal(h.edits.length, 1);
   assert.ok(h.textbox.focused > before, "the focus goes back to the text box");
+});
+
+test("T31: Image asks the host for an image file and inserts the reference; a failed pick inserts nothing", () => {
+  let done: ((value: string | undefined) => void) | undefined;
+  let asked = "";
+  const h = openHost({ value: "see ", caret: 4, pickHost: (kind, callback) => { asked = kind; done = callback; } });
+  button(h.root, "image").dispatch("click", click);
+  assert.equal(asked, "image");
+  done!("img/logo.png");
+  assert.equal(h.textbox.value, "see ![logo](img/logo.png)");
+  button(h.root, "figure").dispatch("click", click);
+  assert.equal(asked, "image");
+  done!(undefined);
+  assert.equal(h.edits.length, 1);
 });

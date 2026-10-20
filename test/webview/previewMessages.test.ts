@@ -129,7 +129,7 @@ test("previewLabelRename validates the line and both label names", () => {
 });
 
 test("T30: the list and pick messages carry an edit id and no other payload", () => {
-  for (const type of ["previewListTargets", "previewListCitations", "previewPickDocument"]) {
+  for (const type of ["previewListTargets", "previewListCitations", "previewPickDocument", "previewPickImage"]) {
     const base = { type, documentId: "doc", documentVersion: 1, requestId: 1, editId: "host-1" };
     assert.equal(isRegisteredPreviewMessage(base), true, type);
     assert.equal(isRegisteredPreviewMessage({ ...base, editId: "" }), false, type);

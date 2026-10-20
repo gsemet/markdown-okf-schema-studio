@@ -84,8 +84,11 @@ export interface EditAction {
    * `citations`: keys of the workspace `.bib` files); the chosen value becomes `ctx.arg`.
    */
   hostList?: "targets" | "citations";
-  /** The button asks the host for a native dialog (`document`: an open dialog); the answer is `ctx.arg`. */
-  hostDialog?: "document";
+  /**
+   * The button asks the host for a native open dialog (`document`: a Markdown file, `image`: an
+   * image file); the answer, a path relative to the document, is `ctx.arg`.
+   */
+  hostDialog?: "document" | "image";
   apply(ctx: EditActionContext): TextEdit | undefined;
 }
 
@@ -1125,6 +1128,59 @@ export function createEditActions(
     return { start: ctx.selectionStart, end: ctx.selectionEnd, text, selectionStart: caret, selectionEnd: caret };
   }
 
+  /** The file stem of a picked path, without the characters that would break `![alt]`. */
+  function imageName(imagePath: string): string {
+    const file = imagePath.slice(imagePath.lastIndexOf("/") + 1);
+    const dot = file.lastIndexOf(".");
+    const stem = (dot > 0 ? file.slice(0, dot) : file).replace(/[\[\]\\]/gu, "").trim();
+    return stem === "" ? "image" : stem;
+  }
+
+  /** A picked path the actions can write: relative text without line breaks or angle brackets. */
+  function pickedImagePath(ctx: EditActionContext): string | undefined {
+    const picked = ctx.arg;
+    if (picked === undefined || picked === "" || /[<>\r\n]/u.test(picked)) return undefined;
+    return picked;
+  }
+
+  /** `![name](path)` over the selection with the name selected; `<…>` around spaces or parentheses. */
+  function insertImage(ctx: EditActionContext): TextEdit | undefined {
+    const picked = pickedImagePath(ctx);
+    if (!validSelection(ctx) || picked === undefined) return undefined;
+    const name = imageName(picked);
+    const target = /[\s()]/u.test(picked) ? "<" + picked + ">" : picked;
+    const text = "![" + name + "](" + target + ")";
+    return {
+      start: ctx.selectionStart, end: ctx.selectionEnd, text,
+      selectionStart: ctx.selectionStart + 2, selectionEnd: ctx.selectionStart + 2 + name.length,
+    };
+  }
+
+  /**
+   * `:::{figure} path` with `:alt:` and an empty caption line. The touched lines of a selection
+   * become the caption; the fence is one colon longer than the longest colon fence inside them.
+   */
+  function insertFigure(ctx: EditActionContext): TextEdit | undefined {
+    const picked = pickedImagePath(ctx);
+    if (!validSelection(ctx) || picked === undefined) return undefined;
+    const selected = ctx.selectionStart !== ctx.selectionEnd;
+    const { firstStart, lastEnd, lines } = touchedLines(ctx);
+    let longest = 2;
+    if (selected) {
+      for (const line of lines) {
+        const fence = /^\s*(:{3,})/u.exec(line);
+        if (fence) longest = Math.max(longest, fence[1].length);
+      }
+    }
+    const colons = ":".repeat(longest + 1);
+    const head = colons + "{figure} " + picked + "\n:alt: " + imageName(picked) + "\n\n";
+    const text = head + (selected ? lines.join("\n") : "") + "\n" + colons;
+    if (selected) {
+      return { start: firstStart, end: lastEnd, text, selectionStart: firstStart + head.length, selectionEnd: firstStart + head.length };
+    }
+    return insertBlockAt(ctx, text, head.length, 0);
+  }
+
   /** A MyST dropdown: a note admonition with `:class: dropdown`; the touched lines become its body. */
   function insertDropdown(ctx: EditActionContext): TextEdit | undefined {
     if (!validSelection(ctx)) return undefined;
@@ -1305,6 +1361,17 @@ export function createEditActions(
       shortcut: { codes: ["KeyK"], keys: ["k"] },
       panel: "link",
       apply: (ctx) => linkEdit(ctx, linkDraft(ctx).text, ctx.arg ?? ""),
+    },
+    {
+      id: "image",
+      label: "Image",
+      title: "Image (pick a file next to the document)",
+      icon: "image",
+      group: "inline",
+      modes: ["strict"],
+      scopes: ["block"],
+      hostDialog: "image",
+      apply: insertImage,
     },
     {
       id: "codeFence",
@@ -1587,6 +1654,17 @@ export function createEditActions(
       modes: ["myst"],
       scopes: ["block"],
       apply: tableCaption,
+    },
+    {
+      id: "figure",
+      label: "Figure",
+      title: "Figure (pick an image file; MyST directive with a caption)",
+      icon: "figure",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      hostDialog: "image",
+      apply: insertFigure,
     },
     {
       id: "roleKbd",

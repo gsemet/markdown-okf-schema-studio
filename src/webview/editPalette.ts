@@ -35,7 +35,7 @@ export interface EditPaletteDeps {
    * `undefined` when the dialog was cancelled or failed. The caller keeps the editor open while it
    * is shown.
    */
-  pickHost?(kind: "document", done: (value: string | undefined) => void): void;
+  pickHost?(kind: "document" | "image", done: (value: string | undefined) => void): void;
   /** Opens the small panel of an action that has one (the Link button). */
   openPanel?(action: EditAction): void;
   mode: EditActionMode;
@@ -122,6 +122,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     label: svg("M4 5h9l7 7-7 7H4zM8 10v.5"),
     kbd: svg("M3 7h18v10H3zM7 11h.5M11 11h.5M15 11h.5M8 14h8"),
     ref: svg("M9 8H7a4 4 0 0 0 0 8h2M15 8h2a4 4 0 0 1 0 8h-2M8 12h8") + caret,
+    image: svg("M4 5h16v14H4zM4 16l5-5 4 4 2-2 5 5M15 9.5v.5"),
+    figure: svg("M4 4h16v11H4zM4 15l4.5-4.5 3.5 3.5 2-2 6 3M7 19h10"),
     doc: svg("M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"),
     cite: glyph("cite", "\u201c") + caret,
     dropdown: svg("M4 5h16v14H4zM8 10l4 4 4-4"),

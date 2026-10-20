@@ -32,6 +32,7 @@ import { sourceRangeForLines, type SourceMappingOptions } from "./mapping/source
 import { insertionText, planInsertion, type InsertionPlan } from "./mapping/insertion";
 import { minimalReplacement } from "./mapping/textDiff";
 import { countRefUses, renameLabelLine } from "./mapping/labelRename";
+import { IMAGE_EXTENSIONS, isImageFileName, relativeImageReference } from "./mapping/imageReference";
 import { docReference, documentTargets } from "./mapping/mystTargets";
 import { scanBibKeys } from "./preview/bibScan";
 import {
@@ -1879,6 +1880,51 @@ function handlePickDocument(preview: ActivePreview, message: RegisteredPreviewMe
   });
 }
 
+/**
+ * Native open dialog for the Image and Figure buttons: answers with the picked image as a path
+ * relative to the document. Nothing is read or written. A file outside the workspace folders, on
+ * another drive, or that is not an image is refused with a message the page shows.
+ */
+function handlePickImage(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+  if (preview.readOnly) {
+    postHostResult(preview, message, { ok: false, reason: "Inserting an image needs a trusted workspace." });
+    return undefined;
+  }
+  const document = currentPreviewDocument(preview, message);
+  if (!document || document.uri.scheme !== "file") {
+    postHostResult(preview, message, { ok: false, reason: "The preview is out of date, or the document is not a file." });
+    return undefined;
+  }
+  return Promise.resolve(vscode.window.showOpenDialog({
+    canSelectMany: false,
+    canSelectFiles: true,
+    canSelectFolders: false,
+    defaultUri: vscode.Uri.file(path.dirname(document.uri.fsPath)),
+    filters: { Images: IMAGE_EXTENSIONS },
+    openLabel: "Insert image",
+  })).then((picked) => {
+    const file = picked?.[0];
+    if (!file) {
+      postHostResult(preview, message, { ok: true, cancelled: true });
+      return;
+    }
+    if (file.scheme !== "file" || !isImageFileName(file.fsPath)) {
+      postHostResult(preview, message, { ok: false, reason: "Pick a png, jpeg, gif, webp or svg image." });
+      return;
+    }
+    if (!vscode.workspace.getWorkspaceFolder(file)) {
+      postHostResult(preview, message, { ok: false, reason: "The image must be inside a workspace folder." });
+      return;
+    }
+    const reference = relativeImageReference(document.uri.fsPath, file.fsPath);
+    postHostResult(preview, message, reference === undefined
+      ? { ok: false, reason: "That image cannot be referenced from this document (another drive, or an unusual name)." }
+      : { ok: true, path: reference });
+  }, (error: unknown) => {
+    postHostResult(preview, message, { ok: false, reason: error instanceof Error ? error.message : String(error) });
+  });
+}
+
 function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessage): void {
   if (preview.activeBlockEdit) {
     postEditSourceError(preview, message, "Another Markdown block is already being edited.");
@@ -2774,6 +2820,7 @@ registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
 registeredMessageHandlers.set("previewListTargets", handleListTargets);
 registeredMessageHandlers.set("previewListCitations", handleListCitations);
 registeredMessageHandlers.set("previewPickDocument", handlePickDocument);
+registeredMessageHandlers.set("previewPickImage", handlePickImage);
 
 function initialPaletteMode(): PaletteMode {
   const stored = editModeStorage?.get(PALETTE_MODE_STORAGE_KEY);

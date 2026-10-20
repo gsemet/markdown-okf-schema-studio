@@ -94,6 +94,8 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   previewListTargets: isHostRequest,
   previewListCitations: isHostRequest,
   previewPickDocument: isHostRequest,
+  // The image button and the Figure button: a native open dialog for an image file.
+  previewPickImage: isHostRequest,
 };
 
 export const isRegisteredPreviewMessage = createPreviewMessageChecker(REGISTERED_PREVIEW_MESSAGES);
