@@ -32,6 +32,18 @@ export interface EditActionOption {
   label: string;
 }
 
+/** One emoji of the picker: the Unicode character and its English name (used by the filter). */
+export interface EmojiEntry {
+  char: string;
+  name: string;
+}
+
+export interface EmojiCategory {
+  id: string;
+  label: string;
+  items: EmojiEntry[];
+}
+
 /**
  * One registered editing operation. The palette renders `label`, `icon` and `group`; a shortcut
  * and the palette button run the same `apply`, which returns the edit to run as one native step.
@@ -51,6 +63,10 @@ export interface EditAction {
   popover?: string;
   /** What the popover lists: `value` becomes `ctx.arg`, `label` is shown. */
   options?: EditActionOption[];
+  /** Popover `grid`: the size picker (`ctx.arg` becomes "<rows>x<columns>"). */
+  grid?: { rows: number; cols: number };
+  /** Popover `emoji`: the picker's categories (`ctx.arg` becomes the chosen character). */
+  emoji?: EmojiCategory[];
   /**
    * Name of the small panel the palette button and the shortcut open instead of running `apply`
    * directly; the panel collects the values and the page then runs the edit.
@@ -570,6 +586,96 @@ export function createEditActions(languages: string[] = []): EditActionRegistry 
     };
   }
 
+
+  // Emoji are plain data: "<character> <english name>" per entry, no network, Unicode only (flags
+  // are left out on purpose). The filter matches the words of the name.
+  const EMOJI_SOURCE: Array<[string, string, string]> = [
+    ["smileys", "Smileys", "😀 grinning face;😃 smiling face with big eyes;😄 smiling face with smiling eyes;"
+      + "😁 beaming face;😆 grinning squinting face laugh;😅 grinning face with sweat;"
+      + "😂 face with tears of joy;🙂 slightly smiling face;🙃 upside-down face;😉 winking face;"
+      + "😊 smiling face with blush;😇 smiling face with halo angel;😍 smiling face with heart eyes;"
+      + "🤩 star-struck;😘 face blowing a kiss;😋 face savoring food yum;😎 smiling face with sunglasses cool;"
+      + "🤔 thinking face;😐 neutral face;😴 sleeping face;"
+      + "😢 crying face sad;😭 loudly crying face;😡 pouting face angry;😱 face screaming in fear;"
+      + "🤯 exploding head mind blown;🥳 partying face"],
+    ["people", "People and hands", "👍 thumbs up like;👎 thumbs down dislike;👏 clapping hands applause;"
+      + "🙌 raising hands celebration;🙏 folded hands please thanks pray;🤝 handshake agreement;"
+      + "👋 waving hand hello;✋ raised hand stop;👌 ok hand;✌️ victory hand peace;🤞 crossed fingers luck;"
+      + "👉 backhand index pointing right;👈 backhand index pointing left;👆 backhand index pointing up;"
+      + "👇 backhand index pointing down;💪 flexed biceps strong;🤷 person shrugging;🤦 person facepalming;"
+      + "🙋 person raising hand;👀 eyes look;🧠 brain;👤 bust in silhouette user;"
+      + "👨‍💻 man technologist;👩‍💻 woman technologist"],
+    ["nature", "Nature", "🌱 seedling sprout;🌲 evergreen tree;🌳 deciduous tree;"
+      + "🌸 cherry blossom;🌹 rose;🌻 sunflower;🍀 four leaf clover;🍁 maple leaf;🔥 fire flame;"
+      + "💧 droplet water;🌊 water wave;⚡ high voltage lightning;☀️ sun;🌙 crescent moon;⭐ star;"
+      + "🌟 glowing star;❄️ snowflake;🌈 rainbow;☁️ cloud;🐛 bug insect;🐞 lady beetle;🐝 honeybee;"
+      + "🦋 butterfly;🐙 octopus;🐧 penguin;🦊 fox;🐱 cat face"],
+    ["food", "Food and drink", "🍎 red apple;🍏 green apple;🍌 banana;🍇 grapes;🍓 strawberry;🍋 lemon;"
+      + "🥑 avocado;🥕 carrot;🌽 ear of corn;🍞 bread;🧀 cheese wedge;🍕 pizza;🍔 hamburger;🍟 french fries;"
+      + "🌮 taco;🍣 sushi;🍪 cookie;🍰 shortcake cake;🍫 chocolate bar;🍩 doughnut;☕ hot beverage coffee;"
+      + "🍵 teacup tea;🍺 beer mug;🍷 wine glass"],
+    ["objects", "Objects", "💻 laptop computer;🖥️ desktop computer;⌨️ keyboard;📱 mobile phone;"
+      + "💡 light bulb idea;🔧 wrench tool;🔨 hammer;⚙️ gear settings;🔒 locked padlock;🔓 unlocked padlock;"
+      + "🔑 key;📁 file folder;📂 open file folder;📄 page facing up document;📝 memo note;"
+      + "📎 paperclip;📅 calendar;📊 bar chart;📈 chart increasing;📉 chart decreasing;🔍 magnifying glass search;"
+      + "📦 package box;🚀 rocket launch;🎯 direct hit target;🎉 party popper tada;🏆 trophy;"
+      + "📚 books;🔔 bell notification"],
+    ["symbols", "Symbols and status", "✅ check mark button done;☑️ check box with check;✔️ check mark;"
+      + "❌ cross mark;❎ cross mark button;⚠️ warning;🚫 prohibited;⛔ no entry;❗ red exclamation mark;"
+      + "❓ red question mark;ℹ️ information;➕ plus;➖ minus;➡️ right arrow;⬅️ left arrow;⬆️ up arrow;"
+      + "⬇️ down arrow;🔄 counterclockwise arrows button refresh;🔁 repeat button;❤️ red heart;💔 broken heart;"
+      + "💯 hundred points;🆗 ok button;🔴 red circle;"
+      + "🟢 green circle;🔵 blue circle"],
+  ];
+  const EMOJI_CATEGORIES: EmojiCategory[] = EMOJI_SOURCE.map(([id, label, list]) => ({
+    id,
+    label,
+    items: list.split(";").map((entry) => {
+      const space = entry.indexOf(" ");
+      return { char: entry.slice(0, space), name: entry.slice(space + 1) };
+    }),
+  }));
+
+  /** A table of `rows` x `cols` (the header counts as a row) set apart by blank lines. */
+  function insertTable(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const size = /^([1-9])x([1-9])$/u.exec(ctx.arg ?? "");
+    if (!size) return undefined;
+    const rows = Number(size[1]);
+    const cols = Number(size[2]);
+    const row = (cell: (column: number) => string): string =>
+      "| " + Array.from({ length: cols }, (_, column) => cell(column)).join(" | ") + " |";
+    const header = row((column) => "Column " + (column + 1));
+    const lines = [header, row(() => "---")];
+    for (let index = 1; index < rows; index += 1) lines.push(row(() => ""));
+    // The table goes after the selection, which stays untouched.
+    const at = ctx.selectionEnd;
+    const before = ctx.value.slice(0, at);
+    const after = ctx.value.slice(at);
+    const lead = before === "" || before.endsWith("\n\n") ? "" : before.endsWith("\n") ? "\n" : "\n\n";
+    const breaks = (/^\n*/u.exec(after) ?? [""])[0].length;
+    const trail = after === "" || breaks >= 2 ? "" : breaks === 1 ? "\n" : "\n\n";
+    const first = at + lead.length + 2;
+    return {
+      start: at,
+      end: at,
+      text: lead + lines.join("\n") + trail,
+      selectionStart: first,
+      selectionEnd: first + "Column 1".length,
+    };
+  }
+
+  /** Replaces the selection with the chosen emoji character, caret after it. */
+  function insertEmoji(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const char = ctx.arg ?? "";
+    if (char === "" || char.length > 16 || !/^[\p{Extended_Pictographic}\u200d\ufe0f]+$/u.test(char)) {
+      return undefined;
+    }
+    const caret = ctx.selectionStart + char.length;
+    return { start: ctx.selectionStart, end: ctx.selectionEnd, text: char, selectionStart: caret, selectionEnd: caret };
+  }
+
   const HEADING_OPTIONS: EditActionOption[] = [
     { value: "0", label: "Paragraph" },
     ...[1, 2, 3, 4, 5].map((level) => ({ value: String(level), label: "Heading " + level })),
@@ -665,6 +771,30 @@ export function createEditActions(languages: string[] = []): EditActionRegistry 
       modes: ["strict"],
       scopes: ["block"],
       apply: insertRule,
+    },
+    {
+      id: "table",
+      label: "Table",
+      title: "Table (choose a size)",
+      icon: "table",
+      group: "block",
+      modes: ["strict"],
+      scopes: ["block"],
+      popover: "grid",
+      grid: { rows: 9, cols: 9 },
+      apply: insertTable,
+    },
+    {
+      id: "emoji",
+      label: "Emoji",
+      title: "Emoji",
+      icon: "emoji",
+      group: "insert",
+      modes: ["strict"],
+      scopes: ["block", "cell"],
+      popover: "emoji",
+      emoji: EMOJI_CATEGORIES,
+      apply: insertEmoji,
     },
     {
       id: "todo",

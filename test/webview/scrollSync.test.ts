@@ -7372,7 +7372,7 @@ test("T21: the palette is the first child of the block editor frame, above the t
   assert.equal(palette.childElements[0].tagName, "SELECT", "the mode select starts the bar");
   assert.deepEqual(
     palette.childElements.slice(1).map((child) => child.getAttribute("data-edit-action")),
-    ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "todo"],
+    ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table", "emoji", "todo"],
   );
 });
 
@@ -7414,7 +7414,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 9);
+  assert.equal(controls.length, 11);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
@@ -8174,4 +8174,190 @@ test("T23: Ctrl+Shift+M focuses the select, Cmd+Shift+M on macOS, and the toolti
   assert.equal(macSelect.focusOptions, undefined, "Ctrl does nothing on macOS");
   macArea.dispatch("keydown", { key: "M", code: "KeyM", metaKey: true, shiftKey: true, preventDefault: () => undefined });
   assert.equal((macSelect.focusOptions as FocusOptions | undefined)?.preventScroll, true);
+});
+
+// T24: the size grid and the emoji picker in the real page script.
+function gridCell(menu: RuntimeElement, row: number, col: number): RuntimeElement {
+  const found = allDescendants(menu).find((e) =>
+    e.getAttribute("data-grid-row") === String(row) && e.getAttribute("data-grid-col") === String(col));
+  assert.ok(found);
+  return found;
+}
+
+function allDescendants(element: RuntimeElement): RuntimeElement[] {
+  return element.childElements.flatMap((child) => [child, ...allDescendants(child)]);
+}
+
+function litCells(menu: RuntimeElement): number {
+  return allDescendants(menu).filter((e) => e.getAttribute("data-grid-on") === "true").length;
+}
+
+test("T24: the Table button opens the grid; hovering lights rows x columns and shows the size", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  paletteButton(harness, "table").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness)!;
+  assert.equal(menu.getAttribute("data-edit-popover"), "grid");
+  assert.equal(allDescendants(menu).filter((e) => e.getAttribute("data-grid-row") !== null).length, 81);
+  menu.dispatch("mouseover", { target: gridCell(menu, 3, 4) });
+  assert.equal(litCells(menu), 12);
+  const label = allDescendants(menu).find((e) => e.className === "sphinx-preview-edit-grid-label")!;
+  assert.equal(label.textContent, "3 \u00d7 4");
+  menu.dispatch("mouseover", { target: gridCell(menu, 9, 9) });
+  assert.equal(litCells(menu), 81);
+});
+
+test("T24: one click on a grid cell inserts the table as one undo step and keeps the editor open", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "Intro";
+  textarea.setSelectionRange(5, 5);
+  const count = harness.messages.length;
+  paletteButton(harness, "table").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness)!;
+  menu.dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined, target: gridCell(menu, 3, 4) });
+  assert.equal(
+    textarea.value,
+    "Intro\n\n| Column 1 | Column 2 | Column 3 | Column 4 |\n| --- | --- | --- | --- |\n|  |  |  |  |\n|  |  |  |  |",
+  );
+  assert.equal(calls.length, 1, "one undo step");
+  assert.equal(paletteMenu(harness), undefined, "the grid closes");
+  assert.equal(harness.messages.length, count, "no commit, no blur save");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(textarea.focusOptions?.preventScroll, true, "focus is in the text box");
+  assert.equal(textarea.value.slice(textarea.selectionStart, textarea.selectionEnd), "Column 1");
+});
+
+test("T24: Escape closes the grid first; arrows and Enter drive it from the text box", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  stubExecCommand(harness, textarea);
+  textarea.value = "";
+  textarea.setSelectionRange(0, 0);
+  paletteButton(harness, "table").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness)!;
+  assert.equal(typeKey(textarea, "ArrowDown"), true);
+  typeKey(textarea, "ArrowRight");
+  assert.equal(litCells(menu), 2, "1 x 2");
+  typeKey(textarea, "Enter");
+  assert.equal(textarea.value, "| Column 1 | Column 2 |\n| --- | --- |");
+  assert.equal(paletteMenu(harness), undefined);
+  paletteButton(harness, "table").dispatch("click", { preventDefault: () => undefined });
+  assert.ok(paletteMenu(harness));
+  typeKey(textarea, "Escape");
+  assert.equal(paletteMenu(harness), undefined);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true", "the editor stays");
+});
+
+test("T24: typing in the text box closes the grid without losing the editor", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  paletteButton(harness, "table").dispatch("click", { preventDefault: () => undefined });
+  assert.ok(paletteMenu(harness));
+  textarea.dispatch("input");
+  assert.equal(paletteMenu(harness), undefined);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+});
+
+function emojiField(harness: RuntimeHarness): RuntimeElement {
+  const field = harness.createdElements.find((e) =>
+    e.tagName === "INPUT" && e.getAttribute("data-emoji-filter") !== null && !e.removed);
+  assert.ok(field);
+  return field;
+}
+
+test("T24: the emoji filter takes focus without saving; leaving the frame from it saves once", () => {
+  const harness = createRuntimeHarness();
+  const focus = trackFocus(harness);
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Second paragraph, changed.";
+  const count = harness.messages.length;
+  paletteButton(harness, "emoji").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(focus.last(), emojiField(harness));
+  // The text box loses focus to the filter: inside the frame, so nothing is saved.
+  textarea.dispatch("blur", { relatedTarget: emojiField(harness) });
+  assert.equal(harness.messages.length, count, "no save when focus moves into the picker");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  emojiField(harness).dispatch("blur", { relatedTarget: null });
+  const saves = harness.messages.slice(count).filter((m) => m.type === "previewEditSave");
+  assert.equal(saves.length, 1, "one final save");
+  assert.equal(saves[0].final, true);
+});
+
+test("T24: choosing an emoji inserts it in the text box and returns the focus there", () => {
+  const harness = createRuntimeHarness();
+  const focus = trackFocus(harness);
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "say foo now";
+  textarea.setSelectionRange(4, 7);
+  paletteButton(harness, "emoji").dispatch("click", { preventDefault: () => undefined });
+  const field = emojiField(harness);
+  field.value = "check mark button";
+  field.dispatch("input");
+  field.dispatch("keydown", { key: "Enter", preventDefault: () => undefined, stopPropagation: () => undefined });
+  assert.equal(textarea.value, "say \u2705 now");
+  assert.equal(calls.length, 1);
+  assert.equal(paletteMenu(harness), undefined);
+  assert.equal(focus.last(), textarea);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+});
+
+test("T24: Shift+click on an emoji keeps the picker open, a plain click closes it", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  stubExecCommand(harness, textarea);
+  textarea.value = "";
+  textarea.setSelectionRange(0, 0);
+  paletteButton(harness, "emoji").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness)!;
+  const emojis = allDescendants(menu).filter((e) => e.getAttribute("data-emoji") !== null);
+  emojis[0].dispatch("click", { preventDefault: () => undefined, shiftKey: true });
+  emojis[1].dispatch("click", { preventDefault: () => undefined, shiftKey: true });
+  assert.equal(textarea.value, emojis[0].textContent + emojis[1].textContent);
+  assert.ok(paletteMenu(harness), "still open after the input events");
+  emojis[2].dispatch("click", { preventDefault: () => undefined });
+  assert.equal(paletteMenu(harness), undefined);
+});
+
+test("T24: Escape in the filter closes the picker, focuses the text box and keeps the editor", () => {
+  const harness = createRuntimeHarness();
+  const focus = trackFocus(harness);
+  const textarea = openBlockEditorWithSource(harness);
+  const count = harness.messages.length;
+  paletteButton(harness, "emoji").dispatch("click", { preventDefault: () => undefined });
+  emojiField(harness).dispatch("keydown", {
+    key: "Escape", preventDefault: () => undefined, stopPropagation: () => undefined,
+  });
+  assert.equal(paletteMenu(harness), undefined);
+  assert.equal(focus.last(), textarea);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(harness.messages.length, count);
+});
+
+test("T24: a mouse press in the text box closes the picker and the editor stays usable", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  paletteButton(harness, "emoji").dispatch("click", { preventDefault: () => undefined });
+  textarea.dispatch("mousedown");
+  assert.equal(paletteMenu(harness), undefined);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  paletteButton(harness, "emoji").dispatch("click", { preventDefault: () => undefined });
+  assert.ok(paletteMenu(harness), "the picker opens again");
+});
+
+test("T24: an emoji chosen after the text changed is inserted at the live caret, never a stale one", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  stubExecCommand(harness, textarea);
+  textarea.value = "abcdef";
+  textarea.setSelectionRange(2, 2);
+  paletteButton(harness, "emoji").dispatch("click", { preventDefault: () => undefined });
+  // The text changes and the caret moves while the picker is open (an incoming edit).
+  textarea.value = "XY";
+  textarea.setSelectionRange(2, 2);
+  const emoji = allDescendants(paletteMenu(harness)!).find((e) => e.getAttribute("data-emoji") !== null)!;
+  emoji.dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "XY" + emoji.textContent);
 });

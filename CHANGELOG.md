@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The edition palette gets a Table button and an Emoji button. Table opens a 9 x 9 grid: the cells
+  from the top left to the pointer light up with their size (for example 3 × 4) and one click
+  inserts that pipe table on its own lines, header row first, with the first header cell selected.
+  Emoji opens a picker with about 150 emoji in six categories and a filter on English names; it
+  inserts the character at the caret (Shift+click keeps the picker open). Both close with Escape.
 - A select at the start of the edition palette chooses its buttons: Strict Markdown, GitHub (GFM)
   or MyST (includes GFM). The choice is remembered per workspace and the new setting
   `editing.defaultPaletteMode` (default MyST) gives the starting mode; rendering is unchanged.

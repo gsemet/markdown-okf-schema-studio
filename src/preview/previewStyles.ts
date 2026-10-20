@@ -944,6 +944,104 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   cursor: pointer;
 }
 
+/* Size grid of the Table button: 9 x 9 cells, the hovered rectangle from the top left is lit. */
+.sphinx-preview-edit-palette-menu[data-edit-popover="grid"] {
+  min-width: 0;
+  padding: 6px;
+  overflow: visible;
+}
+
+.sphinx-preview-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 16px);
+  gap: 2px;
+}
+
+.sphinx-preview-edit-grid-cell {
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--sphinx-preview-border);
+  border-radius: 2px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sphinx-preview-edit-grid-cell[data-grid-on="true"] {
+  border-color: var(--vscode-focusBorder, #007fd4);
+  background: color-mix(in srgb, var(--vscode-focusBorder, #007fd4) 45%, transparent);
+}
+
+.sphinx-preview-edit-grid-label {
+  margin-top: 5px;
+  font-size: 0.8em;
+  text-align: center;
+  color: var(--vscode-descriptionForeground, inherit);
+}
+
+/* Emoji picker: filter field and categories as button grids, inside the frame. */
+.sphinx-preview-edit-palette-menu[data-edit-popover="emoji"] {
+  width: 19em;
+  max-height: 18em;
+  padding: 6px;
+  overflow: hidden;
+}
+
+.sphinx-preview-edit-emoji-filter {
+  box-sizing: border-box;
+  flex: none;
+  width: 100%;
+  margin: 0 0 4px;
+  padding: 3px 6px;
+  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border-radius: 5px;
+  background: var(--vscode-input-background, transparent);
+  color: var(--vscode-input-foreground, inherit);
+  font: inherit;
+  font-size: 0.85em;
+}
+
+.sphinx-preview-edit-emoji-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.sphinx-preview-edit-emoji-heading {
+  margin: 4px 2px 2px;
+  font-size: 0.72em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground, inherit);
+}
+
+.sphinx-preview-edit-emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 1px;
+}
+
+.sphinx-preview-edit-emoji-grid > button {
+  padding: 2px 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font-size: 1.15em;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.sphinx-preview-edit-emoji-grid > button:hover,
+.sphinx-preview-edit-emoji-grid > button:focus-visible {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+}
+
+.sphinx-preview-edit-emoji-grid > button[hidden],
+.sphinx-preview-edit-emoji-heading[hidden] {
+  display: none;
+}
+
 /* Link panel: Text and URL fields under the palette, in the flow of the editor frame. */
 .sphinx-preview-link-panel {
   display: flex;

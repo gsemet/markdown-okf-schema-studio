@@ -24,6 +24,10 @@ class FakeElement {
   public constructor(public readonly tagName: string) {}
   public setAttribute(name: string, value: string): void { this.attributes.set(name, value); }
   public getAttribute(name: string): string | null { return this.attributes.get(name) ?? null; }
+  public removeAttribute(name: string): void { this.attributes.delete(name); }
+  public focusCalls = 0;
+  public focus(): void { this.focusCalls += 1; }
+  public all(): FakeElement[] { return this.children.flatMap((child) => [child, ...child.all()]); }
   public addEventListener(type: string, listener: Listener): void {
     this.listeners.set(type, [...(this.listeners.get(type) ?? []), listener]);
   }
@@ -150,4 +154,292 @@ test("setMode changes the buttons and the select without reporting a change", ()
   assert.equal(selectOf(root).value, "gfm");
   assert.equal(actionIds(root).includes("gfmOnly"), true);
   assert.deepEqual(changes, []);
+});
+
+// T24: the size grid and the emoji picker.
+interface Harness {
+  palette: ReturnType<typeof createEditPalette>;
+  root: FakeElement;
+  textbox: { value: string; selectionStart: number; selectionEnd: number; focus: () => void; focused: number };
+  edits: Array<{ start: number; end: number; text: string }>;
+  leaves: number;
+  frame: Set<unknown>;
+}
+
+function openFull(value = "", caret = 0): Harness {
+  const textbox = {
+    value, selectionStart: caret, selectionEnd: caret, focused: 0,
+    focus() { textbox.focused += 1; },
+  };
+  const harness = { edits: [] as Array<{ start: number; end: number; text: string }>, leaves: 0, frame: new Set<unknown>() } as Harness;
+  harness.textbox = textbox;
+  harness.palette = createEditPalette(fakeDocument(), {
+    actions: createEditActions(),
+    getControl: () => textbox,
+    applyTextEdit: (edit) => {
+      harness.edits.push(edit);
+      textbox.value = textbox.value.slice(0, edit.start) + edit.text + textbox.value.slice(edit.end);
+      textbox.selectionStart = edit.selectionStart;
+      textbox.selectionEnd = edit.selectionEnd;
+      // The page closes popovers on the text box's input event; a Shift+click insertion survives it.
+      harness.palette.closePopover();
+    },
+    mode: "strict",
+    onLeave: () => { harness.leaves += 1; },
+    isInsideFrame: (node) => harness.frame.has(node),
+  });
+  harness.root = harness.palette.element as unknown as FakeElement;
+  return harness;
+}
+
+function button(root: FakeElement, id: string): FakeElement {
+  const found = root.children.find((child) => child.getAttribute("data-edit-action") === id);
+  assert.ok(found, id);
+  return found;
+}
+
+function popover(root: FakeElement): FakeElement | undefined {
+  return root.children.find((child) => child.getAttribute("role") === "menu");
+}
+
+function cell(menu: FakeElement, row: number, col: number): FakeElement {
+  const found = menu.all().find((e) =>
+    e.getAttribute("data-grid-row") === String(row) && e.getAttribute("data-grid-col") === String(col));
+  assert.ok(found);
+  return found;
+}
+
+function lit(menu: FakeElement): number {
+  return menu.all().filter((e) => e.getAttribute("data-grid-on") === "true").length;
+}
+
+const click = { preventDefault: () => undefined, stopPropagation: () => undefined };
+
+test("T24: the Table button opens a 9 x 9 grid of 81 cells", () => {
+  const { root } = openFull();
+  button(root, "table").dispatch("click", click);
+  const menu = popover(root)!;
+  assert.equal(menu.getAttribute("data-edit-popover"), "grid");
+  assert.equal(menu.all().filter((e) => e.getAttribute("data-grid-row") !== null).length, 81);
+  assert.equal(lit(menu), 0);
+});
+
+test("T24: hovering a cell lights the rectangle from the top left and shows rows x columns", () => {
+  const { root } = openFull();
+  button(root, "table").dispatch("click", click);
+  const menu = popover(root)!;
+  menu.dispatch("mouseover", { target: cell(menu, 3, 4) });
+  assert.equal(lit(menu), 12);
+  assert.equal(cell(menu, 3, 4).getAttribute("data-grid-on"), "true");
+  assert.equal(cell(menu, 4, 1).getAttribute("data-grid-on"), null);
+  assert.equal(cell(menu, 1, 5).getAttribute("data-grid-on"), null);
+  const label = menu.all().find((e) => e.className === "sphinx-preview-edit-grid-label")!;
+  assert.equal(label.textContent, "3 \u00d7 4");
+  menu.dispatch("mouseover", { target: cell(menu, 1, 1) });
+  assert.equal(lit(menu), 1);
+  menu.dispatch("mouseover", { target: menu });
+  assert.equal(lit(menu), 1, "a hover outside the cells changes nothing");
+});
+
+test("T24: one click on a cell inserts the table, closes the grid and returns focus", () => {
+  const h = openFull("intro", 5);
+  button(h.root, "table").dispatch("click", click);
+  const menu = popover(h.root)!;
+  menu.dispatch("click", { ...click, target: cell(menu, 3, 2) });
+  assert.equal(h.edits.length, 1);
+  assert.equal(h.textbox.value, "intro\n\n| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n|  |  |");
+  assert.equal(popover(h.root), undefined);
+  assert.equal(h.leaves, 0, "no save");
+});
+
+test("T24: a click that is not on a cell inserts nothing and keeps the grid", () => {
+  const h = openFull();
+  button(h.root, "table").dispatch("click", click);
+  const menu = popover(h.root)!;
+  menu.dispatch("click", { ...click, target: menu });
+  assert.equal(h.edits.length, 0);
+  assert.ok(popover(h.root));
+});
+
+test("T24: arrows move the highlight from the text box and Enter inserts", () => {
+  const h = openFull();
+  const key = (name: string) => {
+    let prevented = false;
+    const consumed = h.palette.handleKey({ key: name, preventDefault: () => { prevented = true; } });
+    return { consumed, prevented };
+  };
+  assert.equal(key("ArrowRight").consumed, false, "nothing is open: not consumed");
+  button(h.root, "table").dispatch("click", click);
+  const menu = popover(h.root)!;
+  assert.deepEqual(key("Enter"), { consumed: true, prevented: true });
+  assert.equal(h.edits.length, 0, "Enter before any highlight chooses nothing");
+  assert.ok(popover(h.root));
+  assert.equal(key("ArrowDown").consumed, true);
+  assert.equal(lit(menu), 1);
+  key("ArrowRight"); key("ArrowRight"); key("ArrowDown");
+  assert.equal(lit(menu), 6, "2 x 3");
+  for (let i = 0; i < 12; i += 1) key("ArrowRight");
+  assert.equal(lit(menu), 18, "columns stop at 9: 2 x 9");
+  for (let i = 0; i < 12; i += 1) key("ArrowLeft");
+  key("ArrowUp"); key("ArrowUp");
+  assert.equal(lit(menu), 1, "never below 1 x 1");
+  key("ArrowDown"); key("ArrowRight");
+  key("Enter");
+  assert.equal(h.textbox.value, "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |", "2 x 2");
+  assert.equal(popover(h.root), undefined);
+  assert.equal(h.palette.handleKey({ key: "Enter" }), false);
+});
+
+test("T24: Escape closes the grid and the popover never leaves the editor stuck", () => {
+  const h = openFull();
+  button(h.root, "table").dispatch("click", click);
+  assert.equal(h.palette.handleKey({ key: "Escape", preventDefault: () => undefined }), true);
+  assert.equal(popover(h.root), undefined);
+  button(h.root, "table").dispatch("click", click);
+  button(h.root, "table").dispatch("click", click);
+  assert.equal(popover(h.root), undefined, "a second click closes it");
+  assert.ok(h.textbox.focused > 0, "the text box has the focus");
+});
+
+function openEmoji(h: Harness): { menu: FakeElement; field: FakeElement; emojis: FakeElement[] } {
+  button(h.root, "emoji").dispatch("click", click);
+  const menu = popover(h.root)!;
+  const field = menu.all().find((e) => e.tagName === "input")!;
+  const emojis = menu.all().filter((e) => e.getAttribute("data-emoji") !== null);
+  return { menu, field, emojis };
+}
+
+const shown = (emojis: FakeElement[]): FakeElement[] => emojis.filter((e) => e.getAttribute("hidden") === null);
+
+test("T24: the emoji picker has about 150 emoji in 6 categories, each with a title", () => {
+  const h = openFull();
+  const { menu, field, emojis } = openEmoji(h);
+  assert.equal(menu.getAttribute("data-edit-popover"), "emoji");
+  assert.equal(field.getAttribute("aria-label"), "Filter emoji");
+  assert.equal(emojis.length >= 140 && emojis.length <= 170, true, String(emojis.length));
+  assert.equal(menu.all().filter((e) => e.className === "sphinx-preview-edit-emoji-heading").length, 6);
+  for (const emoji of emojis) assert.ok(emoji.getAttribute("title"), emoji.textContent);
+  for (const wanted of ["\u2705", "\u26a0\ufe0f", "\u274c"]) {
+    assert.ok(emojis.some((e) => e.textContent === wanted), wanted);
+  }
+  assert.equal(emojis.some((e) => /[\u{1F1E6}-\u{1F1FF}]/u.test(e.textContent)), false, "no flags");
+  assert.equal(h.textbox.focused, 0, "the filter takes the focus, not the text box");
+  assert.equal((field as unknown as { focusCalls: number }).focusCalls, 1);
+});
+
+test("T24: the filter matches English names and hides empty categories", () => {
+  const h = openFull();
+  const { menu, field, emojis } = openEmoji(h);
+  field.value = "thumbs";
+  field.dispatch("input");
+  assert.deepEqual(shown(emojis).map((e) => e.getAttribute("title")), ["thumbs up like", "thumbs down dislike"]);
+  const headings = menu.all().filter((e) => e.className === "sphinx-preview-edit-emoji-heading");
+  assert.equal(headings.filter((e) => e.getAttribute("hidden") === null).length, 1);
+  field.value = "  WARN ";
+  field.dispatch("input");
+  assert.deepEqual(shown(emojis).map((e) => e.textContent), ["\u26a0\ufe0f"]);
+  field.value = "zzz";
+  field.dispatch("input");
+  assert.equal(shown(emojis).length, 0);
+  field.value = "";
+  field.dispatch("input");
+  assert.equal(shown(emojis).length, emojis.length);
+});
+
+test("T24: clicking an emoji inserts it at the caret, replaces a selection and closes", () => {
+  const h = openFull("say foo now", 4);
+  h.textbox.selectionEnd = 7;
+  const { emojis } = openEmoji(h);
+  emojis[0].dispatch("click", click);
+  assert.equal(h.textbox.value, "say " + emojis[0].textContent + " now");
+  assert.equal(h.edits.length, 1);
+  assert.equal(popover(h.root), undefined);
+  assert.ok(h.textbox.focused > 0);
+  assert.equal(h.leaves, 0);
+});
+
+test("T24: Shift+click keeps the picker open for the next emoji", () => {
+  const h = openFull("", 0);
+  const { emojis } = openEmoji(h);
+  emojis[0].dispatch("click", { ...click, shiftKey: true });
+  emojis[1].dispatch("click", { ...click, shiftKey: true });
+  assert.equal(h.textbox.value, emojis[0].textContent + emojis[1].textContent);
+  assert.ok(popover(h.root), "still open");
+  emojis[2].dispatch("click", click);
+  assert.equal(popover(h.root), undefined);
+});
+
+test("T24: Enter in the filter inserts the first match; Escape returns to the text box", () => {
+  const h = openFull();
+  const { field, emojis } = openEmoji(h);
+  field.value = "check mark button";
+  field.dispatch("input");
+  let prevented = false;
+  field.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(h.textbox.value, "\u2705");
+  assert.equal(popover(h.root), undefined);
+
+  const again = openEmoji(h);
+  const before = h.textbox.focused;
+  again.field.dispatch("keydown", { key: "Escape", preventDefault: () => undefined, stopPropagation: () => undefined });
+  assert.equal(popover(h.root), undefined);
+  assert.equal(h.textbox.focused, before + 1, "focus goes back to the text box");
+  assert.equal(h.leaves, 0);
+});
+
+test("T24: leaving the editor frame from the filter saves once; moving inside does not", () => {
+  const h = openFull();
+  const { field, emojis } = openEmoji(h);
+  h.frame.add(emojis[0]);
+  field.dispatch("blur", { relatedTarget: emojis[0] });
+  assert.equal(h.leaves, 0, "focus moved inside the frame");
+  field.dispatch("blur", { relatedTarget: null });
+  assert.equal(h.leaves, 1, "focus left: one final save");
+  emojis[0].dispatch("blur", { relatedTarget: { outside: true } });
+  assert.equal(h.leaves, 2, "the same rule applies to the emoji buttons");
+});
+
+test("T24: closing the popover while the filter has the focus does not read as leaving", () => {
+  const h = openFull();
+  const { field } = openEmoji(h);
+  field.dispatch("focus");
+  // The popover removes itself and the browser may report a blur with no related target.
+  const root = h.root;
+  const menu = popover(root)!;
+  const remove = menu.remove.bind(menu);
+  menu.remove = () => { remove(); field.dispatch("blur", { relatedTarget: null }); };
+  const before = h.textbox.focused;
+  button(root, "emoji").dispatch("click", click);
+  assert.equal(popover(root), undefined);
+  assert.equal(h.leaves, 0, "no save from our own removal");
+  assert.equal(h.textbox.focused, before + 1, "focus returned to the text box");
+});
+
+test("T24: the filter receives mousedown itself; the rest of the popover cancels it", () => {
+  const h = openFull();
+  const { menu, field, emojis } = openEmoji(h);
+  let prevented = false;
+  let stopped = false;
+  menu.dispatch("mousedown", { target: field, preventDefault: () => { prevented = true; }, stopPropagation: () => { stopped = true; } });
+  assert.equal(prevented, false);
+  assert.equal(stopped, true, "the bar's focus guard does not see it");
+  menu.dispatch("mousedown", { target: emojis[0], preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true);
+});
+
+test("T24: arrow keys move through the visible emoji and back to the filter", () => {
+  const h = openFull();
+  const { field, emojis } = openEmoji(h);
+  const focused: FakeElement[] = [];
+  for (const e of emojis) e.focus = () => { focused.push(e); };
+  field.focus = () => { focused.push(field); };
+  field.dispatch("keydown", { key: "ArrowDown", preventDefault: () => undefined });
+  assert.equal(focused.at(-1), emojis[0]);
+  emojis[0].dispatch("keydown", { key: "ArrowRight", preventDefault: () => undefined });
+  assert.equal(focused.at(-1), emojis[1]);
+  emojis[1].dispatch("keydown", { key: "ArrowDown", preventDefault: () => undefined });
+  assert.equal(focused.at(-1), emojis[9]);
+  emojis[0].dispatch("keydown", { key: "ArrowUp", preventDefault: () => undefined });
+  assert.equal(focused.at(-1), field);
 });

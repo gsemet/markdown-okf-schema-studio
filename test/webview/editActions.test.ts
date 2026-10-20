@@ -147,7 +147,7 @@ test("the todo toggle is its own inverse", () => {
 test("the registry lists the actions with metadata and indexes them by id", () => {
   assert.deepEqual(
     registry.actions.map((action) => action.id),
-    ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "todo"],
+    ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table", "emoji", "todo"],
   );
   for (const action of registry.actions) {
     assert.equal(registry.byId.get(action.id), action);
@@ -477,4 +477,93 @@ test("replacing an existing link keeps its title", () => {
   assert.equal(registry.linkDraft(ctxOf("a [l|](u) b")).title, undefined);
   // The empty-URL caret stays inside the parentheses even with a title.
   assert.equal(link('a [l|](u "t") b', "new", ""), 'a [new](| "t") b');
+});
+
+// T24: table and emoji.
+function rawTable(value: string, selection: [number, number], arg: string | undefined, scope: "block" | "cell" = "block") {
+  const action = registry.byId.get("table")!;
+  const edit = action.apply({
+    value, selectionStart: selection[0], selectionEnd: selection[1], scope,
+    ...(arg === undefined ? {} : { arg }),
+  });
+  if (!edit) return undefined;
+  return { result: value.slice(0, edit.start) + edit.text + value.slice(edit.end), edit };
+}
+
+test("table 1x1 is a header and its separator", () => {
+  assert.equal(rawTable("", [0, 0], "1x1")?.result, "| Column 1 |\n| --- |");
+});
+
+test("table 3x4 has a header row, a separator and two empty rows", () => {
+  assert.equal(
+    rawTable("", [0, 0], "3x4")?.result,
+    "| Column 1 | Column 2 | Column 3 | Column 4 |\n| --- | --- | --- | --- |\n|  |  |  |  |\n|  |  |  |  |",
+  );
+});
+
+test("table 9x9 has 9 columns and 9 rows plus the separator", () => {
+  const lines = rawTable("", [0, 0], "9x9")!.result.split("\n");
+  assert.equal(lines.length, 10);
+  assert.equal(lines[0], "| Column 1 | Column 2 | Column 3 | Column 4 | Column 5 | Column 6 | Column 7 | Column 8 | Column 9 |");
+  assert.equal(lines[1], "| " + Array(9).fill("---").join(" | ") + " |");
+  assert.equal(lines[9], "| " + Array(9).fill("").join(" | ") + " |");
+});
+
+test("the table caret selects the placeholder of the first header cell", () => {
+  const out = rawTable("para", [4, 4], "2x2")!;
+  assert.equal(out.edit.selectionStart, "para\n\n| ".length);
+  assert.equal(out.result.slice(out.edit.selectionStart, out.edit.selectionEnd), "Column 1");
+});
+
+test("a table in the middle of a paragraph splits it onto its own lines", () => {
+  assert.equal(
+    rawTable("one two", [3, 3], "1x2")?.result,
+    "one\n\n| Column 1 | Column 2 |\n| --- | --- |\n\n two",
+  );
+});
+
+test("a table after a line break or a blank line adds only the missing blank lines", () => {
+  assert.equal(rawTable("a\n", [2, 2], "1x1")?.result, "a\n\n| Column 1 |\n| --- |");
+  assert.equal(rawTable("a\n\n", [3, 3], "1x1")?.result, "a\n\n| Column 1 |\n| --- |");
+  assert.equal(rawTable("a\n\nb", [3, 3], "1x1")?.result, "a\n\n| Column 1 |\n| --- |\n\nb");
+  assert.equal(rawTable("a\nb", [2, 2], "1x1")?.result, "a\n\n| Column 1 |\n| --- |\n\nb");
+});
+
+test("a table keeps a selection and goes after it", () => {
+  assert.equal(rawTable("say foo now", [4, 7], "1x1")?.result, "say foo\n\n| Column 1 |\n| --- |\n\n now");
+});
+
+test("table refuses a missing, malformed or out-of-range size", () => {
+  for (const arg of [undefined, "", "3", "0x3", "3x0", "10x2", "2x10", "ax2", "3x4x5", "3 x 4"]) {
+    assert.equal(rawTable("x", [0, 0], arg), undefined, String(arg));
+  }
+});
+
+test("the table action is for blocks only; emoji is for blocks and cells", () => {
+  assert.deepEqual(registry.byId.get("table")!.scopes, ["block"]);
+  assert.deepEqual(registry.byId.get("emoji")!.scopes, ["block", "cell"]);
+});
+
+test("emoji inserts at the caret and replaces the selection", () => {
+  assert.equal(run("emoji", "say | now", "\u2705"), "say \u2705| now");
+  assert.equal(run("emoji", "say [foo] now", "\u26a0\ufe0f"), "say \u26a0\ufe0f| now");
+});
+
+test("emoji refuses anything that is not a single pictograph run", () => {
+  for (const arg of [undefined, "", "a", "<b>", "\n", "\u2705x", "x".repeat(20)]) {
+    assert.equal(run("emoji", "a|b", arg), undefined, String(arg));
+  }
+});
+
+test("every emoji of the picker is accepted, named and unique, in six categories without flags", () => {
+  const categories = registry.byId.get("emoji")!.emoji!;
+  assert.equal(categories.length, 6);
+  const all = categories.flatMap((category) => category.items);
+  assert.equal(all.length >= 140 && all.length <= 170, true, String(all.length));
+  assert.equal(new Set(all.map((e) => e.char)).size, all.length, "no duplicates");
+  for (const entry of all) {
+    assert.match(entry.name, /^[a-z0-9 -]+$/u, entry.char);
+    assert.notEqual(run("emoji", "|", entry.char), undefined, entry.char + " " + entry.name);
+    assert.equal(/[\u{1F1E6}-\u{1F1FF}]/u.test(entry.char), false, "no flags");
+  }
 });
