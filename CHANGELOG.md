@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- In edit mode the "+" bar under each body block also shows an up and a down arrow. A click swaps
+  the block above the bar with its neighbour in one edit (one undo step) and keeps the moved block
+  where it was on screen, so repeated clicks keep moving it. A list or a code block moves as one
+  block. The arrows are disabled at the ends and for blocks that come from an included file, and
+  a move is refused, with a message, when a comment or a link definition sits between the blocks.
 - Editing a table cell shows the formatting buttons that make sense in a cell (bold, italic,
   strikethrough, link, emoji, colour, keys, sub/superscript, as the palette mode allows) in the
   row and column bar, after a separator, with the same shortcuts (Cmd/Ctrl+B, +I, +K). Block

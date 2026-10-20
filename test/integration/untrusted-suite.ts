@@ -8,6 +8,7 @@ import {
   EDITOR_VIEW_TYPE,
   getActivePreviewForTests,
 } from "./extensionApi";
+import { runUntrusted as runBlockMoveUntrusted } from "./blockMove.test";
 import { runUntrusted as runMystDiagnostics } from "./mystDiagnostics.test";
 
 async function waitForPreview(): Promise<void> {
@@ -61,6 +62,7 @@ export async function run(): Promise<void> {
       windowApi.showOpenDialog = originalDialog;
     }
     assert.equal(dialogCalls, 0, "the untrusted preview must not open the image dialog");
+    await runBlockMoveUntrusted(commandPreview, document);
     await vscode.commands.executeCommand("vscode.openWith", document.uri, EDITOR_VIEW_TYPE);
     await waitForPreview();
     const editorPreview = getActivePreviewForTests();

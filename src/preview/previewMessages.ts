@@ -89,6 +89,14 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   // Rename of a MyST label from its anchor icon: the source line of `(oldName)=` and both names.
   previewLabelRename: (message) => isSourceLine(message.line)
     && isValidLabelName(message.oldName) && isValidLabelName(message.newName),
+  // Move of a body block past its neighbour from the "+" bar: both line ranges, the direction and
+  // the moved block's viewport top (the host knows the new line). The host re-checks the ranges.
+  previewBlockMove: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
+    && isSourceLine(message.neighbourLine) && isSourceLine(message.neighbourEndLine)
+    && isOneOf(message.direction, ["up", "down"] as const)
+    && (message.pinViewportTop === undefined
+      || (typeof message.pinViewportTop === "number" && Number.isFinite(message.pinViewportTop)
+        && Math.abs(message.pinViewportTop) <= 100000)),
   // The MyST palette's pickers: labels of the document, citation keys of the workspace `.bib`
   // files, and a native open dialog for a `{doc}` path. They read only; the answer repeats `editId`.
   previewListTargets: isHostRequest,

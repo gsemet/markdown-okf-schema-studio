@@ -545,6 +545,44 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   opacity: 1;
 }
 
+/* The move buttons sit right of the "+", touching it so the pointer never loses the bar. */
+.sphinx-preview-insert-point button.sphinx-preview-move--up {
+  left: -0.2em;
+}
+
+.sphinx-preview-insert-point button.sphinx-preview-move--down {
+  left: 1.2em;
+}
+
+.sphinx-preview-insert-point button.sphinx-preview-move:disabled {
+  cursor: default;
+  background: var(--vscode-button-secondaryBackground, GrayText);
+  color: var(--vscode-button-secondaryForeground, Canvas);
+}
+
+[data-sphinx-source-line]:hover + .sphinx-preview-insert-point button.sphinx-preview-move:disabled,
+.sphinx-preview-insert-point button.sphinx-preview-move:disabled:hover {
+  opacity: 0.5;
+}
+
+html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sphinx-preview-move {
+  display: none;
+}
+
+.sphinx-preview-move-status {
+  position: absolute;
+  left: 2.8em;
+  top: -0.9em;
+  z-index: 2;
+  max-width: 24em;
+  padding: 2px 8px;
+  border: 1px solid var(--vscode-focusBorder, Highlight);
+  border-radius: 3px;
+  background: var(--vscode-editorWidget-background, Canvas);
+  color: var(--vscode-editorWidget-foreground, CanvasText);
+  font-size: 0.85em;
+}
+
 .sphinx-preview-insert-point--start {
   height: auto;
   margin: 0 0 1em;
