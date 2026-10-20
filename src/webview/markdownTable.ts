@@ -12,6 +12,8 @@ export interface MarkdownTableModel {
   columnsChanged?: boolean;
 }
 
+export type MarkdownTableTools = ReturnType<typeof createMarkdownTableTools>;
+
 export function createMarkdownTableTools() {
   function splitRow(line: string): string[] {
     const text = line.trim();
@@ -235,9 +237,55 @@ export function createMarkdownTableTools() {
     return Math.min(deleteAt, model.rows[0].length - 1);
   }
 
+  /**
+   * The model as an HTML `<table>`: the first row in `<thead>`, the rows after the delimiter row
+   * in `<tbody>`, the delimiter's colons as `align` attributes. Cell text is kept as text: only
+   * `&`, `<` and `>` are escaped and an escaped pipe becomes `|`, so inline Markdown stays as typed.
+   */
+  function toHtmlTable(model: MarkdownTableModel): string {
+    const escapeText = (text: string): string => {
+      let out = "";
+      for (let index = 0; index < text.length; index += 1) {
+        const character = text[index];
+        if (character === "\\" && text[index + 1] === "|") {
+          out += "|";
+          index += 1;
+        } else if (character === "\\" && index + 1 < text.length) {
+          out += character + text[index + 1];
+          index += 1;
+        } else {
+          out += character === "&" ? "&amp;" : character === "<" ? "&lt;" : character === ">" ? "&gt;" : character;
+        }
+      }
+      return out;
+    };
+    const alignments = (model.rows[1] ?? []).map((cell) => {
+      const mark = cell.replace(/\s/gu, "");
+      const left = mark.startsWith(":");
+      const right = mark.endsWith(":");
+      return left && right ? "center" : right ? "right" : left ? "left" : "";
+    });
+    const row = (cells: string[], tag: string): string[] => [
+      "    <tr>",
+      ...cells.map((cell, column) => {
+        const align = alignments[column] ? ` align="${alignments[column]}"` : "";
+        return `      <${tag}${align}>${escapeText(cell)}</${tag}>`;
+      }),
+      "    </tr>",
+    ];
+    const lines = ["<table>", "  <thead>", ...row(model.rows[0] ?? [], "th"), "  </thead>"];
+    const body = model.rows.slice(2);
+    if (body.length > 0) {
+      lines.push("  <tbody>", ...body.flatMap((cells) => row(cells, "td")), "  </tbody>");
+    }
+    lines.push("</table>");
+    return lines.join("\n");
+  }
+
   return {
     parse,
     serialize,
+    toHtmlTable,
     insertRowAfter,
     deleteRow,
     insertColumnAfter,

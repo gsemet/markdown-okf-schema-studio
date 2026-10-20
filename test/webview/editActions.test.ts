@@ -2,8 +2,9 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { createEditActions } from "../../src/webview/editActions";
+import { createMarkdownTableTools } from "../../src/webview/markdownTable";
 
-const registry = createEditActions();
+const registry = createEditActions([], createMarkdownTableTools());
 
 /**
  * `[` and `]` mark a selection, `|` a caret; the result is shown in the same notation, or
@@ -147,12 +148,17 @@ test("the todo toggle is its own inverse", () => {
 test("the registry lists the actions with metadata and indexes them by id", () => {
   assert.deepEqual(
     registry.actions.map((action) => action.id),
-    ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table", "emoji", "todo"],
+    [
+      "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
+      "emoji", "todo", "alert", "checkbox", "htmlTable",
+    ],
   );
   for (const action of registry.actions) {
     assert.equal(registry.byId.get(action.id), action);
     assert.ok(action.label.length > 0 && action.icon.length > 0 && action.group.length > 0);
-    assert.ok(action.modes.includes("strict"), "available in every mode");
+    // T25: the GitHub group is listed for gfm only; every other action is in every mode.
+    const github = ["alert", "checkbox", "htmlTable"].includes(action.id);
+    assert.deepEqual(action.modes, github ? ["gfm"] : ["strict"], action.id);
     assert.ok(action.scopes.includes("block"));
   }
   assert.equal(registry.byId.get("todo")!.scopes.includes("cell"), false);
@@ -566,4 +572,200 @@ test("every emoji of the picker is accepted, named and unique, in six categories
     assert.notEqual(run("emoji", "|", entry.char), undefined, entry.char + " " + entry.name);
     assert.equal(/[\u{1F1E6}-\u{1F1FF}]/u.test(entry.char), false, "no flags");
   }
+});
+
+// T25: alert, checkbox and HTML table.
+interface Applied { value: string; selection: [number, number] }
+
+function applyTo(
+  id: string, value: string, selection: [number, number], arg?: string,
+): Applied | undefined {
+  const edit = registry.byId.get(id)!.apply({
+    value, selectionStart: selection[0], selectionEnd: selection[1], scope: "block",
+    ...(arg === undefined ? {} : { arg }),
+  });
+  if (!edit) return undefined;
+  return {
+    value: value.slice(0, edit.start) + edit.text + value.slice(edit.end),
+    selection: [edit.selectionStart, edit.selectionEnd],
+  };
+}
+
+test("T25: the GitHub actions are block actions of the gfm mode with no shortcut", () => {
+  for (const id of ["alert", "checkbox", "htmlTable"]) {
+    const action = registry.byId.get(id)!;
+    assert.deepEqual(action.modes, ["gfm"]);
+    assert.deepEqual(action.scopes, ["block"]);
+    assert.equal(action.shortcut, undefined);
+  }
+});
+
+test("T25: alert on an empty line writes the NOTE head and a quoted line with the caret in it", () => {
+  const out = applyTo("alert", "", [0, 0])!;
+  assert.equal(out.value, "> [!NOTE]\n> ");
+  assert.deepEqual(out.selection, [out.value.length, out.value.length]);
+});
+
+test("T25: alert quotes the touched lines under the head and keeps blank lines quoted", () => {
+  assert.equal(applyTo("alert", "Be careful", [4, 4])!.value, "> [!NOTE]\n> Be careful");
+  const multi = applyTo("alert", "intro\none\n\ntwo\nafter", [6, 15])!;
+  assert.equal(multi.value, "intro\n> [!NOTE]\n> one\n>\n> two\nafter");
+  assert.equal(multi.value.slice(multi.selection[0], multi.selection[1]), "> one\n>\n> two");
+});
+
+test("T25: alert takes the type from the argument and refuses an unknown one", () => {
+  for (const type of ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"]) {
+    assert.equal(applyTo("alert", "x", [1, 1], type)!.value, "> [!" + type + "]\n> x");
+  }
+  assert.equal(applyTo("alert", "x", [1, 1], "DANGER"), undefined);
+  assert.equal(applyTo("alert", "x", [1, 1], "note"), undefined);
+});
+
+test("T25: with the caret in an alert the action changes its type and keeps the caret in place", () => {
+  const value = "Intro\n\n> [!NOTE]\n> body text\n> more\n\nAfter";
+  const caret = value.indexOf("body") + 2;
+  const out = applyTo("alert", value, [caret, caret], "CAUTION")!;
+  assert.equal(out.value, "Intro\n\n> [!CAUTION]\n> body text\n> more\n\nAfter");
+  assert.deepEqual(out.selection, [caret + 3, caret + 3], "the caret follows its text");
+  assert.equal(applyTo("alert", value, [caret, caret]), undefined, "no argument: nothing to change");
+  assert.equal(applyTo("alert", value, [caret, caret], "NOTE"), undefined, "same type: no edit");
+  const inHead = value.indexOf("NOTE") + 1;
+  const head = applyTo("alert", value, [inHead, inHead], "TIP")!;
+  assert.equal(head.value.includes("> [!TIP]"), true);
+  assert.equal(head.value.slice(head.selection[0] - 3, head.selection[0]), "TIP", "a caret in the type goes after it");
+});
+
+test("T25: a quote that is not an alert, or a caret after the alert, inserts a new alert", () => {
+  assert.equal(applyTo("alert", "> plain", [3, 3])!.value, "> [!NOTE]\n> > plain");
+  const after = "> [!NOTE]\n> a\n\nB";
+  const caret = after.length;
+  assert.equal(applyTo("alert", after, [caret, caret])!.value, after.slice(0, -1) + "> [!NOTE]\n> B");
+});
+
+function checkbox(value: string, selection: [number, number]): Applied {
+  return applyTo("checkbox", value, selection)!;
+}
+
+test("T25: checkbox puts - [ ] on a plain line and [ ] after the marker of a list item", () => {
+  assert.equal(checkbox("buy milk", [3, 3]).value, "- [ ] buy milk");
+  assert.equal(checkbox("- buy milk", [3, 3]).value, "- [ ] buy milk");
+  assert.equal(checkbox("* buy", [0, 0]).value, "* [ ] buy");
+  assert.equal(checkbox("12. buy", [0, 0]).value, "12. [ ] buy");
+  assert.equal(checkbox("  - nested", [0, 0]).value, "  - [ ] nested");
+  assert.equal(checkbox("  nested plain", [0, 0]).value, "  - [ ] nested plain");
+});
+
+test("T25: checkbox toggles a checkbox line off, checked or not, and leaves the list item", () => {
+  assert.equal(checkbox("- [ ] done", [8, 8]).value, "- done");
+  assert.equal(checkbox("- [x] done", [8, 8]).value, "- done");
+  assert.equal(checkbox("1. [X] done", [8, 8]).value, "1. done");
+});
+
+test("T25: checkbox keeps the caret on its text", () => {
+  const out = checkbox("- buy milk", [5, 5]);
+  assert.equal(out.value.slice(0, out.selection[0]), "- [ ] buy");
+  const back = checkbox("- [ ] buy milk", [9, 9]);
+  assert.equal(back.value.slice(0, back.selection[0]), "- buy");
+  const atStart = checkbox("plain", [0, 0]);
+  assert.equal(atStart.value.slice(0, atStart.selection[0]), "- [ ] ", "a caret at the start lands after the box");
+});
+
+test("T25: checkbox on several lines is one action: all checkboxes lose it, else all lines get one", () => {
+  assert.equal(checkbox("- [ ] a\n- [x] b", [0, 15]).value, "- a\n- b");
+  assert.equal(checkbox("- [ ] a\n- b\nc", [0, 13]).value, "- [ ] a\n- [ ] b\n- [ ] c");
+  assert.equal(checkbox("a\n\nb", [0, 4]).value, "- [ ] a\n\n- [ ] b", "blank lines stay blank");
+  const out = checkbox("a\nb", [0, 3]);
+  assert.deepEqual(out.selection, [0, out.value.length], "the touched lines stay selected");
+});
+
+test("T25: checkbox on an empty line inserts the box with the caret after it", () => {
+  const out = checkbox("a\n\nb", [2, 2]);
+  assert.equal(out.value, "a\n- [ ] \nb");
+  assert.deepEqual(out.selection, [8, 8]);
+});
+
+test("T25: checkbox is its own inverse on a list item", () => {
+  const once = checkbox("- item", [0, 6]);
+  const twice = checkbox(once.value, once.selection);
+  assert.equal(twice.value, "- item");
+});
+
+const HTML_TABLE_SOURCE = "| Name | Qty | Note |\n| :--- | ---: | :---: |\n| a&b | <3 | x\\|y |\n| `c|d` |  | z |";
+
+test("T25: htmlTable converts the pipe table under the caret, text escaped, alignment kept", () => {
+  const value = "Intro\n\n" + HTML_TABLE_SOURCE + "\n\nAfter";
+  const caret = value.indexOf("a&b") + 1;
+  const out = applyTo("htmlTable", value, [caret, caret])!;
+  assert.equal(
+    out.value,
+    "Intro\n\n" + [
+      "<table>",
+      "  <thead>",
+      "    <tr>",
+      '      <th align="left">Name</th>',
+      '      <th align="right">Qty</th>',
+      '      <th align="center">Note</th>',
+      "    </tr>",
+      "  </thead>",
+      "  <tbody>",
+      "    <tr>",
+      '      <td align="left">a&amp;b</td>',
+      '      <td align="right">&lt;3</td>',
+      '      <td align="center">x|y</td>',
+      "    </tr>",
+      "    <tr>",
+      '      <td align="left">`c|d`</td>',
+      '      <td align="right"></td>',
+      '      <td align="center">z</td>',
+      "    </tr>",
+      "  </tbody>",
+      "</table>",
+    ].join("\n") + "\n\nAfter",
+  );
+  assert.equal(out.value.slice(out.selection[0]).startsWith("\n\nAfter"), true, "caret after </table>");
+});
+
+test("T25: htmlTable finds the table from its header, delimiter or last row, and from a table after text", () => {
+  const value = "para | with pipe\n| a | b |\n| --- | --- |\n| 1 | 2 |";
+  for (const at of [value.indexOf("| a"), value.indexOf("---"), value.length]) {
+    const out = applyTo("htmlTable", value, [at, at])!;
+    assert.equal(out.value.startsWith("para | with pipe\n<table>"), true, String(at));
+    assert.equal(out.value.endsWith("</table>"), true);
+  }
+});
+
+test("T25: htmlTable keeps the other tables and lines untouched", () => {
+  const value = "| a |\n| - |\n\n| b | c |\n| --- | --- |\n| 1 | 2 |";
+  const caret = value.indexOf("| b");
+  const out = applyTo("htmlTable", value, [caret, caret])!;
+  assert.equal(out.value.startsWith("| a |\n| - |\n\n<table>"), true, "the first block is not a table anyway");
+  assert.equal(out.value.includes("<th>b</th>"), true);
+  assert.equal(out.value.includes("<th>c</th>"), true, "no alignment: no attribute");
+});
+
+test("T25: htmlTable outside a pipe table inserts a new 2 x 2 table set apart by blank lines", () => {
+  const out = applyTo("htmlTable", "one two", [3, 3])!;
+  assert.equal(out.value.startsWith("one\n\n<table>"), true);
+  assert.equal(out.value.endsWith("</table>\n\n two"), true);
+  const rows = out.value.match(/<tr>/gu) ?? [];
+  assert.equal(rows.length, 2, "a header row and one body row");
+  assert.equal((out.value.match(/<th>/gu) ?? []).length, 2);
+  assert.equal((out.value.match(/<td><\/td>/gu) ?? []).length, 2);
+  assert.equal(out.value.slice(out.selection[0], out.selection[1]), "Column 1");
+  assert.equal(applyTo("htmlTable", "", [0, 0])!.value.startsWith("<table>"), true);
+});
+
+test("T25: htmlTable with a paragraph that only contains a pipe inserts instead of converting", () => {
+  const out = applyTo("htmlTable", "a | b\nplain", [5, 5])!;
+  assert.equal(out.value.startsWith("a | b\n\n<table>"), true);
+});
+
+test("T25: htmlTable without table tools still inserts a new table and never throws", () => {
+  const bare = createEditActions().byId.get("htmlTable")!;
+  const end = HTML_TABLE_SOURCE.length;
+  const edit = bare.apply({ value: HTML_TABLE_SOURCE, selectionStart: end, selectionEnd: end, scope: "block" });
+  assert.ok(edit);
+  assert.equal(edit.text.includes("<table>"), true);
+  assert.equal(edit.start, end, "inserted after, nothing converted");
+  assert.equal(edit.end, end);
 });

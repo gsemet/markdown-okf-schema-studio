@@ -36,7 +36,8 @@ Markdown flavours and extensions:
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
   An edition palette above the text box adds headings, strikethrough, code blocks with a language,
-  blockquotes and horizontal rules.
+  blockquotes and horizontal rules; in GitHub (GFM) and MyST mode it also adds GitHub alerts with a
+  type list, task-list checkboxes and HTML tables.
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)
   annotations can show target metadata and source line numbers for implementation
   and test evidence.
@@ -117,7 +118,7 @@ manually navigating raw YAML. The Markdown body remains a live, editable MyST pr
 
 ## Linked-File Annotations
 
-Schema `x-okf-link` annotations can display metadata from the resolved target file:
+OKF-Schema supports `x-okf-link` annotations in the JSON Schema that allows Studio to display metadata from the resolved target file:
 
 ```yaml
 x-okf-link:

@@ -8,6 +8,7 @@ import {
   type PreviewDocument,
 } from "../../src/render/renderPipeline";
 import { createEditActions } from "../../src/webview/editActions";
+import { createMarkdownTableTools } from "../../src/webview/markdownTable";
 import { rewriteSphinxHtml } from "../../src/security/html-sanitizer";
 import { ResourcePolicy } from "../../src/security/resource-policy";
 import {
@@ -1198,4 +1199,71 @@ test("a table inserted by the edition palette renders as a table with its header
   const rows = findElements(tables[0], isTag("tr"));
   assert.equal(rows.length, 3, "the header row and two empty rows");
   assert.equal(findElements(rows[2], isTag("td")).length, 4);
+});
+
+// T25: what the GFM group of the palette writes renders as an alert, checkboxes and a table.
+function paletteInsert(id: string, value: string, at: number, arg?: string): string {
+  const edit = createEditActions([], createMarkdownTableTools()).byId.get(id)!.apply({
+    value, selectionStart: at, selectionEnd: at, scope: "block", ...(arg === undefined ? {} : { arg }),
+  })!;
+  return value.slice(0, edit.start) + edit.text + value.slice(edit.end);
+}
+
+test("an alert inserted by the edition palette renders as an admonition of the chosen type", async () => {
+  const written = paletteInsert("alert", "Mind the gap", 4, "WARNING");
+  assert.equal(written, "> [!WARNING]\n> Mind the gap");
+  const document = inlineDocument(written + "\n\nAfter.\n");
+  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+  const admonition = findElement(parseHtml(result.html), (element) =>
+    hasClass(element, "admonition") && hasClass(element, "warning"));
+  assert.ok(admonition, "the inserted alert was not rendered as an admonition");
+  assert.equal(textContent(findElement(admonition, (e) => hasClass(e, "admonition-title"))!), "Warning");
+  assert.match(textContent(admonition), /Mind the gap/u);
+});
+
+test("checkboxes written by the edition palette render as checkbox inputs", async () => {
+  let text = "buy milk\nbake bread";
+  text = paletteInsert("checkbox", text, 0);
+  const first = text.indexOf("bake");
+  text = paletteInsert("checkbox", text, first);
+  assert.equal(text, "- [ ] buy milk\n- [ ] bake bread");
+  const document = inlineDocument(text + "\n");
+  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+  const boxes = findElements(parseHtml(result.html), (element) =>
+    element.tagName === "input" && hasClass(element, "myst-checkbox"));
+  assert.equal(boxes.length, 2);
+});
+
+test("a pipe table converted by the edition palette renders as a table with the same text", async () => {
+  const source = "| Name | Qty |\n| :--- | ---: |\n| a & b | <3 |\n| c | 4 |";
+  const html = paletteInsert("htmlTable", source, 3);
+  assert.equal(html.startsWith("<table>"), true);
+  const document = inlineDocument("Intro\n\n" + html + "\n\nAfter.\n");
+  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+  const tables = findElements(parseHtml(result.html), isTag("table"));
+  assert.equal(tables.length, 1);
+  assert.deepEqual(
+    findElements(tables[0], isTag("th")).map((cell) => textContent(cell).trim()),
+    ["Name", "Qty"],
+  );
+  assert.deepEqual(
+    findElements(tables[0], isTag("td")).map((cell) => textContent(cell).trim()),
+    ["a & b", "<3", "c", "4"],
+  );
+  assert.equal(findElements(tables[0], isTag("tr")).length, 3);
+});
+
+test("a new HTML table inserted by the edition palette renders as a 2 x 2 table", async () => {
+  const html = paletteInsert("htmlTable", "Intro", 5);
+  const document = inlineDocument(html + "\n\nAfter.\n");
+  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+  const tables = findElements(parseHtml(result.html), isTag("table"));
+  assert.equal(tables.length, 1);
+  assert.equal(findElements(tables[0], isTag("th")).length, 2);
+  assert.equal(findElements(tables[0], isTag("td")).length, 2);
+  assert.match(result.html, /After\./u);
 });

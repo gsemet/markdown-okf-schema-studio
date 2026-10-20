@@ -1,3 +1,4 @@
+import type { MarkdownTableTools } from "./markdownTable";
 import type { TextEdit } from "./textEditing";
 
 export type EditActionMode = "strict" | "gfm" | "myst";
@@ -72,6 +73,12 @@ export interface EditAction {
    * directly; the panel collects the values and the page then runs the edit.
    */
   panel?: string;
+  /**
+   * The button and the shortcut first run `apply` without an argument, then open the popover at
+   * the caret; choosing an option runs `apply` again with it (the Alert button inserts the alert,
+   * then the dropdown changes its type).
+   */
+  popoverAtCaret?: boolean;
   apply(ctx: EditActionContext): TextEdit | undefined;
 }
 
@@ -117,9 +124,13 @@ export interface EditActionRegistry {
  * Action registry of the raw-Markdown block editor. Later palette tasks only append entries to
  * `actions`. The factory is stringified into the webview runtime, so its body must stay
  * self-contained. `languages` are the fence languages the preview highlights; the code block
- * action offers them after "text".
+ * action offers them after "text". `tableTools` (the Markdown table parser and HTML writer) lets
+ * the HTML table action convert the table under the caret; without it the action only inserts.
  */
-export function createEditActions(languages: string[] = []): EditActionRegistry {
+export function createEditActions(
+  languages: string[] = [],
+  tableTools?: MarkdownTableTools,
+): EditActionRegistry {
   const isSpace = (char: string): boolean => /\s/u.test(char);
   const isWordChar = (char: string): boolean => /[\p{L}\p{N}_]/u.test(char);
 
@@ -649,20 +660,196 @@ export function createEditActions(languages: string[] = []): EditActionRegistry 
     const lines = [header, row(() => "---")];
     for (let index = 1; index < rows; index += 1) lines.push(row(() => ""));
     // The table goes after the selection, which stays untouched.
+    return insertBlockAfterSelection(ctx, lines.join("\n"), "Column 1");
+  }
+
+  /**
+   * A block set apart by blank lines after the selection (which stays untouched); the first
+   * occurrence of `select` in it becomes the selection.
+   */
+  function insertBlockAfterSelection(
+    ctx: EditActionContext,
+    body: string,
+    select: string,
+  ): TextEdit {
     const at = ctx.selectionEnd;
     const before = ctx.value.slice(0, at);
     const after = ctx.value.slice(at);
     const lead = before === "" || before.endsWith("\n\n") ? "" : before.endsWith("\n") ? "\n" : "\n\n";
     const breaks = (/^\n*/u.exec(after) ?? [""])[0].length;
     const trail = after === "" || breaks >= 2 ? "" : breaks === 1 ? "\n" : "\n\n";
-    const first = at + lead.length + 2;
+    const first = at + lead.length + Math.max(0, body.indexOf(select));
     return {
       start: at,
       end: at,
-      text: lead + lines.join("\n") + trail,
+      text: lead + body + trail,
       selectionStart: first,
-      selectionEnd: first + "Column 1".length,
+      selectionEnd: first + select.length,
     };
+  }
+
+  const ALERT_TYPES = ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"];
+  const ALERT_HEAD = /^(\s{0,3}>\s?\[!)(NOTE|TIP|IMPORTANT|WARNING|CAUTION)(\][ \t]*)$/iu;
+  const ALERT_OPTIONS: EditActionOption[] = ALERT_TYPES.map((type) => ({
+    value: type,
+    label: type.charAt(0) + type.slice(1).toLowerCase(),
+  }));
+
+  /**
+   * The type word of the alert the caret is in: the head line is the first line of the run of
+   * quoted lines around the caret (`> [!TYPE]`).
+   */
+  function alertAtCaret(ctx: EditActionContext): { start: number; end: number; type: string } | undefined {
+    const { value } = ctx;
+    const lineEndOf = (start: number): number => {
+      const end = value.indexOf("\n", start);
+      return end === -1 ? value.length : end;
+    };
+    const quoted = (start: number): boolean => /^\s{0,3}>/u.test(value.slice(start, lineEndOf(start)));
+    let lineStart = value.lastIndexOf("\n", ctx.selectionStart - 1) + 1;
+    if (!quoted(lineStart)) return undefined;
+    while (lineStart > 0) {
+      const previousStart = value.lastIndexOf("\n", lineStart - 2) + 1;
+      if (!quoted(previousStart)) break;
+      lineStart = previousStart;
+    }
+    const head = ALERT_HEAD.exec(value.slice(lineStart, lineEndOf(lineStart)));
+    if (!head) return undefined;
+    const start = lineStart + head[1].length;
+    return { start, end: start + head[2].length, type: head[2].toUpperCase() };
+  }
+
+  /**
+   * Inserts a GitHub alert (`> [!NOTE]` and the touched lines quoted) or, with the caret inside
+   * an alert, changes its type to `ctx.arg`. An unknown type is refused.
+   */
+  function insertAlert(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    if (ctx.arg !== undefined && !ALERT_TYPES.includes(ctx.arg)) return undefined;
+    const existing = alertAtCaret(ctx);
+    if (existing) {
+      if (ctx.arg === undefined || ctx.arg === existing.type) return undefined;
+      const delta = ctx.arg.length - existing.type.length;
+      const move = (position: number): number =>
+        position >= existing.end ? position + delta : position > existing.start ? existing.start + ctx.arg!.length : position;
+      return {
+        start: existing.start,
+        end: existing.end,
+        text: ctx.arg,
+        selectionStart: move(ctx.selectionStart),
+        selectionEnd: move(ctx.selectionEnd),
+      };
+    }
+    const head = "> [!" + (ctx.arg ?? "NOTE") + "]\n";
+    const { firstStart, lastEnd, lines } = touchedLines(ctx);
+    const quoted = lines.map((line) => (line.trim() === "" && lines.length > 1 ? ">" : "> " + line));
+    const text = head + quoted.join("\n");
+    if (ctx.selectionStart !== ctx.selectionEnd) {
+      return {
+        start: firstStart,
+        end: lastEnd,
+        text,
+        selectionStart: firstStart + head.length,
+        selectionEnd: firstStart + text.length,
+      };
+    }
+    const column = ctx.selectionStart - firstStart;
+    const caret = firstStart + head.length + 2 + Math.min(column, lines[0].length);
+    return { start: firstStart, end: lastEnd, text, selectionStart: caret, selectionEnd: caret };
+  }
+
+  const CHECKBOX_LINE = /^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)\[[ xX]\][ \t]?/u;
+  const LIST_ITEM_LINE = /^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)/u;
+
+  /**
+   * Toggles a task-list checkbox on the touched lines: when every non-blank line has one they
+   * lose it (the list item stays), otherwise the lines without one gain `[ ]` after their list
+   * marker, or `- [ ] ` when they have none.
+   */
+  function toggleCheckbox(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const { firstStart, lastEnd, lines } = touchedLines(ctx);
+    const filled = lines.filter((line) => line.trim() !== "");
+    const remove = filled.length > 0 && filled.every((line) => CHECKBOX_LINE.test(line));
+    // For each line: where the change happens, how many characters go and what comes instead.
+    const changes = lines.map((line) => {
+      if (line.trim() === "" && lines.length > 1) return { at: 0, drop: 0, add: "" };
+      const boxed = CHECKBOX_LINE.exec(line);
+      if (remove) {
+        const marker = boxed![1];
+        return { at: marker.length, drop: boxed![0].length - marker.length, add: "" };
+      }
+      if (boxed) return { at: 0, drop: 0, add: "" };
+      const item = LIST_ITEM_LINE.exec(line);
+      if (item) return { at: item[1].length, drop: 0, add: "[ ] " };
+      const indent = (/^[ \t]*/u.exec(line) ?? [""])[0].length;
+      return { at: indent, drop: 0, add: "- [ ] " };
+    });
+    const text = lines.map((line, index) => {
+      const change = changes[index];
+      return line.slice(0, change.at) + change.add + line.slice(change.at + change.drop);
+    }).join("\n");
+    if (text === lines.join("\n")) return undefined;
+    if (lines.length === 1 && ctx.selectionStart === ctx.selectionEnd) {
+      const change = changes[0];
+      const column = ctx.selectionStart - firstStart;
+      const next = column < change.at
+        ? column
+        : column >= change.at + change.drop ? column - change.drop + change.add.length : change.at;
+      const caret = firstStart + next;
+      return { start: firstStart, end: lastEnd, text, selectionStart: caret, selectionEnd: caret };
+    }
+    return {
+      start: firstStart,
+      end: lastEnd,
+      text,
+      selectionStart: firstStart,
+      selectionEnd: firstStart + text.length,
+    };
+  }
+
+  /**
+   * With the caret in a pipe table, replaces that table's lines with an HTML `<table>`; anywhere
+   * else (or without table tools) inserts a new 2 x 2 HTML table after the selection.
+   */
+  function htmlTable(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const tools = tableTools;
+    if (tools) {
+      const { value } = ctx;
+      // The run of non-blank lines around the caret, with the offset of each line.
+      const caretLineStart = value.lastIndexOf("\n", ctx.selectionStart - 1) + 1;
+      const offsets: number[] = [];
+      const rows: string[] = [];
+      let from = caretLineStart;
+      while (from > 0) {
+        const previous = value.lastIndexOf("\n", from - 2) + 1;
+        if (value.slice(previous, from - 1).trim() === "") break;
+        from = previous;
+      }
+      for (let offset = from; offset <= value.length;) {
+        const lineEnd = value.indexOf("\n", offset) === -1 ? value.length : value.indexOf("\n", offset);
+        const line = value.slice(offset, lineEnd);
+        if (line.trim() === "") break;
+        offsets.push(offset);
+        rows.push(line);
+        offset = lineEnd + 1;
+      }
+      for (let first = 0; first < rows.length && offsets[first] <= caretLineStart; first += 1) {
+        const model = tools.parse(rows.slice(first).join("\n"));
+        if (!model) continue;
+        const start = offsets[first];
+        const end = offsets[rows.length - 1] + rows[rows.length - 1].length;
+        const text = tools.toHtmlTable(model);
+        return { start, end, text, selectionStart: start + text.length, selectionEnd: start + text.length };
+      }
+    }
+    const body = [
+      "<table>", "  <thead>", "    <tr>", "      <th>Column 1</th>", "      <th>Column 2</th>",
+      "    </tr>", "  </thead>", "  <tbody>", "    <tr>", "      <td></td>", "      <td></td>",
+      "    </tr>", "  </tbody>", "</table>",
+    ].join("\n");
+    return insertBlockAfterSelection(ctx, body, "Column 1");
   }
 
   /** Replaces the selection with the chosen emoji character, caret after it. */
@@ -806,6 +993,39 @@ export function createEditActions(languages: string[] = []): EditActionRegistry 
       scopes: ["block"],
       shortcut: { codes: ["Slash"], keys: ["/"], anyShift: true, modifier: "any" },
       apply: toggleTodo,
+    },
+    {
+      id: "alert",
+      label: "Alert",
+      title: "GitHub alert (choose a type)",
+      icon: "alert",
+      group: "github",
+      modes: ["gfm"],
+      scopes: ["block"],
+      popover: "alert",
+      popoverAtCaret: true,
+      options: ALERT_OPTIONS,
+      apply: insertAlert,
+    },
+    {
+      id: "checkbox",
+      label: "Checkbox",
+      title: "Toggle checkbox",
+      icon: "checkbox",
+      group: "github",
+      modes: ["gfm"],
+      scopes: ["block"],
+      apply: toggleCheckbox,
+    },
+    {
+      id: "htmlTable",
+      label: "HTML table",
+      title: "HTML table (converts the table at the caret)",
+      icon: "htmlTable",
+      group: "github",
+      modes: ["gfm"],
+      scopes: ["block"],
+      apply: htmlTable,
     },
   ];
 

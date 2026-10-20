@@ -851,7 +851,8 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
 }
 
 .sphinx-preview-edit-palette > button:hover,
-.sphinx-preview-edit-palette-menu > button:hover {
+.sphinx-preview-edit-palette-menu > button:hover,
+.sphinx-preview-edit-palette-menu > button[data-active="true"] {
   background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
@@ -927,6 +928,10 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
   color: var(--vscode-editor-foreground, CanvasText);
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.25);
+}
+
+.sphinx-preview-edit-palette-menu[data-edit-popover-at="caret"] {
+  max-width: none;
 }
 
 .sphinx-preview-edit-palette-menu > button {

@@ -237,3 +237,39 @@ test("T24: the table inserted by the palette parses back with its header and emp
   // The canonical serializer writes the same text back, so cell edits keep the layout.
   assert.equal(tools.serialize({ ...model, columnsChanged: true }), edit.text);
 });
+
+test("T25: toHtmlTable writes thead and tbody with escaped text and alignment attributes", () => {
+  const tools = createMarkdownTableTools();
+  const model = tools.parse("| A & B | <C> |\n| :--- | :---: |\n| 1 \\| 2 | **bold** |")!;
+  assert.equal(tools.toHtmlTable(model), [
+    "<table>",
+    "  <thead>",
+    "    <tr>",
+    '      <th align="left">A &amp; B</th>',
+    '      <th align="center">&lt;C&gt;</th>',
+    "    </tr>",
+    "  </thead>",
+    "  <tbody>",
+    "    <tr>",
+    '      <td align="left">1 | 2</td>',
+    '      <td align="center">**bold**</td>',
+    "    </tr>",
+    "  </tbody>",
+    "</table>",
+  ].join("\n"));
+});
+
+test("T25: toHtmlTable omits tbody without rows and alignment attributes without colons", () => {
+  const tools = createMarkdownTableTools();
+  const html = tools.toHtmlTable(tools.parse("| A |\n| --- |")!);
+  assert.equal(html, "<table>\n  <thead>\n    <tr>\n      <th>A</th>\n    </tr>\n  </thead>\n</table>");
+  assert.equal(html.includes("tbody"), false);
+});
+
+test("T25: toHtmlTable keeps a model's unicode and empty cells", () => {
+  const tools = createMarkdownTableTools();
+  const html = tools.toHtmlTable(tools.parse("| \u00e9t\u00e9 | |\n|---|---:|\n| \u2705 | |")!);
+  assert.equal(html.includes("<th>\u00e9t\u00e9</th>"), true);
+  assert.equal(html.includes('<th align="right"></th>'), true);
+  assert.equal(html.includes("<td>\u2705</td>"), true);
+});

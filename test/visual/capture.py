@@ -2590,7 +2590,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   }""")
   if not geometry["first"]:
     failures.append(Failure(page_name, "the palette is not the first child of the editor frame"))
-  expected = ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table", "emoji", "todo"]
+  expected = ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table", "emoji", "todo", "alert", "checkbox", "htmlTable"]
   if geometry["labels"] != expected:
     failures.append(Failure(page_name, f"palette buttons are {geometry['labels']}, expected {expected}"))
   if geometry["barBottom"] > geometry["areaTop"] + 0.5:
@@ -2736,6 +2736,39 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
     if editor.count() != 1 or refocused != "TEXTAREA" or editor.locator(".sphinx-preview-edit-palette-menu").count() != 0:
       failures.append(Failure(page_name, f"Escape in the emoji filter left the editor in a bad state: {refocused}"))
       return
+
+  # T25: the Alert button writes the alert and opens its type list at the caret, inside the frame.
+  area.focus()
+  palette.locator("button[data-edit-action='alert']").click()
+  alert_list = editor.locator(".sphinx-preview-edit-palette-menu[data-edit-popover='alert']")
+  page.wait_for_timeout(150)
+  if alert_list.count() != 1 or not alert_list.is_visible():
+    failures.append(Failure(page_name, "the alert type list did not open"))
+  else:
+    alert_state = alert_list.evaluate("""element => {
+      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      const r = element.getBoundingClientRect();
+      const t = document.querySelector('.sphinx-preview-block-editor textarea');
+      return { options: [...element.querySelectorAll('[data-edit-option]')].map((o) => o.textContent),
+        left: r.left, right: r.right, top: r.top, frameLeft: f.left, frameRight: f.right,
+        areaTop: t.getBoundingClientRect().top, focused: document.activeElement === t,
+        value: t.value.split('\\n')[0] };
+    }""")
+    if alert_state["options"] != ["Note", "Tip", "Important", "Warning", "Caution"]:
+      failures.append(Failure(page_name, f"the alert type list is wrong: {alert_state}"))
+    if alert_state["value"] != "> [!NOTE]" or not alert_state["focused"]:
+      failures.append(Failure(page_name, f"the alert was not written with the focus kept: {alert_state}"))
+    if alert_state["left"] < alert_state["frameLeft"] - 0.5 or alert_state["top"] < alert_state["areaTop"]:
+      failures.append(Failure(page_name, f"the alert type list is not next to the text: {alert_state}"))
+    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-alert.png"), caret="hide")
+    alert_list.locator("[data-edit-option='WARNING']").click()
+    page.wait_for_timeout(100)
+    changed = page.evaluate("""() => {
+      const t = document.querySelector('.sphinx-preview-block-editor textarea');
+      return { head: t ? t.value.split('\\n')[0] : '', focused: document.activeElement === t };
+    }""")
+    if changed["head"] != "> [!WARNING]" or not changed["focused"] or editor.locator(".sphinx-preview-edit-palette-menu").count() != 0:
+      failures.append(Failure(page_name, f"choosing Warning did not change the head: {changed}"))
 
   # Closing puts the block back where it was before the editor opened (no jump by the bar height).
   page.keyboard.press("Escape")
