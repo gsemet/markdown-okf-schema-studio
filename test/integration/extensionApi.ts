@@ -10,6 +10,8 @@ export const {
   getActivePreviewForTests,
   getActivePreviewPanelForTests,
   getLivePreviewRolesForTests,
+  listCitationKeysForTests,
+  listDocumentTargetsForTests,
   PANEL_VIEW_TYPE,
   REFRESH_COMMAND_ID,
   resetPreviewThemeModeForTests,

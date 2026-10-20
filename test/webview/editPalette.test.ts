@@ -118,7 +118,8 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   // T28: the registry's own MyST group (admonition ... label) sits before the test's extra action.
   const gfmReal = gfm.filter((id) => id !== "gfmOnly");
   assert.deepEqual(myst, [
-    ...gfmReal, "admonition", "deflist", "math", "sub", "sup", "label", "gfmOnly", "mystOnly",
+    ...gfmReal, "admonition", "deflist", "math", "sub", "sup", "label",
+    "ref", "doc", "cite", "dropdown", "tableCaption", "roleKbd", "gfmOnly", "mystOnly",
   ]);
 });
 
@@ -664,4 +665,111 @@ test("T26: Details, Footnote, Mermaid and Key are one-click actions", () => {
   button(k.root, "kbd").dispatch("click", click);
   assert.equal(k.textbox.value, "press <kbd>Esc</kbd>");
   assert.equal(popover(k.root), undefined);
+});
+
+// T30: host-backed pickers (labels, citations) and the document dialog.
+function openHost(options: {
+  value?: string;
+  caret?: number;
+  requestList?: (kind: string, done: (result: { items: Array<{ value: string; label: string; detail?: string }>; truncated?: boolean; error?: string }) => void) => void;
+  pickHost?: (kind: string, done: (value: string | undefined) => void) => void;
+} = {}) {
+  const h = openFull(options.value ?? "", options.caret ?? 0);
+  // openFull builds a strict palette; rebuild a MyST one with the host callbacks.
+  const palette = createEditPalette(fakeDocument(), {
+    actions: createEditActions([], createMarkdownTableTools()),
+    getControl: () => h.textbox,
+    applyTextEdit: (edit) => {
+      h.edits.push(edit);
+      h.textbox.value = h.textbox.value.slice(0, edit.start) + edit.text + h.textbox.value.slice(edit.end);
+      palette.closePopover();
+    },
+    mode: "myst",
+    onLeave: () => { h.leaves += 1; },
+    isInsideFrame: (node) => h.frame.has(node),
+    ...(options.requestList ? { requestList: options.requestList } : {}),
+    ...(options.pickHost ? { pickHost: options.pickHost } : {}),
+  });
+  h.palette = palette;
+  h.root = palette.element as unknown as FakeElement;
+  return h;
+}
+
+const choiceButtons = (menu: FakeElement): FakeElement[] =>
+  menu.all().filter((e) => e.getAttribute("data-edit-option") !== null);
+
+test("T30: Reference opens a filter popover, lists the host's labels and inserts the chosen one", () => {
+  let asked = "";
+  let answer: ((result: { items: Array<{ value: string; label: string; detail?: string }> }) => void) | undefined;
+  const h = openHost({
+    value: "see ", caret: 4,
+    requestList: (kind, done) => { asked = kind; answer = done; },
+  });
+  button(h.root, "ref").dispatch("click", click);
+  const menu = popover(h.root)!;
+  assert.equal(asked, "targets");
+  assert.equal(menu.getAttribute("data-edit-popover"), "choices");
+  assert.equal(choiceButtons(menu).length, 0, "nothing is listed before the host answers");
+  assert.match(menu.all().map((e) => e.textContent).join(" "), /Loading/u);
+  answer!({ items: [
+    { value: "intro", label: "intro", detail: "Introduction" },
+    { value: "setup-steps", label: "setup-steps" },
+  ] });
+  assert.deepEqual(choiceButtons(menu).map((e) => e.getAttribute("data-edit-option")), ["intro", "setup-steps"]);
+  // Filter: matches the name and the detail.
+  const field = menu.all().find((e) => e.tagName === "input")!;
+  field.value = "introd";
+  field.dispatch("input");
+  const visible = choiceButtons(menu).filter((e) => e.getAttribute("hidden") === null);
+  assert.deepEqual(visible.map((e) => e.getAttribute("data-edit-option")), ["intro"]);
+  visible[0].dispatch("click", click);
+  assert.equal(h.textbox.value, "see {ref}`intro`");
+  assert.equal(popover(h.root), undefined);
+});
+
+test("T30: Enter in the filter picks the first match; Escape closes", () => {
+  const h = openHost({
+    requestList: (_kind, done) => done({ items: [{ value: "k1", label: "k1" }, { value: "k2", label: "k2" }] }),
+  });
+  button(h.root, "cite").dispatch("click", click);
+  const menu = popover(h.root)!;
+  const field = menu.all().find((e) => e.tagName === "input")!;
+  field.value = "k2";
+  field.dispatch("input");
+  field.dispatch("keydown", { key: "Enter", preventDefault: () => undefined, stopPropagation: () => undefined });
+  assert.equal(h.textbox.value, "{cite}`k2`");
+  button(h.root, "cite").dispatch("click", click);
+  assert.equal(h.palette.handleKey({ key: "Escape", preventDefault: () => undefined }), true);
+  assert.equal(popover(h.root), undefined);
+});
+
+test("T30: an empty list or a host error is said in the popover; a late answer after closing is ignored", () => {
+  const empty = openHost({ requestList: (_kind, done) => done({ items: [] }) });
+  button(empty.root, "ref").dispatch("click", click);
+  assert.match(popover(empty.root)!.all().map((e) => e.textContent).join(" "), /No label/u);
+  const failed = openHost({ requestList: (_kind, done) => done({ items: [], error: "Open a trusted workspace." }) });
+  button(failed.root, "cite").dispatch("click", click);
+  assert.match(popover(failed.root)!.all().map((e) => e.textContent).join(" "), /trusted workspace/u);
+  let late: ((result: { items: Array<{ value: string; label: string }> }) => void) | undefined;
+  const closed = openHost({ requestList: (_kind, done) => { late = done; } });
+  button(closed.root, "ref").dispatch("click", click);
+  closed.palette.closePopover();
+  late!({ items: [{ value: "x", label: "x" }] });
+  assert.equal(popover(closed.root), undefined);
+});
+
+test("T30: Document asks the host for a file and inserts the path; a cancelled pick inserts nothing", () => {
+  let done: ((value: string | undefined) => void) | undefined;
+  let asked = "";
+  const h = openHost({ value: "read ", caret: 5, pickHost: (kind, callback) => { asked = kind; done = callback; } });
+  button(h.root, "doc").dispatch("click", click);
+  assert.equal(asked, "document");
+  assert.equal(popover(h.root), undefined, "no popover: the host shows its own dialog");
+  done!("../guide/setup");
+  assert.equal(h.textbox.value, "read {doc}`../guide/setup`");
+  button(h.root, "doc").dispatch("click", click);
+  const before = h.textbox.focused;
+  done!(undefined);
+  assert.equal(h.edits.length, 1);
+  assert.ok(h.textbox.focused > before, "the focus goes back to the text box");
 });

@@ -1047,6 +1047,51 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   display: none;
 }
 
+/* Reference and citation lists: a filter field and the host's entries, inside the frame. */
+.sphinx-preview-edit-palette-menu[data-edit-popover="choices"] {
+  width: 22em;
+  max-width: 100%;
+  max-height: 16em;
+  padding: 6px;
+  overflow: hidden;
+}
+
+.sphinx-preview-edit-choice-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.sphinx-preview-edit-choice-list > button {
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85em;
+  text-align: start;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.sphinx-preview-edit-choice-list > button:hover,
+.sphinx-preview-edit-choice-list > button:focus-visible {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+}
+
+.sphinx-preview-edit-choice-list > button[hidden] {
+  display: none;
+}
+
+.sphinx-preview-edit-choice-note {
+  padding: 3px 6px;
+  font-size: 0.8em;
+  color: var(--vscode-descriptionForeground, inherit);
+}
+
 /* Link panel: Text and URL fields under the palette, in the flow of the editor frame. */
 .sphinx-preview-link-panel {
   display: flex;

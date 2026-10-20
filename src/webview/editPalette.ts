@@ -10,6 +10,14 @@ export interface EditPaletteControl {
   focus(options?: { preventScroll?: boolean }): void;
 }
 
+/** What the host answers to a list request: the entries of a filterable popover. */
+export interface EditPaletteChoiceList {
+  items: Array<{ value: string; label: string; detail?: string }>;
+  truncated?: boolean;
+  /** Why the list could not be read; shown in place of the entries. */
+  error?: string;
+}
+
 export interface EditPaletteDeps {
   actions: EditActionRegistry;
   getControl(): EditPaletteControl;
@@ -20,6 +28,14 @@ export interface EditPaletteDeps {
   getCaretRect?(): CaretRect | undefined;
   /** Runs an edit as one native, undoable step in the control (and autosaves). */
   applyTextEdit(edit: TextEdit): void;
+  /** Asks the host for the entries of a `hostList` action; `done` is called once, maybe late. */
+  requestList?(kind: "targets" | "citations", done: (result: EditPaletteChoiceList) => void): void;
+  /**
+   * Asks the host for a native dialog (a `hostDialog` action). `done` gets the chosen value, or
+   * `undefined` when the dialog was cancelled or failed. The caller keeps the editor open while it
+   * is shown.
+   */
+  pickHost?(kind: "document", done: (value: string | undefined) => void): void;
   /** Opens the small panel of an action that has one (the Link button). */
   openPanel?(action: EditAction): void;
   mode: EditActionMode;
@@ -105,6 +121,11 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     sup: glyph("sup", "x\u00b2"),
     label: svg("M4 5h9l7 7-7 7H4zM8 10v.5"),
     kbd: svg("M3 7h18v10H3zM7 11h.5M11 11h.5M15 11h.5M8 14h8"),
+    ref: svg("M9 8H7a4 4 0 0 0 0 8h2M15 8h2a4 4 0 0 1 0 8h-2M8 12h8") + caret,
+    doc: svg("M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"),
+    cite: glyph("cite", "\u201c") + caret,
+    dropdown: svg("M4 5h16v14H4zM8 10l4 4 4-4"),
+    tableCaption: svg("M4 4h16M4 8h16v12H4zM4 13h16M10 8v12"),
     table: svg("M4 5h16v14H4zM4 10h16M4 14.5h16M10 5v14M15 5v14"),
     emoji: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 14a4.5 4.5 0 0 0 7 0M9 9.5v.5M15 9.5v.5"),
   };
@@ -468,6 +489,136 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     emojiField = field;
   }
 
+  /**
+   * A filterable list the host fills: "Loading..." first, then one button per entry. The filter
+   * matches the value and the detail; Enter picks the first match, Escape closes (the shared
+   * handlers). An answer that arrives after the popover closed is dropped.
+   */
+  function buildChoices(menu: HTMLElement, action: EditAction): () => void {
+    const field = document.createElement("input");
+    field.setAttribute("type", "text");
+    field.className = "sphinx-preview-edit-emoji-filter";
+    field.setAttribute("aria-label", "Filter " + action.label.toLowerCase());
+    field.setAttribute("placeholder", "Filter");
+    field.setAttribute("data-choice-filter", "true");
+    field.setAttribute("spellcheck", "false");
+    field.setAttribute("autocomplete", "off");
+    menu.appendChild(field);
+    const list = document.createElement("div");
+    list.className = "sphinx-preview-edit-choice-list";
+    menu.appendChild(list);
+    const note = document.createElement("div");
+    note.className = "sphinx-preview-edit-choice-note";
+    note.setAttribute("role", "status");
+    note.textContent = "Loading...";
+    list.appendChild(note);
+    let entries: Array<{ button: HTMLElement; text: string; value: string }> = [];
+    const visible = (): Array<{ button: HTMLElement; text: string; value: string }> =>
+      entries.filter((entry) => entry.button.getAttribute("hidden") === null);
+    const choose = (value: string): void => {
+      closePopover();
+      run(action, value);
+    };
+    const filter = (): void => {
+      const words = String(field.value).trim().toLowerCase().split(/\s+/u).filter((word) => word !== "");
+      for (const entry of entries) {
+        if (words.every((word) => entry.text.includes(word))) entry.button.removeAttribute("hidden");
+        else entry.button.setAttribute("hidden", "true");
+      }
+    };
+    field.addEventListener("input", filter);
+    trackFocus(field);
+    field.addEventListener("keydown", (event: {
+      key?: string;
+      metaKey?: boolean;
+      ctrlKey?: boolean;
+      isComposing?: boolean;
+      preventDefault?: () => void;
+      stopPropagation?: () => void;
+    }) => {
+      if (event.isComposing) return;
+      if (event.key === "Escape") {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        closePopover();
+      } else if (event.key === "Enter") {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        if (event.metaKey || event.ctrlKey) {
+          closePopover();
+          deps.onDone?.();
+          return;
+        }
+        const first = visible()[0];
+        if (first) choose(first.value);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        visible()[0]?.button.focus({ preventScroll: true });
+      }
+    });
+    const kind = action.hostList;
+    const ask = deps.requestList;
+    if (!kind || !ask) {
+      note.textContent = "The list is not available here.";
+      emojiField = field;
+      return () => undefined;
+    }
+    emojiField = field;
+    // Started once the popover is open, so an answer in the same turn still finds it.
+    return () => ask(kind, (result) => {
+      if (openMenu !== menu) return;
+      note.remove();
+      if (result.error || result.items.length === 0) {
+        list.appendChild(note);
+        note.textContent = result.error
+          ? result.error
+          : kind === "targets" ? "No label found. Add one with the Label button." : "No citation key found in the workspace .bib files.";
+        return;
+      }
+      entries = result.items.map((item) => {
+        const button = document.createElement("button");
+        button.setAttribute("type", "button");
+        button.setAttribute("tabindex", "-1");
+        button.setAttribute("role", "menuitem");
+        button.setAttribute("data-edit-option", item.value);
+        button.textContent = item.detail ? item.label + " \u2014 " + item.detail : item.label;
+        button.addEventListener("mousedown", keepFocus);
+        button.addEventListener("click", (event: { preventDefault?: () => void; stopPropagation?: () => void }) => {
+          event.preventDefault?.();
+          event.stopPropagation?.();
+          choose(item.value);
+        });
+        button.addEventListener("keydown", (event: { key?: string; isComposing?: boolean; preventDefault?: () => void; stopPropagation?: () => void }) => {
+          if (event.isComposing) return;
+          const shown = visible();
+          const at = shown.findIndex((entry) => entry.button === button);
+          if (event.key === "Escape") {
+            event.preventDefault?.();
+            event.stopPropagation?.();
+            closePopover();
+          } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault?.();
+            event.stopPropagation?.();
+            const next = at + (event.key === "ArrowDown" ? 1 : -1);
+            if (next < 0) field.focus({ preventScroll: true });
+            else shown[next]?.button.focus({ preventScroll: true });
+          }
+        });
+        trackFocus(button);
+        list.appendChild(button);
+        return { button, text: (item.value + " " + (item.detail ?? "")).toLowerCase(), value: item.value };
+      });
+      if (result.truncated) {
+        const more = document.createElement("div");
+        more.className = "sphinx-preview-edit-choice-note";
+        more.textContent = "More entries exist. Type to narrow the list.";
+        list.appendChild(more);
+      }
+      filter();
+    });
+  }
+
   function openPopover(action: EditAction, button: HTMLElement): void {
     closePopover();
     const menu = document.createElement("div");
@@ -475,6 +626,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     menu.setAttribute("role", "menu");
     menu.setAttribute("aria-label", action.label);
     menu.setAttribute("data-edit-popover", String(action.popover));
+    let startChoices: (() => void) | undefined;
     // The emoji filter has to receive the press itself to take the caret; everything else keeps
     // the focus where it is.
     menu.addEventListener("mousedown", (event: {
@@ -491,6 +643,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       buildGrid(menu, action);
     } else if (action.popover === "emoji" && action.emoji) {
       buildEmoji(menu, action);
+    } else if (action.popover === "choices" && action.hostList) {
+      startChoices = buildChoices(menu, action);
     } else {
       for (const option of action.options ?? []) {
         const item = document.createElement("button");
@@ -545,6 +699,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     button.setAttribute("aria-expanded", "true");
     openMenu = menu;
     openButton = button;
+    startChoices?.();
   }
 
   function tooltip(action: EditAction): string {
@@ -618,6 +773,16 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
         closePopover();
         if (action.panel) {
           deps.openPanel?.(action);
+          return;
+        }
+        if (action.hostDialog) {
+          // The host shows its own dialog; the page keeps the editor open until it answers.
+          const kind = action.hostDialog;
+          if (!deps.pickHost) return;
+          deps.pickHost(kind, (value) => {
+            if (value === undefined) deps.getControl().focus({ preventScroll: true });
+            else run(action, value);
+          });
           return;
         }
         run(action);

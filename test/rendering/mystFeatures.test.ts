@@ -1511,3 +1511,54 @@ test("the anchor carries the source line of its label in a document with frontma
   const anchor = findElement(html, (element) => hasClass(element, "okf-anchor"))!;
   assert.equal(text.split("\n")[Number(attribute(anchor, "data-okf-label-line")) - 1], "(intro)=");
 });
+
+// T30: what the reference, citation, dropdown, captioned table and key actions write renders.
+test("T30: a {ref} inserted by the edition palette renders as a link to the label", async () => {
+  const edit = createEditActions([], createMarkdownTableTools()).byId.get("ref")!.apply({
+    value: "See ", selectionStart: 4, selectionEnd: 4, scope: "block", arg: "intro" })!;
+  const written = "(intro)=\n# Introduction\n\n" + "See ".slice(0, edit.start) + edit.text;
+  assert.match(written, /\{ref\}`intro`/u);
+  const { html } = await renderPalette(written);
+  const link = findElement(html, (element) => element.tagName === "a" && attribute(element, "href") === "#intro");
+  assert.ok(link, "the reference was not rendered as a link");
+  assert.match(textContent(link), /Introduction/u);
+});
+
+test("T30: a {cite} inserted by the edition palette renders the citation placeholder", async () => {
+  const edit = createEditActions([], createMarkdownTableTools()).byId.get("cite")!.apply({
+    value: "Claim ", selectionStart: 6, selectionEnd: 6, scope: "block", arg: "smith2024" })!;
+  const { html } = await renderPalette("Claim " + edit.text);
+  const citation = findElement(html, (element) => hasClass(element, "myst-cite"));
+  assert.ok(citation, "no citation placeholder");
+  assert.equal(textContent(citation), "[smith2024]");
+});
+
+test("T30: a dropdown inserted by the edition palette renders as details with the title", async () => {
+  const edit = createEditActions([], createMarkdownTableTools()).byId.get("dropdown")!.apply({
+    value: "", selectionStart: 0, selectionEnd: 0, scope: "block" })!;
+  const { html } = await renderPalette(edit.text);
+  const details = findElement(html, isTag("details"));
+  assert.ok(details, "the dropdown was not rendered as details");
+  assert.equal(textContent(findElement(details, isTag("summary"))!).trim(), "Title");
+  assert.match(textContent(details), /Content/u);
+});
+
+test("T30: a captioned table inserted by the edition palette renders a caption", async () => {
+  const edit = createEditActions([], createMarkdownTableTools()).byId.get("tableCaption")!.apply({
+    value: "", selectionStart: 0, selectionEnd: 0, scope: "block" })!;
+  const { html } = await renderPalette(edit.text);
+  const table = findElement(html, isTag("table"));
+  assert.ok(table, "no table");
+  assert.match(textContent(findElement(html, (element) =>
+    element.tagName === "figcaption" || element.tagName === "caption") ?? table), /Caption/u);
+  assert.equal(findElements(html, (element) => element.tagName === "th").length, 2);
+});
+
+test("T30: a {kbd} role inserted by the edition palette renders a kbd element", async () => {
+  const edit = createEditActions([], createMarkdownTableTools()).byId.get("roleKbd")!.apply({
+    value: "Press ", selectionStart: 6, selectionEnd: 6, scope: "block" })!;
+  const { html } = await renderPalette("Press " + edit.text + " now");
+  const key = findElement(html, isTag("kbd"));
+  assert.ok(key, "the {kbd} role was not rendered as a kbd element");
+  assert.equal(textContent(key), "Ctrl+K");
+});

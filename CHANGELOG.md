@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- The edition palette gets six more MyST buttons. Reference lists the `(label)=` names of the
+  document (with the heading or text after each) and writes `` {ref}`label` ``; with text
+  selected it writes `` {ref}`text <label>` ``. Document link opens the system file dialog and
+  writes `` {doc}`../path/file` `` relative to the document, without the extension. Citation
+  lists the keys of the workspace `.bib` files (at most 20 files and 2 MB, node_modules and build
+  folders skipped, a few seconds at most) and writes `` {cite}`key` ``. Dropdown writes a
+  collapsible `:class: dropdown` note, Table with caption wraps the table at the caret in
+  `:::{table} Caption`, and Key (MyST) wraps the selection in `` {kbd}`…` ``.
 - The edition palette gets six MyST buttons, shown in MyST mode only. Admonition opens a list
   (Note, Tip, Important, Warning, Caution, Danger, Attention, Error, Hint, See also, Custom) and
   wraps the current lines in a `:::{type}` fence, one colon longer than any fence inside; Custom

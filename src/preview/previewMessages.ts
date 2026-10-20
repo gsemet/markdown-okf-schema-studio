@@ -67,6 +67,12 @@ const VIEW_PREFERENCE_VALIDATORS: Record<string, (value: unknown) => boolean> = 
 
 const MAX_COPY_TEXT_LENGTH = 1_000_000;
 
+const MAX_EDIT_ID_LENGTH = 100;
+
+/** The list and pick requests of the MyST palette carry only the id their answer is matched by. */
+const isHostRequest: MessageValidator = (message) =>
+  isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "";
+
 const PALETTE_MODES = ["strict", "gfm", "myst"] as const;
 
 export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
@@ -83,6 +89,11 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   // Rename of a MyST label from its anchor icon: the source line of `(oldName)=` and both names.
   previewLabelRename: (message) => isSourceLine(message.line)
     && isValidLabelName(message.oldName) && isValidLabelName(message.newName),
+  // The MyST palette's pickers: labels of the document, citation keys of the workspace `.bib`
+  // files, and a native open dialog for a `{doc}` path. They read only; the answer repeats `editId`.
+  previewListTargets: isHostRequest,
+  previewListCitations: isHostRequest,
+  previewPickDocument: isHostRequest,
 };
 
 export const isRegisteredPreviewMessage = createPreviewMessageChecker(REGISTERED_PREVIEW_MESSAGES);

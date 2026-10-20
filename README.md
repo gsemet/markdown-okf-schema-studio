@@ -41,7 +41,9 @@ Markdown flavours and extensions:
   blockquotes and horizontal rules; in GitHub (GFM) and MyST mode it also adds GitHub alerts with a
   type list, task-list checkboxes, HTML tables, collapsible sections, footnotes, Mermaid diagrams,
   table column alignment and `<kbd>` keys; MyST mode adds admonitions with a type list,
-  definition lists, math (inline, display, aligned), subscript, superscript and `(name)=` labels.
+  definition lists, math (inline, display, aligned), subscript, superscript, `(name)=` labels,
+  `{ref}` and `{doc}` references, `{cite}` citations from the workspace `.bib` files, dropdowns,
+  tables with a caption and `{kbd}` keys.
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)
   annotations can show target metadata and source line numbers for implementation
   and test evidence.
