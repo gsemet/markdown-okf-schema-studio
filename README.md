@@ -37,7 +37,9 @@ Markdown flavours and extensions:
   keyboard navigation, row creation, and focused field editing.
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
-  An edition palette above the text box adds headings, strikethrough, code blocks with a language,
+  An edition palette above the text box adds headings, strikethrough, text and background colours
+  (a Colour picker with 16 swatches and a hex field; a swatch button appears when the caret is in a
+  colour code), code blocks with a language,
   blockquotes, horizontal rules and images; in GitHub (GFM) and MyST mode it also adds GitHub alerts with a
   type list, task-list checkboxes, HTML tables, collapsible sections, footnotes, Mermaid diagrams,
   table column alignment and `<kbd>` keys; MyST mode adds admonitions with a type list,

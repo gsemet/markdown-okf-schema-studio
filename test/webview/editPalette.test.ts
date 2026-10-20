@@ -5,6 +5,7 @@ import { createEditActions } from "../../src/webview/editActions";
 import type { EditAction, EditActionMode, EditActionRegistry } from "../../src/webview/editActions";
 import { createEditPalette } from "../../src/webview/editPalette";
 import { createMarkdownTableTools } from "../../src/webview/markdownTable";
+import { isSafeOkfColor } from "../../src/webview/spanColors";
 
 type Listener = (event: Record<string, unknown>) => void;
 
@@ -177,7 +178,7 @@ interface Harness {
   frame: Set<unknown>;
 }
 
-function openFull(value = "", caret = 0): Harness {
+function openFull(value = "", caret = 0, registry: EditActionRegistry = createEditActions()): Harness {
   const textbox = {
     value, selectionStart: caret, selectionEnd: caret, focused: 0,
     focus() { textbox.focused += 1; },
@@ -185,7 +186,7 @@ function openFull(value = "", caret = 0): Harness {
   const harness = { edits: [] as Array<{ start: number; end: number; text: string }>, leaves: 0, frame: new Set<unknown>() } as Harness;
   harness.textbox = textbox;
   harness.palette = createEditPalette(fakeDocument(), {
-    actions: createEditActions(),
+    actions: registry,
     getControl: () => textbox,
     applyTextEdit: (edit) => {
       harness.edits.push(edit);
@@ -786,4 +787,126 @@ test("T31: Image asks the host for an image file and inserts the reference; a fa
   assert.equal(asked, "image");
   done!(undefined);
   assert.equal(h.edits.length, 1);
+});
+
+// T34: the colour picker and the colour-code swatch.
+function openColour(value = "", caret = 0, end = caret): Harness {
+  const h = openFull(value, caret, createEditActions([], createMarkdownTableTools(), isSafeOkfColor));
+  h.textbox.selectionEnd = end;
+  return h;
+}
+
+function byAttr(menu: FakeElement, name: string): FakeElement[] {
+  return menu.all().filter((e) => e.getAttribute(name) !== null);
+}
+
+test("T34: the Colour button opens a picker with two tabs, 16 swatches, a hex field and Remove", () => {
+  const h = openColour("say foo now", 4, 7);
+  button(h.root, "color").dispatch("click", click);
+  const menu = popover(h.root)!;
+  assert.equal(menu.getAttribute("data-edit-popover"), "color");
+  const tabs = byAttr(menu, "data-color-tab");
+  assert.deepEqual(tabs.map((tab) => [tab.getAttribute("data-color-tab"), tab.getAttribute("aria-selected")]),
+    [["text", "true"], ["background", "false"]]);
+  assert.equal(byAttr(menu, "data-color-swatch").length, 16);
+  assert.equal(byAttr(menu, "data-color-hex").length, 1);
+  assert.equal(byAttr(menu, "data-color-remove").length, 1);
+  assert.equal(h.textbox.focused > 0, true, "the focus stays in the text box");
+});
+
+test("T34: a swatch applies the colour of the open tab and closes the picker", () => {
+  const h = openColour("say foo now", 4, 7);
+  button(h.root, "color").dispatch("click", click);
+  const menu = popover(h.root)!;
+  const swatch = byAttr(menu, "data-color-swatch")[3]!;
+  swatch.dispatch("click", click);
+  const hex = swatch.getAttribute("data-color-swatch")!;
+  assert.equal(h.textbox.value, `say <span style="color:${hex}">foo</span> now`);
+  assert.equal(popover(h.root), undefined);
+  button(h.root, "color").dispatch("click", click);
+  const again = popover(h.root)!;
+  byAttr(again, "data-color-tab")[1]!.dispatch("click", click);
+  assert.equal(byAttr(again, "data-color-tab")[1]!.getAttribute("aria-selected"), "true");
+  assert.equal(popover(h.root), again, "switching tabs keeps the picker open");
+  byAttr(again, "data-color-swatch")[0]!.dispatch("click", click);
+  assert.equal(h.textbox.value,
+    `say <span style="color:${hex}; background-color:${byAttr(again, "data-color-swatch")[0]!.getAttribute("data-color-swatch")}">foo</span> now`);
+});
+
+test("T34: the hex field validates live, refuses invalid values on Enter and applies a valid one", () => {
+  const h = openColour("say foo now", 4, 7);
+  button(h.root, "color").dispatch("click", click);
+  const menu = popover(h.root)!;
+  const field = byAttr(menu, "data-color-hex")[0]!;
+  const enter = { key: "Enter", ...click };
+  field.value = "red";
+  field.dispatch("input");
+  assert.equal(field.getAttribute("aria-invalid"), "true");
+  field.dispatch("keydown", enter);
+  assert.equal(h.textbox.value, "say foo now", "nothing written");
+  assert.equal(popover(h.root), menu, "the picker stays open");
+  field.value = "#12";
+  field.dispatch("input");
+  assert.equal(field.getAttribute("aria-invalid"), "true");
+  field.value = "#1a2b3c";
+  field.dispatch("input");
+  assert.equal(field.getAttribute("aria-invalid"), null);
+  field.dispatch("keydown", enter);
+  assert.equal(h.textbox.value, 'say <span style="color:#1a2b3c">foo</span> now');
+  assert.equal(popover(h.root), undefined);
+});
+
+test("T34: the hex field may hold the focus; leaving the frame saves, moving inside does not", () => {
+  const h = openColour("say foo now", 4, 7);
+  button(h.root, "color").dispatch("click", click);
+  const field = byAttr(popover(h.root)!, "data-color-hex")[0]!;
+  const inside = {};
+  h.frame.add(inside);
+  field.dispatch("focus");
+  field.dispatch("blur", { relatedTarget: inside });
+  assert.equal(h.leaves, 0);
+  field.dispatch("focus");
+  field.dispatch("blur", { relatedTarget: {} });
+  assert.equal(h.leaves, 1);
+  const mouse: { prevented: boolean } = { prevented: false };
+  popover(h.root)!.dispatch("mousedown", { target: field, stopPropagation: () => undefined, preventDefault: () => { mouse.prevented = true; } });
+  assert.equal(mouse.prevented, false, "a press on the field is not cancelled, so it takes the caret");
+  field.dispatch("keydown", { key: "Escape", ...click });
+  assert.equal(popover(h.root), undefined);
+});
+
+test("T34: Remove unwraps the span of the open tab", () => {
+  const h = openColour('say <span style="color:#c00">foo</span> now', 29, 32);
+  button(h.root, "color").dispatch("click", click);
+  byAttr(popover(h.root)!, "data-color-remove")[0]!.dispatch("click", click);
+  assert.equal(h.textbox.value, "say foo now");
+});
+
+test("T34: the code swatch button shows only with the caret in a colour code and opens on that value", () => {
+  const h = openColour("a #c00 b rgb(1, 2, 3) c", 0);
+  const swatch = button(h.root, "colorCode");
+  assert.equal(swatch.getAttribute("hidden"), "true", "hidden with the caret elsewhere");
+  h.textbox.selectionStart = 4;
+  h.textbox.selectionEnd = 4;
+  h.palette.updateAvailability();
+  assert.equal(swatch.getAttribute("hidden"), null);
+  assert.equal(h.root.all().some((e) => e.styles.get("background-color") === "#c00"), true, "shows the colour");
+  h.textbox.selectionStart = 7;
+  h.textbox.selectionEnd = 7;
+  h.palette.updateAvailability();
+  assert.equal(swatch.getAttribute("hidden"), "true");
+  h.textbox.selectionStart = 12;
+  h.textbox.selectionEnd = 12;
+  h.palette.updateAvailability();
+  assert.equal(swatch.getAttribute("hidden"), null);
+  assert.equal(h.root.all().some((e) => e.styles.get("background-color") === "rgb(1, 2, 3)"), true);
+  swatch.dispatch("click", click);
+  const menu = popover(h.root)!;
+  assert.equal(menu.getAttribute("data-edit-popover"), "color");
+  assert.equal(byAttr(menu, "data-color-tab").length, 0, "no tabs: the code is replaced in place");
+  assert.equal(byAttr(menu, "data-color-remove").length, 0);
+  assert.equal(byAttr(menu, "data-color-hex")[0]!.value, "rgb(1, 2, 3)");
+  byAttr(menu, "data-color-swatch")[0]!.dispatch("click", click);
+  assert.equal(h.textbox.value.startsWith("a #c00 b #"), true);
+  assert.equal(h.textbox.value.includes("rgb("), false);
 });

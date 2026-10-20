@@ -7373,7 +7373,7 @@ test("T21: the palette is the first child of the block editor frame, above the t
   assert.deepEqual(
     palette.childElements.slice(1).map((child) => child.getAttribute("data-edit-action")),
     [
-      "heading", "bold", "italic", "strikethrough", "link", "image", "codeFence", "quote", "rule", "table",
+      "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table",
       "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
       "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd",
@@ -7419,7 +7419,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 33);
+  assert.equal(controls.length, 35);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
@@ -8813,4 +8813,68 @@ test("T32: Edit figure opens the block editor and, once the source arrives, the 
   });
   assert.ok(figurePanelOf(harness), "the form opens with the editor");
   assert.equal(figureField(harness, "source").value, "images/chip.png");
+});
+
+// T34: the colour picker and the colour-code swatch in the real page script.
+test("T34: the code swatch appears and disappears as the caret moves into and out of a colour code", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Use #c00 or plain text";
+  textarea.setSelectionRange(0, 0);
+  textarea.dispatch("keyup", { key: "Home" });
+  const swatch = paletteButton(harness, "colorCode");
+  assert.equal(swatch.getAttribute("hidden"), "true");
+  textarea.setSelectionRange(6, 6);
+  textarea.dispatch("keyup", { key: "ArrowRight" });
+  assert.equal(swatch.getAttribute("hidden"), null, "caret inside #c00");
+  textarea.setSelectionRange(15, 15);
+  textarea.dispatch("mouseup");
+  assert.equal(swatch.getAttribute("hidden"), "true", "caret in plain text");
+  textarea.value = "Use #c00 or #00f";
+  textarea.setSelectionRange(16, 16);
+  textarea.dispatch("input");
+  assert.equal(swatch.getAttribute("hidden"), null, "typing next to a code shows it");
+});
+
+test("T34: the picker edits the text box as one undo step and keeps the editor open", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "say foo now";
+  textarea.setSelectionRange(4, 7);
+  const count = harness.messages.length;
+  paletteButton(harness, "color").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness)!;
+  assert.equal(menu.getAttribute("data-edit-popover"), "color");
+  const swatches = allDescendants(menu).filter((e) => e.getAttribute("data-color-swatch") !== null);
+  assert.equal(swatches.length, 16);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  swatches[0].dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined });
+  assert.equal(textarea.value, `say <span style="color:${swatches[0].getAttribute("data-color-swatch")}">foo</span> now`);
+  assert.equal(calls.length, 1);
+  assert.equal(paletteMenu(harness), undefined);
+  assert.equal(harness.messages.length, count, "no commit");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(textarea.value.slice(textarea.selectionStart, textarea.selectionEnd), "foo", "the text stays selected");
+});
+
+test("T34: the hex field takes the focus without saving, and the code swatch replaces a code in place", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  stubExecCommand(harness, textarea);
+  textarea.value = "Use #c00 here";
+  textarea.setSelectionRange(6, 6);
+  textarea.dispatch("keyup");
+  paletteButton(harness, "colorCode").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness)!;
+  const field = allDescendants(menu).find((e) => e.getAttribute("data-color-hex") !== null)!;
+  assert.equal(field.value, "#c00");
+  textarea.dispatch("blur", { relatedTarget: field });
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), false,
+    "focus moved inside the frame");
+  field.value = "#00ff88";
+  field.dispatch("input");
+  field.dispatch("keydown", { key: "Enter", preventDefault: () => undefined, stopPropagation: () => undefined });
+  assert.equal(textarea.value, "Use #00ff88 here");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
 });

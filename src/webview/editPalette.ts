@@ -81,6 +81,11 @@ export interface EditPalette {
   }): boolean;
   /** Closes the open popover (if any) and reports whether there was one. */
   closePopover(): boolean;
+  /**
+   * Shows or hides the buttons that depend on the caret (the colour-code swatch) for the text
+   * box's current selection; the page calls it as the caret moves.
+   */
+  updateAvailability(): void;
 }
 
 /**
@@ -131,6 +136,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     dropdown: svg("M4 5h16v14H4zM8 10l4 4 4-4"),
     tableCaption: svg("M4 4h16M4 8h16v12H4zM4 13h16M10 8v12"),
     table: svg("M4 5h16v14H4zM4 10h16M4 14.5h16M10 5v14M15 5v14"),
+    color: svg("M7 15l5-10 5 10M9 11h6M5 20h14") + caret,
+    colorCode: "",
     emoji: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 14a4.5 4.5 0 0 0 7 0M9 9.5v.5M15 9.5v.5"),
   };
 
@@ -162,6 +169,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   let caretIndex = -1;
   let mode: EditActionMode = deps.mode;
   let buttons: HTMLElement[] = [];
+  // The action behind each button, for the ones whose visibility follows the caret.
+  let caretButtons: Array<{ button: HTMLElement; action: EditAction; swatch?: HTMLElement }> = [];
 
   // The mode select starts the bar. Unlike the buttons it must receive the press itself (a
   // cancelled mousedown would keep the native list from opening); focus moving to it stays inside
@@ -623,6 +632,156 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     });
   }
 
+  function contextOf(arg?: string) {
+    const control = deps.getControl();
+    return {
+      value: String(control.value ?? ""),
+      selectionStart: Number(control.selectionStart),
+      selectionEnd: Number(control.selectionEnd),
+      scope: "block" as const,
+      ...(arg === undefined ? {} : { arg }),
+    };
+  }
+
+  /**
+   * The colour picker: Text and Background tabs, 16 swatches, a hex field and Remove. A swatch
+   * applies at once; the hex field validates as the user types and Enter applies it. For the
+   * colour-code swatch (an action that has `current`) there are no tabs and no Remove: the picker
+   * starts on the code's value and replaces the code in place. The hex field takes the focus when
+   * clicked (the T22 blur relaxation keeps that from saving); everything else keeps it in the text.
+   */
+  function buildColor(menu: HTMLElement, action: EditAction): void {
+    const inPlace = typeof action.current === "function";
+    let tab = "text";
+    const tabs: HTMLElement[] = [];
+    if (!inPlace) {
+      const strip = document.createElement("div");
+      strip.className = "sphinx-preview-edit-color-tabs";
+      strip.setAttribute("role", "tablist");
+      for (const [id, label] of [["text", "Text"], ["background", "Background"]]) {
+        const button = document.createElement("button");
+        button.setAttribute("type", "button");
+        button.setAttribute("tabindex", "-1");
+        button.setAttribute("role", "tab");
+        button.setAttribute("data-color-tab", id);
+        button.setAttribute("aria-selected", id === tab ? "true" : "false");
+        button.textContent = label;
+        button.addEventListener("mousedown", keepFocus);
+        button.addEventListener("click", (event: { preventDefault?: () => void; stopPropagation?: () => void }) => {
+          event.preventDefault?.();
+          event.stopPropagation?.();
+          tab = id;
+          for (const other of tabs) {
+            other.setAttribute("aria-selected", other.getAttribute("data-color-tab") === tab ? "true" : "false");
+          }
+        });
+        tabs.push(button);
+        strip.appendChild(button);
+      }
+      menu.appendChild(strip);
+    }
+    const apply = (colour: string): void => {
+      closePopover();
+      run(action, inPlace ? colour : tab + ":" + colour);
+    };
+    const grid = document.createElement("div");
+    grid.className = "sphinx-preview-edit-color-grid";
+    for (const colour of action.colors ?? []) {
+      const swatch = document.createElement("button");
+      swatch.setAttribute("type", "button");
+      swatch.setAttribute("tabindex", "-1");
+      swatch.setAttribute("title", colour);
+      swatch.setAttribute("aria-label", colour);
+      swatch.setAttribute("data-color-swatch", colour);
+      swatch.style.setProperty("background-color", colour);
+      swatch.addEventListener("mousedown", keepFocus);
+      swatch.addEventListener("click", (event: { preventDefault?: () => void; stopPropagation?: () => void }) => {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        apply(colour);
+      });
+      grid.appendChild(swatch);
+    }
+    menu.appendChild(grid);
+    const field = document.createElement("input");
+    field.setAttribute("type", "text");
+    field.className = "sphinx-preview-edit-emoji-filter sphinx-preview-edit-color-hex";
+    field.setAttribute("aria-label", "Colour code");
+    field.setAttribute("placeholder", "#rrggbb");
+    field.setAttribute("data-color-hex", "true");
+    field.setAttribute("spellcheck", "false");
+    field.setAttribute("autocomplete", "off");
+    field.value = action.current?.(contextOf()) ?? "";
+    const valid = (): boolean => action.validateColor?.(String(field.value)) === true;
+    const check = (): void => {
+      if (String(field.value).trim() === "" || valid()) field.removeAttribute("aria-invalid");
+      else field.setAttribute("aria-invalid", "true");
+    };
+    field.addEventListener("input", check);
+    trackFocus(field);
+    field.addEventListener("keydown", (event: {
+      key?: string;
+      metaKey?: boolean;
+      ctrlKey?: boolean;
+      isComposing?: boolean;
+      preventDefault?: () => void;
+      stopPropagation?: () => void;
+    }) => {
+      if (event.isComposing) return;
+      if (event.key === "Escape") {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        closePopover();
+      } else if (event.key === "Enter") {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        if (event.metaKey || event.ctrlKey) {
+          closePopover();
+          deps.onDone?.();
+        } else if (valid()) {
+          apply(String(field.value).trim());
+        } else {
+          field.setAttribute("aria-invalid", "true");
+        }
+      }
+    });
+    menu.appendChild(field);
+    if (!inPlace) {
+      const remove = document.createElement("button");
+      remove.setAttribute("type", "button");
+      remove.setAttribute("tabindex", "-1");
+      remove.className = "sphinx-preview-edit-color-remove";
+      remove.setAttribute("data-color-remove", "true");
+      remove.textContent = "Remove";
+      remove.addEventListener("mousedown", keepFocus);
+      remove.addEventListener("click", (event: { preventDefault?: () => void; stopPropagation?: () => void }) => {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        closePopover();
+        run(action, tab + ":");
+      });
+      menu.appendChild(remove);
+    }
+  }
+
+  /** Shows the caret-dependent buttons only where their action says so; shows the code swatch. */
+  function updateAvailability(): void {
+    if (caretButtons.length === 0) return;
+    const ctx = contextOf();
+    for (const entry of caretButtons) {
+      const shown = entry.action.available ? entry.action.available(ctx) : true;
+      if (shown) {
+        entry.button.removeAttribute("hidden");
+        const colour = entry.action.current?.(ctx);
+        if (colour !== undefined && entry.swatch) entry.swatch.style.setProperty("background-color", colour);
+      } else {
+        entry.button.setAttribute("hidden", "true");
+        // The caret left the code the open picker was for.
+        if (openButton === entry.button) closePopover();
+      }
+    }
+  }
+
   function openPopover(action: EditAction, button: HTMLElement): void {
     closePopover();
     const menu = document.createElement("div");
@@ -649,6 +808,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       buildEmoji(menu, action);
     } else if (action.popover === "choices" && action.hostList) {
       startChoices = buildChoices(menu, action);
+    } else if (action.popover === "color" && action.colors) {
+      buildColor(menu, action);
     } else {
       for (const option of action.options ?? []) {
         const item = document.createElement("button");
@@ -720,6 +881,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     closePopover();
     for (const old of buttons) old.remove();
     buttons = [];
+    caretButtons = [];
     modeSelect.value = mode;
     root.setAttribute("data-palette-mode", mode);
     const rank = MODE_RANK[mode] ?? 0;
@@ -741,6 +903,14 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       }
       previousGroup = action.group;
       button.innerHTML = icons[action.icon] ?? "";
+      if (action.available) {
+        // The swatch is built as an element (not from the icon text), so it can be coloured later.
+        const swatch = document.createElement("span");
+        swatch.className = "sphinx-preview-edit-palette-swatch";
+        swatch.setAttribute("aria-hidden", "true");
+        button.appendChild(swatch);
+        caretButtons.push({ button, action, swatch });
+      }
       if (action.popover) {
         button.setAttribute("aria-haspopup", "menu");
         button.setAttribute("aria-expanded", "false");
@@ -798,6 +968,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       root.appendChild(button);
       buttons.push(button);
     }
+    updateAvailability();
   }
 
   build();
@@ -895,5 +1066,6 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       return false;
     },
     closePopover: () => (holding ? false : closePopover()),
+    updateAvailability,
   };
 }

@@ -8,6 +8,7 @@ import {
   type PreviewDocument,
 } from "../../src/render/renderPipeline";
 import { createEditActions } from "../../src/webview/editActions";
+import { isSafeOkfColor } from "../../src/webview/spanColors";
 import { createMarkdownTableTools } from "../../src/webview/markdownTable";
 import { renderMathHtml } from "../../src/render/mathRenderer";
 import { rewriteSphinxHtml } from "../../src/security/html-sanitizer";
@@ -1583,4 +1584,43 @@ test("a span with a colour style renders as data attributes, anything else is dr
     [["#c00", "rgb(1, 2, 3)"], [undefined, undefined], [undefined, undefined]]);
   assert.doesNotMatch(rewritten.html, /\sstyle="color|position|url\(x\)/u);
   assert.match(textContent(spans[0]!), /red bold/u);
+});
+
+// T34: what the colour picker writes renders coloured, in a paragraph and in a table cell.
+async function colouredSpans(markdown: string): Promise<HtmlElement[]> {
+  const { raw } = await renderPalette(markdown);
+  const rewritten = rewriteSphinxHtml(raw, {
+    outputRoot: workspaceRoot,
+    policy: new ResourcePolicy([]),
+    nonce: "unit-nonce",
+    resolveResource: () => undefined,
+    resolveNavigation: () => ({ kind: "blocked" }),
+  });
+  return findElements(parseHtml(rewritten.html), (element) =>
+    element.tagName === "span" && (attribute(element, "data-okf-color") !== undefined
+      || attribute(element, "data-okf-background") !== undefined));
+}
+
+function colourWrite(value: string, start: number, end: number, arg: string): string {
+  const edit = createEditActions([], createMarkdownTableTools(), isSafeOkfColor).byId.get("color")!.apply({
+    value, selectionStart: start, selectionEnd: end, scope: "block", arg })!;
+  return value.slice(0, edit.start) + edit.text + value.slice(edit.end);
+}
+
+test("T34: text and background colours written by the picker render as data attributes", async () => {
+  const first = colourWrite("Say foo now", 4, 7, "text:#c00");
+  const both = colourWrite(first, first.indexOf("foo"), first.indexOf("foo") + 3, "background:rgb(1, 2, 3)");
+  assert.equal(both, 'Say <span style="color:#c00; background-color:rgb(1, 2, 3)">foo</span> now');
+  const spans = await colouredSpans(both);
+  assert.equal(spans.length, 1);
+  assert.equal(attribute(spans[0]!, "data-okf-color"), "#c00");
+  assert.equal(attribute(spans[0]!, "data-okf-background"), "rgb(1, 2, 3)");
+  assert.equal(textContent(spans[0]!), "foo");
+});
+
+test("T34: a colour span inside a pipe-table cell renders coloured", async () => {
+  const cell = colourWrite("beta", 0, 4, "text:#0a0");
+  const spans = await colouredSpans(`| Name | Note |\n| --- | --- |\n| alpha | ${cell} |\n| **x** | <span style="background-color:#ff0">y</span> z |`);
+  assert.deepEqual(spans.map((span) => [textContent(span), attribute(span, "data-okf-color"), attribute(span, "data-okf-background")]),
+    [["beta", "#0a0", undefined], ["y", undefined, "#ff0"]]);
 });

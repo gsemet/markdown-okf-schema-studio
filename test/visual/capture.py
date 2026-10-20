@@ -2688,7 +2688,8 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
     const b = bar.getBoundingClientRect();
     const a = area.getBoundingClientRect();
     const t = toolbar ? toolbar.getBoundingClientRect() : null;
-    const buttons = [...bar.querySelectorAll(':scope > button')].map((button) => {
+    // The colour-code swatch button is hidden unless the caret is in a colour code.
+    const buttons = [...bar.querySelectorAll(':scope > button:not([hidden])')].map((button) => {
       const r = button.getBoundingClientRect();
       return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
     });
@@ -2703,7 +2704,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   }""")
   if not geometry["first"]:
     failures.append(Failure(page_name, "the palette is not the first child of the editor frame"))
-  expected = ["heading", "bold", "italic", "strikethrough", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd", "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
+  expected = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd", "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
   if geometry["labels"] != expected:
     failures.append(Failure(page_name, f"palette buttons are {geometry['labels']}, expected {expected}"))
   if geometry["barBottom"] > geometry["areaTop"] + 0.5:
@@ -2882,6 +2883,57 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
     }""")
     if changed["head"] != "> [!WARNING]" or not changed["focused"] or editor.locator(".sphinx-preview-edit-palette-menu").count() != 0:
       failures.append(Failure(page_name, f"choosing Warning did not change the head: {changed}"))
+
+  # T34: the Colour picker opens inside the frame, a swatch colours the selection, and the code
+  # swatch button follows the caret.
+  area.focus()
+  area.evaluate("t => { t.setSelectionRange(2, 6); }")
+  palette.locator("button[data-edit-action='color']").click()
+  colour_menu = editor.locator(".sphinx-preview-edit-palette-menu[data-edit-popover='color']")
+  page.wait_for_timeout(150)
+  if colour_menu.count() != 1 or not colour_menu.is_visible():
+    failures.append(Failure(page_name, "the colour picker did not open"))
+  else:
+    colour_state = colour_menu.evaluate("""element => {
+      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      const r = element.getBoundingClientRect();
+      const t = document.querySelector('.sphinx-preview-block-editor textarea');
+      const swatch = element.querySelector('[data-color-swatch]').getBoundingClientRect();
+      return { swatches: element.querySelectorAll('[data-color-swatch]').length,
+        tabs: element.querySelectorAll('[data-color-tab]').length, left: r.left, right: r.right,
+        frameLeft: f.left, frameRight: f.right, swatchWidth: swatch.width, swatchHeight: swatch.height,
+        focused: document.activeElement === t };
+    }""")
+    if colour_state["swatches"] != 16 or colour_state["tabs"] != 2 or not colour_state["focused"]:
+      failures.append(Failure(page_name, f"the colour picker is not ready: {colour_state}"))
+    if colour_state["left"] < colour_state["frameLeft"] - 0.5 or colour_state["right"] > colour_state["frameRight"] + 0.5:
+      failures.append(Failure(page_name, f"the colour picker leaves the editor frame: {colour_state}"))
+    if colour_state["swatchWidth"] < 12 or colour_state["swatchHeight"] < 12:
+      failures.append(Failure(page_name, f"the colour swatches are too small: {colour_state}"))
+    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-colour.png"), caret="hide")
+    colour_menu.locator("[data-color-swatch]").nth(0).click()
+    page.wait_for_timeout(100)
+    coloured = page.evaluate("""() => {
+      const t = document.querySelector('.sphinx-preview-block-editor textarea');
+      return { value: t ? t.value : '', focused: document.activeElement === t };
+    }""")
+    if '<span style="color:#e53935">' not in coloured["value"] or not coloured["focused"]:
+      failures.append(Failure(page_name, f"a colour swatch did not colour the selection: {coloured}"))
+    if editor.locator(".sphinx-preview-edit-palette-menu").count() != 0 or editor.count() != 1:
+      failures.append(Failure(page_name, "choosing a colour left the picker open or closed the editor"))
+  code_button = palette.locator("button[data-edit-action='colorCode']")
+  if code_button.is_visible():
+    failures.append(Failure(page_name, "the colour-code swatch is shown with the caret outside a colour code"))
+  area.evaluate("""t => {
+    t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+    document.execCommand('insertText', false, ' #1e88e5');
+  }""")
+  page.keyboard.press("ArrowLeft")
+  page.wait_for_timeout(100)
+  if not code_button.is_visible():
+    failures.append(Failure(page_name, "the colour-code swatch is hidden with the caret in a colour code"))
+  else:
+    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-colour-code.png"), caret="hide")
 
   # Closing puts the block back where it was before the editor opened (no jump by the bar height).
   page.keyboard.press("Escape")
