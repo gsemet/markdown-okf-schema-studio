@@ -7374,7 +7374,7 @@ test("T21: the palette is the first child of the block editor frame, above the t
     palette.childElements.slice(1).map((child) => child.getAttribute("data-edit-action")),
     [
       "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
-      "emoji", "todo", "alert", "checkbox", "htmlTable",
+      "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     ],
   );
 });
@@ -7417,7 +7417,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 14);
+  assert.equal(controls.length, 19);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });

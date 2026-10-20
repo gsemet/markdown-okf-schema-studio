@@ -94,6 +94,11 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     alert: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5v5.5M12 16v.5") + caret,
     checkbox: svg("M5 5h14v14H5zM8.5 12l2.5 2.5 4.5-5"),
     htmlTable: svg("M4 5h16v14H4zM4 10h16M9 12.5l-1.7 1.7L9 16M15 12.5l1.7 1.7L15 16"),
+    details: svg("M5 5l4 4 4-4M5 14h14M5 19h10"),
+    footnote: svg("M5 9h8M9 5v10M5 19h14M16 5.5l1.5-1v5"),
+    mermaid: svg("M4 5h6v4H4zM14 15h6v4h-6zM7 9v3a2 2 0 0 0 2 2h5"),
+    columnAlign: svg("M4 6h16M4 10h10M4 14h16M4 18h10") + caret,
+    kbd: svg("M3 7h18v10H3zM7 11h.5M11 11h.5M15 11h.5M8 14h8"),
     table: svg("M4 5h16v14H4zM4 10h16M4 14.5h16M10 5v14M15 5v14"),
     emoji: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 14a4.5 4.5 0 0 0 7 0M9 9.5v.5M15 9.5v.5"),
   };

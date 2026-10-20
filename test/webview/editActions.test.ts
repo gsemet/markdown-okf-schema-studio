@@ -150,14 +150,16 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     registry.actions.map((action) => action.id),
     [
       "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
-      "emoji", "todo", "alert", "checkbox", "htmlTable",
+      "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     ],
   );
   for (const action of registry.actions) {
     assert.equal(registry.byId.get(action.id), action);
     assert.ok(action.label.length > 0 && action.icon.length > 0 && action.group.length > 0);
     // T25: the GitHub group is listed for gfm only; every other action is in every mode.
-    const github = ["alert", "checkbox", "htmlTable"].includes(action.id);
+    const github = [
+      "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+    ].includes(action.id);
     assert.deepEqual(action.modes, github ? ["gfm"] : ["strict"], action.id);
     assert.ok(action.scopes.includes("block"));
   }
@@ -768,4 +770,96 @@ test("T25: htmlTable without table tools still inserts a new table and never thr
   assert.equal(edit.text.includes("<table>"), true);
   assert.equal(edit.start, end, "inserted after, nothing converted");
   assert.equal(edit.end, end);
+});
+
+// T26: details, footnote, mermaid, column alignment and kbd.
+test("T26: the five proposals are gfm actions with no shortcut; only kbd also works in a cell", () => {
+  for (const id of ["details", "footnote", "mermaid", "columnAlign", "kbd"]) {
+    const action = registry.byId.get(id)!;
+    assert.deepEqual(action.modes, ["gfm"], id);
+    assert.deepEqual(action.scopes, id === "kbd" ? ["block", "cell"] : ["block"], id);
+    assert.equal(action.shortcut, undefined, id);
+  }
+  assert.equal(registry.byId.get("columnAlign")!.popover, "align");
+  assert.deepEqual(registry.byId.get("columnAlign")!.options!.map((o) => o.value), ["left", "center", "right"]);
+});
+
+test("T26: details inserts a collapsible sample after the selection, summary selected", () => {
+  const out = applyTo("details", "Intro", [5, 5])!;
+  assert.equal(out.value, "Intro\n\n<details>\n<summary>Summary</summary>\n\nContent\n\n</details>");
+  assert.equal(out.value.slice(...out.selection), "Summary");
+});
+
+test("T26: details wraps the touched lines and keeps them as content", () => {
+  const out = applyTo("details", "one\ntwo\nthree", [2, 6])!;
+  assert.equal(out.value, "<details>\n<summary>Summary</summary>\n\none\ntwo\n\n</details>\nthree");
+  assert.equal(out.value.slice(...out.selection), "Summary");
+});
+
+test("T26: footnote takes the next free number and writes the definition at the end", () => {
+  const out = applyTo("footnote", "A claim here.\n\nMore text.", [7, 7])!;
+  assert.equal(out.value, "A claim[^1] here.\n\nMore text.\n\n[^1]: ");
+  assert.deepEqual(out.selection, [out.value.length, out.value.length]);
+  const second = applyTo("footnote", "x[^1] y[^3]\n\n[^1]: one\n[^3]: three\n", [1, 1])!;
+  assert.equal(second.value, "x[^4][^1] y[^3]\n\n[^1]: one\n[^3]: three\n[^4]: \n");
+  assert.equal(second.value.slice(0, second.selection[0]).endsWith("[^4]: "), true);
+  assert.equal(second.value.slice(second.selection[0]), "\n", "the trailing newline stays after the caret");
+});
+
+test("T26: footnote with named labels counts only numbers and inserts after a selection", () => {
+  const out = applyTo("footnote", "see [^note] word", [4, 11])!;
+  assert.equal(out.value.startsWith("see [^note][^1] word"), true);
+  assert.equal(out.value.endsWith("\n\n[^1]: "), true);
+});
+
+test("T26: mermaid inserts a flowchart fence set apart, first label selected", () => {
+  const out = applyTo("mermaid", "Intro\n\nOutro", [5, 5])!;
+  assert.equal(out.value, "Intro\n\n```mermaid\nflowchart TD\n  A[Start] --> B[End]\n```\n\nOutro");
+  assert.equal(out.value.slice(...out.selection), "Start");
+});
+
+const ALIGN_TABLE = "| Name | Qty |\n| --- | --- |\n| a | 1 |";
+
+test("T26: columnAlign rewrites only the delimiter cell of the caret's column", () => {
+  const at = ALIGN_TABLE.indexOf("Qty");
+  assert.equal(applyTo("columnAlign", ALIGN_TABLE, [at, at], "right")!.value,
+    "| Name | Qty |\n| --- | ---: |\n| a | 1 |");
+  assert.equal(applyTo("columnAlign", ALIGN_TABLE, [2, 2], "center")!.value,
+    "| Name | Qty |\n| :---: | --- |\n| a | 1 |");
+  assert.equal(applyTo("columnAlign", ALIGN_TABLE, [2, 2], "left")!.value,
+    "| Name | Qty |\n| :--- | --- |\n| a | 1 |");
+});
+
+test("T26: columnAlign keeps the width of a padded column and replaces an existing alignment", () => {
+  const padded = "| Name   | Qty |\n| ------ | --- |\n| a      | 1   |";
+  assert.equal(applyTo("columnAlign", padded, [2, 2], "right")!.value.split("\n")[1], "| -----: | --- |");
+  assert.equal(applyTo("columnAlign", padded, [2, 2], "center")!.value.split("\n")[1], "| :----: | --- |");
+  const aligned = "| a | b |\n| :---: | ---: |\n| 1 | 2 |";
+  const at = aligned.indexOf("b");
+  assert.equal(applyTo("columnAlign", aligned, [at, at], "left")!.value.split("\n")[1], "| :---: | :--- |");
+  const again = applyTo("columnAlign", aligned, [at, at], "left")!.value;
+  assert.equal(applyTo("columnAlign", again, [at, at], "left"), undefined, "already left: no edit");
+});
+
+test("T26: columnAlign works from a body row, outside pipes and in tables without edge pipes", () => {
+  const value = "intro\n\nA | B\n--- | ---\n1 | 2";
+  const at = value.indexOf("2");
+  assert.equal(applyTo("columnAlign", value, [at, at], "right")!.value, "intro\n\nA | B\n--- | ---:\n1 | 2");
+  assert.equal(applyTo("columnAlign", "no table here", [3, 3], "left"), undefined);
+  assert.equal(applyTo("columnAlign", ALIGN_TABLE, [2, 2]), undefined, "no choice yet");
+  assert.equal(applyTo("columnAlign", ALIGN_TABLE, [2, 2], "justify"), undefined);
+});
+
+test("T26: kbd wraps the selection, unwraps it, and inserts a sample on a caret", () => {
+  const wrapped = applyTo("kbd", "Press Ctrl now", [6, 10])!;
+  assert.equal(wrapped.value, "Press <kbd>Ctrl</kbd> now");
+  assert.equal(wrapped.value.slice(...wrapped.selection), "Ctrl");
+  const back = applyTo("kbd", wrapped.value, wrapped.selection)!;
+  assert.equal(back.value, "Press Ctrl now");
+  assert.equal(back.value.slice(...back.selection), "Ctrl");
+  const whole = applyTo("kbd", "<kbd>Esc</kbd>", [0, 14])!;
+  assert.equal(whole.value, "Esc");
+  const sample = applyTo("kbd", "a b", [1, 1])!;
+  assert.equal(sample.value, "a<kbd>Key</kbd> b");
+  assert.equal(sample.value.slice(...sample.selection), "Key");
 });

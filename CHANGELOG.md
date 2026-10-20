@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The edition palette gets five more GitHub (GFM) buttons, also shown in MyST mode. Collapsible
+  wraps the lines in `<details><summary>`, Footnote adds `[^n]` at the caret and an empty `[^n]: `
+  at the end, Mermaid inserts a flowchart fence, Column alignment (Left, Center, Right) rewrites
+  only that column's delimiter cell of the table at the caret, and Key wraps the selection in
+  `<kbd>`. The preview now renders raw `<details>`/`<summary>` and `<kbd>`.
 - The edition palette gets three GitHub buttons, shown in the GitHub (GFM) and MyST modes. Alert
   writes `> [!NOTE]` and quotes the current lines, then a list of types (Note, Tip, Important,
   Warning, Caution) opens at the caret to change it; Escape keeps Note. Checkbox toggles `- [ ]`

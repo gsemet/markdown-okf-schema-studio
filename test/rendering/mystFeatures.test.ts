@@ -1267,3 +1267,60 @@ test("a new HTML table inserted by the edition palette renders as a 2 x 2 table"
   assert.equal(findElements(tables[0], isTag("td")).length, 2);
   assert.match(result.html, /After\./u);
 });
+
+// T26: what the details, footnote, mermaid, alignment and kbd actions write renders.
+async function renderPalette(markdown: string) {
+  const document = inlineDocument(markdown + "\n");
+  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+  return { html: parseHtml(result.html), raw: result.html };
+}
+
+test("a collapsible section inserted by the edition palette renders as details with a summary", async () => {
+  const { html } = await renderPalette(paletteInsert("details", "Intro", 5));
+  const details = findElement(html, isTag("details"));
+  assert.ok(details, "no details element");
+  assert.equal(textContent(findElement(details, isTag("summary"))!).trim(), "Summary");
+  assert.match(textContent(details), /Content/u);
+});
+
+test("a footnote inserted by the edition palette renders a reference and a definition", async () => {
+  const written = paletteInsert("footnote", "A claim.", 7) + "The source.";
+  assert.equal(written, "A claim[^1].\n\n[^1]: The source.");
+  const { html } = await renderPalette(written);
+  const definition = findElement(html, (element) =>
+    element.tagName === "li" && attribute(element, "id") === "user-content-fn-1");
+  assert.ok(definition, "the footnote definition was not rendered");
+  assert.match(textContent(definition), /The source\./u);
+});
+
+test("a Mermaid fence inserted by the edition palette renders a diagram container", async () => {
+  const { html } = await renderPalette(paletteInsert("mermaid", "Intro", 5));
+  const diagram = findElement(html, (element) => hasClass(element, "myst-mermaid-diagram"));
+  assert.ok(diagram, "no Mermaid diagram node");
+  assert.match(textContent(diagram), /flowchart TD/u);
+});
+
+test("a column aligned by the edition palette renders with that alignment only", async () => {
+  const source = "| Name | Qty |\n| --- | --- |\n| a | 1 |";
+  const at = source.indexOf("Qty");
+  const edit = createEditActions([], createMarkdownTableTools()).byId.get("columnAlign")!.apply({
+    value: source, selectionStart: at, selectionEnd: at, scope: "block", arg: "right" })!;
+  const written = source.slice(0, edit.start) + edit.text + source.slice(edit.end);
+  const { html } = await renderPalette(written);
+  const cells = findElements(html, (element) => element.tagName === "th" || element.tagName === "td");
+  assert.equal(cells.length, 4);
+  const aligned = cells.map((cell) => /right/u.test((attribute(cell, "align") ?? "") + (attribute(cell, "style") ?? "") + (attribute(cell, "class") ?? "")));
+  assert.deepEqual(aligned, [false, true, false, true]);
+});
+
+test("a kbd element written by the edition palette is kept in the preview", async () => {
+  const edit = createEditActions([], createMarkdownTableTools()).byId.get("kbd")!.apply({
+    value: "Press Ctrl now", selectionStart: 6, selectionEnd: 10, scope: "block" })!;
+  const written = "Press Ctrl now".slice(0, edit.start) + edit.text + "Press Ctrl now".slice(edit.end);
+  assert.equal(written, "Press <kbd>Ctrl</kbd> now");
+  const { html } = await renderPalette(written);
+  const key = findElement(html, isTag("kbd"));
+  assert.ok(key, "the kbd element was stripped");
+  assert.equal(textContent(key), "Ctrl");
+});
