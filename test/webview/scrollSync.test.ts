@@ -7375,6 +7375,7 @@ test("T21: the palette is the first child of the block editor frame, above the t
     [
       "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
       "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+      "admonition", "deflist", "math", "sub", "sup", "label",
     ],
   );
 });
@@ -7417,7 +7418,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 19);
+  assert.equal(controls.length, 25);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
@@ -8463,4 +8464,18 @@ test("T25: Checkbox and HTML table edit the text box as one undo step each", () 
   assert.equal(calls.length, 1);
   assert.equal(calls[0].command, "insertText");
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+});
+
+test("T28: the MyST buttons show in MyST mode only", () => {
+  const ids = ["admonition", "deflist", "math", "sub", "sup", "label"];
+  for (const mode of ["strict", "gfm"] as const) {
+    const harness = createRuntimeHarness({ initialPaletteMode: mode });
+    openBlockEditorWithSource(harness);
+    for (const id of ids) {
+      assert.equal(harness.createdElements.some((e) => e.getAttribute("data-edit-action") === id), false, mode + " " + id);
+    }
+  }
+  const myst = createRuntimeHarness({ initialPaletteMode: "myst" });
+  openBlockEditorWithSource(myst);
+  for (const id of ids) assert.ok(paletteButton(myst, id), id);
 });

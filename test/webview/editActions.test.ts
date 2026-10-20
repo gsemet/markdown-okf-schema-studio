@@ -151,6 +151,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     [
       "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
       "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+      "admonition", "deflist", "math", "sub", "sup", "label",
     ],
   );
   for (const action of registry.actions) {
@@ -160,7 +161,8 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     const github = [
       "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     ].includes(action.id);
-    assert.deepEqual(action.modes, github ? ["gfm"] : ["strict"], action.id);
+    const myst = ["admonition", "deflist", "math", "sub", "sup", "label"].includes(action.id);
+    assert.deepEqual(action.modes, myst ? ["myst"] : github ? ["gfm"] : ["strict"], action.id);
     assert.ok(action.scopes.includes("block"));
   }
   assert.equal(registry.byId.get("todo")!.scopes.includes("cell"), false);
@@ -862,4 +864,101 @@ test("T26: kbd wraps the selection, unwraps it, and inserts a sample on a caret"
   const sample = applyTo("kbd", "a b", [1, 1])!;
   assert.equal(sample.value, "a<kbd>Key</kbd> b");
   assert.equal(sample.value.slice(...sample.selection), "Key");
+});
+
+// T28: MyST group.
+test("T28: the MyST actions are myst-only with no shortcut; sub and sup also work in a cell", () => {
+  for (const id of ["admonition", "deflist", "math", "sub", "sup", "label"]) {
+    const action = registry.byId.get(id)!;
+    assert.deepEqual(action.modes, ["myst"], id);
+    assert.equal(action.shortcut, undefined, id);
+    assert.deepEqual(action.scopes, id === "sub" || id === "sup" ? ["block", "cell"] : ["block"], id);
+  }
+  assert.deepEqual(registry.byId.get("admonition")!.options!.map((o) => o.value), [
+    "note", "tip", "important", "warning", "caution", "danger", "attention", "error", "hint", "seealso",
+    "custom",
+  ]);
+  assert.equal(registry.byId.get("admonition")!.options!.at(-1)!.label, "Custom\u2026");
+  assert.deepEqual(registry.byId.get("math")!.options!.map((o) => o.value), ["inline", "display", "aligned"]);
+});
+
+test("T28: admonition wraps the touched lines in a colon fence and selects the body", () => {
+  const out = applyTo("admonition", "one\ntwo\nthree", [2, 6], "warning")!;
+  assert.equal(out.value, ":::{warning}\none\ntwo\n:::\nthree");
+  assert.equal(out.value.slice(...out.selection), "one\ntwo");
+});
+
+test("T28: admonition without a selection inserts an empty body with the caret in it", () => {
+  const out = applyTo("admonition", "Intro", [5, 5], "tip")!;
+  assert.equal(out.value, "Intro\n\n:::{tip}\n\n:::");
+  const body = out.value.indexOf("{tip}\n") + 6;
+  assert.deepEqual(out.selection, [body, body], "the caret is on the empty body line");
+});
+
+test("T28: admonition uses one more colon than the longest fence inside", () => {
+  const inner = "::::{note}\nx\n::::";
+  assert.equal(applyTo("admonition", inner, [0, inner.length], "hint")!.value,
+    ":::::{hint}\n::::{note}\nx\n::::\n:::::");
+  const plain = ":::{note}\nx\n:::";
+  assert.equal(applyTo("admonition", plain, [0, plain.length], "tip")!.value,
+    "::::{tip}\n:::{note}\nx\n:::\n::::");
+});
+
+test("T28: admonition keeps list items together and ignores an unknown type", () => {
+  const list = "- a\n- b";
+  assert.equal(applyTo("admonition", list, [0, list.length], "note")!.value, ":::{note}\n- a\n- b\n:::");
+  assert.equal(applyTo("admonition", list, [0, 3], "bogus"), undefined);
+  assert.equal(applyTo("admonition", list, [0, 3]), undefined);
+});
+
+test("T28: a selection ending at a line start does not pull that line into the admonition", () => {
+  const out = applyTo("admonition", "one\ntwo\n", [0, 4], "note")!;
+  assert.equal(out.value, ":::{note}\none\n:::\ntwo\n");
+});
+
+test("T28: custom admonition writes a titled block with a class and selects the title", () => {
+  const out = applyTo("admonition", "Body", [0, 4], "custom")!;
+  assert.equal(out.value, ":::{admonition} Title\n:class: note\n\nBody\n:::");
+  assert.equal(out.value.slice(...out.selection), "Title");
+  const empty = applyTo("admonition", "Intro", [5, 5], "custom")!;
+  assert.equal(empty.value, "Intro\n\n:::{admonition} Title\n:class: note\n\n:::");
+  assert.equal(empty.value.slice(...empty.selection), "Title");
+});
+
+test("T28: deflist makes the selection the term and selects the definition", () => {
+  const out = applyTo("deflist", "Alpha\nrest", [0, 5])!;
+  assert.equal(out.value, "Alpha\n: Definition\nrest");
+  assert.equal(out.value.slice(...out.selection), "Definition");
+  const empty = applyTo("deflist", "Intro", [5, 5])!;
+  assert.equal(empty.value, "Intro\n\nTerm\n: Definition");
+  assert.equal(empty.value.slice(...empty.selection), "Term");
+});
+
+test("T28: math inline, display and aligned", () => {
+  assert.equal(applyTo("math", "a b c", [2, 3], "inline")!.value, "a $b$ c");
+  const inline = applyTo("math", "a  c", [2, 2], "inline")!;
+  assert.equal(inline.value, "a $x$ c");
+  assert.equal(inline.value.slice(...inline.selection), "x");
+  assert.equal(applyTo("math", "E=mc2", [0, 5], "display")!.value, "$$\nE=mc2\n$$");
+  const display = applyTo("math", "Intro", [5, 5], "display")!;
+  assert.equal(display.value, "Intro\n\n$$\nE = mc^2\n$$");
+  const aligned = applyTo("math", "Intro", [5, 5], "aligned")!;
+  assert.equal(aligned.value, "Intro\n\n$$\n\\begin{align}\na &= b\n\\end{align}\n$$");
+  assert.equal(aligned.value.slice(...aligned.selection), "a &= b");
+  assert.equal(applyTo("math", "x", [0, 1], "bogus"), undefined);
+});
+
+test("T28: sub and sup wrap the selection in a role; empty puts the caret inside", () => {
+  assert.equal(run("sub", "H[2]O"), "H{sub}`[2]`O");
+  assert.equal(run("sup", "x[2]"), "x{sup}`[2]`");
+  const out = applyTo("sub", "H", [1, 1])!;
+  assert.equal(out.value, "H{sub}``");
+  assert.deepEqual(out.selection, [7, 7]);
+});
+
+test("T28: label inserts (name)= above the block with the name selected", () => {
+  const out = applyTo("label", "Para\ntext", [6, 6])!;
+  assert.equal(out.value, "(label-name)=\nPara\ntext");
+  assert.equal(out.value.slice(...out.selection), "label-name");
+  assert.equal(applyTo("label", "(x)=\nPara", [0, 0]), undefined, "already labelled");
 });

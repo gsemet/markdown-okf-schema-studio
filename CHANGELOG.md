@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- The edition palette gets six MyST buttons, shown in MyST mode only. Admonition opens a list
+  (Note, Tip, Important, Warning, Caution, Danger, Attention, Error, Hint, See also, Custom) and
+  wraps the current lines in a `:::{type}` fence, one colon longer than any fence inside; Custom
+  writes a titled block with a `:class:`. Definition list writes `Term` and `: Definition`, Math
+  offers inline `$…$`, display `$$` and aligned `\begin{align}`, Subscript and Superscript wrap
+  the selection in `{sub}` and `{sup}`, and Label puts `(label-name)=` above the block.
 - The preview shows MyST figure size and alignment (`:width:` in px, %, em or rem; `:align:` left,
   center or right, on `{figure}` and `{image}`), and a `(name)=` label now shows a faint anchor
   icon in the left margin of the labelled block, with the tooltip "Anchor: name"; `{ref}` links to
