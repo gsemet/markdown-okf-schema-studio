@@ -1428,3 +1428,75 @@ test("an anchor icon is not a mapped block or Tab stop, while the labelled block
     assert.equal(attribute(block, "tabindex"), "0");
   }
 });
+
+// T28: what the MyST group of the palette writes renders.
+function paletteWrite(id: string, value: string, selection: [number, number], arg?: string): string {
+  const edit = createEditActions([], createMarkdownTableTools()).byId.get(id)!.apply({
+    value, selectionStart: selection[0], selectionEnd: selection[1], scope: "block",
+    ...(arg === undefined ? {} : { arg }),
+  })!;
+  return value.slice(0, edit.start) + edit.text + value.slice(edit.end);
+}
+
+test("an admonition of every palette type renders with its title, empty or wrapped", async () => {
+  for (const type of ["note", "tip", "important", "warning", "caution", "danger", "attention", "error", "hint", "seealso"]) {
+    for (const written of [paletteWrite("admonition", "Body text", [0, 9], type), paletteWrite("admonition", "Intro", [5, 5], type)]) {
+      const { html } = await renderPalette(written);
+      const admonition = findElement(html, (element) => hasClass(element, "admonition") && hasClass(element, type));
+      assert.ok(admonition, `${type} was not rendered as an admonition: ${written}`);
+      assert.ok(findElement(admonition, (e) => hasClass(e, "admonition-title")), `${type} has no title`);
+    }
+  }
+  const nested = paletteWrite("admonition", ":::{note}\nInner\n:::", [0, 19], "warning");
+  const { html } = await renderPalette(nested);
+  const outer = findElement(html, (e) => hasClass(e, "admonition") && hasClass(e, "warning"))!;
+  assert.ok(outer, "outer admonition missing");
+  assert.ok(findElement(outer, (e) => hasClass(e, "admonition") && hasClass(e, "note")), "nested note missing");
+});
+
+test("a custom admonition from the palette renders its title and class", async () => {
+  const written = paletteWrite("admonition", "Body text", [0, 9], "custom").replace("Title", "My title");
+  const { html } = await renderPalette(written);
+  const admonition = findElement(html, (e) => hasClass(e, "admonition") && hasClass(e, "note"));
+  assert.ok(admonition, "no custom admonition");
+  assert.equal(textContent(findElement(admonition, (e) => hasClass(e, "admonition-title"))!).trim(), "My title");
+  assert.match(textContent(admonition), /Body text/u);
+});
+
+test("a definition list from the palette renders a dl with its term and definition", async () => {
+  const { html } = await renderPalette(paletteWrite("deflist", "Alpha", [0, 5]));
+  const list = findElement(html, isTag("dl"))!;
+  assert.ok(list, "no dl");
+  assert.equal(textContent(findElement(list, isTag("dt"))!).trim(), "Alpha");
+  assert.equal(textContent(findElement(list, isTag("dd"))!).trim(), "Definition");
+});
+
+test("inline, display and aligned math from the palette typeset with KaTeX", async () => {
+  const inline = paletteWrite("math", "Value x here", [6, 7], "inline");
+  const display = paletteWrite("math", "Intro", [5, 5], "display");
+  const aligned = paletteWrite("math", "Intro", [5, 5], "aligned");
+  for (const [written, selector] of [[inline, "math-inline"], [display, "math-display"], [aligned, "math-display"]] as const) {
+    const { raw } = await renderPalette(written);
+    const typeset = parseHtml(renderMathHtml(raw, "katex.css", "nonce"));
+    const math = findElement(typeset, (element) => hasClass(element, selector));
+    assert.ok(math, `no ${selector} for ${written}`);
+    assert.equal(attribute(math, "data-studio-math-error"), undefined, `KaTeX rejected ${written}`);
+  }
+  const { raw } = await renderPalette(aligned);
+  const rows = findElements(parseHtml(renderMathHtml(raw, "katex.css", "nonce")), isTag("mtr"));
+  assert.equal(rows.length, 1);
+});
+
+test("sub and sup written by the palette render sub and sup elements", async () => {
+  const { html } = await renderPalette(
+    paletteWrite("sub", "H2O", [1, 2]) + " and " + paletteWrite("sup", "x2", [1, 2]));
+  assert.equal(textContent(findElement(html, isTag("sub"))!), "2");
+  assert.equal(textContent(findElement(html, isTag("sup"))!), "2");
+});
+
+test("a label written by the palette renders an anchor icon for the block", async () => {
+  const { html } = await renderPalette(paletteWrite("label", "A paragraph.", [0, 0]).replace("label-name", "my-label"));
+  const anchor = findElement(html, (e) => hasClass(e, "okf-anchor"))!;
+  assert.ok(anchor, "no anchor icon");
+  assert.equal(attribute(anchor, "id"), "my-label");
+});

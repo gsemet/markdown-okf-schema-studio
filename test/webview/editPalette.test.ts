@@ -115,7 +115,11 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
     ...strict, "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     "gfmOnly",
   ]);
-  assert.deepEqual(myst, [...gfm, "mystOnly"]);
+  // T28: the registry's own MyST group (admonition ... label) sits before the test's extra action.
+  const gfmReal = gfm.filter((id) => id !== "gfmOnly");
+  assert.deepEqual(myst, [
+    ...gfmReal, "admonition", "deflist", "math", "sub", "sup", "label", "gfmOnly", "mystOnly",
+  ]);
 });
 
 test("choosing a mode rebuilds the buttons, keeps the select and reports the change once", () => {

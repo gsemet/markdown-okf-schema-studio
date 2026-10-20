@@ -965,6 +965,141 @@ export function createEditActions(
     return { start: at, end: ctx.value.length, text: text + trailing, selectionStart: caret, selectionEnd: caret };
   }
 
+  const ADMONITION_TYPES = [
+    "note", "tip", "important", "warning", "caution", "danger", "attention", "error", "hint", "seealso",
+  ];
+  const ADMONITION_OPTIONS: EditActionOption[] = [
+    ...ADMONITION_TYPES.map((type) => ({
+      value: type,
+      label: type === "seealso" ? "See also" : type.charAt(0).toUpperCase() + type.slice(1),
+    })),
+    { value: "custom", label: "Custom\u2026" },
+  ];
+
+  /** Inserts `body` as a block after the selection; the selection starts `offset` in, `length` long. */
+  function insertBlockAt(ctx: EditActionContext, body: string, offset: number, length: number): TextEdit {
+    const at = ctx.selectionEnd;
+    const before = ctx.value.slice(0, at);
+    const after = ctx.value.slice(at);
+    const lead = before === "" || before.endsWith("\n\n") ? "" : before.endsWith("\n") ? "\n" : "\n\n";
+    const breaks = (/^\n*/u.exec(after) ?? [""])[0].length;
+    const trail = after === "" || breaks >= 2 ? "" : breaks === 1 ? "\n" : "\n\n";
+    const first = at + lead.length + offset;
+    return { start: at, end: at, text: lead + body + trail, selectionStart: first, selectionEnd: first + length };
+  }
+
+  /**
+   * Wraps the touched lines in a MyST colon-fence admonition (`:::{type}`), or inserts an empty one;
+   * "custom" writes `{admonition} Title` with a `:class:`. The outer fence is one colon longer than
+   * the longest colon fence inside.
+   */
+  function insertAdmonition(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const type = ctx.arg;
+    if (type === undefined || (type !== "custom" && !ADMONITION_TYPES.includes(type))) return undefined;
+    const custom = type === "custom";
+    const selected = ctx.selectionStart !== ctx.selectionEnd;
+    const { firstStart, lastEnd, lines } = touchedLines(ctx);
+    let longest = 2;
+    if (selected) {
+      for (const line of lines) {
+        const fence = /^\s*(:{3,})/u.exec(line);
+        if (fence) longest = Math.max(longest, fence[1].length);
+      }
+    }
+    const colons = ":".repeat(longest + 1);
+    const head = colons + (custom ? "{admonition} Title\n:class: note\n\n" : "{" + type + "}\n");
+    const body = selected ? lines.join("\n") : "";
+    const text = head + (selected ? body + "\n" : custom ? "" : "\n") + colons;
+    const titleAt = head.indexOf("Title");
+    if (selected) {
+      return {
+        start: firstStart,
+        end: lastEnd,
+        text,
+        selectionStart: firstStart + (custom ? titleAt : head.length),
+        selectionEnd: firstStart + (custom ? titleAt + 5 : head.length + body.length),
+      };
+    }
+    return insertBlockAt(ctx, text, custom ? titleAt : head.length, custom ? 5 : 0);
+  }
+
+  /** Makes the touched lines a definition list term with an `: Definition` line below (or a sample). */
+  function insertDefinitionList(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    if (ctx.selectionStart === ctx.selectionEnd) {
+      return insertBlockAt(ctx, "Term\n: Definition", 0, 4);
+    }
+    const { lastEnd } = touchedLines(ctx);
+    return {
+      start: lastEnd,
+      end: lastEnd,
+      text: "\n: Definition",
+      selectionStart: lastEnd + 3,
+      selectionEnd: lastEnd + 13,
+    };
+  }
+
+  /** Math: `inline` wraps in `$…$`, `display` in a `$$` block and `aligned` in `\begin{align}`. */
+  function insertMath(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const kind = ctx.arg;
+    if (kind !== "inline" && kind !== "display" && kind !== "aligned") return undefined;
+    const selected = ctx.selectionStart !== ctx.selectionEnd;
+    if (kind === "inline") {
+      const text = ctx.value.slice(ctx.selectionStart, ctx.selectionEnd) || "x";
+      return {
+        start: ctx.selectionStart,
+        end: ctx.selectionEnd,
+        text: "$" + text + "$",
+        selectionStart: ctx.selectionStart + 1,
+        selectionEnd: ctx.selectionStart + 1 + text.length,
+      };
+    }
+    const { firstStart, lastEnd, lines } = touchedLines(ctx);
+    const content = selected ? lines.join("\n") : kind === "display" ? "E = mc^2" : "a &= b";
+    const head = kind === "display" ? "$$\n" : "$$\n\\begin{align}\n";
+    const tail = kind === "display" ? "\n$$" : "\n\\end{align}\n$$";
+    const text = head + content + tail;
+    if (selected) {
+      return {
+        start: firstStart, end: lastEnd, text,
+        selectionStart: firstStart + head.length, selectionEnd: firstStart + head.length + content.length,
+      };
+    }
+    return insertBlockAt(ctx, text, head.length, content.length);
+  }
+
+  /** Wraps the selection in a MyST role (`{sub}` or `{sup}`); empty puts the caret between the quotes. */
+  function wrapRole(ctx: EditActionContext, role: string): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const selected = ctx.value.slice(ctx.selectionStart, ctx.selectionEnd);
+    if (selected.includes("`") || selected.includes("\n")) return undefined;
+    const open = "{" + role + "}`";
+    const caret = ctx.selectionStart + open.length;
+    return {
+      start: ctx.selectionStart,
+      end: ctx.selectionEnd,
+      text: open + selected + "`",
+      selectionStart: caret,
+      selectionEnd: caret + selected.length,
+    };
+  }
+
+  /** Writes `(label-name)=` above the first line of the text, the name selected; refuses a second one. */
+  function insertLabel(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const lead = (/^(?:[ \t]*\n)*/u.exec(ctx.value) ?? [""])[0].length;
+    if (/^\([^()\n]+\)=[ \t]*(?:\n|$)/u.test(ctx.value.slice(lead))) return undefined;
+    return {
+      start: lead,
+      end: lead,
+      text: "(label-name)=\n",
+      selectionStart: lead + 1,
+      selectionEnd: lead + 11,
+    };
+  }
+
   /** A fenced Mermaid flowchart set apart after the selection, its first node label selected. */
   function insertMermaid(ctx: EditActionContext): TextEdit | undefined {
     if (!validSelection(ctx)) return undefined;
@@ -1237,6 +1372,74 @@ export function createEditActions(
       modes: ["gfm"],
       scopes: ["block", "cell"],
       apply: toggleKbd,
+    },
+    {
+      id: "admonition",
+      label: "Admonition",
+      title: "Admonition (choose a type)",
+      icon: "admonition",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      popover: "admonition",
+      options: ADMONITION_OPTIONS,
+      apply: insertAdmonition,
+    },
+    {
+      id: "deflist",
+      label: "Definition list",
+      title: "Definition list",
+      icon: "deflist",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      apply: insertDefinitionList,
+    },
+    {
+      id: "math",
+      label: "Math",
+      title: "Math (choose inline, display or aligned)",
+      icon: "math",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      popover: "math",
+      options: [
+        { value: "inline", label: "Inline $\u2026$" },
+        { value: "display", label: "Display $$" },
+        { value: "aligned", label: "Aligned equations" },
+      ],
+      apply: insertMath,
+    },
+    {
+      id: "sub",
+      label: "Subscript",
+      title: "Subscript",
+      icon: "sub",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block", "cell"],
+      apply: (ctx) => wrapRole(ctx, "sub"),
+    },
+    {
+      id: "sup",
+      label: "Superscript",
+      title: "Superscript",
+      icon: "sup",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block", "cell"],
+      apply: (ctx) => wrapRole(ctx, "sup"),
+    },
+    {
+      id: "label",
+      label: "Label",
+      title: "Label (anchor for {ref})",
+      icon: "label",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      apply: insertLabel,
     },
   ];
 
