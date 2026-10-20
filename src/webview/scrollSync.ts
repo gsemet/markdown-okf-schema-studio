@@ -82,7 +82,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
   const tableTools = (${createMarkdownTableTools.toString()})();
   const textEditing = (${createTextEditingTools.toString()})();
-  const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())}, tableTools);
+  const isSafeOkfColor = ${isSafeOkfColor.toString()};
+  const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())}, tableTools, isSafeOkfColor);
   const createEditPalette = ${createEditPalette.toString()};
   const caretRectOf = ${caretRectOf.toString()};
   const createLinkPanel = ${createLinkPanel.toString()};
@@ -130,7 +131,6 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context);
   const firstClearance = (${installFirstClearance.toString()})(document, window);
   const applyFigureSizes = ${applyFigureSizes.toString()};
-  const isSafeOkfColor = ${isSafeOkfColor.toString()};
   const applySpanColors = ${applySpanColors.toString()};
   const codeCopy = (${installCodeCopy.toString()})(document, window, (text) => vscode.postMessage({
     type: "previewCopyText",
@@ -3141,7 +3141,12 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       palette.closePopover();
       edit.closeLinkPanel?.(false);
       edit.closeFigurePanel?.(false);
+      palette.updateAvailability();
     });
+    // The colour-code swatch follows the caret: arrows and selections end in a key or mouse release.
+    for (const kind of ["keyup", "mouseup", "select"]) {
+      textarea.addEventListener(kind, () => palette.updateAvailability());
+    }
     textarea.addEventListener("keydown", (event) => {
       if (palette.handleKey(event)) return;
       // Cmd/Ctrl+Shift+M: keyboard path to the palette mode select.

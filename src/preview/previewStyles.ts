@@ -1092,6 +1092,89 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   color: var(--vscode-descriptionForeground, inherit);
 }
 
+/* Colour picker (Colour button) and the colour-code swatch button. */
+.sphinx-preview-edit-palette > button[hidden] {
+  display: none;
+}
+
+.sphinx-preview-edit-palette-swatch {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--vscode-icon-foreground, currentColor);
+  border-radius: 4px;
+}
+
+.sphinx-preview-edit-palette-menu[data-edit-popover="color"] {
+  width: 15em;
+  max-width: 100%;
+  max-height: none;
+  padding: 6px;
+  overflow: visible;
+}
+
+.sphinx-preview-edit-color-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.sphinx-preview-edit-color-tabs > button,
+.sphinx-preview-edit-color-remove {
+  flex: 1 1 0;
+  padding: 3px 6px;
+  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.sphinx-preview-edit-color-tabs > button[aria-selected="true"] {
+  border-color: var(--vscode-focusBorder, #007fd4);
+  background: color-mix(in srgb, var(--vscode-focusBorder, #007fd4) 25%, transparent);
+}
+
+.sphinx-preview-edit-color-tabs > button:hover,
+.sphinx-preview-edit-color-remove:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+}
+
+.sphinx-preview-edit-color-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+  margin-bottom: 6px;
+}
+
+.sphinx-preview-edit-color-grid > button {
+  box-sizing: border-box;
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid var(--sphinx-preview-border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.sphinx-preview-edit-color-grid > button:hover,
+.sphinx-preview-edit-color-grid > button:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: 1px;
+}
+
+.sphinx-preview-edit-color-hex[aria-invalid="true"] {
+  border-color: var(--vscode-inputValidation-errorBorder, #be1100);
+}
+
+.sphinx-preview-edit-color-remove {
+  width: 100%;
+  margin-top: 2px;
+}
+
 /* Link panel: Text and URL fields under the palette, in the flow of the editor frame. */
 .sphinx-preview-link-panel {
   display: flex;

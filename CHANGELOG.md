@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- The edition palette gets a Colour button in every mode. Its picker has Text and Background tabs,
+  16 swatches, a hex field (Enter applies, invalid values are refused) and Remove. It wraps the
+  selection in `<span style="color:#hex">` or `background-color`, and changes, extends or removes
+  the span the selection is in. Only colours the preview keeps (hex, `rgb()`, `rgba()`) are
+  written, also in table cells. With the caret in a colour code (`#rgb`, `#rrggbb`, `rgb(…)`), a
+  swatch button shows that colour and opens the picker to replace the code in place.
 - Text and background colours set with `<span style="color: #c00; background-color: rgb(…)">` now
   render coloured. Only hex (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`) and `rgb()`/`rgba()` values
   are kept; named colours, `var()`, `url()`, `!important` and other properties are still removed.
