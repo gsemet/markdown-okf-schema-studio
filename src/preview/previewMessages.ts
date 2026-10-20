@@ -12,6 +12,8 @@
  * must not import `vscode`.
  */
 
+import { isValidLabelName } from "../mapping/labelRename";
+
 export type MessageValidator = (message: Readonly<Record<string, unknown>>) => boolean;
 
 export interface RegisteredPreviewMessage {
@@ -78,6 +80,9 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
     && VIEW_PREFERENCE_VALIDATORS[message.preference](message.value),
   // The palette mode select of the edition palette: strict, GFM or MyST buttons (workspace state).
   previewPaletteModeChanged: (message) => isOneOf(message.mode, PALETTE_MODES),
+  // Rename of a MyST label from its anchor icon: the source line of `(oldName)=` and both names.
+  previewLabelRename: (message) => isSourceLine(message.line)
+    && isValidLabelName(message.oldName) && isValidLabelName(message.newName),
 };
 
 export const isRegisteredPreviewMessage = createPreviewMessageChecker(REGISTERED_PREVIEW_MESSAGES);

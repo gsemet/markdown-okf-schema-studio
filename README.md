@@ -27,7 +27,8 @@ Markdown flavours and extensions:
 
 - **MyST rendering:** directives, admonitions, tables, math (including `align` environments),
   Mermaid, PlantUML, images and figures with their `:width:` and `:align:`, media, `(label)=`
-  anchors (shown as a small icon), and permitted external links render in the preview.
+  anchors (shown as a small icon; in edit mode a click on it renames the label), and permitted
+  external links render in the preview.
 - **OpenKnowledge Format and OKF-Schema properties:** frontmatter field can be shown as a schema-aware properties table,
   with validation diagnostics, enum controls, typed scalar editors,
   and YAML editors for arrays and objects.

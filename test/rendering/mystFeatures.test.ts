@@ -1374,6 +1374,7 @@ test("a label before a paragraph renders an anchor icon span that is the link ta
   assert.equal(attribute(anchors[0], "data-okf-label"), "intro");
   assert.equal(attribute(anchors[0], "title"), "Anchor: intro");
   assert.equal(attribute(anchors[0], "data-line"), undefined);
+  assert.equal(attribute(anchors[0], "data-okf-label-line"), "1");
   const paragraph = findElement(html, isTag("p"))!;
   assert.equal((paragraph.childNodes[0] as HtmlElement), anchors[0], "the anchor is not the first child");
   assert.match(textContent(paragraph), /^A paragraph\./u);
@@ -1398,6 +1399,7 @@ test("a label before a list or at the end of the document renders its own anchor
   const anchors = findElements(html, (element) => hasClass(element, "okf-anchor"));
   assert.deepEqual(anchors.map((anchor) => attribute(anchor, "id")), ["items", "last"]);
   assert.equal(findElements(html, isTag("ul")).length, 1);
+  assert.deepEqual(anchors.map((anchor) => attribute(anchor, "data-okf-label-line")), ["1", "5"]);
   assert.equal(findElement(html, isTag("ul"))!.childNodes.some((node) => "attrs" in node && hasClass(node as HtmlElement, "okf-anchor")), false);
 });
 
@@ -1420,7 +1422,9 @@ test("an anchor icon is not a mapped block or Tab stop, while the labelled block
     assert.equal(attribute(anchor, "tabindex"), undefined);
     assert.equal(attribute(anchor, "data-sphinx-preview-block"), undefined);
     assert.equal(attribute(anchor, "data-line"), undefined);
+    assert.equal(attribute(anchor, "data-sphinx-source-line"), undefined);
   }
+  assert.deepEqual(anchors.map((anchor) => attribute(anchor, "data-okf-label-line")), ["1", "4", "7"]);
   const paragraph = findElement(html, isTag("p"))!;
   const heading = findElement(html, isTag("h1"))!;
   for (const block of [paragraph, heading]) {
@@ -1499,4 +1503,11 @@ test("a label written by the palette renders an anchor icon for the block", asyn
   const anchor = findElement(html, (e) => hasClass(e, "okf-anchor"))!;
   assert.ok(anchor, "no anchor icon");
   assert.equal(attribute(anchor, "id"), "my-label");
+});
+
+test("the anchor carries the source line of its label in a document with frontmatter", async () => {
+  const text = "---\ntitle: T\n---\n\n# Head\n\n(intro)=\nA paragraph.\n";
+  const { html } = await renderPalette(text);
+  const anchor = findElement(html, (element) => hasClass(element, "okf-anchor"))!;
+  assert.equal(text.split("\n")[Number(attribute(anchor, "data-okf-label-line")) - 1], "(intro)=");
 });

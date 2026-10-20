@@ -31,6 +31,7 @@ import { checkboxToggleEdit } from "./render/checkboxMarkers";
 import { sourceRangeForLines, type SourceMappingOptions } from "./mapping/sourceMapping";
 import { insertionText, planInsertion, type InsertionPlan } from "./mapping/insertion";
 import { minimalReplacement } from "./mapping/textDiff";
+import { countRefUses, renameLabelLine } from "./mapping/labelRename";
 import {
   DEFAULT_PREVIEW_CONFIGURATION,
   PREVIEW_CONFIGURATION_SECTION,
@@ -1379,7 +1380,7 @@ function recordPreviewState(preview: ActivePreview, message: PreviewSyncMessage)
 
 function currentPreviewDocument(
   preview: ActivePreview,
-  message: PreviewSyncMessage,
+  message: Pick<PreviewSyncMessage, "documentVersion">,
 ): vscode.TextDocument | undefined {
   const document = preview.document;
   const stage = preview.stage;
@@ -1693,6 +1694,81 @@ function handleCheckboxToggle(preview: ActivePreview, message: PreviewSyncMessag
       : { error: "VS Code could not apply the checkbox edit." });
   }, (error: unknown) => {
     postCheckboxResult(preview, message, { error: error instanceof Error ? error.message : String(error) });
+  });
+}
+
+function postLabelRenameResult(
+  preview: ActivePreview,
+  message: RegisteredPreviewMessage,
+  result: { ok: true; remainingRefs: number } | { ok: false; reason: string },
+): void {
+  void preview.panel.webview.postMessage({
+    type: "previewLabelRenameResult",
+    documentId: message.documentId,
+    documentVersion: message.documentVersion,
+    requestId: message.requestId,
+    editId: message.editId,
+    ...result,
+  });
+}
+
+/**
+ * Renames a MyST label from its anchor icon: only the `(oldName)=` line changes, in one undo step.
+ * A line that is not exactly `(oldName)=` is refused, never searched for elsewhere.
+ */
+function handleLabelRename(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+  if (preview.readOnly) {
+    postLabelRenameResult(preview, message, { ok: false, reason: "Renaming needs a trusted workspace." });
+    return undefined;
+  }
+  if (preview.activeBlockEdit) {
+    postLabelRenameResult(preview, message, {
+      ok: false,
+      reason: "Save or cancel the open Markdown edit before renaming a label.",
+    });
+    return undefined;
+  }
+  const document = currentPreviewDocument(preview, message);
+  if (!document) {
+    postLabelRenameResult(preview, message, {
+      ok: false,
+      reason: "The preview is out of date. Try again once it has refreshed.",
+    });
+    return undefined;
+  }
+  const oldName = message.oldName as string;
+  const text = document.getText();
+  const rename = renameLabelLine(text, message.line as number, oldName, message.newName as string);
+  if (!rename) {
+    postLabelRenameResult(preview, message, {
+      ok: false,
+      reason: "The label is no longer on that line. Refresh the preview.",
+    });
+    return undefined;
+  }
+  const remainingRefs = countRefUses(text, oldName);
+  const range = new vscode.Range(document.positionAt(rename.start), document.positionAt(rename.end));
+  const sourceEditor = vscode.window.visibleTextEditors.find((candidate) =>
+    documentKey(candidate.document) === documentKey(document));
+  const applyEdit = sourceEditor
+    ? sourceEditor.edit((builder) => builder.replace(range, rename.text), {
+      undoStopBefore: true,
+      undoStopAfter: true,
+    })
+    : (() => {
+      const edit = new vscode.WorkspaceEdit();
+      edit.replace(document.uri, range, rename.text);
+      return vscode.workspace.applyEdit(edit);
+    })();
+  return applyEdit.then((applied) => {
+    postLabelRenameResult(preview, message, applied
+      ? { ok: true, remainingRefs }
+      : { ok: false, reason: "VS Code could not apply the rename." });
+  }, (error: unknown) => {
+    postLabelRenameResult(preview, message, {
+      ok: false,
+      reason: error instanceof Error ? error.message : String(error),
+    });
   });
 }
 
@@ -2586,6 +2662,8 @@ registeredMessageHandlers.set("previewPaletteModeChanged", (preview, message) =>
     void editModeStorage?.update(PALETTE_MODE_STORAGE_KEY, message.mode);
   }
 });
+
+registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
 
 function initialPaletteMode(): PaletteMode {
   const stored = editModeStorage?.get(PALETTE_MODE_STORAGE_KEY);

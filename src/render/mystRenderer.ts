@@ -1273,11 +1273,13 @@ const NATIVE_TARGET_TYPES = new Set(["heading", "container", "math"]);
 const ANCHOR_INLINE_HOSTS = new Set(["paragraph", "heading"]);
 
 // No `data-line`: the sanitizer would make the span a focusable mapped block of its own.
-function anchorProperties(label: string): Record<string, unknown> {
+// `data-okf-label-line` is the source line of `(name)=` for the rename field: not a mapping attribute.
+function anchorProperties(label: string, line: number | undefined): Record<string, unknown> {
   return {
     class: "okf-anchor",
     "data-okf-anchor-id": label,
     "data-okf-label": label,
+    ...(line === undefined ? {} : { "data-okf-label-line": String(line) }),
     title: `Anchor: ${label}`,
     role: "img",
     "aria-label": `Anchor: ${label}`,
@@ -1305,7 +1307,7 @@ function normalizeAnchors(root: MystNode): ReadonlySet<string> {
         let next = index + 1;
         while (children[next]?.type === "mystTarget") next += 1;
         const following = children[next];
-        const properties = anchorProperties(target.label);
+        const properties = anchorProperties(target.label, target.position?.start?.line);
         labels.add(target.label);
         if (!following || !NATIVE_TARGET_TYPES.has(following.type)) plain.add(target.label);
         if (following?.type === "heading") headingText.set(target.label, textOf(following));
