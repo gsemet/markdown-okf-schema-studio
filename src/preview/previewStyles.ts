@@ -2038,6 +2038,49 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   opacity: 1;
 }
 
+/* In edit mode the icon renames its label. */
+:root[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content .okf-anchor {
+  cursor: pointer;
+}
+
+[data-okf-label-rename] {
+  position: fixed;
+  z-index: 1060;
+  display: grid;
+  gap: 4px;
+  width: min(22em, calc(100vw - 16px));
+  padding: 6px;
+  border: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.45));
+  border-radius: 4px;
+  background: var(--vscode-editorWidget-background, #252526);
+  color: var(--vscode-editorWidget-foreground, var(--vscode-editor-foreground, inherit));
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
+}
+
+[data-okf-label-rename] > input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 3px 6px;
+  border: 1px solid var(--vscode-input-border, rgba(128, 128, 128, 0.45));
+  background: var(--vscode-input-background, transparent);
+  color: var(--vscode-input-foreground, inherit);
+  font: inherit;
+}
+
+[data-okf-label-rename] > input:focus {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: -1px;
+}
+
+[data-okf-label-rename-status][data-visible="false"] {
+  display: none;
+}
+
+[data-okf-label-rename-status] {
+  font-size: 0.9em;
+  color: var(--vscode-descriptionForeground, inherit);
+}
+
 #sphinx-myst-preview-content .okf-anchor-row {
   position: relative;
   height: 0;

@@ -13,6 +13,7 @@ import { run as runDirtySnapshots } from "./dirtySnapshots.test";
 import { run as runGenericMarkdown } from "./genericMarkdown.test";
 import { run as runPreviewEditing } from "./previewEditing.test";
 import { run as runIncomingChanges } from "./incomingChanges.test";
+import { run as runLabelRename } from "./labelRename.test";
 import { run as runPaletteMode } from "./paletteMode.test";
 import { run as runPreviewHistory } from "./previewHistory.test";
 import { run as runRealInput } from "./realInput.test";
@@ -101,6 +102,7 @@ export async function run(): Promise<void> {
   }
   await runPreviewHistory();
   await runPaletteMode();
+  await runLabelRename();
   await runIncomingChanges();
   await runGenericMarkdown();
   await runDirtySnapshots();

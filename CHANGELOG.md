@@ -12,6 +12,10 @@
   center or right, on `{figure}` and `{image}`), and a `(name)=` label now shows a faint anchor
   icon in the left margin of the labelled block, with the tooltip "Anchor: name"; `{ref}` links to
   it jump there. `\begin{align}` blocks in `$$` and `{math}` already render with KaTeX.
+- In edit mode, clicking a label's anchor icon opens a small field with its name. Enter renames the
+  `(name)=` line as one undo step, Escape cancels, and a status line says how many `{ref}` uses of
+  the old name remain (they are not rewritten). The rename is refused while another edit is open,
+  in a read-only preview, or when the label is no longer on that line.
 - The edition palette gets five more GitHub (GFM) buttons, also shown in MyST mode. Collapsible
   wraps the lines in `<details><summary>`, Footnote adds `[^n]` at the caret and an empty `[^n]: `
   at the end, Mermaid inserts a flowchart fence, Column alignment (Left, Center, Right) rewrites

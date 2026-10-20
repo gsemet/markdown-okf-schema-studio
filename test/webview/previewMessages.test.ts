@@ -111,3 +111,19 @@ test("previewPaletteModeChanged accepts only strict, gfm or myst", () => {
   assert.equal(isRegisteredPreviewMessage({ ...base, mode: true }), false);
   assert.equal(isRegisteredPreviewMessage({ ...base }), false);
 });
+
+test("previewLabelRename validates the line and both label names", () => {
+  const rename = {
+    type: "previewLabelRename", documentId: "doc", documentVersion: 1, requestId: 1, editId: "e",
+    line: 3, oldName: "old", newName: "new.name:1",
+  };
+  assert.equal(isRegisteredPreviewMessage(rename), true);
+  assert.equal(isRegisteredPreviewMessage({ ...rename, newName: "x".repeat(100) }), true);
+  for (const patch of [
+    { newName: "x".repeat(101) }, { newName: "" }, { newName: "-x" }, { newName: "a b" }, { newName: "a)=" },
+    { oldName: "a b" }, { oldName: undefined }, { newName: 4 },
+    { line: 0 }, { line: 1.5 }, { line: "3" }, { line: undefined },
+  ]) {
+    assert.equal(isRegisteredPreviewMessage({ ...rename, ...patch }), false, JSON.stringify(patch));
+  }
+});

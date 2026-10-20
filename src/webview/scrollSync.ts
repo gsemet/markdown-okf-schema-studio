@@ -12,6 +12,7 @@ import { createLinkPanel } from "./linkPanel";
 import { highlightLanguageNames } from "../render/highlight";
 import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
+import { installLabelRename } from "./labelRename";
 import { installFirstClearance } from "./firstClearance";
 import { applyFigureSizes } from "./figureSizes";
 import { installLinkNavigation } from "./linkNavigation";
@@ -130,6 +131,22 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     requestId: context.requestId,
     text,
   }));
+  // Edit mode: the anchor icon of a label renames it. The result is matched by edit id: the edit
+  // itself moves the document version before the answer arrives.
+  const labelRename = (${installLabelRename.toString()})(document, window, {
+    isEditMode: () => editMode,
+    blockedReason: () => activeBlockEdit || activeFrontmatterEdit
+      ? "Save or cancel the open edit before renaming a label." : undefined,
+    nextEditId: () => "label-" + context.requestId + "-" + (++editSequence),
+    post: (rename, editId) => vscode.postMessage({
+      type: "previewLabelRename",
+      documentId: context.documentId,
+      documentVersion: context.documentVersion,
+      requestId: context.requestId,
+      editId,
+      ...rename,
+    }),
+  });
   // Zoom changes layout only: keep the source line at the reading line across it.
   const keepReadingLine = () => {
     if (!anchor) {
@@ -3179,6 +3196,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
 
   function applyEditMode(enabled) {
     if (!enabled) {
+      labelRename.close();
       setEditHover(undefined);
       closeFrontmatterEditor();
       if (activeBlockEdit && typeof activeBlockEdit.originalText === "string") {
@@ -3788,6 +3806,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       revealAt(targetTop);
       return;
     }
+    if (message?.type === "previewLabelRenameResult" && labelRename.receive(message)) return;
     if (sameContext(message) && message.type === "previewEditSource") {
       receiveBlockEditSource(message);
       return;
