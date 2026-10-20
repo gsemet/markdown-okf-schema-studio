@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { createEditActions } from "../../src/webview/editActions";
 import type { EditAction, EditActionMode, EditActionRegistry } from "../../src/webview/editActions";
 import { createEditPalette } from "../../src/webview/editPalette";
+import { createMarkdownTableTools } from "../../src/webview/markdownTable";
 
 type Listener = (event: Record<string, unknown>) => void;
 
@@ -20,7 +21,9 @@ class FakeElement {
   public offsetLeft = 0;
   public offsetWidth = 0;
   public clientWidth = 0;
-  public readonly style = { setProperty: (_name: string, _value: string): void => undefined };
+  public readonly styles = new Map<string, string>();
+  public readonly style = { setProperty: (name: string, value: string): void => { this.styles.set(name, value); } };
+  public getBoundingClientRect(): { left: number; top: number } { return { left: 100, top: 50 }; }
   public constructor(public readonly tagName: string) {}
   public setAttribute(name: string, value: string): void { this.attributes.set(name, value); }
   public getAttribute(name: string): string | null { return this.attributes.get(name) ?? null; }
@@ -108,7 +111,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   const myst = actionIds(open("myst").root);
   assert.equal(strict.length >= 9, true);
   assert.equal(strict.includes("gfmOnly") || strict.includes("mystOnly"), false);
-  assert.deepEqual(gfm, [...strict, "gfmOnly"]);
+  assert.deepEqual(gfm, [...strict, "alert", "checkbox", "htmlTable", "gfmOnly"]);
   assert.deepEqual(myst, [...gfm, "mystOnly"]);
 });
 
@@ -442,4 +445,183 @@ test("T24: arrow keys move through the visible emoji and back to the filter", ()
   assert.equal(focused.at(-1), emojis[9]);
   emojis[0].dispatch("keydown", { key: "ArrowUp", preventDefault: () => undefined });
   assert.equal(focused.at(-1), field);
+});
+
+// T25: the Alert dropdown at the caret.
+function openGfm(value = "", caret = 0, rect?: { left: number; top: number; bottom: number }): Harness {
+  const textbox = {
+    value, selectionStart: caret, selectionEnd: caret, focused: 0,
+    focus() { textbox.focused += 1; },
+  };
+  const harness = { edits: [] as Array<{ start: number; end: number; text: string }>, leaves: 0, frame: new Set<unknown>() } as Harness;
+  harness.textbox = textbox;
+  harness.palette = createEditPalette(fakeDocument(), {
+    actions: createEditActions([], createMarkdownTableTools()),
+    getControl: () => textbox,
+    ...(rect ? { getCaretRect: () => rect } : {}),
+    applyTextEdit: (edit) => {
+      harness.edits.push(edit);
+      textbox.value = textbox.value.slice(0, edit.start) + edit.text + textbox.value.slice(edit.end);
+      textbox.selectionStart = edit.selectionStart;
+      textbox.selectionEnd = edit.selectionEnd;
+      harness.palette.closePopover();
+    },
+    mode: "gfm",
+    onLeave: () => { harness.leaves += 1; },
+    isInsideFrame: (node) => harness.frame.has(node),
+  });
+  harness.root = harness.palette.element as unknown as FakeElement;
+  return harness;
+}
+
+const options = (menu: FakeElement): FakeElement[] =>
+  menu.all().filter((e) => e.getAttribute("data-edit-option") !== null);
+
+test("T25: strict mode has no GitHub buttons; GFM and MyST show Alert, Checkbox and HTML table", () => {
+  const ids = (mode: EditActionMode): string[] => actionIds(open(mode).root);
+  for (const id of ["alert", "checkbox", "htmlTable"]) {
+    assert.equal(ids("strict").includes(id), false, "strict");
+    assert.equal(ids("gfm").includes(id), true, "gfm");
+    assert.equal(ids("myst").includes(id), true, "myst");
+  }
+});
+
+test("T25: Alert writes the alert first, then lists the five types, none lit", () => {
+  const h = openGfm("Mind the gap", 4);
+  button(h.root, "alert").dispatch("click", click);
+  assert.equal(h.textbox.value, "> [!NOTE]\n> Mind the gap");
+  assert.equal(h.edits.length, 1);
+  const menu = popover(h.root)!;
+  assert.ok(menu, "the list stays open through the insertion's input event");
+  assert.equal(menu.getAttribute("data-edit-popover"), "alert");
+  assert.deepEqual(options(menu).map((e) => e.getAttribute("data-edit-option")),
+    ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"]);
+  assert.deepEqual(options(menu).map((e) => e.textContent), ["Note", "Tip", "Important", "Warning", "Caution"]);
+  assert.equal(button(h.root, "alert").getAttribute("aria-expanded"), "true");
+});
+
+test("T25: choosing a type changes the head of the alert the caret is in, in one more edit", () => {
+  const h = openGfm("Mind the gap", 4);
+  button(h.root, "alert").dispatch("click", click);
+  const warning = options(popover(h.root)!).find((e) => e.getAttribute("data-edit-option") === "WARNING")!;
+  warning.dispatch("click", click);
+  assert.equal(h.textbox.value, "> [!WARNING]\n> Mind the gap");
+  assert.equal(h.edits.length, 2);
+  assert.equal(popover(h.root), undefined);
+  assert.equal(button(h.root, "alert").getAttribute("aria-expanded"), "false");
+});
+
+test("T25: the dropdown acts on the live selection, not the one at opening time", () => {
+  const h = openGfm("one\n\ntwo", 0);
+  button(h.root, "alert").dispatch("click", click);
+  assert.equal(h.textbox.value, "> [!NOTE]\n> one\n\ntwo");
+  // The caret leaves the alert (a mouse click would close the list; a stale script must not insert).
+  h.textbox.selectionStart = h.textbox.selectionEnd = h.textbox.value.length;
+  const tip = options(popover(h.root)!).find((e) => e.getAttribute("data-edit-option") === "TIP")!;
+  tip.dispatch("click", click);
+  assert.equal(h.textbox.value.startsWith("> [!NOTE]\n> one\n\n> [!TIP]\n> two"), true,
+    "read at pick time: the caret is on the last line, so that line becomes the alert");
+});
+
+test("T25: Escape dismisses the dropdown, keeps NOTE and puts the focus in the text box", () => {
+  const h = openGfm("x", 1);
+  button(h.root, "alert").dispatch("click", click);
+  const before = h.textbox.focused;
+  let prevented = false;
+  assert.equal(h.palette.handleKey({ key: "Escape", preventDefault: () => { prevented = true; } }), true);
+  assert.equal(prevented, true);
+  assert.equal(popover(h.root), undefined);
+  assert.equal(h.textbox.value, "> [!NOTE]\n> x");
+  assert.equal(h.textbox.focused > before, true, "focus given back to the text box");
+  assert.equal(h.leaves, 0, "no save");
+});
+
+test("T25: a second click on Alert closes the list without another edit", () => {
+  const h = openGfm("x", 1);
+  button(h.root, "alert").dispatch("click", click);
+  button(h.root, "alert").dispatch("click", click);
+  assert.equal(popover(h.root), undefined);
+  assert.equal(h.edits.length, 1);
+});
+
+test("T25: Alert on an existing alert only opens the list", () => {
+  const h = openGfm("> [!TIP]\n> body", 12);
+  button(h.root, "alert").dispatch("click", click);
+  assert.equal(h.edits.length, 0);
+  assert.ok(popover(h.root));
+  options(popover(h.root)!).find((e) => e.getAttribute("data-edit-option") === "CAUTION")!.dispatch("click", click);
+  assert.equal(h.textbox.value, "> [!CAUTION]\n> body");
+});
+
+test("T25: the list opens at the caret, in the bar's coordinates", () => {
+  const h = openGfm("x", 1, { left: 340, top: 120, bottom: 140 });
+  button(h.root, "alert").dispatch("click", click);
+  const menu = popover(h.root)!;
+  assert.equal(menu.getAttribute("data-edit-popover-at"), "caret");
+  assert.equal(menu.styles.get("inset-inline-start"), "240px", "340 - 100");
+  assert.equal(menu.styles.get("inset-block-start"), "92px", "140 - 50 + 2");
+});
+
+test("T25: without a caret position the list opens under its button like the others", () => {
+  const h = openGfm("x", 1);
+  button(h.root, "alert").dispatch("click", click);
+  const menu = popover(h.root)!;
+  assert.equal(menu.getAttribute("data-edit-popover-at"), null);
+  assert.equal(menu.styles.has("inset-block-start"), false);
+});
+
+test("T25: arrows light a type, Enter picks it; moving the caret or typing ends the list", () => {
+  const h = openGfm("x", 1);
+  button(h.root, "alert").dispatch("click", click);
+  const menu = popover(h.root)!;
+  const items = options(menu);
+  const key = (name: string): boolean => h.palette.handleKey({ key: name, preventDefault: () => undefined });
+  assert.equal(key("Enter"), false, "nothing lit: Enter is the text box's");
+  assert.equal(key("ArrowDown"), true);
+  assert.equal(items[0].getAttribute("data-active"), "true");
+  key("ArrowDown");
+  key("ArrowDown");
+  assert.equal(items[2].getAttribute("data-active"), "true");
+  assert.equal(items[0].getAttribute("data-active"), null);
+  key("ArrowUp");
+  key("ArrowUp");
+  key("ArrowUp");
+  assert.equal(items[4].getAttribute("data-active"), "true", "wraps");
+  assert.equal(key("Enter"), true);
+  assert.equal(h.textbox.value, "> [!CAUTION]\n> x");
+  assert.equal(popover(h.root), undefined);
+
+  const again = openGfm("y", 1);
+  button(again.root, "alert").dispatch("click", click);
+  assert.equal(again.palette.handleKey({ key: "ArrowLeft" }), false, "the caret still moves");
+  assert.equal(popover(again.root), undefined, "and the list is gone");
+});
+
+test("T25: an option holding the focus gives it back on Escape and saves when the frame is left", () => {
+  const h = openGfm("x", 1);
+  button(h.root, "alert").dispatch("click", click);
+  const item = options(popover(h.root)!)[1];
+  item.dispatch("focus");
+  const before = h.textbox.focused;
+  item.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(popover(h.root), undefined);
+  assert.equal(h.textbox.focused > before, true);
+
+  const left = openGfm("x", 1);
+  button(left.root, "alert").dispatch("click", click);
+  const other = options(popover(left.root)!)[0];
+  other.dispatch("focus");
+  other.dispatch("blur", { relatedTarget: {} });
+  assert.equal(left.leaves, 1, "focus left the frame");
+});
+
+test("T25: Checkbox and HTML table are one-click actions with no list", () => {
+  const h = openGfm("task", 2);
+  button(h.root, "checkbox").dispatch("click", click);
+  assert.equal(h.textbox.value, "- [ ] task");
+  assert.equal(popover(h.root), undefined);
+  const t = openGfm("| a | b |\n| --- | --- |\n| 1 | 2 |", 3);
+  button(t.root, "htmlTable").dispatch("click", click);
+  assert.equal(t.textbox.value.startsWith("<table>"), true);
+  assert.equal(popover(t.root), undefined);
 });

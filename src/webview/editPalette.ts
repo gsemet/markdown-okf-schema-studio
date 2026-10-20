@@ -1,4 +1,5 @@
 import type { EditAction, EditActionMode, EditActionRegistry } from "./editActions";
+import type { CaretRect } from "./caretRect";
 import type { TextEdit } from "./textEditing";
 
 /** The text box the palette edits (a textarea; only these members are read). */
@@ -12,6 +13,11 @@ export interface EditPaletteControl {
 export interface EditPaletteDeps {
   actions: EditActionRegistry;
   getControl(): EditPaletteControl;
+  /**
+   * Where the caret is on screen (viewport coordinates), for the dropdowns that open at the caret
+   * (the Alert type list). Absent or `undefined`: the dropdown opens under its button.
+   */
+  getCaretRect?(): CaretRect | undefined;
   /** Runs an edit as one native, undoable step in the control (and autosaves). */
   applyTextEdit(edit: TextEdit): void;
   /** Opens the small panel of an action that has one (the Link button). */
@@ -85,6 +91,9 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     link: svg("M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"),
     rule: svg("M3 12h18M8 7h8M8 17h8"),
     todo: svg("M5 4v17M5 5h12l-2 4 2 4H5"),
+    alert: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5v5.5M12 16v.5") + caret,
+    checkbox: svg("M5 5h14v14H5zM8.5 12l2.5 2.5 4.5-5"),
+    htmlTable: svg("M4 5h16v14H4zM4 10h16M9 12.5l-1.7 1.7L9 16M15 12.5l1.7 1.7L15 16"),
     table: svg("M4 5h16v14H4zM4 10h16M4 14.5h16M10 5v14M15 5v14"),
     emoji: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 14a4.5 4.5 0 0 0 7 0M9 9.5v.5M15 9.5v.5"),
   };
@@ -111,6 +120,10 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   let closing = false;
   // True while a Shift+click insertion runs: the popover stays open through the text box's input.
   let holding = false;
+  // Dropdown that opens at the caret (Alert): its option buttons and the one the arrow keys lit.
+  let caretOptions: HTMLElement[] = [];
+  let caretAction: EditAction | undefined;
+  let caretIndex = -1;
   let mode: EditActionMode = deps.mode;
   let buttons: HTMLElement[] = [];
 
@@ -211,6 +224,9 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     gridState = undefined;
     gridAction = undefined;
     emojiField = undefined;
+    caretOptions = [];
+    caretAction = undefined;
+    caretIndex = -1;
     menuFocused = false;
     if (hadFocus && refocus) deps.getControl().focus({ preventScroll: true });
     return true;
@@ -471,6 +487,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
         item.setAttribute("role", "menuitem");
         item.setAttribute("data-edit-option", option.value);
         item.textContent = option.label;
+        item.setAttribute("tabindex", "-1");
         item.addEventListener("mousedown", keepFocus);
         item.addEventListener("click", (event) => {
           event.preventDefault?.();
@@ -478,16 +495,41 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
           closePopover();
           run(action, option.value);
         });
+        // Should an option ever hold the focus, Escape hands it back and leaving the frame saves.
+        trackFocus(item);
+        item.addEventListener("keydown", (event: {
+          key?: string;
+          isComposing?: boolean;
+          preventDefault?: () => void;
+          stopPropagation?: () => void;
+        }) => {
+          if (event.isComposing || event.key !== "Escape") return;
+          event.preventDefault?.();
+          event.stopPropagation?.();
+          closePopover();
+          deps.getControl().focus({ preventScroll: true });
+        });
         menu.appendChild(item);
+        if (action.popoverAtCaret) caretOptions.push(item);
       }
+      if (action.popoverAtCaret) caretAction = action;
     }
     root.appendChild(menu);
-    // Under its button, pulled back left when it would leave the bar's width.
-    const left = button.offsetLeft;
+    // A caret dropdown sits under the caret (in the bar's coordinates); every other popover under
+    // its button. Both are pulled back left when they would leave the bar's width.
+    const caretRect = action.popoverAtCaret ? deps.getCaretRect?.() : undefined;
+    const barRect = caretRect ? root.getBoundingClientRect?.() : undefined;
+    const left = caretRect && barRect ? caretRect.left - barRect.left : button.offsetLeft;
     if (typeof left === "number" && Number.isFinite(left)) {
-      const room = root.clientWidth - menu.offsetWidth;
+      // The bar is as wide as its buttons; a dropdown at the caret may use the whole frame.
+      const bound = caretRect ? (root.parentElement?.clientWidth || root.clientWidth) : root.clientWidth;
+      const room = bound - menu.offsetWidth;
       const at = Number.isFinite(room) && room > 0 ? Math.min(left, room) : left;
       menu.style.setProperty("inset-inline-start", Math.max(0, at) + "px");
+    }
+    if (caretRect && barRect && Number.isFinite(caretRect.bottom - barRect.top)) {
+      menu.style.setProperty("inset-block-start", Math.round(caretRect.bottom - barRect.top + 2) + "px");
+      menu.setAttribute("data-edit-popover-at", "caret");
     }
     button.setAttribute("aria-expanded", "true");
     openMenu = menu;
@@ -541,6 +583,17 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
           if (openButton === button) {
             closePopover();
           } else {
+            if (action.popoverAtCaret) {
+              // The action runs first (the alert is written), then the list changes its type.
+              // The text box's input event must not close the list that is about to open.
+              closePopover();
+              holding = true;
+              try {
+                run(action);
+              } finally {
+                holding = false;
+              }
+            }
             openPopover(action, button);
             // The emoji picker takes the focus for its filter; every other popover leaves it in
             // the text box.
@@ -582,8 +635,42 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       if (event.key === "Escape") {
         event.preventDefault?.();
         event.stopPropagation?.();
+        const atCaret = caretAction !== undefined;
         closePopover();
+        // A dropdown dismissed without a choice always leaves the focus in the text box.
+        if (atCaret) deps.getControl().focus({ preventScroll: true });
         return true;
+      }
+      const choices = caretOptions;
+      const listed = caretAction;
+      if (listed && choices.length > 0 && !event.altKey && !event.metaKey && !event.ctrlKey) {
+        const vertical = event.key === "ArrowDown" || event.key === "ArrowUp";
+        if (vertical) {
+          event.preventDefault?.();
+          event.stopPropagation?.();
+          const step = event.key === "ArrowDown" ? 1 : -1;
+          caretIndex = caretIndex < 0
+            ? (step > 0 ? 0 : choices.length - 1)
+            : (caretIndex + step + choices.length) % choices.length;
+          choices.forEach((choice, index) => {
+            if (index === caretIndex) choice.setAttribute("data-active", "true");
+            else choice.removeAttribute("data-active");
+          });
+          return true;
+        }
+        if (event.key === "Enter" && !event.shiftKey && caretIndex >= 0) {
+          event.preventDefault?.();
+          event.stopPropagation?.();
+          const chosen = choices[caretIndex].getAttribute("data-edit-option");
+          closePopover();
+          if (chosen !== null) run(listed, chosen);
+          return true;
+        }
+        // Moving the caret elsewhere ends the dropdown: it would no longer be at the alert.
+        if (["ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"].includes(String(event.key))) {
+          closePopover();
+          return false;
+        }
       }
       // The size grid is driven from the text box: arrows move the highlighted rectangle and
       // Enter inserts it. Anything else (typing, modifiers) falls through and closes nothing.

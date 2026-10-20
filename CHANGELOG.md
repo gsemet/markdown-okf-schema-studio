@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The edition palette gets three GitHub buttons, shown in the GitHub (GFM) and MyST modes. Alert
+  writes `> [!NOTE]` and quotes the current lines, then a list of types (Note, Tip, Important,
+  Warning, Caution) opens at the caret to change it; Escape keeps Note. Checkbox toggles `- [ ]`
+  on the current lines. HTML table converts the Markdown table at the caret to an HTML `<table>`
+  with its text and alignment, or inserts a new 2 × 2 one. Each is one undo step.
 - The edition palette gets a Table button and an Emoji button. Table opens a 9 x 9 grid: the cells
   from the top left to the pointer light up with their size (for example 3 × 4) and one click
   inserts that pipe table on its own lines, header row first, with the first header cell selected.

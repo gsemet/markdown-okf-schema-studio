@@ -7,6 +7,7 @@ import { createAnchorPolicy } from "./anchorPolicy";
 import { createMarkdownTableTools } from "./markdownTable";
 import { createEditActions } from "./editActions";
 import { createEditPalette } from "./editPalette";
+import { caretRectOf } from "./caretRect";
 import { createLinkPanel } from "./linkPanel";
 import { highlightLanguageNames } from "../render/highlight";
 import { createTextEditingTools } from "./textEditing";
@@ -75,8 +76,9 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
   const tableTools = (${createMarkdownTableTools.toString()})();
   const textEditing = (${createTextEditingTools.toString()})();
-  const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())});
+  const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())}, tableTools);
   const createEditPalette = ${createEditPalette.toString()};
+  const caretRectOf = ${caretRectOf.toString()};
   const createLinkPanel = ${createLinkPanel.toString()};
   const anchorPolicy = (${createAnchorPolicy.toString()})();
   const settings = {
@@ -3021,6 +3023,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const palette = createEditPalette(document, {
       actions: editActions,
       getControl: () => textarea,
+      getCaretRect: () => caretRectOf(document, window, textarea),
       applyTextEdit: (paletteEdit) => applyTextEdit(textarea, paletteEdit, () => {
         resizeTextarea();
         autosaveBlockEdit();

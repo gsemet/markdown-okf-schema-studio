@@ -7372,7 +7372,10 @@ test("T21: the palette is the first child of the block editor frame, above the t
   assert.equal(palette.childElements[0].tagName, "SELECT", "the mode select starts the bar");
   assert.deepEqual(
     palette.childElements.slice(1).map((child) => child.getAttribute("data-edit-action")),
-    ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table", "emoji", "todo"],
+    [
+      "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
+      "emoji", "todo", "alert", "checkbox", "htmlTable",
+    ],
   );
 });
 
@@ -7414,7 +7417,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 11);
+  assert.equal(controls.length, 14);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
@@ -8360,4 +8363,104 @@ test("T24: an emoji chosen after the text changed is inserted at the live caret,
   const emoji = allDescendants(paletteMenu(harness)!).find((e) => e.getAttribute("data-emoji") !== null)!;
   emoji.dispatch("click", { preventDefault: () => undefined });
   assert.equal(textarea.value, "XY" + emoji.textContent);
+});
+
+// T25: the Alert dropdown in the real page script.
+function withCaretMarker(harness: RuntimeHarness, textarea: RuntimeElement): void {
+  // The page measures the caret with a hidden mirror: give its marker span a layout.
+  const create = harness.document.createElement as (tagName: string) => RuntimeElement;
+  harness.document.createElement = (tagName: string): RuntimeElement => {
+    const element = create(tagName);
+    if (tagName === "span") {
+      Object.assign(element, { offsetLeft: 120, offsetTop: 18, offsetHeight: 18 });
+    }
+    return element;
+  };
+  textarea.rectProvider = () => ({ top: 200, left: 40, height: 60, bottom: 260, width: 400 });
+}
+
+function menuOption(menu: RuntimeElement, value: string): RuntimeElement {
+  const found = allDescendants(menu).find((e) => e.getAttribute("data-edit-option") === value);
+  assert.ok(found, value);
+  return found;
+}
+
+test("T25: strict mode shows no GitHub buttons; GFM shows Alert, Checkbox and HTML table", () => {
+  const strict = createRuntimeHarness({ initialPaletteMode: "strict" });
+  openBlockEditorWithSource(strict);
+  assert.equal(strict.createdElements.some((e) => e.getAttribute("data-edit-action") === "alert"), false);
+  const gfm = createRuntimeHarness({ initialPaletteMode: "gfm" });
+  openBlockEditorWithSource(gfm);
+  for (const id of ["alert", "checkbox", "htmlTable"]) assert.ok(paletteButton(gfm, id), id);
+});
+
+test("T25: Alert writes the head, opens the type list near the caret and picking changes the type", () => {
+  const harness = createRuntimeHarness({ initialPaletteMode: "gfm" });
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  withCaretMarker(harness, textarea);
+  textarea.value = "Mind the gap";
+  textarea.setSelectionRange(4, 4);
+  const count = harness.messages.length;
+  paletteButton(harness, "alert").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "> [!NOTE]\n> Mind the gap");
+  const menu = paletteMenu(harness)!;
+  assert.ok(menu, "the list survives the insertion's input event");
+  assert.equal(menu.getAttribute("data-edit-popover"), "alert");
+  assert.equal(menu.getAttribute("data-edit-popover-at"), "caret");
+  assert.equal(menu.style.getPropertyValue("inset-inline-start"), "160px", "40 + 120");
+  const barTop = paletteOf(harness)!.getBoundingClientRect().top;
+  assert.equal(menu.style.getPropertyValue("inset-block-start"), String(236 - barTop + 2) + "px", "caret bottom 236, in the bar's coordinates");
+  menuOption(menu, "WARNING").dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined });
+  assert.equal(textarea.value, "> [!WARNING]\n> Mind the gap");
+  assert.equal(calls.length, 2, "one undo step for the alert, one for the type");
+  assert.equal(paletteMenu(harness), undefined);
+  assert.equal(harness.messages.length, count, "no commit");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
+  assert.equal(textarea.focusOptions?.preventScroll, true);
+  assert.equal(textarea.selectionStart, "> [!WARNING]\n> Mind".length, "the caret stayed on its text");
+});
+
+test("T25: dismissing the type list leaves NOTE, the focus in the text box and the editor open", () => {
+  const harness = createRuntimeHarness({ initialPaletteMode: "gfm" });
+  const focus = trackFocus(harness);
+  const textarea = openBlockEditorWithSource(harness);
+  stubExecCommand(harness, textarea);
+  textarea.value = "";
+  textarea.setSelectionRange(0, 0);
+  paletteButton(harness, "alert").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "> [!NOTE]\n> ");
+  assert.ok(paletteMenu(harness));
+  assert.equal(typeKey(textarea, "Escape"), true);
+  assert.equal(paletteMenu(harness), undefined);
+  assert.equal(focus.last(), textarea);
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true", "Escape closed the list only");
+  // Clicking into the text instead also dismisses it.
+  paletteButton(harness, "alert").dispatch("click", { preventDefault: () => undefined });
+  assert.ok(paletteMenu(harness));
+  textarea.dispatch("mousedown");
+  assert.equal(paletteMenu(harness), undefined);
+  assert.equal(textarea.value, "> [!NOTE]\n> ", "the second click only opened the list on the existing alert");
+});
+
+test("T25: Checkbox and HTML table edit the text box as one undo step each", () => {
+  const harness = createRuntimeHarness({ initialPaletteMode: "gfm" });
+  const textarea = openBlockEditorWithSource(harness);
+  const calls = stubExecCommand(harness, textarea);
+  textarea.value = "buy milk";
+  textarea.setSelectionRange(3, 3);
+  paletteButton(harness, "checkbox").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "- [ ] buy milk");
+  assert.equal(calls.length, 1);
+  paletteButton(harness, "checkbox").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value, "- buy milk");
+  textarea.value = "| a | b |\n| :--- | ---: |\n| 1 | 2 |";
+  textarea.setSelectionRange(2, 2);
+  calls.length = 0;
+  paletteButton(harness, "htmlTable").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(textarea.value.startsWith("<table>\n  <thead>"), true);
+  assert.equal(textarea.value.includes('<td align="right">2</td>'), true);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].command, "insertText");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
 });
