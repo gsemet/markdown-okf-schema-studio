@@ -1175,6 +1175,39 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   margin-top: 2px;
 }
 
+/* Table cell bar: the inline buttons of the palette join the row and column buttons. */
+.sphinx-preview-table-menu-separator {
+  align-self: stretch;
+  flex: none;
+  width: 1px;
+  margin: 6px 4px;
+  background: var(--sphinx-preview-border);
+}
+
+.sphinx-preview-edit-palette.sphinx-preview-edit-palette-in-bar {
+  flex: 0 1 auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.sphinx-preview-edit-palette-in-bar .sphinx-preview-edit-palette-menu {
+  max-width: min(22em, calc(100vw - 32px));
+}
+
+.sphinx-preview-edit-palette-in-bar .sphinx-preview-edit-palette-menu > button {
+  height: auto;
+  min-height: 0;
+}
+
+.sphinx-preview-table-menu > .sphinx-preview-link-panel {
+  flex: 1 1 100%;
+  margin: 2px 0 0;
+}
+
 /* Link panel: Text and URL fields under the palette, in the flow of the editor frame. */
 .sphinx-preview-link-panel {
   display: flex;

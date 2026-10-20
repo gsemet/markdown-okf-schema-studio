@@ -48,6 +48,8 @@ Markdown flavours and extensions:
   tables with a caption, figures and `{kbd}` keys. In edit mode, hovering a figure shows Edit figure
   (or press Figure with the caret in a `{figure}`): a form edits the source (with Browse), alt text,
   caption, legend, width, alignment and name, and leaves every other option as it was.
+  Editing a table cell adds the inline buttons (bold, italic, link, colour, emoji and so on) to the
+  row and column bar.
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)
   annotations can show target metadata and source line numbers for implementation
   and test evidence.

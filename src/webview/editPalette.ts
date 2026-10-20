@@ -41,6 +41,12 @@ export interface EditPaletteDeps {
   /** True when the caret is inside existing syntax of this kind (see `panelWhenInside`). */
   caretInside?(kind: "figure"): boolean;
   mode: EditActionMode;
+  /**
+   * Where the palette lives. "block" (default): the bar above a block editor, with the mode
+   * select. "cell": only the actions allowed in a table cell, as a group inside the table bar
+   * (no mode select; the caller owns the surrounding bar).
+   */
+  scope?: "block" | "cell";
   /** Called once when the user picks another mode in the select (not by `setMode`). */
   onModeChange?(mode: EditActionMode): void;
   /** Focus left the editor frame from the select: the caller runs the normal final save. */
@@ -141,11 +147,19 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     emoji: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8.5 14a4.5 4.5 0 0 0 7 0M9 9.5v.5M15 9.5v.5"),
   };
 
+  const scope: "block" | "cell" = deps.scope === "cell" ? "cell" : "block";
   const root = document.createElement("div");
-  root.className = "sphinx-preview-edit-palette";
-  root.setAttribute("role", "toolbar");
-  root.setAttribute("aria-label", "Edition palette");
-  root.setAttribute("data-sphinx-edit-palette", "true");
+  if (scope === "cell") {
+    root.className = "sphinx-preview-edit-palette sphinx-preview-edit-palette-in-bar";
+    root.setAttribute("role", "group");
+    root.setAttribute("aria-label", "Cell formatting");
+    root.setAttribute("data-sphinx-edit-palette", "cell");
+  } else {
+    root.className = "sphinx-preview-edit-palette";
+    root.setAttribute("role", "toolbar");
+    root.setAttribute("aria-label", "Edition palette");
+    root.setAttribute("data-sphinx-edit-palette", "true");
+  }
   root.addEventListener("click", (event) => event.stopPropagation?.());
   // A press on the bar's padding, gaps or rounded edge must not blur the text box either.
   const keepFocus = (event: { preventDefault?: () => void }): void => event.preventDefault?.();
@@ -247,7 +261,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     deps.onModeChange?.(mode);
     deps.getControl().focus({ preventScroll: true });
   });
-  root.appendChild(modeSelect);
+  if (scope === "block") root.appendChild(modeSelect);
 
   /**
    * Closes the open popover. When the focus was inside it (the emoji filter or a button) the focus
@@ -283,7 +297,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       value: String(control.value ?? ""),
       selectionStart: Number(control.selectionStart),
       selectionEnd: Number(control.selectionEnd),
-      scope: "block",
+      scope,
       ...(arg === undefined ? {} : { arg }),
     });
     if (edit) deps.applyTextEdit(edit);
@@ -638,7 +652,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       value: String(control.value ?? ""),
       selectionStart: Number(control.selectionStart),
       selectionEnd: Number(control.selectionEnd),
-      scope: "block" as const,
+      scope,
       ...(arg === undefined ? {} : { arg }),
     };
   }
@@ -887,7 +901,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     const rank = MODE_RANK[mode] ?? 0;
     let previousGroup = "";
     for (const action of deps.actions.actions) {
-      if (!action.scopes.includes("block")) continue;
+      if (!action.scopes.includes(scope)) continue;
       // Modes are additive: an action listed for a lower mode shows in every higher one.
       if (!action.modes.some((candidate) => (MODE_RANK[candidate] ?? 0) <= rank)) continue;
       const button = document.createElement("button");
@@ -978,6 +992,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     refresh: build,
     setMode,
     focusModeSelect() {
+      if (scope !== "block") return;
       closePopover();
       modeSelect.focus({ preventScroll: true });
     },

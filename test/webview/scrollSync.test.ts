@@ -8878,3 +8878,191 @@ test("T34: the hex field takes the focus without saving, and the code swatch rep
   assert.equal(textarea.value, "Use #00ff88 here");
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
 });
+
+// T35: the inline palette group merged into the table cell bar.
+function cellBar(harness: RuntimeHarness): RuntimeElement {
+  const bar = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-table-menu") === "true");
+  assert.ok(bar, "the table bar exists");
+  return bar;
+}
+
+function cellGroup(harness: RuntimeHarness): RuntimeElement | undefined {
+  return cellBar(harness).childElements.find((child) =>
+    child.getAttribute("data-sphinx-edit-palette") === "cell");
+}
+
+function openCellEditorWithPalette(platform?: string) {
+  const harness = createRuntimeHarness(platform === undefined ? {} : { platform });
+  const opened = openTableCellEditorForTab(harness);
+  const control = opened.input();
+  const calls = stubExecCommand(harness, control);
+  return { harness, ...opened, control, calls };
+}
+
+test("T35: the cell bar keeps the four table operations and adds the inline group after a separator", () => {
+  const { harness } = openCellEditorWithPalette();
+  const bar = cellBar(harness);
+  assert.deepEqual(
+    bar.childElements.filter((child) => child.tagName === "BUTTON")
+      .map((button) => button.getAttribute("data-sphinx-table-operation")),
+    ["Insert row after selected row", "Delete selected row", "Insert column after selected column",
+      "Delete selected column"],
+  );
+  const group = cellGroup(harness);
+  assert.ok(group, "the inline group is inside the table bar");
+  const separator = bar.childElements.find((child) => child.getAttribute("role") === "separator");
+  assert.ok(separator, "a separator");
+  assert.equal(bar.childElements.indexOf(separator) + 1, bar.childElements.indexOf(group));
+  assert.equal(group.childElements.some((child) => child.tagName === "SELECT"), false, "no mode select");
+  const ids = group.childElements.map((child) => child.getAttribute("data-edit-action"));
+  for (const id of ["bold", "italic", "strikethrough", "link", "emoji", "color", "kbd", "sub", "sup"]) {
+    assert.ok(ids.includes(id), id);
+  }
+  for (const id of ["heading", "quote", "rule", "table", "image", "codeFence", "alert", "todo", "details"]) {
+    assert.equal(ids.includes(id), false, "block action " + id + " is not in a cell");
+  }
+  assert.equal(paletteOf(harness), undefined, "no separate palette bar");
+});
+
+test("T35: every inline cell button keeps the focus in the cell on mousedown", () => {
+  const { harness } = openCellEditorWithPalette();
+  const controls = cellGroup(harness)!.childElements.filter((child) =>
+    child.getAttribute("data-edit-action") !== null);
+  assert.ok(controls.length >= 9);
+  for (const control of controls) {
+    let prevented = false;
+    control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
+    assert.equal(prevented, true, String(control.getAttribute("data-edit-action")));
+  }
+});
+
+test("T35: Bold in a cell is one native edit, keeps the cell open and Enter still saves it", () => {
+  const { harness, control, calls } = openCellEditorWithPalette();
+  control.value = "say foo now";
+  control.setSelectionRange(4, 7);
+  const count = harness.messages.length;
+  paletteButton(harness, "bold").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(control.value, "say **foo** now");
+  assert.equal(calls.length, 1);
+  assert.equal(harness.messages.length, count, "no commit");
+  typeKey(control, "Enter");
+  const save = harness.messages.at(-1);
+  assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.final, true);
+  assert.match(String(save?.editedText), /\| say \*\*foo\*\* now \| y \|/u);
+});
+
+test("T35: the bold shortcut works in a cell and stays out of the browser", () => {
+  const { control } = openCellEditorWithPalette();
+  control.value = "foo";
+  control.setSelectionRange(0, 3);
+  let stopped = false;
+  control.dispatch("keydown", {
+    key: "b", code: "KeyB", ctrlKey: true,
+    preventDefault: () => undefined, stopPropagation: () => { stopped = true; },
+  });
+  assert.equal(control.value, "**foo**");
+  assert.equal(stopped, true);
+});
+
+test("T35: block-only shortcuts do nothing in a cell", () => {
+  const { control } = openCellEditorWithPalette();
+  control.value = "foo";
+  control.setSelectionRange(0, 3);
+  control.dispatch("keydown", {
+    key: "/", code: "Slash", ctrlKey: true, preventDefault: () => undefined, stopPropagation: () => undefined,
+  });
+  assert.equal(control.value, "foo", "the TODO comment toggle is a block action");
+});
+
+test("T35: link text and URL with a pipe are escaped and newlines become spaces in a cell", () => {
+  const { harness, control } = openCellEditorWithPalette();
+  control.value = "see a|b";
+  control.setSelectionRange(4, 7);
+  control.dispatch("keydown", {
+    key: "k", code: "KeyK", ctrlKey: true,
+    preventDefault: () => undefined, stopPropagation: () => undefined,
+  });
+  assert.ok(linkPanelOf(harness), "the link panel opens from the cell");
+  assert.equal(linkField(harness, "text").value, "a|b");
+  linkField(harness, "text").value = "a|b\nc";
+  linkField(harness, "url").value = "https://x.org/?a|b";
+  linkField(harness, "url").dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  assert.equal(control.value, "see [a\\|b c](https://x.org/?a\\|b)");
+  assert.equal(control.selectionStart, control.value.length, "caret after the link");
+  assert.equal(linkPanelOf(harness), undefined);
+});
+
+test("T35: already escaped pipes stay single and a colour span has no pipe to break", () => {
+  const { harness, control } = openCellEditorWithPalette();
+  control.value = "x a\\|b y";
+  control.setSelectionRange(2, 6);
+  paletteButton(harness, "bold").dispatch("click", { preventDefault: () => undefined });
+  assert.equal(control.value, "x **a\\|b** y");
+  control.value = "foo";
+  control.setSelectionRange(0, 3);
+  paletteButton(harness, "color").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness)!;
+  const swatch = allDescendants(menu).find((e) => e.getAttribute("data-color-swatch") !== null)!;
+  swatch.dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined });
+  assert.match(control.value, /^<span style="color:#[0-9a-f]+">foo<\/span>$/u);
+});
+
+test("T35: a popover opened from the cell bar keeps the editor open, outside focus still commits", () => {
+  const { harness, control } = openCellEditorWithPalette();
+  control.value = "foo";
+  control.dispatch("input");
+  control.setSelectionRange(0, 3);
+  paletteButton(harness, "emoji").dispatch("click", { preventDefault: () => undefined });
+  const menu = paletteMenu(harness)!;
+  assert.ok(menu, "the emoji picker opens");
+  assert.equal(cellBar(harness).childElements.includes(cellGroup(harness)!), true);
+  const filter = allDescendants(menu).find((e) => e.tagName === "INPUT")!;
+  const doc = harness.document as unknown as { activeElement?: unknown };
+  doc.activeElement = filter;
+  control.dispatch("blur", { relatedTarget: filter });
+  harness.flushTimers();
+  assert.equal(harness.messages.some((m) => m.final === true), false, "focus moved into the bar");
+  doc.activeElement = undefined;
+  filter.dispatch("blur", { relatedTarget: null });
+  harness.flushTimers();
+  assert.equal(harness.messages.at(-1)?.final, true, "focus left to nowhere: the cell commits");
+});
+
+test("T35: the link panel opened from the cell keeps the editor open and clicking outside commits", () => {
+  const { harness, control } = openCellEditorWithPalette();
+  control.value = "foo";
+  control.dispatch("input");
+  control.setSelectionRange(0, 3);
+  paletteButton(harness, "link").dispatch("click", { preventDefault: () => undefined });
+  const panel = linkPanelOf(harness)!;
+  assert.ok(panel);
+  const doc = harness.document as unknown as { activeElement?: unknown };
+  doc.activeElement = linkField(harness, "url");
+  control.dispatch("blur", { relatedTarget: linkField(harness, "url") });
+  harness.flushTimers();
+  assert.equal(harness.messages.some((m) => m.final === true), false);
+  doc.activeElement = undefined;
+  linkField(harness, "url").dispatch("blur", { relatedTarget: null });
+  harness.flushTimers();
+  assert.equal(harness.messages.at(-1)?.final, true);
+});
+
+test("T35: table operations keep the inline group in the rebuilt bar", () => {
+  const { harness } = openCellEditorWithPalette();
+  const group = cellGroup(harness)!;
+  harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Insert row after selected row").at(-1)?.dispatch("click");
+  // The fake DOM does not empty a parent on `textContent = ""`, so check identity, not counts.
+  assert.equal(cellGroup(harness), group, "the same group is moved into the rebuilt bar");
+  assert.equal(group.parentElement, cellBar(harness));
+  assert.equal(group.removed, false);
+});
+
+test("T35: the cell group leaves with the editor", () => {
+  const { harness, control } = openCellEditorWithPalette();
+  const group = cellGroup(harness)!;
+  control.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(group.removed || group.parentElement === undefined || cellBar(harness).removed === true, true);
+});

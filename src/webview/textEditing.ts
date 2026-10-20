@@ -271,5 +271,48 @@ export function createTextEditingTools() {
     return undefined;
   }
 
-  return { continueOnEnter, indentSelection, wrapSelection, mapRenderedCaret };
+  /**
+   * Makes an edit safe for a Markdown table cell: an unescaped `|` in the inserted text gets a
+   * backslash (one already escaped, or preceded by an escaping backslash in the cell, stays as it
+   * is) and every line break becomes a space. The selection moves with the characters it sat on.
+   */
+  function cellSafeEdit(value: string, edit: TextEdit): TextEdit {
+    const before = value.slice(0, edit.start);
+    const clean = (prefix: string): string => {
+      let result = "";
+      for (let index = 0; index < prefix.length; index += 1) {
+        const character = prefix[index];
+        if (character === "\r" || character === "\n") {
+          if (character === "\r" && prefix[index + 1] === "\n") index += 1;
+          result += " ";
+        } else if (character === "|") {
+          const preceding = before + result;
+          let backslashes = 0;
+          for (let back = preceding.length - 1; back >= 0 && preceding[back] === "\\"; back -= 1) {
+            backslashes += 1;
+          }
+          result += backslashes % 2 === 1 ? "|" : "\\|";
+        } else {
+          result += character;
+        }
+      }
+      return result;
+    };
+    const text = clean(edit.text);
+    if (text === edit.text) return edit;
+    const moved = (offset: number): number => {
+      if (offset <= edit.start) return offset;
+      if (offset >= edit.start + edit.text.length) return offset + text.length - edit.text.length;
+      return edit.start + clean(edit.text.slice(0, offset - edit.start)).length;
+    };
+    return {
+      start: edit.start,
+      end: edit.end,
+      text,
+      selectionStart: moved(edit.selectionStart),
+      selectionEnd: moved(edit.selectionEnd),
+    };
+  }
+
+  return { continueOnEnter, indentSelection, wrapSelection, mapRenderedCaret, cellSafeEdit };
 }

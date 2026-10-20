@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Editing a table cell shows the formatting buttons that make sense in a cell (bold, italic,
+  strikethrough, link, emoji, colour, keys, sub/superscript, as the palette mode allows) in the
+  row and column bar, after a separator, with the same shortcuts (Cmd/Ctrl+B, +I, +K). Block
+  buttons never appear there. Text inserted in a cell gets its `|` escaped and its line breaks
+  replaced by spaces, so a link or a colour cannot split the table.
 - The edition palette gets a Colour button in every mode. Its picker has Text and Background tabs,
   16 swatches, a hex field (Enter applies, invalid values are refused) and Remove. It wraps the
   selection in `<span style="color:#hex">` or `background-color`, and changes, extends or removes

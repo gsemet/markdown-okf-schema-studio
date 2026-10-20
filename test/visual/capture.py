@@ -2954,6 +2954,85 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   page.wait_for_timeout(250)
 
 
+def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolbar, failures: list[Failure]) -> None:
+  """T35: the inline palette group inside the table cell bar."""
+  group = toolbar.locator("[data-sphinx-edit-palette='cell']")
+  if group.count() != 1 or not group.is_visible():
+    failures.append(Failure(page_name, "the table cell bar shows no inline formatting group"))
+    return
+  geometry = toolbar.evaluate("""bar => {
+    const group = bar.querySelector("[data-sphinx-edit-palette='cell']");
+    const box = bar.getBoundingClientRect();
+    const buttons = [...group.querySelectorAll(':scope > button:not([hidden])')];
+    const rects = buttons.map((button) => button.getBoundingClientRect());
+    const cell = document.querySelector('[data-sphinx-preview-table-cell-selected="true"]');
+    const cellRect = cell.getBoundingClientRect();
+    const table = cell.closest('table').getBoundingClientRect();
+    const separator = bar.querySelector(':scope > [role=separator]');
+    return {
+      ids: buttons.map((button) => button.dataset.editAction),
+      operations: bar.querySelectorAll(':scope > [data-sphinx-table-operation]').length,
+      hasSeparator: Boolean(separator),
+      mode: Boolean(group.querySelector('select')),
+      barLeft: box.left, barRight: box.right, barBottom: box.bottom, barHeight: box.height,
+      tableTop: table.top, viewport: document.documentElement.clientWidth,
+      outside: rects.filter((r) => r.left < box.left - 0.5 || r.right > box.right + 0.5
+        || r.width < 8 || r.height < 8).length,
+      rows: new Set(rects.map((r) => Math.round(r.top))).size,
+      scrollWidth: bar.scrollWidth, clientWidth: bar.clientWidth,
+    };
+  }""")
+  for required in ("bold", "italic", "link"):
+    if required not in geometry["ids"]:
+      failures.append(Failure(page_name, f"the cell bar lacks the {required} button: {geometry['ids']}"))
+  for block_only in ("heading", "quote", "table", "image", "codeFence"):
+    if block_only in geometry["ids"]:
+      failures.append(Failure(page_name, f"the cell bar shows the block action {block_only}"))
+  if geometry["operations"] != 4 or not geometry["hasSeparator"] or geometry["mode"]:
+    failures.append(Failure(page_name, f"the cell bar structure is wrong: {geometry}"))
+  if geometry["outside"] or geometry["scrollWidth"] > geometry["clientWidth"] + 1 or geometry["barRight"] > geometry["viewport"] + 0.5:
+    failures.append(Failure(page_name, f"the cell bar buttons overflow the bar: {geometry}"))
+  if geometry["barBottom"] > geometry["tableTop"] + 0.5:
+    failures.append(Failure(page_name, f"the merged cell bar covers the table: {geometry}"))
+  if scenario["width"] <= 400 and geometry["rows"] < 2:
+    failures.append(Failure(page_name, f"the cell bar did not wrap at {scenario['width']} px: {geometry}"))
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-cell-bar.png"), caret="hide")
+  # A formatting button keeps the cell editor open and focused, and the text changes in the cell.
+  area = page.locator("[data-sphinx-preview-table-cell-editor] textarea")
+  area.focus()
+  area.press("ControlOrMeta+a")
+  group.locator("button[data-edit-action='bold']").click()
+  page.wait_for_timeout(120)
+  state = page.evaluate("""() => {
+    const area = document.querySelector('[data-sphinx-preview-table-cell-editor] textarea');
+    return { open: Boolean(area), focused: document.activeElement === area, value: area ? area.value : '' };
+  }""")
+  if not state["open"] or not state["focused"] or not state["value"].startswith("**"):
+    failures.append(Failure(page_name, f"Bold in the cell bar closed the cell, lost the focus or did nothing: {state}"))
+  area.press("ControlOrMeta+z")
+  page.wait_for_timeout(100)
+  # The emoji picker opens under the group and keeps the cell open.
+  group.locator("button[data-edit-action='emoji']").click()
+  page.wait_for_timeout(150)
+  picker = group.locator(".sphinx-preview-edit-palette-menu")
+  if picker.count() != 1 or not picker.is_visible():
+    failures.append(Failure(page_name, "the emoji picker did not open from the cell bar"))
+  else:
+    box = picker.evaluate("""element => {
+      const r = element.getBoundingClientRect();
+      return { left: r.left, right: r.right, viewport: document.documentElement.clientWidth };
+    }""")
+    if box["left"] < -0.5 or box["right"] > box["viewport"] + 0.5:
+      failures.append(Failure(page_name, f"the emoji picker leaves the viewport: {box}"))
+    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-cell-emoji.png"), caret="hide")
+  page.keyboard.press("Escape")
+  page.wait_for_timeout(100)
+  if group.locator(".sphinx-preview-edit-palette-menu").count() != 0 or page.locator("[data-sphinx-preview-table-cell-editor]").count() != 1:
+    failures.append(Failure(page_name, "Escape did not close only the emoji picker in the cell bar"))
+  area = page.locator("[data-sphinx-preview-table-cell-editor] textarea")
+  area.focus()
+
+
 def check_cell_editor_chrome(page: Page, page_name: str, target, original_bounds, failures: list[Failure]) -> None:
     """Done/Cancel live inside the cell, the columns keep their width, the toolbar status is centred."""
     info = page.evaluate("""() => {
@@ -3523,7 +3602,8 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
         failures.append(Failure(page_name, "table row/column actions are hidden while the cell editor has focus"))
       if toolbar.locator("[data-sphinx-preview-table-save], [data-sphinx-preview-table-cancel]").count() != 0:
         failures.append(Failure(page_name, "table action bar still contains Save or Cancel controls"))
-      buttons = toolbar.locator("button")
+      # The four row and column buttons are the bar's own children; the inline group is checked apart (T35).
+      buttons = toolbar.locator(":scope > button")
       if buttons.count() != 4 or not buttons.evaluate_all("""items => items.every(button =>
         button.getAttribute("aria-label")
         && button.title
@@ -3552,6 +3632,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       label_texts = toolbar.locator(".sphinx-preview-table-menu-label").all_text_contents()
       if label_texts != ["Row +", "Row \u2212", "Col +", "Col \u2212"]:
         failures.append(Failure(page_name, f"table action bar labels are wrong: {label_texts}"))
+      check_cell_bar_formatting(page, page_name, scenario, toolbar, failures)
       cell_input = editor.locator("textarea[aria-label='Markdown table cell']")
       original_value = cell_input.input_value()
       cell_input.fill(original_value + " updated")
