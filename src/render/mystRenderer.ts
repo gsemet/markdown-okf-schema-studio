@@ -1227,9 +1227,135 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
     return;
   }
 
+  if (node.type === "image") {
+    normalizeImageSize(node);
+  }
+
+  if (node.type === "container" && node.kind === "figure") {
+    const align = node.children?.find((child) => child.type === "image")?.align;
+    if (isFigureAlignment(align)) {
+      node.class = [node.class, `align-${align}`].filter(Boolean).join(" ");
+    }
+  }
+
   if (line !== undefined && BLOCK_TYPES.has(node.type)) {
     mergeProperties(node, sourcePositionProperties(node, line));
   }
+}
+
+const FIGURE_WIDTH = /^\d+(?:\.\d+)?(?:px|%|em|rem)?$/u;
+const FIGURE_ALIGNMENTS = new Set(["left", "center", "right"]);
+
+function isFigureAlignment(value: unknown): value is "left" | "center" | "right" {
+  return typeof value === "string" && FIGURE_ALIGNMENTS.has(value);
+}
+
+/**
+ * A MyST figure or image size: a plain length becomes `data-okf-width` (the page script applies
+ * it, since inline styles are blocked); anything else, and an unknown alignment, is dropped.
+ */
+function normalizeImageSize(node: MystNode): void {
+  const image = node as MystNode & { width?: unknown };
+  const width = typeof image.width === "string" ? image.width.trim() : undefined;
+  delete image.width;
+  if (width && FIGURE_WIDTH.test(width)) {
+    mergeProperties(node, { "data-okf-width": width });
+  }
+  if (node.align !== undefined && !isFigureAlignment(node.align)) {
+    delete node.align;
+  }
+}
+
+// `(name)=` labels. MyST drops the target and gives its id to the next heading or figure; the
+// preview also shows a small anchor icon there, which is the target for every other block.
+const ANCHOR_LABEL = /^[A-Za-z0-9_.:-]+$/u;
+const NATIVE_TARGET_TYPES = new Set(["heading", "container", "math"]);
+const ANCHOR_INLINE_HOSTS = new Set(["paragraph", "heading"]);
+
+// No `data-line`: the sanitizer would make the span a focusable mapped block of its own.
+function anchorProperties(label: string): Record<string, unknown> {
+  return {
+    class: "okf-anchor",
+    "data-okf-anchor-id": label,
+    "data-okf-label": label,
+    title: `Anchor: ${label}`,
+    role: "img",
+    "aria-label": `Anchor: ${label}`,
+  };
+}
+
+/**
+ * Adds the anchor icon for each `(name)=` target: the first child of the following paragraph or
+ * heading, else a zero-height row of its own before the block (or alone at the end). Returns the
+ * labels, for `resolveAnchorIds`. A `{ref}` to a label whose block MyST cannot resolve (any block
+ * but a heading, figure, table or equation) becomes a link to `#name`.
+ */
+function normalizeAnchors(root: MystNode): ReadonlySet<string> {
+  const plain = new Set<string>();
+  const labels = new Set<string>();
+  const headingText = new Map<string, string>();
+  const textOf = (node: MystNode): string =>
+    node.value ?? (node.children ?? []).map(textOf).join("");
+  const visit = (node: MystNode): void => {
+    const children = node.children;
+    if (!children) return;
+    for (let index = 0; index < children.length; index += 1) {
+      const target = children[index];
+      if (target.type === "mystTarget" && target.label && ANCHOR_LABEL.test(target.label)) {
+        let next = index + 1;
+        while (children[next]?.type === "mystTarget") next += 1;
+        const following = children[next];
+        const properties = anchorProperties(target.label);
+        labels.add(target.label);
+        if (!following || !NATIVE_TARGET_TYPES.has(following.type)) plain.add(target.label);
+        if (following?.type === "heading") headingText.set(target.label, textOf(following));
+        if (following && ANCHOR_INLINE_HOSTS.has(following.type)) {
+          const anchor: MystNode = { type: "okfAnchor" };
+          setHast(anchor, "span", properties, []);
+          following.children = [anchor, ...(following.children ?? [])];
+        } else {
+          const row: MystNode = { type: "okfAnchorRow", children: [] };
+          setHast(row, "div", { class: "okf-anchor-row" }, [
+            { type: "element", tagName: "span", properties, children: [] },
+          ]);
+          children.splice(index, 0, row);
+          index += 1;
+        }
+      }
+    }
+    children.forEach(visit);
+  };
+  visit(root);
+  const linkRefs = (node: MystNode): void => {
+    for (const child of node.children ?? []) {
+      const reference = child.type === "mystRole" && child.name === "ref" ? child.children?.[0] : undefined;
+      if (reference?.type === "crossReference" && reference.identifier && plain.has(reference.identifier)) {
+        child.type = "link";
+        child.url = `#${reference.identifier}`;
+        child.children = reference.children?.length
+          ? reference.children
+          : [{ type: "text", value: reference.identifier }];
+        delete child.name;
+        delete child.value;
+      } else {
+        // MyST copies the heading's content into a bare `{ref}`; that must not include the icon.
+        if (reference?.type === "crossReference" && !reference.children?.length
+          && reference.identifier && headingText.has(reference.identifier)) {
+          reference.children = [{ type: "text", value: headingText.get(reference.identifier) }];
+        }
+        linkRefs(child);
+      }
+    }
+  };
+  linkRefs(root);
+  return labels;
+}
+
+/** Turns each anchor's id placeholder into `id`, unless a heading or figure already carries it. */
+function resolveAnchorIds(html: string, labels: ReadonlySet<string>): string {
+  if (!html.includes("data-okf-anchor-id=")) return html;
+  return html.replace(/ data-okf-anchor-id="([^"]*)"/gu, (_match, label: string) =>
+    labels.has(label) && html.includes(` id="${label}"`) ? "" : ` id="${label}"`);
 }
 
 const RAW_DETAILS_HEAD = /^<details((?:\s+open(?:=(?:""|"open"))?)?)\s*>\s*(?:<summary>([^<]*)<\/summary>)?\s*$/iu;
@@ -1654,11 +1780,12 @@ export async function renderMyst(
   normalizeRawDetailsAndKbd(ast, mystParse);
   normalizeContextTagContainers(ast);
   wrapBareBlockImages(ast);
+  const anchorLabels = normalizeAnchors(ast);
   walk(ast, diagnostics);
   const tableAlignments: Array<TableAlignmentSpec | undefined> = [];
   collectTableAlignments(ast, tableAlignments);
   return {
-    html: highlightCodeBlocks(applyTableAlignments(mystToHtml(ast), tableAlignments)),
+    html: resolveAnchorIds(highlightCodeBlocks(applyTableAlignments(mystToHtml(ast), tableAlignments)), anchorLabels),
     diagnostics,
     dependencies: [...dependencies],
   };

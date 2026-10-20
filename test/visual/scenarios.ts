@@ -79,6 +79,8 @@ export interface Scenario {
   tocChecks?: boolean;
   /** Opens and closes the comment chips, keeps the reading line, and turns the gray chips off and on. */
   commentChipChecks?: boolean;
+  /** Figure width and alignment, and the anchor icon of a (label)= target (T27). */
+  figureAnchorChecks?: boolean;
   firstElementGap?: "element" | "empty" | "wide-margin" | "properties";
   /** Hovering the first code block shows the copy button in its top right; a click posts the code. */
   codeCopyChecks?: boolean;
@@ -1440,6 +1442,24 @@ export const SCENARIOS: Scenario[] = [
       + "the reading line does not move the text being read, and turning preview.showComments off "
       + "hides the gray chips (not the TODO chips) without a new render. The capture shows both "
       + "boxes open.",
+  })),
+  ...([
+    ["light", undefined],
+    ["dark", undefined],
+    ["dark", "cream"],
+  ] as const).map(([theme, mode]) => ({
+    id: `figure-anchors-${theme}-${mode ?? "theme"}`,
+    fixture: "33-figures-anchors",
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    figureAnchorChecks: true,
+    description: "Book-style figures: one at 50 % of the column and centred, one at 40 % floating right "
+      + "with text wrapping beside it. Labels show a faint anchor icon hanging in the left margin of "
+      + "the labelled paragraph, heading, list or code block (tooltip 'Anchor: name'); a reference "
+      + "to a label scrolls to it.",
   })),
   ...[WIDE, NARROW].map((viewport) => ({
     id: `first-element-gap-empty-${viewport.width}`,

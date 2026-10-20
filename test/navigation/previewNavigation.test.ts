@@ -217,3 +217,11 @@ test("blocks unsafe anchors, schemes, and paths", () => {
     fs.rmSync(workspaceRoot, { recursive: true, force: true });
   }
 });
+
+test("a MyST (label)= line is the target of its fragment, but not inside a fence", () => {
+  const source = "```md\n(shown)=\n```\n\n(intro)=\nA paragraph.\n\n(a.b:c_d-1)=\n- item\n";
+  assert.deepEqual(markdownFragmentRange(source, "#intro"), { startLine: 5, endLine: 5 });
+  assert.deepEqual(markdownFragmentRange(source, "#a.b:c_d-1"), { startLine: 8, endLine: 8 });
+  assert.equal(markdownFragmentRange(source, "#shown"), undefined);
+  assert.equal(markdownFragmentRange(source, "#missing"), undefined);
+});

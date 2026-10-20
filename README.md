@@ -25,8 +25,9 @@ Markdown flavours and extensions:
 | --- | --- | --- |
 | [![JSON Schema-aware OKF properties table](images/readme/schema-properties.png)](images/readme/schema-properties.png) | [![Editing an OKF frontmatter property in place](images/readme/edit-frontmatter.png)](images/readme/edit-frontmatter.png) | [![Edit affordance on rendered Markdown](images/readme/inline-editing.png)](images/readme/inline-editing.png) |
 
-- **MyST rendering:** directives, admonitions, tables, math, Mermaid, PlantUML, images, media,
-  anchors, and permitted external links render in the preview.
+- **MyST rendering:** directives, admonitions, tables, math (including `align` environments),
+  Mermaid, PlantUML, images and figures with their `:width:` and `:align:`, media, `(label)=`
+  anchors (shown as a small icon), and permitted external links render in the preview.
 - **OpenKnowledge Format and OKF-Schema properties:** frontmatter field can be shown as a schema-aware properties table,
   with validation diagnostics, enum controls, typed scalar editors,
   and YAML editors for arrays and objects.

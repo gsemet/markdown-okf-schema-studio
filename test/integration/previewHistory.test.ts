@@ -45,7 +45,7 @@ export async function run(): Promise<void> {
   const firstPath = path.join(directory, "first.md");
   const secondPath = path.join(directory, "second.md");
   fs.writeFileSync(firstPath, "# First\n\nGo to [second](second.md#target).\n\nBlocked [x](javascript:alert(1)).\n");
-  fs.writeFileSync(secondPath, "# Second\n\nBack to [section](#target).\n\n## Target\n\nText.\n");
+  fs.writeFileSync(secondPath, "# Second\n\nBack to [section](#target).\n\n## Target\n\nText.\n\n(note-label)=\nA labelled paragraph.\n");
   const firstUri = vscode.Uri.file(firstPath);
   const secondUri = vscode.Uri.file(secondPath);
   const env = vscode.env as unknown as { openExternal: (uri: vscode.Uri) => Thenable<boolean> };
@@ -115,6 +115,14 @@ export async function run(): Promise<void> {
       && historyOf().index === before - 1);
     assert.equal(getActivePreviewForTests()?.lastSourceScrollLine, 1);
     assert.equal(historyOf().entries[historyOf().index].uri, secondUri.toString());
+
+    // A `(label)=` anchor is a target like a heading: the jump is recorded at the label line.
+    const labelIndex = historyOf().index;
+    void sendPreviewMessageForTests({ type: "previewLink", ...context(), request: "#note-label" });
+    await waitFor("the label jump to be recorded", () => historyOf().index === labelIndex + 1);
+    assert.equal(historyOf().entries[labelIndex + 1].line, 9);
+    void sendPreviewMessageForTests({ type: "previewHistoryGo", ...context(), direction: "back" });
+    await waitFor("Back to leave the label jump", () => historyOf().index === labelIndex);
 
     // Back and Next are refused while a block editor is open.
     const editBase = { ...context(), editId: "history-open-edit", line: 3, endLine: 3, insertAfterLine: 3 };

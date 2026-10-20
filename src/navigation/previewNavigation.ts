@@ -47,6 +47,10 @@ export function markdownFragmentRange(source: string, suffix: string): MarkdownF
       continue;
     }
     if (fence) continue;
+    // A MyST `(label)=` line is the target of `#label`.
+    if (target === /^ {0,3}\(([A-Za-z0-9_.:-]+)\)=\s*$/u.exec(lines[index])?.[1]) {
+      return { startLine: index + 1, endLine: index + 1 };
+    }
     const blockId = /(?:^|\s)\^([^\s]+)\s*$/u.exec(lines[index])?.[1];
     if (blockTarget && blockId === blockTarget) {
       return { startLine: index + 1, endLine: index + 1 };

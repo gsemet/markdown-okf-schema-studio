@@ -92,6 +92,9 @@ export function installWidthMode(
     for (const element of Array.from(content.querySelectorAll("table, figure, img, pre, .myst-mermaid-diagram"))) {
       const wrapper = wrapperOf(element, content);
       if (!wrapper || wrappers.includes(wrapper)) continue;
+      // A figure sized in %, em or rem asks for a size relative to the column: it never breaks out.
+      const sized = (wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img"))?.getAttribute("data-okf-width");
+      if (sized && /(?:%|r?em)$/u.test(sized)) continue;
       // An element under edit keeps the column width.
       if (wrapper.getAttribute("data-sphinx-preview-editing") === "true"
         || wrapper.querySelector?.('[data-sphinx-preview-editing="true"], textarea')) continue;
@@ -118,11 +121,13 @@ export function installWidthMode(
       const image = wrapper.tagName === "IMG" ? wrapper : wrapper.querySelector?.("img");
       // An image is capped by the column, so its own size is the natural width: the pixel width
       // attribute when it has one (an SVG has no intrinsic size), else the intrinsic width.
-      const declared = parseFloat(image?.getAttribute("width") ?? "") || 0;
+      const declared = parseFloat(image?.getAttribute("data-okf-width") ?? image?.getAttribute("width") ?? "") || 0;
+      // A pixel width asked for by the author replaces the intrinsic size, which may be larger.
+      const intrinsic = image?.hasAttribute("data-okf-width") ? 0 : (image as HTMLImageElement | null)?.naturalWidth ?? 0;
       // scrollWidth is rounded down: a table of 1038.2px given 1038px would squeeze its cells and
       // wrap them, so the fractional box width counts too and the result is rounded up.
       const box = wrapper.getBoundingClientRect?.()?.width ?? 0;
-      return Math.ceil(Math.max(wrapper.scrollWidth, declared, (image as HTMLImageElement | null)?.naturalWidth ?? 0, box));
+      return Math.ceil(Math.max(wrapper.scrollWidth, declared, intrinsic, box));
     });
     for (const wrapper of wrappers) wrapper.removeAttribute(measuring);
     wrappers.forEach((wrapper, index) => {
