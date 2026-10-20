@@ -36,8 +36,10 @@ export interface EditPaletteDeps {
    * is shown.
    */
   pickHost?(kind: "document" | "image", done: (value: string | undefined) => void): void;
-  /** Opens the small panel of an action that has one (the Link button). */
-  openPanel?(action: EditAction): void;
+  /** Opens the small panel of an action that has one (the Link button), or the named one. */
+  openPanel?(action: EditAction, panel?: string): void;
+  /** True when the caret is inside existing syntax of this kind (see `panelWhenInside`). */
+  caretInside?(kind: "figure"): boolean;
   mode: EditActionMode;
   /** Called once when the user picks another mode in the select (not by `setMode`). */
   onModeChange?(mode: EditActionMode): void;
@@ -775,6 +777,10 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
         closePopover();
         if (action.panel) {
           deps.openPanel?.(action);
+          return;
+        }
+        if (action.panelWhenInside && deps.caretInside?.(action.panelWhenInside)) {
+          deps.openPanel?.(action, action.panelWhenInside);
           return;
         }
         if (action.hostDialog) {

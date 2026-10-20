@@ -1160,6 +1160,137 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   outline-offset: 1px;
 }
 
+/* Figure form: the figure's options under the palette, in the flow of the editor frame. */
+.sphinx-preview-figure-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14em, 1fr));
+  align-items: start;
+  gap: 6px 10px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 8px;
+  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border-radius: 8px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
+  color: var(--vscode-editor-foreground, CanvasText);
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
+  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  font-size: 0.85em;
+}
+
+.sphinx-preview-figure-panel-title {
+  grid-column: 1 / -1;
+  font-weight: 600;
+}
+
+.sphinx-preview-figure-panel-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sphinx-preview-figure-panel-row[data-figure-row="source"],
+.sphinx-preview-figure-panel-row[data-figure-row="caption"],
+.sphinx-preview-figure-panel-row[data-figure-row="legend"] {
+  grid-column: 1 / -1;
+}
+
+.sphinx-preview-figure-panel-control {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sphinx-preview-figure-panel-control > :first-child {
+  flex: 1 1 auto;
+}
+
+.sphinx-preview-figure-panel input,
+.sphinx-preview-figure-panel textarea,
+.sphinx-preview-figure-panel select {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  padding: 3px 6px;
+  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border-radius: 4px;
+  background: var(--vscode-input-background, var(--vscode-editor-background, Canvas));
+  color: var(--vscode-input-foreground, var(--vscode-editor-foreground, CanvasText));
+  font: inherit;
+}
+
+.sphinx-preview-figure-panel textarea {
+  resize: vertical;
+}
+
+.sphinx-preview-figure-panel [aria-invalid="true"] {
+  border-color: var(--vscode-inputValidation-errorBorder, #be1100);
+}
+
+.sphinx-preview-figure-panel input:focus,
+.sphinx-preview-figure-panel textarea:focus,
+.sphinx-preview-figure-panel select:focus {
+  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline-offset: -1px;
+}
+
+.sphinx-preview-figure-panel-error {
+  color: var(--vscode-errorForeground, #be1100);
+}
+
+.sphinx-preview-figure-panel-error[hidden] {
+  display: none;
+}
+
+.sphinx-preview-figure-panel-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 4px;
+}
+
+.sphinx-preview-figure-panel button {
+  padding: 3px 10px;
+  border: 1px solid var(--vscode-button-border, var(--sphinx-preview-border));
+  border-radius: 4px;
+  background: var(--vscode-button-secondaryBackground, transparent);
+  color: var(--vscode-button-secondaryForeground, inherit);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sphinx-preview-figure-panel button[data-figure-action="apply"] {
+  background: var(--vscode-button-background, Highlight);
+  color: var(--vscode-button-foreground, HighlightText);
+}
+
+.sphinx-preview-figure-panel button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline-offset: 1px;
+}
+
+/* The Edit figure button floats over the hovered figure in edit mode (placed by the page script). */
+.sphinx-preview-figure-edit-button {
+  position: fixed;
+  z-index: 20;
+  padding: 2px 8px;
+  border: 1px solid var(--vscode-button-border, var(--sphinx-preview-border));
+  border-radius: 4px;
+  background: var(--vscode-button-background, Highlight);
+  color: var(--vscode-button-foreground, HighlightText);
+  font: 0.8em var(--vscode-font-family, system-ui, sans-serif);
+  cursor: pointer;
+}
+
+.sphinx-preview-figure-edit-button[hidden] {
+  display: none;
+}
+
+html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-figure-edit-button {
+  display: none;
+}
+
 .sphinx-preview-frontmatter-menu {
   position: static;
   display: flex;

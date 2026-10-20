@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Edit mode shows an Edit figure button over a hovered figure. It opens the block editor with a
+  form above the text box: Source (with Browse), Alt text, Caption, Legend, Width, Align and Name.
+  Apply rewrites the `{figure}` directive as one undo step and keeps every option the form does
+  not edit, in its order. The Figure button does the same when the caret is inside a `{figure}`,
+  and on a Markdown image alone in its paragraph it converts the image to a figure. A width needs
+  a number with px, %, em or rem.
 - The edition palette gets an Image button in every mode and a Figure button in MyST mode. Both
   open the system file dialog in the document's folder. Image writes `![name](path)` with the
   name selected; Figure writes `:::{figure} path`, `:alt: name` and an empty caption line (the

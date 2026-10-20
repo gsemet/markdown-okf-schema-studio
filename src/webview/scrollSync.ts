@@ -9,6 +9,8 @@ import { createEditActions } from "./editActions";
 import { createEditPalette } from "./editPalette";
 import { caretRectOf } from "./caretRect";
 import { createLinkPanel } from "./linkPanel";
+import { createFigureTools } from "./figureDirective";
+import { createFigurePanel, installFigureEditButton } from "./figurePanel";
 import { highlightLanguageNames } from "../render/highlight";
 import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
@@ -83,6 +85,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const createEditPalette = ${createEditPalette.toString()};
   const caretRectOf = ${caretRectOf.toString()};
   const createLinkPanel = ${createLinkPanel.toString()};
+  const figureTools = (${createFigureTools.toString()})();
+  const createFigurePanel = ${createFigurePanel.toString()};
   const anchorPolicy = (${createAnchorPolicy.toString()})();
   const settings = {
     scrollPreviewWithEditor: context.scrollPreviewWithEditor !== false,
@@ -159,6 +163,11 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
       documentVersion: context.documentVersion,
       requestId: context.requestId,
     }),
+  });
+  // Edit mode: the "Edit figure" button over a hovered figure opens its block editor with the form.
+  const figureEditButton = (${installFigureEditButton.toString()})(document, window, {
+    isEditMode: () => editMode,
+    open: (figure) => openFigureEditor(figure),
   });
   // Zoom changes layout only: keep the source line at the reading line across it.
   const keepReadingLine = () => {
@@ -994,6 +1003,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     edit.tableMenu?.remove?.();
     edit.linkPanel?.destroy();
     edit.linkPanel = undefined;
+    edit.figurePanel?.destroy();
+    edit.figurePanel = undefined;
     edit.palette?.destroy();
     restoreTableCellContent(edit);
     if (edit.selectedCell) {
@@ -3063,14 +3074,16 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         resizeTextarea();
         autosaveBlockEdit();
       }),
-      openPanel: (action) => {
-        if (action.panel === "link") {
-          openLinkPanel(textarea, () => {
-            resizeTextarea();
-            autosaveBlockEdit();
-          });
-        }
+      openPanel: (action, panelName) => {
+        const onFallbackInput = () => {
+          resizeTextarea();
+          autosaveBlockEdit();
+        };
+        if ((panelName ?? action.panel) === "link") openLinkPanel(textarea, onFallbackInput);
+        else if (panelName === "figure") openFigurePanel(textarea, onFallbackInput);
       },
+      caretInside: (kind) => kind === "figure"
+        && figureTools.locateFigure(String(textarea.value ?? ""), Number(textarea.selectionStart)) !== undefined,
       mode: paletteMode,
       modeShortcut: (isApplePlatform() ? "Cmd" : "Ctrl") + "+Shift+M",
       isInsideFrame: (node) => Boolean(node) && (node === edit.element || edit.element.contains(node)),
@@ -3119,10 +3132,12 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     textarea.addEventListener("mousedown", () => {
       palette.closePopover();
       edit.closeLinkPanel?.(false);
+      edit.closeFigurePanel?.(false);
     });
     textarea.addEventListener("input", () => {
       palette.closePopover();
       edit.closeLinkPanel?.(false);
+      edit.closeFigurePanel?.(false);
     });
     textarea.addEventListener("keydown", (event) => {
       if (palette.handleKey(event)) return;
@@ -3197,6 +3212,127 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       }
     });
     focusTextControlAtLastContent(textarea, edit.initialCaretPosition);
+    if (edit.openFigureForm) {
+      edit.openFigureForm = false;
+      openFigurePanel(textarea, () => {
+        resizeTextarea();
+        autosaveBlockEdit();
+      }, true);
+    }
+  }
+
+  // The figure form: the {figure} directive around the caret (the first one when the editor was
+  // opened by the Edit figure button), or a Markdown image alone in its paragraph. Apply rewrites
+  // that range as one native edit; the text box keeps its caret and the editor stays open.
+  function openFigurePanel(control, onFallbackInput, first = false) {
+    const edit = activeBlockEdit;
+    if (!edit || edit.finishing || edit.textarea !== control || !edit.palette) return;
+    if (edit.figurePanel) {
+      edit.figurePanel.focusFirst();
+      return;
+    }
+    edit.palette.closePopover();
+    edit.closeLinkPanel?.(false);
+    const text = String(control.value ?? "");
+    const location = figureTools.locateFigure(text, first ? undefined : Number(control.selectionStart));
+    if (!location) {
+      edit.status.textContent = "No figure at the caret.";
+      return;
+    }
+    const slice = text.slice(location.start, location.end);
+    const model = location.kind === "image"
+      ? figureTools.modelFromImage(location.alt ?? "", location.source ?? "")
+      : figureTools.parseFigure(slice);
+    if (!model) {
+      edit.status.textContent = "This figure uses a YAML option block: edit it in the text box.";
+      return;
+    }
+    const selection = {
+      selectionStart: Number(control.selectionStart),
+      selectionEnd: Number(control.selectionEnd),
+    };
+    const closePanel = (restore = true) => {
+      const panel = edit.figurePanel;
+      if (!panel) return;
+      edit.figurePanel = undefined;
+      edit.closeFigurePanel = undefined;
+      panel.destroy();
+      if (restore) {
+        control.focus({ preventScroll: true });
+        control.setSelectionRange(selection.selectionStart, selection.selectionEnd);
+      }
+      const shift = edit.figurePanelShift ?? 0;
+      edit.figurePanelShift = 0;
+      if (shift > 0 && activeBlockEdit === edit && editAnchor) {
+        edit.paletteShift = Math.max(0, (edit.paletteShift ?? 0) - shift);
+        editAnchor.viewportTop += shift;
+        applyAnchor();
+      }
+    };
+    const panel = createFigurePanel(document, {
+      values: figureTools.valuesOf(model),
+      mode: location.kind === "image" ? "image" : "figure",
+      validate: (values) => figureTools.validate(values),
+      browse: (done) => hostRequests.ask("previewPickImage", {}, { dialog: true }, (result) => {
+        done(result.ok === true && typeof result.path === "string" ? result.path : undefined);
+        if (result.ok !== true && activeBlockEdit === edit && typeof result.reason === "string") {
+          edit.status.textContent = result.reason;
+        }
+      }),
+      onSubmit: (values) => {
+        if (activeBlockEdit !== edit || edit.finishing) return;
+        // The range was taken when the form opened; a text changed without an input event is stale.
+        if (String(control.value ?? "") !== text) {
+          closePanel(false);
+          return;
+        }
+        const written = figureTools.serializeFigure(figureTools.applyValues(model, values));
+        closePanel(false);
+        if (written === slice) {
+          control.focus({ preventScroll: true });
+          control.setSelectionRange(selection.selectionStart, selection.selectionEnd);
+          return;
+        }
+        applyTextEdit(control, {
+          start: location.start,
+          end: location.end,
+          text: written,
+          selectionStart: location.start,
+          selectionEnd: location.start,
+        }, onFallbackInput);
+      },
+      onCancel: () => closePanel(),
+      onLeave: () => {
+        if (hostRequests.isDialogOpen()) return;
+        if (activeBlockEdit === edit) saveBlockEdit();
+      },
+      isInsideFrame: (node) => Boolean(node) && (node === edit.element || edit.element.contains(node)),
+    });
+    edit.figurePanel = panel;
+    edit.closeFigurePanel = closePanel;
+    const textTopBefore = control.getBoundingClientRect?.().top;
+    edit.element.insertBefore(panel.element, control);
+    const shift = keepTextInPlace(edit, textTopBefore);
+    edit.figurePanelShift = shift;
+    if (shift > 0) edit.paletteShift = (edit.paletteShift ?? 0) + shift;
+    applyAnchor();
+    panel.focusFirst();
+  }
+
+  // The Edit figure button: open the figure's block editor, then its form once the source arrives.
+  function openFigureEditor(figure) {
+    if (!editMode || activeFrontmatterEdit) return;
+    if (activeBlockEdit) {
+      if (activeBlockEdit.finishing || activeBlockEdit.selectedCell) return;
+      if (activeBlockEdit.target === figure) {
+        if (activeBlockEdit.textarea) openFigurePanel(activeBlockEdit.textarea, () => undefined, true);
+        return;
+      }
+      saveBlockEdit();
+      return;
+    }
+    openMappedEditor(figure, figure, "end", true);
+    if (activeBlockEdit && activeBlockEdit.target === figure) activeBlockEdit.openFigureForm = true;
   }
 
   let editHoverElement;
@@ -3206,6 +3342,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     editHoverElement?.removeAttribute?.("data-sphinx-preview-edit-hover");
     editHoverElement = element;
     editHoverElement?.setAttribute?.("data-sphinx-preview-edit-hover", "true");
+    figureEditButton.sync(element);
   }
 
   // The element whose outline shows what a click at this node would edit, or undefined.
@@ -3977,8 +4114,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     postReveal(target, "click");
   });
-  document.addEventListener("mouseover", (event) => setEditHover(editHoverTarget(event.target)));
-  document.addEventListener("mouseout", (event) => setEditHover(editHoverTarget(event.relatedTarget)));
+  document.addEventListener("mouseover", (event) => {
+    if (figureEditButton.owns(event.target)) return;
+    setEditHover(editHoverTarget(event.target));
+  });
+  document.addEventListener("mouseout", (event) => {
+    if (figureEditButton.owns(event.relatedTarget)) return;
+    setEditHover(editHoverTarget(event.relatedTarget));
+  });
   document.addEventListener("focusin", (event) => setEditHover(editHoverTarget(event.target)));
   document.addEventListener("focusout", () => setEditHover(undefined));
   document.addEventListener("dblclick", (event) => {
