@@ -2091,6 +2091,14 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   font-size: 0.92em;
 }
 
+/* A keyboard key (kbd element): a hairline cap derived from the text colour. */
+#sphinx-myst-preview-content kbd {
+  padding: 0.05em 0.4em;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-bottom-width: 2px;
+  border-radius: 0.3em;
+}
+
 /*
  * Inline code is a quiet pill: a tint and a hairline derived from the text colour, so it sits on
  * any page colour (current theme, dark, white, cream) without a hard-coded box. Sizes are in em

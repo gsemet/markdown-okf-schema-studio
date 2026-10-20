@@ -111,7 +111,10 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   const myst = actionIds(open("myst").root);
   assert.equal(strict.length >= 9, true);
   assert.equal(strict.includes("gfmOnly") || strict.includes("mystOnly"), false);
-  assert.deepEqual(gfm, [...strict, "alert", "checkbox", "htmlTable", "gfmOnly"]);
+  assert.deepEqual(gfm, [
+    ...strict, "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+    "gfmOnly",
+  ]);
   assert.deepEqual(myst, [...gfm, "mystOnly"]);
 });
 
@@ -624,4 +627,37 @@ test("T25: Checkbox and HTML table are one-click actions with no list", () => {
   button(t.root, "htmlTable").dispatch("click", click);
   assert.equal(t.textbox.value.startsWith("<table>"), true);
   assert.equal(popover(t.root), undefined);
+});
+
+// T26: the GFM proposals in the palette.
+test("T26: the GFM mode lists the five proposals, strict mode none of them", () => {
+  const proposals = ["details", "footnote", "mermaid", "columnAlign", "kbd"];
+  const strict = actionIds(open("strict").root);
+  const gfm = actionIds(open("gfm").root);
+  for (const id of proposals) {
+    assert.equal(strict.includes(id), false, "strict " + id);
+    assert.equal(gfm.includes(id), true, "gfm " + id);
+  }
+});
+
+test("T26: Column alignment lists left, center and right; a choice rewrites the delimiter cell", () => {
+  const h = openGfm("| a | b |\n| --- | --- |\n| 1 | 2 |", 2);
+  button(h.root, "columnAlign").dispatch("click", click);
+  assert.equal(h.edits.length, 0, "nothing is written before a choice");
+  const menu = popover(h.root)!;
+  assert.deepEqual(options(menu).map((e) => e.textContent), ["Left", "Center", "Right"]);
+  options(menu).find((e) => e.getAttribute("data-edit-option") === "center")!.dispatch("click", click);
+  assert.equal(h.textbox.value, "| a | b |\n| :---: | --- |\n| 1 | 2 |");
+  assert.equal(popover(h.root), undefined);
+});
+
+test("T26: Details, Footnote, Mermaid and Key are one-click actions", () => {
+  const h = openGfm("word", 4);
+  button(h.root, "footnote").dispatch("click", click);
+  assert.equal(h.textbox.value, "word[^1]\n\n[^1]: ");
+  const k = openGfm("press Esc", 6);
+  k.textbox.selectionEnd = 9;
+  button(k.root, "kbd").dispatch("click", click);
+  assert.equal(k.textbox.value, "press <kbd>Esc</kbd>");
+  assert.equal(popover(k.root), undefined);
 });

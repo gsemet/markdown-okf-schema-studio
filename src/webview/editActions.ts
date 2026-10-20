@@ -809,40 +809,64 @@ export function createEditActions(
   }
 
   /**
+   * The pipe table the caret is in (or at the end of): its text range, parsed model, lines and
+   * the caret's line. The table is the run of non-blank lines around the caret, started at the
+   * first line from which the rest parses as a table.
+   */
+  function tableAtCaret(ctx: EditActionContext) {
+    const tools = tableTools;
+    if (!tools) return undefined;
+    const { value } = ctx;
+    // The run of non-blank lines around the caret, with the offset of each line.
+    const caretLineStart = value.lastIndexOf("\n", ctx.selectionStart - 1) + 1;
+    const offsets: number[] = [];
+    const rows: string[] = [];
+    let from = caretLineStart;
+    while (from > 0) {
+      const previous = value.lastIndexOf("\n", from - 2) + 1;
+      if (value.slice(previous, from - 1).trim() === "") break;
+      from = previous;
+    }
+    for (let offset = from; offset <= value.length;) {
+      const lineEnd = value.indexOf("\n", offset) === -1 ? value.length : value.indexOf("\n", offset);
+      const line = value.slice(offset, lineEnd);
+      if (line.trim() === "") break;
+      offsets.push(offset);
+      rows.push(line);
+      offset = lineEnd + 1;
+    }
+    for (let first = 0; first < rows.length && offsets[first] <= caretLineStart; first += 1) {
+      const model = tools.parse(rows.slice(first).join("\n"));
+      if (!model) continue;
+      return {
+        model,
+        start: offsets[first],
+        end: offsets[rows.length - 1] + rows[rows.length - 1].length,
+        lines: rows.slice(first),
+        lineOffsets: offsets.slice(first),
+        caretLine: offsets.indexOf(caretLineStart) - first,
+        caretLineStart,
+      };
+    }
+    return undefined;
+  }
+
+  /**
    * With the caret in a pipe table, replaces that table's lines with an HTML `<table>`; anywhere
    * else (or without table tools) inserts a new 2 x 2 HTML table after the selection.
    */
   function htmlTable(ctx: EditActionContext): TextEdit | undefined {
     if (!validSelection(ctx)) return undefined;
-    const tools = tableTools;
-    if (tools) {
-      const { value } = ctx;
-      // The run of non-blank lines around the caret, with the offset of each line.
-      const caretLineStart = value.lastIndexOf("\n", ctx.selectionStart - 1) + 1;
-      const offsets: number[] = [];
-      const rows: string[] = [];
-      let from = caretLineStart;
-      while (from > 0) {
-        const previous = value.lastIndexOf("\n", from - 2) + 1;
-        if (value.slice(previous, from - 1).trim() === "") break;
-        from = previous;
-      }
-      for (let offset = from; offset <= value.length;) {
-        const lineEnd = value.indexOf("\n", offset) === -1 ? value.length : value.indexOf("\n", offset);
-        const line = value.slice(offset, lineEnd);
-        if (line.trim() === "") break;
-        offsets.push(offset);
-        rows.push(line);
-        offset = lineEnd + 1;
-      }
-      for (let first = 0; first < rows.length && offsets[first] <= caretLineStart; first += 1) {
-        const model = tools.parse(rows.slice(first).join("\n"));
-        if (!model) continue;
-        const start = offsets[first];
-        const end = offsets[rows.length - 1] + rows[rows.length - 1].length;
-        const text = tools.toHtmlTable(model);
-        return { start, end, text, selectionStart: start + text.length, selectionEnd: start + text.length };
-      }
+    const found = tableAtCaret(ctx);
+    if (found && tableTools) {
+      const text = tableTools.toHtmlTable(found.model);
+      return {
+        start: found.start,
+        end: found.end,
+        text,
+        selectionStart: found.start + text.length,
+        selectionEnd: found.start + text.length,
+      };
     }
     const body = [
       "<table>", "  <thead>", "    <tr>", "      <th>Column 1</th>", "      <th>Column 2</th>",
@@ -850,6 +874,137 @@ export function createEditActions(
       "    </tr>", "  </tbody>", "</table>",
     ].join("\n");
     return insertBlockAfterSelection(ctx, body, "Column 1");
+  }
+
+  const ALIGNMENTS = ["left", "center", "right"];
+
+  /**
+   * Sets the alignment of the table column the caret is in, rewriting only that cell of the
+   * delimiter row (`:---`, `:---:`, `---:`): the cell keeps its padding and, when the colons need
+   * room, takes it from the trailing spaces. Outside a pipe table nothing happens.
+   */
+  function alignColumn(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    if (ctx.arg === undefined || !ALIGNMENTS.includes(ctx.arg)) return undefined;
+    const found = tableAtCaret(ctx);
+    const tools = tableTools;
+    if (!found || !tools || found.caretLine < 0) return undefined;
+    const caretSegments = tools.cellSegments(found.lines[found.caretLine]);
+    const offset = ctx.selectionStart - found.caretLineStart;
+    let column = caretSegments.findIndex((segment) => offset <= segment.end);
+    if (column === -1) column = caretSegments.length - 1;
+    const delimiter = found.lines[1];
+    const segments = tools.cellSegments(delimiter);
+    const segment = segments[Math.min(column, segments.length - 1)];
+    const cell = delimiter.slice(segment.start, segment.end);
+    const lead = /^\s*/u.exec(cell)![0];
+    const core = cell.trim();
+    const tail = cell.slice(lead.length + core.length);
+    const colons = ctx.arg === "center" ? 2 : 1;
+    const dashes = Math.max(3, core.length - colons);
+    const next = (ctx.arg === "left" || ctx.arg === "center" ? ":" : "")
+      + "-".repeat(dashes) + (ctx.arg === "right" || ctx.arg === "center" ? ":" : "");
+    if (next === core) return undefined;
+    // Growth comes out of the trailing spaces, keeping at least one when there was one.
+    const grow = next.length - core.length;
+    const padding = tail === "" ? "" : " ".repeat(Math.max(1, tail.length - Math.max(0, grow)));
+    const start = found.lineOffsets[1] + segment.start + lead.length;
+    const end = found.lineOffsets[1] + segment.end;
+    const shift = next.length + padding.length - core.length - tail.length;
+    const mapped = (position: number): number => (position >= end ? position + shift : position);
+    return {
+      start,
+      end,
+      text: next + padding,
+      selectionStart: mapped(ctx.selectionStart),
+      selectionEnd: mapped(ctx.selectionEnd),
+    };
+  }
+
+  /**
+   * Wraps the touched lines (or a new sample) in `<details><summary>`; the summary text is
+   * selected. A blank line after the summary lets the content render as Markdown.
+   */
+  function insertDetails(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    if (ctx.selectionStart === ctx.selectionEnd) {
+      return insertBlockAfterSelection(
+        ctx, "<details>\n<summary>Summary</summary>\n\nContent\n\n</details>", "Summary");
+    }
+    const { firstStart, lastEnd, lines } = touchedLines(ctx);
+    const head = "<details>\n<summary>";
+    const text = head + "Summary</summary>\n\n" + lines.join("\n") + "\n\n</details>";
+    return {
+      start: firstStart,
+      end: lastEnd,
+      text,
+      selectionStart: firstStart + head.length,
+      selectionEnd: firstStart + head.length + "Summary".length,
+    };
+  }
+
+  /**
+   * Adds a footnote: `[^n]` after the selection and an empty `[^n]: ` definition at the end of
+   * the text (after the footnote definitions already there), the caret in it. `n` is one more than
+   * the highest numeric label in use.
+   */
+  function insertFootnote(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    let highest = 0;
+    for (const label of ctx.value.matchAll(/\[\^(\d+)\]/gu)) highest = Math.max(highest, Number(label[1]));
+    const mark = "[^" + (highest + 1) + "]";
+    const at = ctx.selectionEnd;
+    const rest = ctx.value.slice(at);
+    const content = rest.replace(/\s+$/u, "");
+    const trailing = rest.slice(content.length);
+    const body = ctx.value.slice(0, at) + mark + content;
+    const lastLine = body.slice(body.lastIndexOf("\n") + 1);
+    const separator = /^\[\^[^\]]+\]:/u.test(lastLine) ? "\n" : "\n\n";
+    const text = mark + content + separator + mark + ": ";
+    const caret = at + text.length;
+    return { start: at, end: ctx.value.length, text: text + trailing, selectionStart: caret, selectionEnd: caret };
+  }
+
+  /** A fenced Mermaid flowchart set apart after the selection, its first node label selected. */
+  function insertMermaid(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    return insertBlockAfterSelection(
+      ctx, "```mermaid\nflowchart TD\n  A[Start] --> B[End]\n```", "Start");
+  }
+
+  /** Wraps the selection in `<kbd>`, removes the tags when it already has them, or inserts a sample. */
+  function toggleKbd(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const { value, selectionStart: start, selectionEnd: end } = ctx;
+    const open = "<kbd>";
+    const close = "</kbd>";
+    const selected = value.slice(start, end);
+    if (selected.length >= open.length + close.length && selected.startsWith(open) && selected.endsWith(close)) {
+      const inner = selected.slice(open.length, selected.length - close.length);
+      return { start, end, text: inner, selectionStart: start, selectionEnd: start + inner.length };
+    }
+    if (value.slice(start - open.length, start) === open && value.slice(end, end + close.length) === close) {
+      return {
+        start: start - open.length,
+        end: end + close.length,
+        text: selected,
+        selectionStart: start - open.length,
+        selectionEnd: end - open.length,
+      };
+    }
+    if (selected === "") {
+      return {
+        start, end, text: open + "Key" + close,
+        selectionStart: start + open.length, selectionEnd: start + open.length + 3,
+      };
+    }
+    return {
+      start,
+      end,
+      text: open + selected + close,
+      selectionStart: start + open.length,
+      selectionEnd: end + open.length,
+    };
   }
 
   /** Replaces the selection with the chosen emoji character, caret after it. */
@@ -1026,6 +1181,62 @@ export function createEditActions(
       modes: ["gfm"],
       scopes: ["block"],
       apply: htmlTable,
+    },
+    {
+      id: "details",
+      label: "Collapsible",
+      title: "Collapsible section (details)",
+      icon: "details",
+      group: "github",
+      modes: ["gfm"],
+      scopes: ["block"],
+      apply: insertDetails,
+    },
+    {
+      id: "footnote",
+      label: "Footnote",
+      title: "Footnote",
+      icon: "footnote",
+      group: "github",
+      modes: ["gfm"],
+      scopes: ["block"],
+      apply: insertFootnote,
+    },
+    {
+      id: "mermaid",
+      label: "Mermaid",
+      title: "Mermaid diagram",
+      icon: "mermaid",
+      group: "github",
+      modes: ["gfm"],
+      scopes: ["block"],
+      apply: insertMermaid,
+    },
+    {
+      id: "columnAlign",
+      label: "Column alignment",
+      title: "Table column alignment (choose)",
+      icon: "columnAlign",
+      group: "github",
+      modes: ["gfm"],
+      scopes: ["block"],
+      popover: "align",
+      options: [
+        { value: "left", label: "Left" },
+        { value: "center", label: "Center" },
+        { value: "right", label: "Right" },
+      ],
+      apply: alignColumn,
+    },
+    {
+      id: "kbd",
+      label: "Key",
+      title: "Keyboard key (kbd)",
+      icon: "kbd",
+      group: "github",
+      modes: ["gfm"],
+      scopes: ["block", "cell"],
+      apply: toggleKbd,
     },
   ];
 

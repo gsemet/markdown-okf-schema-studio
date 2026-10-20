@@ -1232,6 +1232,105 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
   }
 }
 
+const RAW_DETAILS_HEAD = /^<details((?:\s+open(?:=(?:""|"open"))?)?)\s*>\s*(?:<summary>([^<]*)<\/summary>)?\s*$/iu;
+const RAW_DETAILS_WHOLE = /^<details((?:\s+open(?:=(?:""|"open"))?)?)\s*>\s*(?:<summary>([^<]*)<\/summary>)?([\s\S]*?)<\/details>\s*$/iu;
+
+function rawDetailsNode(
+  open: boolean,
+  summary: string | undefined,
+  body: MystNode[],
+  position: MystNode["position"],
+): MystNode {
+  const summaryText = (summary ?? "").trim() || "Details";
+  const node: MystNode = {
+    type: "rawDetails",
+    position,
+    children: [
+      { type: "rawSummary", data: { hName: "summary" }, children: [{ type: "text", value: summaryText }] },
+      ...body,
+    ],
+  };
+  node.data = { hName: "details", hProperties: open ? { open: true } : {} };
+  return node;
+}
+
+/**
+ * Renders the raw HTML a Markdown author writes for a collapsible section and a keyboard key.
+ * `<details>` (optionally `open`, with a plain `<summary>`) becomes a details element: either a
+ * head block, the Markdown between, and a closing `</details>` block (the form the edition
+ * palette writes), or one block holding all of it. `<kbd>` without attributes wraps the inline
+ * content up to its `</kbd>`. Any other raw HTML stays dropped, as before.
+ */
+function normalizeRawDetailsAndKbd(node: MystNode, mystParse: MystEngine["mystParse"]): void {
+  if (!node.children) {
+    return;
+  }
+  const source = node.children;
+  const output: MystNode[] = [];
+  for (let index = 0; index < source.length; index += 1) {
+    const child = source[index];
+    const value = child.type === "html" ? (child.value ?? "").trim() : "";
+    const head = RAW_DETAILS_HEAD.exec(value);
+    if (head) {
+      let depth = 1;
+      let close = -1;
+      for (let scan = index + 1; scan < source.length && close === -1; scan += 1) {
+        if (source[scan].type !== "html") {
+          continue;
+        }
+        const text = (source[scan].value ?? "").trim();
+        if (RAW_DETAILS_HEAD.test(text)) {
+          depth += 1;
+        } else if (/^<\/details>$/iu.test(text)) {
+          depth -= 1;
+          if (depth === 0) {
+            close = scan;
+          }
+        }
+      }
+      if (close !== -1) {
+        const body = source.slice(index + 1, close);
+        const closeEnd = source[close].position?.end;
+        const wrapper = rawDetailsNode(head[1] !== "", head[2], body, {
+          ...(child.position?.start ? { start: { ...child.position.start } } : {}),
+          ...(closeEnd ? { end: { ...closeEnd } } : {}),
+        });
+        normalizeRawDetailsAndKbd(wrapper, mystParse);
+        output.push(wrapper);
+        index = close;
+        continue;
+      }
+    }
+    const whole = RAW_DETAILS_WHOLE.exec(value);
+    if (whole && !/<details/iu.test(whole[3])) {
+      const body = mystParse(whole[3].trim(), MYST_PARSE_OPTIONS);
+      const line = child.position?.start?.line;
+      if (line !== undefined) {
+        offsetNodeLines(body, line);
+      }
+      output.push(rawDetailsNode(whole[1] !== "", whole[2], body.children ?? [], child.position));
+      continue;
+    }
+    if (child.type === "html" && /^<kbd>$/iu.test(value)) {
+      const close = source.findIndex((candidate, at) =>
+        at > index && candidate.type === "html" && /^<\/kbd>$/iu.test((candidate.value ?? "").trim()));
+      if (close !== -1) {
+        const key: MystNode = {
+          type: "rawKbd",
+          data: { hName: "kbd" },
+          children: source.slice(index + 1, close),
+        };
+        output.push(key);
+        index = close;
+        continue;
+      }
+    }
+    normalizeRawDetailsAndKbd(child, mystParse);
+    output.push(child);
+  }
+  node.children = output;
+}
+
 function offsetNodeLines(node: MystNode, offset: number): void {
   if (node.position?.start?.line !== undefined) {
     node.position.start.line += offset;
@@ -1552,6 +1651,7 @@ export async function renderMyst(
   }
   autolinkBareUrls(ast);
   convertCommentMarkers(ast, (comment) => sourcePositionProperties(comment, comment.position?.start?.line));
+  normalizeRawDetailsAndKbd(ast, mystParse);
   normalizeContextTagContainers(ast);
   wrapBareBlockImages(ast);
   walk(ast, diagnostics);

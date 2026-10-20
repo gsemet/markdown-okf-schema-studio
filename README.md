@@ -37,7 +37,8 @@ Markdown flavours and extensions:
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
   An edition palette above the text box adds headings, strikethrough, code blocks with a language,
   blockquotes and horizontal rules; in GitHub (GFM) and MyST mode it also adds GitHub alerts with a
-  type list, task-list checkboxes and HTML tables.
+  type list, task-list checkboxes, HTML tables, collapsible sections, footnotes, Mermaid diagrams,
+  table column alignment and `<kbd>` keys.
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)
   annotations can show target metadata and source line numbers for implementation
   and test evidence.
