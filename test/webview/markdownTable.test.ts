@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { lineDelta } from "../shared/lineDelta";
+import { createEditActions } from "../../src/webview/editActions";
 import { createMarkdownTableTools } from "../../src/webview/markdownTable";
 
 test("pipe tables round-trip escaped cells and CRLF line endings", () => {
@@ -221,4 +222,18 @@ test("filling an empty cell keeps the table's padding", () => {
     removed: ["|c||"],
     added: ["|c|x|"],
   });
+});
+
+test("T24: the table inserted by the palette parses back with its header and empty rows", () => {
+  const edit = createEditActions().byId.get("table")!.apply({
+    value: "", selectionStart: 0, selectionEnd: 0, scope: "block", arg: "3x4",
+  })!;
+  const tools = createMarkdownTableTools();
+  const model = tools.parse(edit.text);
+  assert.ok(model);
+  assert.deepEqual(model.rows[0], ["Column 1", "Column 2", "Column 3", "Column 4"]);
+  assert.equal(model.rows.length, 4, "header, separator and two rows");
+  assert.deepEqual(model.rows[2], ["", "", "", ""]);
+  // The canonical serializer writes the same text back, so cell edits keep the layout.
+  assert.equal(tools.serialize({ ...model, columnsChanged: true }), edit.text);
 });

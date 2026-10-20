@@ -7,6 +7,7 @@ import {
   renderPreviewDocument,
   type PreviewDocument,
 } from "../../src/render/renderPipeline";
+import { createEditActions } from "../../src/webview/editActions";
 import { rewriteSphinxHtml } from "../../src/security/html-sanitizer";
 import { ResourcePolicy } from "../../src/security/resource-policy";
 import {
@@ -1178,4 +1179,23 @@ test("a lone raw <img> block is a mapped block with a source line", async () => 
     attribute(element, "data-line") === "3"
     && findElement(element, (child) => child.tagName === "img") !== undefined);
   assert.ok(mapped, "the raw <img> block carries its source line");
+});
+
+test("a table inserted by the edition palette renders as a table with its header", async () => {
+  const insertion = createEditActions().byId.get("table")!.apply({
+    value: "Intro", selectionStart: 5, selectionEnd: 5, scope: "block", arg: "3x4",
+  })!;
+  const document = inlineDocument("Intro" + insertion.text + "\n\nAfter.\n");
+  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+  const root = parseHtml(result.html);
+  const tables = findElements(root, isTag("table"));
+  assert.equal(tables.length, 1);
+  assert.deepEqual(
+    findElements(tables[0], isTag("th")).map((cell) => textContent(cell).trim()),
+    ["Column 1", "Column 2", "Column 3", "Column 4"],
+  );
+  const rows = findElements(tables[0], isTag("tr"));
+  assert.equal(rows.length, 3, "the header row and two empty rows");
+  assert.equal(findElements(rows[2], isTag("td")).length, 4);
 });

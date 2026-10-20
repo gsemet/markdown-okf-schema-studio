@@ -2590,7 +2590,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   }""")
   if not geometry["first"]:
     failures.append(Failure(page_name, "the palette is not the first child of the editor frame"))
-  expected = ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "todo"]
+  expected = ["heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table", "emoji", "todo"]
   if geometry["labels"] != expected:
     failures.append(Failure(page_name, f"palette buttons are {geometry['labels']}, expected {expected}"))
   if geometry["barBottom"] > geometry["areaTop"] + 0.5:
@@ -2670,6 +2670,72 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   if editor.count() != 1:
     failures.append(Failure(page_name, "Escape with a heading list open closed the editor"))
     return
+
+  # T24: the Table button opens a 9 x 9 grid; hovering 3 x 4 lights 12 cells and shows the size.
+  palette.locator("button[data-edit-action='table']").click()
+  grid = editor.locator(".sphinx-preview-edit-palette-menu[data-edit-popover='grid']")
+  page.wait_for_timeout(150)
+  if grid.count() != 1 or not grid.is_visible():
+    failures.append(Failure(page_name, "the table grid did not open"))
+  else:
+    grid.locator("[data-grid-row='3'][data-grid-col='4']").hover()
+    page.wait_for_timeout(100)
+    grid_state = grid.evaluate("""element => {
+      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      const r = element.getBoundingClientRect();
+      const lit = [...element.querySelectorAll('[data-grid-on]')];
+      const off = element.querySelector('[data-grid-row="4"][data-grid-col="1"]');
+      const on = element.querySelector('[data-grid-row="3"][data-grid-col="4"]');
+      return {
+        cells: element.querySelectorAll('[data-grid-row]').length, lit: lit.length,
+        label: element.querySelector('.sphinx-preview-edit-grid-label').textContent,
+        onColor: getComputedStyle(on).backgroundColor, offColor: getComputedStyle(off).backgroundColor,
+        left: r.left, right: r.right, frameLeft: f.left, frameRight: f.right,
+      };
+    }""")
+    if grid_state["cells"] != 81 or grid_state["lit"] != 12 or grid_state["label"] != "3 \u00d7 4":
+      failures.append(Failure(page_name, f"hovering 3 x 4 did not light 12 of 81 cells: {grid_state}"))
+    if grid_state["onColor"] == grid_state["offColor"]:
+      failures.append(Failure(page_name, f"a lit grid cell looks like an unlit one: {grid_state}"))
+    if grid_state["left"] < grid_state["frameLeft"] - 0.5 or grid_state["right"] > grid_state["frameRight"] + 0.5:
+      failures.append(Failure(page_name, f"the table grid leaves the editor frame: {grid_state}"))
+    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-grid.png"), caret="hide")
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(100)
+    if editor.locator(".sphinx-preview-edit-palette-menu").count() != 0 or editor.count() != 1:
+      failures.append(Failure(page_name, "Escape did not close only the table grid"))
+      return
+
+  # The emoji picker takes the focus for its filter; Escape gives it back to the text box.
+  palette.locator("button[data-edit-action='emoji']").click()
+  picker = editor.locator(".sphinx-preview-edit-palette-menu[data-edit-popover='emoji']")
+  page.wait_for_timeout(150)
+  if picker.count() != 1 or not picker.is_visible():
+    failures.append(Failure(page_name, "the emoji picker did not open"))
+  else:
+    picker_state = picker.evaluate("""element => {
+      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      const r = element.getBoundingClientRect();
+      const field = element.querySelector('input');
+      return { focused: document.activeElement === field, left: r.left, right: r.right,
+        frameLeft: f.left, frameRight: f.right, count: element.querySelectorAll('[data-emoji]').length };
+    }""")
+    if not picker_state["focused"] or picker_state["count"] < 140:
+      failures.append(Failure(page_name, f"the emoji picker is not ready: {picker_state}"))
+    if picker_state["left"] < picker_state["frameLeft"] - 0.5 or picker_state["right"] > picker_state["frameRight"] + 0.5:
+      failures.append(Failure(page_name, f"the emoji picker leaves the editor frame: {picker_state}"))
+    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-emoji.png"), caret="hide")
+    page.keyboard.type("warning")
+    page.wait_for_timeout(100)
+    shown = picker.locator("[data-emoji]:not([hidden])").count()
+    if shown != 1:
+      failures.append(Failure(page_name, f"filtering 'warning' left {shown} emoji, expected 1"))
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(100)
+    refocused = page.evaluate("() => document.activeElement && document.activeElement.tagName")
+    if editor.count() != 1 or refocused != "TEXTAREA" or editor.locator(".sphinx-preview-edit-palette-menu").count() != 0:
+      failures.append(Failure(page_name, f"Escape in the emoji filter left the editor in a bad state: {refocused}"))
+      return
 
   # Closing puts the block back where it was before the editor opened (no jump by the bar height).
   page.keyboard.press("Escape")

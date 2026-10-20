@@ -825,7 +825,7 @@ export const SCENARIOS: Scenario[] = [
     machineChecks: ["overlay-clipped"],
     description:
       "Edit mode on, light theme, a paragraph in the middle of the chapter open in its editor: the "
-      + "edition palette (heading, bold, italic, strikethrough, code, quote, rule, TODO) sits above the "
+      + "edition palette (heading, bold, italic, strikethrough, link, code, quote, rule, table, emoji, TODO) sits above the "
       + "text box, the clicked text keeps its screen position, and the -menu PNG shows the heading list.",
   },
   {
