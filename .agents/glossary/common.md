@@ -8,6 +8,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Anchor icon**: marker rendered for a MyST `(label)=` target (`span.okf-anchor`, tooltip "Anchor: name"; first child of the next paragraph or heading, else in a `div.okf-anchor-row`).
 - **Anchor button**: toolbar toggle that ties preview scrolling to the editor (`data-sphinx-preview-anchor`).
 - **Block editor**: raw Markdown text box that replaces a mapped block in edit mode (`.sphinx-preview-block-editor`, `openBlockEditor` in `src/webview/scrollSync.ts`).
+- **Blur commit suspension**: while a host round trip marked `dialog` is pending (`hostRequests.ask(…, { dialog: true }, …)` in `src/webview/hostRequests.ts`: the `{doc}` and image file pickers), the text box blur and the palette `onLeave` do not save, so the block editor stays open under the native dialog; `cancelAll()` in `closeBlockEdit` and the request timeout clear it.
 - **Block selection (planned)**: selecting whole blocks in the preview, for example to comment on them.
 - **Chip**: small inline marker in the preview, gray for an HTML comment and green for TODO (`.okf-chip`, `src/render/commentMarkers.ts`).
 - **Comment thread (planned)**: a conversation attached to a block or range of a document.

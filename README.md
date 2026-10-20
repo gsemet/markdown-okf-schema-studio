@@ -38,12 +38,12 @@ Markdown flavours and extensions:
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
   An edition palette above the text box adds headings, strikethrough, code blocks with a language,
-  blockquotes and horizontal rules; in GitHub (GFM) and MyST mode it also adds GitHub alerts with a
+  blockquotes, horizontal rules and images; in GitHub (GFM) and MyST mode it also adds GitHub alerts with a
   type list, task-list checkboxes, HTML tables, collapsible sections, footnotes, Mermaid diagrams,
   table column alignment and `<kbd>` keys; MyST mode adds admonitions with a type list,
   definition lists, math (inline, display, aligned), subscript, superscript, `(name)=` labels,
   `{ref}` and `{doc}` references, `{cite}` citations from the workspace `.bib` files, dropdowns,
-  tables with a caption and `{kbd}` keys.
+  tables with a caption, figures and `{kbd}` keys.
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)
   annotations can show target metadata and source line numbers for implementation
   and test evidence.

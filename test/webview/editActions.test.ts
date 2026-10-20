@@ -149,10 +149,10 @@ test("the registry lists the actions with metadata and indexes them by id", () =
   assert.deepEqual(
     registry.actions.map((action) => action.id),
     [
-      "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
+      "heading", "bold", "italic", "strikethrough", "link", "image", "codeFence", "quote", "rule", "table",
       "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
-      "ref", "doc", "cite", "dropdown", "tableCaption", "roleKbd",
+      "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd",
     ],
   );
   for (const action of registry.actions) {
@@ -163,7 +163,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
       "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     ].includes(action.id);
     const myst = ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
-      "tableCaption", "roleKbd"].includes(action.id);
+      "tableCaption", "figure", "roleKbd"].includes(action.id);
     assert.deepEqual(action.modes, myst ? ["myst"] : github ? ["gfm"] : ["strict"], action.id);
     assert.ok(action.scopes.includes("block"));
   }
@@ -1040,4 +1040,54 @@ test("T30: roleKbd wraps the selection in {kbd}, or inserts a sample key", () =>
   assert.equal(run("roleKbd", "press [Ctrl] now"), "press {kbd}`[Ctrl]` now");
   assert.equal(run("roleKbd", "press | now"), "press {kbd}`[Ctrl+K]` now");
   assert.equal(run("roleKbd", "press [a`b]"), undefined);
+});
+
+// T31: image and figure from a picked file.
+test("T31: image is a strict action and figure a myst one, both asking the host for a file", () => {
+  const image = registry.byId.get("image")!;
+  assert.deepEqual(image.modes, ["strict"]);
+  assert.equal(image.hostDialog, "image");
+  assert.equal(image.shortcut, undefined);
+  const figure = registry.byId.get("figure")!;
+  assert.deepEqual(figure.modes, ["myst"]);
+  assert.equal(figure.hostDialog, "image");
+  assert.deepEqual(figure.scopes, ["block"]);
+});
+
+test("T31: image inserts ![name](path) with the name selected", () => {
+  const out = applyTo("image", "see ", [4, 4], "img/logo.png")!;
+  assert.equal(out.value, "see ![logo](img/logo.png)");
+  assert.equal(out.value.slice(...out.selection), "logo");
+  const replaced = applyTo("image", "a [old] b", [2, 7], "../x/photo.final.jpg")!;
+  assert.equal(replaced.value, "a ![photo.final](../x/photo.final.jpg) b");
+});
+
+test("T31: image wraps a path with spaces or parentheses in angle brackets", () => {
+  assert.equal(applyTo("image", "", [0, 0], "my pics/a.png")!.value, "![a](<my pics/a.png>)");
+  assert.equal(applyTo("image", "", [0, 0], "a (1).png")!.value, "![a (1)](<a (1).png>)");
+  assert.equal(applyTo("image", "", [0, 0], "p(1).png")!.value, "![p(1)](<p(1).png>)");
+});
+
+test("T31: image refuses a missing or unwritable path and keeps brackets out of the name", () => {
+  assert.equal(applyTo("image", "", [0, 0]), undefined);
+  assert.equal(applyTo("image", "", [0, 0], "a>b.png"), undefined);
+  assert.equal(applyTo("image", "", [0, 0], "a\nb.png"), undefined);
+  assert.equal(applyTo("image", "", [0, 0], "a[1].png")!.value, "![a1](a[1].png)");
+  assert.equal(applyTo("image", "", [0, 0], "a\\.png")!.value, "![a](a\\.png)", "a trailing backslash would escape ]");
+});
+
+test("T31: figure inserts the directive with alt text and an empty caption line", () => {
+  const out = applyTo("figure", "Intro", [5, 5], "img/logo.png")!;
+  assert.equal(out.value, "Intro\n\n:::{figure} img/logo.png\n:alt: logo\n\n\n:::");
+  const caption = out.value.indexOf(":alt: logo\n\n") + ":alt: logo\n\n".length;
+  assert.deepEqual(out.selection, [caption, caption], "the caret is on the caption line");
+});
+
+test("T31: figure keeps the touched lines as the caption and uses one more colon than the fences inside", () => {
+  const out = applyTo("figure", "A caption\nsecond", [0, 9], "p.png")!;
+  assert.equal(out.value, ":::{figure} p.png\n:alt: p\n\nA caption\n:::\nsecond");
+  const nested = applyTo("figure", ":::{note}\nx\n:::", [0, 15], "p.png")!;
+  assert.equal(nested.value, "::::{figure} p.png\n:alt: p\n\n:::{note}\nx\n:::\n::::");
+  assert.equal(applyTo("figure", "", [0, 0]), undefined);
+  assert.equal(applyTo("figure", "", [0, 0], "a`b.png")?.value.includes("`"), true, "backticks are fine in an argument");
 });

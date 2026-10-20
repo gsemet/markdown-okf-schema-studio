@@ -7373,10 +7373,10 @@ test("T21: the palette is the first child of the block editor frame, above the t
   assert.deepEqual(
     palette.childElements.slice(1).map((child) => child.getAttribute("data-edit-action")),
     [
-      "heading", "bold", "italic", "strikethrough", "link", "codeFence", "quote", "rule", "table",
+      "heading", "bold", "italic", "strikethrough", "link", "image", "codeFence", "quote", "rule", "table",
       "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
-      "ref", "doc", "cite", "dropdown", "tableCaption", "roleKbd",
+      "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd",
     ],
   );
 });
@@ -7419,7 +7419,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 31);
+  assert.equal(controls.length, 33);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
@@ -8515,5 +8515,57 @@ test("T30: a cancelled file dialog inserts nothing and the blur saves again", ()
   harness.dispatchMessage({ type: "previewPickDocumentResult", editId: request.editId, ok: true, cancelled: true });
   assert.equal(textarea.value.includes("{doc}"), false);
   textarea.dispatch("blur");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), true);
+});
+
+const paletteClick = { preventDefault: () => undefined, stopPropagation: () => undefined };
+
+test("T31: Image keeps the editor open while the file dialog has the focus, then inserts the reference", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "See ";
+  textarea.selectionStart = 4;
+  textarea.selectionEnd = 4;
+  paletteButton(harness, "image").dispatch("click", paletteClick);
+  const request = harness.messages.at(-1)!;
+  assert.equal(request.type, "previewPickImage");
+  assert.equal(typeof request.editId, "string");
+  textarea.dispatch("blur");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), false);
+  harness.dispatchMessage({
+    type: "previewPickImageResult", editId: request.editId, ok: true, path: "img/my logo.png",
+    documentVersion: 99, requestId: 99,
+  });
+  assert.equal(textarea.value, "See ![my logo](<img/my logo.png>)");
+  assert.equal(textarea.value.slice(textarea.selectionStart, textarea.selectionEnd), "my logo");
+  textarea.dispatch("blur");
+  assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), true);
+});
+
+test("T31: a stale image answer, a refusal and a cancel insert nothing", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "See ";
+  textarea.selectionStart = 4;
+  textarea.selectionEnd = 4;
+  paletteButton(harness, "image").dispatch("click", paletteClick);
+  const request = harness.messages.at(-1)!;
+  harness.dispatchMessage({ type: "previewPickImageResult", editId: "other-edit", ok: true, path: "a.png" });
+  assert.equal(textarea.value, "See ", "an answer for another edit id is ignored");
+  harness.dispatchMessage({ type: "previewPickImageResult", editId: request.editId, ok: false, reason: "Outside the workspace." });
+  assert.equal(textarea.value, "See ");
+  paletteButton(harness, "image").dispatch("click", paletteClick);
+  const second = harness.messages.at(-1)!;
+  harness.dispatchMessage({ type: "previewPickImageResult", editId: second.editId, ok: true, cancelled: true });
+  assert.equal(textarea.value, "See ");
+});
+
+test("T31: Done saves while the file dialog is still open, so the editor is never stuck", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Second paragraph. edited";
+  textarea.dispatch("input");
+  paletteButton(harness, "image").dispatch("click", paletteClick);
+  textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
   assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), true);
 });

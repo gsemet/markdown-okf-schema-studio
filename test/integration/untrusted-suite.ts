@@ -44,6 +44,23 @@ export async function run(): Promise<void> {
       requestId: commandPreview.requestId,
       mode: "strict",
     });
+    // A read-only preview never opens the image dialog.
+    const windowApi = vscode.window as unknown as { showOpenDialog: typeof vscode.window.showOpenDialog };
+    const originalDialog = windowApi.showOpenDialog;
+    let dialogCalls = 0;
+    windowApi.showOpenDialog = (async () => { dialogCalls += 1; return undefined; }) as typeof originalDialog;
+    try {
+      await sendPreviewMessageForTests({
+        type: "previewPickImage",
+        documentId: commandPreview.documentUri,
+        documentVersion: commandPreview.documentVersion,
+        requestId: commandPreview.requestId,
+        editId: "untrusted-image",
+      });
+    } finally {
+      windowApi.showOpenDialog = originalDialog;
+    }
+    assert.equal(dialogCalls, 0, "the untrusted preview must not open the image dialog");
     await vscode.commands.executeCommand("vscode.openWith", document.uri, EDITOR_VIEW_TYPE);
     await waitForPreview();
     const editorPreview = getActivePreviewForTests();

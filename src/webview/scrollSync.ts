@@ -3080,7 +3080,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
           ? { items: result.items, truncated: result.truncated === true }
           : { items: [], error: typeof result.reason === "string" ? result.reason : "The list could not be read." })),
       pickHost: (kind, done) => hostRequests.ask(
-        "previewPickDocument", {}, { dialog: true },
+        kind === "image" ? "previewPickImage" : "previewPickDocument", {}, { dialog: true },
         (result) => {
           done(result.ok === true && typeof result.path === "string" ? result.path : undefined);
           if (result.ok !== true && activeBlockEdit === edit && typeof result.reason === "string") {
