@@ -7,6 +7,9 @@
   where it was on screen, so repeated clicks keep moving it. A list or a code block moves as one
   block. The arrows are disabled at the ends and for blocks that come from an included file, and
   a move is refused, with a message, when a comment or a link definition sits between the blocks.
+  Alt+Up and Alt+Down move the focused block (or the block whose bar button has the focus); in the
+  text box, Cmd+Alt (Ctrl+Alt elsewhere) + Up or Down saves the edit, moves the block and reopens
+  the editor with the caret where it was. Option/Alt+arrow alone keeps word navigation.
 - Editing a table cell shows the formatting buttons that make sense in a cell (bold, italic,
   strikethrough, link, emoji, colour, keys, sub/superscript, as the palette mode allows) in the
   row and column bar, after a separator, with the same shortcuts (Cmd/Ctrl+B, +I, +K). Block
