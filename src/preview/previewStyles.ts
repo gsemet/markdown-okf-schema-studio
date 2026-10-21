@@ -504,6 +504,22 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-edit-hover="true"]
   outline-offset: 3px;
 }
 
+html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-block-selected="true"] {
+  outline: 2px solid var(--vscode-focusBorder, Highlight);
+  outline-offset: 3px;
+}
+
+.sphinx-preview-selection-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .sphinx-preview-insert-point {
   position: relative;
   height: 0;
