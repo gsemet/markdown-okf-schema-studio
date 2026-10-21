@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The edit palette now sits on top of the edit box, outside its border, instead of inside it. It
+  sticks to the top of the viewport while you scroll a tall edit box (below the sticky heading
+  band and the floating toolbar), and goes away with the box. The text stays where it was.
 - The palette mode select now reads "MyST" instead of "MyST (includes GFM)" (the setting values
   are unchanged).
 - Review comments follow the text: when you edit the document, threads move with their lines, and

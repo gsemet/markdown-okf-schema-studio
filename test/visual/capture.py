@@ -769,12 +769,12 @@ def check_edit_activation_scroll(page: Page, scenario: dict, failures: list[Fail
     geometry = page.evaluate("""() => {
       const area = document.querySelector('.sphinx-preview-block-editor textarea');
       const frame = area.closest('.sphinx-preview-block-editor');
-      const bar = frame.querySelector('.sphinx-preview-edit-palette');
+      // P4: the palette sits above the frame, in the frame's host.
+      const bar = frame.parentElement.querySelector(':scope > .sphinx-preview-edit-palette');
       const barBox = bar ? bar.getBoundingClientRect() : null;
       const margin = bar ? parseFloat(getComputedStyle(bar).marginBottom) || 0 : 0;
       return {
-        inset: area.getBoundingClientRect().top - frame.getBoundingClientRect().top
-          - (barBox ? barBox.height + margin : 0),
+        inset: area.getBoundingClientRect().top - frame.getBoundingClientRect().top,
         barHeight: barBox ? barBox.height + margin : 0,
         textTop: area.getBoundingClientRect().top,
       };
@@ -1896,11 +1896,11 @@ def check_top_spacing(page: Page, scenario: dict, failures: list[Failure]) -> No
       "() => document.activeElement === document.querySelector('.sphinx-preview-block-editor textarea')"
     ):
       failures.append(Failure(page_name, "the new-block editor does not hold the focus"))
-    selector = ".sphinx-preview-block-editor"
+    selector = ".sphinx-preview-block-editor-host"  # P4: the palette on top of the frame is the first thing on the page
   elif mode == "empty-start":
     selector = ".sphinx-preview-insert-point--start button"
   else:
-    selector = ".sphinx-preview-block-editor"
+    selector = ".sphinx-preview-block-editor-host"  # P4: the palette on top of the frame is the first thing on the page
   target = page.locator(selector)
   if target.count() != 1 or not target.is_visible():
     failures.append(Failure(page_name, f"{selector} is not visible exactly once"))
@@ -2556,7 +2556,7 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
       return
     page.locator(first).click(position={"x": 12, "y": 6})
     page.locator(".sphinx-preview-block-editor textarea").wait_for(state="visible", timeout=2000)
-    selector = ".sphinx-preview-block-editor"
+    selector = ".sphinx-preview-block-editor-host"  # P4: the palette on top of the frame is the first thing on the page
   geometry = page.evaluate(measure, selector)
   if not geometry:
     failures.append(Failure(page_name, f"{selector} is not in the page"))
@@ -2725,16 +2725,16 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
   def pick_and_check(label: str) -> None:
     editor = page.locator(".sphinx-preview-block-editor")
     editor.locator("textarea").wait_for(state="visible", timeout=2000)
-    editor.locator("select[data-edit-palette-mode-select]").select_option(mode)
+    page.locator(".sphinx-preview-block-editor-host").locator("select[data-edit-palette-mode-select]").select_option(mode)
     page.wait_for_timeout(150)
-    labels = editor.locator(".sphinx-preview-edit-palette").evaluate(
+    labels = page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette").evaluate(
       "bar => [...bar.querySelectorAll(':scope > button')].map((button) => button.dataset.editAction)"
     )
     if labels != expected:
       failures.append(Failure(page_name, f"{label}: palette buttons in {mode} mode are {labels}, expected {expected}"))
-    if editor.locator(".sphinx-preview-edit-palette").get_attribute("data-palette-mode") != mode:
+    if page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette").get_attribute("data-palette-mode") != mode:
       failures.append(Failure(page_name, f"{label}: the palette is not in {mode} mode"))
-    selected = editor.locator("select[data-edit-palette-mode-select] option:checked").text_content()
+    selected = page.locator(".sphinx-preview-block-editor-host").locator("select[data-edit-palette-mode-select] option:checked").text_content()
     if mode == "myst" and selected != "MyST":
       failures.append(Failure(page_name, f"{label}: the MyST option reads {selected!r}, expected 'MyST'"))
     page.mouse.move(2, 2)
@@ -2759,6 +2759,137 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
   # The editor stays open: the scenario's own PNG then shows this mode, not a mode-less page.
 
 
+def check_edit_palette_tall(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """P4: a very tall edit box; the palette stays at the top of the viewport while the box scrolls."""
+  if not scenario.get("editPaletteTall"):
+    return
+  page_name = scenario["page"]
+  paragraph = page.locator("main > p[data-sphinx-source-line]").nth(3)
+  paragraph.evaluate("element => element.scrollIntoView({ block: 'center' })")
+  page.wait_for_timeout(150)
+  paragraph.click()
+  editor = page.locator(".sphinx-preview-block-editor")
+  area = editor.locator("textarea")
+  area.wait_for(state="visible")
+  area.fill("\n".join(f"Line {number} of a very tall edit box that outgrows the viewport." for number in range(1, 141)))
+  page.wait_for_timeout(300)
+  measure = """() => {
+    const frame = document.querySelector('.sphinx-preview-block-editor');
+    const host = frame.parentElement;
+    const bar = host.querySelector(':scope > .sphinx-preview-edit-palette');
+    const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+    const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+    const rect = (element) => {
+      if (!element) return null;
+      const r = element.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, height: r.height };
+    };
+    const b = bar.getBoundingClientRect();
+    const hit = document.elementFromPoint(b.left + 40, b.top + b.height / 2);
+    return {
+      frame: rect(frame), host: rect(host), bar: rect(bar), toolbar: rect(toolbar),
+      band: band && !band.hidden ? rect(band) : null,
+      covered: !(hit && (hit === bar || bar.contains(hit))),
+      viewport: window.innerHeight, docWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    };
+  }"""
+  frame_page_top = editor.evaluate("element => element.getBoundingClientRect().top + window.scrollY")
+  frame_height = editor.evaluate("element => element.getBoundingClientRect().height")
+  viewport = page.evaluate("() => window.innerHeight")
+  if frame_height < viewport * 1.5:
+    failures.append(Failure(page_name, f"the edit box is not taller than the viewport: {frame_height} vs {viewport}"))
+    return
+
+  # Box top visible: the palette is attached on top of the box, outside its border.
+  page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top - 220)
+  page.wait_for_timeout(200)
+  top = page.evaluate(measure)
+  if not (0 <= top["frame"]["top"] - top["bar"]["bottom"] <= 6) or top["bar"]["bottom"] > top["frame"]["top"] + 0.5:
+    failures.append(Failure(page_name, f"the palette is not attached on top of the box: {top}"))
+  if top["covered"]:
+    failures.append(Failure(page_name, f"the palette is covered at the box top: {top}"))
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-top.png"), caret="hide")
+
+  def check_stuck(label: str, state: dict) -> None:
+    usable = 0.0
+    if state["band"]:
+      usable = max(usable, state["band"]["bottom"])
+    toolbar = state["toolbar"]
+    if toolbar and state["bar"]["left"] < toolbar["right"] and state["bar"]["right"] > toolbar["left"]:
+      usable = max(usable, toolbar["bottom"])
+    if state["frame"]["top"] > -40:
+      failures.append(Failure(page_name, f"{label}: the box top is still in view: {state}"))
+    if state["bar"]["top"] < usable - 0.5:
+      failures.append(Failure(page_name, f"{label}: the palette is under the band or the toolbar ({usable}): {state}"))
+    if state["bar"]["top"] > usable + 16 or state["bar"]["bottom"] > state["viewport"]:
+      failures.append(Failure(page_name, f"{label}: the palette did not stay at the top of the viewport: {state}"))
+    if state["bar"]["bottom"] > state["host"]["bottom"] + 0.5 or state["bar"]["top"] < state["host"]["top"] - 0.5:
+      failures.append(Failure(page_name, f"{label}: the palette left its host: {state}"))
+    if state["covered"]:
+      failures.append(Failure(page_name, f"{label}: the palette is covered by something: {state}"))
+    if state["docWidth"] > state["clientWidth"] + 1:
+      failures.append(Failure(page_name, f"{label}: the page scrolls sideways: {state}"))
+
+  narrow = scenario["width"] <= 480
+  if narrow:
+    # A five-row palette would cover a third of a narrow pane: it stays in the flow.
+    page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 700)
+    page.wait_for_timeout(200)
+    state = page.evaluate(measure)
+    position = page.evaluate(
+      "() => getComputedStyle(document.querySelector('.sphinx-preview-block-editor-host > .sphinx-preview-edit-palette')).position")
+    if position != "relative" or state["bar"]["bottom"] > 0:
+      failures.append(Failure(page_name, f"the palette sticks in a narrow pane: {position} {state}"))
+  else:
+    # Box top out of view: the palette stuck to the top of the viewport, buttons still usable.
+    for offset, label in ((700, "box scrolled 700px"), (1500, "box scrolled 1500px")):
+      page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + offset)
+      page.wait_for_timeout(200)
+      check_stuck(label, page.evaluate(measure))
+    page.locator(".sphinx-preview-edit-palette button[data-edit-action='bold']").click()
+    page.wait_for_timeout(150)
+    if area.count() != 1:
+      failures.append(Failure(page_name, "clicking Bold in the stuck palette closed the editor"))
+      return
+    # P4 r2: the caret must not end under the stuck palette. Start on line 12, scroll so the first
+    # lines are under the bar, then press ArrowUp past the bar's lower edge.
+    page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 60)
+    page.wait_for_timeout(200)
+    area.evaluate("""element => {
+      element.focus({ preventScroll: true });
+      const offset = element.value.split('\\n').slice(0, 11).join('\\n').length + 1;
+      element.setSelectionRange(offset, offset);
+    }""")
+    for _ in range(9):
+      page.keyboard.press("ArrowUp")
+      page.wait_for_timeout(60)
+    page.wait_for_timeout(200)
+    caret = area.evaluate("""element => {
+      const r = element.getBoundingClientRect();
+      const lineHeight = parseFloat(getComputedStyle(element).lineHeight);
+      const line = element.value.slice(0, element.selectionEnd).split('\\n').length;
+      const bar = document.querySelector('.sphinx-preview-block-editor-host > .sphinx-preview-edit-palette').getBoundingClientRect();
+      return { line, top: r.top + (line - 1) * lineHeight, bottom: r.top + line * lineHeight, barBottom: bar.bottom };
+    }""")
+    if caret["line"] != 3 or caret["top"] < caret["barBottom"] - 1:
+      failures.append(Failure(page_name, f"the caret ended under the stuck palette after ArrowUp: {caret}"))
+    page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 700)
+    page.wait_for_timeout(200)
+    page.mouse.move(2, 2)
+
+  # The box end in view: the palette left with the box, never below it.
+  page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + frame_height - viewport + 120)
+  page.wait_for_timeout(200)
+  end = page.evaluate(measure)
+  if end["bar"]["bottom"] > end["host"]["bottom"] + 0.5:
+    failures.append(Failure(page_name, f"the palette is below the end of the box: {end}"))
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-end.png"), caret="hide")
+  # The scenario PNG shows the stuck palette mid-box.
+  page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 700)
+  page.wait_for_timeout(200)
+
+
 def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """T21: the edition palette above an open block editor."""
   if not scenario.get("editPalette"):
@@ -2775,12 +2906,13 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   if editor.count() != 1 or not editor.is_visible():
     failures.append(Failure(page_name, "clicking a paragraph did not open its framed editor"))
     return
-  palette = editor.locator(".sphinx-preview-edit-palette")
+  palette = page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette")
   if palette.count() != 1 or not palette.is_visible():
     failures.append(Failure(page_name, "the open editor shows no edition palette"))
     return
   geometry = editor.evaluate("""element => {
-    const bar = element.querySelector('.sphinx-preview-edit-palette');
+    // P4: the palette is the frame's previous sibling, in the same host, outside the edit box.
+    const bar = element.parentElement.querySelector(':scope > .sphinx-preview-edit-palette');
     const area = element.querySelector('textarea');
     const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
     const frame = element.getBoundingClientRect();
@@ -2793,7 +2925,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
       return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
     });
     return {
-      first: element.firstElementChild === bar,
+      first: element.previousElementSibling === bar && !element.contains(bar),
       barTop: b.top, barBottom: b.bottom, barLeft: b.left, barRight: b.right, barHeight: b.height,
       areaTop: a.top, frameLeft: frame.left, frameRight: frame.right, frameTop: frame.top,
       toolbarBottom: t ? t.bottom : 0, toolbarLeft: t ? t.left : 0, toolbarRight: t ? t.right : 0,
@@ -2802,12 +2934,12 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
     };
   }""")
   if not geometry["first"]:
-    failures.append(Failure(page_name, "the palette is not the first child of the editor frame"))
+    failures.append(Failure(page_name, "the palette is not on top of the edit box (previous sibling, outside the frame)"))
   expected = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd", "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
   if geometry["labels"] != expected:
     failures.append(Failure(page_name, f"palette buttons are {geometry['labels']}, expected {expected}"))
-  if geometry["barBottom"] > geometry["areaTop"] + 0.5:
-    failures.append(Failure(page_name, f"the palette is not above the text box: {geometry}"))
+  if geometry["barBottom"] > geometry["frameTop"] + 0.5 or geometry["frameTop"] - geometry["barBottom"] > 6:
+    failures.append(Failure(page_name, f"the palette is not attached on top of the edit box: {geometry}"))
   overlaps_toolbar_row = (
     geometry["barLeft"] < geometry["toolbarRight"] and geometry["barRight"] > geometry["toolbarLeft"]
   )
@@ -2863,14 +2995,14 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
 
   # The heading list opens inside the frame, Escape closes it and leaves the editor open.
   palette.locator("button[data-edit-action='heading']").click()
-  menu = editor.locator(".sphinx-preview-edit-palette-menu")
+  menu = page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu")
   page.wait_for_timeout(150)
   if menu.count() != 1 or not menu.is_visible():
     failures.append(Failure(page_name, "the heading list did not open"))
   else:
     box = menu.evaluate("""element => {
       const r = element.getBoundingClientRect();
-      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      const f = element.closest('.sphinx-preview-block-editor-host').getBoundingClientRect();
       return { left: r.left, right: r.right, frameLeft: f.left, frameRight: f.right };
     }""")
     if box["left"] < box["frameLeft"] - 0.5 or box["right"] > box["frameRight"] + 0.5:
@@ -2878,7 +3010,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-menu.png"), caret="hide")
   page.keyboard.press("Escape")
   page.wait_for_timeout(100)
-  if editor.locator(".sphinx-preview-edit-palette-menu").count() != 0:
+  if page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu").count() != 0:
     failures.append(Failure(page_name, "Escape did not close the heading list"))
   if editor.count() != 1:
     failures.append(Failure(page_name, "Escape with a heading list open closed the editor"))
@@ -2886,7 +3018,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
 
   # T24: the Table button opens a 9 x 9 grid; hovering 3 x 4 lights 12 cells and shows the size.
   palette.locator("button[data-edit-action='table']").click()
-  grid = editor.locator(".sphinx-preview-edit-palette-menu[data-edit-popover='grid']")
+  grid = page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu[data-edit-popover='grid']")
   page.wait_for_timeout(150)
   if grid.count() != 1 or not grid.is_visible():
     failures.append(Failure(page_name, "the table grid did not open"))
@@ -2894,7 +3026,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
     grid.locator("[data-grid-row='3'][data-grid-col='4']").hover()
     page.wait_for_timeout(100)
     grid_state = grid.evaluate("""element => {
-      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      const f = element.closest('.sphinx-preview-block-editor-host').getBoundingClientRect();
       const r = element.getBoundingClientRect();
       const lit = [...element.querySelectorAll('[data-grid-on]')];
       const off = element.querySelector('[data-grid-row="4"][data-grid-col="1"]');
@@ -2915,19 +3047,19 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
     page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-grid.png"), caret="hide")
     page.keyboard.press("Escape")
     page.wait_for_timeout(100)
-    if editor.locator(".sphinx-preview-edit-palette-menu").count() != 0 or editor.count() != 1:
+    if page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu").count() != 0 or editor.count() != 1:
       failures.append(Failure(page_name, "Escape did not close only the table grid"))
       return
 
   # The emoji picker takes the focus for its filter; Escape gives it back to the text box.
   palette.locator("button[data-edit-action='emoji']").click()
-  picker = editor.locator(".sphinx-preview-edit-palette-menu[data-edit-popover='emoji']")
+  picker = page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu[data-edit-popover='emoji']")
   page.wait_for_timeout(150)
   if picker.count() != 1 or not picker.is_visible():
     failures.append(Failure(page_name, "the emoji picker did not open"))
   else:
     picker_state = picker.evaluate("""element => {
-      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      const f = element.closest('.sphinx-preview-block-editor-host').getBoundingClientRect();
       const r = element.getBoundingClientRect();
       const field = element.querySelector('input');
       return { focused: document.activeElement === field, left: r.left, right: r.right,
@@ -2946,20 +3078,20 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
     page.keyboard.press("Escape")
     page.wait_for_timeout(100)
     refocused = page.evaluate("() => document.activeElement && document.activeElement.tagName")
-    if editor.count() != 1 or refocused != "TEXTAREA" or editor.locator(".sphinx-preview-edit-palette-menu").count() != 0:
+    if editor.count() != 1 or refocused != "TEXTAREA" or page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu").count() != 0:
       failures.append(Failure(page_name, f"Escape in the emoji filter left the editor in a bad state: {refocused}"))
       return
 
   # T25: the Alert button writes the alert and opens its type list at the caret, inside the frame.
   area.focus()
   palette.locator("button[data-edit-action='alert']").click()
-  alert_list = editor.locator(".sphinx-preview-edit-palette-menu[data-edit-popover='alert']")
+  alert_list = page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu[data-edit-popover='alert']")
   page.wait_for_timeout(150)
   if alert_list.count() != 1 or not alert_list.is_visible():
     failures.append(Failure(page_name, "the alert type list did not open"))
   else:
     alert_state = alert_list.evaluate("""element => {
-      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      const f = element.closest('.sphinx-preview-block-editor-host').getBoundingClientRect();
       const r = element.getBoundingClientRect();
       const t = document.querySelector('.sphinx-preview-block-editor textarea');
       return { options: [...element.querySelectorAll('[data-edit-option]')].map((o) => o.textContent),
@@ -2980,7 +3112,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
       const t = document.querySelector('.sphinx-preview-block-editor textarea');
       return { head: t ? t.value.split('\\n')[0] : '', focused: document.activeElement === t };
     }""")
-    if changed["head"] != "> [!WARNING]" or not changed["focused"] or editor.locator(".sphinx-preview-edit-palette-menu").count() != 0:
+    if changed["head"] != "> [!WARNING]" or not changed["focused"] or page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu").count() != 0:
       failures.append(Failure(page_name, f"choosing Warning did not change the head: {changed}"))
 
   # T34: the Colour picker opens inside the frame, a swatch colours the selection, and the code
@@ -2988,13 +3120,13 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   area.focus()
   area.evaluate("t => { t.setSelectionRange(2, 6); }")
   palette.locator("button[data-edit-action='color']").click()
-  colour_menu = editor.locator(".sphinx-preview-edit-palette-menu[data-edit-popover='color']")
+  colour_menu = page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu[data-edit-popover='color']")
   page.wait_for_timeout(150)
   if colour_menu.count() != 1 or not colour_menu.is_visible():
     failures.append(Failure(page_name, "the colour picker did not open"))
   else:
     colour_state = colour_menu.evaluate("""element => {
-      const f = element.closest('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      const f = element.closest('.sphinx-preview-block-editor-host').getBoundingClientRect();
       const r = element.getBoundingClientRect();
       const t = document.querySelector('.sphinx-preview-block-editor textarea');
       const swatch = element.querySelector('[data-color-swatch]').getBoundingClientRect();
@@ -3018,7 +3150,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
     }""")
     if '<span style="color:#e53935">' not in coloured["value"] or not coloured["focused"]:
       failures.append(Failure(page_name, f"a colour swatch did not colour the selection: {coloured}"))
-    if editor.locator(".sphinx-preview-edit-palette-menu").count() != 0 or editor.count() != 1:
+    if page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu").count() != 0 or editor.count() != 1:
       failures.append(Failure(page_name, "choosing a colour left the picker open or closed the editor"))
   code_button = palette.locator("button[data-edit-action='colorCode']")
   if code_button.is_visible():
@@ -3565,8 +3697,8 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
         mapped_list = page.locator('main ul[data-sphinx-preview-editing="true"]')
         if mapped_list.count() != 1 or mapped_list.is_visible():
           failures.append(Failure(page_name, "editing one list item did not replace the whole list"))
-        elif not editor.evaluate("""element => element.parentElement?.previousElementSibling
-          ?.matches('ul[data-sphinx-preview-editing="true"]') === true"""):
+        elif not editor.evaluate("""element => (element.closest('.sphinx-preview-block-editor-host') ?? element.parentElement)
+          ?.previousElementSibling?.matches('ul[data-sphinx-preview-editing="true"]') === true"""):
           failures.append(Failure(page_name, "list editor is not positioned after the hidden whole list"))
         elif editor.evaluate("""element => element.scrollHeight > element.clientHeight + 1
           || element.scrollWidth > element.clientWidth + 1
@@ -4271,7 +4403,7 @@ def check_sticky_headings(
       failures.append(Failure(page_name, "fixed sticky heading unexpectedly shifts document flow"))
 
 def check_final_frame(page: Page, scenario: dict, failures: list[Failure]) -> dict:
-    result = page.evaluate(r"""() => {
+    result = page.evaluate(r"""(tallEditor) => {
       const main = document.getElementById('sphinx-myst-preview-content');
       const errors = [];
       const visible = element => {
@@ -4298,7 +4430,10 @@ def check_final_frame(page: Page, scenario: dict, failures: list[Failure]) -> di
         .filter(visible);
       for (const element of editors) {
         const bounds = element.getBoundingClientRect();
-        if (bounds.left < -1 || bounds.right > innerWidth + 1 || bounds.top < 0 || bounds.bottom > innerHeight + 1) {
+        // P4: the very tall edit box outgrows the viewport by design; only its sides are checked
+        // (the palette's position is asserted by check_edit_palette_tall).
+        const sidesClipped = bounds.left < -1 || bounds.right > innerWidth + 1;
+        if (sidesClipped || (!tallEditor && (bounds.top < 0 || bounds.bottom > innerHeight + 1))) {
           errors.push(`final editor is clipped: ${element.getAttribute('aria-label')}`);
         }
         // The toolbar only reserves room for text that shares horizontal space with it.
@@ -4306,7 +4441,7 @@ def check_final_frame(page: Page, scenario: dict, failures: list[Failure]) -> di
           .map(item => item.getBoundingClientRect())
           .filter(box => bounds.left < box.right && bounds.right > box.left)
           .map(box => box.bottom));
-        if (bounds.top < reserved - 1) errors.push('final editor text collides with toolbar/sticky overlay');
+        if (!tallEditor && bounds.top < reserved - 1) errors.push('final editor text collides with toolbar/sticky overlay');
       }
       const visibleContent = [...(main?.querySelectorAll('p, pre, figure, table, textarea, .sphinx-preview-insert-point--start button') || [])].filter(visible);
       if (!visibleContent.length) errors.push('final viewport contains no visible content landmark');
@@ -4322,7 +4457,7 @@ def check_final_frame(page: Page, scenario: dict, failures: list[Failure]) -> di
           .filter(element => !element.checked).map(element => element.closest('[data-okf-field]').dataset.okfField),
         visibleContent: visibleContent.map(element => element.textContent.trim().slice(0, 100)),
       };
-    }""")
+    }""", bool(scenario.get("editPaletteTall")))
     for detail in result.pop("errors"):
         failures.append(Failure(scenario["page"], detail))
     try:
@@ -4598,7 +4733,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

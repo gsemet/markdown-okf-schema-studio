@@ -60,3 +60,24 @@ export function caretRectOf(
     mirror.remove?.();
   }
 }
+
+/**
+ * How far to scroll (positive: down) so the caret is neither under the stuck edition palette nor
+ * below the viewport. 0 when the palette is not stuck (it is still above the frame) or when the
+ * caret is already clear. Injected into the page script with `.toString()`: self-contained.
+ */
+export function caretRevealDelta(
+  caret: { top: number; bottom: number },
+  bar: { bottom: number },
+  frame: { top: number },
+  viewportHeight: number,
+): number {
+  const gap = 8;
+  if (![caret.top, caret.bottom, bar.bottom, frame.top, viewportHeight].every(Number.isFinite)) return 0;
+  if (!(bar.bottom > frame.top + 0.5)) return 0;
+  // The caret line may touch the bar's lower edge; only a hidden caret moves the page.
+  const limit = bar.bottom;
+  if (caret.top < limit) return caret.top - limit;
+  if (caret.bottom > viewportHeight - gap) return caret.bottom - (viewportHeight - gap);
+  return 0;
+}

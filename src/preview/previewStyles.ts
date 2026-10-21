@@ -848,7 +848,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   opacity: 0.55;
 }
 
-/* Edition palette: the pill bar above an open block editor, first child of the editor frame. */
+/* Edition palette: the pill bar of an open block editor (placed on top of the frame, see below). */
 .sphinx-preview-edit-palette {
   position: relative;
   display: flex;
@@ -867,6 +867,37 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
   font-family: var(--vscode-font-family, system-ui, sans-serif);
   line-height: 1.2;
+}
+
+/*
+ * Edition palette: the pill bar on top of an open block editor, attached to the frame's top edge.
+ * The host holds the bar and the frame; the bar sticks to the top of the viewport (below the sticky
+ * band and, where it overlaps the bar, the floating toolbar) while a tall frame scrolls, and stays
+ * inside the host, so it leaves with the frame. The host takes the margins the bare frame had.
+ */
+.sphinx-preview-block-editor-host {
+  margin: 0;
+}
+
+.sphinx-preview-block-editor-host > .sphinx-preview-edit-palette {
+  position: sticky;
+  inset-block-start: calc(max(var(--sphinx-preview-reading-offset, 0px), var(--sphinx-preview-toolbar-bottom, 0px)) + 4px);
+  z-index: 3;
+  margin: 0 0 3px;
+}
+
+/* Small panes, and a palette that would take over 40% of the viewport (set by the runtime), keep
+   the bar in the flow (relative: its popovers stay anchored to it): a stuck bar would cover the text. */
+@media (max-width: 480px), (max-height: 520px) {
+  .sphinx-preview-block-editor-host > .sphinx-preview-edit-palette {
+    position: relative;
+    inset-block-start: auto;
+  }
+}
+
+.sphinx-preview-block-editor-host[data-sphinx-palette-static="true"] > .sphinx-preview-edit-palette {
+  position: relative;
+  inset-block-start: auto;
 }
 
 .sphinx-preview-edit-palette > select.sphinx-preview-edit-palette-mode {
@@ -2156,6 +2187,15 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   margin: 0 0 1em;
 }
 
+#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host {
+  margin: 0 0 1em;
+}
+
+/* The host carries the spacing (and the first-element clearance) of the frame it wraps. */
+#sphinx-myst-preview-content .sphinx-preview-block-editor-host > .sphinx-preview-block-editor {
+  margin: 0;
+}
+
 /*
  * An open first-block editor, the Start writing button and a leading properties table (it has
  * clickable controls) add the runtime's clearance, measured
@@ -2164,6 +2204,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 #sphinx-myst-preview-content > [data-okf-properties]:first-child,
 #sphinx-myst-preview-content .sphinx-preview-block-editor--first,
 #sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first,
 #sphinx-myst-preview-content .sphinx-preview-insert-point--first {
   margin-top: calc(40px + var(--sphinx-preview-first-clearance, 0px));
 }

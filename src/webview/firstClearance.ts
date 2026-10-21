@@ -7,6 +7,10 @@
  * rows) can reach lower than that, so an open first-block editor needs extra room, but only when
  * the toolbar and the content column share horizontal space. The runtime publishes that extra room
  * as `--sphinx-preview-first-clearance` on the root element: 0 whenever nothing overlaps.
+ *
+ * The same overlap test publishes `--sphinx-preview-toolbar-bottom`: the toolbar's bottom edge in
+ * viewport coordinates (plus a small margin) while it shares horizontal space with the column, 0
+ * otherwise. The edition palette sticks below it.
  */
 export function installFirstClearance(
   document: Document,
@@ -18,23 +22,37 @@ export function installFirstClearance(
   const margin = 8;
   let current = -1;
 
-  const measure = (): number => {
+  const bottomProperty = "--sphinx-preview-toolbar-bottom";
+  let currentBottom = -1;
+
+  // The toolbar's bottom edge (viewport coordinates, margin included) and the extra room below the
+  // 40px gap, both 0 when the toolbar and the column share no horizontal space.
+  const measure = (): { clearance: number; bottom: number } => {
+    const none = { clearance: 0, bottom: 0 };
     const content = document.getElementById(contentId);
     const toolbar = document.querySelector("[data-sphinx-preview-toolbar]");
-    if (!content || !toolbar) return 0;
+    if (!content || !toolbar) return none;
     const column = content.getBoundingClientRect();
     const bar = toolbar.getBoundingClientRect();
-    if (!bar.width || !bar.height) return 0;
+    if (!bar.width || !bar.height) return none;
     const style = window.getComputedStyle(content);
     const left = column.left + (parseFloat(style.paddingLeft) || 0);
     const right = column.right - (parseFloat(style.paddingRight) || 0);
-    if (!(bar.left < right && bar.right > left)) return 0;
+    if (!(bar.left < right && bar.right > left)) return none;
     const contentTop = column.top + window.scrollY;
-    return Math.max(0, Math.ceil(bar.bottom + margin - contentTop - gap));
+    return {
+      clearance: Math.max(0, Math.ceil(bar.bottom + margin - contentTop - gap)),
+      bottom: Math.max(0, Math.ceil(bar.bottom + margin)),
+    };
   };
 
   const update = (): void => {
-    const next = measure();
+    const measured = measure();
+    if (measured.bottom !== currentBottom) {
+      currentBottom = measured.bottom;
+      document.documentElement.style.setProperty(bottomProperty, measured.bottom + "px");
+    }
+    const next = measured.clearance;
     if (next === current) return;
     current = next;
     document.documentElement.style.setProperty(property, next + "px");
