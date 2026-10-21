@@ -36,6 +36,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Palette mode**: Strict / GFM / MyST button set of the edition palette, per workspace (`PALETTE_MODE_STORAGE_KEY` in `src/extension.ts`, select in `src/webview/editPalette.ts`).
 - **Preview panel**: the webview panel that shows the rendered preview.
 - **Properties table**: rendered frontmatter table at the top of a document (`[data-okf-properties]`).
+- **Re-anchoring**: moving a thread's stored lines to follow its quoted text (`src/comments/anchoring.ts`).
 - **Reading offset**: strip at the top of the viewport reserved for the sticky heading band (`refreshReadingOffset`, `docs/scroll-anchoring.md`).
 - **Runtime**: the page script injected into the preview, built by `createScrollSyncScript` (`src/webview/scrollSync.ts`).
 - **Runtime context**: the settings and ids the host passes to the runtime (`PreviewRuntimeContext`).

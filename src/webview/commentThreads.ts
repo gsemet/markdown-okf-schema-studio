@@ -11,6 +11,12 @@ export interface PageCommentThread {
   resolved: boolean;
   createdAt: string;
   comments: PageCommentEntry[];
+  /**
+   * T45: the host's verdict after re-anchoring. `true`: list in the Orphaned box without looking at
+   * the page; `false`: the host placed the thread, so its lines are trusted and the page does not
+   * search the quote elsewhere; absent: the page decides alone (T44 rules).
+   */
+  orphaned?: boolean;
 }
 
 /**
@@ -42,6 +48,11 @@ export interface PageCommentThread {
  * block) is listed in an "Orphaned comments" box that this module creates after the content
  * element, never inside it, and re-creates on every `apply()`. Each entry opens the same popover.
  * The page never writes anything for an orphan: the thread stays in the file untouched.
+ *
+ * T45: the host re-anchors threads against the document text and posts `orphaned` with each
+ * thread. `orphaned: true` goes straight to the box; `orphaned: false` trusts the posted lines
+ * (the page never searches the quote elsewhere for such a thread). Threads without the field
+ * (older hosts, tests) keep the T44 placement rules.
  */
 export function installCommentThreads(
   document: Document,
@@ -127,6 +138,7 @@ export function installCommentThreads(
         resolved: raw.resolved === true,
         createdAt: text(raw.createdAt),
         comments,
+        ...(typeof raw.orphaned === "boolean" ? { orphaned: raw.orphaned } : {}),
       });
     }
     return result;
@@ -322,6 +334,8 @@ export function installCommentThreads(
     const quote = thread.anchor.quote;
     if (quote === "") return false;
     const block = blockFor(thread.anchor.line);
+    // The host re-anchored this thread and found no block to trust: do not guess a place here.
+    if (!block && thread.orphaned === false) return false;
     // No block at the line (the text moved): look for the quote in every eligible block, in order.
     const blocks: Element[] = block ? [block] : [];
     if (!block) {
@@ -464,7 +478,7 @@ export function installCommentThreads(
     if (threads.length === 0) return;
     const orphans: PageCommentThread[] = [];
     for (const thread of threads) {
-      if (!attach(thread) && !badge(thread)) orphans.push(thread);
+      if (thread.orphaned === true || (!attach(thread) && !badge(thread))) orphans.push(thread);
     }
     renderOrphans(orphans);
     if (reopen !== undefined) {

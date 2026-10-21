@@ -709,3 +709,34 @@ test("T44: orphans are never reported to the host as changes (the page only disp
   comments.apply();
   assert.deepEqual(calls, []);
 });
+
+// ---- T45: the page trusts the host's re-anchoring verdict ----
+
+test("T45: orphaned true goes to the box even when the quote is on the page", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([{ ...thread(), orphaned: true }]);
+  assert.equal(marks(document).length, 0);
+  assert.equal(badges(document).length, 0);
+  assert.deepEqual(orphanItems(document).map((item) => item.getAttribute("data-okf-comment-orphan")), ["t1"]);
+});
+
+test("T45: orphaned false trusts the host lines and does not search the quote elsewhere", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "1" }, document.content, "a long unique needle phrase here");
+  const moved = { anchor: { line: 40, endLine: 40, quote: "long unique needle phrase", prefix: "", suffix: "" } };
+  comments.setThreads([{ ...thread(moved), orphaned: false }]);
+  assert.equal(marks(document).length, 0, "no placement by the page quote search");
+  assert.equal(orphanItems(document).length, 1);
+  // Without the verdict the T44 fallback still places a long unique quote.
+  comments.setThreads([thread(moved)]);
+  assert.equal(marks(document).length, 1);
+});
+
+test("T45: orphaned false with a block at the line places the thread as before", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([{ ...thread(), orphaned: false }]);
+  assert.equal(marks(document).length, 1);
+  assert.equal(orphanItems(document).length, 0);
+});

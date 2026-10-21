@@ -38,11 +38,22 @@ export function newId(prefix: "t_" | "c_"): string {
 }
 
 export function createCommentStore(io: CommentFileIo): {
-  update(path: string, documentName: string, change: CommentChange): Promise<CommentUpdateResult>;
+  /** `renameDocument` stores `documentName` in the file even when the file already names another. */
+  update(
+    path: string,
+    documentName: string,
+    change: CommentChange,
+    options?: { renameDocument?: boolean },
+  ): Promise<CommentUpdateResult>;
 } {
   const queues = new Map<string, Promise<unknown>>();
 
-  const step = async (path: string, documentName: string, change: CommentChange): Promise<CommentUpdateResult> => {
+  const step = async (
+    path: string,
+    documentName: string,
+    change: CommentChange,
+    renameDocument: boolean,
+  ): Promise<CommentUpdateResult> => {
     try {
       const existing = await io.read(path);
       let threads: CommentThread[] = [];
@@ -53,7 +64,7 @@ export function createCommentStore(io: CommentFileIo): {
           return { ok: false, reason: `the comments file is not valid (${parsed.errors[0]}) and is left untouched` };
         }
         threads = parsed.threads;
-        document = parsed.document;
+        if (!renameDocument) document = parsed.document;
       }
       const next = change(threads);
       if (typeof next === "string") return { ok: false, reason: next };
@@ -69,8 +80,9 @@ export function createCommentStore(io: CommentFileIo): {
   };
 
   return {
-    update(path, documentName, change) {
-      const run = (queues.get(path) ?? Promise.resolve()).then(() => step(path, documentName, change));
+    update(path, documentName, change, options) {
+      const run = (queues.get(path) ?? Promise.resolve())
+        .then(() => step(path, documentName, change, options?.renameDocument === true));
       const tail = run.then(() => undefined);
       queues.set(path, tail);
       void tail.then(() => {

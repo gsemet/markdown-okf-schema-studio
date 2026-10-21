@@ -216,9 +216,12 @@ async function scenarioReviewComments(page: Page, evidence: Evidence): Promise<v
       await waitForRender(document);
       await setEditMode(page, true);
       const paragraph = "p:has-text('The second paragraph')";
-      await waitFor("the highlight and the badge", () => withCurrentFrame(page, async (frame) =>
+      // T45: the quote of t2 is nowhere in the document, so the host orphans it (D25) instead of
+      // leaving a badge on whatever block sits at its old line.
+      await waitFor("the highlight and the orphaned entry", () => withCurrentFrame(page, async (frame) =>
         await frame.locator("mark[data-okf-comment-thread]").count() === 1
-        && await frame.locator("button[data-okf-comment-badge]").count() === 1));
+        && await frame.locator("button[data-okf-comment-badge]").count() === 0
+        && await frame.locator("[data-okf-comment-orphan]").count() === 1));
       await withCurrentFrame(page, async (frame) => {
         assert.equal(await frame.locator(paragraph).first().evaluate((element) => element.textContent),
           "The second paragraph has needle text here.", "the highlight adds no text");
