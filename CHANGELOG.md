@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The palette mode select now reads "MyST" instead of "MyST (includes GFM)" (the setting values
+  are unchanged).
 - Review comments follow the text: when you edit the document, threads move with their lines, and
   a moved or reloaded document looks for each quote again (nearby first, then everywhere; only a
   clear match counts, otherwise the thread is listed as orphaned and stays in the file). Moved
@@ -115,7 +117,7 @@
   Emoji opens a picker with about 150 emoji in six categories and a filter on English names; it
   inserts the character at the caret (Shift+click keeps the picker open). Both close with Escape.
 - A select at the start of the edition palette chooses its buttons: Strict Markdown, GitHub (GFM)
-  or MyST (includes GFM). The choice is remembered per workspace and the new setting
+  or MyST. The choice is remembered per workspace and the new setting
   `editing.defaultPaletteMode` (default MyST) gives the starting mode; rendering is unchanged.
 - The block editor gets a Link button and Cmd/Ctrl+K. A small panel with Text and URL fields opens
   under the palette, prefilled from the selection (a selected URL fills the URL, a selected link is

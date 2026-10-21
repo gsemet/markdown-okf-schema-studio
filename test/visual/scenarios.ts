@@ -60,6 +60,12 @@ export interface Scenario {
    * open and a second PNG (-menu) keeps the heading list open.
    */
   editPalette?: boolean;
+  /**
+   * P6: the palette mode select is set to this mode in an open paragraph editor; the buttons are
+   * checked against the mode and the palette (-palette PNG) and the palette of an insertion
+   * point editor (-insert-point PNG) are captured.
+   */
+  paletteModeShot?: "strict" | "gfm" | "myst";
   /** Click the + after the final figure; the insertion message must carry the closing fence line. */
   insertAfterFigureChecks?: boolean;
   /** Last block of the fixture, the line the insertion must follow, and its selector. */
@@ -831,6 +837,84 @@ export const SCENARIOS: Scenario[] = [
       "Edit mode on, light theme, a paragraph in the middle of the chapter open in its editor: the "
       + "edition palette (heading, bold, italic, strikethrough, link, code, quote, rule, table, emoji, TODO) sits above the "
       + "text box, the clicked text keeps its screen position, and the -menu PNG shows the heading list.",
+  },
+  {
+    id: "palette-mode-strict-light",
+    fixture: "05-long-chapter",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    paletteModeShot: "strict",
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Palette mode Strict, light theme: plain Markdown buttons only. The -palette PNG is the bar above a paragraph editor, the "
+      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+  },
+  {
+    id: "palette-mode-strict-dark",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    paletteModeShot: "strict",
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Palette mode Strict, dark theme: plain Markdown buttons only. The -palette PNG is the bar above a paragraph editor, the "
+      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+  },
+  {
+    id: "palette-mode-gfm-light",
+    fixture: "05-long-chapter",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    paletteModeShot: "gfm",
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Palette mode GFM, light theme: strict plus the GitHub buttons. The -palette PNG is the bar above a paragraph editor, the "
+      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+  },
+  {
+    id: "palette-mode-gfm-dark",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    paletteModeShot: "gfm",
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Palette mode GFM, dark theme: strict plus the GitHub buttons. The -palette PNG is the bar above a paragraph editor, the "
+      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+  },
+  {
+    id: "palette-mode-myst-light",
+    fixture: "05-long-chapter",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    paletteModeShot: "myst",
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Palette mode MyST, light theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The -palette PNG is the bar above a paragraph editor, the "
+      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+  },
+  {
+    id: "palette-mode-myst-dark",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    paletteModeShot: "myst",
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Palette mode MyST, dark theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The -palette PNG is the bar above a paragraph editor, the "
+      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
   },
   {
     id: "edit-palette-dark",

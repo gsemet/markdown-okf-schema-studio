@@ -197,7 +197,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   const MODE_LABELS: Array<[EditActionMode, string]> = [
     ["strict", "Strict Markdown"],
     ["gfm", "GitHub (GFM)"],
-    ["myst", "MyST (includes GFM)"],
+    ["myst", "MyST"],
   ];
   for (const [value, label] of MODE_LABELS) {
     const option = document.createElement("option");
