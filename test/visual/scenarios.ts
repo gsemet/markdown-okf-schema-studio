@@ -92,6 +92,8 @@ export interface Scenario {
   widthModeShot?: "auto";
   /** Opens the TOC column and measures it against the toolbar, the content, the width modes and zoom. */
   tocChecks?: boolean;
+  /** P1: leaves the TOC open (opened with the toolbar button) in this width mode for the screenshot. */
+  tocShot?: "margin" | "auto" | "full";
   /** Opens and closes the comment chips, keeps the reading line, and turns the gray chips off and on. */
   commentChipChecks?: boolean;
   /** Figure width and alignment, and the anchor icon of a (label)= target (T27). */
@@ -1624,17 +1626,24 @@ export const SCENARIOS: Scenario[] = [
     ["light", WIDE],
     ["dark", XLARGE],
     ["light", NARROW],
-  ] as const).map(([theme, viewport]) => ({
-    id: `toc-column-${theme}-${viewport.width}`,
+    ["dark", NARROW],
+  ] as const).flatMap(([theme, viewport]) => (viewport.width >= 760
+    ? (["margin", "auto", "full"] as const)
+    : (["margin"] as const)).map((mode) => ({
+    id: `toc-column-${theme}-${viewport.width}${mode === "margin" ? "" : `-${mode}`}`,
     fixture: "30-toc",
     theme,
     ...viewport,
     scroll: { kind: "top" as const },
     tocChecks: true,
+    tocShot: mode,
     description: "The TOC button opens a column of h1-h4 headings right of the content and below the "
-      + "toolbar. It never overlaps the content or the table, Auto and Full width respect it, zoom "
-      + "200 % keeps it usable, a click scrolls to the heading, and a pane under 760 px hides it.",
-  })),
+      + "toolbar. It never overlaps the content, the table or the floating toolbar, Auto and Full "
+      + "width respect it, zoom 200 % keeps it usable, a click scrolls to the heading, and a pane "
+      + "under 760 px hides it (the button then only records the preference). The screenshot is "
+      + `taken with the column open in ${mode === "margin" ? "Margin" : mode === "auto" ? "Auto" : "Full width"} mode`
+      + " (narrow panes: column hidden by design).",
+  }))),
   ...([
     ["light", undefined],
     ["dark", undefined],
