@@ -96,7 +96,11 @@ export interface Scenario {
   commentChipChecks?: boolean;
   /** Figure width and alignment, and the anchor icon of a (label)= target (T27). */
   figureAnchorChecks?: boolean;
-  firstElementGap?: "element" | "empty" | "wide-margin" | "properties";
+  firstElementGap?: "element" | "table" | "empty" | "wide-margin" | "properties";
+  /** P3: "read" measures the preview only (default "edit": preview, edit mode, first editor open). */
+  firstElementGapState?: "read" | "edit";
+  /** P3: Width button state measured (default margin). */
+  firstElementGapWidth?: "margin" | "auto" | "full";
   /** Hovering the first code block shows the copy button in its top right; a click posts the code. */
   codeCopyChecks?: boolean;
   expectStickyGrowth?: boolean;
@@ -108,6 +112,92 @@ export interface Scenario {
 const WIDE = { width: 900, height: 1000 };
 const NARROW = { width: 460, height: 900 };
 const XLARGE = { width: 1600, height: 1100 };
+
+const NARROW360 = { width: 360, height: 800 };
+
+/**
+ * P3: the same 40 px gap above the first element in every case. One scenario per case, state and
+ * pane width; each writes its measurements to out/reports/visual/first-gap/<id>.json.
+ */
+const FIRST_GAP_CASES = [
+  ["paragraph", "23-first-paragraph", "element"],
+  ["h1", "17-wrapped-editing", "element"],
+  ["h2", "24-first-h2", "element"],
+  ["h3", "25-first-h3", "element"],
+  ["table", "26-first-table", "table"],
+  ["image", "27-first-image", "element"],
+  ["admonition", "28-first-admonition", "element"],
+  ["properties", "07-frontmatter", "properties"],
+  ["properties-docs", "08-okf-schema", "properties"],
+  ["properties-issues", "09-okf-schema-missing-required", "properties"],
+  ["empty", "20-empty-document", "empty"],
+] as const;
+
+const FIRST_GAP_SCENARIOS: Scenario[] = [
+  // Edit mode (first block editor open, Start writing) in the three pane widths.
+  // (h3 at 460 px renders exactly like h2: the harness rejects identical screenshots.)
+  ...FIRST_GAP_CASES.flatMap(([name, fixture, kind]) => [WIDE, NARROW, XLARGE]
+    .filter((viewport) => !(name === "h3" && viewport.width === NARROW.width)).map((viewport) => ({
+    id: `first-element-gap-${name}-${viewport.width}`,
+    fixture,
+    theme: (name === "empty" ? "dark" : "light") as "light" | "dark",
+    ...viewport,
+    scroll: { kind: "top" as const },
+    firstElementGap: (viewport.width === 1600 && kind === "element" ? "wide-margin" : kind) as Scenario["firstElementGap"],
+    description: `First element: ${name}, edit mode, ${viewport.width}px pane. It starts 40 px below the top `
+      + "(preview, edit mode and the open first-block editor with its palette); only a pane of 460 px or "
+      + "less may push an interactive element below the toolbar.",
+  }))),
+  // Read mode, 900 px.
+  // (The 07 and 09 read-mode screenshots already exist as frontmatter-light and okf-schema-missing-required-light.)
+  ...FIRST_GAP_CASES.filter(([name, , kind]) => kind !== "empty" && !["properties", "properties-issues"].includes(name)).map(([name, fixture, kind]) => ({
+    id: `first-element-gap-${name}-read-900`,
+    fixture,
+    theme: "light" as const,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    firstElementGap: kind as Scenario["firstElementGap"],
+    firstElementGapState: "read" as const,
+    description: `Read mode, first element: ${name}. It starts exactly 40 px below the top.`,
+  })),
+  // A 360 px pane.
+  ...FIRST_GAP_CASES.filter(([name]) => ["paragraph", "h1", "table", "properties", "empty"].includes(name))
+    .map(([name, fixture, kind]) => ({
+      id: `first-element-gap-${name}-360`,
+      fixture,
+      theme: (name === "empty" ? "dark" : "light") as "light" | "dark",
+      ...NARROW360,
+      scroll: { kind: "top" as const },
+      firstElementGap: kind as Scenario["firstElementGap"],
+      description: `First element: ${name}, edit mode, 360 px pane.`,
+    })),
+  // Auto and Full width modes at 900 px.
+  ...(["auto", "full"] as const).flatMap((widthMode) => FIRST_GAP_CASES
+    .filter(([name]) => ["paragraph", "properties", "empty"].includes(name))
+    .map(([name, fixture, kind]) => ({
+      id: `first-element-gap-${name}-${widthMode}-900`,
+      fixture,
+      theme: (name === "empty" ? "dark" : "light") as "light" | "dark",
+      ...WIDE,
+      scroll: { kind: "top" as const },
+      firstElementGap: kind as Scenario["firstElementGap"],
+      firstElementGapWidth: widthMode,
+      description: `First element: ${name}, ${widthMode} width mode, 900 px pane: the same 40 px gap.`,
+    }))),
+  // Dark theme.
+  ...(["paragraph", "properties", "table"] as const).map((name) => {
+    const [, fixture, kind] = FIRST_GAP_CASES.find(([candidate]) => candidate === name)!;
+    return {
+      id: `first-element-gap-${name}-dark-900`,
+      fixture,
+      theme: "dark" as const,
+      ...WIDE,
+      scroll: { kind: "top" as const },
+      firstElementGap: kind as Scenario["firstElementGap"],
+      description: `First element: ${name}, dark theme, edit mode, 900 px pane: the same 40 px gap.`,
+    };
+  }),
+];
 
 export const SCENARIOS: Scenario[] = [
   {
@@ -1501,35 +1591,7 @@ export const SCENARIOS: Scenario[] = [
       + "(the table scrolls or widens instead), while the long REGIONAL_ARBITER identifier in the "
       + "paragraph wraps without causing horizontal page overflow.",
   },
-  ...([
-    ["paragraph", "23-first-paragraph"],
-    ["h1", "17-wrapped-editing"],
-    ["h2", "24-first-h2"],
-    ["h3", "25-first-h3"],
-    ["table", "26-first-table"],
-    ["image", "27-first-image"],
-    ["admonition", "28-first-admonition"],
-  ] as const).flatMap(([name, fixture]) => [WIDE, NARROW].map((viewport) => ({
-    id: `first-element-gap-${name}-${viewport.width}`,
-    fixture,
-    theme: "light",
-    ...viewport,
-    scroll: { kind: "top" as const },
-    firstElementGap: "element" as const,
-    description: `The first element is a ${name}: it starts 40 px below the top of the preview, `
-      + "in the preview and in edit mode; an open first-block editor stays clear of the toolbar.",
-  }))),
-  ...[WIDE, NARROW, XLARGE].map((viewport) => ({
-    id: `first-element-gap-properties-${viewport.width}`,
-    fixture: "07-frontmatter",
-    theme: "light",
-    ...viewport,
-    scroll: { kind: "top" as const },
-    firstElementGap: "properties" as const,
-    description: "The properties table comes first and has clickable controls: it starts 40 px below "
-      + "the top, or lower only so that its header and Description toggle never sit under the "
-      + "toolbar (preview and edit mode).",
-  })),
+  ...FIRST_GAP_SCENARIOS,
   ...([
     ["light", undefined],
     ["dark", undefined],
@@ -1609,26 +1671,6 @@ export const SCENARIOS: Scenario[] = [
       + "the labelled paragraph, heading, list or code block (tooltip 'Anchor: name'); a reference "
       + "to a label scrolls to it.",
   })),
-  ...[WIDE, NARROW].map((viewport) => ({
-    id: `first-element-gap-empty-${viewport.width}`,
-    fixture: "20-empty-document",
-    theme: "dark",
-    ...viewport,
-    scroll: { kind: "top" as const },
-    firstElementGap: "empty" as const,
-    description: "An empty document: in edit mode the Start writing button starts 40 px below the "
-      + "top, or lower only to stay clear of the toolbar.",
-  })),
-  {
-    id: "first-element-gap-wide-margin-1600",
-    fixture: "23-first-paragraph",
-    theme: "light",
-    ...XLARGE,
-    scroll: { kind: "top" },
-    firstElementGap: "wide-margin",
-    description: "A wide pane with the column far from the toolbar: the clearance is 0 and the "
-      + "first-block editor frame starts exactly 40 px below the top.",
-  },
   ...["white", "dark"].flatMap((mode) => [WIDE, NARROW].map((viewport) => ({
     id: `frontmatter-link-details-${mode}-${viewport.width}`,
     fixture: "14-frontmatter-links",

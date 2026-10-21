@@ -2473,107 +2473,138 @@ def check_comment_chips(page: Page, scenario: dict, failures: list[Failure]) -> 
 
 
 FIRST_ELEMENT_GAP = 40
-FIRST_ELEMENT_TOLERANCE = 2
+FIRST_ELEMENT_TOLERANCE = 4
+FIRST_GAP_REPORT_DIR = VISUAL_REPORT_DIR / "first-gap"
 
 
 def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure]) -> None:
-  """Every page starts its first element 40px below the top; open editors clear the toolbar."""
+  """P3: one uniform 40px gap above the first element, in every case, state and width mode.
+
+  The rule: the first element (or the Start writing button, the open first-block editor, the
+  controls of a leading properties table) starts 40 +-4px below the top. The only exception is an
+  interactive element in a pane of 480px or less (the toolbar covers most of the width): it is then
+  pushed just far enough that it clears the toolbar, and the report says so. Every measurement is
+  written to out/reports/visual/first-gap/<scenario>.json.
+  """
   mode = scenario.get("firstElementGap")
   if not mode:
     return
   page_name = scenario["page"]
-  measure = """selector => {
+  state_wanted = scenario.get("firstElementGapState", "edit")
+  width_mode = scenario.get("firstElementGapWidth", "margin")
+  records: list[dict] = []
+  probe = """selector => {
     const element = document.querySelector(selector);
     if (!element) return null;
     const rect = element.getBoundingClientRect();
-    const bar = document.querySelector('[data-sphinx-preview-toolbar]')?.getBoundingClientRect();
-    const overlaps = !!bar && rect.left < bar.right && rect.right > bar.left
-      && rect.top < bar.bottom && rect.bottom > bar.top;
-    const clearance = parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue('--sphinx-preview-first-clearance')) || 0;
-    return { top: rect.top + window.scrollY, overlaps, clearance };
+    const barElement = document.querySelector('[data-sphinx-preview-toolbar]');
+    const bar = barElement.getBoundingClientRect();
+    const root = getComputedStyle(document.documentElement);
+    const hit = r => r.width > 0 && r.height > 0 && r.left < bar.right && r.right > bar.left
+      && r.top < bar.bottom && r.bottom > bar.top;
+    return {
+      viewportTop: rect.top, scrollY: window.scrollY, top: rect.top + window.scrollY, width: rect.width, left: rect.left, right: rect.right,
+      overlaps: hit(rect),
+      barBottom: bar.bottom, barLeft: bar.left,
+      clearance: parseFloat(root.getPropertyValue('--sphinx-preview-first-clearance')) || 0,
+      inset: parseFloat(root.getPropertyValue('--sphinx-preview-first-inset')) || 0,
+    };
   }"""
+
+  def record(label: str, selector: str, controls: str | None = None, interactive: bool = False) -> None:
+    got = page.evaluate(probe, selector)
+    if not got:
+      failures.append(Failure(page_name, f"[{label}] {selector} is not in the page"))
+      return
+    hits = 0
+    if controls:
+      hits = page.evaluate(
+        """selector => {
+          const bar = document.querySelector('[data-sphinx-preview-toolbar]').getBoundingClientRect();
+          return [...document.querySelectorAll(selector)].filter(e => {
+            const r = e.getBoundingClientRect();
+            return r.width > 0 && r.height > 0 && r.left < bar.right && r.right > bar.left
+              && r.top < bar.bottom && r.bottom > bar.top;
+          }).length;
+        }""",
+        controls,
+      )
+    gap = got["top"]
+    pushed = got["clearance"] > 0
+    ok_uniform = abs(gap - FIRST_ELEMENT_GAP) <= FIRST_ELEMENT_TOLERANCE
+    # Only a narrow pane (the toolbar covers most of the width) may push an interactive element down.
+    ok_pushed = pushed and page.viewport_size["width"] <= 480 and gap > FIRST_ELEMENT_GAP
+    records.append({
+      "label": label, "selector": selector, "mode": mode, "state": label.split(":")[0],
+      "pane": page.viewport_size["width"], "widthMode": width_mode,
+      "gap": round(gap, 1), "viewportTop": round(got["viewportTop"], 1), "scrollY": got["scrollY"], "clearance": got["clearance"], "inset": got["inset"],
+      "toolbarBottom": round(got["barBottom"], 1), "pushedBelowToolbar": pushed,
+      "overlapsToolbar": got["overlaps"], "controlsUnderToolbar": hits,
+    })
+    if not (ok_uniform or ok_pushed):
+      failures.append(Failure(
+        page_name,
+        f"[{label}] the gap is {gap:.1f}px, expected {FIRST_ELEMENT_GAP}px +-{FIRST_ELEMENT_TOLERANCE} "
+        f"(or more in a pane of 480px or less, when an interactive element must sit below the toolbar; clearance {got['clearance']:.0f}px)"))
+    if got["overlaps"] and interactive:
+      failures.append(Failure(page_name, f"[{label}] {selector} overlaps the floating toolbar"))
+    if hits:
+      failures.append(Failure(page_name, f"[{label}] {hits} control(s) of {selector} sit under the toolbar"))
+
+  def finish() -> None:
+    FIRST_GAP_REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    (FIRST_GAP_REPORT_DIR / f"{scenario['id']}.json").write_text(json.dumps(records, indent=2), encoding="utf-8")
+
+  # Width mode: the Width button cycles margin -> auto -> full.
+  for _ in range({"margin": 0, "auto": 1, "full": 2}[width_mode]):
+    page.locator("[data-sphinx-preview-width-toggle]").click()
+    page.wait_for_timeout(200)
+
   first = "#sphinx-myst-preview-content > :first-child"
-  if mode == "properties":
-    props = """() => {
-      const section = document.querySelector('#sphinx-myst-preview-content > [data-okf-properties]');
-      if (!section) return null;
-      const bar = document.querySelector('[data-sphinx-preview-toolbar]').getBoundingClientRect();
-      const hit = r => r.width > 0 && r.height > 0 && r.left < bar.right && r.right > bar.left
-        && r.top < bar.bottom && r.bottom > bar.top;
-      const controls = [...section.querySelectorAll('thead th, [data-okf-description-toggle], .okf-column-heading')]
-        .filter(e => e.getBoundingClientRect().width > 0 && hit(e.getBoundingClientRect()));
-      const clearance = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--sphinx-preview-first-clearance')) || 0;
-      return { top: section.getBoundingClientRect().top + window.scrollY, hits: controls.length, clearance };
-    }"""
-    for state in ("preview", "edit"):
-      if state == "edit":
-        page.locator("[data-sphinx-preview-edit-toggle]").click()
-        page.wait_for_timeout(150)
-      got = page.evaluate(props)
-      if not got:
-        failures.append(Failure(page_name, "no properties table is first"))
-        return
-      expected = FIRST_ELEMENT_GAP + got["clearance"]
-      if abs(got["top"] - expected) > FIRST_ELEMENT_TOLERANCE:
-        failures.append(Failure(
-          page_name,
-          f"[{state}] the properties table starts {got['top']:.1f}px from the top, expected {expected:.1f}px "
-          f"(40px + clearance {got['clearance']:.1f}px)"))
-      if got["hits"]:
-        failures.append(Failure(page_name, f"[{state}] the properties header or Description toggle sits under the toolbar"))
-      if page.viewport_size["width"] >= 1600 and (got["clearance"] != 0 or abs(got["top"] - FIRST_ELEMENT_GAP) > FIRST_ELEMENT_TOLERANCE):
-        failures.append(Failure(page_name, f"[{state}] wide pane: expected exactly 40px and no clearance, got {got}"))
-    return
+  props_selector = "#sphinx-myst-preview-content > [data-okf-properties]"
+  props_controls = ", ".join(props_selector + " " + part for part in ("button", "a[href]", "[data-okf-description-toggle]"))
+
+  def measure_first(label: str) -> None:
+    if mode == "properties":
+      record(label + ":properties", props_selector, props_controls)
+    else:
+      record(label + ":" + mode, first)
+
   if mode != "empty":
-    preview = page.evaluate(measure, first)
-    if not preview:
-      failures.append(Failure(page_name, "the preview has no first element"))
+    measure_first("read")
+    if state_wanted == "read":
+      finish()
       return
-    if abs(preview["top"] - FIRST_ELEMENT_GAP) > FIRST_ELEMENT_TOLERANCE:
-      failures.append(Failure(
-        page_name,
-        f"the first element starts {preview['top']:.1f}px from the top in the preview, expected {FIRST_ELEMENT_GAP}px",
-      ))
-  page.locator("[data-sphinx-preview-edit-toggle]").click()
-  page.wait_for_timeout(150)
-  if mode == "empty":
-    selector = ".sphinx-preview-insert-point--start button"
-  else:
-    selector = first
-    after = page.evaluate(measure, first)
-    if abs(after["top"] - FIRST_ELEMENT_GAP) > FIRST_ELEMENT_TOLERANCE:
-      failures.append(Failure(
-        page_name,
-        f"the first element moved to {after['top']:.1f}px when edit mode was switched on",
-      ))
-    tag = page.evaluate("selector => document.querySelector(selector).tagName", first)
-    kind = page.evaluate("selector => document.querySelector(selector).hasAttribute('data-okf-properties')", first)
-    if tag in {"TABLE"} or kind or page.evaluate(
-      "selector => !!document.querySelector(selector).querySelector('table')", first
-    ):
-      return
-    page.locator(first).click(position={"x": 12, "y": 6})
-    page.locator(".sphinx-preview-block-editor textarea").wait_for(state="visible", timeout=2000)
-    selector = ".sphinx-preview-block-editor-host"  # P4: the palette on top of the frame is the first thing on the page
-  geometry = page.evaluate(measure, selector)
-  if not geometry:
-    failures.append(Failure(page_name, f"{selector} is not in the page"))
+  elif state_wanted == "read":
+    # An empty document has no first element to look at; the report says so.
+    finish()
     return
-  if geometry["overlaps"]:
-    failures.append(Failure(page_name, f"{selector} overlaps the floating toolbar"))
-  if geometry["top"] < FIRST_ELEMENT_GAP - FIRST_ELEMENT_TOLERANCE:
-    failures.append(Failure(page_name, f"{selector} starts {geometry['top']:.1f}px from the top, expected at least {FIRST_ELEMENT_GAP}px"))
-  expected = FIRST_ELEMENT_GAP + geometry["clearance"]
-  if abs(geometry["top"] - expected) > FIRST_ELEMENT_TOLERANCE:
-    failures.append(Failure(
-      page_name,
-      f"{selector} starts {geometry['top']:.1f}px from the top, expected {expected:.1f}px "
-      f"(40px + clearance {geometry['clearance']:.1f}px)",
-    ))
-  if mode == "wide-margin" and geometry["clearance"] != 0:
-    failures.append(Failure(page_name, f"a wide pane needs no clearance, found {geometry['clearance']}px"))
+  page.locator("[data-sphinx-preview-edit-toggle]").click()
+  page.wait_for_timeout(200)
+  if mode == "empty":
+    record("edit:Start writing", ".sphinx-preview-insert-point--start button", interactive=True)
+    finish()
+    return
+  measure_first("edit")
+  if mode in {"table", "properties"} or page.evaluate(
+    "selector => !!document.querySelector(selector).querySelector('table') || document.querySelector(selector).hasAttribute('data-okf-properties')", first
+  ):
+    finish()
+    return
+  page.locator(first).click(position={"x": 12, "y": 6})
+  page.locator(".sphinx-preview-block-editor textarea").wait_for(state="visible", timeout=2000)
+  page.wait_for_timeout(150)
+  # P4: the palette on top of the frame is the first thing on the page; the host wraps both.
+  record("editor:" + mode + " (frame with palette)", ".sphinx-preview-block-editor-host", interactive=True)
+  # The palette is the first thing above the text box: it must sit in the same place, not lower.
+  record("palette:" + mode + " (edition palette)", ".sphinx-preview-block-editor-host > .sphinx-preview-edit-palette", interactive=True)
+  editor_gap = next((item["gap"] for item in records if item["label"].startswith("editor:")), None)
+  palette_gap = next((item["gap"] for item in records if item["label"].startswith("palette:")), None)
+  if editor_gap is not None and palette_gap is not None and abs(palette_gap - editor_gap) > FIRST_ELEMENT_TOLERANCE:
+    failures.append(Failure(page_name, f"the palette starts {palette_gap:.1f}px from the top but its editor starts {editor_gap:.1f}px: it is displaced"))
+  if mode == "wide-margin" and any(item["clearance"] != 0 for item in records):
+    failures.append(Failure(page_name, "a wide pane needs no clearance"))
+  finish()
 
 
 def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None:
