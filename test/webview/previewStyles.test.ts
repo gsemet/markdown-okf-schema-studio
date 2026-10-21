@@ -787,6 +787,34 @@ test("T21: the edition palette is a wrapping pill bar with an in-frame popover a
   assert.match(menu, /overflow-y: auto;/u);
 });
 
+test("P4: the palette sits on top of the frame and sticks below the sticky band and the toolbar", () => {
+  const css = PREVIEW_THEME_CSS;
+  const bar = /\.sphinx-preview-block-editor-host > \.sphinx-preview-edit-palette\s*\{([^}]*)\}/u.exec(css)?.[1] ?? "";
+  assert.match(bar, /position: sticky;/u, "pure CSS sticky, no scroll handler");
+  assert.match(bar, /inset-block-start: calc\(max\(var\(--sphinx-preview-reading-offset, 0px\), var\(--sphinx-preview-toolbar-bottom, 0px\)\) \+ 4px\);/u);
+  assert.match(bar, /z-index: 3;/u, "above the frame (z-index 1), below the sticky band (999)");
+  assert.doesNotMatch(bar, /position: (?:fixed|absolute)/u);
+  // The host (palette + frame) bounds the sticky range, takes the spacing of the bare frame and
+  // leaves the frame without margins of its own.
+  assert.match(css, /\.sphinx-preview-block-editor-host \{\s*margin: 0;\s*\}/u);
+  assert.match(css,
+    /#sphinx-myst-preview-content p\[data-sphinx-preview-editing="true"\] \+ \.sphinx-preview-block-editor-host \{\s*margin: 0 0 1em;/u);
+  assert.match(css,
+    /#sphinx-myst-preview-content \.sphinx-preview-block-editor-host > \.sphinx-preview-block-editor \{\s*margin: 0;/u);
+  assert.match(css,
+    /p\[data-sphinx-preview-editing="true"\] \+ \.sphinx-preview-block-editor-host\.sphinx-preview-block-editor--first,/u,
+    "the first-element clearance moves to the host");
+  assert.doesNotMatch(css, /sphinx-preview-edit-palette[^{]*\{[^}]*style=/u);
+});
+
+test("P4: the palette stays in the flow in narrow or short panes and when the runtime says it is too tall", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css,
+    /@media \(max-width: 480px\), \(max-height: 520px\) \{\s*\.sphinx-preview-block-editor-host > \.sphinx-preview-edit-palette \{\s*position: relative;/u);
+  assert.match(css,
+    /\.sphinx-preview-block-editor-host\[data-sphinx-palette-static="true"\] > \.sphinx-preview-edit-palette \{\s*position: relative;/u);
+});
+
 test("T44: the Orphaned comments box sits in the content's bottom padding and adds no scroll height", () => {
   const padding = /#sphinx-myst-preview-content \{[^}]*padding: 0 var\(--sphinx-preview-content-gutter\) (min\(80vh[^;]*\));/u
     .exec(PREVIEW_THEME_CSS);

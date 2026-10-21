@@ -61,6 +61,13 @@ export interface Scenario {
    */
   editPalette?: boolean;
   /**
+   * P4: a paragraph editor filled with a very tall text (taller than the viewport). The palette sits
+   * on top of the edit box; scrolled so the box top is out of view it stays at the top of the
+   * viewport, below the sticky band and the floating toolbar, and it leaves with the box's end.
+   * PNGs: -top (box top visible), -end (box end visible), and the scenario PNG (scrolled mid-box).
+   */
+  editPaletteTall?: boolean;
+  /**
    * P6: the palette mode select is set to this mode in an open paragraph editor; the buttons are
    * checked against the mode and the palette (-palette PNG) and the palette of an insertion
    * point editor (-insert-point PNG) are captured.
@@ -835,8 +842,51 @@ export const SCENARIOS: Scenario[] = [
     machineChecks: ["overlay-clipped"],
     description:
       "Edit mode on, light theme, a paragraph in the middle of the chapter open in its editor: the "
-      + "edition palette (heading, bold, italic, strikethrough, link, code, quote, rule, table, emoji, TODO) sits above the "
-      + "text box, the clicked text keeps its screen position, and the -menu PNG shows the heading list.",
+      + "edition palette (heading, bold, italic, strikethrough, link, code, quote, rule, table, emoji, TODO) sits on top of "
+      + "the edit box, outside its border and attached to it, the clicked text keeps its screen "
+      + "position, and the -menu PNG shows the heading list.",
+  },
+  {
+    id: "edit-palette-tall-light",
+    fixture: "05-long-chapter",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    editPaletteTall: true,
+    description:
+      "Light theme, a paragraph editor filled with a very tall text and scrolled so the top of the "
+      + "edit box is out of view: the edition palette stays at the top of the viewport, below the "
+      + "sticky heading band and the floating toolbar. The -top PNG shows the palette on top of "
+      + "the box, the -end PNG the bottom of the box with its Done/Cancel row (the palette is still stuck at the top "
+      + "until the box end reaches it). Pressing ArrowUp on the first lines keeps the caret below the palette.",
+  },
+  {
+    id: "edit-palette-tall-dark",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    editPaletteTall: true,
+    description:
+      "Dark theme, the same very tall paragraph editor scrolled mid-box: the palette stays visible "
+      + "at the top of the viewport. -top and -end PNGs as in the light scenario (-end: box bottom with Done/Cancel, "
+      + "palette still stuck).",
+  },
+  {
+    id: "edit-palette-tall-narrow-360",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    width: 360,
+    height: 800,
+    scroll: { kind: "top" },
+    editMode: true,
+    editPaletteTall: true,
+    description:
+      "360 px preview, a very tall paragraph editor scrolled mid-box: the five-row palette is not "
+      + "sticky in a narrow pane (it would cover a third of the viewport), so the text is unobstructed. "
+      + "-top shows the palette on top of the box.",
   },
   {
     id: "palette-mode-strict-light",
@@ -950,8 +1000,8 @@ export const SCENARIOS: Scenario[] = [
     editPalette: true,
     machineChecks: ["overlay-clipped"],
     description:
-      "360 px preview: the palette wraps onto a second row inside the editor frame instead of "
-      + "overflowing it, and its heading list stays inside the frame.",
+      "360 px preview: the palette on top of the edit box wraps onto more rows instead of "
+      + "overflowing it, and its heading list stays inside the box's width.",
   },
   {
     id: "edit-insert-point-hover",

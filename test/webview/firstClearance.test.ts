@@ -47,3 +47,11 @@ test("the clearance measures the content top in document coordinates", () => {
   const { clearance } = setup(rect(-300, 0, 460, 2000), rect(12, 200, 250, 72), 300);
   assert.equal(clearance.value(), 52);
 });
+
+test("P4: the toolbar's bottom edge is published for the sticky palette only where it overlaps the column", () => {
+  const overlap = setup(rect(0, 0, 460, 2000), rect(12, 200, 250, 72));
+  // Toolbar bottom 84 + 8 margin.
+  assert.equal(overlap.published.get("--sphinx-preview-toolbar-bottom"), "92px");
+  const beside = setup(rect(0, 100, 600, 2000), rect(12, 800, 150, 72));
+  assert.equal(beside.published.get("--sphinx-preview-toolbar-bottom"), "0px");
+});

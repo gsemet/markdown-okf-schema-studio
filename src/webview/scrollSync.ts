@@ -7,7 +7,7 @@ import { createAnchorPolicy } from "./anchorPolicy";
 import { createMarkdownTableTools } from "./markdownTable";
 import { createEditActions } from "./editActions";
 import { createEditPalette } from "./editPalette";
-import { caretRectOf } from "./caretRect";
+import { caretRectOf, caretRevealDelta } from "./caretRect";
 import { createLinkPanel } from "./linkPanel";
 import { createFigureTools } from "./figureDirective";
 import { createFigurePanel, installFigureEditButton } from "./figurePanel";
@@ -93,6 +93,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())}, tableTools, isSafeOkfColor);
   const createEditPalette = ${createEditPalette.toString()};
   const caretRectOf = ${caretRectOf.toString()};
+  const caretRevealDelta = ${caretRevealDelta.toString()};
   const createLinkPanel = ${createLinkPanel.toString()};
   const figureTools = (${createFigureTools.toString()})();
   const createFigurePanel = ${createFigurePanel.toString()};
@@ -671,6 +672,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         const barHeight = editing.palette.element.getBoundingClientRect?.()?.height;
         if (barHeight !== editing.paletteHeight) {
           editing.paletteHeight = barHeight;
+          syncPaletteSticky(editing);
           revealTableToolbar(editing.palette.element, editing.textarea);
         }
       }
@@ -720,7 +722,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const table = edit.selectedCell?.closest?.("table");
     // The edition palette pushed the frame up (paletteShift) to keep the text still: the
     // element comes back where the frame stood before that.
-    return pinFields(line, table || edit.renderedTarget || edit.target, edit.element, edit.paletteShift ?? 0);
+    return pinFields(line, table || edit.renderedTarget || edit.target, edit.host ?? edit.element, edit.paletteShift ?? 0);
   }
 
   function pinEntryFor(line) {
@@ -1062,6 +1064,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       (edit.renderedTarget || edit.target).removeAttribute("data-sphinx-preview-editing");
     }
     edit.element.remove?.();
+    edit.host?.remove?.();
+    if (edit.host) document.documentElement?.style?.removeProperty?.("scroll-padding-top");
     // Opening scrolled the page down by paletteShift to keep the text still; the frame is gone
     // now, so scroll back and the rendered block stays where the user last saw the text.
     if (edit.paletteShift > 0 && !edit.selectedCell) {
@@ -3041,6 +3045,93 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // After a row (the palette, the link panel) was added above the text box, the page scrolls down
   // by the height it added so the text the user is editing stays where it was. Returns the shift
   // applied: none on a page at its very top, and never more than the room under the sticky band.
+  // The palette sits on top of the frame, attached to it, in a host that holds both: the host
+  // bounds the palette's sticky position, so it follows a tall frame and leaves with it.
+  function placePaletteAboveFrame(edit, paletteElement) {
+    if (!edit.host) {
+      const host = document.createElement("div");
+      host.className = "sphinx-preview-block-editor-host";
+      if (edit.element.className?.includes?.("sphinx-preview-block-editor--first")) {
+        host.className += " sphinx-preview-block-editor--first";
+      }
+      host.setAttribute("data-sphinx-preview-block-editor-host", "true");
+      // Like the frame, the palette's clicks never reach the page's block click handling.
+      host.addEventListener("click", (event) => event.stopPropagation?.());
+      edit.element.before(host);
+      host.appendChild(edit.element);
+      edit.host = host;
+    }
+    edit.host.insertBefore(paletteElement, edit.element);
+  }
+
+  // A tall box scrolls under the stuck palette: the palette stays sticky only while it is small
+  // next to the viewport (the CSS also drops it in narrow or short panes), and the page keeps
+  // the caret clear of it (scroll-padding for native scrolling, plus a nudge after caret moves).
+  function syncPaletteSticky(edit) {
+    const bar = edit.palette?.element?.getBoundingClientRect?.();
+    if (!edit.host || !bar || !Number.isFinite(bar.height)) return;
+    const small = bar.height <= window.innerHeight * 0.4;
+    const flowing = window.getComputedStyle?.(edit.palette.element)?.position !== "sticky";
+    if (small) edit.host.removeAttribute("data-sphinx-palette-static");
+    else edit.host.setAttribute("data-sphinx-palette-static", "true");
+    // Scroll padding only while the bar is stuck over the box: with the bar in its place above the
+    // box it would make the browser scroll the page for a caret that is not hidden.
+    const frameTop = edit.element.getBoundingClientRect?.()?.top;
+    const stuck = !flowing && Number.isFinite(frameTop) && bar.bottom > frameTop + 0.5;
+    const padding = small && stuck
+      ? "calc(max(var(--sphinx-preview-reading-offset, 0px), var(--sphinx-preview-toolbar-bottom, 0px)) + "
+        + Math.ceil(bar.height + 12) + "px)"
+      : "";
+    if (padding) document.documentElement?.style?.setProperty?.("scroll-padding-top", padding);
+    else document.documentElement?.style?.removeProperty?.("scroll-padding-top");
+  }
+
+  function revealCaretBelowPalette(edit, textarea) {
+    if (!edit.host || !edit.palette || edit.finishing || activeBlockEdit !== edit) return;
+    if (edit.host.getAttribute("data-sphinx-palette-static") === "true") return;
+    const bar = edit.palette.element.getBoundingClientRect?.();
+    const frame = edit.element.getBoundingClientRect?.();
+    const caret = caretRectOf(document, window, textarea);
+    if (!bar || !frame || !caret) return;
+    const delta = caretRevealDelta(caret, bar, frame, window.innerHeight);
+    if (!delta) return;
+    const target = Math.max(0, Math.min(maxScrollTop(), window.scrollY + delta));
+    programmaticScroll(target);
+    if (editAnchor?.element) {
+      const viewportTop = editAnchor.element.getBoundingClientRect().top;
+      if (Number.isFinite(viewportTop)) editAnchor.viewportTop = viewportTop;
+    }
+  }
+
+  // The editor frame and, in a block editor, the host that also holds the palette above it.
+  function frameContains(edit, node) {
+    if (!node) return false;
+    const root = edit.host ?? edit.element;
+    return node === root || node === edit.element || Boolean(root.contains?.(node))
+      || Boolean(edit.element.contains?.(node));
+  }
+
+  // Opening the palette adds its height above the frame, in the host. The frame is the scroll
+  // anchor, so the text would stay where it is and the content above scrolls up by that height
+  // (scroll shift). Not on a page scrolled to its top, and never so far that the bar would end
+  // under the sticky band or the preview controls: the frame then goes down by the difference.
+  // Returns the scroll shift, which a close scrolls back.
+  function keepTextInPlaceBelowPalette(edit, textTopBefore) {
+    const textTopAfter = edit.textarea.getBoundingClientRect?.().top;
+    const height = textTopAfter - textTopBefore;
+    if (!editAnchor?.element || !Number.isFinite(textTopBefore) || !Number.isFinite(textTopAfter) || !(height > 0)) {
+      return 0;
+    }
+    let shift = 0;
+    if (window.scrollY > 0) {
+      const bar = edit.palette.element.getBoundingClientRect?.();
+      const room = bar && Number.isFinite(bar.top) ? Math.max(0, bar.top - toolbarUsableTop(bar)) : 0;
+      shift = Math.min(height, room);
+    }
+    editAnchor.viewportTop += height - shift;
+    return shift;
+  }
+
   function keepTextInPlace(edit, textTopBefore) {
     const textTopAfter = edit.textarea.getBoundingClientRect?.().top;
     if (
@@ -3116,9 +3207,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       onLeave: () => {
         if (activeBlockEdit === edit) saveBlockEdit();
       },
-      isInsideFrame: (node) => Boolean(node)
-        && (node === edit.element || edit.element.contains(node)
-          || (inCell && Boolean(edit.tableMenu) && edit.tableMenu.contains(node))),
+      isInsideFrame: (node) => frameContains(edit, node)
+        || (inCell && Boolean(node) && Boolean(edit.tableMenu) && edit.tableMenu.contains(node)),
     });
     edit.linkPanel = panel;
     edit.closeLinkPanel = closePanel;
@@ -3214,7 +3304,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     // a focus that goes outside the frame (or nowhere) commits.
     textarea.addEventListener("blur", (event) => {
       const next = event && event.relatedTarget;
-      if (next && edit.element.contains(next)) return;
+      if (next && frameContains(edit, next)) return;
       // A native dialog of the host (the {doc} file picker) took the focus: not leaving.
       if (hostRequests.isDialogOpen()) return;
       saveBlockEdit();
@@ -3246,11 +3336,12 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     edit.textarea = textarea;
     edit.resizeTextarea = resizeTextarea;
     resizeTextarea();
-    // The edition palette is the frame's first child. The text line the user clicked stays where
-    // it was: the anchor keeps the frame, moved up by the height the bar adds above the text, but
-    // never so far that the bar would end under the sticky band or the preview controls, and not
-    // at all on a page scrolled to its very top.
+    // The edition palette sits on top of the frame, in a host holding both. The text line the user
+    // clicked stays where it was: the anchor keeps the frame and the content above scrolls up by
+    // the height the bar adds, but never so far that the bar would end under the sticky band or
+    // the preview controls, and not at all on a page scrolled to its very top.
     const textTopBefore = textarea.getBoundingClientRect?.().top;
+    edit.palette?.destroy();
     const palette = createEditPalette(document, {
       actions: editActions,
       getControl: () => textarea,
@@ -3271,7 +3362,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         && figureTools.locateFigure(String(textarea.value ?? ""), Number(textarea.selectionStart)) !== undefined,
       mode: paletteMode,
       modeShortcut: (isApplePlatform() ? "Cmd" : "Ctrl") + "+Shift+M",
-      isInsideFrame: (node) => Boolean(node) && (node === edit.element || edit.element.contains(node)),
+      isInsideFrame: (node) => frameContains(edit, node),
       requestList: (kind, done) => hostRequests.ask(
         kind === "targets" ? "previewListTargets" : "previewListCitations", {}, {},
         (result) => done(result.ok === true && Array.isArray(result.items)
@@ -3310,8 +3401,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       apple: isApplePlatform(),
     });
     edit.palette = palette;
-    edit.element.insertBefore(palette.element, edit.element.firstElementChild);
-    const shift = keepTextInPlace(edit, textTopBefore);
+    placePaletteAboveFrame(edit, palette.element);
+    syncPaletteSticky(edit);
+    const shift = keepTextInPlaceBelowPalette(edit, textTopBefore);
     if (shift > 0) edit.paletteShift = shift;
     applyAnchor();
     textarea.addEventListener("mousedown", () => {
@@ -3324,10 +3416,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       edit.closeLinkPanel?.(false);
       edit.closeFigurePanel?.(false);
       palette.updateAvailability();
+      revealCaretBelowPalette(edit, textarea);
     });
     // The colour-code swatch follows the caret: arrows and selections end in a key or mouse release.
     for (const kind of ["keyup", "mouseup", "select"]) {
-      textarea.addEventListener(kind, () => palette.updateAvailability());
+      textarea.addEventListener(kind, () => {
+        palette.updateAvailability();
+        revealCaretBelowPalette(edit, textarea);
+      });
     }
     textarea.addEventListener("keydown", (event) => {
       if (palette.handleKey(event)) return;
@@ -3497,7 +3593,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         if (hostRequests.isDialogOpen()) return;
         if (activeBlockEdit === edit) saveBlockEdit();
       },
-      isInsideFrame: (node) => Boolean(node) && (node === edit.element || edit.element.contains(node)),
+      isInsideFrame: (node) => frameContains(edit, node),
     });
     edit.figurePanel = panel;
     edit.closeFigurePanel = closePanel;
@@ -4318,6 +4414,12 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   window.addEventListener("scroll", () => closeLinkTooltip(), true);
   window.addEventListener("resize", () => closeLinkTooltip());
   window.visualViewport?.addEventListener("resize", () => closeLinkTooltip());
+  window.addEventListener("resize", () => {
+    if (activeBlockEdit?.host) syncPaletteSticky(activeBlockEdit);
+  });
+  window.addEventListener("scroll", () => {
+    if (activeBlockEdit?.host) syncPaletteSticky(activeBlockEdit);
+  }, { passive: true });
   window.addEventListener("pagehide", () => closeLinkTooltip());
   window.addEventListener("beforeunload", () => closeLinkTooltip());
 

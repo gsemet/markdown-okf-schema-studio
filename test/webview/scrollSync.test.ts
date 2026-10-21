@@ -219,10 +219,16 @@ class RuntimeElement {
     child.parentElement?.removeChild(child);
     child.parentElement = this;
     // Inserted children sit where their parent sits (the fake has no layout of its own).
-    if (child.top === 0 && child.tagName === "DIV") child.top = this.top;
-    // Opt-in layout for the edition palette: it pushes the siblings below it down.
+    if (child.top === 0 && child.tagName === "DIV") child.top = reference?.top ?? this.top;
+    // Opt-in layout for the edition palette: it pushes what follows it down, with the content of
+    // those siblings (the palette now sits in a host above the editor frame, not inside it).
     if (child.className === "sphinx-preview-edit-palette" && this.windowState.paletteHeight) {
-      for (const sibling of this.childElements) sibling.top += this.windowState.paletteHeight;
+      const push = (element: RuntimeElement): void => {
+        element.top += this.windowState.paletteHeight!;
+        element.childElements.forEach(push);
+      };
+      const at = reference ? this.childElements.indexOf(reference) : -1;
+      (at < 0 ? [] : this.childElements.slice(at)).forEach(push);
     }
     // The link panel is laid out the same way, and its removal gives the height back.
     if (child.className === "sphinx-preview-link-panel" && this.windowState.panelHeight) {
@@ -264,6 +270,16 @@ class RuntimeElement {
 
   public contains(candidate: RuntimeElement): boolean {
     return this.childElements.some((child) => child === candidate || child.contains(candidate));
+  }
+
+  /** ChildNode.before: the node takes this element's place in its parent, at its position. */
+  public before(node: RuntimeElement): void {
+    node.parentElement?.removeChild(node);
+    node.parentElement = this.parentElement;
+    if (node.top === 0 && node.tagName === "DIV") node.top = this.top;
+    const siblings = this.parentElement?.childElements;
+    const index = siblings ? siblings.indexOf(this) : -1;
+    if (siblings && index >= 0) siblings.splice(index, 0, node);
   }
 
   public insertAdjacentElement(_position: string, element: RuntimeElement): RuntimeElement {
@@ -7745,15 +7761,19 @@ function paletteMenu(harness: RuntimeHarness): RuntimeElement | undefined {
     && element.parentElement !== undefined);
 }
 
-test("T21: the palette is the first child of the block editor frame, above the text box", () => {
+test("T21: the palette sits in a host above the block editor frame, not inside it", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
   const palette = paletteOf(harness);
   assert.ok(palette, "a palette exists while editing");
   assert.equal(palette.getAttribute("role"), "toolbar");
   const editor = textarea.parentElement!;
-  assert.equal(editor.childElements[0], palette);
-  assert.equal(editor.childElements.indexOf(palette) < editor.childElements.indexOf(textarea), true);
+  const host = palette.parentElement!;
+  assert.equal(host.getAttribute("data-sphinx-preview-block-editor-host"), "true");
+  assert.equal(host.className, "sphinx-preview-block-editor-host");
+  assert.deepEqual(host.childElements, [palette, editor], "the bar is on top of the frame, the frame is its sibling");
+  assert.equal(editor.contains(palette), false, "the palette is not inside the edit box");
+  assert.equal(editor.getAttribute("data-sphinx-preview-block-editor"), "true");
   assert.equal(palette.childElements[0].tagName, "SELECT", "the mode select starts the bar");
   assert.deepEqual(
     palette.childElements.slice(1).map((child) => child.getAttribute("data-edit-action")),
@@ -7916,7 +7936,8 @@ test("T21: the palette appears in the insertion editor", () => {
   const palette = paletteOf(harness);
   assert.ok(palette);
   const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA")!;
-  assert.equal(textarea.parentElement!.childElements[0], palette);
+  const host = palette.parentElement!;
+  assert.deepEqual(host.childElements, [palette, textarea.parentElement!]);
 });
 
 test("T21: the table cell editor and the frontmatter editors get no palette", () => {
@@ -7936,12 +7957,15 @@ test("T21: the table cell editor and the frontmatter editors get no palette", ()
   assert.equal(paletteOf(frontmatter), undefined);
 });
 
-test("T21: the palette stays reachable by a content patch because it lives in the frame", () => {
+test("P4: the palette's host wraps the frame and goes with it, also on a content patch", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
   const palette = paletteOf(harness)!;
-  assert.equal(palette.parentElement, textarea.parentElement);
-  assert.equal(palette.parentElement!.getAttribute("data-sphinx-preview-block-editor"), "true");
+  const host = palette.parentElement!;
+  assert.equal(host.childElements.includes(textarea.parentElement!), true);
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(host.removed, true, "the host is removed with the editor");
+  assert.equal(palette.removed, true);
 });
 
 test("T21: the palette root cancels mousedown so a press on its padding keeps the focus", () => {
@@ -7950,6 +7974,41 @@ test("T21: the palette root cancels mousedown so a press on its padding keeps th
   let prevented = false;
   paletteOf(harness)!.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
   assert.equal(prevented, true);
+});
+
+test("P4: the host takes the first-block clearance class and swallows clicks like the frame", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  const host = paletteOf(harness)!.parentElement!;
+  let stopped = false;
+  host.dispatch("click", { stopPropagation: () => { stopped = true; } });
+  assert.equal(stopped, true, "a click on the palette does not reach the page's block handling");
+  const frame = host.childElements[1];
+  assert.equal(frame.className.includes("--first"), host.className.includes("--first"));
+});
+
+test("P4: focus moving from the text box into the palette does not save", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const palette = paletteOf(harness)!;
+  const before = harness.messages.length;
+  textarea.dispatch("blur", { relatedTarget: palette.childElements[0] });
+  assert.equal(messagesAfter(harness, before).some((message) => message.type === "previewEditSave"), false);
+  assert.equal(palette.removed, false, "the editor stays open");
+});
+
+test("P4: a palette taller than 40% of the viewport is not sticky; a small one is", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  const palette = paletteOf(harness)!;
+  const host = palette.parentElement!;
+  assert.equal(host.getAttribute("data-sphinx-palette-static"), null, "40 px of a 100 px viewport is small enough");
+  palette.height = 60;
+  harness.dispatchWindow("resize");
+  assert.equal(host.getAttribute("data-sphinx-palette-static"), "true");
+  palette.height = 30;
+  harness.dispatchWindow("resize");
+  assert.equal(host.getAttribute("data-sphinx-palette-static"), null);
 });
 
 function openCompensatedEditor(harness: RuntimeHarness): RuntimeElement {
