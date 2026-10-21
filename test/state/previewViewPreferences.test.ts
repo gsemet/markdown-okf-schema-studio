@@ -25,7 +25,7 @@ function memoryStorage(): ViewPreferencesStorage {
 
 test("defaults and the storage key", () => {
   assert.deepEqual(DEFAULT_VIEW_PREFERENCES, {
-    zoom: 100, widthMode: "margin", toc: false, incomingChanges: true,
+    zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: false,
   });
   assert.equal(VIEW_PREFERENCES_STORAGE_KEY, "markdownOkfSchemaStudio.viewPreferences");
   assert.deepEqual(normalizeViewPreferences(undefined), DEFAULT_VIEW_PREFERENCES);
@@ -45,14 +45,14 @@ test("zoom is clamped to 70-200 and rounded to 10", () => {
 
 test("bad input falls back to the default per field", () => {
   assert.deepEqual(normalizeViewPreferences({
-    zoom: "big", widthMode: "wide", toc: "yes", incomingChanges: 1,
+    zoom: "big", widthMode: "wide", toc: "yes", incomingChanges: 1, toolbarCollapsed: "no",
   }), DEFAULT_VIEW_PREFERENCES);
   assert.deepEqual(normalizeViewPreferences({ zoom: Number.NaN }), DEFAULT_VIEW_PREFERENCES);
   for (const bad of [null, 5, "x", [], true]) {
     assert.deepEqual(normalizeViewPreferences(bad), DEFAULT_VIEW_PREFERENCES);
   }
-  assert.deepEqual(normalizeViewPreferences({ zoom: 120, toc: true, widthMode: "full", incomingChanges: false }), {
-    zoom: 120, widthMode: "full", toc: true, incomingChanges: false,
+  assert.deepEqual(normalizeViewPreferences({ zoom: 120, toc: true, widthMode: "full", incomingChanges: false, toolbarCollapsed: true }), {
+    zoom: 120, widthMode: "full", toc: true, incomingChanges: false, toolbarCollapsed: true,
   });
 });
 

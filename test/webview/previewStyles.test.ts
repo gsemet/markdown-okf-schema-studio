@@ -395,17 +395,28 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
   assert.doesNotMatch(PREVIEW_THEME_CSS, /data-sphinx-preview-mode-controls/u);
 });
 
-test("preview toolbar provides refresh, editor anchoring, edit mode and theme controls", () => {
+test("preview toolbar has three rows: actions with the collapse button, navigation, view options", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
-  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 11);
-  const [mainRow, viewRow] = toolbar.split('<div data-sphinx-preview-toolbar-row="view">');
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 12);
+  const [mainRow, rest] = toolbar.split('<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">');
+  const [viewRow, optionsRow] = rest.split('<div data-sphinx-preview-toolbar-row="options">');
   assert.match(mainRow, /data-sphinx-preview-toolbar-row="main"/u);
+  assert.match(mainRow, /data-sphinx-preview-refresh[\s\S]*data-sphinx-preview-anchor[\s\S]*data-sphinx-preview-edit-toggle[\s\S]*data-sphinx-preview-toolbar-collapse/u);
   assert.equal((mainRow.match(/<button\b/gu) ?? []).length, 4);
-  assert.equal((mainRow.match(/<\/button><button\b/gu) ?? []).length, 3);
-  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 7);
-  assert.match(viewRow, /data-sphinx-preview-back[\s\S]*data-sphinx-preview-next[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in[\s\S]*data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
-  assert.match(viewRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div>$/u);
+  assert.match(mainRow, /data-sphinx-preview-toolbar-collapse[^>]*aria-expanded="true"[^>]*aria-controls="sphinx-preview-toolbar-more"[^>]*aria-label="Hide view controls"[^>]*title="Hide view controls"/u);
+  assert.match(viewRow, /^<div data-sphinx-preview-toolbar-row="view">/u);
+  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 4);
+  assert.match(viewRow, /data-sphinx-preview-back[\s\S]*data-sphinx-preview-next[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in/u);
+  assert.equal((optionsRow.match(/<button\b/gu) ?? []).length, 4);
+  assert.match(optionsRow, /data-sphinx-preview-theme-toggle[\s\S]*data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
+  assert.match(optionsRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
+  // Read-only previews: no Edit button, same rows, row 1 one button shorter.
+  const readOnly = renderPreviewToolbar(false);
+  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 11);
+  assert.doesNotMatch(readOnly, /data-sphinx-preview-edit-toggle/u);
+  assert.match(readOnly, /data-sphinx-preview-toolbar-row="main"[\s\S]*data-sphinx-preview-toolbar-collapse/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar-more\]\[hidden\]\s*\{[^}]*display: none;/u);
   assert.doesNotMatch(toolbar, /style=/u);
   assert.doesNotMatch(toolbar, /data-sphinx-preview-mode-controls|role="group"/u);
   for (const control of [
@@ -416,7 +427,7 @@ test("preview toolbar provides refresh, editor anchoring, edit mode and theme co
   ]) {
     assert.ok(toolbar.includes(control), `expected toolbar control ${control}`);
   }
-  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 11);
+  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 12);
   assert.match(
     PREVIEW_THEME_CSS,
     /button\[data-tooltip\]::after\s*\{[^}]*content: attr\(data-tooltip\);[^}]*visibility: hidden;[^}]*opacity: 0;/u,
@@ -740,7 +751,8 @@ test("T08: zoom scales the content font size and the column width together", () 
     /--sphinx-preview-column-width: calc\(var\(--sphinx-preview-content-max-width\) \* var\(--sphinx-preview-zoom, 1\)\);/u,
   );
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar-row\]\s*\{[^}]*display: flex;/u);
-  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 96px;/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 128px;/u);
+  assert.match(PREVIEW_THEME_CSS, /html\[data-sphinx-preview-toolbar-state="collapsed"\] \[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 62px;/u);
 });
 
 test("P7: full width uses the 16 px gutter a broken-out table keeps in auto", () => {

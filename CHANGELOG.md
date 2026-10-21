@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The floating toolbar now has three rows: Refresh, Anchor, Edit and a new chevron button on the
+  first row; Back, Next, Zoom - and Zoom + on the second; Theme, Width, TOC and Diff on the third.
+  The chevron button collapses rows 2 and 3 (hidden from the Tab key too) and the choice is
+  remembered per workspace.
 - Full width mode now uses the same 16 px side margins as a table that breaks out of the column
   in Auto mode, instead of up to 78 px of empty space on each side.
 - The gap above the first element is now the same 40 px everywhere: a title, text, picture, table,

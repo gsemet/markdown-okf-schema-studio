@@ -83,7 +83,7 @@ async function page(markdown: string, options: { requestId?: number; version?: n
       activeSourceFile: result.stage.activeDocumentPath,
       ...(requestId % 2 === 0 ? { initialAnchor: 3 } : {}),
       ...(options.zoom !== undefined || options.incoming !== undefined
-        ? { initialViewPreferences: { zoom: options.zoom ?? 100, widthMode: "margin", toc: false, incomingChanges: options.incoming ?? true } }
+        ? { initialViewPreferences: { zoom: options.zoom ?? 100, widthMode: "margin", toc: false, incomingChanges: options.incoming ?? true, toolbarCollapsed: false } }
         : {}),
     },
     workspaceRoot,

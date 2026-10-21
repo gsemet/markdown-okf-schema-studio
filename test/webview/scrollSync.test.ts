@@ -129,6 +129,9 @@ class RuntimeElement {
       if (selector === "th, td") {
         return element.tagName === "TH" || element.tagName === "TD";
       }
+      if (selector === "button, input, textarea, select, a, span, p") {
+        return ["BUTTON", "INPUT", "TEXTAREA", "SELECT", "A", "SPAN", "P"].includes(element.tagName);
+      }
       if (selector === "table, figure, img, pre, .myst-mermaid-diagram") {
         return ["TABLE", "FIGURE", "IMG", "PRE"].includes(element.tagName)
           || element.className.split(" ").includes("myst-mermaid-diagram");
@@ -337,6 +340,8 @@ interface RuntimeHarness {
   readonly zoomInButton: RuntimeElement;
   readonly widthButton: RuntimeElement;
   readonly diffButton: RuntimeElement;
+  readonly collapseButton: RuntimeElement;
+  readonly moreRows: RuntimeElement;
   readonly backButton: RuntimeElement;
   readonly nextButton: RuntimeElement;
   readonly anchorButton: RuntimeElement;
@@ -501,6 +506,8 @@ function createRuntimeHarness(configuration: Partial<{
   const zoomInButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const widthButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const diffButton = new RuntimeElement({}, windowState, 0, 30, "button");
+  const collapseButton = new RuntimeElement({ "aria-expanded": "true" }, windowState, 0, 30, "button");
+  const moreRows = new RuntimeElement({}, windowState, 0, 60);
   const backButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const nextButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const anchorButton = new RuntimeElement({}, windowState, 0, 30);
@@ -731,6 +738,8 @@ function createRuntimeHarness(configuration: Partial<{
       if (selector === "[data-sphinx-preview-zoom-in]") return zoomInButton;
       if (selector === "[data-sphinx-preview-width-toggle]") return widthButton;
       if (selector === "[data-sphinx-preview-diff-toggle]") return diffButton;
+      if (selector === "[data-sphinx-preview-toolbar-collapse]") return collapseButton;
+      if (selector === "[data-sphinx-preview-toolbar-more]") return moreRows;
       if (selector === "[data-sphinx-preview-back]") return backButton;
       if (selector === "[data-sphinx-preview-next]") return nextButton;
       if (selector === "[data-sphinx-preview-anchor]") return anchorButton;
@@ -833,6 +842,8 @@ function createRuntimeHarness(configuration: Partial<{
     zoomInButton,
     widthButton,
     diffButton,
+    collapseButton,
+    moreRows,
     backButton,
     nextButton,
     anchorButton,
@@ -2205,8 +2216,17 @@ test("table toolbar sits in the flow above the table with text labels and a posi
   assert.equal(section.childElements.includes(menu), false);
 });
 
-function openTableForToolbarReveal(options: { cellTop: number; barTop: number; scrollY: number }) {
+function openTableForToolbarReveal(options: {
+  cellTop: number;
+  barTop: number;
+  scrollY: number;
+  /** The floating controls cover the right end of the table toolbar box; its items are given. */
+  controlsOverRightEnd?: boolean;
+}) {
   const harness = createRuntimeHarness({ viewportHeight: 600 });
+  if (options.controlsOverRightEnd) {
+    harness.toolbar.rectProvider = () => ({ top: 12, height: 100, bottom: 112, left: 150, right: 280, width: 130 });
+  }
   const section = new RuntimeElement({}, harness.windowState, 0, 2000, "section");
   harness.body.appendChild(section);
   const table = new RuntimeElement({
@@ -2227,8 +2247,25 @@ function openTableForToolbarReveal(options: { cellTop: number; barTop: number; s
     if (child.getAttribute("data-sphinx-table-menu") === "true") {
       // The toolbar's viewport top is fixed by the test, as after the R7 anchor restore.
       child.rectProvider = () => ({
-        top: bar.top, bottom: bar.top + bar.height, height: bar.height, left: 0, width: 200,
+        top: bar.top, bottom: bar.top + bar.height, height: bar.height, left: 0, width: options.controlsOverRightEnd ? 300 : 200,
       });
+      if (options.controlsOverRightEnd) {
+        // Line 1 (the buttons) ends left of the controls; the status text on line 2 sits under them.
+        const place = (item: RuntimeElement): void => {
+          const status = item.getAttribute("data-sphinx-preview-edit-status") !== null;
+          item.rectProvider = () => ({
+            top: bar.top + (status ? 40 : 10), height: 20, bottom: bar.top + (status ? 60 : 30),
+            left: status ? 200 : 0, width: status ? 90 : 20,
+          });
+        };
+        child.childElements.forEach(place);
+        const appendChild = child.appendChild.bind(child);
+        child.appendChild = (item: RuntimeElement): RuntimeElement => {
+          place(item);
+          bar.height += 1; // the menu grows as it is filled, like a real one
+          return appendChild(item);
+        };
+      }
     }
     return insertBefore(child, reference);
   };
@@ -2258,6 +2295,17 @@ test("a toolbar that appears above the reading offset is scrolled into view by t
   // Reading offset is 65 in the harness; the bar top is -28, so the page scrolls up by 93.
   const { scrolls } = openTableForToolbarReveal({ cellTop: 340, barTop: -28, scrollY: 300 });
   assert.deepEqual(scrolls, [300, 300 - 93]);
+});
+
+test("P8: a toolbar box is not revealed when only its empty part is under the preview controls", () => {
+  // Controls bottom 112 + 4 = 116 > bar top 90, but the buttons end left of the controls and the
+  // status text on line 2 (top 130) is already below them: nothing is covered, so no scroll.
+  const free = openTableForToolbarReveal({ cellTop: 340, barTop: 90, scrollY: 300, controlsOverRightEnd: true });
+  assert.deepEqual(free.scrolls, [300, 300]);
+  // A bar 24 px higher has its status text (top 106) under the controls (bottom 112 + 4): the page
+  // scrolls by the 10 px that bring the status text under them, not by the 26 px of the box.
+  const covered = openTableForToolbarReveal({ cellTop: 340, barTop: 66, scrollY: 300, controlsOverRightEnd: true });
+  assert.deepEqual(covered.scrolls, [300, 300 - 10]);
 });
 
 test("a toolbar that is already visible causes no extra scroll", () => {
@@ -5928,10 +5976,12 @@ function traceStartup(
     const toolbar = [harness.themeButton, harness.refreshButton, harness.anchorButton, harness.editModeButton];
     const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion",
       "data-sphinx-preview-zoom", "data-sphinx-preview-width", "data-sphinx-preview-toc",
-      "data-okf-show-comments", "data-sphinx-preview-incoming"];
+      "data-okf-show-comments", "data-sphinx-preview-incoming", "data-sphinx-preview-toolbar-state"];
     // The zoom buttons and the zoom of the root do not depend on the content (T08); the Diff
     // button of row 2 does not either (T17).
-    const zoomButtons = [harness.zoomOutButton, harness.zoomInButton, harness.widthButton, harness.diffButton];
+    // The collapse button and its rows are content-independent too (P8).
+    const zoomButtons = [harness.zoomOutButton, harness.zoomInButton, harness.widthButton, harness.diffButton,
+      harness.collapseButton, harness.moreRows];
     return {
       effects: entries
         .filter((entry) => !(entry.method === "addEventListener" && toolbar.includes(entry.element)))
@@ -7469,7 +7519,7 @@ test("T08: zoom buttons set the zoom variable, post the preference and keep the 
 });
 
 test("T08: the zoom limits disable the buttons and post nothing more", () => {
-  const low = createRuntimeHarness({ initialViewPreferences: { zoom: 80, widthMode: "margin", toc: false, incomingChanges: true } });
+  const low = createRuntimeHarness({ initialViewPreferences: { zoom: 80, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: false } });
   assert.equal(low.zoomOutButton.disabled, false);
   low.zoomOutButton.dispatch("click");
   assert.equal(low.documentElement.getAttribute("data-sphinx-preview-zoom"), "70");
@@ -7480,7 +7530,7 @@ test("T08: the zoom limits disable the buttons and post nothing more", () => {
   assert.equal(low.documentElement.getAttribute("data-sphinx-preview-zoom"), "70");
   assert.equal(low.messages.length, count);
 
-  const high = createRuntimeHarness({ initialViewPreferences: { zoom: 200, widthMode: "margin", toc: false, incomingChanges: true } });
+  const high = createRuntimeHarness({ initialViewPreferences: { zoom: 200, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: false } });
   assert.equal(high.zoomInButton.disabled, true);
   assert.equal(high.zoomOutButton.disabled, false);
   assert.equal(high.documentElement.style.getPropertyValue("--sphinx-preview-zoom"), "2");
@@ -7488,19 +7538,19 @@ test("T08: the zoom limits disable the buttons and post nothing more", () => {
 
 test("T08: saved webview state wins over the initial context", () => {
   const harness = createRuntimeHarness({
-    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true },
+    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: false },
     savedState: { viewZoom: 120 },
   });
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-zoom"), "120");
   const initialOnly = createRuntimeHarness({
-    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true },
+    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: false },
   });
   assert.equal(initialOnly.documentElement.getAttribute("data-sphinx-preview-zoom"), "150");
 });
 
 function widthModeFixture(initial?: string) {
   const harness = createRuntimeHarness(initial
-    ? { initialViewPreferences: { zoom: 100, widthMode: initial as "auto", toc: false, incomingChanges: true } }
+    ? { initialViewPreferences: { zoom: 100, widthMode: initial as "auto", toc: false, incomingChanges: true, toolbarCollapsed: false } }
     : {});
   harness.previewContent.clientWidth = 700;
   harness.documentElement.clientWidth = 1000;
@@ -7569,7 +7619,7 @@ test("T10b: a wide element is centred on the available area, not on the column",
 test("T10b: with the TOC open the available area, its centre and the cap exclude the TOC column", () => {
   const harness = createRuntimeHarness({
     tocReserve: 256,
-    initialViewPreferences: { zoom: 100, widthMode: "auto", toc: true, incomingChanges: true },
+    initialViewPreferences: { zoom: 100, widthMode: "auto", toc: true, incomingChanges: true, toolbarCollapsed: false },
   });
   harness.previewContent.clientWidth = 400;
   harness.documentElement.clientWidth = 1000;
@@ -7696,12 +7746,12 @@ test("T17: the Diff button flips the marks, posts the preference and keeps the s
 
 test("T17: the initial preference and the saved webview state decide the pressed state", () => {
   const off = createRuntimeHarness({
-    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false },
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false, toolbarCollapsed: false },
   });
   assert.equal(off.documentElement.getAttribute("data-sphinx-preview-incoming"), "off");
   assert.equal(off.diffButton.getAttribute("aria-pressed"), "false");
   const saved = createRuntimeHarness({
-    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false },
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false, toolbarCollapsed: false },
     savedState: { viewIncomingChanges: true },
   });
   assert.equal(saved.documentElement.getAttribute("data-sphinx-preview-incoming"), "on");
@@ -7718,6 +7768,47 @@ test("T17: the Diff button is hidden through the document attribute when the set
     /html\[data-sphinx-preview-incoming="off"\] #sphinx-myst-preview-content \[data-sphinx-preview-changed\] \{\s*box-shadow: none;/u);
 });
 
+test("P8: the collapse button hides rows 2-3, posts the preference and keeps the state", () => {
+  const harness = createRuntimeHarness();
+  const button = harness.collapseButton;
+  assert.equal(harness.moreRows.hidden, false, "expanded by default");
+  assert.equal(button.getAttribute("aria-expanded"), "true");
+  assert.equal(button.getAttribute("aria-label"), "Hide view controls");
+  assert.equal(button.getAttribute("title"), "Hide view controls");
+  const before = harness.messages.length;
+  button.dispatch("click");
+  assert.equal(harness.moreRows.hidden, true);
+  assert.equal(button.getAttribute("aria-expanded"), "false");
+  assert.equal(button.getAttribute("aria-label"), "Show view controls");
+  assert.equal(button.getAttribute("data-tooltip"), "Show view controls");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-toolbar-state"), "collapsed");
+  // The root attribute must never match the `[data-sphinx-preview-toolbar]` selector of the toolbar itself.
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-toolbar"), null);
+  const posted = harness.messages.slice(before).filter((m) => m.type === "previewViewPreferenceChanged");
+  assert.equal(posted.length, 1);
+  assert.equal(posted[0].preference, "toolbarCollapsed");
+  assert.equal(posted[0].value, true);
+  assert.equal(harness.getWebviewState().viewToolbarCollapsed, true);
+  button.dispatch("click");
+  assert.equal(harness.moreRows.hidden, false);
+  assert.equal(button.getAttribute("aria-expanded"), "true");
+  assert.equal(harness.messages.at(-1)?.value, false);
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-toolbar-state"), "expanded");
+});
+
+test("P8: the stored preference and the saved webview state decide the collapsed state", () => {
+  const stored = createRuntimeHarness({
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: true },
+  });
+  assert.equal(stored.moreRows.hidden, true);
+  assert.equal(stored.collapseButton.getAttribute("aria-expanded"), "false");
+  const saved = createRuntimeHarness({
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: true },
+    savedState: { viewToolbarCollapsed: false },
+  });
+  assert.equal(saved.moreRows.hidden, false);
+});
+
 test("T11: a previewHistoryState of another document version is ignored", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage({
@@ -7731,7 +7822,7 @@ test("T11: a previewHistoryState of another document version is ignored", () => 
 test("T13: a state snapshot keeps the TOC visibility and the folded sections", () => {
   const harness = createRuntimeHarness({
     viewportWidth: 900,
-    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: true, incomingChanges: true },
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: true, incomingChanges: true, toolbarCollapsed: false },
   });
   harness.dispatchDocument("click", { target: harness.descriptionButton });
   const state = harness.getWebviewState();

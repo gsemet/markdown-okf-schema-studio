@@ -295,10 +295,23 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   gap: 2px;
 }
 
+/* Rows 2 and 3: the collapse button of row 1 hides them (the hidden attribute removes them from
+   the Tab order as well). */
+[data-sphinx-preview-toolbar-more] {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+[data-sphinx-preview-toolbar-more][hidden] {
+  display: none;
+}
+
 /* Shown by the runtime when a render stays pending; fixed and pointer-transparent, so no content moves. */
 [data-sphinx-preview-pending-overlay] {
   position: fixed;
-  inset-block-start: 96px;
+  inset-block-start: 128px;
   inset-inline-end: 14px;
   z-index: 1099;
   box-sizing: border-box;
@@ -312,6 +325,11 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   font-size: 12px;
   line-height: 1.4;
   pointer-events: none;
+}
+
+/* Below the toolbar: three rows, or one row when rows 2-3 are collapsed. */
+html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending-overlay] {
+  inset-block-start: 62px;
 }
 
 [data-sphinx-preview-pending-overlay] > strong,
@@ -1950,6 +1968,15 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
 [data-sphinx-preview-theme-toggle][data-theme-mode="dark"] [data-theme-icon="dark"],
 [data-sphinx-preview-theme-toggle][data-theme-mode="white"] [data-theme-icon="white"],
 [data-sphinx-preview-theme-toggle][data-theme-mode="cream"] [data-theme-icon="cream"] {
+  display: block;
+}
+
+[data-sphinx-preview-toolbar-collapse] svg {
+  display: none;
+}
+
+[data-sphinx-preview-toolbar-collapse][aria-expanded="true"] [data-collapse-icon="hide"],
+[data-sphinx-preview-toolbar-collapse][aria-expanded="false"] [data-collapse-icon="show"] {
   display: block;
 }
 

@@ -61,6 +61,9 @@ def main() -> None:
         Crop(SCREENSHOTS / "handbook-dark-top.png", "theme-dark.png", (0, 20, 1800, 930), 720),
         Crop(SCREENSHOTS / "handbook-forced-white.png", "theme-white.png", (0, 20, 1800, 930), 720),
         Crop(SCREENSHOTS / "handbook-forced-cream.png", "theme-cream.png", (0, 20, 1800, 930), 720),
+        Crop(SCREENSHOTS / "readme-margin-break-cream.png", "margin-break-cream.png", (0, 0, 2400, 1800), 1200),
+        Crop(SCREENSHOTS / "toolbar-rows-expanded-cream-900.png", "toolbar-expanded.png", (1440, 0, 1800, 260), 360),
+        Crop(SCREENSHOTS / "toolbar-rows-collapsed-cream-900.png", "toolbar-collapsed.png", (1440, 0, 1800, 260), 360),
     ]
     for crop in crops:
         render(crop)

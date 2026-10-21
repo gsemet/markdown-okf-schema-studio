@@ -24,6 +24,8 @@ export interface Scenario {
   linkDetailsChecks?: boolean;
   horizontalOverflow?: boolean;
   previewThemeMode?: "white" | "cream";
+  /** P8: leave the floating toolbar collapsed (rows 2-3 hidden) for the checks and the capture. */
+  toolbarState?: "collapsed";
   stickyHeadingDepth?: number;
   expectedStickyHeadings?: string;
   expectedContentWidth?: number;
@@ -174,6 +176,42 @@ const FIRST_GAP_SCENARIOS: Scenario[] = [
       scroll: { kind: "top" as const },
       firstElementGap: kind as Scenario["firstElementGap"],
       description: `First element: ${name}, edit mode, 360 px pane.`,
+    })),
+  // P8: the floating toolbar on three rows, expanded and collapsed, in every preview theme, wide
+  // and at 360 px. The expanded 360 px captures also prove the rows never overlap the text.
+  ...(([
+    ["light", undefined],
+    ["dark", undefined],
+    ["light", "white" as const],
+    ["light", "cream" as const],
+  ] as const).flatMap(([theme, mode]) => ([
+    ["expanded", WIDE, "900"],
+    ["collapsed", WIDE, "900"],
+    ["expanded", NARROW360, "360"],
+    ["collapsed", NARROW360, "360"],
+  ] as const).map(([state, viewport, label]) => ({
+    id: `toolbar-rows-${state}-${mode ?? theme}-${label}`,
+    fixture: "32-readme-margin-break",
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...viewport,
+    scroll: { kind: "top" as const },
+    ...(state === "collapsed" ? { toolbarState: "collapsed" as const } : {}),
+    description: `Floating toolbar, ${state}, ${mode ?? theme} theme, ${viewport.width} px pane: row 1 Refresh, `
+      + "Anchor, Edit and the collapse button; row 2 Back, Next, Zoom -, Zoom +; row 3 Theme, Width, TOC, Diff. "
+      + (state === "collapsed" ? "Rows 2 and 3 are hidden." : "No row overlaps the text or another row."),
+  })))),
+  // Collapsed toolbar: the first element clears the shorter toolbar (P3) at 360 px.
+  ...FIRST_GAP_CASES.filter(([name]) => ["paragraph", "table"].includes(name))
+    .map(([name, fixture, kind]) => ({
+      id: `first-element-gap-${name}-360-collapsed`,
+      fixture,
+      theme: "light" as const,
+      ...NARROW360,
+      scroll: { kind: "top" as const },
+      toolbarState: "collapsed" as const,
+      firstElementGap: kind as Scenario["firstElementGap"],
+      description: `First element: ${name}, edit mode, 360 px pane, toolbar collapsed.`,
     })),
   // Auto and Full width modes at 900 px.
   ...(["auto", "full"] as const).flatMap((widthMode) => FIRST_GAP_CASES
