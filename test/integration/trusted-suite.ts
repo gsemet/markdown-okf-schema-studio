@@ -15,6 +15,7 @@ import { run as runPreviewEditing } from "./previewEditing.test";
 import { run as runImagePicker } from "./imagePicker.test";
 import { run as runImagePaste } from "./imagePaste.test";
 import { run as runIncomingChanges } from "./incomingChanges.test";
+import { run as runReviewComments } from "./reviewComments.test";
 import { run as runBlockMove } from "./blockMove.test";
 import { run as runBlockClipboard } from "./blockClipboard.test";
 import { run as runLabelRename } from "./labelRename.test";
@@ -114,6 +115,7 @@ export async function run(): Promise<void> {
   await runImagePicker();
   await runImagePaste();
   await runIncomingChanges();
+  await runReviewComments();
   await runGenericMarkdown();
   await runDirtySnapshots();
   await runSourceMapping();

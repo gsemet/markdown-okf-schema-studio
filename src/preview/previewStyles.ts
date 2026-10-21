@@ -2296,6 +2296,94 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   box-shadow: inset 3px 0 0 var(--vscode-editorGutter-addedBackground, #2ea043);
 }
 
+/* Review comments: a highlighted quote (or a badge on its block) opens a popover with the thread.
+   Marks only paint; badges and the popover are out of the flow, so nothing moves. */
+#sphinx-myst-preview-content mark[data-okf-comment-thread] {
+  background: var(--vscode-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
+  color: inherit;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+#sphinx-myst-preview-content mark[data-okf-comment-thread][data-okf-comment-resolved="true"] {
+  background: transparent;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--vscode-descriptionForeground, currentColor);
+}
+
+#sphinx-myst-preview-content [data-okf-comment-badged] {
+  position: relative;
+}
+
+#sphinx-myst-preview-content button[data-okf-comment-badge] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--vscode-focusBorder, #007fd4);
+  border-radius: 7px 7px 7px 0;
+  background: var(--vscode-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
+  cursor: pointer;
+}
+
+#sphinx-myst-preview-content button[data-okf-comment-badge][data-okf-comment-badge-after] {
+  position: static;
+  display: block;
+  margin-left: auto;
+}
+
+#sphinx-myst-preview-content button[data-okf-comment-badge][data-okf-comment-resolved="true"] {
+  opacity: 0.4;
+}
+
+[data-okf-comment-popover] {
+  position: fixed;
+  z-index: 50;
+  box-sizing: border-box;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 8px 10px;
+  border: 1px solid var(--vscode-editorWidget-border, var(--vscode-focusBorder, #454545));
+  border-radius: 4px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  color: var(--vscode-editorWidget-foreground, var(--vscode-editor-foreground));
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
+  font-size: 0.9em;
+}
+
+[data-okf-comment-popover][data-okf-comment-resolved="true"] {
+  opacity: 0.75;
+}
+
+[data-okf-comment-popover] [data-okf-comment-state] {
+  margin-bottom: 6px;
+  font-style: italic;
+}
+
+[data-okf-comment-popover] [data-okf-comment-entry] + [data-okf-comment-entry] {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+}
+
+[data-okf-comment-popover] [data-okf-comment-head] {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+[data-okf-comment-popover] [data-okf-comment-head] span {
+  opacity: 0.7;
+}
+
+[data-okf-comment-popover] [data-okf-comment-body] {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 /* Toolbar Diff button off: the marks go away at once; the host stops sending ranges. */
 html[data-sphinx-preview-incoming="off"] #sphinx-myst-preview-content [data-sphinx-preview-changed] {
   box-shadow: none;

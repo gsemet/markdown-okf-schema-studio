@@ -182,6 +182,78 @@ async function scenarioParagraphBlurCommit(page: Page, evidence: Evidence): Prom
   });
 }
 
+/** T42: a comment highlight opens its popover, not the editor; plain text of the block still edits. */
+async function scenarioReviewComments(page: Page, evidence: Evidence): Promise<void> {
+  const text = "# Review\n\nThe second paragraph has needle text here.\n\nAnother block without the quote.\n";
+  const sidecar = {
+    version: 1,
+    document: "smoke.md",
+    threads: [
+      {
+        id: "t1",
+        anchor: { line: 3, endLine: 3, quote: "needle", prefix: "has ", suffix: " text" },
+        resolved: false,
+        createdAt: "2026-10-21T10:00:00Z",
+        comments: [{ id: "c1", author: "Ada", createdAt: "2026-10-21T10:00:00Z", body: "<b>Why?</b>" }],
+      },
+      {
+        id: "t2",
+        anchor: { line: 5, endLine: 5, quote: "not in the block", prefix: "", suffix: "" },
+        resolved: false,
+        createdAt: "2026-10-21T10:00:00Z",
+        comments: [{ id: "c2", author: "Bob", createdAt: "2026-10-21T10:00:00Z", body: "Second" }],
+      },
+    ],
+  };
+  const fixture = createFixture("realinput-comments", {
+    "smoke.md": text,
+    "smoke.comments.json": `${JSON.stringify(sidecar, null, 2)}\n`,
+  });
+  try {
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("smoke.md")));
+    try {
+      await openSidePreview(document);
+      await waitForRender(document);
+      await setEditMode(page, true);
+      const paragraph = "p:has-text('The second paragraph')";
+      await waitFor("the highlight and the badge", () => withCurrentFrame(page, async (frame) =>
+        await frame.locator("mark[data-okf-comment-thread]").count() === 1
+        && await frame.locator("button[data-okf-comment-badge]").count() === 1));
+      await withCurrentFrame(page, async (frame) => {
+        assert.equal(await frame.locator(paragraph).first().evaluate((element) => element.textContent),
+          "The second paragraph has needle text here.", "the highlight adds no text");
+        assert.equal(await frame.locator("mark[data-okf-comment-thread]").textContent(), "needle");
+      });
+      await withCurrentFrame(page, (frame) => frame.locator("mark[data-okf-comment-thread]").click());
+      await waitFor("the popover", () => withCurrentFrame(page, async (frame) =>
+        await frame.locator("[data-okf-comment-popover]").count() === 1));
+      await withCurrentFrame(page, async (frame) => {
+        assert.equal(await frame.locator("[data-sphinx-preview-block-editor]").count(), 0, "no editor opened");
+        const popover = frame.locator("[data-okf-comment-popover]");
+        assert.match(await popover.textContent() ?? "", /<b>Why\?<\/b>/u);
+        assert.equal(await popover.locator("b").count(), 0, "the body is text");
+      });
+      await captureAfter(evidence, page, "comments-01-popover", "Edit mode on; the popover shows the thread and no editor is open.");
+      // Plain text of the same block still edits (the click lands on the first words).
+      await withCurrentFrame(page, async (frame) => {
+        const target = frame.locator(paragraph).first();
+        const box = await target.boundingBox();
+        assert.ok(box);
+        await target.click({ position: { x: 30, y: box.height / 2 } });
+      });
+      await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+      await withCurrentFrame(page, async (frame) => {
+        assert.equal(await frame.locator("[data-okf-comment-popover]").count(), 0, "the popover closed");
+      });
+    } finally {
+      await leaveEditModeOff();
+      await closeAllEditors();
+    }
+  } finally {
+    fixture.dispose();
+  }
+}
+
 async function scenarioCtrlEnterCommit(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-s2", async (document) => {
     await openSidePreview(document);
@@ -3717,6 +3789,7 @@ export async function run(): Promise<void> {
     await scenarioParagraphBlurCommit(page, evidence);
     await scenarioCommentBlockEdit(page, evidence);
     await scenarioCtrlEnterCommit(page, evidence);
+    await scenarioReviewComments(page, evidence);
     await scenarioArrowNavigation(page, evidence);
     await scenarioTableCellEnter(page, evidence);
     await scenarioTableCellBold(page, evidence);

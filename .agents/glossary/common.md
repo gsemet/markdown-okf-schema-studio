@@ -12,7 +12,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Blur commit suspension**: while a host round trip marked `dialog` is pending (`hostRequests.ask(…, { dialog: true }, …)` in `src/webview/hostRequests.ts`: the `{doc}` and image file pickers), the text box blur and the palette `onLeave` do not save, so the block editor stays open under the native dialog; `cancelAll()` in `closeBlockEdit` and the request timeout clear it.
 - **Block selection**: contiguous run of top-level body blocks selected in edit mode with Shift+click or Shift+Up/Down (`data-sphinx-preview-block-selected`, model in `src/webview/blockSelection.ts`).
 - **Chip**: small inline marker in the preview, gray for an HTML comment and green for TODO (`.okf-chip`, `src/render/commentMarkers.ts`).
-- **Comment thread (planned)**: a conversation attached to a block or range of a document.
+- **Comment thread**: review discussion attached to quoted text, stored in a sidecar file (`src/comments/commentModel.ts`, `src/webview/commentThreads.ts`).
 - **Content patch**: in-place replacement of the content container `#sphinx-myst-preview-content` instead of a full page reload (`src/preview/contentPatch.ts`).
 - **Copy button**: floating button over a hovered code block that copies its raw code (`data-sphinx-preview-code-copy`, `src/webview/codeCopy.ts`).
 - **Edit action**: one registered editing operation (`src/webview/editActions.ts`) used by shortcuts and the palette.
@@ -42,7 +42,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Shell**: the part of the preview page outside the content container; unchanged between renders of one document.
 - **Shell key**: string identifying the shell, compared to decide whether a content patch is possible (`shellKey` in `src/preview/contentPatch.ts`).
 - **Side channel**: host-to-page message carrying data that is not rendered HTML, for example `previewPropertiesTable`.
-- **Sidecar file (planned)**: companion file stored next to a document, for example for comments.
+- **Sidecar file**: `<name>.comments.json` next to the document, holding its review comment threads.
 - **Sticky heading band**: fixed band at the top of the preview showing the current heading path (`docs/scroll-anchoring.md`).
 - **Table bar**: menu shown on a table in edit mode (`.sphinx-preview-table-menu`).
 - **Table-cell editor**: block editor opened on one table cell ("Markdown table cell editor").

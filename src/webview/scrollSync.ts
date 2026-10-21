@@ -26,6 +26,7 @@ import { installHistoryControls } from "./historyControls";
 import { installTocColumn } from "./tocColumn";
 import { installChipToggle } from "./chipToggle";
 import { installIncomingChanges } from "./incomingChanges";
+import { installCommentThreads } from "./commentThreads";
 import { installIncomingToggle } from "./incomingToggle";
 import { installViewControls } from "./viewControls";
 import { installWidthMode } from "./widthMode";
@@ -106,6 +107,9 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     : 3;
   const AUTOSAVE_DELAY_MS = 400;
   const vscode = acquireVsCodeApi();
+  // Review comments. Installed before every click handler below: a click on a highlight or badge
+  // opens the popover and must not edit the block, follow a link or reveal the source.
+  const commentThreads = (${installCommentThreads.toString()})(document, window);
   // Edit mode: a plain click on a link value edits its field; Cmd/Ctrl+click still navigates.
   // Registered before the link navigation so that it also runs first when listeners are not capturing.
   document.addEventListener("click", (event) => {
@@ -4552,6 +4556,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     tocColumn.refresh();
     chipToggle.apply();
     incomingChanges.apply();
+    // Idempotent: puts the last threads back on replaced content; skips blocks being edited.
+    commentThreads.apply();
     measure();
     if (options.restore) {
       restoreState();
@@ -4678,6 +4684,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     if (sameContext(message) && message.type === "previewShowComments") {
       chipToggle.setShowComments(message.showComments !== false);
+      return;
+    }
+    if (sameContext(message) && message.type === "previewComments") {
+      commentThreads.setThreads(message.threads);
+      measure();
       return;
     }
     if (sameContext(message) && message.type === "previewIncomingChanges") {

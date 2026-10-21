@@ -77,6 +77,8 @@ Markdown flavours and extensions:
 - **Safe edition:** wrapping and non-destructive editing operation are applied
   to the raw source, for instance to avoid rewrapping
   the entire document unnecessarily.
+- **Review comments:** threads stored in `<name>.comments.json` next to the document are
+  highlighted in the preview and open in a popover (see [Review Comments](#review-comments)).
 
 Checkboxes in task lists, paragraphs, and table cells are editable in place. In an untrusted
 workspace they remain read-only until the workspace is trusted.
@@ -99,6 +101,34 @@ the table of contents) and is centred. Narrower tables and figures are centred i
 The capture uses the cream theme.
 
 [![Cream preview in Auto width: a narrow text column with a wide table and a wide figure breaking out of it, centred](images/readme/margin-break-cream.png)](images/readme/margin-break-cream.png)
+
+## Review Comments
+
+A file named like the document with `.comments.json` instead of its extension, for example
+`notes.comments.json` next to `notes.md`, holds review comment threads. The preview highlights the
+quoted text of every thread, in preview and in edit mode; when the quote cannot be found in the
+block, a small badge marks the block instead. Click a highlight or a badge to read the thread in a
+popover: author, date, the comments as plain text, and a "Resolved" note for closed threads
+(dimmed). Code, diagrams, math and the properties table are never highlighted. This version only
+shows threads and never writes the file; a file that is not valid is ignored with a warning.
+
+```json
+{
+  "version": 1,
+  "document": "notes.md",
+  "threads": [
+    {
+      "id": "t1",
+      "anchor": { "line": 3, "endLine": 3, "quote": "second paragraph", "prefix": "The ", "suffix": " has" },
+      "resolved": false,
+      "createdAt": "2026-10-21T10:00:00Z",
+      "comments": [
+        { "id": "c1", "author": "Ada", "createdAt": "2026-10-21T10:00:00Z", "body": "Why this?" }
+      ]
+    }
+  ]
+}
+```
 
 ## See It In Use
 

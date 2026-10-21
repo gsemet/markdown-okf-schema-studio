@@ -4,6 +4,7 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 
 import { BuildQueue, BuildQueueState } from "./build/buildQueue";
+import { MAX_SIDECAR_BYTES, parseSidecar, sidecarNameFor, type CommentThread } from "./comments/commentModel";
 import {
   FRONTMATTER_CONFIGURATION_SECTION,
   FrontmatterConfiguration,
@@ -279,6 +280,20 @@ interface ActivePreview {
   incomingPosts: number;
   /** Test hook: the last previewIncomingChanges posted to the page. */
   lastIncomingChanges?: { enabled: boolean; ranges: { start: number; end: number }[] };
+  /** Debounce timer of the review comment threads (T42). */
+  commentsTimer?: NodeJS.Timeout;
+  /** Watch on the sidecar file `<name>.comments.json` of the shown document, and its path. */
+  commentsWatch?: { path: string; watcher: { dispose(): void } };
+  /** The page may show threads (some were posted and not cleared since the page loaded). */
+  commentsShown: boolean;
+  /** JSON of the threads last posted to the loaded page; reset when the page reports ready. */
+  commentsPosted?: string;
+  /** Sidecar text already reported as invalid, so the warning appears once per content. */
+  commentsWarned?: string;
+  /** Test hook: how many previewComments messages were posted. */
+  commentPosts: number;
+  /** Test hook: the last previewComments posted to the page. */
+  lastComments?: CommentThread[];
   /** Test hook: the last previewHistoryState posted to the page. */
   lastHistoryState?: { canBack: boolean; canForward: boolean };
   linkDiscoveries?: Map<string, Promise<readonly string[]>>;
@@ -1088,6 +1103,7 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
   }
   scheduleDeferredPreviewWork(preview, result);
   scheduleIncomingChanges(preview);
+  scheduleComments(preview);
 }
 
 function isCurrentRender(
@@ -2952,6 +2968,95 @@ function clearIncomingChanges(preview: ActivePreview): void {
   preview.incomingWatch = undefined;
 }
 
+const COMMENTS_DEBOUNCE_MS = 150;
+
+/** Reads the sidecar of a document; undefined when there is none. */
+async function readCommentSidecar(sidecar: vscode.Uri): Promise<string | undefined> {
+  try {
+    const stat = await vscode.workspace.fs.stat(sidecar);
+    if (stat.size > MAX_SIDECAR_BYTES) {
+      // Not read: the parser reports the size problem from a stub of the right length.
+      return " ".repeat(MAX_SIDECAR_BYTES + 1);
+    }
+    return new TextDecoder().decode(await vscode.workspace.fs.readFile(sidecar));
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Tells the page the review comment threads stored in `<name>.comments.json` next to the shown
+ * document (T42). Without a sidecar nothing is posted, unless threads shown earlier must go. An
+ * invalid file shows one warning and no threads. Stale ids are dropped by the page.
+ */
+async function postComments(preview: ActivePreview): Promise<void> {
+  const stage = preview.stage;
+  if (preview.disposed || !stage || !preview.documentUri.startsWith("file:")) return;
+  const documentPath = stage.activeDocumentPath;
+  const sidecar = vscode.Uri.file(path.join(path.dirname(documentPath), sidecarNameFor(path.basename(documentPath))));
+  watchCommentSidecar(preview, sidecar);
+  const text = await readCommentSidecar(sidecar);
+  if (preview.disposed || preview.stage !== stage) return;
+  let threads: CommentThread[] = [];
+  if (text !== undefined) {
+    const parsed = parseSidecar(text);
+    threads = parsed.threads;
+    if (parsed.errors.length > 0 && preview.commentsWarned !== text) {
+      preview.commentsWarned = text;
+      void vscode.window.showWarningMessage(
+        `The review comments file ${path.basename(sidecar.fsPath)} is not valid and is ignored: ${parsed.errors[0]}.`,
+      );
+    }
+  }
+  if (threads.length === 0 && !preview.commentsShown) return;
+  // The same threads again (every render asks): nothing to tell the page.
+  const serialized = JSON.stringify(threads);
+  if (preview.commentsPosted === serialized) return;
+  preview.commentsPosted = serialized;
+  preview.commentsShown = threads.length > 0;
+  preview.commentPosts += 1;
+  preview.lastComments = threads;
+  void preview.panel.webview.postMessage({
+    type: "previewComments",
+    threads,
+    documentId: stage.activeDocumentIdentity,
+    documentVersion: stage.activeDocumentVersion,
+    requestId: stage.requestId,
+  });
+}
+
+/** Posts again when the sidecar is created, changed or deleted. */
+function watchCommentSidecar(preview: ActivePreview, sidecar: vscode.Uri): void {
+  if (preview.commentsWatch?.path === sidecar.fsPath) return;
+  preview.commentsWatch?.watcher.dispose();
+  const watcher = vscode.workspace.createFileSystemWatcher(
+    new vscode.RelativePattern(vscode.Uri.file(path.dirname(sidecar.fsPath)), path.basename(sidecar.fsPath)),
+  );
+  const refresh = (): void => scheduleComments(preview, COMMENTS_DEBOUNCE_MS);
+  watcher.onDidCreate(refresh);
+  watcher.onDidChange(refresh);
+  watcher.onDidDelete(refresh);
+  preview.commentsWatch = { path: sidecar.fsPath, watcher };
+}
+
+function scheduleComments(preview: ActivePreview, delay = COMMENTS_DEBOUNCE_MS): void {
+  if (preview.disposed) return;
+  if (preview.commentsTimer) clearTimeout(preview.commentsTimer);
+  preview.commentsTimer = setTimeout(() => {
+    preview.commentsTimer = undefined;
+    void postComments(preview).catch((error: unknown) => {
+      console.error("Failed to show the review comments.", error);
+    });
+  }, delay);
+}
+
+function clearComments(preview: ActivePreview): void {
+  if (preview.commentsTimer) clearTimeout(preview.commentsTimer);
+  preview.commentsTimer = undefined;
+  preview.commentsWatch?.watcher.dispose();
+  preview.commentsWatch = undefined;
+}
+
 /** Records the place being left and the target of a followed link. */
 function recordNavigation(preview: ActivePreview, target: NavigationEntry): void {
   const history = historyOf(preview);
@@ -3304,8 +3409,11 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     if (preview.patchedRequestId === undefined) {
       preview.incomingMarksShown = false;
       preview.incomingEnabledPosted = true;
+      preview.commentsShown = false;
     }
+    preview.commentsPosted = undefined;
     scheduleIncomingChanges(preview, 0);
+    scheduleComments(preview, 0);
     return;
   }
   if (value.type === "previewLink" && value.request) {
@@ -3665,6 +3773,7 @@ function disposePreview(preview: ActivePreview, disposePanel: boolean): void {
   clearPendingOverlay(preview);
   clearContentPatchTimer(preview);
   clearIncomingChanges(preview);
+  clearComments(preview);
   preview.activeBlockEdit = undefined;
   preview.editLock.release();
   if (disposePanel) {
@@ -3818,6 +3927,8 @@ function createPreview(
     incomingMarksShown: false,
     incomingEnabledPosted: true,
     incomingPosts: 0,
+    commentsShown: false,
+    commentPosts: 0,
     disposed: false,
   };
   panel.webview.options = {
@@ -4349,6 +4460,8 @@ export function getActivePreviewForTests():
     pendingOverlayVisible: boolean;
     pendingOverlayShown: number;
     incomingChanges: { posts: number; last?: { enabled: boolean; ranges: { start: number; end: number }[] } };
+    /** Review comment threads posted to the page (T42). */
+    comments: { posts: number; last?: CommentThread[] };
     /** Navigation history of the panel and the last state posted to the page. */
     history: {
       entries: { uri: string; line: number }[];
@@ -4391,6 +4504,7 @@ export function getActivePreviewForTests():
     pendingOverlayVisible: activePreview.pendingOverlayVisible,
     pendingOverlayShown: activePreview.pendingOverlayShown,
     incomingChanges: { posts: activePreview.incomingPosts, last: activePreview.lastIncomingChanges },
+    comments: { posts: activePreview.commentPosts, last: activePreview.lastComments },
     history: {
       ...historyOf(activePreview).snapshot(),
       posted: activePreview.lastHistoryState,
