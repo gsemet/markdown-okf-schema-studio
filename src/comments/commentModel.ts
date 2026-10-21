@@ -199,3 +199,58 @@ export function serializeSidecar(model: { document: string; threads: readonly Co
   };
   return `${JSON.stringify(ordered, null, 2)}\n`;
 }
+
+export const MAX_QUOTE_LENGTH = 500;
+export const MAX_CONTEXT_LENGTH = 32;
+export const MAX_BODY_LENGTH = 10_000;
+
+/**
+ * True for an anchor sent by the page (T43): integer lines with 1 <= line <= endLine, a quote of at
+ * most 500 characters and a prefix and suffix of at most 32 each.
+ */
+export function isValidAnchor(value: unknown): value is CommentAnchor {
+  if (!isRecord(value)) return false;
+  const { line, endLine, quote, prefix, suffix } = value;
+  return isLine(line) && isLine(endLine) && endLine >= line
+    && typeof quote === "string" && quote.length <= MAX_QUOTE_LENGTH
+    && typeof prefix === "string" && prefix.length <= MAX_CONTEXT_LENGTH
+    && typeof suffix === "string" && suffix.length <= MAX_CONTEXT_LENGTH;
+}
+
+/** The trimmed body when it holds 1 to 10 000 characters, else undefined. */
+export function normalizeBody(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.length > MAX_BODY_LENGTH) return undefined;
+  const trimmed = value.trim();
+  return trimmed === "" ? undefined : trimmed;
+}
+
+/** Adds a thread with its first comment; undefined when the file is full or the id is taken. */
+export function addThread(
+  threads: readonly CommentThread[],
+  input: { threadId: string; commentId: string; anchor: CommentAnchor; author: string; body: string; now: Date },
+): CommentThread[] | undefined {
+  if (threads.length >= MAX_THREADS || threads.some((thread) => thread.id === input.threadId)) return undefined;
+  const createdAt = input.now.toISOString();
+  const { line, endLine, quote, prefix, suffix } = input.anchor;
+  return [...threads, {
+    id: input.threadId,
+    anchor: { line, endLine, quote, prefix, suffix },
+    resolved: false,
+    createdAt,
+    comments: [{ id: input.commentId, author: input.author, createdAt, body: input.body }],
+  }];
+}
+
+/** Appends a comment to a thread; undefined when the thread is missing or already full. */
+export function addReply(
+  threads: readonly CommentThread[],
+  threadId: string,
+  input: { commentId: string; author: string; body: string; now: Date },
+): CommentThread[] | undefined {
+  const target = threads.find((thread) => thread.id === threadId);
+  if (!target || target.comments.length >= MAX_COMMENTS_PER_THREAD) return undefined;
+  const comment: CommentEntry = {
+    id: input.commentId, author: input.author, createdAt: input.now.toISOString(), body: input.body,
+  };
+  return threads.map((thread) => (thread === target ? { ...thread, comments: [...thread.comments, comment] } : thread));
+}

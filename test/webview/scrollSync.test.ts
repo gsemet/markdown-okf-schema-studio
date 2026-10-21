@@ -398,6 +398,7 @@ function createRuntimeHarness(configuration: Partial<{
   initialEditMode: boolean;
   initialPaletteMode: "strict" | "gfm" | "myst";
   initialViewPreferences: ViewPreferences;
+  commentsEnabled: boolean;
   intersectionObserver: boolean;
   /** `navigator.platform` of the page (absent: no navigator, like a non-Apple platform). */
   platform: string;
@@ -1159,6 +1160,23 @@ test("runtime script cannot terminate its containing script element", () => {
   });
 
   assert.doesNotMatch(script, /<\/script>/iu);
+});
+
+test("T43: the Comment button and the reply box are installed only for writable previews", () => {
+  const source = (commentsEnabled: boolean) => createScrollSyncScript({
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    activeSourceFile: "/workspace/active.md",
+    commentsEnabled,
+  });
+  assert.match(source(true), /"commentsEnabled":true/u);
+  assert.match(source(false), /"commentsEnabled":false/u);
+  assert.match(source(true), /const commentsEnabled = context\.commentsEnabled === true;/u);
+  assert.match(source(true), /commentsEnabled \? \(\s*function installCommentCompose/u);
+  // Both pages load; the read-only one never lists a Comment button hook.
+  assert.doesNotThrow(() => createRuntimeHarness({ commentsEnabled: true }));
+  assert.doesNotThrow(() => createRuntimeHarness({ commentsEnabled: false }));
 });
 
 test("observes preview content instead of the document body", () => {

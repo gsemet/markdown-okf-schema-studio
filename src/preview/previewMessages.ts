@@ -12,6 +12,7 @@
  * must not import `vscode`.
  */
 
+import { isValidAnchor, MAX_BODY_LENGTH } from "../comments/commentModel";
 import { isValidLabelName } from "../mapping/labelRename";
 import { isBase64, MAX_PASTED_IMAGE_BASE64_LENGTH, PASTED_IMAGE_MIME_TYPES } from "../mapping/pastedImage";
 
@@ -77,6 +78,9 @@ const isHostRequest: MessageValidator = (message) =>
 const isPinViewportTop = (value: unknown): boolean => value === undefined
   || (typeof value === "number" && Number.isFinite(value) && Math.abs(value) <= 100000);
 
+const isCommentBody = (value: unknown): boolean =>
+  typeof value === "string" && value.length >= 1 && value.length <= MAX_BODY_LENGTH;
+
 const PALETTE_MODES = ["strict", "gfm", "myst"] as const;
 
 export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
@@ -111,6 +115,11 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
     && (message.insertAfterLine as number) >= 0
     && (message.pinLine === undefined || isSourceLine(message.pinLine))
     && isPinViewportTop(message.pinViewportTop),
+  // Review comments (T43): a new thread on a selection and a reply. The host picks the author, the
+  // ids and the time; it refuses read-only previews and writes the sidecar file.
+  previewCommentCreate: (message) => isValidAnchor(message.anchor) && isCommentBody(message.body),
+  previewCommentReply: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
+    && message.threadId !== "" && isCommentBody(message.body),
   // The MyST palette's pickers: labels of the document, citation keys of the workspace `.bib`
   // files, and a native open dialog for a `{doc}` path. They read only; the answer repeats `editId`.
   previewListTargets: isHostRequest,

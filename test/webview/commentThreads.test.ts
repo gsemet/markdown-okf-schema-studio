@@ -325,3 +325,129 @@ test("T42 r2: Escape stops propagation only when it closed a popover", () => {
   marks(document)[0].fire("click");
   assert.equal(document.fire("keydown", { key: "Escape", target: document }).stopped, 1);
 });
+
+function setupWithReply() {
+  const document = new FakeDocument();
+  const timers = new Map<number, () => void>();
+  let nextTimer = 1;
+  const window = {
+    innerWidth: 800, innerHeight: 600,
+    setTimeout: (callback: () => void) => { timers.set(nextTimer, callback); return nextTimer++; },
+    clearTimeout: (id: number) => { timers.delete(id); },
+  };
+  const replies: Array<[string, string]> = [];
+  const hooks = { reply: (threadId: string, body: string) => { replies.push([threadId, body]); } };
+  const sandbox = { document, window, hooks, Element: FakeElement, Date, Number, Array, Math };
+  const comments = vm.runInNewContext(`(${installCommentThreads.toString()})(document, window, hooks)`, sandbox) as
+    ReturnType<typeof installCommentThreads>;
+  const fireTimers = () => { for (const [id, callback] of [...timers]) { timers.delete(id); callback(); } };
+  return { document, comments, replies, fireTimers };
+}
+
+const popoverOf = (document: FakeDocument) => document.querySelector("[data-okf-comment-popover]")!;
+const sendButton = (document: FakeDocument) =>
+  popoverOf(document).querySelectorAll("button").find((candidate) => candidate.textContent === "Reply")!;
+
+test("T43: the popover has a reply box that posts the thread id and the trimmed body", () => {
+  const { document, comments, replies } = setupWithReply();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread({ id: "<t&1>" })]);
+  marks(document)[0].fire("click");
+  const input = popoverOf(document).querySelector("textarea")!;
+  assert.ok(input, "a reply box");
+  document.fire("click", { target: sendButton(document) });
+  assert.deepEqual(replies, [], "an empty reply is not sent");
+  (input as any).value = "  Because it is.  ";
+  document.fire("click", { target: sendButton(document) });
+  assert.deepEqual(replies, [["<t&1>", "Because it is."]], "the id is sent as data, unchanged");
+  assert.equal((input as any).value, "  Because it is.  ", "the text stays until the host answers");
+  assert.equal(sendButton(document).getAttribute("disabled"), "true");
+  document.fire("click", { target: sendButton(document) });
+  assert.equal(replies.length, 1, "no second send while waiting");
+  assert.equal(comments.result({ kind: "reply", threadId: "<t&1>", ok: true }), true);
+  assert.equal((input as any).value, "", "ok empties the box");
+  assert.equal(sendButton(document).hasAttribute("disabled"), false);
+});
+
+test("T43 r2: a refused reply keeps the text and shows the reason as text", () => {
+  const { document, comments, replies } = setupWithReply();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  const input = popoverOf(document).querySelector("textarea")!;
+  (input as any).value = "Keep me";
+  document.fire("click", { target: sendButton(document) });
+  assert.equal(comments.result({ kind: "reply", threadId: "other", ok: true }), false, "another thread's answer is ignored");
+  assert.equal(comments.result({ kind: "reply", threadId: "t1", ok: false, reason: "<i>unsaved changes</i>" }), true);
+  assert.equal((input as any).value, "Keep me");
+  const alert = popoverOf(document).querySelector("[data-okf-comment-error]")!;
+  assert.equal(alert.getAttribute("role"), "alert");
+  assert.equal(alert.textContent, "<i>unsaved changes</i>");
+  assert.equal(alert.childNodes.length, 1);
+  document.fire("click", { target: sendButton(document) });
+  assert.equal(replies.length, 2, "the reply can be sent again");
+});
+
+test("T43 r2: no answer keeps the text, says so, and a late ok still empties the box", () => {
+  const { document, comments, replies, fireTimers } = setupWithReply();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  const input = popoverOf(document).querySelector("textarea")!;
+  (input as any).value = "Slow";
+  document.fire("click", { target: sendButton(document) });
+  fireTimers();
+  assert.equal((input as any).value, "Slow");
+  assert.match(popoverOf(document).querySelector("[data-okf-comment-error]")!.textContent, /No answer/u);
+  assert.equal(sendButton(document).hasAttribute("disabled"), false);
+  assert.equal(replies.length, 1);
+  comments.result({ kind: "reply", threadId: "t1", ok: true });
+  assert.equal((input as any).value, "");
+});
+
+test("T43 r2: a reply draft survives the threads being posted again while the thread exists", () => {
+  const { document, comments } = setupWithReply();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  (popoverOf(document).querySelector("textarea") as any).value = "Half typed";
+  comments.setThreads([thread({ resolved: true })]);
+  assert.equal((popoverOf(document).querySelector("textarea") as any).value, "Half typed");
+  comments.setThreads([thread({ id: "other" })]);
+  assert.equal(document.querySelector("[data-okf-comment-popover]"), null, "thread gone: closed");
+});
+
+test("T43: Cmd/Ctrl+Enter sends a reply and keys typed in the reply box stay there", () => {
+  const { document, comments, replies } = setupWithReply();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  const input = popoverOf(document).querySelector("textarea")!;
+  (input as any).value = "ok";
+  const plain = document.fire("keydown", { key: "a", target: input });
+  assert.equal(plain.stopped, 1, "other handlers do not see typing");
+  document.fire("keydown", { key: "Enter", ctrlKey: true, target: input });
+  assert.deepEqual(replies, [["t1", "ok"]]);
+});
+
+test("T43: no reply box without a reply hook (read-only previews)", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  const popover = document.querySelector("[data-okf-comment-popover]")!;
+  assert.equal(popover.querySelector("textarea"), null);
+  assert.equal(popover.querySelectorAll("button").length, 0);
+});
+
+test("T43: a reply over 10000 characters is cut by the box and refused by the page", () => {
+  const { document, comments, replies } = setupWithReply();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  const input = popoverOf(document).querySelector("textarea")!;
+  assert.equal(input.getAttribute("maxlength"), "10000");
+  (input as any).value = "x".repeat(10_001);
+  document.fire("click", { target: sendButton(document) });
+  assert.deepEqual(replies, []);
+});

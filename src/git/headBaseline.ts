@@ -10,6 +10,8 @@ const MAX_CACHE_ENTRIES = 64;
 
 export interface GitRepositoryLike {
   show(ref: string, path: string): Promise<string>;
+  /** Optional: older Git extensions may lack it. */
+  getConfig?(key: string): Promise<string>;
   state: {
     HEAD?: { commit?: string };
     onDidChange(listener: () => void): { dispose(): void };
@@ -29,6 +31,8 @@ export interface GitExtensionLike<U> {
 export interface HeadBaseline<U> {
   /** The file at HEAD and the commit it was read at; undefined when there is nothing to compare. */
   read(uri: U, currentLength: number): Promise<{ commit: string; text: string } | undefined>;
+  /** The Git `user.name` that applies to the file's repository; undefined when unknown. */
+  userName(uri: U): Promise<string | undefined>;
   /**
    * Calls `listener` with the new commit id whenever the HEAD commit of the file's repository
    * changes (other state changes are ignored). Undefined when there is no repository.
@@ -72,6 +76,21 @@ export function createHeadBaseline<U extends { scheme: string; fsPath: string }>
         return { commit, text };
       } catch {
         // The file is not in HEAD (untracked) or Git failed: show nothing.
+        return undefined;
+      }
+    },
+    async userName(uri) {
+      if (uri.scheme !== "file") return undefined;
+      try {
+        const extension = getExtension();
+        if (!extension) return undefined;
+        if (!extension.isActive) await extension.activate();
+        const repository = repositoryOf(uri);
+        if (!repository || typeof repository.getConfig !== "function") return undefined;
+        const name = await repository.getConfig("user.name");
+        const trimmed = typeof name === "string" ? name.trim() : "";
+        return trimmed === "" ? undefined : trimmed;
+      } catch {
         return undefined;
       }
     },

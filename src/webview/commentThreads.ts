@@ -26,18 +26,31 @@ export interface PageCommentThread {
  * the properties table and open inline editors are never touched (O10). The last threads are
  * kept, so `apply()` puts them back on content that was replaced by a patch; it first removes what
  * an earlier run added, so running it twice changes nothing. Clicking a mark or badge opens a
- * popover with the thread (author, date, plain-text bodies, resolved state).
+ * popover with the thread (author, date, plain-text bodies, resolved state). When `hooks.reply`
+ * is given (writable previews only, T43), the popover ends with a reply box: Reply or
+ * Cmd/Ctrl+Enter hands the thread id and the trimmed text (1 to 10 000 characters) to the hook.
+ * The text stays in the box until the host answers `ok: true` through `result()`; a refusal shows
+ * its reason (`textContent`, role="alert") and keeps the text, and so does a missing answer after
+ * 15 seconds. A reply draft survives the threads being posted again while its thread exists.
  */
-export function installCommentThreads(document: Document, window: Window & typeof globalThis): {
+export function installCommentThreads(
+  document: Document,
+  window: Window & typeof globalThis,
+  hooks?: { reply?: (threadId: string, body: string) => void },
+): {
   setThreads(threads: unknown): void;
   apply(): void;
   close(): void;
   openThread(id: string): boolean;
+  /** Feeds a `previewCommentResult` of the host; true when it answered a reply. */
+  result(message: { kind?: unknown; threadId?: unknown; ok?: unknown; reason?: unknown }): boolean;
 } {
   const MARK = "data-okf-comment-thread";
   const BADGE = "data-okf-comment-badge";
   const BADGED = "data-okf-comment-badged";
   const POPOVER = "data-okf-comment-popover";
+  const REPLY_INPUT = "data-okf-comment-reply-input";
+  const REPLY_SEND = "data-okf-comment-reply-send";
   const SKIP = "pre, code, script, style, textarea, svg, .katex, .math, .math-inline, .math-display, "
     + ".myst-mermaid-figure, .myst-plantuml-figure, [data-okf-properties], "
     + ".okf-comment, .okf-chip, [data-sphinx-preview-block-editor], [data-sphinx-preview-editing], "
@@ -51,6 +64,9 @@ export function installCommentThreads(document: Document, window: Window & typeo
   let threads: PageCommentThread[] = [];
   let popover: Element | undefined;
   let openId: string | undefined;
+  const ANSWER_TIMEOUT_MS = 15000;
+  // The reply waiting for the host's answer; it outlives a rebuilt popover (threads posted again).
+  let sent: { threadId: string; body: string; timer?: number; waiting: boolean; error: string } | undefined;
 
   const text = (value: unknown): string => (typeof value === "string" ? value.slice(0, MAX_TEXT) : "");
 
@@ -88,6 +104,33 @@ export function installCommentThreads(document: Document, window: Window & typeo
       });
     }
     return result;
+  };
+
+  const replyInput = (): { value: string } | undefined =>
+    (popover?.querySelector(`[${REPLY_INPUT}]`) ?? undefined) as unknown as { value: string } | undefined;
+
+  // Shows the state of `sent` in the open popover: error line and Reply button.
+  const paintReply = (): void => {
+    if (!popover) return;
+    const reply = popover.querySelector("[data-okf-comment-reply]");
+    const send = popover.querySelector(`[${REPLY_SEND}]`);
+    if (!reply || !send) return;
+    const mine = sent !== undefined && sent.threadId === openId;
+    if (mine && sent!.timer !== undefined) send.setAttribute("disabled", "true");
+    else send.removeAttribute("disabled");
+    let line = popover.querySelector("[data-okf-comment-error]");
+    const text = mine ? sent!.error : "";
+    if (text === "") {
+      line?.remove();
+      return;
+    }
+    if (!line) {
+      line = document.createElement("div");
+      line.setAttribute("data-okf-comment-error", "true");
+      line.setAttribute("role", "alert");
+      reply.insertBefore(line, send);
+    }
+    line.textContent = text;
   };
 
   const close = (): void => {
@@ -237,6 +280,7 @@ export function installCommentThreads(document: Document, window: Window & typeo
     // An open popover stays open across a re-apply (a render re-posts the same threads) when its
     // thread is still there; the holder is the new mark or badge.
     const reopen = openId;
+    const draft = replyInput()?.value;
     close();
     clear();
     if (threads.length === 0) return;
@@ -246,7 +290,12 @@ export function installCommentThreads(document: Document, window: Window & typeo
     if (reopen !== undefined) {
       const holder = [...addedMarks, ...addedBadges].find((candidate) => idOf(candidate) === reopen);
       const thread = threads.find((candidate) => candidate.id === reopen);
-      if (holder && thread) open(thread, holder);
+      if (holder && thread) {
+        open(thread, holder);
+        const input = replyInput();
+        if (input && typeof draft === "string") input.value = draft;
+        paintReply();
+      }
     }
   };
 
@@ -302,10 +351,28 @@ export function installCommentThreads(document: Document, window: Window & typeo
       item.appendChild(body);
       root.appendChild(item);
     }
+    if (hooks && typeof hooks.reply === "function") {
+      const reply = document.createElement("div");
+      reply.setAttribute("data-okf-comment-reply", "true");
+      const input = document.createElement("textarea");
+      input.setAttribute(REPLY_INPUT, "true");
+      input.setAttribute("maxlength", String(MAX_TEXT));
+      input.setAttribute("rows", "2");
+      input.setAttribute("aria-label", "Reply to this thread");
+      input.setAttribute("placeholder", "Reply");
+      const send = document.createElement("button");
+      send.setAttribute("type", "button");
+      send.setAttribute(REPLY_SEND, "true");
+      send.textContent = "Reply";
+      reply.appendChild(input);
+      reply.appendChild(send);
+      root.appendChild(reply);
+    }
     document.body.appendChild(root);
     popover = root;
     openId = thread.id;
     position(target);
+    paintReply();
   };
 
   const holderOf = (target: Element): Element | null => target.closest(`[${MARK}], [${BADGE}]`);
@@ -329,6 +396,36 @@ export function installCommentThreads(document: Document, window: Window & typeo
     event.stopImmediatePropagation();
     if (event.type === "click") toggle(holder);
   };
+  // Sends the text of the reply box of the open popover. The text stays until the host says ok.
+  const sendReply = (input: Element): void => {
+    const field = input as unknown as { value: string };
+    const body = typeof field.value === "string" ? field.value.trim() : "";
+    if (body === "" || body.length > MAX_TEXT || openId === undefined || !hooks?.reply) return;
+    if (sent !== undefined && sent.timer !== undefined) return;
+    const threadId = openId;
+    sent = {
+      threadId,
+      body,
+      waiting: true,
+      error: "",
+      timer: window.setTimeout(() => {
+        if (!sent || sent.threadId !== threadId) return;
+        sent.timer = undefined;
+        sent.error = "No answer from the editor. Your text is kept: try Reply again.";
+        paintReply();
+      }, ANSWER_TIMEOUT_MS),
+    };
+    paintReply();
+    hooks.reply(threadId, body);
+  };
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    const send = target instanceof Element ? target.closest(`[${REPLY_SEND}]`) : null;
+    if (!send) return;
+    event.preventDefault();
+    const input = popover?.querySelector(`[${REPLY_INPUT}]`);
+    if (input) sendReply(input);
+  }, true);
   document.addEventListener("click", intercept, true);
   document.addEventListener("dblclick", intercept, true);
   document.addEventListener("keydown", (event) => {
@@ -336,6 +433,16 @@ export function installCommentThreads(document: Document, window: Window & typeo
     if (event.key === "Escape") {
       if (!popover) return;
       close();
+      event.stopImmediatePropagation();
+      return;
+    }
+    // Typing in the reply box stays in the box: no other key handler of the page sees it.
+    const field = target instanceof Element ? target.closest(`[${REPLY_INPUT}]`) : null;
+    if (field) {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !event.isComposing) {
+        event.preventDefault();
+        sendReply(field);
+      }
       event.stopImmediatePropagation();
       return;
     }
@@ -352,6 +459,24 @@ export function installCommentThreads(document: Document, window: Window & typeo
   }, true);
 
   return {
+    result(message) {
+      if (message.kind !== "reply" || !sent || !sent.waiting || message.threadId !== sent.threadId) return false;
+      if (sent.timer !== undefined) window.clearTimeout(sent.timer);
+      sent.timer = undefined;
+      sent.waiting = false;
+      if (message.ok === true) {
+        const answered = sent;
+        sent = undefined;
+        const input = replyInput();
+        // Only the text that was sent is removed; anything typed since stays.
+        if (input && openId === answered.threadId && input.value.trim() === answered.body) input.value = "";
+      } else {
+        sent.error = typeof message.reason === "string" && message.reason !== ""
+          ? message.reason.slice(0, 500) : "The reply was not saved.";
+      }
+      paintReply();
+      return true;
+    },
     setThreads(next) {
       threads = sanitize(next);
       apply();
