@@ -154,3 +154,20 @@ test("previewBlockMove validates both ranges, the direction and the optional pin
     assert.equal(isRegisteredPreviewMessage({ ...move, ...patch }), false, JSON.stringify(patch));
   }
 });
+
+test("T38: previewPasteImage caps the size and accepts plain base64 of an allowed type only", () => {
+  const base = {
+    type: "previewPasteImage", documentId: "doc", documentVersion: 1, requestId: 1,
+    editId: "host-1", mime: "image/png", dataBase64: "aGVsbG8=",
+  };
+  assert.equal(isRegisteredPreviewMessage(base), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, mime: "image/jpeg" }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, dataBase64: "A".repeat(14_000_000) }), true);
+  for (const patch of [
+    { dataBase64: "A".repeat(14_000_004) }, { dataBase64: "" }, { dataBase64: "data:image/png;base64,AAAA" },
+    { dataBase64: "AA AA" }, { dataBase64: "AAA" }, { dataBase64: 5 }, { dataBase64: undefined },
+    { mime: "image/svg+xml" }, { mime: "text/html" }, { mime: undefined }, { editId: "" }, { editId: undefined },
+  ]) {
+    assert.equal(isRegisteredPreviewMessage({ ...base, ...patch }), false, JSON.stringify(patch).slice(0, 60));
+  }
+});

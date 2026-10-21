@@ -13,6 +13,7 @@
  */
 
 import { isValidLabelName } from "../mapping/labelRename";
+import { isBase64, MAX_PASTED_IMAGE_BASE64_LENGTH, PASTED_IMAGE_MIME_TYPES } from "../mapping/pastedImage";
 
 export type MessageValidator = (message: Readonly<Record<string, unknown>>) => boolean;
 
@@ -104,6 +105,14 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   previewPickDocument: isHostRequest,
   // The image button and the Figure button: a native open dialog for an image file.
   previewPickImage: isHostRequest,
+  // An image pasted into the text box: its MIME type and bytes as plain base64. The host sniffs
+  // the bytes, picks the file name and writes next to the document; the page names nothing.
+  previewPasteImage: (message) => isHostRequest(message)
+    && isOneOf(message.mime, PASTED_IMAGE_MIME_TYPES as readonly string[])
+    && typeof message.dataBase64 === "string"
+    && message.dataBase64.length > 0
+    && message.dataBase64.length <= MAX_PASTED_IMAGE_BASE64_LENGTH
+    && isBase64(message.dataBase64),
 };
 
 export const isRegisteredPreviewMessage = createPreviewMessageChecker(REGISTERED_PREVIEW_MESSAGES);

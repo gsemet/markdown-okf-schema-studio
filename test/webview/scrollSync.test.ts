@@ -628,6 +628,19 @@ function createRuntimeHarness(configuration: Partial<{
   };
 
   const window = {
+    // Reads a pasted file synchronously: the test file carries its data URL.
+    FileReader: class {
+      public result: unknown;
+      public onload?: () => void;
+      public onerror?: () => void;
+      public readAsDataURL(file: { dataUrl?: string }): void {
+        if (file.dataUrl === undefined) this.onerror?.();
+        else {
+          this.result = file.dataUrl;
+          this.onload?.();
+        }
+      }
+    },
     getComputedStyle: () => ({
       getPropertyValue: (name: string): string => name === "--sphinx-preview-controls-height"
         ? String(controlsHeight) + "px"
@@ -9419,4 +9432,85 @@ test("T35: the cell group leaves with the editor", () => {
   const group = cellGroup(harness)!;
   control.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
   assert.equal(group.removed || group.parentElement === undefined || cellBar(harness).removed === true, true);
+});
+
+function pasteEvent(items: Array<Record<string, unknown>>, text = "") {
+  let prevented = false;
+  return {
+    event: {
+      clipboardData: { getData: (type: string) => (type === "text/plain" ? text : ""), items },
+      preventDefault: () => { prevented = true; },
+    },
+    wasPrevented: () => prevented,
+  };
+}
+
+function imageItem(type = "image/png", size = 8): Record<string, unknown> {
+  const file = { type, size, dataUrl: "data:" + type + ";base64,aGVsbG8=" };
+  return { kind: "file", type, getAsFile: () => file };
+}
+
+test("T38: pasting an image posts it to the host with the selection remembered", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "See  here";
+  textarea.selectionStart = 4;
+  textarea.selectionEnd = 4;
+  const paste = pasteEvent([imageItem()]);
+  textarea.dispatch("paste", paste.event);
+  assert.equal(paste.wasPrevented(), true);
+  const request = harness.messages.at(-1)!;
+  assert.equal(request.type, "previewPasteImage");
+  assert.equal(request.mime, "image/png");
+  assert.equal(request.dataBase64, "aGVsbG8=");
+  assert.equal(typeof request.editId, "string");
+  const status = harness.createdElements.find((element) => element.getAttribute("data-sphinx-preview-edit-status") !== null);
+  assert.equal(status?.textContent, "Saving image…");
+  harness.dispatchMessage({ type: "previewPasteImageResult", editId: request.editId, ok: true, fileName: "image.png" });
+  assert.equal(textarea.value, "See ![image.png](image.png) here");
+  assert.equal(textarea.value.slice(textarea.selectionStart, textarea.selectionEnd), "image.png");
+});
+
+test("T38: text on the clipboard wins over an image, and other items are ignored", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  const both = pasteEvent([imageItem()], "some text");
+  textarea.dispatch("paste", both.event);
+  assert.equal(both.wasPrevented(), false, "the native text paste stays");
+  const svg = pasteEvent([imageItem("image/svg+xml")]);
+  textarea.dispatch("paste", svg.event);
+  assert.equal(svg.wasPrevented(), false, "SVG is not an allowed type");
+  const none = pasteEvent([]);
+  textarea.dispatch("paste", none.event);
+  assert.equal(none.wasPrevented(), false);
+  assert.equal(harness.messages.length, before, "nothing was posted");
+});
+
+test("T38: an image over 10 MB is refused in the editor without a message to the host", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  const paste = pasteEvent([imageItem("image/png", 10 * 1024 * 1024 + 1)]);
+  textarea.dispatch("paste", paste.event);
+  assert.equal(paste.wasPrevented(), true);
+  assert.equal(harness.messages.length, before);
+  const status = harness.createdElements.find((element) => element.getAttribute("data-sphinx-preview-edit-status") !== null);
+  assert.match(String(status?.textContent), /larger than 10 MB/u);
+});
+
+test("T38: a reply for another edit is ignored and a refusal shows its reason", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "See ";
+  textarea.selectionStart = 4;
+  textarea.selectionEnd = 4;
+  textarea.dispatch("paste", pasteEvent([imageItem()]).event);
+  const request = harness.messages.at(-1)!;
+  harness.dispatchMessage({ type: "previewPasteImageResult", editId: "other-edit", ok: true, fileName: "image.png" });
+  assert.equal(textarea.value, "See ");
+  harness.dispatchMessage({ type: "previewPasteImageResult", editId: request.editId, ok: false, reason: "Save the document before pasting an image." });
+  assert.equal(textarea.value, "See ");
+  const status = harness.createdElements.find((element) => element.getAttribute("data-sphinx-preview-edit-status") !== null);
+  assert.equal(status?.textContent, "Save the document before pasting an image.");
 });

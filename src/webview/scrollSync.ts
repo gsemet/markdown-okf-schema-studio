@@ -16,6 +16,7 @@ import { createTextEditingTools } from "./textEditing";
 import { installCodeCopy } from "./codeCopy";
 import { installLabelRename } from "./labelRename";
 import { installHostRequests } from "./hostRequests";
+import { installPasteImage } from "./pasteImage";
 import { installFirstClearance } from "./firstClearance";
 import { applyFigureSizes } from "./figureSizes";
 import { applySpanColors, isSafeOkfColor } from "./spanColors";
@@ -167,6 +168,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
       requestId: context.requestId,
     }),
   });
+  // Pasting an image into the text box: the host saves it next to the document and names it.
+  const pasteImage = (${installPasteImage.toString()})(window);
   // Edit mode: the "Edit figure" button over a hovered figure opens its block editor with the form.
   const figureEditButton = (${installFigureEditButton.toString()})(document, window, {
     isEditMode: () => editMode,
@@ -3173,6 +3176,27 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       // A native dialog of the host (the {doc} file picker) took the focus: not leaving.
       if (hostRequests.isDialogOpen()) return;
       saveBlockEdit();
+    });
+    textarea.addEventListener("paste", (event) => {
+      pasteImage.handle(event, textarea, {
+        send: (mime, dataBase64, done) => hostRequests.ask(
+          "previewPasteImage", { mime, dataBase64 }, { timeoutMs: 30000 }, done),
+        status: (text) => { edit.status.textContent = text; },
+        isCurrent: () => activeBlockEdit === edit && !edit.finishing && edit.textarea === textarea,
+        restoreStatus: () => { edit.status.textContent = hint; },
+        insert: (name, start, end) => {
+          const length = textarea.value.length;
+          const from = Math.min(start, length);
+          const to = Math.max(from, Math.min(end, length));
+          applyTextEdit(textarea, {
+            start: from, end: to, text: "![" + name + "](" + name + ")",
+            selectionStart: from + 2, selectionEnd: from + 2 + name.length,
+          }, () => {
+            resizeTextarea();
+            autosaveBlockEdit();
+          });
+        },
+      });
     });
     edit.status.textContent = hint;
     edit.element.appendChild(textarea);

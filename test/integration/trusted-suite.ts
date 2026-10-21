@@ -13,6 +13,7 @@ import { run as runDirtySnapshots } from "./dirtySnapshots.test";
 import { run as runGenericMarkdown } from "./genericMarkdown.test";
 import { run as runPreviewEditing } from "./previewEditing.test";
 import { run as runImagePicker } from "./imagePicker.test";
+import { run as runImagePaste } from "./imagePaste.test";
 import { run as runIncomingChanges } from "./incomingChanges.test";
 import { run as runBlockMove } from "./blockMove.test";
 import { run as runLabelRename } from "./labelRename.test";
@@ -109,6 +110,7 @@ export async function run(): Promise<void> {
   await runBlockMove();
   await runMystPickers();
   await runImagePicker();
+  await runImagePaste();
   await runIncomingChanges();
   await runGenericMarkdown();
   await runDirtySnapshots();
