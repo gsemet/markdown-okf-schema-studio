@@ -44,6 +44,8 @@ export interface Scenario {
   inlineCodeChecks?: boolean;
   /** Table-cell identifiers stay on one line; the long paragraph identifier wraps without overflow. */
   inlineCodeNarrowChecks?: boolean;
+  /** T44: the Orphaned comments box adds no scroll height inside the bottom padding; a taller one extends it. */
+  orphanBoxChecks?: boolean;
   frontmatterLinkState?: "loading" | "loaded";
   hideDescriptionColumn?: boolean;
   contextTagChecks?: boolean;
@@ -1340,6 +1342,18 @@ export const SCENARIOS: Scenario[] = [
       + "corners, slightly smaller than the text, never a heavy black box; paragraph lines with code are "
       + "as tall as lines without; code inside links keeps the link colour and underline.",
   })),
+  {
+    id: "orphan-box-document-end",
+    fixture: "22-inline-code",
+    theme: "dark",
+    width: 900,
+    height: 400,
+    scroll: { kind: "bottom" },
+    orphanBoxChecks: true,
+    description: "End of the document with the Orphaned comments box added after the content. A box "
+      + "shorter than the bottom padding leaves the scrollable height unchanged and sits right under "
+      + "the last block; a taller one extends the page by the excess; removing it restores the height.",
+  },
   {
     id: "inline-code-narrow",
     fixture: "22-inline-code",

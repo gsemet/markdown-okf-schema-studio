@@ -451,3 +451,261 @@ test("T43: a reply over 10000 characters is cut by the box and refused by the pa
   document.fire("click", { target: sendButton(document) });
   assert.deepEqual(replies, []);
 });
+
+// ---- T44: resolve, delete, orphaned threads ----
+
+function setupWithActions() {
+  const document = new FakeDocument();
+  const timers = new Map<number, () => void>();
+  let nextTimer = 1;
+  const window = {
+    innerWidth: 800, innerHeight: 600,
+    setTimeout: (callback: () => void) => { timers.set(nextTimer, callback); return nextTimer++; },
+    clearTimeout: (id: number) => { timers.delete(id); },
+  };
+  const calls: Array<[string, ...unknown[]]> = [];
+  const hooks = {
+    reply: (threadId: string, body: string) => { calls.push(["reply", threadId, body]); },
+    resolve: (threadId: string, resolved: boolean) => { calls.push(["resolve", threadId, resolved]); },
+    remove: (threadId: string) => { calls.push(["delete", threadId]); },
+  };
+  const sandbox = { document, window, hooks, Element: FakeElement, Date, Number, Array, Math };
+  const comments = vm.runInNewContext(`(${installCommentThreads.toString()})(document, window, hooks)`, sandbox) as
+    ReturnType<typeof installCommentThreads>;
+  const fireTimers = () => { for (const [id, callback] of [...timers]) { timers.delete(id); callback(); } };
+  return { document, comments, calls, fireTimers };
+}
+
+const press = (document: FakeDocument, selector: string) => {
+  const target = document.querySelector(selector);
+  assert.ok(target, `${selector} exists`);
+  document.fire("click", { target });
+};
+const orphanBox = (document: FakeDocument) => document.querySelector("[data-okf-orphans]");
+const orphanItems = (document: FakeDocument) => document.querySelectorAll("[data-okf-comment-orphan]");
+
+test("T44: Resolve sends the flag, waits for ok, and the mark changes style after the re-post", () => {
+  const { document, comments, calls } = setupWithActions();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  const resolveButton = () => popoverOf(document).querySelector("[data-okf-comment-resolve]")!;
+  assert.equal(resolveButton().textContent, "Resolve");
+  press(document, "[data-okf-comment-resolve]");
+  assert.deepEqual(calls, [["resolve", "t1", true]]);
+  assert.equal(resolveButton().getAttribute("disabled"), "true", "no second send while waiting");
+  assert.equal(marks(document)[0].hasAttribute("data-okf-comment-resolved"), false, "no success assumed before ok");
+  assert.equal(comments.result({ kind: "resolve", threadId: "t1", ok: true }), true);
+  comments.setThreads([thread({ resolved: true })]);
+  assert.equal(marks(document)[0].getAttribute("data-okf-comment-resolved"), "true");
+  assert.equal(resolveButton().textContent, "Reopen", "the open popover now offers Reopen");
+  press(document, "[data-okf-comment-resolve]");
+  assert.deepEqual(calls[1], ["resolve", "t1", false]);
+});
+
+test("T44: a refused resolve shows the reason as text in an alert and can be retried", () => {
+  const { document, comments, calls, fireTimers } = setupWithActions();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  press(document, "[data-okf-comment-resolve]");
+  assert.equal(comments.result({ kind: "resolve", threadId: "other", ok: true }), false);
+  assert.equal(comments.result({ kind: "resolve", threadId: "t1", ok: false, reason: "<b>no write</b>" }), true);
+  const alert = popoverOf(document).querySelector("[data-okf-comment-action-error]")!;
+  assert.equal(alert.getAttribute("role"), "alert");
+  assert.equal(alert.textContent, "<b>no write</b>");
+  assert.equal(alert.childNodes.length, 1);
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-resolve]")!.hasAttribute("disabled"), false);
+  press(document, "[data-okf-comment-resolve]");
+  assert.equal(calls.length, 2);
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-action-error]"), null, "the error goes while retrying");
+  fireTimers();
+  assert.match(popoverOf(document).querySelector("[data-okf-comment-action-error]")!.textContent, /No answer/u);
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-resolve]")!.hasAttribute("disabled"), false);
+});
+
+test("T44: Delete asks inside the popover first; No cancels, Yes sends and waits for ok", () => {
+  const { document, comments, calls } = setupWithActions();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  press(document, "[data-okf-comment-delete]");
+  assert.deepEqual(calls, [], "the first press only asks");
+  const confirm = popoverOf(document).querySelector("[data-okf-comment-confirm]")!;
+  assert.match(confirm.textContent, /Delete thread\?/u);
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-delete]"), null, "Delete is replaced by the question");
+  press(document, "[data-okf-comment-delete-no]");
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-confirm]"), null);
+  assert.ok(popoverOf(document).querySelector("[data-okf-comment-delete]"));
+  assert.deepEqual(calls, []);
+  press(document, "[data-okf-comment-delete]");
+  press(document, "[data-okf-comment-delete-yes]");
+  assert.deepEqual(calls, [["delete", "t1"]]);
+  assert.equal(marks(document).length, 1, "the thread stays until the host re-posts the list");
+  press(document, "[data-okf-comment-delete-yes]");
+  assert.equal(calls.length, 1, "no second send while waiting");
+  comments.result({ kind: "delete", threadId: "t1", ok: true });
+  comments.setThreads([]);
+  assert.equal(marks(document).length, 0);
+  assert.equal(document.querySelector("[data-okf-comment-popover]"), null);
+});
+
+test("T44: a refused delete keeps the thread, shows the reason and returns to the buttons", () => {
+  const { document, comments } = setupWithActions();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  press(document, "[data-okf-comment-delete]");
+  press(document, "[data-okf-comment-delete-yes]");
+  comments.result({ kind: "delete", threadId: "t1", ok: false, reason: "the comments file is read-only" });
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-action-error]")!.textContent, "the comments file is read-only");
+  assert.ok(popoverOf(document).querySelector("[data-okf-comment-delete]"), "Delete is offered again");
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-confirm]"), null);
+  assert.equal(marks(document).length, 1);
+});
+
+test("T44: the pending question survives the threads being posted again", () => {
+  const { document, comments } = setupWithActions();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  press(document, "[data-okf-comment-delete]");
+  comments.setThreads([thread()]);
+  assert.ok(popoverOf(document).querySelector("[data-okf-comment-confirm]"));
+});
+
+test("T44: Escape closes the popover and forgets the question", () => {
+  const { document, comments } = setupWithActions();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  press(document, "[data-okf-comment-delete]");
+  document.fire("keydown", { key: "Escape" });
+  marks(document)[0].fire("click");
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-confirm]"), null);
+});
+
+test("T44: without resolve and delete hooks (read-only) the popover has neither button", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-resolve]"), null);
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-delete]"), null);
+  const reply = setupWithReply();
+  reply.document.add("p", { "data-line": "1" }, reply.document.content, "a needle b");
+  reply.comments.setThreads([thread()]);
+  marks(reply.document)[0].fire("click");
+  assert.equal(popoverOf(reply.document).querySelector("[data-okf-comment-resolve]"), null, "hooks decide, not the reply hook");
+});
+
+test("T44: a thread with no block at its line and no quote anywhere goes to the Orphaned comments box", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "1" }, document.content, "plain text");
+  comments.setThreads([
+    thread({ id: "gone", anchor: { line: 40, endLine: 40, quote: "<i>vanished</i>", prefix: "", suffix: "" } }),
+    thread({ id: "kept", anchor: { line: 1, endLine: 1, quote: "plain", prefix: "", suffix: "" } }),
+  ]);
+  const box = orphanBox(document)!;
+  assert.ok(box, "the box exists");
+  assert.match(box.textContent, /Orphaned comments/u);
+  const items = orphanItems(document);
+  assert.deepEqual(items.map((item) => item.getAttribute("data-okf-comment-orphan")), ["gone"]);
+  assert.match(items[0].textContent, /<i>vanished<\/i>/u, "the quote is shown as text");
+  assert.equal(items[0].querySelector("i"), null);
+  assert.equal(marks(document).length, 1, "the placed thread is not orphaned");
+  assert.equal(badges(document).length, 0);
+});
+
+test("T44: the box lives outside the content, after it, and is re-created after content is replaced", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "1" }, document.content, "plain");
+  comments.setThreads([thread({ id: "gone", anchor: { line: 9, endLine: 9, quote: "lost", prefix: "", suffix: "" } })]);
+  const box = orphanBox(document)!;
+  assert.equal(box.closest("main"), null, "not inside the patched content");
+  assert.equal(box.parentNode, document.body);
+  assert.equal(document.body.childNodes.indexOf(box), document.body.childNodes.indexOf(document.content) + 1, "right after the content");
+  // A patch replaces the content children and may drop anything else; apply() rebuilds the box.
+  document.content.textContent = "";
+  document.body.removeChild(box);
+  document.add("p", { "data-line": "1" }, document.content, "new text");
+  comments.apply();
+  assert.equal(document.querySelectorAll("[data-okf-orphans]").length, 1);
+  comments.apply();
+  assert.equal(document.querySelectorAll("[data-okf-orphans]").length, 1, "no duplicate box");
+  assert.equal(document.content.querySelectorAll("[data-okf-orphans]").length, 0);
+});
+
+const movedThread = (quote: string) => thread({ anchor: { line: 1, endLine: 1, quote, prefix: "", suffix: "" } });
+
+test("T44 r2: a long quote that occurs once elsewhere is placed, not orphaned", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "3", "data-end-line": "3" }, document.content, "move along, the unique needle phrase here");
+  comments.setThreads([movedThread("unique needle phrase")]);
+  assert.equal(marks(document).length, 1);
+  assert.equal(marks(document)[0].textContent, "unique needle phrase");
+  assert.equal(orphanBox(document), null, "no box when nothing is orphaned");
+});
+
+test("T44 r2: a quote repeated elsewhere is orphaned, not marked on the first copy", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "3", "data-end-line": "3" }, document.content, "a repeated phrase here");
+  document.add("p", { "data-line": "5", "data-end-line": "5" }, document.content, "again a repeated phrase there");
+  comments.setThreads([movedThread("repeated phrase")]);
+  assert.equal(marks(document).length, 0);
+  assert.equal(orphanItems(document).length, 1);
+  assert.equal(document.content.querySelectorAll("mark").length, 0);
+});
+
+test("T44 r2: a short quote is orphaned even when it occurs once elsewhere", () => {
+  const { document, comments } = setup();
+  document.add("p", { "data-line": "3", "data-end-line": "3" }, document.content, "move along, needle here");
+  comments.setThreads([movedThread("needle")]);
+  assert.equal(marks(document).length, 0);
+  assert.equal(orphanItems(document).length, 1);
+});
+
+test("T44 r2: a pending reply disables Resolve and Delete, and a pending resolve disables Reply", () => {
+  const { document, comments, calls } = setupWithActions();
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  (popoverOf(document).querySelector("textarea") as any).value = "Typed";
+  document.fire("click", { target: sendButton(document) });
+  assert.deepEqual(calls, [["reply", "t1", "Typed"]]);
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-resolve]")!.getAttribute("disabled"), "true");
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-delete]")!.getAttribute("disabled"), "true");
+  press(document, "[data-okf-comment-resolve]");
+  press(document, "[data-okf-comment-delete]");
+  assert.equal(calls.length, 1, "nothing else is sent while the reply is in flight");
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-confirm]"), null);
+  comments.result({ kind: "reply", threadId: "t1", ok: true });
+  assert.equal(popoverOf(document).querySelector("[data-okf-comment-resolve]")!.hasAttribute("disabled"), false);
+  press(document, "[data-okf-comment-resolve]");
+  (popoverOf(document).querySelector("textarea") as any).value = "Second";
+  assert.equal(sendButton(document).getAttribute("disabled"), "true");
+  document.fire("click", { target: sendButton(document) });
+  assert.equal(calls.length, 2, "no reply while a resolve is in flight");
+});
+
+test("T44: the box goes away when the orphan is resolved away, and its entries open the popover", () => {
+  const { document, comments, calls } = setupWithActions();
+  document.add("p", { "data-line": "1" }, document.content, "text");
+  comments.setThreads([thread({ id: "gone", resolved: true, anchor: { line: 9, endLine: 9, quote: "lost", prefix: "", suffix: "" } })]);
+  const item = orphanItems(document)[0];
+  assert.equal(item.getAttribute("data-okf-comment-resolved"), "true", "resolved orphans are styled");
+  item.fire("click");
+  assert.ok(popoverOf(document), "an orphan opens the popover (resolve and delete stay possible)");
+  press(document, "[data-okf-comment-resolve]");
+  assert.deepEqual(calls, [["resolve", "gone", false]]);
+  comments.setThreads([]);
+  assert.equal(orphanBox(document), null);
+  assert.equal(document.querySelector("[data-okf-comment-popover]"), null);
+});
+
+test("T44: orphans are never reported to the host as changes (the page only displays them)", () => {
+  const { document, comments, calls } = setupWithActions();
+  comments.setThreads([thread({ anchor: { line: 7, endLine: 7, quote: "lost", prefix: "", suffix: "" } })]);
+  comments.apply();
+  assert.deepEqual(calls, []);
+});

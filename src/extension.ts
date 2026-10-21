@@ -9,10 +9,12 @@ import { resolveAuthor } from "./comments/author";
 import {
   addReply,
   addThread,
+  deleteThread,
   isValidAnchor,
   MAX_SIDECAR_BYTES,
   normalizeBody,
   parseSidecar,
+  setResolved,
   sidecarNameFor,
   type CommentThread,
 } from "./comments/commentModel";
@@ -3104,6 +3106,8 @@ async function readCommentSidecarText(file: string): Promise<string | undefined>
   return new TextDecoder().decode(await vscode.workspace.fs.readFile(uri));
 }
 
+type CommentKind = "create" | "reply" | "resolve" | "delete";
+
 type CommentOutcome = { ok: true } | { ok: false; reason: string };
 
 /**
@@ -3151,7 +3155,7 @@ async function writeComment(
 /** Tells the page how a create or a reply ended; the text stays in the page until ok is true. */
 function postCommentResult(
   preview: ActivePreview,
-  kind: "create" | "reply",
+  kind: CommentKind,
   threadId: string | undefined,
   outcome: CommentOutcome,
 ): void {
@@ -3175,7 +3179,7 @@ function postCommentResult(
 
 async function answerComment(
   preview: ActivePreview,
-  kind: "create" | "reply",
+  kind: CommentKind,
   threadId: string | undefined,
   run: () => Promise<CommentOutcome>,
 ): Promise<void> {
@@ -3207,6 +3211,26 @@ function handleCommentReply(preview: ActivePreview, message: RegisteredPreviewMe
     return writeComment(preview, (author, now) => (threads) =>
       addReply(threads, threadId, { commentId: newId("c_"), author, body, now })
         ?? "the thread no longer exists or has too many comments");
+  });
+}
+
+function handleCommentResolve(preview: ActivePreview, message: RegisteredPreviewMessage): Promise<void> {
+  const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
+  const resolved = message.resolved === true;
+  return answerComment(preview, "resolve", threadId, async () => {
+    if (threadId === undefined) return { ok: false, reason: "the thread is unknown." };
+    return writeComment(preview, () => (threads) =>
+      setResolved(threads, threadId, resolved) ?? "the thread no longer exists");
+  });
+}
+
+function handleCommentDelete(preview: ActivePreview, message: RegisteredPreviewMessage): Promise<void> {
+  const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
+  return answerComment(preview, "delete", threadId, async () => {
+    if (threadId === undefined) return { ok: false, reason: "the thread is unknown." };
+    // The file stays, with an empty list, when the last thread goes.
+    return writeComment(preview, () => (threads) =>
+      deleteThread(threads, threadId) ?? "the thread no longer exists");
   });
 }
 
@@ -3375,7 +3399,9 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
 }
 
 /** Registered messages that ignore the document version (see handlePreviewSyncMessage). */
-const COMMENT_MESSAGE_TYPES: ReadonlySet<string> = new Set(["previewCommentCreate", "previewCommentReply"]);
+const COMMENT_MESSAGE_TYPES: ReadonlySet<string> = new Set([
+  "previewCommentCreate", "previewCommentReply", "previewCommentResolve", "previewCommentDelete",
+]);
 
 const registeredMessageHandlers = new Map<
   string,
@@ -3419,6 +3445,8 @@ registeredMessageHandlers.set("previewPickImage", handlePickImage);
 registeredMessageHandlers.set("previewPasteImage", handlePasteImage);
 registeredMessageHandlers.set("previewCommentCreate", handleCommentCreate);
 registeredMessageHandlers.set("previewCommentReply", handleCommentReply);
+registeredMessageHandlers.set("previewCommentResolve", handleCommentResolve);
+registeredMessageHandlers.set("previewCommentDelete", handleCommentDelete);
 
 function initialPaletteMode(): PaletteMode {
   const stored = editModeStorage?.get(PALETTE_MODE_STORAGE_KEY);

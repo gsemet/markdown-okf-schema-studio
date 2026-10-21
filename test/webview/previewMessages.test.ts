@@ -213,3 +213,19 @@ test("T43: previewCommentCreate and previewCommentReply validate anchor, id and 
     assert.equal(isRegisteredPreviewMessage({ ...reply, ...patch }), false, JSON.stringify(patch).slice(0, 60));
   }
 });
+
+test("T44: previewCommentResolve and previewCommentDelete validate the thread id and the flag", () => {
+  const base = { documentId: "doc", documentVersion: 1, requestId: 1, threadId: "t_0a0b0c0d" };
+  const resolve = { type: "previewCommentResolve", ...base, resolved: true };
+  assert.equal(isRegisteredPreviewMessage(resolve), true);
+  assert.equal(isRegisteredPreviewMessage({ ...resolve, resolved: false }), true);
+  for (const patch of [{ resolved: "yes" }, { resolved: undefined }, { resolved: 1 }, { threadId: "" },
+    { threadId: 3 }, { threadId: undefined }, { threadId: "t".repeat(10_001) }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...resolve, ...patch }), false, JSON.stringify(patch).slice(0, 60));
+  }
+  const remove = { type: "previewCommentDelete", ...base };
+  assert.equal(isRegisteredPreviewMessage(remove), true);
+  for (const patch of [{ threadId: "" }, { threadId: 3 }, { threadId: undefined }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...remove, ...patch }), false, JSON.stringify(patch).slice(0, 60));
+  }
+});

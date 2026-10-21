@@ -121,7 +121,11 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   });
   const commentsEnabled = context.commentsEnabled === true;
   const commentThreads = (${installCommentThreads.toString()})(document, window, commentsEnabled
-    ? { reply: (threadId, body) => postCommentMessage("previewCommentReply", { threadId, body }) }
+    ? {
+      reply: (threadId, body) => postCommentMessage("previewCommentReply", { threadId, body }),
+      resolve: (threadId, resolved) => postCommentMessage("previewCommentResolve", { threadId, resolved }),
+      remove: (threadId) => postCommentMessage("previewCommentDelete", { threadId }),
+    }
     : undefined);
   // The Comment button of a text selection (writable previews only, T43). Not shown while a block
   // editor is open or blocks are selected; it never changes the selection.
