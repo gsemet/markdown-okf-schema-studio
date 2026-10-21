@@ -1,12 +1,16 @@
 /**
  * Prunes old e2e run folders under `out/reports`: keeps the latest N per kind (folder prefix),
- * never the folders a LATEST pointer names, never a folder that holds a git-tracked file, and
+ * never the folders a LATEST pointer names, never a folder that holds a git-tracked file, never a
+ * folder modified in the last 15 minutes (a suite may still write it), and
  * never anything outside `out/reports` (symlinks included).
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
 
 export const DEFAULT_KEEP = 5;
+
+/** A run folder modified within this window may belong to a suite that is still writing it. */
+export const RECENT_PROTECTION_MS = 15 * 60 * 1000;
 
 /** The run folders of the real-window suites: `<kind>-<random suffix>`. */
 export const RUN_FOLDER_PATTERN = /^(checkbox-e2e|frontmatter-e2e|real-input|reload-e2e|scroll-e2e)-[A-Za-z0-9_]+$/u;
@@ -22,13 +26,17 @@ export interface PruneOptions {
   readonly protectedPaths?: readonly string[];
   /** Absolute paths of git-tracked files: a folder holding one is never removed. */
   readonly trackedPaths?: readonly string[];
+  /** Folders modified within this many ms are kept (default 15 minutes; 0 disables). */
+  readonly recentMs?: number;
+  /** Clock for the recent-folder rule (default `Date.now()`). */
+  readonly now?: number;
 }
 
 export interface PruneKindPlan {
   readonly kind: string;
   readonly dir: string;
   readonly kept: readonly string[];
-  /** Kept although outside the latest N (pointer or tracked file). */
+  /** Kept although outside the latest N (pointer, tracked file or modified in the last 15 minutes). */
   readonly protected: readonly string[];
   readonly removed: readonly string[];
 }
@@ -74,6 +82,7 @@ export function planPrune(options: PruneOptions): PruneKindPlan[] {
     .map((dir) => assertInsideReports(root, dir));
   const protectedSet = new Set((options.protectedPaths ?? []).map((entry) => realOrSelf(entry)));
   const tracked = (options.trackedPaths ?? []).map((entry) => realOrSelf(entry));
+  const recentSince = (options.now ?? Date.now()) - (options.recentMs ?? RECENT_PROTECTION_MS);
   const plans: PruneKindPlan[] = [];
   for (const dir of scanDirs) {
     if (!fs.existsSync(dir)) continue;
@@ -94,7 +103,11 @@ export function planPrune(options: PruneOptions): PruneKindPlan[] {
       for (const [position, folder] of folders.entries()) {
         const full = path.join(dir, folder.name);
         if (position < options.keep) kept.push(folder.name);
-        else if (protectedSet.has(realOrSelf(full)) || tracked.some((file) => isInside(full, file))) {
+        else if (
+          folder.mtime > recentSince
+          || protectedSet.has(realOrSelf(full))
+          || tracked.some((file) => isInside(full, file))
+        ) {
           kept.push(folder.name);
           guarded.push(folder.name);
         } else removed.push(folder.name);
@@ -112,7 +125,14 @@ export function applyPrune(plans: readonly PruneKindPlan[], reportsRoot: string)
   for (const plan of plans) {
     for (const name of plan.removed) {
       const full = path.join(plan.dir, name);
-      const stat = fs.lstatSync(full);
+      let stat: fs.Stats;
+      try {
+        stat = fs.lstatSync(full);
+      } catch (error) {
+        // Already gone (a concurrent prune): nothing to do, go on with the rest.
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") continue;
+        throw error;
+      }
       if (!stat.isDirectory() || stat.isSymbolicLink() || !RUN_FOLDER_PATTERN.test(name)) continue;
       assertInsideReports(root, full);
       fs.rmSync(full, { recursive: true, force: true });

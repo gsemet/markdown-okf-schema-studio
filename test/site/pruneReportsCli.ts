@@ -3,13 +3,30 @@ import * as path from "node:path";
 import { EXTENSION_ROOT, REPORTS_ROOT } from "../reportPaths";
 import { DEFAULT_KEEP, applyPrune, planPrune, pointerProtectedFolders, type PruneKindPlan } from "./reportPruner";
 
-export function trackedReportFiles(): string[] {
+type GitRunner = (args: readonly string[]) => string;
+
+const runGit: GitRunner = (args) => execFileSync("git", [...args], { cwd: EXTENSION_ROOT, encoding: "utf8" });
+
+/**
+ * Git-tracked files under `out/reports`. When git fails the tracked-file guard cannot work: warn
+ * and throw, so nothing is pruned (an empty list would silently switch the guard off).
+ */
+export function trackedReportFiles(git: GitRunner = runGit): string[] {
   try {
-    const output = execFileSync("git", ["ls-files", "-z", "--", "out/reports"], { cwd: EXTENSION_ROOT, encoding: "utf8" });
+    const output = git(["ls-files", "-z", "--", "out/reports"]);
     return output.split("\0").filter(Boolean).map((file) => path.join(EXTENSION_ROOT, file));
-  } catch {
-    return [];
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    console.warn(`git ls-files failed (${reason}): refusing to prune, tracked report files cannot be protected.`);
+    throw new Error(`refusing to prune: git ls-files failed (${reason})`);
   }
+}
+
+/** The automatic call of `review:finish` never keeps fewer than two runs per kind. */
+export const AUTOMATIC_MIN_KEEP = 2;
+
+export function automaticKeep(environment: NodeJS.ProcessEnv = process.env): number {
+  return Math.max(AUTOMATIC_MIN_KEEP, keepFromArguments([], environment));
 }
 
 /** Keep count: `--keep N`, else `STUDIO_E2E_KEEP_RUNS`, else 5. */

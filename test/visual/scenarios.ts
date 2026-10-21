@@ -8,6 +8,7 @@
 
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
 import { isGroupId, type GroupId } from "../shared/e2eGroups";
+import type { ScenarioRenderOptions } from "./renderOptions";
 import { ASSERTION_ONLY_IDS, LOCKS_BY_ID, README_BY_ID, REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID, STEPS_BY_ID } from "./scenarioIds";
 
 export type ScrollMode =
@@ -48,6 +49,8 @@ export interface Scenario {
   screenshotOf?: string;
   fixture: string;
   theme: string;
+  /** Options of the static page (read-only, strict fields, content width, ...). Default: the standard page. */
+  render?: ScenarioRenderOptions;
   plantumlExpectation?: "success" | "executable-not-found" | "unconfigured";
   linkDetailsChecks?: boolean;
   horizontalOverflow?: boolean;

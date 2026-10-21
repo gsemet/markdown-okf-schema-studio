@@ -43,22 +43,47 @@ function headRevision(): string | undefined {
   }
 }
 
+function worktreeStatus(): string | undefined {
+  try {
+    return execFileSync("git", ["status", "--short"], { cwd: EXTENSION_ROOT, encoding: "utf8" }).trim();
+  } catch {
+    return undefined;
+  }
+}
+
+/** Removes `gallery/*.md` pages the new output does not contain (a group that disappeared). */
+export function removeStaleGalleryPages(reportRoot: string, files: Readonly<Record<string, string>>): string[] {
+  const directory = path.join(reportRoot, "gallery");
+  if (!fs.existsSync(directory)) return [];
+  const removed: string[] = [];
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
+    if (Object.hasOwn(files, `gallery/${entry.name}`)) continue;
+    fs.rmSync(path.join(directory, entry.name));
+    removed.push(`gallery/${entry.name}`);
+  }
+  return removed;
+}
+
 export function generatePoGallery(): GalleryOutput {
   const manifestPath = path.join(E2E_SCREENSHOT_ROOT, "run-manifest.json");
   const manifest = fs.existsSync(manifestPath)
     ? JSON.parse(fs.readFileSync(manifestPath, "utf8")) as VisualManifest
     : undefined;
   const head = headRevision();
+  const status = worktreeStatus();
   const output = buildPoGallery({
     groups: GROUPS,
     scenarios: SCENARIOS,
     integrationTests: INTEGRATION_TESTS,
     ...(manifest === undefined ? {} : { manifest }),
     ...(head === undefined ? {} : { headRevision: head }),
+    ...(status === undefined ? {} : { worktreeStatus: status }),
     imageExists: (capture) => fs.existsSync(path.join(E2E_SCREENSHOT_ROOT, capture)),
     realWindow: latestRunLinks(),
     generatedAt: new Date().toISOString(),
   });
+  removeStaleGalleryPages(E2E_REPORT_ROOT, output.files);
   for (const [relative, content] of Object.entries(output.files)) {
     const target = path.join(E2E_REPORT_ROOT, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });

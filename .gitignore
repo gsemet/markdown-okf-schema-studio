@@ -8,6 +8,7 @@ __pycache__/
 .artifacts/
 /out/reports/
 /test/visual/screenshots/
+/test/visual/fixtures/gen-*.md
 *.vsix
 .agents/changes/
 .npmrc

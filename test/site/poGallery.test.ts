@@ -179,3 +179,12 @@ test("scenarios of an unknown group are reported on the index", () => {
   const output = build({ scenarios: [...scenarios, scenario("delta/v01-lost-dark-900")] });
   assert.match(output.files["GALLERY.md"]!, /belong to a group that is not in the group list.*delta\/v01-lost-dark-900/u);
 });
+
+test("a run made on a dirty tree, or a tree that changed since, is stale", () => {
+  assert.match(assessFreshness(scenarios, manifest({ worktreeStatus: " M a.ts\n?? b.ts" }), undefined).reasons.join("\n"), /uncommitted changes \(2 files\)/u);
+  assert.equal(assessFreshness(scenarios, manifest({ worktreeStatus: "" }), undefined, () => true, "").stale, false);
+  assert.match(assessFreshness(scenarios, manifest({ worktreeStatus: "" }), undefined, () => true, " M a.ts").reasons.join("\n"), /working tree changed since/u);
+  assert.equal(assessFreshness(scenarios, manifest({ worktreeStatus: " M a.ts" }), undefined, () => true, " M a.ts").reasons.length, 1);
+  // Not detectable (no status in the manifest): no reason.
+  assert.equal(assessFreshness(scenarios, manifest(), undefined, () => true, " M a.ts").stale, false);
+});

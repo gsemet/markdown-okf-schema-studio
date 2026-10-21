@@ -14,11 +14,12 @@ function fixture(): { reports: string; screenshots: string; cleanup: () => void 
   return { reports, screenshots, cleanup: () => fs.rmSync(base, { recursive: true, force: true }) };
 }
 
-function run(screenshots: string, name: string, ageSeconds: number): string {
+/** `ageSeconds` is relative to one hour ago, i.e. outside the 15 minute protection of recent folders. */
+function run(screenshots: string, name: string, ageSeconds: number, recent = false): string {
   const directory = path.join(screenshots, name);
   fs.mkdirSync(directory);
   fs.writeFileSync(path.join(directory, "01.png"), "x");
-  const time = new Date(Date.now() - ageSeconds * 1000);
+  const time = new Date(Date.now() - ageSeconds * 1000 - (recent ? 0 : 3600 * 1000));
   fs.utimesSync(directory, time, time);
   return directory;
 }
@@ -101,5 +102,37 @@ test("a symlinked run folder pointing outside is neither planned nor followed", 
   } finally {
     cleanup();
     fs.rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("a folder modified in the last 15 minutes is protected even beyond the latest N", () => {
+  const { reports, screenshots, cleanup } = fixture();
+  try {
+    run(screenshots, "scroll-e2e-new", 0, true);
+    run(screenshots, "scroll-e2e-mid", 60, true);
+    run(screenshots, "scroll-e2e-old", 0);
+    const [plan] = planPrune({ reportsRoot: reports, keep: 1 });
+    assert.deepEqual(plan!.kept, ["scroll-e2e-new", "scroll-e2e-mid"]);
+    assert.deepEqual(plan!.protected, ["scroll-e2e-mid"]);
+    assert.deepEqual(plan!.removed, ["scroll-e2e-old"]);
+    const [disabled] = planPrune({ reportsRoot: reports, keep: 1, recentMs: 0 });
+    assert.deepEqual(disabled!.removed, ["scroll-e2e-mid", "scroll-e2e-old"]);
+    const [later] = planPrune({ reportsRoot: reports, keep: 1, now: Date.now() + 16 * 60 * 1000 });
+    assert.deepEqual(later!.removed, ["scroll-e2e-mid", "scroll-e2e-old"]);
+  } finally {
+    cleanup();
+  }
+});
+
+test("apply skips a folder that vanished and goes on with the others", () => {
+  const { reports, screenshots, cleanup } = fixture();
+  try {
+    for (let index = 0; index < 4; index += 1) run(screenshots, `real-input-g${index}`, index * 10);
+    const plans = planPrune({ reportsRoot: reports, keep: 1 });
+    fs.rmSync(path.join(screenshots, "real-input-g1"), { recursive: true });
+    assert.equal(applyPrune(plans, reports), 2);
+    assert.deepEqual(fs.readdirSync(screenshots), ["real-input-g0"]);
+  } finally {
+    cleanup();
   }
 });

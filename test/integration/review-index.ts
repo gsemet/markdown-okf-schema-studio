@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { reviewIndexText } from "../site/reviewIndexText";
 import { generatePoGallery } from "../site/poGalleryCli";
-import { keepFromArguments, pruneReports } from "../site/pruneReportsCli";
+import { automaticKeep, pruneReports } from "../site/pruneReportsCli";
 import { validateReviewEvidence, type CampaignIdentity, type EvidenceManifest } from "../site/reviewEvidence";
 
 const artifacts = E2E_REPORT_ROOT;
@@ -65,7 +65,7 @@ function finishReview(): void {
   try {
     generatePoGallery();
     console.log(`PO gallery: ${path.join(artifacts, "GALLERY.md")}`);
-    pruneReports(keepFromArguments([]), false);
+    pruneReports(automaticKeep(), false);
   } catch (error) {
     console.warn(`PO gallery or pruning failed: ${error instanceof Error ? error.message : String(error)}`);
   }
