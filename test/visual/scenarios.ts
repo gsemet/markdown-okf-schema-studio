@@ -7,6 +7,8 @@
  */
 
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
+import type { GroupId } from "../shared/e2eGroups";
+import { GROUP_BY_SCENARIO_ID } from "./scenarioGroups";
 
 export type ScrollMode =
   | { kind: "top" }
@@ -15,8 +17,31 @@ export type ScrollMode =
   | { kind: "selector"; value: string; offset?: number }
   | { kind: "stickyHeading"; value: string };
 
+/** `readme` metadata: the scenario PNG is the source of an `images/readme/*.png` (crop box in PNG pixels). */
+export interface ReadmeSource {
+  file: string;
+  crop: [number, number, number, number];
+  width: number;
+  step?: string;
+}
+
 export interface Scenario {
   id: string;
+  /** Feature group (see `test/shared/e2eGroups.ts`); filled from `scenarioGroups.ts` when the list is built. */
+  group: GroupId;
+  /** One present-tense, observable sentence of what the scenario locks (raw material for the requirements). */
+  locks?: string;
+  /** `false`: assertion-only. Every check runs, no PNG, no step PNG, no sidecar. */
+  capture?: false;
+  /** Step PNGs to write (names in `STEP_NAMES` of capture.py). Omitted: every step the checks produce. */
+  steps?: string[];
+  /** Followup id of a product defect this scenario exposes: its failures are reported, not gating. */
+  knownIssue?: string;
+  /** Runs the Mermaid theme-switch check (cycles dark, white and cream and compares node colours). */
+  mermaidThemeSwitch?: true;
+  /** Shown first in its group page and in the index thumbnails. */
+  gallery?: "key";
+  readme?: ReadmeSource;
   screenshotOf?: string;
   fixture: string;
   theme: string;
@@ -121,6 +146,9 @@ export interface Scenario {
   description: string;
 }
 
+/** A scenario as written below: the group comes from `scenarioGroups.ts`. */
+type ScenarioDefinition = Omit<Scenario, "group">;
+
 const WIDE = { width: 900, height: 1000 };
 const NARROW = { width: 460, height: 900 };
 const XLARGE = { width: 1600, height: 1100 };
@@ -145,7 +173,7 @@ const FIRST_GAP_CASES = [
   ["empty", "20-empty-document", "empty"],
 ] as const;
 
-const FIRST_GAP_SCENARIOS: Scenario[] = [
+const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
   // Edit mode (first block editor open, Start writing) in the three pane widths.
   // (h3 at 460 px renders exactly like h2: the harness rejects identical screenshots.)
   ...FIRST_GAP_CASES.flatMap(([name, fixture, kind]) => [WIDE, NARROW, XLARGE]
@@ -247,7 +275,7 @@ const FIRST_GAP_SCENARIOS: Scenario[] = [
   }),
 ];
 
-export const SCENARIOS: Scenario[] = [
+const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
   {
     id: "handbook-dark-top",
     fixture: "01-handbook-overview",
@@ -514,6 +542,7 @@ export const SCENARIOS: Scenario[] = [
   ]),
   {
     id: "mermaid-map-dark",
+    mermaidThemeSwitch: true,
     fixture: "06-mermaid-map",
     theme: "dark",
     ...WIDE,
@@ -1086,10 +1115,12 @@ export const SCENARIOS: Scenario[] = [
     scroll: { kind: "top" },
     editMode: true,
     paletteModeShot: "myst",
+    // The -palette step equals edit-palette-*; the -insert-point step equals this scenario PNG: no step PNGs.
+    steps: [],
     machineChecks: ["overlay-clipped"],
     description:
-      "Palette mode MyST, light theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The -palette PNG is the bar above a paragraph editor, the "
-      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+      "Palette mode MyST, light theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The scenario PNG shows the bar in the editor opened from a + insertion point; "
+      + "the bar above a paragraph editor is the same as in edit-palette-*.",
   },
   {
     id: "palette-mode-myst-dark",
@@ -1099,10 +1130,12 @@ export const SCENARIOS: Scenario[] = [
     scroll: { kind: "top" },
     editMode: true,
     paletteModeShot: "myst",
+    // The -palette step equals edit-palette-*; the -insert-point step equals this scenario PNG: no step PNGs.
+    steps: [],
     machineChecks: ["overlay-clipped"],
     description:
-      "Palette mode MyST, dark theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The -palette PNG is the bar above a paragraph editor, the "
-      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+      "Palette mode MyST, dark theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The scenario PNG shows the bar in the editor opened from a + insertion point; "
+      + "the bar above a paragraph editor is the same as in edit-palette-*.",
   },
   {
     id: "slash-menu-strict-light",
@@ -1112,10 +1145,12 @@ export const SCENARIOS: Scenario[] = [
     scroll: { kind: "top" },
     editMode: true,
     slashMenuShot: { mode: "strict", finalQuery: "" },
+    // The -open step equals the scenario PNG (menu with only the slash typed): not written.
+    steps: ["filtered", "nomatch", "flip"],
     machineChecks: ["overlay-clipped"],
     description:
       "Slash command menu, palette mode strict, light theme: / at a line start opens the menu at the caret with the palette's commands "
-      + "grouped by category; the -open, -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with only the slash typed.",
+      + "grouped by category; the -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with only the slash typed.",
   },
   {
     id: "slash-menu-gfm-light",
@@ -1138,10 +1173,12 @@ export const SCENARIOS: Scenario[] = [
     scroll: { kind: "top" },
     editMode: true,
     slashMenuShot: { mode: "myst", finalQuery: "" },
+    // The -open step equals the scenario PNG (menu with only the slash typed): not written.
+    steps: ["filtered", "nomatch", "flip"],
     machineChecks: ["overlay-clipped"],
     description:
       "Slash command menu, palette mode myst, light theme: / at a line start opens the menu at the caret with the palette's commands "
-      + "grouped by category; the -open, -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with only the slash typed.",
+      + "grouped by category; the -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with only the slash typed.",
   },
   {
     id: "slash-menu-myst-dark",
@@ -1804,13 +1841,11 @@ export const SCENARIOS: Scenario[] = [
   }))),
 ];
 
-export function scenarioGroup(scenario: Scenario): string {
-  if (scenario.fixture === "14-frontmatter-links") return "05 Link details and loading";
-  if (scenario.fixture === "15-context-tags") return "02 Context tag containers";
-  if (scenario.editMode || scenario.editActivationScroll) return "06 Editing";
-  if (scenario.expectedStickyHeadings || scenario.scrollFeedbackStress) return "07 Scrolling and sticky headings";
-  if (/plantuml|mermaid/.test(scenario.fixture)) return "03 Diagrams";
-  if (/frontmatter|okf-schema|schema-validation|SKILL/.test(scenario.fixture)) return "04 Properties and validation";
-  if (/code|syntax|unresolved/.test(scenario.fixture)) return "02 Code and unresolved constructs";
-  return "01 Documents and admonitions";
-}
+/** Every scenario with its group; an id missing from `scenarioGroups.ts` is an error. */
+export const SCENARIOS: Scenario[] = SCENARIO_DEFINITIONS.map((definition) => {
+  const group = GROUP_BY_SCENARIO_ID[definition.id];
+  if (group === undefined) {
+    throw new Error(`scenario ${definition.id} has no group in test/visual/scenarioGroups.ts`);
+  }
+  return { ...definition, group };
+});

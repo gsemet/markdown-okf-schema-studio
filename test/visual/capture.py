@@ -13,6 +13,7 @@ indistinguishable from the page background.
 from __future__ import annotations
 
 import argparse
+import glob
 import hashlib
 import json
 import os
@@ -1042,6 +1043,7 @@ def sidecar_text(scenario: dict, position: str, result: dict) -> str:
 def sidecar_json(scenario: dict, position: str, result: dict) -> str:
     return json.dumps({
       "summary": scenario["description"],
+      **({"locks": scenario["locks"]} if scenario.get("locks") else {}),
       "info": {
         "id": scenario["id"],
         "fixture": scenario["fixture"] + ".md",
@@ -1907,7 +1909,7 @@ def check_editor_keyboard(page: Page, scenario: dict, failures: list[Failure]) -
   # C: select the first word and type * twice with the real keyboard.
   editor.evaluate("element => { element.focus(); element.setSelectionRange(0, 7); }")
   page.keyboard.type("*")
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-selected.png"), caret="hide")
+  save_step(page, scenario, "selected", caret="hide")
   if not editor.input_value().startswith("*Wrapped* "):
     failures.append(Failure(page_name, f"typing * on a selection did not wrap it: {editor.input_value()[:20]!r}"))
   page.keyboard.type("*")
@@ -2889,7 +2891,7 @@ def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None
     failures.append(Failure(page_name, f"copy button is not 6px inside the block's top right: {geometry}"))
   if geometry["overlaps"]:
     failures.append(Failure(page_name, "the copy button overlaps the floating toolbar"))
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-hover.png"), caret="hide")
+  save_step(page, scenario, "hover", caret="hide")
   expected = block.locator("code").evaluate("element => element.textContent")
   button.click()
   copied = page.evaluate(
@@ -2920,7 +2922,7 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
     failures.append(Failure(page_name, "hover did not mark the whole list"))
   elif hovered.evaluate("element => getComputedStyle(element).outlineStyle") != "dashed":
     failures.append(Failure(page_name, "hovered list has no dashed outline"))
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-hover.png"), caret="hide")
+  save_step(page, scenario, "hover", caret="hide")
 
   paragraph = page.locator("main > p[data-sphinx-source-line]").first
   paragraph.scroll_into_view_if_needed()
@@ -3026,7 +3028,7 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
   page.wait_for_timeout(150)
   paragraph.click()
   pick_and_check("paragraph editor")
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-palette.png"), caret="hide")
+  save_step(page, scenario, "palette", caret="hide")
   page.keyboard.press("Escape")
   page.wait_for_timeout(200)
   if page.locator(".sphinx-preview-block-editor").count() != 0:
@@ -3037,7 +3039,7 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
   point.evaluate("element => element.scrollIntoView({ block: 'center' })")
   point.click(force=True)
   pick_and_check("insertion point editor")
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-insert-point.png"), caret="hide")
+  save_step(page, scenario, "insert-point", caret="hide", unless_final_frame=True)
   # The editor stays open: the scenario's own PNG then shows this mode, not a mode-less page.
 
 
@@ -3119,7 +3121,7 @@ def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> Non
     if flip["placement"] != "above":
       failures.append(Failure(page_name, f"near the bottom the menu is {flip['placement']}, expected above"))
     inside("near the bottom", flip)
-    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-flip.png"), caret="hide")
+    save_step(page, scenario, "flip", caret="hide")
   page.keyboard.press("Escape")
   page.keyboard.press("Escape")
   page.wait_for_timeout(250)
@@ -3151,7 +3153,7 @@ def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> Non
   if not opened["live"] or "commands" not in opened["live"]:
     failures.append(Failure(page_name, f"live region reads {opened['live']!r}"))
   inside("open", opened)
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-open.png"), caret="hide")
+  save_step(page, scenario, "open", caret="hide")
 
   page.keyboard.type("h")
   page.wait_for_timeout(120)
@@ -3160,7 +3162,7 @@ def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> Non
     failures.append(Failure(page_name, f"typing h did not narrow the list: {filtered and len(filtered['ids'])} of {len(opened['ids'])}"))
   else:
     inside("filtered", filtered)
-    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-filtered.png"), caret="hide")
+    save_step(page, scenario, "filtered", caret="hide")
 
   page.keyboard.type("zz")
   page.wait_for_timeout(120)
@@ -3169,7 +3171,7 @@ def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> Non
     failures.append(Failure(page_name, "no No command row for an unmatched query"))
   else:
     inside("no match", none)
-    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-nomatch.png"), caret="hide")
+    save_step(page, scenario, "nomatch", caret="hide")
 
   for _ in range(4):
     page.keyboard.press("Backspace")
@@ -3234,7 +3236,7 @@ def check_edit_palette_tall(page: Page, scenario: dict, failures: list[Failure])
     failures.append(Failure(page_name, f"the palette is not attached on top of the box: {top}"))
   if top["covered"]:
     failures.append(Failure(page_name, f"the palette is covered at the box top: {top}"))
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-top.png"), caret="hide")
+  save_step(page, scenario, "top", caret="hide")
 
   def check_stuck(label: str, state: dict) -> None:
     usable = 0.0
@@ -3309,7 +3311,7 @@ def check_edit_palette_tall(page: Page, scenario: dict, failures: list[Failure])
   end = page.evaluate(measure)
   if end["bar"]["bottom"] > end["host"]["bottom"] + 0.5:
     failures.append(Failure(page_name, f"the palette is below the end of the box: {end}"))
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-end.png"), caret="hide")
+  save_step(page, scenario, "end", caret="hide")
   # The scenario PNG shows the stuck palette mid-box.
   page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 700)
   page.wait_for_timeout(200)
@@ -3416,7 +3418,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   if editor.locator("textarea").input_value().startswith("**"):
     failures.append(Failure(page_name, "Undo after Bold did not restore the text"))
   page.mouse.move(2, 2)
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-bar.png"), caret="hide")
+  save_step(page, scenario, "bar", caret="hide")
 
   # The heading list opens inside the frame, Escape closes it and leaves the editor open.
   palette.locator("button[data-edit-action='heading']").click()
@@ -3432,7 +3434,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
     }""")
     if box["left"] < box["frameLeft"] - 0.5 or box["right"] > box["frameRight"] + 0.5:
       failures.append(Failure(page_name, f"the heading list leaves the editor frame: {box}"))
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-menu.png"), caret="hide")
+  save_step(page, scenario, "menu", caret="hide")
   page.keyboard.press("Escape")
   page.wait_for_timeout(100)
   if page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu").count() != 0:
@@ -3469,7 +3471,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
       failures.append(Failure(page_name, f"a lit grid cell looks like an unlit one: {grid_state}"))
     if grid_state["left"] < grid_state["frameLeft"] - 0.5 or grid_state["right"] > grid_state["frameRight"] + 0.5:
       failures.append(Failure(page_name, f"the table grid leaves the editor frame: {grid_state}"))
-    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-grid.png"), caret="hide")
+    save_step(page, scenario, "grid", caret="hide")
     page.keyboard.press("Escape")
     page.wait_for_timeout(100)
     if page.locator(".sphinx-preview-block-editor-host").locator(".sphinx-preview-edit-palette-menu").count() != 0 or editor.count() != 1:
@@ -3494,7 +3496,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
       failures.append(Failure(page_name, f"the emoji picker is not ready: {picker_state}"))
     if picker_state["left"] < picker_state["frameLeft"] - 0.5 or picker_state["right"] > picker_state["frameRight"] + 0.5:
       failures.append(Failure(page_name, f"the emoji picker leaves the editor frame: {picker_state}"))
-    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-emoji.png"), caret="hide")
+    save_step(page, scenario, "emoji", caret="hide")
     page.keyboard.type("warning")
     page.wait_for_timeout(100)
     shown = picker.locator("[data-emoji]:not([hidden])").count()
@@ -3530,7 +3532,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
       failures.append(Failure(page_name, f"the alert was not written with the focus kept: {alert_state}"))
     if alert_state["left"] < alert_state["frameLeft"] - 0.5 or alert_state["top"] < alert_state["areaTop"]:
       failures.append(Failure(page_name, f"the alert type list is not next to the text: {alert_state}"))
-    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-alert.png"), caret="hide")
+    save_step(page, scenario, "alert", caret="hide")
     alert_list.locator("[data-edit-option='WARNING']").click()
     page.wait_for_timeout(100)
     changed = page.evaluate("""() => {
@@ -3566,7 +3568,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
       failures.append(Failure(page_name, f"the colour picker leaves the editor frame: {colour_state}"))
     if colour_state["swatchWidth"] < 12 or colour_state["swatchHeight"] < 12:
       failures.append(Failure(page_name, f"the colour swatches are too small: {colour_state}"))
-    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-colour.png"), caret="hide")
+    save_step(page, scenario, "colour", caret="hide")
     colour_menu.locator("[data-color-swatch]").nth(0).click()
     page.wait_for_timeout(100)
     coloured = page.evaluate("""() => {
@@ -3589,7 +3591,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   if not code_button.is_visible():
     failures.append(Failure(page_name, "the colour-code swatch is hidden with the caret in a colour code"))
   else:
-    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-colour-code.png"), caret="hide")
+    save_step(page, scenario, "colour-code", caret="hide")
 
   # Closing puts the block back where it was before the editor opened (no jump by the bar height).
   page.keyboard.press("Escape")
@@ -3652,7 +3654,7 @@ def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolba
     failures.append(Failure(page_name, f"the merged cell bar covers the table: {geometry}"))
   if scenario["width"] <= 400 and geometry["rows"] < 2:
     failures.append(Failure(page_name, f"the cell bar did not wrap at {scenario['width']} px: {geometry}"))
-  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-cell-bar.png"), caret="hide")
+  save_step(page, scenario, "cell-bar", caret="hide")
   # A formatting button keeps the cell editor open and focused, and the text changes in the cell.
   area = page.locator("[data-sphinx-preview-table-cell-editor] textarea")
   area.focus()
@@ -3680,7 +3682,7 @@ def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolba
     }""")
     if box["left"] < -0.5 or box["right"] > box["viewport"] + 0.5:
       failures.append(Failure(page_name, f"the emoji picker leaves the viewport: {box}"))
-    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-cell-emoji.png"), caret="hide")
+    save_step(page, scenario, "cell-emoji", caret="hide")
   page.keyboard.press("Escape")
   page.wait_for_timeout(100)
   if group.locator(".sphinx-preview-edit-palette-menu").count() != 0 or page.locator("[data-sphinx-preview-table-cell-editor]").count() != 1:
@@ -4149,7 +4151,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
         return
       check_cell_editor_chrome(page, page_name, target, original_cell_bounds, failures)
       check_cell_end_key(page, page_name, wide_input, failures)
-      page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-end.png"), caret="initial")
+      save_step(page, scenario, "end", caret="initial")
       wide_input.press("Escape")
       return
 
@@ -4336,9 +4338,11 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       }"""):
         failures.append(Failure(page_name, "multi-cell autosave did not preserve all changes in one table edit session"))
       check_cell_end_key(page, page_name, cell_input, failures)
-      page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-end.png"), caret="initial")
       # The scenario's final frame is taken after Escape closed the editor; keep the open state too.
-      page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-open.png"), caret="initial")
+      # The End key moves the caret inside the cell and changes nothing visible: -end is kept only
+      # when it differs from -open (the End-key assertion above runs either way).
+      save_step(page, scenario, "open", caret="initial")
+      save_step(page, scenario, "end", caret="initial", unless_same_as="open")
       # ArrowDown on the last line moves the editor to the cell below in the same column.
       before = cell_input.evaluate("""element => {
         const cell = element.closest('td, th');
@@ -4361,7 +4365,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
         failures.append(Failure(page_name, f"ArrowDown did not move the cell editor to the cell below: {before} -> {moved}"))
       else:
         check_cell_editor_chrome(page, page_name, None, None, failures)
-      page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-arrowdown.png"), caret="initial")
+      save_step(page, scenario, "arrowdown", caret="initial")
       cell_input = page.locator("[data-sphinx-preview-table-cell-editor] textarea")
       cell_input.press("Escape")
       if not page.evaluate("""() => {
@@ -5037,7 +5041,7 @@ def check_tooltip_contrast(page: Page, scenario: dict, failures: list[Failure]) 
 
 
 def check_mermaid_theme_switch(page: Page, scenario: dict, failures: list[Failure]) -> None:
-  if scenario["id"] != "mermaid-map-dark":
+  if not scenario.get("mermaidThemeSwitch"):
     return
   original_mode = page.locator("html").get_attribute("data-sphinx-preview-theme-mode")
   original_labels = None
@@ -5076,7 +5080,96 @@ def check_mermaid_theme_switch(page: Page, scenario: dict, failures: list[Failur
       failures.append(Failure(scenario["page"], f"Mermaid theme {mode} lost diagram labels"))
 
 
+# Every step PNG a check can write (`<scenario id>-<step>.png`). A scenario's `steps` list selects
+# which of them are written; the other steps are skipped silently (their check still runs) and a
+# name that is not in this registry fails the check that asks for it.
+STEP_NAMES = frozenset({"alert", "arrowdown", "bar", "cell-bar", "cell-emoji", "colour", "colour-code", "emoji", "end", "filtered", "flip", "grid", "hover", "insert-point", "menu", "nomatch", "open", "palette", "selected", "top"})
+
+
+def save_step(page: Page, scenario: dict, step: str, caret: str = "hide",
+              unless_same_as: str | None = None, unless_final_frame: bool = False) -> str | None:
+  """Write one step PNG of the scenario, or skip it. Returns the file name when written.
+
+  Skipped: alias scenarios (`screenshotOf`, same page as their canonical scenario), scenarios
+  with `capture: false`, steps missing from the scenario's `steps` list, a step byte-identical to
+  the step named by `unless_same_as`, and (decided after the final frame) a step identical to the
+  scenario's own PNG when `unless_final_frame` is set.
+  """
+  if step not in STEP_NAMES:
+    raise ValueError(f"unknown step name {step!r}: register it in STEP_NAMES")
+  allowed = scenario.get("steps")
+  if scenario.get("screenshotOf") or scenario.get("capture") is False or (allowed is not None and step not in allowed):
+    page.check_trace.bump()  # the check still counts as having worked on the page
+    return None
+  recorder: StepRecorder = page.step_recorder
+  data = page.screenshot(caret=caret)
+  digest = hashlib.sha256(data).hexdigest()
+  recorder.digests[step] = digest
+  if unless_same_as is not None and recorder.digests.get(unless_same_as) == digest:
+    recorder.skipped.append({"step": step, "reason": f"identical to {unless_same_as}"})
+    return None
+  name = f"{scenario['id']}-{step}.png"
+  (SCREENSHOT_DIR / name).write_bytes(data)
+  recorder.written.append({"file": name, "step": step, "dropIfFinal": unless_final_frame})
+  return name
+
+
+class StepRecorder:
+  """Step PNGs of one scenario run: digests of what was taken, files written, steps skipped."""
+
+  def __init__(self) -> None:
+    self.digests: dict[str, str] = {}
+    self.written: list[dict] = []
+    self.skipped: list[dict] = []
+
+  def settle(self, final_png: pathlib.Path | None) -> None:
+    """Drop the `unless_final_frame` steps that equal the scenario's own PNG."""
+    final = hashlib.sha256(final_png.read_bytes()).hexdigest() if final_png and final_png.exists() else None
+    kept = []
+    for entry in self.written:
+      if entry["dropIfFinal"] and final is not None and self.digests.get(entry["step"]) == final:
+        (SCREENSHOT_DIR / entry["file"]).unlink(missing_ok=True)
+        self.skipped.append({"step": entry["step"], "reason": "identical to the scenario PNG"})
+      else:
+        kept.append({"file": entry["file"], "step": entry["step"]})
+    self.written = kept
+
+
+TRACED_PAGE_METHODS = ("evaluate", "locator", "wait_for_function", "add_style_tag", "screenshot", "wait_for_selector")
+
+
+class CheckTrace:
+  """Counts the browser interactions each check performs: a check that returns early counts 0."""
+
+  def __init__(self) -> None:
+    self.current: str | None = None
+    self.counts: dict[str, int] = {}
+
+  def bump(self) -> None:
+    if self.current is not None:
+      self.counts[self.current] = self.counts.get(self.current, 0) + 1
+
+  def attach(self, page: Page) -> None:
+    for method in TRACED_PAGE_METHODS:
+      original = getattr(page, method)
+
+      def traced(*args, _original=original, **kwargs):
+        self.bump()
+        return _original(*args, **kwargs)
+
+      setattr(page, method, traced)
+
+  def run(self, name: str, call):
+    self.counts.setdefault(name, 0)
+    previous, self.current = self.current, name
+    try:
+      return call()
+    finally:
+      self.current = previous
+
+
 def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: dict) -> str:
+  trace: CheckTrace = page.check_trace
   expected_mermaid = count_mermaid_blocks(scenario["fixture"])
   if expected_mermaid:
     page.wait_for_function(
@@ -5145,10 +5238,10 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
     check_math_rendering, check_bare_urls, check_inline_code, check_inline_code_narrow, check_orphan_box, check_content_contracts,
   ):
     try:
-      check(page, scenario, failures)
+      trace.run(check.__name__, lambda check=check: check(page, scenario, failures))
     except Exception as error:
       failures.append(Failure(scenario["page"], f"{check.__name__}: {error}"))
-  for detail in page.evaluate(checks):
+  for detail in trace.run("page_checks", lambda: page.evaluate(checks)):
     failures.append(Failure(scenario["page"], detail))
   initial_top = page.locator("#sphinx-myst-preview-content").evaluate(
     "element => element.getBoundingClientRect().top + scrollY"
@@ -5162,13 +5255,14 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:
-      check(page, scenario, failures)
-      result["actions"].append(check.__name__)
+      trace.run(check.__name__, lambda check=check: check(page, scenario, failures))
+      if trace.counts.get(check.__name__):  # only checks that worked on the page (H5)
+        result["actions"].append(check.__name__)
     except Exception as error:
       failures.append(Failure(scenario["page"], f"{check.__name__}: {error}"))
   page.wait_for_timeout(120)
   if scenario.get("editTarget") in {"frontmatter-key", "frontmatter-value"}:
-    pin_frontmatter_capture(page, scenario, failures)
+    trace.run("pin_frontmatter_capture", lambda: pin_frontmatter_capture(page, scenario, failures))
   if scenario.get("editTarget") == "frontmatter-key":
     key_input = page.locator('input[aria-label="Frontmatter key status"][list]')
     if key_input.count() != 1:
@@ -5179,8 +5273,8 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
       page.wait_for_timeout(100)
       show_schema_key_suggestions(page, scenario, failures)
   if scenario.get("expectedStickyHeadings"):
-    check_sticky_headings(page, scenario, failures, initial_top)
-  check_tooltip_contrast(page, scenario, failures)
+    trace.run("check_sticky_headings", lambda: check_sticky_headings(page, scenario, failures, initial_top))
+  trace.run("check_tooltip_contrast", lambda: check_tooltip_contrast(page, scenario, failures))
   return position
 
 
@@ -5193,7 +5287,7 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
             for scenario in scenarios:
                 start_failures = len(failures)
                 result = {"id": scenario["id"], "sequence": scenario.get("sequence"),
-                          "group": scenario.get("group", "Review"), "screenshotOf": scenario.get("screenshotOf"),
+                          "group": scenario["group"], "screenshotOf": scenario.get("screenshotOf"),
                           "expectedContent": scenario["description"],
                           "actions": [], "finalState": {}}
                 context = browser.new_context(
@@ -5203,6 +5297,11 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                 if scenario.get("mathRenderingChecks"):
                     context.set_offline(True)
                 page = context.new_page()
+                trace = CheckTrace()
+                trace.attach(page)
+                page.check_trace = trace
+                steps = StepRecorder()
+                page.step_recorder = steps
                 position = "setup failed before scrolling"
                 try:
                     page.goto((page_directory / scenario["page"]).as_uri())
@@ -5212,14 +5311,22 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                     failures.append(Failure(scenario["page"], f"scenario exception: {error}"))
                 try:
                   if scenario.get('frontmatterLinkState'):
-                    check_deferred_frontmatter_links(page, scenario, failures)
-                  result["finalState"] = check_final_frame(page, scenario, failures)
+                    trace.run("check_deferred_frontmatter_links_final", lambda: check_deferred_frontmatter_links(page, scenario, failures))
+                  result["finalState"] = trace.run("check_final_frame", lambda: check_final_frame(page, scenario, failures))
                 except Exception as error:
                     failures.append(Failure(scenario["page"], f"final frame unavailable: {error}"))
+                result["checkTrace"] = dict(sorted(trace.counts.items()))
                 result["failures"] = [failure.detail for failure in failures[start_failures:]]
+                if scenario.get("knownIssue") and result["failures"]:
+                    # A scenario that exposes a known product defect reports its failures without gating.
+                    result["knownIssue"] = scenario["knownIssue"]
+                    result["knownIssueFailures"] = result["failures"]
+                    del failures[start_failures:]
+                    result["failures"] = []
                 result["status"] = "failed" if result["failures"] else "passed"
                 target = SCREENSHOT_DIR / f"{scenario['id']}.png"
-                if not scenario.get("screenshotOf"):
+                result["captures"] = []
+                if not scenario.get("screenshotOf") and scenario.get("capture") is not False:
                   try:
                     page.screenshot(
                       path=str(target),
@@ -5227,6 +5334,7 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                       caret="initial" if scenario.get("editTarget") else "hide",
                     )
                     result["capture"] = target.name
+                    result["captures"].append({"file": target.name, "step": None})
                   except Exception as error:
                     detail = f"screenshot unavailable: {error}"
                     failures.append(Failure(scenario["page"], detail))
@@ -5235,6 +5343,15 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                   target.with_suffix(".json").write_text(
                     sidecar_json(scenario, f"final y={result['finalState'].get('scrollY', 'unknown')}; {position}", result), encoding="utf-8"
                   )
+                steps.settle(target if result.get("capture") else None)
+                for entry in steps.written:
+                  (SCREENSHOT_DIR / entry["file"]).with_suffix(".json").write_text(json.dumps({
+                    "summary": f"{scenario['description']} Step: {entry['step']}.",
+                    "info": {"id": scenario["id"], "step": entry["step"], "status": result["status"]},
+                  }, indent=2) + "\n", encoding="utf-8")
+                  result["captures"].append(entry)
+                if steps.skipped:
+                  result["stepsSkipped"] = steps.skipped
                 results.append(result)
                 print(f"{result['status']}: {scenario['id']}" + (f" (alias of {scenario['screenshotOf']})" if scenario.get("screenshotOf") else ""), flush=True)
                 context.close()
@@ -5256,6 +5373,12 @@ def main() -> int:
         "--workers", type=int, choices=range(1, 5), default=4,
         help="Number of independent screenshot threads (default: 4).",
     )
+    parser.add_argument(
+        "--group",
+        action="append",
+        dest="group_ids",
+        help="Capture only the scenarios of this group; may be specified more than once.",
+    )
     arguments = parser.parse_args()
 
     if not MANIFEST.exists():
@@ -5264,7 +5387,20 @@ def main() -> int:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     page_directory = pathlib.Path(manifest["pageDirectory"])
     all_scenarios = manifest["scenarios"]
+    groups = {group["id"]: group for group in manifest.get("groups", [])}
+    requested_groups = set(arguments.group_ids or [])
+    unknown_groups = requested_groups - set(groups)
+    if unknown_groups:
+        print(f"unknown group ID(s): {', '.join(sorted(unknown_groups))}", file=sys.stderr)
+        return 2
+    for scenario in all_scenarios:
+        invalid = [step for step in scenario.get("steps", []) if step not in STEP_NAMES]
+        if invalid or scenario.get("group") not in groups:
+            print(f"invalid scenario {scenario['id']}: unknown steps {invalid} or group {scenario.get('group')!r}", file=sys.stderr)
+            return 2
     requested_ids = set(arguments.scenario_ids or [])
+    requested_ids |= {scenario["id"] for scenario in all_scenarios if scenario["group"] in requested_groups}
+    partial = bool(arguments.scenario_ids or requested_groups)
     known_ids = {scenario["id"] for scenario in all_scenarios}
     unknown_ids = requested_ids - known_ids
     if unknown_ids:
@@ -5282,6 +5418,9 @@ def main() -> int:
         for scenario in scenarios:
             for extension in (".png", ".txt", ".json"):
                 (SCREENSHOT_DIR / f"{scenario['id']}{extension}").unlink(missing_ok=True)
+            for stale in SCREENSHOT_DIR.glob(f"{glob.escape(scenario['id'])}-*"):
+                if stale.suffix in {".png", ".json"} and stale.name[len(scenario["id"]) + 1:-len(stale.suffix)] in STEP_NAMES:
+                    stale.unlink()
     else:
         for stale in [*SCREENSHOT_DIR.glob("*.png"), *SCREENSHOT_DIR.glob("*.txt"), *SCREENSHOT_DIR.glob("*.json")]:
             stale.unlink()
@@ -5300,19 +5439,20 @@ def main() -> int:
     scenario_order = {scenario["id"]: index for index, scenario in enumerate(scenarios)}
     results.sort(key=lambda result: scenario_order[result["id"]])
 
+    # Every PNG of the run is hashed: the scenario PNGs and their step PNGs (H1).
     image_hashes: dict[str, list[str]] = {}
     for result in results:
-      if result.get('capture'):
-        digest = hashlib.sha256((SCREENSHOT_DIR / result['capture']).read_bytes()).hexdigest()
-        image_hashes.setdefault(digest, []).append(result['id'])
-    duplicate_images = [identifiers for identifiers in image_hashes.values() if len(identifiers) > 1]
-    for identifiers in duplicate_images:
-      detail = f"unintended identical PNGs: {', '.join(identifiers)}"
+      for capture in result.get('captures', []):
+        digest = hashlib.sha256((SCREENSHOT_DIR / capture['file']).read_bytes()).hexdigest()
+        image_hashes.setdefault(digest, []).append(capture['file'])
+    duplicate_images = [files for files in image_hashes.values() if len(files) > 1]
+    owner_of_file = {capture['file']: result for result in results for capture in result.get('captures', [])}
+    for files in duplicate_images:
+      detail = f"unintended identical PNGs: {', '.join(files)}"
       failures.append(Failure('campaign', detail))
-      for result in results:
-        if result['id'] in identifiers:
-          result['failures'].append(detail)
-          result['status'] = 'failed'
+      for result in {id(owner_of_file[name]): owner_of_file[name] for name in files}.values():
+        result['failures'].append(detail)
+        result['status'] = 'failed'
     run_manifest = {
       "runId": os.environ.get("STUDIO_E2E_RUN_ID"),
       "campaignStartedAt": os.environ.get("STUDIO_E2E_STARTED_AT"),
@@ -5327,7 +5467,10 @@ def main() -> int:
       "renderCampaignStartedAt": manifest.get("campaignStartedAt"),
       "limitations": manifest.get("limitations"),
       "status": "failed" if failures else "passed",
+      "partial": partial,
       "scenarioCount": len(results),
+      "pngCount": sum(len(result.get("captures", [])) for result in results),
+      "stepPngCount": sum(1 for result in results for capture in result.get("captures", []) if capture["step"]),
       "workerCount": worker_count,
       "screenshotCount": sum(bool(result.get("capture")) for result in results),
       "passedScenarioCount": sum(result['status'] == 'passed' for result in results),
@@ -5338,7 +5481,10 @@ def main() -> int:
       "results": results,
       "completedAt": datetime.now(timezone.utc).isoformat(),
     }
-    (SCREENSHOT_DIR / "run-manifest.json").write_text(json.dumps(run_manifest, indent=2) + "\n", encoding="utf-8")
+    # A partial run (--scenario, --group) must not replace the manifest, the index and the machine
+    # report of the full campaign (they would list a subset): it writes `.partial` companions.
+    suffix_json = "run-manifest.partial.json" if partial else "run-manifest.json"
+    (SCREENSHOT_DIR / suffix_json).write_text(json.dumps(run_manifest, indent=2) + "\n", encoding="utf-8")
     scenario_by_id = {scenario["id"]: scenario for scenario in all_scenarios}
     machine_rows = []
     for result in results:
@@ -5354,23 +5500,26 @@ def main() -> int:
       machine_report.extend(["| Scenario | Check | Mode | Detail |", "| --- | --- | --- | --- |", *machine_rows])
     else:
       machine_report.append("No failing applicable checks.")
-    (SCREENSHOT_DIR / "MACHINE-CHECKS.md").write_text("\n".join(machine_report) + "\n", encoding="utf-8")
+    (SCREENSHOT_DIR / ("MACHINE-CHECKS.partial.md" if partial else "MACHINE-CHECKS.md")).write_text("\n".join(machine_report) + "\n", encoding="utf-8")
     index = ["# Visual Review", "", f"Run status: **{run_manifest['status']}**", "",
          "Machine checks: [MACHINE-CHECKS.md](MACHINE-CHECKS.md) (failing applicable geometry checks)", "",
-         f"Revision: `{run_manifest['revision']}`", "", "See [run manifest](run-manifest.json) for command, dirty status and assertions.",
+         f"Revision: `{run_manifest['revision']}`", "", f"See [run manifest]({suffix_json}) for command, dirty status and assertions.",
          "", str(manifest.get("limitations", "Static generated HTML with mock host.")), ""]
     group = None
     for result in results:
       if result["group"] != group:
         group = result["group"]
-        index.extend([f"## {group}", ""])
+        index.extend([f"## {groups[group]['title']} (`{group}`)", ""])
       canonical = result.get("screenshotOf") or result["id"]
       alias = f" (alias of {canonical}; assertions retained)" if result.get("screenshotOf") else ""
-      index.append(f"{result['sequence']}. **{result['status']}** [{result['id']}]({canonical}.png) [notes]({canonical}.json){alias}")
+      if result.get("screenshotOf") is None and not result.get("capture"):
+        index.append(f"{result['sequence']}. **{result['status']}** {result['id']} (assertion-only: no screenshot)")
+      else:
+        index.append(f"{result['sequence']}. **{result['status']}** [{result['id']}]({canonical}.png) [notes]({canonical}.json){alias}")
       index.append(f"   {result['expectedContent']}")
       for detail in result["failures"]:
         index.append(f"   Failure: {detail}")
-    (SCREENSHOT_DIR / "INDEX.md").write_text("\n".join(index) + "\n", encoding="utf-8")
+    (SCREENSHOT_DIR / ("INDEX.partial.md" if partial else "INDEX.md")).write_text("\n".join(index) + "\n", encoding="utf-8")
     if failures:
         print("\nrendering checks failed:", file=sys.stderr)
         for failure in failures:
