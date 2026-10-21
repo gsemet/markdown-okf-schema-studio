@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Review comments: the thread popover has **Resolve** / **Reopen** and **Delete** (it asks "Delete
+  thread?" with Yes and No in the popover). Threads whose text can no longer be found are listed
+  in an "Orphaned comments" box at the end of the preview, with their quote, and stay in the file
+  untouched. The popover shows the reason when a change is refused; read-only previews offer
+  neither button. A thread whose text moved is placed only when its quote (12 characters or more)
+  occurs exactly once; otherwise it is listed as orphaned.
 - Review comments: select text in the preview and press the "Comment" button that appears next to
   it (or Cmd/Ctrl+Alt+M) to start a comment thread; open a thread to reply. Comments are saved in
   `<name>.comments.json` next to the document, created if needed, with the author from the new

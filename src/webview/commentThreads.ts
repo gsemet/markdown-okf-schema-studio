@@ -32,11 +32,25 @@ export interface PageCommentThread {
  * The text stays in the box until the host answers `ok: true` through `result()`; a refusal shows
  * its reason (`textContent`, role="alert") and keeps the text, and so does a missing answer after
  * 15 seconds. A reply draft survives the threads being posted again while its thread exists.
+ *
+ * T44: `hooks.resolve` and `hooks.remove` (writable previews only) add Resolve / Reopen and Delete
+ * to the popover. Delete asks "Delete thread?" with Yes / No inside the popover (no
+ * `window.confirm`). Both wait for the host's answer like a reply: nothing changes before the
+ * thread list is posted again, and a refusal shows its reason in an alert line.
+ *
+ * A thread the page cannot place (no mapped block at its line and the quote found in no eligible
+ * block) is listed in an "Orphaned comments" box that this module creates after the content
+ * element, never inside it, and re-creates on every `apply()`. Each entry opens the same popover.
+ * The page never writes anything for an orphan: the thread stays in the file untouched.
  */
 export function installCommentThreads(
   document: Document,
   window: Window & typeof globalThis,
-  hooks?: { reply?: (threadId: string, body: string) => void },
+  hooks?: {
+    reply?: (threadId: string, body: string) => void;
+    resolve?: (threadId: string, resolved: boolean) => void;
+    remove?: (threadId: string) => void;
+  },
 ): {
   setThreads(threads: unknown): void;
   apply(): void;
@@ -51,6 +65,10 @@ export function installCommentThreads(
   const POPOVER = "data-okf-comment-popover";
   const REPLY_INPUT = "data-okf-comment-reply-input";
   const REPLY_SEND = "data-okf-comment-reply-send";
+  const ORPHAN = "data-okf-comment-orphan";
+  const ORPHANS = "data-okf-orphans";
+  const ACTIONS = "data-okf-comment-thread-actions";
+  const ACTION_ERROR = "data-okf-comment-action-error";
   const SKIP = "pre, code, script, style, textarea, svg, .katex, .math, .math-inline, .math-display, "
     + ".myst-mermaid-figure, .myst-plantuml-figure, [data-okf-properties], "
     + ".okf-comment, .okf-chip, [data-sphinx-preview-block-editor], [data-sphinx-preview-editing], "
@@ -58,6 +76,8 @@ export function installCommentThreads(
     + `[${MARK}], [${BADGE}], [${POPOVER}]`;
   const EDITING = "[data-sphinx-preview-block-editor], [data-sphinx-preview-editing]";
   const NEXT_TO = new Set(["TABLE", "THEAD", "TBODY", "TR", "UL", "OL", "DL", "PRE", "DETAILS", "IMG", "HR", "SVG"]);
+  // A quote must have this many characters (whitespace collapsed) to be searched for elsewhere.
+  const MIN_MOVED_QUOTE = 12;
   const MAX_THREADS = 1000;
   const MAX_COMMENTS = 200;
   const MAX_TEXT = 10000;
@@ -67,6 +87,12 @@ export function installCommentThreads(
   const ANSWER_TIMEOUT_MS = 15000;
   // The reply waiting for the host's answer; it outlives a rebuilt popover (threads posted again).
   let sent: { threadId: string; body: string; timer?: number; waiting: boolean; error: string } | undefined;
+
+  // The resolve or delete waiting for the host's answer, and the thread whose Delete is being asked.
+  let act: { threadId: string; kind: "resolve" | "delete"; timer?: number; waiting: boolean; error: string } | undefined;
+  let confirming: string | undefined;
+  let orphanBox: Element | undefined;
+  let addedOrphans: Element[] = [];
 
   const text = (value: unknown): string => (typeof value === "string" ? value.slice(0, MAX_TEXT) : "");
 
@@ -112,11 +138,12 @@ export function installCommentThreads(
   // Shows the state of `sent` in the open popover: error line and Reply button.
   const paintReply = (): void => {
     if (!popover) return;
+    paintActions();
     const reply = popover.querySelector("[data-okf-comment-reply]");
     const send = popover.querySelector(`[${REPLY_SEND}]`);
     if (!reply || !send) return;
     const mine = sent !== undefined && sent.threadId === openId;
-    if (mine && sent!.timer !== undefined) send.setAttribute("disabled", "true");
+    if (pendingFor(openId)) send.setAttribute("disabled", "true");
     else send.removeAttribute("disabled");
     let line = popover.querySelector("[data-okf-comment-error]");
     const text = mine ? sent!.error : "";
@@ -133,10 +160,78 @@ export function installCommentThreads(
     line.textContent = text;
   };
 
+  // A resolve, a delete or a reply of this thread is waiting for the host: the others wait too.
+  const pendingFor = (threadId: string | undefined): boolean =>
+    (act !== undefined && act.threadId === threadId && act.timer !== undefined)
+    || (sent !== undefined && sent.threadId === threadId && sent.timer !== undefined);
+
+  const actionButton = (label: string, attribute: string, disabled: boolean): Element => {
+    const element = document.createElement("button");
+    element.setAttribute("type", "button");
+    element.setAttribute(attribute, "true");
+    element.textContent = label;
+    if (disabled) element.setAttribute("disabled", "true");
+    return element;
+  };
+
+  // Resolve / Reopen and Delete, or the Delete question, plus the alert line of a refused action.
+  const paintActions = (): void => {
+    if (!popover) return;
+    const row = popover.querySelector(`[${ACTIONS}]`);
+    if (!row) return;
+    const thread = threads.find((candidate) => candidate.id === openId);
+    row.textContent = "";
+    const busy = pendingFor(openId);
+    if (confirming !== undefined && confirming === openId) {
+      const ask = document.createElement("span");
+      ask.setAttribute("data-okf-comment-confirm", "true");
+      ask.textContent = "Delete thread?";
+      row.appendChild(ask);
+      row.appendChild(actionButton("Yes", "data-okf-comment-delete-yes", busy));
+      row.appendChild(actionButton("No", "data-okf-comment-delete-no", busy));
+    } else {
+      if (hooks?.resolve) {
+        row.appendChild(actionButton(thread?.resolved ? "Reopen" : "Resolve", "data-okf-comment-resolve", busy));
+      }
+      if (hooks?.remove) row.appendChild(actionButton("Delete", "data-okf-comment-delete", busy));
+    }
+    const message = act !== undefined && act.threadId === openId ? act.error : "";
+    if (message !== "") {
+      const line = document.createElement("div");
+      line.setAttribute(ACTION_ERROR, "true");
+      line.setAttribute("role", "alert");
+      line.textContent = message;
+      row.appendChild(line);
+    }
+  };
+
+  const startAction = (kind: "resolve" | "delete", send: (threadId: string) => void): void => {
+    const threadId = openId;
+    if (threadId === undefined || pendingFor(threadId)) return;
+    if (act?.timer !== undefined) window.clearTimeout(act.timer);
+    const mine = {
+      threadId,
+      kind,
+      waiting: true,
+      error: "",
+      timer: window.setTimeout(() => {
+        if (act !== mine) return;
+        mine.timer = undefined;
+        confirming = undefined;
+        mine.error = "No answer from the editor. Nothing changed here: try again.";
+        paintReply();
+      }, ANSWER_TIMEOUT_MS) as number | undefined,
+    };
+    act = mine;
+    paintReply();
+    send(threadId);
+  };
+
   const close = (): void => {
     popover?.remove();
     popover = undefined;
     openId = undefined;
+    confirming = undefined;
   };
 
   // Puts back the text a mark wrapped and merges it with its neighbouring text nodes.
@@ -170,6 +265,9 @@ export function installCommentThreads(
     addedMarks = [];
     addedBadges = [];
     badgedBlocks = [];
+    orphanBox?.remove();
+    orphanBox = undefined;
+    addedOrphans = [];
   };
 
   const spanOf = (element: Element): [number, number] | undefined => {
@@ -179,6 +277,15 @@ export function installCommentThreads(
     return [start, Number.isFinite(endValue) && endValue >= start ? endValue : start];
   };
 
+  // A block may carry a thread: not in an open editor or the properties table, not included content
+  // (it carries the lines of ANOTHER file), not under a skipped ancestor (diagram, chip, math, code).
+  const eligible = (element: Element): boolean => {
+    if (element.closest(EDITING) || element.closest("[data-okf-properties]")) return false;
+    if (element.closest("[data-sphinx-preview-included]")) return false;
+    const container = element.parentNode as Element | null;
+    return !(container && container.nodeType === 1 && container.closest(SKIP));
+  };
+
   // The innermost mapped block that covers the line (smallest span; the deeper one on a tie).
   const blockFor = (line: number): Element | undefined => {
     let best: Element | undefined;
@@ -186,12 +293,7 @@ export function installCommentThreads(
     document.querySelectorAll("[data-line]").forEach((element) => {
       const span = spanOf(element);
       if (!span || line < span[0] || line > span[1]) return;
-      if (element.closest(EDITING) || element.closest("[data-okf-properties]")) return;
-      // Included content carries the lines of ANOTHER file; a skipped ancestor (diagram, chip,
-      // math, code) never holds a commentable block.
-      if (element.closest("[data-sphinx-preview-included]")) return;
-      const container = element.parentNode as Element | null;
-      if (container && container.nodeType === 1 && container.closest(SKIP)) return;
+      if (!eligible(element)) return;
       const size = span[1] - span[0];
       if (size <= bestSize) {
         best = element;
@@ -220,11 +322,46 @@ export function installCommentThreads(
     const quote = thread.anchor.quote;
     if (quote === "") return false;
     const block = blockFor(thread.anchor.line);
-    if (!block) return false;
+    // No block at the line (the text moved): look for the quote in every eligible block, in order.
+    const blocks: Element[] = block ? [block] : [];
+    if (!block) {
+      document.querySelectorAll("[data-line]").forEach((element) => {
+        if (eligible(element)) blocks.push(element);
+      });
+    }
     const variants = [quote];
     const collapsed = quote.replace(/\s+/gu, " ");
     if (collapsed !== quote) variants.push(collapsed);
-    for (const node of textNodesOf(block)) {
+    const seen = new Set<Text>();
+    const nodes: Text[] = [];
+    for (const candidate of blocks) {
+      for (const node of textNodesOf(candidate)) {
+        if (!seen.has(node)) {
+          seen.add(node);
+          nodes.push(node);
+        }
+      }
+    }
+    if (!block) {
+      // The text moved: place the thread only when the quote is long enough to be meaningful and
+      // occurs exactly once; a short or repeated quote would land on an unrelated place.
+      if (collapsed.trim().length < MIN_MOVED_QUOTE) return false;
+      let total = 0;
+      for (const node of nodes) {
+        const value = node.nodeValue ?? "";
+        for (const variant of variants) {
+          let from = value.indexOf(variant);
+          if (from < 0) continue;
+          while (from >= 0) {
+            total += 1;
+            from = value.indexOf(variant, from + variant.length);
+          }
+          break;
+        }
+      }
+      if (total !== 1) return false;
+    }
+    for (const node of nodes) {
       const value = node.nodeValue ?? "";
       for (const variant of variants) {
         const index = value.indexOf(variant);
@@ -256,9 +393,9 @@ export function installCommentThreads(
 
   // A badge has no text, so a block keeps its text content (headings, edit offsets); the stylesheet
   // draws it. It sits inside the block, or after it when the block cannot take children.
-  const badge = (thread: PageCommentThread): void => {
+  const badge = (thread: PageCommentThread): boolean => {
     const block = blockFor(thread.anchor.line);
-    if (!block) return;
+    if (!block) return false;
     const button = document.createElement("button");
     button.setAttribute("type", "button");
     button.setAttribute(BADGE, thread.id);
@@ -274,27 +411,72 @@ export function installCommentThreads(
       block.appendChild(button);
     }
     addedBadges.push(button);
+    return true;
+  };
+
+  // The "Orphaned comments" box: after the content element, outside the HTML a patch replaces. It
+  // adds no scroll height of its own where the content ends (see the stylesheet), so the end of
+  // the document, the first-element gap and the insert points do not change.
+  const renderOrphans = (orphans: PageCommentThread[]): void => {
+    if (orphans.length === 0) return;
+    const box = document.createElement("div");
+    box.setAttribute(ORPHANS, "true");
+    box.setAttribute("role", "region");
+    box.setAttribute("aria-label", "Orphaned comments");
+    const title = document.createElement("div");
+    title.setAttribute("data-okf-orphans-title", "true");
+    title.textContent = "Orphaned comments";
+    box.appendChild(title);
+    for (const thread of orphans) {
+      const item = document.createElement("button");
+      item.setAttribute("type", "button");
+      item.setAttribute(ORPHAN, thread.id);
+      item.setAttribute("aria-haspopup", "dialog");
+      if (thread.resolved) item.setAttribute("data-okf-comment-resolved", "true");
+      const quote = document.createElement("span");
+      quote.setAttribute("data-okf-orphan-quote", "true");
+      quote.textContent = thread.anchor.quote !== "" ? thread.anchor.quote : "(no quoted text)";
+      const first = thread.comments[0];
+      const meta = document.createElement("span");
+      meta.setAttribute("data-okf-orphan-meta", "true");
+      const count = thread.comments.length;
+      meta.textContent = `${first ? first.author + ": " + first.body.slice(0, 120) : ""}`
+        + ` (${count} comment${count === 1 ? "" : "s"}${thread.resolved ? ", resolved" : ""})`;
+      item.appendChild(quote);
+      item.appendChild(meta);
+      box.appendChild(item);
+      addedOrphans.push(item);
+    }
+    const main = document.getElementById?.("sphinx-myst-preview-content");
+    const parent = (main?.parentNode ?? document.body) as Node;
+    parent.insertBefore(box, main ? main.nextSibling : null);
+    orphanBox = box;
   };
 
   const apply = (): void => {
     // An open popover stays open across a re-apply (a render re-posts the same threads) when its
-    // thread is still there; the holder is the new mark or badge.
+    // thread is still there; the holder is the new mark, badge or orphan entry.
     const reopen = openId;
     const draft = replyInput()?.value;
+    const asking = confirming;
     close();
     clear();
     if (threads.length === 0) return;
+    const orphans: PageCommentThread[] = [];
     for (const thread of threads) {
-      if (!attach(thread)) badge(thread);
+      if (!attach(thread) && !badge(thread)) orphans.push(thread);
     }
+    renderOrphans(orphans);
     if (reopen !== undefined) {
-      const holder = [...addedMarks, ...addedBadges].find((candidate) => idOf(candidate) === reopen);
+      const holder = [...addedMarks, ...addedBadges, ...addedOrphans].find((candidate) => idOf(candidate) === reopen);
       const thread = threads.find((candidate) => candidate.id === reopen);
       if (holder && thread) {
         open(thread, holder);
         const input = replyInput();
         if (input && typeof draft === "string") input.value = draft;
+        confirming = asking === reopen ? asking : undefined;
         paintReply();
+        paintActions();
       }
     }
   };
@@ -351,6 +533,11 @@ export function installCommentThreads(
       item.appendChild(body);
       root.appendChild(item);
     }
+    if (hooks && (typeof hooks.resolve === "function" || typeof hooks.remove === "function")) {
+      const row = document.createElement("div");
+      row.setAttribute(ACTIONS, "true");
+      root.appendChild(row);
+    }
     if (hooks && typeof hooks.reply === "function") {
       const reply = document.createElement("div");
       reply.setAttribute("data-okf-comment-reply", "true");
@@ -373,10 +560,12 @@ export function installCommentThreads(
     openId = thread.id;
     position(target);
     paintReply();
+    paintActions();
   };
 
-  const holderOf = (target: Element): Element | null => target.closest(`[${MARK}], [${BADGE}]`);
-  const idOf = (holder: Element): string | null => holder.getAttribute(MARK) ?? holder.getAttribute(BADGE);
+  const holderOf = (target: Element): Element | null => target.closest(`[${MARK}], [${BADGE}], [${ORPHAN}]`);
+  const idOf = (holder: Element): string | null =>
+    holder.getAttribute(MARK) ?? holder.getAttribute(BADGE) ?? holder.getAttribute(ORPHAN);
 
   const toggle = (holder: Element): boolean => {
     const id = idOf(holder);
@@ -401,7 +590,7 @@ export function installCommentThreads(
     const field = input as unknown as { value: string };
     const body = typeof field.value === "string" ? field.value.trim() : "";
     if (body === "" || body.length > MAX_TEXT || openId === undefined || !hooks?.reply) return;
-    if (sent !== undefined && sent.timer !== undefined) return;
+    if (pendingFor(openId)) return;
     const threadId = openId;
     sent = {
       threadId,
@@ -425,6 +614,33 @@ export function installCommentThreads(
     event.preventDefault();
     const input = popover?.querySelector(`[${REPLY_INPUT}]`);
     if (input) sendReply(input);
+  }, true);
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    const hit = (attribute: string): boolean => target instanceof Element && target.closest(`[${attribute}]`) !== null;
+    const resolveHook = hooks?.resolve;
+    const removeHook = hooks?.remove;
+    if (hit("data-okf-comment-resolve") && resolveHook) {
+      event.preventDefault();
+      const thread = threads.find((candidate) => candidate.id === openId);
+      if (thread) startAction("resolve", (threadId) => resolveHook(threadId, !thread.resolved));
+    } else if (hit("data-okf-comment-delete") && removeHook) {
+      event.preventDefault();
+      if (openId !== undefined && !pendingFor(openId)) {
+        confirming = openId;
+        if (act !== undefined && act.threadId === openId) act.error = "";
+        paintActions();
+      }
+    } else if (hit("data-okf-comment-delete-no")) {
+      event.preventDefault();
+      if (!pendingFor(openId)) {
+        confirming = undefined;
+        paintActions();
+      }
+    } else if (hit("data-okf-comment-delete-yes") && removeHook) {
+      event.preventDefault();
+      if (confirming === openId) startAction("delete", (threadId) => removeHook(threadId));
+    }
   }, true);
   document.addEventListener("click", intercept, true);
   document.addEventListener("dblclick", intercept, true);
@@ -460,6 +676,21 @@ export function installCommentThreads(
 
   return {
     result(message) {
+      if ((message.kind === "resolve" || message.kind === "delete") && act !== undefined) {
+        if (!act.waiting || act.kind !== message.kind || message.threadId !== act.threadId) return false;
+        if (act.timer !== undefined) window.clearTimeout(act.timer);
+        act.timer = undefined;
+        act.waiting = false;
+        if (message.ok === true) {
+          act = undefined;
+        } else {
+          act.error = typeof message.reason === "string" && message.reason !== ""
+            ? message.reason.slice(0, 500) : "The change was not saved.";
+        }
+        confirming = undefined;
+        paintReply();
+        return true;
+      }
       if (message.kind !== "reply" || !sent || !sent.waiting || message.threadId !== sent.threadId) return false;
       if (sent.timer !== undefined) window.clearTimeout(sent.timer);
       sent.timer = undefined;
@@ -485,7 +716,7 @@ export function installCommentThreads(
     close,
     openThread(id) {
       // Compared in code, never put into a selector: the id is file data.
-      const holder = Array.from(document.querySelectorAll(`[${MARK}], [${BADGE}]`))
+      const holder = Array.from(document.querySelectorAll(`[${MARK}], [${BADGE}], [${ORPHAN}]`))
         .find((candidate) => idOf(candidate) === id);
       return holder ? toggle(holder) : false;
     },

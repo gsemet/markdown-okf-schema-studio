@@ -110,12 +110,54 @@ export async function run(): Promise<void> {
     assert.ok(readThreads(sidecarPath).some((thread: any) => thread.comments[0].body === "Sent with an old version"),
       "a create with an old documentVersion must still be written");
     // A wrong document id is still dropped.
-    const before = fs.readFileSync(sidecarPath, "utf8");
+    let before = fs.readFileSync(sidecarPath, "utf8");
     await sendPreviewMessageForTests({
       type: "previewCommentCreate", documentId: "file:///elsewhere.md", documentVersion: preview.documentVersion,
       requestId: getActivePreviewForTests()?.requestId, anchor: anchorOf(3, "x"), body: "Wrong document",
     });
     assert.equal(fs.readFileSync(sidecarPath, "utf8"), before);
+
+    // T44: resolve, reopen and delete go through the same queue and are always answered.
+    const secondId = file.threads.find((thread: any) => thread.id !== first.id).id;
+    await send(preview, "previewCommentResolve", { threadId: first.id, resolved: true });
+    assert.equal(readThreads(sidecarPath).find((thread: any) => thread.id === first.id).resolved, true);
+    assert.deepEqual(
+      [getActivePreviewForTests()?.comments.result?.ok, getActivePreviewForTests()?.comments.result?.kind],
+      [true, "resolve"],
+    );
+    await send(preview, "previewCommentResolve", { threadId: first.id, resolved: false });
+    assert.equal(readThreads(sidecarPath).find((thread: any) => thread.id === first.id).resolved, false);
+    await Promise.all([
+      send(preview, "previewCommentResolve", { threadId: secondId, resolved: true }),
+      send(preview, "previewCommentReply", { threadId: first.id, body: "Queued reply" }),
+    ]);
+    assert.equal(readThreads(sidecarPath).find((thread: any) => thread.id === secondId).resolved, true);
+    assert.equal(readThreads(sidecarPath).find((thread: any) => thread.id === first.id).comments.length, 3);
+    const beforeMissing = fs.readFileSync(sidecarPath, "utf8");
+    await send(preview, "previewCommentResolve", { threadId: "t_ffffffff", resolved: true });
+    await send(preview, "previewCommentDelete", { threadId: "t_ffffffff" });
+    assert.equal(fs.readFileSync(sidecarPath, "utf8"), beforeMissing, "unknown threads change nothing");
+    result = getActivePreviewForTests()?.comments.result;
+    assert.deepEqual([result?.ok, result?.kind, result?.threadId], [false, "delete", "t_ffffffff"]);
+    assert.match(result?.reason ?? "", /no longer exists/u);
+    await send(preview, "previewCommentDelete", { threadId: secondId });
+    const remaining = readThreads(sidecarPath).map((thread: any) => thread.id);
+    assert.equal(remaining.includes(secondId), false, "the deleted thread is gone");
+    assert.equal(remaining.includes(first.id), true, "the others stay");
+    assert.deepEqual(
+      [getActivePreviewForTests()?.comments.result?.ok, getActivePreviewForTests()?.comments.result?.kind],
+      [true, "delete"],
+    );
+    for (const id of remaining) await send(preview, "previewCommentDelete", { threadId: id });
+    assert.ok(fs.existsSync(sidecarPath), "deleting the last thread keeps the file");
+    assert.deepEqual(readThreads(sidecarPath), [], "with an empty list");
+    assert.equal(getActivePreviewForTests()?.comments.last?.length, 0);
+    // Put two threads back for the checks that follow.
+    await send(preview, "previewCommentCreate", { anchor: anchorOf(3, "first"), body: "First again" });
+    await send(preview, "previewCommentCreate", { anchor: anchorOf(5, "second"), body: "Second again" });
+    file = JSON.parse(fs.readFileSync(sidecarPath, "utf8"));
+    assert.equal(file.threads.length, 2);
+    before = fs.readFileSync(sidecarPath, "utf8");
 
     // A comments file with unsaved changes in an editor is not overwritten from disk.
     const sidecarDocument = await vscode.workspace.openTextDocument(vscode.Uri.file(sidecarPath));
@@ -167,9 +209,12 @@ export async function runUntrusted(preview: PreviewForTests, document: vscode.Te
   try {
     await send(preview, "previewCommentCreate", { anchor: anchorOf(1, "x"), body: "Refused" });
     await send(preview, "previewCommentReply", { threadId: "t_00000000", body: "Refused" });
+    await send(preview, "previewCommentResolve", { threadId: "t_00000000", resolved: true });
+    await send(preview, "previewCommentDelete", { threadId: "t_00000000" });
     assert.equal(fs.existsSync(sidecar), false, "a read-only preview must not write a comments file");
     const result = getActivePreviewForTests()?.comments.result;
     assert.equal(result?.ok, false, "the refusal is reported to the page");
+    assert.equal(result?.kind, "delete", "resolve and delete are answered too");
     assert.match(result?.reason ?? "", /trusted workspace/u);
   } finally {
     fs.rmSync(sidecar, { force: true });

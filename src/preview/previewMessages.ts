@@ -120,6 +120,11 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   previewCommentCreate: (message) => isValidAnchor(message.anchor) && isCommentBody(message.body),
   previewCommentReply: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "" && isCommentBody(message.body),
+  // Resolve, reopen and delete a thread (T44). The host refuses read-only previews and answers.
+  previewCommentResolve: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
+    && message.threadId !== "" && typeof message.resolved === "boolean",
+  previewCommentDelete: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
+    && message.threadId !== "",
   // The MyST palette's pickers: labels of the document, citation keys of the workspace `.bib`
   // files, and a native open dialog for a `{doc}` path. They read only; the answer repeats `editId`.
   previewListTargets: isHostRequest,

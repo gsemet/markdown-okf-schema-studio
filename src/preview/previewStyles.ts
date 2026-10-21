@@ -2481,6 +2481,99 @@ button[data-okf-comment-create]:hover {
   color: var(--vscode-button-foreground);
 }
 
+/* Resolve / Reopen, Delete and its question in the thread popover (T44). */
+[data-okf-comment-popover] [data-okf-comment-thread-actions] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+}
+
+[data-okf-comment-popover] [data-okf-comment-thread-actions] button {
+  padding: 2px 10px;
+  border: 1px solid var(--vscode-button-border, transparent);
+  border-radius: 3px;
+  background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.25));
+  color: var(--vscode-button-secondaryForeground, inherit);
+  font: inherit;
+  cursor: pointer;
+}
+
+[data-okf-comment-popover] [data-okf-comment-thread-actions] button[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+[data-okf-comment-popover] [data-okf-comment-thread-actions] button[data-okf-comment-delete-yes] {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+[data-okf-comment-popover] [data-okf-comment-action-error],
+[data-okf-comment-popover] [data-okf-comment-error] {
+  flex: 1 1 100%;
+  color: var(--vscode-errorForeground, #f48771);
+  overflow-wrap: anywhere;
+}
+
+/* The "Orphaned comments" box (T44) follows the content element, outside the patched HTML. Its top
+   margin cancels the content's bottom padding, so it sits in that empty space: the scrollable
+   height of the page only grows when the box is taller than the padding, and the end of the
+   document, the first-element gap and the insert points of the content are untouched. The box
+   passes pointer events through; only its entries take them. */
+[data-okf-orphans] {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--sphinx-preview-column-width, ${DEFAULT_PREVIEW_CONTENT_WIDTH}px);
+  margin: calc(-1 * min(80vh, max(24px, calc(100vh - var(--sphinx-preview-reading-offset, 0px) - 40px)))) auto 0;
+  padding: 0 var(--sphinx-preview-content-gutter) 16px;
+  pointer-events: none;
+}
+
+[data-okf-orphans] [data-okf-orphans-title] {
+  margin-bottom: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+[data-okf-orphans] button[data-okf-comment-orphan] {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+[data-okf-orphans] button[data-okf-comment-orphan][data-okf-comment-resolved="true"] {
+  opacity: 0.6;
+}
+
+[data-okf-orphans] [data-okf-orphan-quote] {
+  display: block;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+[data-okf-orphans] [data-okf-orphan-meta] {
+  display: block;
+  opacity: 0.7;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
 /* Toolbar Diff button off: the marks go away at once; the host stops sending ranges. */
 html[data-sphinx-preview-incoming="off"] #sphinx-myst-preview-content [data-sphinx-preview-changed] {
   box-shadow: none;

@@ -4,6 +4,8 @@ import { test } from "node:test";
 import {
   addReply,
   addThread,
+  deleteThread,
+  setResolved,
   isValidAnchor,
   MAX_COMMENTS_PER_THREAD,
   MAX_THREADS,
@@ -163,4 +165,51 @@ test("T43: the result carries the written text and its hash (the host ignores th
   assert.ok(result.ok);
   assert.equal(result.text, io.files.get("/d/notes.comments.json"));
   assert.equal(result.hash, hashText(result.text));
+});
+
+test("T44: setResolved resolves and reopens the named thread only, without touching the input", () => {
+  const base = addThread([], { threadId: "t1", commentId: "c1", anchor, author: "A", body: "x", now: NOW })!;
+  const two = addThread(base, { threadId: "t2", commentId: "c2", anchor, author: "A", body: "y", now: NOW })!;
+  const resolved = setResolved(two, "t2", true)!;
+  assert.deepEqual(resolved.map((thread) => thread.resolved), [false, true]);
+  assert.equal(two[1].resolved, false, "the input is untouched");
+  assert.deepEqual(resolved[1].comments, two[1].comments);
+  assert.deepEqual(setResolved(resolved, "t2", false)!.map((thread) => thread.resolved), [false, false]);
+  assert.deepEqual(setResolved(resolved, "t2", true)!.map((thread) => thread.resolved), [false, true], "idempotent");
+  assert.equal(setResolved(two, "missing", true), undefined);
+  assert.deepEqual(parseSidecar(serializeSidecar({ document: "a.md", threads: resolved })).errors, []);
+});
+
+test("T44: deleteThread removes the named thread only; the last one leaves an empty list", () => {
+  const base = addThread([], { threadId: "t1", commentId: "c1", anchor, author: "A", body: "x", now: NOW })!;
+  const two = addThread(base, { threadId: "t2", commentId: "c2", anchor, author: "A", body: "y", now: NOW })!;
+  const left = deleteThread(two, "t1")!;
+  assert.deepEqual(left.map((thread) => thread.id), ["t2"]);
+  assert.equal(two.length, 2, "the input is untouched");
+  assert.equal(deleteThread(two, "missing"), undefined);
+  const empty = deleteThread(left, "t2")!;
+  assert.deepEqual(empty, []);
+  const text = serializeSidecar({ document: "a.md", threads: empty });
+  const parsed = parseSidecar(text);
+  assert.deepEqual(parsed.errors, [], "an empty list is a valid file");
+  assert.deepEqual(parsed.threads, []);
+});
+
+test("T44: resolve and delete go through the same per-file queue as create", async () => {
+  const files = new Map<string, string>();
+  const io = {
+    read: async (path: string) => { await new Promise((r) => setTimeout(r, 5)); return files.get(path); },
+    write: async (path: string, text: string) => { await new Promise((r) => setTimeout(r, 5)); files.set(path, text); },
+  };
+  const store = createCommentStore(io);
+  const create = (id: string) => store.update("/a.comments.json", "a.md", (threads) =>
+    addThread(threads, { threadId: id, commentId: `c${id}`, anchor, author: "A", body: "x", now: NOW }) ?? "full");
+  await Promise.all([create("t1"), create("t2"), create("t3")]);
+  await Promise.all([
+    store.update("/a.comments.json", "a.md", (threads) => setResolved(threads, "t1", true) ?? "missing"),
+    store.update("/a.comments.json", "a.md", (threads) => deleteThread(threads, "t2") ?? "missing"),
+    store.update("/a.comments.json", "a.md", (threads) => deleteThread(threads, "nope") ?? "the thread no longer exists"),
+  ]);
+  const parsed = parseSidecar(files.get("/a.comments.json")!);
+  assert.deepEqual(parsed.threads.map((thread) => [thread.id, thread.resolved]), [["t1", true], ["t3", false]]);
 });

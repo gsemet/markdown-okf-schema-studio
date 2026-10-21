@@ -122,6 +122,12 @@ shown while a block editor is open, over code or the properties table, or in a r
 (untrusted workspace), where adding comments is refused. The name stored with a comment is the
 `comments.authorName` setting, else your Git `user.name`, else your operating system user name.
 
+A thread popover also has **Resolve** (then **Reopen**) and **Delete**; Delete asks "Delete
+thread?" with Yes and No in the popover, and deleting the last thread keeps the file with an empty
+list. A thread whose block and quote can no longer be found is never dropped: it is listed under
+**Orphaned comments** at the end of the preview, with its quote, and you can open it from there
+to resolve or delete it. Read-only previews show neither button.
+
 ```json
 {
   "version": 1,

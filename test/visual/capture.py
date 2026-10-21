@@ -915,6 +915,56 @@ def check_inline_code_narrow(page: Page, scenario: dict, failures: list[Failure]
         failures.append(Failure(page_name, f"long identifier did not wrap cleanly: {found}"))
 
 
+def check_orphan_box(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    """T44: the Orphaned comments box adds no scroll height while it is shorter than the content's bottom padding."""
+    if not scenario.get("orphanBoxChecks"):
+        return
+    found = page.evaluate("""() => {
+      const content = document.getElementById('sphinx-myst-preview-content');
+      const height = () => document.documentElement.scrollHeight;
+      const padding = parseFloat(getComputedStyle(content).paddingBottom);
+      const before = height();
+      const make = (entries) => {
+        const box = document.createElement('div');
+        box.setAttribute('data-okf-orphans', 'true');
+        const title = document.createElement('div');
+        title.setAttribute('data-okf-orphans-title', 'true');
+        title.textContent = 'Orphaned comments';
+        box.appendChild(title);
+        for (let index = 0; index < entries; index += 1) {
+          const item = document.createElement('button');
+          item.setAttribute('data-okf-comment-orphan', 't' + index);
+          item.textContent = 'A quote that is no longer in the document ' + index;
+          box.appendChild(item);
+        }
+        content.after(box);
+        return box;
+      };
+      const short = make(1);
+      const shortHeight = height();
+      const shortBox = short.getBoundingClientRect().height;
+      const shortTop = short.getBoundingClientRect().top + scrollY;
+      const contentBottom = content.getBoundingClientRect().bottom + scrollY;
+      short.remove();
+      const tall = make(Math.ceil((padding + 400) / 30));
+      const tallHeight = height();
+      const tallBox = tall.getBoundingClientRect().height;
+      tall.remove();
+      return { before, shortHeight, shortBox, shortTop, contentBottom, tallHeight, tallBox, padding, after: height() };
+    }""")
+    page_name = scenario["page"]
+    if found["padding"] < 40 or found["shortBox"] >= found["padding"]:
+        failures.append(Failure(page_name, f"orphan box check needs a short box inside the padding: {found}"))
+    if found["shortHeight"] != found["before"]:
+        failures.append(Failure(page_name, f"a short orphan box changed the scroll height: {found}"))
+    if found["shortTop"] >= found["contentBottom"]:
+        failures.append(Failure(page_name, f"the orphan box does not start inside the bottom padding: {found}"))
+    if not found["tallHeight"] > found["before"] or found["tallBox"] <= found["padding"]:
+        failures.append(Failure(page_name, f"a tall orphan box did not extend the page: {found}"))
+    if found["after"] != found["before"]:
+        failures.append(Failure(page_name, f"removing the orphan box did not restore the height: {found}"))
+
+
 def machine_check_lines(checks: list[dict] | None) -> list[str]:
     """One PASS, FAIL or n/a line per geometry check; says so when the final frame was unavailable."""
     if checks is None:
@@ -4483,7 +4533,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   for check in (
     check_mermaid_theme_switch, check_forced_white_theme, check_forced_cream_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
     check_generic_skill_frontmatter, check_okf_schema_rendering, check_preview_toolbar,
-    check_math_rendering, check_bare_urls, check_inline_code, check_inline_code_narrow, check_content_contracts,
+    check_math_rendering, check_bare_urls, check_inline_code, check_inline_code_narrow, check_orphan_box, check_content_contracts,
   ):
     try:
       check(page, scenario, failures)

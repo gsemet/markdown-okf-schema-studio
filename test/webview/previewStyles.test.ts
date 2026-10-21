@@ -786,3 +786,14 @@ test("T21: the edition palette is a wrapping pill bar with an in-frame popover a
   assert.match(menu, /max-height: 15em;/u);
   assert.match(menu, /overflow-y: auto;/u);
 });
+
+test("T44: the Orphaned comments box sits in the content's bottom padding and adds no scroll height", () => {
+  const padding = /#sphinx-myst-preview-content \{[^}]*padding: 0 var\(--sphinx-preview-content-gutter\) (min\(80vh[^;]*\));/u
+    .exec(PREVIEW_THEME_CSS);
+  assert.ok(padding, "the content keeps its bottom padding");
+  const box = /\n\[data-okf-orphans\] \{([^}]*)\}/u.exec(PREVIEW_THEME_CSS);
+  assert.ok(box, "the box has a rule");
+  assert.ok(box[1].includes(`margin: calc(-1 * ${padding[1]}) auto 0;`),
+    "the negative top margin repeats the content's bottom padding exactly");
+  assert.match(box[1], /pointer-events: none;/u, "the empty space below the content stays clickable as before");
+});

@@ -254,3 +254,20 @@ export function addReply(
   };
   return threads.map((thread) => (thread === target ? { ...thread, comments: [...thread.comments, comment] } : thread));
 }
+
+/** Sets the resolved flag of the named thread; undefined when it does not exist. */
+export function setResolved(
+  threads: readonly CommentThread[],
+  threadId: string,
+  resolved: boolean,
+): CommentThread[] | undefined {
+  const target = threads.find((thread) => thread.id === threadId);
+  if (!target) return undefined;
+  return threads.map((thread) => (thread === target ? { ...thread, resolved } : thread));
+}
+
+/** Removes the named thread (the list may become empty); undefined when it does not exist. */
+export function deleteThread(threads: readonly CommentThread[], threadId: string): CommentThread[] | undefined {
+  if (!threads.some((thread) => thread.id === threadId)) return undefined;
+  return threads.filter((thread) => thread.id !== threadId);
+}
