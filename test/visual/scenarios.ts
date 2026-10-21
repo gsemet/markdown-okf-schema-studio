@@ -8,11 +8,12 @@
 
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
 import { isGroupId, type GroupId } from "../shared/e2eGroups";
-import { ASSERTION_ONLY_IDS, REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID, STEPS_BY_ID } from "./scenarioIds";
+import { ASSERTION_ONLY_IDS, LOCKS_BY_ID, REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID, STEPS_BY_ID } from "./scenarioIds";
 
 export type ScrollMode =
   | { kind: "top" }
-  | { kind: "bottom" }
+  /** `extra`: scroll this many px further down than the last block plus 40 px (shows content placed in the bottom padding). */
+  | { kind: "bottom"; extra?: number }
   | { kind: "fraction"; value: number }
   | { kind: "selector"; value: string; offset?: number }
   | { kind: "stickyHeading"; value: string };
@@ -31,8 +32,8 @@ export interface Scenario {
   group: GroupId;
   /** The id this scenario had before P9 B2a (`--scenario` still accepts it). */
   legacyId?: string;
-  /** One present-tense, observable sentence of what the scenario locks (raw material for the requirements). */
-  locks?: string;
+  /** One present-tense, observable sentence of what the scenario locks (raw material for the requirements); from `LOCKS_BY_ID`. */
+  locks: string;
   /** `false`: assertion-only. Every check runs, no PNG, no step PNG, no sidecar. */
   capture?: false;
   /** Step PNGs to write (names in `STEP_NAMES` of capture.py). Omitted: every step the checks produce. */
@@ -86,26 +87,26 @@ export interface Scenario {
   /**
    * Edition palette (T21): a paragraph deep in the page is opened in edit mode. The bar sits above
    * the text box and not under the toolbar, the clicked text stays put, a button keeps the editor
-   * open and a second PNG (-menu) keeps the heading list open.
+   * open and the `menu` step keeps the heading list open.
    */
   editPalette?: boolean;
   /**
    * P4: a paragraph editor filled with a very tall text (taller than the viewport). The palette sits
    * on top of the edit box; scrolled so the box top is out of view it stays at the top of the
    * viewport, below the sticky band and the floating toolbar, and it leaves with the box's end.
-   * PNGs: -top (box top visible), -end (box end visible), and the scenario PNG (scrolled mid-box).
+   * Steps: `top` (box top visible), `end` (box end visible); the final frame is scrolled mid-box.
    */
   editPaletteTall?: boolean;
   /**
    * P6: the palette mode select is set to this mode in an open paragraph editor; the buttons are
-   * checked against the mode and the palette (-palette PNG) and the palette of an insertion
-   * point editor (-insert-point PNG) are captured.
+   * checked against the mode, in a paragraph editor (`palette` step) and in an insertion
+   * point editor (`insert-point` step, dropped when equal to the final frame).
    */
   paletteModeShot?: "strict" | "gfm" | "myst";
   /**
-   * P11: the slash command menu in a paragraph editor of this palette mode. PNGs: -open (all
-   * commands), -filtered, -nomatch (No command row), -flip (editor near the viewport bottom: the
-   * menu opens above the caret). The scenario PNG keeps the menu open with `finalQuery` typed.
+   * P11: the slash command menu in a paragraph editor of this palette mode. Steps: `open` (all
+   * commands), `filtered`, `nomatch` (No command row), `flip` (editor near the viewport bottom: the
+   * menu opens above the caret). The final frame keeps the menu open with `finalQuery` typed.
    */
   slashMenuShot?: { mode: "strict" | "gfm" | "myst"; finalQuery: string };
   /** Click the + after the final figure; the insertion message must carry the closing fence line. */
@@ -149,7 +150,7 @@ export interface Scenario {
 }
 
 /** A scenario as written below: id (legacy) and group are resolved through `scenarioIds.ts`. */
-type ScenarioDefinition = Omit<Scenario, "group" | "legacyId">;
+type ScenarioDefinition = Omit<Scenario, "group" | "legacyId" | "locks">;
 
 const WIDE = { width: 900, height: 1000 };
 const NARROW = { width: 460, height: 900 };
@@ -527,7 +528,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
       scroll: { kind: "top" as const },
       fullPage: true,
       contextTagChecks: true,
-      description: `Desktop ${theme} capture of the exact adjacent YAML context form plus simple and snake_case tags. `
+      description: `Desktop ${theme} render of the exact adjacent YAML context form plus simple and snake_case tags. `
         + "Literal titles, Markdown body, mapped ranges, and YAML code must remain visible.",
     },
     {
@@ -538,7 +539,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
       scroll: { kind: "top" as const },
       fullPage: true,
       contextTagChecks: true,
-      description: `Narrow ${theme} side-panel capture of the exact adjacent YAML form plus simple and snake_case tags. `
+      description: `Narrow ${theme} side-panel render of the exact adjacent YAML form plus simple and snake_case tags. `
         + "The panels must wrap without widening the page or hiding the YAML code.",
     },
   ]),
@@ -642,7 +643,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     ...WIDE,
     scroll: { kind: "selector", value: "table" },
     description:
-      "A sixteen-column table deliberately wider than the preview. The final capture is "
+      "A sixteen-column table deliberately wider than the preview. The final frame is "
       + "scrolled to its FAR-RIGHT-ACCESS column without a horizontal page scrollbar.",
   },
   {
@@ -983,9 +984,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editAffordances: true,
     machineChecks: ["overlay-clipped"],
     description:
-      "Edit mode on. A hovered list is outlined with a dashed line (a second PNG, -hover, is kept); "
-      + "the final frame shows a paragraph editor with its frame, line-range hint, and the status line on one row with the Done and Cancel buttons "
-      + "(status left, buttons right, smaller editor text).",
+      "Edit mode on. A hovered list is outlined with a dashed line (the `hover` step keeps that frame); the final frame shows a paragraph editor with its frame, line-range hint, and the status line on one row with the Done and Cancel buttons (status left, buttons right, smaller editor text).",
   },
   {
     id: "edit-affordances-narrow",
@@ -1010,10 +1009,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editPalette: true,
     machineChecks: ["overlay-clipped"],
     description:
-      "Edit mode on, light theme, a paragraph in the middle of the chapter open in its editor: the "
-      + "edition palette (heading, bold, italic, strikethrough, link, code, quote, rule, table, emoji, TODO) sits on top of "
-      + "the edit box, outside its border and attached to it, the clicked text keeps its screen "
-      + "position, and the -menu PNG shows the heading list.",
+      "Edit mode on, light theme, a paragraph in the middle of the chapter open in its editor: the edition palette (heading, bold, italic, strikethrough, link, code, quote, rule, table, emoji, TODO) sits on top of the edit box, outside its border and attached to it, and the clicked text keeps its screen position. The steps `bar`, `menu`, `grid`, `emoji`, `alert`, `colour` and `colour-code` keep the palette after Bold and undo, the heading list, the table grid, the emoji picker, the alert type list, the colour picker and the colour-code swatch.",
   },
   {
     id: "edit-palette-tall-light",
@@ -1024,11 +1020,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editMode: true,
     editPaletteTall: true,
     description:
-      "Light theme, a paragraph editor filled with a very tall text and scrolled so the top of the "
-      + "edit box is out of view: the edition palette stays at the top of the viewport, below the "
-      + "sticky heading band and the floating toolbar. The -top PNG shows the palette on top of "
-      + "the box, the -end PNG the bottom of the box with its Done/Cancel row (the palette is still stuck at the top "
-      + "until the box end reaches it). Pressing ArrowUp on the first lines keeps the caret below the palette.",
+      "Light theme, a paragraph editor filled with a very tall text and scrolled so the top of the edit box is out of view: the edition palette stays at the top of the viewport, below the sticky heading band and the floating toolbar. The `top` step shows the palette on top of the box, the `end` step the bottom of the box with its Done/Cancel row (the palette is still stuck at the top until the box end reaches it). Pressing ArrowUp on the first lines keeps the caret below the palette.",
   },
   {
     id: "edit-palette-tall-dark",
@@ -1039,9 +1031,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editMode: true,
     editPaletteTall: true,
     description:
-      "Dark theme, the same very tall paragraph editor scrolled mid-box: the palette stays visible "
-      + "at the top of the viewport. -top and -end PNGs as in the light scenario (-end: box bottom with Done/Cancel, "
-      + "palette still stuck).",
+      "Dark theme, the same very tall paragraph editor scrolled mid-box: the palette stays visible at the top of the viewport. The checks of the light scenario run too; only the final frame is kept.",
   },
   {
     id: "edit-palette-tall-narrow-360",
@@ -1053,9 +1043,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editMode: true,
     editPaletteTall: true,
     description:
-      "360 px preview, a very tall paragraph editor scrolled mid-box: the five-row palette is not "
-      + "sticky in a narrow pane (it would cover a third of the viewport), so the text is unobstructed. "
-      + "-top shows the palette on top of the box.",
+      "360 px preview, a very tall paragraph editor scrolled mid-box: the five-row palette is not sticky in a narrow pane (it would cover a third of the viewport), so the text is unobstructed. The `end` step keeps the bottom of the box.",
   },
   {
     id: "palette-mode-strict-light",
@@ -1067,8 +1055,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     paletteModeShot: "strict",
     machineChecks: ["overlay-clipped"],
     description:
-      "Palette mode Strict, light theme: plain Markdown buttons only. The -palette PNG is the bar above a paragraph editor, the "
-      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+      "Palette mode Strict, light theme: plain Markdown buttons only. The `palette` step is the bar above a paragraph editor; the final frame is the bar in the editor opened from a + insertion point.",
   },
   {
     id: "palette-mode-strict-dark",
@@ -1080,8 +1067,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     paletteModeShot: "strict",
     machineChecks: ["overlay-clipped"],
     description:
-      "Palette mode Strict, dark theme: plain Markdown buttons only. The -palette PNG is the bar above a paragraph editor, the "
-      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+      "Palette mode Strict, dark theme: plain Markdown buttons only. The bar above a paragraph editor and the bar in the editor opened from a + insertion point are both checked; no PNG is kept.",
   },
   {
     id: "palette-mode-gfm-light",
@@ -1093,8 +1079,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     paletteModeShot: "gfm",
     machineChecks: ["overlay-clipped"],
     description:
-      "Palette mode GFM, light theme: strict plus the GitHub buttons. The -palette PNG is the bar above a paragraph editor, the "
-      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+      "Palette mode GFM, light theme: strict plus the GitHub buttons. The `palette` step is the bar above a paragraph editor; the final frame is the bar in the editor opened from a + insertion point.",
   },
   {
     id: "palette-mode-gfm-dark",
@@ -1106,8 +1091,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     paletteModeShot: "gfm",
     machineChecks: ["overlay-clipped"],
     description:
-      "Palette mode GFM, dark theme: strict plus the GitHub buttons. The -palette PNG is the bar above a paragraph editor, the "
-      + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+      "Palette mode GFM, dark theme: strict plus the GitHub buttons. The bar above a paragraph editor and the bar in the editor opened from a + insertion point are both checked; no PNG is kept.",
   },
   {
     id: "palette-mode-myst-light",
@@ -1119,8 +1103,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     paletteModeShot: "myst",
     machineChecks: ["overlay-clipped"],
     description:
-      "Palette mode MyST, light theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The scenario PNG shows the bar in the editor opened from a + insertion point; "
-      + "the bar above a paragraph editor is the same as in edit-palette-*.",
+      "Palette mode MyST, light theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The final frame shows the bar in the editor opened from a + insertion point; the bar above a paragraph editor is checked too and looks the same as in the edition palette scenarios.",
   },
   {
     id: "palette-mode-myst-dark",
@@ -1132,8 +1115,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     paletteModeShot: "myst",
     machineChecks: ["overlay-clipped"],
     description:
-      "Palette mode MyST, dark theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The scenario PNG shows the bar in the editor opened from a + insertion point; "
-      + "the bar above a paragraph editor is the same as in edit-palette-*.",
+      "Palette mode MyST, dark theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The bar above a paragraph editor and the bar in the editor opened from a + insertion point are both checked; no PNG is kept.",
   },
   {
     id: "slash-menu-strict-light",
@@ -1145,8 +1127,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     slashMenuShot: { mode: "strict", finalQuery: "" },
     machineChecks: ["overlay-clipped"],
     description:
-      "Slash command menu, palette mode strict, light theme: / at a line start opens the menu at the caret with the palette's commands "
-      + "grouped by category; the -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with only the slash typed.",
+      "Slash command menu, palette mode strict, light theme: / at a line start opens the menu at the caret with the palette's commands grouped by category; the filtered, no-match and flip states are checked without step PNGs; the final frame shows the menu with only the slash typed.",
   },
   {
     id: "slash-menu-gfm-light",
@@ -1158,8 +1139,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     slashMenuShot: { mode: "gfm", finalQuery: "tab" },
     machineChecks: ["overlay-clipped"],
     description:
-      "Slash command menu, palette mode gfm, light theme: / at a line start opens the menu at the caret with the palette's commands "
-      + "grouped by category; the -open, -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with /tab typed.",
+      "Slash command menu, palette mode gfm, light theme: / at a line start opens the menu at the caret with the palette's commands grouped by category; the `open`, `filtered`, `nomatch` and `flip` steps show the states, the final frame the menu with /tab typed.",
   },
   {
     id: "slash-menu-myst-light",
@@ -1171,8 +1151,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     slashMenuShot: { mode: "myst", finalQuery: "" },
     machineChecks: ["overlay-clipped"],
     description:
-      "Slash command menu, palette mode myst, light theme: / at a line start opens the menu at the caret with the palette's commands "
-      + "grouped by category; the -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with only the slash typed.",
+      "Slash command menu, palette mode myst, light theme: / at a line start opens the menu at the caret with the palette's commands grouped by category; the filtered, no-match and flip states are checked without step PNGs; the final frame shows the menu with only the slash typed.",
   },
   {
     id: "slash-menu-myst-dark",
@@ -1184,8 +1163,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     slashMenuShot: { mode: "myst", finalQuery: "no" },
     machineChecks: ["overlay-clipped"],
     description:
-      "Slash command menu, palette mode myst, dark theme: / at a line start opens the menu at the caret with the palette's commands "
-      + "grouped by category; the -open, -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with /no typed.",
+      "Slash command menu, palette mode myst, dark theme: / at a line start opens the menu at the caret with the palette's commands grouped by category; the filtered, no-match and flip states are checked without step PNGs; the final frame shows the menu with /no typed.",
   },
   {
     id: "edit-palette-dark",
@@ -1234,8 +1212,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editAffordances: true,
     machineChecks: ["overlay-clipped"],
     description:
-      "Edit mode on, light theme. Hovering a list reveals the round + insertion button in the left "
-      + "gutter below it (the -hover PNG); the insertion points add no height to the page.",
+      "Edit mode on, light theme. A hovered list is outlined with a dashed line (the `hover` step, which also shows the round + insertion button in the left gutter), then a paragraph editor opens with its frame and Done/Cancel row.",
   },
   {
     id: "edit-insert-after-final-figure",
@@ -1337,10 +1314,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editMode: true,
     editTarget: "table-cell-wide",
     description:
-      "Edit mode on a sixteen-column table wider than the preview. After pressing End in the "
-      + "far-right cell editor (the -end PNG) the caret is at the end of the cell text and the "
-      + "table has not shifted horizontally. Done and Cancel sit inside the cell without widening "
-      + "the column and the toolbar status is centred with its buttons.",
+      "Edit mode on a sixteen-column table wider than the preview. After pressing End in the far-right cell editor (the `end` step) the caret is at the end of the cell text and the table has not shifted horizontally. Done and Cancel sit inside the cell without widening the column and the toolbar status is centred with its buttons.",
   },
   {
     id: "edit-table-cell-dark",
@@ -1360,7 +1334,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
       "The selected table cell is edited in place with a row and column action bar above the table. "
       + "The cell editor uses the block editor font, shows Done and Cancel under the field inside "
       + "the cell (no status hint), and the toolbar status is vertically centred with its buttons. "
-      + "The -arrowdown PNG shows the editor moved to the cell below after ArrowDown.",
+      + "ArrowDown moves the editor to the cell below.",
   },
   ...["light", "dark"].flatMap((theme) => [WIDE, NARROW].map((viewport) => ({
     id: `edit-table-wrapped-${theme}-${viewport.width}`,
@@ -1372,8 +1346,11 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editTarget: "table-cell" as const,
     machineChecks: ["overlay-covers-text", "overlay-clipped"],
     description: "Long table-cell source wraps inside the cell in the block editor font, with Done and "
-      + "Cancel under the field inside the cell and unchanged column widths; the -arrowdown PNG shows "
-      + "the editor moved to the cell below.",
+      + "Cancel under the field inside the cell and unchanged column widths; ArrowDown moves the editor to "
+      + "the cell below"
+      + (theme === "light" && viewport.width === 900
+        ? " (steps `open`, `cell-bar`, `cell-emoji` and `arrowdown` keep the editor, the cell bar, its emoji picker and the moved editor)."
+        : (viewport.width === 900 || theme === "light" ? " (the `open` step keeps the opened editor)." : ".")),
   }))),
   {
     id: "edit-frontmatter-key-dark",
@@ -1619,7 +1596,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     scroll: { kind: "top" },
     scrollFeedbackStress: true,
     description:
-      "Three scroll cycles reach both ends; the final capture returns to the top of the tall frontmatter table.",
+      "Three scroll cycles reach both ends; the final frame returns to the top of the tall frontmatter table.",
   },
   {
     id: "frontmatter-scroll-feedback-edit",
@@ -1630,7 +1607,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editMode: true,
     scrollFeedbackStress: true,
     description:
-      "Edit mode remains on after three scroll cycles; the field editor is closed and the final capture is at the top.",
+      "Edit mode remains on after three scroll cycles; the field editor is closed and the final frame is at the top.",
   },
   {
     id: "frontmatter-dark",
@@ -1703,7 +1680,8 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     theme: "dark",
     width: 900,
     height: 400,
-    scroll: { kind: "bottom" },
+    // The box sits in the padding below the last block; scroll on until it is fully in the frame.
+    scroll: { kind: "bottom", extra: 120 },
     orphanBoxChecks: true,
     description: "End of the document with the Orphaned comments box added after the content. A box "
       + "shorter than the bottom padding leaves the scrollable height unchanged and sits right under "
@@ -1782,7 +1760,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     description: "The TOC button opens a column of h1-h4 headings right of the content and below the "
       + "toolbar. It never overlaps the content, the table or the floating toolbar, Auto and Full "
       + "width respect it, zoom 200 % keeps it usable, a click scrolls to the heading, and a pane "
-      + "under 760 px hides it (the button then only records the preference). The screenshot is "
+      + "under 760 px hides it (the button then only records the preference). The final frame is "
       + `taken with the column open in ${mode === "margin" ? "Margin" : mode === "auto" ? "Auto" : "Full width"} mode`
       + " (narrow panes: column hidden by design).",
   }))),
@@ -1801,7 +1779,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     description: "Gray comment chips and a green TODO chip. A click opens the comment as a box with "
       + "an accent bar and a Comment or TODO title, a second click closes it, opening a chip above "
       + "the reading line does not move the text being read, and turning preview.showComments off "
-      + "hides the gray chips (not the TODO chips) without a new render. The capture shows both "
+      + "hides the gray chips (not the TODO chips) without a new render. The final frame has both "
       + "boxes open.",
   })),
   ...([
@@ -1831,7 +1809,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     frontmatterLinkState: "loaded" as const,
     linkDetailsChecks: true,
-    description: "Resolved links show fresh target metadata and a clipped long excerpt. Beta intentionally lacks the optional description. Inspect excerpt ellipsis, Alpha's line 9 label and the visible Refresh tooltip without page overflow; native link title metadata is DOM-asserted, not visible in the PNG.",
+    description: "Resolved links show fresh target metadata and a clipped long excerpt. Beta intentionally lacks the optional description. The excerpt ellipsis, Alpha's line 9 label and the visible Refresh tooltip are asserted without page overflow; native link title metadata is DOM-asserted, not visible in a screenshot.",
   }))),
 ];
 
@@ -1847,6 +1825,10 @@ export const SCENARIOS: Scenario[] = SCENARIO_DEFINITIONS
     if (!isGroupId(group) || id === group) {
       throw new Error(`scenario ${definition.id} has no permanent id <group>/vNN-... in test/visual/scenarioIds.ts`);
     }
+    const locks = LOCKS_BY_ID[id];
+    if (locks === undefined || locks.trim() === "") {
+      throw new Error(`scenario ${id} has no locks statement in LOCKS_BY_ID (test/visual/scenarioIds.ts)`);
+    }
     const screenshotOf = definition.screenshotOf === undefined
       ? undefined
       : SCENARIO_ID_BY_LEGACY_ID[definition.screenshotOf] ?? definition.screenshotOf;
@@ -1854,6 +1836,7 @@ export const SCENARIOS: Scenario[] = SCENARIO_DEFINITIONS
       ...definition,
       id,
       group,
+      locks,
       ...(id !== definition.id ? { legacyId: definition.id } : {}),
       ...(ASSERTION_ONLY_IDS.has(id) ? { capture: false as const } : {}),
       ...(STEPS_BY_ID[id] === undefined ? {} : { steps: [...STEPS_BY_ID[id]!] }),
