@@ -9514,3 +9514,247 @@ test("T38: a reply for another edit is ignored and a refusal shows its reason", 
   const status = harness.createdElements.find((element) => element.getAttribute("data-sphinx-preview-edit-status") !== null);
   assert.equal(status?.textContent, "Save the document before pasting an image.");
 });
+
+// T39: block selection with Shift+click and Shift+Arrow (edit mode, contiguous, no Delete in v1).
+const SELECTED = "data-sphinx-preview-block-selected";
+
+function selectedLines(harness: RuntimeHarness): number[] {
+  return harness.mappings
+    .filter((block) => block.getAttribute(SELECTED) !== null)
+    .map((block) => Number(block.getAttribute("data-sphinx-source-line")));
+}
+
+function selectionAnnouncement(harness: RuntimeHarness): string | undefined {
+  return harness.createdElements.find((element) =>
+    element.className.split(" ").includes("sphinx-preview-selection-status"))?.textContent;
+}
+
+function shiftClick(harness: RuntimeHarness, block: RuntimeElement, extra: Record<string, unknown> = {}): { prevented: number } {
+  const counts = { prevented: 0 };
+  harness.dispatchDocument("click", {
+    target: block, shiftKey: true, preventDefault: () => { counts.prevented += 1; }, stopPropagation: () => undefined, ...extra,
+  });
+  return counts;
+}
+
+function shiftKey(key: string, extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return { key, shiftKey: true, preventDefault: () => undefined, stopPropagation: () => undefined, ...extra };
+}
+
+test("T39: Shift+click on two blocks selects the run between them without opening an editor", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  const first = shiftClick(harness, harness.mappings[0]);
+  assert.deepEqual(selectedLines(harness), [1]);
+  shiftClick(harness, harness.mappings[2]);
+  assert.deepEqual(selectedLines(harness), [1, 50, 100]);
+  assert.equal(first.prevented > 0, true, "the click does not go on to the browser");
+  assert.equal(selectionAnnouncement(harness), "3 blocks selected");
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditOpen"), false);
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-block-editing"), null);
+  shiftClick(harness, harness.mappings[1]);
+  assert.deepEqual(selectedLines(harness), [1, 50], "a later Shift+click moves the free end, the anchor stays");
+  assert.equal(selectionAnnouncement(harness), "2 blocks selected");
+});
+
+test("T39: the selection announcer is a polite live region created by the page script", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[0]);
+  const region = harness.createdElements.find((element) =>
+    element.className.split(" ").includes("sphinx-preview-selection-status"))!;
+  assert.equal(region.getAttribute("aria-live"), "polite");
+  assert.equal(region.getAttribute("role"), "status");
+  assert.equal(selectionAnnouncement(harness), "1 block selected");
+});
+
+test("T39: outside edit mode Shift+click selects nothing", () => {
+  const harness = createRuntimeHarness();
+  shiftClick(harness, harness.mappings[0]);
+  shiftClick(harness, harness.mappings[2]);
+  assert.deepEqual(selectedLines(harness), []);
+  harness.dispatchDocument("keydown", shiftKey("ArrowDown", { target: harness.mappings[1] }));
+  assert.deepEqual(selectedLines(harness), []);
+});
+
+test("T39: the range starts at the block that was clicked or opened last", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-block-editing"), "true");
+  shiftClick(harness, harness.mappings[2]);
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-block-editing"), null, "the editor is closed");
+  assert.deepEqual(selectedLines(harness), [50, 100]);
+});
+
+test("T39: an open editor with changes is saved first; the blocks are selected once the patch is in", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.value = "Current block, changed\n";
+  textarea.dispatch("input");
+  const before = harness.messages.length;
+  shiftClick(harness, harness.mappings[2]);
+  const saves = harness.messages.slice(before).filter((message) => message.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0].final, true);
+  assert.deepEqual(selectedLines(harness), [], "nothing is selected before the save result");
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), [50, 100]);
+  assert.equal(selectionAnnouncement(harness), "2 blocks selected");
+});
+
+test("T39: Shift+Arrow from a focused block extends and shrinks the selection and moves the focus", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  let prevented = 0;
+  const down = shiftKey("ArrowDown", { target: harness.mappings[1], preventDefault: () => { prevented += 1; } });
+  harness.dispatchDocument("keydown", down);
+  assert.deepEqual(selectedLines(harness), [50, 100]);
+  assert.equal(prevented, 1);
+  assert.equal((harness.mappings[2] as RuntimeElement).focusOptions !== undefined, true, "the free end takes the focus");
+  harness.dispatchDocument("keydown", shiftKey("ArrowUp", { target: harness.mappings[2] }));
+  assert.deepEqual(selectedLines(harness), [50]);
+  harness.dispatchDocument("keydown", shiftKey("ArrowUp", { target: harness.mappings[1] }));
+  assert.deepEqual(selectedLines(harness), [1, 50]);
+  assert.equal(selectionAnnouncement(harness), "2 blocks selected");
+  assert.equal(moveMessages(harness, before).length, 0, "a selection key never moves a block");
+});
+
+test("T39: Shift+Arrow does not collide with the Alt+Arrow move chords", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const target = harness.mappings[1];
+  const before = harness.messages.length;
+  harness.dispatchDocument("keydown", shiftKey("ArrowDown", { target, altKey: true }));
+  harness.dispatchDocument("keydown", shiftKey("ArrowDown", { target, ctrlKey: true }));
+  harness.dispatchDocument("keydown", shiftKey("ArrowDown", { target, metaKey: true }));
+  assert.deepEqual(selectedLines(harness), []);
+  assert.equal(moveMessages(harness, before).length, 0);
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target }));
+  assert.equal(moveMessages(harness, before).length, 1, "Alt+Arrow still moves");
+});
+
+test("T39: Shift+Arrow inside the text box, a field or the property table is left alone", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  let prevented = false;
+  textarea.dispatch("keydown", shiftKey("ArrowDown", { preventDefault: () => { prevented = true; } }));
+  harness.dispatchDocument("keydown", shiftKey("ArrowDown", {
+    target: textarea, preventDefault: () => { prevented = true; },
+  }));
+  assert.equal(prevented, false);
+  assert.deepEqual(selectedLines(harness), []);
+});
+
+test("T39: Escape or a plain click clears the selection", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[0]);
+  shiftClick(harness, harness.mappings[1]);
+  harness.dispatchDocument("keydown", { key: "Escape", target: harness.mappings[1], preventDefault: () => undefined });
+  assert.deepEqual(selectedLines(harness), []);
+  assert.equal(selectionAnnouncement(harness), "");
+  shiftClick(harness, harness.mappings[0]);
+  shiftClick(harness, harness.mappings[1]);
+  harness.dispatchDocument("click", { target: harness.mappings[2], preventDefault: () => undefined });
+  assert.deepEqual(selectedLines(harness), []);
+});
+
+test("T39: a content patch and leaving edit mode clear the selection", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[0]);
+  shiftClick(harness, harness.mappings[2]);
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), []);
+  shiftClick(harness, harness.mappings[0]);
+  harness.editModeButton.dispatch("click");
+  assert.deepEqual(selectedLines(harness), []);
+});
+
+test("T39: included blocks stop the range and the properties table is never selected", () => {
+  const harness = createRuntimeHarness({
+    mapFrontmatter: true, propertiesMapped: true, firstMappedSourceLine: 5, savedState: { editMode: true },
+  });
+  harness.mappings[2].setAttribute("data-sphinx-preview-included", "true");
+  shiftClick(harness, harness.mappings[0]);
+  shiftClick(harness, harness.mappings[2]);
+  assert.deepEqual(selectedLines(harness), [5, 50], "the selection ends before the included block");
+  harness.dispatchDocument("keydown", shiftKey("ArrowDown", { target: harness.mappings[1] }));
+  assert.deepEqual(selectedLines(harness), [5, 50], "Shift+Down cannot pass it");
+  const properties = harness.currentProperties()!;
+  shiftClick(harness, properties);
+  assert.equal(properties.getAttribute(SELECTED), null);
+  assert.deepEqual(selectedLines(harness), [5, 50]);
+  harness.dispatchDocument("keydown", shiftKey("ArrowUp", { target: harness.mappings[0] }));
+  harness.dispatchDocument("keydown", shiftKey("ArrowUp", { target: harness.mappings[0] }));
+  assert.equal(properties.getAttribute(SELECTED), null, "Shift+Up stops at the first body block");
+});
+
+test("T39 r2: blocks are named by position, so an edit that adds lines selects the right blocks", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.value = "Current block\nwith\ntwo more lines\n";
+  textarea.dispatch("input");
+  shiftClick(harness, harness.mappings[2]);
+  // The save adds two lines: the blocks below the edited one shift down by two.
+  harness.mappings[1].setAttribute("data-sphinx-source-end-line", "54");
+  harness.mappings[2].setAttribute("data-sphinx-source-line", "102");
+  harness.mappings[2].setAttribute("data-sphinx-source-end-line", "102");
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), [50, 102], "the edited block and the clicked one, at their new lines");
+  assert.equal(selectionAnnouncement(harness), "2 blocks selected");
+});
+
+test("T39 r2: a save that changes the number of blocks selects nothing instead of another block", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.value = "Current block\n\nsplit\n";
+  textarea.dispatch("input");
+  shiftClick(harness, harness.mappings[2]);
+  harness.mappings.splice(1, 1);
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), []);
+});
+
+test("T39 r2: a pending selection does not survive its editor closing without the patch", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.value = "Current block, changed\n";
+  textarea.dispatch("input");
+  shiftClick(harness, harness.mappings[2]);
+  harness.editModeButton.dispatch("click");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), [], "a later patch selects nothing");
+});
+
+test("T39 r2: Shift+Arrow with a selection leaves toolbar buttons alone", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[0]);
+  let prevented = false;
+  harness.dispatchDocument("keydown", shiftKey("ArrowDown", {
+    target: harness.zoomInButton, preventDefault: () => { prevented = true; },
+  }));
+  assert.equal(prevented, false);
+  assert.deepEqual(selectedLines(harness), [1]);
+  harness.dispatchDocument("keydown", shiftKey("ArrowDown", { target: harness.body }));
+  assert.deepEqual(selectedLines(harness), [1, 50], "the page itself still extends it");
+});
+
+test("T39 r2: Shift+mousedown inside a link keeps the browser default", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const inner = harness.mappings[0];
+  const closest = inner.closest.bind(inner);
+  inner.closest = (selector: string) => (selector === "a" ? inner : closest(selector));
+  let prevented = false;
+  harness.dispatchDocument("mousedown", { target: inner, shiftKey: true, preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, false);
+  harness.dispatchDocument("mousedown", { target: harness.mappings[1], shiftKey: true, preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true, "on plain block text it is cancelled");
+});
+
+test("T39 r2: Shift+click while the property editor is open selects nothing", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell, preventDefault: () => undefined, stopPropagation: () => undefined,
+  });
+  assert.ok(harness.createdElements.some((element) => element.tagName === "SELECT"), "the property editor is open");
+  shiftClick(harness, harness.mappings[0]);
+  assert.deepEqual(selectedLines(harness), []);
+});

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- In edit mode, Shift+click on a block selects every body block from the block you last clicked
+  or opened to that one, and Shift+Up or Shift+Down grows or shrinks the selection. Selected
+  blocks get an outline and a screen reader announces "3 blocks selected". Escape or a plain
+  click clears it, and so does any change to the document. The properties table and blocks that
+  come from an included file are never selected, and an include ends a range. Text selection by
+  dragging, and everything in preview mode, work as before.
 - Pasting an image (a screenshot) into an open block editor saves it next to the document as
   `image.png`, then `image-1.png`, `image-2.png` and so on, and inserts `![image.png](image.png)`
   with the alt text selected. Text on the clipboard still wins over an image. Only png, jpeg, gif

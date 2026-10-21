@@ -13,6 +13,7 @@ import { createFigureTools } from "./figureDirective";
 import { createFigurePanel, installFigureEditButton } from "./figurePanel";
 import { highlightLanguageNames } from "../render/highlight";
 import { createTextEditingTools } from "./textEditing";
+import { createBlockSelection } from "./blockSelection";
 import { installCodeCopy } from "./codeCopy";
 import { installLabelRename } from "./labelRename";
 import { installHostRequests } from "./hostRequests";
@@ -83,6 +84,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
   const tableTools = (${createMarkdownTableTools.toString()})();
   const textEditing = (${createTextEditingTools.toString()})();
+  const blockSelection = (${createBlockSelection.toString()})();
   const isSafeOkfColor = ${isSafeOkfColor.toString()};
   const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())}, tableTools, isSafeOkfColor);
   const createEditPalette = ${createEditPalette.toString()};
@@ -398,11 +400,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     // Editors are closed without cancelling: the document keeps whatever was already saved.
     deferredPropertiesMarkup = undefined;
     closeFrontmatterEditor();
+    applyingContentPatch = true;
     closeBlockEdit(false);
+    applyingContentPatch = false;
     closeLinkTooltip();
     codeCopy.hide();
     setEditHover(undefined);
     pendingCheckboxToggles.clear();
+    clearBlockSelection(true);
     applyPendingOverlay({ visible: false, label: "", message: "" });
     main.innerHTML = message.contentHtml;
     context.documentVersion = next.documentVersion;
@@ -432,6 +437,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     linkNavigation.rescan();
     contentReplaced();
     postPreviewReady();
+    applyPendingBlockSelection();
   }
 
   function sameContext(candidate) {
@@ -984,6 +990,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const edit = activeBlockEdit;
     if (!edit) return;
     activeBlockEdit = undefined;
+    // An editor that closes without the patch of its save has nothing left to wait for.
+    if (!applyingContentPatch) pendingBlockSelection = undefined;
     document.documentElement?.removeAttribute?.("data-sphinx-preview-block-editing");
     hostRequests.cancelAll();
     if (edit.autosaveTimer !== undefined) {
@@ -3096,6 +3104,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (!edit || message.editId !== edit.editId) return;
     if (typeof message.error === "string") {
       clearPendingBlockNavigation();
+      pendingBlockSelection = undefined;
       edit.finishing = false;
       edit.lastPostedText = undefined;
       edit.status.textContent = message.error;
@@ -3512,6 +3521,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
 
   function applyEditMode(enabled) {
     if (!enabled) {
+      clearBlockSelection();
       labelRename.close();
       setEditHover(undefined);
       closeFrontmatterEditor();
@@ -3575,6 +3585,183 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (!start) return;
     event.preventDefault?.();
     openInsertPoint(start, 0);
+  });
+
+  // Block selection (edit mode): a contiguous run of top-level body blocks, built with
+  // Shift+click and Shift+Arrow. The model is blockSelection; this part reads the blocks from the
+  // page, marks them and announces the count. Nothing here edits the document (no Delete in v1).
+  let selectionElements = [];
+  // The anchor and a pending selection are remembered by position among the body blocks, with the
+  // block count they were read at: a line number goes stale when an edit adds or removes lines,
+  // and a different block count means the ordinal no longer names the same block.
+  let selectionAnchor;
+  let applyingContentPatch = false;
+  let selectionStatus;
+  let pendingBlockSelection;
+
+  function selectableBlocks() {
+    return topLevelMappedBlocks().filter((block) => block.getAttribute("data-okf-properties") === null);
+  }
+
+  function syncSelectionModel() {
+    const blocks = selectableBlocks();
+    blockSelection.setBlocks(blocks.map((block) => ({
+      ...blockRange(block),
+      included: isIncludedBlock(block),
+    })));
+    return blocks;
+  }
+
+  function announceSelection(count) {
+    if (!selectionStatus) {
+      if (count === 0) return;
+      selectionStatus = document.createElement("div");
+      selectionStatus.className = "sphinx-preview-selection-status";
+      selectionStatus.setAttribute("role", "status");
+      selectionStatus.setAttribute("aria-live", "polite");
+      document.body?.appendChild(selectionStatus);
+    }
+    selectionStatus.textContent = count === 0 ? "" : count + (count === 1 ? " block selected" : " blocks selected");
+  }
+
+  function renderBlockSelection(blocks) {
+    selectionElements.forEach((element) => element.removeAttribute("data-sphinx-preview-block-selected"));
+    selectionElements = blockSelection.indices()
+      .map((index) => blocks[index])
+      .filter(Boolean)
+      .map((block) => block.closest?.("pre") || block);
+    selectionElements.forEach((element) => element.setAttribute("data-sphinx-preview-block-selected", "true"));
+    announceSelection(selectionElements.length);
+  }
+
+  // A selection that waits for a save (pendingBlockSelection) survives the patch that clears the
+  // old one; every other reason to clear drops it too.
+  function clearBlockSelection(keepPending = false) {
+    if (!keepPending) pendingBlockSelection = undefined;
+    if (!blockSelection.isActive() && selectionElements.length === 0) return;
+    blockSelection.clear();
+    renderBlockSelection([]);
+  }
+
+  function rememberSelectionAnchor(block) {
+    const blocks = selectableBlocks();
+    const element = block?.closest ? blockOfTarget(block) : block;
+    const index = blocks.indexOf(element);
+    selectionAnchor = index >= 0 ? { index, count: blocks.length } : undefined;
+  }
+
+  // The block the free end of the selection sits on: gets the focus so the keyboard (and a screen
+  // reader) follows it.
+  function focusSelectionEnd(blocks) {
+    const anchorIndex = blockSelection.anchorIndex;
+    const free = blockSelection.startIndex === anchorIndex ? blockSelection.endIndex : blockSelection.startIndex;
+    const block = blocks[free];
+    if (!block) return;
+    block.setAttribute("tabindex", "-1");
+    block.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+    block.focus?.({ preventScroll: true });
+  }
+
+  // Shift+click without an open editor: select from the anchor to the clicked block.
+  function selectBlocksNow(anchor, targetIndex) {
+    const blocks = syncSelectionModel();
+    if (!(targetIndex >= 0 && targetIndex < blocks.length)) return;
+    if (!blockSelection.isActive()) {
+      const known = anchor && anchor.count === blocks.length && anchor.index < blocks.length;
+      blockSelection.setAnchor(known ? anchor.index : targetIndex);
+    }
+    if (!blockSelection.extendTo(targetIndex)) {
+      renderBlockSelection(blocks);
+      return;
+    }
+    renderBlockSelection(blocks);
+    window.getSelection?.()?.removeAllRanges?.();
+    focusSelectionEnd(blocks);
+  }
+
+  function selectBlocksTo(node) {
+    const block = blockOfTarget(node);
+    if (!block || block.getAttribute("data-okf-properties") !== null) return;
+    if (activeFrontmatterEdit) return;
+    const blocks = selectableBlocks();
+    const targetIndex = blocks.indexOf(block);
+    const anchor = blockSelection.isActive() ? undefined : selectionAnchor;
+    const edit = activeBlockEdit;
+    if (edit) {
+      // The open editor is saved first; the blocks are selected once its patch is in. The edit
+      // may add or remove lines, so the blocks are named by position, not by line.
+      if (edit.finishing || postBlockEditSave(true)) {
+        pendingBlockSelection = { anchor, targetIndex, count: blocks.length };
+        return;
+      }
+      if (activeBlockEdit) closeBlockEdit(true);
+    }
+    selectBlocksNow(anchor, targetIndex);
+  }
+
+  // Applied on the first patch after the save. When the edit changed the number of blocks the
+  // positions no longer name the same blocks: nothing is selected rather than something else.
+  function applyPendingBlockSelection() {
+    const pending = pendingBlockSelection;
+    pendingBlockSelection = undefined;
+    if (!pending || !editMode || activeBlockEdit) return;
+    if (selectableBlocks().length !== pending.count) return;
+    selectBlocksNow(pending.anchor, pending.targetIndex);
+  }
+
+  // Shift+Arrow on a focused block or on a selection extends or shrinks it. Alt+Arrow (move) and
+  // the Ctrl/Cmd chords are other gestures; the text box, fields and the property table keep
+  // their own keys.
+  document.addEventListener("keydown", (event) => {
+    if (!editMode || event.isComposing || !event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+    if (activeBlockEdit || activeFrontmatterEdit) return;
+    const target = event.target;
+    if (target instanceof Element
+      && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+        || target.isContentEditable
+        || target.closest("[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]"))) return;
+    const focused = target instanceof Element ? blockOfTarget(target) : undefined;
+    // With a selection the keys are ours only on a block, an insertion bar or the page itself:
+    // toolbar buttons and menus keep their arrow keys.
+    if (!focused && target instanceof Element
+      && target !== document.body && target !== document.documentElement
+      && !target.closest(".sphinx-preview-insert-point")) return;
+    const blocks = syncSelectionModel();
+    if (!blockSelection.isActive() && (!focused || focused.getAttribute("data-okf-properties") !== null)) return;
+    const index = focused ? blocks.indexOf(focused) : -1;
+    if (!blockSelection.isActive() && index < 0) return;
+    event.preventDefault?.();
+    event.stopPropagation?.();
+    blockSelection.extendBy(event.key === "ArrowUp" ? -1 : 1, index);
+    renderBlockSelection(blocks);
+    if (blockSelection.isActive()) {
+      rememberSelectionAnchor(blocks[blockSelection.anchorIndex]);
+      focusSelectionEnd(blocks);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !blockSelection.isActive()) return;
+    const target = event.target;
+    if (target instanceof Element
+      && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+        || target.closest("[data-sphinx-preview-block-editor], [data-okf-frontmatter-editor]"))) return;
+    event.preventDefault?.();
+    clearBlockSelection();
+  });
+
+  // Shift+mousedown on a block would extend the browser's text selection under the block
+  // selection; edit mode already turns a click into an edit, so the native range adds nothing.
+  document.addEventListener("mousedown", (event) => {
+    if (!editMode || !event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+    const target = event.target;
+    if (!(target instanceof Element)
+      || ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(target.tagName)
+      || target.closest("a")
+      || target.closest("[data-okf-properties], [data-sphinx-preview-block-editor], .sphinx-preview-insert-point")) return;
+    if (!blockOfTarget(target)) return;
+    event.preventDefault?.();
   });
 
   // The two move buttons of a body block's insert point (backlog move-block-up-down). The host
@@ -3690,6 +3877,18 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       ? direction : undefined;
   }
 
+  // The top-level block a focused or clicked node belongs to (the block of an insertion bar's
+  // buttons too), or undefined.
+  function blockOfTarget(target) {
+    const fromBar = insertMoves.get(target.closest(".sphinx-preview-insert-point"))?.block;
+    if (fromBar) return fromBar;
+    const blocks = topLevelMappedBlocks();
+    for (let element = target.closest(mappingsSelector); element; element = element.parentElement) {
+      if (blocks.includes(element)) return element;
+    }
+    return undefined;
+  }
+
   // Alt+Up/Down on a focused block or insertion bar moves the block like its arrow buttons.
   document.addEventListener("keydown", (event) => {
     const direction = moveChordDirection(event, false);
@@ -3699,16 +3898,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
       || target.isContentEditable
       || target.closest("[data-sphinx-preview-block-editor], [data-okf-properties]")) return;
-    let block = insertMoves.get(target.closest(".sphinx-preview-insert-point"))?.block;
-    if (!block) {
-      const blocks = topLevelMappedBlocks();
-      for (let element = target.closest(mappingsSelector); element; element = element.parentElement) {
-        if (blocks.includes(element)) {
-          block = element;
-          break;
-        }
-      }
-    }
+    const block = blockOfTarget(target);
     if (!block) return;
     event.preventDefault?.();
     event.stopPropagation?.();
@@ -4072,6 +4262,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
 
   function openMappedEditor(target, eventTarget, initialCaretPosition = "end", reveal = false) {
     if (eventTarget.closest?.("[data-okf-properties]")) return;
+    clearBlockSelection();
+    rememberSelectionAnchor(target);
     if (reveal) target.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     const selectedCell = eventTarget.closest?.("td, th");
     const table = selectedCell?.closest?.("table");
@@ -4453,6 +4645,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
   });
   document.addEventListener("click", (event) => {
+    const extendsSelection = editMode && event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey;
+    if (editMode && !extendsSelection) clearBlockSelection();
     if (event.target instanceof Element && event.target.closest(".sphinx-preview-insert-point")) return;
     // A chip is reserved for expanding its comment; the rest of the block edits.
     if (event.target instanceof Element && event.target.closest(".okf-chip")) return;
@@ -4463,6 +4657,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       if (editMode && activeBlockEdit?.selectedCell && !activeBlockEdit.finishing) {
         postBlockEditSave(true);
       }
+      return;
+    }
+    if (extendsSelection) {
+      event.preventDefault?.();
+      selectBlocksTo(target);
       return;
     }
     if (editMode) {

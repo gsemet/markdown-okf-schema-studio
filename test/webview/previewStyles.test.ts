@@ -201,6 +201,14 @@ test("edit mode outlines the hovered block without moving the layout", () => {
   );
 });
 
+test("selected blocks get a solid focus outline and the count is announced off screen", () => {
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /html\[data-sphinx-preview-edit-mode="on"\] \[data-sphinx-preview-block-selected="true"\]\s*\{[^}]*outline: 2px solid var\(--vscode-focusBorder, Highlight\);[^}]*outline-offset: 3px;/u,
+  );
+  assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-selection-status\s*\{[^}]*clip-path: inset\(50%\);/u);
+});
+
 test("raw Markdown and YAML editors use the editor font, text fields keep the preview font", () => {
   assert.match(
     PREVIEW_THEME_CSS,

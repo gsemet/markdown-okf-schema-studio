@@ -40,6 +40,8 @@ Markdown flavours and extensions:
   Alt+Up/Down moves the focused block; Cmd/Ctrl+Alt+Up/Down does it from the block text box.
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
+  Block selection: Shift+click selects the blocks between the last clicked block and the one you
+  click, Shift+Up/Down extends or shrinks the selection, Escape or a click clears it.
   An edition palette above the text box adds headings, bold, italic, strikethrough, inline code,
   links (Cmd/Ctrl+K opens a link panel with text and target), tables from a size grid, emoji from
   a picker, text and background colours

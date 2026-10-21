@@ -267,6 +267,36 @@ async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Promise<vo
   });
 }
 
+/** T39: Shift+click across three blocks, Shift+Up shrinks, Escape clears; nothing is edited. */
+async function scenarioBlockSelection(page: Page, evidence: Evidence): Promise<void> {
+  const text = ["# Selection", "", "Alpha paragraph.", "", "Beta paragraph.", "", "Gamma paragraph.", ""].join("\n");
+  await withDocument("realinput-block-selection", text, async (document) => {
+    await openSidePreview(document);
+    await waitForRender(document);
+    await setEditMode(page, true);
+    const selected = (): Promise<string[]> => withCurrentFrame(page, (frame) =>
+      frame.evaluate(() => Array.from(window.document.querySelectorAll("[data-sphinx-preview-block-selected]"))
+        .map((element) => element.textContent ?? "")));
+    const announced = (): Promise<string> => withCurrentFrame(page, (frame) =>
+      frame.evaluate(() => window.document.querySelector(".sphinx-preview-selection-status")?.textContent ?? ""));
+    await withCurrentFrame(page, async (frame) => {
+      await frame.locator("p", { hasText: "Alpha paragraph." }).click({ modifiers: ["Shift"] });
+      await frame.locator("p", { hasText: "Gamma paragraph." }).click({ modifiers: ["Shift"] });
+    });
+    await waitFor("three blocks to be selected", async () => (await selected()).length === 3);
+    assert.equal(await announced(), "3 blocks selected");
+    await waitForNoBlockEditor(page, "Shift+click opens no block editor");
+    await captureAfter(evidence, page, "block-selection-01-shift-click",
+      "Shift+click on Alpha then Gamma outlines the three body blocks; no editor is open.");
+    await press(page, "Shift+ArrowUp");
+    await waitFor("Shift+Up to shrink the selection", async () => (await selected()).length === 2);
+    assert.equal(await announced(), "2 blocks selected");
+    await press(page, "Escape");
+    await waitFor("Escape to clear the selection", async () => (await selected()).length === 0);
+    assert.equal(bufferText(document), text, "selecting changes nothing in the document");
+  });
+}
+
 async function scenarioArrowNavigation(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-s3", async (document) => {
     await openSidePreview(document);
@@ -3685,6 +3715,7 @@ export async function run(): Promise<void> {
     await scenarioInsertBlocksFromPreview(page, evidence);
     await scenarioInsertAfterFinalFigure(page, evidence);
     await scenarioBlockMoveKeys(page, evidence);
+    await scenarioBlockSelection(page, evidence);
     await scenarioImageEditing(page, evidence);
     await scenarioFocusChangeKeepsPreviewStill(page, evidence);
     await scenarioHiddenPreviewCatchesUp(page, evidence);
