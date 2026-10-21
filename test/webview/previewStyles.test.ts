@@ -684,6 +684,11 @@ test("first-element gap: 40px on the first child, clearance only on the first ed
     PREVIEW_THEME_CSS,
     /\[data-okf-properties\]:first-child,[^{]*\.sphinx-preview-block-editor--first,[^{]*\.sphinx-preview-insert-point--first\s*\{\s*margin-top: calc\(40px \+ var\(--sphinx-preview-first-clearance, 0px\)\);/u,
   );
+  // P3: the first-block editor keeps the gap and yields the toolbar's width through its inline-end margin.
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /\.sphinx-preview-block-editor--first\s*\{\s*margin-inline-end: var\(--sphinx-preview-first-inset, 0px\);/u,
+  );
   // The gap is a margin: padding on the column would move its content box and the scroll anchoring.
   assert.doesNotMatch(
     PREVIEW_THEME_CSS,

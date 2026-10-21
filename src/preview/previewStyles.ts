@@ -886,6 +886,13 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   margin: 0 0 3px;
 }
 
+/* The first block's editor keeps its palette in the 40px place: nothing is above it, so the sticky
+   band's reading offset does not apply, and the toolbar's edge only when the frame did not give up
+   the width under the toolbar (the variable is 0 then). */
+.sphinx-preview-block-editor-host.sphinx-preview-block-editor--first > .sphinx-preview-edit-palette {
+  inset-block-start: calc(var(--sphinx-preview-first-bar-bottom, var(--sphinx-preview-toolbar-bottom, 0px)) + 4px);
+}
+
 /* Small panes, and a palette that would take over 40% of the viewport (set by the runtime), keep
    the bar in the flow (relative: its popovers stay anchored to it): a stuck bar would cover the text. */
 @media (max-width: 480px), (max-height: 520px) {
@@ -897,6 +904,17 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 
 .sphinx-preview-block-editor-host[data-sphinx-palette-static="true"] > .sphinx-preview-edit-palette {
   position: relative;
+  inset-block-start: auto;
+}
+
+/* The first block's own rule above is more specific: the small-pane and static cases win again. */
+@media (max-width: 480px), (max-height: 520px) {
+  .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first > .sphinx-preview-edit-palette {
+    inset-block-start: auto;
+  }
+}
+
+.sphinx-preview-block-editor-host.sphinx-preview-block-editor--first[data-sphinx-palette-static="true"] > .sphinx-preview-edit-palette {
   inset-block-start: auto;
 }
 
@@ -2197,9 +2215,11 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 }
 
 /*
- * An open first-block editor, the Start writing button and a leading properties table (it has
- * clickable controls) add the runtime's clearance, measured
- * only where the floating toolbar and the column share horizontal space (0 otherwise).
+ * Every first element starts 40px below the top. Only an interactive first element that sits under
+ * the floating toolbar moves: an open first-block editor gives up the width the toolbar covers
+ * (--sphinx-preview-first-inset, its inline-end margin) and keeps the 40px; the Start writing
+ * button, a leading properties table, and a first-block editor in a pane too narrow to be narrowed
+ * add the runtime's clearance, which is 0 whenever nothing overlaps.
  */
 #sphinx-myst-preview-content > [data-okf-properties]:first-child,
 #sphinx-myst-preview-content .sphinx-preview-block-editor--first,
@@ -2207,6 +2227,13 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 #sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first,
 #sphinx-myst-preview-content .sphinx-preview-insert-point--first {
   margin-top: calc(40px + var(--sphinx-preview-first-clearance, 0px));
+}
+
+#sphinx-myst-preview-content > [data-okf-properties]:first-child,
+#sphinx-myst-preview-content .sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first {
+  margin-inline-end: var(--sphinx-preview-first-inset, 0px);
 }
 
 #sphinx-myst-preview-content :where(ul, ol) {
