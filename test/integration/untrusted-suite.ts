@@ -1,4 +1,6 @@
 import * as assert from "node:assert/strict";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import * as vscode from "vscode";
 
 import {
@@ -62,6 +64,19 @@ export async function run(): Promise<void> {
       windowApi.showOpenDialog = originalDialog;
     }
     assert.equal(dialogCalls, 0, "the untrusted preview must not open the image dialog");
+    // A read-only preview never writes a pasted image.
+    const folder = path.dirname(document.uri.fsPath);
+    const before = fs.readdirSync(folder);
+    await sendPreviewMessageForTests({
+      type: "previewPasteImage",
+      documentId: commandPreview.documentUri,
+      documentVersion: commandPreview.documentVersion,
+      requestId: commandPreview.requestId,
+      editId: "untrusted-paste",
+      mime: "image/png",
+      dataBase64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+    });
+    assert.deepEqual(fs.readdirSync(folder), before, "the untrusted preview must not write a pasted image");
     await runBlockMoveUntrusted(commandPreview, document);
     await vscode.commands.executeCommand("vscode.openWith", document.uri, EDITOR_VIEW_TYPE);
     await waitForPreview();

@@ -33,6 +33,14 @@ import { insertionText, planInsertion, type InsertionPlan } from "./mapping/inse
 import { minimalReplacement } from "./mapping/textDiff";
 import { opensIncludeDirective, planBlockMove } from "./mapping/blockMove";
 import { countRefUses, renameLabelLine } from "./mapping/labelRename";
+import {
+  imageTypeOfMime,
+  isBase64,
+  MAX_PASTED_IMAGE_BYTES,
+  nextImageName,
+  PASTED_IMAGE_EXTENSION,
+  sniffImage,
+} from "./mapping/pastedImage";
 import { IMAGE_EXTENSIONS, isImageFileName, relativeImageReference } from "./mapping/imageReference";
 import { docReference, documentTargets } from "./mapping/mystTargets";
 import { scanBibKeys } from "./preview/bibScan";
@@ -1872,7 +1880,7 @@ type HostListAnswer =
 function postHostResult(
   preview: ActivePreview,
   message: RegisteredPreviewMessage,
-  result: HostListAnswer | { ok: true; path?: string; cancelled?: boolean } | { ok: false; reason: string },
+  result: HostListAnswer | { ok: true; path?: string; cancelled?: boolean; fileName?: string } | { ok: false; reason: string },
 ): void {
   void preview.panel.webview.postMessage({
     type: `${message.type}Result`,
@@ -2012,6 +2020,55 @@ function handlePickImage(preview: ActivePreview, message: RegisteredPreviewMessa
       : { ok: true, path: reference });
   }, (error: unknown) => {
     postHostResult(preview, message, { ok: false, reason: error instanceof Error ? error.message : String(error) });
+  });
+}
+
+/**
+ * An image pasted into the open block editor: saved next to the document under a name chosen
+ * here (`image.png`, `image-1.png`, …), never a name from the page. Refused in a read-only
+ * preview, for a document that is not a saved file, for a folder that
+ * is not inside a workspace folder (symlinks resolved), for bytes that are not the announced
+ * png, jpeg, gif or webp, and above 10 MB. Only a block editor's text box posts this message (no
+ * editor open: the page ignores the paste); the host has no state for an editor that is open but
+ * not yet saved, and the editor's autosaves move the document version, so neither is checked.
+ */
+function handlePasteImage(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+  const refuse = (reason: string): undefined => {
+    postHostResult(preview, message, { ok: false, reason });
+    return undefined;
+  };
+  if (preview.readOnly) return refuse("Pasting an image needs a trusted workspace.");
+  const document = preview.document;
+  if (!document || document.uri.scheme !== "file" || documentKey(document) !== preview.documentUri) {
+    return refuse("Save the document before pasting an image.");
+  }
+  if (!isDocumentEligible(document)) return refuse("Pasting an image needs a Markdown file.");
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+  const folderPath = path.dirname(document.uri.fsPath);
+  if (!workspaceFolder
+    || !isPathWithin(canonicalPath(workspaceFolder.uri.fsPath), canonicalPath(folderPath))) {
+    return refuse("The image must be saved inside a workspace folder.");
+  }
+  const announced = imageTypeOfMime(String(message.mime));
+  const encoded = String(message.dataBase64);
+  if (!announced || !isBase64(encoded)) return refuse("That clipboard image type is not supported.");
+  const bytes = Buffer.from(encoded, "base64");
+  if (bytes.length > MAX_PASTED_IMAGE_BYTES) return refuse("The image is larger than 10 MB.");
+  const sniffed = sniffImage(bytes);
+  if (sniffed === undefined || sniffed !== announced) {
+    return refuse("The clipboard data is not a png, jpeg, gif or webp image.");
+  }
+  const folder = vscode.Uri.file(folderPath);
+  return Promise.resolve(vscode.workspace.fs.readDirectory(folder)).then(async (entries) => {
+    const fileName = nextImageName(new Set(entries.map(([name]) => name)), PASTED_IMAGE_EXTENSION[sniffed]);
+    if (fileName === undefined) {
+      refuse("Too many pasted images next to this document.");
+      return;
+    }
+    await vscode.workspace.fs.writeFile(vscode.Uri.joinPath(folder, fileName), bytes);
+    postHostResult(preview, message, { ok: true, fileName });
+  }).then(undefined, (error: unknown) => {
+    refuse(error instanceof Error ? error.message : String(error));
   });
 }
 
@@ -2912,6 +2969,7 @@ registeredMessageHandlers.set("previewListTargets", handleListTargets);
 registeredMessageHandlers.set("previewListCitations", handleListCitations);
 registeredMessageHandlers.set("previewPickDocument", handlePickDocument);
 registeredMessageHandlers.set("previewPickImage", handlePickImage);
+registeredMessageHandlers.set("previewPasteImage", handlePasteImage);
 
 function initialPaletteMode(): PaletteMode {
   const stored = editModeStorage?.get(PALETTE_MODE_STORAGE_KEY);

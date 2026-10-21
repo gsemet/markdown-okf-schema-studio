@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Pasting an image (a screenshot) into an open block editor saves it next to the document as
+  `image.png`, then `image-1.png`, `image-2.png` and so on, and inserts `![image.png](image.png)`
+  with the alt text selected. Text on the clipboard still wins over an image. Only png, jpeg, gif
+  and webp up to 10 MB are accepted, and nothing is saved in a read-only preview, for an unsaved
+  document or outside the workspace.
 - In edit mode the "+" bar under each body block also shows an up and a down arrow. A click swaps
   the block above the bar with its neighbour in one edit (one undo step) and keeps the moved block
   where it was on screen, so repeated clicks keep moving it. A list or a code block moves as one

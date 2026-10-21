@@ -45,7 +45,9 @@ Markdown flavours and extensions:
   a picker, text and background colours
   (a Colour picker with 16 swatches and a hex field; a swatch button appears when the caret is in a
   colour code), code blocks with a language,
-  blockquotes, horizontal rules and images picked from a file dialog. A select at its start
+  blockquotes, horizontal rules and images picked from a file dialog (or pasted: a screenshot on the
+  clipboard is saved next to the document as `image.png`, `image-1.png`, … and inserted with its
+  alt text selected). A select at its start
   (Cmd/Ctrl+Shift+M) chooses the Strict, GFM or MyST button set for the workspace.
   In GitHub (GFM) and MyST mode it also adds GitHub alerts with a
   type list, task-list checkboxes, HTML tables, collapsible sections, footnotes, Mermaid diagrams,
