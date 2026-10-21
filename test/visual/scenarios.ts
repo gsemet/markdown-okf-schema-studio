@@ -8,7 +8,7 @@
 
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
 import { isGroupId, type GroupId } from "../shared/e2eGroups";
-import { ASSERTION_ONLY_IDS, LOCKS_BY_ID, REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID, STEPS_BY_ID } from "./scenarioIds";
+import { ASSERTION_ONLY_IDS, LOCKS_BY_ID, README_BY_ID, REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID, STEPS_BY_ID } from "./scenarioIds";
 
 export type ScrollMode =
   | { kind: "top" }
@@ -1841,5 +1841,6 @@ export const SCENARIOS: Scenario[] = SCENARIO_DEFINITIONS
       ...(ASSERTION_ONLY_IDS.has(id) ? { capture: false as const } : {}),
       ...(STEPS_BY_ID[id] === undefined ? {} : { steps: [...STEPS_BY_ID[id]!] }),
       ...(screenshotOf === undefined ? {} : { screenshotOf }),
+      ...(README_BY_ID[id] === undefined ? {} : { readme: { ...README_BY_ID[id]!, crop: [...README_BY_ID[id]!.crop] as ReadmeSource["crop"] } }),
     };
   });

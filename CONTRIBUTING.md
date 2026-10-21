@@ -130,6 +130,29 @@ For serial debugging after rendering fixtures, run
 Real VS Code integration scenarios remain serial. The Pages workflow builds `out/site/` through
 `just preflight`; `just site` also runs the E2E campaign before generating the gallery and site.
 
+### Product-owner gallery and report pruning
+
+`npm run review:gallery` writes `out/reports/e2e/GALLERY.md` and one page per feature group in
+`out/reports/e2e/gallery/`. The pages come from the scenario metadata (`test/visual/scenarios.ts`,
+`test/shared/e2eGroups.ts`) and the last visual run manifest: for each group, every captured
+scenario (thumbnail, `locks` statement, step images, README marks) and a table of the
+assertion-only scenarios with what they verify. Open them in VS Code's Markdown preview. The gallery
+says **STALE** when the last visual run was partial, is from another revision, or lacks scenarios or
+images; run the full `npm run test:visual` first for a fresh one. `npm run review:finish` (the last
+`test:e2e` stage) refreshes it and links it as item 0 of `REVIEW.md`. It is unrelated to
+`gallery:generate`, which curates the tracked README images.
+
+The README images cropped from static captures are declared by the `readme` metadata of their
+scenarios (`README_BY_ID` in `test/visual/scenarioIds.ts`: file, crop box, width);
+`scripts/generate-readme-images.py` reads it from the render manifest. Do not change a README
+scenario's viewport, fixture, theme, scroll or crop unless the image is meant to change.
+
+Run folders of the real-window suites pile up under `out/reports/e2e/screenshots/`.
+`npm run review:finish` keeps the latest 5 per kind (`STUDIO_E2E_KEEP_RUNS` changes it). Run
+`npm run review:prune -- --dry-run` to list what would go, `npm run review:prune -- --keep 3` to
+prune by hand. The pruner only touches run folders inside `out/reports`, never the folders the
+LATEST pointers name, and never a folder that holds a git-tracked file.
+
 ## Build And Install Locally
 
 Build an ignored VSIX without publishing it:

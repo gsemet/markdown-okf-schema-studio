@@ -4,7 +4,7 @@ import * as path from "node:path";
 import test from "node:test";
 
 import { GROUPS, isGroupId } from "../shared/e2eGroups";
-import { ASSERTION_ONLY_IDS, LOCKS_BY_ID, STEPS_BY_ID } from "../visual/scenarioIds";
+import { ASSERTION_ONLY_IDS, LOCKS_BY_ID, README_BY_ID, STEPS_BY_ID } from "../visual/scenarioIds";
 import { SCENARIOS } from "../visual/scenarios";
 
 const ROOT = path.resolve(__dirname, "../../..");
@@ -16,12 +16,6 @@ function registeredSteps(): Set<string> {
   const match = /^STEP_NAMES = frozenset\(\{([^}]*)\}\)/mu.exec(source);
   assert.ok(match, "capture.py declares STEP_NAMES");
   return new Set([...match[1]!.matchAll(/"([^"]+)"/gu)].map((entry) => entry[1]!));
-}
-
-/** Scenario PNG paths `generate-readme-images.py` crops from, as ids (`visual/<id>.png`). */
-function readmeSourceIds(): string[] {
-  const source = fs.readFileSync(path.join(ROOT, "scripts/generate-readme-images.py"), "utf8");
-  return [...source.matchAll(/VISUAL \/ "([^"]+)\.png"/gu)].map((entry) => entry[1]!);
 }
 
 test("scenario ids are unique, follow <group>/vNN-slug, and their numbers are unique per group", () => {
@@ -91,19 +85,28 @@ test("every STEPS_BY_ID key is a scenario and each step name is registered in ca
   }
 });
 
-test("README sources are scenarios that write a PNG", () => {
-  for (const scenario of SCENARIOS.filter((entry) => entry.readme !== undefined)) {
+test("README sources are scenarios that write a PNG, with a crop and a unique destination", () => {
+  const sources = SCENARIOS.filter((entry) => entry.readme !== undefined);
+  assert.equal(sources.length, Object.keys(README_BY_ID).length, "every README_BY_ID key is a scenario");
+  assert.equal(sources.length, 9, "nine README images come from visual scenarios");
+  const files = new Set<string>();
+  for (const scenario of sources) {
     assert.notEqual(scenario.capture, false, `${scenario.id} is a README source but assertion-only`);
     assert.equal(scenario.screenshotOf, undefined, `${scenario.id} is a README source but an alias`);
+    const readme = scenario.readme!;
+    assert.match(readme.file, /^[a-z0-9-]+\.png$/u, scenario.id);
+    assert.ok(!files.has(readme.file), `duplicate README file ${readme.file}`);
+    files.add(readme.file);
+    const [left, top, right, bottom] = readme.crop;
+    assert.ok(right > left && bottom > top && left >= 0 && top >= 0, `${scenario.id}: crop box`);
+    assert.ok(readme.width > 0, `${scenario.id}: width`);
   }
-  const sources = readmeSourceIds();
-  assert.ok(sources.length >= 9, "generate-readme-images.py lists its visual sources");
-  for (const source of sources) {
-    const scenario = SCENARIOS.find((entry) => entry.id === source);
-    assert.ok(scenario, `README source ${source} is not a scenario`);
-    assert.notEqual(scenario.capture, false, `README source ${source} is assertion-only`);
-    assert.equal(scenario.screenshotOf, undefined, `README source ${source} is an alias`);
-  }
+});
+
+test("generate-readme-images.py reads the visual README sources from the metadata, not from names", () => {
+  const source = fs.readFileSync(path.join(ROOT, "scripts/generate-readme-images.py"), "utf8");
+  assert.ok(!/VISUAL \/ "/u.test(source), "no hard-coded scenario PNG path is left in the script");
+  assert.match(source, /visual_crops\(\)/u);
 });
 
 test("the orphan-box scenario scrolls on until the box in the bottom padding is in the frame", () => {
