@@ -2246,6 +2246,74 @@ def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> Non
     page.evaluate("window.scrollTo(0, 0)")
 
 
+def check_toc_shot(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """P1: leaves the TOC open (real toolbar button) in the scenario's width mode and asserts it is visible."""
+  wanted = scenario.get("tocShot")
+  if not wanted:
+    return
+  page_name = scenario["page"]
+  toggle = page.locator("[data-sphinx-preview-toc-toggle]")
+  page.evaluate("window.scrollTo(0, 0)")
+  if toggle.get_attribute("aria-pressed") != "true":
+    toggle.click()
+    page.wait_for_timeout(300)
+  width_button = page.locator("[data-sphinx-preview-width-toggle]")
+  for _ in range(3):
+    if page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-width')") == wanted:
+      break
+    width_button.click()
+    page.wait_for_timeout(250)
+  page.evaluate("window.scrollTo(0, 0)")
+  page.wait_for_timeout(200)
+  state = page.evaluate("""() => {
+    const rect = element => { const r = element.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height }; };
+    const nav = document.querySelector('nav[data-sphinx-preview-toc]');
+    const content = document.getElementById('sphinx-myst-preview-content');
+    const style = getComputedStyle(content);
+    const box = content.getBoundingClientRect();
+    return {
+      width: document.documentElement.getAttribute('data-sphinx-preview-width'),
+      toc: document.documentElement.getAttribute('data-sphinx-preview-toc'),
+      pressed: document.querySelector('[data-sphinx-preview-toc-toggle]').getAttribute('aria-pressed'),
+      shown: !!nav && getComputedStyle(nav).display !== 'none' && getComputedStyle(nav).visibility !== 'hidden',
+      nav: nav ? rect(nav) : null,
+      toolbar: rect(document.querySelector('[data-sphinx-preview-toolbar]')),
+      columnRight: box.right - parseFloat(style.paddingRight),
+      tables: [...content.querySelectorAll(':scope > table')].map(rect),
+      entries: [...document.querySelectorAll('nav[data-sphinx-preview-toc] li[data-level]')].length,
+      current: [...document.querySelectorAll('nav[data-sphinx-preview-toc] [aria-current="location"]')].map(item => item.textContent.trim()),
+      viewport: { width: document.documentElement.clientWidth, height: window.innerHeight },
+    };
+  }""")
+  if state["toc"] != "open" or state["pressed"] != "true":
+    failures.append(Failure(page_name, f"the TOC button did not leave the column open ({state['toc']}, pressed {state['pressed']})"))
+    return
+  if scenario["width"] < 760:
+    # Intended narrow behaviour: the column is hidden, the preference stays on.
+    if state["shown"]:
+      failures.append(Failure(page_name, "the TOC column must stay hidden on a pane under 760px"))
+    return
+  nav = state["nav"]
+  if not state["shown"] or not nav or nav["width"] < 100 or nav["height"] < 100:
+    failures.append(Failure(page_name, f"the TOC column is not visible after opening it: {nav}"))
+    return
+  view = state["viewport"]
+  if nav["left"] < 0 or nav["right"] > view["width"] + 1 or nav["top"] < 0 or nav["bottom"] > view["height"] + 1:
+    failures.append(Failure(page_name, f"{wanted}: the TOC column leaves the viewport: {nav}"))
+  if state["entries"] < 8:
+    failures.append(Failure(page_name, f"{wanted}: the TOC lists only {state['entries']} entries"))
+  if len(state["current"]) != 1:
+    failures.append(Failure(page_name, f"{wanted}: the TOC must highlight one current heading, found {state['current']}"))
+  toolbar = state["toolbar"]
+  if nav["top"] < toolbar["bottom"] + 7:
+    failures.append(Failure(page_name, f"{wanted}: the TOC column touches the floating toolbar"))
+  if state["columnRight"] > nav["left"] + 1:
+    failures.append(Failure(page_name, f"{wanted}: the content column overlaps the TOC column"))
+  for table in state["tables"]:
+    if table["right"] > nav["left"] + 1:
+      failures.append(Failure(page_name, f"{wanted}: a table overlaps the TOC column"))
+
+
 def check_figure_anchors(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Figure width and alignment follow data-okf-width and the align class; label anchors are visible and targetable."""
   if not scenario.get("figureAnchorChecks"):
@@ -4764,7 +4832,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:
