@@ -14,6 +14,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 SCREENSHOTS = ROOT / "out" / "reports" / "e2e" / "screenshots"
+VISUAL = SCREENSHOTS / "visual"
 OUTPUT = ROOT / "images" / "readme"
 
 
@@ -58,8 +59,7 @@ def pixels_equal(first: Path, second: Path) -> bool:
 def check(baseline: Path) -> int:
     """Re-render the images whose source is a visual (static page) capture into a temp directory
     and compare them pixel for pixel with the images of `baseline`. Real-window sources are skipped."""
-    crops = [crop for crop in build_crops(None) if crop.source.is_relative_to(SCREENSHOTS)
-             and crop.source.parent == SCREENSHOTS]
+    crops = [crop for crop in build_crops(None) if crop.source.is_relative_to(VISUAL)]
     differences = 0
     with tempfile.TemporaryDirectory() as temporary:
         for crop in crops:
@@ -80,18 +80,18 @@ def build_crops(real_input: Path | None) -> list[Crop]:
         Crop(real_input / "05-open-with-editor.png", "open-with-editor.png", (250, 55, 1400, 470), 760),
         Crop(real_input / "36-title-bar-button.png", "open-preview-to-side.png", (40, 35, 1390, 430), 760),
         Crop(real_input / "39-quick-open-beside-preview.png", "preview-beside-editor.png", (45, 35, 1395, 420), 760),
-        Crop(SCREENSHOTS / "okf-schema-dark.png", "schema-properties.png", (120, 20, 1680, 1100), 720),
-        Crop(SCREENSHOTS / "edit-frontmatter-value-dark.png", "edit-frontmatter.png", (120, 20, 1680, 1110), 720),
+        Crop(VISUAL / "frontmatter-schema/v05-okf-schema-table-dark-900.png", "schema-properties.png", (120, 20, 1680, 1100), 720),
+        Crop(VISUAL / "frontmatter-editing/v02-edit-enum-value-dark-900.png", "edit-frontmatter.png", (120, 20, 1680, 1110), 720),
         Crop(real_input / "22-editor-frame-and-buttons.png", "inline-editing.png", (700, 40, 1390, 410), 720),
         Crop(real_input / "38-edit-mode-remembered.png", "myst-admonitions.png", (790, 140, 1315, 445), 720),
         Crop(real_input / "38-edit-mode-remembered.png", "myst-diagrams-and-figure.png", (790, 460, 1315, 860), 720),
-        Crop(SCREENSHOTS / "handbook-dark-top.png", "theme-dark.png", (0, 20, 1800, 930), 720),
-        Crop(SCREENSHOTS / "handbook-forced-white.png", "theme-white.png", (0, 20, 1800, 930), 720),
-        Crop(SCREENSHOTS / "handbook-forced-cream.png", "theme-cream.png", (0, 20, 1800, 930), 720),
-        Crop(SCREENSHOTS / "readme-margin-break-cream.png", "margin-break-cream.png", (0, 0, 2400, 1800), 1200),
-        Crop(SCREENSHOTS / "toolbar-rows-expanded-cream-900.png", "toolbar-expanded.png", (1440, 0, 1800, 260), 360),
-        Crop(SCREENSHOTS / "toolbar-rows-collapsed-cream-900.png", "toolbar-collapsed.png", (1440, 0, 1800, 260), 360),
-        Crop(SCREENSHOTS / "slash-menu-gfm-light.png", "slash-menu.png", (140, 780, 1660, 1800), 760),
+        Crop(VISUAL / "rendering-core/v01-handbook-top-dark-900.png", "theme-dark.png", (0, 20, 1800, 930), 720),
+        Crop(VISUAL / "theme-zoom/v01-forced-white-handbook-white-900.png", "theme-white.png", (0, 20, 1800, 930), 720),
+        Crop(VISUAL / "theme-zoom/v02-forced-cream-handbook-cream-900.png", "theme-cream.png", (0, 20, 1800, 930), 720),
+        Crop(VISUAL / "layout-width/v84-break-auto-readme-cream-1200.png", "margin-break-cream.png", (0, 0, 2400, 1800), 1200),
+        Crop(VISUAL / "toolbar-navigation/v18-toolbar-expanded-cream-900.png", "toolbar-expanded.png", (1440, 0, 1800, 260), 360),
+        Crop(VISUAL / "toolbar-navigation/v19-toolbar-collapsed-cream-900.png", "toolbar-collapsed.png", (1440, 0, 1800, 260), 360),
+        Crop(VISUAL / "palette-slash/v12-slash-gfm-light-900.png", "slash-menu.png", (140, 780, 1660, 1800), 760),
     ]
 
 

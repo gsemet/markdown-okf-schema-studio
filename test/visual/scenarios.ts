@@ -7,8 +7,8 @@
  */
 
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
-import type { GroupId } from "../shared/e2eGroups";
-import { GROUP_BY_SCENARIO_ID } from "./scenarioGroups";
+import { isGroupId, type GroupId } from "../shared/e2eGroups";
+import { REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID } from "./scenarioIds";
 
 export type ScrollMode =
   | { kind: "top" }
@@ -27,8 +27,10 @@ export interface ReadmeSource {
 
 export interface Scenario {
   id: string;
-  /** Feature group (see `test/shared/e2eGroups.ts`); filled from `scenarioGroups.ts` when the list is built. */
+  /** Feature group (see `test/shared/e2eGroups.ts`): the prefix of the id. */
   group: GroupId;
+  /** The id this scenario had before P9 B2a (`--scenario` still accepts it). */
+  legacyId?: string;
   /** One present-tense, observable sentence of what the scenario locks (raw material for the requirements). */
   locks?: string;
   /** `false`: assertion-only. Every check runs, no PNG, no step PNG, no sidecar. */
@@ -146,8 +148,8 @@ export interface Scenario {
   description: string;
 }
 
-/** A scenario as written below: the group comes from `scenarioGroups.ts`. */
-type ScenarioDefinition = Omit<Scenario, "group">;
+/** A scenario as written below: id (legacy) and group are resolved through `scenarioIds.ts`. */
+type ScenarioDefinition = Omit<Scenario, "group" | "legacyId">;
 
 const WIDE = { width: 900, height: 1000 };
 const NARROW = { width: 460, height: 900 };
@@ -1841,11 +1843,26 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
   }))),
 ];
 
-/** Every scenario with its group; an id missing from `scenarioGroups.ts` is an error. */
-export const SCENARIOS: Scenario[] = SCENARIO_DEFINITIONS.map((definition) => {
-  const group = GROUP_BY_SCENARIO_ID[definition.id];
-  if (group === undefined) {
-    throw new Error(`scenario ${definition.id} has no group in test/visual/scenarioGroups.ts`);
-  }
-  return { ...definition, group };
-});
+/**
+ * Every scenario with its permanent id and group. A definition whose id is not a legacy id must
+ * already be written as `<group>/vNN-...`; an unknown id or group is an error.
+ */
+export const SCENARIOS: Scenario[] = SCENARIO_DEFINITIONS
+  .filter((definition) => !REMOVED_ALIASES.includes(definition.id))
+  .map((definition) => {
+    const id = SCENARIO_ID_BY_LEGACY_ID[definition.id] ?? definition.id;
+    const group = id.split("/")[0] ?? "";
+    if (!isGroupId(group) || id === group) {
+      throw new Error(`scenario ${definition.id} has no permanent id <group>/vNN-... in test/visual/scenarioIds.ts`);
+    }
+    const screenshotOf = definition.screenshotOf === undefined
+      ? undefined
+      : SCENARIO_ID_BY_LEGACY_ID[definition.screenshotOf] ?? definition.screenshotOf;
+    return {
+      ...definition,
+      id,
+      group,
+      ...(id !== definition.id ? { legacyId: definition.id } : {}),
+      ...(screenshotOf === undefined ? {} : { screenshotOf }),
+    };
+  });
