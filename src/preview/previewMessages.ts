@@ -74,6 +74,9 @@ const MAX_EDIT_ID_LENGTH = 100;
 const isHostRequest: MessageValidator = (message) =>
   isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "";
 
+const isPinViewportTop = (value: unknown): boolean => value === undefined
+  || (typeof value === "number" && Number.isFinite(value) && Math.abs(value) <= 100000);
+
 const PALETTE_MODES = ["strict", "gfm", "myst"] as const;
 
 export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
@@ -98,6 +101,16 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
     && (message.pinViewportTop === undefined
       || (typeof message.pinViewportTop === "number" && Number.isFinite(message.pinViewportTop)
         && Math.abs(message.pinViewportTop) <= 100000)),
+  // Copy, cut and paste of selected blocks as Markdown (T40): the source lines of the selection
+  // (or the line to paste after) and the viewport top of the block the screen is held on. The
+  // host re-checks every line against the document.
+  previewBlocksCopy: (message) => isSourceLine(message.line) && isSourceLine(message.endLine),
+  previewBlocksCut: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
+    && isPinViewportTop(message.pinViewportTop),
+  previewBlocksPaste: (message) => Number.isSafeInteger(message.insertAfterLine)
+    && (message.insertAfterLine as number) >= 0
+    && (message.pinLine === undefined || isSourceLine(message.pinLine))
+    && isPinViewportTop(message.pinViewportTop),
   // The MyST palette's pickers: labels of the document, citation keys of the workspace `.bib`
   // files, and a native open dialog for a `{doc}` path. They read only; the answer repeats `editId`.
   previewListTargets: isHostRequest,

@@ -3612,16 +3612,20 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     return blocks;
   }
 
-  function announceSelection(count) {
+  function ensureSelectionStatus() {
     if (!selectionStatus) {
-      if (count === 0) return;
       selectionStatus = document.createElement("div");
       selectionStatus.className = "sphinx-preview-selection-status";
       selectionStatus.setAttribute("role", "status");
       selectionStatus.setAttribute("aria-live", "polite");
       document.body?.appendChild(selectionStatus);
     }
-    selectionStatus.textContent = count === 0 ? "" : count + (count === 1 ? " block selected" : " blocks selected");
+    return selectionStatus;
+  }
+
+  function announceSelection(count) {
+    if (!selectionStatus && count === 0) return;
+    ensureSelectionStatus().textContent = count === 0 ? "" : count + (count === 1 ? " block selected" : " blocks selected");
   }
 
   function renderBlockSelection(blocks) {
@@ -3750,6 +3754,90 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     event.preventDefault?.();
     clearBlockSelection();
   });
+
+  // Copy, cut and paste of whole blocks as Markdown (edit mode). With a block selection Cmd/Ctrl+C
+  // and +X send its source lines to the host, which owns the clipboard and the edit; Cmd/Ctrl+V
+  // pastes after the selection or after the block of a focused "+" bar. Text boxes, fields and the
+  // property table keep their native keys.
+  let blocksFlight;
+  let selectionNoticeTimer;
+
+  function showSelectionNotice(text) {
+    ensureSelectionStatus().textContent = text;
+    window.clearTimeout(selectionNoticeTimer);
+    selectionNoticeTimer = window.setTimeout(() => announceSelection(selectionElements.length), 4000);
+  }
+
+  function clipboardKey(event) {
+    if (event.isComposing || event.shiftKey || event.altKey) return undefined;
+    const apple = isApplePlatform();
+    if (!(apple ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey)) return undefined;
+    const key = event.key && event.key !== "Unidentified" ? String(event.key).toLowerCase()
+      : (event.code === "KeyC" ? "c" : event.code === "KeyX" ? "x" : event.code === "KeyV" ? "v" : "");
+    return key === "c" || key === "x" || key === "v" ? key : undefined;
+  }
+
+  function postBlocksMessage(type, fields, element) {
+    const top = element?.getBoundingClientRect?.().top;
+    vscode.postMessage({
+      type,
+      documentId: context.documentId,
+      documentVersion: context.documentVersion,
+      requestId: context.requestId,
+      ...fields,
+      ...(type !== "previewBlocksCopy" && Number.isFinite(top) && Math.abs(top) <= 100000
+        ? { pinViewportTop: top } : {}),
+    });
+    blocksFlight = { timer: window.setTimeout(() => { blocksFlight = undefined; }, 5000) };
+  }
+
+  document.addEventListener("keydown", (event) => {
+    const key = clipboardKey(event);
+    if (!key || !editMode || activeBlockEdit || activeFrontmatterEdit) return;
+    const target = event.target;
+    if (target instanceof Element
+      && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+        || target.isContentEditable
+        || target.closest("[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]"))) return;
+    const blocks = syncSelectionModel();
+    const range = blockSelection.isActive() ? blockSelection.range() : undefined;
+    const point = target instanceof Element ? target.closest(".sphinx-preview-insert-point") : null;
+    if (key !== "v" && !range) return;
+    if (key === "v" && !range && !point) return;
+    event.preventDefault?.();
+    event.stopPropagation?.();
+    if (blocksFlight) return;
+    if (key === "c" && range) {
+      postBlocksMessage("previewBlocksCopy", { line: range.line, endLine: range.endLine });
+    } else if (key === "x" && range) {
+      postBlocksMessage("previewBlocksCut", { line: range.line, endLine: range.endLine },
+        blocks[blockSelection.startIndex]?.closest?.("pre") || blocks[blockSelection.startIndex]);
+    } else if (key === "v") {
+      const move = point ? insertMoves.get(point) : undefined;
+      if (!range && move && isIncludedBlock(move.block)) {
+        showSelectionNotice("Text cannot be pasted next to a block that comes from an included file.");
+        return;
+      }
+      const anchorBlock = range ? blocks[blockSelection.endIndex] : move?.block;
+      const afterLine = range ? range.endLine : Number(point.getAttribute("data-sphinx-insert-after-line"));
+      if (!Number.isSafeInteger(afterLine) || afterLine < 0) return;
+      postBlocksMessage("previewBlocksPaste", {
+        insertAfterLine: afterLine,
+        ...(anchorBlock ? { pinLine: blockRange(anchorBlock).line } : {}),
+      }, anchorBlock?.closest?.("pre") || anchorBlock);
+    }
+  });
+
+  function receiveBlocksResult(message) {
+    if (blocksFlight) window.clearTimeout(blocksFlight.timer);
+    blocksFlight = undefined;
+    if (message.ok === true) {
+      if (message.op === "copy") showSelectionNotice("Copied as Markdown");
+      else clearBlockSelection();
+      return;
+    }
+    if (typeof message.reason === "string") showSelectionNotice(message.reason);
+  }
 
   // Shift+mousedown on a block would extend the browser's text selection under the block
   // selection; edit mode already turns a click into an edit, so the native range adds nothing.
@@ -4524,6 +4612,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       return;
     }
     if (message?.type === "previewLabelRenameResult" && labelRename.receive(message)) return;
+    if (message?.type === "previewBlocksResult" && sameContext(message)) {
+      receiveBlocksResult(message);
+      return;
+    }
     if (message?.type === "previewBlockMoveResult" && sameContext(message)) {
       receiveBlockMoveResult(message);
       return;

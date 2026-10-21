@@ -21,12 +21,12 @@ export interface BlockMoveRefusal {
   refused: string;
 }
 
-interface SourceLine {
+export interface SourceLine {
   text: string;
   eol: string;
 }
 
-function splitLines(text: string): SourceLine[] {
+export function splitLines(text: string): SourceLine[] {
   const lines: SourceLine[] = [];
   let offset = 0;
   for (const match of text.matchAll(/\r\n|\n|\r/gu)) {

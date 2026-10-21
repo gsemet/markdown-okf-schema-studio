@@ -11,6 +11,7 @@ import {
   getActivePreviewForTests,
 } from "./extensionApi";
 import { runUntrusted as runBlockMoveUntrusted } from "./blockMove.test";
+import { runUntrusted as runBlockClipboardUntrusted } from "./blockClipboard.test";
 import { runUntrusted as runMystDiagnostics } from "./mystDiagnostics.test";
 
 async function waitForPreview(): Promise<void> {
@@ -78,6 +79,7 @@ export async function run(): Promise<void> {
     });
     assert.deepEqual(fs.readdirSync(folder), before, "the untrusted preview must not write a pasted image");
     await runBlockMoveUntrusted(commandPreview, document);
+    await runBlockClipboardUntrusted(commandPreview, document);
     await vscode.commands.executeCommand("vscode.openWith", document.uri, EDITOR_VIEW_TYPE);
     await waitForPreview();
     const editorPreview = getActivePreviewForTests();

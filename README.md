@@ -42,6 +42,9 @@ Markdown flavours and extensions:
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
   Block selection: Shift+click selects the blocks between the last clicked block and the one you
   click, Shift+Up/Down extends or shrinks the selection, Escape or a click clears it.
+  With a selection, Cmd/Ctrl+C copies its exact Markdown, Cmd/Ctrl+X cuts it (one undo step), and
+  Cmd/Ctrl+V pastes the clipboard text as new blocks after the selection or after the block of a
+  focused "+" bar (one undo step).
   An edition palette above the text box adds headings, bold, italic, strikethrough, inline code,
   links (Cmd/Ctrl+K opens a link panel with text and target), tables from a size grid, emoji from
   a picker, text and background colours

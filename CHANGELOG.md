@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- In edit mode, with blocks selected (Shift+click or Shift+Up/Down), Cmd/Ctrl+C copies their exact
+  Markdown to the clipboard and Cmd/Ctrl+X cuts them in one undo step, together with one blank
+  line so no gap or glued blocks are left. Cmd/Ctrl+V on a selection, or on a focused "+" bar,
+  inserts the clipboard text as new blocks after it, also in one undo step. Blocks from an
+  included file and the frontmatter are refused with a message; text boxes keep their own keys.
 - In edit mode, Shift+click on a block selects every body block from the block you last clicked
   or opened to that one, and Shift+Up or Shift+Down grows or shrinks the selection. Selected
   blocks get an outline and a screen reader announces "3 blocks selected". Escape or a plain
