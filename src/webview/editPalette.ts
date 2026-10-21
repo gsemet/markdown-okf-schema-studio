@@ -61,8 +61,38 @@ export interface EditPaletteDeps {
   apple?: boolean;
 }
 
+/** One line of the `/` command menu: an action of the palette, or a ready-made variant of it. */
+export interface EditPaletteMenuEntry {
+  /** Unique within one list: the action id, or `<id>:<arg>` for a variant. */
+  key: string;
+  /** The registered action it runs. */
+  id: string;
+  label: string;
+  /** The palette group of the action (`inline`, `block`, `insert`, `annotation`, `github`, `myst`). */
+  group: string;
+  /** Static icon markup of the palette button (never user text). */
+  icon: string;
+  /** The shortcut as shown in a tooltip, or "". */
+  shortcut: string;
+  /** Short names the completion also matches. */
+  aliases: string[];
+  /** The ready-made argument of a variant entry. */
+  arg?: string;
+}
+
 export interface EditPalette {
   element: HTMLElement;
+  /**
+   * What the `/` menu lists: the same actions as the buttons of the current mode and scope
+   * (hidden caret-dependent buttons excluded), plus the variants the actions declare.
+   */
+  menuEntries(): EditPaletteMenuEntry[];
+  /**
+   * Runs a menu entry in place of `range` (the typed `/query`): one native edit that removes the
+   * range and applies the action when the action is a plain edit; for an action with a popover,
+   * panel or dialog the range is removed and the action then opens exactly as its button does.
+   */
+  runMenuEntry(key: string, range: { start: number; end: number }): void;
   /** Rebuilds the buttons from the registry and the current mode. */
   refresh(): void;
   /** Moves the focus to the mode select (keyboard path); Enter or Escape there goes back. */
@@ -116,6 +146,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     italic: glyph("italic", "I"),
     strikethrough: glyph("strikethrough", "S"),
     code: svg("M8 7l-5 5 5 5M16 7l5 5-5 5M14 5l-4 14") + caret,
+    bulletList: svg("M9 6h11M9 12h11M9 18h11M4.5 6h.5M4.5 12h.5M4.5 18h.5"),
+    numberedList: svg("M10 6h10M10 12h10M10 18h10M4 5l1.5-1v5M4 14h3l-3 4h3"),
     quote: svg("M5 11h4v6H5zM5 11c0-3 1-5 4-6M14 11h4v6h-4zM14 11c0-3 1-5 4-6"),
     link: svg("M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"),
     rule: svg("M3 12h18M8 7h8M8 17h8"),
@@ -891,6 +923,141 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     build();
   }
 
+  /** The actions the current mode and scope show (additive modes), in registry order. */
+  function visibleActions(): EditAction[] {
+    const rank = MODE_RANK[mode] ?? 0;
+    return deps.actions.actions.filter((action) =>
+      action.scopes.includes(scope)
+      // Modes are additive: an action listed for a lower mode shows in every higher one.
+      && action.modes.some((candidate) => (MODE_RANK[candidate] ?? 0) <= rank));
+  }
+
+  /** What a click on the action's button does; the `/` menu runs the same path. */
+  function activate(action: EditAction, button: HTMLElement | undefined): void {
+    if (action.popover && button) {
+      if (openButton === button) {
+        closePopover();
+      } else {
+        if (action.popoverAtCaret) {
+          // The action runs first (the alert is written), then the list changes its type.
+          // The text box's input event must not close the list that is about to open.
+          closePopover();
+          holding = true;
+          try {
+            run(action);
+          } finally {
+            holding = false;
+          }
+        }
+        openPopover(action, button);
+        // The emoji picker takes the focus for its filter; every other popover leaves it in
+        // the text box.
+        if (emojiField) {
+          emojiField.focus({ preventScroll: true });
+          menuFocused = true;
+        } else deps.getControl().focus({ preventScroll: true });
+      }
+      return;
+    }
+    closePopover();
+    if (action.panel) {
+      deps.openPanel?.(action);
+      return;
+    }
+    if (action.panelWhenInside && deps.caretInside?.(action.panelWhenInside)) {
+      deps.openPanel?.(action, action.panelWhenInside);
+      return;
+    }
+    if (action.hostDialog) {
+      // The host shows its own dialog; the page keeps the editor open until it answers.
+      const kind = action.hostDialog;
+      if (!deps.pickHost) return;
+      deps.pickHost(kind, (value) => {
+        if (value === undefined) deps.getControl().focus({ preventScroll: true });
+        else run(action, value);
+      });
+      return;
+    }
+    run(action);
+  }
+
+  function menuEntries(): EditPaletteMenuEntry[] {
+    const ctx = contextOf();
+    const entries: EditPaletteMenuEntry[] = [];
+    for (const action of visibleActions()) {
+      if (action.available && !action.available(ctx)) continue;
+      const base = {
+        id: action.id,
+        group: action.group,
+        icon: icons[action.icon] ?? "",
+        shortcut: deps.actions.shortcutLabel(action, deps.apple === true),
+      };
+      const slash = action.slash;
+      if (!slash?.variantsOnly) {
+        entries.push({ ...base, key: action.id, label: action.label, aliases: slash?.aliases ?? [] });
+      }
+      for (const variant of slash?.variants ?? []) {
+        entries.push({
+          ...base,
+          key: action.id + ":" + variant.arg,
+          label: variant.label,
+          aliases: variant.aliases ?? [],
+          arg: variant.arg,
+          shortcut: "",
+        });
+      }
+    }
+    return entries;
+  }
+
+  function runMenuEntry(key: string, range: { start: number; end: number }): void {
+    const entry = menuEntries().find((candidate) => candidate.key === key);
+    const action = entry ? deps.actions.byId.get(entry.id) : undefined;
+    if (!entry || !action) return;
+    closePopover();
+    const control = deps.getControl();
+    const value = String(control.value ?? "");
+    const start = Math.max(0, Math.min(range.start, value.length));
+    const end = Math.max(start, Math.min(range.end, value.length));
+    const removed = value.slice(0, start) + value.slice(end);
+    const gone = end - start;
+    const plain = !action.popover && !action.panel && !action.panelWhenInside && !action.hostDialog;
+    if (plain || entry.arg !== undefined) {
+      // One native step: the edit the action makes on the text without the query, written as a
+      // single replacement over the original text, so one undo brings the "/query" back.
+      const edit = action.apply({
+        value: removed,
+        selectionStart: start,
+        selectionEnd: start,
+        scope,
+        ...(entry.arg === undefined ? {} : { arg: entry.arg }),
+      });
+      if (!edit) {
+        deps.applyTextEdit({ start, end, text: "", selectionStart: start, selectionEnd: start });
+        control.focus({ preventScroll: true });
+        return;
+      }
+      // Positions of the text without the query, mapped back onto the original text.
+      const back = (position: number, after: boolean): number =>
+        position > start || (after && position === start) ? position + gone : position;
+      const from = Math.min(start, back(edit.start, false));
+      const to = Math.max(end, back(edit.end, true));
+      const result = removed.slice(0, edit.start) + edit.text + removed.slice(edit.end);
+      const tailLength = value.length - to;
+      deps.applyTextEdit({
+        start: from,
+        end: to,
+        text: result.slice(from, result.length - tailLength),
+        selectionStart: edit.selectionStart,
+        selectionEnd: edit.selectionEnd,
+      });
+      return;
+    }
+    // Popover, panel or dialog: remove the query, then do what the button does.
+    deps.applyTextEdit({ start, end, text: "", selectionStart: start, selectionEnd: start });
+    activate(action, buttons.find((button) => button.getAttribute("data-edit-action") === action.id));
+  }
+
   function build(): void {
     closePopover();
     for (const old of buttons) old.remove();
@@ -898,12 +1065,9 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     caretButtons = [];
     modeSelect.value = mode;
     root.setAttribute("data-palette-mode", mode);
-    const rank = MODE_RANK[mode] ?? 0;
     let previousGroup = "";
-    for (const action of deps.actions.actions) {
-      if (!action.scopes.includes(scope)) continue;
-      // Modes are additive: an action listed for a lower mode shows in every higher one.
-      if (!action.modes.some((candidate) => (MODE_RANK[candidate] ?? 0) <= rank)) continue;
+    // Menu-only actions (the `/` menu's lists) have no button.
+    for (const action of visibleActions().filter((candidate) => !candidate.slash?.menuOnly)) {
       const button = document.createElement("button");
       button.setAttribute("type", "button");
       button.setAttribute("tabindex", "-1");
@@ -933,51 +1097,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       button.addEventListener("click", (event) => {
         event.preventDefault?.();
         event.stopPropagation?.();
-        if (action.popover) {
-          if (openButton === button) {
-            closePopover();
-          } else {
-            if (action.popoverAtCaret) {
-              // The action runs first (the alert is written), then the list changes its type.
-              // The text box's input event must not close the list that is about to open.
-              closePopover();
-              holding = true;
-              try {
-                run(action);
-              } finally {
-                holding = false;
-              }
-            }
-            openPopover(action, button);
-            // The emoji picker takes the focus for its filter; every other popover leaves it in
-            // the text box.
-            if (emojiField) {
-              emojiField.focus({ preventScroll: true });
-              menuFocused = true;
-            } else deps.getControl().focus({ preventScroll: true });
-          }
-          return;
-        }
-        closePopover();
-        if (action.panel) {
-          deps.openPanel?.(action);
-          return;
-        }
-        if (action.panelWhenInside && deps.caretInside?.(action.panelWhenInside)) {
-          deps.openPanel?.(action, action.panelWhenInside);
-          return;
-        }
-        if (action.hostDialog) {
-          // The host shows its own dialog; the page keeps the editor open until it answers.
-          const kind = action.hostDialog;
-          if (!deps.pickHost) return;
-          deps.pickHost(kind, (value) => {
-            if (value === undefined) deps.getControl().focus({ preventScroll: true });
-            else run(action, value);
-          });
-          return;
-        }
-        run(action);
+        activate(action, button);
       });
       root.appendChild(button);
       buttons.push(button);
@@ -989,6 +1109,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
 
   return {
     element: root,
+    menuEntries,
+    runMenuEntry,
     refresh: build,
     setMode,
     focusModeSelect() {

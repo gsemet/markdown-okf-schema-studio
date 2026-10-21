@@ -45,6 +45,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Shell key**: string identifying the shell, compared to decide whether a content patch is possible (`shellKey` in `src/preview/contentPatch.ts`).
 - **Side channel**: host-to-page message carrying data that is not rendered HTML, for example `previewPropertiesTable`.
 - **Sidecar file**: `<name>.comments.json` next to the document, holding its review comment threads.
+- **Slash menu**: the `/` command menu of the block text boxes; it lists the palette's actions (`EditPalette.menuEntries`) and filters them as you type (`src/webview/slashMenu.ts`).
 - **Sticky heading band**: fixed band at the top of the preview showing the current heading path (`docs/scroll-anchoring.md`).
 - **Table bar**: menu shown on a table in edit mode (`.sphinx-preview-table-menu`).
 - **Table-cell editor**: block editor opened on one table cell ("Markdown table cell editor").

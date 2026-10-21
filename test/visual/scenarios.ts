@@ -75,6 +75,12 @@ export interface Scenario {
    * point editor (-insert-point PNG) are captured.
    */
   paletteModeShot?: "strict" | "gfm" | "myst";
+  /**
+   * P11: the slash command menu in a paragraph editor of this palette mode. PNGs: -open (all
+   * commands), -filtered, -nomatch (No command row), -flip (editor near the viewport bottom: the
+   * menu opens above the caret). The scenario PNG keeps the menu open with `finalQuery` typed.
+   */
+  slashMenuShot?: { mode: "strict" | "gfm" | "myst"; finalQuery: string };
   /** Click the + after the final figure; the insertion message must carry the closing fence line. */
   insertAfterFigureChecks?: boolean;
   /** Last block of the fixture, the line the insertion must follow, and its selector. */
@@ -1097,6 +1103,58 @@ export const SCENARIOS: Scenario[] = [
     description:
       "Palette mode MyST, dark theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The -palette PNG is the bar above a paragraph editor, the "
       + "-insert-point PNG the bar in the editor opened from a + insertion point.",
+  },
+  {
+    id: "slash-menu-strict-light",
+    fixture: "05-long-chapter",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    slashMenuShot: { mode: "strict", finalQuery: "" },
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Slash command menu, palette mode strict, light theme: / at a line start opens the menu at the caret with the palette's commands "
+      + "grouped by category; the -open, -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with only the slash typed.",
+  },
+  {
+    id: "slash-menu-gfm-light",
+    fixture: "05-long-chapter",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    slashMenuShot: { mode: "gfm", finalQuery: "tab" },
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Slash command menu, palette mode gfm, light theme: / at a line start opens the menu at the caret with the palette's commands "
+      + "grouped by category; the -open, -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with /tab typed.",
+  },
+  {
+    id: "slash-menu-myst-light",
+    fixture: "05-long-chapter",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    slashMenuShot: { mode: "myst", finalQuery: "" },
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Slash command menu, palette mode myst, light theme: / at a line start opens the menu at the caret with the palette's commands "
+      + "grouped by category; the -open, -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with only the slash typed.",
+  },
+  {
+    id: "slash-menu-myst-dark",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    slashMenuShot: { mode: "myst", finalQuery: "no" },
+    machineChecks: ["overlay-clipped"],
+    description:
+      "Slash command menu, palette mode myst, dark theme: / at a line start opens the menu at the caret with the palette's commands "
+      + "grouped by category; the -open, -filtered, -nomatch and -flip PNGs show the states, the scenario PNG the menu with /no typed.",
   },
   {
     id: "edit-palette-dark",

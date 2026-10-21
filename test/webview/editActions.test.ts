@@ -147,8 +147,10 @@ test("the todo toggle is its own inverse", () => {
 });
 
 test("the registry lists the actions with metadata and indexes them by id", () => {
+  // P11: the `/` menu's own entries (Bulleted and Numbered list) are registered but have no button.
+  assert.deepEqual(registry.actions.filter((action) => action.slash?.menuOnly).map((action) => action.id), ["bulletList", "numberedList"]);
   assert.deepEqual(
-    registry.actions.map((action) => action.id),
+    registry.actions.filter((action) => !action.slash?.menuOnly).map((action) => action.id),
     [
       "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote",
       "rule", "table",
@@ -167,6 +169,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     const myst = ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
       "tableCaption", "figure", "roleKbd"].includes(action.id);
     assert.deepEqual(action.modes, myst ? ["myst"] : github ? ["gfm"] : ["strict"], action.id);
+    if (action.slash?.menuOnly) assert.equal(action.shortcut, undefined, "no shortcut: " + action.id);
     assert.ok(action.scopes.includes("block"));
   }
   assert.equal(registry.byId.get("todo")!.scopes.includes("cell"), false);
@@ -1227,4 +1230,37 @@ test("T34: colorCode replaces the code under the caret in place, validated", () 
   assert.equal(colour("colorCode", "a #c0|0 b", 'rgb(1,2,3);"'), undefined);
   assert.equal(colour("colorCode", "a plain| b", "#00f"), undefined, "no code at the caret");
   assert.equal(colour("colorCode", "a #c0|0 b"), undefined);
+});
+
+// P11: Bulleted list and Numbered list (menu-only actions).
+function listEdit(id: string, value: string, start: number, end = start) {
+  const edit = registry.byId.get(id)!.apply({ value, selectionStart: start, selectionEnd: end, scope: "block" });
+  return edit && { result: value.slice(0, edit.start) + edit.text + value.slice(edit.end), caret: [edit.selectionStart, edit.selectionEnd] };
+}
+
+test("P11: the list actions are menu-only, block-scope and in every mode", () => {
+  for (const id of ["bulletList", "numberedList"]) {
+    const action = registry.byId.get(id)!;
+    assert.equal(action.slash?.menuOnly, true);
+    assert.deepEqual(action.scopes, ["block"]);
+    assert.deepEqual(action.modes, ["strict"]);
+  }
+});
+
+test("P11: Bulleted list on an empty line, a text line, several lines, and toggled off", () => {
+  assert.deepEqual(listEdit("bulletList", "", 0), { result: "- ", caret: [2, 2] });
+  assert.deepEqual(listEdit("bulletList", "a\n\n", 3), { result: "a\n\n- ", caret: [5, 5] });
+  assert.deepEqual(listEdit("bulletList", "item", 2), { result: "- item", caret: [4, 4] });
+  assert.equal(listEdit("bulletList", "one\n\ntwo", 0, 8)?.result, "- one\n\n- two");
+  assert.equal(listEdit("bulletList", "- one\n- two", 0, 11)?.result, "one\ntwo", "toggles off");
+  assert.equal(listEdit("bulletList", "1. one\n2. two", 0, 13)?.result, "- one\n- two", "replaces a numbered marker");
+  assert.equal(listEdit("bulletList", "- one\ntwo", 0, 9)?.result, "- one\n- two", "a mixed selection adds");
+});
+
+test("P11: Numbered list numbers the non-blank lines and toggles off", () => {
+  assert.deepEqual(listEdit("numberedList", "", 0), { result: "1. ", caret: [3, 3] });
+  assert.equal(listEdit("numberedList", "a\nb\n\nc", 0, 6)?.result, "1. a\n2. b\n\n3. c");
+  assert.equal(listEdit("numberedList", "1. a\n2. b", 0, 9)?.result, "a\nb");
+  assert.equal(listEdit("numberedList", "- a\n- b", 0, 7)?.result, "1. a\n2. b", "replaces a bullet marker");
+  assert.equal(listEdit("numberedList", "word", 4)?.result, "1. word");
 });

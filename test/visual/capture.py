@@ -3041,6 +3041,149 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
   # The editor stays open: the scenario's own PNG then shows this mode, not a mode-less page.
 
 
+def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """P11: the / command menu: contents per mode, placement, flip near the bottom, filter and no-match."""
+  shot = scenario.get("slashMenuShot")
+  if not shot:
+    return
+  mode = shot["mode"]
+  page_name = scenario["page"]
+  strict = ["heading", "bold", "italic", "strikethrough", "color", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo"]
+  gfm = strict + ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
+  myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
+  # The palette's buttons (minus the caret-dependent colour code) plus the two menu-only list entries.
+  expected = {"strict": strict, "gfm": gfm, "myst": myst}[mode] + ["bulletList", "numberedList"]
+  page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
+  state_script = """() => {
+    const menu = document.querySelector('[data-slash-menu]');
+    if (!menu) return null;
+    const r = menu.getBoundingClientRect();
+    const area = document.querySelector('.sphinx-preview-block-editor textarea');
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(24, r.height / 2));
+    const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+    const t = toolbar ? toolbar.getBoundingClientRect() : null;
+    return {
+      ids: [...menu.querySelectorAll('[data-slash-id]')].map((option) => option.dataset.slashId),
+      none: Boolean(menu.querySelector('[data-slash-none]')),
+      placement: menu.dataset.slashPlacement,
+      rect: { left: r.left, top: r.top, right: r.right, bottom: r.bottom },
+      vw: innerWidth, vh: innerHeight,
+      covered: !(hit && menu.contains(hit)),
+      overToolbar: Boolean(t && r.left < t.right && r.right > t.left && r.top < t.bottom && r.bottom > t.top),
+      expanded: area ? area.getAttribute('aria-expanded') : null,
+      active: area ? area.getAttribute('aria-activedescendant') : null,
+      activeExists: Boolean(area && area.getAttribute('aria-activedescendant') && document.getElementById(area.getAttribute('aria-activedescendant'))),
+      live: (menu.querySelector('[aria-live]') || {}).textContent,
+    };
+  }"""
+
+  def state() -> dict | None:
+    return page.evaluate(state_script)
+
+  def inside(label: str, found: dict) -> None:
+    rect = found["rect"]
+    if rect["left"] < 0 or rect["top"] < 0 or rect["right"] > found["vw"] or rect["bottom"] > found["vh"]:
+      failures.append(Failure(page_name, f"{label}: the menu leaves the viewport: {rect} in {found['vw']}x{found['vh']}"))
+    if found["covered"]:
+      failures.append(Failure(page_name, f"{label}: something covers the menu"))
+    if found["overToolbar"]:
+      failures.append(Failure(page_name, f"{label}: the menu sits over the floating toolbar but is not above it"))
+
+  def open_editor(index: int) -> "Locator":
+    paragraph = page.locator("main > p[data-sphinx-source-line]").nth(index)
+    paragraph.evaluate("element => element.scrollIntoView({ block: 'center' })")
+    page.wait_for_timeout(150)
+    paragraph.click()
+    area = page.locator(".sphinx-preview-block-editor textarea")
+    area.wait_for(state="visible", timeout=2000)
+    return area
+
+  # Phase A: an editor at the bottom of the viewport; the menu flips above the caret.
+  area = open_editor(6)
+  page.locator(".sphinx-preview-block-editor-host").locator("select[data-edit-palette-mode-select]").select_option(mode)
+  page.wait_for_timeout(150)
+  area.evaluate("""element => {
+    element.focus();
+    const bottom = element.getBoundingClientRect().bottom;
+    window.scrollBy(0, bottom - (innerHeight - 56));
+  }""")
+  page.wait_for_timeout(150)
+  area.press("End")
+  area.press("Enter")
+  page.keyboard.type("/")
+  page.wait_for_timeout(200)
+  flip = state()
+  if flip is None:
+    failures.append(Failure(page_name, "the menu did not open near the bottom of the viewport"))
+  else:
+    if flip["placement"] != "above":
+      failures.append(Failure(page_name, f"near the bottom the menu is {flip['placement']}, expected above"))
+    inside("near the bottom", flip)
+    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-flip.png"), caret="hide")
+  page.keyboard.press("Escape")
+  page.keyboard.press("Escape")
+  page.wait_for_timeout(250)
+  if page.locator(".sphinx-preview-block-editor").count() != 0:
+    failures.append(Failure(page_name, "Escape did not close the editor after the menu"))
+    return
+
+  # Phase B: a paragraph in the middle of the viewport.
+  area = open_editor(3)
+  area.press("End")
+  area.press("Enter")
+  page.keyboard.type("/")
+  page.wait_for_timeout(200)
+  opened = state()
+  if opened is None:
+    failures.append(Failure(page_name, "typing / did not open the menu"))
+    return
+  listed = []
+  for key in opened["ids"]:
+    base = key.split(":")[0]
+    if base not in listed:
+      listed.append(base)
+  if sorted(listed) != sorted(expected):
+    failures.append(Failure(page_name, f"menu commands in {mode} mode are {sorted(listed)}, expected {sorted(expected)}"))
+  if opened["placement"] != "below":
+    failures.append(Failure(page_name, f"menu placement {opened['placement']}, expected below the caret"))
+  if opened["expanded"] != "true" or not opened["activeExists"]:
+    failures.append(Failure(page_name, f"ARIA state of the text box: expanded={opened['expanded']} active={opened['active']}"))
+  if not opened["live"] or "commands" not in opened["live"]:
+    failures.append(Failure(page_name, f"live region reads {opened['live']!r}"))
+  inside("open", opened)
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-open.png"), caret="hide")
+
+  page.keyboard.type("h")
+  page.wait_for_timeout(120)
+  filtered = state()
+  if filtered is None or not (0 < len(filtered["ids"]) < len(opened["ids"])):
+    failures.append(Failure(page_name, f"typing h did not narrow the list: {filtered and len(filtered['ids'])} of {len(opened['ids'])}"))
+  else:
+    inside("filtered", filtered)
+    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-filtered.png"), caret="hide")
+
+  page.keyboard.type("zz")
+  page.wait_for_timeout(120)
+  none = state()
+  if none is None or not none["none"] or none["ids"]:
+    failures.append(Failure(page_name, "no No command row for an unmatched query"))
+  else:
+    inside("no match", none)
+    page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-nomatch.png"), caret="hide")
+
+  for _ in range(4):
+    page.keyboard.press("Backspace")
+  page.wait_for_timeout(120)
+  if state() is not None:
+    failures.append(Failure(page_name, "Backspace past the slash did not close the menu"))
+
+  # The scenario PNG: the menu open with the final query.
+  page.keyboard.type("/" + shot["finalQuery"])
+  page.wait_for_timeout(200)
+  if state() is None:
+    failures.append(Failure(page_name, "the menu did not reopen for the scenario capture"))
+
+
 def check_edit_palette_tall(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """P4: a very tall edit box; the palette stays at the top of the viewport while the box scrolls."""
   if not scenario.get("editPaletteTall"):
@@ -5015,7 +5158,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

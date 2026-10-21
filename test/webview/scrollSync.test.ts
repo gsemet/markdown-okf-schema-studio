@@ -10222,3 +10222,54 @@ test("T41 r2: the last selected block's arrows are labelled for the selection; a
   assert.equal(moveButton(harness, 100, "down").getAttribute("aria-label"), "Move the block above down");
   assert.equal(moveButton(harness, 100, "down").getAttribute("title"), null);
 });
+
+// P11: the / command menu in the page runtime.
+function slashMenuOf(harness: RuntimeHarness): RuntimeElement | undefined {
+  return harness.createdElements.find((element) =>
+    element.getAttribute("data-slash-menu") === "true" && !element.removed);
+}
+
+test("P11: typing / in a block editor opens the menu, Enter applies it and Escape keeps the editor", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Second paragraph.\n/h2";
+  textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+  textarea.dispatch("input", { data: "/", inputType: "insertText" });
+  assert.equal(slashMenuOf(harness), undefined, "the slash must be at a line start or after a space");
+  textarea.value = "Second paragraph.\n/";
+  textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+  textarea.dispatch("input", { data: "/", inputType: "insertText" });
+  assert.ok(slashMenuOf(harness), "opened by the slash after a line break");
+  assert.equal(textarea.getAttribute("aria-expanded"), "true");
+  textarea.value = "Second paragraph.\n/h2";
+  textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+  textarea.dispatch("input", { data: "2", inputType: "insertText" });
+  let prevented = 0;
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented >= 1, true, "Enter is taken by the menu");
+  assert.equal(slashMenuOf(harness), undefined);
+  assert.equal(textarea.value, "Second paragraph.\n## ");
+  assert.equal(textarea.getAttribute("aria-expanded"), null);
+
+  textarea.value = "Second paragraph.\n## /";
+  textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+  textarea.dispatch("input", { data: "/", inputType: "insertText" });
+  assert.ok(slashMenuOf(harness));
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(slashMenuOf(harness), undefined, "Escape closes the menu");
+  assert.equal(textarea.value, "Second paragraph.\n## /", "and keeps the typed text");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true", "the editor stays open");
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null, "the next Escape cancels the editor");
+});
+
+test("P11: the menu closes when the text box loses the focus", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "/";
+  textarea.selectionStart = textarea.selectionEnd = 1;
+  textarea.dispatch("input", { data: "/", inputType: "insertText" });
+  assert.ok(slashMenuOf(harness));
+  textarea.dispatch("blur");
+  assert.equal(slashMenuOf(harness), undefined);
+});

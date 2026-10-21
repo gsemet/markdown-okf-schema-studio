@@ -8,6 +8,7 @@ import { createMarkdownTableTools } from "./markdownTable";
 import { createEditActions } from "./editActions";
 import { createEditPalette } from "./editPalette";
 import { caretRectOf, caretRevealDelta } from "./caretRect";
+import { createSlashMenu } from "./slashMenu";
 import { createLinkPanel } from "./linkPanel";
 import { createFigureTools } from "./figureDirective";
 import { createFigurePanel, installFigureEditButton } from "./figurePanel";
@@ -94,6 +95,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())}, tableTools, isSafeOkfColor);
   const createEditPalette = ${createEditPalette.toString()};
   const caretRectOf = ${caretRectOf.toString()};
+  const createSlashMenu = ${createSlashMenu.toString()};
   const caretRevealDelta = ${caretRevealDelta.toString()};
   const createLinkPanel = ${createLinkPanel.toString()};
   const figureTools = (${createFigureTools.toString()})();
@@ -1063,6 +1065,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     edit.linkPanel = undefined;
     edit.figurePanel?.destroy();
     edit.figurePanel = undefined;
+    edit.slashMenu?.destroy();
+    edit.cellSlash?.destroy();
     edit.palette?.destroy();
     edit.cellPalette?.destroy();
     restoreTableCellContent(edit);
@@ -2817,6 +2821,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     // The panel and popover belong to the control that is about to be replaced.
     edit.closeLinkPanel?.(false);
     edit.cellPalette?.closePopover();
+    edit.cellSlash?.close();
     edit.element.textContent = "";
 
     const input = document.createElement("textarea");
@@ -2951,6 +2956,15 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       });
     }
     edit.cellPalette.setMode(paletteMode);
+    if (!edit.cellSlash) {
+      edit.cellSlash = createSlashMenu(document, window, {
+        getControl: () => edit.tableInput,
+        getEntries: () => edit.cellPalette.menuEntries(),
+        run: (key, range) => edit.cellPalette.runMenuEntry(key, range),
+        getCaretRect: () => caretRectOf(document, window, edit.tableInput),
+        preferGroup: () => (paletteMode === "myst" ? "myst" : undefined),
+      });
+    }
     const separator = document.createElement("span");
     separator.setAttribute("role", "separator");
     separator.setAttribute("aria-orientation", "vertical");
@@ -2977,21 +2991,29 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     edit.resizeTextarea = resizeInput;
     edit.tableInput = input;
     edit.actionButtons = actionButtons;
-    input.addEventListener("blur", () => commitCellEditorOnFocusLoss(edit, input));
+    input.addEventListener("blur", () => {
+      edit.cellSlash?.close();
+      commitCellEditorOnFocusLoss(edit, input);
+    });
     // Clicking or typing in the cell closes what the bar opened, as in a block editor.
     input.addEventListener("mousedown", () => {
       edit.cellPalette?.closePopover();
       edit.closeLinkPanel?.(false);
     });
-    input.addEventListener("input", () => {
+    input.addEventListener("input", (event) => {
       edit.cellPalette?.closePopover();
       edit.closeLinkPanel?.(false);
       edit.cellPalette?.updateAvailability();
+      edit.cellSlash?.handleInput(event);
     });
     for (const kind of ["keyup", "mouseup", "select"]) {
-      input.addEventListener(kind, () => edit.cellPalette?.updateAvailability());
+      input.addEventListener(kind, () => {
+        edit.cellPalette?.updateAvailability();
+        edit.cellSlash?.sync();
+      });
     }
     input.addEventListener("keydown", (event) => {
+      if (edit.cellSlash?.handleKey(event)) return;
       if (edit.cellPalette?.handleKey(event)) return;
       if (keepUndoInControl(event)) return;
       if (paletteShortcut(event, input, rememberAndAutosave)) return;
@@ -3348,6 +3370,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       if (hostRequests.isDialogOpen()) return;
       saveBlockEdit();
     });
+    textarea.addEventListener("blur", () => edit.slashMenu?.close());
     textarea.addEventListener("paste", (event) => {
       pasteImage.handle(event, textarea, {
         send: (mime, dataBase64, done) => hostRequests.ask(
@@ -3440,6 +3463,15 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       apple: isApplePlatform(),
     });
     edit.palette = palette;
+    // The slash command menu lists the palette's own entries and runs them through it.
+    edit.slashMenu?.destroy();
+    edit.slashMenu = createSlashMenu(document, window, {
+      getControl: () => textarea,
+      getEntries: () => palette.menuEntries(),
+      run: (key, range) => palette.runMenuEntry(key, range),
+      getCaretRect: () => caretRectOf(document, window, textarea),
+      preferGroup: () => (paletteMode === "myst" ? "myst" : undefined),
+    });
     placePaletteAboveFrame(edit, palette.element);
     syncPaletteSticky(edit);
     const shift = keepTextInPlaceBelowPalette(edit, textTopBefore);
@@ -3450,21 +3482,24 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       edit.closeLinkPanel?.(false);
       edit.closeFigurePanel?.(false);
     });
-    textarea.addEventListener("input", () => {
+    textarea.addEventListener("input", (event) => {
       palette.closePopover();
       edit.closeLinkPanel?.(false);
       edit.closeFigurePanel?.(false);
       palette.updateAvailability();
       revealCaretBelowPalette(edit, textarea);
+      edit.slashMenu?.handleInput(event);
     });
     // The colour-code swatch follows the caret: arrows and selections end in a key or mouse release.
     for (const kind of ["keyup", "mouseup", "select"]) {
       textarea.addEventListener(kind, () => {
         palette.updateAvailability();
         revealCaretBelowPalette(edit, textarea);
+        edit.slashMenu?.sync();
       });
     }
     textarea.addEventListener("keydown", (event) => {
+      if (edit.slashMenu?.handleKey(event)) return;
       if (palette.handleKey(event)) return;
       // Cmd/Ctrl+Shift+M: keyboard path to the palette mode select.
       if (

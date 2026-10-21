@@ -108,7 +108,23 @@ export interface EditAction {
    * as a swatch and its popover starts on it, with no tabs, and replaces it in place.
    */
   current?(ctx: EditActionContext): string | undefined;
+  /** How the `/` menu offers the action (see `EditActionSlash`); absent: listed under its label. */
+  slash?: EditActionSlash;
   apply(ctx: EditActionContext): TextEdit | undefined;
+}
+
+/**
+ * Data of the `/` command menu, next to the action it belongs to. `aliases` are short names the
+ * completion also matches (`/hr` finds the horizontal rule). `variants` are extra entries that run
+ * the action with a ready-made argument, as if the palette popover had been opened and the option
+ * chosen (`/h2`, `/warning`); `variantsOnly` lists only the variants, not the action itself.
+ */
+export interface EditActionSlash {
+  aliases?: string[];
+  variants?: Array<{ label: string; arg: string; aliases?: string[] }>;
+  variantsOnly?: boolean;
+  /** Listed by the `/` menu only: no palette button (and no shortcut). */
+  menuOnly?: boolean;
 }
 
 /** The subset of a keyboard event the shortcut matcher reads. */
@@ -440,6 +456,35 @@ export function createEditActions(
         return count === 1 ? { remove: line.length, add: "> " } : { remove: 0, add: line === "" ? ">" : "" };
       }
       return { remove: 0, add: "> " };
+    });
+  }
+
+  /**
+   * Turns the touched lines into a bulleted (`- `) or numbered (`1. `) list, or removes the marker
+   * when every non-blank touched line already has it. A marker of the other kind is replaced; an
+   * empty single line gets the marker and the caret after it.
+   */
+  function toggleList(ctx: EditActionContext, ordered: boolean): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const own = ordered ? /^(\d{1,9}[.)])[ \t]+/u : /^[-*+][ \t]+/u;
+    const other = ordered ? /^[-*+][ \t]+/u : /^\d{1,9}[.)][ \t]+/u;
+    const { lines } = touchedLines(ctx);
+    const filled = lines.filter((line) => line.trim() !== "");
+    const remove = filled.length > 0 && filled.every((line) => own.test(line));
+    let number = 0;
+    return editLinePrefixes(ctx, (line, count) => {
+      if (remove) {
+        const marker = own.exec(line);
+        return { remove: marker ? marker[0].length : 0, add: "" };
+      }
+      if (line.trim() === "") {
+        return count === 1
+          ? { remove: line.length, add: ordered ? "1. " : "- " }
+          : { remove: 0, add: "" };
+      }
+      const prefix = ordered ? ++number + ". " : "- ";
+      const existing = own.exec(line) ?? other.exec(line);
+      return { remove: existing ? existing[0].length : 0, add: prefix };
     });
   }
 
@@ -1531,9 +1576,30 @@ export function createEditActions(
       .map((name) => ({ value: name, label: name })),
   ];
 
+  // `/` menu variants: the options of the popovers that are worth a direct entry.
+  const HEADING_SLASH = [
+    ...[1, 2, 3, 4, 5].map((level) => ({
+      label: "Heading " + level,
+      arg: String(level),
+      aliases: level === 1 ? ["h1", "title", "heading1"] : ["h" + level, "heading" + level],
+    })),
+    { label: "Paragraph", arg: "0", aliases: ["text", "plain", "p"] },
+  ];
+  const ALERT_SLASH = ALERT_OPTIONS.map((option) => ({
+    label: option.label + " alert",
+    arg: option.value,
+    aliases: [option.label.toLowerCase(), "callout", "github"],
+  }));
+  const ADMONITION_SLASH = ADMONITION_OPTIONS.map((option) => ({
+    label: option.value === "custom" ? "Custom admonition" : option.label + " admonition",
+    arg: option.value,
+    aliases: [option.value === "seealso" ? "see also" : option.value, "callout", "admonition"],
+  }));
+
   const actions: EditAction[] = [
     {
       id: "heading",
+      slash: { variantsOnly: true, variants: HEADING_SLASH },
       label: "Heading",
       title: "Heading level",
       icon: "heading",
@@ -1546,6 +1612,7 @@ export function createEditActions(
     },
     {
       id: "bold",
+      slash: { aliases: ["strong", "b"] },
       label: "Bold",
       icon: "bold",
       group: "inline",
@@ -1556,6 +1623,7 @@ export function createEditActions(
     },
     {
       id: "italic",
+      slash: { aliases: ["emphasis", "em", "i"] },
       label: "Italic",
       icon: "italic",
       group: "inline",
@@ -1566,6 +1634,7 @@ export function createEditActions(
     },
     {
       id: "strikethrough",
+      slash: { aliases: ["strike", "del", "delete"] },
       label: "Strikethrough",
       icon: "strikethrough",
       group: "inline",
@@ -1575,6 +1644,7 @@ export function createEditActions(
     },
     {
       id: "color",
+      slash: { aliases: ["color", "highlight", "background"] },
       label: "Colour",
       title: "Colour the text or its background",
       icon: "color",
@@ -1603,6 +1673,7 @@ export function createEditActions(
     },
     {
       id: "link",
+      slash: { aliases: ["url", "hyperlink"] },
       label: "Link",
       title: "Link",
       icon: "link",
@@ -1615,6 +1686,7 @@ export function createEditActions(
     },
     {
       id: "image",
+      slash: { aliases: ["img", "picture", "photo"] },
       label: "Image",
       title: "Image (pick a file next to the document)",
       icon: "image",
@@ -1626,6 +1698,7 @@ export function createEditActions(
     },
     {
       id: "codeFence",
+      slash: { aliases: ["code", "fence", "snippet", "pre"] },
       label: "Code block",
       title: "Code block (choose a language)",
       icon: "code",
@@ -1637,7 +1710,28 @@ export function createEditActions(
       apply: insertCodeFence,
     },
     {
+      id: "bulletList",
+      slash: { menuOnly: true, aliases: ["bullet", "bullets", "ul", "unordered", "list", "-", "*"] },
+      label: "Bulleted list",
+      icon: "bulletList",
+      group: "block",
+      modes: ["strict"],
+      scopes: ["block"],
+      apply: (ctx) => toggleList(ctx, false),
+    },
+    {
+      id: "numberedList",
+      slash: { menuOnly: true, aliases: ["numbered", "ol", "ordered", "list", "1."] },
+      label: "Numbered list",
+      icon: "numberedList",
+      group: "block",
+      modes: ["strict"],
+      scopes: ["block"],
+      apply: (ctx) => toggleList(ctx, true),
+    },
+    {
       id: "quote",
+      slash: { aliases: ["quote", "citation", "bq"] },
       label: "Blockquote",
       icon: "quote",
       group: "block",
@@ -1647,6 +1741,7 @@ export function createEditActions(
     },
     {
       id: "rule",
+      slash: { aliases: ["hr", "divider", "line", "separator"] },
       label: "Horizontal rule",
       icon: "rule",
       group: "block",
@@ -1656,6 +1751,7 @@ export function createEditActions(
     },
     {
       id: "table",
+      slash: { aliases: ["grid", "tbl"] },
       label: "Table",
       title: "Table (choose a size)",
       icon: "table",
@@ -1668,6 +1764,7 @@ export function createEditActions(
     },
     {
       id: "emoji",
+      slash: { aliases: ["smiley", "emoticon", "face"] },
       label: "Emoji",
       title: "Emoji",
       icon: "emoji",
@@ -1680,6 +1777,7 @@ export function createEditActions(
     },
     {
       id: "todo",
+      slash: { aliases: ["todo", "fixme", "task"] },
       label: "TODO",
       title: "Toggle TODO comment",
       icon: "todo",
@@ -1691,6 +1789,7 @@ export function createEditActions(
     },
     {
       id: "alert",
+      slash: { aliases: ["callout", "github"], variants: ALERT_SLASH },
       label: "Alert",
       title: "GitHub alert (choose a type)",
       icon: "alert",
@@ -1704,6 +1803,7 @@ export function createEditActions(
     },
     {
       id: "checkbox",
+      slash: { aliases: ["todo", "task", "checklist", "tasklist"] },
       label: "Checkbox",
       title: "Toggle checkbox",
       icon: "checkbox",
@@ -1714,6 +1814,7 @@ export function createEditActions(
     },
     {
       id: "htmlTable",
+      slash: { aliases: ["table", "html"] },
       label: "HTML table",
       title: "HTML table (converts the table at the caret)",
       icon: "htmlTable",
@@ -1724,6 +1825,7 @@ export function createEditActions(
     },
     {
       id: "details",
+      slash: { aliases: ["collapse", "toggle", "spoiler", "accordion"] },
       label: "Collapsible",
       title: "Collapsible section (details)",
       icon: "details",
@@ -1734,6 +1836,7 @@ export function createEditActions(
     },
     {
       id: "footnote",
+      slash: { aliases: ["fn", "endnote"] },
       label: "Footnote",
       title: "Footnote",
       icon: "footnote",
@@ -1744,6 +1847,7 @@ export function createEditActions(
     },
     {
       id: "mermaid",
+      slash: { aliases: ["diagram", "chart", "graph", "flowchart"] },
       label: "Mermaid",
       title: "Mermaid diagram",
       icon: "mermaid",
@@ -1754,6 +1858,7 @@ export function createEditActions(
     },
     {
       id: "columnAlign",
+      slash: { aliases: ["align", "left", "center", "right"] },
       label: "Column alignment",
       title: "Table column alignment (choose)",
       icon: "columnAlign",
@@ -1770,6 +1875,7 @@ export function createEditActions(
     },
     {
       id: "kbd",
+      slash: { aliases: ["kbd", "key", "keyboard", "shortcut"] },
       label: "Key",
       title: "Keyboard key (kbd)",
       icon: "kbd",
@@ -1780,6 +1886,7 @@ export function createEditActions(
     },
     {
       id: "admonition",
+      slash: { aliases: ["callout"], variants: ADMONITION_SLASH },
       label: "Admonition",
       title: "Admonition (choose a type)",
       icon: "admonition",
@@ -1792,6 +1899,7 @@ export function createEditActions(
     },
     {
       id: "deflist",
+      slash: { aliases: ["definition", "dl", "glossary"] },
       label: "Definition list",
       title: "Definition list",
       icon: "deflist",
@@ -1802,6 +1910,7 @@ export function createEditActions(
     },
     {
       id: "math",
+      slash: { aliases: ["equation", "latex", "formula", "katex"] },
       label: "Math",
       title: "Math (choose inline, display or aligned)",
       icon: "math",
@@ -1818,6 +1927,7 @@ export function createEditActions(
     },
     {
       id: "sub",
+      slash: { aliases: ["subscript"] },
       label: "Subscript",
       title: "Subscript",
       icon: "sub",
@@ -1828,6 +1938,7 @@ export function createEditActions(
     },
     {
       id: "sup",
+      slash: { aliases: ["superscript", "power", "exponent"] },
       label: "Superscript",
       title: "Superscript",
       icon: "sup",
@@ -1838,6 +1949,7 @@ export function createEditActions(
     },
     {
       id: "label",
+      slash: { aliases: ["anchor", "target"] },
       label: "Label",
       title: "Label (anchor for {ref})",
       icon: "label",
@@ -1848,6 +1960,7 @@ export function createEditActions(
     },
     {
       id: "ref",
+      slash: { aliases: ["reference", "xref", "crossref"] },
       label: "Reference",
       title: "Reference to a label ({ref})",
       icon: "ref",
@@ -1860,6 +1973,7 @@ export function createEditActions(
     },
     {
       id: "doc",
+      slash: { aliases: ["document", "file", "page"] },
       label: "Document link",
       title: "Link to another document ({doc})",
       icon: "doc",
@@ -1871,6 +1985,7 @@ export function createEditActions(
     },
     {
       id: "cite",
+      slash: { aliases: ["cite", "citation", "bibtex", "bibliography"] },
       label: "Citation",
       title: "Citation from the workspace .bib files ({cite})",
       icon: "cite",
@@ -1888,6 +2003,7 @@ export function createEditActions(
     },
     {
       id: "dropdown",
+      slash: { aliases: ["details", "collapse"] },
       label: "Dropdown",
       title: "Dropdown (collapsible admonition)",
       icon: "dropdown",
@@ -1898,6 +2014,7 @@ export function createEditActions(
     },
     {
       id: "tableCaption",
+      slash: { aliases: ["table", "caption", "list-table"] },
       label: "Table with caption",
       title: "Table with caption (wraps the table at the caret)",
       icon: "tableCaption",
@@ -1908,6 +2025,7 @@ export function createEditActions(
     },
     {
       id: "figure",
+      slash: { aliases: ["fig", "image", "picture"] },
       label: "Figure",
       title: "Figure (pick an image file; with the caret in a figure, edit it)",
       icon: "figure",
@@ -1920,6 +2038,7 @@ export function createEditActions(
     },
     {
       id: "roleKbd",
+      slash: { aliases: ["key", "kbd", "keyboard"] },
       label: "Key (MyST)",
       title: "Keyboard key ({kbd} role)",
       icon: "kbd",

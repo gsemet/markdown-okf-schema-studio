@@ -1027,6 +1027,112 @@ async function scenarioShortcuts(page: Page, evidence: Evidence): Promise<void> 
   });
 }
 
+/** RI-P11: the / command menu: /h2 Enter, /tab Enter (size grid) and an Escape that keeps the text. */
+async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise<void> {
+  await withSmokeDocument("realinput-p11", async (source) => {
+    await openSidePreview(source);
+    await waitForRender(source);
+    await setEditMode(page, true);
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    const readEditor = async (): Promise<{ tag: string | undefined; value: string | undefined }> => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return { tag: undefined, value: undefined };
+      return current.evaluate(() => {
+        const element = document.activeElement;
+        return {
+          tag: element?.tagName,
+          value: element instanceof HTMLTextAreaElement ? element.value : undefined,
+        };
+      });
+    };
+    const expectValue = async (description: string, expected: string): Promise<void> => {
+      try {
+        await waitFor(description, async () => (await readEditor()).value === expected);
+      } catch (error) {
+        throw new Error(String(error) + " Editor state: " + JSON.stringify(await readEditor()));
+      }
+    };
+    const count = async (selector: string): Promise<number> => {
+      const current = await findCurrentFrame(page);
+      return current === undefined ? -1 : current.locator(selector).count();
+    };
+    const waitMenu = async (open: boolean, description: string): Promise<void> => {
+      await waitFor(description, async () => (await count("[data-slash-menu]")) === (open ? 1 : 0));
+    };
+    const original = "Second paragraph.";
+    await press(page, "End");
+
+    // /h2 then Enter: the query is replaced by the heading prefix, the focus stays in the box.
+    await press(page, "Enter");
+    await typeText(page, "/");
+    await waitMenu(true, "the slash menu to open after a line break");
+    await captureAfter(evidence, page, "p11-slash-open",
+      "Edit mode on; typing / on a new line of the paragraph editor opened the command menu under the caret.");
+    await typeText(page, "h2");
+    await waitFor("the menu to list Heading 2 first", async () => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return false;
+      return await current.locator("[data-slash-id]").first().getAttribute("data-slash-id") === "heading:2";
+    });
+    await press(page, "Enter");
+    await waitMenu(false, "the menu to close after Enter");
+    await expectValue("/h2 Enter to write the heading prefix", original + "\n## ");
+    assert.equal((await readEditor()).tag, "TEXTAREA", "the focus stays in the text box");
+    await typeText(page, "Title");
+    await expectValue("the heading text", original + "\n## Title");
+    // Undo walks back through the typed title; the step that follows the bare prefix must bring
+    // the /h2 back in one go (the command is a single native edit).
+    let previous = String((await readEditor()).value);
+    let reachedPrefix = false;
+    for (let step = 0; step < 12; step += 1) {
+      await press(page, MOD + "+z");
+      await new Promise<void>((resolve) => setTimeout(resolve, 120));
+      const value = String((await readEditor()).value);
+      if (previous === original + "\n## ") {
+        assert.equal(value, original + "\n/h2", "one undo brings the /h2 back");
+        reachedPrefix = true;
+        break;
+      }
+      previous = value;
+    }
+    assert.ok(reachedPrefix, "undo reached the bare heading prefix");
+    // Restore the paragraph for the next part: undo everything that is left.
+    for (let step = 0; step < 6; step += 1) await press(page, MOD + "+z");
+    await expectValue("undo back to the start", original);
+
+    // /tab Enter: the menu closes and the table size grid opens, exactly like the Table button.
+    await press(page, "End");
+    await press(page, "Enter");
+    await typeText(page, "/tab");
+    await waitMenu(true, "the menu to open for /tab");
+    await press(page, "Enter");
+    await waitMenu(false, "the menu to close");
+    await waitFor("the table size grid", async () => (await count("[data-edit-popover=\"grid\"]")) === 1);
+    await expectValue("the /tab text removed", original + "\n");
+    await press(page, "ArrowRight");
+    await press(page, "ArrowDown");
+    await press(page, "Enter");
+    await waitFor("the table in the text box", async () => ((await readEditor()).value ?? "").includes("|"));
+
+    // Escape closes the menu and keeps the typed text; the editor stays open.
+    await press(page, process.platform === "darwin" ? "Meta+ArrowDown" : "Control+End");
+    await press(page, "Enter");
+    await typeText(page, "/zz");
+    await waitMenu(true, "the menu to open for /zz");
+    await waitFor("the No command row", async () => (await count("[data-slash-none]")) === 1);
+    await captureAfter(evidence, page, "p11-slash-no-command",
+      "The query /zz matches nothing: the menu shows a No command row.");
+    await press(page, "Escape");
+    await waitMenu(false, "Escape to close the menu");
+    assert.equal(await count("[data-sphinx-preview-block-editor]"), 1, "the editor is still open");
+    const kept = await readEditor();
+    assert.match(String(kept.value), /\/zz$/u, "the typed text is kept: " + JSON.stringify(kept));
+    await press(page, "Escape");
+    await waitForNoBlockEditor(page, "the block editor to close after the second Escape");
+  });
+}
+
 /** RI-T21: palette buttons edit the text box without closing it, and one undo reverts each. */
 async function scenarioPalette(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t21", async (source) => {
@@ -3809,6 +3915,7 @@ export async function run(): Promise<void> {
     await scenarioTabIndents(page, evidence);
     await scenarioShortcuts(page, evidence);
     await scenarioPalette(page, evidence);
+    await scenarioSlashMenu(page, evidence);
     await scenarioLinkPanel(page, evidence);
     await scenarioAlertDropdown(page, evidence);
     await scenarioFigureEditor(page, evidence);
