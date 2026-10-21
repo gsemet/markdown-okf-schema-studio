@@ -653,3 +653,22 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
   "table-editing/v04-cell-editor-wraps-dark-900": ["open"],
   "table-editing/v05-cell-editor-wraps-dark-460": [],
 };
+
+/**
+ * README image sources: the scenario PNG (`visual/<id>.png`) is cropped (pixel box) and scaled to
+ * `width` into `images/readme/<file>`. `scripts/generate-readme-images.py` reads this table through
+ * the render manifest (`out/reports/visual/manifest.json`); the crops are tuned to the PNG geometry
+ * and must not change unless the image is meant to change. The six real-window README images are
+ * still listed in the script (T1 moves them to the capture registry).
+ */
+export const README_BY_ID: Readonly<Record<string, { file: string; crop: [number, number, number, number]; width: number }>> = {
+  "frontmatter-schema/v05-okf-schema-table-dark-900": { file: "schema-properties.png", crop: [120, 20, 1680, 1100], width: 720 },
+  "frontmatter-editing/v02-edit-enum-value-dark-900": { file: "edit-frontmatter.png", crop: [120, 20, 1680, 1110], width: 720 },
+  "rendering-core/v01-handbook-top-dark-900": { file: "theme-dark.png", crop: [0, 20, 1800, 930], width: 720 },
+  "theme-zoom/v01-forced-white-handbook-white-900": { file: "theme-white.png", crop: [0, 20, 1800, 930], width: 720 },
+  "theme-zoom/v02-forced-cream-handbook-cream-900": { file: "theme-cream.png", crop: [0, 20, 1800, 930], width: 720 },
+  "layout-width/v84-break-auto-readme-cream-1200": { file: "margin-break-cream.png", crop: [0, 0, 2400, 1800], width: 1200 },
+  "toolbar-navigation/v18-toolbar-expanded-cream-900": { file: "toolbar-expanded.png", crop: [1440, 0, 1800, 260], width: 360 },
+  "toolbar-navigation/v19-toolbar-collapsed-cream-900": { file: "toolbar-collapsed.png", crop: [1440, 0, 1800, 260], width: 360 },
+  "palette-slash/v12-slash-gfm-light-900": { file: "slash-menu.png", crop: [140, 780, 1660, 1800], width: 760 },
+};

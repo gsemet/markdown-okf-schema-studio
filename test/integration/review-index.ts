@@ -2,6 +2,9 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { randomUUID } from "node:crypto";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
+import { reviewIndexText } from "../site/reviewIndexText";
+import { generatePoGallery } from "../site/poGalleryCli";
+import { keepFromArguments, pruneReports } from "../site/pruneReportsCli";
 import { validateReviewEvidence, type CampaignIdentity, type EvidenceManifest } from "../site/reviewEvidence";
 
 const artifacts = E2E_REPORT_ROOT;
@@ -45,18 +48,8 @@ function finishReview(): void {
     const destination = path.join(history, path.basename(legacy));
     if (!fs.existsSync(destination)) fs.renameSync(source, destination);
   }
-  const legacyScroll = path.join(history, "legacy-scroll");
-  fs.mkdirSync(legacyScroll, { recursive: true });
-  for (const entry of fs.readdirSync(screenshots)) {
-    if (!entry.startsWith("scroll-e2e-") || !fs.statSync(path.join(screenshots, entry)).isDirectory()) continue;
-    for (const image of fs.readdirSync(path.join(screenshots, entry))) {
-      if (!image.endsWith(".png")) continue;
-      const destination = path.join(legacyScroll, image);
-      if (!fs.existsSync(destination)) fs.renameSync(path.join(screenshots, entry, image), destination);
-    }
-  }
   fs.writeFileSync(path.join(history, "README.md"), "# Historical Evidence\n\nThese captures predate the current checkpoint/sidecar contract. They are retained for diagnosis, not stakeholder approval. Missing notes, failed states and unknown provenance are not reconstructed as current passing evidence. Use ../REVIEW.md for the current campaign.\n");
-  fs.writeFileSync(index, `# Screenshot Review\n\nStatus: **${status}**\n\nCommand: \`${campaign?.command ?? "unknown"}\`\nRun identity: \`${campaign?.runId ?? "unknown"}\`\nRevision: \`${integration.revision ?? "unknown"}\`; dirty worktree: ${Boolean(integration.dirty)}.\n\n${failures.length > 0 ? `Freshness failures:\n${failures.map((failure) => `- ${failure}`).join("\n")}\n\n` : ""}## Review Order\n\n1. [Static document and interaction cases](screenshots/INDEX.md): ${visual.scenarioCount ?? 0} checks, ${visual.screenshotCount ?? 0} canonical images. Includes light/dark, wide/narrow, loading, errors, editing, diagrams and link details. Aliases retain separate assertions without duplicate images.\n2. [Real VS Code scroll checkpoints](screenshots/LATEST.md): ordered states backed by layout, mode, synchronization and keyboard checks.\n3. [Real frontmatter and link interactions](FRONTMATTER-LATEST.md): explicit Description transitions, narrow and wide layouts, target saves, hover tooltips and marker navigation.\n4. [Actual window reload and close/reopen](RELOAD-LATEST.md): before reload, after reload, after reopen. No injected state.\n5. [Real checkbox toggles](CHECKBOX-LATEST.md): \`[ ]\`/\`[x]\` markers clicked in reading mode and edit mode, unchecked and checked states.\n6. [Real-input editing](screenshots/REAL-INPUT-LATEST.md): real mouse and keyboard edits in the side preview and the Open With editor, with the buffer checked after each action.\n\n## Reading Each Capture\n\nOpen the adjacent TXT or Markdown note before its image. It states setup, actions, captured state, expected content, visual checks and limitations. Automated assertions establish behavior; visually check contrast, framing, clipping, spacing and overlap. Intentional fixture warnings are not product failures.\n\nStatic pages use a mock host and do not prove installed-extension behavior. Real-window campaigns use isolated development hosts. Older run directories and archive/ are historical evidence, not this campaign.\n\n[Static manifest](screenshots/run-manifest.json) / [Final integration manifest](integration-manifest.json)\n`);
+  fs.writeFileSync(index, reviewIndexText({ status, campaign, integration, visual, failures }));
   fs.writeFileSync(path.join(artifacts, "review.json"), JSON.stringify({
     status,
     runId: campaign?.runId ?? null,
@@ -68,6 +61,14 @@ function finishReview(): void {
     visual,
   }, null, 2) + "\n");
   console.log(`Review index: ${index}`);
+  // The gallery and the pruning never decide the review status: a problem here is only reported.
+  try {
+    generatePoGallery();
+    console.log(`PO gallery: ${path.join(artifacts, "GALLERY.md")}`);
+    pruneReports(keepFromArguments([]), false);
+  } catch (error) {
+    console.warn(`PO gallery or pruning failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
   if (status !== "passed") process.exitCode = 1;
 }
 

@@ -222,6 +222,8 @@
     "test:integration": "npm run compile && npm run bundle && node out/test/integration/run-tests.js",
     "review:begin": "npm run compile && node out/test/integration/review-index.js --begin",
     "review:finish": "node out/test/integration/review-index.js",
+    "review:gallery": "npm run compile && node out/test/site/poGalleryCli.js",
+    "review:prune": "npm run compile && node out/test/site/pruneReportsCli.js",
     "test:e2e": "node scripts/run-e2e.mjs",
     "test:scroll": "npm run compile && npm run bundle && node out/test/integration/run-tests.js --scroll-only",
     "test:reload": "npm run compile && npm run bundle && node out/test/integration/run-tests.js --reload-only",
