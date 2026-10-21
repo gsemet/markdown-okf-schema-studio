@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- New slash menu: typing `/` at a line start or after a space in a block text box (paragraph,
+  insertion point, Start writing, table cell) opens a command menu at the caret with completion
+  (`/h2`, `/table`, `/note`). It lists the palette's commands for the current mode, runs them like
+  their palette buttons, and closes on Escape, a second `/`, a space or leaving the text box.
+  It also offers Bulleted and Numbered list (menu only), ranks MyST commands first in MyST mode,
+  and keeps Enter and Tab as plain keys when only a loose match exists.
 - The floating toolbar now has three rows: Refresh, Anchor, Edit and a new chevron button on the
   first row; Back, Next, Zoom - and Zoom + on the second; Theme, Width, TOC and Diff on the third.
   The chevron button collapses rows 2 and 3 (hidden from the Tab key too) and the choice is

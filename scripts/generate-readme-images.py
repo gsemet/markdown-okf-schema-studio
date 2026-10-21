@@ -64,6 +64,7 @@ def main() -> None:
         Crop(SCREENSHOTS / "readme-margin-break-cream.png", "margin-break-cream.png", (0, 0, 2400, 1800), 1200),
         Crop(SCREENSHOTS / "toolbar-rows-expanded-cream-900.png", "toolbar-expanded.png", (1440, 0, 1800, 260), 360),
         Crop(SCREENSHOTS / "toolbar-rows-collapsed-cream-900.png", "toolbar-collapsed.png", (1440, 0, 1800, 260), 360),
+        Crop(SCREENSHOTS / "slash-menu-gfm-light.png", "slash-menu.png", (140, 780, 1660, 1800), 760),
     ]
     for crop in crops:
         render(crop)

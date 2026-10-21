@@ -1324,6 +1324,121 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   min-height: 0;
 }
 
+/* The / command menu: a floating list at the caret, above the toolbar (1100) and the palette
+   popovers (1300). Positioned by the runtime (top/left/max-height from the caret rectangle). */
+.sphinx-preview-slash-menu {
+  position: fixed;
+  z-index: 1400;
+  box-sizing: border-box;
+  width: min(23em, calc(100vw - 16px));
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border-radius: 8px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
+  color: var(--vscode-editor-foreground, CanvasText);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.sphinx-preview-slash-heading {
+  padding: 6px 8px 2px;
+  color: var(--vscode-descriptionForeground, GrayText);
+  font-size: 0.82em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sphinx-preview-slash-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.sphinx-preview-slash-option[data-active="true"] {
+  background: var(--vscode-list-activeSelectionBackground, rgba(128, 128, 128, 0.3));
+  color: var(--vscode-list-activeSelectionForeground, inherit);
+}
+
+.sphinx-preview-slash-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.sphinx-preview-slash-icon > svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.sphinx-preview-slash-icon > svg.sphinx-preview-edit-palette-caret {
+  display: none;
+}
+
+.sphinx-preview-slash-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sphinx-preview-slash-category,
+.sphinx-preview-slash-shortcut {
+  flex: none;
+  color: var(--vscode-descriptionForeground, GrayText);
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.sphinx-preview-slash-none {
+  padding: 6px 8px;
+  color: var(--vscode-descriptionForeground, GrayText);
+}
+
+.sphinx-preview-slash-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .sphinx-preview-slash-menu {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .sphinx-preview-slash-option[data-active="true"] {
+    outline: 2px solid Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .sphinx-preview-slash-option[data-active="true"] .sphinx-preview-slash-category,
+  .sphinx-preview-slash-option[data-active="true"] .sphinx-preview-slash-shortcut {
+    color: HighlightText;
+  }
+}
+
 .sphinx-preview-table-menu > .sphinx-preview-link-panel {
   flex: 1 1 100%;
   margin: 2px 0 0;

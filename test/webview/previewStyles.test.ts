@@ -847,3 +847,18 @@ test("T44: the Orphaned comments box sits in the content's bottom padding and ad
     "the negative top margin repeats the content's bottom padding exactly");
   assert.match(box[1], /pointer-events: none;/u, "the empty space below the content stays clickable as before");
 });
+
+test("P11: the slash menu floats above the toolbar and the palette popovers and is placed by the runtime", () => {
+  const menu = /\.sphinx-preview-slash-menu\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  assert.match(menu, /position: fixed;/u);
+  assert.match(menu, /z-index: 1400;/u, "above the toolbar (1100) and the palette popovers (1300)");
+  assert.match(menu, /max-height: 320px;/u);
+  assert.match(menu, /overflow-y: auto;/u);
+  assert.doesNotMatch(menu, /\b(?:top|left):/u, "top and left come from the caret, through the CSSOM");
+  assert.match(
+    /\.sphinx-preview-slash-option\[data-active="true"\]\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "",
+    /list-activeSelectionBackground/u,
+  );
+  const live = /\.sphinx-preview-slash-live\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  assert.match(live, /clip: rect\(0 0 0 0\);/u, "the live region is visually hidden");
+});
