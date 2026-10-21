@@ -2076,6 +2076,95 @@ def apply_width_shot(page: Page, scenario: dict, failures: list[Failure]) -> Non
       failures.append(Failure(scenario["page"], f"{wanted}: the {name} is not centred on the pane"))
 
 
+WIDTH_BREAK_REPORT_DIR = VISUAL_REPORT_DIR / "width-margins"
+
+
+def check_width_mode_break(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """P2/P7: side margins of text, table, code block and figure in one width mode.
+
+  Auto and Full width both leave 16 px between a wide block and the pane edge; Full width gives the
+  prose the same side margin. Numbers go to out/reports/visual/width-margins/<scenario>.json.
+  """
+  wanted = scenario.get("widthModeBreak")
+  if not wanted:
+    return
+  page_name = scenario["page"]
+  button = page.locator("[data-sphinx-preview-width-toggle]")
+  for _ in range(3):
+    if page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-width')") == wanted:
+      break
+    button.click()
+    page.wait_for_timeout(250)
+  page.wait_for_timeout(250)
+  state = page.evaluate("""() => {
+    const content = document.getElementById('sphinx-myst-preview-content');
+    const style = getComputedStyle(content);
+    const box = content.getBoundingClientRect();
+    const pane = document.documentElement.clientWidth;
+    const rect = element => { if (!element) return null; const r = element.getBoundingClientRect(); return { left: r.left, right: r.right, width: r.width, top: r.top }; };
+    const text = [...content.querySelectorAll(':scope > p')].map(element => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return rect(element);
+    });
+    const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+    return {
+      mode: document.documentElement.getAttribute('data-sphinx-preview-width'),
+      pane,
+      columnLeft: box.left + parseFloat(style.paddingLeft),
+      columnRight: box.right - parseFloat(style.paddingRight),
+      text: text[0],
+      table: rect(content.querySelector(':scope > table')),
+      code: rect(content.querySelector(':scope > pre, :scope > .highlight, :scope > div.highlight')),
+      figure: rect(content.querySelector(':scope > figure, :scope > p[data-sphinx-preview-figure]')),
+      overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      scrollY: window.scrollY,
+    };
+  }""")
+  pane = state["pane"]
+  margins = {}
+  for name in ("text", "table", "code", "figure"):
+    item = state[name]
+    margins[name] = None if item is None else {"left": round(item["left"], 1), "right": round(pane - item["right"], 1), "width": round(item["width"], 1)}
+  column = state["columnRight"] - state["columnLeft"]
+  report = {"scenario": scenario["id"], "mode": state["mode"], "pane": pane, "column": round(column, 1),
+    "margins": margins, "overflowX": state["overflowX"], "scrollY": state["scrollY"]}
+  WIDTH_BREAK_REPORT_DIR.mkdir(parents=True, exist_ok=True)
+  (WIDTH_BREAK_REPORT_DIR / f"{scenario['id']}.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+  if state["mode"] != wanted:
+    failures.append(Failure(page_name, f"the Width button did not reach {wanted}: {state['mode']}"))
+    return
+  if state["overflowX"] > 1:
+    failures.append(Failure(page_name, f"{wanted}: horizontal page scroll of {state['overflowX']}px"))
+  for name in ("text", "table", "code", "figure"):
+    if margins[name] is None:
+      failures.append(Failure(page_name, f"{wanted}: the {name} block is missing"))
+      return
+  inside = lambda item: item["left"] >= state["columnLeft"] - 1.5 and item["right"] <= state["columnRight"] + 1.5
+  if wanted == "margin":
+    for name in ("table", "code", "figure"):
+      if not inside(state[name]):
+        failures.append(Failure(page_name, f"margin: the {name} leaves the column ({margins[name]})"))
+  else:
+    for name in ("table", "code", "figure"):
+      item = state[name]
+      if item["left"] < 15 or item["right"] > pane - 15:
+        failures.append(Failure(page_name, f"{wanted}: the {name} leaves the 16 px pane gutters ({margins[name]})"))
+      if item["width"] <= column + 4 and column < pane - 60 and wanted == "auto":
+        failures.append(Failure(page_name, f"auto: the {name} did not break out ({item['width']:.0f}px, column {column:.0f}px)"))
+      if abs((item["left"] + item["right"]) / 2 - pane / 2) > 3:
+        failures.append(Failure(page_name, f"{wanted}: the {name} is not centred on the pane ({margins[name]})"))
+  if wanted == "auto":
+    # The table is wider than the pane, so it takes everything except the gutters.
+    table = margins["table"]
+    if abs(table["left"] - 16) > 2 or abs(table["right"] - 16) > 2:
+      failures.append(Failure(page_name, f"auto: the table edge is not 16 px from the pane edge ({table})"))
+  if wanted == "full":
+    text = margins["text"]
+    if abs(text["left"] - 16) > 2 or abs(text["right"] - 16) > 2:
+      failures.append(Failure(page_name, f"full: the text margins are {text['left']}/{text['right']}px, expected 16 px like a broken-out table in Auto"))
+
+
 def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The TOC button opens a right column below the toolbar; wide panes only."""
   if not scenario.get("tocChecks"):
@@ -4832,7 +4921,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

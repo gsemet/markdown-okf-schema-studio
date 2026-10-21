@@ -90,6 +90,8 @@ export interface Scenario {
   widthModeChecks?: boolean;
   /** Switches the Width button to Auto before the screenshot (README capture of the margin break). */
   widthModeShot?: "auto";
+  /** P2/P7: sets this width mode, records the side margins of text, table, code and figure, asserts the break-out geometry. */
+  widthModeBreak?: "margin" | "auto" | "full";
   /** Opens the TOC column and measures it against the toolbar, the content, the width modes and zoom. */
   tocChecks?: boolean;
   /** P1: leaves the TOC open (opened with the toolbar button) in this width mode for the screenshot. */
@@ -1609,6 +1611,19 @@ export const SCENARIOS: Scenario[] = [
     description: "The Width button cycles Margin, Auto and Full width. Margin keeps every block in the "
       + "column; Auto lets the wide table and the wide image break out, centred on the pane, while the "
       + "small table keeps the column; Full width removes the column limit. No horizontal page scroll.",
+  }))),
+  ...([
+    ["light", WIDE], ["light", XLARGE], ["light", NARROW], ["dark", WIDE],
+  ] as const).flatMap(([theme, viewport]) => (["margin", "auto", "full"] as const).map((mode) => ({
+    id: `width-mode-break-${mode}-${theme === "dark" ? "dark-" : ""}${viewport.width}`,
+    fixture: "34-width-mode-break",
+    theme,
+    ...viewport,
+    scroll: { kind: "top" as const },
+    widthModeBreak: mode,
+    description: `Width mode ${mode}, ${theme}, ${viewport.width} px pane: the same document with a table, `
+      + "a code block and a figure wider than the column. Margin keeps them in the column; Auto lets them "
+      + "break out to 16 px from the pane edge; Full width gives the text the same 16 px side margins.",
   }))),
   {
     id: "readme-margin-break-cream",

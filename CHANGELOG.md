@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Full width mode now uses the same 16 px side margins as a table that breaks out of the column
+  in Auto mode, instead of up to 78 px of empty space on each side.
 - The gap above the first element is now the same 40 px everywhere: a title, text, picture, table,
   properties table, an empty document (Start writing), in read and edit mode. The floating
   toolbar no longer adds extra space: an open first-block editor gives up the width the toolbar
