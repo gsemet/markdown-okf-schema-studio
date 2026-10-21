@@ -2710,6 +2710,55 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
         failures.append(Failure(page_name, f"editor text is not smaller than the body text: {layout}"))
 
 
+def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """P6: the palette buttons follow the mode, in a paragraph editor and in an insertion-point editor."""
+  mode = scenario.get("paletteModeShot")
+  if not mode:
+    return
+  page_name = scenario["page"]
+  strict = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo"]
+  gfm = strict + ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
+  myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
+  expected = {"strict": strict, "gfm": gfm, "myst": myst}[mode]
+  page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
+
+  def pick_and_check(label: str) -> None:
+    editor = page.locator(".sphinx-preview-block-editor")
+    editor.locator("textarea").wait_for(state="visible", timeout=2000)
+    editor.locator("select[data-edit-palette-mode-select]").select_option(mode)
+    page.wait_for_timeout(150)
+    labels = editor.locator(".sphinx-preview-edit-palette").evaluate(
+      "bar => [...bar.querySelectorAll(':scope > button')].map((button) => button.dataset.editAction)"
+    )
+    if labels != expected:
+      failures.append(Failure(page_name, f"{label}: palette buttons in {mode} mode are {labels}, expected {expected}"))
+    if editor.locator(".sphinx-preview-edit-palette").get_attribute("data-palette-mode") != mode:
+      failures.append(Failure(page_name, f"{label}: the palette is not in {mode} mode"))
+    selected = editor.locator("select[data-edit-palette-mode-select] option:checked").text_content()
+    if mode == "myst" and selected != "MyST":
+      failures.append(Failure(page_name, f"{label}: the MyST option reads {selected!r}, expected 'MyST'"))
+    page.mouse.move(2, 2)
+
+  paragraph = page.locator("main > p[data-sphinx-source-line]").nth(3)
+  paragraph.evaluate("element => element.scrollIntoView({ block: 'center' })")
+  page.wait_for_timeout(150)
+  paragraph.click()
+  pick_and_check("paragraph editor")
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-palette.png"), caret="hide")
+  page.keyboard.press("Escape")
+  page.wait_for_timeout(200)
+  if page.locator(".sphinx-preview-block-editor").count() != 0:
+    failures.append(Failure(page_name, "Escape did not close the paragraph editor"))
+    return
+
+  point = page.locator("main .sphinx-preview-insert-point:not(.sphinx-preview-insert-point--start) button").nth(3)
+  point.evaluate("element => element.scrollIntoView({ block: 'center' })")
+  point.click(force=True)
+  pick_and_check("insertion point editor")
+  page.screenshot(path=str(SCREENSHOT_DIR / f"{scenario['id']}-insert-point.png"), caret="hide")
+  # The editor stays open: the scenario's own PNG then shows this mode, not a mode-less page.
+
+
 def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """T21: the edition palette above an open block editor."""
   if not scenario.get("editPalette"):
@@ -4549,7 +4598,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_toc_column, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

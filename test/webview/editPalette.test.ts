@@ -100,7 +100,7 @@ test("the palette starts with a labelled select of the three modes", () => {
     [
       ["strict", "Strict Markdown"],
       ["gfm", "GitHub (GFM)"],
-      ["myst", "MyST (includes GFM)"],
+      ["myst", "MyST"],
     ],
   );
   assert.equal(root.getAttribute("data-palette-mode"), "gfm");
@@ -122,6 +122,31 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
     ...gfmReal, "admonition", "deflist", "math", "sub", "sup", "label",
     "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd", "gfmOnly", "mystOnly",
   ]);
+});
+
+test("P6: the real registry shows the MyST-specific buttons in MyST mode only, per mode", () => {
+  const ids = (mode: EditActionMode): string[] => {
+    const textbox = { value: "", selectionStart: 0, selectionEnd: 0, focus: () => undefined };
+    const palette = createEditPalette(fakeDocument(), {
+      actions: createEditActions(),
+      getControl: () => textbox,
+      applyTextEdit: () => undefined,
+      mode,
+    });
+    return actionIds(palette.element as unknown as FakeElement);
+  };
+  const strict = ids("strict");
+  const gfm = ids("gfm");
+  const myst = ids("myst");
+  const gfmOnly = ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"];
+  const mystOnly = [
+    "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
+    "tableCaption", "figure", "roleKbd",
+  ];
+  assert.deepEqual(gfm, [...strict, ...gfmOnly]);
+  assert.deepEqual(myst, [...gfm, ...mystOnly]);
+  for (const id of [...gfmOnly, ...mystOnly]) assert.equal(strict.includes(id), false, id);
+  for (const id of mystOnly) assert.equal(gfm.includes(id), false, id);
 });
 
 test("choosing a mode rebuilds the buttons, keeps the select and reports the change once", () => {
