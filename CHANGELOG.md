@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Review comments: when `notes.comments.json` sits next to `notes.md`, the preview highlights the
+  quoted text of each comment thread (or marks its block with a badge when the text is not found),
+  also in edit mode. Clicking a highlight opens a popover with the thread: author, date, the
+  plain-text comments and whether it is resolved. This first version only shows threads; the file
+  is read-only here and documents without one behave as before.
 - In edit mode, with blocks selected, Alt+Up and Alt+Down (or the up and down arrows of the "+" bar
   under the last selected block) move the whole selection past the block beside it in one undo
   step, and the selection and the focus follow it. Nothing moves at the ends of the document, and
