@@ -8,7 +8,7 @@
 
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
 import { isGroupId, type GroupId } from "../shared/e2eGroups";
-import { REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID } from "./scenarioIds";
+import { ASSERTION_ONLY_IDS, REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID, STEPS_BY_ID } from "./scenarioIds";
 
 export type ScrollMode =
   | { kind: "top" }
@@ -1117,8 +1117,6 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     scroll: { kind: "top" },
     editMode: true,
     paletteModeShot: "myst",
-    // The -palette step equals edit-palette-*; the -insert-point step equals this scenario PNG: no step PNGs.
-    steps: [],
     machineChecks: ["overlay-clipped"],
     description:
       "Palette mode MyST, light theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The scenario PNG shows the bar in the editor opened from a + insertion point; "
@@ -1132,8 +1130,6 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     scroll: { kind: "top" },
     editMode: true,
     paletteModeShot: "myst",
-    // The -palette step equals edit-palette-*; the -insert-point step equals this scenario PNG: no step PNGs.
-    steps: [],
     machineChecks: ["overlay-clipped"],
     description:
       "Palette mode MyST, dark theme: GFM plus the MyST buttons: admonition, definition list, math, sub/sup, label, ref, doc, cite, dropdown, table caption, figure, {kbd} role. The scenario PNG shows the bar in the editor opened from a + insertion point; "
@@ -1147,8 +1143,6 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     scroll: { kind: "top" },
     editMode: true,
     slashMenuShot: { mode: "strict", finalQuery: "" },
-    // The -open step equals the scenario PNG (menu with only the slash typed): not written.
-    steps: ["filtered", "nomatch", "flip"],
     machineChecks: ["overlay-clipped"],
     description:
       "Slash command menu, palette mode strict, light theme: / at a line start opens the menu at the caret with the palette's commands "
@@ -1175,8 +1169,6 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     scroll: { kind: "top" },
     editMode: true,
     slashMenuShot: { mode: "myst", finalQuery: "" },
-    // The -open step equals the scenario PNG (menu with only the slash typed): not written.
-    steps: ["filtered", "nomatch", "flip"],
     machineChecks: ["overlay-clipped"],
     description:
       "Slash command menu, palette mode myst, light theme: / at a line start opens the menu at the caret with the palette's commands "
@@ -1863,6 +1855,8 @@ export const SCENARIOS: Scenario[] = SCENARIO_DEFINITIONS
       id,
       group,
       ...(id !== definition.id ? { legacyId: definition.id } : {}),
+      ...(ASSERTION_ONLY_IDS.has(id) ? { capture: false as const } : {}),
+      ...(STEPS_BY_ID[id] === undefined ? {} : { steps: [...STEPS_BY_ID[id]!] }),
       ...(screenshotOf === undefined ? {} : { screenshotOf }),
     };
   });
