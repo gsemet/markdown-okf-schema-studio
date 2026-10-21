@@ -1,6 +1,6 @@
 /**
- * View preferences: per-workspace preview settings changed from toolbar row 2 (zoom, width mode,
- * table of contents, incoming changes). This module must not import `vscode`.
+ * View preferences: per-workspace preview settings changed from the toolbar (zoom, width mode,
+ * table of contents, incoming changes, collapsed rows 2-3). This module must not import `vscode`.
  */
 
 export type ViewWidthMode = "margin" | "auto" | "full";
@@ -10,6 +10,8 @@ export interface ViewPreferences {
   widthMode: ViewWidthMode;
   toc: boolean;
   incomingChanges: boolean;
+  /** Rows 2 and 3 of the floating toolbar are hidden. */
+  toolbarCollapsed: boolean;
 }
 
 export type ViewPreferenceKey = keyof ViewPreferences;
@@ -18,7 +20,7 @@ export const VIEW_PREFERENCES_STORAGE_KEY = "markdownOkfSchemaStudio.viewPrefere
 export const MIN_VIEW_ZOOM = 70;
 export const MAX_VIEW_ZOOM = 200;
 export const VIEW_ZOOM_STEP = 10;
-export const VIEW_PREFERENCE_KEYS: readonly ViewPreferenceKey[] = ["zoom", "widthMode", "toc", "incomingChanges"];
+export const VIEW_PREFERENCE_KEYS: readonly ViewPreferenceKey[] = ["zoom", "widthMode", "toc", "incomingChanges", "toolbarCollapsed"];
 export const VIEW_WIDTH_MODES: readonly ViewWidthMode[] = ["margin", "auto", "full"];
 
 export const DEFAULT_VIEW_PREFERENCES: Readonly<ViewPreferences> = Object.freeze({
@@ -26,6 +28,7 @@ export const DEFAULT_VIEW_PREFERENCES: Readonly<ViewPreferences> = Object.freeze
   widthMode: "margin",
   toc: false,
   incomingChanges: true,
+  toolbarCollapsed: false,
 });
 
 export interface ViewPreferencesStorage {
@@ -54,6 +57,9 @@ export function normalizeViewPreferences(value: unknown): ViewPreferences {
     incomingChanges: typeof input.incomingChanges === "boolean"
       ? input.incomingChanges
       : DEFAULT_VIEW_PREFERENCES.incomingChanges,
+    toolbarCollapsed: typeof input.toolbarCollapsed === "boolean"
+      ? input.toolbarCollapsed
+      : DEFAULT_VIEW_PREFERENCES.toolbarCollapsed,
   };
 }
 

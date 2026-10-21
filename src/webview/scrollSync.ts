@@ -29,6 +29,7 @@ import { installIncomingChanges } from "./incomingChanges";
 import { installCommentCompose } from "./commentCompose";
 import { installCommentThreads } from "./commentThreads";
 import { installIncomingToggle } from "./incomingToggle";
+import { installToolbarCollapse } from "./toolbarCollapse";
 import { installViewControls } from "./viewControls";
 import { installWidthMode } from "./widthMode";
 import type { ViewPreferences } from "../state/previewViewPreferences";
@@ -221,6 +222,13 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const incomingToggle = (${installIncomingToggle.toString()})(document, vscode, context);
   const historyControls = (${installHistoryControls.toString()})(document, vscode, context);
   const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
+  // The toolbar changes size when rows 2-3 are collapsed: re-measure everything placed around it.
+  const toolbarCollapse = (${installToolbarCollapse.toString()})(document, vscode, context, () => {
+    firstClearance.update();
+    refreshStickyHeadingPosition();
+    tocColumn.layout();
+    widthMode.update();
+  });
   // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.
   const widthMode = (${installWidthMode.toString()})(document, window, vscode, context, () => {
     firstClearance.update();
@@ -1068,7 +1076,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (edit.host) document.documentElement?.style?.removeProperty?.("scroll-padding-top");
     // Opening scrolled the page down by paletteShift to keep the text still; the frame is gone
     // now, so scroll back and the rendered block stays where the user last saw the text.
-    if (edit.paletteShift > 0 && !edit.selectedCell) {
+    if (edit.paletteShift && !edit.selectedCell) {
       const target = Math.max(0, Math.min(maxScrollTop(), window.scrollY - edit.paletteShift));
       programmaticScroll(target);
       const restoredLine = lineAtScroll(target);
@@ -2746,7 +2754,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // The top of the strip of the viewport where the table toolbar is fully usable: below the sticky
   // heading band (its measured bottom when that exceeds the reserved reading offset) and, when the
   // toolbar shares horizontal space with the fixed preview controls, below those controls.
-  function toolbarUsableTop(bar) {
+  // "content" (optional) is the element behind the rectangle "bar": only its visible controls and
+  // text count against the preview controls (a wide toolbar box whose right part is empty does not
+  // need to clear a toolbar that only covers that empty part). An element without any visible item
+  // yet (a menu that is still being filled) is checked again when it grows.
+  function toolbarUsableTop(bar, content) {
     refreshReadingOffset();
     let usableTop = readingOffsetValue;
     if (stickyHeadings && !stickyHeadings.hidden) {
@@ -2759,7 +2771,19 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       const barRight = Number.isFinite(bar.right) ? bar.right : bar.left + bar.width;
       if (Number.isFinite(controlsRight) && Number.isFinite(barRight)
         && bar.left < controlsRight && barRight > controls.left) {
-        usableTop = Math.max(usableTop, controls.bottom + 4);
+        const visible = Array.from(content?.querySelectorAll?.("button, input, textarea, select, a, span, p") ?? [])
+          .map((item) => item.getBoundingClientRect?.())
+          .filter((box) => box && box.width > 0 && box.height > 0 && Number.isFinite(box.left)
+            && Number.isFinite(box.top))
+          .map((box) => ({ top: box.top, left: box.left, right: Number.isFinite(box.right) ? box.right : box.left + box.width }));
+        const items = visible.filter((box) => box.left < controlsRight && box.right > controls.left);
+        if (!content) {
+          usableTop = Math.max(usableTop, controls.bottom + 4);
+        } else if (items.length > 0) {
+          // The bar must move down until its first item sharing columns with the controls clears them.
+          const offset = Math.min(...items.map((box) => box.top)) - bar.top;
+          usableTop = Math.max(usableTop, controls.bottom + 4 - offset);
+        }
       }
     }
     return usableTop;
@@ -2774,7 +2798,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const bar = menu.getBoundingClientRect?.();
     const cellRect = cell?.getBoundingClientRect?.();
     if (!bar || !cellRect || !Number.isFinite(bar.top) || !Number.isFinite(cellRect.bottom)) return;
-    const wanted = toolbarUsableTop(bar) - bar.top;
+    const wanted = toolbarUsableTop(bar, menu) - bar.top;
     const delta = Math.min(wanted, window.scrollY);
     if (!(delta > 0)) return;
     const viewportHeight = window.innerHeight || document.documentElement?.clientHeight || 0;
@@ -2940,6 +2964,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       ? "Header \u00b7 " + columnText
       : "Row " + edit.tableRowIndex + " of " + (edit.tableModel.rows.length - 2) + " \u00b7 " + columnText;
     menu.appendChild(edit.status);
+    // The menu now has its items: check them against the floating controls.
+    applyAnchor();
     edit.element.appendChild(input);
     // Done and Cancel under the field, without the status hint (the toolbar carries the position).
     const cellActions = document.createElement("div");
@@ -3124,9 +3150,22 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     let shift = 0;
     if (window.scrollY > 0) {
+      // The palette's own place is the top of its host: the bar's rectangle is not it while the bar
+      // is stuck below the preview controls (that would count the stuck distance as free room).
       const bar = edit.palette.element.getBoundingClientRect?.();
-      const room = bar && Number.isFinite(bar.top) ? Math.max(0, bar.top - toolbarUsableTop(bar)) : 0;
-      shift = Math.min(height, room);
+      const natural = edit.host?.getBoundingClientRect?.()?.top;
+      const top = Number.isFinite(natural) ? natural : bar?.top;
+      if (Number.isFinite(top)) {
+        const usable = toolbarUsableTop(bar ?? { top, left: 0, width: 0 });
+        shift = Math.min(height, Math.max(0, top - usable));
+        // Not enough room below the preview controls: scroll up (the text goes down) so the bar
+        // keeps its place instead of being stuck over the first lines of the text, as long as the
+        // frame stays in the viewport. The close scrolls back (a negative shift).
+        const frameBottom = edit.element.getBoundingClientRect?.()?.bottom;
+        const spare = Number.isFinite(frameBottom) ? Math.max(0, window.innerHeight - 24 - frameBottom) : 0;
+        const missing = Math.min(Math.max(0, usable - top), spare, window.scrollY + shift);
+        shift -= missing;
+      }
     }
     editAnchor.viewportTop += height - shift;
     return shift;
@@ -3185,7 +3224,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       const shift = edit.linkPanelShift ?? 0;
       edit.linkPanelShift = 0;
       if (shift > 0 && activeBlockEdit === edit && editAnchor) {
-        edit.paletteShift = Math.max(0, (edit.paletteShift ?? 0) - shift);
+        edit.paletteShift = (edit.paletteShift ?? 0) - shift;
         editAnchor.viewportTop += shift;
         applyAnchor();
       }
@@ -3404,7 +3443,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     placePaletteAboveFrame(edit, palette.element);
     syncPaletteSticky(edit);
     const shift = keepTextInPlaceBelowPalette(edit, textTopBefore);
-    if (shift > 0) edit.paletteShift = shift;
+    if (shift) edit.paletteShift = shift;
     applyAnchor();
     textarea.addEventListener("mousedown", () => {
       palette.closePopover();
@@ -3551,7 +3590,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       const shift = edit.figurePanelShift ?? 0;
       edit.figurePanelShift = 0;
       if (shift > 0 && activeBlockEdit === edit && editAnchor) {
-        edit.paletteShift = Math.max(0, (edit.paletteShift ?? 0) - shift);
+        edit.paletteShift = (edit.paletteShift ?? 0) - shift;
         editAnchor.viewportTop += shift;
         applyAnchor();
       }

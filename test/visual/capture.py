@@ -1545,16 +1545,16 @@ def check_okf_schema_rendering(page: Page, scenario: dict, failures: list[Failur
             )
 
 def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
-    """The Diff button is last in row 2, shows both states, and hides with the setting."""
+    """The Diff button is last in row 3, shows both states, and hides with the setting."""
     diff = toolbar.locator('[data-sphinx-preview-diff-toggle]')
     if diff.count() != 1:
         return
     order = toolbar.evaluate(
-        """element => [...element.querySelector('[data-sphinx-preview-toolbar-row="view"]').children]
+        """element => [...element.querySelector('[data-sphinx-preview-toolbar-row="options"]').children]
           .map(item => item.getAttribute('aria-label'))"""
     )
     if not order or order[-1] != "Hide changes since last commit":
-        failures.append(Failure(page_name, f"the Diff button is not the last of row 2: {order}"))
+        failures.append(Failure(page_name, f"the Diff button is not the last of row 3: {order}"))
     root = "document.documentElement.getAttribute('data-sphinx-preview-incoming')"
     try:
         if diff.get_attribute("aria-pressed") != "true" or page.evaluate(root) != "on":
@@ -1583,6 +1583,95 @@ def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failur
         if diff.get_attribute("aria-pressed") != "true":
             diff.click()
             page.wait_for_timeout(100)
+
+
+def toolbar_probe(page: Page) -> dict:
+    return page.evaluate(
+        """() => {
+          const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+          const bar = toolbar.getBoundingClientRect();
+          const more = toolbar.querySelector('[data-sphinx-preview-toolbar-more]');
+          const visible = element => { const r = element.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+          const buttons = [...toolbar.querySelectorAll('button')];
+          const focusable = buttons.filter(button => visible(button) && getComputedStyle(button).visibility !== 'hidden');
+          return {
+            top: bar.top, bottom: bar.bottom, left: bar.left, right: bar.right, height: bar.height,
+            width: bar.width, viewport: innerWidth,
+            moreHidden: more.hidden, moreVisible: visible(more),
+            tabOrder: focusable.map(button => button.getAttribute('aria-label')),
+            expanded: toolbar.querySelector('[data-sphinx-preview-toolbar-collapse]').getAttribute('aria-expanded'),
+            html: document.documentElement.getAttribute('data-sphinx-preview-toolbar-state'),
+            toolbarBottomVar: document.documentElement.style.getPropertyValue('--sphinx-preview-toolbar-bottom'),
+            overlapsViewport: bar.left < 0 || bar.right > innerWidth,
+          };
+        }"""
+    )
+
+
+def check_toolbar_collapse(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
+    """P8: the collapse button hides rows 2-3 (not focusable), shrinks the toolbar and restores it."""
+    button = toolbar.locator('[data-sphinx-preview-toolbar-collapse]')
+    if button.count() != 1:
+        failures.append(Failure(page_name, "the toolbar collapse button is missing"))
+        return
+    start = toolbar_probe(page)
+    was_collapsed = start["moreHidden"]
+    try:
+        if was_collapsed:
+            button.click()
+            page.wait_for_timeout(150)
+            start = toolbar_probe(page)
+        if start["expanded"] != "true" or start["html"] != "expanded" or not start["moreVisible"]:
+            failures.append(Failure(page_name, f"expanded toolbar state is wrong: {start}"))
+        labels = start["tabOrder"]
+        collapse = labels.index("Hide view controls") if "Hide view controls" in labels else -1
+        row_one = [name for name in labels[:collapse] if name in (
+            "Refresh preview", "Anchor preview to text editor", "Toggle edit mode")]
+        if collapse < 2 or len(row_one) != collapse or labels[collapse + 1:collapse + 5] != ["Back", "Next", "Zoom out", "Zoom in"]:
+            failures.append(Failure(page_name, f"toolbar Tab order does not follow the rows: {labels}"))
+        elif not labels[collapse + 5].startswith("Preview theme"):
+            failures.append(Failure(page_name, f"toolbar row 3 does not start with the theme button: {labels}"))
+        if start["overlapsViewport"]:
+            failures.append(Failure(page_name, f"toolbar leaves the pane: {start}"))
+        button.click()
+        page.wait_for_timeout(200)
+        collapsed = toolbar_probe(page)
+        if collapsed["expanded"] != "false" or collapsed["html"] != "collapsed" or not collapsed["moreHidden"] or collapsed["moreVisible"]:
+            failures.append(Failure(page_name, f"collapsed toolbar state is wrong: {collapsed}"))
+        if collapsed["tabOrder"] != labels[:collapse] + ["Show view controls"]:
+            failures.append(Failure(page_name, f"collapsed toolbar keeps rows 2-3 focusable: {collapsed['tabOrder']}"))
+        if collapsed["height"] >= start["height"] - 40:
+            failures.append(Failure(page_name, f"collapsing did not shrink the toolbar: {start['height']} -> {collapsed['height']}"))
+        if collapsed["top"] != start["top"] or collapsed["right"] != start["right"]:
+            failures.append(Failure(page_name, "the toolbar moved when collapsed"))
+        # The variable is 0 while the toolbar does not overlap the text column; compare only when it is set.
+        unset = ("", "0px")
+        if start["toolbarBottomVar"] not in unset and collapsed["toolbarBottomVar"] == start["toolbarBottomVar"]:
+            failures.append(Failure(page_name, "--sphinx-preview-toolbar-bottom was not re-measured on collapse"))
+        if collapsed["overlapsViewport"]:
+            failures.append(Failure(page_name, f"collapsed toolbar leaves the pane: {collapsed}"))
+        button.click()
+        page.wait_for_timeout(200)
+        again = toolbar_probe(page)
+        if again["moreHidden"] or abs(again["height"] - start["height"]) > 0.5 or again["tabOrder"] != labels:
+            failures.append(Failure(page_name, f"expanding did not restore the toolbar: {again}"))
+    finally:
+        now = toolbar_probe(page)
+        if now["moreHidden"] != was_collapsed:
+            button.click()
+            page.wait_for_timeout(200)
+
+
+def apply_toolbar_state(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """Leaves the toolbar collapsed when the scenario shows (or measures) that state."""
+  if scenario.get("toolbarState") != "collapsed":
+    return
+  button = page.locator("[data-sphinx-preview-toolbar-collapse]")
+  if button.get_attribute("aria-expanded") == "true":
+    button.click()
+    page.wait_for_timeout(250)
+  if page.locator("[data-sphinx-preview-toolbar-more]").evaluate("element => element.getBoundingClientRect().height") > 0:
+    failures.append(Failure(scenario["page"], "the toolbar is not collapsed for the collapsed screenshot"))
 
 
 def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -> None:
@@ -1617,23 +1706,28 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         elif button.is_hidden():
             failures.append(Failure(page_name, f"toolbar control is hidden: {label}"))
     rows = toolbar.evaluate(
-        """element => [...element.children].map(child => ({
+        """element => [...element.querySelectorAll('[data-sphinx-preview-toolbar-row]')].map(child => ({
           row: child.getAttribute('data-sphinx-preview-toolbar-row'),
           buttons: [...child.children].filter(item => item.tagName === 'BUTTON').length,
           rect: (({top, bottom, left, right}) => ({top, bottom, left, right}))(child.getBoundingClientRect()),
         }))"""
     )
     expected_main = 4 if toolbar.locator('[data-sphinx-preview-edit-toggle]').count() else 3
-    if [row["row"] for row in rows] != ["main", "view"]:
-        failures.append(Failure(page_name, f"toolbar is not two rows (main, view): {rows}"))
+    if [row["row"] for row in rows] != ["main", "view", "options"]:
+        failures.append(Failure(page_name, f"toolbar is not three rows (main, view, options): {rows}"))
         return
     if rows[0]["buttons"] != expected_main:
         failures.append(Failure(page_name, f"toolbar row 1 does not hold {expected_main} buttons: {rows[0]['buttons']}"))
-    if rows[1]["buttons"] != 7:
-        failures.append(Failure(page_name, f"toolbar row 2 does not hold 7 buttons: {rows[1]['buttons']}"))
+    if rows[1]["buttons"] != 4:
+        failures.append(Failure(page_name, f"toolbar row 2 does not hold 4 buttons: {rows[1]['buttons']}"))
+    if rows[2]["buttons"] != 4:
+        failures.append(Failure(page_name, f"toolbar row 3 does not hold 4 buttons: {rows[2]['buttons']}"))
     check_diff_toggle(page, toolbar, page_name, failures)
-    if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5:
+    if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5 or rows[1]["rect"]["bottom"] > rows[2]["rect"]["top"] + 0.5:
         failures.append(Failure(page_name, "toolbar rows overlap"))
+    if toolbar.evaluate("element => element.getBoundingClientRect().left") < 0:
+        failures.append(Failure(page_name, "toolbar leaves the pane on the left"))
+    check_toolbar_collapse(page, toolbar, page_name, failures)
     # At the zoom limits the toolbar stays put and covers neither the sticky band text nor the page.
     zoom_in = toolbar.locator('[data-sphinx-preview-zoom-in]')
     zoom_out = toolbar.locator('[data-sphinx-preview-zoom-out]')
@@ -4921,7 +5015,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

@@ -65,6 +65,7 @@ const VIEW_PREFERENCE_VALIDATORS: Record<string, (value: unknown) => boolean> = 
   widthMode: (value) => isOneOf(value, ["margin", "auto", "full"] as const),
   toc: (value) => typeof value === "boolean",
   incomingChanges: (value) => typeof value === "boolean",
+  toolbarCollapsed: (value) => typeof value === "boolean",
 };
 
 const MAX_COPY_TEXT_LENGTH = 1_000_000;
@@ -88,7 +89,7 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   previewCopyText: (message) => isBoundedString(message.text, MAX_COPY_TEXT_LENGTH),
   // Back / Next of toolbar row 2: the host walks the panel's navigation history.
   previewHistoryGo: (message) => isOneOf(message.direction, ["back", "forward"] as const),
-  // A view preference of toolbar row 2 (zoom, width mode, TOC, incoming changes).
+  // A view preference of toolbar row 2 (zoom, width mode, TOC, incoming changes, collapsed toolbar).
   previewViewPreferenceChanged: (message) => typeof message.preference === "string"
     && Object.hasOwn(VIEW_PREFERENCE_VALIDATORS, message.preference)
     && VIEW_PREFERENCE_VALIDATORS[message.preference](message.value),

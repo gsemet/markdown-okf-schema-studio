@@ -84,9 +84,26 @@ Markdown flavours and extensions:
 Checkboxes in task lists, paragraphs, and table cells are editable in place. In an untrusted
 workspace they remain read-only until the workspace is trusted.
 
+## Floating Toolbar
+
+The floating toolbar at the top right of the preview has three rows:
+
+1. **Actions:** Refresh, Anchor (link the preview scroll to the text editor), Edit (writable
+   previews only), and a chevron button that hides or shows rows 2 and 3.
+2. **Navigation:** Back, Next, Zoom out and Zoom in.
+3. **View options:** Theme, Width, Table of contents and the incoming-changes (Diff) toggle.
+
+The chevron button collapses the toolbar to its first row when you want the most room for the
+text. The choice is remembered per workspace; the toolbar is expanded by default. Hidden rows are
+skipped by the Tab key.
+
+| Expanded | Collapsed |
+| --- | --- |
+| [![The floating toolbar expanded: three rows of buttons](images/readme/toolbar-expanded.png)](images/readme/toolbar-expanded.png) | [![The floating toolbar collapsed to its first row](images/readme/toolbar-collapsed.png)](images/readme/toolbar-collapsed.png) |
+
 ## Preview Themes
 
-The theme button in the floating preview toolbar cycles through the current VS Code theme, dark,
+The theme button on the third toolbar row cycles through the current VS Code theme, dark,
 white, and cream. Cream is a warm, low-glare paper palette with clay-coloured links. The choice is
 remembered per workspace. These three captures use the same document, viewport, and scroll state.
 
@@ -244,7 +261,7 @@ there is no `conf.py`, nothing is reported. The preview itself renders the same 
 The preview settings are available under **Markdown OKF-Schema Studio** in VS Code settings.
 
 - `preview.maxContentWidth` (default 960): width of the text column in pixels; `0` is full width.
-  The Width button on the second toolbar row switches between Margin (this column), Auto (tables,
+  The Width button on the third toolbar row switches between Margin (this column), Auto (tables,
   figures, images and code blocks wider than the column break out, centred, up to the free pane width;
   narrower tables and figures are centred) and Full width;
   with the setting at `0` all three look the same. The choice is remembered per workspace.
