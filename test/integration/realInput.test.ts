@@ -297,6 +297,44 @@ async function scenarioBlockSelection(page: Page, evidence: Evidence): Promise<v
   });
 }
 
+/** T41: select two blocks, Alt+Up/Down moves the span, the selection follows */
+async function scenarioBlockMoveSelection(page: Page, evidence: Evidence): Promise<void> {
+  const document4 = (order: string[]): string =>
+    ["# Move span", "", ...order.flatMap((name) => [name + " paragraph.", ""])].join("\n");
+  await withDocument("realinput-move-selection", document4(["Alpha", "Beta", "Gamma", "Delta"]), async (document) => {
+    await openSidePreview(document);
+    await waitForRender(document);
+    await setEditMode(page, true);
+    const selected = (): Promise<string[]> => withCurrentFrame(page, (frame) =>
+      frame.evaluate(() => Array.from(window.document.querySelectorAll("[data-sphinx-preview-block-selected]"))
+        .map((element) => element.textContent ?? "")));
+    await withCurrentFrame(page, async (frame) => {
+      await frame.locator("p", { hasText: "Alpha paragraph." }).click({ modifiers: ["Shift"] });
+      await frame.locator("p", { hasText: "Beta paragraph." }).click({ modifiers: ["Shift"] });
+    });
+    await waitFor("two blocks to be selected", async () => (await selected()).length === 2);
+    await press(page, "Alt+ArrowDown");
+    await waitFor("the span to move below Gamma", () =>
+      bufferText(document) === document4(["Gamma", "Alpha", "Beta", "Delta"]));
+    await waitForRender(document);
+    await waitFor("the selection to follow Alpha and Beta", async () => {
+      const blocks = await selected();
+      return blocks.length === 2 && blocks[0].includes("Alpha") && blocks[1].includes("Beta");
+    });
+    await press(page, "Alt+ArrowDown");
+    await waitFor("the span to move below Delta", () =>
+      bufferText(document) === document4(["Gamma", "Delta", "Alpha", "Beta"]));
+    await waitForRender(document);
+    await waitFor("the selection to stay on Alpha and Beta", async () => (await selected()).length === 2);
+    await press(page, "Alt+ArrowUp");
+    await waitFor("the span to move back up", () =>
+      bufferText(document) === document4(["Gamma", "Alpha", "Beta", "Delta"]));
+    await captureAfter(evidence, page, "move-selection-01-alt-arrows",
+      "Alpha and Beta were selected, then moved down twice and up once with Alt+Arrow: the order is Gamma, "
+      + "Alpha, Beta, Delta and both stay selected.");
+  });
+}
+
 async function scenarioArrowNavigation(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-s3", async (document) => {
     await openSidePreview(document);
@@ -3716,6 +3754,7 @@ export async function run(): Promise<void> {
     await scenarioInsertAfterFinalFigure(page, evidence);
     await scenarioBlockMoveKeys(page, evidence);
     await scenarioBlockSelection(page, evidence);
+    await scenarioBlockMoveSelection(page, evidence);
     await scenarioImageEditing(page, evidence);
     await scenarioFocusChangeKeepsPreviewStill(page, evidence);
     await scenarioHiddenPreviewCatchesUp(page, evidence);

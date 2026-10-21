@@ -235,6 +235,10 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   let deferredPropertiesMarkup;
   let editSequence = 0;
   let pendingBlockNavigation = savedState?.pendingBlockNavigation;
+  // After a move of a block selection: where the selection sits once the move is rendered, by
+  // ordinal among the body blocks and the block count. Kept in the saved state so a full reload of
+  // the page (not only a content patch) restores it; a changed block count restores nothing.
+  let pendingMoveSelection = savedState?.pendingMoveSelection;
   // After an add, the re-rendered preview opens the editor of the new field.
   let pendingFrontmatterEdit = savedState?.pendingFrontmatterEdit;
 // The requestId of the render whose load opened the editor for the pending edit.
@@ -279,6 +283,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       ...(selectedText ? { selectedText } : {}),
       ...(details.length ? { openDisclosures: details } : {}),
       ...(pendingBlockNavigation ? { pendingBlockNavigation } : {}),
+      ...(pendingMoveSelection ? { pendingMoveSelection } : {}),
       ...(pendingFrontmatterEdit ? { pendingFrontmatterEdit } : {}),
       ...(pendingFrontmatterEdit && pendingEditOpenedIn !== undefined
         ? { pendingFrontmatterEditOpenedIn: pendingEditOpenedIn } : {}),
@@ -3636,6 +3641,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       .map((block) => block.closest?.("pre") || block);
     selectionElements.forEach((element) => element.setAttribute("data-sphinx-preview-block-selected", "true"));
     announceSelection(selectionElements.length);
+    updateMoveLabels(blocks);
   }
 
   // A selection that waits for a save (pendingBlockSelection) survives the patch that clears the
@@ -3871,9 +3877,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       || Boolean(block.closest?.("[data-sphinx-preview-included]"));
   }
 
-  function postBlockMove(block, neighbour, direction) {
+  function postBlockMove(block, neighbour, direction, span) {
     if (!editMode || activeBlockEdit || activeFrontmatterEdit) return false;
-    const own = blockRange(block);
+    const own = span || blockRange(block);
     const other = blockRange(neighbour);
     const top = (block.closest?.("pre") || block).getBoundingClientRect?.().top;
     vscode.postMessage({
@@ -3918,14 +3924,112 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (blockMoveInFlight) return false;
     const neighbour = bodyBlockNeighbour(block, direction);
     if (!neighbour || !postBlockMove(block, neighbour, direction)) return false;
+    startBlockMoveFlight(mode, caretOffset, blockRange(block).line);
+    return true;
+  }
+
+  function startBlockMoveFlight(mode, caretOffset, line) {
     blockMoveInFlight = {
       mode,
       caretOffset,
-      line: blockRange(block).line,
+      line,
       version: context.documentVersion,
-      timer: window.setTimeout(() => { blockMoveInFlight = undefined; }, 5000),
+      timer: window.setTimeout(() => {
+        blockMoveInFlight = undefined;
+        setPendingMoveSelection(undefined);
+      }, 5000),
     };
+  }
+
+  function setPendingMoveSelection(next) {
+    pendingMoveSelection = next;
+    const state = vscode.getState?.() ?? {};
+    const { pendingMoveSelection: previous, ...rest } = state;
+    vscode.setState?.(next ? { ...rest, pendingMoveSelection: next } : rest);
+  }
+
+  // Alt+Up/Down and the arrows of the last selected block move the whole selection past the
+  // block beside it. The span goes to the host as one range; the selection is restored one block
+  // up or down, by ordinal (the block count must be unchanged), once the render is in.
+  // The keyboard takes the selection when focus is on one of its blocks (or a bar of one) or on
+  // the page itself; a focused block outside the selection keeps the single-block move.
+  function selectionMoveOwns(block) {
+    if (!blockSelection.isActive()) return false;
+    const blocks = syncSelectionModel();
+    return !block || blockSelection.indices().some((index) => blocks[index] === block);
+  }
+
+  // The arrows of the bar under the selection's last block move the whole selection.
+  function selectionEndsAt(block) {
+    if (!blockSelection.isActive()) return false;
+    return syncSelectionModel()[blockSelection.endIndex] === block;
+  }
+
+  function updateMoveLabels(blocks) {
+    insertMoves.forEach((move, point) => {
+      const owns = blockSelection.isActive() && blocks[blockSelection.endIndex] === move.block;
+      Array.from(point.childNodes ?? point.childElements ?? []).forEach((button) => {
+        const direction = button.getAttribute?.("data-sphinx-move");
+        if (!direction) return;
+        const spec = moveButtonSpecs.find((candidate) => candidate.direction === direction);
+        const label = owns ? "Move the selected blocks " + direction : spec.label;
+        button.setAttribute("aria-label", label);
+        if (owns) button.setAttribute("title", label);
+        else button.removeAttribute("title");
+      });
+    });
+  }
+
+  function requestSelectionMove(direction) {
+    if (blockMoveInFlight) return false;
+    const blocks = syncSelectionModel();
+    if (!blockSelection.isActive()) return false;
+    const start = blockSelection.startIndex;
+    const end = blockSelection.endIndex;
+    const step = direction === "up" ? -1 : 1;
+    const neighbour = blocks[direction === "up" ? start - 1 : end + 1];
+    if (!neighbour || isIncludedBlock(neighbour)) return false;
+    const anchorIndex = blockSelection.anchorIndex;
+    const freeIndex = start === anchorIndex ? end : start;
+    const first = blocks[start];
+    if (!postBlockMove(first, neighbour, direction, blockSelection.range())) return false;
+    startBlockMoveFlight("select", undefined, blockRange(first).line);
+    setPendingMoveSelection({
+      anchor: anchorIndex + step,
+      target: freeIndex + step,
+      count: blocks.length,
+      documentId: context.documentId,
+      version: context.documentVersion,
+      at: Date.now(),
+    });
     return true;
+  }
+
+  const MOVE_SELECTION_MAX_AGE = 5000;
+
+  // The move is rendered: select the same blocks at their new place. A different block count
+  // means the ordinals no longer name the same blocks, so nothing is selected.
+  function applyMoveSelection() {
+    const pending = pendingMoveSelection;
+    if (!pending) return;
+    setPendingMoveSelection(undefined);
+    if (!(Date.now() - pending.at < MOVE_SELECTION_MAX_AGE)) return;
+    if (!editMode || activeBlockEdit || pending.documentId !== context.documentId) return;
+    if (selectableBlocks().length !== pending.count) return;
+    selectBlocksNow({ index: pending.anchor, count: pending.count }, pending.target);
+  }
+
+  // A full reload has no move in flight any more; the saved state still names the selection.
+  function resumeMoveSelection() {
+    const pending = pendingMoveSelection;
+    if (!pending || blockMoveInFlight) return;
+    // The same version after a reload means the move never landed (a lost flight cannot be
+    // completed): forget it, so it cannot select blocks after some later edit.
+    if (context.documentVersion === pending.version) {
+      setPendingMoveSelection(undefined);
+      return;
+    }
+    applyMoveSelection();
   }
 
   function bodyBlockAtLine(line) {
@@ -3935,6 +4039,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   }
 
   function settleBlockMove(block, flight) {
+    if (flight.mode === "select") {
+      applyMoveSelection();
+      return;
+    }
     if (!block) return;
     if (flight.mode === "edit") {
       openMappedEditor(block, block, { offset: flight.caretOffset }, false);
@@ -3987,11 +4095,16 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       || target.isContentEditable
       || target.closest("[data-sphinx-preview-block-editor], [data-okf-properties]")) return;
     const block = blockOfTarget(target);
-    if (!block) return;
+    const owner = !block && (target === document.body || target === document.documentElement);
+    if (!block && !(owner && blockSelection.isActive())) return;
     event.preventDefault?.();
     event.stopPropagation?.();
     if (event.repeat && blockMoveInFlight) return;
-    requestBlockMove(block, direction, "focus");
+    if (selectionMoveOwns(block)) {
+      requestSelectionMove(direction);
+      return;
+    }
+    if (block) requestBlockMove(block, direction, "focus");
   });
 
   function addMoveButtons(point, move) {
@@ -4010,9 +4123,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       button.addEventListener("click", (event) => {
         event.preventDefault?.();
         event.stopPropagation?.();
+        if (selectionEndsAt(move.block)) {
+          if (requestSelectionMove(spec.direction)) point.setAttribute("data-sphinx-move-pending", "true");
+          return;
+        }
         if (button.getAttribute("disabled") !== null || !neighbour) return;
-        postBlockMove(move.block, neighbour, spec.direction);
-        point.setAttribute("data-sphinx-move-pending", "true");
+        if (postBlockMove(move.block, neighbour, spec.direction)) {
+          point.setAttribute("data-sphinx-move-pending", "true");
+        }
       });
       point.appendChild(button);
     });
@@ -4028,7 +4146,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       return;
     }
     const flight = clearBlockMoveInFlight();
-    if (flight) settleBlockMove(bodyBlockAtLine(flight.line), flight);
+    if (flight?.mode === "select") setPendingMoveSelection(undefined);
+    else if (flight) settleBlockMove(bodyBlockAtLine(flight.line), flight);
     if (message.ok !== false || typeof message.reason !== "string") return;
     const point = insertPoints.find((candidate) =>
       candidate.getAttribute("data-sphinx-move-pending") === "true");
@@ -4443,6 +4562,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (hasRenderedPreview()) {
       resumePendingBlockNavigation();
       resumeBlockMove();
+      resumeMoveSelection();
     }
     resumePendingFrontmatterEdit();
     document.querySelectorAll("details").forEach((element) => {

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- In edit mode, with blocks selected, Alt+Up and Alt+Down (or the up and down arrows of the "+" bar
+  under the last selected block) move the whole selection past the block beside it in one undo
+  step, and the selection and the focus follow it. Nothing moves at the ends of the document, and
+  without a selection Alt+Up and Alt+Down still move the single focused block.
 - In edit mode, with blocks selected (Shift+click or Shift+Up/Down), Cmd/Ctrl+C copies their exact
   Markdown to the clipboard and Cmd/Ctrl+X cuts them in one undo step, together with one blank
   line so no gap or glued blocks are left. Cmd/Ctrl+V on a selection, or on a focused "+" bar,

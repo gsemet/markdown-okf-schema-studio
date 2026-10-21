@@ -9878,3 +9878,179 @@ test("T40: a copy answer says so and a cut answer clears the selection", () => {
   harness.dispatchMessage({ type: "previewBlocksResult", ...MOVE_IDENTIFIERS, op: "cut", ok: true });
   assert.deepEqual(selectedLines(harness), []);
 });
+
+// T41: Alt+Up/Down (and the bar arrows of the last selected block) move the whole selection.
+function selectTwo(harness: RuntimeHarness, from = 0): void {
+  shiftClick(harness, harness.mappings[from]);
+  shiftClick(harness, harness.mappings[from + 1]);
+}
+
+test("T41: Alt+ArrowDown with a two-block selection posts the span; the selection follows the patch", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  selectTwo(harness);
+  assert.deepEqual(selectedLines(harness), [1, 50]);
+  const before = harness.messages.length;
+  let prevented = 0;
+  harness.dispatchDocument("keydown", altKey("ArrowDown", {
+    target: harness.mappings[1], preventDefault: () => { prevented += 1; },
+  }));
+  const moves = moveMessages(harness, before);
+  assert.equal(moves.length, 1);
+  assert.deepEqual(
+    [moves[0].line, moves[0].endLine, moves[0].neighbourLine, moves[0].neighbourEndLine, moves[0].direction],
+    [1, 52, 100, 100, "down"],
+  );
+  assert.equal(prevented, 1);
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: true, line: 3 });
+  harness.dispatchMessage(patchMessage());
+  // Same block count after the patch: the span now covers the second and third blocks.
+  assert.deepEqual(selectedLines(harness), [50, 100]);
+  assert.equal(selectionAnnouncement(harness), "2 blocks selected");
+  assert.equal((harness.mappings[2] as RuntimeElement).focusOptions?.preventScroll, true, "the focus follows the span");
+});
+
+test("T41: Alt+ArrowUp with a selection posts the span above its neighbour", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  selectTwo(harness, 1);
+  const before = harness.messages.length;
+  harness.dispatchDocument("keydown", altKey("ArrowUp", { target: harness.mappings[2] }));
+  const up = moveMessages(harness, before).at(-1)!;
+  assert.deepEqual([up.line, up.endLine, up.neighbourLine, up.neighbourEndLine, up.direction], [50, 100, 1, 1, "up"]);
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: true, line: 1 });
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), [1, 50]);
+});
+
+test("T41: at either end of the document the span does not move, and the selection stays", () => {
+  const bottom = createRuntimeHarness({ savedState: { editMode: true } });
+  selectTwo(bottom, 1);
+  const before = bottom.messages.length;
+  let prevented = 0;
+  bottom.dispatchDocument("keydown", altKey("ArrowDown", {
+    target: bottom.mappings[2], preventDefault: () => { prevented += 1; },
+  }));
+  assert.deepEqual(moveMessages(bottom, before), []);
+  assert.equal(prevented, 1, "the key is still ours");
+  assert.deepEqual(selectedLines(bottom), [50, 100]);
+  const top = createRuntimeHarness({ savedState: { editMode: true } });
+  selectTwo(top, 0);
+  top.dispatchDocument("keydown", altKey("ArrowUp", { target: top.mappings[1] }));
+  assert.deepEqual(moveMessages(top, 0), []);
+});
+
+test("T41: a key repeat does not move the span twice; a refusal keeps the selection and can be retried", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  selectTwo(harness);
+  const before = harness.messages.length;
+  const target = harness.mappings[1];
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target }));
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target, repeat: true }));
+  assert.equal(moveMessages(harness, before).length, 1);
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: false, reason: "Text between." });
+  assert.deepEqual(selectedLines(harness), [1, 50], "a refused move leaves the selection as it was");
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target }));
+  assert.equal(moveMessages(harness, before).length, 2);
+});
+
+test("T41: the arrows of the last selected block's bar move the span; other bars move one block", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  selectTwo(harness);
+  const before = harness.messages.length;
+  moveButton(harness, 52, "down").dispatch("click", plainClick());
+  const span = moveMessages(harness, before).at(-1)!;
+  assert.deepEqual([span.line, span.endLine, span.neighbourLine, span.direction], [1, 52, 100, "down"]);
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: false, reason: "no" });
+  // The bar of a block that is not the end of the selection moves that one block.
+  const count = moveMessages(harness, before).length;
+  moveButton(harness, 100, "up").dispatch("click", plainClick());
+  const moved = moveMessages(harness, before);
+  assert.equal(moved.length, count + 1);
+  assert.deepEqual([moved.at(-1)!.line, moved.at(-1)!.endLine, moved.at(-1)!.direction], [100, 100, "up"]);
+});
+
+test("T41: without a selection Alt+Arrow still moves the one focused block", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target: harness.mappings[1] }));
+  const move = moveMessages(harness, before).at(-1)!;
+  assert.deepEqual([move.line, move.endLine, move.direction], [50, 52, "down"]);
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: true, line: 100 });
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), [], "a single-block move selects nothing");
+});
+
+test("T41: a patch that changes the number of blocks restores nothing instead of another block", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  selectTwo(harness);
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target: harness.mappings[1] }));
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: true, line: 3 });
+  harness.mappings.splice(2, 1);
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), []);
+});
+
+test("T41: after a full reload the selection is restored from the saved state", () => {
+  const savedState = {
+    documentId: "file:///active.md",
+    editMode: true,
+    pendingMoveSelection: { anchor: 1, target: 2, count: 3, documentId: "file:///active.md", version: 6, at: Date.now() },
+  };
+  const harness = createRuntimeHarness({ savedState, previewStatus: "success" });
+  assert.deepEqual(selectedLines(harness), [50, 100]);
+  const stale = createRuntimeHarness({
+    savedState: { ...savedState, pendingMoveSelection: { ...savedState.pendingMoveSelection, count: 4 } },
+    previewStatus: "success",
+  });
+  assert.deepEqual(selectedLines(stale), [], "a different block count selects nothing");
+});
+
+function savedPending(harness: RuntimeHarness): unknown {
+  return (harness.getWebviewState() ?? {}).pendingMoveSelection;
+}
+
+test("T41 r2: a saved pending selection of the same version, or an old one, selects nothing and is dropped", () => {
+  const base = { anchor: 1, target: 2, count: 3, documentId: "file:///active.md" };
+  for (const pending of [
+    { ...base, version: 7, at: Date.now() },
+    { ...base, version: 6, at: Date.now() - 10000 },
+    { ...base, version: 6 },
+  ]) {
+    const harness = createRuntimeHarness({
+      savedState: { documentId: "file:///active.md", editMode: true, pendingMoveSelection: pending },
+      previewStatus: "success",
+    });
+    assert.deepEqual(selectedLines(harness), [], JSON.stringify(pending));
+    assert.equal(savedPending(harness), undefined, "no pendingMoveSelection is left in the saved state");
+  }
+});
+
+test("T41 r2: with a selection, Alt+Arrow on a block outside it moves that one block", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[0]);
+  const before = harness.messages.length;
+  harness.dispatchDocument("keydown", altKey("ArrowDown", { target: harness.mappings[2] }));
+  const single = moveMessages(harness, before);
+  assert.equal(single.length, 0, "the last block has no neighbour below");
+  harness.dispatchDocument("keydown", altKey("ArrowUp", { target: harness.mappings[2] }));
+  const up = moveMessages(harness, before).at(-1)!;
+  assert.deepEqual([up.line, up.endLine, up.direction], [100, 100, "up"]);
+});
+
+test("T41 r2: the last selected block's arrows are labelled for the selection; a dropped request leaves no pending mark", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  selectTwo(harness, 1);
+  const last = moveButton(harness, 100, "down");
+  assert.equal(last.getAttribute("aria-label"), "Move the selected blocks down");
+  assert.equal(last.getAttribute("title"), "Move the selected blocks down");
+  assert.equal(moveButton(harness, 52, "down").getAttribute("aria-label"), "Move the block above down");
+  // Nothing below the span: the click posts nothing and marks nothing.
+  const before = harness.messages.length;
+  const point = insertPointAfterLine(harness, 100);
+  point.childElements[2].removeAttribute("disabled");
+  point.childElements[2].dispatch("click", plainClick());
+  assert.deepEqual(moveMessages(harness, before), []);
+  assert.equal(point.getAttribute("data-sphinx-move-pending"), null);
+  harness.dispatchDocument("keydown", { key: "Escape", preventDefault: () => undefined, target: harness.mappings[1] });
+  assert.equal(moveButton(harness, 100, "down").getAttribute("aria-label"), "Move the block above down");
+  assert.equal(moveButton(harness, 100, "down").getAttribute("title"), null);
+});

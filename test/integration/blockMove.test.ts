@@ -100,8 +100,43 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
     fs.rmSync(directory, { recursive: true, force: true });
   }
-  // The undo checks of cut and paste live here: the locked-screen gate skips this whole suite.
+  // The undo checks live here: the locked-screen gate skips this whole suite.
+  await runUndo();
   await runBlockClipboardUndo();
+}
+
+/** Moving a selection of blocks (T41): the whole span moves, and one undo restores the order. */
+export async function runUndo(): Promise<void> {
+  const extensionRoot = path.resolve(__dirname, "../../..");
+  const directory = fs.mkdtempSync(path.join(extensionRoot, "test", "integration", "fixtures", "block-move-span-"));
+  const sourcePath = path.join(directory, "span.md");
+  const original = ["# Span", "", "One.", "", "Two.", "", "- three a", "- three b", "", "Four.", ""].join("\n");
+  fs.writeFileSync(sourcePath, original);
+  try {
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(sourcePath));
+    const preview = await openPreview(document);
+    // "One." and "Two." (lines 3-5) move below the list (lines 7-8), as Alt+Down does.
+    const before = document.getText();
+    for (let attempt = 0; attempt < 20 && document.getText() === before; attempt += 1) {
+      await sendPreviewMessageForTests({
+        type: "previewBlockMove",
+        documentId: preview.documentUri,
+        documentVersion: document.version,
+        requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
+        line: 3, endLine: 5, neighbourLine: 7, neighbourEndLine: 8, direction: "down", pinViewportTop: 200,
+      });
+      if (document.getText() === before) await new Promise<void>((resolve) => setTimeout(resolve, 250));
+    }
+    const moved = ["# Span", "", "- three a", "- three b", "", "One.", "", "Two.", "", "Four.", ""].join("\n");
+    assert.equal(document.getText(), moved, "the whole span moves past the list");
+    await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+    await vscode.commands.executeCommand("undo");
+    assert.equal(document.getText(), original, "one undo should restore the original order");
+  } finally {
+    disposeActivePreviewForTests();
+    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
 }
 
 /** An untrusted (read-only) preview never moves a block. */
