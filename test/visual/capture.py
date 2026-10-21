@@ -511,11 +511,12 @@ def apply_scroll(page: Page, scroll: dict) -> str:
         # The preview keeps 80vh of trailing padding so scroll sync can align the last
         # line to the top; scrolling to the raw bottom would frame only that padding.
         page.evaluate(
-            """() => {
+            """(extra) => {
               const main = document.getElementById('sphinx-myst-preview-content');
               const last = main.lastElementChild;
-              if (last) { last.scrollIntoView({ block: 'end' }); window.scrollBy(0, 40); }
-            }"""
+              if (last) { last.scrollIntoView({ block: 'end' }); window.scrollBy(0, 40 + extra); }
+            }""",
+            int(scroll.get("extra", 0)),
         )
         return "last content element visible with 40px trailing padding below it"
     if kind == "selector":
