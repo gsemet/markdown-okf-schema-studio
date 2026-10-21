@@ -36,6 +36,15 @@ SCREENSHOT_DIR = EXTENSION_ROOT / "out" / "reports" / "e2e" / "screenshots"
 VISUAL_SCREENSHOT_DIR = SCREENSHOT_DIR / "visual"
 
 
+# Exact aliases removed in P9 B2a (legacy id -> legacy id of the scenario they mirrored).
+REMOVED_ALIAS_CANONICAL = {
+  "syntax-light-shell": "diff-light-preview",
+  "preview-toolbar-dark": "okf-schema-dark",
+  "edit-mode-dark": "edit-paragraph-dark",
+  "edit-table-cell-dark": "edit-table-wrapped-dark-900",
+}
+
+
 def scenario_png(scenario_id: str) -> pathlib.Path:
   return VISUAL_SCREENSHOT_DIR / f"{scenario_id}.png"
 
@@ -972,7 +981,10 @@ def check_orphan_box(page: Page, scenario: dict, failures: list[Failure]) -> Non
       const tallHeight = height();
       const tallBox = tall.getBoundingClientRect().height;
       tall.remove();
-      return { before, shortHeight, shortBox, shortTop, contentBottom, tallHeight, tallBox, padding, after: height() };
+      const after = height();
+      // P9 B2b: every assertion ran; put the short box back so the capture shows it in the bottom padding.
+      make(1);
+      return { before, shortHeight, shortBox, shortTop, contentBottom, tallHeight, tallBox, padding, after };
     }""")
     page_name = scenario["page"]
     if found["padding"] < 40 or found["shortBox"] >= found["padding"]:
@@ -5300,6 +5312,8 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   return position
 
 
+# NOTE: test/site/e2eGroups.test.ts slices this file at the next line to find the check code
+# (everything above it): keep `def capture_scenarios` as the first function of the campaign driver.
 def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tuple[list[dict], list[Failure]]:
     failures: list[Failure] = []
     results: list[dict] = []
@@ -5422,6 +5436,11 @@ def main() -> int:
             print(f"invalid scenario {scenario['id']}: unknown steps {invalid} or group {scenario.get('group')!r}", file=sys.stderr)
             return 2
     legacy_to_id = {scenario["legacyId"]: scenario["id"] for scenario in all_scenarios if scenario.get("legacyId")}
+    # The four exact aliases of P9 B2a no longer run; their old ids select the scenario they mirrored.
+    for alias, canonical in REMOVED_ALIAS_CANONICAL.items():
+        if canonical in legacy_to_id and alias in (arguments.scenario_ids or []):
+            print(f"note: {alias} was an exact alias, no longer a scenario; running {legacy_to_id[canonical]}", file=sys.stderr)
+            legacy_to_id[alias] = legacy_to_id[canonical]
     requested_ids = {legacy_to_id.get(identifier, identifier) for identifier in arguments.scenario_ids or []}
     requested_ids |= {scenario["id"] for scenario in all_scenarios if scenario["group"] in requested_groups}
     partial = bool(arguments.scenario_ids or requested_groups)

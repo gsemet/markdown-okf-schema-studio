@@ -2,6 +2,10 @@
 
 Intro paragraph before the sections.
 
+| Column 1 heading | Column 2 heading | Column 3 heading | Column 4 heading | Column 5 heading | Column 6 heading | Column 7 heading | Column 8 heading | Column 9 heading | Column 10 heading |
+|---|---|---|---|---|---|---|---|---|---|
+| row1-column-1-value | row1-column-2-value | row1-column-3-value | row1-column-4-value | row1-column-5-value | row1-column-6-value | row1-column-7-value | row1-column-8-value | row1-column-9-value | row1-column-10-value |
+
 ## Section 1
 
 Text of the section. Text of the section. Text of the section. Text of the section. Text of the section. Text of the section. Text of the section. Text of the section. Text of the section. Text of the section. Text of the section. Text of the section. 
