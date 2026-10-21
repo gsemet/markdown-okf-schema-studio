@@ -1,0 +1,75 @@
+/**
+ * Per-scenario options of the static visual page (the mock of the webview host).
+ *
+ * Every field is optional and means "different from the default page"; a scenario without
+ * `render` keeps the page it always had (byte-identical HTML). The options are part of the page
+ * identity: `pageFileName` appends a hash of them, so two scenarios with the same fixture, theme,
+ * sticky depth and PlantUML expectation but other options never share a page.
+ */
+import { createHash } from "node:crypto";
+
+export interface HostMessage {
+  /** Delay after the page script ran (ms, default 0). */
+  readonly delayMs?: number;
+  /** Dispatched on `window` as a `message` event, like `webview.postMessage`. */
+  readonly data: Readonly<Record<string, unknown>>;
+}
+
+export interface ScenarioRenderOptions {
+  /** `false`: untrusted workspace (PlantUML disabled, external scripts refused). Default trusted. */
+  readonly trusted?: false;
+  /** `true`: editing disabled like a read-only preview (no Edit button, properties table not editable). Default editing on. */
+  readonly readOnly?: true;
+  /** `true`: undeclared frontmatter fields are warnings (`strictAdditionalProperties`). Default off. */
+  readonly strictAdditionalProperties?: true;
+  /** `false`: no properties table (`propertiesTable` setting off). Default on. */
+  readonly propertiesTable?: false;
+  /** Content width in px (`maxContentWidth` setting). Default: the product default. */
+  readonly maxContentWidth?: number;
+  /** Initial palette mode (the workspace choice). Default: the runtime default. */
+  readonly paletteMode?: "strict" | "gfm" | "myst";
+  /** Initial zoom in percent (70 to 200, the stored view preference). Default 100. */
+  readonly zoom?: number;
+  /** Messages the mock host sends to the page after load, in order. */
+  readonly hostMessages?: readonly HostMessage[];
+}
+
+const OPTION_ORDER: readonly (keyof ScenarioRenderOptions)[] = [
+  "trusted", "readOnly", "strictAdditionalProperties", "propertiesTable",
+  "maxContentWidth", "paletteMode", "zoom", "hostMessages",
+];
+
+/** Stable text of the options that are set (empty for none): the cache key part. */
+export function renderOptionsKey(options: ScenarioRenderOptions | undefined): string {
+  if (options === undefined) return "";
+  const entries = OPTION_ORDER
+    .filter((name) => options[name] !== undefined)
+    .map((name) => [name, options[name]] as const);
+  return entries.length === 0 ? "" : JSON.stringify(entries);
+}
+
+export interface PageIdentity {
+  readonly fixture: string;
+  readonly theme: string;
+  readonly stickyHeadingDepth: number;
+  readonly plantumlExpectation?: string;
+  readonly render?: ScenarioRenderOptions;
+}
+
+/** The cache key of a page: one rendering per distinct value. */
+export function pageKey(identity: PageIdentity): string {
+  return [
+    identity.fixture,
+    identity.theme,
+    identity.stickyHeadingDepth,
+    identity.plantumlExpectation ?? "default",
+    renderOptionsKey(identity.render),
+  ].join("\u0000");
+}
+
+/** The page file name; unchanged for a scenario without options. */
+export function pageFileName(identity: PageIdentity): string {
+  const base = `${identity.fixture}--${identity.theme}--sticky-${identity.stickyHeadingDepth}--${identity.plantumlExpectation ?? "default"}`;
+  const key = renderOptionsKey(identity.render);
+  return key === "" ? `${base}.html` : `${base}--o${createHash("sha1").update(key).digest("hex").slice(0, 8)}.html`;
+}

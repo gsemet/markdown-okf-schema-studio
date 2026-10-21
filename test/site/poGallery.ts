@@ -62,6 +62,8 @@ export interface VisualManifest {
   readonly status?: string;
   readonly partial?: boolean;
   readonly revision?: string;
+  /** `git status --short` when the run was made (empty: clean tree). */
+  readonly worktreeStatus?: string;
   readonly startedAt?: string;
   readonly completedAt?: string;
   readonly scenarioCount?: number;
@@ -82,6 +84,8 @@ export interface GalleryInput {
   readonly manifest?: VisualManifest;
   /** Current git revision; a manifest from another revision is reported as stale. */
   readonly headRevision?: string;
+  /** Current `git status --short` (tracked and untracked files, ignored ones excluded), when known. */
+  readonly worktreeStatus?: string;
   /** Does a capture path (relative to `screenshots/`) exist on disk? Omitted: assume it does. */
   readonly imageExists?: (capture: string) => boolean;
   readonly realWindow?: readonly RealWindowLink[];
@@ -147,6 +151,7 @@ export function assessFreshness(
   manifest: VisualManifest | undefined,
   headRevision: string | undefined,
   imageExists: (capture: string) => boolean = () => true,
+  currentWorktreeStatus?: string,
 ): Freshness {
   if (manifest === undefined) {
     return { stale: true, reasons: ["No visual run manifest was found: run `npm run test:visual`. No image is listed."] };
@@ -168,6 +173,15 @@ export function assessFreshness(
   }
   if (headRevision !== undefined && manifest.revision !== undefined && manifest.revision !== headRevision) {
     reasons.push(`The visual run was made at revision ${manifest.revision.slice(0, 7)}, HEAD is ${headRevision.slice(0, 7)}.`);
+  }
+  const dirtyAtRun = manifest.worktreeStatus?.trim() ?? "";
+  if (dirtyAtRun !== "") {
+    const files = dirtyAtRun.split("\n").length;
+    reasons.push(`The visual run was made with uncommitted changes (${plural(files, "file")}): the pictures may not match a commit.`);
+  }
+  if (currentWorktreeStatus !== undefined && manifest.worktreeStatus !== undefined
+    && currentWorktreeStatus.trim() !== dirtyAtRun) {
+    reasons.push("The working tree changed since the visual run (`git status` differs).");
   }
   const missingImages = new Set<string>();
   for (const result of results) {
@@ -280,7 +294,7 @@ function freshnessBanner(freshness: Freshness): string[] {
 export function buildPoGallery(input: GalleryInput): GalleryOutput {
   const imageExists = input.imageExists ?? (() => true);
   const manifest = input.manifest;
-  const freshness = assessFreshness(input.scenarios, manifest, input.headRevision, imageExists);
+  const freshness = assessFreshness(input.scenarios, manifest, input.headRevision, imageExists, input.worktreeStatus);
   const results = new Map<string, ManifestResult>((manifest?.results ?? []).map((result) => [result.id, result]));
   const files: Record<string, string> = {};
   const counts: Record<string, GroupCounts> = {};

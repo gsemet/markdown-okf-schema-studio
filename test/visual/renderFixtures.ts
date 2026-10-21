@@ -36,6 +36,10 @@ import {
 import { SCENARIOS } from "./scenarios";
 import { GROUPS, groupIndex } from "../shared/e2eGroups";
 import { THEMES } from "./themes";
+import { writeGeneratedFixtures } from "./generatedFixtures";
+import { pageFileName, pageKey, type PageIdentity, type ScenarioRenderOptions } from "./renderOptions";
+import { DEFAULT_VIEW_PREFERENCES } from "../../src/state/previewViewPreferences";
+import { previewContentWidthCss } from "../../src/preview/previewStyles";
 import { VISUAL_REPORT_ROOT } from "../reportPaths";
 
 const visualRoot = path.resolve(__dirname, "../../../test/visual");
@@ -67,12 +71,10 @@ ${fragment}
 </html>`;
 }
 
-async function renderPage(
-  fixture: string,
-  themeId: string,
-  stickyHeadingDepth: number,
-  plantumlExpectation?: string,
-): Promise<string[]> {
+async function renderPage(identity: PageIdentity): Promise<string[]> {
+  const { fixture, theme: themeId, stickyHeadingDepth, plantumlExpectation } = identity;
+  const options: ScenarioRenderOptions = identity.render ?? {};
+  const editingEnabled = options.readOnly !== true;
   const theme = THEMES.find((candidate) => candidate.id === themeId);
   if (!theme) {
     throw new Error(`Unknown theme: ${themeId}`);
@@ -107,6 +109,7 @@ async function renderPage(
     },
     resolveResource,
     resolveNavigation: (request) => ({ kind: "deferred", value: request }),
+    ...(options.trusted === false ? { allowExternalScripts: false } : {}),
   });
   const plantUml = await renderPlantUmlDiagrams(rewritten.html, {
     executablePath: fixture === "13-plantuml-executable-not-found"
@@ -114,7 +117,7 @@ async function renderPage(
       : plantumlExpectation === "unconfigured" ? "plantuml-visual-intentionally-unconfigured"
       : undefined,
     workspaceRoot: visualRoot,
-    trusted: true,
+    trusted: options.trusted !== false,
   });
   const withPlantUml = injectPlantUmlDiagrams(rewritten.html, plantUml.diagrams);
   // Mirror the real webview: strip the raw YAML block and inject the same
@@ -124,21 +127,22 @@ async function renderPage(
   const frontmatter = analyzeFrontmatter({
     sourceText: source,
     filePath: sourcePath,
-    strictAdditionalProperties: false,
+    strictAdditionalProperties: options.strictAdditionalProperties === true,
     inspectLinks: !deferredFrontmatterLinks,
   });
   const sourceMapping = {
     documentId: pathToFileURL(sourcePath).toString(),
     activeSourceFile: sourcePath,
   };
-  const markup = renderPropertiesTable(frontmatter, true, sourceMapping);
+  const tableEnabled = options.propertiesTable !== false;
+  const markup = renderPropertiesTable(frontmatter, tableEnabled, sourceMapping, editingEnabled);
   const deferredMarkup = deferredFrontmatterLinks
     ? renderPropertiesTable(analyzeFrontmatter({
       sourceText: source,
       filePath: sourcePath,
-      strictAdditionalProperties: false,
+      strictAdditionalProperties: options.strictAdditionalProperties === true,
       inspectLinks: true,
-    }), true, sourceMapping)
+    }), tableEnabled, sourceMapping, editingEnabled)
     : "";
   const withPlantUmlAndTable = markup
     ? withPlantUml.replace(
@@ -155,7 +159,7 @@ async function renderPage(
     : withPlantUmlAndTable;
   const withToolbar = withStatus.replace(
     /(<body(?:\s[^>]*)?>)/iu,
-    (opening) => `${opening}${renderPreviewToolbar()}${renderPreviewStickyHeadings()}`,
+    (opening) => `${opening}${renderPreviewToolbar(editingEnabled)}${renderPreviewStickyHeadings()}`,
   );
   const runtimeContext = {
     activeSourceFile: sourcePath,
@@ -163,6 +167,8 @@ async function renderPage(
     documentVersion: 1,
     requestId: 1,
     stickyHeadingDepth,
+    ...(options.paletteMode === undefined ? {} : { initialPaletteMode: options.paletteMode }),
+    ...(options.zoom === undefined ? {} : { initialViewPreferences: { ...DEFAULT_VIEW_PREFERENCES, zoom: options.zoom } }),
   };
   const serializedSource = JSON.stringify(source).replace(/</gu, "\\u003c");
   const visualHostScript = `<script>
@@ -187,6 +193,13 @@ window.acquireVsCodeApi = () => ({
   },
 });
 </script>`;
+  const hostMessageScript = options.hostMessages === undefined || options.hostMessages.length === 0
+    ? ""
+    : `<script>
+for (const entry of ${JSON.stringify(options.hostMessages).replace(/</gu, "\\u003c")}) {
+  setTimeout(() => window.dispatchEvent(new MessageEvent("message", { data: entry.data })), entry.delayMs ?? 0);
+}
+</script>`;
   const deferredLinkScript = deferredFrontmatterLinks
     ? `<script>
 const deferredPropertiesMarkup = ${JSON.stringify(deferredMarkup).replace(/</gu, "\\u003c")};
@@ -204,10 +217,15 @@ window.resolveVisualFrontmatterLinks = () => {
     : "";
   const withScrollRuntime = withToolbar.replace(
     /<\/body>/iu,
-    () => `${deferredLinkScript}${visualHostScript}<script>${createScrollSyncScript(runtimeContext)}</script></body>`,
+    () => `${deferredLinkScript}${visualHostScript}<script>${createScrollSyncScript(runtimeContext)}</script>${hostMessageScript}</body>`,
   );
 
-  const css = [themeBlock(theme.variables), PREVIEW_ACCESSIBILITY_CSS, PREVIEW_THEME_CSS].join("\n");
+  const css = [
+    themeBlock(theme.variables),
+    PREVIEW_ACCESSIBILITY_CSS,
+    PREVIEW_THEME_CSS,
+    ...(options.maxContentWidth === undefined ? [] : [previewContentWidthCss(options.maxContentWidth)]),
+  ].join("\n");
   let page = withScrollRuntime.replace(/<\/head>/iu, `<style>${css}</style></head>`);
   page = renderMathHtml(page, pathToFileURL(
     path.resolve(__dirname, "../../../out/bundle/katex/katex.min.css"),
@@ -219,7 +237,7 @@ window.resolveVisualFrontmatterLinks = () => {
     );
   }
   fs.writeFileSync(
-    path.join(pageDirectory, `${fixture}--${themeId}--sticky-${stickyHeadingDepth}--${plantumlExpectation ?? "default"}.html`),
+    path.join(pageDirectory, pageFileName(identity)),
     page,
     "utf8",
   );
@@ -227,20 +245,29 @@ window.resolveVisualFrontmatterLinks = () => {
   return diagnostics.map((diagnostic) => `${fixture}:${diagnostic.line ?? "?"} ${diagnostic.message}`);
 }
 
+function scenarioPage(scenario: (typeof SCENARIOS)[number]): PageIdentity {
+  return {
+    fixture: scenario.fixture,
+    theme: scenario.theme,
+    stickyHeadingDepth: scenario.stickyHeadingDepth ?? DEFAULT_PREVIEW_CONFIGURATION.stickyHeadingDepth,
+    ...(scenario.plantumlExpectation === undefined ? {} : { plantumlExpectation: scenario.plantumlExpectation }),
+    ...(scenario.render === undefined ? {} : { render: scenario.render }),
+  };
+}
+
 async function main(): Promise<void> {
   fs.rmSync(pageDirectory, { recursive: true, force: true });
   fs.mkdirSync(pageDirectory, { recursive: true });
+  writeGeneratedFixtures(fixtureDirectory);
 
-  const pages = new Set(SCENARIOS.map((scenario) => [
-    scenario.fixture,
-    scenario.theme,
-    scenario.stickyHeadingDepth ?? DEFAULT_PREVIEW_CONFIGURATION.stickyHeadingDepth,
-    scenario.plantumlExpectation ?? "default",
-  ].join("\u0000")));
+  const pages = new Map<string, PageIdentity>();
+  for (const scenario of SCENARIOS) {
+    const identity = scenarioPage(scenario);
+    pages.set(pageKey(identity), identity);
+  }
   const notes: string[] = [];
-  for (const page of pages) {
-    const [fixture, theme, stickyHeadingDepth, plantumlExpectation] = page.split("\u0000");
-    notes.push(...await renderPage(fixture!, theme!, Number(stickyHeadingDepth), plantumlExpectation));
+  for (const identity of pages.values()) {
+    notes.push(...await renderPage(identity));
   }
 
   const manifest = {
@@ -262,7 +289,7 @@ async function main(): Promise<void> {
     ).map((scenario, index) => ({
       ...scenario,
       sequence: index + 1,
-      page: `${scenario.fixture}--${scenario.theme}--sticky-${scenario.stickyHeadingDepth ?? DEFAULT_PREVIEW_CONFIGURATION.stickyHeadingDepth}--${scenario.plantumlExpectation ?? "default"}.html`,
+      page: pageFileName(scenarioPage(scenario)),
       themeLabel: THEMES.find((theme) => theme.id === scenario.theme)?.label ?? scenario.theme,
     })),
   };
