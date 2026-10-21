@@ -101,3 +101,35 @@ test("detects the line that opens an include directive", () => {
     assert.equal(opensIncludeDirective(line), false, line);
   }
 });
+
+// A selection of blocks moves as one range: its inner separators travel with it, untouched.
+test("a span of blocks moves past one block, inner separators untouched", () => {
+  const text = "# T\n\nA\n\n\nB\n\nC\n\nD\n";
+  // Span A..B (lines 3-6, two blank lines inside) moves down past C.
+  assert.equal(move(text, [3, 6], [8, 8]), "# T\n\nC\n\nA\n\n\nB\n\nD\n");
+  // Span moves up past the block above it: C goes below the span A..B.
+  assert.equal(move("# T\n\nC\n\nA\n\n\nB\n\nD\n", [3, 3], [5, 8]), text);
+  const down = plan(text, [3, 6], [8, 8]);
+  assert.equal(down.newStartLine, 5, "the span starts after C and one separator");
+  assert.equal(down.newSecondStartLine, 3);
+});
+
+test("a span keeps CRLF line breaks inside and around it", () => {
+  const text = "A1\r\n\r\nA2\r\n\r\nB\r\n\r\nC\r\n";
+  assert.equal(move(text, [1, 3], [5, 5]), "B\r\n\r\nA1\r\n\r\nA2\r\n\r\nC\r\n");
+  assert.equal(move(text, [3, 3], [5, 7]), "A1\r\n\r\nB\r\n\r\nC\r\n\r\nA2\r\n");
+});
+
+test("a span at the end of the document, or past it, is refused", () => {
+  const text = "A\n\nB\n\nC\n";
+  assert.ok("refused" in (move(text, [3, 5], [7, 7]) as object), "nothing below the span");
+  assert.ok("refused" in (move(text, [3, 5], [5, 5]) as object), "overlapping the neighbour");
+  assert.ok("refused" in (move(text, [1, 5], [1, 1]) as object), "span first, neighbour inside it");
+  assert.ok("refused" in (move(text, [1, 4], [5, 5]) as object), "a span that ends on a blank line");
+});
+
+test("a span next to the frontmatter cannot cross it", () => {
+  const text = "---\ntitle: x\n---\n\nA\n\nB\n\nC\n";
+  assert.ok("refused" in (move(text, [1, 7], [9, 9]) as object));
+  assert.equal(move(text, [5, 7], [9, 9]), "---\ntitle: x\n---\n\nC\n\nA\n\nB\n");
+});

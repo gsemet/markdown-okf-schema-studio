@@ -1803,6 +1803,7 @@ function postBlockMoveResult(
  * Moves a body block past its neighbour from the "+" bar: the two blocks swap in one edit (one undo
  * step). The page ranges are not trusted: the planner checks order, bounds, the frontmatter and the
  * text between the blocks, and a block that opens an `{include}` directive is never moved.
+ * The moving range may span several selected blocks (their inner separators travel with it).
  */
 function handleBlockMove(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
   if (preview.readOnly) {
