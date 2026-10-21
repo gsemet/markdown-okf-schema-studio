@@ -135,7 +135,7 @@ Studio makes that metadata comfortable to use. It turns frontmatter into a prope
 schema descriptions and diagnostics beside each field, and lets you edit typed values without
 manually navigating raw YAML. The Markdown body remains a live, editable MyST preview.
 
-## Linked-File Annotations
+### Linked-File Annotations
 
 OKF-Schema supports `x-okf-link` annotations in the JSON Schema that allows Studio to display metadata from the resolved target file:
 
@@ -150,6 +150,8 @@ x-okf-link:
 `tooltip_shows_fields` adds named frontmatter fields to a link's hover tooltip.
 `preview_shows_fields` displays their values beside the link. Missing fields are omitted; string,
 number, and boolean fields are supported.
+
+<!-- TODO: add frontmatter example here -->
 
 For source and test evidence, enable the first matching marker's one-based line number:
 

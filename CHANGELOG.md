@@ -79,7 +79,7 @@
   `editing.defaultPaletteMode` (default MyST) gives the starting mode; rendering is unchanged.
 - The block editor gets a Link button and Cmd/Ctrl+K. A small panel with Text and URL fields opens
   under the palette, prefilled from the selection (a selected URL fills the URL, a selected link is
-  read back); Enter inserts `[text](url)` as one undo step and Escape returns to the text box.
+  <!-- TODO: read back); Enter inserts `[text](url)` as one undo step and Escape returns to the text box. -->
 - An edition palette now sits above the text box of an open block editor, also when you insert a
   new block: heading level (Paragraph, H1 to H5), bold, italic, strikethrough, code block with a
   language list, blockquote, horizontal rule and TODO. Buttons never close the editor, each is one
