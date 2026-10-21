@@ -32,6 +32,7 @@ import { sourceRangeForLines, type SourceMappingOptions } from "./mapping/source
 import { insertionText, planInsertion, type InsertionPlan } from "./mapping/insertion";
 import { minimalReplacement } from "./mapping/textDiff";
 import { opensIncludeDirective, planBlockMove } from "./mapping/blockMove";
+import { planCut, planPaste, spanText } from "./mapping/blockRange";
 import { countRefUses, renameLabelLine } from "./mapping/labelRename";
 import {
   imageTypeOfMime,
@@ -1873,6 +1874,180 @@ function handleBlockMove(preview: ActivePreview, message: RegisteredPreviewMessa
   });
 }
 
+type BlocksOp = "copy" | "cut" | "paste";
+
+function postBlocksResult(
+  preview: ActivePreview,
+  message: RegisteredPreviewMessage,
+  op: BlocksOp,
+  result: { ok: true } | { ok: false; reason: string },
+): void {
+  void preview.panel.webview.postMessage({
+    type: "previewBlocksResult",
+    documentId: message.documentId,
+    documentVersion: message.documentVersion,
+    requestId: message.requestId,
+    op,
+    ...result,
+  });
+}
+
+/** Read-only, open-editor and stale-version refusals shared by copy, cut and paste of blocks. */
+function blocksDocument(
+  preview: ActivePreview,
+  message: RegisteredPreviewMessage,
+  op: BlocksOp,
+): vscode.TextDocument | undefined {
+  const refuse = (reason: string): undefined => {
+    postBlocksResult(preview, message, op, { ok: false, reason });
+    return undefined;
+  };
+  if (preview.readOnly) {
+    return refuse("Copying, cutting and pasting blocks needs a trusted workspace.");
+  }
+  if (preview.activeBlockEdit) {
+    return refuse("Save or cancel the open Markdown edit first.");
+  }
+  return currentPreviewDocument(preview, message)
+    ?? refuse("The preview is out of date. Try again once it has refreshed.");
+}
+
+function linesOpenInclude(document: vscode.TextDocument, line: number, endLine: number): boolean {
+  for (let current = line; current <= Math.min(endLine, document.lineCount); current += 1) {
+    if (opensIncludeDirective(document.lineAt(current - 1).text)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function replaceDocumentRange(
+  preview: ActivePreview,
+  document: vscode.TextDocument,
+  start: number,
+  end: number,
+  text: string,
+): Thenable<boolean> {
+  const range = new vscode.Range(document.positionAt(start), document.positionAt(end));
+  const sourceEditor = visibleEditorFor(preview);
+  if (sourceEditor) {
+    return sourceEditor.edit((builder) => builder.replace(range, text), {
+      undoStopBefore: true,
+      undoStopAfter: true,
+    });
+  }
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(document.uri, range, text);
+  return vscode.workspace.applyEdit(edit);
+}
+
+/**
+ * Copy and cut of selected blocks (T40): the exact Markdown of the lines goes to the clipboard; cut
+ * then deletes them (with one blank separator) in one edit. The page ranges are not trusted.
+ */
+function handleBlocksCopyCut(
+  preview: ActivePreview,
+  message: RegisteredPreviewMessage,
+): Thenable<void> | undefined {
+  const op: BlocksOp = message.type === "previewBlocksCut" ? "cut" : "copy";
+  const document = blocksDocument(preview, message, op);
+  if (!document) {
+    return undefined;
+  }
+  const line = message.line as number;
+  const endLine = message.endLine as number;
+  const refuse = (reason: string): undefined => {
+    postBlocksResult(preview, message, op, { ok: false, reason });
+    return undefined;
+  };
+  const text = document.getText();
+  const copied = spanText(text, line, endLine);
+  if (typeof copied !== "string") {
+    return refuse(copied.refused);
+  }
+  if (linesOpenInclude(document, line, endLine)) {
+    return refuse("A block that comes from an included file cannot be copied or cut.");
+  }
+  const plan = op === "cut" ? planCut(text, line, endLine) : undefined;
+  if (plan && "refused" in plan) {
+    return refuse(plan.refused);
+  }
+  const fail = (error: unknown): void => postBlocksResult(preview, message, op, {
+    ok: false,
+    reason: error instanceof Error ? error.message : String(error),
+  });
+  return vscode.env.clipboard.writeText(copied).then(() => {
+    if (!plan) {
+      postBlocksResult(preview, message, op, { ok: true });
+      return undefined;
+    }
+    // The clipboard write is asynchronous: the edit only goes in if the text did not change.
+    if (preview.document !== document || document.version !== message.documentVersion) {
+      postBlocksResult(preview, message, op, {
+        ok: false,
+        reason: "The document changed while cutting. The blocks are on the clipboard, nothing was removed.",
+      });
+      return undefined;
+    }
+    return replaceDocumentRange(preview, document, plan.start, plan.end, "").then((applied) => {
+      if (!applied) {
+        postBlocksResult(preview, message, op, { ok: false, reason: "VS Code could not apply the cut." });
+        return;
+      }
+      if (plan.followingLine !== undefined) {
+        // The block after the cut moves up into its place: hold it at the cut blocks' screen position.
+        storePendingPin(preview, {
+          documentId: message.documentId,
+          pinLine: line,
+          pinViewportTop: message.pinViewportTop as number | undefined,
+        }, document.version);
+      }
+      postBlocksResult(preview, message, op, { ok: true });
+    });
+  }).then(undefined, fail);
+}
+
+/** Paste of clipboard text as new blocks after a block or at the start of the body (T40). */
+function handleBlocksPaste(
+  preview: ActivePreview,
+  message: RegisteredPreviewMessage,
+): Thenable<void> | undefined {
+  const document = blocksDocument(preview, message, "paste");
+  if (!document) {
+    return undefined;
+  }
+  const afterLine = message.insertAfterLine as number;
+  const refuse = (reason: string): void => postBlocksResult(preview, message, "paste", { ok: false, reason });
+  if (afterLine > 0 && afterLine <= document.lineCount
+    && linesOpenInclude(document, afterLine, afterLine)) {
+    refuse("Text cannot be pasted next to a block that comes from an included file.");
+    return undefined;
+  }
+  return vscode.env.clipboard.readText().then((clipboard) => {
+    if (preview.document !== document || document.version !== message.documentVersion) {
+      refuse("The document changed while pasting. Try again.");
+      return undefined;
+    }
+    const plan = planPaste(document.getText(), afterLine, clipboard);
+    if ("refused" in plan) {
+      refuse(plan.refused);
+      return undefined;
+    }
+    return replaceDocumentRange(preview, document, plan.offset, plan.offset, plan.text).then((applied) => {
+      if (!applied) {
+        refuse("VS Code could not apply the paste.");
+        return;
+      }
+      storePendingPin(preview, {
+        documentId: message.documentId,
+        pinLine: message.pinLine as number | undefined,
+        pinViewportTop: message.pinViewportTop as number | undefined,
+      }, document.version);
+      postBlocksResult(preview, message, "paste", { ok: true });
+    });
+  }).then(undefined, (error: unknown) => refuse(error instanceof Error ? error.message : String(error)));
+}
+
 type HostListAnswer =
   | { ok: true; items: Array<{ value: string; label: string; detail?: string }>; truncated: boolean }
   | { ok: false; reason: string };
@@ -2965,6 +3140,9 @@ registeredMessageHandlers.set("previewPaletteModeChanged", (preview, message) =>
 
 registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
 registeredMessageHandlers.set("previewBlockMove", handleBlockMove);
+registeredMessageHandlers.set("previewBlocksCopy", handleBlocksCopyCut);
+registeredMessageHandlers.set("previewBlocksCut", handleBlocksCopyCut);
+registeredMessageHandlers.set("previewBlocksPaste", handleBlocksPaste);
 registeredMessageHandlers.set("previewListTargets", handleListTargets);
 registeredMessageHandlers.set("previewListCitations", handleListCitations);
 registeredMessageHandlers.set("previewPickDocument", handlePickDocument);

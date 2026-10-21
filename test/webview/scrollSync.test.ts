@@ -9758,3 +9758,123 @@ test("T39 r2: Shift+click while the property editor is open selects nothing", ()
   shiftClick(harness, harness.mappings[0]);
   assert.deepEqual(selectedLines(harness), []);
 });
+
+// T40: copy, cut and paste of the selected blocks as Markdown (the host owns clipboard and edit).
+function clipboardKey(key: string, extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return { key, ctrlKey: true, preventDefault: () => undefined, stopPropagation: () => undefined, ...extra };
+}
+
+function blocksMessages(harness: RuntimeHarness, from = 0): Array<Record<string, unknown>> {
+  return harness.messages.slice(from).filter((message) =>
+    typeof message.type === "string" && message.type.startsWith("previewBlocks") && !message.type.endsWith("Result"));
+}
+
+test("T40: Ctrl+C and Ctrl+X on a selection post its source lines; the keys are ours", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[0]);
+  shiftClick(harness, harness.mappings[1]);
+  const before = harness.messages.length;
+  let prevented = 0;
+  const target = harness.mappings[1];
+  harness.dispatchDocument("keydown", clipboardKey("c", { target, preventDefault: () => { prevented += 1; } }));
+  let sent = blocksMessages(harness, before);
+  assert.deepEqual(sent.map((message) => [message.type, message.line, message.endLine]), [["previewBlocksCopy", 1, 52]]);
+  assert.equal(prevented, 1, "the browser does not copy the rendered text");
+  harness.dispatchMessage({ type: "previewBlocksResult", ...MOVE_IDENTIFIERS, op: "copy", ok: true });
+  harness.dispatchDocument("keydown", clipboardKey("x", { target }));
+  sent = blocksMessages(harness, before);
+  assert.deepEqual(sent.map((message) => [message.type, message.line, message.endLine]), [
+    ["previewBlocksCopy", 1, 52], ["previewBlocksCut", 1, 52],
+  ]);
+  assert.equal(typeof sent[1].pinViewportTop, "number", "a cut holds the screen position");
+  assert.equal(sent[0].pinViewportTop, undefined);
+});
+
+test("T40: on macOS the chord is Cmd, and Ctrl alone is ignored", () => {
+  const harness = createRuntimeHarness({ platform: "MacIntel", savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[1]);
+  const before = harness.messages.length;
+  harness.dispatchDocument("keydown", clipboardKey("c", { target: harness.mappings[1] }));
+  assert.equal(blocksMessages(harness, before).length, 0);
+  harness.dispatchDocument("keydown", clipboardKey("c", { target: harness.mappings[1], ctrlKey: false, metaKey: true }));
+  assert.deepEqual(blocksMessages(harness, before).map((message) => [message.line, message.endLine]), [[50, 52]]);
+});
+
+test("T40: without a selection, in reading mode or with Shift/Alt the keys stay native", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  let prevented = false;
+  const native = { target: harness.mappings[1], preventDefault: () => { prevented = true; } };
+  harness.dispatchDocument("keydown", clipboardKey("c", native));
+  harness.dispatchDocument("keydown", clipboardKey("x", native));
+  assert.equal(blocksMessages(harness, before).length, 0);
+  assert.equal(prevented, false);
+  shiftClick(harness, harness.mappings[1]);
+  harness.dispatchDocument("keydown", clipboardKey("c", { ...native, shiftKey: true }));
+  harness.dispatchDocument("keydown", clipboardKey("c", { ...native, altKey: true }));
+  harness.dispatchDocument("keydown", clipboardKey("c", { ...native, ctrlKey: false }));
+  assert.equal(blocksMessages(harness, before).length, 0);
+  const reading = createRuntimeHarness({ savedState: { editMode: false } });
+  reading.dispatchDocument("keydown", clipboardKey("c", { target: reading.mappings[1] }));
+  assert.equal(blocksMessages(reading).length, 0);
+});
+
+test("T40: the keys are ignored inside a text box, a field and the property table", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  const before = harness.messages.length;
+  let prevented = false;
+  for (const key of ["c", "x", "v"]) {
+    harness.dispatchDocument("keydown", clipboardKey(key, { target: textarea, preventDefault: () => { prevented = true; } }));
+  }
+  assert.equal(blocksMessages(harness, before).length, 0);
+  assert.equal(prevented, false);
+});
+
+test("T40: Ctrl+V pastes after the selection, or after the block of a focused bar", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  shiftClick(harness, harness.mappings[1]);
+  shiftClick(harness, harness.mappings[2]);
+  harness.dispatchDocument("keydown", clipboardKey("v", { target: harness.mappings[2] }));
+  let sent = blocksMessages(harness, before);
+  assert.deepEqual(sent.map((message) => [message.type, message.insertAfterLine, message.pinLine]), [
+    ["previewBlocksPaste", 100, 100],
+  ]);
+  harness.dispatchMessage({ type: "previewBlocksResult", ...MOVE_IDENTIFIERS, op: "paste", ok: true });
+  assert.deepEqual(selectedLines(harness), [], "the selection is gone after a paste");
+  const bar = insertPointAfterLine(harness, 52);
+  harness.dispatchDocument("keydown", clipboardKey("v", { target: bar.childElements[0] }));
+  sent = blocksMessages(harness, before);
+  assert.deepEqual(sent.at(-1) && [sent.at(-1)!.insertAfterLine, sent.at(-1)!.pinLine], [52, 50]);
+  const start = createRuntimeHarness({ savedState: { editMode: true }, emptyBody: true });
+  start.dispatchDocument("keydown", clipboardKey("v", { target: start.mappings[0] }));
+  assert.equal(blocksMessages(start).length, 0, "plain focus on the page pastes nothing");
+});
+
+test("T40: a held key sends one request until the host answers; a refusal is announced", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[1]);
+  const before = harness.messages.length;
+  const key = clipboardKey("x", { target: harness.mappings[1] });
+  harness.dispatchDocument("keydown", key);
+  harness.dispatchDocument("keydown", key);
+  assert.equal(blocksMessages(harness, before).length, 1);
+  harness.dispatchMessage({ type: "previewBlocksResult", ...MOVE_IDENTIFIERS, op: "cut", ok: false, reason: "Nope." });
+  assert.equal(selectionAnnouncement(harness), "Nope.");
+  assert.deepEqual(selectedLines(harness), [50], "a refused cut keeps the selection");
+  harness.dispatchDocument("keydown", key);
+  assert.equal(blocksMessages(harness, before).length, 2, "a new request after the answer");
+});
+
+test("T40: a copy answer says so and a cut answer clears the selection", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[1]);
+  harness.dispatchDocument("keydown", clipboardKey("c", { target: harness.mappings[1] }));
+  harness.dispatchMessage({ type: "previewBlocksResult", ...MOVE_IDENTIFIERS, op: "copy", ok: true });
+  assert.equal(selectionAnnouncement(harness), "Copied as Markdown");
+  assert.deepEqual(selectedLines(harness), [50], "copy keeps the selection");
+  harness.dispatchDocument("keydown", clipboardKey("x", { target: harness.mappings[1] }));
+  harness.dispatchMessage({ type: "previewBlocksResult", ...MOVE_IDENTIFIERS, op: "cut", ok: true });
+  assert.deepEqual(selectedLines(harness), []);
+});

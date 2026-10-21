@@ -16,6 +16,7 @@ import { run as runImagePicker } from "./imagePicker.test";
 import { run as runImagePaste } from "./imagePaste.test";
 import { run as runIncomingChanges } from "./incomingChanges.test";
 import { run as runBlockMove } from "./blockMove.test";
+import { run as runBlockClipboard } from "./blockClipboard.test";
 import { run as runLabelRename } from "./labelRename.test";
 import { run as runMystPickers } from "./mystPickers.test";
 import { run as runPaletteMode } from "./paletteMode.test";
@@ -108,6 +109,7 @@ export async function run(): Promise<void> {
   await runPaletteMode();
   await runLabelRename();
   await runBlockMove();
+  await runBlockClipboard();
   await runMystPickers();
   await runImagePicker();
   await runImagePaste();

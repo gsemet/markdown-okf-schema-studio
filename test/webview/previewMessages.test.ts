@@ -155,6 +155,26 @@ test("previewBlockMove validates both ranges, the direction and the optional pin
   }
 });
 
+test("T40: the block clipboard messages validate their lines and the optional pin", () => {
+  const base = { documentId: "doc", documentVersion: 1, requestId: 1 };
+  for (const type of ["previewBlocksCopy", "previewBlocksCut"]) {
+    const message = { ...base, type, line: 5, endLine: 8, pinViewportTop: 10 };
+    assert.equal(isRegisteredPreviewMessage(message), true, type);
+    assert.equal(isRegisteredPreviewMessage({ ...message, pinViewportTop: undefined }), true, type);
+    for (const patch of [{ line: 0 }, { endLine: 1.5 }, { line: undefined }, { endLine: "8" }]) {
+      assert.equal(isRegisteredPreviewMessage({ ...message, ...patch }), false, `${type} ${JSON.stringify(patch)}`);
+    }
+  }
+  assert.equal(isRegisteredPreviewMessage({ ...base, type: "previewBlocksCut", line: 1, endLine: 1, pinViewportTop: Number.NaN }), false);
+  const paste = { ...base, type: "previewBlocksPaste", insertAfterLine: 0, pinLine: 4, pinViewportTop: 99 };
+  assert.equal(isRegisteredPreviewMessage(paste), true);
+  assert.equal(isRegisteredPreviewMessage({ ...paste, pinLine: undefined, pinViewportTop: undefined }), true);
+  for (const patch of [{ insertAfterLine: -1 }, { insertAfterLine: 1.5 }, { insertAfterLine: undefined },
+    { pinLine: 0 }, { pinViewportTop: 200000 }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...paste, ...patch }), false, JSON.stringify(patch));
+  }
+});
+
 test("T38: previewPasteImage caps the size and accepts plain base64 of an allowed type only", () => {
   const base = {
     type: "previewPasteImage", documentId: "doc", documentVersion: 1, requestId: 1,

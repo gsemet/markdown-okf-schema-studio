@@ -9,6 +9,7 @@ import {
   getActivePreviewForTests,
   sendPreviewMessageForTests,
 } from "./extensionApi";
+import { runUndo as runBlockClipboardUndo } from "./blockClipboard.test";
 
 async function waitFor(description: string, predicate: () => boolean, timeoutMs = 20_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -99,6 +100,8 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
     fs.rmSync(directory, { recursive: true, force: true });
   }
+  // The undo checks of cut and paste live here: the locked-screen gate skips this whole suite.
+  await runBlockClipboardUndo();
 }
 
 /** An untrusted (read-only) preview never moves a block. */
