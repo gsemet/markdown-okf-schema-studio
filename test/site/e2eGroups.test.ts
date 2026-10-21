@@ -4,7 +4,7 @@ import * as path from "node:path";
 import test from "node:test";
 
 import { GROUPS, INTEGRATION_TESTS, isGroupId } from "../shared/e2eGroups";
-import { GROUP_BY_SCENARIO_ID } from "../visual/scenarioGroups";
+import { REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID } from "../visual/scenarioIds";
 import { SCENARIOS } from "../visual/scenarios";
 
 test("the e2e campaign has the 16 frozen feature groups with unique ids", () => {
@@ -15,22 +15,33 @@ test("the e2e campaign has the 16 frozen feature groups with unique ids", () => 
   }
 });
 
-test("every visual scenario has a group and the group table has no stale id", () => {
+test("every visual scenario has a permanent <group>/vNN id whose prefix is its group", () => {
   const ids = new Set(SCENARIOS.map((scenario) => scenario.id));
   assert.equal(ids.size, SCENARIOS.length, "scenario ids are unique");
+  assert.equal(SCENARIOS.length, 241, "245 scenarios minus the 4 exact aliases");
   for (const scenario of SCENARIOS) {
     assert.ok(isGroupId(scenario.group), scenario.id);
+    assert.match(scenario.id, new RegExp(`^${scenario.group}/v\\d{2,}-[a-z0-9-]+$`, "u"));
   }
-  assert.deepEqual(Object.keys(GROUP_BY_SCENARIO_ID).filter((id) => !ids.has(id)), []);
+  assert.deepEqual(Object.values(SCENARIO_ID_BY_LEGACY_ID).filter((id) => !ids.has(id)), []);
+  assert.equal(REMOVED_ALIASES.length, 4);
+  for (const alias of REMOVED_ALIASES) {
+    assert.ok(!SCENARIOS.some((scenario) => scenario.legacyId === alias), alias);
+  }
 });
 
 test("the Mermaid theme-switch check is keyed by a flag, not by an id", () => {
-  assert.deepEqual(
-    SCENARIOS.filter((scenario) => scenario.mermaidThemeSwitch).map((scenario) => scenario.id),
-    ["mermaid-map-dark"],
-  );
-  const capture = fs.readFileSync(path.resolve(__dirname, "../../../test/visual/capture.py"), "utf8");
-  assert.doesNotMatch(capture, /scenario\["id"\]\s*(==|!=)/u);
+  const flagged = SCENARIOS.filter((scenario) => scenario.mermaidThemeSwitch);
+  assert.equal(flagged.length, 1);
+  assert.match(flagged[0]!.fixture, /mermaid/u);
+  const source = fs.readFileSync(path.resolve(__dirname, "../../../test/visual/capture.py"), "utf8");
+  // Everything before the campaign driver (`capture_scenarios`, `main`) is check code.
+  const capture = source.slice(0, source.indexOf("def capture_scenarios"));
+  assert.ok(capture.length > 1000);
+  // No check may branch on a scenario id: not by comparison, membership or prefix/suffix tests.
+  assert.doesNotMatch(capture, /scenario\[["']id["']\]\s*(==|!=|in\b|not in\b)/u);
+  assert.doesNotMatch(capture, /scenario\[["']id["']\]\.(startswith|endswith)\(/u);
+  assert.doesNotMatch(capture, /scenario\.get\(["']id["']/u);
 });
 
 test("integration test rows name existing test files", () => {

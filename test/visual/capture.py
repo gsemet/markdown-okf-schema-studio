@@ -32,6 +32,27 @@ EXTENSION_ROOT = HERE.parent.parent
 VISUAL_REPORT_DIR = EXTENSION_ROOT / "out" / "reports" / "visual"
 MANIFEST = VISUAL_REPORT_DIR / "manifest.json"
 SCREENSHOT_DIR = EXTENSION_ROOT / "out" / "reports" / "e2e" / "screenshots"
+# Scenario ids are `<group>/vNN-<slug>-<theme>-<width>`: PNG and sidecar live in visual/<group>/.
+VISUAL_SCREENSHOT_DIR = SCREENSHOT_DIR / "visual"
+
+
+def scenario_png(scenario_id: str) -> pathlib.Path:
+  return VISUAL_SCREENSHOT_DIR / f"{scenario_id}.png"
+
+
+def step_png(scenario_id: str, step: str) -> pathlib.Path:
+  return VISUAL_SCREENSHOT_DIR / f"{scenario_id}--{step}.png"
+
+
+def report_path(directory: pathlib.Path, scenario_id: str) -> pathlib.Path:
+  """`<directory>/<group>/vNN-....json`; the parent folder is created."""
+  path = directory / f"{scenario_id}.json"
+  path.parent.mkdir(parents=True, exist_ok=True)
+  return path
+
+
+def relative_to_screenshots(path: pathlib.Path) -> str:
+  return path.relative_to(SCREENSHOT_DIR).as_posix()
 FIXTURE_DIR = HERE / "fixtures"
 # Plain browser JavaScript shared with the real-input harness; it declares studioGeometryChecks.
 GEOMETRY_SOURCE = (EXTENSION_ROOT / "test" / "shared" / "geometry-checks.js").read_text(encoding="utf-8")
@@ -2179,7 +2200,7 @@ def check_width_mode_break(page: Page, scenario: dict, failures: list[Failure]) 
   """P2/P7: side margins of text, table, code block and figure in one width mode.
 
   Auto and Full width both leave 16 px between a wide block and the pane edge; Full width gives the
-  prose the same side margin. Numbers go to out/reports/visual/width-margins/<scenario>.json.
+  prose the same side margin. Numbers go to out/reports/visual/width-margins/<group>/<scenario>.json.
   """
   wanted = scenario.get("widthModeBreak")
   if not wanted:
@@ -2226,7 +2247,7 @@ def check_width_mode_break(page: Page, scenario: dict, failures: list[Failure]) 
   report = {"scenario": scenario["id"], "mode": state["mode"], "pane": pane, "column": round(column, 1),
     "margins": margins, "overflowX": state["overflowX"], "scrollY": state["scrollY"]}
   WIDTH_BREAK_REPORT_DIR.mkdir(parents=True, exist_ok=True)
-  (WIDTH_BREAK_REPORT_DIR / f"{scenario['id']}.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+  report_path(WIDTH_BREAK_REPORT_DIR, scenario["id"]).write_text(json.dumps(report, indent=2), encoding="utf-8")
   if state["mode"] != wanted:
     failures.append(Failure(page_name, f"the Width button did not reach {wanted}: {state['mode']}"))
     return
@@ -2737,7 +2758,7 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
   controls of a leading properties table) starts 40 +-4px below the top. The only exception is an
   interactive element in a pane of 480px or less (the toolbar covers most of the width): it is then
   pushed just far enough that it clears the toolbar, and the report says so. Every measurement is
-  written to out/reports/visual/first-gap/<scenario>.json.
+  written to out/reports/visual/first-gap/<group>/<scenario>.json.
   """
   mode = scenario.get("firstElementGap")
   if not mode:
@@ -2806,7 +2827,7 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
 
   def finish() -> None:
     FIRST_GAP_REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    (FIRST_GAP_REPORT_DIR / f"{scenario['id']}.json").write_text(json.dumps(records, indent=2), encoding="utf-8")
+    report_path(FIRST_GAP_REPORT_DIR, scenario["id"]).write_text(json.dumps(records, indent=2), encoding="utf-8")
 
   # Width mode: the Width button cycles margin -> auto -> full.
   for _ in range({"margin": 0, "auto": 1, "full": 2}[width_mode]):
@@ -5108,10 +5129,11 @@ def save_step(page: Page, scenario: dict, step: str, caret: str = "hide",
   if unless_same_as is not None and recorder.digests.get(unless_same_as) == digest:
     recorder.skipped.append({"step": step, "reason": f"identical to {unless_same_as}"})
     return None
-  name = f"{scenario['id']}-{step}.png"
-  (SCREENSHOT_DIR / name).write_bytes(data)
-  recorder.written.append({"file": name, "step": step, "dropIfFinal": unless_final_frame})
-  return name
+  path = step_png(scenario["id"], step)
+  path.parent.mkdir(parents=True, exist_ok=True)
+  path.write_bytes(data)
+  recorder.written.append({"file": relative_to_screenshots(path), "step": step, "dropIfFinal": unless_final_frame})
+  return relative_to_screenshots(path)
 
 
 class StepRecorder:
@@ -5324,17 +5346,18 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                     del failures[start_failures:]
                     result["failures"] = []
                 result["status"] = "failed" if result["failures"] else "passed"
-                target = SCREENSHOT_DIR / f"{scenario['id']}.png"
+                target = scenario_png(scenario["id"])
                 result["captures"] = []
                 if not scenario.get("screenshotOf") and scenario.get("capture") is not False:
                   try:
+                    target.parent.mkdir(parents=True, exist_ok=True)
                     page.screenshot(
                       path=str(target),
                       full_page=bool(scenario.get("fullPage")),
                       caret="initial" if scenario.get("editTarget") else "hide",
                     )
-                    result["capture"] = target.name
-                    result["captures"].append({"file": target.name, "step": None})
+                    result["capture"] = relative_to_screenshots(target)
+                    result["captures"].append({"file": result["capture"], "step": None})
                   except Exception as error:
                     detail = f"screenshot unavailable: {error}"
                     failures.append(Failure(scenario["page"], detail))
@@ -5398,7 +5421,8 @@ def main() -> int:
         if invalid or scenario.get("group") not in groups:
             print(f"invalid scenario {scenario['id']}: unknown steps {invalid} or group {scenario.get('group')!r}", file=sys.stderr)
             return 2
-    requested_ids = set(arguments.scenario_ids or [])
+    legacy_to_id = {scenario["legacyId"]: scenario["id"] for scenario in all_scenarios if scenario.get("legacyId")}
+    requested_ids = {legacy_to_id.get(identifier, identifier) for identifier in arguments.scenario_ids or []}
     requested_ids |= {scenario["id"] for scenario in all_scenarios if scenario["group"] in requested_groups}
     partial = bool(arguments.scenario_ids or requested_groups)
     known_ids = {scenario["id"] for scenario in all_scenarios}
@@ -5417,13 +5441,18 @@ def main() -> int:
     if requested_ids:
         for scenario in scenarios:
             for extension in (".png", ".txt", ".json"):
-                (SCREENSHOT_DIR / f"{scenario['id']}{extension}").unlink(missing_ok=True)
-            for stale in SCREENSHOT_DIR.glob(f"{glob.escape(scenario['id'])}-*"):
-                if stale.suffix in {".png", ".json"} and stale.name[len(scenario["id"]) + 1:-len(stale.suffix)] in STEP_NAMES:
+                (VISUAL_SCREENSHOT_DIR / f"{scenario['id']}{extension}").unlink(missing_ok=True)
+            for stale in VISUAL_SCREENSHOT_DIR.glob(f"{glob.escape(scenario['id'])}--*"):
+                if stale.suffix in {".png", ".json"} and stale.name[len(scenario["id"].split("/")[-1]) + 2:-len(stale.suffix)] in STEP_NAMES:
                     stale.unlink()
     else:
-        for stale in [*SCREENSHOT_DIR.glob("*.png"), *SCREENSHOT_DIR.glob("*.txt"), *SCREENSHOT_DIR.glob("*.json")]:
+        # The whole visual tree is regenerated; the flat files of the pre-B2a layout are purged too.
+        for stale in [*VISUAL_SCREENSHOT_DIR.rglob("*.png"), *VISUAL_SCREENSHOT_DIR.rglob("*.txt"), *VISUAL_SCREENSHOT_DIR.rglob("*.json"),
+                      *SCREENSHOT_DIR.glob("*.png"), *SCREENSHOT_DIR.glob("*.txt"), *SCREENSHOT_DIR.glob("*.json")]:
             stale.unlink()
+        for report_directory in (FIRST_GAP_REPORT_DIR, WIDTH_BREAK_REPORT_DIR):
+            for stale in report_directory.rglob("*.json"):
+                stale.unlink()
 
     failures: list[Failure] = []
     results: list[dict] = []
@@ -5515,7 +5544,7 @@ def main() -> int:
       if result.get("screenshotOf") is None and not result.get("capture"):
         index.append(f"{result['sequence']}. **{result['status']}** {result['id']} (assertion-only: no screenshot)")
       else:
-        index.append(f"{result['sequence']}. **{result['status']}** [{result['id']}]({canonical}.png) [notes]({canonical}.json){alias}")
+        index.append(f"{result['sequence']}. **{result['status']}** [{result['id']}](visual/{canonical}.png) [notes](visual/{canonical}.json){alias}")
       index.append(f"   {result['expectedContent']}")
       for detail in result["failures"]:
         index.append(f"   Failure: {detail}")

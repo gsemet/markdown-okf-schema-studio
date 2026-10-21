@@ -42,7 +42,8 @@ work with Markdown-It 14. Revisit these corrections when updating `myst-to-html`
 `just clean` removes compiled output, reports, the generated Pages site, VSIX packages,
 generated README gallery captures, and Python test caches. Dependencies, `.env`, manual images,
 and source fixtures are preserved. Campaign screenshots are generated under
-`out/reports/e2e/screenshots/`; the obsolete `test/visual/screenshots/` directory is not tracked.
+`out/reports/e2e/screenshots/` (static-page scenarios in `visual/<group>/`, named
+`vNN-<slug>-<theme>-<width>.png`, step captures `…--<step>.png`); the obsolete `test/visual/screenshots/` directory is not tracked.
 
 `just mr-proper` also removes `.env`, `node_modules/`, `.venv/`, the downloaded VS Code test
 runtime, and local tool caches. It returns the local build environment to an uninstalled checkout.
