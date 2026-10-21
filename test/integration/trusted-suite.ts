@@ -15,6 +15,7 @@ import { run as runPreviewEditing } from "./previewEditing.test";
 import { run as runImagePicker } from "./imagePicker.test";
 import { run as runImagePaste } from "./imagePaste.test";
 import { run as runIncomingChanges } from "./incomingChanges.test";
+import { run as runCommentAnchors } from "./commentAnchors.test";
 import { run as runCommentWrite } from "./commentWrite.test";
 import { run as runReviewComments } from "./reviewComments.test";
 import { run as runBlockMove } from "./blockMove.test";
@@ -118,6 +119,7 @@ export async function run(): Promise<void> {
   await runIncomingChanges();
   await runReviewComments();
   await runCommentWrite();
+  await runCommentAnchors();
   await runGenericMarkdown();
   await runDirtySnapshots();
   await runSourceMapping();

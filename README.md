@@ -128,6 +128,12 @@ list. A thread whose block and quote can no longer be found is never dropped: it
 **Orphaned comments** at the end of the preview, with its quote, and you can open it from there
 to resolve or delete it. Read-only previews show neither button.
 
+Threads follow the text. Edits move them in memory, and the moved lines are written to the comments
+file when you save the document (never while typing, never creating a file). When the document is
+opened or changed outside the editor, each quote is searched again, near its old place first; a
+match that is not clear is not guessed, the thread becomes orphaned. Renaming a document renames
+its comments file too, unless one with the new name exists.
+
 ```json
 {
   "version": 1,

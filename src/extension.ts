@@ -5,6 +5,12 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 
 import { BuildQueue, BuildQueueState } from "./build/buildQueue";
+import {
+  createDocumentIndex,
+  reanchorThreads,
+  shiftThreadLines,
+  toLineChanges,
+} from "./comments/anchoring";
 import { resolveAuthor } from "./comments/author";
 import {
   addReply,
@@ -316,8 +322,17 @@ interface ActivePreview {
   commentPosts: number;
   /** Test hook: the last previewCommentResult posted to the page. */
   lastCommentResult?: { ok: boolean; reason?: string; kind: string; threadId?: string };
-  /** Test hook: the last previewComments posted to the page. */
-  lastComments?: CommentThread[];
+  /** Test hook: the last previewComments posted to the page (each thread carries the T45 `orphaned` flag). */
+  lastComments?: Array<CommentThread & { orphaned?: boolean }>;
+  /**
+   * T45: the threads as the page shows them. Built from the sidecar text with hash `diskHash`: the
+   * anchors are checked against the document text (re-anchoring) and then follow the edits in memory
+   * (`shiftThreadLines`). Never written per keystroke; saved with the document, see
+   * `persistCommentAnchors`. Dropped when the sidecar changes or the document reloads.
+   */
+  commentView?: { diskHash: string; threads: CommentThread[]; orphaned: Set<string> };
+  /** Hash of the sidecar text our own last comment write produced: the view's lines are valid for it. */
+  commentHintHash?: string;
   /** Test hook: the last previewHistoryState posted to the page. */
   lastHistoryState?: { canBack: boolean; canForward: boolean };
   linkDiscoveries?: Map<string, Promise<readonly string[]>>;
@@ -3033,10 +3048,10 @@ async function postComments(preview: ActivePreview): Promise<void> {
   const hash = text === undefined ? undefined : hashText(text);
   if (hash !== undefined && hash === preview.commentsTextHash && preview.commentsPosted !== undefined) return;
   preview.commentsTextHash = hash;
-  let threads: CommentThread[] = [];
+  let stored: CommentThread[] = [];
   if (text !== undefined) {
     const parsed = parseSidecar(text);
-    threads = parsed.threads;
+    stored = parsed.threads;
     if (parsed.errors.length > 0 && preview.commentsWarned !== text) {
       preview.commentsWarned = text;
       void vscode.window.showWarningMessage(
@@ -3044,6 +3059,34 @@ async function postComments(preview: ActivePreview): Promise<void> {
       );
     }
   }
+  // T45: the page gets the live anchors. Same sidecar text as the last time: the in-memory view that
+  // followed the edits. New or changed text: check every anchor against the document (re-anchoring).
+  let live = stored;
+  let orphaned = new Set<string>();
+  if (stored.length === 0 || hash === undefined) {
+    preview.commentView = undefined;
+  } else if (preview.commentView?.diskHash === hash) {
+    live = preview.commentView.threads;
+    orphaned = preview.commentView.orphaned;
+  } else {
+    const documentText = await currentDocumentText(documentPath);
+    if (preview.disposed || preview.stage !== stage || sequence !== preview.commentsSeq) return;
+    if (documentText !== undefined) {
+      // After one of our own comment writes the lines followed in memory are the better start;
+      // after any other change of the file the stored lines are.
+      const known = preview.commentHintHash === hash ? preview.commentView?.threads : undefined;
+      const hints = new Map((known ?? []).map((thread) => [thread.id, thread.anchor]));
+      const start = stored.map((thread) => {
+        const hint = hints.get(thread.id);
+        return hint ? { ...thread, anchor: { ...thread.anchor, line: hint.line, endLine: hint.endLine } } : thread;
+      });
+      const outcome = reanchorThreads(documentText, start);
+      live = outcome.threads;
+      orphaned = outcome.orphaned;
+    }
+    preview.commentView = { diskHash: hash, threads: live, orphaned };
+  }
+  const threads = live.map((thread) => ({ ...thread, orphaned: orphaned.has(thread.id) }));
   if (threads.length === 0 && !preview.commentsShown) return;
   // The same threads again (every render asks): nothing to tell the page.
   const serialized = JSON.stringify(threads);
@@ -3059,6 +3102,157 @@ async function postComments(preview: ActivePreview): Promise<void> {
     documentVersion: stage.activeDocumentVersion,
     requestId: stage.requestId,
   });
+}
+
+/** The text of the document: the open buffer when there is one, else the file (bounded size). */
+async function currentDocumentText(documentPath: string): Promise<string | undefined> {
+  const open = vscode.workspace.textDocuments.find((candidate) =>
+    candidate.uri.scheme === "file" && candidate.uri.fsPath === documentPath);
+  if (open) return open.getText();
+  try {
+    const uri = vscode.Uri.file(documentPath);
+    if ((await vscode.workspace.fs.stat(uri)).size > 8 * 1024 * 1024) return undefined;
+    return new TextDecoder().decode(await vscode.workspace.fs.readFile(uri));
+  } catch {
+    return undefined;
+  }
+}
+
+/** T45: the threads follow the edits in memory; nothing is written while typing. */
+function shiftCommentsForEdits(event: vscode.TextDocumentChangeEvent): void {
+  const documentIdentity = documentKey(event.document);
+  for (const preview of activePreviews) {
+    const view = preview.commentView;
+    if (!view || preview.documentUri !== documentIdentity) continue;
+    if (event.document.isDirty) {
+      // Contents of one event are all in the coordinates of the text before it, in any order.
+      preview.commentView = { ...view, threads: shiftThreadLines(view.threads, toLineChanges(event.contentChanges)) };
+    } else {
+      // A clean document changed: reload from disk, a revert or an undo to the saved text. Check again.
+      preview.commentView = undefined;
+    }
+    scheduleComments(preview);
+  }
+}
+
+const ANCHORS_UNCHANGED = "no anchor moved";
+let lastAnchorWarning: string | undefined;
+
+/**
+ * T45: saves the moved anchors with the document. Runs on save only, through the same per-file queue
+ * as every comment write, so it honours its refusals: an invalid sidecar is left untouched, and so
+ * is one with unsaved changes in an editor. A sidecar that does not exist is never created, nothing
+ * is written when no anchor moved, and a thread that could not be placed keeps its stored lines.
+ * The in-memory lines of the previews are the starting point of the search (the edits that moved
+ * the text are known there), the saved text decides.
+ */
+async function persistCommentAnchors(document: vscode.TextDocument): Promise<void> {
+  if (document.uri.scheme !== "file") return;
+  const documentIdentity = documentKey(document);
+  const previews = [...activePreviews].filter((preview) =>
+    !preview.disposed && !preview.readOnly && preview.documentUri === documentIdentity);
+  if (previews.length === 0) return;
+  const documentPath = document.uri.fsPath;
+  const sidecar = path.join(path.dirname(documentPath), sidecarNameFor(path.basename(documentPath)));
+  const open = vscode.workspace.textDocuments.find((candidate) =>
+    candidate.uri.scheme === "file" && candidate.uri.fsPath === sidecar);
+  if (open?.isDirty) {
+    // Worth a warning only when there are threads that could have moved.
+    if (previews.some((preview) => (preview.commentView?.threads.length ?? 0) > 0)) {
+      warnAnchorsNotSaved(`${path.basename(sidecar)} has unsaved changes in an editor.`);
+    }
+    return;
+  }
+  const hints = new Map<string, { line: number; endLine: number }>();
+  for (const preview of previews) {
+    for (const thread of preview.commentView?.threads ?? []) {
+      if (!hints.has(thread.id)) hints.set(thread.id, { line: thread.anchor.line, endLine: thread.anchor.endLine });
+    }
+  }
+  const index = createDocumentIndex(document.getText());
+  let orphaned = new Set<string>();
+  const result = await commentStore.update(sidecar, path.basename(documentPath), (threads) => {
+    const hinted = threads.map((thread) => {
+      const hint = hints.get(thread.id);
+      return hint ? { ...thread, anchor: { ...thread.anchor, ...hint } } : thread;
+    });
+    const outcome = reanchorThreads(index, hinted);
+    orphaned = outcome.orphaned;
+    let moved = false;
+    const next = threads.map((thread, position) => {
+      if (outcome.orphaned.has(thread.id)) return thread;
+      const { line, endLine } = outcome.threads[position].anchor;
+      if (line === thread.anchor.line && endLine === thread.anchor.endLine) return thread;
+      moved = true;
+      return { ...thread, anchor: { ...thread.anchor, line, endLine } };
+    });
+    return moved ? next : ANCHORS_UNCHANGED;
+  });
+  if (result.ok) {
+    lastAnchorWarning = undefined;
+    const written = parseSidecar(result.text).threads;
+    for (const preview of previews) {
+      preview.commentView = { diskHash: result.hash, threads: written, orphaned };
+      scheduleComments(preview);
+    }
+    return;
+  }
+  // Silent: nothing moved, or the file is invalid (the preview already warned about it once).
+  if (result.reason === ANCHORS_UNCHANGED || result.reason.startsWith("the comments file is not valid")) return;
+  warnAnchorsNotSaved(result.reason);
+}
+
+function warnAnchorsNotSaved(reason: string): void {
+  if (lastAnchorWarning === reason) return;
+  lastAnchorWarning = reason;
+  void vscode.window.showWarningMessage(`The review comments were not re-anchored in their file: ${reason}`);
+}
+
+/**
+ * T45: a renamed or moved document takes its comments file along and names itself in it. Nothing
+ * is overwritten: when the new comments file exists, or the old one is not valid, belongs to another
+ * document or has unsaved changes in an editor, it stays where it is and a warning says so.
+ */
+async function moveCommentSidecars(event: vscode.FileRenameEvent): Promise<void> {
+  for (const { oldUri, newUri } of event.files) {
+    if (oldUri.scheme !== "file" || newUri.scheme !== "file") continue;
+    const oldName = path.basename(oldUri.fsPath);
+    const newName = path.basename(newUri.fsPath);
+    if (oldName.endsWith(".comments.json")) continue;
+    const oldSidecar = path.join(path.dirname(oldUri.fsPath), sidecarNameFor(oldName));
+    const newSidecar = path.join(path.dirname(newUri.fsPath), sidecarNameFor(newName));
+    if (oldSidecar === newSidecar) continue;
+    try {
+      if ((await vscode.workspace.fs.stat(newUri)).type & vscode.FileType.Directory) continue;
+      const oldText = await readCommentSidecarText(oldSidecar);
+      if (oldText === undefined) continue;
+      const parsed = parseSidecar(oldText);
+      if (parsed.errors.length === 0 && parsed.document !== oldName) continue;
+      const keep = (reason: string): void => {
+        void vscode.window.showWarningMessage(
+          `The review comments of ${oldName} stay in ${path.basename(oldSidecar)}: ${reason}`,
+        );
+      };
+      if (parsed.errors.length > 0) {
+        keep("that file is not valid.");
+        continue;
+      }
+      if (await readCommentSidecarText(newSidecar) !== undefined) {
+        keep(`${path.basename(newSidecar)} already exists.`);
+        continue;
+      }
+      const open = vscode.workspace.textDocuments.find((candidate) =>
+        candidate.uri.scheme === "file" && candidate.uri.fsPath === oldSidecar);
+      if (open?.isDirty) {
+        keep("it has unsaved changes in an editor.");
+        continue;
+      }
+      await vscode.workspace.fs.rename(vscode.Uri.file(oldSidecar), vscode.Uri.file(newSidecar), { overwrite: false });
+      await commentStore.update(newSidecar, newName, (threads) => threads, { renameDocument: true });
+    } catch (error) {
+      console.error("Failed to move the review comments with the renamed document.", error);
+    }
+  }
 }
 
 /** Posts again when the sidecar is created, changed or deleted. */
@@ -3148,6 +3342,7 @@ async function writeComment(
   const now = new Date();
   const result = await commentStore.update(sidecar, path.basename(documentPath), change(author, now));
   if (!result.ok) return refuse(`${result.reason}.`);
+  preview.commentHintHash = result.hash;
   await postComments(preview);
   return { ok: true };
 }
@@ -3817,6 +4012,7 @@ function recoverMissingSource(preview: ActivePreview): void {
 }
 
 function handleRenames(event: vscode.FileRenameEvent): void {
+  void moveCommentSidecars(event);
   for (const preview of activePreviews) {
     const activePath = preview.document?.uri.fsPath ?? vscode.Uri.parse(preview.documentUri).fsPath;
     for (const file of event.files) {
@@ -4525,8 +4721,14 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidChangeTextDocument((event) => {
       if (event.contentChanges.length > 0) {
         shiftAnchorsForEdits(event);
+        shiftCommentsForEdits(event);
         refreshPreview(event.document);
       }
+    }),
+    vscode.workspace.onDidSaveTextDocument((document) => {
+      void persistCommentAnchors(document).catch((error: unknown) => {
+        console.error("Failed to save the moved review comment anchors.", error);
+      });
     }),
     vscode.workspace.onDidGrantWorkspaceTrust(() => {
       for (const preview of activePreviews) scheduleIncomingChanges(preview, 0);
@@ -4661,7 +4863,7 @@ export function getActivePreviewForTests():
     pendingOverlayShown: number;
     incomingChanges: { posts: number; last?: { enabled: boolean; ranges: { start: number; end: number }[] } };
     /** Review comment threads posted to the page (T42). */
-    comments: { posts: number; last?: CommentThread[]; result?: { ok: boolean; reason?: string; kind: string; threadId?: string } };
+    comments: { posts: number; last?: Array<CommentThread & { orphaned?: boolean }>; result?: { ok: boolean; reason?: string; kind: string; threadId?: string } };
     /** Navigation history of the panel and the last state posted to the page. */
     history: {
       entries: { uri: string; line: number }[];

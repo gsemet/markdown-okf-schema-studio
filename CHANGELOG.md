@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Review comments follow the text: when you edit the document, threads move with their lines, and
+  a moved or reloaded document looks for each quote again (nearby first, then everywhere; only a
+  clear match counts, otherwise the thread is listed as orphaned and stays in the file). Moved
+  lines are saved to the comments file when you save the document, never while typing. Renaming
+  a document renames its comments file too (an existing one is never overwritten).
 - Review comments: the thread popover has **Resolve** / **Reopen** and **Delete** (it asks "Delete
   thread?" with Yes and No in the popover). Threads whose text can no longer be found are listed
   in an "Orphaned comments" box at the end of the preview, with their quote, and stay in the file
