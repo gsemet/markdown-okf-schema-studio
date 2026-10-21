@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import re
+import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -36,20 +39,44 @@ def latest_real_input_directory() -> Path:
     return directory
 
 
-def render(crop: Crop) -> None:
+def render(crop: Crop, output: Path = OUTPUT) -> None:
     if not crop.source.is_file():
         raise FileNotFoundError(f"required E2E capture is missing: {crop.source}")
     with Image.open(crop.source) as source:
         image = source.convert("RGB").crop(crop.box)
         height = round(image.height * crop.width / image.width)
         image = image.resize((crop.width, height), Image.Resampling.LANCZOS)
-        image.save(OUTPUT / crop.destination, optimize=True)
+        image.save(output / crop.destination, optimize=True)
 
 
-def main() -> None:
-    real_input = latest_real_input_directory()
-    OUTPUT.mkdir(parents=True, exist_ok=True)
-    crops = [
+def pixels_equal(first: Path, second: Path) -> bool:
+    with Image.open(first) as left, Image.open(second) as right:
+        return left.convert("RGB").size == right.convert("RGB").size \
+            and left.convert("RGB").tobytes() == right.convert("RGB").tobytes()
+
+
+def check(baseline: Path) -> int:
+    """Re-render the images whose source is a visual (static page) capture into a temp directory
+    and compare them pixel for pixel with the images of `baseline`. Real-window sources are skipped."""
+    crops = [crop for crop in build_crops(None) if crop.source.is_relative_to(SCREENSHOTS)
+             and crop.source.parent == SCREENSHOTS]
+    differences = 0
+    with tempfile.TemporaryDirectory() as temporary:
+        for crop in crops:
+            render(crop, Path(temporary))
+            expected = baseline / crop.destination
+            if not expected.is_file() or not pixels_equal(Path(temporary) / crop.destination, expected):
+                print(f"DIFFERS: {crop.destination} (source {crop.source.name})")
+                differences += 1
+            else:
+                print(f"identical: {crop.destination}")
+    print(f"{len(crops)} visual-sourced README images checked, {differences} differences")
+    return 1 if differences else 0
+
+
+def build_crops(real_input: Path | None) -> list[Crop]:
+    real_input = real_input or SCREENSHOTS / "_real-input-unavailable"
+    return [
         Crop(real_input / "05-open-with-editor.png", "open-with-editor.png", (250, 55, 1400, 470), 760),
         Crop(real_input / "36-title-bar-button.png", "open-preview-to-side.png", (40, 35, 1390, 430), 760),
         Crop(real_input / "39-quick-open-beside-preview.png", "preview-beside-editor.png", (45, 35, 1395, 420), 760),
@@ -66,10 +93,23 @@ def main() -> None:
         Crop(SCREENSHOTS / "toolbar-rows-collapsed-cream-900.png", "toolbar-collapsed.png", (1440, 0, 1800, 260), 360),
         Crop(SCREENSHOTS / "slash-menu-gfm-light.png", "slash-menu.png", (140, 780, 1660, 1800), 760),
     ]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", type=Path, metavar="BASELINE_DIR",
+                        help="compare the visual-sourced images with this directory instead of writing images/readme")
+    arguments = parser.parse_args()
+    if arguments.check is not None:
+        return check(arguments.check)
+    real_input = latest_real_input_directory()
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    crops = build_crops(real_input)
     for crop in crops:
         render(crop)
     print(f"Generated {len(crops)} README images in {OUTPUT.relative_to(ROOT)}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -33,7 +33,8 @@ import {
   createPreviewResourcePolicy,
   resourceReferenceSuffix,
 } from "../../src/security/resource-policy";
-import { SCENARIOS, scenarioGroup } from "./scenarios";
+import { SCENARIOS } from "./scenarios";
+import { GROUPS, groupIndex } from "../shared/e2eGroups";
 import { THEMES } from "./themes";
 import { VISUAL_REPORT_ROOT } from "../reportPaths";
 
@@ -254,16 +255,13 @@ async function main(): Promise<void> {
     diagnostics: [...new Set(notes)],
     completedAt: new Date().toISOString(),
     pageDirectory,
+    groups: GROUPS,
+    // Group order, then declaration order in scenarios.ts (the sort is stable).
     scenarios: [...SCENARIOS].sort((first, second) =>
-      scenarioGroup(first).localeCompare(scenarioGroup(second))
-      || first.fixture.localeCompare(second.fixture)
-      || (first.previewThemeMode ?? first.theme).localeCompare(second.previewThemeMode ?? second.theme)
-      || first.width - second.width
-      || first.height - second.height
+      groupIndex(first.group) - groupIndex(second.group)
     ).map((scenario, index) => ({
       ...scenario,
       sequence: index + 1,
-      group: scenarioGroup(scenario),
       page: `${scenario.fixture}--${scenario.theme}--sticky-${scenario.stickyHeadingDepth ?? DEFAULT_PREVIEW_CONFIGURATION.stickyHeadingDepth}--${scenario.plantumlExpectation ?? "default"}.html`,
       themeLabel: THEMES.find((theme) => theme.id === scenario.theme)?.label ?? scenario.theme,
     })),
