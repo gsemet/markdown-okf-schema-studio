@@ -2073,9 +2073,11 @@ nav[data-sphinx-preview-toc] [data-sphinx-preview-toc-empty] {
   opacity: 0.7;
 }
 
-/* Full width: no column limit. A large pixel width keeps the sticky band padding math valid. */
+/* Full width: no column limit. A large pixel width keeps the sticky band padding math valid. The side
+   margin is the 16 px gutter a table keeps when it breaks out in Auto, so both modes line up. */
 html[data-sphinx-preview-width="full"] {
   --sphinx-preview-column-width: 100000px;
+  --sphinx-preview-content-gutter: 16px;
 }
 
 /* Auto: a table, figure, image or code block wider than the column breaks out, centred on the

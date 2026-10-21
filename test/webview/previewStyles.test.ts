@@ -743,6 +743,11 @@ test("T08: zoom scales the content font size and the column width together", () 
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 96px;/u);
 });
 
+test("P7: full width uses the 16 px gutter a broken-out table keeps in auto", () => {
+  assert.match(PREVIEW_THEME_CSS,
+    /html\[data-sphinx-preview-width="full"\]\s*\{[^}]*--sphinx-preview-content-gutter: 16px;/u);
+});
+
 test("T10: full width lifts the column limit and auto lets flagged elements break out", () => {
   assert.match(PREVIEW_THEME_CSS,
     /html\[data-sphinx-preview-width="full"\]\s*\{[^}]*--sphinx-preview-column-width: 100000px;/u);
