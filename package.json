@@ -148,6 +148,12 @@
           "markdownDescription": "Marks the blocks you changed since the last Git commit with a green bar on their left, like the editor gutter. It compares the file, unsaved edits included, with the version in `HEAD` using the built-in Git extension. **On**: changed blocks are marked and the toolbar toggle for the marks is shown. **Off**: no marks and no toggle. Files that are not in Git show nothing.",
           "order": 22
         },
+        "markdownOkfSchemaStudio.comments.authorName": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "The name stored with the review comments you write in the preview. **Empty** (default): your Git `user.name` is used, and when Git has none, your operating system user name. **A name**: that name is used as it is, up to 100 characters.",
+          "order": 50
+        },
         "markdownOkfSchemaStudio.editing.defaultPaletteMode": {
           "type": "string",
           "enum": [

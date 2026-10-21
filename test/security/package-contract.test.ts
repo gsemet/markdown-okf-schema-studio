@@ -94,6 +94,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.deepEqual(
     Object.keys(packageJson.contributes.configuration.properties).sort(),
     [
+      "markdownOkfSchemaStudio.comments.authorName",
       "markdownOkfSchemaStudio.editing.defaultPaletteMode",
       "markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks",
       "markdownOkfSchemaStudio.frontmatter.bundleRoot",
@@ -119,6 +120,15 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(showComments.default, true);
   assert.equal(showComments.order, 21);
   assert.match(showComments.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
+  const authorName = packageJson.contributes.configuration.properties[
+    "markdownOkfSchemaStudio.comments.authorName"
+  ] as { type: string; default: string; order: number; markdownDescription: string; description?: string };
+  assert.equal(authorName.type, "string");
+  assert.equal(authorName.default, "");
+  assert.equal(authorName.order, 50);
+  assert.match(authorName.markdownDescription, /Git/u);
+  assert.match(authorName.markdownDescription, /empty/iu);
+  assert.match(authorName.markdownDescription, /user name/iu);
   const showIncomingChanges = packageJson.contributes.configuration.properties[
     "markdownOkfSchemaStudio.preview.showIncomingChanges"
   ] as { type: string; default: boolean; order: number; markdownDescription: string };

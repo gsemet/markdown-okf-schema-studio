@@ -2384,6 +2384,103 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   overflow-wrap: anywhere;
 }
 
+/* Comment button of a text selection, the box that writes a comment, and the reply box (T43). */
+button[data-okf-comment-create] {
+  position: fixed;
+  z-index: 50;
+  padding: 2px 10px;
+  border: 1px solid var(--vscode-button-border, transparent);
+  border-radius: 3px;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  box-shadow: 0 2px 6px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+button[data-okf-comment-create]:hover {
+  background: var(--vscode-button-hoverBackground, var(--vscode-button-background));
+}
+
+[data-okf-comment-compose] {
+  position: fixed;
+  z-index: 51;
+  box-sizing: border-box;
+  width: min(320px, calc(100vw - 16px));
+  padding: 8px 10px;
+  border: 1px solid var(--vscode-editorWidget-border, var(--vscode-focusBorder, #454545));
+  border-radius: 4px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  color: var(--vscode-editorWidget-foreground, var(--vscode-editor-foreground));
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
+  font-size: 0.9em;
+}
+
+[data-okf-comment-compose] [data-okf-comment-quote] {
+  max-height: 4.5em;
+  margin-bottom: 6px;
+  overflow: hidden;
+  opacity: 0.7;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+[data-okf-comment-compose] textarea,
+[data-okf-comment-popover] textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 3.2em;
+  resize: vertical;
+  padding: 4px 6px;
+  border: 1px solid var(--vscode-input-border, rgba(128, 128, 128, 0.5));
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  font: inherit;
+}
+
+[data-okf-comment-compose] textarea:focus,
+[data-okf-comment-popover] textarea:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+[data-okf-comment-compose] [data-okf-comment-actions],
+[data-okf-comment-popover] [data-okf-comment-reply] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+[data-okf-comment-popover] [data-okf-comment-reply] {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+}
+
+[data-okf-comment-popover] [data-okf-comment-reply] textarea {
+  flex: 1 1 100%;
+}
+
+[data-okf-comment-compose] button,
+[data-okf-comment-popover] [data-okf-comment-reply] button {
+  padding: 2px 10px;
+  border: 1px solid var(--vscode-button-border, transparent);
+  border-radius: 3px;
+  background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.25));
+  color: var(--vscode-button-secondaryForeground, inherit);
+  font: inherit;
+  cursor: pointer;
+}
+
+[data-okf-comment-compose] button[data-okf-comment-compose-save],
+[data-okf-comment-popover] button[data-okf-comment-reply-send] {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
 /* Toolbar Diff button off: the marks go away at once; the host stops sending ranges. */
 html[data-sphinx-preview-incoming="off"] #sphinx-myst-preview-content [data-sphinx-preview-changed] {
   box-shadow: none;

@@ -191,3 +191,25 @@ test("T38: previewPasteImage caps the size and accepts plain base64 of an allowe
     assert.equal(isRegisteredPreviewMessage({ ...base, ...patch }), false, JSON.stringify(patch).slice(0, 60));
   }
 });
+
+test("T43: previewCommentCreate and previewCommentReply validate anchor, id and body limits", () => {
+  const anchor = { line: 2, endLine: 3, quote: "q", prefix: "p", suffix: "s" };
+  const create = { type: "previewCommentCreate", documentId: "doc", documentVersion: 1, requestId: 1, anchor, body: "Why?" };
+  assert.equal(isRegisteredPreviewMessage(create), true);
+  assert.equal(isRegisteredPreviewMessage({ ...create, body: "x".repeat(10_000) }), true);
+  for (const patch of [
+    { body: "" }, { body: "x".repeat(10_001) }, { body: 5 }, { body: undefined },
+    { anchor: undefined }, { anchor: null }, { anchor: { ...anchor, line: 0 } },
+    { anchor: { ...anchor, endLine: 1 } }, { anchor: { ...anchor, quote: "q".repeat(501) } },
+    { anchor: { ...anchor, prefix: "p".repeat(33) } }, { anchor: { ...anchor, suffix: "s".repeat(33) } },
+    { anchor: { ...anchor, quote: 1 } },
+  ]) {
+    assert.equal(isRegisteredPreviewMessage({ ...create, ...patch }), false, JSON.stringify(patch).slice(0, 60));
+  }
+  const reply = { type: "previewCommentReply", documentId: "doc", documentVersion: 1, requestId: 1, threadId: "t_0a0b0c0d", body: "Because" };
+  assert.equal(isRegisteredPreviewMessage(reply), true);
+  for (const patch of [{ body: "" }, { body: "x".repeat(10_001) }, { threadId: "" }, { threadId: 3 },
+    { threadId: "t".repeat(10_001) }, { threadId: undefined }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...reply, ...patch }), false, JSON.stringify(patch).slice(0, 60));
+  }
+});

@@ -1,10 +1,26 @@
 import * as fs from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 
 import * as vscode from "vscode";
 
 import { BuildQueue, BuildQueueState } from "./build/buildQueue";
-import { MAX_SIDECAR_BYTES, parseSidecar, sidecarNameFor, type CommentThread } from "./comments/commentModel";
+import { resolveAuthor } from "./comments/author";
+import {
+  addReply,
+  addThread,
+  isValidAnchor,
+  MAX_SIDECAR_BYTES,
+  normalizeBody,
+  parseSidecar,
+  sidecarNameFor,
+  type CommentThread,
+} from "./comments/commentModel";
+import { createCommentStore, hashText, newId } from "./comments/commentStore";
+import {
+  COMMENTS_CONFIGURATION_SECTION,
+  readCommentsConfiguration,
+} from "./configuration/commentsConfiguration";
 import {
   FRONTMATTER_CONFIGURATION_SECTION,
   FrontmatterConfiguration,
@@ -290,8 +306,14 @@ interface ActivePreview {
   commentsPosted?: string;
   /** Sidecar text already reported as invalid, so the warning appears once per content. */
   commentsWarned?: string;
+  /** Hash of the sidecar text last handled: a watcher event for the same text (our own write) is skipped. */
+  commentsTextHash?: string;
+  /** Counts reads of the sidecar; a read overtaken by a newer one posts nothing. */
+  commentsSeq: number;
   /** Test hook: how many previewComments messages were posted. */
   commentPosts: number;
+  /** Test hook: the last previewCommentResult posted to the page. */
+  lastCommentResult?: { ok: boolean; reason?: string; kind: string; threadId?: string };
   /** Test hook: the last previewComments posted to the page. */
   lastComments?: CommentThread[];
   /** Test hook: the last previewHistoryState posted to the page. */
@@ -623,7 +645,13 @@ function scrollContext(
   configuration: PreviewConfiguration = DEFAULT_PREVIEW_CONFIGURATION,
   initialAnchor?: number,
   initialPin?: { line: number; viewportTop: number },
-  toolbarState?: { pairedTextEditor: boolean; initialEditMode: boolean; initialPaletteMode: PaletteMode },
+  toolbarState?: {
+    pairedTextEditor: boolean;
+    initialEditMode: boolean;
+    initialPaletteMode: PaletteMode;
+    /** False in read-only previews: the page offers no Comment button and no reply box. */
+    commentsEnabled: boolean;
+  },
 ): PreviewRuntimeContext {
   return {
     documentId: stage.activeDocumentIdentity,
@@ -1001,6 +1029,7 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
       pairedTextEditor: visibleEditorFor(preview) !== undefined,
       initialEditMode: !preview.readOnly && editModeStorage?.get(EDIT_MODE_STORAGE_KEY) === true,
       initialPaletteMode: initialPaletteMode(),
+      commentsEnabled: !preview.readOnly,
     },
   );
   const localResourceRoots = [vscode.Uri.file(preview.workspaceRoot)];
@@ -2995,8 +3024,13 @@ async function postComments(preview: ActivePreview): Promise<void> {
   const documentPath = stage.activeDocumentPath;
   const sidecar = vscode.Uri.file(path.join(path.dirname(documentPath), sidecarNameFor(path.basename(documentPath))));
   watchCommentSidecar(preview, sidecar);
+  const sequence = ++preview.commentsSeq;
   const text = await readCommentSidecar(sidecar);
-  if (preview.disposed || preview.stage !== stage) return;
+  if (preview.disposed || preview.stage !== stage || sequence !== preview.commentsSeq) return;
+  // The same text again (the echo of our own write, a touch): nothing changed for the page.
+  const hash = text === undefined ? undefined : hashText(text);
+  if (hash !== undefined && hash === preview.commentsTextHash && preview.commentsPosted !== undefined) return;
+  preview.commentsTextHash = hash;
   let threads: CommentThread[] = [];
   if (text !== undefined) {
     const parsed = parseSidecar(text);
@@ -3048,6 +3082,132 @@ function scheduleComments(preview: ActivePreview, delay = COMMENTS_DEBOUNCE_MS):
       console.error("Failed to show the review comments.", error);
     });
   }, delay);
+}
+
+const commentStore = createCommentStore({
+  read: readCommentSidecarText,
+  write: async (file, text) => {
+    await vscode.workspace.fs.writeFile(vscode.Uri.file(file), new TextEncoder().encode(text));
+  },
+});
+
+/** The text of a sidecar, undefined when there is none; any other failure is thrown. */
+async function readCommentSidecarText(file: string): Promise<string | undefined> {
+  const uri = vscode.Uri.file(file);
+  try {
+    await vscode.workspace.fs.stat(uri);
+  } catch (error) {
+    if (error instanceof vscode.FileSystemError && error.code === "FileNotFound") return undefined;
+    if ((error as { code?: string } | undefined)?.code === "ENOENT") return undefined;
+    throw error;
+  }
+  return new TextDecoder().decode(await vscode.workspace.fs.readFile(uri));
+}
+
+type CommentOutcome = { ok: true } | { ok: false; reason: string };
+
+/**
+ * Writes a review comment (T43): a new thread on a selection or a reply. Refused in a read-only
+ * preview (untrusted workspace or no folder), for a document that is not a saved file, and while
+ * the comments file has unsaved changes in an editor. The author, the ids and the time are chosen
+ * here; the page sends only the anchor, the thread id of a reply and the text. The sidecar is
+ * changed through the per-file queue (read latest, apply, serialize, write), then posted to the
+ * page; the watcher event of our own write is skipped by the hash of the text. The caller always
+ * answers the page with the outcome, so typed text is never dropped silently.
+ */
+async function writeComment(
+  preview: ActivePreview,
+  change: (author: string, now: Date) => ((threads: CommentThread[]) => CommentThread[] | string),
+): Promise<CommentOutcome> {
+  const refuse = (reason: string): CommentOutcome => {
+    void vscode.window.showWarningMessage(`The comment was not saved: ${reason}`);
+    return { ok: false, reason };
+  };
+  if (preview.readOnly) return refuse("comments need a trusted workspace.");
+  const stage = preview.stage;
+  if (preview.disposed || !stage || !preview.documentUri.startsWith("file:")) {
+    return refuse("save the document first.");
+  }
+  const documentPath = stage.activeDocumentPath;
+  const sidecar = path.join(path.dirname(documentPath), sidecarNameFor(path.basename(documentPath)));
+  const open = vscode.workspace.textDocuments.find((candidate) =>
+    candidate.uri.scheme === "file" && candidate.uri.fsPath === sidecar);
+  if (open?.isDirty) {
+    return refuse(`${path.basename(sidecar)} has unsaved changes in an editor; save or close it first.`);
+  }
+  const documentUri = vscode.Uri.file(documentPath);
+  const author = await resolveAuthor({
+    setting: readCommentsConfiguration(vscode.workspace.getConfiguration(COMMENTS_CONFIGURATION_SECTION)).authorName,
+    gitName: () => headBaseline.userName(documentUri),
+    osUserName: () => os.userInfo().username,
+  });
+  const now = new Date();
+  const result = await commentStore.update(sidecar, path.basename(documentPath), change(author, now));
+  if (!result.ok) return refuse(`${result.reason}.`);
+  await postComments(preview);
+  return { ok: true };
+}
+
+/** Tells the page how a create or a reply ended; the text stays in the page until ok is true. */
+function postCommentResult(
+  preview: ActivePreview,
+  kind: "create" | "reply",
+  threadId: string | undefined,
+  outcome: CommentOutcome,
+): void {
+  const stage = preview.stage;
+  if (!stage || preview.disposed) return;
+  const result = {
+    ok: outcome.ok,
+    ...(outcome.ok ? {} : { reason: outcome.reason }),
+    kind,
+    ...(threadId !== undefined ? { threadId } : {}),
+  };
+  preview.lastCommentResult = result;
+  void preview.panel.webview.postMessage({
+    type: "previewCommentResult",
+    ...result,
+    documentId: stage.activeDocumentIdentity,
+    documentVersion: stage.activeDocumentVersion,
+    requestId: stage.requestId,
+  });
+}
+
+async function answerComment(
+  preview: ActivePreview,
+  kind: "create" | "reply",
+  threadId: string | undefined,
+  run: () => Promise<CommentOutcome>,
+): Promise<void> {
+  let outcome: CommentOutcome;
+  try {
+    outcome = await run();
+  } catch (error) {
+    outcome = { ok: false, reason: error instanceof Error ? error.message : String(error) };
+  }
+  postCommentResult(preview, kind, threadId, outcome);
+}
+
+function handleCommentCreate(preview: ActivePreview, message: RegisteredPreviewMessage): Promise<void> {
+  const body = normalizeBody(message.body);
+  const anchor = message.anchor;
+  return answerComment(preview, "create", undefined, async () => {
+    if (!isValidAnchor(anchor) || body === undefined) return { ok: false, reason: "the comment is empty or too long." };
+    return writeComment(preview, (author, now) => (threads) =>
+      addThread(threads, { threadId: newId("t_"), commentId: newId("c_"), anchor, author, body, now })
+        ?? "the comments file is full");
+  });
+}
+
+function handleCommentReply(preview: ActivePreview, message: RegisteredPreviewMessage): Promise<void> {
+  const body = normalizeBody(message.body);
+  const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
+  return answerComment(preview, "reply", threadId, async () => {
+    if (threadId === undefined || body === undefined) return { ok: false, reason: "the reply is empty or too long." };
+    return writeComment(preview, (author, now) => (threads) =>
+      addReply(threads, threadId, { commentId: newId("c_"), author, body, now })
+        ?? "the thread no longer exists or has too many comments");
+  });
 }
 
 function clearComments(preview: ActivePreview): void {
@@ -3214,6 +3374,9 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
   }
 }
 
+/** Registered messages that ignore the document version (see handlePreviewSyncMessage). */
+const COMMENT_MESSAGE_TYPES: ReadonlySet<string> = new Set(["previewCommentCreate", "previewCommentReply"]);
+
 const registeredMessageHandlers = new Map<
   string,
   (preview: ActivePreview, message: RegisteredPreviewMessage) => Thenable<void> | void
@@ -3254,6 +3417,8 @@ registeredMessageHandlers.set("previewListCitations", handleListCitations);
 registeredMessageHandlers.set("previewPickDocument", handlePickDocument);
 registeredMessageHandlers.set("previewPickImage", handlePickImage);
 registeredMessageHandlers.set("previewPasteImage", handlePasteImage);
+registeredMessageHandlers.set("previewCommentCreate", handleCommentCreate);
+registeredMessageHandlers.set("previewCommentReply", handleCommentReply);
 
 function initialPaletteMode(): PaletteMode {
   const stored = editModeStorage?.get(PALETTE_MODE_STORAGE_KEY);
@@ -3268,7 +3433,12 @@ function initialPaletteMode(): PaletteMode {
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
   if (isRegisteredPreviewMessage(value)) {
     const handler = registeredMessageHandlers.get(value.type);
-    if (!handler || !matchesCurrentPreview(preview, value)) {
+    // Comments live in the sidecar, not in the document text: a changed document version does not
+    // stale them (the quote re-anchors), and typed text must not be lost to a race with typing.
+    const candidate = COMMENT_MESSAGE_TYPES.has(value.type) && preview.stage
+      ? { ...value, documentVersion: preview.stage.activeDocumentVersion }
+      : value;
+    if (!handler || !matchesCurrentPreview(preview, candidate)) {
       return;
     }
     return Promise.resolve(handler(preview, value));
@@ -3412,6 +3582,7 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
       preview.commentsShown = false;
     }
     preview.commentsPosted = undefined;
+    preview.commentsTextHash = undefined;
     scheduleIncomingChanges(preview, 0);
     scheduleComments(preview, 0);
     return;
@@ -3928,6 +4099,7 @@ function createPreview(
     incomingEnabledPosted: true,
     incomingPosts: 0,
     commentsShown: false,
+    commentsSeq: 0,
     commentPosts: 0,
     disposed: false,
   };
@@ -4461,7 +4633,7 @@ export function getActivePreviewForTests():
     pendingOverlayShown: number;
     incomingChanges: { posts: number; last?: { enabled: boolean; ranges: { start: number; end: number }[] } };
     /** Review comment threads posted to the page (T42). */
-    comments: { posts: number; last?: CommentThread[] };
+    comments: { posts: number; last?: CommentThread[]; result?: { ok: boolean; reason?: string; kind: string; threadId?: string } };
     /** Navigation history of the panel and the last state posted to the page. */
     history: {
       entries: { uri: string; line: number }[];
@@ -4504,7 +4676,7 @@ export function getActivePreviewForTests():
     pendingOverlayVisible: activePreview.pendingOverlayVisible,
     pendingOverlayShown: activePreview.pendingOverlayShown,
     incomingChanges: { posts: activePreview.incomingPosts, last: activePreview.lastIncomingChanges },
-    comments: { posts: activePreview.commentPosts, last: activePreview.lastComments },
+    comments: { posts: activePreview.commentPosts, last: activePreview.lastComments, result: activePreview.lastCommentResult },
     history: {
       ...historyOf(activePreview).snapshot(),
       posted: activePreview.lastHistoryState,

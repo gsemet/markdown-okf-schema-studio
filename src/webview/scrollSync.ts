@@ -26,6 +26,7 @@ import { installHistoryControls } from "./historyControls";
 import { installTocColumn } from "./tocColumn";
 import { installChipToggle } from "./chipToggle";
 import { installIncomingChanges } from "./incomingChanges";
+import { installCommentCompose } from "./commentCompose";
 import { installCommentThreads } from "./commentThreads";
 import { installIncomingToggle } from "./incomingToggle";
 import { installViewControls } from "./viewControls";
@@ -55,6 +56,8 @@ export interface PreviewRuntimeContext extends ScrollContext {
   markEditorSelection?: boolean;
   doubleClickToSwitchToEditor?: boolean;
   stickyHeadingDepth?: number;
+  /** True in writable previews: the page offers the Comment button and the reply box (T43). */
+  commentsEnabled?: boolean;
   /** False hides the gray comment chips (preview.showComments). */
   showComments?: boolean;
   themeKind?: number;
@@ -109,7 +112,24 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const vscode = acquireVsCodeApi();
   // Review comments. Installed before every click handler below: a click on a highlight or badge
   // opens the popover and must not edit the block, follow a link or reveal the source.
-  const commentThreads = (${installCommentThreads.toString()})(document, window);
+  const postCommentMessage = (type, fields) => vscode.postMessage({
+    type,
+    documentId: context.documentId,
+    documentVersion: context.documentVersion,
+    requestId: context.requestId,
+    ...fields,
+  });
+  const commentsEnabled = context.commentsEnabled === true;
+  const commentThreads = (${installCommentThreads.toString()})(document, window, commentsEnabled
+    ? { reply: (threadId, body) => postCommentMessage("previewCommentReply", { threadId, body }) }
+    : undefined);
+  // The Comment button of a text selection (writable previews only, T43). Not shown while a block
+  // editor is open or blocks are selected; it never changes the selection.
+  const commentCompose = commentsEnabled ? (${installCommentCompose.toString()})(document, window, {
+    post: postCommentMessage,
+    busy: () => Boolean(activeBlockEdit || activeFrontmatterEdit || blockSelection.isActive()),
+    beforeOpen: () => commentThreads.close(),
+  }) : undefined;
   // Edit mode: a plain click on a link value edits its field; Cmd/Ctrl+click still navigates.
   // Registered before the link navigation so that it also runs first when listeners are not capturing.
   document.addEventListener("click", (event) => {
@@ -4684,6 +4704,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     if (sameContext(message) && message.type === "previewShowComments") {
       chipToggle.setShowComments(message.showComments !== false);
+      return;
+    }
+    if (sameContext(message) && message.type === "previewCommentResult") {
+      // The answer to a create or a reply: the compose box and the reply box keep the text until ok.
+      if (!commentCompose?.result(message)) commentThreads.result(message);
       return;
     }
     if (sameContext(message) && message.type === "previewComments") {

@@ -78,7 +78,8 @@ Markdown flavours and extensions:
   to the raw source, for instance to avoid rewrapping
   the entire document unnecessarily.
 - **Review comments:** threads stored in `<name>.comments.json` next to the document are
-  highlighted in the preview and open in a popover (see [Review Comments](#review-comments)).
+  highlighted in the preview and open in a popover; select text to start a thread and reply to
+  existing ones (see [Review Comments](#review-comments)).
 
 Checkboxes in task lists, paragraphs, and table cells are editable in place. In an untrusted
 workspace they remain read-only until the workspace is trusted.
@@ -109,8 +110,17 @@ A file named like the document with `.comments.json` instead of its extension, f
 quoted text of every thread, in preview and in edit mode; when the quote cannot be found in the
 block, a small badge marks the block instead. Click a highlight or a badge to read the thread in a
 popover: author, date, the comments as plain text, and a "Resolved" note for closed threads
-(dimmed). Code, diagrams, math and the properties table are never highlighted. This version only
-shows threads and never writes the file; a file that is not valid is ignored with a warning.
+(dimmed). Code, diagrams, math and the properties table are never highlighted. A file that is not
+valid is ignored with a warning and is never overwritten.
+
+To start a thread, select text in the preview: a small **Comment** button appears next to the
+selection (or press Cmd+Alt+M on macOS, Ctrl+Alt+M elsewhere). Write the comment in the box and
+press **Save** (Cmd/Ctrl+Enter); Escape cancels. The thread is saved in the comments file, which is
+created when it does not exist. A selection that spans several blocks is anchored from the first
+block to the end of the last one. To answer, open a thread and use its reply box. The button is not
+shown while a block editor is open, over code or the properties table, or in a read-only preview
+(untrusted workspace), where adding comments is refused. The name stored with a comment is the
+`comments.authorName` setting, else your Git `user.name`, else your operating system user name.
 
 ```json
 {
@@ -233,6 +243,8 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
 - `preview.showComments` (default on): show HTML comments as gray chips; click one (or press Enter
   or Space on it) to open the comment text in a box under the line. Off hides the gray chips in
   open previews at once. TODO chips always show.
+- `comments.authorName` (default empty): the name stored with the review comments you write in the
+  preview. Empty uses your Git `user.name`, then your operating system user name.
 - `preview.showIncomingChanges` (default on): mark blocks changed since the last Git commit
   (unsaved edits included) with a green bar on the left, like the editor gutter. Needs the built-in
   Git extension; files that are not in Git, and untrusted workspaces, show nothing. Off turns the
