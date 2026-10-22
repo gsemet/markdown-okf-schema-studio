@@ -2216,6 +2216,66 @@ test("table toolbar sits in the flow above the table with text labels and a posi
   assert.equal(section.childElements.includes(menu), false);
 });
 
+test("CR 034: the table toolbar rides down with a tall table and leaves with the table", () => {
+  const harness = createRuntimeHarness({ viewportHeight: 600 });
+  const section = new RuntimeElement({}, harness.windowState, 0, 3000, "section");
+  harness.body.appendChild(section);
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 200, 1200, "table");
+  section.appendChild(table);
+  const row = new RuntimeElement({}, harness.windowState, 200, 30, "tr");
+  row.rowIndex = 1;
+  table.appendChild(row);
+  const cell = new RuntimeElement({}, harness.windowState, 240, 30, "td");
+  cell.cellIndex = 0;
+  row.appendChild(cell);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
+  });
+  const menu = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-table-menu") === "true");
+  assert.ok(menu);
+  // The bar's natural place is just above the table (top 156 in the page); a shift moves it.
+  const shiftOf = (): number => Number.parseFloat(menu.style.getPropertyValue("--sphinx-preview-table-menu-shift")) || 0;
+  menu.rectProvider = () => {
+    const top = 156 - harness.windowState.scrollY + shiftOf();
+    return { top, bottom: top + 40, height: 40, left: 0, right: 200, width: 200 };
+  };
+  const scrollTo = (y: number): void => {
+    harness.windowState.scrollY = y;
+    harness.dispatchWindow("scroll");
+  };
+  scrollTo(0);
+  assert.equal(shiftOf(), 0, "table top in view: the bar stays above the table");
+  assert.equal(menu.getAttribute("data-sphinx-table-menu-stuck"), null);
+  scrollTo(400);
+  assert.ok(shiftOf() > 0, "table top scrolled out: the bar rides down");
+  assert.equal(menu.getAttribute("data-sphinx-table-menu-stuck"), "true");
+  const stuck = menu.getBoundingClientRect();
+  assert.ok(stuck.top >= 0 && (stuck.bottom ?? 0) <= 600, "the bar stays inside the viewport");
+  scrollTo(1250);
+  const leaving = menu.getBoundingClientRect();
+  assert.ok((leaving.bottom ?? 0) <= 200 + 1200 - 1250 + 0.5, "the bar never goes below the table's bottom");
+  scrollTo(0);
+  assert.equal(shiftOf(), 0, "back at the top the bar is back in place");
+  assert.equal(menu.getAttribute("data-sphinx-table-menu-stuck"), null);
+  assert.equal(menu.parentElement, section, "the bar is not moved in the flow");
+});
+
 function openTableForToolbarReveal(options: {
   cellTop: number;
   barTop: number;

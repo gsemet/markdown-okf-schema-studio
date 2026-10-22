@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The edit bar (format buttons or table row and column buttons) now stays in view while you edit a
+  tall block or table: it sits just above the block without covering its text, and when you
+  scroll so the top of the block is out of view it stays at the top of the viewport (below the
+  preview controls) until the block ends. It also stays visible in narrow panes (360 and 460 px),
+  where it wraps onto several rows inside the pane. The text and the cursor never move.
 - Long words and bare URLs now wrap inside their paragraph, list item, quote or table cell instead
   of widening the page and making it scroll horizontally.
 - An invalid Mermaid diagram now shows one error line, however many times the theme changes, with

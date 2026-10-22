@@ -56,6 +56,10 @@ Markdown flavours and extensions:
   clipboard is saved next to the document as `image.png`, `image-1.png`, … and inserted with its
   alt text selected). A select at its start
   (Cmd/Ctrl+Shift+M) chooses the Strict, GFM or MyST button set for the workspace.
+  The palette sits just above the text box, never over its text; when you scroll so the top of the
+  box is out of view, it stays at the top of the viewport (below the preview controls) until the
+  box ends, in narrow panes too, where it wraps inside the pane. The table toolbar of a cell
+  editor does the same above its table.
   In GitHub (GFM) and MyST mode it also adds GitHub alerts with a
   type list, task-list checkboxes, HTML tables, collapsible sections, footnotes, Mermaid diagrams,
   table column alignment and `<kbd>` keys; MyST mode adds admonitions with a type list,

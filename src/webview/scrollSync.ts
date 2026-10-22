@@ -8,6 +8,7 @@ import { createMarkdownTableTools } from "./markdownTable";
 import { createEditActions } from "./editActions";
 import { createEditPalette } from "./editPalette";
 import { caretRectOf, caretRevealDelta } from "./caretRect";
+import { stickyBarShift } from "./stickyBar";
 import { createSlashMenu } from "./slashMenu";
 import { createLinkPanel } from "./linkPanel";
 import { createFigureTools } from "./figureDirective";
@@ -97,6 +98,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const caretRectOf = ${caretRectOf.toString()};
   const createSlashMenu = ${createSlashMenu.toString()};
   const caretRevealDelta = ${caretRevealDelta.toString()};
+  const stickyBarShift = ${stickyBarShift.toString()};
   const createLinkPanel = ${createLinkPanel.toString()};
   const figureTools = (${createFigureTools.toString()})();
   const createFigurePanel = ${createFigurePanel.toString()};
@@ -2815,6 +2817,30 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (line !== undefined) anchor = { line, owner: anchor?.owner ?? "preview" };
   }
 
+  // CR 034: the table toolbar stays in view while a tall table scrolls. It keeps its place above the
+  // table (the table's text never moves) and is translated down to just under the sticky band or
+  // the preview controls, never past the table's bottom. A bar over 40% of the viewport stays put.
+  function syncTableMenuSticky(edit) {
+    const menu = edit.tableMenu;
+    const table = edit.selectedCell?.closest?.("table");
+    if (!menu || !table || edit.finishing || activeBlockEdit !== edit) return;
+    const bar = menu.getBoundingClientRect?.();
+    const tableRect = table.getBoundingClientRect?.();
+    if (!bar || !tableRect || !Number.isFinite(bar.top)) return;
+    const current = Number.parseFloat(menu.style?.getPropertyValue?.("--sphinx-preview-table-menu-shift")) || 0;
+    const natural = { top: bar.top - current, left: bar.left, right: bar.right, width: bar.width };
+    const small = bar.height <= window.innerHeight * 0.4;
+    // Only once the table's own top is under the band or the controls: while the table top is in
+    // view the bar keeps its place above the table and never covers a row.
+    const usable = toolbarUsableTop(natural);
+    const shift = small && tableRect.top < usable
+      ? stickyBarShift(natural.top, bar.height, usable, tableRect.bottom)
+      : 0;
+    if (shift > 0) menu.setAttribute("data-sphinx-table-menu-stuck", "true");
+    else menu.removeAttribute("data-sphinx-table-menu-stuck");
+    menu.style?.setProperty?.("--sphinx-preview-table-menu-shift", shift + "px");
+  }
+
   function renderTableCellEditor(edit) {
     const modelRowIndex = edit.tableRowIndex === 0 ? 0 : edit.tableRowIndex + 1;
     const row = edit.tableModel.rows[modelRowIndex];
@@ -2869,6 +2895,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         document.body.appendChild(menu);
       }
       edit.tableMenu = menu;
+      // The bar rides down with the page while its table scrolls (CR 034), and follows a resize.
+      edit.tableMenuPositionListener = () => syncTableMenuSticky(edit);
+      window.addEventListener("scroll", edit.tableMenuPositionListener, true);
+      window.addEventListener("resize", edit.tableMenuPositionListener);
       applyAnchor();
     }
     const actionButtons = [];
@@ -2988,6 +3018,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     cellActions.appendChild(createEditorButtons(edit));
     edit.element.appendChild(cellActions);
     resizeInput();
+    syncTableMenuSticky(edit);
     // stabilizeLayout (window and content resize) re-fits the field when the width changes.
     edit.resizeTextarea = resizeInput;
     edit.tableInput = input;

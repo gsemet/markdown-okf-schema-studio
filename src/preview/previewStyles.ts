@@ -802,6 +802,15 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
 }
 
+/* CR 034: while its table scrolls, the runtime translates the bar down to just under the sticky band
+   or the preview controls (never past the table's bottom); nothing is laid out again, so the text
+   stays where it is. The menu is static otherwise. */
+.sphinx-preview-table-menu[data-sphinx-table-menu-stuck="true"] {
+  position: relative;
+  z-index: 3;
+  transform: translateY(var(--sphinx-preview-table-menu-shift, 0px));
+}
+
 .sphinx-preview-table-menu button {
   display: inline-flex;
   align-items: center;
@@ -914,9 +923,10 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   inset-block-start: calc(var(--sphinx-preview-first-bar-bottom, var(--sphinx-preview-toolbar-bottom, 0px)) + 4px);
 }
 
-/* Small panes, and a palette that would take over 40% of the viewport (set by the runtime), keep
-   the bar in the flow (relative: its popovers stay anchored to it): a stuck bar would cover the text. */
-@media (max-width: 480px), (max-height: 520px) {
+/* Short panes, and a palette that would take over 40% of the viewport (set by the runtime), keep
+   the bar in the flow (relative: its popovers stay anchored to it): a stuck bar would cover the text.
+   A narrow pane keeps the sticky bar: it wraps onto more rows inside the pane (CR 034). */
+@media (max-height: 520px) {
   .sphinx-preview-block-editor-host > .sphinx-preview-edit-palette {
     position: relative;
     inset-block-start: auto;
@@ -928,8 +938,8 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   inset-block-start: auto;
 }
 
-/* The first block's own rule above is more specific: the small-pane and static cases win again. */
-@media (max-width: 480px), (max-height: 520px) {
+/* The first block's own rule above is more specific: the short-pane and static cases win again. */
+@media (max-height: 520px) {
   .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first > .sphinx-preview-edit-palette {
     inset-block-start: auto;
   }
