@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A leading properties table no longer keeps its Description toggle under the floating toolbar
+  when the page loads slowly: the table gives up the toolbar's width once its layout settles.
 - Saving a linked file in the editor now refreshes its excerpt and title in the previews that
   link to it right away, instead of waiting for the file watcher (which could miss the write).
 - Closing a locked preview no longer makes the next Quick Open from your own locked group open
