@@ -22,7 +22,7 @@ The CI only runs what a developer can run locally. All logic lives in the task r
 7. **The local full gate stays one command** (`just preflight`) running the same `ci-*`
    targets in sequence. CI parallelises them, it never adds steps that preflight lacks.
 8. **Failures must be readable from the target output**: each `ci-*` target ends with a clear
-   pass/fail line and writes its reports under one folder (`out/reports/<name>/`) that the
+   pass/fail line and writes its reports under a documented folder of `out/reports/` that the
    workflow uploads.
 9. **No retries to hide flakiness.** A job that passes on re-run without a change is a bug to fix,
    not a CI setting.
