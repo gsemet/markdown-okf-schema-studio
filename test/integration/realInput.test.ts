@@ -4101,6 +4101,34 @@ async function scenarioFlushCellAndFrontmatter(page: Page, evidence: Evidence): 
   });
 }
 
+/**
+ * The value of the open frontmatter control matching `selector`, read without the 30 s locator
+ * auto-wait: when the editor is gone, the error names the case, the step and the preview state.
+ */
+async function flushEditorValue(page: Page, selector: string, label: string, step: string): Promise<string> {
+  const value = await withCurrentFrame(page, (frame) => frame.evaluate((query) => {
+    const control = window.document.querySelector(query) as HTMLInputElement | HTMLTextAreaElement | null;
+    return control === null ? null : control.value;
+  }, selector));
+  if (value === null) {
+    throw new Error(`${label}: no ${selector} ${step}; ${await flushFrameState(page)}`);
+  }
+  return value;
+}
+
+/** Whether the whole value of the textarea matching `selector` is selected; fails when it is gone. */
+async function flushEditorSelection(page: Page, selector: string, label: string): Promise<"all" | "partial"> {
+  const state = await withCurrentFrame(page, (frame) => frame.evaluate((query) => {
+    const control = window.document.querySelector(query) as HTMLTextAreaElement | null;
+    if (control === null) return "missing";
+    return control.selectionStart === 0 && control.selectionEnd === control.value.length ? "all" : "partial";
+  }, selector));
+  if (state === "missing") {
+    throw new Error(`${label}: no ${selector} after ${MOD}+A; ${await flushFrameState(page)}`);
+  }
+  return state;
+}
+
 /** Describes the preview for a flush failure message: which document, edit mode, open editors. */
 async function flushFrameState(page: Page): Promise<string> {
   const preview = getActivePreviewForTests();
@@ -4155,22 +4183,28 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
       await withCurrentFrame(page, (frame) =>
         frame.locator(`tr[data-okf-field="${item.field}"] [data-okf-edit-cell="value"]`).click());
       await waitForEditor(page, item.selector);
-      await press(page, `${MOD}+a`);
-      // See RI-T06: VS Code echoes Cmd/Ctrl+A into the webview as an asynchronous `selectAll`. Keys
-      // typed before the echo are selected again and replaced by the next ones (`[unclosed` can end
-      // as `losed`), so wait for the echo and check the whole value is selected before typing.
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      await waitFor(`${label}: the editor value to be fully selected`, () =>
-        withCurrentFrame(page, (frame) => frame.locator(item.selector).evaluate((element) => {
-          const control = element as HTMLInputElement | HTMLTextAreaElement;
-          // A number input has no text selection (null): select-all cannot be checked there.
-          if (control.selectionStart === null) return true;
-          return control.selectionStart === 0 && control.selectionEnd === control.value.length;
-        })));
-      if (item.typed === undefined) await press(page, "Backspace");
-      else await typeText(page, item.typed, 5);
+      if (item.typed === undefined) {
+        // The number field is emptied with real keys and no Cmd/Ctrl+A. The workbench echoes the
+        // shortcut as `selectAll` (see RI-T06), and a number input exposes no text selection to
+        // that echo, so the page selection can leave the input. The blur then closes the unchanged
+        // editor (CI run 39831790532). End, then one Backspace and one Delete per character, empties
+        // it wherever the caret is (macOS can ignore End in an input).
+        const length = (await flushEditorValue(page, item.selector, label, "before emptying")).length;
+        await press(page, "End");
+        for (let key = 0; key < length; key += 1) await press(page, "Backspace");
+        for (let key = 0; key < length; key += 1) await press(page, "Delete");
+      } else {
+        await press(page, `${MOD}+a`);
+        // See RI-T06: VS Code echoes Cmd/Ctrl+A into the webview as an asynchronous `selectAll`. Keys
+        // typed before the echo are selected again and replaced by the next ones (`[unclosed` can end
+        // as `losed`), so wait for the echo and check the whole value is selected before typing.
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        await waitFor(`${label}: the editor value to be fully selected`, async () =>
+          (await flushEditorSelection(page, item.selector, label)) === "all");
+        await typeText(page, item.typed, 5);
+      }
       // The frontmatter editor saves on blur and Enter only (no timer): reading its value saves nothing.
-      const heldValue = await withCurrentFrame(page, (frame) => frame.locator(item.selector).inputValue());
+      const heldValue = await flushEditorValue(page, item.selector, label, "after typing");
       assert.equal(heldValue, item.typed ?? "", `${label}: the editor holds the typed text before the switch`);
       await vscode.window.showTextDocument(second, { viewColumn: vscode.ViewColumn.One, preview: false });
       try {
