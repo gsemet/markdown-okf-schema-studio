@@ -179,7 +179,14 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     requestId: 1,
     stickyHeadingDepth,
     ...(options.paletteMode === undefined ? {} : { initialPaletteMode: options.paletteMode }),
-    ...(options.zoom === undefined ? {} : { initialViewPreferences: { ...DEFAULT_VIEW_PREFERENCES, zoom: options.zoom } }),
+    ...(options.zoom === undefined && options.incomingChanges === undefined ? {} : {
+      initialViewPreferences: {
+        ...DEFAULT_VIEW_PREFERENCES,
+        ...(options.zoom === undefined ? {} : { zoom: options.zoom }),
+        ...(options.incomingChanges === undefined ? {} : { incomingChanges: options.incomingChanges }),
+      },
+    }),
+    ...(options.markEditorSelection === true ? { markEditorSelection: true } : {}),
   };
   const serializedSource = JSON.stringify(source).replace(/</gu, "\\u003c");
   const visualHostScript = `<script>
@@ -207,8 +214,13 @@ window.acquireVsCodeApi = () => ({
   const hostMessageScript = options.hostMessages === undefined || options.hostMessages.length === 0
     ? ""
     : `<script>
+const hostContext = ${JSON.stringify({
+      documentId: runtimeContext.documentId,
+      documentVersion: runtimeContext.documentVersion,
+      requestId: runtimeContext.requestId,
+    })};
 for (const entry of ${JSON.stringify(options.hostMessages).replace(/</gu, "\\u003c")}) {
-  setTimeout(() => window.dispatchEvent(new MessageEvent("message", { data: entry.data })), entry.delayMs ?? 0);
+  setTimeout(() => window.dispatchEvent(new MessageEvent("message", { data: { ...hostContext, ...entry.data } })), entry.delayMs ?? 0);
 }
 </script>`;
   const deferredLinkScript = deferredFrontmatterLinks

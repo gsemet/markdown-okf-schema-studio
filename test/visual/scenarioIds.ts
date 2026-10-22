@@ -545,6 +545,25 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "frontmatter-schema/v20-invalid-yaml-dark-900": "Frontmatter with broken YAML shows one parse-error row and an error badge in the properties table and still renders the Markdown body below it.",
   "frontmatter-schema/v21-unknown-field-strict-light-900": "With the strict additional-properties setting on, a field the schema does not declare is listed in the properties table and the badge counts one warning.",
   "frontmatter-schema/v22-properties-hidden-light-900": "With the properties table setting off, the document shows neither a properties table nor the raw YAML, and its heading still renders.",
+  "theme-zoom/v08-forced-dark-handbook-light-900": "With the preview forced to dark on a light host, the toolbar theme button shows the dark icon and the page, text, note panels and headings all use the dark palette.",
+  "theme-zoom/v09-zoom-70-light-900": "At 70 % zoom the body text is 70 % of the base size and the content column shrinks with it, with no horizontal page scroll.",
+  "theme-zoom/v10-zoom-200-light-900": "At 200 % zoom the body text is twice the base size and the column fills the pane, with no horizontal page scroll.",
+  "theme-zoom/v11-zoom-150-light-460": "At 150 % zoom in a 460 px pane the body text is 150 % of the base size and the column stays inside the pane, with no horizontal page scroll.",
+  "trust-security/v01-read-only-page-dark-900": "A read-only preview in the dark theme has no Edit button, no editable frontmatter cell and still renders the document.",
+  "trust-security/v02-read-only-page-light-460": "A read-only preview in a 460 px light pane has no Edit button, no editable frontmatter cell and still renders the document.",
+  "trust-security/v03-read-only-no-hover-outline-light-900": "In a read-only preview a pointer resting on a paragraph, and a click on it, show no edit outline and open no editor.",
+  "toolbar-navigation/v30-back-enabled-after-anchor-light-900": "After an in-page jump the host's history report enables Back, Next stays disabled and the target heading sits at the top of the pane.",
+  "toolbar-navigation/v31-mark-editor-selection-light-900": "With the mark-editor-selection setting on, the block holding the text editor's selection line is outlined and no other block is.",
+  "block-editing/v17-block-selection-light-900": "In edit mode a Shift+click on two blocks outlines both as selected, announces two selected blocks and opens no editor.",
+  "palette-slash/v21-slash-gfm-light-360": "In a 360 px light pane the gfm slash menu opens inside the pane, uncovered and clear of the toolbar, and flips above the caret near the bottom.",
+  "layout-width/v85-max-width-setting-light-2000": "A 1400 px maximum content width is honoured in a 2000 px pane: the column is exactly 1400 px wide and centred.",
+  "review-annotations/v14-incoming-bars-light-900": "Incoming line ranges sent by the host draw one 3 px green square-ended bar per block they meet, all in one column at the left margin and as tall as their blocks.",
+  "review-annotations/v15-incoming-bars-dark-900": "In the dark theme incoming line ranges sent by the host draw one 3 px green square-ended bar per block they meet, all in one column at the left margin and as tall as their blocks.",
+  "review-annotations/v16-incoming-diff-off-light-900": "With the Diff toggle off, incoming changes reported by the host mark their blocks but the bar layer is hidden and no bar shows.",
+  "review-annotations/v17-review-thread-open-light-900": "Clicking an open review thread's quote shows its popover with every comment in order, no Resolved state, inside the pane.",
+  "review-annotations/v18-review-thread-resolved-light-900": "Clicking a resolved review thread's quote shows its popover marked Resolved, and the quote is drawn differently from an open thread's.",
+  "review-annotations/v19-orphaned-list-light-900": "Threads whose text is gone are listed in an Orphaned comments box after the content, each with its quote, first comment and comment count.",
+  "review-annotations/v20-comment-chips-hidden-light-900": "With show-comments off the gray comment chips stay in the document but are not displayed, while the TODO chips stay visible.",
 };
 
 /**
@@ -552,6 +571,9 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
  * final-frame checks; only the screenshot, its sidecar and the step PNGs go.
  */
 export const ASSERTION_ONLY_IDS: ReadonlySet<string> = new Set([
+  "trust-security/v03-read-only-no-hover-outline-light-900",
+  "review-annotations/v16-incoming-diff-off-light-900",
+  "review-annotations/v20-comment-chips-hidden-light-900",
   "rendering-core/v03-handbook-bottom-dark-900",
   "frontmatter-schema/v22-properties-hidden-light-900",
   "theme-zoom/v06-forced-cream-paragraph-editor-cream-900",
@@ -666,6 +688,7 @@ export const ASSERTION_ONLY_IDS: ReadonlySet<string> = new Set([
  * absent here writes every step its checks produce; a dropped step's check still runs.
  */
 export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
+  "palette-slash/v21-slash-gfm-light-360": [],
   "block-editing/v03-wrapped-paragraph-keyboard-dark-460": ["selected"],
   "code-blocks/v01-copy-button-light-900": ["hover"],
   "code-blocks/v02-copy-button-dark-900": [],
