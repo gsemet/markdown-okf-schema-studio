@@ -155,9 +155,21 @@ export function installFirstClearance(
     if (toolbar) new MutationObserver(update).observe(toolbar, { childList: true, subtree: true, attributes: true });
     // The first-block editor and the Start writing button come and go inside the column.
     const content = document.getElementById(contentId);
-    if (content) new MutationObserver(update).observe(content, { childList: true, subtree: true });
+    // Link states, hidden toggles and text changes resize controls without adding or removing nodes.
+    if (content) {
+      new MutationObserver(update).observe(content, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ["data-sphinx-preview-link-state", "hidden", "href"],
+      });
+    }
     new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class", "data-sphinx-preview-edit-mode", "data-sphinx-preview-zoom", "data-sphinx-preview-width"] });
   }
+  // A late web font (the toolbar icons, the text) changes widths without any element event.
+  (document as Document & { fonts?: { addEventListener?: (type: string, listener: () => void) => void } })
+    .fonts?.addEventListener?.("loadingdone", update);
   update();
   return { update, value: () => Math.max(0, current), inset: () => Math.max(0, currentInset) };
 }
