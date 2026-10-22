@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Hebrew and Arabic paragraphs, headings, list items, quotes and table cells are now right-aligned
+  in the preview, like on GitHub; left-to-right text is unchanged.
 - The edit bar (format buttons or table row and column buttons) now stays in view while you edit a
   tall block or table: it sits just above the block without covering its text, and when you
   scroll so the top of the block is out of view it stays at the top of the viewport (below the

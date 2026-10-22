@@ -59,6 +59,13 @@ const SAFE_LINEAR_GRADIENT = new RegExp(
 const SAFE_HEX_COLOR = /^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/iu;
 const SAFE_FUNCTIONAL_COLOR = /^(?:rgb|rgba|hsl|hsla)\(\s*[\d.%\s,/-]+\)$/iu;
 
+/** Block elements that get `dir="auto"` so right-to-left text aligns to the right like GitHub. */
+const AUTO_DIRECTION_ELEMENTS = new Set([
+  "p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "blockquote", "td", "th",
+]);
+/** The only values the `dir` attribute may keep. */
+const SAFE_DIR_VALUES = new Set(["ltr", "rtl", "auto"]);
+
 const NATURALLY_FOCUSABLE_ELEMENTS = new Set([
   "a",
   "button",
@@ -234,6 +241,16 @@ function rewriteNode(
       }
       continue;
     }
+    if (name === "dir") {
+      const direction = attribute.value.trim().toLowerCase();
+      if (SAFE_DIR_VALUES.has(direction)) {
+        attribute.value = direction;
+      } else {
+        removeAttr(node, attribute.name);
+        addDiagnostic(diagnostics, "blocked-dir", "Removed an unsupported dir value.", attribute.value);
+      }
+      continue;
+    }
     if (name === "data-okf-width") {
       if (!SAFE_OKF_WIDTH.test(attribute.value.trim())) {
         removeAttr(node, attribute.name);
@@ -331,6 +348,10 @@ function rewriteNode(
         addDiagnostic(diagnostics, "blocked-navigation", "Removed navigation outside the preview policy.", originalRequest);
       }
     }
+  }
+
+  if (AUTO_DIRECTION_ELEMENTS.has(tagName) && !attr(node, "dir")) {
+    setAttr(node, "dir", "auto");
   }
 
   if (

@@ -208,6 +208,17 @@ const CJK_RTL_ASSERTIONS: ContentAssertion[] = [
     selector: MAIN,
     expr: "(() => { const rtl = [...document.querySelectorAll('#sphinx-myst-preview-content p')].filter(p => /[\\u0590-\\u06FF]/.test(p.textContent)); if (rtl.length !== 2) return false; return rtl.every(p => { const range = document.createRange(); range.selectNodeContents(p); const right = Math.max(...[...range.getClientRects()].map(box => box.right)); return p.getBoundingClientRect().right - right < 4; }); })()",
   },
+  {
+    message: "every paragraph and heading carries dir=auto, and the Hebrew and Arabic paragraphs resolve to right-to-left",
+    selector: MAIN,
+    expr: "(() => { const blocks = [...document.querySelectorAll('#sphinx-myst-preview-content p, #sphinx-myst-preview-content h1, #sphinx-myst-preview-content h2')]; if (!blocks.every(b => b.getAttribute('dir') === 'auto')) return false; const rtl = blocks.filter(b => /[\\u0590-\\u06FF]/.test(b.textContent)); return rtl.length === 2 && rtl.every(b => getComputedStyle(b).direction === 'rtl'); })()",
+  },
+  {
+    message: "the CJK and Latin paragraphs stay left-to-right and start at the left edge of the column",
+    selector: MAIN,
+    expr: "(() => { const main = document.querySelector('#sphinx-myst-preview-content'); const ltr = [...main.querySelectorAll('p')].filter(p => !/[\\u0590-\\u06FF]/.test(p.textContent)); return ltr.length === 5 && ltr.every(p => getComputedStyle(p).direction === 'ltr' && getComputedStyle(p).textAlign !== 'right' && getComputedStyle(p).textAlign !== 'end'); })()",
+  },
+  { message: "the page does not scroll horizontally", selector: MAIN, expr: "document.documentElement.scrollWidth <= window.innerWidth && document.body.scrollWidth <= window.innerWidth" },
   { message: "the unbroken word and the long URL wrap inside their paragraphs", selector: `${MAIN} p:nth-of-type(n+6)`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p:nth-of-type(n+6)')].every(p => p.scrollWidth <= p.clientWidth + 1)" },
   { message: "the long URL link stays inside the pane", selector: `${MAIN} p:nth-of-type(7) a`, insidePane: true },
 ];
@@ -2010,7 +2021,6 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     ...viewport,
     scroll: { kind: "top" as const },
     contentAssertions: CJK_RTL_ASSERTIONS,
-    knownIssue: "P9-B4-K2",
     description: `CJK paragraphs, Hebrew and Arabic right-to-left paragraphs and two unbroken strings, ${viewport.width} px pane: `
       + "the text wraps inside the column, the right-to-left paragraphs stay right-aligned and nothing scrolls horizontally.",
   })),

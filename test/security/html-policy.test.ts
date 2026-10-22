@@ -105,7 +105,7 @@ test("maps rendered source lines to the active preview document", () => {
 
   assert.match(result.html, /<h1 data-line="1"[^>]*data-sphinx-source-file="\/workspace\/active\.md"[^>]*data-sphinx-source-line="1"[^>]*data-sphinx-preview-document="preview-1"[^>]*data-sphinx-preview-block="source-block-1"[^>]*tabindex="0"/u);
   assert.match(result.html, /<p data-line="4" data-end-line="6"[^>]*data-sphinx-source-end-line="6"[^>]*data-sphinx-preview-block="source-block-2"[^>]*tabindex="0">Body<\/p>/u);
-  assert.match(result.html, /<p>Unmapped<\/p>/u);
+  assert.match(result.html, /<p dir="auto">Unmapped<\/p>/u);
 });
 
 test("keeps the included-block marker next to the source mapping", () => {
@@ -331,4 +331,31 @@ test("span style keeps only hex and rgb colour and background-color as data attr
   assert.doesNotMatch(other.html, /style=|data-okf-color="(?:#c00|red)"/u);
   assert.match(other.html, /data-okf-background="#fff"/u);
   assert.ok(other.diagnostics.length >= 4);
+});
+
+test("emits dir=auto on block elements and keeps only ltr, rtl and auto", () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
+  temporaryDirectories.push(output);
+  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const result = rewriteSphinxHtml(
+    "<html><body><main><h1>T</h1><p>a</p><p dir=\"rtl\">b</p><p dir=\"RTL \">c</p><p dir=\"evil\">d</p>"
+    + "<ul><li>e</li></ul><blockquote>f</blockquote><table><tr><th>g</th><td>h</td></tr></table><div>i</div></main></body></html>",
+    {
+      outputRoot: output,
+      policy,
+      nonce: "n",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+  for (const tag of ["h1", "li", "blockquote", "th", "td"]) {
+    assert.match(result.html, new RegExp(`<${tag}[^>]* dir="auto"`, "u"), tag);
+  }
+  assert.match(result.html, /<p dir="auto">a<\/p>/u);
+  assert.match(result.html, /<p dir="rtl">b<\/p>/u);
+  assert.match(result.html, /<p dir="rtl">c<\/p>/u);
+  assert.match(result.html, /<p dir="auto">d<\/p>/u);
+  assert.doesNotMatch(result.html, /evil/u);
+  assert.doesNotMatch(result.html, /<div[^>]* dir=/u);
+  assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-dir"));
 });
