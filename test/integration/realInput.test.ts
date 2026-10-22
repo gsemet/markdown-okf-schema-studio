@@ -1957,6 +1957,12 @@ async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<voi
         controlsBottom: controls.bottom,
         firstTop: tops.length > 0 ? Math.min(...tops) : undefined,
         menuHeight: menu.getBoundingClientRect().height,
+        menuTop: menu.getBoundingClientRect().top,
+        bandBottom: (() => {
+          const band = menu.ownerDocument.querySelector("[data-sphinx-preview-sticky-headings]");
+          const box = band && !(band as HTMLElement).hidden ? band.getBoundingClientRect() : undefined;
+          return box && box.height > 0 ? box.bottom : undefined;
+        })(),
         scrollY: view?.scrollY,
         maxScroll: scroller ? scroller.scrollHeight - scroller.clientHeight : undefined,
       };
@@ -1967,7 +1973,10 @@ async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<voi
     // A short page cannot scroll by the whole toolbar height: the cell then goes down by the rest.
     const pageTooShort = moved > 2 && clearance?.scrollY !== undefined && clearance.maxScroll !== undefined
       && Math.abs(clearance.scrollY - clearance.maxScroll) <= 1 && moved <= clearance.menuHeight + 1;
-    assert.ok(Math.abs(moved) <= 2 || revealed || pageTooShort,
+    // The toolbar is kept out from under the sticky heading band: the page moves just enough.
+    const belowBand = moved > 2 && clearance?.bandBottom !== undefined
+      && Math.abs(clearance.menuTop - clearance.bandBottom) <= 2 && moved <= clearance.menuHeight + 1;
+    assert.ok(Math.abs(moved) <= 2 || revealed || pageTooShort || belowBand,
       "the selected cell moved " + (after - before) + " px; toolbar clearance " + JSON.stringify(clearance));
     await withCurrentFrame(page, async (frame) => {
       const status = await frame.locator("[data-sphinx-table-menu] [data-sphinx-preview-edit-status]").textContent();
