@@ -2868,6 +2868,21 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
       record(label + ":" + mode, first)
 
   if mode != "empty":
+    # The page settles its toolbar clearance through observers: wait for two equal readings.
+    settle = """() => {
+      const root = getComputedStyle(document.documentElement);
+      const first = document.querySelector('#sphinx-myst-preview-content > :first-child');
+      const box = first ? first.getBoundingClientRect() : null;
+      return [root.getPropertyValue('--sphinx-preview-first-clearance'), root.getPropertyValue('--sphinx-preview-first-inset'),
+        box ? Math.round(box.top) + ':' + Math.round(box.width) + ':' + Math.round(box.height) : ''].join('|');
+    }"""
+    previous = None
+    for _ in range(20):
+      current_layout = page.evaluate(settle)
+      if current_layout == previous:
+        break
+      previous = current_layout
+      page.wait_for_timeout(100)
     measure_first("read")
     if state_wanted == "read":
       finish()
