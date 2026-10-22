@@ -1942,7 +1942,21 @@ async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<voi
       previous = after;
       return stable;
     });
-    assert.ok(Math.abs(after - before) <= 2, "the selected cell moved " + (after - before) + " px");
+    // The cell may move only by the reveal that clears the floating controls: wider fonts can put
+    // the right end of the table toolbar under them, and the page then moves just enough.
+    const clearance = await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-table-menu]").evaluate((menu) => {
+      const controls = menu.ownerDocument.querySelector("[data-sphinx-preview-toolbar]")?.getBoundingClientRect();
+      if (!controls) return undefined;
+      const tops = Array.from(menu.querySelectorAll("button, input, textarea, select, a, span, p"))
+        .map((item) => item.getBoundingClientRect())
+        .filter((box) => box.width > 0 && box.height > 0 && box.left < controls.right && box.right > controls.left)
+        .map((box) => box.top);
+      return { controlsBottom: controls.bottom, firstTop: tops.length > 0 ? Math.min(...tops) : undefined };
+    }));
+    const revealed = after - before > 2 && clearance?.firstTop !== undefined
+      && Math.abs(clearance.firstTop - (clearance.controlsBottom + 4)) <= 2;
+    assert.ok(Math.abs(after - before) <= 2 || revealed,
+      "the selected cell moved " + (after - before) + " px; toolbar clearance " + JSON.stringify(clearance));
     await withCurrentFrame(page, async (frame) => {
       const status = await frame.locator("[data-sphinx-table-menu] [data-sphinx-preview-edit-status]").textContent();
       assert.equal(status, "Row 1 of 2 \u00b7 column 2 of 2");

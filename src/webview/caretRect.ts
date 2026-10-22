@@ -50,7 +50,10 @@ export function caretRectOf(
     const border = (name: string): number => Number.parseFloat(view.getPropertyValue(name)) || 0;
     const left = box.left + border("border-left-width") + marker.offsetLeft - (control.scrollLeft || 0);
     const top = box.top + border("border-top-width") + marker.offsetTop - (control.scrollTop || 0);
-    const bottom = top + marker.offsetHeight;
+    // The marker holds the rest of the text, so it can span many lines: the caret line is the
+    // height of its first line box only.
+    const firstLine = typeof marker.getClientRects === "function" ? marker.getClientRects()[0] : undefined;
+    const bottom = top + (firstLine && firstLine.height > 0 ? firstLine.height : marker.offsetHeight);
     return [left, top, bottom].every((number) => Number.isFinite(number))
       ? { left, top, bottom }
       : undefined;
