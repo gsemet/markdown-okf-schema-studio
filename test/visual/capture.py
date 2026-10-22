@@ -2808,6 +2808,38 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
     };
   }"""
 
+  # Read-only snapshot added to the failure message and the record when a control or the element is
+  # under the toolbar: it shows which input of the clearance moved. It never decides pass or fail.
+  diagnostic_probe = """selector => {
+    const box = element => {
+      if (!element) return null;
+      const r = element.getBoundingClientRect();
+      return [Math.round(r.left), Math.round(r.top), Math.round(r.right), Math.round(r.bottom)];
+    };
+    const root = getComputedStyle(document.documentElement);
+    const bar = document.querySelector('[data-sphinx-preview-toolbar]');
+    const barRect = bar ? bar.getBoundingClientRect() : null;
+    const section = document.querySelector('#sphinx-myst-preview-content > [data-okf-properties]');
+    const controls = section ? [...section.querySelectorAll('button, a[href], [data-okf-description-toggle]')] : [];
+    return {
+      toolbar: box(bar), content: box(document.getElementById('sphinx-myst-preview-content')),
+      section: box(section), element: box(document.querySelector(selector)),
+      controls: controls.map(control => ({
+        kind: control.hasAttribute('data-okf-description-toggle') ? 'toggle' : control.tagName.toLowerCase(),
+        box: box(control),
+        under: !!barRect && (r => r.width > 0 && r.height > 0 && r.left < barRect.right && r.right > barRect.left
+          && r.top < barRect.bottom && r.bottom > barRect.top)(control.getBoundingClientRect()),
+      })).filter(item => item.under),
+      vars: {
+        clearance: root.getPropertyValue('--sphinx-preview-first-clearance'),
+        inset: root.getPropertyValue('--sphinx-preview-first-inset'),
+        toolbarBottom: root.getPropertyValue('--sphinx-preview-toolbar-bottom'),
+      },
+      readyState: document.readyState, fonts: document.fonts.status,
+      viewport: [window.innerWidth, window.innerHeight],
+    };
+  }"""
+
   def record(label: str, selector: str, controls: str | None = None, interactive: bool = False) -> None:
     got = page.evaluate(probe, selector)
     if not got:
@@ -2843,10 +2875,14 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
         page_name,
         f"[{label}] the gap is {gap:.1f}px, expected {FIRST_ELEMENT_GAP}px +-{FIRST_ELEMENT_TOLERANCE} "
         f"(or more in a pane of 480px or less, when an interactive element must sit below the toolbar; clearance {got['clearance']:.0f}px)"))
+    diagnostic = ""
+    if hits or (got["overlaps"] and interactive):
+      diagnostic = " " + json.dumps(page.evaluate(diagnostic_probe, selector), separators=(",", ":"))
+      records[-1]["diagnostic"] = json.loads(diagnostic)
     if got["overlaps"] and interactive:
-      failures.append(Failure(page_name, f"[{label}] {selector} overlaps the floating toolbar"))
+      failures.append(Failure(page_name, f"[{label}] {selector} overlaps the floating toolbar{diagnostic}"))
     if hits:
-      failures.append(Failure(page_name, f"[{label}] {hits} control(s) of {selector} sit under the toolbar"))
+      failures.append(Failure(page_name, f"[{label}] {hits} control(s) of {selector} sit under the toolbar{diagnostic}"))
 
   def finish() -> None:
     FIRST_GAP_REPORT_DIR.mkdir(parents=True, exist_ok=True)
