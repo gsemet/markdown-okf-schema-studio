@@ -14,8 +14,9 @@ on:
 env:
   STUDIO_NPM: npm --registry=https://registry.npmjs.org/
   # One end-to-end campaign id per workflow run, shared by the visual and integration jobs;
-  # each job records its own real start time.
-  STUDIO_E2E_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+  # each job records its own real start time. The attempt number is left out on purpose: re-running
+  # only the failed jobs must keep the same id, or the report job would see two campaigns.
+  STUDIO_E2E_RUN_ID: ${{ github.run_id }}
 
 permissions:
   contents: read
