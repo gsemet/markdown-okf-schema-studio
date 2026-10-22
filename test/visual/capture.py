@@ -155,7 +155,10 @@ PAGE_CHECKS = """
     if (Math.abs(blockSize - codeSize) > 0.5) {
       failures.push(`fenced code is ${codeSize}px inside a ${blockSize}px pre block`);
     }
-    const expectedRadius = isDiff ? '0px' : '4px';
+    // A diff panel is square; so is the top of a block joined to its caption title bar.
+    const joinedToCaption = block.parentElement && block.parentElement.tagName === 'FIGURE'
+      && block.parentElement.querySelector(':scope > figcaption');
+    const expectedRadius = isDiff || joinedToCaption ? '0px' : '4px';
     if (blockStyle.borderTopLeftRadius !== expectedRadius) {
       failures.push(`fenced code panel radius is ${blockStyle.borderTopLeftRadius}, expected ${expectedRadius}`);
     }

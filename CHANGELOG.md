@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A MyST `{code-block}` now keeps its code left-aligned like a plain fenced block, and its
+  `:caption:` is a title bar joined to the top of the block (left-aligned, monospace, same width
+  and border) instead of a centred italic line below it. Line numbers, emphasized lines and the
+  copy button work as before.
 - Hebrew and Arabic paragraphs, headings, list items, quotes and table cells are now right-aligned
   in the preview, like on GitHub; left-to-right text is unchanged.
 - The edit bar (format buttons or table row and column buttons) now stays in view while you edit a

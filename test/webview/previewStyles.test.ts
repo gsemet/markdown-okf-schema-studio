@@ -388,6 +388,33 @@ test("figure captions are centred and de-emphasised", () => {
   );
 });
 
+test("a captioned code block is left-aligned with its caption as a title bar on top", () => {
+  const css = PREVIEW_THEME_CSS;
+  // The figure around the code no longer inherits the centred text of image figures.
+  assert.match(
+    css,
+    /#sphinx-myst-preview-content figure:has\(> pre\) \{[^}]*display: flex;[^}]*flex-direction: column;[^}]*text-align: left;/u,
+  );
+  // The caption (after the code in the markup) is drawn above it, joined to the block.
+  assert.match(
+    css,
+    /#sphinx-myst-preview-content figure:has\(> pre\) > figcaption \{[^}]*order: -1;[^}]*border-bottom: 0;[^}]*border-radius: 4px 4px 0 0;[^}]*font-family: var\(--vscode-editor-font-family[^}]*font-style: normal;[^}]*text-align: left;/u,
+  );
+  assert.match(
+    css,
+    /#sphinx-myst-preview-content figure:has\(> pre\) > pre \{[^}]*margin: 0;[^}]*border-top-left-radius: 0;[^}]*border-top-right-radius: 0;/u,
+  );
+  assert.match(css, /figure:has\(> pre\) > figcaption > p \{[^}]*margin: 0;[^}]*font: inherit;/u);
+});
+
+test("the caption title bar takes its colours from theme variables only", () => {
+  const rule = /figure:has\(> pre\) > figcaption \{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  assert.notEqual(rule, "", "the title bar rule is missing");
+  assert.match(rule, /color: var\(--vscode-editor-foreground/u);
+  assert.match(rule, /border: 1px solid var\(--sphinx-preview-border\)/u);
+  assert.doesNotMatch(rule, /#[0-9a-fA-F]{3,8}\b/u);
+});
+
 test("images never overflow the preview column", () => {
   assert.match(PREVIEW_THEME_CSS, /#sphinx-myst-preview-content img \{[^}]*max-width: 100%;/u);
 });

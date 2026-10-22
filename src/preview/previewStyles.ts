@@ -2978,6 +2978,43 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   text-align: center;
 }
 
+/* A captioned MyST code-block is a figure around the code: the code stays left-aligned like a
+   plain fence and the caption becomes a title bar joined to the top of the block (same width and
+   border, square joint). The caption follows the code in the markup; order draws it first. */
+#sphinx-myst-preview-content figure:has(> pre) {
+  display: flex;
+  flex-direction: column;
+  margin: 1em 0;
+  text-align: left;
+}
+
+#sphinx-myst-preview-content figure:has(> pre) > figcaption {
+  order: -1;
+  margin: 0;
+  padding: 0.35em 1em;
+  border: 1px solid var(--sphinx-preview-border);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(rgba(128, 128, 128, 0.12), rgba(128, 128, 128, 0.12)), var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.15));
+  color: var(--vscode-editor-foreground, inherit);
+  font-family: var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.85em;
+  font-style: normal;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+#sphinx-myst-preview-content figure:has(> pre) > figcaption > p {
+  margin: 0;
+  font: inherit;
+}
+
+#sphinx-myst-preview-content figure:has(> pre) > pre {
+  margin: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 /* Admonitions: tinted panel with a thick accent bar, matching VS Code alert styling. */
 #sphinx-myst-preview-content :where(.admonition, div[class*="admonition-"], .attention, .caution, .danger, .error, .hint, .important, .note, .seealso, .tip, .tips, .warning) {
   --sphinx-preview-accent: var(--vscode-textLink-foreground, #4488dd);
