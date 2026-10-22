@@ -4129,10 +4129,16 @@ async function flushEditorSelection(page: Page, selector: string, label: string)
   return state;
 }
 
+/** Full page loads counted when the flush scenario opened its editor (see flushFrameState). */
+let reloadsBefore = 0;
+
 /** Describes the preview for a flush failure message: which document, edit mode, open editors. */
 async function flushFrameState(page: Page): Promise<string> {
   const preview = getActivePreviewForTests();
-  const shown = preview ? `${path.basename(vscode.Uri.parse(preview.documentUri).fsPath)} (${preview.phase})` : "none";
+  const shown = preview
+    ? `${path.basename(vscode.Uri.parse(preview.documentUri).fsPath)} (${preview.phase}, page ready `
+      + `${String(preview.webviewReady)}, page loads ${preview.htmlAssignments - reloadsBefore} since the editor opened)`
+    : "none";
   try {
     const frame = await findCurrentFrame(page);
     if (frame === undefined) return `preview ${shown}, no current frame`;
@@ -4177,12 +4183,21 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
       await vscode.window.showTextDocument(first, { viewColumn: vscode.ViewColumn.One, preview: false });
       await waitForPreviewOf(first);
       await waitForRender(first);
+      // The host reports "ready" once the render is done, before the page has loaded it. A deferred
+      // update that arrives while the page has not reported ready (the frontmatter link check, about
+      // 150 ms after the render) reloads the whole page, and the reload drops an editor opened in
+      // the meantime (CI run 39849844386: case 2 clicked right after the switch back, as edit mode
+      // was already on). Open the editor only once the page itself reports ready for this render.
+      await waitFor(`${label}: the page to report ready for ${path.basename(first.uri.fsPath)}`, () =>
+        getActivePreviewForTests()?.webviewReady === true);
       if (!(await withCurrentFrame(page, (frame) => frame.locator("html").getAttribute("data-sphinx-preview-edit-mode")) === "on")) {
         await setEditMode(page, true);
       }
       await withCurrentFrame(page, (frame) =>
         frame.locator(`tr[data-okf-field="${item.field}"] [data-okf-edit-cell="value"]`).click());
       await waitForEditor(page, item.selector);
+      // Full page loads so far: a failure message shows whether the page was reloaded under the editor.
+      reloadsBefore = htmlAssignmentCount();
       if (item.typed === undefined) {
         // The number field is emptied with real keys and no Cmd/Ctrl+A. The workbench echoes the
         // shortcut as `selectAll` (see RI-T06), and a number input exposes no text selection to
