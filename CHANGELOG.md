@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Saving a linked file in the editor now refreshes its excerpt and title in the previews that
+  link to it right away, instead of waiting for the file watcher (which could miss the write).
+- Closing a locked preview no longer makes the next Quick Open from your own locked group open
+  the file in a new empty editor group.
 - GitHub `[!CAUTION]` alerts and MyST `caution` callouts are now red with a stop-sign (octagon)
   icon, like on GitHub, instead of the Warning amber with a triangle.
 - New slash menu: typing `/` at a line start or after a space in a block text box (paragraph,

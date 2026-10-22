@@ -489,18 +489,28 @@ export async function run(): Promise<void> {
       await captureLinkState(page, frame, artifacts, `links-${theme}-hover`,
         "Action: hover the related link. Expected: visible target path and description: Original target description, with readable text, preserved line breaks and no viewport clipping.", true);
     }
-    const updatedTarget = () =>
-      /class="okf-link-excerpt"[^>]*>Updated target description<\/span>/u.test(getActivePreviewForTests()?.html ?? "");
-    // File watchers arm asynchronously and can miss the first write on loaded CI runners.
-    for (let attempt = 1; ; attempt += 1) {
-      fs.writeFileSync(path.join(directory, "references/frontmatter-target.md"), "---\ndescription: Updated target description\n---\n# Target\n\n## Supported\n", "utf8");
-      try {
-        await waitFor("linked target metadata to refresh after a saved change", updatedTarget, 10_000);
-        break;
-      } catch (error) {
-        if (attempt >= 3) throw error;
-      }
-    }
+    const targetExcerpt = (text: string) => () =>
+      new RegExp(`class="okf-link-excerpt"[^>]*>${text}<\\/span>`, "u").test(getActivePreviewForTests()?.html ?? "");
+    // The user edits and saves the linked target in the editor. The refresh the edit triggers reads
+    // the file before the save wrote it; the save itself must trigger the refresh that shows it.
+    const targetDocument = await vscode.workspace.openTextDocument(
+      vscode.Uri.file(path.join(directory, "references/frontmatter-target.md")));
+    const replaceTarget = new vscode.WorkspaceEdit();
+    replaceTarget.replace(targetDocument.uri,
+      new vscode.Range(targetDocument.positionAt(0), targetDocument.positionAt(targetDocument.getText().length)),
+      "---\ndescription: Saved target description\n---\n# Target\n\n## Supported\n");
+    assert.ok(await vscode.workspace.applyEdit(replaceTarget), "the target edit was applied");
+    assert.ok(await targetDocument.save(), "the target was saved");
+    await waitFor("linked target metadata to refresh after a saved change", targetExcerpt("Saved target description"), 10_000);
+    // The save wrote the file, so the per-target watcher must deliver that real event: proof that it
+    // is armed. Only then is the file changed from outside the editor, as git or a tool would.
+    await waitFor("the linked-target watcher to deliver the event of the save",
+      () => (getActivePreviewForTests()?.linkedTargetEvents ?? 0) > 0, 10_000);
+    const eventsBeforeExternalWrite = getActivePreviewForTests()?.linkedTargetEvents ?? 0;
+    fs.writeFileSync(targetDocument.uri.fsPath, "---\ndescription: Updated target description\n---\n# Target\n\n## Supported\n", "utf8");
+    await waitFor("the linked-target watcher to deliver the external write",
+      () => (getActivePreviewForTests()?.linkedTargetEvents ?? 0) > eventsBeforeExternalWrite, 10_000);
+    await waitFor("linked target metadata to refresh after an external write", targetExcerpt("Updated target description"), 10_000);
     await waitForCurrentPreview(document);
     for (const theme of ["white", "dark"] as const) {
       const frame = await previewFrame(page, "Updated target description");
