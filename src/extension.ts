@@ -111,6 +111,7 @@ import {
   runtimeContextKey,
   type RuntimeContextSettings,
 } from "./preview/contentPatch";
+import { FLUSH_WAIT_MS, flushRefusalMessage, LatestRequest, waitForAnswer, waitForSettled } from "./preview/flushWait";
 import { isRegisteredPreviewMessage, type RegisteredPreviewMessage } from "./preview/previewMessages";
 import {
   PreviewDiagnostic,
@@ -196,6 +197,8 @@ interface PreviewSyncMessage {
   newFieldName?: string;
   fieldValue?: unknown;
   fieldValueFormat?: "yaml";
+  /** A value edit sent by the flush before a navigation: text that is not valid YAML is kept as typed. */
+  flush?: boolean;
   /** For a value edit: "plain" writes a safe string as a plain YAML scalar (a new custom key). */
   fieldValueStyle?: "plain";
   sourceLine?: number;
@@ -283,6 +286,11 @@ interface ActivePreview {
   hadFailure: boolean;
   disposed: boolean;
   activeBlockEdit?: ActiveBlockEdit;
+  /** Frontmatter and checkbox saves whose WorkspaceEdit is still being applied (CR 025). */
+  pendingSaves: Set<Promise<unknown>>;
+  /** Flush requests posted to the page and not answered yet, by flush id (CR 025). */
+  flushWaiters: Map<string, () => void>;
+  flushSequence: number;
   /** Release and deferral decisions of the inline block-edit lock (STAB-02, STAB-03). */
   editLock: EditLock;
   /** Edited element position carried across the render that follows a final save (R7). */
@@ -609,6 +617,9 @@ function isPreviewSyncMessage(value: unknown): value is PreviewSyncMessage {
       && message.fieldValueStyle === "plain"
       && message.frontmatterAction === undefined
       && message.fieldValueFormat === undefined);
+  const validFlush = message.flush === undefined
+    || ((message.type === "previewFrontmatterSave" || message.type === "previewEditSave")
+      && message.flush === true);
   const validFrontmatterKey = message.newFieldName === undefined
     || (message.type === "previewFrontmatterSave" && typeof message.newFieldName === "string");
   const validCheckbox = message.type !== "previewCheckboxToggle"
@@ -648,6 +659,7 @@ function isPreviewSyncMessage(value: unknown): value is PreviewSyncMessage {
     && validFrontmatterPayload
     && validFrontmatterFormat
     && validFrontmatterKey
+    && validFlush
     && validFrontmatterStyle
     && validFrontmatterAction
     && validAfterField
@@ -1504,6 +1516,14 @@ function postFrontmatterEditError(
   message: PreviewSyncMessage,
   error: string,
 ): void {
+  if (message.flush === true) {
+    // The page is about to be replaced: only a VS Code warning tells the reader the text was dropped.
+    const field = message.newFieldName ?? message.fieldName;
+    void vscode.window.showWarningMessage(flushRefusalMessage(
+      field ? `the frontmatter field "${field}"` : "a frontmatter field",
+      error,
+    ));
+  }
   void preview.panel.webview.postMessage({
     type: "previewFrontmatterResult",
     documentId: message.documentId,
@@ -1579,14 +1599,20 @@ function handleFrontmatterSave(preview: ActivePreview, message: PreviewSyncMessa
       return;
     }
     const parsed = parseYamlValue(fieldValue);
-    if (!parsed.valid) {
+    if (parsed.valid) {
+      fieldValue = parsed.value;
+    } else if (message.flush !== true) {
       postFrontmatterEditError(preview, message, `Invalid YAML value: ${parsed.error}`);
       return;
     }
-    fieldValue = parsed.value;
+    // A flush before a navigation keeps text that is not valid YAML as typed (a string value): the
+    // reader leaves the page and could not fix it, and the typed text must not be lost.
   }
   const schemaFound = preview.frontmatter?.schemaFound === true;
-  if (!isAdd && !isRemove && newFieldName === undefined
+  // A flush before a navigation writes the value as typed, whatever the schema says: the reader
+  // leaves the page and could not fix it, and the preview then shows the validation error.
+  const flushed = message.flush === true;
+  if (!isAdd && !isRemove && newFieldName === undefined && !flushed
     && !frontmatterValueMatchesField(currentField, fieldValue, schemaFound)) {
     postFrontmatterEditError(preview, message, "The frontmatter field is stale or its value does not match the schema.");
     return;
@@ -1638,7 +1664,7 @@ function handleFrontmatterSave(preview: ActivePreview, message: PreviewSyncMessa
     return;
   }
   const targetFieldName = isAdd ? fieldName : newFieldName ?? currentField.name;
-  if (schemaFound) {
+  if (schemaFound && !flushed) {
     const candidateSource = sourceText.slice(0, patch.start)
       + patch.text
       + sourceText.slice(patch.end);
@@ -1712,6 +1738,12 @@ function postEditSourceError(
   message: PreviewSyncMessage,
   error: string,
 ): void {
+  if (message.flush === true) {
+    const where = message.line !== undefined && message.endLine !== undefined
+      ? `the block at lines ${message.line}-${message.endLine}`
+      : "a block";
+    void vscode.window.showWarningMessage(flushRefusalMessage(where, error));
+  }
   void preview.panel.webview.postMessage({
     type: "previewEditSource",
     documentId: message.documentId,
@@ -3465,12 +3497,11 @@ async function openLocalDocument(targetUri: vscode.Uri, selection?: vscode.Range
 }
 
 async function handlePreviewHistoryGo(preview: ActivePreview, direction: "back" | "forward"): Promise<void> {
+  if (!preview.stage) return;
+  // The page posted the save of its open editor before this message: apply it before the switch.
+  await settleHostEdits(preview);
   const stage = preview.stage;
-  if (!stage) return;
-  if (preview.activeBlockEdit) {
-    vscode.window.setStatusBarMessage("Finish the open block edit before going back or forward.", 3000);
-    return;
-  }
+  if (!stage || preview.disposed) return;
   const history = historyOf(preview);
   const available = direction === "back" ? history.canBack() : history.canForward();
   if (!available) {
@@ -3510,7 +3541,41 @@ async function handlePreviewHistoryGo(preview: ActivePreview, direction: "back" 
   }
 }
 
+/** Waits, bounded, until the block edit and the frontmatter saves of the preview reached the document. */
+async function settleHostEdits(preview: ActivePreview): Promise<void> {
+  await waitForSettled(() => preview.disposed || (!preview.activeBlockEdit && preview.pendingSaves.size === 0));
+}
+
+/**
+ * Asks the page to save and close what its open editors hold, then waits for the saves to reach the
+ * document (CR 025). Used before the host switches document on its own (tab follow, Back / Next):
+ * the page posts the final saves first and the answer after them, and messages arrive in order, so
+ * the host knows every save when the answer comes. A dead page or a refused save ends after
+ * `FLUSH_WAIT_MS`; the navigation is never blocked and nothing is flushed in a read-only preview.
+ */
+async function flushPageEdits(preview: ActivePreview): Promise<void> {
+  const stage = preview.stage;
+  if (!preview.disposed && !preview.readOnly && stage && preview.readyRequestId !== undefined) {
+    const flushId = `flush-${++preview.flushSequence}`;
+    const answered = new Promise<void>((resolve) => preview.flushWaiters.set(flushId, resolve));
+    const posted = await preview.panel.webview.postMessage({
+      type: "previewFlushEdit",
+      flushId,
+      documentId: stage.activeDocumentIdentity,
+      documentVersion: stage.activeDocumentVersion,
+      requestId: stage.requestId,
+    }).then((ok) => ok, () => false);
+    if (posted) {
+      await waitForAnswer(answered, FLUSH_WAIT_MS);
+    }
+    preview.flushWaiters.delete(flushId);
+  }
+  await settleHostEdits(preview);
+}
+
 async function handlePreviewLink(preview: ActivePreview, request: string): Promise<void> {
+  // The page posted the save of its open editor before this link: apply it before anything else.
+  await settleHostEdits(preview);
   const stage = preview.stage;
   if (!stage || !matchesCurrentPreview(preview, {
     type: "previewLink",
@@ -3527,7 +3592,7 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
     void vscode.window.showWarningMessage(`Preview link resolution failed: ${String(error)}`);
     return;
   }
-  if (preview.disposed || preview.stage !== stage) return;
+  if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
   if (navigation.kind === "blocked") {
     void vscode.window.showWarningMessage(`Markdown OKF-Schema Studio could not follow the link: ${navigation.reason}`);
     return;
@@ -3585,12 +3650,12 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
         );
       }
     }
-    if (preview.disposed || preview.stage !== stage) return;
+    if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
     const targetUri = vscode.Uri.file(navigation.path);
     if (preview.followsActiveEditor) {
       // A locked preview does not follow the opened file, so only anchor jumps are recorded.
       const opened = await vscode.workspace.openTextDocument(targetUri).then((document) => document, () => undefined);
-      if (preview.disposed || preview.stage !== stage) return;
+      if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
       if (opened && isDocumentEligible(opened)) {
         recordNavigation(preview, { uri: documentKey(opened), line: (selection?.start.line ?? 0) + 1 });
       }
@@ -3638,6 +3703,11 @@ registeredMessageHandlers.set("previewPaletteModeChanged", (preview, message) =>
   }
 });
 
+// The page saved its open editors and says so (CR 025); the waiting flush goes on. No document edit.
+registeredMessageHandlers.set("previewEditFlushed", (preview, message) => {
+  preview.flushWaiters.get(message.flushId as string)?.();
+});
+
 registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
 registeredMessageHandlers.set("previewBlockMove", handleBlockMove);
 registeredMessageHandlers.set("previewBlocksCopy", handleBlocksCopyCut);
@@ -3663,9 +3733,22 @@ function initialPaletteMode(): PaletteMode {
   ).defaultPaletteMode;
 }
 
+/** Remembers a save until its WorkspaceEdit is applied, so a navigation can wait for it (CR 025). */
+function trackPendingSave(preview: ActivePreview, save: Thenable<void> | undefined): Thenable<void> | undefined {
+  if (!save) return save;
+  const tracked = Promise.resolve(save).finally(() => preview.pendingSaves.delete(tracked));
+  preview.pendingSaves.add(tracked);
+  return tracked;
+}
+
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
   if (isRegisteredPreviewMessage(value)) {
     const handler = registeredMessageHandlers.get(value.type);
+    if (value.type === "previewEditFlushed") {
+      // The answer to a flush request is matched by its flush id only: it must reach the waiting
+      // host even when a render moved the stage on while the page saved.
+      return preview.disposed || !handler ? undefined : Promise.resolve(handler(preview, value));
+    }
     // Comments live in the sidecar, not in the document text: a changed document version does not
     // stale them (the quote re-anchors), and typed text must not be lost to a race with typing.
     const candidate = COMMENT_MESSAGE_TYPES.has(value.type) && preview.stage
@@ -3755,10 +3838,10 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     return;
   }
   if (value.type === "previewFrontmatterSave") {
-    return handleFrontmatterSave(preview, value);
+    return trackPendingSave(preview, handleFrontmatterSave(preview, value));
   }
   if (value.type === "previewCheckboxToggle") {
-    return handleCheckboxToggle(preview, value);
+    return trackPendingSave(preview, handleCheckboxToggle(preview, value));
   }
   recordPreviewState(preview, value);
   if (value.type === "previewRefresh") {
@@ -3885,6 +3968,42 @@ function refreshPreviewDocument(
   }
   preview.document = document;
   return preview.queue.refresh(document);
+}
+
+/**
+ * The switches the host starts itself (the preview follows the active editor, Open Preview on
+ * another file) save what the page's open editor holds first, so typed text is never dropped with
+ * the page (CR 025). Switches queue behind each other and only the latest request is applied, so
+ * A -> B -> A during the flush ends on A.
+ */
+const switchChains = new WeakMap<vscode.WebviewPanel, Promise<void>>();
+const latestSwitches = new WeakMap<vscode.WebviewPanel, LatestRequest<vscode.TextDocument>>();
+
+function switchPreviewDocumentAfterFlush(preview: ActivePreview, document: vscode.TextDocument): void {
+  if (!isDocumentEligible(document)) {
+    return;
+  }
+  const panel = preview.panel;
+  let latest = latestSwitches.get(panel);
+  if (!latest) {
+    latest = new LatestRequest<vscode.TextDocument>();
+    latestSwitches.set(panel, latest);
+  }
+  if (latest.idle && documentKey(document) === preview.documentUri) {
+    return;
+  }
+  latest.request(document);
+  const queue = latest;
+  const chain = (switchChains.get(panel) ?? Promise.resolve())
+    .then(() => flushPageEdits(preview))
+    .catch((error: unknown) => console.error("Failed to flush the open editor before the switch.", error))
+    .then(() => {
+      const target = queue.settle();
+      if (target && !preview.disposed && activePreviews.has(preview)) {
+        switchPreviewDocument(preview, target);
+      }
+    });
+  switchChains.set(panel, chain);
 }
 
 function switchPreviewDocument(preview: ActivePreview, document: vscode.TextDocument): void {
@@ -4320,6 +4439,9 @@ function createPreview(
     activePathChanges: 0,
     linkedTargetEvents: 0,
     editLock: new EditLock(),
+    pendingSaves: new Set(),
+    flushWaiters: new Map(),
+    flushSequence: 0,
     restoreCalls: 0,
     hadFailure: false,
     htmlAssignments: 0,
@@ -4433,7 +4555,7 @@ async function openPreview(uri?: unknown): Promise<void> {
   if (sidePreview) {
     sidePreview.panel.reveal(sidePreview.panel.viewColumn ?? vscode.ViewColumn.Beside);
     if (documentKey(document) !== sidePreview.documentUri) {
-      switchPreviewDocument(sidePreview, document);
+      switchPreviewDocumentAfterFlush(sidePreview, document);
     } else {
       await requestPreviewDocument(sidePreview, document);
     }
@@ -4702,7 +4824,7 @@ function followActiveEditor(editor: vscode.TextEditor | undefined): void {
     // editor is active.
     return;
   }
-  switchPreviewDocument(preview, document);
+  switchPreviewDocumentAfterFlush(preview, document);
 }
 
 export function activate(context: vscode.ExtensionContext): void {

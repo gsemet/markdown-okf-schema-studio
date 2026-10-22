@@ -13,6 +13,7 @@ export function installHistoryControls(
   document: Document,
   vscode: { postMessage(message: unknown): void },
   context: HistoryControlsContext,
+  beforeNavigate?: () => void,
 ): { apply(state: { canBack?: unknown; canForward?: unknown }): void } {
   const back = document.querySelector("[data-sphinx-preview-back]") as HTMLButtonElement | null;
   const next = document.querySelector("[data-sphinx-preview-next]") as HTMLButtonElement | null;
@@ -20,6 +21,8 @@ export function installHistoryControls(
   if (back) back.disabled = true;
   if (next) next.disabled = true;
   const go = (direction: "back" | "forward"): void => {
+    // Back and Next can switch document: save what the open editor holds first (CR 025).
+    beforeNavigate?.();
     vscode.postMessage({
       type: "previewHistoryGo",
       documentId: context.documentId,

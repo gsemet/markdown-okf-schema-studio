@@ -9,6 +9,7 @@ export function installLinkNavigation(
   window: Window & typeof globalThis,
   vscode: { postMessage(message: unknown): void },
   context: LinkRuntimeContext,
+  beforeNavigate?: () => void,
 ): { rescan(): void } {
   const selector = "a[data-sphinx-preview-navigation]";
   let links = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
@@ -61,6 +62,9 @@ export function installLinkNavigation(
     const request = link?.getAttribute("data-sphinx-preview-navigation");
     if (!request) return;
     event.preventDefault();
+    // A link to another file replaces this page: save what the open editor holds first (CR 025).
+    // Same-page anchors keep the page and its editor.
+    if (!request.startsWith("#")) beforeNavigate?.();
     vscode.postMessage({ type: "previewLink", ...context, request });
   };
   document.addEventListener("click", activate);

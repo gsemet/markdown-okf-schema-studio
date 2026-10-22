@@ -165,7 +165,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     event.stopImmediatePropagation?.();
     openMappedEditor(block, event.target, "end");
   }, true);
-  const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context);
+  const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context, () => flushOpenEditors());
   const firstClearance = (${installFirstClearance.toString()})(document, window);
   const applyFigureSizes = ${applyFigureSizes.toString()};
   const applySpanColors = ${applySpanColors.toString()};
@@ -224,7 +224,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
   const incomingChanges = (${installIncomingChanges.toString()})(document);
   const incomingToggle = (${installIncomingToggle.toString()})(document, vscode, context);
-  const historyControls = (${installHistoryControls.toString()})(document, vscode, context);
+  const historyControls = (${installHistoryControls.toString()})(document, vscode, context, () => flushOpenEditors());
   const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
   // The toolbar changes size when rows 2-3 are collapsed: re-measure everything placed around it.
   const toolbarCollapse = (${installToolbarCollapse.toString()})(document, vscode, context, () => {
@@ -1825,8 +1825,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     let cancelled = false;
     const saveKey = () => {
       if (cancelled || control.disabled) return;
-      const newFieldName = control.value;
-      if (newFieldName === name) {
+      // A flush keeps the key the reader typed minus the spaces around it; an empty key keeps the old one.
+      const newFieldName = flushingEditors ? control.value.trim() : control.value;
+      if (newFieldName === name || (flushingEditors && newFieldName === "")) {
         cancelled = true;
         closeFrontmatterEditor();
         return;
@@ -1865,6 +1866,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         fieldName: name,
         newFieldName,
         fieldValue: value,
+        ...(flushingEditors ? { flush: true } : {}),
         ...frontmatterPinFields(nameCell),
         ...anchorField(),
       });
@@ -1902,6 +1904,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       fieldName: name,
       fieldValue: value,
       cancel: () => { cancelled = true; },
+      save: () => saveKey(),
     };
     if (refreshButton) refreshButton.disabled = true;
     createFrontmatterMenu(activeFrontmatterEdit, nameCell, properties);
@@ -2316,13 +2319,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       control.addEventListener("input", resizeTextarea);
       edit.resizeTextarea = resizeTextarea;
     }
+    edit.save = () => saveValue();
     const saveValue = (forcedValue) => {
       if (cancelled || edit.saving || control.disabled) return;
       if (forcedValue === undefined && fieldType === "text" && !useYamlEditor && !useListEditorValue
         && control.tagName === "TEXTAREA" && (typeof value !== "string" || !value.endsWith("\\n"))) {
         control.value = String(control.value).replace(/(?:\\r?\\n)+$/u, "");
       }
-      const fieldValue = forcedValue === undefined
+      let fieldValue = forcedValue === undefined
         ? useListEditorValue ? readListValue()
           : useYamlEditor ? control.value
           : fieldType === "checkbox" ? control.checked
@@ -2330,10 +2334,15 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
             : control.value
         : forcedValue;
       if (fieldType === "number" && forcedValue !== null && (!control.value || !Number.isFinite(fieldValue))) {
-        status.textContent = "Enter a valid number.";
-        status.setAttribute("data-state", "error");
-        status.setAttribute("data-visible", "true");
-        return;
+        // A flush keeps the typed text as it is: the host writes it and the preview shows the problem.
+        if (flushingEditors) {
+          fieldValue = control.value;
+        } else {
+          status.textContent = "Enter a valid number.";
+          status.setAttribute("data-state", "error");
+          status.setAttribute("data-visible", "true");
+          return;
+        }
       }
       const unchanged = useYamlEditor
         ? control.value === initialYaml
@@ -2364,6 +2373,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         editId,
         fieldName: name,
         ...(useYamlEditor ? { fieldValueFormat: "yaml" } : {}),
+        ...(flushingEditors ? { flush: true } : {}),
         ...(newCustomKey ? { fieldValueStyle: "plain" } : {}),
         fieldValue,
         ...frontmatterPinFields(valueCell),
@@ -2586,6 +2596,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       final,
       ...(edit.insertAfterLine !== undefined ? { insertAfterLine: edit.insertAfterLine } : {}),
       ...(final ? blockPinFields(edit) : {}),
+      ...(flushingEditors ? { flush: true } : {}),
       ...anchorField(),
     });
     return true;
@@ -2608,13 +2619,59 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (!edit || edit.autosaveTimer === undefined) return;
     postBlockEditSave(false);
   }
-  window.addEventListener("pagehide", flushPendingAutosave);
+  // A frontmatter editor has no autosave: its typed text is saved (and the editor closed) when the
+  // page goes away or is hidden, as a flush, so a window close or Reload Window loses nothing.
+  function flushHiddenPage() {
+    flushPendingAutosave();
+    flushFrontmatterEditor();
+  }
+  window.addEventListener("pagehide", flushHiddenPage);
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") flushPendingAutosave();
+    if (document.visibilityState === "hidden") flushHiddenPage();
   });
 
   function saveBlockEdit() {
     postBlockEditSave(true);
+  }
+
+  // True while flushOpenEditors runs: a frontmatter value save then tells the host to keep text
+  // that is not valid YAML as typed.
+  let flushingEditors = false;
+
+  // Before the preview leaves this document (a link to another file, Back / Next, the host
+  // following another tab, CR 025): save and close every open editor now, whatever it holds, and
+  // do not wait for the autosave timer. The host applies the saves before it switches document.
+  // Returns true when a save was posted.
+  function flushOpenEditors() {
+    let flushed = false;
+    const blockEdit = activeBlockEdit;
+    if (blockEdit && !blockEdit.finishing) {
+      if (blockEdit.tableModel && blockEdit.tableInput && blockEdit.selectedCell) {
+        const modelRowIndex = blockEdit.tableRowIndex === 0 ? 0 : blockEdit.tableRowIndex + 1;
+        const modelRow = blockEdit.tableModel.rows[modelRowIndex];
+        if (modelRow) modelRow[blockEdit.tableColumnIndex] = blockEdit.tableInput.value;
+      }
+      flushingEditors = true;
+      try {
+        flushed = postBlockEditSave(true) === true;
+      } finally {
+        flushingEditors = false;
+      }
+    }
+    return flushFrontmatterEditor() || flushed;
+  }
+
+  // Saves the open frontmatter editor as a flush (typed text is kept whatever it holds).
+  function flushFrontmatterEditor() {
+    const frontmatterEdit = activeFrontmatterEdit;
+    if (!frontmatterEdit || frontmatterEdit.saving || typeof frontmatterEdit.save !== "function") return false;
+    flushingEditors = true;
+    try {
+      frontmatterEdit.save();
+    } finally {
+      flushingEditors = false;
+    }
+    return Boolean(activeFrontmatterEdit?.saving || activeFrontmatterEdit?.editId);
   }
 
   // Cancel button and Escape: close without saving, and restore the block when an autosave already
@@ -4931,6 +4988,19 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (sameContext(message) && message.type === "previewIncomingChanges") {
       incomingChanges.setEnabled(message.enabled !== false);
       incomingChanges.setRanges(message.ranges);
+      return;
+    }
+    if (message && message.type === "previewFlushEdit" && typeof message.flushId === "string") {
+      // The host is about to switch document: post the final saves, then the answer, in that order.
+      const flushed = flushOpenEditors();
+      vscode.postMessage({
+        type: "previewEditFlushed",
+        documentId: context.documentId,
+        documentVersion: context.documentVersion,
+        requestId: context.requestId,
+        flushId: message.flushId,
+        flushed,
+      });
       return;
     }
     if (sameContext(message) && message.type === "previewHistoryState") {

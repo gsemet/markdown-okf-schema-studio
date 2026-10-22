@@ -231,3 +231,15 @@ test("T44: previewCommentResolve and previewCommentDelete validate the thread id
     assert.equal(isRegisteredPreviewMessage({ ...remove, ...patch }), false, JSON.stringify(patch).slice(0, 60));
   }
 });
+
+test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
+  const flushed = {
+    type: "previewEditFlushed", documentId: "doc", documentVersion: 1, requestId: 1, flushId: "flush-1", flushed: true,
+  };
+  assert.equal(isRegisteredPreviewMessage(flushed), true);
+  assert.equal(isRegisteredPreviewMessage({ ...flushed, flushed: false }), true);
+  for (const patch of [{ flushId: "" }, { flushId: 3 }, { flushId: undefined }, { flushId: "f".repeat(101) },
+    { flushed: "yes" }, { flushed: undefined }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...flushed, ...patch }), false, JSON.stringify(patch));
+  }
+});
