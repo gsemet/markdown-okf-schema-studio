@@ -3920,6 +3920,223 @@ async function scenarioPreviewGroupLock(page: Page, evidence: Evidence): Promise
   }
 }
 
+// CR 025: typed text must reach the source document before the preview leaves it. Each scenario
+// types and then switches document at once (a few keystrokes at 5 ms, far below the 400 ms
+// autosave), so the text exists only in the page when the switch starts.
+
+const FLUSH_FIRST = [
+  "---",
+  "type: req",
+  "title: Flush title",
+  "count: 3",
+  "meta:",
+  "  a: 1",
+  "---",
+  "",
+  "# First",
+  "",
+  "Go to [the second note](second.md).",
+  "",
+  "Typed target paragraph.",
+  "",
+  "| Name | Value |",
+  "|------|-------|",
+  "| alpha | one |",
+  "",
+].join("\n");
+
+const FLUSH_SECOND = ["# Second", "", "Second body.", "", "Back to [the first note](first.md).", ""].join("\n");
+
+async function withFlushDocuments(
+  prefix: string,
+  scenario: (first: vscode.TextDocument, second: vscode.TextDocument) => Promise<void>,
+): Promise<void> {
+  const fixture = createFixture(prefix, { "first.md": FLUSH_FIRST, "second.md": FLUSH_SECOND });
+  try {
+    writeSchema(fixture.directory, "req", REQ_SCHEMA + "  count:\n    type: number\n  meta:\n    type: object\n");
+    const first = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("first.md")));
+    const second = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("second.md")));
+    try {
+      await scenario(first, second);
+    } finally {
+      await leaveEditModeOff();
+      await closeAllEditors();
+    }
+  } finally {
+    fixture.dispose();
+  }
+}
+
+async function waitForPreviewOf(document: vscode.TextDocument): Promise<void> {
+  await waitFor(`the preview to show ${path.basename(document.uri.fsPath)}`, () => {
+    const preview = getActivePreviewForTests();
+    return preview?.documentUri === document.uri.toString() && preview.phase === "ready";
+  });
+}
+
+async function waitForNoOpenEditor(page: Page): Promise<void> {
+  await waitFor("no editor to be open in the preview", async () => {
+    const current = await findCurrentFrame(page);
+    return current !== undefined
+      && await current.locator("[data-sphinx-preview-block-editor], [data-okf-frontmatter-editor]").count() === 0;
+  });
+}
+
+/** Opens the editor of the block with `text` and types ` Added.` without waiting for the autosave. */
+async function typeIntoBlock(page: Page, selector: string, text: string | RegExp): Promise<void> {
+  await withCurrentFrame(page, (frame) => frame.locator(selector).filter({ hasText: text }).first().click());
+  await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+  await press(page, "End");
+  await typeText(page, " Added.", 5);
+}
+
+/**
+ * Activates an element of the preview without moving the focus: a pointer click would blur the text
+ * box first and the blur commit would save the text, hiding the race this CR is about. The click
+ * event reaches the page handlers (link navigation, Back) while the caret stays in the text box.
+ */
+async function clickWithoutBlur(
+  page: Page,
+  selector: string,
+  options: { hasText?: string; modifier?: boolean } = {},
+): Promise<void> {
+  await withCurrentFrame(page, async (frame) => {
+    const target = frame.locator(selector).filter(options.hasText ? { hasText: options.hasText } : {}).first();
+    const focusedBefore = await frame.evaluate(() => window.document.activeElement?.tagName);
+    assert.ok(focusedBefore === "TEXTAREA" || focusedBefore === "INPUT", "the caret is in the editor before the click");
+    await target.evaluate((element, meta) => {
+      element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, metaKey: meta, ctrlKey: !meta }));
+    }, process.platform === "darwin");
+  });
+}
+
+/** CR 025: a link to another file, right after typing. */
+async function scenarioFlushBeforeLink(page: Page, evidence: Evidence): Promise<void> {
+  await withFlushDocuments("realinput-cr25a", async (first, second) => {
+    await openSidePreview(first);
+    await waitForRender(first);
+    await setEditMode(page, true);
+    await typeIntoBlock(page, "p", "Typed target paragraph.");
+    await clickWithoutBlur(page, "a", { hasText: "the second note" });
+    await waitFor("the typed text to reach the first document", () =>
+      bufferText(first).includes("Typed target paragraph. Added."));
+    await waitForPreviewOf(second);
+    // Back to the first document: the editor was saved and closed, and is not reopened.
+    await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-preview-back]").click());
+    await waitForPreviewOf(first);
+    await waitForNoOpenEditor(page);
+    assert.equal(bufferText(first), FLUSH_FIRST.replace("Typed target paragraph.", "Typed target paragraph. Added."));
+  });
+}
+
+/** CR 025: Back across documents, right after typing. */
+async function scenarioFlushBeforeBack(page: Page, evidence: Evidence): Promise<void> {
+  await withFlushDocuments("realinput-cr25b", async (first, second) => {
+    await openSidePreview(first);
+    await waitForRender(first);
+    await setEditMode(page, true);
+    await withCurrentFrame(page, (frame) =>
+      frame.locator("a", { hasText: "the second note" }).click({ modifiers: [MOD] }));
+    await waitForPreviewOf(second);
+    await waitForRender(second);
+    await typeIntoBlock(page, "p", "Second body.");
+    await clickWithoutBlur(page, "[data-sphinx-preview-back]");
+    await waitFor("the typed text to reach the second document", () =>
+      bufferText(second).includes("Second body. Added."));
+    await waitForPreviewOf(first);
+    await waitForNoOpenEditor(page);
+  });
+}
+
+/** CR 025: the preview follows another editor tab, right after typing; the screenshot comes back. */
+async function scenarioFlushBeforeTabSwitch(page: Page, evidence: Evidence): Promise<void> {
+  await withFlushDocuments("realinput-cr25c", async (first, second) => {
+    await openSidePreview(first);
+    await waitForRender(first);
+    await setEditMode(page, true);
+    await typeIntoBlock(page, "p", "Typed target paragraph.");
+    await vscode.window.showTextDocument(second, { viewColumn: vscode.ViewColumn.One, preview: false });
+    await waitFor("the typed text to reach the first document", () =>
+      bufferText(first).includes("Typed target paragraph. Added."));
+    await waitForPreviewOf(second);
+    await vscode.window.showTextDocument(first, { viewColumn: vscode.ViewColumn.One, preview: false });
+    await waitForPreviewOf(first);
+    await waitForRender(first);
+    await waitForNoOpenEditor(page);
+    assert.equal(bufferText(first), FLUSH_FIRST.replace("Typed target paragraph.", "Typed target paragraph. Added."));
+    await captureAfter(evidence, page, "40-flush-before-tab-switch",
+      "Edit mode on; ` Added.` was typed in the paragraph and the editor tab was switched at once. "
+      + "Coming back, the preview shows `Typed target paragraph. Added.` and no editor is open; the "
+      + "source buffer holds the same text.");
+  });
+}
+
+/** CR 025: a table cell and a frontmatter field, right after typing, then a tab switch. */
+async function scenarioFlushCellAndFrontmatter(page: Page, evidence: Evidence): Promise<void> {
+  await withFlushDocuments("realinput-cr25d", async (first, second) => {
+    await openSidePreview(first);
+    await waitForRender(first);
+    await setEditMode(page, true);
+    await withCurrentFrame(page, (frame) => frame.locator("td").filter({ hasText: /^one$/u }).click());
+    await waitForEditor(page, "[data-sphinx-preview-table-cell-editor] textarea");
+    await press(page, "End");
+    await typeText(page, "1", 5);
+    await vscode.window.showTextDocument(second, { viewColumn: vscode.ViewColumn.One, preview: false });
+    await waitFor("the typed cell text to reach the first document", () =>
+      /\|\s*alpha\s*\|\s*one1\s*\|/u.test(bufferText(first)));
+    await waitForPreviewOf(second);
+
+    await vscode.window.showTextDocument(first, { viewColumn: vscode.ViewColumn.One, preview: false });
+    await waitForPreviewOf(first);
+    await waitForRender(first);
+    await withCurrentFrame(page, (frame) =>
+      frame.locator('tr[data-okf-field="title"] [data-okf-edit-cell="value"]').click());
+    await waitForEditor(page, "[data-okf-frontmatter-editor] textarea, [data-okf-frontmatter-editor] input");
+    await press(page, "End");
+    await typeText(page, " more", 5);
+    await vscode.window.showTextDocument(second, { viewColumn: vscode.ViewColumn.One, preview: false });
+    await waitFor("the typed title to reach the first document", () =>
+      bufferText(first).includes("title: Flush title more"));
+    await waitForPreviewOf(second);
+  });
+}
+
+/**
+ * CR 025: a frontmatter value typed in the editor and followed by a tab switch is written as typed,
+ * even when it is not valid YAML, does not fit the schema or is not a number. The preview then
+ * shows the validation error; the text is never lost.
+ */
+async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidence): Promise<void> {
+  await withFlushDocuments("realinput-cr25e", async (first, second) => {
+    const cases: Array<{ field: string; selector: string; typed: string | undefined; expected: RegExp }> = [
+      // Invalid YAML in the YAML editor of an object field.
+      { field: "meta", selector: "[data-okf-frontmatter-editor] textarea", typed: "[unclosed", expected: /\[unclosed/u },
+      // Valid YAML that does not fit the schema (a string for an object).
+      { field: "meta", selector: "[data-okf-frontmatter-editor] textarea", typed: "just text", expected: /just text/u },
+      // A number field that is emptied: not a number.
+      { field: "count", selector: "[data-okf-frontmatter-editor] input", typed: undefined, expected: /^count:\s*(""|'')\s*$/mu },
+    ];
+    for (const item of cases) {
+      await vscode.window.showTextDocument(first, { viewColumn: vscode.ViewColumn.One, preview: false });
+      await waitForPreviewOf(first);
+      await waitForRender(first);
+      if (!(await withCurrentFrame(page, (frame) => frame.locator("html").getAttribute("data-sphinx-preview-edit-mode")) === "on")) {
+        await setEditMode(page, true);
+      }
+      await withCurrentFrame(page, (frame) =>
+        frame.locator(`tr[data-okf-field="${item.field}"] [data-okf-edit-cell="value"]`).click());
+      await waitForEditor(page, item.selector);
+      await press(page, `${MOD}+a`);
+      if (item.typed === undefined) await press(page, "Backspace");
+      else await typeText(page, item.typed, 5);
+      await vscode.window.showTextDocument(second, { viewColumn: vscode.ViewColumn.One, preview: false });
+      await waitFor(`the typed ${item.field} value to reach the first document`, () =>
+        item.expected.test(bufferText(first)));
+      await waitForPreviewOf(second);
+    }
+  });
+}
+
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   const evidence = createEvidence("real-input");
@@ -3980,6 +4197,11 @@ export async function run(): Promise<void> {
     await scenarioImageEditing(page, evidence);
     await scenarioFocusChangeKeepsPreviewStill(page, evidence);
     await scenarioHiddenPreviewCatchesUp(page, evidence);
+    await scenarioFlushBeforeLink(page, evidence);
+    await scenarioFlushBeforeBack(page, evidence);
+    await scenarioFlushBeforeTabSwitch(page, evidence);
+    await scenarioFlushCellAndFrontmatter(page, evidence);
+    await scenarioFlushFrontmatterKeptAsTyped(page, evidence);
     await scenarioSaveKeepsBlockInPlace(page, evidence);
     await scenarioStatusPageTwoLines(page, evidence);
     await scenarioTitleBarButton(page, evidence);

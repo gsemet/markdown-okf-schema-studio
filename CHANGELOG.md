@@ -10,6 +10,11 @@
   rounded corners of code blocks: every bar now sits in one column at the left margin of the page,
   with square ends and the full height of its block, whatever the indentation. Nothing moves.
 - The current section in the table of contents keeps its bar and tint but now has square corners.
+- Text you type in an open editor (a paragraph, a table cell or a property) is no longer lost when
+  you follow a link to another file, go Back or Next, or switch editor tab right after typing:
+  the editor is saved and closed first, and the preview then switches. A property value that
+  is not valid YAML, does not fit the schema or is not a number is written as typed in that case,
+  and the preview then shows the validation error.
 - A leading properties table no longer keeps its Description toggle under the floating toolbar
   when the page loads slowly: the table gives up the toolbar's width once its layout settles.
 - Saving a linked file in the editor now refreshes its excerpt and title in the previews that

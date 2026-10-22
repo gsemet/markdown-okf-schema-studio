@@ -126,6 +126,10 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
     && message.threadId !== "" && typeof message.resolved === "boolean",
   previewCommentDelete: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "",
+  // The page's answer to a host flush request (CR 025): it posted the final save of every open
+  // editor before this message, so the host can wait for those saves. It edits nothing.
+  previewEditFlushed: (message) => isBoundedString(message.flushId, MAX_EDIT_ID_LENGTH)
+    && message.flushId !== "" && typeof message.flushed === "boolean",
   // The MyST palette's pickers: labels of the document, citation keys of the workspace `.bib`
   // files, and a native open dialog for a `{doc}` path. They read only; the answer repeats `editId`.
   previewListTargets: isHostRequest,
