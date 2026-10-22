@@ -6,6 +6,7 @@ import { matchFrontmatterBlock } from "./okfFrontmatter";
 import { getCachedBranchValidator } from "./schemaValidator";
 import {
   getCachedMarkdownStemIndex,
+  invalidateStemIndex,
   type MarkdownStemIndex,
 } from "./stemIndex";
 
@@ -553,7 +554,13 @@ function resolveFilenameStem(
 ): { path: string; normalizedTarget: string } | LinkError {
   if (rejectAbsolute(target)) return diagnostic("E10", field, `absolute target '${target}' is not allowed`);
   if (roots.length === 0) return diagnostic("W15", field, "filename-stem root is unavailable");
-  const lookup = (stemIndex ?? getCachedMarkdownStemIndex(roots)).lookup(target);
+  let lookup = (stemIndex ?? getCachedMarkdownStemIndex(roots)).lookup(target);
+  // An indexed file that no longer exists means the cached index is stale (file watcher events
+  // can lag, or miss the files of a deleted directory): rebuild it once before deciding.
+  if (!stemIndex && lookup.unavailable) {
+    invalidateStemIndex();
+    lookup = getCachedMarkdownStemIndex(roots).lookup(target);
+  }
   const uniqueMatches = [...new Set(lookup.paths)];
   if (uniqueMatches.length === 0) {
     return diagnostic(

@@ -100,3 +100,22 @@ test("T22: stems returns the indexed stems sorted and limited", () => {
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("a cached match whose file was deleted rebuilds the index before resolving", () => {
+  // The CI race: a fixture directory is deleted and a new one with the same stems is created
+  // before the file watcher invalidates the index (the root's own mtime does not change).
+  const root = makeRoot();
+  try {
+    writeFile(root, "fixtures/first/StRS-A.md");
+    assert.equal(inspect(root, "StRS-A").status, "valid");
+
+    fs.rmSync(path.join(root, "fixtures/first"), { recursive: true, force: true });
+    writeFile(root, "fixtures/second/StRS-A.md");
+    const refreshed = inspect(root, "StRS-A");
+    assert.equal(refreshed.status, "valid");
+    assert.equal(refreshed.resolvedPath, fs.realpathSync(path.join(root, "fixtures/second/StRS-A.md")));
+  } finally {
+    invalidateStemIndex(root);
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
