@@ -1978,6 +1978,60 @@ def check_editor_keyboard(page: Page, scenario: dict, failures: list[Failure]) -
     failures.append(Failure(page_name, f"redo did not reapply the wraps: {editor.input_value()[:24]!r}"))
 
 
+def check_paste_rich_text(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """Rich text pasted in a paragraph editor goes to the host as HTML and comes back as Markdown."""
+  if not scenario.get("pasteRichTextChecks"):
+    return
+  page_name = scenario["page"]
+  page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
+  if page.locator("html").get_attribute("data-sphinx-preview-edit-mode") != "on":
+    page.locator("[data-sphinx-preview-edit-toggle]").click()
+  page.locator("main p", has_text="Wrapped paragraphs keep").click()
+  editor = page.locator('textarea[aria-label="Raw Markdown block"]')
+  editor.wait_for(state="visible")
+  original = editor.input_value()
+  html = ("<h2>Plan</h2><p>Read <b>the</b> <a href=\"https://example.com/doc\">doc</a></p>"
+          "<ul><li>One<ul><li>Nested</li></ul></li></ul>")
+  markdown = "## Plan\n\nRead **the** [doc](https://example.com/doc)\n\n- One\n  - Nested"
+  paste = """(args) => {
+    const element = document.querySelector('textarea[aria-label="Raw Markdown block"]');
+    const data = new DataTransfer();
+    data.setData('text/html', args.html);
+    data.setData('text/plain', args.plain);
+    const event = new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true });
+    element.dispatchEvent(event);
+    return event.defaultPrevented;
+  }"""
+  editor.evaluate("element => { element.focus(); element.select(); }")
+  if not page.evaluate(paste, {"html": html, "plain": "Plan Read the doc One Nested"}):
+    failures.append(Failure(page_name, "a rich-text paste was not taken over by the editor"))
+    return
+  page.wait_for_function("() => window.visualMessages.some(m => m.type === 'previewPasteHtml')")
+  if editor.input_value() != original:
+    failures.append(Failure(page_name, "the editor changed before the host answered the rich-text paste"))
+  page.evaluate("""(markdown) => {
+    const request = window.visualMessages.filter(m => m.type === 'previewPasteHtml').at(-1);
+    const result = { type: 'previewPasteHtmlResult', editId: request.editId, ok: true, markdown };
+    window.dispatchEvent(new MessageEvent('message', { data: result }));
+  }""", markdown)
+  if editor.input_value() != markdown:
+    failures.append(Failure(page_name, f"the pasted Markdown did not replace the selection: {editor.input_value()[:60]!r}"))
+  save_step(page, scenario, "pasted", caret="hide")
+  undo = "Meta+Z" if sys.platform == "darwin" else "Control+Z"
+  page.keyboard.press(undo)
+  if editor.input_value() != original:
+    failures.append(Failure(page_name, f"one undo did not remove the whole paste: {editor.input_value()[:60]!r}"))
+  # Cmd/Ctrl+Shift+V: the keydown marks the next paste as plain text, which the editor leaves alone.
+  editor.evaluate("element => { element.focus(); element.setSelectionRange(0, 0); }")
+  editor.evaluate("""element => element.dispatchEvent(new KeyboardEvent('keydown', {
+    key: 'V', shiftKey: true, metaKey: true, ctrlKey: true, bubbles: true, cancelable: true }))""")
+  before = page.evaluate("window.visualMessages.filter(m => m.type === 'previewPasteHtml').length")
+  plain_prevented = page.evaluate(paste, {"html": html, "plain": "Plan"})
+  after = page.evaluate("window.visualMessages.filter(m => m.type === 'previewPasteHtml').length")
+  if plain_prevented or after != before:
+    failures.append(Failure(page_name, "a paste right after Cmd/Ctrl+Shift+V was converted instead of left plain"))
+
+
 def check_insert_after_figure(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The + after a figure that ends the document opens an empty editor after the closing fence."""
   if not scenario.get("insertAfterFigureChecks"):
@@ -5602,7 +5656,7 @@ def check_mermaid_error_theme_switch(page: Page, scenario: dict, failures: list[
 # Every step PNG a check can write (`<scenario id>-<step>.png`). A scenario's `steps` list selects
 # which of them are written; the other steps are skipped silently (their check still runs) and a
 # name that is not in this registry fails the check that asks for it.
-STEP_NAMES = frozenset({"alert", "arrowdown", "bar", "cell-bar", "cell-emoji", "colour", "colour-code", "emoji", "end", "filtered", "flip", "grid", "hover", "insert-point", "menu", "nomatch", "open", "palette", "selected", "top"})
+STEP_NAMES = frozenset({"alert", "arrowdown", "bar", "cell-bar", "cell-emoji", "colour", "colour-code", "emoji", "end", "filtered", "flip", "grid", "hover", "insert-point", "menu", "nomatch", "open", "palette", "pasted", "selected", "top"})
 
 
 def save_step(page: Page, scenario: dict, step: str, caret: str = "hide",
@@ -5772,7 +5826,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:
