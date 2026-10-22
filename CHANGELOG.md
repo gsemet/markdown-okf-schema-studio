@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Long words and bare URLs now wrap inside their paragraph, list item, quote or table cell instead
+  of widening the page and making it scroll horizontally.
+- An invalid Mermaid diagram now shows one error line, however many times the theme changes, with
+  a collapsed "Show the parser error" section giving the reason (line, expected token).
 - The green bar of blocks changed since the last commit no longer touches the text or follows the
   rounded corners of code blocks: every bar now sits in one column at the left margin of the page,
   with square ends and the full height of its block, whatever the indentation. Nothing moves.

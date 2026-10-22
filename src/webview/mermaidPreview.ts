@@ -1,3 +1,5 @@
+import { showMermaidError } from "./mermaidError";
+
 const CSS_SYSTEM_COLOR_KEYWORDS = new Set([
   "accentcolor",
   "accentcolortext",
@@ -88,11 +90,8 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
         image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(normalizeSvgForDataImage(rendered.svg))}`;
         diagram.replaceChildren(image);
         diagram.dataset.renderState = "rendered";
-      } catch {
-        const error = document.createElement("p");
-        error.className = "myst-mermaid-error";
-        error.textContent = "Unable to render Mermaid diagram. Its source remains available below.";
-        diagram.prepend(error);
+      } catch (err) {
+        showMermaidError(diagram, err instanceof Error ? err.message : String(err));
         diagram.dataset.renderState = "error";
       }
     }));

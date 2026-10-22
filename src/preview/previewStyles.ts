@@ -2280,6 +2280,11 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   padding: 0 var(--sphinx-preview-content-gutter) min(80vh, max(24px, calc(100vh - var(--sphinx-preview-reading-offset, 0px) - 40px)));
 }
 
+/* Long words and bare URLs wrap instead of widening the page; code blocks keep their own scroll. */
+#sphinx-myst-preview-content :is(p, li, dd, dt, td, th, blockquote, h1, h2, h3, h4, h5, h6, figcaption, summary, a) {
+  overflow-wrap: anywhere;
+}
+
 .sphinx-preview-table-menu button,
 .sphinx-preview-frontmatter-menu button {
   flex-shrink: 0;
@@ -3219,7 +3224,35 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 
 #sphinx-myst-preview-content .myst-mermaid-error {
   color: var(--vscode-errorForeground, #f14c4c);
+  text-align: start;
+}
+
+#sphinx-myst-preview-content .myst-mermaid-error > p {
+  margin: 0 0 0.25em;
   font-style: italic;
+}
+
+#sphinx-myst-preview-content .myst-mermaid-error-details {
+  margin-bottom: 0.5em;
+  font-size: 0.9em;
+}
+
+#sphinx-myst-preview-content .myst-mermaid-error-details summary {
+  color: var(--vscode-descriptionForeground, inherit);
+  cursor: pointer;
+}
+
+#sphinx-myst-preview-content .myst-mermaid-error-details pre {
+  margin: 0.4em 0 0;
+  padding: 0.5em 0.75em;
+  overflow-x: auto;
+  border: 1px solid var(--sphinx-preview-border);
+  border-radius: 4px;
+  background: var(--vscode-textCodeBlock-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-style: normal;
+  white-space: pre-wrap;
 }
 
 #sphinx-myst-preview-content .myst-plantuml-diagram {
