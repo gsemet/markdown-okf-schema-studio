@@ -855,12 +855,29 @@ test("P4: the palette sits on top of the frame and sticks below the sticky band 
   assert.doesNotMatch(css, /sphinx-preview-edit-palette[^{]*\{[^}]*style=/u);
 });
 
-test("P4: the palette stays in the flow in narrow or short panes and when the runtime says it is too tall", () => {
+test("P4: the palette stays in the flow in short panes and when the runtime says it is too tall", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css,
-    /@media \(max-width: 480px\), \(max-height: 520px\) \{\s*\.sphinx-preview-block-editor-host > \.sphinx-preview-edit-palette \{\s*position: relative;/u);
+    /@media \(max-height: 520px\) \{\s*\.sphinx-preview-block-editor-host > \.sphinx-preview-edit-palette \{\s*position: relative;/u);
   assert.match(css,
     /\.sphinx-preview-block-editor-host\[data-sphinx-palette-static="true"\] > \.sphinx-preview-edit-palette \{\s*position: relative;/u);
+});
+
+test("CR 034: a narrow pane keeps the palette sticky; it wraps inside the pane instead of leaving the flow", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.doesNotMatch(css, /@media \(max-width: 480px\)[^{]*\{\s*\.sphinx-preview-block-editor-host/u,
+    "no width query drops the sticky bar");
+  const bar = /\.sphinx-preview-edit-palette \{([^}]*)\}/u.exec(css)?.[1] ?? "";
+  assert.match(bar, /flex-wrap: wrap;/u);
+  assert.match(bar, /max-width: 100%;/u);
+});
+
+test("CR 034: the table toolbar rides down with a scrolling table by a transform, not by layout", () => {
+  const css = PREVIEW_THEME_CSS;
+  const rule = /\.sphinx-preview-table-menu\[data-sphinx-table-menu-stuck="true"\]\s*\{([^}]*)\}/u.exec(css)?.[1] ?? "";
+  assert.match(rule, /transform: translateY\(var\(--sphinx-preview-table-menu-shift, 0px\)\);/u);
+  assert.match(rule, /z-index: 3;/u);
+  assert.doesNotMatch(rule, /position: (?:fixed|absolute)|inset-block|top:/u);
 });
 
 test("T44: the Orphaned comments box sits in the content's bottom padding and adds no scroll height", () => {

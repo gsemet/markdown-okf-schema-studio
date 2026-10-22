@@ -134,6 +134,12 @@ export interface Scenario {
    */
   editPaletteTall?: boolean;
   /**
+   * CR 034: a table cell of a table taller than the viewport is open in its editor. The table
+   * toolbar sits above the table; with the table top scrolled out it rides down to the top of the
+   * viewport, stays inside the table and leaves with the table's end. Steps: `top`, `end`.
+   */
+  tableToolbarTall?: boolean;
+  /**
    * P6: the palette mode select is set to this mode in an open paragraph editor; the buttons are
    * checked against the mode, in a paragraph editor (`palette` step) and in an insertion
    * point editor (`insert-point` step, dropped when equal to the final frame).
@@ -1181,7 +1187,40 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     editMode: true,
     editPaletteTall: true,
     description:
-      "360 px preview, a very tall paragraph editor scrolled mid-box: the five-row palette is not sticky in a narrow pane (it would cover a third of the viewport), so the text is unobstructed. The `end` step keeps the bottom of the box.",
+      "360 px preview, a very tall paragraph editor scrolled mid-box: the five-row palette stays stuck to the top of the viewport inside the pane (CR 034) and leaves with the box end. The `end` step keeps the bottom of the box.",
+  },
+  {
+    id: "palette-slash/v18-palette-sticky-tall-editor-light-460",
+    fixture: "05-long-chapter",
+    theme: "light",
+    ...NARROW,
+    scroll: { kind: "top" },
+    editMode: true,
+    editPaletteTall: true,
+    description:
+      "460 px preview, light theme, a very tall paragraph editor: the palette sits on top of the box with the box top in view, and with the box top scrolled out it sticks to the top of the viewport inside the pane (wrapping onto several rows), keeps the focus in the box and leaves with the box end. The `top` step shows the palette on top of the box, the `end` step the bottom of the box, the final frame the stuck palette mid-box.",
+  },
+  {
+    id: "palette-slash/v19-table-toolbar-sticky-tall-table-light-900",
+    fixture: "46-tall-table",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    tableToolbarTall: true,
+    description:
+      "900 px preview, light theme, a cell of a table taller than the viewport open in its editor: the table toolbar sits on top of the table without covering a row; with the table top scrolled out it stays at the top of the viewport below the preview controls, inside the table, and the table never moves. The `top` step shows the toolbar on top of the table, the `end` step the end of the table, the final frame the toolbar riding mid-table.",
+  },
+  {
+    id: "palette-slash/v20-table-toolbar-sticky-tall-table-light-460",
+    fixture: "46-tall-table",
+    theme: "light",
+    ...NARROW,
+    scroll: { kind: "top" },
+    editMode: true,
+    tableToolbarTall: true,
+    description:
+      "460 px preview, light theme, a cell of a table taller than the viewport open in its editor: the table toolbar wraps inside the pane, sits on top of the table and, with the table top scrolled out, stays at the top of the viewport inside the table. The `top` step shows the toolbar on top of the table, the `end` step the end of the table, the final frame the toolbar riding mid-table.",
   },
   {
     id: "palette-mode-strict-light",

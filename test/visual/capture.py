@@ -3476,8 +3476,11 @@ def check_edit_palette_tall(page: Page, scenario: dict, failures: list[Failure])
     failures.append(Failure(page_name, f"the edit box is not taller than the viewport: {frame_height} vs {viewport}"))
     return
 
-  # Box top visible: the palette is attached on top of the box, outside its border.
-  page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top - 220)
+  # Box top visible: the palette is attached on top of the box, outside its border. A tall (wrapped)
+  # palette needs the room above the box to be clear of the preview controls: with the box top just
+  # under them the bar has to ride over the box (the viewport limit), which is not the state shown here.
+  bar_height = page.evaluate("() => document.querySelector('.sphinx-preview-block-editor-host > .sphinx-preview-edit-palette').getBoundingClientRect().height")
+  page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top - max(220, 114 + 4 + bar_height + 24))
   page.wait_for_timeout(200)
   top = page.evaluate(measure)
   if not (0 <= top["frame"]["top"] - top["bar"]["bottom"] <= 6) or top["bar"]["bottom"] > top["frame"]["top"] + 0.5:
@@ -3505,53 +3508,56 @@ def check_edit_palette_tall(page: Page, scenario: dict, failures: list[Failure])
       failures.append(Failure(page_name, f"{label}: the palette is covered by something: {state}"))
     if state["docWidth"] > state["clientWidth"] + 1:
       failures.append(Failure(page_name, f"{label}: the page scrolls sideways: {state}"))
+    # CR 034: the bar rides over the box, the box's text never moves (no layout shift).
+    scrolled = page.evaluate("() => window.scrollY")
+    if abs(state["frame"]["top"] + scrolled - frame_page_top) > 1.5:
+      failures.append(Failure(page_name, f"{label}: the box moved while the palette stuck: {state}"))
+    if state["bar"]["left"] < -0.5 or state["bar"]["right"] > state["clientWidth"] + 0.5:
+      failures.append(Failure(page_name, f"{label}: the palette leaves the pane sideways: {state}"))
 
-  narrow = scenario["width"] <= 480
-  if narrow:
-    # A five-row palette would cover a third of a narrow pane: it stays in the flow.
-    page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 700)
+  # CR 034: wide or narrow, the palette stays in view while the box top is scrolled out: it sticks at
+  # the top of the viewport (wrapping inside the pane when it is narrow), and leaves with the box end.
+  # Box top out of view: the palette stuck to the top of the viewport, buttons still usable.
+  for offset, label in ((700, "box scrolled 700px"), (1500, "box scrolled 1500px")):
+    page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + offset)
     page.wait_for_timeout(200)
-    state = page.evaluate(measure)
-    position = page.evaluate(
-      "() => getComputedStyle(document.querySelector('.sphinx-preview-block-editor-host > .sphinx-preview-edit-palette')).position")
-    if position != "relative" or state["bar"]["bottom"] > 0:
-      failures.append(Failure(page_name, f"the palette sticks in a narrow pane: {position} {state}"))
-  else:
-    # Box top out of view: the palette stuck to the top of the viewport, buttons still usable.
-    for offset, label in ((700, "box scrolled 700px"), (1500, "box scrolled 1500px")):
-      page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + offset)
-      page.wait_for_timeout(200)
-      check_stuck(label, page.evaluate(measure))
-    page.locator(".sphinx-preview-edit-palette button[data-edit-action='bold']").click()
-    page.wait_for_timeout(150)
-    if area.count() != 1:
-      failures.append(Failure(page_name, "clicking Bold in the stuck palette closed the editor"))
-      return
-    # P4 r2: the caret must not end under the stuck palette. Start on line 12, scroll so the first
-    # lines are under the bar, then press ArrowUp past the bar's lower edge.
-    page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 60)
-    page.wait_for_timeout(200)
-    area.evaluate("""element => {
-      element.focus({ preventScroll: true });
-      const offset = element.value.split('\\n').slice(0, 11).join('\\n').length + 1;
-      element.setSelectionRange(offset, offset);
-    }""")
-    for _ in range(9):
-      page.keyboard.press("ArrowUp")
-      page.wait_for_timeout(60)
-    page.wait_for_timeout(200)
-    caret = area.evaluate("""element => {
-      const r = element.getBoundingClientRect();
-      const lineHeight = parseFloat(getComputedStyle(element).lineHeight);
-      const line = element.value.slice(0, element.selectionEnd).split('\\n').length;
-      const bar = document.querySelector('.sphinx-preview-block-editor-host > .sphinx-preview-edit-palette').getBoundingClientRect();
-      return { line, top: r.top + (line - 1) * lineHeight, bottom: r.top + line * lineHeight, barBottom: bar.bottom };
-    }""")
-    if caret["line"] != 3 or caret["top"] < caret["barBottom"] - 1:
-      failures.append(Failure(page_name, f"the caret ended under the stuck palette after ArrowUp: {caret}"))
-    page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 700)
-    page.wait_for_timeout(200)
-    page.mouse.move(2, 2)
+    check_stuck(label, page.evaluate(measure))
+  page.locator(".sphinx-preview-edit-palette button[data-edit-action='bold']").click()
+  page.wait_for_timeout(150)
+  if area.count() != 1:
+    failures.append(Failure(page_name, "clicking Bold in the stuck palette closed the editor"))
+    return
+  if not area.evaluate("element => document.activeElement === element"):
+    failures.append(Failure(page_name, "clicking Bold in the stuck palette took the focus out of the box"))
+  # P4 r2: the caret must not end under the stuck palette. Start on line 12, scroll so the first
+  # lines are under the bar, then press ArrowUp past the bar's lower edge.
+  page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 60)
+  page.wait_for_timeout(200)
+  area.evaluate("""element => {
+    element.focus({ preventScroll: true });
+    const offset = element.value.split('\\n').slice(0, 11).join('\\n').length + 1;
+    element.setSelectionRange(offset, offset);
+  }""")
+  wide = scenario["width"] > 480
+  for _ in range(9 if wide else 80):
+    page.keyboard.press("ArrowUp")
+    page.wait_for_timeout(60)
+    # A narrow pane wraps the lines: go up to the first rows, where the bar would hide the caret.
+    if not wide and area.evaluate("element => element.selectionEnd < 30"):
+      break
+  page.wait_for_timeout(200)
+  caret = area.evaluate("""element => {
+    const r = element.getBoundingClientRect();
+    const lineHeight = parseFloat(getComputedStyle(element).lineHeight);
+    const line = element.value.slice(0, element.selectionEnd).split('\\n').length;
+    const bar = document.querySelector('.sphinx-preview-block-editor-host > .sphinx-preview-edit-palette').getBoundingClientRect();
+    return { line, top: r.top + (line - 1) * lineHeight, bottom: r.top + line * lineHeight, barBottom: bar.bottom };
+  }""")
+  if (wide and caret["line"] != 3) or caret["top"] < caret["barBottom"] - 1:
+    failures.append(Failure(page_name, f"the caret ended under the stuck palette after ArrowUp: {caret}"))
+  page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 700)
+  page.wait_for_timeout(200)
+  page.mouse.move(2, 2)
 
   # The box end in view: the palette left with the box, never below it.
   page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + frame_height - viewport + 120)
@@ -3563,6 +3569,101 @@ def check_edit_palette_tall(page: Page, scenario: dict, failures: list[Failure])
   # The scenario PNG shows the stuck palette mid-box.
   page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top + 700)
   page.wait_for_timeout(200)
+
+
+def check_table_toolbar_tall(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """CR 034: the table toolbar stays above its table, then rides down with a tall table and leaves with it."""
+  if not scenario.get("tableToolbarTall"):
+    return
+  page_name = scenario["page"]
+  table = page.locator("main > table").first
+  table.evaluate("element => element.scrollIntoView({ block: 'start' })")
+  page.wait_for_timeout(150)
+  cell = table.locator("tbody tr").nth(2).locator("td").nth(1)
+  cell.click()
+  page.wait_for_timeout(300)
+  # The table top goes 24 px below the bar's own height under the preview controls, so the bar is in its
+  # place above the table (a table top just under the controls makes the bar ride over it by design).
+  bar_height = page.evaluate("() => document.querySelector('[data-sphinx-table-menu]').getBoundingClientRect().height")
+  table_top_now = page.evaluate("() => document.querySelector('main > table').getBoundingClientRect().top")
+  page.evaluate("(delta) => window.scrollBy(0, -delta)", max(114 + 4 + bar_height + 24, 220) - table_top_now + 6)
+  page.wait_for_timeout(250)
+  measure = """() => {
+    const table = document.querySelector('main > table');
+    const menu = document.querySelector('[data-sphinx-table-menu]');
+    const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+    const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+    const rect = (element) => {
+      if (!element) return null;
+      const r = element.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, height: r.height };
+    };
+    const bar = menu && menu.getBoundingClientRect();
+    const hit = bar && document.elementFromPoint(bar.left + 20, bar.top + bar.height / 2);
+    return {
+      table: rect(table), bar: rect(menu), toolbar: rect(toolbar),
+      band: band && !band.hidden ? rect(band) : null,
+      stuck: menu ? menu.getAttribute('data-sphinx-table-menu-stuck') : null,
+      covered: !(hit && menu && (hit === menu || menu.contains(hit))),
+      scrollY: window.scrollY, viewport: window.innerHeight,
+      focusInCell: Boolean(document.activeElement && document.activeElement.closest('td, th')),
+      docWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth,
+    };
+  }"""
+  top = page.evaluate(measure)
+  if top["bar"] is None:
+    failures.append(Failure(page_name, "clicking a table cell opened no table toolbar"))
+    return
+  table_page_top = top["table"]["top"] + top["scrollY"]
+  table_height = top["table"]["height"]
+  if table_height < top["viewport"] * 1.5:
+    failures.append(Failure(page_name, f"the table is not taller than the viewport: {table_height} vs {top['viewport']}"))
+    return
+  if top["bar"]["bottom"] > top["table"]["top"] + 0.5:
+    failures.append(Failure(page_name, f"the table toolbar covers the table top: {top}"))
+  if top["stuck"] is not None:
+    failures.append(Failure(page_name, f"the table toolbar is shifted while the table top is in view: {top}"))
+  save_step(page, scenario, "top", caret="hide")
+
+  def usable_top(state: dict) -> float:
+    usable = 0.0
+    if state["band"]:
+      usable = max(usable, state["band"]["bottom"])
+    toolbar = state["toolbar"]
+    if toolbar and state["bar"]["left"] < toolbar["right"] and state["bar"]["right"] > toolbar["left"]:
+      usable = max(usable, toolbar["bottom"])
+    return usable
+
+  for offset, label in ((700, "table scrolled 700px"), (1500, "table scrolled 1500px")):
+    page.evaluate("(y) => window.scrollTo(0, y)", table_page_top + offset)
+    page.wait_for_timeout(200)
+    state = page.evaluate(measure)
+    usable = usable_top(state)
+    if state["stuck"] != "true":
+      failures.append(Failure(page_name, f"{label}: the table toolbar did not follow the table: {state}"))
+    if state["bar"]["top"] < usable - 0.5 or state["bar"]["top"] > usable + 16:
+      failures.append(Failure(page_name, f"{label}: the table toolbar is not at the top of the viewport ({usable}): {state}"))
+    if state["bar"]["bottom"] > state["table"]["bottom"] + 0.5 or state["bar"]["bottom"] > state["viewport"]:
+      failures.append(Failure(page_name, f"{label}: the table toolbar left the table or the viewport: {state}"))
+    if state["covered"]:
+      failures.append(Failure(page_name, f"{label}: the table toolbar is covered by something: {state}"))
+    if abs(state["table"]["top"] + state["scrollY"] - table_page_top) > 1.5:
+      failures.append(Failure(page_name, f"{label}: the table moved while the toolbar followed: {state}"))
+    if state["bar"]["right"] > state["clientWidth"] + 0.5 or state["docWidth"] > state["clientWidth"] + 1:
+      failures.append(Failure(page_name, f"{label}: the table toolbar leaves the pane sideways: {state}"))
+    if not state["focusInCell"]:
+      failures.append(Failure(page_name, f"{label}: the focus left the cell editor: {state}"))
+
+  # The table end in view: the toolbar left with the table, never below it.
+  page.evaluate("(y) => window.scrollTo(0, y)", table_page_top + table_height - top["viewport"] + 120)
+  page.wait_for_timeout(200)
+  end = page.evaluate(measure)
+  if end["bar"]["bottom"] > end["table"]["bottom"] + 0.5:
+    failures.append(Failure(page_name, f"the table toolbar is below the end of the table: {end}"))
+  save_step(page, scenario, "end", caret="hide")
+  page.evaluate("(y) => window.scrollTo(0, y)", table_page_top + 700)
+  page.wait_for_timeout(200)
+  page.mouse.move(2, 2)
 
 
 def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> None:
@@ -5575,7 +5676,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:
