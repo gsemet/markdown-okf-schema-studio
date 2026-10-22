@@ -18,7 +18,7 @@ test("the e2e campaign has the 16 frozen feature groups with unique ids", () => 
 test("every visual scenario has a permanent <group>/vNN id whose prefix is its group", () => {
   const ids = new Set(SCENARIOS.map((scenario) => scenario.id));
   assert.equal(ids.size, SCENARIOS.length, "scenario ids are unique");
-  assert.equal(SCENARIOS.length, 241, "245 scenarios minus the 4 exact aliases");
+  assert.equal(SCENARIOS.length, 255, "245 scenarios minus the 4 exact aliases, plus 14 B4 gap-fill scenarios");
   for (const scenario of SCENARIOS) {
     assert.ok(isGroupId(scenario.group), scenario.id);
     assert.match(scenario.id, new RegExp(`^${scenario.group}/v\\d{2,}-[a-z0-9-]+$`, "u"));
