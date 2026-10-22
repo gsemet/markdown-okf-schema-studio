@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- GitHub `[!CAUTION]` alerts and MyST `caution` callouts are now red with a stop-sign (octagon)
+  icon, like on GitHub, instead of the Warning amber with a triangle.
 - New slash menu: typing `/` at a line start or after a space in a block text box (paragraph,
   insertion point, Start writing, table cell) opens a command menu at the caret with completion
   (`/h2`, `/table`, `/note`). It lists the palette's commands for the current mode, runs them like

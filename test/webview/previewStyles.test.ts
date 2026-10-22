@@ -289,12 +289,26 @@ test("Sphinx version admonitions use success, warning, and danger accents", () =
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /:where\(\.warning, \.attention, \.caution, \.versionchanged\)\s*\{[^}]*--sphinx-preview-accent: var\(--vscode-charts-yellow/u,
+    /:where\(\.warning, \.attention, \.versionchanged\)\s*\{[^}]*--sphinx-preview-accent: var\(--vscode-charts-yellow/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
     /:where\(\.danger, \.error, \.deprecated\)\s*\{[^}]*--sphinx-preview-accent: var\(--vscode-charts-red/u,
   );
+});
+
+test("caution callouts are red with the octagon icon, not the warning amber", () => {
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /#sphinx-myst-preview-content \.caution\s*\{[^}]*--sphinx-preview-accent: var\(--vscode-charts-red/u,
+  );
+  const rule = /#sphinx-myst-preview-content \.caution\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  const octagon = /--sphinx-preview-icon: (url\("[^"]*"\))/u.exec(rule)?.[1] ?? "";
+  assert.ok(octagon.includes("data:image/svg+xml"), "caution sets an icon");
+  const triangle = /:where\(\.warning[^)]*\)\s*\{[^}]*--sphinx-preview-icon: (url\("[^"]*"\))/u.exec(PREVIEW_THEME_CSS)?.[1];
+  assert.ok(triangle?.includes("data:image/svg+xml"), "the warning rule sets an icon");
+  assert.notEqual(octagon, triangle, "caution does not reuse the warning triangle");
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /:where\(\.warning[^)]*\.caution[^)]*\)/u);
 });
 
 test("MyST simple and no-icon admonition modifiers are styled", () => {
