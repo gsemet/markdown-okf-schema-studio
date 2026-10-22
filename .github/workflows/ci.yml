@@ -5,15 +5,24 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      gallery:
+        description: Also build the gallery and the site from the end-to-end reports
+        type: boolean
+        default: false
+
+env:
+  STUDIO_NPM: npm --registry=https://registry.npmjs.org/
+  # One end-to-end campaign id per workflow run, shared by the visual and integration jobs;
+  # each job records its own real start time.
+  STUDIO_E2E_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
 
 permissions:
   contents: read
 
 jobs:
-  checks:
+  static:
     runs-on: ubuntu-latest
-    env:
-      STUDIO_NPM: npm --registry=https://registry.npmjs.org/
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,24 +39,155 @@ jobs:
         with:
           enable-cache: true
       - uses: extractions/setup-just@v2
-      - name: Install PlantUML and Graphviz
-        run: sudo -n apt-get update && sudo -n apt-get install --yes --no-install-recommends plantuml graphviz
-      - run: npm ci
-      - run: uv sync --group docs
-      - run: uv run --no-sync --group docs playwright install --with-deps chromium
-      - name: Run full preflight
-        run: xvfb-run --auto-servernum just preflight
-      - name: Ensure justfile formatting is clean
-        run: |
-          just format
-          git diff --exit-code -- justfile
+      - run: just dev-ci
+      - run: just ci-static
       - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-static
+          path: out/reports/
+          if-no-files-found: warn
+
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Fetch Git LFS objects
+        run: git lfs pull
+      - name: Verify Git LFS objects
+        run: git lfs fsck
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v2
+      - run: just dev-ci
+      - run: just ci-visual
+      - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-visual
+          path: out/reports/
+          if-no-files-found: warn
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Fetch Git LFS objects
+        run: git lfs pull
+      - name: Verify Git LFS objects
+        run: git lfs fsck
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v2
+      - run: just dev-ci
+      - run: xvfb-run --auto-servernum just ci-integration
+      - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-integration
+          path: out/reports/
+          if-no-files-found: warn
+
+  report:
+    needs: [visual, integration]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Fetch Git LFS objects
+        run: git lfs pull
+      - name: Verify Git LFS objects
+        run: git lfs fsck
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v2
+      - run: just dev-ci
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: e2e-*
+          path: out/reports/
+          merge-multiple: true
+      - run: just ci-report
+      - name: Publish merged reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: studio-reports
           path: out/reports/
           if-no-files-found: warn
+
+  gallery:
+    needs: report
+    if: github.event_name == 'workflow_dispatch' && inputs.gallery
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Fetch Git LFS objects
+        run: git lfs pull
+      - name: Verify Git LFS objects
+        run: git lfs fsck
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v2
+      - run: just dev-ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: studio-reports
+          path: out/reports/
+      - run: just ci-gallery
+      - name: Publish gallery and site
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-site
+          path: out/site/
+          if-no-files-found: warn
+
+  # Stable aggregate name for branch protection: it depends on every check job.
+  checks:
+    needs: [static, visual, integration, report]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every check job to pass
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "job results: $RESULTS"
+          for result in $RESULTS; do
+            [ "$result" = "success" ] || exit 1
+          done
 
   tag-release:
     needs: checks

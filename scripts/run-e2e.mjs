@@ -72,7 +72,7 @@ function escapeXml(value) {
     .replaceAll("'", "&apos;");
 }
 
-function writeJUnit(stages) {
+export function writeJUnit(stages) {
   const failures = stages.filter((stage) => stage.status !== "passed");
   const cases = stages.map((stage) => stage.status === "passed"
     ? `    <testcase classname="e2e" name="${escapeXml(stage.name)}"/>`
