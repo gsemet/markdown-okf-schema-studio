@@ -88,6 +88,8 @@ test("previewViewPreferenceChanged validates the value per preference", () => {
   assert.equal(ok("toc", "yes"), false);
   assert.equal(ok("incomingChanges", false), true);
   assert.equal(ok("incomingChanges", 0), false);
+  assert.equal(ok("comments", false), true);
+  assert.equal(ok("comments", "no"), false);
   assert.equal(ok("toolbarCollapsed", true), true);
   assert.equal(ok("toolbarCollapsed", "yes"), false);
   assert.equal(ok("other", true), false);

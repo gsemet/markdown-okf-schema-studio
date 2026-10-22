@@ -1594,7 +1594,7 @@ def check_okf_schema_rendering(page: Page, scenario: dict, failures: list[Failur
             )
 
 def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
-    """The Diff button is last in row 3, shows both states, and hides with the setting."""
+    """The Diff button is second to last in row 3 (Comments is last), shows both states, and hides with the setting."""
     diff = toolbar.locator('[data-sphinx-preview-diff-toggle]')
     if diff.count() != 1:
         return
@@ -1602,8 +1602,8 @@ def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failur
         """element => [...element.querySelector('[data-sphinx-preview-toolbar-row="options"]').children]
           .map(item => item.getAttribute('aria-label'))"""
     )
-    if not order or order[-1] != "Hide changes since last commit":
-        failures.append(Failure(page_name, f"the Diff button is not the last of row 3: {order}"))
+    if not order or order[-2:] != ["Hide changes since last commit", "Hide comments"]:
+        failures.append(Failure(page_name, f"the Diff and Comments buttons are not the last two of row 3: {order}"))
     root = "document.documentElement.getAttribute('data-sphinx-preview-incoming')"
     try:
         if diff.get_attribute("aria-pressed") != "true" or page.evaluate(root) != "on":
@@ -1748,6 +1748,7 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         ('[data-sphinx-preview-zoom-in]', "Zoom in"),
         ('[data-sphinx-preview-width-toggle]', "Width: Margin"),
         ('[data-sphinx-preview-diff-toggle]', "Hide changes since last commit"),
+        ('[data-sphinx-preview-comments-toggle]', "Hide comments"),
     ):
         button = toolbar.locator(selector)
         if button.count() != 1 or button.get_attribute("aria-label") != label:
@@ -1769,8 +1770,8 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         failures.append(Failure(page_name, f"toolbar row 1 does not hold {expected_main} buttons: {rows[0]['buttons']}"))
     if rows[1]["buttons"] != 4:
         failures.append(Failure(page_name, f"toolbar row 2 does not hold 4 buttons: {rows[1]['buttons']}"))
-    if rows[2]["buttons"] != 4:
-        failures.append(Failure(page_name, f"toolbar row 3 does not hold 4 buttons: {rows[2]['buttons']}"))
+    if rows[2]["buttons"] != 5:
+        failures.append(Failure(page_name, f"toolbar row 3 does not hold 5 buttons: {rows[2]['buttons']}"))
     check_diff_toggle(page, toolbar, page_name, failures)
     if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5 or rows[1]["rect"]["bottom"] > rows[2]["rect"]["top"] + 0.5:
         failures.append(Failure(page_name, "toolbar rows overlap"))
@@ -2917,6 +2918,71 @@ def check_comment_chips(page: Page, scenario: dict, failures: list[Failure]) -> 
   todo = page.evaluate(measure, todo_block)
   if todo["title"] != '"TODO"':
     failures.append(Failure(page_name, f"the open TODO comment must be titled TODO: {todo['title']}"))
+
+
+def check_comment_toggle(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The toolbar Comments button hides and shows the gray chips in preview and in edit mode."""
+  final = scenario.get("commentToggleChecks")
+  if not final:
+    return
+  page_name = scenario["page"]
+  button = page.locator("[data-sphinx-preview-comments-toggle]")
+  gray_count = "[...document.querySelectorAll('.okf-comment[data-okf-comment-kind=comment] > .okf-chip')]"
+  shown = f"{gray_count}.filter(e => e.getClientRects().length > 0).length"
+  todo_shown = "[...document.querySelectorAll('.okf-comment[data-okf-comment-kind=todo] > .okf-chip')].filter(e => e.getClientRects().length > 0).length"
+  root = "document.documentElement.getAttribute('data-sphinx-preview-comments')"
+  labels = page.evaluate(f"{gray_count}.map(e => e.textContent)")
+  if labels != ["comment", "comment"]:
+    failures.append(Failure(page_name, f"the gray chips must be labelled comment: {labels}"))
+
+  def cycle(where: str) -> None:
+    if button.count() != 1 or not button.is_visible():
+      failures.append(Failure(page_name, f"the Comments button is not visible in {where}"))
+      return
+    if button.get_attribute("aria-pressed") != "true" or page.evaluate(root) != "on" or page.evaluate(shown) != 2:
+      failures.append(Failure(page_name, f"in {where} the Comments button must start pressed with both gray chips visible"))
+    pressed = button.evaluate("element => getComputedStyle(element).backgroundColor")
+    button.click()
+    page.wait_for_timeout(150)
+    if page.evaluate(shown) != 0 or page.evaluate(root) != "off" or button.get_attribute("aria-pressed") != "false":
+      failures.append(Failure(page_name, f"in {where} the Comments button did not hide the gray chips"))
+    if page.evaluate(todo_shown) != 1:
+      failures.append(Failure(page_name, f"in {where} the TODO chip must stay when the comments are hidden"))
+    if button.get_attribute("data-tooltip") != "Show comments":
+      failures.append(Failure(page_name, f"in {where} the unpressed Comments button has the wrong tooltip"))
+    if button.evaluate("element => getComputedStyle(element).backgroundColor") == pressed:
+      failures.append(Failure(page_name, f"in {where} the Comments button looks the same pressed and unpressed"))
+    button.click()
+    page.wait_for_timeout(150)
+    if page.evaluate(shown) != 2 or page.evaluate(root) != "on":
+      failures.append(Failure(page_name, f"in {where} the Comments button did not bring the gray chips back"))
+
+  edit = page.locator("[data-sphinx-preview-edit-toggle]")
+  try:
+    page.evaluate("window.scrollTo(0, 0)")
+    cycle("preview mode")
+    if edit.count() == 1:
+      edit.click()
+      page.wait_for_timeout(250)
+      cycle("edit mode")
+      edit.click()
+      page.wait_for_timeout(250)
+    # The open comment box has square corners.
+    chip = page.locator(".okf-comment[data-okf-comment-kind=comment] > .okf-chip").first
+    chip.click()
+    page.wait_for_timeout(150)
+    radius = page.evaluate("getComputedStyle(document.querySelector('.okf-comment-body:not([hidden])')).borderTopLeftRadius")
+    if radius not in ("0px", "0"):
+      failures.append(Failure(page_name, f"the open comment box has rounded corners: {radius}"))
+    chip.click()
+    page.wait_for_timeout(150)
+  finally:
+    if final == "hidden" and button.count() == 1 and button.get_attribute("aria-pressed") == "true":
+      button.click()
+      page.wait_for_timeout(200)
+    page.evaluate("window.scrollTo(0, 0)")
+  if page.evaluate(shown) != (0 if final == "hidden" else 2):
+    failures.append(Failure(page_name, f"the final frame must have the gray chips {final}"))
 
 
 FIRST_ELEMENT_GAP = 40
@@ -5706,7 +5772,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

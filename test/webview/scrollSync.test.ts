@@ -6097,6 +6097,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-comments,on)",
       "button.addEventListener(click,fn)",
       "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
@@ -6143,6 +6144,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-comments,on)",
       "button.addEventListener(click,fn)",
       "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
@@ -6238,6 +6240,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-comments,on)",
       "button.addEventListener(click,fn)",
       "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
@@ -6281,6 +6284,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-comments,on)",
       "button.addEventListener(click,fn)",
       "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
@@ -6327,6 +6331,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-comments,on)",
       "button.addEventListener(click,fn)",
       "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
@@ -6373,6 +6378,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-comments,on)",
       "button.addEventListener(click,fn)",
       "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
@@ -6478,6 +6484,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div.setAttribute(data-sphinx-preview-document-id,file:///active.md)",
       "div.setAttribute(data-sphinx-preview-document-version,7)",
       "div.setAttribute(data-sphinx-preview-request-id,11)",
+      "div.setAttribute(data-sphinx-preview-comments,on)",
       "button.addEventListener(click,fn)",
       "button.addEventListener(click,fn)",
       "div.setAttribute(data-sphinx-preview-theme-mode,current)",
@@ -7579,7 +7586,7 @@ test("T08: zoom buttons set the zoom variable, post the preference and keep the 
 });
 
 test("T08: the zoom limits disable the buttons and post nothing more", () => {
-  const low = createRuntimeHarness({ initialViewPreferences: { zoom: 80, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: false } });
+  const low = createRuntimeHarness({ initialViewPreferences: { zoom: 80, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false } });
   assert.equal(low.zoomOutButton.disabled, false);
   low.zoomOutButton.dispatch("click");
   assert.equal(low.documentElement.getAttribute("data-sphinx-preview-zoom"), "70");
@@ -7590,7 +7597,7 @@ test("T08: the zoom limits disable the buttons and post nothing more", () => {
   assert.equal(low.documentElement.getAttribute("data-sphinx-preview-zoom"), "70");
   assert.equal(low.messages.length, count);
 
-  const high = createRuntimeHarness({ initialViewPreferences: { zoom: 200, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: false } });
+  const high = createRuntimeHarness({ initialViewPreferences: { zoom: 200, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false } });
   assert.equal(high.zoomInButton.disabled, true);
   assert.equal(high.zoomOutButton.disabled, false);
   assert.equal(high.documentElement.style.getPropertyValue("--sphinx-preview-zoom"), "2");
@@ -7598,19 +7605,19 @@ test("T08: the zoom limits disable the buttons and post nothing more", () => {
 
 test("T08: saved webview state wins over the initial context", () => {
   const harness = createRuntimeHarness({
-    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: false },
+    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false },
     savedState: { viewZoom: 120 },
   });
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-zoom"), "120");
   const initialOnly = createRuntimeHarness({
-    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: false },
+    initialViewPreferences: { zoom: 150, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false },
   });
   assert.equal(initialOnly.documentElement.getAttribute("data-sphinx-preview-zoom"), "150");
 });
 
 function widthModeFixture(initial?: string) {
   const harness = createRuntimeHarness(initial
-    ? { initialViewPreferences: { zoom: 100, widthMode: initial as "auto", toc: false, incomingChanges: true, toolbarCollapsed: false } }
+    ? { initialViewPreferences: { zoom: 100, widthMode: initial as "auto", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false } }
     : {});
   harness.previewContent.clientWidth = 700;
   harness.documentElement.clientWidth = 1000;
@@ -7679,7 +7686,7 @@ test("T10b: a wide element is centred on the available area, not on the column",
 test("T10b: with the TOC open the available area, its centre and the cap exclude the TOC column", () => {
   const harness = createRuntimeHarness({
     tocReserve: 256,
-    initialViewPreferences: { zoom: 100, widthMode: "auto", toc: true, incomingChanges: true, toolbarCollapsed: false },
+    initialViewPreferences: { zoom: 100, widthMode: "auto", toc: true, incomingChanges: true, comments: true, toolbarCollapsed: false },
   });
   harness.previewContent.clientWidth = 400;
   harness.documentElement.clientWidth = 1000;
@@ -7806,15 +7813,29 @@ test("T17: the Diff button flips the marks, posts the preference and keeps the s
 
 test("T17: the initial preference and the saved webview state decide the pressed state", () => {
   const off = createRuntimeHarness({
-    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false, toolbarCollapsed: false },
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false, comments: true, toolbarCollapsed: false },
   });
   assert.equal(off.documentElement.getAttribute("data-sphinx-preview-incoming"), "off");
   assert.equal(off.diffButton.getAttribute("aria-pressed"), "false");
   const saved = createRuntimeHarness({
-    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false, toolbarCollapsed: false },
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: false, comments: true, toolbarCollapsed: false },
     savedState: { viewIncomingChanges: true },
   });
   assert.equal(saved.documentElement.getAttribute("data-sphinx-preview-incoming"), "on");
+});
+
+test("the Comments toggle is installed with the page: on by default, off from the saved preference", () => {
+  const on = createRuntimeHarness();
+  assert.equal(on.documentElement.getAttribute("data-sphinx-preview-comments"), "on");
+  const off = createRuntimeHarness({
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: false, toolbarCollapsed: false },
+  });
+  assert.equal(off.documentElement.getAttribute("data-sphinx-preview-comments"), "off");
+  const saved = createRuntimeHarness({
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: false, toolbarCollapsed: false },
+    savedState: { viewComments: true },
+  });
+  assert.equal(saved.documentElement.getAttribute("data-sphinx-preview-comments"), "on");
 });
 
 test("T17: the Diff button is hidden through the document attribute when the setting is off", () => {
@@ -7858,12 +7879,12 @@ test("P8: the collapse button hides rows 2-3, posts the preference and keeps the
 
 test("P8: the stored preference and the saved webview state decide the collapsed state", () => {
   const stored = createRuntimeHarness({
-    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: true },
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: true },
   });
   assert.equal(stored.moreRows.hidden, true);
   assert.equal(stored.collapseButton.getAttribute("aria-expanded"), "false");
   const saved = createRuntimeHarness({
-    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, toolbarCollapsed: true },
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: true },
     savedState: { viewToolbarCollapsed: false },
   });
   assert.equal(saved.moreRows.hidden, false);
@@ -7882,7 +7903,7 @@ test("T11: a previewHistoryState of another document version is ignored", () => 
 test("T13: a state snapshot keeps the TOC visibility and the folded sections", () => {
   const harness = createRuntimeHarness({
     viewportWidth: 900,
-    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: true, incomingChanges: true, toolbarCollapsed: false },
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: true, incomingChanges: true, comments: true, toolbarCollapsed: false },
   });
   harness.dispatchDocument("click", { target: harness.descriptionButton });
   const state = harness.getWebviewState();

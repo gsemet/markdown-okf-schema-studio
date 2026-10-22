@@ -176,6 +176,12 @@ export interface Scenario {
   tocShot?: "margin" | "auto" | "full";
   /** Opens and closes the comment chips, keeps the reading line, and turns the gray chips off and on. */
   commentChipChecks?: boolean;
+  /**
+   * The toolbar Comments button (preview and edit mode) hides and shows the gray comment chips (TODO
+   * chips stay) and is pressed again at the end; the open comment box has square corners. The value
+   * is the state left for the screenshot.
+   */
+  commentToggleChecks?: "visible" | "hidden";
   /** Sends the "changed" blocks of the fixture as incoming changes and checks every bar sits in one column at the page margin, square, as tall as its block, and nothing moves. */
   changeBarChecks?: boolean;
   /** Figure width and alignment, and the anchor icon of a (label)= target (T27). */
@@ -221,6 +227,14 @@ const CJK_RTL_ASSERTIONS: ContentAssertion[] = [
   { message: "the page does not scroll horizontally", selector: MAIN, expr: "document.documentElement.scrollWidth <= window.innerWidth && document.body.scrollWidth <= window.innerWidth" },
   { message: "the unbroken word and the long URL wrap inside their paragraphs", selector: `${MAIN} p:nth-of-type(n+6)`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p:nth-of-type(n+6)')].every(p => p.scrollWidth <= p.clientWidth + 1)" },
   { message: "the long URL link stays inside the pane", selector: `${MAIN} p:nth-of-type(7) a`, insidePane: true },
+];
+
+const COMMENT_LIST_ASSERTIONS: ContentAssertion[] = [
+  { message: "every comment shows as a chip (two gray, one TODO), none as a <!-- label", selector: ".okf-comment > .okf-chip", count: 3, notText: "<!--" },
+  { message: "the gray comment chips are labelled comment", selector: ".okf-comment[data-okf-comment-kind='comment'] > .okf-chip", count: 2, text: "comment comment" },
+  { message: "the TODO comment is a green TODO chip", selector: ".okf-comment[data-okf-comment-kind='todo'] > .okf-chip--todo", count: 1, text: "TODO" },
+  { message: "the list keeps its four items", selector: "ul > li", count: 4 },
+  { message: "the toolbar offers the Comments button", selector: "[data-sphinx-preview-comments-toggle]", count: 1, visible: true },
 ];
 
 const LONG_WORDS_ASSERTIONS: ContentAssertion[] = [
@@ -1982,6 +1996,24 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
       + "the reading line does not move the text being read, and turning preview.showComments off "
       + "hides the gray chips (not the TODO chips) without a new render. The final frame has both "
       + "boxes open.",
+  })),
+  ...([
+    ["light", "visible", 7],
+    ["dark", "visible", 8],
+    ["light", "hidden", 9],
+    ["dark", "hidden", 10],
+  ] as const).map(([theme, state, number]) => ({
+    id: `review-annotations/v${String(number).padStart(2, "0")}-comment-list-chips-${state}-${theme}-900`,
+    fixture: "46-comment-list",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    commentToggleChecks: state,
+    contentAssertions: COMMENT_LIST_ASSERTIONS,
+    description: "A list of requirements with HTML comments before and after it, two of them one after the other: "
+      + "each comment is a chip labelled comment (a green TODO chip for the TODO comment), never a `<!--` label. "
+      + "The toolbar Comments button, in preview and in edit mode, hides the gray chips and brings them back "
+      + `(TODO stays). The final frame has the gray chips ${state}.`,
   })),
   ...(["light", "dark"] as const).map((theme) => ({
     id: `review-annotations/v0${theme === "light" ? 5 : 6}-change-bar-${theme}-900`,

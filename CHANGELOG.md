@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- HTML comments now show as a chip labelled "comment" instead of a bare `<!--`, including
+  comments written one after the other on a line. A new Comments button in the floating toolbar
+  hides and shows the gray chips in both preview and edit mode, and remembers the choice per
+  workspace. The open comment box, the comment compose box and the thread box now have square
+  corners.
 - A MyST `{code-block}` now keeps its code left-aligned like a plain fenced block, and its
   `:caption:` is a title bar joined to the top of the block (left-aligned, monospace, same width
   and border) instead of a centred italic line below it. Line numbers, emphasized lines and the
