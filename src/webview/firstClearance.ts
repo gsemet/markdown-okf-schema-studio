@@ -111,16 +111,40 @@ export function installFirstClearance(
   };
 
   // The observers below watch what update() changes: a layout that never settles must not loop.
-  // More than 200 updates inside one second are skipped (the next event after that updates again).
+  // More than 200 updates inside one second are skipped, and one trailing update runs when that
+  // second ends: the last change of a busy second must never be left unmeasured.
   let windowStart = 0;
   let burst = 0;
+  let trailing: number | undefined;
+  // The leading properties table can change size or controls without resizing the column (a
+  // toggle shown, a heading wrapped, a font applied), so it is observed itself, and again when
+  // the section is replaced by a new one.
+  let observedSection: Element | null = null;
+  let sectionObserver: ResizeObserver | undefined;
+  const armSection = (): void => {
+    if (!sectionObserver) return;
+    const section = document.querySelector("#" + contentId + " > [data-okf-properties]");
+    if (section === observedSection) return;
+    sectionObserver.disconnect();
+    observedSection = section;
+    if (section) sectionObserver.observe(section);
+  };
   const update = (): void => {
     const now = Date.now();
     if (now - windowStart > 1000) {
       windowStart = now;
       burst = 0;
     }
-    if (++burst > 200) return;
+    if (++burst > 200) {
+      if (trailing === undefined) {
+        trailing = window.setTimeout(() => {
+          trailing = undefined;
+          update();
+        }, Math.max(0, windowStart + 1000 - now) + 1);
+      }
+      return;
+    }
+    armSection();
     const measured = measure();
     if (measured.bottom !== currentBottom) {
       currentBottom = measured.bottom;
@@ -143,6 +167,7 @@ export function installFirstClearance(
 
   window.addEventListener("resize", update);
   if (typeof ResizeObserver !== "undefined") {
+    sectionObserver = new ResizeObserver(update);
     const observer = new ResizeObserver(update);
     const content = document.getElementById(contentId);
     const toolbar = document.querySelector("[data-sphinx-preview-toolbar]");
@@ -170,6 +195,9 @@ export function installFirstClearance(
   // A late web font (the toolbar icons, the text) changes widths without any element event.
   (document as Document & { fonts?: { addEventListener?: (type: string, listener: () => void) => void } })
     .fonts?.addEventListener?.("loadingdone", update);
+  // Stylesheets, images and fonts that finish after the script ran move the controls without an event.
+  window.addEventListener("load", update);
+  (document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts?.ready?.then(update, () => undefined);
   update();
   return { update, value: () => Math.max(0, current), inset: () => Math.max(0, currentInset) };
 }

@@ -136,3 +136,104 @@ test("P4: the toolbar's bottom edge is published for the sticky palette only whe
   const beside = setup(rect(0, 100, 600, 2000), rect(12, 800, 150, 72));
   assert.equal(beside.published.get("--sphinx-preview-toolbar-bottom"), "0px");
 });
+
+/** A page whose leading properties table can change after the install, with every observer captured. */
+function dynamicPage() {
+  const published = new Map<string, string>();
+  const column = rect(0, 0, 900, 2000);
+  const toolbar = rect(12, 700, 188, 102);
+  const state = { toggles: [] as Rect[], section: { id: 1 } as object, now: 1_000 };
+  const section = (identity: object) => ({
+    identity,
+    getBoundingClientRect: () => rect(40, 0, 900, 300),
+    querySelectorAll: (selector: string) => (selector.includes(":not(") ? [] : state.toggles)
+      .map((control) => ({ getBoundingClientRect: () => control })),
+  });
+  const sections = new Map<object, ReturnType<typeof section>>();
+  const currentSection = () => {
+    if (!sections.has(state.section)) sections.set(state.section, section(state.section));
+    return sections.get(state.section);
+  };
+  const document = {
+    getElementById: () => ({ getBoundingClientRect: () => column }),
+    querySelector: (selector: string) => {
+      if (selector === "[data-sphinx-preview-toolbar]") return { getBoundingClientRect: () => toolbar };
+      if (selector.endsWith(".sphinx-preview-insert-point--first button")) return null;
+      if (selector.endsWith("> [data-okf-properties]")) return currentSection();
+      return null;
+    },
+    documentElement: { style: { setProperty: (name: string, value: string) => published.set(name, value) } },
+  };
+  const listeners = new Map<string, () => void>();
+  const timers: Array<{ at: number; run: () => void }> = [];
+  const window = {
+    scrollY: 0,
+    addEventListener: (type: string, listener: () => void) => listeners.set(type, listener),
+    getComputedStyle: () => ({ paddingLeft: "16px", paddingRight: "16px" }),
+    setTimeout: (run: () => void, delay: number) => { timers.push({ at: state.now + delay, run }); return timers.length; },
+  };
+  const observers: Array<{ callback: () => void; targets: unknown[] }> = [];
+  const globals = globalThis as Record<string, unknown>;
+  const saved = { ro: globals.ResizeObserver, mo: globals.MutationObserver, now: Date.now };
+  globals.ResizeObserver = class {
+    entry = { callback: undefined as unknown as () => void, targets: [] as unknown[] };
+    constructor(callback: () => void) { this.entry.callback = callback; observers.push(this.entry); }
+    observe(target: unknown) { this.entry.targets.push(target); }
+    disconnect() { this.entry.targets = []; }
+  };
+  globals.MutationObserver = class { constructor() {} observe() {} };
+  Date.now = () => state.now;
+  const restore = (): void => {
+    globals.ResizeObserver = saved.ro;
+    globals.MutationObserver = saved.mo;
+    Date.now = saved.now;
+  };
+  const clearance = installFirstClearance(document as never, window as never);
+  return { clearance, published, state, listeners, timers, observers, currentSection, restore };
+}
+
+test("a change inside a burst of skipped updates is measured by one trailing update", (context) => {
+  const page = dynamicPage();
+  context.after(page.restore);
+  assert.equal(page.clearance.inset(), 0);
+  // A busy first second: more than 200 updates, then the Description toggle appears under the toolbar.
+  for (let index = 0; index < 205; index += 1) page.listeners.get("resize")?.();
+  page.state.toggles = [rect(79, 851, 24, 24)];
+  page.listeners.get("resize")?.();
+  page.listeners.get("resize")?.();
+  assert.equal(page.clearance.inset(), 0, "the update was skipped by the limiter");
+  assert.equal(page.timers.length, 1, "one trailing update is scheduled, not one per skipped update");
+  page.state.now += 1_001;
+  page.timers[0]?.run();
+  // Column content box 16..884, toolbar from 700: the table gives up 884 - 700 + 8.
+  assert.equal(page.clearance.inset(), 192);
+  assert.equal(page.published.get("--sphinx-preview-first-inset"), "192px");
+});
+
+test("the leading properties table is observed itself, also after it is replaced", (context) => {
+  const page = dynamicPage();
+  context.after(page.restore);
+  const sectionObserver = page.observers[0];
+  assert.ok(sectionObserver, "a section observer exists");
+  assert.deepEqual(sectionObserver.targets, [page.currentSection()], "the section is observed");
+  // The table grows a visible toggle without resizing the column: only the section observer sees it.
+  page.state.toggles = [rect(79, 851, 24, 24)];
+  assert.equal(page.clearance.inset(), 0);
+  sectionObserver.callback();
+  assert.equal(page.clearance.inset(), 192);
+  // The section is replaced (a properties patch): the next update observes the new one.
+  const previous = page.currentSection();
+  page.state.section = { id: 2 };
+  page.listeners.get("resize")?.();
+  assert.notEqual(page.currentSection(), previous);
+  assert.deepEqual(sectionObserver.targets, [page.currentSection()]);
+});
+
+test("a late load or font settlement measures again", (context) => {
+  const page = dynamicPage();
+  context.after(page.restore);
+  page.state.toggles = [rect(79, 851, 24, 24)];
+  assert.equal(page.clearance.inset(), 0);
+  page.listeners.get("load")?.();
+  assert.equal(page.clearance.inset(), 192);
+});
