@@ -4116,6 +4116,9 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
       // A number field that is emptied: not a number.
       { field: "count", selector: "[data-okf-frontmatter-editor] input", typed: undefined, expected: /^count:\s*(""|'')\s*$/mu },
     ];
+    // The preview must exist before the first tab switch: nothing else has opened one in this fixture.
+    await openSidePreview(first);
+    await waitForRender(first);
     for (const item of cases) {
       await vscode.window.showTextDocument(first, { viewColumn: vscode.ViewColumn.One, preview: false });
       await waitForPreviewOf(first);
