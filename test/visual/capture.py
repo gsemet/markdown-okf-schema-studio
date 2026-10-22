@@ -2533,6 +2533,16 @@ def check_toc_shot(page: Page, scenario: dict, failures: list[Failure]) -> None:
     failures.append(Failure(page_name, f"{wanted}: the TOC lists only {state['entries']} entries"))
   if len(state["current"]) != 1:
     failures.append(Failure(page_name, f"{wanted}: the TOC must highlight one current heading, found {state['current']}"))
+  radii = page.evaluate("""() => {
+    const corners = element => { const style = getComputedStyle(element); return [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius]; };
+    const current = document.querySelector('nav[data-sphinx-preview-toc] li[data-sphinx-preview-toc-current] > button:not([data-sphinx-preview-toc-twisty])');
+    const other = document.querySelector('nav[data-sphinx-preview-toc] li:not([data-sphinx-preview-toc-current]) > button:not([data-sphinx-preview-toc-twisty])');
+    return { current: current ? corners(current) : null, other: other ? corners(other) : null };
+  }""")
+  if not radii["current"] or any(corner != "0px" for corner in radii["current"]):
+    failures.append(Failure(page_name, f"{wanted}: the current TOC entry must have square corners, got {radii['current']}"))
+  if not radii["other"] or any(corner != "4px" for corner in radii["other"]):
+    failures.append(Failure(page_name, f"{wanted}: the other TOC entries keep their 4px corners, got {radii['other']}"))
   toolbar = state["toolbar"]
   if nav["top"] < toolbar["bottom"] + 7:
     failures.append(Failure(page_name, f"{wanted}: the TOC column touches the floating toolbar"))
@@ -2541,6 +2551,143 @@ def check_toc_shot(page: Page, scenario: dict, failures: list[Failure]) -> None:
   for table in state["tables"]:
     if table["right"] > nav["left"] + 1:
       failures.append(Failure(page_name, f"{wanted}: a table overlaps the TOC column"))
+
+
+def check_change_bar(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """Incoming-change bars: one column at the page margin, square, full block height; nothing moves."""
+  if not scenario.get("changeBarChecks"):
+    return
+  page_name = scenario["page"]
+  probe = """() => {
+    const root = document.getElementById('sphinx-myst-preview-content');
+    const html = document.documentElement;
+    const pick = {
+      heading: [...root.querySelectorAll('h2')].find(h => h.textContent.startsWith('Changed')),
+      paragraph: [...root.querySelectorAll('p')].find(p => p.textContent.startsWith('A changed paragraph')),
+      bullet: [...root.querySelectorAll('li')].find(li => li.textContent.trim().startsWith('A changed bullet')),
+      nested: [...root.querySelectorAll('li')].find(li => li.textContent.trim().startsWith('A changed nested')),
+      number: [...root.querySelectorAll('ol > li')].find(li => li.textContent.trim().startsWith('A changed number')),
+      quotation: [...root.querySelectorAll('blockquote')].find(q => q.textContent.includes('A changed quotation')),
+      table: root.querySelectorAll('table')[1],
+      code: root.querySelectorAll('pre')[1],
+      admonition: root.querySelectorAll('.admonition')[1],
+      image: root.querySelectorAll('img')[1],
+    };
+    const twins = {
+      heading: [...root.querySelectorAll('h2')].find(h => h.textContent.startsWith('Unchanged')),
+      paragraph: [...root.querySelectorAll('p')].find(p => p.textContent.startsWith('An unchanged paragraph')),
+    };
+    const textLeft = element => {
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, { acceptNode: node => (node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+      const node = walker.nextNode();
+      if (!node) return element.getBoundingClientRect().left;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      return range.getClientRects()[0].left;
+    };
+    const snapshot = () => [...root.querySelectorAll('*')].map(element => {
+      const r = element.getBoundingClientRect();
+      return [r.left, r.top, r.width, r.height];
+    });
+    const missing = Object.entries(pick).filter(([, element]) => !element).map(([kind]) => kind);
+    if (missing.length) return { missing };
+    const ranges = Object.values(pick).map(element => {
+      const mapped = element.closest('[data-line]') || element.querySelector('[data-line]') || element;
+      const start = Number(mapped.getAttribute('data-line'));
+      const end = Number(mapped.getAttribute('data-end-line'));
+      return { start, end: Number.isFinite(end) && end >= start ? end : start };
+    });
+    const before = snapshot();
+    window.postMessage({
+      type: 'previewIncomingChanges', enabled: true, ranges,
+      documentId: html.getAttribute('data-sphinx-preview-document-id'),
+      documentVersion: Number(html.getAttribute('data-sphinx-preview-document-version')),
+      requestId: Number(html.getAttribute('data-sphinx-preview-request-id')),
+    }, '*');
+    return { before: before.length, ranges, snapshot: before };
+  }"""
+  started = page.evaluate(probe)
+  if started.get("missing"):
+    failures.append(Failure(page_name, f"change bar: the fixture lacks {started['missing']}"))
+    return
+  page.wait_for_timeout(300)
+  state = page.evaluate("""(before) => {
+    const root = document.getElementById('sphinx-myst-preview-content');
+    const rect = element => { const r = element.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top + scrollY, height: r.height, width: r.width }; };
+    const textLeft = element => {
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, { acceptNode: node => (node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+      const node = walker.nextNode();
+      if (!node) return element.getBoundingClientRect().left;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      return range.getClientRects()[0].left;
+    };
+    const layer = document.querySelector('[data-sphinx-preview-change-layer]');
+    const marked = [...root.querySelectorAll('[data-sphinx-preview-changed]')];
+    const bars = layer ? [...layer.children].filter(bar => !bar.hidden) : [];
+    const after = [...root.querySelectorAll('*')].map(element => { const r = element.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; });
+    let moved = before.length === after.length ? 0 : -1;
+    if (moved === 0) for (let index = 0; index < after.length; index += 1) {
+      if (after[index].some((value, at) => Math.abs(value - before[index][at]) > 0.5)) moved += 1;
+    }
+    const clipped = [];
+    for (const bar of bars) {
+      for (let node = bar; node && node !== document.documentElement; node = node.parentElement) {
+        const style = getComputedStyle(node);
+        if (style.overflowX !== 'visible' || style.overflowY !== 'visible') { clipped.push(node.tagName); break; }
+      }
+    }
+    return {
+      layerPosition: layer ? getComputedStyle(layer).position : null,
+      marked: marked.map(element => ({ tag: element.tagName, box: rect(element.tagName === 'CODE' && element.parentElement.tagName === 'PRE' ? element.parentElement : element), text: textLeft(element) })),
+      bars: bars.map(bar => ({ box: rect(bar), radius: getComputedStyle(bar).borderTopLeftRadius, color: getComputedStyle(bar).backgroundColor, display: getComputedStyle(bar).display })),
+      moved, clipped,
+      anchors: [...root.querySelectorAll('.okf-anchor')].map(rect),
+      scrollWidth: document.documentElement.scrollWidth, innerWidth,
+    };
+  }""", started["snapshot"])
+  marked, bars = state["marked"], state["bars"]
+  if len(marked) != 10:
+    failures.append(Failure(page_name, f"change bar: expected 10 marked blocks, got {len(marked)} {[m['tag'] for m in marked]} ranges {started['ranges']}"))
+  if len(bars) != len(marked):
+    failures.append(Failure(page_name, f"change bar: {len(bars)} bars for {len(marked)} marked blocks"))
+    return
+  if state["moved"] != 0:
+    failures.append(Failure(page_name, f"change bar: marking moved {state['moved']} elements"))
+  if state["clipped"]:
+    failures.append(Failure(page_name, f"change bar: an ancestor clips the bars: {state['clipped']}"))
+  if state["scrollWidth"] > state["innerWidth"] + 1:
+    failures.append(Failure(page_name, "change bar: the bars make the page scroll horizontally"))
+  lefts = {round(bar["box"]["left"], 1) for bar in bars}
+  if len(lefts) != 1:
+    failures.append(Failure(page_name, f"change bar: the bars are not in one column ({sorted(lefts)})"))
+  for block, bar in zip(marked, bars):
+    kind = block["tag"]
+    if abs(bar["box"]["width"] - 3) > 0.5:
+      failures.append(Failure(page_name, f"change bar {kind}: the bar is {bar['box']['width']}px wide, expected 3px"))
+    if bar["radius"] != "0px":
+      failures.append(Failure(page_name, f"change bar {kind}: the bar ends are rounded ({bar['radius']})"))
+    if abs(bar["box"]["top"] - block["box"]["top"]) > 1 or abs(bar["box"]["height"] - block["box"]["height"]) > 1:
+      failures.append(Failure(page_name, f"change bar {kind}: the bar does not span the block ({bar['box']} vs {block['box']})"))
+    if bar["box"]["left"] < 0 or bar["box"]["left"] > 16:
+      failures.append(Failure(page_name, f"change bar {kind}: the bar is not at the page's left margin ({bar['box']['left']})"))
+    if block["tag"] != "IMG" and bar["box"]["right"] + 4 > block["text"]:
+      failures.append(Failure(page_name, f"change bar {kind}: the bar touches the text ({bar['box']['right']} vs {block['text']})"))
+    for anchor in state["anchors"]:
+      if bar["box"]["right"] > anchor["left"] and bar["box"]["left"] < anchor["right"] and bar["box"]["top"] < anchor["top"] + anchor["height"] and bar["box"]["top"] + bar["box"]["height"] > anchor["top"]:
+        failures.append(Failure(page_name, f"change bar {kind}: the bar overlaps an anchor icon"))
+  # The Diff toggle hides the bars again, and showing it restores them.
+  diff = page.locator("[data-sphinx-preview-diff-toggle]")
+  if diff.count() == 1:
+    shown = page.evaluate("() => getComputedStyle(document.querySelector('[data-sphinx-preview-change-layer]')).display")
+    diff.click()
+    page.wait_for_timeout(100)
+    hidden = page.evaluate("() => getComputedStyle(document.querySelector('[data-sphinx-preview-change-layer]')).display")
+    diff.click()
+    page.wait_for_timeout(100)
+    if shown == "none" or hidden != "none":
+      failures.append(Failure(page_name, f"change bar: the Diff toggle must hide the bars (shown {shown}, hidden {hidden})"))
+  page.evaluate("window.scrollTo(0, 0)")
 
 
 def check_figure_anchors(page: Page, scenario: dict, failures: list[Failure]) -> None:
@@ -5407,7 +5554,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

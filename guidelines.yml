@@ -1,4 +1,5 @@
 version: 1
+default_guidelines_path: .agents/guidelines
 guidelines:
 - source: gsemet/ai-guidelines-registry
   path: SWE/Git/Git_Commit_Message

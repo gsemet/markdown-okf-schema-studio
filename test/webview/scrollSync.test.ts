@@ -7765,7 +7765,7 @@ test("T17: the Diff button is hidden through the document attribute when the set
   assert.match(PREVIEW_THEME_CSS,
     /html\[data-okf-incoming-changes="false"\] \[data-sphinx-preview-diff-toggle\] \{\s*display: none;/u);
   assert.match(PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-incoming="off"\] #sphinx-myst-preview-content \[data-sphinx-preview-changed\] \{\s*box-shadow: none;/u);
+    /html\[data-sphinx-preview-incoming="off"\] \[data-sphinx-preview-change-layer\] \{\s*display: none;/u);
 });
 
 test("P8: the collapse button hides rows 2-3, posts the preference and keeps the state", () => {

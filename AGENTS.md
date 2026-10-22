@@ -32,8 +32,8 @@ It is MIT licensed and is developed independently from the Agentic Coding White 
 
 ## Guidelines
 
-- When creating a git commit in this project: [.github/guidelines/git-commit-message.guidelines.md](.github/guidelines/git-commit-message.guidelines.md)
-- Allowed Conventional commit scopes: [.github/guidelines/git-commit-allowed-scopes.md](.github/guidelines/git-commit-allowed-scopes.md)
+- When creating a git commit in this project: [.agents/guidelines/git-commit-message.guidelines.md](.agents/guidelines/git-commit-message.guidelines.md)
+- Allowed Conventional commit scopes: [.agents/guidelines/git-commit-allowed-scopes.md](.agents/guidelines/git-commit-allowed-scopes.md)
 - When changing the CI workflows or `ci-*` justfile targets: [.agents/guidelines/ci.guidelines.md](.agents/guidelines/ci.guidelines.md)
 - When picking up backlog work, change requests or PRs (`.agents/changes/`): [.agents/guidelines/prd-workflow.guidelines.md](.agents/guidelines/prd-workflow.guidelines.md)
 - Shared vocabulary (UI and code terms): [.agents/glossary/common.md](.agents/glossary/common.md). Use these words in code, tests, commits and docs; add new terms there.
