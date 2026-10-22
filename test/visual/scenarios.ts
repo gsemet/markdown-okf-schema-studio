@@ -54,6 +54,11 @@ export interface ContentAssertion {
   expr?: string;
 }
 
+/** A user action `check_page_actions` performs: click (optionally with held keys) or hover the first match. */
+export type PageAction =
+  | { click: string; modifiers?: string[]; waitMs?: number }
+  | { hover: string; waitMs?: number };
+
 export interface Scenario {
   id: string;
   /** Feature group (see `test/shared/e2eGroups.ts`): the prefix of the id. */
@@ -76,6 +81,8 @@ export interface Scenario {
   gallery?: "key";
   readme?: ReadmeSource;
   screenshotOf?: string;
+  /** Real clicks and hovers on the page, in order, before the content assertions (P9 B5): `modifiers` are Playwright key names such as "Shift". */
+  pageActions?: PageAction[];
   /** Declarative DOM assertions on top of the standard page checks (P9 B4 gap fill). */
   contentAssertions?: ContentAssertion[];
   /** "error": every Mermaid diagram must show its error message and no image (invalid syntax). */
@@ -87,7 +94,7 @@ export interface Scenario {
   plantumlExpectation?: "success" | "executable-not-found" | "unconfigured";
   linkDetailsChecks?: boolean;
   horizontalOverflow?: boolean;
-  previewThemeMode?: "white" | "cream";
+  previewThemeMode?: "white" | "cream" | "dark";
   /** P8: leave the floating toolbar collapsed (rows 2-3 hidden) for the checks and the capture. */
   toolbarState?: "collapsed";
   stickyHeadingDepth?: number;
@@ -368,6 +375,193 @@ const PROPERTIES_HIDDEN_ASSERTIONS: ContentAssertion[] = [
   { message: "no properties table", selector: "[data-okf-properties]", count: 0 },
   { message: "the heading still renders", selector: `${MAIN} h1`, text: "Frontmatter Rendering" },
   { message: "the raw YAML is not shown", selector: MAIN, notText: "Preview Team" },
+];
+
+/** P9 B5 assertion lists and mock-host messages (extension states). */
+const BARS = "[data-sphinx-preview-change-layer] > span";
+const NO_HORIZONTAL_SCROLL = "document.documentElement.scrollWidth <= window.innerWidth + 1";
+
+/** Lines of the changed blocks of fixture 44-change-bar.md (heading, paragraph, nested bullet, bullet, number, quotation, table, code, admonition, image). */
+const CHANGE_BAR_LINES: ReadonlyArray<readonly [number, number]> = [[7, 7], [9, 9], [12, 12], [13, 13], [16, 16], [20, 20], [26, 28], [34, 36], [42, 44], [48, 48]];
+const INCOMING_CHANGES_MESSAGE = {
+  data: { type: "previewIncomingChanges", enabled: true, ranges: CHANGE_BAR_LINES.map(([start, end]) => ({ start, end })) },
+};
+/** Three ranges that each cross several blocks: lines 7-13 (heading to bullets), 26-36 (table to code) and 48 (image). */
+const INCOMING_RANGES_MESSAGE = {
+  data: { type: "previewIncomingChanges", enabled: true, ranges: [{ start: 7, end: 13 }, { start: 26, end: 36 }, { start: 48, end: 48 }] },
+};
+
+const INCOMING_BARS_ASSERTIONS: ContentAssertion[] = [
+  { message: "every block the ranges meet is marked and the blocks before them are not", selector: `${MAIN} [data-sphinx-preview-changed]`, min: 8,
+    expr: "(() => { const marked = [...document.querySelectorAll('#sphinx-myst-preview-content [data-sphinx-preview-changed]')]; const first = document.querySelector('#sphinx-myst-preview-content p'); return marked.every(e => e.getBoundingClientRect().top > first.getBoundingClientRect().bottom) && !first.hasAttribute('data-sphinx-preview-changed') && !document.querySelector('#sphinx-myst-preview-content h2').hasAttribute('data-sphinx-preview-changed'); })()" },
+  { message: "one bar is drawn per marked block, 3 px wide with square ends and the added-line green", selector: BARS, min: 8,
+    css: { width: "3px", borderTopLeftRadius: "0px", borderBottomRightRadius: "0px", backgroundColor: "rgb(46, 160, 67)" } },
+  {
+    message: "every bar sits in one column at the left margin of the page, whatever the indentation of its block",
+    selector: BARS,
+    expr: "(() => { const lefts = [...document.querySelectorAll('[data-sphinx-preview-change-layer] > span')].map(b => Math.round(b.getBoundingClientRect().left * 10)); return new Set(lefts).size === 1 && lefts[0] >= 0 && lefts[0] <= 160; })()",
+  },
+  {
+    message: "every bar spans the top and the full height of its block",
+    selector: BARS,
+    expr: "(() => { const bars = [...document.querySelectorAll('[data-sphinx-preview-change-layer] > span')]; const blocks = [...document.querySelectorAll('#sphinx-myst-preview-content [data-sphinx-preview-changed]')].map(e => (e.tagName === 'CODE' && e.parentElement.tagName === 'PRE' ? e.parentElement : e)); return bars.length === blocks.length && bars.every((bar, i) => { const a = bar.getBoundingClientRect(); const b = blocks[i].getBoundingClientRect(); return Math.abs(a.top - b.top) <= 1 && Math.abs(a.height - b.height) <= 1; }); })()",
+  },
+  {
+    message: "no bar touches the text of its block",
+    selector: BARS,
+    expr: "(() => { const bars = [...document.querySelectorAll('[data-sphinx-preview-change-layer] > span')]; const heading = document.querySelector('#sphinx-myst-preview-content h2'); return bars.every(b => b.getBoundingClientRect().right + 4 <= heading.getBoundingClientRect().left + 1); })()",
+  },
+  { message: "the bars do not make the page scroll sideways", selector: "html", expr: NO_HORIZONTAL_SCROLL },
+  { message: "the Diff toggle is pressed", selector: "[data-sphinx-preview-diff-toggle]", attr: { name: "aria-pressed", value: "true" } },
+];
+
+const INCOMING_DIFF_OFF_ASSERTIONS: ContentAssertion[] = [
+  { message: "the view preference is off", selector: "html", attr: { name: "data-sphinx-preview-incoming", value: "off" } },
+  { message: "the Diff toggle shows it is not pressed", selector: "[data-sphinx-preview-diff-toggle]", attr: { name: "aria-pressed", value: "false" } },
+  { message: "the host still reported ten changed blocks", selector: `${MAIN} [data-sphinx-preview-changed]`, count: 10 },
+  { message: "the bar layer is hidden", selector: "[data-sphinx-preview-change-layer]", count: 1, css: { display: "none" } },
+  { message: "no bar is visible", selector: BARS, expr: "[...document.querySelectorAll('[data-sphinx-preview-change-layer] > span')].every(b => b.getBoundingClientRect().width === 0)" },
+];
+
+const THREAD_ENTRY_OPEN = {
+  id: "thread-open",
+  anchor: { line: 3, endLine: 3, quote: "retry budget is exceeded", prefix: "The ", suffix: " when three" },
+  resolved: false,
+  createdAt: "2 days ago",
+  comments: [
+    { id: "c1", author: "Marie Dubois", createdAt: "2 days ago", body: "Is three failures the right limit for the batch client?" },
+    { id: "c2", author: "Tom Becker", createdAt: "yesterday", body: "Yes for interactive calls; the batch client sets its own budget." },
+  ],
+};
+const THREAD_ENTRY_RESOLVED = {
+  id: "thread-resolved",
+  anchor: { line: 5, endLine: 5, quote: "first request never waits", prefix: "so the ", suffix: " for a cold" },
+  resolved: true,
+  createdAt: "2 days ago",
+  comments: [
+    { id: "c3", author: "Marie Dubois", createdAt: "2 days ago", body: "Say how long the warm-up takes." },
+  ],
+};
+const THREAD_ENTRY_ORPHAN_OPEN = {
+  id: "thread-orphan-open",
+  orphaned: true,
+  anchor: { line: 40, endLine: 40, quote: "the paragraph that was deleted in the last edit", prefix: "", suffix: "" },
+  resolved: false,
+  createdAt: "this morning",
+  comments: [{ id: "c4", author: "Tom Becker", createdAt: "this morning", body: "This sentence is gone; was that on purpose?" }],
+};
+const THREAD_ENTRY_ORPHAN_RESOLVED = {
+  id: "thread-orphan-resolved",
+  orphaned: true,
+  anchor: { line: 52, endLine: 52, quote: "an old caveat nobody wrote down again", prefix: "", suffix: "" },
+  resolved: true,
+  createdAt: "2 days ago",
+  comments: [
+    { id: "c5", author: "Marie Dubois", createdAt: "2 days ago", body: "Covered by the new section." },
+    { id: "c6", author: "Tom Becker", createdAt: "yesterday", body: "Agreed, closing it." },
+  ],
+};
+const THREADS_MESSAGE = { data: { type: "previewComments", threads: [THREAD_ENTRY_OPEN, THREAD_ENTRY_RESOLVED] } };
+const ORPHAN_THREADS_MESSAGE = { data: { type: "previewComments", threads: [THREAD_ENTRY_OPEN, THREAD_ENTRY_ORPHAN_OPEN, THREAD_ENTRY_ORPHAN_RESOLVED] } };
+
+const POPOVER = "[data-okf-comment-popover]";
+const REVIEW_THREAD_OPEN_ASSERTIONS: ContentAssertion[] = [
+  { message: "the two anchored quotes are highlighted in the text", selector: `${MAIN} mark[data-okf-comment-thread]`, count: 2 },
+  { message: "only the resolved quote is marked as resolved", selector: `${MAIN} mark[data-okf-comment-resolved="true"]`, count: 1, text: "first request never waits" },
+  { message: "the paragraph without a thread has no mark", selector: `${MAIN} p:nth-of-type(4) mark`, count: 0 },
+  { message: "clicking the open quote shows its thread, visible, with both comments in order", selector: POPOVER, count: 1, visible: true, text: "Marie Dubois" },
+  { message: "the second comment follows the first", selector: `${POPOVER} [data-okf-comment-body]`, count: 2,
+    expr: "[...document.querySelectorAll('[data-okf-comment-popover] [data-okf-comment-body]')].map(e => e.textContent).join('|') === 'Is three failures the right limit for the batch client?|Yes for interactive calls; the batch client sets its own budget.'" },
+  { message: "an open thread shows no Resolved state", selector: `${POPOVER} [data-okf-comment-state]`, count: 0 },
+  { message: "the thread popover stays inside the pane", selector: POPOVER, insidePane: true },
+  { message: "no orphan box is shown while every thread is anchored", selector: "[data-okf-orphans]", count: 0 },
+];
+const REVIEW_THREAD_RESOLVED_ASSERTIONS: ContentAssertion[] = [
+  { message: "the two anchored quotes are highlighted in the text", selector: `${MAIN} mark[data-okf-comment-thread]`, count: 2 },
+  { message: "clicking the resolved quote shows its thread, visible", selector: POPOVER, count: 1, visible: true, text: "Say how long the warm-up takes." },
+  { message: "the popover is marked resolved and says so", selector: `${POPOVER}[data-okf-comment-resolved="true"] [data-okf-comment-state="resolved"]`, count: 1, text: "Resolved" },
+  { message: "the resolved quote is drawn differently from the open one", selector: `${MAIN} mark[data-okf-comment-resolved="true"]`, count: 1,
+    expr: "(() => { const open = document.querySelector('#sphinx-myst-preview-content mark[data-okf-comment-thread]:not([data-okf-comment-resolved])'); const done = document.querySelector('#sphinx-myst-preview-content mark[data-okf-comment-resolved=\"true\"]'); const a = getComputedStyle(open); const b = getComputedStyle(done); return a.backgroundColor !== b.backgroundColor || a.textDecorationLine !== b.textDecorationLine || a.opacity !== b.opacity; })()" },
+  { message: "the thread popover stays inside the pane", selector: POPOVER, insidePane: true },
+];
+const ORPHAN_LIST_ASSERTIONS: ContentAssertion[] = [
+  { message: "the anchored thread is highlighted in the text", selector: `${MAIN} mark[data-okf-comment-thread]`, count: 1 },
+  { message: "the Orphaned comments box is shown after the content", selector: "[data-okf-orphans]", count: 1, visible: true, text: "Orphaned comments" },
+  { message: "the box lists the two threads that lost their place", selector: "[data-okf-orphans] button[data-okf-comment-orphan]", count: 2, visible: true },
+  { message: "each entry quotes its text and counts its comments", selector: "[data-okf-orphans]", text: "the paragraph that was deleted in the last edit" },
+  { message: "the resolved orphan says it is resolved", selector: "[data-okf-orphans] button[data-okf-comment-resolved=\"true\"]", count: 1, text: "2 comments, resolved" },
+  { message: "the box sits after the content element, not inside it", selector: "[data-okf-orphans]", expr: "document.getElementById('sphinx-myst-preview-content').nextElementSibling === document.querySelector('[data-okf-orphans]')" },
+  { message: "the box stays inside the pane", selector: "[data-okf-orphans]", insidePane: true },
+];
+const CHIPS_HIDDEN_ASSERTIONS: ContentAssertion[] = [
+  { message: "the gray comment chips are still in the document", selector: `${MAIN} .okf-comment[data-okf-comment-kind="comment"]`, min: 2 },
+  { message: "the setting is off on the page", selector: "html", attr: { name: "data-okf-show-comments", value: "false" } },
+  { message: "no gray comment chip is displayed", selector: `${MAIN} .okf-comment[data-okf-comment-kind="comment"]`, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content .okf-comment[data-okf-comment-kind=\"comment\"]')].every(e => getComputedStyle(e).display === 'none')" },
+  { message: "the TODO chips stay visible", selector: `${MAIN} .okf-chip--todo`, min: 1, visible: true },
+];
+
+const FORCED_DARK_ASSERTIONS: ContentAssertion[] = [
+  { message: "the toolbar button put the preview in dark mode", selector: "html", attr: { name: "data-sphinx-preview-theme-mode", value: "dark" } },
+  { message: "the page is dark although the host is light", selector: "body", css: { backgroundColor: "rgb(30, 30, 30)", color: "rgb(212, 212, 212)" } },
+  { message: "the page asks the browser for dark controls", selector: "html", css: { colorScheme: "dark" } },
+  { message: "the first admonition is drawn on a dark panel", selector: `${MAIN} .admonition`, min: 1, expr: "(() => { const m = getComputedStyle(document.querySelector('#sphinx-myst-preview-content .admonition')).backgroundColor.match(/[\\d.]+/g).map(Number); return (m[0] + m[1] + m[2]) / 3 < 100; })()" },
+  { message: "the headings stay readable on the dark page", selector: `${MAIN} h1`, count: 1, expr: "(() => { const c = getComputedStyle(document.querySelector('#sphinx-myst-preview-content h1')).color.match(/[\\d.]+/g).map(Number); return (c[0] + c[1] + c[2]) / 3 > 150; })()" },
+];
+
+const zoomAssertions = (zoom: number): ContentAssertion[] => [
+  { message: `the stored zoom is ${zoom} %`, selector: "html", attr: { name: "data-sphinx-preview-zoom", value: String(zoom) } },
+  { message: `the zoom variable is ${zoom / 100}`, selector: "html", expr: `Math.abs(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sphinx-preview-zoom')) - ${zoom / 100}) < 0.001` },
+  { message: `the body text is scaled to ${zoom} % of the base size`, selector: `${MAIN} p`, min: 1,
+    expr: `(() => { const base = parseFloat(getComputedStyle(document.body).getPropertyValue('--vscode-markdown-font-size')) || 14; const size = parseFloat(getComputedStyle(document.querySelector('#sphinx-myst-preview-content p')).fontSize); return Math.abs(size - base * ${zoom / 100}) <= 0.5; })()` },
+  { message: "the content column is the zoomed maximum width or the pane, whichever is smaller", selector: MAIN,
+    expr: `(() => { const box = document.querySelector('#sphinx-myst-preview-content').getBoundingClientRect(); const wanted = Math.min(window.innerWidth, 960 * ${zoom / 100}); return Math.abs(box.width - wanted) <= 40; })()` },
+  { message: "the page does not scroll sideways", selector: "html", expr: NO_HORIZONTAL_SCROLL },
+  { message: "the text column stays inside the pane", selector: `${MAIN} p`, insidePane: true },
+];
+
+const READ_ONLY_ASSERTIONS: ContentAssertion[] = [
+  { message: "the toolbar is shown", selector: "[data-sphinx-preview-toolbar]", count: 1, visible: true },
+  { message: "the read-only toolbar has no Edit (pencil) button", selector: "[data-sphinx-preview-edit-toggle]", count: 0 },
+  { message: "the Refresh button is still there", selector: "[data-sphinx-preview-refresh]", count: 1 },
+  { message: "edit mode is never switched on", selector: "html", expr: "document.documentElement.getAttribute('data-sphinx-preview-edit-mode') !== 'on'" },
+  { message: "no frontmatter cell is editable", selector: "[data-okf-edit-cell]", count: 0 },
+  { message: "every frontmatter row says it is not editable", selector: "[data-okf-field]", min: 5, expr: "[...document.querySelectorAll('[data-okf-field]')].every(row => row.getAttribute('data-okf-editable') === 'false')" },
+  { message: "the document itself is still rendered", selector: `${MAIN} h1`, count: 1, text: "Brake pedal release detection" },
+];
+const READ_ONLY_NO_HOVER_ASSERTIONS: ContentAssertion[] = [
+  { message: "no block is marked as an edit target after the pointer rested on a paragraph", selector: "[data-sphinx-preview-edit-hover]", count: 0 },
+  { message: "the paragraph under the pointer has no outline", selector: `${MAIN} p`, min: 1, expr: "(() => { const hovered = [...document.querySelectorAll('#sphinx-myst-preview-content p')].find(p => p.matches(':hover')); if (!hovered) return 'no paragraph under the pointer'; const style = getComputedStyle(hovered); return style.outlineStyle === 'none' || style.outlineWidth === '0px'; })()" },
+  { message: "clicking the paragraph opened no editor", selector: "[data-sphinx-preview-block-editor], .sphinx-preview-block-editor", count: 0 },
+  { message: "the pointer is a normal text cursor, not an edit affordance", selector: `${MAIN} p`, min: 1, expr: "(() => { const hovered = [...document.querySelectorAll('#sphinx-myst-preview-content p')].find(p => p.matches(':hover')); return hovered !== undefined && getComputedStyle(hovered).cursor !== 'pointer'; })()" },
+  { message: "there is no Edit button", selector: "[data-sphinx-preview-edit-toggle]", count: 0 },
+];
+
+const MARK_EDITOR_SELECTION_ASSERTIONS: ContentAssertion[] = [
+  { message: "exactly one block carries the editor-selection marker", selector: "[data-sphinx-preview-current=\"true\"]", count: 1, visible: true },
+  { message: "the marked block is the one at the editor's selection line", selector: "[data-sphinx-preview-current=\"true\"]", text: "The dispatch path is the only component",
+    attr: { name: "aria-current", value: "location" } },
+  { message: "the marker is an outline in the find-match colour", selector: "[data-sphinx-preview-current=\"true\"]", css: { outlineStyle: "solid", outlineWidth: "2px" } },
+];
+
+const BACK_ENABLED_ASSERTIONS: ContentAssertion[] = [
+  { message: "Back is enabled once the host reports a place to go back to", selector: "[data-sphinx-preview-back]", count: 1, expr: "document.querySelector('[data-sphinx-preview-back]').disabled === false" },
+  { message: "Next stays disabled", selector: "[data-sphinx-preview-next]", count: 1, expr: "document.querySelector('[data-sphinx-preview-next]').disabled === true" },
+  { message: "the in-page jump scrolled the target heading into view", selector: `${MAIN} h2`, min: 1, expr: "window.scrollY > 100" },
+];
+
+const BLOCK_SELECTION_ASSERTIONS: ContentAssertion[] = [
+  { message: "two blocks are selected", selector: "[data-sphinx-preview-block-selected=\"true\"]", count: 2, visible: true },
+  { message: "the selected blocks are outlined in the focus colour", selector: "[data-sphinx-preview-block-selected=\"true\"]", css: { outlineStyle: "solid", outlineWidth: "2px" } },
+  { message: "the selection is announced", selector: ".sphinx-preview-selection-status", count: 1, text: "2 blocks selected" },
+  { message: "no editor is open", selector: ".sphinx-preview-block-editor", count: 0 },
+];
+
+const MAX_WIDTH_ASSERTIONS: ContentAssertion[] = [
+  { message: "the content column is 1400 px wide, the configured maximum", selector: MAIN,
+    expr: "Math.abs(document.querySelector('#sphinx-myst-preview-content').getBoundingClientRect().width - 1400) <= 1" },
+  { message: "the column is centred in the 2000 px pane", selector: MAIN,
+    expr: "(() => { const box = document.querySelector('#sphinx-myst-preview-content').getBoundingClientRect(); return Math.abs(box.left - (window.innerWidth - box.width) / 2) <= 1; })()" },
+  { message: "the page does not scroll sideways", selector: "html", expr: NO_HORIZONTAL_SCROLL },
 ];
 
 const WIDE = { width: 900, height: 1000 };
@@ -2268,6 +2462,192 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     render: { propertiesTable: false as const },
     contentAssertions: PROPERTIES_HIDDEN_ASSERTIONS,
     description: "Frontmatter with the properties table setting off: no table is shown and the raw YAML block is not shown either.",
+  },
+  // P9 B5 (a): theme, zoom, trust, layout, toolbar, block and palette states of the extension.
+  {
+    id: "theme-zoom/v08-forced-dark-handbook-light-900",
+    fixture: "01-handbook-overview",
+    theme: "light",
+    previewThemeMode: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    contentAssertions: FORCED_DARK_ASSERTIONS,
+    description: "The handbook forced to the dark preview theme while the VS Code host stays light: the toolbar button shows the dark icon, "
+      + "the page, text, note panels and headings all use the dark palette.",
+  },
+  ...([[70, WIDE, "900"], [200, WIDE, "900"], [150, NARROW, "460"]] as const).map(([zoom, viewport, width], index) => ({
+    id: `theme-zoom/v${String(9 + index).padStart(2, "0")}-zoom-${zoom}-light-${width}`,
+    fixture: "01-handbook-overview",
+    theme: "light",
+    ...viewport,
+    scroll: { kind: "top" as const },
+    render: { zoom },
+    contentAssertions: zoomAssertions(zoom),
+    description: `The handbook at ${zoom} % zoom in a ${width} px pane: the text size and the content column scale together `
+      + "and the page does not scroll sideways.",
+  })),
+  ...([["dark", WIDE, "900", 1], ["light", NARROW, "460", 2]] as const).map(([theme, viewport, width, number]) => ({
+    id: `trust-security/v0${number}-read-only-page-${theme}-${width}`,
+    fixture: "08-okf-schema",
+    theme,
+    ...viewport,
+    scroll: { kind: "top" as const },
+    render: { readOnly: true as const },
+    contentAssertions: READ_ONLY_ASSERTIONS,
+    description: `A read-only preview (restricted workspace or file outside the workspace), ${theme} theme, ${width} px pane: `
+      + "the toolbar has no Edit (pencil) button and the frontmatter table offers no editable cell.",
+  })),
+  {
+    id: "trust-security/v03-read-only-no-hover-outline-light-900",
+    fixture: "08-okf-schema",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { readOnly: true as const },
+    pageActions: [{ hover: "main > p" }, { click: "main > p" }],
+    contentAssertions: READ_ONLY_NO_HOVER_ASSERTIONS,
+    description: "A read-only preview with the pointer resting on a paragraph and a click on it: no dashed edit outline, no editor, no Edit button.",
+  },
+  {
+    id: "toolbar-navigation/v30-back-enabled-after-anchor-light-900",
+    fixture: "01-handbook-overview",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "selector" as const, value: 'h2[data-line="146"]' },
+    render: {
+      hostMessages: [
+        { data: { type: "navigateAnchor", value: "#deployment", line: 146 } },
+        { delayMs: 50, data: { type: "previewHistoryState", canBack: true, canForward: false } },
+      ],
+    },
+    contentAssertions: [
+      ...BACK_ENABLED_ASSERTIONS,
+      { message: "the Deployment heading is at the top of the pane after the jump", selector: `${MAIN} h2[data-line="146"]`, count: 1,
+        expr: "(() => { const top = document.querySelector('#sphinx-myst-preview-content h2[data-line=\"146\"]').getBoundingClientRect().top; return top >= 0 && top < 300; })()" },
+    ],
+    description: "After an in-page jump to the Deployment heading the host reports a history entry: Back is enabled, Next stays disabled "
+      + "and the target heading sits at the top of the pane.",
+  },
+  {
+    id: "toolbar-navigation/v31-mark-editor-selection-light-900",
+    fixture: "01-handbook-overview",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: {
+      markEditorSelection: true as const,
+      hostMessages: [{ delayMs: 50, data: { type: "sourceScroll", line: 1, selectionLine: 12 } }],
+    },
+    contentAssertions: MARK_EDITOR_SELECTION_ASSERTIONS,
+    description: "With the mark-editor-selection setting on, the text editor's selection on line 12 outlines the paragraph that holds it "
+      + "(the dispatch path sentence) in the preview, and only that block.",
+  },
+  {
+    id: "block-editing/v17-block-selection-light-900",
+    fixture: "01-handbook-overview",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    pageActions: [
+      { click: "[data-sphinx-preview-edit-toggle]" },
+      { click: "main > p:nth-of-type(1)", modifiers: ["Shift"] },
+      { click: "main > .admonition", modifiers: ["Shift"] },
+    ],
+    contentAssertions: BLOCK_SELECTION_ASSERTIONS,
+    description: "Edit mode on, Shift+click on the first paragraph and then on the note: both blocks are outlined as selected, "
+      + "the selection is announced and no editor is open.",
+  },
+  {
+    id: "palette-slash/v21-slash-gfm-light-360",
+    fixture: "05-long-chapter",
+    theme: "light",
+    width: NARROW360.width,
+    height: 1000,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    slashMenuShot: { mode: "gfm", finalQuery: "tab" },
+    machineChecks: ["overlay-clipped"],
+    description: "Slash command menu, palette mode gfm, light theme, 360 px pane: the menu opens at the caret, stays inside the pane, "
+      + "is not covered by anything and flips above the caret near the bottom; the final frame shows it with /tab typed.",
+  },
+  {
+    id: "layout-width/v85-max-width-setting-light-2000",
+    fixture: "05-long-chapter",
+    theme: "light",
+    width: 2000,
+    height: 1100,
+    expectedContentWidth: 1400,
+    scroll: { kind: "top" as const },
+    render: { maxContentWidth: 1400 },
+    contentAssertions: MAX_WIDTH_ASSERTIONS,
+    description: "The maximum content width set to 1400 px (not the 960 px default) in a 2000 px pane: the column is exactly 1400 px wide and centred.",
+  },
+  // P9 B5 (b): review annotations (incoming changes, review threads, orphans, comment chips).
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    id: `review-annotations/v${14 + index}-incoming-bars-${theme}-900`,
+    fixture: "44-change-bar",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { hostMessages: [INCOMING_RANGES_MESSAGE] },
+    contentAssertions: INCOMING_BARS_ASSERTIONS,
+    description: `Three line ranges reported by the host, each crossing several blocks (heading to bullets, table to code block, image), ${theme} theme: `
+      + "one 3 px green bar per block they meet, all in one column at the left margin, square ends, the full height of their block and clear of the text.",
+  })),
+  {
+    id: "review-annotations/v16-incoming-diff-off-light-900",
+    fixture: "44-change-bar",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { incomingChanges: false as const, hostMessages: [INCOMING_CHANGES_MESSAGE] },
+    contentAssertions: INCOMING_DIFF_OFF_ASSERTIONS,
+    description: "The Diff toggle off from the start while the host still reports ten changed blocks: the bar layer is hidden and no bar shows.",
+  },
+  {
+    id: "review-annotations/v17-review-thread-open-light-900",
+    fixture: "45-review-threads",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { hostMessages: [THREADS_MESSAGE] },
+    pageActions: [{ click: 'mark[data-okf-comment-thread="thread-open"]' }],
+    contentAssertions: REVIEW_THREAD_OPEN_ASSERTIONS,
+    description: "Two review threads on a short page, a click on the open one: its popover lists both comments in order, "
+      + "shows no Resolved state and stays inside the pane.",
+  },
+  {
+    id: "review-annotations/v18-review-thread-resolved-light-900",
+    fixture: "45-review-threads",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { hostMessages: [THREADS_MESSAGE] },
+    pageActions: [{ click: 'mark[data-okf-comment-thread="thread-resolved"]' }],
+    contentAssertions: REVIEW_THREAD_RESOLVED_ASSERTIONS,
+    description: "The same two review threads, a click on the resolved one: its popover says Resolved, and its quote in the text "
+      + "is drawn differently from the open thread's.",
+  },
+  {
+    id: "review-annotations/v19-orphaned-list-light-900",
+    fixture: "45-review-threads",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { hostMessages: [ORPHAN_THREADS_MESSAGE] },
+    contentAssertions: ORPHAN_LIST_ASSERTIONS,
+    description: "One anchored thread and two threads whose text is gone (one of them resolved): the Orphaned comments box after the content "
+      + "lists both with their quote, first comment and comment count.",
+  },
+  {
+    id: "review-annotations/v20-comment-chips-hidden-light-900",
+    fixture: "31-comments",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { hostMessages: [{ data: { type: "previewShowComments", showComments: false } }] },
+    contentAssertions: CHIPS_HIDDEN_ASSERTIONS,
+    description: "The show-comments setting off: the gray comment chips are in the document but not displayed, and the TODO chips stay visible.",
   },
 ];
 

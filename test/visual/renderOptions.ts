@@ -30,13 +30,20 @@ export interface ScenarioRenderOptions {
   readonly paletteMode?: "strict" | "gfm" | "myst";
   /** Initial zoom in percent (70 to 200, the stored view preference). Default 100. */
   readonly zoom?: number;
-  /** Messages the mock host sends to the page after load, in order. */
+  /** `false`: the Diff toggle starts off (the `incomingChanges` view preference). Default on. */
+  readonly incomingChanges?: false;
+  /** `true`: the page marks the block under the editor selection (`markEditorSelection` setting). Default off. */
+  readonly markEditorSelection?: true;
+  /**
+   * Messages the mock host sends to the page after load, in order. The document id, version and
+   * request id of the page are added to each message unless `data` sets them.
+   */
   readonly hostMessages?: readonly HostMessage[];
 }
 
 const OPTION_ORDER: readonly (keyof ScenarioRenderOptions)[] = [
   "trusted", "readOnly", "strictAdditionalProperties", "propertiesTable",
-  "maxContentWidth", "paletteMode", "zoom", "hostMessages",
+  "maxContentWidth", "paletteMode", "zoom", "incomingChanges", "markEditorSelection", "hostMessages",
 ];
 
 /** Stable text of the options that are set (empty for none): the cache key part. */

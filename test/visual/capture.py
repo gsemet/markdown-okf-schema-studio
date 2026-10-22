@@ -1593,8 +1593,8 @@ def check_okf_schema_rendering(page: Page, scenario: dict, failures: list[Failur
                 Failure(page_name, "description text is not smaller than value text")
             )
 
-def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
-    """The Diff button is second to last in row 3 (Comments is last), shows both states, and hides with the setting."""
+def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failure], starts_pressed: bool = True) -> None:
+    """The Diff button is second to last in row 3 (Comments is last), shows both states, and hides with the setting. It starts pressed unless the scenario starts with the view preference off."""
     diff = toolbar.locator('[data-sphinx-preview-diff-toggle]')
     if diff.count() != 1:
         return
@@ -1602,19 +1602,20 @@ def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failur
         """element => [...element.querySelector('[data-sphinx-preview-toolbar-row="options"]').children]
           .map(item => item.getAttribute('aria-label'))"""
     )
-    if not order or order[-2:] != ["Hide changes since last commit", "Hide comments"]:
+    hide_label, show_label = "Hide changes since last commit", "Show changes since last commit"
+    if not order or order[-2:] != [hide_label if starts_pressed else show_label, "Hide comments"]:
         failures.append(Failure(page_name, f"the Diff and Comments buttons are not the last two of row 3: {order}"))
     root = "document.documentElement.getAttribute('data-sphinx-preview-incoming')"
     try:
-        if diff.get_attribute("aria-pressed") != "true" or page.evaluate(root) != "on":
-            failures.append(Failure(page_name, "the Diff button must start pressed"))
+        if diff.get_attribute("aria-pressed") != ("true" if starts_pressed else "false") or page.evaluate(root) != ("on" if starts_pressed else "off"):
+            failures.append(Failure(page_name, "the Diff button must start pressed" if starts_pressed else "the Diff button must start unpressed"))
         pressed = diff.evaluate("element => getComputedStyle(element).backgroundColor")
         diff.click()
         page.wait_for_timeout(100)
-        if diff.get_attribute("aria-pressed") != "false" or page.evaluate(root) != "off":
-            failures.append(Failure(page_name, "the Diff button did not switch the marks off"))
-        if diff.get_attribute("data-tooltip") != "Show changes since last commit":
-            failures.append(Failure(page_name, "the unpressed Diff button has the wrong tooltip"))
+        if diff.get_attribute("aria-pressed") != ("false" if starts_pressed else "true") or page.evaluate(root) != ("off" if starts_pressed else "on"):
+            failures.append(Failure(page_name, "the Diff button did not switch the marks off" if starts_pressed else "the Diff button did not switch the marks on"))
+        if diff.get_attribute("data-tooltip") != (show_label if starts_pressed else hide_label):
+            failures.append(Failure(page_name, "the unpressed Diff button has the wrong tooltip" if starts_pressed else "the pressed Diff button has the wrong tooltip"))
         unpressed = diff.evaluate("element => getComputedStyle(element).backgroundColor")
         if pressed == unpressed:
             failures.append(Failure(page_name, "the Diff button looks the same pressed and unpressed"))
@@ -1629,7 +1630,7 @@ def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failur
         if not hidden:
             failures.append(Failure(page_name, "the Diff button stays visible when the setting is off"))
     finally:
-        if diff.get_attribute("aria-pressed") != "true":
+        if diff.get_attribute("aria-pressed") != ("true" if starts_pressed else "false"):
             diff.click()
             page.wait_for_timeout(100)
 
@@ -1729,15 +1730,21 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
     if toolbar.count() != 1:
         failures.append(Failure(page_name, "preview toolbar is missing or duplicated"))
         return
+    render_options = scenario.get("render") or {}
+    theme_labels = {"cream": "Preview theme: Cream theme", "dark": "Preview theme: Dark theme"}
     controls = (
         ('[data-sphinx-preview-refresh]', "Refresh preview"),
         ('[data-sphinx-preview-anchor]', "Anchor preview to text editor"),
         ('[data-sphinx-preview-edit-toggle]', "Toggle edit mode"),
         ('[data-sphinx-preview-theme-toggle]',
-         "Preview theme: Cream theme" if scenario.get("previewThemeMode") == "cream"
-         else "Preview theme: Current theme"),
+         theme_labels.get(scenario.get("previewThemeMode"), "Preview theme: Current theme")),
     )
     for selector, label in controls:
+        if selector == '[data-sphinx-preview-edit-toggle]' and render_options.get("readOnly"):
+            # A read-only preview has no Edit button at all.
+            if toolbar.locator(selector).count() != 0:
+                failures.append(Failure(page_name, "the read-only toolbar still has an Edit button"))
+            continue
         button = toolbar.locator(selector)
         if button.count() != 1 or button.get_attribute("aria-label") != label:
             failures.append(Failure(page_name, f"toolbar control is missing or mislabeled: {label}"))
@@ -1747,7 +1754,8 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         ('[data-sphinx-preview-zoom-out]', "Zoom out"),
         ('[data-sphinx-preview-zoom-in]', "Zoom in"),
         ('[data-sphinx-preview-width-toggle]', "Width: Margin"),
-        ('[data-sphinx-preview-diff-toggle]', "Hide changes since last commit"),
+        ('[data-sphinx-preview-diff-toggle]',
+         "Show changes since last commit" if render_options.get("incomingChanges") is False else "Hide changes since last commit"),
         ('[data-sphinx-preview-comments-toggle]', "Hide comments"),
     ):
         button = toolbar.locator(selector)
@@ -1772,7 +1780,7 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         failures.append(Failure(page_name, f"toolbar row 2 does not hold 4 buttons: {rows[1]['buttons']}"))
     if rows[2]["buttons"] != 5:
         failures.append(Failure(page_name, f"toolbar row 3 does not hold 5 buttons: {rows[2]['buttons']}"))
-    check_diff_toggle(page, toolbar, page_name, failures)
+    check_diff_toggle(page, toolbar, page_name, failures, starts_pressed=render_options.get("incomingChanges") is not False)
     if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5 or rows[1]["rect"]["bottom"] > rows[2]["rect"]["top"] + 0.5:
         failures.append(Failure(page_name, "toolbar rows overlap"))
     if toolbar.evaluate("element => element.getBoundingClientRect().left") < 0:
@@ -1781,6 +1789,7 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
     # At the zoom limits the toolbar stays put and covers neither the sticky band text nor the page.
     zoom_in = toolbar.locator('[data-sphinx-preview-zoom-in]')
     zoom_out = toolbar.locator('[data-sphinx-preview-zoom-out]')
+    starting_zoom = int(page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-zoom')"))
     try:
         for target, button in ((70, zoom_out), (200, zoom_in)):
             for _ in range(14):
@@ -1821,9 +1830,9 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
     finally:
         for _ in range(14):
             current = int(page.evaluate("document.documentElement.getAttribute('data-sphinx-preview-zoom')"))
-            if current == 100:
+            if current == starting_zoom:
                 break
-            (zoom_out if current > 100 else zoom_in).click()
+            (zoom_out if current > starting_zoom else zoom_in).click()
         page.wait_for_timeout(150)
 
 def check_nested_list_typing(page: Page, scenario: dict, failures: list[Failure]) -> None:
@@ -5745,6 +5754,48 @@ def check_content_assertions(page: Page, scenario: dict, failures: list[Failure]
     failures.append(Failure(scenario["page"], detail))
 
 
+def check_forced_dark_theme(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    """The preview forced to dark on a light host: the real toolbar button is driven until it shows the dark mode."""
+    if scenario.get("previewThemeMode") != "dark":
+        return
+
+    page_name = scenario["page"]
+    for _ in range(4):
+        if page.evaluate(
+            'document.querySelector("[data-sphinx-preview-theme-toggle]")?.dataset.themeMode'
+        ) == "dark":
+            break
+        page.evaluate('document.querySelector("[data-sphinx-preview-theme-toggle]").click()')
+    state = page.evaluate(
+        """() => ({
+          mode: document.documentElement.dataset.sphinxPreviewThemeMode,
+          icons: [...document.querySelectorAll('[data-sphinx-preview-theme-toggle] [data-theme-icon]')]
+            .filter((icon) => getComputedStyle(icon).display !== 'none')
+            .map((icon) => icon.dataset.themeIcon),
+        })"""
+    )
+    if state["mode"] != "dark":
+        failures.append(Failure(page_name, f"forced dark: the preview theme mode is {state['mode']}, expected dark"))
+    if state["icons"] != ["dark"]:
+        failures.append(Failure(page_name, f"forced dark: visible theme icons are {state['icons']}, expected ['dark']"))
+
+
+def check_page_actions(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    """The scenario's `pageActions`: real clicks and hovers on the page, in order, before the content assertions."""
+    for action in scenario.get("pageActions") or []:
+        selector = action.get("click") or action.get("hover")
+        target = page.locator(selector).first
+        if target.count() == 0:
+            failures.append(Failure(scenario["page"], f"page action: {selector} matches nothing"))
+            return
+        target.scroll_into_view_if_needed()
+        if "click" in action:
+            target.click(modifiers=action.get("modifiers") or [])
+        else:
+            target.hover()
+        page.wait_for_timeout(action.get("waitMs", 200))
+
+
 def check_mermaid_theme_switch(page: Page, scenario: dict, failures: list[Failure]) -> None:
   if not scenario.get("mermaidThemeSwitch"):
     return
@@ -5961,7 +6012,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   ):
     checks = checks.replace(placeholder, str(value))
   for check in (
-    check_mermaid_theme_switch, check_mermaid_error_theme_switch, check_forced_white_theme, check_forced_cream_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
+    check_mermaid_theme_switch, check_mermaid_error_theme_switch, check_forced_white_theme, check_forced_cream_theme, check_forced_dark_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
     check_generic_skill_frontmatter, check_okf_schema_rendering, check_preview_toolbar,
     check_math_rendering, check_bare_urls, check_inline_code, check_inline_code_narrow, check_orphan_box, check_content_contracts,
   ):
@@ -5979,7 +6030,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_inline_thread, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_inline_thread, check_change_bar, check_code_copy, check_page_actions, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:
