@@ -3479,8 +3479,23 @@ def check_edit_palette_tall(page: Page, scenario: dict, failures: list[Failure])
   # Box top visible: the palette is attached on top of the box, outside its border. A tall (wrapped)
   # palette needs the room above the box to be clear of the preview controls: with the box top just
   # under them the bar has to ride over the box (the viewport limit), which is not the state shown here.
-  bar_height = page.evaluate("() => document.querySelector('.sphinx-preview-block-editor-host > .sphinx-preview-edit-palette').getBoundingClientRect().height")
-  page.evaluate("(y) => window.scrollTo(0, y)", frame_page_top - max(220, 114 + 4 + bar_height + 24))
+  # The clearance comes from the real layout, not from a constant: the room under the toolbar and the
+  # sticky headings band (their height depends on the fonts, the number of levels and the heading text
+  # at that scroll position), the bar's own height and a margin. The band changes with the scroll
+  # position, so the scroll is repeated until the clearance it needs is the one it has.
+  clearance_probe = """() => {
+    const bar = document.querySelector('.sphinx-preview-block-editor-host > .sphinx-preview-edit-palette').getBoundingClientRect();
+    const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+    const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+    const bottoms = [band && !band.hidden ? band.getBoundingClientRect().bottom : 0, toolbar ? toolbar.getBoundingClientRect().bottom : 0];
+    return { needed: Math.max(220, Math.max(...bottoms) + 4 + bar.height + 24), frameTop: document.querySelector('.sphinx-preview-block-editor').getBoundingClientRect().top };
+  }"""
+  for _ in range(6):
+    room = page.evaluate(clearance_probe)
+    if room["frameTop"] >= room["needed"] and room["frameTop"] - room["needed"] <= 60:
+      break
+    page.evaluate("(delta) => window.scrollBy(0, delta)", room["frameTop"] - room["needed"] - 10)
+    page.wait_for_timeout(200)
   page.wait_for_timeout(200)
   top = page.evaluate(measure)
   if not (0 <= top["frame"]["top"] - top["bar"]["bottom"] <= 6) or top["bar"]["bottom"] > top["frame"]["top"] + 0.5:
@@ -3584,9 +3599,21 @@ def check_table_toolbar_tall(page: Page, scenario: dict, failures: list[Failure]
   page.wait_for_timeout(300)
   # The table top goes 24 px below the bar's own height under the preview controls, so the bar is in its
   # place above the table (a table top just under the controls makes the bar ride over it by design).
-  bar_height = page.evaluate("() => document.querySelector('[data-sphinx-table-menu]').getBoundingClientRect().height")
-  table_top_now = page.evaluate("() => document.querySelector('main > table').getBoundingClientRect().top")
-  page.evaluate("(delta) => window.scrollBy(0, -delta)", max(114 + 4 + bar_height + 24, 220) - table_top_now + 6)
+  # The room above the table comes from the real layout (toolbar and sticky band bottoms, which depend
+  # on the fonts and on the scroll position), so the scroll is repeated until the table has it.
+  room_probe = """() => {
+    const bar = document.querySelector('[data-sphinx-table-menu]').getBoundingClientRect();
+    const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+    const toolbar = document.querySelector('[data-sphinx-preview-toolbar]');
+    const bottoms = [band && !band.hidden ? band.getBoundingClientRect().bottom : 0, toolbar ? toolbar.getBoundingClientRect().bottom : 0];
+    return { needed: Math.max(220, Math.max(...bottoms) + 4 + bar.height + 24), tableTop: document.querySelector('main > table').getBoundingClientRect().top };
+  }"""
+  for _ in range(6):
+    room = page.evaluate(room_probe)
+    if room["tableTop"] >= room["needed"] and room["tableTop"] - room["needed"] <= 60:
+      break
+    page.evaluate("(delta) => window.scrollBy(0, delta)", room["tableTop"] - room["needed"] - 10)
+    page.wait_for_timeout(250)
   page.wait_for_timeout(250)
   measure = """() => {
     const table = document.querySelector('main > table');
