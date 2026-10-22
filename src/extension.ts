@@ -5025,6 +5025,8 @@ export function getActivePreviewForTests():
     incomingChanges: { posts: number; last?: { enabled: boolean; ranges: { start: number; end: number }[] } };
     /** Review comment threads posted to the page (T42). */
     comments: { posts: number; last?: Array<CommentThread & { orphaned?: boolean }>; result?: { ok: boolean; reason?: string; kind: string; threadId?: string } };
+    /** True while the host holds an open block edit (its final save has not completed). */
+    blockEditOpen: boolean;
     /** Navigation history of the panel and the last state posted to the page. */
     history: {
       entries: { uri: string; line: number }[];
@@ -5069,6 +5071,7 @@ export function getActivePreviewForTests():
     pendingOverlayShown: activePreview.pendingOverlayShown,
     incomingChanges: { posts: activePreview.incomingPosts, last: activePreview.lastIncomingChanges },
     comments: { posts: activePreview.commentPosts, last: activePreview.lastComments, result: activePreview.lastCommentResult },
+    blockEditOpen: activePreview.activeBlockEdit !== undefined,
     history: {
       ...historyOf(activePreview).snapshot(),
       posted: activePreview.lastHistoryState,

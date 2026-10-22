@@ -124,7 +124,8 @@ export async function run(): Promise<void> {
     void sendPreviewMessageForTests({ type: "previewHistoryGo", ...context(), direction: "back" });
     await waitFor("Back to leave the label jump", () => historyOf().index === labelIndex);
 
-    // Back and Next are refused while a block editor is open.
+    // Back while a block editor is open (CR 025, decision 5): the page posts the final save of the
+    // typed text, then Back. The text is saved, the editor is closed, the history moves one step.
     const editBase = { ...context(), editId: "history-open-edit", line: 3, endLine: 3, insertAfterLine: 3 };
     await sendPreviewMessageForTests({ type: "previewEditOpen", ...editBase });
     const secondDocument = vscode.window.activeTextEditor!.document;
@@ -133,13 +134,31 @@ export async function run(): Promise<void> {
       type: "previewEditSave", ...editBase, originalText: "", editedText: "Temporary block", final: false,
     });
     await waitFor("the temporary block to reach the document", () => secondDocument.getText() !== secondText);
+    assert.equal(getActivePreviewForTests()?.blockEditOpen, true, "the block editor should be open");
     const openIndex = historyOf().index;
-    await sendPreviewMessageForTests({ type: "previewHistoryGo", ...context(), direction: "back" });
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
-    assert.equal(historyOf().index, openIndex, "Back moved the history while a block editor was open");
-    assert.equal(vscode.window.activeTextEditor?.document.uri.fsPath, secondPath);
-    await sendPreviewMessageForTests({ type: "previewEditCancel", ...editBase });
-    await waitFor("the cancelled block to be removed", () => secondDocument.getText() === secondText);
+    // Typed after the last autosave: only the final save carries it.
+    void sendPreviewMessageForTests({
+      type: "previewEditSave", ...editBase, originalText: "", editedText: "Temporary block typed last", final: true,
+    });
+    void sendPreviewMessageForTests({ type: "previewHistoryGo", ...context(), direction: "back" });
+    await waitFor("Back to open the first document", () =>
+      vscode.window.activeTextEditor?.document.uri.fsPath === firstPath);
+    assert.equal(historyOf().index, openIndex - 1, "Back should move the history by exactly one step");
+    assert.ok(secondDocument.getText().includes("Temporary block typed last"),
+      "the text typed in the block editor was lost by Back");
+    assert.equal(getActivePreviewForTests()?.blockEditOpen, false, "the block editor stayed open after Back");
+    await waitForReady(firstUri);
+    // Forward comes back to the second document; the editor is not reopened. Restore its text.
+    void sendPreviewMessageForTests({ type: "previewHistoryGo", ...context(), direction: "forward" });
+    await waitFor("Next to open the second document", () =>
+      vscode.window.activeTextEditor?.document.uri.fsPath === secondPath);
+    await waitForReady(secondUri);
+    assert.equal(historyOf().index, openIndex);
+    assert.equal(getActivePreviewForTests()?.blockEditOpen, false);
+    const restore = new vscode.WorkspaceEdit();
+    restore.replace(secondUri, new vscode.Range(0, 0, secondDocument.lineCount, 0), secondText);
+    await vscode.workspace.applyEdit(restore);
+    await waitFor("the second document to be restored", () => secondDocument.getText() === secondText);
     await waitForReady(secondUri);
 
     // Blocked and external links are not recorded.
