@@ -2868,8 +2868,14 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
       record(label + ":" + mode, first)
 
   if mode != "empty":
-    # The page settles its toolbar clearance through observers: wait for two equal readings.
-    settle = """() => {
+    # The page settles its toolbar clearance through observers (ResizeObserver callbacks run in the
+    # rendering steps of a frame). On a loaded runner a frame can take longer than the pause between
+    # two readings, so a reading taken without a frame in between can repeat while an observer
+    # update is still pending. Every reading therefore waits for two animation frames (and for the
+    # fonts) first; two equal readings then mean that the observers had their turn.
+    settle = """async () => {
+      await document.fonts.ready;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       const root = getComputedStyle(document.documentElement);
       const first = document.querySelector('#sphinx-myst-preview-content > :first-child');
       const box = first ? first.getBoundingClientRect() : null;
