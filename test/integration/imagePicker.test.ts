@@ -28,7 +28,13 @@ export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const extensionRoot = path.resolve(__dirname, "../../..");
   const directory = fs.mkdtempSync(path.join(extensionRoot, "test", "integration", "fixtures", "image-picker-"));
-  const outside = fs.mkdtempSync(path.join(os.tmpdir(), "image-picker-outside-"));
+  // The test workspace also holds /tmp (os.tmpdir() on Linux): use a parent that no workspace
+  // folder contains, so the pick really is outside the workspace.
+  const outsideParent = [os.tmpdir(), os.homedir()].find((candidate) =>
+    !vscode.workspace.getWorkspaceFolder(vscode.Uri.file(path.join(candidate, "probe.png")))) ?? os.homedir();
+  const outside = fs.mkdtempSync(path.join(outsideParent, "image-picker-outside-"));
+  assert.equal(vscode.workspace.getWorkspaceFolder(vscode.Uri.file(outside)), undefined,
+    "the outside folder is in no workspace folder");
   const sourcePath = path.join(directory, "chapter.md");
   fs.writeFileSync(sourcePath, "# Chapter\n\nText.\n");
   fs.mkdirSync(path.join(directory, "my pics"));
