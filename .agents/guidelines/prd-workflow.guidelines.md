@@ -56,11 +56,13 @@ restrictions) come from `AGENTS.md`; this file only defines the workflow.
    After three rounds without approval, stop and ask the user.
 7. **Commit.** The orchestrator commits: explicit paths only (never `git add -A` / `git add .`),
    Conventional Commits, the project's trailer rules.
-8. **PR.** Push the branch and open the PR. Body: summary, what changed, screenshots (see below),
-   test plan with the local gate results, link to nothing in `.agents/changes/` (it is local).
+8. **PR.** Push the branch and open the PR with the body required by
+   [ci.guidelines.md](ci.guidelines.md) (the PR template), screenshots in Impacts (see below).
+   Link to nothing in `.agents/changes/` (it is local).
 9. **CI.** Watch the checks (`gh pr checks <n> --watch`). Fix failures with new commits and a plain
-   push: never force-push or rewrite pushed history. Never weaken a test to get green; fix the
-   product or explain why the test was wrong.
+   push. Never weaken a test to get green; fix the product or explain why the test was wrong.
+   When another PR merges, rebase every open PR on the new default branch and push with
+   `--force-with-lease` (no merge commits); this is the only allowed history rewrite.
 10. **Notify.** When CI is green, tell the user the PR is ready and what still blocks the merge
     (for example a required review).
 11. **Land (after merge).** Write `report.md`, move `requests/NNN-<slug>` to
@@ -78,9 +80,10 @@ git worktree add -b <type>/<slug> ../<repo>-wt-NNN origin/main --no-track
 ln -s "$PWD/node_modules" ../<repo>-wt-NNN/node_modules   # reuse deps, no install
 ```
 
-Each sub-agent works only in its worktree; PRD folders stay in the main checkout's
-`.agents/changes/` (absolute paths in the brief). Never stage the dependency symlinks. Two
-CRs must not run app-window tests at the same time. Remove the worktree after landing
+Keep at most the number of open PRs the user allows (default 4); start the next CR locally and
+open its PR when one merges. Each sub-agent works only in its worktree; PRD folders stay in the
+main checkout's `.agents/changes/` (absolute paths in the brief). Never stage the dependency
+symlinks. Two CRs must not run app-window tests at the same time. Remove the worktree after landing
 (`git worktree remove ../<repo>-wt-NNN`).
 
 ## Sub-agent rules (put in `rules.md`)
