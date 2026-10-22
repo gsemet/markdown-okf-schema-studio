@@ -1270,6 +1270,48 @@ async function scenarioLinkPanel(page: Page, evidence: Evidence): Promise<void> 
   });
 }
 
+/** CR 035: the link panel opens pre-filled inside an existing link, Enter replaces it, one undo restores it. */
+async function scenarioLinkPanelPrefill(page: Page, evidence: Evidence): Promise<void> {
+  const original = 'See [the docs](https://example.org/docs "Docs") now.';
+  await withDocument("realinput-cr035", "# Link prefill\n\nFirst paragraph.\n\n" + original + "\n", async (source) => {
+    await openSidePreview(source);
+    await waitForRender(source);
+    await setEditMode(page, true);
+    await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "now." }).click());
+    await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    const readValue = async (): Promise<string | undefined> => {
+      const current = await findCurrentFrame(page);
+      if (current === undefined) return undefined;
+      return current.evaluate(() => {
+        const element = document.activeElement;
+        return element instanceof HTMLTextAreaElement ? element.value : undefined;
+      });
+    };
+    const field = async (name: string): Promise<string> =>
+      await (await findCurrentFrame(page))!.locator("[data-link-field='" + name + "']").inputValue();
+    await press(page, "Home");
+    for (let index = 0; index < "See [the".length; index += 1) await press(page, "ArrowRight");
+    await press(page, MOD + "+k");
+    await waitFor("the link panel", async () => {
+      const current = await findCurrentFrame(page);
+      return current !== undefined && await current.locator("[role='dialog'][aria-label='Insert link']").count() === 1;
+    });
+    assert.equal(await field("text"), "the docs", "the text is prefilled from the link");
+    assert.equal(await field("url"), "https://example.org/docs", "the URL is prefilled from the link");
+    await captureAfter(evidence, page, "cr035-link-panel-prefilled",
+      "Edit mode on; Cmd/Ctrl+K with the caret inside [the docs](https://example.org/docs) opened the link panel "
+      + "pre-filled with the text and the URL.");
+    await (await findCurrentFrame(page))!.locator("[data-link-field='url']").fill("https://example.org/new");
+    await press(page, "Enter");
+    await waitFor("the link to be replaced", async () =>
+      await readValue() === 'See [the docs](https://example.org/new "Docs")' + " now.");
+    await press(page, MOD + "+z");
+    await waitFor("one undo to restore the link", async () => await readValue() === original);
+    await press(page, "Escape");
+    await waitForNoBlockEditor(page, "the block editor to close after Escape");
+  });
+}
+
 const FIGURE_DOCUMENT = [
   "# Figure document",
   "",
@@ -4249,6 +4291,11 @@ export async function run(): Promise<void> {
       passed = true;
       return;
     }
+    if (process.env.STUDIO_REAL_INPUT_SCENARIO === "link-prefill") {
+      await scenarioLinkPanelPrefill(page, evidence);
+      passed = true;
+      return;
+    }
     await scenarioParagraphBlurCommit(page, evidence);
     await scenarioCommentBlockEdit(page, evidence);
     await scenarioCtrlEnterCommit(page, evidence);
@@ -4271,6 +4318,7 @@ export async function run(): Promise<void> {
     await scenarioPalette(page, evidence);
     await scenarioSlashMenu(page, evidence);
     await scenarioLinkPanel(page, evidence);
+    await scenarioLinkPanelPrefill(page, evidence);
     await scenarioAlertDropdown(page, evidence);
     await scenarioFigureEditor(page, evidence);
     await scenarioPreviewKeepsMarkdown(page, evidence);

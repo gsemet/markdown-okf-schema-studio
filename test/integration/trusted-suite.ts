@@ -88,10 +88,13 @@ export async function run(): Promise<void> {
     await vscode.workspace.applyEdit(restoreEdit);
   }
 
-  await runProjectFeatures();
-  await runStockCoexistence();
+  const onlyRealInput = process.env.STUDIO_REAL_INPUT_SCENARIO !== undefined;
+  if (!onlyRealInput) {
+    await runProjectFeatures();
+    await runStockCoexistence();
+  }
   try {
-    await runCheckboxToggle();
+    if (!onlyRealInput) await runCheckboxToggle();
   } catch (error) {
     console.error("Checkbox toggle integration failed:", error);
     throw error;
@@ -102,6 +105,7 @@ export async function run(): Promise<void> {
     console.error("Real-input integration failed:", error);
     throw error;
   }
+  if (onlyRealInput) return;
   try {
     await runPreviewEditing();
   } catch (error) {
