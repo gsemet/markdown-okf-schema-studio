@@ -25,13 +25,13 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 .agents/changes/
 ├── backlog/INDEX.md              ← priority table of backlog items + closed decisions
 ├── backlog/P1|P2|P3/<slug>/      ← items not started
-├── requests/ORCHESTRATOR.md      ← orchestration brief (parallel mode only)
-├── requests/ORCHESTRATOR-STATUS.md ← one line per CR, written by the orchestrator
+├── requests/ORCHESTRATOR.md      ← CR table only (parallel mode)
+├── requests/ORCHESTRATOR-STATUS.md ← rebuilt by the orchestrator from the STATE.md headers
 ├── requests/NNN-<slug>/          ← PRD folder
 │   ├── 00-request.md             ← intent + user decisions
 │   ├── task.md                   ← brief: files, change, tests first, docs, gates
 │   ├── rules.md                  ← hard rules for sub-agents (see below)
-│   ├── STATE.md                  ← steps 1–11 as a checklist
+│   ├── STATE.md                  ← header (see below) + steps 1–11 as a checklist
 │   ├── reports/T1-r<n>.md        ← coder report, round n
 │   └── reviews/T1-r<n>.md        ← reviewer verdict, round n
 └── archives/NNN-<slug>/          ← landed CRs
@@ -41,20 +41,20 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 
 | Role | Count | Model | Does | Never |
 | --- | --- | --- | --- | --- |
-| User | 1 | — | answers grill questions, merges PRs | — |
-| Main session | 1 | Opus | talks to the user, steps 1–4, starts the orchestrator | edits a worktree a driver owns |
-| Orchestrator | 1 | Sonnet | starts drivers, watches merges, step 11, rebase requests | edits worktrees, merges PRs |
-| CR driver | 1 per CR | Sonnet | steps 5–10 for its CR, starts coder and reviewer | touches another CR |
-| Coder | 1 per round | Sonnet | changes the worktree, runs local gates, writes the report | commits, pushes |
-| Reviewer | 1 per round | Sonnet | verifies the diff (read-only), writes the verdict | edits files |
+| User | 1 | — | answers grill questions, grants extra rounds, merges PRs | — |
+| Main session | 1 | Opus | talks to the user, steps 1–4, starts and supervises the orchestrator | starts drivers, lands CRs, edits a CR worktree |
+| Orchestrator | 1 | Sonnet | starts and supervises drivers, watches merges, step 11, rebase requests | runs long commands, codes, reviews, commits, merges PRs |
+| CR driver | 1 per CR | Sonnet | steps 5–10 for its CR, starts coder and reviewer, watches its CI | codes, reviews, touches another CR |
+| Coder | 1 per round | Sonnet | changes the worktree, runs local gates, writes the report | commits, pushes, lives past its round |
+| Reviewer | 1 per round | Sonnet | verifies the diff (read-only), writes the verdict | edits files, lives past its round |
 
-- **Escalation to Opus**: the driver uses Opus for the coder and itself after the second
-  FIX-REQUIRED, or after two CI failures with the same cause. The reviewer uses Opus when the CR's
-  blast radius is 2 or 3. Use a different model for the reviewer than for the coder when possible.
-- **Single CR**: the main session plays orchestrator and driver; coder and reviewer stay separate
-  sub-agents.
-- **No sub-agents available**: the agent does the missing level itself in separate passes (coding
-  pass, then a review pass that rereads the diff from scratch) and says so.
+- **Escalation to Opus**: the driver uses Opus for the coder after the second FIX-REQUIRED, or
+  after two CI failures with the same cause. The reviewer uses Opus when the CR's blast radius is
+  2 or 3. Orchestrator and drivers stay on Sonnet (a session limit on one model must not stop the
+  whole tree).
+- **Never move a task up a level**: each role does only its own row, even for a single CR and even
+  when a child fails. A failing child is restarted (see "Supervision"), never replaced by its
+  parent. If sub-agents cannot be started at all, the agent returns "blocked" to its parent.
 
 ## Lifecycle
 
@@ -62,20 +62,39 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 | --- | --- | --- |
 | 1 Pick | main | In the highest priority with work, propose the easiest item: problem, file:line, fix, PR content. |
 | 2 Grill | main | Ask only the questions that change the result, each with a recommended answer. "ok" accepts all. Record answers in `00-request.md`. |
-| 3 Open | main | Create the PRD folder, move the backlog content in (partial item: copy the part, note the split in the backlog item), update `INDEX.md`, create the branch from fresh `origin/main`. |
-| 4 Brief | main | Write `task.md` and `rules.md`. |
+| 3 Open | main | Create the PRD folder, move the backlog content in (partial item: copy the part, note the split in the backlog item), update `INDEX.md`, create the worktree and branch from fresh `origin/main`. |
+| 4 Brief | main | Write `task.md`, `rules.md`, the `STATE.md` header, and the row in `ORCHESTRATOR.md`. |
 | 5 Code | coder | Implement round n, run local gates, write `reports/T1-r<n>.md`. |
-| 6 Review | reviewer | Write `reviews/T1-r<n>.md` starting with `Verdict: APPROVE` or `Verdict: FIX-REQUIRED`. FIX-REQUIRED → step 5, round n+1. No APPROVE after round 3 → blocked, ask the user. |
+| 6 Review | reviewer | Write `reviews/T1-r<n>.md` starting with `Verdict: APPROVE` or `Verdict: FIX-REQUIRED`. FIX-REQUIRED → step 5, round n+1. |
 | 7 Commit | driver | Explicit paths only (never `git add -A` / `git add .`), project commit format. |
 | 8 PR | driver | Rebase on `origin/main`, push, open the PR with the template from [ci.guidelines.md](ci.guidelines.md), screenshots in Impacts. |
-| 9 CI | driver | `gh pr checks <n> --watch`. Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. Never weaken a test. |
-| 10 Notify | driver → user | CI green: report "ready" and what still blocks the merge (for example a review). |
-| 11 Land | orchestrator | After the user merges: write `report.md`, move the PRD folder to `archives/`, update `INDEX.md`, remove the worktree. |
+| 9 CI | driver | Watch the checks (see "Responsiveness"). Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. Never weaken a test. |
+| 10 Notify | driver | CI green: `status: ready` in the header, then return. |
+| 11 Land | orchestrator | After the user merges: write `report.md`, move the PRD folder to `archives/`, update `INDEX.md`, remove the worktree and branch. |
 
-Tick `STATE.md` after every step. A new session resumes at the first unticked step.
+**Round limit**: a round is one coder pass, whether a review or a CI failure triggered it. At most
+3 rounds per CR, all causes together. After round 3 without green CI, the driver sets
+`status: blocked` with its diagnosis and a question, and returns. Only the user grants more rounds
+(written in `00-request.md`, for example "rounds: 5").
 
 **Rebase rule**: when any PR merges, rebase every open CR branch on `origin/main` and push with
 `--force-with-lease`. This is the only allowed history rewrite. No merge commits.
+
+### `STATE.md` header
+
+The first four lines of `STATE.md`, rewritten by the owner of the current step at every
+transition and at every CI watch slice. Everything else reads it; nobody keeps a CR's state in
+memory only.
+
+```text
+driver: <agent id | none> · updated: <HH:MM>
+status: <working | wait-ci | ready | blocked | landed> · step: <1–11 name> · round: <n>/<limit>
+head: <sha> · PR: <#n | —> · run: <id> <pass | fail | pending>
+next: <next action> · question: <question for the user, or —>
+```
+
+`driver:` is a lock: a CR has at most one live driver. A new orchestrator reads it before starting
+a driver and messages the existing one instead of starting a second.
 
 ## Parallel Change Requests Orchestration
 
@@ -83,9 +102,9 @@ Use it when the user asks for several CRs at once. Open PRs never exceed the use
 (default 4); further CRs wait locally until a PR merges.
 
 ```text
-main session ── user interface: grill, decisions, merges
- └─ orchestrator ── one driver per CR, all in parallel; merges, landing, rebase requests
-     ├─ CR driver A ── coder r1 → reviewer r1 → coder r2 … (max 3) → commit → PR → CI
+main session ── user interface: grill, decisions, merges; supervises the orchestrator
+ └─ orchestrator ── one driver per CR, in parallel; ticks every 4–5 min; merges, landing
+     ├─ CR driver A ── coder r1 → reviewer r1 → coder r2 … (max 3) → commit → PR → CI watch
      ├─ CR driver B ── same, own worktree
      └─ CR driver C ── same, own worktree
 ```
@@ -99,26 +118,65 @@ main session ── user interface: grill, decisions, merges
    ln -s "$PWD/node_modules" ../<repo>-wt-NNN/node_modules
    ```
 
-2. Write `requests/ORCHESTRATOR.md`: one table row per CR (PRD folder, worktree, branch, PR,
-   current situation) and the driver prompt (steps 5–10, `rules.md`, absolute paths).
-3. Start the orchestrator in the background with that brief.
+2. `requests/ORCHESTRATOR.md` holds only the CR table: CR, PRD folder, worktree, branch, PR. The
+   situation of each CR lives in its `STATE.md` header, the driver prompt in this guideline.
+3. Start the orchestrator in the background (Sonnet), pointing it to this guideline and the table.
 
-### Orchestrator loop
+### Responsiveness
 
-1. Start every driver at once, in the background.
-2. Every 5 minutes: check merged PRs. On a merge: step 11 for that CR, then message each running
-   driver to rebase; restart a returned driver to rebase, push and watch CI.
-3. After every event, overwrite `ORCHESTRATOR-STATUS.md`: one line per CR with PR, step, round,
-   last CI run and result, next action or question.
-4. Return when every CR is "ready" or "blocked", with each question and a recommended answer.
+No agent blocks: a message from its parent is read within 5 minutes.
+
+- **Orchestrator**: no command longer than a few seconds (no watch, no test, no rebase). It wakes
+  on a driver's return, on a message, or on its tick: a 270-second `sleep` run in the background,
+  restarted at the end of every tick.
+- **Driver**: watches its own CI, in slices of at most 5 minutes (`gh pr checks <n>`, then a
+  background `sleep`, or `gh pr checks <n> --watch` run in the background), reads its messages
+  between slices, and rewrites the `STATE.md` header at every slice.
+- **Coder and reviewer**: one round, then return. Their gates run in the foreground but never
+  outlive the round.
+
+### Orchestrator tick
+
+1. First tick, within 5 minutes of starting: for each CR in the table, read the header; start a
+   driver (background) where `driver: none` and the status is not ready, blocked or landed.
+2. Every tick: check merged PRs. On a merge: step 11 for that CR, then message each live driver to
+   rebase; for a ready CR without a live driver, start one for "rebase, push, watch CI".
+3. Check every driver against the supervision rules and the round limit.
+4. Rebuild `ORCHESTRATOR-STATUS.md` from the headers: one line per CR, plus the time of the tick.
+5. Return when every CR is ready, blocked or landed, with each question and a recommended answer.
+
+### Supervision
+
+- Parents supervise only their own children: the main session supervises the orchestrator; the
+  orchestrator its drivers; a driver its coder and reviewer.
+- **Stuck**: the child's header (`ORCHESTRATOR-STATUS.md` for the orchestrator) is more than 15
+  minutes old. The parent messages it; if the next tick shows no change, the parent stops it and
+  starts the same role with the same brief, which resumes from the files.
+- **Crashed** (for example a session limit, HTTP 429): the parent resumes the same agent by message
+  after the reset time instead of starting a new one, so it keeps its history.
+- **Round limit exceeded** without `status: blocked`: the orchestrator stops the driver, sets the
+  CR to blocked and reports the question upward.
+- After two restarts of the same child without progress, the parent reports "blocked" upward.
+
+### Driver prompt (the orchestrator fills the placeholders)
+
+> You are the CR driver for CR `<NNN>`. You alone own worktree `<path>` (branch `<branch>`, PR
+> `<#n or none>`). Read `.agents/guidelines/prd-workflow.guidelines.md` (lifecycle, round limit,
+> `STATE.md` header, responsiveness), `.agents/guidelines/ci.guidelines.md`, and the PRD folder
+> `<absolute path>` (`00-request.md`, `task.md`, `rules.md`, `STATE.md`, latest report and review).
+> Resume from the `STATE.md` header and write `driver: <your id>` in it. Run steps 5–10: start a
+> coder, then a separate reviewer, per round, in the background; commit, rebase, push, PR; watch
+> CI in slices of at most 5 minutes. Rewrite the header at every transition and every slice. Never
+> code or review yourself. Return with `status: ready` or `status: blocked` and a question with
+> your recommended answer.
 
 ### Constraints
 
 - One driver per worktree; PRD folders stay in the main checkout (absolute paths).
 - Two CRs never run app-window tests locally at the same time; CI runs the full gate.
 - No agent starts a new backlog item or merges a PR: the user decides.
-- Any level can be stopped and restarted: it resumes from `STATE.md`, the latest report and
-  review, and `ORCHESTRATOR-STATUS.md`.
+- Shell commands never wait for input: `rm`, `cp` and `mv` may be aliased to `-i`, so call them
+  as `\rm`, `\cp`, `\mv` to bypass the alias.
 
 ## Sub-agent rules (copy into `rules.md`)
 
