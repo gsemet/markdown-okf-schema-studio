@@ -28,23 +28,30 @@ function validateIdentity(label: string, manifest: EvidenceManifest, campaign: C
   return failures;
 }
 
+/**
+ * Validate the integration and visual evidence of one campaign. When the two stages ran as separate
+ * jobs, each recorded its own campaign identity (same run id, own start time): pass the visual one
+ * as `visualCampaign`; each manifest is then validated against the identity of its own stage.
+ */
 export function validateReviewEvidence(
   campaign: CampaignIdentity,
   integration: EvidenceManifest,
   visual: EvidenceManifest,
+  visualCampaign: CampaignIdentity = campaign,
 ): string[] {
   const failures = [
     ...validateIdentity("integration", integration, campaign),
-    ...validateIdentity("visual", visual, campaign),
+    ...validateIdentity("visual", visual, visualCampaign),
   ];
+  if (visualCampaign.runId !== campaign.runId) failures.push("visual and integration stages belong to different campaigns");
   if (integration.status !== "passed") failures.push("integration campaign did not pass");
   if (integration.scope !== "all") failures.push("integration campaign is not the full scope");
   if (visual.status !== "passed") failures.push("visual campaign did not pass");
   if (!Array.isArray(visual.duplicateImages) || visual.duplicateImages.length !== 0) {
     failures.push("visual campaign has duplicate or missing duplicateImages evidence");
   }
-  if (visual.renderRunId !== campaign.runId) failures.push("visual render identity does not match review start");
-  if (visual.renderCampaignStartedAt !== campaign.startedAt) {
+  if (visual.renderRunId !== visualCampaign.runId) failures.push("visual render identity does not match review start");
+  if (visual.renderCampaignStartedAt !== visualCampaign.startedAt) {
     failures.push("visual render start time does not match review start");
   }
   return failures;

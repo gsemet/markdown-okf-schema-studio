@@ -29,13 +29,18 @@ It is MIT licensed and is developed independently from the Agentic Coding White 
 - Run end-to-end tests: `just e2e`
 - Package a VSIX: `just package`
 - Run the complete validation and site-generation pipeline: `just preflight`
+- Set up a CI machine from the lock files: `just dev-ci`
+- CI jobs (run in parallel by `.github/workflows/ci.yml`, in sequence by `just preflight`):
+  `just ci-static`, `just ci-visual`, `just ci-integration`, then `just ci-report` (merges the
+  visual and integration outputs) and `just ci-gallery` (gallery and site from existing outputs)
 
 ## Guidelines
 
 - When creating a git commit in this project: [.agents/guidelines/git-commit-message.guidelines.md](.agents/guidelines/git-commit-message.guidelines.md)
 - Allowed Conventional commit scopes: [.agents/guidelines/git-commit-allowed-scopes.md](.agents/guidelines/git-commit-allowed-scopes.md)
 - When changing the CI workflows or `ci-*` justfile targets: [.agents/guidelines/ci.guidelines.md](.agents/guidelines/ci.guidelines.md)
-- When picking up backlog work, change requests or PRs (`.agents/changes/`): [.agents/guidelines/prd-workflow.guidelines.md](.agents/guidelines/prd-workflow.guidelines.md)
+- When picking up backlog work, change requests or PRs (`.agents/changes/`), including
+  Parallel Change Requests Orchestration: [.agents/guidelines/prd-workflow.guidelines.md](.agents/guidelines/prd-workflow.guidelines.md)
 - Shared vocabulary (UI and code terms): [.agents/glossary/common.md](.agents/glossary/common.md). Use these words in code, tests, commits and docs; add new terms there.
 
 ## Completion gate

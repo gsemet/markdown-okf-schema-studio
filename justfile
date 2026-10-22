@@ -16,6 +16,18 @@ dev:
     uv sync --group docs --group release
     uv run --no-sync --group docs playwright install chromium
 
+# Set up a CI machine (CI only: npm ci replaces node_modules) from the lock files; the runner provides Node.js.
+dev-ci:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ "$(uname -s)" == "Linux" ]] && ! { command -v plantuml && command -v dot; } >/dev/null; then
+        sudo -n apt-get update
+        sudo -n apt-get install --yes --no-install-recommends plantuml graphviz
+    fi
+    {{ npm }} ci
+    uv sync --group docs --group release
+    uv run --no-sync --group docs playwright install --with-deps chromium
+
 # Upgrade dependencies from npmjs.org and PyPI and refresh the development environment.
 update:
     fnm install
@@ -101,19 +113,77 @@ site: e2e
     {{ npm }} run site:gallery
     {{ npm }} run site
 
-# Run formatting and all preflight validation stages.
+# CI job "static": justfile format check, TypeScript, unit, contract and security checks, Sphinx contract.
+ci-static:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    if just --unstable --fmt --check && just check && just sphinx-check; then
+        echo "ci-static: passed"
+    else
+        echo "ci-static: FAILED" >&2
+        exit 1
+    fi
+
+# CI job "visual": the visual end-to-end stage, reports under out/reports/e2e.
+ci-visual:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    eval "$(node scripts/e2e-campaign.mjs begin visual)"
+    if {{ npm }} run test:visual; then
+        echo "ci-visual: passed"
+    else
+        echo "ci-visual: FAILED" >&2
+        exit 1
+    fi
+
+# CI job "integration": the VS Code integration end-to-end stage, reports under out/reports/e2e.
+ci-integration:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    eval "$(node scripts/e2e-campaign.mjs begin integration)"
+    if {{ npm }} run test:integration; then
+        echo "ci-integration: passed"
+    else
+        echo "ci-integration: FAILED" >&2
+        exit 1
+    fi
+
+# CI job "report": merge the visual and integration outputs into the review index and e2e manifest.
+ci-report:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    failed=0
+    {{ npm }} run compile || failed=1
+    {{ npm }} run review:finish || failed=1
+    node scripts/e2e-campaign.mjs report || failed=1
+    if [[ "$failed" -eq 0 ]]; then
+        echo "ci-report: passed"
+    else
+        echo "ci-report: FAILED" >&2
+        exit 1
+    fi
+
+# CI job "gallery": generate the gallery and the site from existing end-to-end outputs.
+ci-gallery:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    if {{ npm }} run site:gallery && {{ npm }} run site; then
+        echo "ci-gallery: passed"
+    else
+        echo "ci-gallery: FAILED" >&2
+        exit 1
+    fi
+
+# Run formatting and all preflight validation stages (the ci-* targets in sequence).
 preflight: clean format
     #!/usr/bin/env bash
     set +e
     failures=0
-    just check || failures=$((failures + 1))
-    just sphinx-check || failures=$((failures + 1))
-    if {{ npm }} run test:e2e; then
-        {{ npm }} run site:gallery || failures=$((failures + 1))
-        {{ npm }} run site || failures=$((failures + 1))
-    else
-        failures=$((failures + 1))
-    fi
+    just ci-static || failures=$((failures + 1))
+    just ci-visual || failures=$((failures + 1))
+    just ci-integration || failures=$((failures + 1))
+    just ci-report || failures=$((failures + 1))
+    just ci-gallery || failures=$((failures + 1))
     if [[ "$failures" -ne 0 ]]; then
         echo "$failures preflight stage(s) failed" >&2
         exit 1
