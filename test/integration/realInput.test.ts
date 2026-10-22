@@ -1963,6 +1963,8 @@ async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<voi
           const box = band && !(band as HTMLElement).hidden ? band.getBoundingClientRect() : undefined;
           return box && box.height > 0 ? box.bottom : undefined;
         })(),
+        readingOffset: Number.parseFloat(view?.getComputedStyle(menu.ownerDocument.documentElement)
+          .getPropertyValue("--sphinx-preview-reading-offset") ?? "") || undefined,
         scrollY: view?.scrollY,
         maxScroll: scroller ? scroller.scrollHeight - scroller.clientHeight : undefined,
       };
@@ -1973,9 +1975,11 @@ async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<voi
     // A short page cannot scroll by the whole toolbar height: the cell then goes down by the rest.
     const pageTooShort = moved > 2 && clearance?.scrollY !== undefined && clearance.maxScroll !== undefined
       && Math.abs(clearance.scrollY - clearance.maxScroll) <= 1 && moved <= clearance.menuHeight + 1;
-    // The toolbar is kept out from under the sticky heading band: the page moves just enough.
-    const belowBand = moved > 2 && clearance?.bandBottom !== undefined
-      && Math.abs(clearance.menuTop - clearance.bandBottom) <= 2 && moved <= clearance.menuHeight + 1;
+    // The toolbar is kept below the reading line (the sticky heading band or the anchor offset):
+    // the page moves just enough to put its top there.
+    const readingLine = Math.max(clearance?.bandBottom ?? 0, clearance?.readingOffset ?? 0);
+    const belowBand = moved > 2 && clearance !== undefined && readingLine > 0
+      && Math.abs(clearance.menuTop - readingLine) <= 2 && moved <= clearance.menuHeight + 1;
     assert.ok(Math.abs(moved) <= 2 || revealed || pageTooShort || belowBand,
       "the selected cell moved " + (after - before) + " px; toolbar clearance " + JSON.stringify(clearance));
     await withCurrentFrame(page, async (frame) => {
