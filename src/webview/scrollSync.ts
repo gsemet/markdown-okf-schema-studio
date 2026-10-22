@@ -934,6 +934,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       applyAnchor();
       updateStickyHeadings();
       tocColumn.remeasure();
+      incomingChanges.layout();
     });
   }
 

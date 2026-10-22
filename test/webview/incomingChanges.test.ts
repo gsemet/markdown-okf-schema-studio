@@ -124,3 +124,64 @@ test("T16: included blocks are never marked, a distinct wrapper of the directive
   assert.deepEqual(marked(), [wrapper]);
   assert.equal(outsider.hasAttribute("data-sphinx-preview-changed"), false);
 });
+
+test("T16: one bar per marked block in a layer, at the block's top and height, nested or not", () => {
+  class Box extends FakeElement {
+    box = { top: 0, height: 0 };
+    style = { values: new Map<string, string>(), setProperty(name: string, value: string) { this.values.set(name, value); } };
+    hidden = false;
+    tagName = "";
+    appendChild<T extends FakeElement>(child: T): T { return this.append(child); }
+    getBoundingClientRect() { return { top: this.box.top, height: this.box.height }; }
+  }
+  const html = new Box("html");
+  html.box = { top: -100, height: 900 };
+  const body = html.append(new Box("body"));
+  const main = body.append(new Box("main"));
+  const top = main.append(new Box("p", { "data-line": "1" }));
+  top.box = { top: 20, height: 30 };
+  const list = main.append(new Box("ul", { "data-line": "3", "data-end-line": "4" }));
+  const nested = list.append(new Box("li", { "data-line": "3" }));
+  nested.box = { top: 120, height: 40 };
+  const pre = main.append(new Box("pre"));
+  pre.tagName = "PRE";
+  pre.box = { top: 300, height: 70 };
+  const code = pre.append(new Box("code", { "data-line": "6" }));
+  code.tagName = "CODE";
+  code.box = { top: 312, height: 46 };
+  const all = (): FakeElement[] => {
+    const found: FakeElement[] = [];
+    const walk = (node: FakeElement) => { for (const child of node.children) { found.push(child); walk(child); } };
+    walk(html);
+    return found;
+  };
+  const document = {
+    documentElement: html,
+    body,
+    defaultView: undefined,
+    createElement: (name: string) => new Box(name),
+    querySelectorAll: (selector: string) => {
+      const name = selector.replace(/^\[|\]$/g, "");
+      return all().filter((element) => element.attrs.has(name));
+    },
+  };
+  const marks = vm.runInNewContext(`(${installIncomingChanges.toString()})(document)`, { document }) as
+    ReturnType<typeof installIncomingChanges>;
+  marks.setRanges([{ start: 1, end: 1 }, { start: 3, end: 3 }, { start: 6, end: 6 }]);
+  const layer = body.children.find((child) => child.hasAttribute("data-sphinx-preview-change-layer")) as Box;
+  assert.ok(layer, "the layer is appended to the body");
+  assert.equal(layer.getAttribute("aria-hidden"), "true");
+  const bars = layer.children as Box[];
+  assert.deepEqual(bars.map((bar) => [bar.style.values.get("top"), bar.style.values.get("height"), bar.hidden]),
+    [["120px", "30px", false], ["220px", "40px", false], ["400px", "70px", false]]);
+  // A code block is marked on its <code>: the bar spans the <pre> box around it.
+  // The bar carries no horizontal position: every bar shares the stylesheet's column.
+  assert.ok(bars.every((bar) => !bar.style.values.has("left") && !bar.style.values.has("inset-inline-start")));
+  // A block that moved or collapsed is followed by layout(); bars of blocks that left are hidden.
+  top.box = { top: 60, height: 0 };
+  marks.layout();
+  assert.deepEqual(bars.map((bar) => bar.hidden), [false, false, true]);
+  assert.equal(bars[0].style.values.get("top"), "220px");
+  marks.setRanges([]);
+  assert.deepEqual(bars.map((bar) => bar.hidden), [true, true, true]);
+});

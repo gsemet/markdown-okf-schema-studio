@@ -168,6 +168,8 @@ export interface Scenario {
   tocShot?: "margin" | "auto" | "full";
   /** Opens and closes the comment chips, keeps the reading line, and turns the gray chips off and on. */
   commentChipChecks?: boolean;
+  /** Sends the "changed" blocks of the fixture as incoming changes and checks every bar sits in one column at the page margin, square, as tall as its block, and nothing moves. */
+  changeBarChecks?: boolean;
   /** Figure width and alignment, and the anchor icon of a (label)= target (T27). */
   figureAnchorChecks?: boolean;
   firstElementGap?: "element" | "table" | "empty" | "wide-margin" | "properties";
@@ -1906,6 +1908,20 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
       + "the reading line does not move the text being read, and turning preview.showComments off "
       + "hides the gray chips (not the TODO chips) without a new render. The final frame has both "
       + "boxes open.",
+  })),
+  ...(["light", "dark"] as const).map((theme) => ({
+    id: `review-annotations/v0${theme === "light" ? 5 : 6}-change-bar-${theme}-900`,
+    fixture: "44-change-bar",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    changeBarChecks: true,
+    description: "Blocks changed since the last commit (heading, paragraph, bullet, nested bullet, "
+      + "number, quotation, table, code block, admonition, image) are sent as incoming changes. "
+      + "Every green bar is drawn in one column at the left margin of the page, whatever the "
+      + "indentation of its block, with square ends and the full height of the block; no block "
+      + "and no text edge moves, no ancestor clips a bar and none touches an anchor icon. The Diff "
+      + "toggle hides the bars.",
   })),
   ...([
     ["light", undefined],

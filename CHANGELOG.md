@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The green bar of blocks changed since the last commit no longer touches the text or follows the
+  rounded corners of code blocks: every bar now sits in one column at the left margin of the page,
+  with square ends and the full height of its block, whatever the indentation. Nothing moves.
+- The current section in the table of contents keeps its bar and tint but now has square corners.
 - A leading properties table no longer keeps its Description toggle under the floating toolbar
   when the page loads slowly: the table gives up the toolbar's width once its layout settles.
 - Saving a linked file in the editor now refreshes its excerpt and title in the previews that

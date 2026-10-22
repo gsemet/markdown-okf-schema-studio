@@ -804,10 +804,22 @@ test("T15: an open comment is an admonition-like box and showComments off hides 
   assert.doesNotMatch(css, /data-okf-show-comments="false"\][^{]*kind="todo"/u);
 });
 
-test("T16: a changed block gets an inset green bar without layout shift", () => {
+test("T16: the change bars sit in one column of a layer, square, with no layout shift", () => {
   const css = PREVIEW_THEME_CSS;
-  assert.match(css, /\[data-sphinx-preview-changed\] \{[^}]*box-shadow: inset 3px 0 0 var\(--vscode-editorGutter-addedBackground, #2ea043\)/u);
-  assert.doesNotMatch(css, /\[data-sphinx-preview-changed\] \{[^}]*(?:margin|padding|border|width)/u);
+  // The bar is no longer an inset shadow against the text edge, nor a pseudo-element of the block.
+  assert.doesNotMatch(css, /inset 3px 0 0 var\(--vscode-editorGutter-addedBackground/u);
+  assert.doesNotMatch(css, /\[data-sphinx-preview-changed\][^{]*(?:::before|\{[^}]*box-shadow)/u);
+  assert.match(css, /\[data-sphinx-preview-change-layer\] \{[^}]*position: absolute;[^}]*inset-inline: 0;[^}]*height: 0;[^}]*pointer-events: none;/u);
+  // One column for every bar: a fixed inline-start offset, 3px wide, square ends, the gutter colour.
+  assert.match(css, /\[data-sphinx-preview-change-layer\] > span \{[^}]*position: absolute;[^}]*inset-inline-start: 8px;[^}]*width: 3px;[^}]*border-radius: 0;[^}]*background: var\(--vscode-editorGutter-addedBackground, #2ea043\);/u);
+  // The Diff toggle off hides the layer.
+  assert.match(css, /data-sphinx-preview-incoming="off"\] \[data-sphinx-preview-change-layer\] \{\s*display: none;/u);
+});
+
+test("T16b: only the current TOC entry loses its rounded corners", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /li\[data-sphinx-preview-toc-current\] > button:not\(\[data-sphinx-preview-toc-twisty\]\) \{[^}]*border-radius: 0;[^}]*box-shadow: inset 3px 0 0 var\(--vscode-focusBorder, Highlight\)/u);
+  assert.match(css, /nav\[data-sphinx-preview-toc\] li button \{[^}]*border-radius: 4px;/u);
 });
 
 test("T21: the edition palette is a wrapping pill bar with an in-frame popover and no inline style", () => {

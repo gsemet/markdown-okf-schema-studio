@@ -2187,6 +2187,7 @@ nav[data-sphinx-preview-toc] li button[data-sphinx-preview-toc-twisty][aria-expa
    dark and cream themes alike. */
 nav[data-sphinx-preview-toc] li[data-sphinx-preview-toc-current] > button:not([data-sphinx-preview-toc-twisty]) {
   background: color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: 0;
   box-shadow: inset 3px 0 0 var(--vscode-focusBorder, Highlight);
   font-weight: 600;
 }
@@ -2505,10 +2506,28 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   content: "TODO";
 }
 
-/* Incoming-change mark: a green bar on the left edge of a block changed since the last commit,
-   drawn inside the box so nothing moves. */
-#sphinx-myst-preview-content [data-sphinx-preview-changed] {
-  box-shadow: inset 3px 0 0 var(--vscode-editorGutter-addedBackground, #2ea043);
+/* Incoming-change mark: a green bar for each block changed since the last commit. All bars sit in
+   one column at the inline start of the page, whatever the indentation of the block, with square
+   ends and the full height of the block. They are drawn in a layer after the content (placed by the
+   page script from the block boxes), so no block, neighbour or text edge moves and no ancestor
+   clips a bar. */
+[data-sphinx-preview-change-layer] {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+[data-sphinx-preview-change-layer] > span {
+  position: absolute;
+  inset-inline-start: 8px;
+  width: 3px;
+  border-radius: 0;
+  background: var(--vscode-editorGutter-addedBackground, #2ea043);
 }
 
 /* Review comments: a highlighted quote (or a badge on its block) opens a popover with the thread.
@@ -2790,8 +2809,8 @@ button[data-okf-comment-create]:hover {
 }
 
 /* Toolbar Diff button off: the marks go away at once; the host stops sending ranges. */
-html[data-sphinx-preview-incoming="off"] #sphinx-myst-preview-content [data-sphinx-preview-changed] {
-  box-shadow: none;
+html[data-sphinx-preview-incoming="off"] [data-sphinx-preview-change-layer] {
+  display: none;
 }
 
 /* preview.showIncomingChanges off: the Diff button is not offered. The markup stays the same. */
