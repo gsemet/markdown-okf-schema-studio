@@ -2,7 +2,7 @@
  * Comment and TODO chips.
  *
  * Raw HTML is never rendered, so an HTML comment is invisible in the preview. This stage turns a
- * comment into a small gray chip (`<!--`) and the word TODO, or a `<!-- TODO … -->` comment, into
+ * comment into a small gray chip (labelled "comment") and the word TODO, or a `<!-- TODO … -->` comment, into
  * a green chip. The comment text is carried as a hast text node (never raw HTML) in a hidden body
  * that the chip's `title` mirrors; expanding it is up to the page script.
  *
@@ -54,6 +54,19 @@ function commentText(value: string | undefined): string | undefined {
   // `<!-- a --> <!-- b -->` matches lazily as one comment only when no `-->` precedes the end.
   if (!match || match[1].includes("-->")) return undefined;
   return match[1].trim();
+}
+
+const COMMENT_GLOBAL = /<!--([\s\S]*?)-->/gu;
+
+/**
+ * The bodies of an html value made only of several comments (`<!-- a --> <!-- b -->`, which the
+ * parser keeps as one html node), or undefined when it is anything else.
+ */
+function commentBodies(value: string | undefined): string[] | undefined {
+  if (value === undefined) return undefined;
+  const bodies = Array.from(value.matchAll(COMMENT_GLOBAL), (match) => match[1].trim());
+  if (bodies.length < 2 || value.replace(COMMENT_GLOBAL, "").trim() !== "") return undefined;
+  return bodies;
 }
 
 export function isToolComment(text: string): boolean {
@@ -112,7 +125,7 @@ function commentNode(
       ...(block ? positionProperties : {}),
     },
     [
-      chip(kind === "todo" ? "TODO" : "<!--", kind, body),
+      chip(kind === "todo" ? "TODO" : "comment", kind, body),
       element(wrapper, { className: ["okf-comment-body"], hidden: true }, [text(body)]),
     ],
   );
@@ -163,6 +176,15 @@ export function convertCommentMarkers(
   const inline = PHRASING_PARENTS.has(node.type);
   node.children = node.children.flatMap((child): CommentMarkerNode[] => {
     if (child.type === "html") {
+      const bodies = commentBodies(child.value);
+      if (bodies) {
+        // One node per comment, so each one is its own chip; tool comments stay hidden.
+        return bodies.map((body): CommentMarkerNode => {
+          const part: CommentMarkerNode = { type: "html", value: `<!-- ${body} -->`, position: child.position };
+          if (!isToolComment(body)) commentNode(part, body, !inline, positionProperties(part));
+          return part;
+        });
+      }
       const body = commentText(child.value);
       if (body !== undefined && !isToolComment(body)) {
         commentNode(child, body, !inline, positionProperties(child));

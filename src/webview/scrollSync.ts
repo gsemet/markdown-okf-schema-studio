@@ -30,6 +30,7 @@ import { installChipToggle } from "./chipToggle";
 import { installIncomingChanges } from "./incomingChanges";
 import { installCommentCompose } from "./commentCompose";
 import { installCommentThreads } from "./commentThreads";
+import { installCommentsToggle } from "./commentsToggle";
 import { installIncomingToggle } from "./incomingToggle";
 import { installToolbarCollapse } from "./toolbarCollapse";
 import { installViewControls } from "./viewControls";
@@ -224,6 +225,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
   const incomingChanges = (${installIncomingChanges.toString()})(document);
   const incomingToggle = (${installIncomingToggle.toString()})(document, vscode, context);
+  // Toolbar Comments button: hides the gray chips, which moves the content like expanding one does.
+  const commentsToggle = (${installCommentsToggle.toString()})(document, vscode, context, keepReadingLine);
   const historyControls = (${installHistoryControls.toString()})(document, vscode, context, (navigate) => flushOpenEditorsThen(navigate));
   const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
   // The toolbar changes size when rows 2-3 are collapsed: re-measure everything placed around it.

@@ -2497,6 +2497,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   padding: 0.6em 1em;
   border: 1px solid var(--sphinx-preview-border);
   border-inline-start: 4px solid var(--sphinx-preview-accent);
+  border-radius: 0;
   background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
   background: color-mix(in srgb, var(--sphinx-preview-accent) 14%, var(--vscode-editor-background, Canvas));
   color: var(--vscode-editor-foreground, CanvasText);
@@ -2596,7 +2597,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   overflow-y: auto;
   padding: 8px 10px;
   border: 1px solid var(--vscode-editorWidget-border, var(--vscode-focusBorder, #454545));
-  border-radius: 4px;
+  border-radius: 0;
   background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
   color: var(--vscode-editorWidget-foreground, var(--vscode-editor-foreground));
   box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
@@ -2659,7 +2660,7 @@ button[data-okf-comment-create]:hover {
   width: min(320px, calc(100vw - 16px));
   padding: 8px 10px;
   border: 1px solid var(--vscode-editorWidget-border, var(--vscode-focusBorder, #454545));
-  border-radius: 4px;
+  border-radius: 0;
   background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
   color: var(--vscode-editorWidget-foreground, var(--vscode-editor-foreground));
   box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
@@ -2836,6 +2837,16 @@ html[data-okf-incoming-changes="false"] [data-sphinx-preview-diff-toggle] {
 /* preview.showComments off: the gray comment chips go away at once, without a new render. TODO
    chips stay. */
 html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="comment"] {
+  display: none;
+}
+
+/* Toolbar Comments button off: same hiding as the setting, kept per workspace. The button itself is
+   not offered when the setting is off. */
+html[data-sphinx-preview-comments="off"] #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="comment"] {
+  display: none;
+}
+
+html[data-okf-show-comments="false"] [data-sphinx-preview-comments-toggle] {
   display: none;
 }
 

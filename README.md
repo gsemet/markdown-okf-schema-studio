@@ -97,7 +97,8 @@ The floating toolbar at the top right of the preview has three rows:
 1. **Actions:** Refresh, Anchor (link the preview scroll to the text editor), Edit (writable
    previews only), and a chevron button that hides or shows rows 2 and 3.
 2. **Navigation:** Back, Next, Zoom out and Zoom in.
-3. **View options:** Theme, Width, Table of contents and the incoming-changes (Diff) toggle.
+3. **View options:** Theme, Width, Table of contents, the incoming-changes (Diff) toggle and the
+   Comments toggle (hides or shows the gray comment chips, in preview and in edit mode).
 
 The chevron button collapses the toolbar to its first row when you want the most room for the
 text. The choice is remembered per workspace; the toolbar is expanded by default. Hidden rows are
@@ -300,8 +301,10 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
   fold sections with the twisty; the current section is highlighted.
 - `preview.stickyHeadingDepth` (default 3): heading levels pinned at the top while scrolling (1-6).
 - `preview.showComments` (default on): show HTML comments as gray chips; click one (or press Enter
-  or Space on it) to open the comment text in a box under the line. Off hides the gray chips in
-  open previews at once. TODO chips always show.
+  or Space on it) to open the comment text in a box under the line. Each chip is labelled
+  "comment". The Comments button of the toolbar hides and shows them in both preview and edit mode
+  (remembered per workspace, shown by default). Off here hides the gray chips in open previews at
+  once and removes that button. TODO chips always show.
 - `comments.authorName` (default empty): the name stored with the review comments you write in the
   preview. Empty uses your Git `user.name`, then your operating system user name.
 - `preview.showIncomingChanges` (default on): mark blocks changed since the last Git commit

@@ -65,6 +65,7 @@ const VIEW_PREFERENCE_VALIDATORS: Record<string, (value: unknown) => boolean> = 
   widthMode: (value) => isOneOf(value, ["margin", "auto", "full"] as const),
   toc: (value) => typeof value === "boolean",
   incomingChanges: (value) => typeof value === "boolean",
+  comments: (value) => typeof value === "boolean",
   toolbarCollapsed: (value) => typeof value === "boolean",
 };
 

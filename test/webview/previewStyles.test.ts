@@ -439,7 +439,7 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 test("preview toolbar has three rows: actions with the collapse button, navigation, view options", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
-  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 12);
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 13);
   const [mainRow, rest] = toolbar.split('<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">');
   const [viewRow, optionsRow] = rest.split('<div data-sphinx-preview-toolbar-row="options">');
   assert.match(mainRow, /data-sphinx-preview-toolbar-row="main"/u);
@@ -449,12 +449,12 @@ test("preview toolbar has three rows: actions with the collapse button, navigati
   assert.match(viewRow, /^<div data-sphinx-preview-toolbar-row="view">/u);
   assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 4);
   assert.match(viewRow, /data-sphinx-preview-back[\s\S]*data-sphinx-preview-next[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in/u);
-  assert.equal((optionsRow.match(/<button\b/gu) ?? []).length, 4);
+  assert.equal((optionsRow.match(/<button\b/gu) ?? []).length, 5);
   assert.match(optionsRow, /data-sphinx-preview-theme-toggle[\s\S]*data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
-  assert.match(optionsRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
+  assert.match(optionsRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><button[^>]*data-sphinx-preview-comments-toggle aria-pressed="true"[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
   // Read-only previews: no Edit button, same rows, row 1 one button shorter.
   const readOnly = renderPreviewToolbar(false);
-  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 11);
+  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 12);
   assert.doesNotMatch(readOnly, /data-sphinx-preview-edit-toggle/u);
   assert.match(readOnly, /data-sphinx-preview-toolbar-row="main"[\s\S]*data-sphinx-preview-toolbar-collapse/u);
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar-more\]\[hidden\]\s*\{[^}]*display: none;/u);
@@ -468,7 +468,7 @@ test("preview toolbar has three rows: actions with the collapse button, navigati
   ]) {
     assert.ok(toolbar.includes(control), `expected toolbar control ${control}`);
   }
-  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 12);
+  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 13);
   assert.match(
     PREVIEW_THEME_CSS,
     /button\[data-tooltip\]::after\s*\{[^}]*content: attr\(data-tooltip\);[^}]*visibility: hidden;[^}]*opacity: 0;/u,
@@ -829,6 +829,34 @@ test("T15: an open comment is an admonition-like box and showComments off hides 
   assert.match(css, /\.okf-comment\[data-okf-comment-kind="todo"\] > \.okf-comment-body:not\(\[hidden\]\)::before \{\s*content: "TODO";/u);
   assert.match(css, /html\[data-okf-show-comments="false"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="comment"\] \{\s*display: none;/u);
   assert.doesNotMatch(css, /data-okf-show-comments="false"\][^{]*kind="todo"/u);
+});
+
+test("the Comments toolbar button hides the gray chips at once and goes away with the setting", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /html\[data-sphinx-preview-comments="off"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="comment"\] \{\s*display: none;/u);
+  assert.doesNotMatch(css, /data-sphinx-preview-comments="off"\][^{]*kind="todo"/u);
+  assert.match(css, /html\[data-okf-show-comments="false"\] \[data-sphinx-preview-comments-toggle\] \{\s*display: none;/u);
+  const toolbar = renderPreviewToolbar(false);
+  assert.match(toolbar, /data-sphinx-preview-comments-toggle aria-pressed="true" aria-label="Hide comments" title="Hide comments" data-tooltip="Hide comments"/u);
+});
+
+test("the comment boxes (compose, thread popover, open comment) have square corners", () => {
+  const block = (selector: string): string => {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    return new RegExp(`(?:^|\\n)${escaped} \\{([^}]*)\\}`, "u").exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  };
+  for (const selector of [
+    "[data-okf-comment-compose]",
+    "[data-okf-comment-popover]",
+    "#sphinx-myst-preview-content .okf-comment > .okf-comment-body:not([hidden])",
+  ]) {
+    const rules = block(selector);
+    assert.ok(rules, `${selector} rule`);
+    assert.match(rules, /border-radius: 0;/u, selector);
+    assert.doesNotMatch(rules, /border-radius: [1-9]/u, selector);
+  }
+  // Buttons and text inputs inside the boxes keep their small radius.
+  assert.match(PREVIEW_THEME_CSS, /\[data-okf-comment-compose\] button,[^{]*\{[^}]*border-radius: 3px;/u);
 });
 
 test("T16: the change bars sit in one column of a layer, square, with no layout shift", () => {
