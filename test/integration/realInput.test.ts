@@ -1951,11 +1951,23 @@ async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<voi
         .map((item) => item.getBoundingClientRect())
         .filter((box) => box.width > 0 && box.height > 0 && box.left < controls.right && box.right > controls.left)
         .map((box) => box.top);
-      return { controlsBottom: controls.bottom, firstTop: tops.length > 0 ? Math.min(...tops) : undefined };
+      const view = menu.ownerDocument.defaultView;
+      const scroller = menu.ownerDocument.scrollingElement;
+      return {
+        controlsBottom: controls.bottom,
+        firstTop: tops.length > 0 ? Math.min(...tops) : undefined,
+        menuHeight: menu.getBoundingClientRect().height,
+        scrollY: view?.scrollY,
+        maxScroll: scroller ? scroller.scrollHeight - scroller.clientHeight : undefined,
+      };
     }));
-    const revealed = after - before > 2 && clearance?.firstTop !== undefined
+    const moved = after - before;
+    const revealed = moved > 2 && clearance?.firstTop !== undefined
       && Math.abs(clearance.firstTop - (clearance.controlsBottom + 4)) <= 2;
-    assert.ok(Math.abs(after - before) <= 2 || revealed,
+    // A short page cannot scroll by the whole toolbar height: the cell then goes down by the rest.
+    const pageTooShort = moved > 2 && clearance?.scrollY !== undefined && clearance.maxScroll !== undefined
+      && Math.abs(clearance.scrollY - clearance.maxScroll) <= 1 && moved <= clearance.menuHeight + 1;
+    assert.ok(Math.abs(moved) <= 2 || revealed || pageTooShort,
       "the selected cell moved " + (after - before) + " px; toolbar clearance " + JSON.stringify(clearance));
     await withCurrentFrame(page, async (frame) => {
       const status = await frame.locator("[data-sphinx-table-menu] [data-sphinx-preview-edit-status]").textContent();
