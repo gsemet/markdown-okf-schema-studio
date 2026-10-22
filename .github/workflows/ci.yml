@@ -39,6 +39,8 @@ jobs:
         with:
           enable-cache: true
       - uses: extractions/setup-just@v2
+        with:
+          just-version: 1.58.0
       - run: just dev-ci
       - run: just ci-static
       - name: Publish reports
@@ -67,6 +69,8 @@ jobs:
         with:
           enable-cache: true
       - uses: extractions/setup-just@v2
+        with:
+          just-version: 1.58.0
       - run: just dev-ci
       - run: just ci-visual
       - name: Publish reports
@@ -95,6 +99,8 @@ jobs:
         with:
           enable-cache: true
       - uses: extractions/setup-just@v2
+        with:
+          just-version: 1.58.0
       - run: just dev-ci
       - run: xvfb-run --auto-servernum just ci-integration
       - name: Publish reports
@@ -125,6 +131,8 @@ jobs:
         with:
           enable-cache: true
       - uses: extractions/setup-just@v2
+        with:
+          just-version: 1.58.0
       - run: just dev-ci
       - uses: actions/download-artifact@v4
         with:
@@ -160,6 +168,8 @@ jobs:
         with:
           enable-cache: true
       - uses: extractions/setup-just@v2
+        with:
+          just-version: 1.58.0
       - run: just dev-ci
       - uses: actions/download-artifact@v4
         with:
