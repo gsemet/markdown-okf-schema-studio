@@ -4101,6 +4101,31 @@ async function scenarioFlushCellAndFrontmatter(page: Page, evidence: Evidence): 
   });
 }
 
+/** Describes the preview for a flush failure message: which document, edit mode, open editors. */
+async function flushFrameState(page: Page): Promise<string> {
+  const preview = getActivePreviewForTests();
+  const shown = preview ? `${path.basename(vscode.Uri.parse(preview.documentUri).fsPath)} (${preview.phase})` : "none";
+  try {
+    const frame = await findCurrentFrame(page);
+    if (frame === undefined) return `preview ${shown}, no current frame`;
+    const state = await frame.evaluate(() => {
+      const editor = window.document.querySelector("[data-okf-frontmatter-editor]");
+      const control = editor?.querySelector("textarea, input") as HTMLInputElement | HTMLTextAreaElement | null;
+      return {
+        editMode: window.document.documentElement.getAttribute("data-sphinx-preview-edit-mode"),
+        frontmatterEditors: window.document.querySelectorAll("[data-okf-frontmatter-editor]").length,
+        blockEditors: window.document.querySelectorAll("[data-sphinx-preview-block-editor]").length,
+        value: control?.value,
+        disabled: control?.disabled,
+        status: editor?.querySelector('[role="status"]')?.textContent ?? undefined,
+      };
+    });
+    return `preview ${shown}, frame ${JSON.stringify(state)}`;
+  } catch (error) {
+    return `preview ${shown}, frame unreadable (${String(error)})`;
+  }
+}
+
 /**
  * CR 025: a frontmatter value typed in the editor and followed by a tab switch is written as typed,
  * even when it is not valid YAML, does not fit the schema or is not a number. The preview then
@@ -4119,7 +4144,8 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
     // The preview must exist before the first tab switch: nothing else has opened one in this fixture.
     await openSidePreview(first);
     await waitForRender(first);
-    for (const item of cases) {
+    for (const [index, item] of cases.entries()) {
+      const label = `case ${index + 1} (${item.field}, typed ${JSON.stringify(item.typed ?? "")})`;
       await vscode.window.showTextDocument(first, { viewColumn: vscode.ViewColumn.One, preview: false });
       await waitForPreviewOf(first);
       await waitForRender(first);
@@ -4130,11 +4156,31 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
         frame.locator(`tr[data-okf-field="${item.field}"] [data-okf-edit-cell="value"]`).click());
       await waitForEditor(page, item.selector);
       await press(page, `${MOD}+a`);
+      // See RI-T06: VS Code echoes Cmd/Ctrl+A into the webview as an asynchronous `selectAll`. Keys
+      // typed before the echo are selected again and replaced by the next ones (`[unclosed` can end
+      // as `losed`), so wait for the echo and check the whole value is selected before typing.
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      await waitFor(`${label}: the editor value to be fully selected`, () =>
+        withCurrentFrame(page, (frame) => frame.locator(item.selector).evaluate((element) => {
+          const control = element as HTMLInputElement | HTMLTextAreaElement;
+          // A number input has no text selection (null): select-all cannot be checked there.
+          if (control.selectionStart === null) return true;
+          return control.selectionStart === 0 && control.selectionEnd === control.value.length;
+        })));
       if (item.typed === undefined) await press(page, "Backspace");
       else await typeText(page, item.typed, 5);
+      // The frontmatter editor saves on blur and Enter only (no timer): reading its value saves nothing.
+      const heldValue = await withCurrentFrame(page, (frame) => frame.locator(item.selector).inputValue());
+      assert.equal(heldValue, item.typed ?? "", `${label}: the editor holds the typed text before the switch`);
       await vscode.window.showTextDocument(second, { viewColumn: vscode.ViewColumn.One, preview: false });
-      await waitFor(`the typed ${item.field} value to reach the first document`, () =>
-        item.expected.test(bufferText(first)));
+      try {
+        await waitFor(`the typed ${item.field} value to reach the first document`, () =>
+          item.expected.test(bufferText(first)));
+      } catch (error) {
+        throw new Error(`${error instanceof Error ? error.message : String(error)} ${label}; `
+          + `expected ${String(item.expected)}; ${await flushFrameState(page)}; `
+          + `first document starts with ${JSON.stringify(bufferText(first).slice(0, 300))}`);
+      }
       await waitForPreviewOf(second);
     }
   });
