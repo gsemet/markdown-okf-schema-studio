@@ -28,17 +28,31 @@ function writeReviewStart(): void {
 }
 
 function finishReview(): void {
-  const startPath = path.join(artifacts, "review-start.json");
-  const campaign = fs.existsSync(startPath)
-    ? JSON.parse(fs.readFileSync(startPath, "utf8")) as CampaignIdentity
-    : undefined;
+  const readCampaign = (file: string): CampaignIdentity | undefined => {
+    const filePath = path.join(artifacts, file);
+    return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, "utf8")) as CampaignIdentity : undefined;
+  };
+  // Stages run as separate jobs (ci-visual, ci-integration) each record their own identity;
+  // `npm run test:e2e` records a single review-start.json.
+  const visualCampaign = readCampaign("campaign-visual.json");
+  const integrationCampaign = readCampaign("campaign-integration.json");
+  const split = visualCampaign !== undefined || integrationCampaign !== undefined;
+  const campaign = split ? integrationCampaign ?? visualCampaign : readCampaign("review-start.json");
   const integrationPath = path.join(artifacts, "integration-manifest.json");
   const visualPath = path.join(screenshots, "run-manifest.json");
   const integration = readJson(integrationPath, { status: "failed", scope: "missing", error: "integration manifest is missing" });
   const visual = readJson(visualPath, { status: "failed", error: "visual manifest is missing" });
-  const failures = campaign
-    ? validateReviewEvidence(campaign, integration, visual)
-    : ["review start identity is missing"];
+  const failures = split
+    ? [
+      ...(integrationCampaign ? [] : ["integration campaign identity is missing"]),
+      ...(visualCampaign ? [] : ["visual campaign identity is missing"]),
+      ...(integrationCampaign && visualCampaign
+        ? validateReviewEvidence(integrationCampaign, integration, visual, visualCampaign)
+        : []),
+    ]
+    : campaign
+      ? validateReviewEvidence(campaign, integration, visual)
+      : ["review start identity is missing"];
   const status = failures.length === 0 ? "passed" : "failed";
   const history = path.join(artifacts, "archive");
   fs.mkdirSync(history, { recursive: true });

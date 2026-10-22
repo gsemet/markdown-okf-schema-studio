@@ -66,6 +66,16 @@ Playwright browser runtime. They can be run with `just integration`, `just visua
 Generated reports are stored under `out/reports/`; the README-derived Pages tree is stored under
 `out/site/`. `just preflight` runs every stage and returns a failure if any stage fails.
 
+CI runs the same stages as parallel jobs, each calling one target after `just dev-ci`:
+`just ci-static` (justfile format, `check`, `sphinx-check`), `just ci-visual`,
+`just ci-integration`, then `just ci-report` (merges the visual and integration outputs into the
+review index and `out/reports/e2e/e2e-manifest.json`; it fails when a stage manifest is missing or
+failed) and `just ci-gallery` (gallery and site from the existing outputs, no E2E re-run).
+`just preflight` calls these targets in sequence. Each stage records its own start time and they share
+a run id, so `just ci-visual`, `just ci-integration` and `just ci-report` also work one by one; `just
+clean` starts a fresh campaign. `just dev-ci` is for CI machines only: `npm ci` replaces
+`node_modules`.
+
 The focused site and gallery commands are:
 
 ```bash

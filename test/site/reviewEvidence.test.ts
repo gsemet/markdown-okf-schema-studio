@@ -63,3 +63,26 @@ test("rejects an artifact created with a different command even when its status 
   );
   assert.match(failures.join("\n"), /visual campaign command does not match/u);
 });
+
+test("validates each stage against its own campaign identity when the stages ran as separate jobs", () => {
+  const visualCampaign: CampaignIdentity = { ...campaign, startedAt: "2026-10-14T14:00:30.000Z" };
+  const integration = artifact({ status: "passed", scope: "all" });
+  const visual = artifact({
+    status: "passed",
+    duplicateImages: [],
+    campaignStartedAt: visualCampaign.startedAt,
+    startedAt: "2026-10-14T14:00:40.000Z",
+    renderRunId: visualCampaign.runId,
+    renderCampaignStartedAt: visualCampaign.startedAt,
+  });
+  assert.deepEqual(validateReviewEvidence(campaign, integration, visual, visualCampaign), []);
+  const stale = { ...visual, startedAt: "2026-10-14T14:00:10.000Z" };
+  assert.match(
+    validateReviewEvidence(campaign, integration, stale, visualCampaign).join("\n"),
+    /visual startedAt is missing or predates review start/u,
+  );
+  assert.match(
+    validateReviewEvidence(campaign, integration, visual, { ...visualCampaign, runId: "other" }).join("\n"),
+    /different campaigns/u,
+  );
+});
