@@ -888,3 +888,12 @@ test("P11: the slash menu floats above the toolbar and the palette popovers and 
   const live = /\.sphinx-preview-slash-live\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   assert.match(live, /clip: rect\(0 0 0 0\);/u, "the live region is visually hidden");
 });
+
+test("K1: long words and bare URLs wrap inside text blocks, links and table cells", () => {
+  const rule = /#sphinx-myst-preview-content :is\(([^)]*)\)\s*\{[^}]*overflow-wrap: anywhere;/u.exec(PREVIEW_THEME_CSS);
+  assert.ok(rule, "expected an overflow-wrap: anywhere rule for text blocks");
+  const selectors = rule[1].split(",").map((token) => token.trim());
+  for (const tag of ["p", "li", "td", "th", "a", "blockquote", "dd", "dt", "h1", "h2", "figcaption"]) {
+    assert.ok(selectors.includes(tag), `expected ${tag} to wrap long words`);
+  }
+});

@@ -5381,6 +5381,27 @@ def check_mermaid_theme_switch(page: Page, scenario: dict, failures: list[Failur
       failures.append(Failure(scenario["page"], f"Mermaid theme {mode} lost diagram labels"))
 
 
+def check_mermaid_error_theme_switch(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """K3: re-rendering an invalid diagram after each theme change keeps one error with one details."""
+  if not scenario.get("mermaidErrorThemeSwitch"):
+    return
+  original_mode = page.locator("html").get_attribute("data-sphinx-preview-theme-mode")
+  for mode in ("dark", "white", "cream", original_mode):
+    page.evaluate(
+      "mode => { const d = document.querySelector('.myst-mermaid-diagram'); d.dataset.renderState = 'pending'; "
+      "mode === null ? document.documentElement.removeAttribute('data-sphinx-preview-theme-mode') "
+      ": document.documentElement.setAttribute('data-sphinx-preview-theme-mode', mode); }",
+      mode,
+    )
+    page.wait_for_function("() => document.querySelector('.myst-mermaid-diagram').dataset.renderState === 'error'")
+    counts = page.evaluate("""() => ({
+      errors: document.querySelectorAll('.myst-mermaid-error').length,
+      details: document.querySelectorAll('.myst-mermaid-error details').length,
+    })""")
+    if counts != {"errors": 1, "details": 1}:
+      failures.append(Failure(scenario["page"], f"Mermaid error after switching to theme {mode}: {counts}, expected one error and one details"))
+
+
 # Every step PNG a check can write (`<scenario id>-<step>.png`). A scenario's `steps` list selects
 # which of them are written; the other steps are skipped silently (their check still runs) and a
 # name that is not in this registry fails the check that asks for it.
@@ -5536,7 +5557,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   ):
     checks = checks.replace(placeholder, str(value))
   for check in (
-    check_mermaid_theme_switch, check_forced_white_theme, check_forced_cream_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
+    check_mermaid_theme_switch, check_mermaid_error_theme_switch, check_forced_white_theme, check_forced_cream_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
     check_generic_skill_frontmatter, check_okf_schema_rendering, check_preview_toolbar,
     check_math_rendering, check_bare_urls, check_inline_code, check_inline_code_narrow, check_orphan_box, check_content_contracts,
   ):

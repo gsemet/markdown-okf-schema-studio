@@ -70,6 +70,8 @@ export interface Scenario {
   knownIssue?: string;
   /** Runs the Mermaid theme-switch check (cycles dark, white and cream and compares node colours). */
   mermaidThemeSwitch?: true;
+  /** K3: cycles the theme modes of an invalid diagram and asserts it keeps exactly one error with one parser-message details. */
+  mermaidErrorThemeSwitch?: true;
   /** Shown first in its group page and in the index thumbnails. */
   gallery?: "key";
   readme?: ReadmeSource;
@@ -204,6 +206,14 @@ const CJK_RTL_ASSERTIONS: ContentAssertion[] = [
   { message: "the long URL link stays inside the pane", selector: `${MAIN} p:nth-of-type(7) a`, insidePane: true },
 ];
 
+const LONG_WORDS_ASSERTIONS: ContentAssertion[] = [
+  { message: "the long words, URLs, list and quote are rendered", selector: `${MAIN} p, ${MAIN} li, ${MAIN} blockquote`, min: 7 },
+  { message: "the page does not scroll horizontally", selector: MAIN, expr: "document.documentElement.scrollWidth <= window.innerWidth && document.body.scrollWidth <= window.innerWidth" },
+  { message: "no paragraph, list item or quote is wider than its box", selector: MAIN, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p, #sphinx-myst-preview-content li, #sphinx-myst-preview-content blockquote')].every(e => e.scrollWidth <= e.clientWidth + 1)" },
+  { message: "the links stay inside the pane", selector: `${MAIN} a`, min: 3, insidePane: true },
+  { message: "the text after them continues", selector: `${MAIN} > p`, text: "continues normally" },
+];
+
 const MISSING_IMAGE_ASSERTIONS: ContentAssertion[] = [
   { message: "both image elements stay in the page", selector: `${MAIN} img`, count: 2 },
   { message: "the images keep their alt text", selector: `${MAIN} img`, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content img')].map(i => i.alt).join('|') === 'Diagram of the missing depot loop|Second missing picture'" },
@@ -255,6 +265,7 @@ const MYST_GALLERY_ASSERTIONS: ContentAssertion[] = [
 
 const MERMAID_ERROR_ASSERTIONS: ContentAssertion[] = [
   { message: "exactly one visible error message replaces the picture", selector: ".myst-mermaid-error", count: 1, visible: true, text: "Unable to render Mermaid diagram" },
+  { message: "the error holds one closed details block with the parser message", selector: ".myst-mermaid-error details.myst-mermaid-error-details", count: 1, expr: "(() => { const d = document.querySelector('.myst-mermaid-error details'); return d.open === false && d.querySelector('pre').textContent.trim().length > 0; })()" },
   { message: "no rendered picture", selector: "img.myst-mermaid-image", count: 0 },
   { message: "the source stays available", selector: "details.myst-mermaid-source", count: 1, text: "flowchart TD" },
   { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
@@ -1960,9 +1971,18 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     ...viewport,
     scroll: { kind: "top" as const },
     contentAssertions: CJK_RTL_ASSERTIONS,
-    knownIssue: "P9-B4-K1 P9-B4-K2",
+    knownIssue: "P9-B4-K2",
     description: `CJK paragraphs, Hebrew and Arabic right-to-left paragraphs and two unbroken strings, ${viewport.width} px pane: `
       + "the text wraps inside the column, the right-to-left paragraphs stay right-aligned and nothing scrolls horizontally.",
+  })),
+  ...([WIDE, NARROW] as const).map((viewport) => ({
+    id: `rendering-core/v${viewport === WIDE ? "21" : "22"}-long-words-light-${viewport.width}`,
+    fixture: "45-long-words",
+    theme: "light",
+    ...viewport,
+    scroll: { kind: "top" as const },
+    contentAssertions: LONG_WORDS_ASSERTIONS,
+    description: `Long unbroken words and bare URLs in paragraphs, a list and a quote, ${viewport.width} px pane: they wrap inside their block and the page never scrolls horizontally.`,
   })),
   {
     id: "rendering-core/v19-missing-image-dark-900",
@@ -2011,7 +2031,7 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     ...WIDE,
     scroll: { kind: "top" as const },
     mermaidExpectation: "error" as const,
-    knownIssue: "P9-B4-K3",
+    mermaidErrorThemeSwitch: true as const,
     contentAssertions: MERMAID_ERROR_ASSERTIONS,
     description: `An invalid Mermaid diagram in the ${theme} theme: the error message replaces the picture, the source stays available and the text after it continues.`,
   })),
