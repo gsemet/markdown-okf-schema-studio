@@ -133,6 +133,7 @@ import {
 import { EditLock, isUnchangedSave, needsRefresh } from "./state/editLock";
 import { preloadMystEngine } from "./render/mystRenderer";
 import { createNonce } from "./security/csp";
+import { focusGroupCommand } from "./navigation/groupFocus";
 import { NavigationHistory, type NavigationEntry } from "./state/navigationHistory";
 import { parsePreviewPanelState, PreviewPanelState } from "./state/previewState";
 import {
@@ -274,6 +275,8 @@ interface ActivePreview {
   enrichmentGeneration: number;
   /** Test hook: how many watcher events for the active document refreshReferencedPath saw. */
   activePathChanges: number;
+  /** Test hook: how many events the per-target watchers of linked files delivered. */
+  linkedTargetEvents: number;
   /** Test hook: how many times restorePreviewState ran for this preview. */
   restoreCalls: number;
   hadFailure: boolean;
@@ -1193,6 +1196,7 @@ function setFrontmatterState(
         new vscode.RelativePattern(vscode.Uri.file(path.dirname(target)), filename),
       );
       const refresh = (): void => {
+        preview.linkedTargetEvents += 1;
         const document = preview.document;
         if (document && !preview.disposed) {
           scheduleLinkEnrichment(preview, preview.documentUri, document.version);
@@ -4308,6 +4312,7 @@ function createPreview(
     ),
     enrichmentGeneration: 0,
     activePathChanges: 0,
+    linkedTargetEvents: 0,
     editLock: new EditLock(),
     restoreCalls: 0,
     hadFailure: false,
@@ -4472,17 +4477,6 @@ async function lockNewPreviewGroup(panel: vscode.WebviewPanel, preview: ActivePr
   }
 }
 
-const FOCUS_GROUP_COMMANDS = [
-  "workbench.action.focusFirstEditorGroup",
-  "workbench.action.focusSecondEditorGroup",
-  "workbench.action.focusThirdEditorGroup",
-  "workbench.action.focusFourthEditorGroup",
-  "workbench.action.focusFifthEditorGroup",
-  "workbench.action.focusSixthEditorGroup",
-  "workbench.action.focusSeventhEditorGroup",
-  "workbench.action.focusEighthEditorGroup",
-];
-
 /** Called when a preview's panel goes away: unlock its group one tick later, if this extension locked it. */
 function releasePreviewGroupLock(preview: ActivePreview): void {
   const lockedColumn = preview.lockedColumn;
@@ -4520,21 +4514,48 @@ async function unlockPreviewGroup(column: vscode.ViewColumn): Promise<void> {
       : vscode.window.tabGroups.all
         .filter((group) => group.tabs.length === 0 && group.viewColumn !== undefined && !hasLivePreviewIn(group.viewColumn))
         .map((group) => group.viewColumn);
-    const remembered = vscode.window.tabGroups.activeTabGroup.viewColumn;
-    for (const target of targets) {
-      const command = FOCUS_GROUP_COMMANDS[target - 1];
+    // The groups themselves are remembered, not their columns: a column goes stale when a group on
+    // its left closes, and a focus command for a position past the last group creates a new group.
+    // This relies on the extension host keeping one TabGroup object per group and updating it in
+    // place (its viewColumn follows the shift); if that ever changed, the restore below would be
+    // skipped and the wait would time out after its bound.
+    const remembered = vscode.window.tabGroups.activeTabGroup;
+    const unlocked = targets.map(groupAt).filter((group): group is vscode.TabGroup => group !== undefined);
+    for (const group of unlocked) {
+      const command = focusGroupCommand(group.viewColumn, vscode.window.tabGroups.all.length);
       if (command === undefined) continue;
       await vscode.commands.executeCommand(command);
       await vscode.commands.executeCommand("workbench.action.unlockEditorGroup");
     }
+    // An unlocked empty group closes and the groups on its right shift left. Focus may only be
+    // restored once that is visible here, or the remembered group would still be read at its old column.
+    await waitForGroupsToClose(unlocked);
     // Focus held outside the editor area (terminal, sidebar) cannot be restored through the API.
-    const restore = FOCUS_GROUP_COMMANDS[remembered - 1];
-    if (!targets.includes(remembered) && targets.length > 0 && restore !== undefined && groupAt(remembered) !== undefined) {
-      await vscode.commands.executeCommand(restore);
+    if (unlocked.length > 0 && !unlocked.includes(remembered) && !remembered.isActive
+      && vscode.window.tabGroups.all.includes(remembered)) {
+      const restore = focusGroupCommand(remembered.viewColumn, vscode.window.tabGroups.all.length);
+      if (restore !== undefined) await vscode.commands.executeCommand(restore);
     }
   } catch {
     // Never throw from dispose.
   }
+}
+
+/** Resolves once none of `groups` is open any more, or after a bounded wait when one stays open. */
+function waitForGroupsToClose(groups: readonly vscode.TabGroup[]): Promise<void> {
+  const allClosed = (): boolean => groups.every((group) => !vscode.window.tabGroups.all.includes(group));
+  if (allClosed()) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    const finish = (): void => {
+      clearTimeout(timer);
+      subscription.dispose();
+      resolve();
+    };
+    const subscription = vscode.window.tabGroups.onDidChangeTabGroups(() => {
+      if (allClosed()) finish();
+    });
+    const timer = setTimeout(finish, 1000);
+  });
 }
 
 /** Where to open a file so it does not cover the side preview. */
@@ -4726,6 +4747,16 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
     vscode.workspace.onDidSaveTextDocument((document) => {
+      // A linked target saved in the editor: the refresh its edits triggered read the file before
+      // the save wrote it, and the file watchers can lag behind or miss the write. Only the link
+      // enrichment is scheduled; a dependency (an include) is re-rendered by its watcher as before.
+      const saved = canonicalPath(document.uri.fsPath);
+      for (const preview of activePreviews) {
+        if (!preview.disposed && preview.document && documentKey(document) !== preview.documentUri
+          && [...preview.linkedTargetWatchers?.keys() ?? []].some((target) => canonicalPath(target) === saved)) {
+          scheduleLinkEnrichment(preview, preview.documentUri, preview.document.version);
+        }
+      }
       void persistCommentAnchors(document).catch((error: unknown) => {
         console.error("Failed to save the moved review comment anchors.", error);
       });
@@ -4853,6 +4884,8 @@ export function getActivePreviewForTests():
     renderedStages: number;
     /** How many watcher events for the active document were seen (a save is one). */
     activePathChanges: number;
+    /** How many events the per-target watchers of linked files delivered. */
+    linkedTargetEvents: number;
     /** How many renders and deferred updates were applied as an in-place content patch. */
     contentPatches: number;
     /** The preview.incrementalUpdates setting as the preview currently holds it. */
@@ -4899,6 +4932,7 @@ export function getActivePreviewForTests():
     htmlAssignments: activePreview.htmlAssignments,
     renderedStages: activePreview.renderedStages,
     activePathChanges: activePreview.activePathChanges,
+    linkedTargetEvents: activePreview.linkedTargetEvents,
     contentPatches: activePreview.contentPatches,
     incrementalUpdates: activePreview.configuration.incrementalUpdates,
     webviewReady: activePreview.stage !== undefined
