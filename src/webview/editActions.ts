@@ -149,9 +149,21 @@ export interface LinkDraft {
   title?: string;
 }
 
+/** An existing Markdown image around the selection: what the image action replaces. */
+export interface ImageDraft {
+  alt: string;
+  url: string;
+  start: number;
+  end: number;
+  /** The quoted title (kept when the image is replaced); absent otherwise. */
+  title?: string;
+}
+
 export interface EditActionRegistry {
   actions: EditAction[];
   byId: Map<string, EditAction>;
+  /** The image around the selection or caret, or `undefined` outside any image. */
+  imageDraft(ctx: EditActionContext): ImageDraft | undefined;
   /** The link panel's initial values for the selection (an existing link is read back). */
   linkDraft(ctx: EditActionContext): LinkDraft;
   /** The edit that writes `[text](url)` over the draft's range; see `linkDraft`. */
@@ -618,6 +630,12 @@ export function createEditActions(
 
   const LINK_PATTERN =
     /\[((?:\\.|[^\]\\\n])*)\]\(\s*(<[^>\n]*>|[^)\s\n]*)(?:\s+("[^"\n]*"))?\s*\)/gu;
+  const IMAGE_PATTERN =
+    /!\[((?:\\.|[^\]\\\n])*)\]\(\s*(<[^>\n]*>|[^)\s\n]*)(?:\s+("[^"\n]*"))?\s*\)/gu;
+  const REFERENCE_LINK_PATTERN =
+    /\[((?:\\.|[^\]\\\n])*)\](?:\[((?:\\.|[^\]\\\n])*)\])?(?![([:])/gu;
+  const DEFINITION_PATTERN =
+    /^ {0,3}\[([^\]\n]+)\]:[ \t]*(<[^>\n]*>|\S+)(?:[ \t]+("[^"\n]*"|'[^'\n]*'|\([^)\n]*\)))?[ \t]*$/gmu;
   const URL_SELECTION = /^(?:https?:\/\/|mailto:|www\.)\S+$/iu;
 
   /**
@@ -641,11 +659,70 @@ export function createEditActions(
       const text = match[1].replace(/\\([[\]])/gu, "$1");
       return match[3] === undefined ? { text, url, start, end } : { text, url, start, end, title: match[3] };
     }
+    const reference = referenceDraft(ctx);
+    if (reference) return reference;
     const selected = value.slice(selectionStart, selectionEnd);
     if (URL_SELECTION.test(selected)) {
       return { text: "", url: selected, start: selectionStart, end: selectionEnd };
     }
     return { text: selected, url: "", start: selectionStart, end: selectionEnd };
+  }
+
+  const normalLabel = (label: string): string => label.trim().replace(/\s+/gu, " ").toLowerCase();
+
+  /**
+   * A `[text][ref]`, `[text][]` or `[ref]` link around the selection whose definition is in the
+   * same text: the panel starts from the definition and saving writes an inline link (the
+   * definition stays). Without a definition here, nothing is read back.
+   */
+  function referenceDraft(ctx: EditActionContext): LinkDraft | undefined {
+    const { value, selectionStart, selectionEnd } = ctx;
+    const collapsed = selectionStart === selectionEnd;
+    const definitions = new Map<string, { url: string; title?: string }>();
+    for (const match of value.matchAll(DEFINITION_PATTERN)) {
+      const key = normalLabel(match[1]);
+      if (definitions.has(key)) continue;
+      const target = match[2];
+      const url = target.startsWith("<") ? target.slice(1, -1) : target;
+      const title = match[3] === undefined ? undefined : "\"" + match[3].slice(1, -1).replace(/"/gu, "'") + "\"";
+      definitions.set(key, title === undefined ? { url } : { url, title });
+    }
+    if (definitions.size === 0) return undefined;
+    for (const match of value.matchAll(REFERENCE_LINK_PATTERN)) {
+      const start = match.index ?? 0;
+      const end = start + match[0].length;
+      if (start > 0 && value.charAt(start - 1) === "!") continue;
+      const inside = collapsed
+        ? selectionStart > start && selectionStart < end
+        : selectionStart >= start && selectionEnd <= end;
+      if (!inside) continue;
+      const label = match[2] === undefined || match[2] === "" ? match[1] : match[2];
+      const found = definitions.get(normalLabel(label));
+      if (!found) continue;
+      const text = match[1].replace(/\\([[\]])/gu, "$1");
+      return found.title === undefined
+        ? { text, url: found.url, start, end }
+        : { text, url: found.url, start, end, title: found.title };
+    }
+    return undefined;
+  }
+
+  function imageDraft(ctx: EditActionContext): ImageDraft | undefined {
+    const { value, selectionStart, selectionEnd } = ctx;
+    const collapsed = selectionStart === selectionEnd;
+    for (const match of value.matchAll(IMAGE_PATTERN)) {
+      const start = match.index ?? 0;
+      const end = start + match[0].length;
+      const inside = collapsed
+        ? selectionStart > start && selectionStart < end
+        : selectionStart >= start && selectionEnd <= end;
+      if (!inside) continue;
+      const target = match[2];
+      const url = target.startsWith("<") ? target.slice(1, -1) : target;
+      const alt = match[1].replace(/\\([[\]])/gu, "$1");
+      return match[3] === undefined ? { alt, url, start, end } : { alt, url, start, end, title: match[3] };
+    }
+    return undefined;
   }
 
   function linkEdit(ctx: EditActionContext, text: string, url: string): TextEdit {
@@ -1214,12 +1291,15 @@ export function createEditActions(
   function insertImage(ctx: EditActionContext): TextEdit | undefined {
     const picked = pickedImagePath(ctx);
     if (!validSelection(ctx) || picked === undefined) return undefined;
-    const name = imageName(picked);
+    // With the caret in an existing image the pick replaces its path; alt text and title stay.
+    const existing = imageDraft(ctx);
+    const name = existing && existing.alt !== "" ? existing.alt.replace(/([[\]])/gu, "\\$1") : imageName(picked);
     const target = /[\s()]/u.test(picked) ? "<" + picked + ">" : picked;
-    const text = "![" + name + "](" + target + ")";
+    const text = "![" + name + "](" + target + (existing?.title === undefined ? "" : " " + existing.title) + ")";
+    const start = existing ? existing.start : ctx.selectionStart;
     return {
-      start: ctx.selectionStart, end: ctx.selectionEnd, text,
-      selectionStart: ctx.selectionStart + 2, selectionEnd: ctx.selectionStart + 2 + name.length,
+      start, end: existing ? existing.end : ctx.selectionEnd, text,
+      selectionStart: start + 2, selectionEnd: start + 2 + name.length,
     };
   }
 
@@ -2082,5 +2162,5 @@ export function createEditActions(
     return (mac === true ? "Cmd" : "Ctrl") + "+" + key.toUpperCase();
   }
 
-  return { actions, byId, linkDraft, linkEdit, shortcutFor, shortcutLabel };
+  return { actions, byId, imageDraft, linkDraft, linkEdit, shortcutFor, shortcutLabel };
 }

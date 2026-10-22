@@ -48,8 +48,8 @@ Markdown flavours and extensions:
   Alt+Up/Down (or the arrows of the selection's last block) moves the whole selection (one undo
   step), and the selection follows.
   An edition palette above the text box adds headings, bold, italic, strikethrough, inline code,
-  links (Cmd/Ctrl+K opens a link panel with text and target), tables from a size grid, emoji from
-  a picker, text and background colours
+  links (Cmd/Ctrl+K opens a link panel with text and target, pre-filled when the caret is in a
+  link), tables from a size grid, emoji from a picker, text and background colours
   (a Colour picker with 16 swatches and a hex field; a swatch button appears when the caret is in a
   colour code), code blocks with a language,
   blockquotes, horizontal rules and images picked from a file dialog (or pasted: a screenshot on the

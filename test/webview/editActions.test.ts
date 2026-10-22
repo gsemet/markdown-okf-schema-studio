@@ -1264,3 +1264,55 @@ test("P11: Numbered list numbers the non-blank lines and toggles off", () => {
   assert.equal(listEdit("numberedList", "- a\n- b", 0, 7)?.result, "1. a\n2. b", "replaces a bullet marker");
   assert.equal(listEdit("numberedList", "word", 4)?.result, "1. word");
 });
+
+// CR 035: the link and image panels start from the link or image around the caret.
+test("CR035: linkDraft reads a reference-style link back from its definition", () => {
+  const defs = "\n\n[ref]: https://r.org \"Ref title\"";
+  const full = registry.linkDraft(ctxOf("a [la|bel][Ref] b" + defs));
+  assert.equal(full.text, "label");
+  assert.equal(full.url, "https://r.org");
+  assert.equal(full.title, "\"Ref title\"");
+  assert.equal(full.start, 2);
+  assert.equal(full.end, 14);
+  const collapsed = registry.linkDraft(ctxOf("a [re|f][] b" + defs));
+  assert.equal(collapsed.url, "https://r.org");
+  assert.equal(collapsed.end, 9);
+  const shortcut = registry.linkDraft(ctxOf("a [re|f] b" + defs));
+  assert.equal(shortcut.url, "https://r.org");
+  assert.equal(shortcut.text, "ref");
+});
+
+test("CR035: an unresolvable reference link inserts an inline link instead", () => {
+  const draft = registry.linkDraft(ctxOf("a [la|bel][missing] b"));
+  assert.equal(draft.url, "");
+  assert.equal(draft.start, draft.end);
+});
+
+test("CR035: saving the panel replaces a reference link by an inline one, definition kept", () => {
+  const input = "a [la|bel][ref] b\n\n[ref]: https://r.org";
+  assert.equal(link(input, "new", "https://n.org"), "a [new](https://n.org)| b\n\n[ref]: https://r.org");
+});
+
+test("CR035: link replacement keeps the title and the caret inside a link with a title", () => {
+  assert.equal(link('a [la|bel](u "t") b', "x", "v"), 'a [x](v "t")| b');
+});
+
+test("CR035: imageDraft reads alt, path and title of the image around the caret", () => {
+  const draft = registry.imageDraft(ctxOf('a ![al|t](p/x.png "T") b'));
+  assert.deepEqual(draft, { alt: "alt", url: "p/x.png", title: '"T"', start: 2, end: 21 });
+  const angle = registry.imageDraft(ctxOf("![a|](<my pics/a.png>)"));
+  assert.equal(angle?.url, "my pics/a.png");
+  assert.equal(registry.imageDraft(ctxOf("a [lab|el](u) b")), undefined);
+  assert.equal(registry.imageDraft(ctxOf("![a](b)|")), undefined);
+  assert.equal(registry.imageDraft(ctxOf("see |here")), undefined);
+});
+
+test("CR035: the image action replaces the image around the caret and keeps alt and title", () => {
+  const out = applyTo("image", 'a ![al|t](p/x.png "T") b'.replace("|", ""), [5, 5], "img/new.png")!;
+  assert.equal(out.value, 'a ![alt](img/new.png "T") b');
+  assert.equal(out.value.slice(...out.selection), "alt");
+  const selected = applyTo("image", "![alt](old.png)", [3, 6], "n (1).png")!;
+  assert.equal(selected.value, "![alt](<n (1).png>)");
+  // Outside any image the behaviour is unchanged.
+  assert.equal(applyTo("image", "![alt](old.png) ", [16, 16], "n.png")!.value, "![alt](old.png) ![n](n.png)");
+});

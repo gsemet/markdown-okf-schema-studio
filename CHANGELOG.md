@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- With the caret inside an existing Markdown link, the link button (or Cmd/Ctrl+K) now opens the
+  panel pre-filled with the link's text and URL, and Save replaces that link (its title is kept);
+  one undo restores it. A reference-style link (`[text][ref]`) is read from its definition when it
+  is in the same block and saved as an inline link, otherwise the panel starts empty. The Image
+  button with the caret inside an image replaces its file and keeps its alt text and title.
 - Pasting rich text (Google Docs, Word, a web page, a VS Code copy) into a block editor now inserts
   it as Markdown: headings, bold, italic, strikethrough, links, nested lists, inline and fenced
   code, quotes, simple tables and images (as links). One undo removes the paste, and
