@@ -165,7 +165,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     event.stopImmediatePropagation?.();
     openMappedEditor(block, event.target, "end");
   }, true);
-  const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context, () => flushOpenEditors());
+  const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context, (navigate) => flushOpenEditorsThen(navigate));
   const firstClearance = (${installFirstClearance.toString()})(document, window);
   const applyFigureSizes = ${applyFigureSizes.toString()};
   const applySpanColors = ${applySpanColors.toString()};
@@ -224,7 +224,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
   const incomingChanges = (${installIncomingChanges.toString()})(document);
   const incomingToggle = (${installIncomingToggle.toString()})(document, vscode, context);
-  const historyControls = (${installHistoryControls.toString()})(document, vscode, context, () => flushOpenEditors());
+  const historyControls = (${installHistoryControls.toString()})(document, vscode, context, (navigate) => flushOpenEditorsThen(navigate));
   const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
   // The toolbar changes size when rows 2-3 are collapsed: re-measure everything placed around it.
   const toolbarCollapse = (${installToolbarCollapse.toString()})(document, vscode, context, () => {
@@ -1848,6 +1848,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         editId,
         fieldName: name,
         fieldValue: value,
+        // A refused plain save (a blur) is saved again as a flush when a navigation waits for it.
+        plainSavePending: !flushingEditors,
+        cancel: () => { cancelled = true; },
+        save: () => saveKey(),
       };
       nameCell.setAttribute("data-okf-editing", "true");
       nameCell.setAttribute("data-okf-key-editing", "true");
@@ -2355,6 +2359,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       const editId = context.requestId + "-field-" + (++editSequence);
       edit.editId = editId;
       edit.saving = true;
+      // A plain save (Enter, blur) can be refused; a navigation waits for its result (CR 025).
+      edit.plainSavePending = !flushingEditors;
       activeFrontmatterEdit = edit;
       valueCell.setAttribute("data-okf-editing", "true");
       if (refreshButton) refreshButton.disabled = true;
@@ -2455,10 +2461,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   function receiveFrontmatterResult(message) {
     const edit = activeFrontmatterEdit;
     if (!edit || message.editId !== edit.editId) return;
+    edit.plainSavePending = false;
+    const afterResult = edit.afterResult;
+    edit.afterResult = undefined;
     if (message.saved === true) {
       edit.status.removeAttribute("data-visible");
       edit.status.removeAttribute("data-state");
       edit.status.textContent = "Saved. Refreshing preview…";
+      afterResult?.();
       return;
     }
     clearPendingFrontmatterEdit();
@@ -2471,6 +2481,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     edit.control.disabled = false;
     if (edit.setNullButton) edit.setNullButton.disabled = false;
     edit.setDisabled?.(false);
+    // A navigation waiting for this refused save now saves the typed text again, as a flush.
+    afterResult?.();
   }
 
   function setFrontmatterEditCells(enabled) {
@@ -2672,6 +2684,33 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       flushingEditors = false;
     }
     return Boolean(activeFrontmatterEdit?.saving || activeFrontmatterEdit?.editId);
+  }
+
+  // Flushes the open editors, then calls navigate(flushed) once the saves are posted (CR 025).
+  // Leaving the page (a click, the host focusing another editor tab) blurs the frontmatter
+  // editor first, and its blur posts a plain save. The host refuses a plain save of text that is
+  // not valid YAML or does not fit the schema, and the flush would find the editor busy and skip
+  // it, so the typed text would be lost with the page. While such a save waits for its result,
+  // wait too (bounded, below the host's own 1.5 s wait) and save again as a flush when it was
+  // refused. With nothing pending, navigate runs at once.
+  function flushOpenEditorsThen(navigate) {
+    const flushed = flushOpenEditors();
+    const edit = activeFrontmatterEdit;
+    if (!edit || !edit.plainSavePending) {
+      navigate(flushed);
+      return;
+    }
+    let done = false;
+    let timer;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      window.clearTimeout(timer);
+      navigate(flushFrontmatterEditor() || flushed);
+    };
+    const previous = edit.afterResult;
+    edit.afterResult = previous ? () => { previous(); finish(); } : finish;
+    timer = window.setTimeout(finish, 1000);
   }
 
   // Cancel button and Escape: close without saving, and restore the block when an autosave already
@@ -4992,15 +5031,15 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     if (message && message.type === "previewFlushEdit" && typeof message.flushId === "string") {
       // The host is about to switch document: post the final saves, then the answer, in that order.
-      const flushed = flushOpenEditors();
-      vscode.postMessage({
+      const flushId = message.flushId;
+      flushOpenEditorsThen((flushed) => vscode.postMessage({
         type: "previewEditFlushed",
         documentId: context.documentId,
         documentVersion: context.documentVersion,
         requestId: context.requestId,
-        flushId: message.flushId,
+        flushId,
         flushed,
-      });
+      }));
       return;
     }
     if (sameContext(message) && message.type === "previewHistoryState") {

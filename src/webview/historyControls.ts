@@ -13,7 +13,7 @@ export function installHistoryControls(
   document: Document,
   vscode: { postMessage(message: unknown): void },
   context: HistoryControlsContext,
-  beforeNavigate?: () => void,
+  beforeNavigate?: (navigate: () => void) => void,
 ): { apply(state: { canBack?: unknown; canForward?: unknown }): void } {
   const back = document.querySelector("[data-sphinx-preview-back]") as HTMLButtonElement | null;
   const next = document.querySelector("[data-sphinx-preview-next]") as HTMLButtonElement | null;
@@ -21,15 +21,17 @@ export function installHistoryControls(
   if (back) back.disabled = true;
   if (next) next.disabled = true;
   const go = (direction: "back" | "forward"): void => {
-    // Back and Next can switch document: save what the open editor holds first (CR 025).
-    beforeNavigate?.();
-    vscode.postMessage({
+    const navigate = (): void => vscode.postMessage({
       type: "previewHistoryGo",
       documentId: context.documentId,
       documentVersion: context.documentVersion,
       requestId: context.requestId,
       direction,
     });
+    // Back and Next can switch document: save what the open editor holds first (CR 025). The
+    // flush calls navigate once its saves are posted, which can wait for a pending save result.
+    if (beforeNavigate) beforeNavigate(navigate);
+    else navigate();
   };
   back?.addEventListener("click", () => go("back"));
   next?.addEventListener("click", () => go("forward"));

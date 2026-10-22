@@ -10462,6 +10462,99 @@ test("CR 025: a frontmatter YAML editor with invalid YAML is still sent on a flu
   assert.equal(saves[0].flush, true);
 });
 
+function openObjectYamlEditor(): {
+  harness: ReturnType<typeof createRuntimeHarness>;
+  textarea: ReturnType<typeof createRuntimeHarness>["createdElements"][number];
+} {
+  const harness = createRuntimeHarness();
+  harness.frontmatterRow.setAttribute("data-okf-type", "object");
+  harness.frontmatterRow.setAttribute("data-okf-value", JSON.stringify({ a: 1 }));
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "a: 1\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: harness.frontmatterValueCell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  return { harness, textarea };
+}
+
+const CR25_IDS = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+
+test("CR 025: a blur save refused before a host flush is saved again as a flush, then answered", () => {
+  // The host focusing another editor tab blurs the editor first: the blur posts a plain save that
+  // the host refuses (invalid YAML), and the flush request arrives while it is pending.
+  const { harness, textarea } = openObjectYamlEditor();
+  textarea.value = "[unclosed";
+  textarea.dispatch("blur");
+  const plain = frontmatterSaves(harness);
+  assert.equal(plain.length, 1);
+  assert.equal(plain[0].flush, undefined);
+  const before = harness.messages.length;
+  harness.dispatchMessage({ type: "previewFlushEdit", flushId: "flush-9" });
+  assert.deepEqual(messageTypesSince(harness, before), [], "the answer waits for the pending save");
+  harness.dispatchMessage({
+    type: "previewFrontmatterResult",
+    ...CR25_IDS,
+    editId: plain[0].editId,
+    error: "Invalid YAML value: unexpected end",
+  });
+  assert.deepEqual(messageTypesSince(harness, before), ["previewFrontmatterSave", "previewEditFlushed"]);
+  const flushSave = harness.messages[before];
+  assert.equal(flushSave.fieldValue, "[unclosed");
+  assert.equal(flushSave.fieldValueFormat, "yaml");
+  assert.equal(flushSave.flush, true);
+  assert.equal(harness.messages[before + 1].flushId, "flush-9");
+  assert.equal(harness.messages[before + 1].flushed, true);
+  assert.equal(harness.pendingTimerCount(), 0);
+});
+
+test("CR 025: a blur save accepted before a host flush is not saved twice", () => {
+  const { harness, textarea } = openObjectYamlEditor();
+  textarea.value = "a: 2";
+  textarea.dispatch("blur");
+  const plain = frontmatterSaves(harness);
+  const before = harness.messages.length;
+  harness.dispatchMessage({ type: "previewFlushEdit", flushId: "flush-10" });
+  assert.deepEqual(messageTypesSince(harness, before), []);
+  harness.dispatchMessage({ type: "previewFrontmatterResult", ...CR25_IDS, editId: plain[0].editId, saved: true });
+  assert.deepEqual(messageTypesSince(harness, before), ["previewEditFlushed"]);
+  assert.equal(frontmatterSaves(harness).length, 1);
+});
+
+test("CR 025: a host flush whose pending save gets no result still answers after a bounded wait", () => {
+  const { harness, textarea } = openObjectYamlEditor();
+  textarea.value = "[unclosed";
+  textarea.dispatch("blur");
+  const before = harness.messages.length;
+  harness.dispatchMessage({ type: "previewFlushEdit", flushId: "flush-11" });
+  assert.deepEqual(messageTypesSince(harness, before), []);
+  harness.flushTimers();
+  assert.deepEqual(messageTypesSince(harness, before), ["previewEditFlushed"]);
+});
+
+test("CR 025: Back right after a refused blur save posts the flush save before previewHistoryGo", () => {
+  const { harness, textarea } = openObjectYamlEditor();
+  harness.dispatchMessage({ type: "previewHistoryState", ...CR25_IDS, canBack: true, canForward: false });
+  textarea.value = "just text";
+  textarea.dispatch("blur");
+  const plain = frontmatterSaves(harness);
+  const before = harness.messages.length;
+  harness.backButton.dispatch("click");
+  assert.deepEqual(messageTypesSince(harness, before), []);
+  harness.dispatchMessage({
+    type: "previewFrontmatterResult",
+    ...CR25_IDS,
+    editId: plain[0].editId,
+    error: "The frontmatter field is stale or its value does not match the schema.",
+  });
+  assert.deepEqual(messageTypesSince(harness, before), ["previewFrontmatterSave", "previewHistoryGo"]);
+  assert.equal(harness.messages[before].fieldValue, "just text");
+  assert.equal(harness.messages[before].flush, true);
+});
+
 test("CR 025: a normal frontmatter save does not carry the flush flag", () => {
   const { harness, textarea } = openTextFieldEditor("Alpha");
   textarea.value = "Beta";
