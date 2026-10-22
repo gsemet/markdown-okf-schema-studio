@@ -73,6 +73,7 @@ ADMONITION_DIRECTIVE = re.compile(
     r"^[ \t]*(?:`{3,}|:{3,})\{(admonition|attention|caution|danger|error|hint|important|note|seealso|tip|warning|versionadded|versionchanged|deprecated)\}",
     re.MULTILINE,
 )
+GFM_ALERT = re.compile(r"^>[ \t]*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]", re.MULTILINE)
 FIGURE_DIRECTIVE = re.compile(r"^(?:`{3,}|:{3,})\{figure\}\s+\S+", re.MULTILINE)
 MERMAID_BLOCK = re.compile(r"^`{3,}(?:\{)?mermaid(?:\})?(?:\s|$)", re.MULTILINE)
 PLANTUML_BLOCK = re.compile(r"^`{3,}(?:\{)?plantuml(?:\})?(?:\s|$)", re.MULTILINE)
@@ -83,14 +84,14 @@ CONTEXT_TAG_OPEN = re.compile(
 
 
 def count_admonitions(fixture: str) -> int:
-    """Count admonition directives in the fixture source.
+    """Count admonition directives and GFM alerts in the fixture source.
 
     The campaign once passed with every admonition silently stripped from the output,
     because the per-element assertions had nothing to iterate over. Comparing against the
     source makes that failure mode loud.
     """
     source = (FIXTURE_DIR / f"{fixture}.md").read_text(encoding="utf-8")
-    return len(ADMONITION_DIRECTIVE.findall(source))
+    return len(ADMONITION_DIRECTIVE.findall(source)) + len(GFM_ALERT.findall(source))
 
 
 def count_figures(fixture: str) -> int:
@@ -180,6 +181,15 @@ PAGE_CHECKS = """
     failures.push(`expected __EXPECTED_MERMAID__ Mermaid diagram(s), found ${mermaidFigures.length}`);
   }
   for (const [index, figure] of mermaidFigures.entries()) {
+    if (__MERMAID_EXPECTATION__ === 'error') {
+      if (figure.querySelector('img.myst-mermaid-image')) {
+        failures.push(`Mermaid diagram ${index + 1} rendered an image despite invalid syntax`);
+      }
+      if (!figure.querySelector('.myst-mermaid-error')) {
+        failures.push(`Mermaid diagram ${index + 1} shows no error message`);
+      }
+      continue;
+    }
     const image = figure.querySelector('img.myst-mermaid-image');
     if (!image || !image.complete || image.naturalWidth <= 0 || image.naturalHeight <= 0) {
       failures.push(`Mermaid diagram ${index + 1} did not render to a loaded SVG image`);
@@ -5074,6 +5084,59 @@ def check_tooltip_contrast(page: Page, scenario: dict, failures: list[Failure]) 
         page.mouse.move(scenario["width"] - 1, scenario["height"] - 1)
 
 
+CONTENT_ASSERTIONS_JS = r"""(list) => {
+  const errors = [];
+  for (const a of list) {
+    const els = [...document.querySelectorAll(a.selector)];
+    const fail = (detail) => errors.push(`${a.message}: ${detail} (${a.selector})`);
+    if (a.count !== undefined && els.length !== a.count) fail(`expected ${a.count} match(es), found ${els.length}`);
+    if (a.min !== undefined && els.length < a.min) fail(`expected at least ${a.min} match(es), found ${els.length}`);
+    const text = els.map(el => el.textContent || '').join(' ');
+    if (a.text !== undefined && !text.includes(a.text)) fail(`text "${a.text}" not found`);
+    if (a.notText !== undefined && text.includes(a.notText)) fail(`text "${a.notText}" must not be present`);
+    if (a.visible) {
+      if (els.length === 0) fail('no element');
+      for (const el of els) {
+        const box = el.getBoundingClientRect();
+        const style = getComputedStyle(el);
+        if (box.width <= 0 || box.height <= 0 || style.visibility === 'hidden' || style.display === 'none') fail('an element is not visible');
+      }
+    }
+    if (a.insidePane) {
+      for (const el of els) {
+        const box = el.getBoundingClientRect();
+        if (box.left < -1 || box.right > window.innerWidth + 1) fail(`an element leaves the pane (${Math.round(box.left)}..${Math.round(box.right)} of ${window.innerWidth})`);
+      }
+    }
+    if (a.css) {
+      if (els.length === 0) fail('no element for the style check');
+      else for (const [name, value] of Object.entries(a.css)) {
+        const actual = getComputedStyle(els[0])[name];
+        if (actual !== value) fail(`${name} is "${actual}", expected "${value}"`);
+      }
+    }
+    if (a.attr) {
+      if (els.length === 0 || els[0].getAttribute(a.attr.name) !== a.attr.value) fail(`attribute ${a.attr.name} is not "${a.attr.value}"`);
+    }
+    if (a.expr) {
+      let result;
+      try { result = (new Function(`return (${a.expr});`))(); } catch (error) { result = `threw ${error}`; }
+      if (result !== true) fail(`expression is ${JSON.stringify(result)}: ${a.expr}`);
+    }
+  }
+  return errors;
+}"""
+
+
+def check_content_assertions(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """P9 B4: the scenario's declarative DOM assertions (after the scroll)."""
+  assertions = scenario.get("contentAssertions")
+  if not assertions:
+    return
+  for detail in page.evaluate(CONTENT_ASSERTIONS_JS, assertions):
+    failures.append(Failure(scenario["page"], detail))
+
+
 def check_mermaid_theme_switch(page: Page, scenario: dict, failures: list[Failure]) -> None:
   if not scenario.get("mermaidThemeSwitch"):
     return
@@ -5265,6 +5328,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
     ("__EXPECTED_CONTEXT_TAGS__", count_context_tags(scenario["fixture"])),
     ("__CONTEXT_TAG_CHECKS__", json.dumps(bool(scenario.get("contextTagChecks")))),
     ("__PLANTUML_EXPECTATION__", json.dumps(scenario.get("plantumlExpectation", "none"))),
+    ("__MERMAID_EXPECTATION__", json.dumps(scenario.get("mermaidExpectation", "none"))),
   ):
     checks = checks.replace(placeholder, str(value))
   for check in (
@@ -5286,7 +5350,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

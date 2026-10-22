@@ -27,6 +27,33 @@ export interface ReadmeSource {
   step?: string;
 }
 
+/**
+ * A DOM assertion checked by `check_content_assertions` in capture.py. Every given condition must
+ * hold; `message` names the behaviour in the failure text.
+ */
+export interface ContentAssertion {
+  message: string;
+  selector: string;
+  /** Exactly this many matches. */
+  count?: number;
+  /** At least this many matches. */
+  min?: number;
+  /** The text content of the matches (joined) contains this text. */
+  text?: string;
+  /** ... does not contain this text. */
+  notText?: string;
+  /** Every match has a non-empty box and is not hidden. */
+  visible?: true;
+  /** Every match lies inside the pane horizontally (no horizontal overflow of that element). */
+  insidePane?: true;
+  /** Computed style of the first match, property name (camelCase) to expected value. */
+  css?: Record<string, string>;
+  /** Attribute of the first match. */
+  attr?: { name: string; value: string };
+  /** A JavaScript expression evaluated in the page (after the scroll); it must be true. */
+  expr?: string;
+}
+
 export interface Scenario {
   id: string;
   /** Feature group (see `test/shared/e2eGroups.ts`): the prefix of the id. */
@@ -47,6 +74,10 @@ export interface Scenario {
   gallery?: "key";
   readme?: ReadmeSource;
   screenshotOf?: string;
+  /** Declarative DOM assertions on top of the standard page checks (P9 B4 gap fill). */
+  contentAssertions?: ContentAssertion[];
+  /** "error": every Mermaid diagram must show its error message and no image (invalid syntax). */
+  mermaidExpectation?: "error";
   fixture: string;
   theme: string;
   /** Options of the static page (read-only, strict fields, content width, ...). Default: the standard page. */
@@ -154,6 +185,91 @@ export interface Scenario {
 
 /** A scenario as written below: id (legacy) and group are resolved through `scenarioIds.ts`. */
 type ScenarioDefinition = Omit<Scenario, "group" | "legacyId" | "locks">;
+
+/** P9 B4 assertion lists (see the scenarios at the end of SCENARIO_DEFINITIONS). */
+const MAIN = "#sphinx-myst-preview-content";
+
+const CJK_RTL_ASSERTIONS: ContentAssertion[] = [
+  { message: "the CJK, bidirectional and unbroken-string paragraphs are rendered", selector: `${MAIN} p`, count: 7 },
+  { message: "the CJK text is present", selector: MAIN, text: "日本語の段落です" },
+  { message: "the Chinese and Korean paragraphs wrap inside the pane", selector: `${MAIN} p:nth-of-type(-n+3)`, insidePane: true },
+  {
+    message: "the Hebrew and Arabic paragraphs are right-aligned (their text ends at the right edge of the column)",
+    selector: MAIN,
+    expr: "(() => { const rtl = [...document.querySelectorAll('#sphinx-myst-preview-content p')].filter(p => /[\\u0590-\\u06FF]/.test(p.textContent)); if (rtl.length !== 2) return false; return rtl.every(p => { const range = document.createRange(); range.selectNodeContents(p); const right = Math.max(...[...range.getClientRects()].map(box => box.right)); return p.getBoundingClientRect().right - right < 4; }); })()",
+  },
+  { message: "the unbroken word and the long URL wrap inside their paragraphs", selector: `${MAIN} p:nth-of-type(n+6)`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p:nth-of-type(n+6)')].every(p => p.scrollWidth <= p.clientWidth + 1)" },
+  { message: "the long URL link stays inside the pane", selector: `${MAIN} p:nth-of-type(7) a`, insidePane: true },
+];
+
+const MISSING_IMAGE_ASSERTIONS: ContentAssertion[] = [
+  { message: "both image elements stay in the page", selector: `${MAIN} img`, count: 2 },
+  { message: "the images keep their alt text", selector: `${MAIN} img`, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content img')].map(i => i.alt).join('|') === 'Diagram of the missing depot loop|Second missing picture'" },
+  {
+    message: "the paragraph after a missing image follows it in the document order",
+    selector: `${MAIN} p`,
+    expr: "(() => { const texts = [...document.querySelectorAll('#sphinx-myst-preview-content p')].map(p => p.textContent); return texts.findIndex(t => t.includes('Before the image')) < texts.findIndex(t => t.includes('After the image')); })()",
+  },
+  { message: "the images do not leave the pane", selector: `${MAIN} img`, insidePane: true },
+];
+
+const HUGE_DOCUMENT_ASSERTIONS: ContentAssertion[] = [
+  { message: "all 336 sections are rendered", selector: `${MAIN} h2`, count: 336 },
+  { message: "the last paragraph is visible after scrolling to the end", selector: `${MAIN} p:last-of-type`, text: "End of the huge document", visible: true },
+  {
+    message: "the last paragraph lies inside the viewport above its bottom padding",
+    selector: `${MAIN} p:last-of-type`,
+    expr: "(() => { const box = [...document.querySelectorAll('#sphinx-myst-preview-content p')].pop().getBoundingClientRect(); return box.top >= 0 && box.bottom <= window.innerHeight - 20; })()",
+  },
+];
+
+const GFM_GALLERY_ASSERTIONS: ContentAssertion[] = [
+  { message: "five alerts with their type titles", selector: `${MAIN} aside.admonition`, count: 5, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content aside.admonition > .admonition-title')].map(t => t.textContent.trim()).join(',') === 'Note,Tip,Important,Warning,Caution'" },
+  { message: "strikethrough text", selector: `${MAIN} del`, count: 1, text: "struck text" },
+  { message: "two footnote references and their texts", selector: `${MAIN} a[data-footnote-ref]`, count: 2, expr: "document.querySelector('#sphinx-myst-preview-content section.footnotes').textContent.includes('Second footnote text.')" },
+  { message: "three task list checkboxes, one checked", selector: `${MAIN} input.myst-checkbox`, count: 3, expr: "document.querySelectorAll('#sphinx-myst-preview-content input.myst-checkbox:checked').length === 1" },
+  { message: "the table honours column alignment", selector: `${MAIN} table:not(.myst-raw-html-table table) th:nth-child(3)`, css: { textAlign: "right" } },
+  { message: "the raw HTML table is rendered", selector: `${MAIN} .myst-raw-html-table`, count: 1, text: "cell two" },
+  { message: "the raw details block is rendered", selector: `${MAIN} details`, count: 1, text: "Raw details" },
+  { message: "the autolink is a link", selector: `${MAIN} a[data-sphinx-preview-navigation='https://example.com/gfm']`, count: 1 },
+];
+
+const MYST_GALLERY_ASSERTIONS: ContentAssertion[] = [
+  { message: "a reference links to its label", selector: `${MAIN} a[data-sphinx-preview-navigation='#gallery-target']`, count: 1, text: "Labels and references" },
+  { message: "the dropdown is a closed details block with its summary", selector: `${MAIN} details`, count: 1, text: "Read more", expr: "document.querySelector('#sphinx-myst-preview-content details').open === false" },
+  { message: "the definition list has two terms", selector: `${MAIN} dl dt`, count: 2 },
+  { message: "subscript and superscript", selector: `${MAIN} sub, ${MAIN} sup:not(.footnote-ref):not([data-footnote-ref])`, min: 2 },
+  { message: "the kbd role", selector: `${MAIN} kbd`, count: 1, text: "Ctrl+S" },
+  { message: "the abbreviation keeps its expansion", selector: `${MAIN} abbr`, count: 1, attr: { name: "title", value: "Heart Rate" } },
+  { message: "the footnote text", selector: `${MAIN} section.footnotes`, text: "The MyST footnote text." },
+  { message: "the inline math is typeset", selector: `${MAIN} .katex`, min: 1 },
+];
+
+const MERMAID_ERROR_ASSERTIONS: ContentAssertion[] = [
+  { message: "exactly one visible error message replaces the picture", selector: ".myst-mermaid-error", count: 1, visible: true, text: "Unable to render Mermaid diagram" },
+  { message: "no rendered picture", selector: "img.myst-mermaid-image", count: 0 },
+  { message: "the source stays available", selector: "details.myst-mermaid-source", count: 1, text: "flowchart TD" },
+  { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
+];
+
+const INVALID_YAML_ASSERTIONS: ContentAssertion[] = [
+  { message: "the parse error is shown as an alert row", selector: "[data-okf-properties] tr.okf-error[role=alert], [data-okf-properties] .okf-error [role=alert]", count: 1, text: "Invalid frontmatter YAML" },
+  { message: "the badge counts one error", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-errors", value: "1" } },
+  { message: "the body is still rendered", selector: `${MAIN} h1`, text: "Body after broken frontmatter" },
+  { message: "the body paragraph is rendered", selector: `${MAIN} > p`, text: "still rendered below the parse error" },
+];
+
+const STRICT_FIELD_ASSERTIONS: ContentAssertion[] = [
+  { message: "the properties table is shown", selector: "[data-okf-properties]", count: 1 },
+  { message: "the badge counts one warning", selector: "[data-okf-badge]", count: 1, attr: { name: "data-okf-warnings", value: "1" } },
+  { message: "the undeclared field is listed", selector: "[data-okf-properties]", text: "bonus_field" },
+];
+
+const PROPERTIES_HIDDEN_ASSERTIONS: ContentAssertion[] = [
+  { message: "no properties table", selector: "[data-okf-properties]", count: 0 },
+  { message: "the heading still renders", selector: `${MAIN} h1`, text: "Frontmatter Rendering" },
+  { message: "the raw YAML is not shown", selector: MAIN, notText: "Preview Team" },
+];
 
 const WIDE = { width: 900, height: 1000 };
 const NARROW = { width: 460, height: 900 };
@@ -1814,6 +1930,98 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     linkDetailsChecks: true,
     description: "Resolved links show fresh target metadata and a clipped long excerpt. Beta intentionally lacks the optional description. The excerpt ellipsis, Alpha's line 9 label and the visible Refresh tooltip are asserted without page overflow; native link title metadata is DOM-asserted, not visible in a screenshot.",
   }))),
+  // P9 B4: content and error states (gap fill). Ids are final; see scenarioIds.ts for their locks.
+  ...([WIDE, NARROW] as const).map((viewport) => ({
+    id: `rendering-core/v${viewport === WIDE ? "17" : "18"}-cjk-rtl-light-${viewport.width}`,
+    fixture: "35-cjk-rtl",
+    theme: "light",
+    ...viewport,
+    scroll: { kind: "top" as const },
+    contentAssertions: CJK_RTL_ASSERTIONS,
+    knownIssue: "P9-B4-K1 P9-B4-K2",
+    description: `CJK paragraphs, Hebrew and Arabic right-to-left paragraphs and two unbroken strings, ${viewport.width} px pane: `
+      + "the text wraps inside the column, the right-to-left paragraphs stay right-aligned and nothing scrolls horizontally.",
+  })),
+  {
+    id: "rendering-core/v19-missing-image-dark-900",
+    fixture: "36-missing-image",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    contentAssertions: MISSING_IMAGE_ASSERTIONS,
+    description: "Two images whose files do not exist: the page keeps its layout, the text before and after stays in order "
+      + "and the broken pictures do not push the content outside the column.",
+  },
+  {
+    id: "rendering-core/v20-huge-document-bottom-dark-900",
+    fixture: "gen-huge-document",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "bottom" as const },
+    contentAssertions: HUGE_DOCUMENT_ASSERTIONS,
+    description: "A generated document of about 6000 lines (335 sections with a list, a code block and a table each), scrolled to the end: "
+      + "the last paragraph is reachable inside the frame with its bottom padding.",
+  },
+  ...([["dark", 900], ["light", 900], ["light", 460]] as const).map(([theme, width], index) => ({
+    id: `gfm/v0${index + 2}-gfm-gallery-full-${theme}-${width}`,
+    fixture: "37-gfm-gallery",
+    theme,
+    ...(width === 900 ? WIDE : NARROW),
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: GFM_GALLERY_ASSERTIONS,
+    description: `Every GFM construct on one page (five alerts, strikethrough, footnotes, task list, aligned table, raw HTML table and details, colour span, autolink), ${theme}, ${width} px pane.`,
+  })),
+  ...(["dark", "light"] as const).map((theme, index) => ({
+    id: `myst/v${20 + index}-myst-gallery-full-${theme}-900`,
+    fixture: "38-myst-gallery",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: MYST_GALLERY_ASSERTIONS,
+    description: `Every MyST construct on one page (label and references, dropdown, definition list, sub and sup, kbd and abbr roles, footnote, math, glossary), ${theme}, 900 px pane.`,
+  })),
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    id: `diagrams/v0${8 + index}-mermaid-syntax-error-${theme}-900`,
+    fixture: "40-mermaid-error",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    mermaidExpectation: "error" as const,
+    knownIssue: "P9-B4-K3",
+    contentAssertions: MERMAID_ERROR_ASSERTIONS,
+    description: `An invalid Mermaid diagram in the ${theme} theme: the error message replaces the picture, the source stays available and the text after it continues.`,
+  })),
+  {
+    id: "frontmatter-schema/v20-invalid-yaml-dark-900",
+    fixture: "41-invalid-yaml",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    contentAssertions: INVALID_YAML_ASSERTIONS,
+    description: "Frontmatter with broken YAML: the preview reports the parse problem and still renders the Markdown body.",
+  },
+  {
+    id: "frontmatter-schema/v21-unknown-field-strict-light-900",
+    fixture: "42-strict-unknown-field",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { strictAdditionalProperties: true as const },
+    contentAssertions: STRICT_FIELD_ASSERTIONS,
+    description: "A schema-typed document with a field the schema does not declare, with the strict setting on: the field gets a warning and the badge counts it.",
+  },
+  {
+    id: "frontmatter-schema/v22-properties-hidden-light-900",
+    fixture: "43-properties-hidden",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { propertiesTable: false as const },
+    contentAssertions: PROPERTIES_HIDDEN_ASSERTIONS,
+    description: "Frontmatter with the properties table setting off: no table is shown and the raw YAML block is not shown either.",
+  },
 ];
 
 /**
