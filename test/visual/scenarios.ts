@@ -231,6 +231,19 @@ const LONG_WORDS_ASSERTIONS: ContentAssertion[] = [
   { message: "the text after them continues", selector: `${MAIN} > p`, text: "continues normally" },
 ];
 
+const CODE_BLOCK_CAPTION_ASSERTIONS: ContentAssertion[] = [
+  { message: "the two captioned code blocks and the plain fence are rendered", selector: `${MAIN} pre`, count: 3 },
+  { message: "each caption is a title bar of its own code figure", selector: `${MAIN} figure > figcaption`, count: 2 },
+  { message: "the plain fence keeps its left-aligned code", selector: `${MAIN} > pre`, count: 1, expr: "['left', 'start'].includes(getComputedStyle(document.querySelector('#sphinx-myst-preview-content > pre')).textAlign)" },
+  { message: "the code of a captioned block is left-aligned, not centred", selector: `${MAIN} figure > pre`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content figure > pre')].every(e => ['left', 'start'].includes(getComputedStyle(e).textAlign) && ['left', 'start'].includes(getComputedStyle(e.querySelector('.myst-code-line, code')).textAlign))" },
+  { message: "the caption text is left-aligned and upright", selector: `${MAIN} figure > figcaption`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content figure > figcaption')].every(e => ['left', 'start'].includes(getComputedStyle(e).textAlign) && getComputedStyle(e).fontStyle === 'normal')" },
+  { message: "the caption sits above its code and has the same left edge and width", selector: `${MAIN} figure > figcaption`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content figure')].every(f => { const c = f.querySelector(':scope > figcaption').getBoundingClientRect(); const p = f.querySelector(':scope > pre').getBoundingClientRect(); return c.bottom <= p.top + 1.5 && Math.abs(c.left - p.left) < 1 && Math.abs(c.right - p.right) < 1; })" },
+  { message: "the caption and the code join with a square top edge on the code and rounded top corners on the bar", selector: `${MAIN} figure > pre`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content figure')].every(f => { const c = getComputedStyle(f.querySelector(':scope > figcaption')); const p = getComputedStyle(f.querySelector(':scope > pre')); return p.borderTopLeftRadius === '0px' && p.borderTopRightRadius === '0px' && c.borderTopLeftRadius === '4px' && c.borderBottomLeftRadius === '0px'; })" },
+  { message: "the numbered block keeps its line numbers and its emphasized line", selector: `${MAIN} figure .myst-code-line[data-line-number]`, min: 6 },
+  { message: "the emphasized line is still marked", selector: `${MAIN} figure .myst-code-line-emphasized`, count: 1 },
+  { message: "the caption text is present", selector: `${MAIN} figure > figcaption`, text: "src/export.py" },
+];
+
 const MISSING_IMAGE_ASSERTIONS: ContentAssertion[] = [
   { message: "both image elements stay in the page", selector: `${MAIN} img`, count: 2 },
   { message: "the images keep their alt text", selector: `${MAIN} img`, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content img')].map(i => i.alt).join('|') === 'Diagram of the missing depot loop|Second missing picture'" },
@@ -2032,6 +2045,21 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     contentAssertions: LONG_WORDS_ASSERTIONS,
     description: `Long unbroken words and bare URLs in paragraphs, a list and a quote, ${viewport.width} px pane: they wrap inside their block and the page never scrolls horizontally.`,
+  })),
+  ...([
+    { n: "14", theme: "light" },
+    { n: "15", theme: "dark" },
+    { n: "16", theme: "cream" },
+  ] as const).map(({ n, theme }) => ({
+    id: `code-blocks/v${n}-code-block-caption-${theme}-900`,
+    fixture: "46-code-block-caption",
+    theme: theme === "cream" ? "dark" : theme,
+    ...(theme === "cream" ? { previewThemeMode: "cream" as const } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    contentAssertions: CODE_BLOCK_CAPTION_ASSERTIONS,
+    description: `A MyST code-block with a caption, line numbers and an emphasized line next to a plain fence, ${theme} theme: `
+      + "the code is left-aligned like the plain fence and the caption is a left-aligned monospace title bar joined to the top of the block.",
   })),
   {
     id: "rendering-core/v19-missing-image-dark-900",
