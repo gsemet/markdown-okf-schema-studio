@@ -9764,6 +9764,72 @@ test("T38: a reply for another edit is ignored and a refusal shows its reason", 
   assert.equal(status?.textContent, "Save the document before pasting an image.");
 });
 
+function htmlPasteEvent(html: string, text = "") {
+  let prevented = false;
+  return {
+    event: {
+      clipboardData: {
+        getData: (type: string) => (type === "text/html" ? html : type === "text/plain" ? text : ""),
+        items: [],
+      },
+      preventDefault: () => { prevented = true; },
+    },
+    wasPrevented: () => prevented,
+  };
+}
+
+test("T1: pasting rich text asks the host for Markdown and inserts the answer over the selection", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "See  here";
+  textarea.selectionStart = 4;
+  textarea.selectionEnd = 4;
+  const paste = htmlPasteEvent("<b>bold</b>", "bold");
+  textarea.dispatch("paste", paste.event);
+  assert.equal(paste.wasPrevented(), true);
+  const request = harness.messages.at(-1)!;
+  assert.equal(request.type, "previewPasteHtml");
+  assert.equal(request.html, "<b>bold</b>");
+  assert.equal(textarea.value, "See  here", "nothing is inserted before the answer");
+  harness.dispatchMessage({ type: "previewPasteHtmlResult", editId: request.editId, ok: true, markdown: "**bold**" });
+  assert.equal(textarea.value, "See **bold** here");
+  assert.equal(textarea.selectionStart, 12);
+  assert.equal(textarea.selectionEnd, 12);
+});
+
+test("T1: a failed or empty conversion inserts the plain text of the clipboard", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "A: ";
+  textarea.selectionStart = 3;
+  textarea.selectionEnd = 3;
+  textarea.dispatch("paste", htmlPasteEvent("<b>x</b>", "plain x").event);
+  harness.dispatchMessage({ type: "previewPasteHtmlResult", editId: harness.messages.at(-1)!.editId, ok: false, reason: "boom" });
+  assert.equal(textarea.value, "A: plain x");
+});
+
+test("T1: Cmd+Shift+V, an image paste and a clipboard without HTML stay untouched", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  textarea.dispatch("keydown", { key: "v", shiftKey: true, metaKey: true });
+  const plain = htmlPasteEvent("<b>bold</b>", "bold");
+  textarea.dispatch("paste", plain.event);
+  assert.equal(plain.wasPrevented(), false, "paste as plain text stays native");
+  const next = htmlPasteEvent("<b>bold</b>", "bold");
+  textarea.dispatch("paste", next.event);
+  assert.equal(next.wasPrevented(), true, "the next ordinary paste is converted again");
+  const before2 = harness.messages.length;
+  const noHtml = htmlPasteEvent("", "text only");
+  textarea.dispatch("paste", noHtml.event);
+  assert.equal(noHtml.wasPrevented(), false);
+  assert.equal(harness.messages.length, before2);
+  assert.equal(before2, before + 1);
+  const image = pasteEvent([imageItem()]);
+  textarea.dispatch("paste", image.event);
+  assert.equal(harness.messages.at(-1)!.type, "previewPasteImage");
+});
+
 // T39: block selection with Shift+click and Shift+Arrow (edit mode, contiguous, no Delete in v1).
 const SELECTED = "data-sphinx-preview-block-selected";
 

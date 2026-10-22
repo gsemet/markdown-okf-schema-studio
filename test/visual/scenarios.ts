@@ -118,6 +118,8 @@ export interface Scenario {
   listTypingChecks?: boolean;
   /** Real-keyboard checks in a wrapped paragraph editor: Up/Down on wrapped lines, marker wrapping, undo. */
   editorKeyboardChecks?: boolean;
+  /** CR 036: a rich-text (HTML) paste in a paragraph editor becomes Markdown in one undo step; Cmd/Ctrl+Shift+V stays plain. */
+  pasteRichTextChecks?: boolean;
   /** Hover outline, then an open paragraph editor with frame, hint and buttons (T15). */
   editAffordances?: boolean;
   /**
@@ -701,6 +703,17 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
       + "line moved the caret to the first line without leaving the editor; typing * twice on the selected "
       + "word Wrapped shows **Wrapped** in the textarea, and undo and redo restored the text.",
   },
+  ...([["dark", 460], ["light", 900]] as const).map(([theme, width], index) => ({
+    id: `block-editing/v1${index + 5}-paste-rich-text-${theme}-${width}`,
+    fixture: "17-wrapped-editing",
+    theme,
+    ...(width === 900 ? WIDE : NARROW),
+    scroll: { kind: "top" as const },
+    editMode: true,
+    pasteRichTextChecks: true,
+    description: `Rich text (HTML with a heading, bold, a link and a list) pasted into a paragraph editor in the ${theme} theme at ${width} px: `
+      + "the editor shows the Markdown, one undo restores the text, and Cmd/Ctrl+Shift+V pastes the plain text.",
+  })),
   ...["dark", "light"].flatMap((theme) => [
     {
       id: `context-tags-${theme}-wide`,

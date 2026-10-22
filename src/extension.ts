@@ -57,6 +57,7 @@ import { checkboxToggleEdit } from "./render/checkboxMarkers";
 import { sourceRangeForLines, type SourceMappingOptions } from "./mapping/sourceMapping";
 import { insertionText, planInsertion, type InsertionPlan } from "./mapping/insertion";
 import { minimalReplacement } from "./mapping/textDiff";
+import { htmlToMarkdown } from "./paste/htmlToMarkdown";
 import { opensIncludeDirective, planBlockMove } from "./mapping/blockMove";
 import { planCut, planPaste, spanText } from "./mapping/blockRange";
 import { countRefUses, renameLabelLine } from "./mapping/labelRename";
@@ -2160,7 +2161,7 @@ type HostListAnswer =
 function postHostResult(
   preview: ActivePreview,
   message: RegisteredPreviewMessage,
-  result: HostListAnswer | { ok: true; path?: string; cancelled?: boolean; fileName?: string } | { ok: false; reason: string },
+  result: HostListAnswer | { ok: true; path?: string; cancelled?: boolean; fileName?: string; markdown?: string } | { ok: false; reason: string },
 ): void {
   void preview.panel.webview.postMessage({
     type: `${message.type}Result`,
@@ -2350,6 +2351,15 @@ function handlePasteImage(preview: ActivePreview, message: RegisteredPreviewMess
   }).then(undefined, (error: unknown) => {
     refuse(error instanceof Error ? error.message : String(error));
   });
+}
+
+/** Rich text pasted into the open block editor: the clipboard's HTML as Markdown. No file is touched. */
+function handlePasteHtml(preview: ActivePreview, message: RegisteredPreviewMessage): void {
+  try {
+    postHostResult(preview, message, { ok: true, markdown: htmlToMarkdown(String(message.html)) });
+  } catch (error) {
+    postHostResult(preview, message, { ok: false, reason: error instanceof Error ? error.message : String(error) });
+  }
 }
 
 function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessage): void {
@@ -3718,6 +3728,7 @@ registeredMessageHandlers.set("previewListCitations", handleListCitations);
 registeredMessageHandlers.set("previewPickDocument", handlePickDocument);
 registeredMessageHandlers.set("previewPickImage", handlePickImage);
 registeredMessageHandlers.set("previewPasteImage", handlePasteImage);
+registeredMessageHandlers.set("previewPasteHtml", handlePasteHtml);
 registeredMessageHandlers.set("previewCommentCreate", handleCommentCreate);
 registeredMessageHandlers.set("previewCommentReply", handleCommentReply);
 registeredMessageHandlers.set("previewCommentResolve", handleCommentResolve);

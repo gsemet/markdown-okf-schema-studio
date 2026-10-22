@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Pasting rich text (Google Docs, Word, a web page, a VS Code copy) into a block editor now inserts
+  it as Markdown: headings, bold, italic, strikethrough, links, nested lists, inline and fenced
+  code, quotes, simple tables and images (as links). One undo removes the paste, and
+  Cmd/Ctrl+Shift+V still pastes plain text.
 - HTML comments now show as a chip labelled "comment" instead of a bare `<!--`, including
   comments written one after the other on a line. A new Comments button in the floating toolbar
   hides and shows the gray chips in both preview and edit mode, and remembers the choice per

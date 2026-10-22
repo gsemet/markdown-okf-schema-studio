@@ -54,7 +54,9 @@ Markdown flavours and extensions:
   colour code), code blocks with a language,
   blockquotes, horizontal rules and images picked from a file dialog (or pasted: a screenshot on the
   clipboard is saved next to the document as `image.png`, `image-1.png`, … and inserted with its
-  alt text selected). A select at its start
+  alt text selected). Pasting rich text (from Google Docs, Word, a web page or VS Code) into a
+  block editor inserts it as Markdown (headings, bold, italic, strikethrough, links, lists, code,
+  quotes, simple tables, images as links) in one undo step; Cmd/Ctrl+Shift+V pastes plain text. A select at its start
   (Cmd/Ctrl+Shift+M) chooses the Strict, GFM or MyST button set for the workspace.
   The palette sits just above the text box, never over its text; when you scroll so the top of the
   box is out of view, it stays at the top of the viewport (below the preview controls) until the

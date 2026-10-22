@@ -196,6 +196,14 @@ test("T38: previewPasteImage caps the size and accepts plain base64 of an allowe
   }
 });
 
+test("T1: previewPasteHtml accepts a bounded non-empty HTML string with an edit id", () => {
+  const base = { type: "previewPasteHtml", documentId: "doc", documentVersion: 1, requestId: 1, editId: "host-1", html: "<b>x</b>" };
+  assert.equal(isRegisteredPreviewMessage(base), true);
+  for (const patch of [{ html: "" }, { html: 5 }, { html: undefined }, { html: "x".repeat(1_000_001) }, { editId: "" }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...base, ...patch }), false, JSON.stringify(patch).slice(0, 40));
+  }
+});
+
 test("T43: previewCommentCreate and previewCommentReply validate anchor, id and body limits", () => {
   const anchor = { line: 2, endLine: 3, quote: "q", prefix: "p", suffix: "s" };
   const create = { type: "previewCommentCreate", documentId: "doc", documentVersion: 1, requestId: 1, anchor, body: "Why?" };

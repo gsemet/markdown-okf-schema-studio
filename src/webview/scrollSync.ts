@@ -19,6 +19,7 @@ import { createBlockSelection } from "./blockSelection";
 import { installCodeCopy } from "./codeCopy";
 import { installLabelRename } from "./labelRename";
 import { installHostRequests } from "./hostRequests";
+import { installPasteHtml } from "./pasteHtml";
 import { installPasteImage } from "./pasteImage";
 import { installFirstClearance } from "./firstClearance";
 import { applyFigureSizes } from "./figureSizes";
@@ -207,6 +208,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   });
   // Pasting an image into the text box: the host saves it next to the document and names it.
   const pasteImage = (${installPasteImage.toString()})(window);
+  const pasteHtml = (${installPasteHtml.toString()})();
   // Edit mode: the "Edit figure" button over a hovered figure opens its block editor with the form.
   const figureEditButton = (${installFigureEditButton.toString()})(document, window, {
     isEditMode: () => editMode,
@@ -3502,8 +3504,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       saveBlockEdit();
     });
     textarea.addEventListener("blur", () => edit.slashMenu?.close());
+    textarea.addEventListener("keydown", (event) => pasteHtml.noteKey(event));
     textarea.addEventListener("paste", (event) => {
-      pasteImage.handle(event, textarea, {
+      // An image on an otherwise empty clipboard first, then rich text; plain text stays native.
+      if (pasteImage.handle(event, textarea, {
         send: (mime, dataBase64, done) => hostRequests.ask(
           "previewPasteImage", { mime, dataBase64 }, { timeoutMs: 30000 }, done),
         status: (text) => { edit.status.textContent = text; },
@@ -3516,6 +3520,22 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
           applyTextEdit(textarea, {
             start: from, end: to, text: "![" + name + "](" + name + ")",
             selectionStart: from + 2, selectionEnd: from + 2 + name.length,
+          }, () => {
+            resizeTextarea();
+            autosaveBlockEdit();
+          });
+        },
+      })) return;
+      pasteHtml.handle(event, textarea, {
+        send: (html, done) => hostRequests.ask("previewPasteHtml", { html }, { timeoutMs: 10000 }, done),
+        isCurrent: () => activeBlockEdit === edit && !edit.finishing && edit.textarea === textarea,
+        insert: (text, start, end) => {
+          const length = textarea.value.length;
+          const from = Math.min(start, length);
+          const to = Math.max(from, Math.min(end, length));
+          applyTextEdit(textarea, {
+            start: from, end: to, text,
+            selectionStart: from + text.length, selectionEnd: from + text.length,
           }, () => {
             resizeTextarea();
             autosaveBlockEdit();

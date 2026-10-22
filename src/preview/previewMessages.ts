@@ -73,6 +73,8 @@ const MAX_COPY_TEXT_LENGTH = 1_000_000;
 
 const MAX_EDIT_ID_LENGTH = 100;
 
+const MAX_PASTED_HTML_LENGTH = 1_000_000;
+
 /** The list and pick requests of the MyST palette carry only the id their answer is matched by. */
 const isHostRequest: MessageValidator = (message) =>
   isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "";
@@ -146,6 +148,9 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
     && message.dataBase64.length > 0
     && message.dataBase64.length <= MAX_PASTED_IMAGE_BASE64_LENGTH
     && isBase64(message.dataBase64),
+  // Rich text pasted into the text box: the clipboard's HTML, converted to Markdown by the host.
+  previewPasteHtml: (message) => isHostRequest(message)
+    && isBoundedString(message.html, MAX_PASTED_HTML_LENGTH) && message.html !== "",
 };
 
 export const isRegisteredPreviewMessage = createPreviewMessageChecker(REGISTERED_PREVIEW_MESSAGES);
