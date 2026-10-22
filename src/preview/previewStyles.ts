@@ -90,6 +90,9 @@ const ICONS = {
   triangle: icon(
     "M8 1.1 15.5 14.6H.5L8 1.1Zm0 3.1L3.1 13.1h9.8L8 4.2ZM7.3 6.8h1.4v3.4H7.3V6.8Zm0 4.2h1.4v1.4H7.3V11Z",
   ),
+  octagon: icon(
+    "M5 1h6l4 4v6l-4 4H5l-4-4V5l4-4Zm.62 1.5L2.5 5.62v4.76l3.12 3.12h4.76l3.12-3.12V5.62L10.38 2.5H5.62ZM7.3 4.6h1.4v4.2H7.3V4.6Zm0 5.2h1.4v1.4H7.3V9.8Z",
+  ),
   cross: icon(
     "M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 1.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Zm2.6 1.84L8 6.94 5.4 4.34 4.34 5.4 6.94 8 4.34 10.6 5.4 11.66 8 9.06l2.6 2.6 1.06-1.06L9.06 8l2.6-2.6-1.06-1.06Z",
   ),
@@ -3017,9 +3020,14 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   --sphinx-preview-icon: ${ICONS.star};
 }
 
-#sphinx-myst-preview-content :where(.warning, .attention, .caution, .versionchanged) {
+#sphinx-myst-preview-content :where(.warning, .attention, .versionchanged) {
   --sphinx-preview-accent: var(--vscode-charts-yellow, #cca700);
   --sphinx-preview-icon: ${ICONS.triangle};
+}
+
+#sphinx-myst-preview-content .caution {
+  --sphinx-preview-accent: var(--vscode-charts-red, #f14c4c);
+  --sphinx-preview-icon: ${ICONS.octagon};
 }
 
 #sphinx-myst-preview-content :where(.danger, .error, .deprecated) {

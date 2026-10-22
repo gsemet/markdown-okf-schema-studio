@@ -225,6 +225,12 @@ const HUGE_DOCUMENT_ASSERTIONS: ContentAssertion[] = [
 
 const GFM_GALLERY_ASSERTIONS: ContentAssertion[] = [
   { message: "five alerts with their type titles", selector: `${MAIN} aside.admonition`, count: 5, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content aside.admonition > .admonition-title')].map(t => t.textContent.trim()).join(',') === 'Note,Tip,Important,Warning,Caution'" },
+  {
+    message: "the Caution alert is red like the danger colour and differs from the Warning amber",
+    selector: `${MAIN} aside.admonition.caution`,
+    count: 1,
+    expr: "(() => { const q = (s) => getComputedStyle(document.querySelector('#sphinx-myst-preview-content aside.admonition.' + s + ' > .admonition-title')).color; const probe = document.createElement('span'); probe.style.color = 'var(--vscode-charts-red)'; document.body.append(probe); const red = getComputedStyle(probe).color; probe.remove(); return q('caution') === red && q('caution') !== q('warning'); })()",
+  },
   { message: "strikethrough text", selector: `${MAIN} del`, count: 1, text: "struck text" },
   { message: "two footnote references and their texts", selector: `${MAIN} a[data-footnote-ref]`, count: 2, expr: "document.querySelector('#sphinx-myst-preview-content section.footnotes').textContent.includes('Second footnote text.')" },
   { message: "three task list checkboxes, one checked", selector: `${MAIN} input.myst-checkbox`, count: 3, expr: "document.querySelectorAll('#sphinx-myst-preview-content input.myst-checkbox:checked').length === 1" },
