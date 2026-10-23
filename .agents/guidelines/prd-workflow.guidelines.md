@@ -67,7 +67,7 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 | 5 Code | coder | Implement round n, run local gates, write `reports/T1-r<n>.md`. |
 | 6 Review | reviewer | Write `reviews/T1-r<n>.md` starting with `Verdict: APPROVE` or `Verdict: FIX-REQUIRED`. FIX-REQUIRED → step 5, round n+1. |
 | 7 Commit | driver | Explicit paths only (never `git add -A` / `git add .`), project commit format. |
-| 8 PR | driver | Rebase on `origin/main`, push, open the PR with the template from [ci.guidelines.md](ci.guidelines.md), screenshots in Impacts. |
+| 8 PR | driver | Rebase on `origin/main`, push, open the PR with the template from [ci.guidelines.md](ci.guidelines.md), written for an external reader (see "PR body for an external reader"), screenshots in Impacts. |
 | 9 CI | driver | Watch the checks (see "Responsiveness"). Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. Never weaken a test. |
 | 10 Notify | driver | CI green: `status: ready` in the header, then return. |
 | 11 Land | orchestrator | After the user merges: write `report.md`, move the PRD folder to `archives/`, update `INDEX.md`, remove the worktree and branch. |
@@ -201,6 +201,24 @@ Proposing a smart order (bottom to top):
 
 One "stack driver" owns all the stacked branches (it restacks and pushes); the CR drivers stop
 pushing once their PR is in the stack. Changing a lower PR means restacking everything above it.
+
+### PR body for an external reader
+
+The PR is read by people outside the agent session: reviewers, stakeholders, future maintainers.
+They do not know the backlog, the CR numbers or the plan files, and `.agents/changes/` is not
+even in git.
+
+- Explain the change from the reader's side: what was wrong or missing, what the PR changes, what
+  they will notice. Name features by what they do ("incoming-changes bars", "Restricted Mode
+  window"), not by internal ids.
+- No internal references in the body text: no CR numbers (`CR 043`), backlog or plan ids (`P9`,
+  `T2`, `B5`, `F`), task or round numbers, scenario ids, agent roles, or paths under
+  `.agents/changes/`. Define any project term the reader needs on first use.
+- If a reference helps the maintainers, put it in one last section, "Internal references", just
+  before the Claude Code line.
+- The title follows the same rule: a Conventional Commit subject that says what changes.
+- Update the body whenever the scope changes (re-scope, dropped item, follow-up); it describes
+  the PR as it is now, not its history.
 
 ### Constraints
 
