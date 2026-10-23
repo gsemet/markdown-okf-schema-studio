@@ -25,7 +25,7 @@ function memoryStorage(): ViewPreferencesStorage {
 
 test("defaults and the storage key", () => {
   assert.deepEqual(DEFAULT_VIEW_PREFERENCES, {
-    zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false,
+    zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: true,
   });
   assert.equal(VIEW_PREFERENCES_STORAGE_KEY, "markdownOkfSchemaStudio.viewPreferences");
   assert.deepEqual(normalizeViewPreferences(undefined), DEFAULT_VIEW_PREFERENCES);
@@ -73,4 +73,18 @@ test("read and write go through a Memento-like store", async () => {
   assert.equal(readViewPreferences(storage).zoom, 130);
   await storage.update(VIEW_PREFERENCES_STORAGE_KEY, "garbage");
   assert.deepEqual(readViewPreferences(storage), DEFAULT_VIEW_PREFERENCES);
+});
+
+test("a fresh workspace starts with the toolbar collapsed", () => {
+  const storage = memoryStorage();
+  assert.equal(readViewPreferences(storage).toolbarCollapsed, true);
+  assert.equal(normalizeViewPreferences({ zoom: 120 }).toolbarCollapsed, true, "a missing field takes the default");
+});
+
+test("stored choice wins: a stored expanded toolbar stays expanded", async () => {
+  const storage = memoryStorage();
+  await storage.update(VIEW_PREFERENCES_STORAGE_KEY, { zoom: 100, toolbarCollapsed: false });
+  assert.equal(readViewPreferences(storage).toolbarCollapsed, false);
+  await writeViewPreferences(storage, { ...DEFAULT_VIEW_PREFERENCES, toolbarCollapsed: false });
+  assert.equal(readViewPreferences(storage).toolbarCollapsed, false);
 });

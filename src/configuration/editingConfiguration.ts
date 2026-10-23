@@ -18,7 +18,7 @@ export interface EditingConfiguration {
 }
 
 export const DEFAULT_EDITING_CONFIGURATION: EditingConfiguration = {
-  defaultPaletteMode: "myst",
+  defaultPaletteMode: "gfm",
 };
 
 export function readEditingConfiguration(source: EditingConfigurationSource): EditingConfiguration {
@@ -29,4 +29,12 @@ export function readEditingConfiguration(source: EditingConfigurationSource): Ed
   return {
     defaultPaletteMode: isPaletteMode(mode) ? mode : DEFAULT_EDITING_CONFIGURATION.defaultPaletteMode,
   };
+}
+
+/**
+ * The palette mode a new panel starts in: the mode stored for the workspace when there is a valid
+ * one (the user's choice always wins), otherwise the `defaultPaletteMode` setting.
+ */
+export function initialPaletteModeOf(stored: unknown, source: EditingConfigurationSource): PaletteMode {
+  return isPaletteMode(stored) ? stored : readEditingConfiguration(source).defaultPaletteMode;
 }

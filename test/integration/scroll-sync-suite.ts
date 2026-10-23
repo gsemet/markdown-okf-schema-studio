@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import { disposeActivePreviewForTests, getActivePreviewForTests, getActivePreviewPanelForTests } from "./extensionApi";
 import { captureByLegacy, captureFile } from "../shared/captureRegistry";
 import { RealWindowEvidence } from "./evidence";
+import { pinStoredWorkspaceChoices } from "./storedChoices";
 
 async function waitFor(description: string, predicate: () => boolean | Promise<boolean>): Promise<void> {
   const deadline = Date.now() + 15_000;
@@ -267,6 +268,7 @@ async function runBlockNavigation(
 
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the E2E runner must expose a loopback CDP port");
+  await pinStoredWorkspaceChoices();
   const browser = await chromium.connectOverCDP(`http://127.0.0.1:${process.env.STUDIO_CDP_PORT}`);
   const page = browser.contexts()[0].pages().find((candidate) => candidate.url().includes("workbench"));
   assert.ok(page, "the VS Code workbench is attached");

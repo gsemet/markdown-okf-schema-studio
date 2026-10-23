@@ -12,7 +12,7 @@ export interface ViewPreferences {
   incomingChanges: boolean;
   /** The gray comment chips show (toolbar Comments button); on by default. */
   comments: boolean;
-  /** Rows 2 and 3 of the floating toolbar are hidden. */
+  /** Rows 2 and 3 of the floating toolbar are hidden; collapsed by default. */
   toolbarCollapsed: boolean;
 }
 
@@ -31,7 +31,7 @@ export const DEFAULT_VIEW_PREFERENCES: Readonly<ViewPreferences> = Object.freeze
   toc: false,
   incomingChanges: true,
   comments: true,
-  toolbarCollapsed: false,
+  toolbarCollapsed: true,
 });
 
 export interface ViewPreferencesStorage {

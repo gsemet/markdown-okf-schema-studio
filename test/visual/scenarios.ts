@@ -588,6 +588,16 @@ const FORCED_DARK_ASSERTIONS: ContentAssertion[] = [
   { message: "the headings stay readable on the dark page", selector: `${MAIN} h1`, count: 1, expr: "(() => { const c = getComputedStyle(document.querySelector('#sphinx-myst-preview-content h1')).color.match(/[\\d.]+/g).map(Number); return (c[0] + c[1] + c[2]) / 3 > 150; })()" },
 ];
 
+/** A fresh workspace: the built-in defaults, checked on the final frame (the first frame is checked by `check_fresh_workspace`). */
+const FRESH_WORKSPACE_ASSERTIONS: ContentAssertion[] = [
+  { message: "the preview opens in the cream theme mode", selector: "html", attr: { name: "data-sphinx-preview-theme-mode", value: "cream" } },
+  { message: "the theme button shows the cream mode", selector: "[data-sphinx-preview-theme-toggle]", count: 1, attr: { name: "aria-label", value: "Preview theme: Cream theme" } },
+  { message: "the page is the light cream paper whatever the host theme", selector: "body", css: { backgroundColor: "rgb(245, 241, 232)", color: "rgb(43, 42, 39)" } },
+  { message: "the floating toolbar is collapsed", selector: "html", attr: { name: "data-sphinx-preview-toolbar-state", value: "collapsed" } },
+  { message: "the collapse button offers to show the view controls", selector: "[data-sphinx-preview-toolbar-collapse]", count: 1, visible: true, attr: { name: "aria-label", value: "Show view controls" } },
+  { message: "rows 2 and 3 of the toolbar are hidden", selector: "[data-sphinx-preview-toolbar-more]", count: 1, expr: "(() => { const more = document.querySelector('[data-sphinx-preview-toolbar-more]'); return more.hidden && more.getBoundingClientRect().height === 0; })()" },
+];
+
 const zoomAssertions = (zoom: number): ContentAssertion[] => [
   { message: `the stored zoom is ${zoom} %`, selector: "html", attr: { name: "data-sphinx-preview-zoom", value: String(zoom) } },
   { message: `the zoom variable is ${zoom / 100}`, selector: "html", expr: `Math.abs(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sphinx-preview-zoom')) - ${zoom / 100}) < 0.001` },
@@ -2614,6 +2624,21 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     contentAssertions: zoomAssertions(zoom),
     description: `The handbook at ${zoom} % zoom in a ${width} px pane: the text size and the content column scale together `
       + "and the page does not scroll sideways.",
+  })),
+  // CR 047: a workspace that stored no choice opens with the built-in defaults, on a light and on a
+  // dark host (the cream page hides the host theme, so the dark one uses a narrow pane to differ).
+  ...([["light", 12, WIDE, "900"], ["dark", 13, NARROW, "460"]] as const).map(([theme, number, viewport, width]) => ({
+    id: `theme-zoom/v${number}-fresh-workspace-${theme}-${width}`,
+    fixture: "01-handbook-overview",
+    theme,
+    previewThemeMode: "cream" as const,
+    toolbarState: "collapsed" as const,
+    ...viewport,
+    scroll: { kind: "top" as const },
+    render: { freshWorkspace: true as const },
+    contentAssertions: FRESH_WORKSPACE_ASSERTIONS,
+    description: `The handbook in a fresh workspace (no stored theme, toolbar state or palette mode) on a ${theme} host, ${width} px pane: `
+      + "the preview opens in the cream theme and the floating toolbar shows only its first row, without any click.",
   })),
   ...([["dark", WIDE, "900", 1], ["light", NARROW, "460", 2]] as const).map(([theme, viewport, width, number]) => ({
     id: `trust-security/v0${number}-read-only-page-${theme}-${width}`,

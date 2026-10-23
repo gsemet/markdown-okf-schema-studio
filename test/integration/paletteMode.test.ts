@@ -4,6 +4,7 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 
 import {
+  clearStoredPaletteModeForTests,
   COMMAND_ID,
   disposeActivePreviewForTests,
   getActivePreviewForTests,
@@ -46,7 +47,9 @@ export async function run(): Promise<void> {
   const settings = vscode.workspace.getConfiguration("markdownOkfSchemaStudio.editing");
   const original = settings.inspect<string>("defaultPaletteMode")?.globalValue;
   try {
-    // Nothing stored yet: the setting decides.
+    // Nothing stored yet: the setting decides. The suite pinned MyST as a stored choice
+    // (storedChoices.ts), so forget it first; the end of this test stores MyST again.
+    await clearStoredPaletteModeForTests();
     await settings.update("defaultPaletteMode", "strict", vscode.ConfigurationTarget.Global);
     let preview = await openPreview(uri);
     assert.equal(startMode(preview.html), "strict", "the setting gives the first mode");
@@ -75,7 +78,7 @@ export async function run(): Promise<void> {
     preview = await openPreview(uri);
     assert.equal(startMode(preview.html), "gfm");
 
-    // Leave the workspace on the default mode for the suites that follow.
+    // Leave the workspace on the pinned MyST mode (storedChoices.ts) for the suites that follow.
     await sendPreviewMessageForTests({
       type: "previewPaletteModeChanged",
       documentId: preview.documentUri,

@@ -1214,7 +1214,8 @@ test("observes preview content instead of the document body", () => {
 });
 
 test("cycles preview theme modes and restores the saved selection", () => {
-  const harness = createRuntimeHarness();
+  // A workspace that stored the "current" mode (the fresh default is cream).
+  const harness = createRuntimeHarness({}, undefined, "current");
 
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "current");
   assert.equal(harness.themeButton.getAttribute("aria-label"), "Preview theme: Current theme");
@@ -6096,7 +6097,9 @@ function traceStartup(
     };
   }
   try {
-    const harness = createRuntimeHarness(configuration, undefined, undefined, savedAnchorMode);
+    // The trace was recorded with the theme mode "current" stored for the workspace (pinned since
+    // the fresh default became cream).
+    const harness = createRuntimeHarness(configuration, undefined, "current", savedAnchorMode);
     const toolbar = [harness.themeButton, harness.refreshButton, harness.anchorButton, harness.editModeButton];
     const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion",
       "data-sphinx-preview-zoom", "data-sphinx-preview-width", "data-sphinx-preview-toc",
@@ -7944,9 +7947,12 @@ test("T17: the Diff button is hidden through the document attribute when the set
 });
 
 test("P8: the collapse button hides rows 2-3, posts the preference and keeps the state", () => {
-  const harness = createRuntimeHarness();
+  // A workspace that stored the expanded toolbar (the fresh default is collapsed).
+  const harness = createRuntimeHarness({
+    initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false },
+  });
   const button = harness.collapseButton;
-  assert.equal(harness.moreRows.hidden, false, "expanded by default");
+  assert.equal(harness.moreRows.hidden, false, "expanded as stored");
   assert.equal(button.getAttribute("aria-expanded"), "true");
   assert.equal(button.getAttribute("aria-label"), "Hide view controls");
   assert.equal(button.getAttribute("title"), "Hide view controls");
@@ -7982,6 +7988,36 @@ test("P8: the stored preference and the saved webview state decide the collapsed
     savedState: { viewToolbarCollapsed: false },
   });
   assert.equal(saved.moreRows.hidden, false);
+});
+
+test("fresh workspace: the toolbar starts collapsed and the preview theme starts in cream", () => {
+  const fresh = createRuntimeHarness();
+  assert.equal(fresh.moreRows.hidden, true, "rows 2 and 3 are hidden without a stored choice");
+  assert.equal(fresh.collapseButton.getAttribute("aria-expanded"), "false");
+  assert.equal(fresh.collapseButton.getAttribute("aria-label"), "Show view controls");
+  assert.equal(fresh.documentElement.getAttribute("data-sphinx-preview-toolbar-state"), "collapsed");
+  assert.equal(fresh.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "cream");
+  assert.equal(fresh.themeButton.getAttribute("data-theme-mode"), "cream");
+  assert.equal(fresh.themeButton.getAttribute("aria-label"), "Preview theme: Cream theme");
+  assert.equal(fresh.themeButton.getAttribute("data-tooltip"), "Cream theme (click for current theme)");
+  // Nothing is posted: the defaults are not stored as if the user had chosen them.
+  assert.deepEqual(fresh.messages.filter((message) =>
+    message.type === "previewThemeModeChanged" || message.type === "previewViewPreferenceChanged"), []);
+});
+
+test("stored choice wins: a stored expanded toolbar and a stored theme mode are kept", () => {
+  for (const mode of ["current", "dark", "white"] as const) {
+    const stored = createRuntimeHarness({
+      initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false },
+    }, undefined, mode);
+    assert.equal(stored.moreRows.hidden, false, mode);
+    assert.equal(stored.documentElement.getAttribute("data-sphinx-preview-toolbar-state"), "expanded");
+    assert.equal(stored.documentElement.getAttribute("data-sphinx-preview-theme-mode"), mode);
+  }
+  // The webview state of a restored panel wins over the fresh default too.
+  const restored = createRuntimeHarness({ savedState: { viewToolbarCollapsed: false } }, "white");
+  assert.equal(restored.moreRows.hidden, false);
+  assert.equal(restored.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "white");
 });
 
 test("T11: a previewHistoryState of another document version is ignored", () => {
@@ -8028,7 +8064,7 @@ function paletteMenu(harness: RuntimeHarness): RuntimeElement | undefined {
 }
 
 test("T21: the palette sits in a host above the block editor frame, not inside it", () => {
-  const harness = createRuntimeHarness();
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   const textarea = openBlockEditorWithSource(harness);
   const palette = paletteOf(harness);
   assert.ok(palette, "a palette exists while editing");
@@ -8086,7 +8122,7 @@ test("T21: the palette buttons show the real shortcut in their tooltip", () => {
 });
 
 test("T21: every palette control keeps the focus in the text box on mousedown", () => {
-  const harness = createRuntimeHarness();
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
@@ -8749,11 +8785,11 @@ function choosePaletteMode(harness: RuntimeHarness, mode: string): void {
   select.dispatch("change");
 }
 
-test("T23: the palette mode starts as MyST without a stored value or saved state", () => {
+test("T23: the palette mode starts as GFM without a stored value or saved state", () => {
   const harness = createRuntimeHarness();
   openBlockEditorWithSource(harness);
-  assert.equal(paletteOf(harness)!.getAttribute("data-palette-mode"), "myst");
-  assert.equal(paletteSelect(harness).value, "myst");
+  assert.equal(paletteOf(harness)!.getAttribute("data-palette-mode"), "gfm");
+  assert.equal(paletteSelect(harness).value, "gfm");
 });
 
 test("T23: the stored workspace mode is used, and the saved webview state wins over it", () => {
@@ -8765,13 +8801,17 @@ test("T23: the stored workspace mode is used, and the saved webview state wins o
   openBlockEditorWithSource(saved);
   assert.equal(paletteOf(saved)!.getAttribute("data-palette-mode"), "gfm");
 
+  const myst = createRuntimeHarness({ initialPaletteMode: "myst" });
+  openBlockEditorWithSource(myst);
+  assert.equal(paletteOf(myst)!.getAttribute("data-palette-mode"), "myst", "a stored MyST mode wins over the GFM default");
+
   const invalid = createRuntimeHarness({ initialPaletteMode: "bogus" as "strict", savedState: { paletteMode: 3 } });
   openBlockEditorWithSource(invalid);
-  assert.equal(paletteOf(invalid)!.getAttribute("data-palette-mode"), "myst");
+  assert.equal(paletteOf(invalid)!.getAttribute("data-palette-mode"), "gfm");
 });
 
 test("T23: choosing a mode posts previewPaletteModeChanged once and keeps the editor open", () => {
-  const harness = createRuntimeHarness();
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   const textarea = openBlockEditorWithSource(harness);
   const count = harness.messages.length;
   choosePaletteMode(harness, "gfm");
@@ -9192,7 +9232,7 @@ test("T28: the MyST buttons show in MyST mode only", () => {
 });
 
 test("T30: the editor stays open while the host's file dialog has the focus, and the answer is inserted", () => {
-  const harness = createRuntimeHarness();
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   const textarea = openBlockEditorWithSource(harness);
   textarea.value = "Read ";
   textarea.selectionStart = 5;
@@ -9216,7 +9256,7 @@ test("T30: the editor stays open while the host's file dialog has the focus, and
 });
 
 test("T30: a cancelled file dialog inserts nothing and the blur saves again", () => {
-  const harness = createRuntimeHarness();
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   const textarea = openBlockEditorWithSource(harness);
   textarea.value = "Second paragraph. changed";
   textarea.dispatch("input");
@@ -9603,7 +9643,8 @@ function cellGroup(harness: RuntimeHarness): RuntimeElement | undefined {
 }
 
 function openCellEditorWithPalette(platform?: string) {
-  const harness = createRuntimeHarness(platform === undefined ? {} : { platform });
+  // The inline group was written for a workspace that stored the MyST palette mode.
+  const harness = createRuntimeHarness(platform === undefined ? { initialPaletteMode: "myst" } : { platform, initialPaletteMode: "myst" });
   const opened = openTableCellEditorForTab(harness);
   const control = opened.input();
   const calls = stubExecCommand(harness, control);

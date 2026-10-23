@@ -86,9 +86,9 @@ import {
 } from "./configuration/previewConfiguration";
 import {
   EDITING_CONFIGURATION_SECTION,
+  initialPaletteModeOf,
   isPaletteMode,
   PaletteMode,
-  readEditingConfiguration,
 } from "./configuration/editingConfiguration";
 import {
   PLANTUML_CONFIGURATION_SECTION,
@@ -4012,13 +4012,10 @@ registeredMessageHandlers.set("previewCommentResolve", handleCommentResolve);
 registeredMessageHandlers.set("previewCommentDelete", handleCommentDelete);
 
 function initialPaletteMode(): PaletteMode {
-  const stored = editModeStorage?.get(PALETTE_MODE_STORAGE_KEY);
-  if (isPaletteMode(stored)) {
-    return stored;
-  }
-  return readEditingConfiguration(
+  return initialPaletteModeOf(
+    editModeStorage?.get(PALETTE_MODE_STORAGE_KEY),
     vscode.workspace.getConfiguration(EDITING_CONFIGURATION_SECTION),
-  ).defaultPaletteMode;
+  );
 }
 
 /** Remembers a save until its WorkspaceEdit is applied, so a navigation can wait for it (CR 025). */
@@ -5507,6 +5504,30 @@ export function disposeActivePreviewForTests(): void {
   for (const preview of [...activePreviews]) {
     disposePreview(preview, true);
   }
+}
+
+/**
+ * Stores workspace choices as if the user had made them in the page (theme mode, toolbar state,
+ * palette mode). Integration suites written before the fresh defaults changed pin the choices
+ * they rely on with it; the extension must be active.
+ */
+export async function storeWorkspaceChoicesForTests(choices: {
+  previewThemeMode: PreviewThemeMode;
+  toolbarCollapsed: boolean;
+  paletteMode: PaletteMode;
+}): Promise<void> {
+  sessionPreviewThemeMode = choices.previewThemeMode;
+  sessionViewPreferences = applyViewPreference(sessionViewPreferences, "toolbarCollapsed", choices.toolbarCollapsed);
+  await Promise.all([
+    previewThemeModeStorage ? writePreviewThemeMode(previewThemeModeStorage, choices.previewThemeMode) : undefined,
+    viewPreferencesStorage ? writeViewPreferences(viewPreferencesStorage, sessionViewPreferences) : undefined,
+    editModeStorage?.update(PALETTE_MODE_STORAGE_KEY, choices.paletteMode),
+  ]);
+}
+
+/** Forgets the stored palette mode, so the next preview starts from the setting again. */
+export async function clearStoredPaletteModeForTests(): Promise<void> {
+  await editModeStorage?.update(PALETTE_MODE_STORAGE_KEY, undefined);
 }
 
 export async function resetPreviewThemeModeForTests(): Promise<void> {

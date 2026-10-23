@@ -1038,7 +1038,10 @@ def sidecar_text(scenario: dict, position: str, result: dict) -> str:
     if "value" in scroll:
         detail = f"{detail} ({scroll['value']})"
     preview_mode = scenario.get("previewThemeMode")
-    preview_label = f"forced {preview_mode}" if preview_mode else "current"
+    if (scenario.get("render") or {}).get("freshWorkspace"):
+        preview_label = f"fresh workspace default ({preview_mode or 'cream'})"
+    else:
+        preview_label = f"forced {preview_mode}" if preview_mode else "current"
     lines = [
         scenario["id"],
         "=" * len(scenario["id"]),
@@ -1733,7 +1736,56 @@ def apply_toolbar_state(page: Page, scenario: dict, failures: list[Failure]) -> 
     failures.append(Failure(scenario["page"], "the toolbar is not collapsed for the collapsed screenshot"))
 
 
+FRESH_WORKSPACE_STATE_JS = """() => {
+  const html = document.documentElement;
+  const more = document.querySelector('[data-sphinx-preview-toolbar-more]');
+  return {
+    themeMode: html.getAttribute('data-sphinx-preview-theme-mode'),
+    themeButton: document.querySelector('[data-sphinx-preview-theme-toggle]')?.getAttribute('aria-label') ?? null,
+    toolbarState: html.getAttribute('data-sphinx-preview-toolbar-state'),
+    collapseExpanded: document.querySelector('[data-sphinx-preview-toolbar-collapse]')?.getAttribute('aria-expanded') ?? null,
+    rowsHidden: more !== null && more.hidden && more.getBoundingClientRect().height === 0,
+    posted: (window.visualMessages || []).filter(message =>
+      message.type === 'previewThemeModeChanged' || message.type === 'previewViewPreferenceChanged').length,
+  };
+}"""
+
+
+def check_fresh_workspace(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    """A workspace that stored nothing opens in the cream theme mode with rows 2-3 of the toolbar hidden, before any click."""
+    if not (scenario.get("render") or {}).get("freshWorkspace"):
+        return
+    state = page.evaluate(FRESH_WORKSPACE_STATE_JS)
+    for key, expected in (
+        ("themeMode", "cream"),
+        ("themeButton", "Preview theme: Cream theme"),
+        ("toolbarState", "collapsed"),
+        ("collapseExpanded", "false"),
+        ("rowsHidden", True),
+        ("posted", 0),
+    ):
+        if state[key] != expected:
+            failures.append(Failure(scenario["page"], f"fresh workspace: {key} is {state[key]!r}, expected {expected!r}"))
+
+
 def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    """The toolbar controls and rows; a toolbar that starts collapsed is shown for the checks and collapsed again."""
+    toolbar = page.locator('[data-sphinx-preview-toolbar][role="toolbar"]')
+    started_collapsed = toolbar.count() == 1 and page.evaluate(
+        "document.documentElement.getAttribute('data-sphinx-preview-toolbar-state')") == "collapsed"
+    if started_collapsed:
+        toolbar.locator('[data-sphinx-preview-toolbar-collapse]').click()
+        page.wait_for_timeout(200)
+    try:
+        check_preview_toolbar_rows(page, scenario, failures)
+    finally:
+        if started_collapsed and page.evaluate(
+            "document.documentElement.getAttribute('data-sphinx-preview-toolbar-state')") != "collapsed":
+            toolbar.locator('[data-sphinx-preview-toolbar-collapse]').click()
+            page.wait_for_timeout(200)
+
+
+def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failure]) -> None:
     page_name = scenario["page"]
     toolbar = page.locator('[data-sphinx-preview-toolbar][role="toolbar"]')
     if toolbar.count() != 1:
@@ -6133,7 +6185,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   ):
     checks = checks.replace(placeholder, str(value))
   for check in (
-    check_mermaid_theme_switch, check_mermaid_error_theme_switch, check_forced_white_theme, check_forced_cream_theme, check_forced_dark_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
+    check_fresh_workspace, check_mermaid_theme_switch, check_mermaid_error_theme_switch, check_forced_white_theme, check_forced_cream_theme, check_forced_dark_theme, check_frontmatter_rendering, check_deferred_frontmatter_links,
     check_generic_skill_frontmatter, check_okf_schema_rendering, check_preview_toolbar,
     check_math_rendering, check_bare_urls, check_inline_code, check_inline_code_narrow, check_orphan_box, check_content_contracts,
   ):

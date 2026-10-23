@@ -5,7 +5,7 @@ import * as path from "node:path";
 import test from "node:test";
 
 import { GENERATED_FIXTURES, HUGE_DOCUMENT_SENTINEL, hugeDocument, writeGeneratedFixtures } from "../visual/generatedFixtures";
-import { pageFileName, pageKey, renderOptionsKey, type PageIdentity } from "../visual/renderOptions";
+import { PINNED_WORKSPACE_CHOICES, pageFileName, pageKey, renderOptionsKey, type PageIdentity } from "../visual/renderOptions";
 
 const base: PageIdentity = { fixture: "01-basic", theme: "dark", stickyHeadingDepth: 3 };
 
@@ -49,4 +49,11 @@ test("generated fixtures are written once and rewritten only on change", () => {
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
+});
+
+test("a fresh workspace is a page of its own; every other page pins the stored choices", () => {
+  const fresh = { ...base, render: { freshWorkspace: true as const } };
+  assert.notEqual(pageKey(fresh), pageKey(base));
+  assert.notEqual(pageFileName(fresh), pageFileName(base));
+  assert.deepEqual(PINNED_WORKSPACE_CHOICES, { previewThemeMode: "current", toolbarCollapsed: false, paletteMode: "myst" });
 });

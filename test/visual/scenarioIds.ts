@@ -556,6 +556,8 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "theme-zoom/v09-zoom-70-light-900": "At 70 % zoom the body text is 70 % of the base size and the content column shrinks with it, with no horizontal page scroll.",
   "theme-zoom/v10-zoom-200-light-900": "At 200 % zoom the body text is twice the base size and the column fills the pane, with no horizontal page scroll.",
   "theme-zoom/v11-zoom-150-light-460": "At 150 % zoom in a 460 px pane the body text is 150 % of the base size and the column stays inside the pane, with no horizontal page scroll.",
+  "theme-zoom/v12-fresh-workspace-light-900": "In a fresh workspace on a light host the preview opens, before any click and without posting a choice, in the cream theme mode with the cream page colours and with the floating toolbar collapsed to its first row.",
+  "theme-zoom/v13-fresh-workspace-dark-460": "In a fresh workspace on a dark host in a 460 px pane the preview opens, before any click and without posting a choice, in the cream theme mode with the cream page colours and with the floating toolbar collapsed to its first row.",
   "trust-security/v01-read-only-page-dark-900": "A read-only preview in the dark theme has no Edit button, no editable frontmatter cell and still renders the document.",
   "trust-security/v02-read-only-page-light-460": "A read-only preview in a 460 px light pane has no Edit button, no editable frontmatter cell and still renders the document.",
   "trust-security/v03-read-only-no-hover-outline-light-900": "In a read-only preview a pointer resting on a paragraph, and a click on it, show no edit outline and open no editor.",

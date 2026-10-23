@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  DEFAULT_PREVIEW_THEME_MODE,
   isPreviewThemeModeChangedMessage,
   PREVIEW_THEME_MODE_STORAGE_KEY,
   readPreviewThemeMode,
@@ -53,4 +54,18 @@ test("restores a stored cream theme mode", async () => {
 
   await writePreviewThemeMode(storage, "cream");
   assert.equal(readPreviewThemeMode(storage), "cream");
+});
+
+test("a fresh workspace has no stored mode and the built-in default is cream", () => {
+  const storage = createMemoryStorage();
+  assert.equal(readPreviewThemeMode(storage), undefined, "the host sends no mode, the page uses the default");
+  assert.equal(DEFAULT_PREVIEW_THEME_MODE, "cream");
+});
+
+test("stored choice wins: every stored theme mode is restored as is", async () => {
+  const storage = createMemoryStorage();
+  for (const mode of ["current", "dark", "white", "cream"] as const) {
+    await writePreviewThemeMode(storage, mode);
+    assert.equal(readPreviewThemeMode(storage), mode);
+  }
 });

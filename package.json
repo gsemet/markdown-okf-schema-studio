@@ -85,135 +85,162 @@
         "when": "editorTextFocus && resourceExtname == .md"
       }
     ],
-    "configuration": {
-      "title": "Markdown OKF-Schema Studio",
-      "properties": {
-        "markdownOkfSchemaStudio.preview.scrollPreviewWithEditor": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Makes the preview follow the editor: scrolling the source editor scrolls the preview to the same place. **On**: the preview follows. **Off**: the preview stays where it is. The toolbar anchor button in each preview panel overrides this setting for that panel.",
-          "order": 30
-        },
-        "markdownOkfSchemaStudio.preview.scrollEditorWithPreview": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Makes the editor follow the preview: scrolling or clicking in the preview reveals the matching source line in the editor. **On**: the editor follows. **Off**: the editor is never moved by the preview, and `#markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor#` has no effect.",
-          "order": 31
-        },
-        "markdownOkfSchemaStudio.preview.markEditorSelection": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Marks, in the preview, the block that holds the editor cursor line; the marker refreshes when the editor scrolls or the preview re-renders, not on every cursor move. **On**: the matching block is marked. **Off**: no marker. Works even when `#markdownOkfSchemaStudio.preview.scrollPreviewWithEditor#` is off.",
-          "order": 32
-        },
-        "markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Lets you double-click rendered content in the preview to jump to its source line in the editor. **On**: double-click reveals the source line. **Off**: double-click does nothing special. Requires `#markdownOkfSchemaStudio.preview.scrollEditorWithPreview#` to be on, and is ignored while a block is being edited in the preview.",
-          "order": 33
-        },
-        "markdownOkfSchemaStudio.preview.maxContentWidth": {
-          "type": "number",
-          "default": 960,
-          "minimum": 0,
-          "maximum": 2400,
-          "step": 50,
-          "markdownDescription": "Sets the maximum width of the preview text column, in pixels. A value up to 2400 limits the column to that width and centers it. **0**: use the full width of the preview panel.",
-          "order": 10
-        },
-        "markdownOkfSchemaStudio.preview.stickyHeadingDepth": {
-          "type": "number",
-          "default": 3,
-          "minimum": 1,
-          "maximum": 6,
-          "step": 1,
-          "markdownDescription": "Sets how many heading levels stay pinned at the top of the preview while you scroll. **1**: only the top-level heading. **3** (default): up to three levels. **6**: every level.",
-          "order": 11
-        },
-        "markdownOkfSchemaStudio.preview.incrementalUpdates": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Controls how the preview refreshes while you type. **On**: the changed parts of the page are updated in place, so scroll position and open sections are kept. **Off**: the whole page reloads on every change; turn this off if the preview shows stale or broken content.",
-          "order": 20
-        },
-        "markdownOkfSchemaStudio.preview.showComments": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Shows HTML comments (`<!-- ... -->`) in the preview as small gray chips that open into a box with the comment text when clicked. **On**: the gray comment chips show. **Off**: they are hidden at once in open previews. Green TODO chips always show, and comments used by tools (such as `markdownlint-*` or `prettier-ignore`) are always hidden.",
-          "order": 21
-        },
-        "markdownOkfSchemaStudio.preview.showIncomingChanges": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Marks the blocks you changed since the last Git commit with a green bar on their left, like the editor gutter. It compares the file, unsaved edits included, with the version in `HEAD` using the built-in Git extension. **On**: changed blocks are marked and the toolbar toggle for the marks is shown. **Off**: no marks and no toggle. Files that are not in Git show nothing.",
-          "order": 22
-        },
-        "markdownOkfSchemaStudio.comments.authorName": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "The name stored with the review comments you write in the preview. **Empty** (default): your Git `user.name` is used, and when Git has none, your operating system user name. **A name**: that name is used as it is, up to 100 characters.",
-          "order": 50
-        },
-        "markdownOkfSchemaStudio.editing.defaultPaletteMode": {
-          "type": "string",
-          "enum": [
-            "strict",
-            "gfm",
-            "myst"
-          ],
-          "enumDescriptions": [
-            "Strict Markdown: only buttons for plain Markdown syntax.",
-            "GitHub Flavored Markdown: the strict buttons plus the GFM ones.",
-            "MyST Markdown: the GFM buttons plus the MyST ones."
-          ],
-          "default": "myst",
-          "markdownDescription": "Chooses which buttons the edition palette shows in a workspace that has not picked a mode yet. The select at the start of the palette changes it for the workspace and is remembered. **strict**: plain Markdown only. **gfm**: strict plus GitHub Flavored Markdown. **myst**: GFM plus MyST (the default). The mode only changes the buttons, never how the preview renders.",
-          "order": 40
-        },
-        "markdownOkfSchemaStudio.plantuml.useJar": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Chooses the engine that draws PlantUML diagrams. **On**: Java with the JAR of `#markdownOkfSchemaStudio.plantuml.jarPath#`, or the `plantuml` command on your PATH; trusted workspaces only, and needed for `!include` files and remote libraries. **Off** (default): the built-in engine bundled with the extension, with no Java, no process and no network; it also works in Restricted Mode.",
-          "order": 79
-        },
-        "markdownOkfSchemaStudio.plantuml.jarPath": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "Path to `plantuml.jar`, used only when `#markdownOkfSchemaStudio.plantuml.useJar#` is on. A relative path is resolved from the workspace folder. **Empty**: the `plantuml` command found on your PATH is used.",
-          "order": 80
-        },
-        "markdownOkfSchemaStudio.frontmatter.propertiesTable": {
-          "type": "boolean",
-          "default": true,
-          "markdownDescription": "Shows the frontmatter properties table at the top of the preview. **On**: the table is shown. **Off**: the frontmatter is not displayed.",
-          "order": 60
-        },
-        "markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Controls warnings for frontmatter fields that the matching OKF schema does not declare. **On**: such fields are reported as warnings. **Off**: they are accepted silently.",
-          "order": 61
-        },
-        "markdownOkfSchemaStudio.frontmatter.bundleRoot": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "Folder used as the bundle root when resolving `x-okf-link` values. A relative path is resolved from the first workspace folder. **Empty**: the parent folder of the schema folder is used when it contains the document and has an `index.md` or `log.md`; otherwise bundle-relative links cannot be resolved.",
-          "order": 62
-        },
-        "markdownOkfSchemaStudio.frontmatter.projectRoot": {
-          "type": "string",
-          "default": "",
-          "markdownDescription": "Folder used as the project root when resolving `x-okf-link` values. A relative path is resolved from the first workspace folder. **Empty**: the git root of the document is used when it is inside the workspace; otherwise project-relative links cannot be resolved.",
-          "order": 63
-        },
-        "markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Controls document-relative `x-okf-link` values that point outside the workspace folders. **On**: such links are resolved. **Off**: they are reported as errors.",
-          "order": 64
+    "configuration": [
+      {
+        "title": "Preview",
+        "order": 1,
+        "properties": {
+          "markdownOkfSchemaStudio.preview.maxContentWidth": {
+            "type": "number",
+            "default": 960,
+            "minimum": 0,
+            "maximum": 2400,
+            "step": 50,
+            "markdownDescription": "Sets the maximum width of the preview text column, in pixels. A value from 1 to 2400 limits the column to that width and centers it. **0**: the column uses the full width of the preview panel.",
+            "order": 10
+          },
+          "markdownOkfSchemaStudio.preview.stickyHeadingDepth": {
+            "type": "number",
+            "default": 3,
+            "minimum": 1,
+            "maximum": 6,
+            "step": 1,
+            "markdownDescription": "Sets how many heading levels stay pinned at the top of the preview while you scroll. **1**: only the top-level heading. **3** (default): up to three levels. **6**: every level.",
+            "order": 11
+          },
+          "markdownOkfSchemaStudio.preview.incrementalUpdates": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Controls how the preview refreshes while you type. **On**: the changed parts of the page are updated in place, so scroll position and open sections are kept. **Off**: the whole page reloads on every change; turn this off if the preview shows stale or broken content.",
+            "order": 20
+          },
+          "markdownOkfSchemaStudio.preview.showComments": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Shows HTML comments (`<!-- ... -->`) in the preview as small gray chips that open into a box with the comment text when clicked. **On**: the gray comment chips show. **Off**: they are hidden at once in open previews. Green TODO chips always show, and comments used by tools (such as `markdownlint-*` or `prettier-ignore`) are always hidden.",
+            "order": 21
+          },
+          "markdownOkfSchemaStudio.preview.showIncomingChanges": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Marks the blocks you changed since the last Git commit with a green bar on their left, like the editor gutter. It compares the file, unsaved edits included, with the version in `HEAD` using the built-in Git extension. **On**: changed blocks are marked and the toolbar toggle for the marks is shown. **Off**: no marks and no toggle. Files that are not in Git show nothing.",
+            "order": 22
+          },
+          "markdownOkfSchemaStudio.preview.scrollPreviewWithEditor": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Makes the preview follow the editor: scrolling the source editor scrolls the preview to the same place. **On**: the preview follows. **Off**: the preview stays where it is. The toolbar anchor button in each preview panel overrides this setting for that panel.",
+            "order": 30
+          },
+          "markdownOkfSchemaStudio.preview.scrollEditorWithPreview": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Makes the editor follow the preview: scrolling or clicking in the preview reveals the matching source line in the editor. **On**: the editor follows. **Off**: the editor is never moved by the preview, and `#markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor#` has no effect.",
+            "order": 31
+          },
+          "markdownOkfSchemaStudio.preview.markEditorSelection": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Marks, in the preview, the block that holds the editor cursor line. The mark is refreshed when the editor scrolls or the preview re-renders, not on every cursor move. **On**: the matching block is marked. **Off**: no mark. Works even when `#markdownOkfSchemaStudio.preview.scrollPreviewWithEditor#` is off.",
+            "order": 32
+          },
+          "markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Lets you double-click rendered content in the preview to jump to its source line in the editor. **On**: double-click reveals the source line. **Off**: double-click does nothing special. Requires `#markdownOkfSchemaStudio.preview.scrollEditorWithPreview#` to be on, and is ignored while a block is being edited in the preview.",
+            "order": 33
+          }
+        }
+      },
+      {
+        "title": "Editing",
+        "order": 2,
+        "properties": {
+          "markdownOkfSchemaStudio.editing.defaultPaletteMode": {
+            "type": "string",
+            "enum": [
+              "strict",
+              "gfm",
+              "myst"
+            ],
+            "enumDescriptions": [
+              "Strict Markdown: only buttons for plain Markdown syntax.",
+              "GitHub Flavored Markdown: the strict buttons plus the GFM ones.",
+              "MyST Markdown: the GFM buttons plus the MyST ones."
+            ],
+            "default": "gfm",
+            "markdownDescription": "Chooses which buttons the edition palette shows in a workspace that has not picked a mode yet. The select at the start of the palette changes the mode for the workspace, and the choice is remembered. **strict**: plain Markdown only. **gfm** (the default): strict plus GitHub Flavored Markdown. **myst**: GFM plus MyST. The mode only changes the buttons, never how the preview renders.",
+            "order": 40
+          }
+        }
+      },
+      {
+        "title": "Frontmatter",
+        "order": 3,
+        "properties": {
+          "markdownOkfSchemaStudio.frontmatter.propertiesTable": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Shows the frontmatter properties table at the top of the preview. **On**: the table is shown. **Off**: the frontmatter is not displayed.",
+            "order": 60
+          },
+          "markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Controls warnings for frontmatter fields that the matching OKF schema does not declare. **On**: such fields are reported as warnings. **Off**: they are accepted silently.",
+            "order": 61
+          },
+          "markdownOkfSchemaStudio.frontmatter.bundleRoot": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Folder used as the bundle root when resolving `x-okf-link` values. A relative path is resolved from the first workspace folder. **Empty**: the parent folder of the schema folder is used when it contains the document and has an `index.md` or `log.md`; otherwise bundle-relative links cannot be resolved.",
+            "order": 62
+          },
+          "markdownOkfSchemaStudio.frontmatter.projectRoot": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Folder used as the project root when resolving `x-okf-link` values. A relative path is resolved from the first workspace folder. **Empty**: the git root of the document is used when it is inside the workspace; otherwise project-relative links cannot be resolved.",
+            "order": 63
+          },
+          "markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Controls document-relative `x-okf-link` values that point outside the workspace folders. **On**: such links are resolved. **Off**: they are reported as errors.",
+            "order": 64
+          }
+        }
+      },
+      {
+        "title": "Comments",
+        "order": 4,
+        "properties": {
+          "markdownOkfSchemaStudio.comments.authorName": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "The name stored with the review comments you write in the preview. **Empty** (default): your Git `user.name` is used, and when Git has none, your operating system user name. **A name**: that name is used as it is, up to 100 characters.",
+            "order": 50
+          }
+        }
+      },
+      {
+        "title": "PlantUML",
+        "order": 5,
+        "properties": {
+          "markdownOkfSchemaStudio.plantuml.useJar": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "Chooses the engine that draws PlantUML diagrams. **On**: Java with the JAR of `#markdownOkfSchemaStudio.plantuml.jarPath#`, or the `plantuml` command on your PATH; trusted workspaces only, and needed for `!include` files and remote libraries. **Off** (default): the built-in engine bundled with the extension, with no Java, no process and no network; it also works in Restricted Mode.",
+            "order": 79
+          },
+          "markdownOkfSchemaStudio.plantuml.jarPath": {
+            "type": "string",
+            "default": "",
+            "markdownDescription": "Path to `plantuml.jar`, used only when `#markdownOkfSchemaStudio.plantuml.useJar#` is on. A relative path is resolved from the workspace folder. **Empty**: the `plantuml` command found on your PATH is used.",
+            "order": 80
+          }
         }
       }
-    }
+    ]
   },
   "scripts": {
     "postinstall": "node scripts/patch-myst-imports.mjs",
