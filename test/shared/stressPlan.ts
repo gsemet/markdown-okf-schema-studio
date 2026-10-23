@@ -63,6 +63,8 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "image-paste",
     // CR 044: the watcher event of a linked target's save.
     "linked-target-save",
+    // CR 048: the slash menu once did not open after a line break in a full local run.
+    "slash-menu",
   ],
   untrusted: ["untrusted-read-only"],
 };

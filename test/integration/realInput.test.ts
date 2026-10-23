@@ -46,6 +46,7 @@ import {
   type Evidence,
 } from "./realInput/harness";
 import { scenarioImagePaste, scenarioIncomingChanges, scenarioReviewThreads } from "./realWindowGaps";
+import { traceDocumentChanges, windowFocusReport } from "./windowFocus";
 
 const SMOKE = [
   "# Smoke document",
@@ -903,6 +904,7 @@ async function scenarioTypingUndoGrouping(page: Page, evidence: Evidence): Promi
           "every change is minimal: " + JSON.stringify(changes));
       }
       await waitForNoBlockEditor(page, "the block editor to close before the undo");
+      const undoTrace = traceDocumentChanges(document);
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
       await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
       await vscode.commands.executeCommand("undo");
@@ -910,7 +912,11 @@ async function scenarioTypingUndoGrouping(page: Page, evidence: Evidence): Promi
         await waitFor("one undo to restore the paragraph", () => bufferText(document) === SMOKE);
       } catch (error) {
         throw new Error(String(error) + " Buffer paragraph line: "
-          + JSON.stringify(lines(bufferText(document))[5]) + "; changes: " + JSON.stringify(changes));
+          + JSON.stringify(lines(bufferText(document))[5]) + "; changes: " + JSON.stringify(changes)
+          + "; window focus: " + await windowFocusReport(page)
+          + "; buffer changes since the undo step: " + undoTrace.report());
+      } finally {
+        undoTrace.dispose();
       }
       await captureAfter(evidence, page, "block-editing/r06-typing-one-undo-step",
         "Typed 20 characters inline; " + changes.length + " content change(s) reached the source "
@@ -1041,8 +1047,11 @@ async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise<void> 
     await openSidePreview(source);
     await waitForRender(source);
     await setEditMode(page, true);
+    // Nothing may replace the page under the editor, and the keys below need the caret in its box.
+    await waitForPageSettled(page, "slash menu", source);
     await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
     await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+    await waitForTextInput(page, "[data-sphinx-preview-block-editor] textarea", "slash menu");
     const readEditor = async (): Promise<{ tag: string | undefined; value: string | undefined }> => {
       const current = await findCurrentFrame(page);
       if (current === undefined) return { tag: undefined, value: undefined };
@@ -1066,7 +1075,12 @@ async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise<void> 
       return current === undefined ? -1 : current.locator(selector).count();
     };
     const waitMenu = async (open: boolean, description: string): Promise<void> => {
-      await waitFor(description, async () => (await count("[data-slash-menu]")) === (open ? 1 : 0));
+      try {
+        await explained(page, () => waitFor(description, async () => (await count("[data-slash-menu]")) === (open ? 1 : 0)));
+      } catch (error) {
+        throw new Error(String(error) + " Editor state: " + JSON.stringify(await readEditor())
+          + "; window focus: " + await windowFocusReport(page));
+      }
     };
     const original = "Second paragraph.";
     await press(page, "End");
@@ -4423,6 +4437,8 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   "image-paste": scenarioImagePaste,
   // CR 044: the watcher event of a linked target's save (CI run 39848594435).
   "linked-target-save": scenarioLinkedTargetSave,
+  // CR 048: the menu once did not open after a line break in a full local run.
+  "slash-menu": scenarioSlashMenu,
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */

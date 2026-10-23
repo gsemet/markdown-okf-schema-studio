@@ -7,14 +7,55 @@ import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { captureByLegacy } from "../shared/captureRegistry";
 import { freePort } from "../shared/runIsolation";
 import { RealWindowEvidence } from "./evidence";
+import { activateMacProcess, frontmostPid, macFocusDiagnostics } from "./macWindow";
 
-async function waitFor(label: string, predicate: () => boolean | Promise<boolean>): Promise<void> {
+async function waitFor(label: string, predicate: () => boolean | Promise<boolean>,
+  explain?: () => Promise<string>): Promise<void> {
   const deadline = Date.now() + 45000;
   while (Date.now() < deadline) {
     try { if (await predicate()) return; } catch { }
     await new Promise(resolve => setTimeout(resolve, 100));
   }
-  throw new Error(`Timed out waiting for ${label}`);
+  throw new Error(`Timed out waiting for ${label}${explain ? `. ${await explain()}` : ""}`);
+}
+
+/**
+ * What the campaign window showed when a wait failed: the window focus as VS Code and macOS report
+ * it, the open tabs, the quick input, workbench toasts, the frames that hold a preview, and a
+ * screenshot of the window (CI guidelines rule 12).
+ */
+async function workbenchReport(page: Page, pid: number | undefined): Promise<string> {
+  let state: unknown;
+  try {
+    state = await page.evaluate(() => ({
+      titlebar: Array.from(document.querySelectorAll(".part.titlebar")).map(element => String(element.className)),
+      tabs: Array.from(document.querySelectorAll(".tab")).map(element =>
+        `${element.getAttribute("data-resource-name") ?? "?"}${element.getAttribute("aria-selected") === "true" ? " (selected)" : ""}`),
+      quickInput: Array.from(document.querySelectorAll<HTMLInputElement>(".quick-input-widget input"))
+        .map(input => ({ visible: input.offsetParent !== null, value: input.value })),
+      activeElement: document.activeElement ? `${document.activeElement.tagName.toLowerCase()}.${String(document.activeElement.className).split(/\s+/u).join(".")}` : null,
+      messages: Array.from(document.querySelectorAll(
+        ".notifications-toasts .notification-list-item-message, .monaco-dialog-box .dialog-message-text",
+      )).map(element => (element.textContent ?? "").trim()).filter(text => text !== ""),
+    }));
+  } catch (error) {
+    state = `unavailable: ${String(error)}`;
+  }
+  const previews: unknown[] = [];
+  for (const frame of page.frames()) {
+    try {
+      if (await frame.locator("[data-okf-description-toggle]").count() === 0) continue;
+      previews.push(await frame.evaluate(() => ({ documentId: document.documentElement.getAttribute("data-sphinx-preview-document-id"),
+        nonce: document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce ?? null })));
+    } catch (error) {
+      previews.push(`unavailable: ${String(error)}`);
+    }
+  }
+  const screenshot = path.join(E2E_REPORT_ROOT, "reload-failure.png");
+  let shot = screenshot;
+  try { await page.screenshot({ path: screenshot }); } catch (error) { shot = `unavailable: ${String(error)}`; }
+  return JSON.stringify({ windowPid: pid ?? null, frontmostPid: process.platform === "darwin" ? frontmostPid() : null,
+    ...(process.platform === "darwin" ? macFocusDiagnostics() : {}), page: state, previews, screenshot: shot });
 }
 
 async function command(page: Page, label: string): Promise<void> {
@@ -30,6 +71,39 @@ async function command(page: Page, label: string): Promise<void> {
   await waitFor(`the selected command ${label}`, async () =>
     (await page.locator(".quick-input-list .monaco-list-row").first().textContent())?.includes(label) === true);
   await page.keyboard.press("Enter");
+}
+
+/**
+ * The campaign drives its window with keys (Escape, F1, Enter), which on macOS reach nothing in a
+ * window that was never the active window (windowFocus.ts explains why). This window has no test
+ * extension host to ask, so the signal is the one the workbench itself shows: its title bar drops
+ * the `inactive` class when VS Code receives the window focus, while macOS reports the window's
+ * main process (`pid`) as the frontmost app. When the window is behind, ask macOS to bring it to
+ * the front and wait for both; fail with the diagnostics when they never come (a locked screen).
+ */
+async function ensureCampaignWindowFocused(page: Page, pid: number | undefined): Promise<void> {
+  if (process.platform !== "darwin") return;
+  assert.ok(pid !== undefined, "the reload campaign window has no process id");
+  const focused = async (): Promise<boolean> => frontmostPid() === pid
+    && await page.locator(".part.titlebar").count() === 1
+    && await page.locator(".part.titlebar.inactive").count() === 0;
+  if (await focused()) return;
+  // osascript runs from this runner, so macOS asks the Automation permission for the app that
+  // started the tests (the terminal or editor running npm).
+  const requester = process.env.TERM_PROGRAM ? `the app that runs npm (${process.env.TERM_PROGRAM})`
+    : "the app that runs npm (your terminal or editor)";
+  const activation = activateMacProcess(pid, requester);
+  console.log(`Reload campaign: the window was not the active window; macOS activation ${activation}.`);
+  const deadline = Date.now() + 10_000;
+  while (Date.now() < deadline) {
+    if (await focused()) return;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  const titlebar = await page.locator(".part.titlebar").evaluateAll(elements =>
+    elements.map(element => String(element.className)));
+  throw new Error(`The reload campaign window never became the active window (macOS activation ${activation}).`
+    + " The real-window tests need an unlocked session. "
+    + JSON.stringify({ windowPid: pid, frontmostPid: frontmostPid(), titlebar, ...macFocusDiagnostics() }));
 }
 
 export async function runReloadCampaign(executable: string, extensionRoot: string, workspaceRoot: string): Promise<void> {
@@ -60,6 +134,7 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
     const page: Page = workbench;
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.locator(".monaco-workbench").waitFor();
+    await ensureCampaignWindowFocused(page, child.pid);
     await command(page, "Markdown OKF-Schema Studio: Open Preview to Side");
     async function frameForDocument(previousNonce?: string): Promise<Frame> {
       let result: Frame | undefined;
@@ -73,7 +148,7 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
           return true;
         }
         return false;
-      });
+      }, () => workbenchReport(page, child.pid));
       assert.ok(result);
       return result;
     }

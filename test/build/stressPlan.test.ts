@@ -45,3 +45,9 @@ test("CR 043: every T2 real-window scenario is in the stress plan, and no name i
     assert.ok(all.includes(name), name);
   }
 });
+
+test("CR 048: the slash menu scenario runs in the trusted window's stress plan", () => {
+  assert.ok(STRESS_SCENARIOS_BY_HOST.trusted.includes("slash-menu"));
+  assert.deepEqual(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "slash-menu" }, "trusted")?.scenarios, ["slash-menu"]);
+  assert.equal(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "slash-menu" }, "untrusted"), undefined);
+});
