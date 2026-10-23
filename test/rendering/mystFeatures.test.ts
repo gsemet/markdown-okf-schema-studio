@@ -682,6 +682,91 @@ test("MyST GFM and directive tables preserve captions, headers, and alignment", 
   assert.match(textContent(csvTable), /line one\s+line two/u);
 });
 
+test("CR038: a list-table renders its title, header rows, widths and alignment as one editable block", async () => {
+  const source = [
+    "Before",
+    "",
+    "```{list-table} Fruit prices",
+    ":header-rows: 1",
+    ":widths: 20 80",
+    ":align: center",
+    "",
+    "* - Name",
+    "  - **Price**",
+    "* - apple",
+    "  - 3",
+    "```",
+    "",
+    "```{list-table}",
+    ":header-rows: 0",
+    "",
+    "* - only",
+    "  - body",
+    "```",
+  ].join("\n");
+  const result = await renderPreviewDocument({
+    document: inlineDocument(source),
+    workspaceRoot,
+    requestId: 12,
+    isWorkspaceTrusted: () => true,
+  });
+  const html = parseHtml(result.html);
+  const tables = findElements(html, isTag("table"));
+  assert.equal(tables.length, 2);
+  const [titled, plain] = tables;
+  const figure = findElement(html, (element) =>
+    element.tagName === "figure" && textContent(element).includes("Fruit prices"));
+  assert.ok(figure, "the title is the table caption");
+  assert.equal(attribute(titled, "align"), "center");
+  assert.equal(findElements(titled, isTag("thead")).length, 1, "one header row");
+  assert.deepEqual(findElements(titled, isTag("th")).map((cell) => textContent(cell).trim()), ["Name", "Price"]);
+  assert.equal(findElements(plain, isTag("thead")).length, 0, "no header rows");
+  // The table is one block of the source: lines 3 to 12; nothing inside has a source line of its own.
+  assert.equal(attribute(titled, "data-line"), "3");
+  assert.equal(attribute(titled, "data-end-line"), "12");
+  assert.equal(attribute(plain, "data-line"), "14");
+  assert.equal(
+    findElements(titled, (element) => element !== titled && attribute(element, "data-line") !== undefined).length,
+    0,
+  );
+  // :widths: becomes one column per width, in percent of the total.
+  const columns = findElements(titled, isTag("col"));
+  assert.deepEqual(columns.map((column) => attribute(column, "data-myst-table-style")), ["width: 20%", "width: 80%"]);
+  assert.equal(findElements(plain, isTag("col")).length, 0, "no widths, no columns");
+});
+
+test("CR038: :header-rows: decides how many rows are header cells", async () => {
+  const result = await renderPreviewDocument({
+    document: inlineDocument([
+      "```{list-table}", ":header-rows: 2", "", "* - h1", "  - h2", "* - s1", "  - s2", "* - b1", "  - b2", "```",
+    ].join("\n")),
+    workspaceRoot,
+    requestId: 14,
+    isWorkspaceTrusted: () => true,
+  });
+  const html = parseHtml(result.html);
+  const head = findElement(html, isTag("thead"));
+  const body = findElement(html, isTag("tbody"));
+  assert.ok(head && body);
+  assert.deepEqual(findElements(head, isTag("th")).map((cell) => textContent(cell).trim()), ["h1", "h2", "s1", "s2"]);
+  assert.deepEqual(findElements(body, isTag("td")).map((cell) => textContent(cell).trim()), ["b1", "b2"]);
+});
+
+test("CR038: list-table widths that do not match the columns or are not numbers are ignored", async () => {
+  const result = await renderPreviewDocument({
+    document: inlineDocument([
+      "```{list-table}", ":widths: 1 2 3", "", "* - a", "  - b", "```", "",
+      "```{list-table}", ":widths: auto", "", "* - a", "  - b", "```",
+    ].join("\n")),
+    workspaceRoot,
+    requestId: 13,
+    isWorkspaceTrusted: () => true,
+  });
+  const html = parseHtml(result.html);
+  assert.equal(findElements(html, isTag("table")).length, 2);
+  assert.equal(findElements(html, isTag("col")).length, 0);
+});
+
 test("raw HTML tables preserve complex cell spans without active content", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(

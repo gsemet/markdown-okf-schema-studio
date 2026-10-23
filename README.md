@@ -79,6 +79,14 @@ Markdown flavours and extensions:
   caption, legend, width, alignment and name, and leaves every other option as it was.
   Editing a table cell adds the inline buttons (bold, italic, link, colour, emoji and so on) to the
   row and column bar.
+  MyST `{list-table}` directives render with their title, `:header-rows:`, `:widths:` and
+  `:align:`, styled like a pipe table. The table bar has a List table button that turns the pipe
+  table into a `{list-table}`; in MyST mode, with the caret in a pipe, `{list-table}` or simple
+  HTML table, the List table and Pipe table buttons (also `/list-table` and `/pipe` in the slash
+  menu) convert it to the other form in one undo step. A conversion that would lose content (a
+  list-table cell with several lines or block content, a title, a label or several header rows to a
+  pipe table) shows a message and changes nothing; column alignment colons and `:widths:` are
+  dropped. Conversion never writes HTML.
   Typing `/` at a line start opens a Notion-style command menu with completion
   (see [Slash Menu](#slash-menu)).
 - **Linked evidence:** [`x-okf-link`](https://okf-schema.readthedocs.io/en/latest/reference/okfreq-frontmatter.html)

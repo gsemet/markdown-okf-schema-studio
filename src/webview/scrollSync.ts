@@ -2596,7 +2596,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       window.clearTimeout(edit.autosaveTimer);
       edit.autosaveTimer = undefined;
     }
-    const editedText = edit.tableModel
+    const editedText = edit.convertedText !== undefined
+      ? edit.convertedText
+      : edit.tableModel
       ? tableTools.serialize(edit.tableModel)
       : edit.textarea.value + (edit.trailingLineEnding || "");
     if (final && editedText === edit.originalText && !edit.hasAutosavedChange) {
@@ -2973,6 +2975,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       input.style.height = input.scrollHeight + "px";
     };
     const rememberCellValue = () => {
+      // Any later change wins over a conversion that was not saved.
+      edit.convertedText = undefined;
       const selectedRow = edit.tableRowIndex === 0 ? 0 : edit.tableRowIndex + 1;
       edit.tableModel.rows[selectedRow][edit.tableColumnIndex] = input.value;
     };
@@ -3018,6 +3022,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       deleteRow: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 3.5h16v13H4z"></path><path d="M4 8h16M9.5 3.5v13M14.5 3.5v13M9.5 21.5h5"></path></svg>',
       addColumn: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 4h13v16h-13z"></path><path d="M8 4v16M12.5 4v16M17 9h6M20 6v6"></path></svg>',
       deleteColumn: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 4h13v16h-13z"></path><path d="M8 4v16M12.5 4v16M17 9h6"></path></svg>',
+      listTable: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16v14H4z"></path><path d="M4 10h16M9 5v14M6 7.5h.01M6 14.5h.01M12 14.5h6"></path></svg>',
     };
     const addAction = (name, icon, label, handler, disabled, group) => {
       const button = document.createElement("button");
@@ -3036,7 +3041,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       button.addEventListener("click", () => {
         rememberCellValue();
         handler();
-        renderTableCellEditor(edit);
+        if (!edit.finishing) renderTableCellEditor(edit);
       });
       menu.appendChild(button);
       actionButtons.push(button);
@@ -3055,6 +3060,19 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       const nextColumn = tableTools.deleteColumn(edit.tableModel, edit.tableColumnIndex);
       if (nextColumn !== undefined) edit.tableColumnIndex = nextColumn;
     }, edit.tableModel.rows[0].length <= 1, "column");
+    // Table level: the pipe table becomes a {list-table}, written back as one edit (one undo step).
+    // A table captioned by a {table} directive sits in a figure; wrapping a list-table in it is not
+    // offered.
+    const tableFigure = edit.selectedCell.closest?.("table")?.parentElement?.tagName === "FIGURE";
+    addAction("Convert to list-table", tableActionIcons.listTable, "List table", () => {
+      const converted = tableTools.convertTable(tableTools.serialize(edit.tableModel), "list-table");
+      if (converted && converted.ok) {
+        edit.convertedText = converted.text;
+        saveBlockEdit();
+      } else if (converted) {
+        edit.status.textContent = converted.reason;
+      }
+    }, tableFigure, "table");
 
     // The inline buttons allowed in a cell join the bar after a separator; the same group object
     // is kept for the whole edit and only moved into each rebuilt bar.
@@ -3586,6 +3604,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       mode: paletteMode,
       modeShortcut: (isApplePlatform() ? "Cmd" : "Ctrl") + "+Shift+M",
       isInsideFrame: (node) => frameContains(edit, node),
+      notify: (message) => {
+        if (activeBlockEdit === edit && !edit.finishing) edit.status.textContent = message;
+      },
       requestList: (kind, done) => hostRequests.ask(
         kind === "targets" ? "previewListTargets" : "previewListCitations", {}, {},
         (result) => done(result.ok === true && Array.isArray(result.items)

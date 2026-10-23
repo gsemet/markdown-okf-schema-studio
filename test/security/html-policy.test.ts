@@ -124,6 +124,25 @@ test("keeps the included-block marker next to the source mapping", () => {
   assert.match(result.html, /data-sphinx-source-line="3"[^>]*data-sphinx-source-end-line="4"/u);
 });
 
+test("CR038: a column width in percent becomes a stylesheet rule; other widths are dropped", () => {
+  const result = rewriteSphinxHtml(
+    '<html><head></head><body><table><colgroup>'
+    + '<col data-myst-table-style="width: 25%"><col data-myst-table-style="width: 75%">'
+    + '<col data-myst-table-style="width: 400px"><col data-myst-table-style="width: calc(100vw)">'
+    + '</colgroup><tr><td>a</td><td>b</td><td>c</td><td>d</td></tr></table></body></html>',
+    {
+      outputRoot: "/tmp",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+  assert.match(result.html, /\.myst-inline-table-style-1\s*\{[^}]*width: 25%/u);
+  assert.match(result.html, /\.myst-inline-table-style-2\s*\{[^}]*width: 75%/u);
+  assert.doesNotMatch(result.html, /400px|calc|data-myst-table-style|style="/u);
+});
+
 test("rewrites sanitized table styles into a nonce-bearing stylesheet", () => {
   const result = rewriteSphinxHtml(
     '<html><head></head><body><table><tr>'

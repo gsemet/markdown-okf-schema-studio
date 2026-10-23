@@ -56,6 +56,8 @@ interface MystNode {
   position?: { start?: { line?: number }; end?: { line?: number } };
   data?: Record<string, unknown>;
   name?: string;
+  /** A table cell the parser marked as a header cell. */
+  header?: boolean;
   args?: string;
   label?: string;
   identifier?: string;
@@ -170,6 +172,7 @@ const BLOCKED_HTML_TABLE_TAGS = new Set([
 
 interface RawHtmlNode {
   nodeName: string;
+  namespaceURI?: string;
   tagName?: string;
   attrs?: Array<{ name: string; value: string }>;
   childNodes?: RawHtmlNode[];
@@ -181,6 +184,12 @@ interface TableAlignmentSpec {
   columns: Array<string | undefined>;
   sourceLine?: number;
   sourceEndLine?: number;
+  /** `{list-table}`: the `:widths:` as percentages, one per column. */
+  widths?: number[];
+  /** `{list-table}`: the number of leading header rows (`:header-rows:`). */
+  headerRows?: number;
+  /** `{list-table}`: the cell paragraphs carry no source line, so a click edits the whole table. */
+  listTable?: boolean;
 }
 
 function stripQuote(line: string): string {
@@ -888,6 +897,13 @@ function collectTableAlignments(node: MystNode, output: Array<TableAlignmentSpec
       ...(node.position?.end?.line === undefined
         ? {}
         : { sourceEndLine: node.position.end.line }),
+      ...(node.data?.listTable === true
+        ? {
+          listTable: true,
+          widths: node.data.widths as number[] | undefined,
+          headerRows: node.data.headerRows as number | undefined,
+        }
+        : {}),
     });
   }
   for (const child of node.children ?? []) {
@@ -905,12 +921,112 @@ function setHtmlAttribute(node: RawHtmlNode, name: string, value: string): void 
   node.attrs.push({ name, value });
 }
 
+/** Removes the source lines of everything inside a list-table: a click anywhere edits the table. */
+function stripSourceLines(table: RawHtmlNode): void {
+  for (const child of table.childNodes ?? []) {
+    if (child.attrs) {
+      child.attrs = child.attrs.filter((attribute) =>
+        attribute.name !== "data-line" && attribute.name !== "data-end-line");
+    }
+    stripSourceLines(child);
+  }
+}
+
+const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
+
+function rawElement(tagName: string, children: RawHtmlNode[]): RawHtmlNode {
+  return { nodeName: tagName, tagName, namespaceURI: HTML_NAMESPACE, attrs: [], childNodes: children };
+}
+
+/**
+ * The MyST HTML writer makes the first row the header, whatever `:header-rows:` says. This lays the
+ * rows out again: the first `headerRows` rows in `<thead>` with `<th>` cells, the others in
+ * `<tbody>` with `<td>` cells.
+ */
+function setHeaderRows(table: RawHtmlNode, headerRows: number): void {
+  const rows: RawHtmlNode[] = [];
+  for (const section of table.childNodes ?? []) {
+    if (section.tagName === "tr") rows.push(section);
+    for (const row of section.childNodes ?? []) {
+      if (row.tagName === "tr") rows.push(row);
+    }
+  }
+  if (rows.length === 0) return;
+  rows.forEach((row, index) => {
+    const tag = index < headerRows ? "th" : "td";
+    for (const cell of row.childNodes ?? []) {
+      if (cell.tagName === "th" || cell.tagName === "td") {
+        cell.tagName = tag;
+        cell.nodeName = tag;
+      }
+    }
+  });
+  const sections: RawHtmlNode[] = [];
+  if (headerRows > 0) sections.push(rawElement("thead", rows.slice(0, headerRows)));
+  if (rows.length > headerRows) sections.push(rawElement("tbody", rows.slice(headerRows)));
+  table.childNodes = sections;
+}
+
+/** `:widths:` as a `<colgroup>`; the sanitizer turns each width into a stylesheet rule. */
+function addColumnWidths(table: RawHtmlNode, widths: number[] | undefined): void {
+  if (!widths || widths.length === 0) return;
+  const firstRow = findRawRow(table);
+  const columns = (firstRow?.childNodes ?? []).filter((child) =>
+    ["th", "td"].includes(child.tagName?.toLowerCase() ?? "")).length;
+  if (columns !== widths.length) return;
+  const cols = widths.map((width): RawHtmlNode => ({
+    nodeName: "col",
+    tagName: "col",
+    namespaceURI: HTML_NAMESPACE,
+    attrs: [{ name: "data-myst-table-style", value: `width: ${width}%` }],
+    childNodes: [],
+  }));
+  const colgroup: RawHtmlNode = {
+    nodeName: "colgroup",
+    tagName: "colgroup",
+    namespaceURI: HTML_NAMESPACE,
+    attrs: [],
+    childNodes: cols,
+  };
+  table.childNodes = [colgroup, ...(table.childNodes ?? [])];
+}
+
+function findRawRow(node: RawHtmlNode): RawHtmlNode | undefined {
+  for (const child of node.childNodes ?? []) {
+    if (child.tagName?.toLowerCase() === "tr") return child;
+    const nested = child.tagName?.toLowerCase() === "table" ? undefined : findRawRow(child);
+    if (nested) return nested;
+  }
+  return undefined;
+}
+
+/** The number of leading rows of a table AST whose cells are marked as header cells. */
+function leadingHeaderRows(table: MystNode): number {
+  let count = 0;
+  for (const row of table.children ?? []) {
+    if (row.children?.[0]?.header !== true) break;
+    count += 1;
+  }
+  return count;
+}
+
+/** The `:widths:` of a list-table as percentages that add up to 100; `auto`, `grid` or junk: none. */
+function listTableWidths(value: unknown): number[] | undefined {
+  const parts = Array.isArray(value)
+    ? value.map(Number)
+    : typeof value === "string" ? value.trim().split(/[\s,]+/u).map(Number) : [];
+  if (parts.length === 0 || parts.some((part) => !Number.isFinite(part) || part <= 0)) return undefined;
+  const total = parts.reduce((sum, part) => sum + part, 0);
+  return parts.map((part) => Math.round((part / total) * 10000) / 100);
+}
+
 function applyTableAlignments(
   html: string,
   alignments: Array<TableAlignmentSpec | undefined>,
 ): string {
   if (!alignments.some((alignment) =>
-    alignment && (alignment.table || alignment.columns.some(Boolean) || alignment.sourceLine !== undefined))) {
+    alignment && (alignment.table || alignment.columns.some(Boolean) || alignment.sourceLine !== undefined
+      || alignment.listTable === true))) {
     return html;
   }
 
@@ -929,6 +1045,11 @@ function applyTableAlignments(
       }
       if (alignment?.sourceEndLine !== undefined) {
         setHtmlAttribute(node, "data-end-line", String(alignment.sourceEndLine));
+      }
+      if (alignment?.listTable === true) {
+        stripSourceLines(node);
+        if (alignment.headerRows !== undefined) setHeaderRows(node, alignment.headerRows);
+        addColumnWidths(node, alignment.widths);
       }
 
       const rows: RawHtmlNode[] = [];
@@ -1091,6 +1212,17 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
   ) {
     const alignment = normalizeTableAlignment(node.options?.align);
     const table = findNode(node, "table");
+    if (node.name === "list-table" && table) {
+      // The parser gives the table no position: it spans the directive, so the table is one
+      // editable block.
+      table.position ??= node.position;
+      table.data = {
+        ...(table.data ?? {}),
+        listTable: true,
+        widths: listTableWidths(node.options?.widths),
+        headerRows: leadingHeaderRows(table),
+      };
+    }
     if (alignment && table) {
       table.align = alignment;
     } else if (alignment) {

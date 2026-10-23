@@ -2106,11 +2106,11 @@ test("table cell editing exposes row and column operations and saves the edited 
   cell.top = 100;
   assert.equal(
     tableMenu.childElements.filter((element) => element.tagName === "BUTTON").length,
-    4,
+    5,
   );
   const operationButtons = harness.createdElements.filter((element) =>
     element.getAttribute("data-sphinx-table-operation") !== null);
-  assert.equal(operationButtons.length, 4);
+  assert.equal(operationButtons.length, 5);
   assert.ok(operationButtons.every((button) =>
     button.innerHTML.includes("<svg") && button.getAttribute("title") !== null));
   assert.equal(harness.createdElements.filter((element) =>
@@ -2150,6 +2150,70 @@ test("table cell editing exposes row and column operations and saves the edited 
   assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
   assert.equal(harness.messages.at(-1)?.final, true);
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+});
+
+function openPipeTableCellEditor(harness: ReturnType<typeof createRuntimeHarness>, parent?: RuntimeElement) {
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  if (parent) parent.appendChild(table);
+  const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+  row.rowIndex = 1;
+  const cell = new RuntimeElement({}, harness.windowState, 100, 30, "td");
+  cell.cellIndex = 1;
+  table.appendChild(row);
+  row.appendChild(cell);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const request = harness.messages.at(-1);
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    documentVersion: 7,
+    requestId: 11,
+    editId: request?.editId,
+    originalText: "| A | B |\n| --- | --- |\n| x | y |\n",
+  });
+}
+
+const convertButton = (harness: ReturnType<typeof createRuntimeHarness>) =>
+  harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Convert to list-table").at(-1);
+
+test("CR038: the table toolbar converts the pipe table to a list-table in one final save", () => {
+  const harness = createRuntimeHarness();
+  openPipeTableCellEditor(harness);
+  const input = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+  assert.ok(input);
+  input.value = "edited";
+  input.dispatch("input");
+  const saves = harness.messages.filter((message) => message.type === "previewEditSave").length;
+  const button = convertButton(harness);
+  assert.ok(button, "the conversion button is in the table toolbar");
+  assert.equal(button.disabled, false);
+  button.dispatch("click");
+  const saved = harness.messages.filter((message) => message.type === "previewEditSave");
+  assert.equal(saved.length, saves + 1, "one save, so one undo step");
+  assert.equal(saved.at(-1)?.final, true);
+  assert.equal(saved.at(-1)?.originalText, "| A | B |\n| --- | --- |\n| x | y |\n");
+  assert.equal(saved.at(-1)?.editedText, [
+    "```{list-table}", ":header-rows: 1", "", "* - A", "  - B", "* - x", "  - edited", "```", "",
+  ].join("\n"));
+});
+
+test("CR038: the conversion button is off for a table inside a captioned figure", () => {
+  const harness = createRuntimeHarness();
+  const figure = new RuntimeElement({}, harness.windowState, 100, 100, "figure");
+  harness.body.appendChild(figure);
+  openPipeTableCellEditor(harness, figure);
+  assert.equal(convertButton(harness)?.disabled, true);
 });
 
 test("table toolbar sits in the flow above the table with text labels and a position status", () => {
@@ -2199,7 +2263,7 @@ test("table toolbar sits in the flow above the table with text labels and a posi
   const labels = menu.childElements.filter((element) => element.tagName === "BUTTON")
     .map((button) => button.childElements.find((child) =>
       child.className === "sphinx-preview-table-menu-label")?.textContent);
-  assert.deepEqual(labels, ["Row +", "Row \u2212", "Col +", "Col \u2212"]);
+  assert.deepEqual(labels, ["Row +", "Row \u2212", "Col +", "Col \u2212", "List table"]);
   assert.equal(menu.childElements.find((element) =>
     element.getAttribute("data-sphinx-preview-edit-status") !== null)?.textContent,
   "Row 1 of 2 \u00b7 column 2 of 2");
@@ -7953,7 +8017,7 @@ test("T21: the palette sits in a host above the block editor frame, not inside i
       "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table",
       "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
-      "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd",
+      "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",
     ],
   );
 });
@@ -7996,7 +8060,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 36);
+  assert.equal(controls.length, 38);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
@@ -9516,14 +9580,14 @@ function openCellEditorWithPalette(platform?: string) {
   return { harness, ...opened, control, calls };
 }
 
-test("T35: the cell bar keeps the four table operations and adds the inline group after a separator", () => {
+test("T35: the cell bar keeps the table operations and adds the inline group after a separator", () => {
   const { harness } = openCellEditorWithPalette();
   const bar = cellBar(harness);
   assert.deepEqual(
     bar.childElements.filter((child) => child.tagName === "BUTTON")
       .map((button) => button.getAttribute("data-sphinx-table-operation")),
     ["Insert row after selected row", "Delete selected row", "Insert column after selected column",
-      "Delete selected column"],
+      "Delete selected column", "Convert to list-table"],
   );
   const group = cellGroup(harness);
   assert.ok(group, "the inline group is inside the table bar");

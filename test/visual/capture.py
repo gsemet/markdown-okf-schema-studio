@@ -3526,7 +3526,7 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
   page_name = scenario["page"]
   strict = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread"]
   gfm = strict + ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
-  myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
+  myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd"]
   expected = {"strict": strict, "gfm": gfm, "myst": myst}[mode]
   page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
 
@@ -3577,7 +3577,7 @@ def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> Non
   strict = ["heading", "bold", "italic", "strikethrough", "color", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread"]
   gfm = strict + ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
   myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
-  # The palette's buttons (minus the caret-dependent colour code) plus the two menu-only list entries.
+  # The palette's buttons (minus the caret-dependent colour code and table conversions) plus the two menu-only list entries.
   expected = {"strict": strict, "gfm": gfm, "myst": myst}[mode] + ["bulletList", "numberedList"]
   page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
   state_script = """() => {
@@ -4014,7 +4014,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   }""")
   if not geometry["first"]:
     failures.append(Failure(page_name, "the palette is not on top of the edit box (previous sibling, outside the frame)"))
-  expected = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd", "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
+  expected = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd", "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd"]
   if geometry["labels"] != expected:
     failures.append(Failure(page_name, f"palette buttons are {geometry['labels']}, expected {expected}"))
   if geometry["barBottom"] > geometry["frameTop"] + 0.5 or geometry["frameTop"] - geometry["barBottom"] > 6:
@@ -4298,7 +4298,7 @@ def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolba
   for block_only in ("heading", "quote", "table", "image", "codeFence"):
     if block_only in geometry["ids"]:
       failures.append(Failure(page_name, f"the cell bar shows the block action {block_only}"))
-  if geometry["operations"] != 4 or not geometry["hasSeparator"] or geometry["mode"]:
+  if geometry["operations"] != 5 or not geometry["hasSeparator"] or geometry["mode"]:
     failures.append(Failure(page_name, f"the cell bar structure is wrong: {geometry}"))
   if geometry["outside"] or geometry["scrollWidth"] > geometry["clientWidth"] + 1 or geometry["barRight"] > geometry["viewport"] + 0.5:
     failures.append(Failure(page_name, f"the cell bar buttons overflow the bar: {geometry}"))
@@ -4906,15 +4906,15 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       ):
         failures.append(Failure(page_name, f"table action bar is outside the screenshot viewport: {toolbar_bounds}"))
       operations = toolbar.locator("[data-sphinx-table-operation]")
-      if operations.count() != 4:
-        failures.append(Failure(page_name, f"table action bar has {operations.count()} row/column actions, expected 4"))
+      if operations.count() != 5:
+        failures.append(Failure(page_name, f"table action bar has {operations.count()} row/column/table actions, expected 5"))
       elif not operations.first.is_visible():
         failures.append(Failure(page_name, "table row/column actions are hidden while the cell editor has focus"))
       if toolbar.locator("[data-sphinx-preview-table-save], [data-sphinx-preview-table-cancel]").count() != 0:
         failures.append(Failure(page_name, "table action bar still contains Save or Cancel controls"))
-      # The four row and column buttons are the bar's own children; the inline group is checked apart (T35).
+      # The four row and column buttons and the table conversion are the bar's own children; the inline group is checked apart (T35).
       buttons = toolbar.locator(":scope > button")
-      if buttons.count() != 4 or not buttons.evaluate_all("""items => items.every(button =>
+      if buttons.count() != 5 or not buttons.evaluate_all("""items => items.every(button =>
         button.getAttribute("aria-label")
         && button.title
         && button.querySelector("svg")
@@ -4940,7 +4940,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       ):
         failures.append(Failure(page_name, f"selected table cell has no visible focus outline: {selected_cell_state}"))
       label_texts = toolbar.locator(".sphinx-preview-table-menu-label").all_text_contents()
-      if label_texts != ["Row +", "Row \u2212", "Col +", "Col \u2212"]:
+      if label_texts != ["Row +", "Row \u2212", "Col +", "Col \u2212", "List table"]:
         failures.append(Failure(page_name, f"table action bar labels are wrong: {label_texts}"))
       check_cell_bar_formatting(page, page_name, scenario, toolbar, failures)
       cell_input = editor.locator("textarea[aria-label='Markdown table cell']")
