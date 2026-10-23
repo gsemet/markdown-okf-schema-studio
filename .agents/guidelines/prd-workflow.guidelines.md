@@ -207,6 +207,9 @@ pushing once their PR is in the stack. Changing a lower PR means restacking ever
 - One driver per worktree; PRD folders stay in the main checkout (absolute paths).
 - Two CRs never run app-window tests locally at the same time; CI runs the full gate.
 - No agent starts a new backlog item or merges a PR: the user decides.
+- Everything written to the repository or GitHub is in English (commits, PR titles and bodies,
+  code, docs), whatever language the user speaks. A decision an agent took without the user is
+  listed in the PR body under "Autonomous decisions".
 - Shell commands never wait for input: `rm`, `cp` and `mv` may be aliased to `-i`, so call them
   as `\rm`, `\cp`, `\mv` to bypass the alias.
 

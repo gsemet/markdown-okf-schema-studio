@@ -1,3 +1,5 @@
+<!-- Write the whole PR (title and body) in English. -->
+
 ## Summary
 
 <!-- Why: the user problem or limitation this solves, in two or three sentences. -->
