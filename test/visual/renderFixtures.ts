@@ -12,6 +12,7 @@ import { execFileSync } from "node:child_process";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { listGlobDocuments } from "../../src/render/documentGlob";
 import { renderMyst } from "../../src/render/mystRenderer";
 import { renderMathHtml } from "../../src/render/mathRenderer";
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
@@ -82,7 +83,17 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
   const sourcePath = path.join(fixtureDirectory, `${fixture}.md`);
   const documentDirectory = path.dirname(sourcePath);
   const source = fs.readFileSync(sourcePath, "utf8");
-  const { html, diagnostics } = await renderMyst(source);
+  const { html, diagnostics } = await renderMyst(source, {
+    sourcePath,
+    resolveInclude: (request, from) => {
+      const target = path.resolve(path.dirname(from), request);
+      if (!target.startsWith(fixtureDirectory + path.sep) || !fs.existsSync(target) || !fs.statSync(target).isFile()) {
+        return undefined;
+      }
+      return { path: target, source: fs.readFileSync(target, "utf8") };
+    },
+    listDocuments: (pattern, from) => listGlobDocuments(pattern, path.dirname(from), () => true, from),
+  });
 
   const policy = createPreviewResourcePolicy(documentDirectory, visualRoot);
   const resolveResource = (request: string, baseDirectory: string): ResolvedResource | undefined => {

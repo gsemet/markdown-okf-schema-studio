@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import { performance } from "node:perf_hooks";
 import * as path from "node:path";
 
+import { listGlobDocuments } from "./documentGlob";
 import { renderMyst, RenderDiagnostic } from "./mystRenderer";
 import {
   renderPlantUmlDiagrams,
@@ -177,6 +178,12 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
             return undefined;
           }
         },
+        listDocuments: (pattern, sourcePath) => listGlobDocuments(
+          pattern,
+          path.dirname(sourcePath),
+          (candidate) => resourcePolicy.resolveResource(candidate, path.dirname(sourcePath)) !== undefined,
+          sourcePath,
+        ),
       });
     html = rendered.html;
     if (!renderOverride && "dependencies" in rendered) {

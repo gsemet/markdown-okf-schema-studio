@@ -2,6 +2,7 @@ import {
   DEFAULT_PREVIEW_CONTENT_WIDTH,
   normalizePreviewContentWidth,
 } from "../configuration/previewConfiguration";
+import { gridColumnCss } from "../render/mystGridToctree";
 
 /**
  * Stylesheets injected into every preview webview.
@@ -3490,6 +3491,123 @@ html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > 
   padding: 0 0.15em;
   border-bottom: 1px dotted currentColor;
   cursor: help;
+}
+
+/* MyST {grid}: the column count follows the pane width (container queries), one column when narrow. */
+#sphinx-myst-preview-content .myst-grid {
+  container-type: inline-size;
+  margin: 1.2em 0;
+}
+
+#sphinx-myst-preview-content .myst-grid-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1em;
+}
+
+${gridColumnCss()}
+
+#sphinx-myst-preview-content .myst-grid-item {
+  min-width: 0;
+}
+
+#sphinx-myst-preview-content .myst-grid-item > :first-child {
+  margin-top: 0;
+}
+
+#sphinx-myst-preview-content .myst-grid-item > :last-child {
+  margin-bottom: 0;
+}
+
+#sphinx-myst-preview-content .myst-grid-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--sphinx-preview-border);
+  border-radius: 6px;
+  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
+  color: var(--vscode-editor-foreground, inherit);
+}
+
+#sphinx-myst-preview-content .myst-grid-card-title {
+  padding: 0.7em 1em 0;
+  font-weight: 600;
+}
+
+#sphinx-myst-preview-content .myst-grid-card-header,
+#sphinx-myst-preview-content .myst-grid-card-footer {
+  padding: 0.5em 1em;
+  border-color: var(--sphinx-preview-border);
+  border-style: solid;
+  border-width: 0;
+  color: var(--vscode-descriptionForeground, inherit);
+  font-size: 0.9em;
+}
+
+#sphinx-myst-preview-content .myst-grid-card-header {
+  border-bottom-width: 1px;
+}
+
+#sphinx-myst-preview-content .myst-grid-card-footer {
+  border-top-width: 1px;
+}
+
+#sphinx-myst-preview-content .myst-grid-card-body {
+  flex: 1 1 auto;
+  padding: 0.7em 1em;
+}
+
+#sphinx-myst-preview-content .myst-grid-card-body > :first-child,
+#sphinx-myst-preview-content .myst-grid-card-header > :first-child,
+#sphinx-myst-preview-content .myst-grid-card-footer > :first-child {
+  margin-top: 0;
+}
+
+#sphinx-myst-preview-content .myst-grid-card-body > :last-child,
+#sphinx-myst-preview-content .myst-grid-card-header > :last-child,
+#sphinx-myst-preview-content .myst-grid-card-footer > :last-child {
+  margin-bottom: 0;
+}
+
+/* The whole card is the click target of its link. */
+#sphinx-myst-preview-content .myst-grid-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* MyST {toctree}: a list of links to the referenced documents. */
+#sphinx-myst-preview-content .myst-toctree {
+  margin: 1.2em 0;
+}
+
+#sphinx-myst-preview-content .myst-toctree-hidden {
+  display: none;
+}
+
+#sphinx-myst-preview-content .myst-toctree-caption {
+  margin: 0 0 0.4em;
+  font-size: 0.85em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground, inherit);
+}
+
+#sphinx-myst-preview-content .myst-toctree-list {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+#sphinx-myst-preview-content .myst-toctree-missing {
+  border-bottom: 1px dashed var(--vscode-charts-orange, #d18616);
+  color: var(--vscode-charts-orange, #d18616);
+  cursor: help;
+}
+
+#sphinx-myst-preview-content .myst-toctree-missing::before {
+  content: "\\26A0\\FE0E\\00A0";
 }
 
 #sphinx-myst-preview-content .myst-directive {
