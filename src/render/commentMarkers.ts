@@ -9,6 +9,8 @@
  * Tool comments (`markdownlint-*`, `prettier-ignore`, `toc`, `cspell:`, `vale `) stay hidden.
  */
 
+import { parseThreadBody, type ThreadMessage } from "../comments/inlineThread";
+
 export interface CommentMarkerNode {
   type: string;
   children?: CommentMarkerNode[];
@@ -17,7 +19,7 @@ export interface CommentMarkerNode {
   data?: Record<string, unknown>;
 }
 
-export type CommentKind = "comment" | "todo";
+export type CommentKind = "comment" | "todo" | "thread";
 
 interface HastText {
   type: "text";
@@ -89,7 +91,9 @@ function chip(label: string, kind: CommentKind, title: string): HastElement {
   return element(
     "span",
     {
-      className: kind === "todo" ? ["okf-chip", "okf-chip--todo"] : ["okf-chip"],
+      className: kind === "todo"
+        ? ["okf-chip", "okf-chip--todo"]
+        : kind === "thread" ? ["okf-chip", "okf-chip--thread"] : ["okf-chip"],
       role: "button",
       tabIndex: 0,
       title,
@@ -108,12 +112,52 @@ function setHast(
   node.data = { ...(node.data ?? {}), hName: tagName, hProperties: properties, hChildren: children };
 }
 
+function threadChipLabel(messages: ThreadMessage[]): string {
+  return messages.length > 1 ? `${messages[0].author} (${messages.length})` : messages[0].author;
+}
+
+/** A `<!-- THREAD` comment: a green chip with the first author, a body with one entry per message. */
+function threadNode(
+  node: CommentMarkerNode,
+  messages: ThreadMessage[],
+  positionProperties: Record<string, number | string>,
+): void {
+  const title = messages.map((message) => `${message.author} (${message.date}): ${message.text}`).join("\n");
+  const entries = messages.map((message) => element("div", { className: ["okf-thread-message"] }, [
+    element("div", { className: ["okf-thread-head"] }, [
+      element("span", { className: ["okf-thread-author"] }, [text(message.author)]),
+      element("span", { className: ["okf-thread-date"] }, [text(message.date)]),
+    ]),
+    element("div", { className: ["okf-thread-text"] }, [text(message.text)]),
+  ]));
+  const threadChip = chip(threadChipLabel(messages), "thread", title);
+  setHast(
+    node,
+    "div",
+    {
+      class: "okf-comment",
+      "data-okf-comment-kind": "thread",
+      "data-okf-thread-count": messages.length,
+      ...positionProperties,
+    },
+    [threadChip, element("div", { className: ["okf-comment-body"], hidden: true }, entries)],
+  );
+  node.type = "okfComment";
+  node.value = undefined;
+  node.children = [];
+}
+
 function commentNode(
   node: CommentMarkerNode,
   body: string,
   block: boolean,
   positionProperties: Record<string, number | string>,
 ): void {
+  const messages = block ? parseThreadBody(body) : undefined;
+  if (messages) {
+    threadNode(node, messages, positionProperties);
+    return;
+  }
   const kind: CommentKind = TODO_COMMENT.test(body) ? "todo" : "comment";
   const wrapper = block ? "div" : "span";
   setHast(

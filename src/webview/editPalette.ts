@@ -152,6 +152,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     link: svg("M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"),
     rule: svg("M3 12h18M8 7h8M8 17h8"),
     todo: svg("M5 4v17M5 5h12l-2 4 2 4H5"),
+    thread: svg("M4 4h16v12H10l-5 4v-4H4z"),
     alert: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5v5.5M12 16v.5") + caret,
     checkbox: svg("M5 5h14v14H5zM8.5 12l2.5 2.5 4.5-5"),
     htmlTable: svg("M4 5h16v14H4zM4 10h16M9 12.5l-1.7 1.7L9 16M15 12.5l1.7 1.7L15 16"),

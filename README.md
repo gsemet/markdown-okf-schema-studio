@@ -41,6 +41,12 @@ Markdown flavours and extensions:
   Alt+Up/Down moves the focused block; Cmd/Ctrl+Alt+Up/Down does it from the block text box.
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
+  The Thread button (or `/thread`) inserts an inline comment thread after the block: a
+  `<!-- THREAD` comment holding `Author (YYYY-MM-DD HH:MM):` headers, each followed by the indented
+  text of the message. In the preview it is a green chip with a speech bubble; click it to read the
+  messages, type a reply (Cmd/Ctrl+Enter or Reply) or delete the whole thread. A reply is appended
+  with your name (`comments.authorName`, else your Git `user.name`) and the local time and changes
+  nothing else in the file; one undo step each.
   Block selection: Shift+click selects the blocks between the last clicked block and the one you
   click, Shift+Up/Down extends or shrinks the selection, Escape or a click clears it.
   With a selection, Cmd/Ctrl+C copies its exact Markdown, Cmd/Ctrl+X cuts it (one undo step), and
@@ -306,8 +312,8 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
 - `preview.showComments` (default on): show HTML comments as gray chips; click one (or press Enter
   or Space on it) to open the comment text in a box under the line. Each chip is labelled
   "comment". The Comments button of the toolbar hides and shows them in both preview and edit mode
-  (remembered per workspace, shown by default). Off here hides the gray chips in open previews at
-  once and removes that button. TODO chips always show.
+  (remembered per workspace, shown by default). Off here hides the gray chips and the green thread chips in open
+  previews at once and removes that button. TODO chips always show.
 - `comments.authorName` (default empty): the name stored with the review comments you write in the
   preview. Empty uses your Git `user.name`, then your operating system user name.
 - `preview.showIncomingChanges` (default on): mark blocks changed since the last Git commit

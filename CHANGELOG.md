@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- New inline comment threads: a `<!-- THREAD` comment with `Author (YYYY-MM-DD HH:MM):` headers and
+  indented messages shows in the preview as a green chip with a speech bubble. Click it to read the
+  messages in a box, reply (your name and the time are added) or delete the thread; the rest of the
+  file is left byte for byte as it was. Start one from the Thread button or `/thread`. The
+  `preview.showComments` setting hides thread chips with the gray ones.
 - MyST `{grid}` and `{toctree}` now render in the preview instead of showing a "not available"
   placeholder. A grid lays out its `grid-item` and `grid-item-card` blocks (title, header, body,
   footer, and a link that makes the whole card clickable) in the number of columns given by its

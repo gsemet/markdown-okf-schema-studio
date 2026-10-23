@@ -190,6 +190,7 @@ export function createEditActions(
   languages: string[] = [],
   tableTools?: MarkdownTableTools,
   isSafeColor?: (value: string) => boolean,
+  threadAuthor?: string,
 ): EditActionRegistry {
   const isSpace = (char: string): boolean => /\s/u.test(char);
   const isWordChar = (char: string): boolean => /[\p{L}\p{N}_]/u.test(char);
@@ -365,6 +366,37 @@ export function createEditActions(
     };
   }
 
+
+  /**
+   * Inserts an inline comment thread after the block at the caret, with the first message started
+   * by `threadAuthor` (the Git user) and the local date, and the caret on its text line:
+   * `<!-- THREAD`, `Author (YYYY-MM-DD HH:MM):`, an indented line, `-->`.
+   */
+  function insertThread(ctx: EditActionContext): TextEdit | undefined {
+    if (!validSelection(ctx)) return undefined;
+    const { value } = ctx;
+    const { firstStart, lastEnd } = touchedLines({ ...ctx, selectionStart: ctx.selectionEnd });
+    const blank = value.slice(firstStart, lastEnd).trim() === "";
+    const start = blank ? firstStart : lastEnd;
+    const lead = value.slice(0, start);
+    const gap = !blank
+      ? "\n\n"
+      : lead === "" || lead.endsWith("\n\n")
+        ? ""
+        : lead.endsWith("\n")
+          ? "\n"
+          : "\n\n";
+    const end = value.charAt(lastEnd) === "\n" ? lastEnd + 1 : lastEnd;
+    const now = new Date();
+    const two = (number: number): string => String(number).padStart(2, "0");
+    const stamp = now.getFullYear() + "-" + two(now.getMonth() + 1) + "-" + two(now.getDate())
+      + " " + two(now.getHours()) + ":" + two(now.getMinutes());
+    const author = String(threadAuthor ?? "").replace(/[\u0000-\u001f\u007f]/gu, " ").replace(/\s+/gu, " ").trim() || "Anonymous";
+    const head = gap + "<!-- THREAD\n" + author + " (" + stamp + "):\n  ";
+    const text = head + "\n-->\n\n";
+    const caret = start + head.length;
+    return { start, end, text, selectionStart: caret, selectionEnd: caret };
+  }
 
   /** The lines a selection touches (a selection ending at a line start excludes that line). */
   function touchedLines(ctx: EditActionContext) {
@@ -1866,6 +1898,17 @@ export function createEditActions(
       scopes: ["block"],
       shortcut: { codes: ["Slash"], keys: ["/"], anyShift: true, modifier: "any" },
       apply: toggleTodo,
+    },
+    {
+      id: "thread",
+      slash: { aliases: ["thread", "discussion", "comment"] },
+      label: "Thread",
+      title: "Insert a comment thread",
+      icon: "thread",
+      group: "annotation",
+      modes: ["strict"],
+      scopes: ["block"],
+      apply: insertThread,
     },
     {
       id: "alert",

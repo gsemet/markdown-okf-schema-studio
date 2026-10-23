@@ -28,6 +28,7 @@ import { installLinkNavigation } from "./linkNavigation";
 import { installHistoryControls } from "./historyControls";
 import { installTocColumn } from "./tocColumn";
 import { installChipToggle } from "./chipToggle";
+import { installInlineThreads } from "./inlineThread";
 import { installIncomingChanges } from "./incomingChanges";
 import { installCommentCompose } from "./commentCompose";
 import { installCommentThreads } from "./commentThreads";
@@ -63,6 +64,8 @@ export interface PreviewRuntimeContext extends ScrollContext {
   stickyHeadingDepth?: number;
   /** True in writable previews: the page offers the Comment button and the reply box (T43). */
   commentsEnabled?: boolean;
+  /** The name a new inline comment thread starts with (comments.authorName, else the Git user). */
+  threadAuthor?: string;
   /** False hides the gray comment chips (preview.showComments). */
   showComments?: boolean;
   themeKind?: number;
@@ -95,7 +98,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const textEditing = (${createTextEditingTools.toString()})();
   const blockSelection = (${createBlockSelection.toString()})();
   const isSafeOkfColor = ${isSafeOkfColor.toString()};
-  const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())}, tableTools, isSafeOkfColor);
+  const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())}, tableTools, isSafeOkfColor, context.threadAuthor);
   const createEditPalette = ${createEditPalette.toString()};
   const caretRectOf = ${caretRectOf.toString()};
   const createSlashMenu = ${createSlashMenu.toString()};
@@ -295,6 +298,13 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   const checkboxEditingEnabled = Boolean(editModeButton);
   const checkboxSelector = "input.myst-checkbox";
   const pendingCheckboxToggles = new Map();
+  // Inline threads (<!-- THREAD): the reply box and Delete of an open thread; the host edits the file.
+  const inlineThreads = (${installInlineThreads.toString()})(document, {
+    enabled: checkboxEditingEnabled,
+    blockedReason: () => activeBlockEdit || activeFrontmatterEdit
+      ? "Save or cancel the open edit before changing a thread." : undefined,
+    ask: (type, payload, done) => hostRequests.ask(type, payload, {}, done),
+  });
   const mappingsSelector = "[data-sphinx-source-file][data-sphinx-source-line]";
   let layout = [];
   let anchorMap = [];
@@ -4906,6 +4916,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     firstClearance.update();
     tocColumn.refresh();
     chipToggle.apply();
+    inlineThreads.apply();
     incomingChanges.apply();
     // Idempotent: puts the last threads back on replaced content; skips blocks being edited.
     commentThreads.apply();
@@ -5242,6 +5253,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (event.target instanceof Element && event.target.closest(".sphinx-preview-insert-point")) return;
     // A chip is reserved for expanding its comment; the rest of the block edits.
     if (event.target instanceof Element && event.target.closest(".okf-chip")) return;
+    // The open thread is a small form of its own: clicking in it never opens the block editor.
+    if (event.target instanceof Element
+      && event.target.closest('.okf-comment[data-okf-comment-kind="thread"] > .okf-comment-body')) return;
     const target = event.target instanceof Element
       ? event.target.closest(mappingsSelector)
       : undefined;

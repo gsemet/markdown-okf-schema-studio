@@ -20,6 +20,7 @@ import { run as runCommentWrite } from "./commentWrite.test";
 import { run as runReviewComments } from "./reviewComments.test";
 import { run as runBlockMove } from "./blockMove.test";
 import { run as runBlockClipboard } from "./blockClipboard.test";
+import { run as runInlineThread } from "./inlineThread.test";
 import { run as runLabelRename } from "./labelRename.test";
 import { run as runMystPickers } from "./mystPickers.test";
 import { run as runPaletteMode } from "./paletteMode.test";
@@ -115,6 +116,7 @@ export async function run(): Promise<void> {
   await runPreviewHistory();
   await runPaletteMode();
   await runLabelRename();
+  await runInlineThread();
   await runBlockMove();
   await runBlockClipboard();
   await runMystPickers();

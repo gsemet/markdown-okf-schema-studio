@@ -3039,6 +3039,159 @@ def check_comment_toggle(page: Page, scenario: dict, failures: list[Failure]) ->
     failures.append(Failure(page_name, f"the final frame must have the gray chips {final}"))
 
 
+def check_inline_thread(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """An inline comment thread: green chip with a bubble, a titled green box, reply and delete requests, the switch."""
+  if not scenario.get("inlineThreadChecks"):
+    return
+  page_name = scenario["page"]
+  chip = "div.okf-comment[data-okf-comment-kind='thread'] > .okf-chip"
+  gray = "div.okf-comment[data-okf-comment-kind='comment'] > .okf-chip"
+  measure = """selector => {
+    const chip = document.querySelector(selector);
+    if (!chip) return null;
+    const wrapper = chip.parentElement;
+    const body = wrapper.querySelector('.okf-comment-body');
+    const box = body.getBoundingClientRect();
+    const style = getComputedStyle(body);
+    const shown = style.display !== 'none';
+    const root = document.documentElement;
+    const green = getComputedStyle(document.documentElement).getPropertyValue('--vscode-charts-green').trim();
+    const bubble = getComputedStyle(chip, '::before');
+    return {
+      expanded: chip.getAttribute('aria-expanded'),
+      shown,
+      title: shown ? getComputedStyle(body, '::before').content : null,
+      top: box.top + window.scrollY,
+      chipBottom: chip.getBoundingClientRect().bottom + window.scrollY,
+      barWidth: style.borderInlineStartWidth,
+      barColor: style.borderInlineStartColor,
+      chipColor: getComputedStyle(chip).color,
+      chipBorder: getComputedStyle(chip).borderTopColor,
+      bubbleMask: bubble.maskImage || bubble.webkitMaskImage,
+      bubbleWidth: bubble.width,
+      label: chip.textContent,
+      messages: body.querySelectorAll('.okf-thread-message').length,
+      heads: [...body.querySelectorAll('.okf-thread-head')].map(h => h.textContent),
+      replyBox: !!body.querySelector('textarea'),
+      replyButton: !!body.querySelector('button[data-okf-thread-reply]'),
+      deleteButton: !!body.querySelector('button[data-okf-thread-delete]'),
+      right: box.right,
+      pane: root.clientWidth,
+      overflowX: root.scrollWidth - root.clientWidth,
+    };
+  }"""
+  try:
+    page.evaluate("window.scrollTo(0, 0)")
+    closed = page.evaluate(measure, chip)
+    if not closed or closed["shown"] or closed["expanded"] != "false":
+      failures.append(Failure(page_name, f"a thread must start closed: {closed}"))
+      return
+    if closed["label"] != "Ada Lovelace (2)":
+      failures.append(Failure(page_name, f"the thread chip shows the first author and the count: {closed['label']!r}"))
+    if closed["bubbleMask"] in (None, "", "none") or closed["bubbleWidth"] in ("auto", "0px"):
+      failures.append(Failure(page_name, f"the thread chip has no speech bubble: {closed['bubbleMask']!r} {closed['bubbleWidth']}"))
+    if closed["chipColor"] == chip_color(page, gray):
+      failures.append(Failure(page_name, "the thread chip must be green, not the gray comment color"))
+    save_step(page, scenario, "collapsed", caret="hide")
+    page.locator(chip).first.click()
+    page.wait_for_timeout(150)
+    opened = page.evaluate(measure, chip)
+    if opened["expanded"] != "true" or not opened["shown"]:
+      failures.append(Failure(page_name, "a click on the thread chip did not open the thread"))
+      return
+    if opened["title"] != '"Thread"':
+      failures.append(Failure(page_name, f"the open thread must be titled Thread: {opened['title']}"))
+    if opened["barWidth"] != "4px" or opened["barColor"] != opened["chipColor"]:
+      failures.append(Failure(page_name, f"the open thread needs a green accent bar: {opened['barWidth']} {opened['barColor']} vs {opened['chipColor']}"))
+    if opened["top"] < opened["chipBottom"] - 1:
+      failures.append(Failure(page_name, "the open thread must sit under the chip line"))
+    if opened["messages"] != 2 or "Grace Hopper" not in " ".join(opened["heads"]) or "2026-10-16 10:52" not in " ".join(opened["heads"]):
+      failures.append(Failure(page_name, f"the open thread lists both messages with author and date: {opened['heads']}"))
+    if not (opened["replyBox"] and opened["replyButton"] and opened["deleteButton"]):
+      failures.append(Failure(page_name, f"the open thread needs a reply box, Reply and Delete thread: {opened}"))
+    if opened["right"] > opened["pane"] or opened["overflowX"] > 0:
+      failures.append(Failure(page_name, "the open thread overflows the pane"))
+
+    # Reading line: the paragraph after the thread does not move when the thread above it closes and opens.
+    target = "document.querySelectorAll('#sphinx-myst-preview-content h2')[0].getBoundingClientRect().top"
+    page.evaluate("document.querySelectorAll('#sphinx-myst-preview-content h2')[0].scrollIntoView()")
+    page.wait_for_timeout(400)
+    before = page.evaluate(target)
+    page.evaluate(f"document.querySelector(\"{chip}\").click()")
+    page.wait_for_timeout(400)
+    if abs(page.evaluate(target) - before) > 2:
+      failures.append(Failure(page_name, "closing the thread above moved the reading line"))
+    page.evaluate(f"document.querySelector(\"{chip}\").click()")
+    page.wait_for_timeout(400)
+    if abs(page.evaluate(target) - before) > 2:
+      failures.append(Failure(page_name, "opening the thread above moved the reading line"))
+    page.evaluate("window.scrollTo(0, 0)")
+    page.wait_for_timeout(200)
+
+    # Reply and Delete talk to the host with the source lines; nothing is sent for an empty reply.
+    body = "div.okf-comment[data-okf-comment-kind='thread'] > .okf-comment-body"
+    page.evaluate("window.visualMessages.length = 0")
+    page.locator(f"{body} button[data-okf-thread-reply]").click()
+    page.wait_for_timeout(100)
+    if page.evaluate("window.visualMessages.filter(m => m.type === 'previewThreadReply').length") != 0:
+      failures.append(Failure(page_name, "an empty reply must not be sent"))
+    page.locator(f"{body} textarea").fill("Thanks, resolved.")
+    page.locator(f"{body} button[data-okf-thread-reply]").click()
+    page.wait_for_timeout(100)
+    sent = page.evaluate("window.visualMessages.filter(m => m.type === 'previewThreadReply')")
+    if len(sent) != 1 or sent[0].get("line") != 5 or sent[0].get("endLine") != 11 or sent[0].get("text") != "Thanks, resolved.":
+      failures.append(Failure(page_name, f"Reply must send the thread lines and the text: {sent}"))
+    else:
+      # The host answers: the box is emptied and the buttons are usable again.
+      page.evaluate("""editId => window.dispatchEvent(new MessageEvent('message', { data: {
+        type: 'previewThreadReplyResult', editId, ok: true } }))""", sent[0]["editId"])
+      page.wait_for_timeout(100)
+      if page.locator(f"{body} textarea").input_value() != "":
+        failures.append(Failure(page_name, "the reply box must be emptied once the host saved the reply"))
+    page.locator(f"{body} button[data-okf-thread-delete]").click()
+    page.wait_for_timeout(100)
+    removed = page.evaluate("window.visualMessages.filter(m => m.type === 'previewThreadDelete')")
+    if len(removed) != 1 or removed[0].get("line") != 5 or removed[0].get("endLine") != 11:
+      failures.append(Failure(page_name, f"Delete thread must send the thread lines: {removed}"))
+    else:
+      page.evaluate("""editId => window.dispatchEvent(new MessageEvent('message', { data: {
+        type: 'previewThreadDeleteResult', editId, ok: true } }))""", removed[0]["editId"])
+      page.wait_for_timeout(100)
+
+    # The switch: the thread goes with the gray chips, the TODO chip stays.
+    send = """show => {
+      const root = document.documentElement;
+      window.postMessage({
+        type: 'previewShowComments', showComments: show,
+        documentId: root.getAttribute('data-sphinx-preview-document-id'),
+        documentVersion: Number(root.getAttribute('data-sphinx-preview-document-version')),
+        requestId: Number(root.getAttribute('data-sphinx-preview-request-id')),
+      }, '*');
+    }"""
+    page.evaluate(send, False)
+    page.wait_for_timeout(300)
+    if page.evaluate("[...document.querySelectorAll('.okf-comment[data-okf-comment-kind=thread]')].some(e => e.getClientRects().length > 0)"):
+      failures.append(Failure(page_name, "the thread is still visible with showComments off"))
+    if not page.evaluate("[...document.querySelectorAll('.okf-chip--todo')].every(e => e.getClientRects().length > 0)"):
+      failures.append(Failure(page_name, "TODO chips must stay with showComments off"))
+    page.evaluate(send, True)
+    page.wait_for_timeout(300)
+    if not page.evaluate("[...document.querySelectorAll('.okf-comment[data-okf-comment-kind=thread]')].every(e => e.getClientRects().length > 0)"):
+      failures.append(Failure(page_name, "the thread did not come back with showComments on"))
+  finally:
+    page.evaluate("window.scrollTo(0, 0)")
+  # The capture shows the thread open with a reply being typed.
+  if page.evaluate(measure, chip)["expanded"] != "true":
+    page.locator(chip).first.click()
+  page.locator("div.okf-comment[data-okf-comment-kind='thread'] > .okf-comment-body textarea").fill("Thanks, I will update the draft.")
+  page.wait_for_timeout(200)
+
+
+def chip_color(page: Page, selector: str) -> str | None:
+  """The text color of a chip, or None when the page has none of that kind."""
+  return page.evaluate("selector => { const e = document.querySelector(selector); return e ? getComputedStyle(e).color : null; }", selector)
+
+
 FIRST_ELEMENT_GAP = 40
 FIRST_ELEMENT_TOLERANCE = 4
 FIRST_GAP_REPORT_DIR = VISUAL_REPORT_DIR / "first-gap"
@@ -3371,7 +3524,7 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
   if not mode:
     return
   page_name = scenario["page"]
-  strict = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo"]
+  strict = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread"]
   gfm = strict + ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
   myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
   expected = {"strict": strict, "gfm": gfm, "myst": myst}[mode]
@@ -3421,7 +3574,7 @@ def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> Non
     return
   mode = shot["mode"]
   page_name = scenario["page"]
-  strict = ["heading", "bold", "italic", "strikethrough", "color", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo"]
+  strict = ["heading", "bold", "italic", "strikethrough", "color", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread"]
   gfm = strict + ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
   myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
   # The palette's buttons (minus the caret-dependent colour code) plus the two menu-only list entries.
@@ -3861,7 +4014,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   }""")
   if not geometry["first"]:
     failures.append(Failure(page_name, "the palette is not on top of the edit box (previous sibling, outside the frame)"))
-  expected = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd", "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
+  expected = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd", "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
   if geometry["labels"] != expected:
     failures.append(Failure(page_name, f"palette buttons are {geometry['labels']}, expected {expected}"))
   if geometry["barBottom"] > geometry["frameTop"] + 0.5 or geometry["frameTop"] - geometry["barBottom"] > 6:
@@ -5656,7 +5809,7 @@ def check_mermaid_error_theme_switch(page: Page, scenario: dict, failures: list[
 # Every step PNG a check can write (`<scenario id>-<step>.png`). A scenario's `steps` list selects
 # which of them are written; the other steps are skipped silently (their check still runs) and a
 # name that is not in this registry fails the check that asks for it.
-STEP_NAMES = frozenset({"alert", "arrowdown", "bar", "cell-bar", "cell-emoji", "colour", "colour-code", "emoji", "end", "filtered", "flip", "grid", "hover", "insert-point", "menu", "nomatch", "open", "palette", "pasted", "selected", "top"})
+STEP_NAMES = frozenset({"alert", "arrowdown", "bar", "cell-bar", "cell-emoji", "collapsed", "colour", "colour-code", "emoji", "end", "filtered", "flip", "grid", "hover", "insert-point", "menu", "nomatch", "open", "palette", "pasted", "selected", "top"})
 
 
 def save_step(page: Page, scenario: dict, step: str, caret: str = "hide",
@@ -5826,7 +5979,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_inline_thread, check_change_bar, check_code_copy, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

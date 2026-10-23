@@ -13,6 +13,7 @@
  */
 
 import { isValidAnchor, MAX_BODY_LENGTH } from "../comments/commentModel";
+import { MAX_THREAD_REPLY_LENGTH } from "../comments/inlineThread";
 import { isValidLabelName } from "../mapping/labelRename";
 import { isBase64, MAX_PASTED_IMAGE_BASE64_LENGTH, PASTED_IMAGE_MIME_TYPES } from "../mapping/pastedImage";
 
@@ -101,6 +102,13 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   // Rename of a MyST label from its anchor icon: the source line of `(oldName)=` and both names.
   previewLabelRename: (message) => isSourceLine(message.line)
     && isValidLabelName(message.oldName) && isValidLabelName(message.newName),
+  // Inline comment threads (`<!-- THREAD`): reply to or delete the thread at these source lines.
+  // The host picks the author and the time and re-checks that the lines are still a thread.
+  previewThreadReply: (message) => isHostRequest(message) && isSourceLine(message.line)
+    && isSourceLine(message.endLine) && (message.endLine as number) >= (message.line as number)
+    && isBoundedString(message.text, MAX_THREAD_REPLY_LENGTH) && message.text.trim() !== "",
+  previewThreadDelete: (message) => isHostRequest(message) && isSourceLine(message.line)
+    && isSourceLine(message.endLine) && (message.endLine as number) >= (message.line as number),
   // Move of a body block past its neighbour from the "+" bar: both line ranges, the direction and
   // the moved block's viewport top (the host knows the new line). The host re-checks the ranges.
   previewBlockMove: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)

@@ -184,6 +184,8 @@ export interface Scenario {
    * is the state left for the screenshot.
    */
   commentToggleChecks?: "visible" | "hidden";
+  /** Opens and closes an inline comment thread, checks its box, the reply and delete controls and the show-comments switch. */
+  inlineThreadChecks?: boolean;
   /** Sends the "changed" blocks of the fixture as incoming changes and checks every bar sits in one column at the page margin, square, as tall as its block, and nothing moves. */
   changeBarChecks?: boolean;
   /** Figure width and alignment, and the anchor icon of a (label)= target (T27). */
@@ -2047,6 +2049,25 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
       + "each comment is a chip labelled comment (a green TODO chip for the TODO comment), never a `<!--` label. "
       + "The toolbar Comments button, in preview and in edit mode, hides the gray chips and brings them back "
       + `(TODO stays). The final frame has the gray chips ${state}.`,
+  })),
+  ...([
+    ["light", undefined, "11"],
+    ["dark", undefined, "12"],
+    ["dark", "cream", "13"],
+  ] as const).map(([theme, mode, number]) => ({
+    id: `review-annotations/v${number}-inline-thread-${mode ?? theme}-900`,
+    fixture: "46-inline-thread",
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    inlineThreadChecks: true,
+    description: "An inline comment thread next to a gray comment chip and a TODO chip. The thread is a "
+      + "green chip led by a speech bubble and the first author. A click opens a green box titled Thread "
+      + "with one entry per message (author, date, text), a reply box and a Delete thread button; a second "
+      + "click closes it. Reply and Delete send the host the source lines of the thread; an empty reply is "
+      + "not sent. Turning preview.showComments off hides the thread with the gray chips. The final frame "
+      + "has the thread open with a reply being typed.",
   })),
   ...(["light", "dark"] as const).map((theme) => ({
     id: `review-annotations/v0${theme === "light" ? 5 : 6}-change-bar-${theme}-900`,
