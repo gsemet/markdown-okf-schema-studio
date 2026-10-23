@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 import * as vm from "node:vm";
 
+import { pageLiveStateMessages, type PageIdentity } from "../../src/preview/pageLiveState";
 import { PREVIEW_THEME_CSS } from "../../src/preview/previewStyles";
 import { highlightLanguageNames } from "../../src/render/highlight";
 import {
@@ -5810,6 +5811,24 @@ test("T38: an unpaired preview disables the anchor button and a previewPairing m
   });
   assert.equal(harness.anchorButton.disabled, true);
   assert.equal(harness.anchorButton.getAttribute("title"), NO_EDITOR_TOOLTIP);
+});
+
+test("a page whose pairing and theme messages were lost while it loaded gets both from the host's answer to its ready report", () => {
+  // The page loaded with the context of a render made before a text editor showed the file. The
+  // host's previewPairing and themeChanged reached the document before its runtime listened (VS
+  // Code delivers queued messages a fixed delay after writing the document), so the page never saw
+  // them: this harness never dispatches them.
+  const harness = createRuntimeHarness({ pairedTextEditor: false });
+  assert.equal(harness.anchorButton.disabled, true);
+  const ready = harness.messages.find((message) => message.type === "previewReady") as PageIdentity | undefined;
+  assert.ok(ready, "the page reports ready once it listens");
+  for (const message of pageLiveStateMessages(ready, { pairedTextEditor: true, themeKind: 2 })) {
+    harness.dispatchMessage(message);
+  }
+  assert.equal(harness.anchorButton.disabled, false);
+  assert.equal(harness.anchorButton.getAttribute("title"), "Preview and text editor scroll together");
+  assert.equal(harness.anchorButton.getAttribute("aria-label"), "Anchor preview to text editor");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme"), "2");
 });
 
 test("T38: a paired preview keeps the anchor button enabled, and a foreign previewPairing is ignored", () => {

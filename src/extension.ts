@@ -123,6 +123,7 @@ import {
 } from "./preview/contentPatch";
 import { FLUSH_WAIT_MS, flushRefusalMessage, LatestRequest, waitForAnswer, waitForSettled } from "./preview/flushWait";
 import { isRegisteredPreviewMessage, type RegisteredPreviewMessage } from "./preview/previewMessages";
+import { pageLiveStateMessages, type PageIdentity } from "./preview/pageLiveState";
 import {
   PreviewDiagnostic,
   PreviewDocument,
@@ -4312,6 +4313,8 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     markEditorSelectionInPreview(preview);
     // The page starts with both buttons disabled: tell it what the history of this panel allows.
     postHistoryState(preview);
+    // A pairing or theme change announced before the page listened did not reach it.
+    postPageLiveState(preview, value);
     postShowComments(preview);
     // A freshly loaded page has no marks and assumes the marks are enabled; a patched page keeps
     // what it shows.
@@ -4677,6 +4680,22 @@ function notifyPairing(preview: ActivePreview): void {
     requestId: stage.requestId,
     pairedTextEditor: visibleEditorFor(preview) !== undefined,
   });
+}
+
+/**
+ * Answers a page's ready report with the live state it read from its render's context: a change
+ * announced while the page was still loading may have reached it before it listened.
+ */
+function postPageLiveState(preview: ActivePreview, ready: PageIdentity): void {
+  if (preview.disposed) {
+    return;
+  }
+  for (const message of pageLiveStateMessages(ready, {
+    pairedTextEditor: visibleEditorFor(preview) !== undefined,
+    themeKind: vscode.window.activeColorTheme.kind,
+  })) {
+    void preview.panel.webview.postMessage(message);
+  }
 }
 
 function notifyTheme(preview: ActivePreview): void {
