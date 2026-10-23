@@ -14,46 +14,18 @@ import {
 } from "../../src/preview/contentPatch";
 import { injectPlantUmlDiagrams } from "../../src/render/plantUmlRenderer";
 import { renderPreviewDocument } from "../../src/render/renderPipeline";
-import type { buildPreviewWebviewHtml as BuildPreviewWebviewHtml } from "../../src/preview/webview";
+import { buildPreviewWebviewHtml, setPreviewStatus } from "../../src/preview/webview";
+import { fakeAssetResolver } from "../shared/fakeAssets";
 
-// src/preview/webview.ts imports "vscode", which only exists inside the extension host. The unit
-// run supplies the few members the page builder uses, so these tests build the real page.
-interface FakeUri {
-  fsPath: string;
-  toString(): string;
-}
-const fakeUri = (fsPath: string): FakeUri => ({ fsPath, toString: () => "file://" + fsPath });
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const nodeModule = require("node:module") as {
-  _load: (request: string, ...rest: unknown[]) => unknown;
-};
-const originalLoad = nodeModule._load;
-nodeModule._load = function load(request: string, ...rest: unknown[]): unknown {
-  if (request === "vscode") {
-    return {
-      Uri: {
-        file: fakeUri,
-        joinPath: (base: FakeUri, ...parts: string[]) => fakeUri(path.join(base.fsPath, ...parts)),
-      },
-    };
-  }
-  return originalLoad.call(this, request, ...rest);
-};
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { buildPreviewWebviewHtml, setPreviewStatus } = require("../../src/preview/webview") as {
-  buildPreviewWebviewHtml: typeof BuildPreviewWebviewHtml;
-  setPreviewStatus: typeof import("../../src/preview/webview").setPreviewStatus;
-};
-nodeModule._load = originalLoad;
 
 const extensionRoot = path.resolve(__dirname, "../../..");
 const workspaceRoot = extensionRoot;
 const fixtureDirectory = path.join(workspaceRoot, "tests", "fixtures", "sphinx-features");
-const extensionUri = fakeUri(extensionRoot);
-const webview = {
+const assets = fakeAssetResolver({
   cspSource: "vscode-webview://csp",
-  asWebviewUri: (uri: FakeUri) => fakeUri("vscode-webview://resource" + uri.fsPath),
-};
+  url: (filePath) => "file://vscode-webview://resource" + filePath,
+  extensionRoot,
+});
 
 let nextRequestId = 1;
 
@@ -75,7 +47,7 @@ async function page(markdown: string, options: { requestId?: number; version?: n
   const built = buildPreviewWebviewHtml(
     result.html,
     result.stage.outputDirectory,
-    webview as never,
+    assets,
     {
       documentId: result.stage.activeDocumentIdentity,
       revision: version,
@@ -89,7 +61,6 @@ async function page(markdown: string, options: { requestId?: number; version?: n
     workspaceRoot,
     undefined,
     960,
-    extensionUri as never,
   );
   return setPreviewStatus(built.html, "success", undefined, []);
 }
@@ -312,12 +283,11 @@ test("the page script is injected verbatim even when it contains replacement pat
   const built = buildPreviewWebviewHtml(
     "<html><head></head><body><main>x</main></body></html>",
     "/tmp/out",
-    webview as never,
+    assets,
     { documentId: "file:///a.md", revision: 1, requestId: 1, activeSourceFile: tricky },
     undefined,
     undefined,
     960,
-    extensionUri as never,
   );
   assert.ok(built.html.includes(JSON.stringify(tricky)), "the source path reaches the page script unchanged");
   assert.equal(built.html.split("</body>").length, 2, "the closing tag is not duplicated by a replacement pattern");

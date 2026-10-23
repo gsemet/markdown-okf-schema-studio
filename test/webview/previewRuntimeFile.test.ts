@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { test } from "node:test";
 
 import { renderPreviewDocument } from "../../src/render/renderPipeline";
-import type { buildPreviewWebviewHtml as BuildPreviewWebviewHtml } from "../../src/preview/webview";
+import { buildPreviewWebviewHtml } from "../../src/preview/webview";
 import { shellKey } from "../../src/preview/contentPatch";
 import {
   createPreviewRuntimeScript,
@@ -13,39 +13,16 @@ import {
   type PreviewRuntimeContext,
 } from "../../src/webview/scrollSync";
 import { attribute, findElements, parseHtml, type HtmlElement } from "../rendering/dom";
+import { fakeAssetResolver } from "../shared/fakeAssets";
 
-// src/preview/webview.ts imports "vscode"; the unit run supplies the members the page builder uses.
-interface FakeUri {
-  fsPath: string;
-  toString(): string;
-}
-const fakeUri = (fsPath: string): FakeUri => ({ fsPath, toString: () => "file://" + fsPath });
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const nodeModule = require("node:module") as { _load: (request: string, ...rest: unknown[]) => unknown };
-const originalLoad = nodeModule._load;
-nodeModule._load = function load(request: string, ...rest: unknown[]): unknown {
-  if (request === "vscode") {
-    return {
-      Uri: {
-        file: fakeUri,
-        joinPath: (base: FakeUri, ...parts: string[]) => fakeUri(path.join(base.fsPath, ...parts)),
-      },
-    };
-  }
-  return originalLoad.call(this, request, ...rest);
-};
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { buildPreviewWebviewHtml } = require("../../src/preview/webview") as {
-  buildPreviewWebviewHtml: typeof BuildPreviewWebviewHtml;
-};
-nodeModule._load = originalLoad;
 
 const extensionRoot = path.resolve(__dirname, "../../..");
 const sourcePath = path.join(extensionRoot, "tests", "fixtures", "sphinx-features", "inline.md");
-const webview = {
+const assets = fakeAssetResolver({
   cspSource: "vscode-webview://csp",
-  asWebviewUri: (uri: FakeUri) => fakeUri("vscode-webview://resource" + uri.fsPath),
-};
+  url: (filePath) => "file://vscode-webview://resource" + filePath,
+  extensionRoot,
+});
 
 async function page(markdown: string, requestId: number, maxContentWidth?: number): Promise<{ html: string; context: PreviewRuntimeContext }> {
   const result = await renderPreviewDocument({
@@ -64,12 +41,11 @@ async function page(markdown: string, requestId: number, maxContentWidth?: numbe
   const built = buildPreviewWebviewHtml(
     result.html,
     result.stage.outputDirectory,
-    webview as never,
+    assets,
     context,
     extensionRoot,
     undefined,
     maxContentWidth,
-    fakeUri(extensionRoot) as never,
   );
   result.stage.dispose();
   return { html: built.html, context };

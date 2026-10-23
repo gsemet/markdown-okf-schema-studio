@@ -15,6 +15,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Comment thread**: review discussion attached to quoted text, stored in a sidecar file (`src/comments/commentModel.ts`, `src/webview/commentThreads.ts`).
 - **Content patch**: in-place replacement of the content container `#sphinx-myst-preview-content` instead of a full page reload (`src/preview/contentPatch.ts`).
 - **Copy button**: floating button over a hovered code block that copies its raw code (`data-sphinx-preview-code-copy`, `src/webview/codeCopy.ts`).
+- **Document store**: the port that holds the documents a host shows: their text, revision and line breaks, and the edits applied to them (`DocumentStore` in `src/host-api/documentStore.ts`); the VS Code host wraps `TextDocument`, `src/host-memory/` keeps them in memory.
 - **Edit action**: one registered editing operation (`src/webview/editActions.ts`) used by shortcuts and the palette.
 - **Edit lock**: host-side record that an inline edit is open, deferring work that would replace the page (`src/state/editLock.ts`).
 - **Edit mode**: toolbar toggle that makes preview blocks editable (`data-sphinx-preview-edit-toggle`).
@@ -22,6 +23,8 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Figure editor**: form for `{figure}` options above the block text box (`src/webview/figureDirective.ts`, `src/webview/figurePanel.ts`).
 - **Fresh workspace**: a workspace that has stored no theme mode, toolbar state or palette mode; it starts with the built-in defaults (`DEFAULT_PREVIEW_THEME_MODE` cream, `DEFAULT_VIEW_PREFERENCES.toolbarCollapsed`, `editing.defaultPaletteMode` gfm). A stored choice always wins. The visual mock host pins `PINNED_WORKSPACE_CHOICES` (`test/visual/renderOptions.ts`) except for `freshWorkspace` pages.
 - **First-element gap**: fixed 40 px space above the first rendered element; `--sphinx-preview-first-clearance` (`src/webview/firstClearance.ts`) adds room only under the toolbar.
+- **Host adapter**: the implementation of the ports for one host, the only code that calls that host's API (`src/host-vscode/` for VS Code).
+- **Host API**: the host-neutral interfaces (ports) the core and the extension reach the host through: documents, files, settings, workspace, UI, Git, diagnostics, watchers, processes, assets and navigation (`src/host-api/`); no host API, DOM or Node imports.
 - **Included block**: rendered block that comes from an `{include}`; maps to the directive lines and carries `data-sphinx-preview-included`.
 - **Incoming-change mark**: green left bar on a block changed since HEAD (`data-sphinx-preview-changed`), from `src/webview/incomingChanges.ts`; ranges come from `src/mapping/lineDiff.ts` and `src/git/headBaseline.ts`.
 - **Insert point**: "+" bar after each top-level block that opens an insertion editor (`.sphinx-preview-insert-point`).
@@ -55,6 +58,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Sticky heading band**: fixed band at the top of the preview showing the current heading path (`docs/scroll-anchoring.md`).
 - **Table bar**: menu shown on a table in edit mode (`.sphinx-preview-table-menu`).
 - **Table-cell editor**: block editor opened on one table cell ("Markdown table cell editor").
+- **Text edit**: a replacement of the UTF-16 offsets `start` to `end` of a document text by `text` (`TextEdit` in `src/core/edits/textEdit.ts`); the pure planners of `src/core/edits/` return them and the document store applies them.
 - **Theme mode**: preview colour scheme, one of `current`, `dark`, `white`, `cream` (`PreviewThemeMode` in `src/state/previewTheme.ts`).
 - **TOC column**: runtime-created right column listing h1-h4 headings (`[data-sphinx-preview-toc]`), built by `src/webview/tocColumn.ts`.
 - **Toolbar**: the controls bar at the top of the preview (`[data-sphinx-preview-toolbar]`).

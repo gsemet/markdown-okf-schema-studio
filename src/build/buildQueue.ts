@@ -47,6 +47,11 @@ export interface BuildQueueOptions<
   onState?: (state: BuildQueueState<TResult, TDocument>) => void;
   disposeResult?: (result: TResult) => void;
   disposeError?: (error: unknown) => void;
+  /**
+   * The revision of a document, as the host's document store gives it; a request records it as
+   * `documentVersion`. Defaults to `document.version`.
+   */
+  revisionOf?: (document: TDocument) => number;
 }
 
 interface PendingBuild<TDocument extends QueueDocument, TResult> {
@@ -77,6 +82,7 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
   private readonly onState: NonNullable<BuildQueueOptions<TDocument, TResult>["onState"]>;
   private readonly disposeResult: NonNullable<BuildQueueOptions<TDocument, TResult>["disposeResult"]>;
   private readonly disposeError: NonNullable<BuildQueueOptions<TDocument, TResult>["disposeError"]>;
+  private readonly revisionOf: (document: TDocument) => number;
   private requestCounter = 0;
   private latestRequestId = 0;
   private timer: NodeJS.Timeout | undefined;
@@ -95,6 +101,7 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
     this.onState = options.onState ?? (() => undefined);
     this.disposeResult = options.disposeResult ?? (() => undefined);
     this.disposeError = options.disposeError ?? (() => undefined);
+    this.revisionOf = options.revisionOf ?? documentVersion;
   }
 
   public getState(): BuildQueueState<TResult, TDocument> {
@@ -114,7 +121,7 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
   public request(document: TDocument): Promise<BuildQueueOutcome<TResult, TDocument>> {
     const request: BuildRequest<TDocument> = {
       requestId: ++this.requestCounter,
-      documentVersion: documentVersion(document),
+      documentVersion: this.revisionOf(document),
       document,
     };
     this.latestRequestId = request.requestId;

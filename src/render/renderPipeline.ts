@@ -58,6 +58,12 @@ export interface RenderResult {
 
 export interface RenderOptions {
   document: PreviewDocument;
+  /**
+   * The revision of the document text, as the host's document store gives it (see
+   * `src/host-api/documentStore.ts`); the stage carries it as `activeDocumentVersion`. Defaults to
+   * `document.version` for callers without a store.
+   */
+  revision?: number;
   workspaceRoot: string;
   requestId: number;
   documentIdentity?: string;
@@ -123,7 +129,7 @@ function createStage(options: RenderOptions, diagnostics: PreviewDiagnostic[]): 
   return {
     activeDocumentPath: documentPath,
     activeDocumentIdentity: options.documentIdentity ?? documentPath,
-    activeDocumentVersion: options.document.version ?? 0,
+    activeDocumentVersion: options.revision ?? options.document.version ?? 0,
     requestId: options.requestId,
     outputDirectory: path.dirname(documentPath),
     sourceText: options.document.getText(),

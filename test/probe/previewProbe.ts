@@ -31,38 +31,12 @@ import { analyzeFrontmatter } from "../../src/frontmatter/okfFrontmatter";
 import { sourceRangeForLines } from "../../src/mapping/sourceMapping";
 import { planContentPatch } from "../../src/preview/contentPatch";
 import { renderPreviewDocument } from "../../src/render/renderPipeline";
-import type { buildPreviewWebviewHtml as BuildPreviewWebviewHtml } from "../../src/preview/webview";
+import * as webviewModule from "../../src/preview/webview";
 import { REPORTS_ROOT, EXTENSION_ROOT } from "../reportPaths";
+import { fakeAssetResolver } from "../shared/fakeAssets";
 import { frameStats, installFrameProbe, rebuiltBlocks, snapshotBlocks, type FrameSample } from "./frameProbe";
 import { PROBE_EDIT_PARAGRAPH, PROBE_MERMAID_COUNT, probeChapter } from "./largeChapter";
 
-// src/preview/webview.ts imports "vscode"; the probe supplies the members the page builder uses.
-interface FakeUri {
-  fsPath: string;
-  toString(): string;
-}
-const fakeUri = (fsPath: string): FakeUri => ({ fsPath, toString: () => pathToFileURL(fsPath).href });
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const nodeModule = require("node:module") as { _load: (request: string, ...rest: unknown[]) => unknown };
-const originalLoad = nodeModule._load;
-nodeModule._load = function load(request: string, ...rest: unknown[]): unknown {
-  if (request === "vscode") {
-    return {
-      Uri: {
-        file: fakeUri,
-        joinPath: (base: FakeUri, ...parts: string[]) => fakeUri(path.join(base.fsPath, ...parts)),
-      },
-    };
-  }
-  return originalLoad.call(this, request, ...rest);
-};
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const webviewModule = require("../../src/preview/webview") as {
-  buildPreviewWebviewHtml: typeof BuildPreviewWebviewHtml;
-  setPreviewStatus: typeof import("../../src/preview/webview").setPreviewStatus;
-  PREVIEW_STATUS_LABELS: typeof import("../../src/preview/webview").PREVIEW_STATUS_LABELS;
-};
-nodeModule._load = originalLoad;
 
 const PROBE_ROOT = path.join(REPORTS_ROOT, "probe");
 const SOURCE_PATH = path.join(PROBE_ROOT, "large-chapter.md");
@@ -73,10 +47,11 @@ const SLOW_CPU_RATE = 4;
 /** Exit criterion of the scroll frame (script time, ms). */
 export const SCROLL_FRAME_BUDGET_MS = 4;
 
-const webview = {
+const assets = fakeAssetResolver({
   cspSource: "file:",
-  asWebviewUri: (uri: FakeUri) => fakeUri(uri.fsPath),
-};
+  url: (filePath) => pathToFileURL(filePath).href,
+  extensionRoot: EXTENSION_ROOT,
+});
 
 interface BuiltPage {
   html: string;
@@ -117,7 +92,7 @@ async function buildPage(text: string, version: number, requestId: number): Prom
   const built = webviewModule.buildPreviewWebviewHtml(
     result.html,
     result.stage.outputDirectory,
-    webview as never,
+    assets,
     {
       documentId: result.stage.activeDocumentIdentity,
       revision: version,
@@ -131,7 +106,6 @@ async function buildPage(text: string, version: number, requestId: number): Prom
     EXTENSION_ROOT,
     frontmatter.present ? { result: frontmatter, tableEnabled: true } : undefined,
     undefined,
-    fakeUri(EXTENSION_ROOT) as never,
     true,
     true,
     [],
