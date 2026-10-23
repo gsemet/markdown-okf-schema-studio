@@ -21,7 +21,7 @@ async function waitFor(description: string, predicate: () => boolean): Promise<v
 
 function currentContext(document: vscode.TextDocument): {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
 } {
   const preview = getActivePreviewForTests();
@@ -31,7 +31,7 @@ function currentContext(document: vscode.TextDocument): {
   assert.ok(preview.requestId !== undefined);
   return {
     documentId: document.uri.toString(),
-    documentVersion: preview.documentVersion as number,
+    revision: preview.documentVersion as number,
     requestId: preview.requestId,
   };
 }

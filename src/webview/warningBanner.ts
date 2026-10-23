@@ -47,7 +47,7 @@ export function warningBannerText(count: number): string {
 
 export interface WarningBannerContext {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
   /** The key of the set the user closed for this document in this session (from the host). */
   dismissedWarningBanner?: string;
@@ -81,7 +81,7 @@ export function installWarningBanner(
     vscode.postMessage({
       type,
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       ...extra,
     });

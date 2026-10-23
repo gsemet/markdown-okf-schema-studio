@@ -87,7 +87,7 @@ export async function run(): Promise<void> {
     assert.equal(editorSync?.lastSourceScrollLine, 1);
     const context = {
       documentId: document.uri.toString(),
-      documentVersion: editorSync.documentVersion,
+      revision: editorSync.documentVersion,
       requestId: editorSync.requestId,
     };
     sendPreviewMessageForTests({ type: "previewScroll", ...context, line: 1 });

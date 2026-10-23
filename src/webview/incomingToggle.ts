@@ -1,6 +1,6 @@
 export interface IncomingToggleContext {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
   initialViewPreferences?: { incomingChanges?: boolean };
 }
@@ -50,7 +50,7 @@ export function installIncomingToggle(
     vscode.postMessage({
       type: "previewViewPreferenceChanged",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       preference: "incomingChanges",
       value: shown,

@@ -1,6 +1,6 @@
 export interface ViewControlsContext {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
   initialViewPreferences?: { zoom?: number };
 }
@@ -62,7 +62,7 @@ export function installViewControls(
     vscode.postMessage({
       type: "previewViewPreferenceChanged",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       preference: "zoom",
       value: zoom,

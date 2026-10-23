@@ -56,7 +56,7 @@ async function page(markdown: string, requestId: number, maxContentWidth?: numbe
   });
   const context: PreviewRuntimeContext = {
     documentId: result.stage.activeDocumentIdentity,
-    documentVersion: requestId,
+    revision: requestId,
     requestId,
     activeSourceFile: result.stage.activeDocumentPath,
     initialAnchor: 2,
@@ -121,7 +121,7 @@ test("PERF-11: the static stylesheet is a bundle file; the page keeps only the p
 test("PERF-11: the bundled runtime is the inline runtime with its context read from the page", () => {
   const context: PreviewRuntimeContext = {
     documentId: "file:///workspace/a.md",
-    documentVersion: 4,
+    revision: 4,
     requestId: 9,
     activeSourceFile: "/workspace/a.md",
     initialAnchor: 3,

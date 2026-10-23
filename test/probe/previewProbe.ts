@@ -120,7 +120,7 @@ async function buildPage(text: string, version: number, requestId: number): Prom
     webview as never,
     {
       documentId: result.stage.activeDocumentIdentity,
-      documentVersion: version,
+      revision: version,
       requestId,
       activeSourceFile: result.stage.activeDocumentPath,
       stickyHeadingDepth: 3,
@@ -240,9 +240,9 @@ function contentPatchMessage(previous: BuiltPage, next: BuiltPage): unknown {
   return {
     type: "previewContentPatch",
     documentId: previous.documentId,
-    documentVersion: previous.version,
+    revision: previous.version,
     requestId: previous.requestId,
-    next: { documentVersion: next.version, requestId: next.requestId },
+    next: { revision: next.version, requestId: next.requestId },
     contentHtml: patch.contentHtml,
     status: "success",
     label: webviewModule.PREVIEW_STATUS_LABELS.success,
@@ -300,7 +300,7 @@ async function probeEditor(page: Page, current: BuiltPage, rebuild: (requestId: 
     type: "themeChanged",
     themeKind: 2,
     documentId: current.documentId,
-    documentVersion: current.version,
+    revision: current.version,
     requestId: current.requestId,
   });
   result.survivesThemeChange = await editorAlive(page, "Z");

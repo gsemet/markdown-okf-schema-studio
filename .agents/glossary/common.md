@@ -29,7 +29,9 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Link panel**: two-field Text/URL panel under the palette, opened by the Link button or Cmd/Ctrl+K (`src/webview/linkPanel.ts`).
 - **Mapped block**: rendered element carrying its source location (`[data-sphinx-source-file][data-sphinx-source-line]`).
 - **Margin mode (planned)**: layout mode that uses the page margins for side content.
-- **Message registry**: map from a webview-to-host message type to its validator and host handler (`src/preview/previewMessages.ts`).
+- **Message gate**: host rule that matches a page message to the preview before its handler runs (`render`, `comment`, `document`, `own-id`, `page-state`; `PAGE_MESSAGE_GATES` in `src/extension.ts`).
+- **Message registry**: map from a page-to-host message type to its validator (`PAGE_TO_HOST_VALIDATORS` in `src/protocol/pageToHost.ts`); the host handler is registered on the host's message router.
+- **Message router**: typed `on(type, handler)` / `dispatch` table of one side of the protocol (`createMessageRouter` in `src/protocol/router.ts`), used by the host and by the page runtime.
 - **Motion**: the short CSS effects of the preview (soft appearance, editor-closed fade, theme colour transition, update glow), driven by attributes from `src/webview/motion.ts` and turned off by `prefers-reduced-motion: reduce`; soft appearance needs `data-sphinx-preview-motion="on"`, set by the first pointer or key press and taken back by a content patch.
 - **MyST autodetect**: check of used MyST syntax against `myst_enable_extensions` in the nearest `conf.py` (`src/myst/`).
 - **Navigation history**: per-panel Back/Next stack of followed links (`src/state/navigationHistory.ts`).
@@ -38,8 +40,10 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Palette mode**: Strict / GFM / MyST button set of the edition palette, per workspace (`PALETTE_MODE_STORAGE_KEY` in `src/extension.ts`, select in `src/webview/editPalette.ts`).
 - **Preview panel**: the webview panel that shows the rendered preview.
 - **Properties table**: rendered frontmatter table at the top of a document (`[data-okf-properties]`).
+- **Protocol**: the typed messages between host and page, both directions, as discriminated unions with their validators (`src/protocol/`); no host API, DOM or Node imports.
 - **Re-anchoring**: moving a thread's stored lines to follow its quoted text (`src/comments/anchoring.ts`).
 - **Reading offset**: strip at the top of the viewport reserved for the sticky heading band (`refreshReadingOffset`, `docs/scroll-anchoring.md`).
+- **Revision**: the protocol's name for one state of the document text (`revision` on the wire, `src/protocol/revision.ts`); compared for equality only. The VS Code host uses `TextDocument.version`; a host without versions counts with `RevisionCounter`.
 - **Runtime**: the page script injected into the preview, built by `createScrollSyncScript` (`src/webview/scrollSync.ts`).
 - **Runtime context**: the settings and ids the host passes to the runtime (`PreviewRuntimeContext`).
 - **Scroll anchor**: the block and offset that keep the reading position stable across re-renders (`docs/scroll-anchoring.md`).

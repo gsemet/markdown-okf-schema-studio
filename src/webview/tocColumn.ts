@@ -1,6 +1,6 @@
 export interface TocColumnContext {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
   initialViewPreferences?: { toc?: boolean };
 }
@@ -279,7 +279,7 @@ export function installTocColumn(
     vscode.postMessage({
       type: "previewViewPreferenceChanged",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       preference: "toc",
       value: open,

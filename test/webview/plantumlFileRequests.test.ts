@@ -23,7 +23,7 @@ function page() {
   let sequence = 0;
   const requests = installHostRequests(fakeWindow, {
     nextEditId: () => `plantuml-${++sequence}`,
-    post: (message) => posted.push({ ...message, documentId: "doc", documentVersion: 2, requestId: 7 }),
+    post: (message) => posted.push({ ...message, documentId: "doc", revision: 2, requestId: 7 }),
   });
   const document = {
     addEventListener: (type: string, listener: (event: unknown) => void) => {
@@ -52,7 +52,7 @@ test("a file request of the PlantUML bundle becomes a registered host message an
     from: null,
     editId: "plantuml-1",
     documentId: "doc",
-    documentVersion: 2,
+    revision: 2,
     requestId: 7,
   }]);
   assert.equal(requests.receive({ type: "previewPlantUmlIncludeResult", editId: "plantuml-1", ok: true, id: "/docs/styles/common.puml", text: "A -> B" }), true);

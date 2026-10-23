@@ -92,7 +92,7 @@ test("anchors source scrolling below a top-aligned sticky band without a toolbar
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 50,
   });
@@ -223,7 +223,7 @@ test("maps the frontmatter table for stable top and mid-table scroll round-trips
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: Math.round(reportedLine),
   });
@@ -240,7 +240,7 @@ test("maps the frontmatter table for stable top and mid-table scroll round-trips
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 1,
   });
@@ -293,7 +293,7 @@ test("anchors the editor source line below the sticky heading band without rever
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 50,
   });
@@ -309,7 +309,7 @@ test("source anchoring does not reserve a row for floating controls", () => {
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 50,
   });
@@ -320,7 +320,7 @@ test("source anchoring does not reserve a row for floating controls", () => {
 test("runtime script cannot terminate its containing script element", () => {
   const script = createScrollSyncScript({
     documentId: "file:///active.md</script><script>alert(1)</script>",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     activeSourceFile: "/workspace/active.md</script>",
   });
@@ -331,7 +331,7 @@ test("runtime script cannot terminate its containing script element", () => {
 test("T43: the Comment button and the reply box are installed only for writable previews", () => {
   const source = (commentsEnabled: boolean) => createScrollSyncScript({
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     activeSourceFile: "/workspace/active.md",
     commentsEnabled,
@@ -496,7 +496,7 @@ test("refresh preserves viewport state while reverse synchronization stays disab
   const sourceScroll = {
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 50,
   };
@@ -562,7 +562,7 @@ test("preview can revisit its last reported line after the source editor scrolls
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 50,
   });
@@ -581,7 +581,7 @@ test("source scrolling remains bidirectional while a block editor is open", () =
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "Editable paragraph.\n",
@@ -589,7 +589,7 @@ test("source scrolling remains bidirectional while a block editor is open", () =
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 50,
   });
@@ -613,7 +613,7 @@ test("refreshes source anchor geometry after a block editor changes document flo
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "Editable paragraph.\n",
@@ -623,7 +623,7 @@ test("refreshes source anchor geometry after a block editor changes document flo
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 100,
   });
@@ -658,7 +658,7 @@ test("activating a centered block editor preserves scroll before and after layou
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "A paragraph centered in the viewport.\n",
@@ -701,7 +701,7 @@ test("fenced Markdown editors sit outside the rendered pre and preserve source w
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText,
@@ -737,7 +737,7 @@ test("without caretRangeFromPoint a click opens the editor with the caret at the
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "First line\nSecond line\n",
@@ -755,7 +755,7 @@ test("active Markdown editors leave repeated spaces and Enter to native text inp
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "- `compendium-jira-confluence`:\n  - `jira-skill`.        \n  - `derive-jira-issue-to-change-request`\n",
@@ -787,7 +787,7 @@ test("Enter in a list item continues the list, and Shift+Enter stays native", ()
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "- a\n",
@@ -817,7 +817,7 @@ test("Tab and Shift+Tab indent the block editor without closing it", () => {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "- a\n  - b\n",
@@ -855,7 +855,7 @@ test("Enter on an empty list item empties the line and Enter in plain text stays
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "- a\n- \n",
@@ -882,7 +882,7 @@ test("block textareas resize on input and preview layout changes", () => {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "A long paragraph. ".repeat(500),
@@ -913,7 +913,7 @@ test("edit mode loads raw Markdown and saves changes when the block loses focus"
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId,
     originalText,
@@ -953,7 +953,7 @@ function openRawEditor(harness: RuntimeHarness): RuntimeElement {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "Raw line one\nRaw line two\n",
@@ -1092,7 +1092,7 @@ test("raw Markdown block edits autosave on input without disabling the textarea"
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId,
     originalText,
@@ -1139,7 +1139,7 @@ test("arrow boundaries transfer block editing in every direction", () => {
     harness.dispatchMessage({
       type: "previewEditSource",
       documentId: "file:///active.md",
-      documentVersion: 7,
+      revision: 7,
       requestId: 11,
       editId: request?.editId,
       originalText: "Current block\n",
@@ -1161,7 +1161,7 @@ test("arrow boundaries transfer block editing in every direction", () => {
     harness.dispatchMessage({
       type: "previewEditSource",
       documentId: "file:///active.md",
-      documentVersion: 7,
+      revision: 7,
       requestId: 11,
       editId: navigationRequest?.editId,
       originalText: testCase.source,
@@ -1205,7 +1205,7 @@ test("table cell editing exposes row and column operations and saves the edited 
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: request?.editId,
     originalText: "| A | B |\n| --- | :---: |\n| x | y |\n| p | q |\n",
@@ -1315,7 +1315,7 @@ function openPipeTableCellEditor(harness: ReturnType<typeof createRuntimeHarness
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: request?.editId,
     originalText: "| A | B |\n| --- | --- |\n| x | y |\n",
@@ -1388,7 +1388,7 @@ test("table toolbar sits in the flow above the table with text labels and a posi
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: request?.editId,
     originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
@@ -1445,7 +1445,7 @@ test("CR 034: the table toolbar rides down with a tall table and leaves with the
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
@@ -1546,7 +1546,7 @@ function openTableForToolbarReveal(options: {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: request?.editId,
     originalText: "| A |\n| --- |\n| x |\n",
@@ -1640,7 +1640,7 @@ test("table editing switches cells without losing changes and finalizes before l
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId,
     originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
@@ -1669,7 +1669,7 @@ test("table editing switches cells without losing changes and finalizes before l
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId,
     error: "The save could not be applied.",
@@ -1720,7 +1720,7 @@ function openTableCellEditorForTab(
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
@@ -1971,7 +1971,7 @@ test("Home and End move the caret inside the block textarea instead of scrolling
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "first line\nsecond line\n",
@@ -2048,7 +2048,7 @@ function openBlockEditorWithSource(harness: ReturnType<typeof createRuntimeHarne
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "Second paragraph.\n",
@@ -2158,7 +2158,7 @@ test("STAB-03: an editor the host watches reports its close; without a watch the
   const textarea = openBlockEditorWithSource(harness);
   const editId = harness.messages.filter((message) => message.type === "previewEditOpen").at(-1)?.editId;
   assert.equal(typeof editId, "string");
-  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///active.md", documentVersion: 7, requestId: 11, editId });
+  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///active.md", revision: 7, requestId: 11, editId });
   const messageCount = harness.messages.length;
   assert.equal(harness.messages.length, messageCount, "the watch itself posts nothing while the editor is open");
   textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
@@ -2171,7 +2171,7 @@ test("STAB-03: an editor the host watches reports its close; without a watch the
 test("STAB-03: a watch for an editor that is already closed is answered at once", () => {
   const harness = createRuntimeHarness();
   const messageCount = harness.messages.length;
-  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///active.md", documentVersion: 7, requestId: 11, editId: "gone" });
+  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///active.md", revision: 7, requestId: 11, editId: "gone" });
   assert.deepEqual(harness.messages.slice(messageCount).map((message) => [message.type, message.editId]),
     [["previewEditClosed", "gone"]]);
 });
@@ -2183,12 +2183,12 @@ test("STAB-03: a watch sent while the host already follows another document is s
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
   const editId = harness.messages.filter((message) => message.type === "previewEditOpen").at(-1)?.editId;
-  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///other.md", documentVersion: 1, requestId: 12, editId });
+  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///other.md", revision: 1, requestId: 12, editId });
   const messageCount = harness.messages.length;
   textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
   assert.deepEqual(harness.messages.slice(messageCount).map((message) => [message.type, message.editId]),
     [["previewEditClosed", editId]], "the open editor reports its close");
-  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///other.md", documentVersion: 1, requestId: 12, editId: "gone" });
+  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///other.md", revision: 1, requestId: 12, editId: "gone" });
   assert.deepEqual(harness.messages.slice(messageCount + 1).map((message) => [message.type, message.editId]),
     [["previewEditClosed", "gone"]], "a closed editor is reported at once");
 });
@@ -2214,7 +2214,7 @@ function openTableCellEditor(harness: ReturnType<typeof createRuntimeHarness>) {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "| A | B |\n| --- | --- |\n| x | y |\n",
@@ -2322,7 +2322,7 @@ test("table header cannot be deleted from the cell toolbar", () => {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: request?.editId,
     originalText: "| A | B |\n| --- | --- |\n| x | y |\n",
@@ -2358,7 +2358,7 @@ test("table toolbar cannot delete the last body row", () => {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: request?.editId,
     originalText: "| A |\n| --- |\n| x |\n",
@@ -2505,7 +2505,7 @@ test("edit mode exposes schema enum controls and saves the selected value", () =
   harness.dispatchMessage({
     type: "previewFrontmatterResult",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: save?.editId,
     saved: true,
@@ -2895,7 +2895,7 @@ test("frontmatter list editor keeps invalid edits open and Escape cancels them",
   harness.dispatchMessage({
     type: "previewFrontmatterResult",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: save?.editId,
     error: "Schema validation failed: invalid list item",
@@ -2933,7 +2933,7 @@ test("frontmatter validation errors show an explicit error state", () => {
   harness.dispatchMessage({
     type: "previewFrontmatterResult",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: save?.editId,
     error: "Schema validation failed: must NOT have fewer than 1 characters",
@@ -3372,7 +3372,7 @@ test("executes source and preview synchronization across layout changes", () => 
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 50,
   });
@@ -3385,14 +3385,14 @@ test("executes source and preview synchronization across layout changes", () => 
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 10,
   });
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 90,
   });
@@ -3454,7 +3454,7 @@ test("executes source and preview synchronization across layout changes", () => 
   harness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///other.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 1,
   });
@@ -3470,7 +3470,7 @@ test("marks editor selection without moving the preview when following is disabl
   sourceOnlyHarness.dispatchMessage({
     type: "sourceScroll",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     line: 50,
     selectionLine: 50,
@@ -3484,7 +3484,7 @@ test("marks editor selection without moving the preview when following is disabl
 test("source scrolling rejects stale identities and invalid line numbers", async (context) => {
   for (const [name, override] of Object.entries({
     "other document": { documentId: "file:///other.md" },
-    "old document version": { documentVersion: 6 },
+    "old document version": { revision: 6 },
     "old render request": { requestId: 10 },
     "zero line": { line: 0 },
     "non-finite line": { line: Number.NaN },
@@ -3495,7 +3495,7 @@ test("source scrolling rejects stale identities and invalid line numbers", async
       harness.dispatchMessage({
         type: "sourceScroll",
         documentId: "file:///active.md",
-        documentVersion: 7,
+        revision: 7,
         requestId: 11,
         line: 50,
         ...override,
@@ -3513,7 +3513,7 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
   harness.dispatchMessage({
     type: "navigateAnchor",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     value: "#section",
   });
@@ -3522,7 +3522,7 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
   harness.dispatchMessage({
     type: "navigateAnchor",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     value: "#Caf%C3%A9",
     sourceLine: 50,
@@ -3532,7 +3532,7 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
   harness.dispatchMessage({
     type: "navigateAnchor",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     value: "#unmapped-heading",
     sourceLine: 51,
@@ -3542,7 +3542,7 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
   harness.dispatchMessage({
     type: "navigateAnchor",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     value: "#unmapped-final-heading",
     sourceLine: 100,
@@ -3552,7 +3552,7 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
   harness.dispatchMessage({
     type: "navigateAnchor",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     value: "#invalid anchor",
   });
@@ -3561,7 +3561,7 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
   harness.dispatchMessage({
     type: "navigateAnchor",
     documentId: "file:///other.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     value: "#section",
   });
@@ -3605,13 +3605,13 @@ test("clicking a checkbox posts a source toggle instead of revealing the block",
   assert.equal(posted[0].endLine, 51);
   assert.equal(posted[0].column, 2);
   assert.equal(posted[0].checked, true);
-  assert.equal(posted[0].documentVersion, 7);
+  assert.equal(posted[0].revision, 7);
   assert.equal(harness.checkbox.getAttribute("aria-busy"), "true");
 
   harness.dispatchMessage({
     type: "previewCheckboxResult",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: posted[0].editId,
     saved: true,
@@ -3627,7 +3627,7 @@ test("a rejected checkbox toggle reverts the box and explains why", () => {
   harness.dispatchMessage({
     type: "previewCheckboxResult",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     error: "The preview is out of date. Try again once it has refreshed.",
@@ -3784,7 +3784,7 @@ test("switching table cells posts the pending change immediately", () => {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
@@ -4273,7 +4273,7 @@ test("T25: an error result clears the pending frontmatter edit", () => {
   harness.dispatchMessage({
     type: "previewFrontmatterResult",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: message.editId,
     saved: false,
@@ -4347,7 +4347,7 @@ function sourceReply(harness: RuntimeHarness, originalText: string, extra: Recor
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText,
@@ -4437,7 +4437,7 @@ test("T36: a click posts the ranges of the block above the bar and of its neighb
   assert.deepEqual(
     { ...moves[0], pinViewportTop: typeof moves[0].pinViewportTop },
     {
-      type: "previewBlockMove", documentId: "file:///active.md", documentVersion: 7, requestId: 11,
+      type: "previewBlockMove", documentId: "file:///active.md", revision: 7, requestId: 11,
       line: 50, endLine: 52, neighbourLine: 100, neighbourEndLine: 100, direction: "down",
       pinViewportTop: "number",
     },
@@ -4468,7 +4468,7 @@ test("T36: a refused move says why next to the bar; a result of another context 
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   moveButton(harness, 52, "down").dispatch("click", plainClick());
   const result = {
-    type: "previewBlockMoveResult", documentId: "file:///active.md", documentVersion: 7, requestId: 11,
+    type: "previewBlockMoveResult", documentId: "file:///active.md", revision: 7, requestId: 11,
     ok: false, reason: "Text between the two blocks prevents the move.",
   };
   harness.dispatchMessage({ ...result, requestId: 99 });
@@ -4481,7 +4481,7 @@ test("T36: a refused move says why next to the bar; a result of another context 
 });
 
 // T37: Alt+Up/Down moves the focused block; Cmd/Ctrl+Alt+Up/Down moves it from the text box.
-const MOVE_IDENTIFIERS = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+const MOVE_IDENTIFIERS = { documentId: "file:///active.md", revision: 7, requestId: 11 };
 
 function moveMessages(harness: RuntimeHarness, from = 0): Array<Record<string, unknown>> {
   return harness.messages.slice(from).filter((message) => message.type === "previewBlockMove");
@@ -4595,20 +4595,20 @@ test("T37: Ctrl+Alt+ArrowDown saves, moves, then reopens the editor with the car
   const moves = moveMessages(harness, before);
   assert.equal(moves.length, 1);
   assert.deepEqual([moves[0].line, moves[0].neighbourLine, moves[0].direction], [50, 100, "down"]);
-  assert.equal(moves[0].documentVersion, 8);
+  assert.equal(moves[0].revision, 8);
   harness.dispatchMessage({ type: "previewBlockMoveResult", ...NEXT_IDENTIFIERS, ok: true, line: 100 });
   assert.equal(
     harness.messages.slice(before).some((message) => message.type === "previewEditOpen"),
     false, "the editor waits for the render of the move",
   );
   harness.dispatchMessage(patchMessage({
-    documentVersion: 8, requestId: 12, next: { documentVersion: 9, requestId: 13 },
+    revision: 8, requestId: 12, next: { revision: 9, requestId: 13 },
   }));
   const open = harness.messages.slice(before).find((message) => message.type === "previewEditOpen");
   assert.ok(open, "the editor reopens on the moved block");
   assert.equal(open.line, 100);
   harness.dispatchMessage({
-    type: "previewEditSource", documentId: "file:///active.md", documentVersion: 9, requestId: 13,
+    type: "previewEditSource", documentId: "file:///active.md", revision: 9, requestId: 13,
     editId: open.editId, originalText: "Current block, changed\n",
   });
   const reopened = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
@@ -4836,7 +4836,7 @@ test("a final block save carries the edited element's pin; an autosave does not"
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "A paragraph centered in the viewport.\n",
@@ -4906,7 +4906,7 @@ test("T38: an unpaired preview disables the anchor button and a previewPairing m
   harness.dispatchMessage({
     type: "previewPairing",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     pairedTextEditor: true,
   });
@@ -4915,7 +4915,7 @@ test("T38: an unpaired preview disables the anchor button and a previewPairing m
   harness.dispatchMessage({
     type: "previewPairing",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     pairedTextEditor: false,
   });
@@ -4947,7 +4947,7 @@ test("T38: a paired preview keeps the anchor button enabled, and a foreign previ
   harness.dispatchMessage({
     type: "previewPairing",
     documentId: "file:///other.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     pairedTextEditor: false,
   });
@@ -5079,7 +5079,7 @@ function overlayMessage(extra: Record<string, unknown> = {}): Record<string, unk
   return {
     type: "previewPendingOverlay",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     visible: true,
     label: "Preview pending",
@@ -5133,7 +5133,7 @@ test("T43: visible false removes the pending overlay", () => {
 test("T43: invalid or foreign pending overlay messages are ignored", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage(overlayMessage({ requestId: 12 }));
-  harness.dispatchMessage(overlayMessage({ documentVersion: 8 }));
+  harness.dispatchMessage(overlayMessage({ revision: 8 }));
   harness.dispatchMessage(overlayMessage({ visible: "yes" }));
   harness.dispatchMessage(overlayMessage({ label: 3 }));
   harness.dispatchMessage(overlayMessage({ message: undefined }));
@@ -5149,7 +5149,7 @@ function propertiesMessage(markup: string, extra: Record<string, unknown> = {}):
   return {
     type: "previewPropertiesTable",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     markup,
     ...extra,
@@ -5192,7 +5192,7 @@ test("T30: previewPropertiesTable is ignored for another request, version, docum
   const harness = createRuntimeHarness();
   const old = harness.currentProperties();
   harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { requestId: 12 }));
-  harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { documentVersion: 8 }));
+  harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { revision: 8 }));
   harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { documentId: "file:///other.md" }));
   harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { markup: 3 }));
   harness.dispatchMessage(propertiesMessage(cellMarkup("x"), { markup: undefined }));
@@ -5893,9 +5893,9 @@ function patchMessage(extra: Record<string, unknown> = {}): Record<string, unkno
   return {
     type: "previewContentPatch",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
-    next: { documentVersion: 8, requestId: 12 },
+    next: { revision: 8, requestId: 12 },
     contentHtml: "<p>fresh</p>",
     status: "success",
     label: "Preview ready",
@@ -5904,7 +5904,7 @@ function patchMessage(extra: Record<string, unknown> = {}): Record<string, unkno
   };
 }
 
-const NEXT_IDENTIFIERS = { documentId: "file:///active.md", documentVersion: 8, requestId: 12 };
+const NEXT_IDENTIFIERS = { documentId: "file:///active.md", revision: 8, requestId: 12 };
 
 function messagesAfter(harness: RuntimeHarness, count: number): Array<Record<string, unknown>> {
   return harness.messages.slice(count);
@@ -5921,7 +5921,7 @@ test("T34: a content patch replaces the content, moves the identifiers and posts
   const ready = messagesAfter(harness, before).filter((message) => message.type === "previewReady");
   assert.equal(ready.length, 1, "exactly one previewReady");
   assert.deepEqual(
-    { documentId: ready[0]!.documentId, documentVersion: ready[0]!.documentVersion, requestId: ready[0]!.requestId },
+    { documentId: ready[0]!.documentId, revision: ready[0]!.revision, requestId: ready[0]!.requestId },
     NEXT_IDENTIFIERS,
   );
   assert.equal(typeof ready[0]!.descriptionsCollapsed, "boolean");
@@ -5972,7 +5972,7 @@ test("STAB-02: a patch that closes an open block editor reports blockEditOpen fa
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "- a\n",
@@ -5993,13 +5993,13 @@ test("T34: after a patch the page answers to the new identifiers only", () => {
   harness.flushFrames();
   const scroll = harness.messages.at(-1)!;
   assert.deepEqual(
-    { documentId: scroll.documentId, documentVersion: scroll.documentVersion, requestId: scroll.requestId },
+    { documentId: scroll.documentId, revision: scroll.revision, requestId: scroll.requestId },
     NEXT_IDENTIFIERS,
   );
   harness.dispatchMessage(propertiesMessage(cellMarkup("old identifiers")));
   assert.equal(harness.htmlInsertions.length, 0, "a message of the previous render is ignored");
   harness.dispatchMessage(propertiesMessage(cellMarkup("new identifiers"), {
-    documentVersion: 8,
+    revision: 8,
     requestId: 12,
   }));
   assert.equal(harness.htmlInsertions.length, 1, "a message of the new render is applied");
@@ -6007,9 +6007,9 @@ test("T34: after a patch the page answers to the new identifiers only", () => {
   harness.dispatchMessage(patchMessage({ contentHtml: "<p>stale</p>" }));
   assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>", "a repeated patch for the old render is ignored");
   harness.dispatchMessage(patchMessage({
-    documentVersion: 8,
+    revision: 8,
     requestId: 12,
-    next: { documentVersion: 9, requestId: 13 },
+    next: { revision: 9, requestId: 13 },
     contentHtml: "<p>third</p>",
   }));
   assert.equal(harness.previewContent.innerHTML, "<p>third</p>");
@@ -6019,19 +6019,19 @@ test("T34: after a patch the page answers to the new identifiers only", () => {
 test("T34: a patch with stale or malformed fields is ignored", () => {
   const variants: Array<[string, Record<string, unknown>]> = [
     ["another request", { requestId: 12 }],
-    ["another version", { documentVersion: 8 }],
+    ["another version", { revision: 8 }],
     ["another document", { documentId: "file:///other.md" }],
     ["numeric content", { contentHtml: 3 }],
     ["missing content", { contentHtml: undefined }],
     ["oversized content", { contentHtml: "x".repeat(20 * 1024 * 1024 + 1) }],
     ["missing next", { next: undefined }],
     ["null next", { next: null }],
-    ["string next version", { next: { documentVersion: "8", requestId: 12 } }],
-    ["fractional next request", { next: { documentVersion: 8, requestId: 12.5 } }],
-    ["unsafe next version", { next: { documentVersion: 2 ** 60, requestId: 12 } }],
-    ["string anchor", { next: { documentVersion: 8, requestId: 12, initialAnchor: "3" } }],
-    ["infinite anchor", { next: { documentVersion: 8, requestId: 12, initialAnchor: Infinity } }],
-    ["malformed pin", { next: { documentVersion: 8, requestId: 12, initialPin: { line: "1", viewportTop: 2 } } }],
+    ["string next version", { next: { revision: "8", requestId: 12 } }],
+    ["fractional next request", { next: { revision: 8, requestId: 12.5 } }],
+    ["unsafe next version", { next: { revision: 2 ** 60, requestId: 12 } }],
+    ["string anchor", { next: { revision: 8, requestId: 12, initialAnchor: "3" } }],
+    ["infinite anchor", { next: { revision: 8, requestId: 12, initialAnchor: Infinity } }],
+    ["malformed pin", { next: { revision: 8, requestId: 12, initialPin: { line: "1", viewportTop: 2 } } }],
     ["unknown status", { status: "weird" }],
     ["numeric label", { label: 3 }],
     ["long label", { label: "x".repeat(501) }],
@@ -6079,7 +6079,7 @@ test("T34: an open frontmatter editor is closed and a deferred properties update
   assert.equal(editor.parentElement, undefined, "the editor closed");
   assert.equal(harness.htmlInsertions.length, 0, "the deferred markup was not applied to the old section");
   assert.deepEqual(messagesAfter(harness, before).map((message) => message.type), ["previewReady"]);
-  harness.dispatchMessage(propertiesMessage(cellMarkup("late"), { documentVersion: 8, requestId: 12 }));
+  harness.dispatchMessage(propertiesMessage(cellMarkup("late"), { revision: 8, requestId: 12 }));
   assert.equal(harness.htmlInsertions.length, 1, "the next update is applied at once, nothing is deferred");
 });
 
@@ -6115,9 +6115,9 @@ test("CR 050: a patch keeps the code of each status line and refuses a malformed
     ["myst-extension", null]);
   assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>");
   harness.dispatchMessage(patchMessage({
-    documentVersion: 8,
+    revision: 8,
     requestId: 12,
-    next: { documentVersion: 9, requestId: 13 },
+    next: { revision: 9, requestId: 13 },
     contentHtml: "<p>refused</p>",
     diagnostics: [{ severity: "warning", text: "x", code: 7 }],
   }));
@@ -6166,9 +6166,9 @@ test("T34: the patch rebuilds the status region from plain text", () => {
   }
   // A status without message and diagnostics has neither element.
   harness.dispatchMessage(patchMessage({
-    documentVersion: 8,
+    revision: 8,
     requestId: 12,
-    next: { documentVersion: 9, requestId: 13 },
+    next: { revision: 9, requestId: 13 },
     status: "success",
     label: "Preview ready",
   }));
@@ -6216,7 +6216,7 @@ test("T34: a patch with an anchor or a pin positions the page like a loaded page
   assert.ok(anchored.windowState.scrollY > 0, "the reference page scrolls to the anchor");
   const patched = createRuntimeHarness();
   assert.equal(patched.windowState.scrollY, 0);
-  patched.dispatchMessage(patchMessage({ next: { documentVersion: 8, requestId: 12, initialAnchor: 50 } }));
+  patched.dispatchMessage(patchMessage({ next: { revision: 8, requestId: 12, initialAnchor: 50 } }));
   assert.equal(patched.windowState.scrollY, anchored.windowState.scrollY);
 
   const pinned = createRuntimeHarness({ initialPin: { line: 50, viewportTop: 120 } });
@@ -6225,7 +6225,7 @@ test("T34: a patch with an anchor or a pin positions the page like a loaded page
   const patchedPin = createRuntimeHarness();
   const before = patchedPin.messages.length;
   patchedPin.dispatchMessage(patchMessage({
-    next: { documentVersion: 8, requestId: 12, initialPin: { line: 50, viewportTop: 120 } },
+    next: { revision: 8, requestId: 12, initialPin: { line: 50, viewportTop: 120 } },
   }));
   assert.equal(patchedPin.windowState.scrollY, pinned.windowState.scrollY);
   const ready = messagesAfter(patchedPin, before).find((message) => message.type === "previewReady")!;
@@ -6234,9 +6234,9 @@ test("T34: a patch with an anchor or a pin positions the page like a loaded page
   // The pin is for one render: the next patch without one does not report a pinned anchor.
   const before2 = patchedPin.messages.length;
   patchedPin.dispatchMessage(patchMessage({
-    documentVersion: 8,
+    revision: 8,
     requestId: 12,
-    next: { documentVersion: 9, requestId: 13 },
+    next: { revision: 9, requestId: 13 },
   }));
   const ready2 = messagesAfter(patchedPin, before2).find((message) => message.type === "previewReady")!;
   assert.equal(ready2.anchorLine, undefined);
@@ -6303,7 +6303,7 @@ test("T34: links of the new content keep known target hints and discover new tar
   const discover = messagesAfter(harness, before).find((message) => message.type === "previewLinkDiscover")!;
   assert.ok(discover, "entering the viewport asks the host for the target");
   assert.deepEqual(Array.from(discover.requests as string[]), ["Typed"]);
-  assert.equal(discover.documentVersion, 8);
+  assert.equal(discover.revision, 8);
   assert.equal(discover.requestId, 12);
   harness.dispatchMessage({
     type: "previewLinkTargets",
@@ -6332,7 +6332,7 @@ test("T34: pending block navigation resumes after a content patch", () => {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: "Current block\n",
@@ -6360,7 +6360,7 @@ test("T34: pending block navigation resumes after a content patch", () => {
   assert.ok(open, "the next block is opened after the patch");
   assert.equal(open.line, 100);
   assert.deepEqual(
-    { documentId: open.documentId, documentVersion: open.documentVersion, requestId: open.requestId },
+    { documentId: open.documentId, revision: open.revision, requestId: open.requestId },
     NEXT_IDENTIFIERS,
   );
   assert.equal(harness.getWebviewState().pendingBlockNavigation, undefined, "the navigation is spent");
@@ -6381,15 +6381,15 @@ test("T34: patches sent before the page acknowledged the previous one apply in o
   // The host addresses the second patch to the identifiers the first one introduces.
   harness.dispatchMessage(patchMessage({ contentHtml: "<p>one</p>" }));
   harness.dispatchMessage(patchMessage({
-    documentVersion: 8,
+    revision: 8,
     requestId: 12,
-    next: { documentVersion: 9, requestId: 13 },
+    next: { revision: 9, requestId: 13 },
     contentHtml: "<p>two</p>",
   }));
   harness.dispatchMessage(patchMessage({
-    documentVersion: 9,
+    revision: 9,
     requestId: 13,
-    next: { documentVersion: 10, requestId: 14 },
+    next: { revision: 10, requestId: 14 },
     contentHtml: "<p>three</p>",
   }));
   assert.equal(harness.previewContent.innerHTML, "<p>three</p>");
@@ -6403,9 +6403,9 @@ test("T34: when a patch of a chain is rejected, the later ones are ignored and n
   const before = harness.messages.length;
   harness.dispatchMessage(patchMessage({ status: "weird", contentHtml: "<p>rejected</p>" }));
   harness.dispatchMessage(patchMessage({
-    documentVersion: 8,
+    revision: 8,
     requestId: 12,
-    next: { documentVersion: 9, requestId: 13 },
+    next: { revision: 9, requestId: 13 },
     contentHtml: "<p>orphan</p>",
   }));
   assert.equal(harness.previewContent.innerHTML, "");
@@ -6862,7 +6862,7 @@ test("ArrowUp from the first body block under a properties table keeps the edito
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: request?.editId,
     originalText: "Current block\n",
@@ -7065,7 +7065,7 @@ test("T10: the saved width mode applies at startup and an edited element keeps t
 
 test("T11: Back and Next post previewHistoryGo and follow previewHistoryState", () => {
   const harness = createRuntimeHarness();
-  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
   harness.dispatchMessage({ type: "previewHistoryState", ...ids, canBack: true, canForward: false });
   assert.equal(harness.backButton.disabled, false);
   assert.equal(harness.nextButton.disabled, true);
@@ -7084,7 +7084,7 @@ test("T11: Back and Next post previewHistoryGo and follow previewHistoryState", 
 
 test("T15: previewShowComments sets the show-comments attribute of the page, stale ids are ignored", () => {
   const harness = createRuntimeHarness();
-  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
   assert.equal(harness.documentElement.getAttribute("data-okf-show-comments"), "true");
   harness.dispatchMessage({ type: "previewShowComments", ...ids, showComments: false });
   assert.equal(harness.documentElement.getAttribute("data-okf-show-comments"), "false");
@@ -7096,7 +7096,7 @@ test("T15: previewShowComments sets the show-comments attribute of the page, sta
 
 test("T16: previewIncomingChanges marks blocks and reports enabled, stale ids are ignored", () => {
   const harness = createRuntimeHarness();
-  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
   assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), null);
   harness.dispatchMessage({ type: "previewIncomingChanges", ...ids, requestId: 3, enabled: false, ranges: [] });
   assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), null);
@@ -7158,7 +7158,7 @@ test("the Comments toggle is installed with the page: on by default, off from th
 
 test("T17: the Diff button is hidden through the document attribute when the setting is off", () => {
   const harness = createRuntimeHarness();
-  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
   harness.dispatchMessage({ type: "previewIncomingChanges", ...ids, enabled: false, ranges: [] });
   assert.equal(harness.documentElement.getAttribute("data-okf-incoming-changes"), "false");
   assert.match(PREVIEW_THEME_CSS,
@@ -7244,7 +7244,7 @@ test("stored choice wins: a stored expanded toolbar and a stored theme mode are 
 test("T11: a previewHistoryState of another document version is ignored", () => {
   const harness = createRuntimeHarness();
   harness.dispatchMessage({
-    type: "previewHistoryState", documentId: "file:///active.md", documentVersion: 99, requestId: 11,
+    type: "previewHistoryState", documentId: "file:///active.md", revision: 99, requestId: 11,
     canBack: true, canForward: true,
   });
   assert.equal(harness.backButton.disabled, true);
@@ -8041,7 +8041,7 @@ test("T23: choosing a mode posts previewPaletteModeChanged once and keeps the ed
   assert.equal(posted[0].type, "previewPaletteModeChanged");
   assert.equal(posted[0].mode, "gfm");
   assert.equal(posted[0].documentId, "file:///active.md");
-  assert.equal(posted[0].documentVersion, 7);
+  assert.equal(posted[0].revision, 7);
   assert.equal(posted[0].requestId, 11);
   assert.equal(paletteOf(harness)!.getAttribute("data-palette-mode"), "gfm");
   assert.equal(harness.getWebviewState().paletteMode, "gfm");
@@ -8468,7 +8468,7 @@ test("T30: the editor stays open while the host's file dialog has the focus, and
   assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), false);
   harness.dispatchMessage({
     type: "previewPickDocumentResult", editId: request.editId, ok: true, path: "../guide/setup",
-    documentVersion: 99, requestId: 99,
+    revision: 99, requestId: 99,
   });
   assert.equal(textarea.value, "Read {doc}`../guide/setup`");
   // Once answered, a real departure saves again.
@@ -8505,7 +8505,7 @@ test("T31: Image keeps the editor open while the file dialog has the focus, then
   assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), false);
   harness.dispatchMessage({
     type: "previewPickImageResult", editId: request.editId, ok: true, path: "img/my logo.png",
-    documentVersion: 99, requestId: 99,
+    revision: 99, requestId: 99,
   });
   assert.equal(textarea.value, "See ![my logo](<img/my logo.png>)");
   assert.equal(textarea.value.slice(textarea.selectionStart, textarea.selectionEnd), "my logo");
@@ -8559,7 +8559,7 @@ function figureHarness(source: string, caret: number) {
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
     originalText: source + "\n",
@@ -8702,7 +8702,7 @@ test("T32: Browse asks the host for an image, keeps the editor open, and fills S
   assert.equal(harness.messages.some((message) => message.type === "previewEditSave" && message.final === true), false);
   harness.dispatchMessage({
     type: "previewPickImageResult", editId: request.editId, ok: true, path: "img/other.png",
-    documentVersion: 99, requestId: 99,
+    revision: 99, requestId: 99,
   });
   assert.equal(figureField(harness, "source").value, "img/other.png");
   assert.ok(figurePanelOf(harness));
@@ -8777,7 +8777,7 @@ test("T32: Edit figure opens the block editor and, once the source arrives, the 
   harness.dispatchMessage({
     type: "previewEditSource",
     documentId: "file:///active.md",
-    documentVersion: 7,
+    revision: 7,
     requestId: 11,
     editId: open.editId,
     originalText: figureSource + "\n",
@@ -9814,7 +9814,7 @@ test("CR 025: an anchor link inside the page keeps the open editor", () => {
 
 test("CR 025: Back right after typing posts the final save before previewHistoryGo", () => {
   const harness = createRuntimeHarness();
-  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
   harness.dispatchMessage({ type: "previewHistoryState", ...ids, canBack: true, canForward: false });
   const textarea = openBlockEditorWithSource(harness);
   const before = harness.messages.length;
@@ -9828,7 +9828,7 @@ test("CR 025: Back right after typing posts the final save before previewHistory
 
 test("CR 025: Back with an untouched editor open posts only the navigation", () => {
   const harness = createRuntimeHarness();
-  const ids = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+  const ids = { documentId: "file:///active.md", revision: 7, requestId: 11 };
   harness.dispatchMessage({ type: "previewHistoryState", ...ids, canBack: true, canForward: false });
   openBlockEditorWithSource(harness);
   const before = harness.messages.length;
@@ -9925,7 +9925,7 @@ function openObjectYamlEditor(): {
   return { harness, textarea };
 }
 
-const CR25_IDS = { documentId: "file:///active.md", documentVersion: 7, requestId: 11 };
+const CR25_IDS = { documentId: "file:///active.md", revision: 7, requestId: 11 };
 
 test("CR 025: a blur save refused before a host flush is saved again as a flush, then answered", () => {
   // The host focusing another editor tab blurs the editor first: the blur posts a plain save that

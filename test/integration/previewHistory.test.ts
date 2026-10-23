@@ -19,10 +19,10 @@ async function waitFor(description: string, predicate: () => boolean, timeoutMs 
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
-function context(): { documentId: string; documentVersion: number; requestId: number } {
+function context(): { documentId: string; revision: number; requestId: number } {
   const preview = getActivePreviewForTests();
   assert.ok(preview && preview.requestId !== undefined && preview.documentVersion !== undefined);
-  return { documentId: preview.documentUri, documentVersion: preview.documentVersion, requestId: preview.requestId };
+  return { documentId: preview.documentUri, revision: preview.documentVersion, requestId: preview.requestId };
 }
 
 async function waitForReady(uri: vscode.Uri): Promise<void> {

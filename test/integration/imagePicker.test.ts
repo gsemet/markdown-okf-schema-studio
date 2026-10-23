@@ -71,7 +71,7 @@ export async function run(): Promise<void> {
       await sendPreviewMessageForTests({
         type: "previewPickImage",
         documentId: preview.documentUri,
-        documentVersion: version,
+        revision: version,
         requestId: preview.requestId,
         editId,
       });

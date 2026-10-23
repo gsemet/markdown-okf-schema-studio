@@ -116,7 +116,7 @@ function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?:
       getState: () => state,
       setState: (next: unknown) => { state = next as Record<string, unknown>; },
     },
-    { documentId: "doc", documentVersion: 1, requestId: 2, initialViewPreferences: { toc: options.toc } },
+    { documentId: "doc", revision: 1, requestId: 2, initialViewPreferences: { toc: options.toc } },
     (target) => scrolled.push(target as never),
     () => { changes += 1; },
     () => 40,
@@ -224,7 +224,7 @@ test("the toggle opens the TOC, posts the preference, remembers it and builds th
   assert.deepEqual(posted, [{
     type: "previewViewPreferenceChanged",
     documentId: "doc",
-    documentVersion: 1,
+    revision: 1,
     requestId: 2,
     preference: "toc",
     value: true,

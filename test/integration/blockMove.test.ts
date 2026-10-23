@@ -53,7 +53,7 @@ export async function run(): Promise<void> {
     ) => sendPreviewMessageForTests({
       type: "previewBlockMove",
       documentId: preview.documentUri,
-      documentVersion: version,
+      revision: version,
       requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
       line, endLine, neighbourLine, neighbourEndLine, direction, pinViewportTop: 200,
     });
@@ -121,7 +121,7 @@ export async function runUndo(): Promise<void> {
       await sendPreviewMessageForTests({
         type: "previewBlockMove",
         documentId: preview.documentUri,
-        documentVersion: document.version,
+        revision: document.version,
         requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
         line: 3, endLine: 5, neighbourLine: 7, neighbourEndLine: 8, direction: "down", pinViewportTop: 200,
       });
@@ -145,7 +145,7 @@ export async function runUntrusted(preview: { documentUri: string; documentVersi
   await sendPreviewMessageForTests({
     type: "previewBlockMove",
     documentId: preview.documentUri,
-    documentVersion: preview.documentVersion,
+    revision: preview.documentVersion,
     requestId: preview.requestId,
     line: 1, endLine: 1, neighbourLine: 3, neighbourEndLine: 3, direction: "down", pinViewportTop: 10,
   });

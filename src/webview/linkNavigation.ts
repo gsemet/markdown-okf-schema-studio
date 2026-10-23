@@ -1,6 +1,6 @@
 export interface LinkRuntimeContext {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
 }
 
@@ -77,7 +77,7 @@ export function installLinkNavigation(
   window.addEventListener("message", (event: MessageEvent) => {
     const message = event.data;
     if (message?.type !== "previewLinkTargets" || message.documentId !== context.documentId
-      || message.documentVersion !== context.documentVersion || message.requestId !== context.requestId
+      || message.revision !== context.revision || message.requestId !== context.requestId
       || !Array.isArray(message.targets)) return;
     for (const target of message.targets) {
       for (const link of links) {

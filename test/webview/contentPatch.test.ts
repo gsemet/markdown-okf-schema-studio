@@ -78,7 +78,7 @@ async function page(markdown: string, options: { requestId?: number; version?: n
     webview as never,
     {
       documentId: result.stage.activeDocumentIdentity,
-      documentVersion: version,
+      revision: version,
       requestId,
       activeSourceFile: result.stage.activeDocumentPath,
       ...(requestId % 2 === 0 ? { initialAnchor: 3 } : {}),
@@ -234,7 +234,7 @@ test("T34: the runtime context key covers the startup settings and nothing the p
     assert.notEqual(runtimeContextKey({ ...base, ...change }), key, JSON.stringify(change));
   }
   // Fields outside the key (identifiers, theme, pairing, anchor) are not even inputs.
-  assert.equal(runtimeContextKey({ ...base, documentVersion: 9, requestId: 4, themeKind: 2, initialAnchor: 7 } as never), key);
+  assert.equal(runtimeContextKey({ ...base, revision: 9, requestId: 4, themeKind: 2, initialAnchor: 7 } as never), key);
 });
 
 test("T34: status lines that the runtime would reject keep the patch from being sent", () => {
@@ -313,7 +313,7 @@ test("the page script is injected verbatim even when it contains replacement pat
     "<html><head></head><body><main>x</main></body></html>",
     "/tmp/out",
     webview as never,
-    { documentId: "file:///a.md", documentVersion: 1, requestId: 1, activeSourceFile: tricky },
+    { documentId: "file:///a.md", revision: 1, requestId: 1, activeSourceFile: tricky },
     undefined,
     undefined,
     960,

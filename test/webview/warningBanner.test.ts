@@ -74,7 +74,7 @@ function page(status: string, lines: Array<[string, string | undefined]>): { doc
 
 function install(document: FakeDocument, extra: Record<string, unknown> = {}) {
   const messages: Array<Record<string, unknown>> = [];
-  const context = { documentId: "file:///chapter.md", documentVersion: 4, requestId: 9, ...extra };
+  const context = { documentId: "file:///chapter.md", revision: 4, requestId: 9, ...extra };
   const banner = installWarningBanner(document, { postMessage: (message) => messages.push(message as Record<string, unknown>) },
     context, warningBannerState, warningBannerText);
   return { banner, messages, context };
@@ -118,7 +118,7 @@ test("CR 050: Open Problems asks the host to open the Problems view", () => {
   const { banner, messages } = install(document);
   banner.update();
   (bannersOf(document)[0].querySelector("[data-sphinx-preview-warning-problems]") as FakeElement).listeners.get("click")![0]({});
-  assert.deepEqual(messages, [{ type: "previewShowProblems", documentId: "file:///chapter.md", documentVersion: 4, requestId: 9 }]);
+  assert.deepEqual(messages, [{ type: "previewShowProblems", documentId: "file:///chapter.md", revision: 4, requestId: 9 }]);
 });
 
 test("CR 050: closing removes the banner, tells the host the key and keeps it closed until the set changes", () => {
@@ -126,10 +126,10 @@ test("CR 050: closing removes the banner, tells the host the key and keeps it cl
   const { banner, messages, context } = install(document);
   banner.update();
   const key = banner.state().key;
-  context.documentVersion = 5;
+  context.revision = 5;
   (bannersOf(document)[0].querySelector("[data-sphinx-preview-warning-close]") as FakeElement).listeners.get("click")![0]({});
   assert.equal(bannersOf(document).length, 0, "gone");
-  assert.deepEqual(messages, [{ type: "previewWarningBannerClosed", documentId: "file:///chapter.md", documentVersion: 5, requestId: 9, key }]);
+  assert.deepEqual(messages, [{ type: "previewWarningBannerClosed", documentId: "file:///chapter.md", revision: 5, requestId: 9, key }]);
   banner.update();
   assert.equal(bannersOf(document).length, 0, "the same set after a patch stays closed");
   region.querySelector("li")!.remove();

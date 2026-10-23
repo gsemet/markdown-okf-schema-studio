@@ -211,7 +211,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
   const runtimeContext = {
     activeSourceFile: sourcePath,
     documentId: pathToFileURL(sourcePath).toString(),
-    documentVersion: 1,
+    revision: 1,
     requestId: 1,
     stickyHeadingDepth,
     ...(stored === undefined ? {} : { previewThemeMode: stored.previewThemeMode }),
@@ -253,7 +253,7 @@ window.acquireVsCodeApi = () => ({
       setTimeout(() => window.dispatchEvent(new MessageEvent("message", { data: {
         type: "previewPlantUmlIncludeResult",
         documentId: message.documentId,
-        documentVersion: message.documentVersion,
+        revision: message.revision,
         requestId: message.requestId,
         editId: message.editId,
         ...(text === undefined ? { ok: false, reason: "PlantUML file not found: " + message.path + "." } : { ok: true, id, text }),
@@ -278,7 +278,7 @@ window.acquireVsCodeApi = () => ({
     : `<script>
 const hostContext = ${JSON.stringify({
       documentId: runtimeContext.documentId,
-      documentVersion: runtimeContext.documentVersion,
+      revision: runtimeContext.revision,
       requestId: runtimeContext.requestId,
     })};
 for (const entry of ${JSON.stringify(options.hostMessages).replace(/</gu, "\\u003c")}) {

@@ -1,6 +1,6 @@
 export interface ToolbarCollapseContext {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
   initialViewPreferences?: { toolbarCollapsed?: boolean };
 }
@@ -54,7 +54,7 @@ export function installToolbarCollapse(
     vscode.postMessage({
       type: "previewViewPreferenceChanged",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       preference: "toolbarCollapsed",
       value: collapsed,

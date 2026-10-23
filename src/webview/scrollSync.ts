@@ -48,10 +48,14 @@ import type { ViewPreferences } from "../state/previewViewPreferences";
 import { DEFAULT_PREVIEW_THEME_MODE, type PreviewThemeMode } from "../state/previewTheme";
 import { DEFAULT_EDITING_CONFIGURATION } from "../configuration/editingConfiguration";
 import type { PreviewPanelState } from "../state/previewState";
+import { createHostMessageFilter } from "../protocol/hostToPage";
+import { createMessageRouter } from "../protocol/router";
+import type { Revision } from "../protocol/revision";
 
 export interface ScrollContext {
   documentId: string;
-  documentVersion: number;
+  /** The revision of the document text the render was made from (see src/protocol/revision.ts). */
+  revision: Revision;
   requestId: number;
 }
 
@@ -126,7 +130,7 @@ function runtimeScript(contextExpression: string): string {
   "use strict";
   const context = ${contextExpression};
   document.documentElement.setAttribute("data-sphinx-preview-document-id", context.documentId);
-  document.documentElement.setAttribute("data-sphinx-preview-document-version", String(context.documentVersion));
+  document.documentElement.setAttribute("data-sphinx-preview-document-version", String(context.revision));
   document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
   // Keyed content updates (PERF-05): the host HTML of every block, recorded before anything changes it.
   const contentMorph = (${installContentMorph.toString()})(document, ${planKeyedMorph.toString()}, ${morphKey.toString()});
@@ -157,7 +161,7 @@ function runtimeScript(contextExpression: string): string {
     return "active=" + (active ? String(active.tagName).toLowerCase() : "none") + " pageFocus=" + focused;
   };
   const traceStack = () => editorTrace.callers(new Error().stack, 2);
-  editorTrace.record("page", "request " + context.requestId + " version " + context.documentVersion);
+  editorTrace.record("page", "request " + context.requestId + " version " + context.revision);
   window.addEventListener("focus", () => editorTrace.record("page focus", traceFocus()));
   window.addEventListener("blur", () => editorTrace.record("page blur", traceFocus()));
   // Cmd/Ctrl+A in a text control selects that control's text and never reaches the workbench
@@ -258,7 +262,7 @@ function runtimeScript(contextExpression: string): string {
   const postCommentMessage = (type, fields) => vscode.postMessage({
     type,
     documentId: context.documentId,
-    documentVersion: context.documentVersion,
+    revision: context.revision,
     requestId: context.requestId,
     ...fields,
   });
@@ -321,7 +325,7 @@ function runtimeScript(contextExpression: string): string {
   const codeCopy = (${installCodeCopy.toString()})(document, window, (text) => vscode.postMessage({
     type: "previewCopyText",
     documentId: context.documentId,
-    documentVersion: context.documentVersion,
+    revision: context.revision,
     requestId: context.requestId,
     text,
   }));
@@ -335,7 +339,7 @@ function runtimeScript(contextExpression: string): string {
     post: (rename, editId) => vscode.postMessage({
       type: "previewLabelRename",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       editId,
       ...rename,
@@ -349,7 +353,7 @@ function runtimeScript(contextExpression: string): string {
     post: (request) => vscode.postMessage({
       ...request,
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
     }),
   });
@@ -361,7 +365,7 @@ function runtimeScript(contextExpression: string): string {
     post: (request) => vscode.postMessage({
       ...request,
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
     }),
   });
@@ -554,29 +558,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
 
   // In-place content patch (T34). The host sends the sanitized inner HTML of the content container
   // instead of loading a new document; the runtime keeps running and moves to the new render. The
-  // status region is rebuilt from plain text and never goes through innerHTML.
-  const PATCH_STATUSES = ["pending", "success", "stale", "error", "missing-source", "recovery"];
-  const MAX_PATCH_CONTENT_LENGTH = 20 * 1024 * 1024;
-  const MAX_PATCH_DIAGNOSTICS = 500;
-
-  function isValidContentPatch(message) {
-    const next = message.next;
-    if (!next || typeof next !== "object"
-      || !Number.isSafeInteger(next.documentVersion) || !Number.isSafeInteger(next.requestId)) return false;
-    if (next.initialAnchor !== undefined && !Number.isFinite(next.initialAnchor)) return false;
-    const pin = next.initialPin;
-    if (pin !== undefined && (!pin || typeof pin !== "object"
-      || !Number.isFinite(pin.line) || !Number.isFinite(pin.viewportTop))) return false;
-    if (typeof message.contentHtml !== "string" || message.contentHtml.length > MAX_PATCH_CONTENT_LENGTH) return false;
-    if (!PATCH_STATUSES.includes(message.status)) return false;
-    if (typeof message.label !== "string" || message.label.length > 500) return false;
-    if (message.message !== undefined && (typeof message.message !== "string" || message.message.length > 20000)) return false;
-    return Array.isArray(message.diagnostics)
-      && message.diagnostics.length <= MAX_PATCH_DIAGNOSTICS
-      && message.diagnostics.every((entry) => entry && typeof entry.severity === "string"
-        && entry.severity.length <= 50 && typeof entry.text === "string" && entry.text.length <= 20000
-        && (entry.code === undefined || (typeof entry.code === "string" && entry.code.length <= 100)));
-  }
+  // status region is rebuilt from plain text and never goes through innerHTML. The patch was
+  // validated by the host message filter (src/protocol/hostToPage.ts) before it got here.
 
   // The status region of a rendered page: label, optional message, optional diagnostics list. Every
   // field is set with textContent.
@@ -611,7 +594,6 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   }
 
   function applyContentPatch(message) {
-    if (!isValidContentPatch(message)) return;
     const main = document.getElementById?.("sphinx-myst-preview-content");
     if (!main) return;
     const next = message.next;
@@ -643,7 +625,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     applyPendingOverlay({ visible: false, label: "", message: "" });
     // Blocks whose HTML did not change stay in place with what the page did to them (PERF-05).
     contentMorph.replace(main, message.contentHtml);
-    context.documentVersion = next.documentVersion;
+    context.revision = next.revision;
     context.requestId = next.requestId;
     if (next.initialAnchor !== undefined) context.initialAnchor = next.initialAnchor;
     else delete context.initialAnchor;
@@ -654,7 +636,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     if (openDisclosures.length > 0) context.initialState = { openDisclosures };
     else delete context.initialState;
-    document.documentElement.setAttribute("data-sphinx-preview-document-version", String(context.documentVersion));
+    document.documentElement.setAttribute("data-sphinx-preview-document-version", String(context.revision));
     document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
     applyStatusRegion(message);
     if (linkHints.size > 0) {
@@ -673,12 +655,6 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     applyPendingBlockSelection();
     // Set by the host only when the change came from outside the preview or was an undo / redo.
     motion.glow(message.updatedRanges);
-  }
-
-  function sameContext(candidate) {
-    return candidate && candidate.documentId === context.documentId
-      && candidate.documentVersion === context.documentVersion
-      && candidate.requestId === context.requestId;
   }
 
   function normalize(value) {
@@ -1119,7 +1095,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     (leadsEditor ? vscode.postMessage : postStateMessageThrottled)({
       type: leadsEditor ? "previewScroll" : "previewState",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       line: sourceLine,
       anchorLine: line,
@@ -1200,7 +1176,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewThemeModeChanged",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       previewThemeMode,
     });
@@ -1238,7 +1214,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewAnchorModeChanged",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       anchorToEditor,
     });
@@ -1283,7 +1259,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       vscode.postMessage({
         type: "previewEditCancel",
         documentId: context.documentId,
-        documentVersion: context.documentVersion,
+        revision: context.revision,
         requestId: context.requestId,
         editId: edit.editId,
         line: edit.line,
@@ -1332,7 +1308,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewEditClosed",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       editId,
     });
@@ -1426,7 +1402,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const message = {
       type: "previewFrontmatterSave",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       editId,
       frontmatterAction: action,
@@ -2118,7 +2094,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       vscode.postMessage({
         type: "previewFrontmatterSave",
         documentId: context.documentId,
-        documentVersion: context.documentVersion,
+        revision: context.revision,
         requestId: context.requestId,
         editId,
         fieldName: name,
@@ -2628,7 +2604,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       vscode.postMessage({
         type: "previewFrontmatterSave",
         documentId: context.documentId,
-        documentVersion: context.documentVersion,
+        revision: context.revision,
         requestId: context.requestId,
         editId,
         fieldName: name,
@@ -2820,7 +2796,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewEditOpen",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       editId,
       line,
@@ -2860,7 +2836,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewEditSave",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       editId: edit.editId,
       line: edit.line,
@@ -3876,7 +3852,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         vscode.postMessage({
           type: "previewPaletteModeChanged",
           documentId: context.documentId,
-          documentVersion: context.documentVersion,
+          revision: context.revision,
           requestId: context.requestId,
           mode: nextMode,
         });
@@ -4414,7 +4390,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type,
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       ...fields,
       ...(type !== "previewBlocksCopy" && Number.isFinite(top) && Math.abs(top) <= 100000
@@ -4511,7 +4487,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewBlockMove",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       line: own.line,
       endLine: own.endLine,
@@ -4559,7 +4535,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       mode,
       caretOffset,
       line,
-      version: context.documentVersion,
+      version: context.revision,
       timer: window.setTimeout(() => {
         blockMoveInFlight = undefined;
         setPendingMoveSelection(undefined);
@@ -4625,7 +4601,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       target: freeIndex + step,
       count: blocks.length,
       documentId: context.documentId,
-      version: context.documentVersion,
+      version: context.revision,
       at: Date.now(),
     });
     return true;
@@ -4651,7 +4627,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (!pending || blockMoveInFlight) return;
     // The same version after a reload means the move never landed (a lost flight cannot be
     // completed): forget it, so it cannot select blocks after some later edit.
-    if (context.documentVersion === pending.version) {
+    if (context.revision === pending.version) {
       setPendingMoveSelection(undefined);
       return;
     }
@@ -4681,7 +4657,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // The move is done and its render is in: focus or edit the block at its new place.
   function resumeBlockMove() {
     const flight = blockMoveInFlight;
-    if (!flight || flight.newLine === undefined || context.documentVersion === flight.version) return;
+    if (!flight || flight.newLine === undefined || context.revision === flight.version) return;
     if (!editMode) return;
     clearBlockMoveInFlight();
     settleBlockMove(bodyBlockAtLine(flight.newLine), flight);
@@ -4961,7 +4937,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewCheckboxToggle",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       editId,
       line,
@@ -4992,7 +4968,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewRefresh",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       sourceLine: state.sourceLine,
       scrollTop: state.scrollTop,
@@ -5012,7 +4988,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       type: "previewReveal",
       activation,
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       blockId: target.getAttribute("data-sphinx-preview-block"),
       sourceFile,
@@ -5220,7 +5196,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       vscode.postMessage({
         type: "previewScroll",
         documentId: context.documentId,
-        documentVersion: context.documentVersion,
+        revision: context.revision,
         requestId: context.requestId,
         line: sourceLine,
         anchorLine: line,
@@ -5269,7 +5245,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewEditModeChanged",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       editMode: nextEditMode,
     });
@@ -5285,151 +5261,133 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   window.addEventListener("scroll", scheduleScroll, { passive: true });
   window.addEventListener("resize", stabilizeLayout, { passive: true });
   window.visualViewport?.addEventListener("resize", stabilizeLayout, { passive: true });
-  window.addEventListener("message", (event) => {
-    const message = event.data;
-    if (sameContext(message) && message.type === "previewPendingOverlay") {
-      applyPendingOverlay(message);
+  // Host messages (src/protocol/hostToPage.ts): the filter checks that a message is addressed to
+  // this page and has a valid payload, then the router runs the handler of its type.
+  const hostMessageFilter = (${createHostMessageFilter.toString()})();
+  const hostMessages = (${createMessageRouter.toString()})();
+  hostMessages.on("previewPendingOverlay", (message) => {
+    applyPendingOverlay(message);
+  });
+  hostMessages.on("previewEditorWatch", (message) => {
+    // The host holds page updates back until this editor closes (STAB-03): report the close. The
+    // editor id is the match; the document id may already be the next document the host follows.
+    if (activeBlockEdit && activeBlockEdit.editId === message.editId) activeBlockEdit.reportClose = true;
+    else postEditClosed(message.editId);
+  });
+  hostMessages.on("previewContentPatch", (message) => {
+    applyContentPatch(message);
+  });
+  hostMessages.on("previewPropertiesTable", (message) => {
+    if (activeFrontmatterEdit) {
+      editorTrace.record("properties table deferred", "seq " + message.seq);
+      deferredPropertiesMarkup = message.markup;
+      deferredPropertiesSeq = message.seq;
       return;
     }
-    if (message && message.type === "previewEditorWatch" && typeof message.editId === "string") {
-      // The host holds page updates back until this editor closes (STAB-03): report the close. The
-      // editor id is the match; the document id may already be the next document the host follows.
-      if (activeBlockEdit && activeBlockEdit.editId === message.editId) activeBlockEdit.reportClose = true;
-      else postEditClosed(message.editId);
-      return;
-    }
-    if (sameContext(message) && message.type === "previewContentPatch") {
-      applyContentPatch(message);
-      return;
-    }
-    if (sameContext(message) && message.type === "previewPropertiesTable") {
-      if (typeof message.markup !== "string") return;
-      if (activeFrontmatterEdit) {
-        editorTrace.record("properties table deferred", "seq " + message.seq);
-        deferredPropertiesMarkup = message.markup;
-        deferredPropertiesSeq = message.seq;
-        return;
-      }
-      applyPropertiesMarkup(message.markup, message.seq);
-      return;
-    }
-    if (sameContext(message) && message.type === "previewPairing") {
-      applyPairing(message.pairedTextEditor !== false);
-      return;
-    }
-    if (sameContext(message) && message.type === "themeChanged") {
-      applyTheme(message.themeKind);
-      return;
-    }
-    if (sameContext(message) && message.type === "previewShowComments") {
-      chipToggle.setShowComments(message.showComments !== false);
-      return;
-    }
-    if (sameContext(message) && message.type === "previewCommentResult") {
-      // The answer to a create or a reply: the compose box and the reply box keep the text until ok.
-      if (!commentCompose?.result(message)) commentThreads.result(message);
-      return;
-    }
-    if (sameContext(message) && message.type === "previewComments") {
-      commentThreads.setThreads(message.threads);
-      measure();
-      return;
-    }
-    if (sameContext(message) && message.type === "previewIncomingChanges") {
-      incomingChanges.setEnabled(message.enabled !== false);
-      incomingChanges.setRanges(message.ranges);
-      return;
-    }
-    if (message && message.type === "previewFlushEdit" && typeof message.flushId === "string") {
-      // The host is about to switch document: post the final saves, then the answer, in that order.
-      const flushId = message.flushId;
-      flushOpenEditorsThen((flushed) => vscode.postMessage({
-        type: "previewEditFlushed",
-        documentId: context.documentId,
-        documentVersion: context.documentVersion,
-        requestId: context.requestId,
-        flushId,
-        flushed,
-      }));
-      return;
-    }
-    if (sameContext(message) && message.type === "previewHistoryState") {
-      historyControls.apply(message);
-      return;
-    }
-    if (sameContext(message) && message.type === "navigateAnchor") {
-      const value = typeof message.value === "string" ? message.value : "";
-      const decodeFragment = (fragment) => {
-        let decoded = fragment;
-        try {
-          for (let attempt = 0; attempt < 4; attempt += 1) {
-            const next = decodeURIComponent(decoded);
-            if (next === decoded) return decoded;
-            decoded = next;
-          }
-        } catch {
-          return undefined;
+    applyPropertiesMarkup(message.markup, message.seq);
+  });
+  hostMessages.on("previewPairing", (message) => {
+    applyPairing(message.pairedTextEditor !== false);
+  });
+  hostMessages.on("themeChanged", (message) => {
+    applyTheme(message.themeKind);
+  });
+  hostMessages.on("previewShowComments", (message) => {
+    chipToggle.setShowComments(message.showComments !== false);
+  });
+  hostMessages.on("previewCommentResult", (message) => {
+    // The answer to a create or a reply: the compose box and the reply box keep the text until ok.
+    if (!commentCompose?.result(message)) commentThreads.result(message);
+  });
+  hostMessages.on("previewComments", (message) => {
+    commentThreads.setThreads(message.threads);
+    measure();
+  });
+  hostMessages.on("previewIncomingChanges", (message) => {
+    incomingChanges.setEnabled(message.enabled !== false);
+    incomingChanges.setRanges(message.ranges);
+  });
+  hostMessages.on("previewFlushEdit", (message) => {
+    // The host is about to switch document: post the final saves, then the answer, in that order.
+    const flushId = message.flushId;
+    flushOpenEditorsThen((flushed) => vscode.postMessage({
+      type: "previewEditFlushed",
+      documentId: context.documentId,
+      revision: context.revision,
+      requestId: context.requestId,
+      flushId,
+      flushed,
+    }));
+  });
+  hostMessages.on("previewHistoryState", (message) => {
+    historyControls.apply(message);
+  });
+  hostMessages.on("navigateAnchor", (message) => {
+    const value = typeof message.value === "string" ? message.value : "";
+    const decodeFragment = (fragment) => {
+      let decoded = fragment;
+      try {
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          const next = decodeURIComponent(decoded);
+          if (next === decoded) return decoded;
+          decoded = next;
         }
-        return /%[\da-f]{2}/iu.test(decoded) ? undefined : decoded;
-      };
-      const fragmentSourceLine = Number(message.sourceLine ?? message.line);
-      const mappedEntry = Number.isInteger(fragmentSourceLine) && fragmentSourceLine > 0
-        ? layout.find((entry) => fragmentSourceLine >= entry.sourceLine
-          && fragmentSourceLine <= (entry.endLine ?? entry.sourceLine))
-        : undefined;
-      const mappedTarget = mappedEntry?.element;
-      const decodedValue = value.startsWith("#") ? decodeFragment(value.slice(1)) : undefined;
-      if (!decodedValue && !mappedTarget) return;
-      const target = mappedTarget
-        ?? (decodedValue ? document.getElementById?.(decodedValue) : undefined)
-        ?? (decodedValue?.startsWith("^")
-          ? document.getElementById?.(decodedValue.slice(1))
-          : undefined);
-      if (!target) return;
-      const rectangle = target.getBoundingClientRect?.();
-      if (!rectangle) return;
-      const mappedScrollTop = mappedEntry && Number.isInteger(fragmentSourceLine)
-        ? anchorPolicy.scrollTopForLine(anchorMap, fragmentSourceLine, readingOffsetValue, maxScrollTop())
-        : undefined;
-      const targetTop = mappedScrollTop ?? anchorPolicy.scrollTopForY(
-          rectangle.top + window.scrollY,
-          readingOffsetValue,
-          maxScrollTop(),
-        );
-      revealAt(targetTop);
-      return;
-    }
-    if (message?.type === "previewLabelRenameResult" && labelRename.receive(message)) return;
-    if (message?.type === "previewPlantUmlIncludeResult" && plantUmlFileRequests.receive(message)) return;
-    if (message?.type === "previewPlantUmlIncludesChanged" && message.documentId === context.documentId) {
-      if (typeof CustomEvent === "function") {
-        document.dispatchEvent(new CustomEvent("studio:plantuml-includes-changed"));
+      } catch {
+        return undefined;
       }
-      return;
+      return /%[\da-f]{2}/iu.test(decoded) ? undefined : decoded;
+    };
+    const fragmentSourceLine = Number(message.sourceLine ?? message.line);
+    const mappedEntry = Number.isInteger(fragmentSourceLine) && fragmentSourceLine > 0
+      ? layout.find((entry) => fragmentSourceLine >= entry.sourceLine
+        && fragmentSourceLine <= (entry.endLine ?? entry.sourceLine))
+      : undefined;
+    const mappedTarget = mappedEntry?.element;
+    const decodedValue = value.startsWith("#") ? decodeFragment(value.slice(1)) : undefined;
+    if (!decodedValue && !mappedTarget) return;
+    const target = mappedTarget
+      ?? (decodedValue ? document.getElementById?.(decodedValue) : undefined)
+      ?? (decodedValue?.startsWith("^")
+        ? document.getElementById?.(decodedValue.slice(1))
+        : undefined);
+    if (!target) return;
+    const rectangle = target.getBoundingClientRect?.();
+    if (!rectangle) return;
+    const mappedScrollTop = mappedEntry && Number.isInteger(fragmentSourceLine)
+      ? anchorPolicy.scrollTopForLine(anchorMap, fragmentSourceLine, readingOffsetValue, maxScrollTop())
+      : undefined;
+    const targetTop = mappedScrollTop ?? anchorPolicy.scrollTopForY(
+        rectangle.top + window.scrollY,
+        readingOffsetValue,
+        maxScrollTop(),
+      );
+    revealAt(targetTop);
+  });
+  // A label rename and a PlantUML include read are matched by edit id; an answer they do not
+  // recognise is left to the host round trips below.
+  hostMessages.on("previewLabelRenameResult", (message) => labelRename.receive(message));
+  hostMessages.on("previewPlantUmlIncludeResult", (message) => plantUmlFileRequests.receive(message));
+  hostMessages.on("previewPlantUmlIncludesChanged", () => {
+    if (typeof CustomEvent === "function") {
+      document.dispatchEvent(new CustomEvent("studio:plantuml-includes-changed"));
     }
-    if (message?.type === "previewBlocksResult" && sameContext(message)) {
-      receiveBlocksResult(message);
-      return;
-    }
-    if (message?.type === "previewBlockMoveResult" && sameContext(message)) {
-      receiveBlockMoveResult(message);
-      return;
-    }
-    if (message && typeof message.type === "string" && message.type.endsWith("Result")
-      && hostRequests.receive(message)) return;
-    if (sameContext(message) && message.type === "previewEditSource") {
-      receiveBlockEditSource(message);
-      return;
-    }
-    if (sameContext(message) && message.type === "previewFrontmatterResult") {
-      receiveFrontmatterResult(message);
-      return;
-    }
-    if (sameContext(message) && message.type === "previewCheckboxResult") {
-      receiveCheckboxResult(message);
-      return;
-    }
-    if (!sameContext(message) || message.type !== "sourceScroll") return;
+  });
+  hostMessages.on("previewBlocksResult", (message) => {
+    receiveBlocksResult(message);
+  });
+  hostMessages.on("previewBlockMoveResult", (message) => {
+    receiveBlockMoveResult(message);
+  });
+  hostMessages.on("previewEditSource", (message) => {
+    receiveBlockEditSource(message);
+  });
+  hostMessages.on("previewFrontmatterResult", (message) => {
+    receiveFrontmatterResult(message);
+  });
+  hostMessages.on("previewCheckboxResult", (message) => {
+    receiveCheckboxResult(message);
+  });
+  hostMessages.on("sourceScroll", (message) => {
     markSourceLine(Number(message.selectionLine ?? message.line));
     if (!settings.scrollPreviewWithEditor) return;
     const line = Number(message.line);
@@ -5451,6 +5409,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       }
       applyAnchor();
     });
+  });
+  window.addEventListener("message", (event) => {
+    const message = event.data;
+    if (hostMessageFilter.accepts(message, context) && hostMessages.dispatch(message).handled) return;
+    // Every other answer may close a host round trip of the palette: matched by edit id.
+    if (message && typeof message.type === "string" && message.type.endsWith("Result")) {
+      hostRequests.receive(message);
+    }
   });
   function applyDescriptionVisibility() {
     document.documentElement?.setAttribute("data-okf-descriptions-collapsed", String(descriptionsCollapsed));
@@ -5504,7 +5470,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewState",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       ...state,
     });
@@ -5632,7 +5598,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     vscode.postMessage({
       type: "previewReady",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       sourceLine: readyState.sourceLine,
       scrollTop: readyState.scrollTop,

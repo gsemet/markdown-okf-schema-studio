@@ -1,16 +1,14 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { isBoundedString, isOneOf, isSourceLine } from "../../src/protocol/envelope";
 import {
-  createPreviewMessageChecker,
-  isBoundedString,
-  isOneOf,
-  isRegisteredPreviewMessage,
-  isSourceLine,
-} from "../../src/preview/previewMessages";
+  createMessageChecker as createPreviewMessageChecker,
+  isPageToHostMessage as isRegisteredPreviewMessage,
+} from "../../src/protocol/pageToHost";
 
 const check = createPreviewMessageChecker({ sample: (m) => m.text === "ok" });
-const valid = { type: "sample", documentId: "doc", documentVersion: 3, requestId: 7, text: "ok" };
+const valid = { type: "sample", documentId: "doc", revision: 3, requestId: 7, text: "ok" };
 
 test("accepts a valid registered message", () => {
   assert.equal(check(valid), true);
@@ -21,8 +19,8 @@ test("rejects missing or non-integer ids and oversize documentId", () => {
   assert.equal(check({ ...valid, documentId: 1 }), false);
   assert.equal(check({ ...valid, documentId: "x".repeat(4097) }), false);
   assert.equal(check({ ...valid, documentId: "x".repeat(4096) }), true);
-  assert.equal(check({ ...valid, documentVersion: 1.5 }), false);
-  assert.equal(check({ ...valid, documentVersion: "3" }), false);
+  assert.equal(check({ ...valid, revision: 1.5 }), false);
+  assert.equal(check({ ...valid, revision: "3" }), false);
   assert.equal(check({ ...valid, requestId: undefined }), false);
   assert.equal(check({ ...valid, requestId: Number.NaN }), false);
   assert.equal(check({ ...valid, requestId: 2 ** 53 }), false);
@@ -46,7 +44,7 @@ test("the shipped registry rejects an unregistered type", () => {
 });
 
 test("previewCopyText accepts text up to 1 MB and rejects anything else", () => {
-  const copy = { type: "previewCopyText", documentId: "doc", documentVersion: 1, requestId: 1, text: "code" };
+  const copy = { type: "previewCopyText", documentId: "doc", revision: 1, requestId: 1, text: "code" };
   assert.equal(isRegisteredPreviewMessage(copy), true);
   assert.equal(isRegisteredPreviewMessage({ ...copy, text: "" }), true);
   assert.equal(isRegisteredPreviewMessage({ ...copy, text: "x".repeat(1_000_000) }), true);
@@ -69,7 +67,7 @@ test("field helpers respect their boundaries", () => {
 });
 
 test("previewViewPreferenceChanged validates the value per preference", () => {
-  const base = { type: "previewViewPreferenceChanged", documentId: "doc", documentVersion: 1, requestId: 1 };
+  const base = { type: "previewViewPreferenceChanged", documentId: "doc", revision: 1, requestId: 1 };
   const ok = (preference: unknown, value: unknown): boolean =>
     isRegisteredPreviewMessage({ ...base, preference, value });
   assert.equal(ok("zoom", 70), true);
@@ -98,7 +96,7 @@ test("previewViewPreferenceChanged validates the value per preference", () => {
 });
 
 test("previewHistoryGo accepts only back or forward", () => {
-  const base = { type: "previewHistoryGo", documentId: "doc", documentVersion: 1, requestId: 1 };
+  const base = { type: "previewHistoryGo", documentId: "doc", revision: 1, requestId: 1 };
   assert.equal(isRegisteredPreviewMessage({ ...base, direction: "back" }), true);
   assert.equal(isRegisteredPreviewMessage({ ...base, direction: "forward" }), true);
   assert.equal(isRegisteredPreviewMessage({ ...base, direction: "up" }), false);
@@ -106,7 +104,7 @@ test("previewHistoryGo accepts only back or forward", () => {
 });
 
 test("previewPaletteModeChanged accepts only strict, gfm or myst", () => {
-  const base = { type: "previewPaletteModeChanged", documentId: "doc", documentVersion: 1, requestId: 1 };
+  const base = { type: "previewPaletteModeChanged", documentId: "doc", revision: 1, requestId: 1 };
   for (const mode of ["strict", "gfm", "myst"]) {
     assert.equal(isRegisteredPreviewMessage({ ...base, mode }), true, mode);
   }
@@ -118,7 +116,7 @@ test("previewPaletteModeChanged accepts only strict, gfm or myst", () => {
 
 test("previewLabelRename validates the line and both label names", () => {
   const rename = {
-    type: "previewLabelRename", documentId: "doc", documentVersion: 1, requestId: 1, editId: "e",
+    type: "previewLabelRename", documentId: "doc", revision: 1, requestId: 1, editId: "e",
     line: 3, oldName: "old", newName: "new.name:1",
   };
   assert.equal(isRegisteredPreviewMessage(rename), true);
@@ -134,7 +132,7 @@ test("previewLabelRename validates the line and both label names", () => {
 
 test("T30: the list and pick messages carry an edit id and no other payload", () => {
   for (const type of ["previewListTargets", "previewListCitations", "previewPickDocument", "previewPickImage"]) {
-    const base = { type, documentId: "doc", documentVersion: 1, requestId: 1, editId: "host-1" };
+    const base = { type, documentId: "doc", revision: 1, requestId: 1, editId: "host-1" };
     assert.equal(isRegisteredPreviewMessage(base), true, type);
     assert.equal(isRegisteredPreviewMessage({ ...base, editId: "" }), false, type);
     assert.equal(isRegisteredPreviewMessage({ ...base, editId: "x".repeat(101) }), false, type);
@@ -145,7 +143,7 @@ test("T30: the list and pick messages carry an edit id and no other payload", ()
 
 test("previewBlockMove validates both ranges, the direction and the optional pin", () => {
   const move = {
-    type: "previewBlockMove", documentId: "doc", documentVersion: 1, requestId: 1,
+    type: "previewBlockMove", documentId: "doc", revision: 1, requestId: 1,
     line: 5, endLine: 6, neighbourLine: 1, neighbourEndLine: 3, direction: "up", pinViewportTop: 120.5,
   };
   assert.equal(isRegisteredPreviewMessage(move), true);
@@ -160,7 +158,7 @@ test("previewBlockMove validates both ranges, the direction and the optional pin
 });
 
 test("T40: the block clipboard messages validate their lines and the optional pin", () => {
-  const base = { documentId: "doc", documentVersion: 1, requestId: 1 };
+  const base = { documentId: "doc", revision: 1, requestId: 1 };
   for (const type of ["previewBlocksCopy", "previewBlocksCut"]) {
     const message = { ...base, type, line: 5, endLine: 8, pinViewportTop: 10 };
     assert.equal(isRegisteredPreviewMessage(message), true, type);
@@ -181,7 +179,7 @@ test("T40: the block clipboard messages validate their lines and the optional pi
 
 test("T38: previewPasteImage caps the size and accepts plain base64 of an allowed type only", () => {
   const base = {
-    type: "previewPasteImage", documentId: "doc", documentVersion: 1, requestId: 1,
+    type: "previewPasteImage", documentId: "doc", revision: 1, requestId: 1,
     editId: "host-1", mime: "image/png", dataBase64: "aGVsbG8=",
   };
   assert.equal(isRegisteredPreviewMessage(base), true);
@@ -197,7 +195,7 @@ test("T38: previewPasteImage caps the size and accepts plain base64 of an allowe
 });
 
 test("T1: previewPasteHtml accepts a bounded non-empty HTML string with an edit id", () => {
-  const base = { type: "previewPasteHtml", documentId: "doc", documentVersion: 1, requestId: 1, editId: "host-1", html: "<b>x</b>" };
+  const base = { type: "previewPasteHtml", documentId: "doc", revision: 1, requestId: 1, editId: "host-1", html: "<b>x</b>" };
   assert.equal(isRegisteredPreviewMessage(base), true);
   for (const patch of [{ html: "" }, { html: 5 }, { html: undefined }, { html: "x".repeat(1_000_001) }, { editId: "" }]) {
     assert.equal(isRegisteredPreviewMessage({ ...base, ...patch }), false, JSON.stringify(patch).slice(0, 40));
@@ -206,7 +204,7 @@ test("T1: previewPasteHtml accepts a bounded non-empty HTML string with an edit 
 
 test("T43: previewCommentCreate and previewCommentReply validate anchor, id and body limits", () => {
   const anchor = { line: 2, endLine: 3, quote: "q", prefix: "p", suffix: "s" };
-  const create = { type: "previewCommentCreate", documentId: "doc", documentVersion: 1, requestId: 1, anchor, body: "Why?" };
+  const create = { type: "previewCommentCreate", documentId: "doc", revision: 1, requestId: 1, anchor, body: "Why?" };
   assert.equal(isRegisteredPreviewMessage(create), true);
   assert.equal(isRegisteredPreviewMessage({ ...create, body: "x".repeat(10_000) }), true);
   for (const patch of [
@@ -218,7 +216,7 @@ test("T43: previewCommentCreate and previewCommentReply validate anchor, id and 
   ]) {
     assert.equal(isRegisteredPreviewMessage({ ...create, ...patch }), false, JSON.stringify(patch).slice(0, 60));
   }
-  const reply = { type: "previewCommentReply", documentId: "doc", documentVersion: 1, requestId: 1, threadId: "t_0a0b0c0d", body: "Because" };
+  const reply = { type: "previewCommentReply", documentId: "doc", revision: 1, requestId: 1, threadId: "t_0a0b0c0d", body: "Because" };
   assert.equal(isRegisteredPreviewMessage(reply), true);
   for (const patch of [{ body: "" }, { body: "x".repeat(10_001) }, { threadId: "" }, { threadId: 3 },
     { threadId: "t".repeat(10_001) }, { threadId: undefined }]) {
@@ -227,7 +225,7 @@ test("T43: previewCommentCreate and previewCommentReply validate anchor, id and 
 });
 
 test("T44: previewCommentResolve and previewCommentDelete validate the thread id and the flag", () => {
-  const base = { documentId: "doc", documentVersion: 1, requestId: 1, threadId: "t_0a0b0c0d" };
+  const base = { documentId: "doc", revision: 1, requestId: 1, threadId: "t_0a0b0c0d" };
   const resolve = { type: "previewCommentResolve", ...base, resolved: true };
   assert.equal(isRegisteredPreviewMessage(resolve), true);
   assert.equal(isRegisteredPreviewMessage({ ...resolve, resolved: false }), true);
@@ -244,7 +242,7 @@ test("T44: previewCommentResolve and previewCommentDelete validate the thread id
 
 test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
   const flushed = {
-    type: "previewEditFlushed", documentId: "doc", documentVersion: 1, requestId: 1, flushId: "flush-1", flushed: true,
+    type: "previewEditFlushed", documentId: "doc", revision: 1, requestId: 1, flushId: "flush-1", flushed: true,
   };
   assert.equal(isRegisteredPreviewMessage(flushed), true);
   assert.equal(isRegisteredPreviewMessage({ ...flushed, flushed: false }), true);
@@ -255,7 +253,7 @@ test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
 });
 
 test("STAB-03: previewEditClosed carries the id of the closed editor", () => {
-  const closed = { type: "previewEditClosed", documentId: "doc", documentVersion: 1, requestId: 1, editId: "edit-3" };
+  const closed = { type: "previewEditClosed", documentId: "doc", revision: 1, requestId: 1, editId: "edit-3" };
   assert.equal(isRegisteredPreviewMessage(closed), true);
   for (const patch of [{ editId: "" }, { editId: 3 }, { editId: undefined }, { editId: "e".repeat(101) }]) {
     assert.equal(isRegisteredPreviewMessage({ ...closed, ...patch }), false, JSON.stringify(patch));
@@ -264,7 +262,7 @@ test("STAB-03: previewEditClosed carries the id of the closed editor", () => {
 
 test("previewThreadReply and previewThreadDelete validate the lines, the edit id and the text", () => {
   const reply = {
-    type: "previewThreadReply", documentId: "doc", documentVersion: 1, requestId: 1, editId: "host-1",
+    type: "previewThreadReply", documentId: "doc", revision: 1, requestId: 1, editId: "host-1",
     line: 3, endLine: 7, text: "an answer",
   };
   assert.equal(isRegisteredPreviewMessage(reply), true);
@@ -281,7 +279,7 @@ test("previewThreadReply and previewThreadDelete validate the lines, the edit id
 });
 
 test("previewPlantUmlInclude carries a bounded file name, the including file id or null, and an edit id", () => {
-  const base = { type: "previewPlantUmlInclude", documentId: "doc", documentVersion: 1, requestId: 1, editId: "plantuml-1", path: "styles/common.puml", from: null };
+  const base = { type: "previewPlantUmlInclude", documentId: "doc", revision: 1, requestId: 1, editId: "plantuml-1", path: "styles/common.puml", from: null };
   assert.equal(isRegisteredPreviewMessage(base), true);
   assert.equal(isRegisteredPreviewMessage({ ...base, from: "/docs/styles/common.puml" }), true);
   assert.equal(isRegisteredPreviewMessage({ ...base, path: "x".repeat(4096) }), true);
@@ -296,7 +294,7 @@ test("previewPlantUmlInclude carries a bounded file name, the including file id 
 });
 
 test("CR 050: the warning banner messages are registered with a bounded key", () => {
-  const envelope = { documentId: "file:///chapter.md", documentVersion: 3, requestId: 7 };
+  const envelope = { documentId: "file:///chapter.md", revision: 3, requestId: 7 };
   assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewShowProblems" }), true);
   assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewWarningBannerClosed", key: "2-0a1b2c3d" }), true);
   for (const key of [undefined, 2, "", "2-0A1B2C3D", "2-0a1b2c3", "x".repeat(40), "2-0a1b2c3d\n"]) {

@@ -66,7 +66,7 @@ async function previewFrame(page: Page, expectedExcerpt?: string): Promise<Frame
 
 function currentContext(document: vscode.TextDocument): {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
 } {
   const preview = getActivePreviewForTests();
@@ -76,7 +76,7 @@ function currentContext(document: vscode.TextDocument): {
   assert.ok(preview.requestId !== undefined);
   return {
     documentId: document.uri.toString(),
-    documentVersion: preview.documentVersion as number,
+    revision: preview.documentVersion as number,
     requestId: preview.requestId,
   };
 }
@@ -1111,8 +1111,8 @@ export async function run(): Promise<void> {
     });
     await waitFor("the first autosaved block text", () =>
       document.getText().includes("Autosaved first line\nAutosaved second line\n"));
-    assert.equal(getActivePreviewForTests()?.documentVersion, autosaveContext.documentVersion);
-    assert.notEqual(document.version, autosaveContext.documentVersion);
+    assert.equal(getActivePreviewForTests()?.documentVersion, autosaveContext.revision);
+    assert.notEqual(document.version, autosaveContext.revision);
 
     sendPreviewMessageForTests({
       type: "previewEditSave",
@@ -1126,7 +1126,7 @@ export async function run(): Promise<void> {
     });
     await waitFor("the latest autosaved block text", () =>
       document.getText().includes("Autosaved final line\nAutosaved second line\n"));
-    assert.equal(getActivePreviewForTests()?.documentVersion, autosaveContext.documentVersion);
+    assert.equal(getActivePreviewForTests()?.documentVersion, autosaveContext.revision);
 
     sendPreviewMessageForTests({
       type: "previewEditSave",
@@ -1183,7 +1183,7 @@ export async function run(): Promise<void> {
         final: false,
       });
       await waitFor("the cumulative multi-cell table autosave", () => document.getText().includes(editedText));
-      assert.equal(getActivePreviewForTests()?.documentVersion, tableContext.documentVersion);
+      assert.equal(getActivePreviewForTests()?.documentVersion, tableContext.revision);
     }
     await sendPreviewMessageForTests({
       type: "previewEditSave",
