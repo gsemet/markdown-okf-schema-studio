@@ -143,6 +143,7 @@ import {
   migrateLegacyCollapsedKeys,
   saveCollapsedMap,
 } from "./state/boundedState";
+import { rebaseBlockRange, type BlockRangeChange } from "./state/blockRange";
 import { EditLock, isUnchangedSave, needsRefresh } from "./state/editLock";
 import { preloadMystEngine } from "./render/mystRenderer";
 import { createNonce } from "./security/csp";
@@ -309,6 +310,10 @@ interface ActivePreview {
   flushSequence: number;
   /** Release and deferral decisions of the inline block-edit lock (STAB-02, STAB-03). */
   editLock: EditLock;
+  /** The page editor the page was asked to report the close of (`previewEditorWatch`, STAB-03). */
+  watchedPageEditorId?: string;
+  /** An explicit refresh asked for the next render: it reaches the page even over an open editor. */
+  forceNextResult?: boolean;
   /**
    * Document version after the last change made outside the preview, or an undo / redo (CR 046):
    * the content patch that first shows it makes the updated blocks glow.
@@ -901,7 +906,10 @@ function assignWebviewHtml(target: ActivePreview | vscode.WebviewPanel, html: st
     if (target.activeBlockEdit) {
       target.activeBlockEdit = undefined;
       queuedAfterAssign = target.editLock.release();
+    } else if (target.editLock.pageEditorOpen) {
+      queuedAfterAssign = target.editLock.closePageEditor();
     }
+    target.watchedPageEditorId = undefined;
     // A new document supersedes a patch that was waiting for its acknowledgement.
     clearContentPatchTimer(target);
     target.propertiesTableAwaited = undefined;
@@ -1199,11 +1207,10 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
     },
   );
   const localResourceRoots = [vscode.Uri.file(preview.workspaceRoot)];
-  const hasMermaidDiagram = result.html.includes('class="myst-mermaid-figure"');
   const plantUmlRenderer = result.plantUmlEngine === "builtin" ? "builtin" : "host";
-  const hasBuiltinPlantUml = plantUmlRenderer === "builtin"
-    && result.html.includes('class="myst-plantuml-figure"');
-  if ((hasMermaidDiagram || hasBuiltinPlantUml) && extensionRootUri) {
+  // Every rendered page loads its runtime and stylesheet from the bundle (PERF-11), and the
+  // diagram engines when it has diagrams: the bundle folder is always a resource root.
+  if (extensionRootUri) {
     localResourceRoots.push(vscode.Uri.joinPath(extensionRootUri, "out", "bundle"));
   }
   const frontmatter = analyzeFrontmatter({
@@ -1583,29 +1590,60 @@ function handleQueueState(
   }
   if (state.phase === "ready" && state.result) {
     endPendingOverlay(preview);
-    updatePreview(preview, state.result);
+    const result = state.result;
+    if (preview.editLock.shouldDeferResult() && !preview.forceNextResult) {
+      // The page has an inline editor open: the render reaches the page when it closes, so the
+      // editor keeps its text, caret and selection (STAB-03). A newer outcome replaces this one.
+      deferPageWork(preview, "render-result", () => {
+        if (preview.stage && result.stage.requestId < preview.stage.requestId) {
+          result.stage.dispose(); // a newer render reached the page in the meantime
+          return;
+        }
+        updatePreview(preview, result);
+      }, () => result.stage.dispose());
+      return;
+    }
+    // An explicit refresh replaces the page as before, open editor included; an older deferred
+    // result must not come back over it.
+    preview.forceNextResult = false;
+    preview.editLock.drop("render-result");
+    updatePreview(preview, result);
     return;
   }
   if (state.phase !== "failed") {
     return;
   }
   endPendingOverlay(preview);
+  if (preview.editLock.shouldDeferResult() && !preview.forceNextResult) {
+    // A failed render replaces the page with its status document: it waits for the editor too.
+    const error = state.error;
+    deferPageWork(preview, "render-result", () => showRenderFailure(preview, error));
+    return;
+  }
+  preview.forceNextResult = false;
+  preview.editLock.drop("render-result");
+  showRenderFailure(preview, state.error);
+}
 
-  const diagnostics = diagnosticDetails(state.error);
+function showRenderFailure(preview: ActivePreview, error: unknown): void {
+  if (preview.disposed || !activePreviews.has(preview)) {
+    return;
+  }
+  const diagnostics = diagnosticDetails(error);
   preview.hadFailure = true;
   if (preview.stage?.activeDocumentIdentity === preview.documentUri) {
     setStatus(
-    preview,
-    "stale",
-    state.error instanceof Error ? state.error.message : "The latest render failed.",
-    diagnostics,
-  );
+      preview,
+      "stale",
+      error instanceof Error ? error.message : "The latest render failed.",
+      diagnostics,
+    );
     return;
   }
   setStatus(
     preview,
     "error",
-    state.error instanceof Error ? state.error.message : "The render failed.",
+    error instanceof Error ? error.message : "The render failed.",
     diagnostics,
   );
 }
@@ -2659,6 +2697,7 @@ function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessa
       postEditSourceError(preview, message, "The preview is stale. Refresh it before editing this block.");
       return;
     }
+    openPageEditor(preview, message);
     void preview.panel.webview.postMessage({
       type: "previewEditSource",
       documentId: message.documentId,
@@ -2678,6 +2717,7 @@ function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessa
     return;
   }
   const originalText = source.document.getText(source.range);
+  openPageEditor(preview, message);
   void preview.panel.webview.postMessage({
     type: "previewEditSource",
     documentId: message.documentId,
@@ -2688,6 +2728,24 @@ function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessa
     endLine: message.endLine,
     originalText,
   });
+}
+
+/** The page shows an inline editor from now on: page updates wait for it to close (STAB-03). */
+function openPageEditor(preview: ActivePreview, message: PreviewSyncMessage): void {
+  if (typeof message.editId === "string" && message.editId !== "") {
+    preview.editLock.openPageEditor(message.editId);
+  }
+}
+
+/** The page closed its inline editor `editId`: the page updates that waited for it run now. */
+function closePageEditor(preview: ActivePreview, editId?: string): void {
+  const queued = preview.editLock.closePageEditor(editId);
+  if (!preview.editLock.pageEditorOpen) {
+    preview.watchedPageEditorId = undefined;
+  }
+  if (!preview.disposed) {
+    queued.forEach((work) => work());
+  }
 }
 
 function activeBlockEditSource(
@@ -2714,6 +2772,9 @@ function activeBlockEditSource(
 function beginActiveBlockEdit(preview: ActivePreview, edit: ActiveBlockEdit): void {
   preview.activeBlockEdit = edit;
   preview.editLock.acquire(edit.requestId);
+  if (!preview.editLock.pageEditorOpen) {
+    preview.editLock.openPageEditor(edit.editId);
+  }
 }
 
 /**
@@ -2728,8 +2789,22 @@ function releaseActiveBlockEdit(
   preview.activeBlockEdit = undefined;
   if (renderFollows) {
     preview.editLock.drop("render");
+    preview.editLock.drop("render-result");
   }
   const queued = alreadyReleased ?? preview.editLock.release();
+  preview.watchedPageEditorId = undefined;
+  if (!preview.disposed) {
+    queued.forEach((work) => work());
+  }
+}
+
+/**
+ * The host's edit ended on an error the page shows in its still open editor: the lock is free for
+ * a new edit, but page updates keep waiting for the editor to close (STAB-03).
+ */
+function releaseHostEditKeepingEditor(preview: ActivePreview): void {
+  preview.activeBlockEdit = undefined;
+  const queued = preview.editLock.releaseHostEdit();
   if (!preview.disposed) {
     queued.forEach((work) => work());
   }
@@ -2769,7 +2844,7 @@ function drainActiveBlockEdit(preview: ActivePreview, edit: ActiveBlockEdit): vo
   const source = activeBlockEditSource(preview, edit);
   if (!source || source.document.getText(source.range) !== edit.lastSavedText) {
     postEditSourceError(preview, edit.lastMessage, "The source block changed while it was being edited.");
-    releaseActiveBlockEdit(preview);
+    releaseHostEditKeepingEditor(preview);
     return;
   }
   const replacement = minimalReplacement(edit.lastSavedText, editedText);
@@ -4009,6 +4084,11 @@ registeredMessageHandlers.set("previewWarningBannerClosed", (preview, message) =
   dismissedWarningBanners.set(preview.documentUri, message.key as string);
 });
 
+// The page closed an inline editor the host was waiting for (STAB-03). It edits nothing.
+registeredMessageHandlers.set("previewEditClosed", (preview, message) => {
+  closePageEditor(preview, message.editId as string);
+});
+
 registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
 registeredMessageHandlers.set("previewThreadReply", (preview, message) => handleThreadChange(preview, message, "reply"));
 registeredMessageHandlers.set("previewThreadDelete", (preview, message) => handleThreadChange(preview, message, "delete"));
@@ -4043,6 +4123,22 @@ function trackPendingSave(preview: ActivePreview, save: Thenable<void> | undefin
   return tracked;
 }
 
+/**
+ * A save or cancel of an editor opened on an older page than the one the host holds is refused
+ * with an explicit error the editor shows, instead of being dropped: the reader keeps the text and
+ * knows it was not saved (STAB-06).
+ */
+function reportStaleEdit(preview: ActivePreview, value: PreviewSyncMessage): void {
+  if (preview.disposed || preview.readOnly || !activePreviews.has(preview) || value.documentId !== preview.documentUri) {
+    return;
+  }
+  if (value.type === "previewEditSave" || value.type === "previewEditCancel") {
+    postEditSourceError(preview, value, "The preview changed while this block was being edited. Copy your text, then reopen the block.");
+  } else if (value.type === "previewFrontmatterSave") {
+    postFrontmatterEditError(preview, value, "The preview changed while this field was being edited. Reopen the field.");
+  }
+}
+
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
   if (isRegisteredPreviewMessage(value)) {
     const handler = registeredMessageHandlers.get(value.type);
@@ -4056,6 +4152,13 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     if (value.type === "previewShowProblems" || value.type === "previewWarningBannerClosed") {
       // The banner belongs to the document, not to one render of it: a page one render behind
       // still opens the Problems view and closes its banner.
+      return preview.disposed || !handler || value.documentId !== preview.documentUri
+        ? undefined
+        : Promise.resolve(handler(preview, value));
+    }
+    if (value.type === "previewEditClosed") {
+      // A close is matched by the editor's id: the editor was opened on the page the host holds,
+      // which may be one render behind the stage when a render finished while it was open.
       return preview.disposed || !handler || value.documentId !== preview.documentUri
         ? undefined
         : Promise.resolve(handler(preview, value));
@@ -4103,6 +4206,7 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     return;
   }
   if (!matchesCurrentPreview(preview, value)) {
+    reportStaleEdit(preview, value);
     return;
   }
   if (value.type === "previewLinkDiscover") {
@@ -4162,6 +4266,7 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
   recordPreviewState(preview, value);
   if (value.type === "previewRefresh") {
     if (preview.document) {
+      preview.forceNextResult = true;
       void refreshPreviewDocument(preview, preview.document);
     }
     return;
@@ -4191,6 +4296,9 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
       if (outcome.released) {
         releaseActiveBlockEdit(preview, false, outcome.flush);
       }
+    } else if (preview.editLock.pageEditorOpen && value.blockEditOpen === false) {
+      // The page reports no open editor: the work that waited for one runs now.
+      closePageEditor(preview);
     }
     if (preview.status === "pending" && preview.shownStatus !== undefined && !preview.pendingOverlayVisible) {
       if (preview.pendingOverlayDue) {
@@ -4258,6 +4366,8 @@ function setMissingSource(
   }
   preview.queue.cancel();
   preview.queue.clearLastGood();
+  // A render that waited for an open editor must not bring the page back over this status.
+  preview.editLock.drop("render-result");
   preview.stage = undefined;
   preview.state = undefined;
   preview.status = "missing-source";
@@ -4385,10 +4495,29 @@ function isIgnoredWatchPath(filePath: string): boolean {
 /** Runs `work` now, or after the open inline block edit ends: the work would replace its page. */
 function deferWhileEditing(preview: ActivePreview, key: string, work: () => void): void {
   if (preview.editLock.shouldDeferReload()) {
-    preview.editLock.defer(key, work);
+    deferPageWork(preview, key, work);
     return;
   }
   work();
+}
+
+/**
+ * Queues page work behind the open edit. When the page has an inline editor open, it is asked once
+ * per editor to report the close (`previewEditorWatch`): an editor closed without a change sends
+ * nothing otherwise, and the work would wait forever (STAB-03).
+ */
+function deferPageWork(preview: ActivePreview, key: string, work: () => void, discard?: () => void): void {
+  preview.editLock.defer(key, work, discard);
+  const editId = preview.editLock.pageEditor;
+  if (editId === undefined || preview.watchedPageEditorId === editId || preview.disposed) {
+    return;
+  }
+  preview.watchedPageEditorId = editId;
+  void preview.panel.webview.postMessage({
+    type: "previewEditorWatch",
+    documentId: preview.documentUri,
+    editId,
+  });
 }
 
 function refreshOpenDocument(preview: ActivePreview, isDependencyChange = false): void {
@@ -4543,7 +4672,11 @@ function notifyTheme(preview: ActivePreview): void {
     });
   }
   if (preview.document && isDocumentEligible(preview.document)) {
-    void refreshPreviewDocument(preview, preview.document);
+    // The page re-themes itself at once; the render with the new theme waits for an open editor.
+    const document = preview.document;
+    deferWhileEditing(preview, "theme-render", () => {
+      if (!preview.disposed) void refreshPreviewDocument(preview, document);
+    });
   }
 }
 
@@ -4627,6 +4760,8 @@ function disposePreview(preview: ActivePreview, disposePanel: boolean): void {
   clearIncomingChanges(preview);
   clearComments(preview);
   preview.activeBlockEdit = undefined;
+  // A render result that waited for an open editor frees its stage with the preview.
+  preview.editLock.drop("render-result");
   preview.editLock.release();
   if (disposePanel) {
     releasePreviewGroupLock(preview);
@@ -5142,11 +5277,19 @@ async function deserializePreviewPanel(
   await requestPreviewDocument(preview, document);
 }
 
-function refreshPreview(document: vscode.TextDocument): void {
+function refreshPreview(document: vscode.TextDocument, changes?: readonly BlockRangeChange[]): void {
   for (const preview of activePreviews) {
     if (documentKey(document) === preview.documentUri) {
-      if (preview.activeBlockEdit) {
-        if (preview.activeBlockEdit.applying) {
+      const edit = preview.activeBlockEdit;
+      if (edit) {
+        if (edit.applying) {
+          continue;
+        }
+        if (changes && sourceAvailable(preview) && trackOutsideChange(preview, edit, changes)) {
+          // The block moved with the change, or the conflict was reported: the editor stays open
+          // and the render waits for it (STAB-03, STAB-06).
+          refreshFrontmatter(preview, document);
+          deferWhileEditing(preview, "render", () => refreshOpenDocument(preview));
           continue;
         }
         releaseActiveBlockEdit(preview, true);
@@ -5161,6 +5304,30 @@ function refreshPreview(document: vscode.TextDocument): void {
       refreshReferencedPath(preview, document.uri.fsPath);
     }
   }
+}
+
+/**
+ * Keeps the open block edit in step with a change made outside it (STAB-06). A change before the
+ * block moves its offset; a change inside it ends the host's edit with an explicit error in the
+ * editor, which stays open with the reader's text. Returns false when the edit cannot be tracked.
+ */
+function trackOutsideChange(
+  preview: ActivePreview,
+  edit: ActiveBlockEdit,
+  changes: readonly BlockRangeChange[],
+): boolean {
+  if (edit.pendingText !== undefined || edit.finalRequested) {
+    return false;
+  }
+  const rebased = rebaseBlockRange({ start: edit.sourceStartOffset, length: edit.lastSavedText.length }, changes);
+  if (rebased === "conflict") {
+    postEditSourceError(preview, edit.lastMessage,
+      "The source block changed outside the preview while it was being edited. Copy your text, then reopen the block.");
+    releaseHostEditKeepingEditor(preview);
+    return true;
+  }
+  edit.sourceStartOffset = rebased.start;
+  return true;
 }
 
 function followActiveEditor(editor: vscode.TextEditor | undefined): void {
@@ -5212,6 +5379,8 @@ export function activate(context: vscode.ExtensionContext): void {
       const preview = activePreview;
       const document = vscode.window.activeTextEditor?.document ?? preview?.document;
       if (preview && document && documentKey(document) === preview.documentUri) {
+        // The reader asked for it: the render replaces the page even over an open inline editor.
+        preview.forceNextResult = true;
         await requestPreviewDocument(preview, document);
       }
     }),
@@ -5223,7 +5392,7 @@ export function activate(context: vscode.ExtensionContext): void {
         noteOutsideChange(event);
         shiftAnchorsForEdits(event);
         shiftCommentsForEdits(event);
-        refreshPreview(event.document);
+        refreshPreview(event.document, event.contentChanges);
       }
     }),
     vscode.workspace.onDidSaveTextDocument((document) => {
@@ -5403,6 +5572,8 @@ export function getActivePreviewForTests():
     comments: { posts: number; last?: Array<CommentThread & { orphaned?: boolean }>; result?: { ok: boolean; reason?: string; kind: string; threadId?: string } };
     /** True while the host holds an open block edit (its final save has not completed). */
     blockEditOpen: boolean;
+    /** True while the page has an inline editor open that page updates wait for (STAB-03). */
+    pageEditorOpen: boolean;
     /** Navigation history of the panel and the last state posted to the page. */
     history: {
       entries: { uri: string; line: number }[];
@@ -5460,6 +5631,7 @@ export function getActivePreviewForTests():
     incomingChanges: { posts: activePreview.incomingPosts, last: activePreview.lastIncomingChanges },
     comments: { posts: activePreview.commentPosts, last: activePreview.lastComments, result: activePreview.lastCommentResult },
     blockEditOpen: activePreview.activeBlockEdit !== undefined,
+    pageEditorOpen: activePreview.editLock.pageEditorOpen,
     history: {
       ...historyOf(activePreview).snapshot(),
       posted: activePreview.lastHistoryState,

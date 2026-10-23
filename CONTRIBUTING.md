@@ -130,6 +130,33 @@ The E2E review index is only passed when the visual and integration artifacts sh
 campaign UUID, start time, and command. A failed `review:begin` stops `test:e2e`; stale visual
 manifests cannot certify a later run.
 
+### Preview performance probe
+
+The probe measures the live preview on a large generated chapter (about 93 KB, 80 sections,
+8 Mermaid diagrams, see `test/probe/largeChapter.ts`). Run it before and after a change to the
+webview runtime, the content patch or the edit lock, and compare the JSON reports.
+
+```bash
+npm run probe
+```
+
+It runs without a VS Code window: it builds the real preview page, opens it in headless Chromium
+with a stub host and writes `out/reports/probe/preview-probe.json`. It reports the page size, the
+script time of each scroll frame (normal CPU and four times slower), the page loads and Mermaid
+redraws while ten characters are typed as content patches, and whether an open inline editor
+survives a theme change and the Mermaid redraw. With `--check` (the npm script passes it), it
+exits with an error when a scroll frame's 95th percentile goes over 4 ms, a page reloads while
+typing, or the open editor is lost.
+
+The real-window probe measures the same in VS Code: `webview.html` assignments while typing in the
+text editor, scroll frames of the webview, and an open editor through a save, a colour theme change
+and the Mermaid redraw. It writes `out/reports/probe/window-probe.json` and asserts only what it
+needs to run:
+
+```bash
+STUDIO_REAL_INPUT_SCENARIO=probe npm run test:integration -- --trusted-only
+```
+
 ## Scope
 
 Keep the extension standalone. Runtime code and tests must not resolve files from a parent

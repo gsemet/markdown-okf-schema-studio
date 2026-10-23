@@ -33,6 +33,7 @@ import { installChipToggle } from "./chipToggle";
 import { installInlineThreads } from "./inlineThread";
 import { installIncomingChanges } from "./incomingChanges";
 import { installMotion } from "./motion";
+import { installContentMorph, planKeyedMorph } from "./contentMorph";
 import { installCommentCompose } from "./commentCompose";
 import { installCommentThreads } from "./commentThreads";
 import { installCommentsToggle } from "./commentsToggle";
@@ -93,18 +94,44 @@ export interface PreviewRuntimeContext extends ScrollContext {
   initialState?: Pick<PreviewPanelState, "sourceLine" | "scrollTop" | "focusedBlockId" | "selectedText" | "openDisclosures" | "descriptionsCollapsed">;
 }
 
-function serializeRuntimeContext(context: PreviewRuntimeContext): string {
+/** JSON of the runtime context that is safe inside a `<script>` element (no `</script>`). */
+export function serializeRuntimeContext(context: PreviewRuntimeContext): string {
   return JSON.stringify(context).replace(/</gu, "\\u003c");
 }
 
+/**
+ * Marks the `<script type="application/json">` element that carries the runtime context of a page
+ * whose runtime is loaded as a file (PERF-11).
+ */
+export const RUNTIME_CONTEXT_ATTRIBUTE = "data-sphinx-preview-runtime-context";
+
+/** The runtime with its context inlined: the visual pages and the unit tests run this. */
 export function createScrollSyncScript(context: PreviewRuntimeContext): string {
-  const serializedContext = serializeRuntimeContext(context);
+  return runtimeScript(serializeRuntimeContext(context));
+}
+
+/**
+ * The runtime as one context-free script, the file `out/bundle/preview.js` (PERF-11). It reads its
+ * context from the JSON element marked with {@link RUNTIME_CONTEXT_ATTRIBUTE}, which the page puts
+ * before the script, so one cacheable file serves every render.
+ */
+export function createPreviewRuntimeScript(): string {
+  return runtimeScript(
+    `JSON.parse(document.querySelector("script[${RUNTIME_CONTEXT_ATTRIBUTE}]")?.textContent || "{}")`,
+  );
+}
+
+function runtimeScript(contextExpression: string): string {
   return `(function () {
   "use strict";
-  const context = ${serializedContext};
+  const context = ${contextExpression};
   document.documentElement.setAttribute("data-sphinx-preview-document-id", context.documentId);
   document.documentElement.setAttribute("data-sphinx-preview-document-version", String(context.documentVersion));
   document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
+  // Keyed content updates (PERF-05): the host HTML of every block, recorded before anything changes it.
+  const contentMorph = (${installContentMorph.toString()})(document, ${planKeyedMorph.toString()});
+  const initialContent = document.getElementById?.("sphinx-myst-preview-content");
+  if (initialContent) contentMorph.record(initialContent);
   const tableTools = (${createMarkdownTableTools.toString()})();
   const textEditing = (${createTextEditingTools.toString()})();
   const blockSelection = (${createBlockSelection.toString()})();
@@ -156,7 +183,76 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     ? Math.max(1, Math.min(6, Math.round(requestedStickyHeadingDepth)))
     : 3;
   const AUTOSAVE_DELAY_MS = 400;
-  const vscode = acquireVsCodeApi();
+  const hostApi = acquireVsCodeApi();
+  // Webview state written while scrolling is throttled (PERF-08): at most one write per
+  // STATE_THROTTLE_MS, the last one always written (trailing, and when the page is hidden). Every
+  // other write goes through at once and replaces a pending one; a read sees the pending state.
+  const STATE_THROTTLE_MS = 100;
+  const throttleClock = () => window.performance?.now?.() ?? Date.now();
+  let pendingState;
+  let pendingStateTimer;
+  let lastStateWrite = Number.NEGATIVE_INFINITY;
+  function cancelPendingState() {
+    if (pendingStateTimer !== undefined) window.clearTimeout(pendingStateTimer);
+    pendingStateTimer = undefined;
+    pendingState = undefined;
+  }
+  function flushPendingState() {
+    const state = pendingState;
+    cancelPendingState();
+    if (state !== undefined) {
+      lastStateWrite = throttleClock();
+      hostApi.setState?.(state);
+    }
+  }
+  function setStateThrottled(state) {
+    const now = throttleClock();
+    if (pendingStateTimer === undefined && now - lastStateWrite >= STATE_THROTTLE_MS) {
+      lastStateWrite = now;
+      hostApi.setState?.(state);
+      return;
+    }
+    pendingState = state;
+    if (pendingStateTimer === undefined) {
+      pendingStateTimer = window.setTimeout(flushPendingState, Math.max(0, STATE_THROTTLE_MS - (now - lastStateWrite)));
+    }
+  }
+  const vscode = {
+    postMessage: (message) => hostApi.postMessage(message),
+    getState: () => pendingState !== undefined ? pendingState : hostApi.getState?.(),
+    setState: (state) => {
+      cancelPendingState();
+      lastStateWrite = throttleClock();
+      hostApi.setState?.(state);
+    },
+  };
+  // The host's copy of the scroll state (previewState) follows the same rule; a previewScroll,
+  // which moves the text editor, is never held back.
+  let pendingStateMessage;
+  let pendingStateMessageTimer;
+  let lastStateMessage = Number.NEGATIVE_INFINITY;
+  function flushStateMessage() {
+    const message = pendingStateMessage;
+    if (pendingStateMessageTimer !== undefined) window.clearTimeout(pendingStateMessageTimer);
+    pendingStateMessageTimer = undefined;
+    pendingStateMessage = undefined;
+    if (message !== undefined) {
+      lastStateMessage = throttleClock();
+      vscode.postMessage(message);
+    }
+  }
+  function postStateMessageThrottled(message) {
+    const now = throttleClock();
+    if (pendingStateMessageTimer === undefined && now - lastStateMessage >= STATE_THROTTLE_MS) {
+      lastStateMessage = now;
+      vscode.postMessage(message);
+      return;
+    }
+    pendingStateMessage = message;
+    if (pendingStateMessageTimer === undefined) {
+      pendingStateMessageTimer = window.setTimeout(flushStateMessage, Math.max(0, STATE_THROTTLE_MS - (now - lastStateMessage)));
+    }
+  }
   // Review comments. Installed before every click handler below: a click on a highlight or badge
   // opens the popover and must not edit the block, follow a link or reveal the source.
   const postCommentMessage = (type, fields) => vscode.postMessage({
@@ -389,7 +485,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   let frame;
   let sourceScrollSequence = 0;
 
-  function stateSnapshot(line) {
+  function stateSnapshot(line, throttled = false) {
     const details = Array.from(document.querySelectorAll("details"))
       .map((element, index) => element.open ? index : undefined)
       .filter((index) => index !== undefined);
@@ -423,7 +519,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       tocCollapsed: tocColumn.collapsed(),
       expandedChips: chipToggle.expanded(),
     };
-    vscode.setState?.(state);
+    if (throttled) setStateThrottled(state);
+    else vscode.setState?.(state);
     return state;
   }
 
@@ -544,7 +641,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     pendingCheckboxToggles.clear();
     clearBlockSelection(true);
     applyPendingOverlay({ visible: false, label: "", message: "" });
-    main.innerHTML = message.contentHtml;
+    // Blocks whose HTML did not change stay in place with what the page did to them (PERF-05).
+    contentMorph.replace(main, message.contentHtml);
     context.documentVersion = next.documentVersion;
     context.requestId = next.requestId;
     if (next.initialAnchor !== undefined) context.initialAnchor = next.initialAnchor;
@@ -899,29 +997,65 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     return copy.textContent;
   }
 
-  function updateStickyHeadings() {
+  // Heading tops in document coordinates, measured on every layout update; a scroll frame reads
+  // no heading geometry and finds the active heading by binary search (PERF-08).
+  let headingList = [];
+  let headingTops = [];
+
+  function measureHeadings() {
+    headingList = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"));
+    const scrollY = window.scrollY;
+    headingTops = [];
+    headingList.forEach((heading, index) => {
+      const bounds = heading.getBoundingClientRect();
+      if (bounds.height > 0) headingTops.push({ index, top: bounds.top + scrollY });
+    });
+    headingTops.sort((left, right) => left.top - right.top || left.index - right.index);
+  }
+
+  // The visible heading with the greatest top at or above the threshold (viewport y), the first one
+  // in document order on a tie; -1 when there is none.
+  function activeHeadingIndex(threshold) {
+    const scrollY = window.scrollY;
+    let low = 0;
+    let high = headingTops.length - 1;
+    let found = -1;
+    while (low <= high) {
+      const middle = (low + high) >> 1;
+      if (headingTops[middle].top - scrollY <= threshold) {
+        found = middle;
+        low = middle + 1;
+      } else {
+        high = middle - 1;
+      }
+    }
+    if (found < 0) return -1;
+    while (found > 0 && headingTops[found - 1].top === headingTops[found].top) found -= 1;
+    return headingTops[found].index;
+  }
+
+  // fromScroll: only the scroll position changed since the last layout update, so the measured
+  // heading tops still hold. Every other caller measures them again.
+  function updateStickyHeadings(fromScroll = false) {
     if (!stickyHeadings) return;
     refreshStickyHeadingPosition();
-    const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"));
+    if (fromScroll && headingList.length === 0) measureHeadings();
     let previousActiveIndex = -2;
     for (let pass = 0; pass < 3; pass += 1) {
+      if (!fromScroll) measureHeadings();
+      const headings = headingList;
       const activeThreshold = stickyHeadings.hidden || window.scrollY <= 1
         ? 0
         : stickyHeadings.getBoundingClientRect().bottom;
-      let activeIndex = -1;
-      let activeTop = Number.NEGATIVE_INFINITY;
-      for (let index = 0; index < headings.length; index += 1) {
-        const bounds = headings[index].getBoundingClientRect();
-        if (bounds.height > 0 && bounds.top <= activeThreshold && bounds.top > activeTop) {
-          activeIndex = index;
-          activeTop = bounds.top;
-        }
-      }
+      const activeIndex = activeHeadingIndex(activeThreshold);
       if (activeIndex === previousActiveIndex) return;
       previousActiveIndex = activeIndex;
+      const readingOffsetBefore = readingOffsetValue;
       if (activeIndex < 0) {
-        stickyHeadings.hidden = true;
-        stickyHeadings.textContent = "";
+        if (!stickyHeadings.hidden || stickyHeadings.textContent !== "") {
+          stickyHeadings.hidden = true;
+          stickyHeadings.textContent = "";
+        }
         if (document.body) document.body.removeAttribute("data-sphinx-preview-sticky-headings-active");
         continue;
       }
@@ -945,8 +1079,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       }
       const activeText = headingLabel(active).trim();
       if (activeText) labels.push("#".repeat(activeLevel) + " " + activeText);
-      stickyHeadings.textContent = labels.join("\\n");
-      stickyHeadings.hidden = labels.length === 0;
+      // Written only when it changes: rewriting the same text would dirty the layout every frame.
+      const bandText = labels.join("\\n");
+      if (stickyHeadings.textContent !== bandText) stickyHeadings.textContent = bandText;
+      if (stickyHeadings.hidden !== (labels.length === 0)) stickyHeadings.hidden = labels.length === 0;
       if (visibleStickyHeadingHeight() > observedBandHeight) refreshReadingOffset();
       if (document.body) {
         if (labels.length > 0) {
@@ -955,12 +1091,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
           document.body.removeAttribute("data-sphinx-preview-sticky-headings-active");
         }
       }
+      // A new reading offset can move the content: the next pass measures the headings again.
+      if (readingOffsetValue !== readingOffsetBefore) measureHeadings();
     }
   }
 
   function postScroll() {
     frame = undefined;
-    updateStickyHeadings();
+    updateStickyHeadings(true);
     tocColumn.track();
     const scrollTop = window.scrollY;
     if (expectedScroll && Date.now() <= expectedScroll.until
@@ -974,11 +1112,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       const viewportTop = editAnchor.element.getBoundingClientRect().top;
       if (Number.isFinite(viewportTop)) editAnchor.viewportTop = viewportTop;
     }
-    const state = stateSnapshot(line);
+    const state = stateSnapshot(line, true);
     const sourceLine = anchorPolicy.editorTopLine(line);
     const leadsEditor = anchorToEditor && settings.scrollEditorWithPreview && sourceLine !== lastPostedLine;
     if (leadsEditor) lastPostedLine = sourceLine;
-    vscode.postMessage({
+    (leadsEditor ? vscode.postMessage : postStateMessageThrottled)({
       type: leadsEditor ? "previewScroll" : "previewState",
       documentId: context.documentId,
       documentVersion: context.documentVersion,
@@ -1186,6 +1324,18 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     if (!activeFrontmatterEdit) editAnchor = undefined;
     if (refreshButton) refreshButton.disabled = false;
+    // The host holds back page updates while this editor is open and asked to hear when it closes.
+    if (edit.reportClose) postEditClosed(edit.editId);
+  }
+
+  function postEditClosed(editId) {
+    vscode.postMessage({
+      type: "previewEditClosed",
+      documentId: context.documentId,
+      documentVersion: context.documentVersion,
+      requestId: context.requestId,
+      editId,
+    });
   }
 
   function closeFrontmatterEditor(reason) {
@@ -2746,6 +2896,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // A frontmatter editor has no autosave: its typed text is saved (and the editor closed) when the
   // page goes away or is hidden, as a flush, so a window close or Reload Window loses nothing.
   function flushHiddenPage() {
+    flushPendingState();
+    flushStateMessage();
     flushPendingAutosave();
     flushFrontmatterEditor();
   }
@@ -5137,6 +5289,13 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const message = event.data;
     if (sameContext(message) && message.type === "previewPendingOverlay") {
       applyPendingOverlay(message);
+      return;
+    }
+    if (message && message.type === "previewEditorWatch" && message.documentId === context.documentId
+      && typeof message.editId === "string") {
+      // The host holds page updates back until this editor closes (STAB-03): report the close.
+      if (activeBlockEdit && activeBlockEdit.editId === message.editId) activeBlockEdit.reportClose = true;
+      else postEditClosed(message.editId);
       return;
     }
     if (sameContext(message) && message.type === "previewContentPatch") {

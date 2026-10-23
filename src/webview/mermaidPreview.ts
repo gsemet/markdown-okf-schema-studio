@@ -1,3 +1,4 @@
+import { createMermaidCache, diagramKey } from "./mermaidCache";
 import { showMermaidError } from "./mermaidError";
 
 const CSS_SYSTEM_COLOR_KEYWORDS = new Set([
@@ -46,6 +47,11 @@ const diagrams = Array.from(document.querySelectorAll<HTMLElement>(diagramSelect
 // Mermaid ids must be unique across every render of the page, including renders of replaced content.
 let diagramCounter = 0;
 const diagramSources = new WeakMap<HTMLElement, string>();
+// The key (theme and source) each diagram node was last drawn with, and the drawings by key
+// (PERF-07): unchanged diagrams are not drawn again by a content update or an attribute change.
+const drawnKeys = new WeakMap<HTMLElement, string>();
+const drawings = createMermaidCache();
+let initializedTheme: string | undefined;
 
 const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
   const diagramSizing = Object.fromEntries(
@@ -56,40 +62,63 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
   ) as NonNullable<Parameters<typeof mermaid.initialize>[0]>;
 
   const renderDiagrams = async (pending: readonly HTMLElement[]): Promise<void> => {
-    mermaid.initialize({
-      ...diagramSizing,
-      startOnLoad: false,
-      securityLevel: "strict",
-      theme: "base",
-      themeVariables: {
-        background: "transparent",
-        primaryColor: themeVariable("--vscode-textCodeBlock-background", "#f0f0f0"),
-        primaryTextColor: themeVariable("--vscode-editor-foreground", "#1f1f1f"),
-        primaryBorderColor: themeVariable("--sphinx-preview-border", "#808080"),
-        lineColor: themeVariable("--vscode-editor-foreground", "#1f1f1f"),
-        secondaryColor: themeVariable("--vscode-textBlockQuote-background", "#f0f0f0"),
-        tertiaryColor: themeVariable("--vscode-editor-background", "#ffffff"),
-        fontFamily: themeVariable("--sphinx-preview-font", "sans-serif"),
-      },
-    });
+    const themeVariables = {
+      background: "transparent",
+      primaryColor: themeVariable("--vscode-textCodeBlock-background", "#f0f0f0"),
+      primaryTextColor: themeVariable("--vscode-editor-foreground", "#1f1f1f"),
+      primaryBorderColor: themeVariable("--sphinx-preview-border", "#808080"),
+      lineColor: themeVariable("--vscode-editor-foreground", "#1f1f1f"),
+      secondaryColor: themeVariable("--vscode-textBlockQuote-background", "#f0f0f0"),
+      tertiaryColor: themeVariable("--vscode-editor-background", "#ffffff"),
+      fontFamily: themeVariable("--sphinx-preview-font", "sans-serif"),
+    };
+    const themeKey = JSON.stringify(themeVariables);
+    const ensureInitialized = (): void => {
+      if (initializedTheme === themeKey) return;
+      initializedTheme = themeKey;
+      mermaid.initialize({
+        ...diagramSizing,
+        startOnLoad: false,
+        securityLevel: "strict",
+        theme: "base",
+        themeVariables,
+      });
+    };
+
+    const showImage = (diagram: HTMLElement, src: string): void => {
+      const image = document.createElement("img");
+      image.className = "myst-mermaid-image";
+      image.alt = "Mermaid diagram";
+      image.src = src;
+      diagram.replaceChildren(image);
+      diagram.dataset.renderState = "rendered";
+    };
 
     await Promise.all(pending.map(async (diagram) => {
-      const id = `myst-mermaid-${diagramCounter}`;
-      diagramCounter += 1;
       const source = diagramSources.get(diagram) ?? diagram.textContent?.trim() ?? "";
       if (!source) {
         return;
       }
 
       diagramSources.set(diagram, source);
+      const key = diagramKey(themeVariables, source);
+      const plan = drawings.plan(diagram.dataset.renderState === undefined ? undefined : drawnKeys.get(diagram), key);
+      if (plan.action === "keep") {
+        return;
+      }
+      drawnKeys.set(diagram, key);
+      if (plan.action === "reuse") {
+        showImage(diagram, plan.image);
+        return;
+      }
+      ensureInitialized();
+      const id = `myst-mermaid-${diagramCounter}`;
+      diagramCounter += 1;
       try {
         const rendered = await mermaid.render(id, source);
-        const image = document.createElement("img");
-        image.className = "myst-mermaid-image";
-        image.alt = "Mermaid diagram";
-        image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(normalizeSvgForDataImage(rendered.svg))}`;
-        diagram.replaceChildren(image);
-        diagram.dataset.renderState = "rendered";
+        const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(normalizeSvgForDataImage(rendered.svg))}`;
+        drawings.store(key, src);
+        showImage(diagram, src);
       } catch (err) {
         showMermaidError(diagram, err instanceof Error ? err.message : String(err));
         diagram.dataset.renderState = "error";

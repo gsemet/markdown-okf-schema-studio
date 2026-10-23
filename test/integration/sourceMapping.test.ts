@@ -1,4 +1,5 @@
 import * as assert from "node:assert/strict";
+import * as fs from "node:fs";
 import * as path from "node:path";
 import * as vscode from "vscode";
 
@@ -42,7 +43,10 @@ export async function run(): Promise<void> {
     assert.match(preview.html, /data-sphinx-source-line="[1-9]\d*"/u);
     assert.match(preview.html, /data-sphinx-preview-block="source-block-\d+"/u);
     assert.match(preview.html, /data-sphinx-preview-scroll-sync/iu);
-    assert.match(preview.html, /type: "previewReady"/u);
+    // The runtime that reports previewReady is the bundled file (PERF-11); its context is inline JSON.
+    assert.match(preview.html, /<script[^>]+src="[^"]*\/out\/bundle\/preview\.js"[^>]*data-sphinx-preview-scroll-sync/u);
+    assert.match(preview.html, /<script[^>]+type="application\/json"[^>]+data-sphinx-preview-runtime-context/u);
+    assert.match(fs.readFileSync(path.join(extensionRoot, "out", "bundle", "preview.js"), "utf8"), /previewReady/u);
     assert.doesNotMatch(preview.html, /data-sphinx-source-line="(?:0|-\d+)"/u);
     assert.match(
       preview.html,

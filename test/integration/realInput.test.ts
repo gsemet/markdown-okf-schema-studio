@@ -46,6 +46,7 @@ import {
   type Evidence,
 } from "./realInput/harness";
 import { scenarioImagePaste, scenarioIncomingChanges, scenarioReviewThreads } from "./realWindowGaps";
+import { scenarioPerformanceProbe } from "./performanceProbe";
 import { traceDocumentChanges, windowFocusReport } from "./windowFocus";
 
 const SMOKE = [
@@ -4491,6 +4492,12 @@ export async function run(): Promise<void> {
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "stress") {
       await runStress(page);
       passed = true; // the stress rounds keep their own evidence; the registry check is skipped
+      return;
+    }
+    if (process.env.STUDIO_REAL_INPUT_SCENARIO === "probe") {
+      // The performance probe measures and reports; it is not part of the integration job.
+      await scenarioPerformanceProbe(page);
+      passed = true;
       return;
     }
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "link-prefill") {

@@ -378,6 +378,8 @@ interface RuntimeHarness {
   readonly window: Record<string, unknown>;
   readonly document: Record<string, unknown>;
   getWebviewState(): Record<string, unknown>;
+  /** How many times the runtime wrote the webview state. */
+  readonly setStateCalls: number;
   dispatchDocument(type: string, event: unknown): void;
   dispatchMessage(message: Record<string, unknown>): void;
   dispatchVisualViewportResize(): void;
@@ -614,6 +616,7 @@ function createRuntimeHarness(configuration: Partial<{
   const microtaskQueue: Array<() => void> = [];
   let intersectionCallback: ((entries: Array<{ isIntersecting: boolean; target: RuntimeElement }>) => void) | undefined;
   const messages: Array<Record<string, unknown>> = [];
+  let setStateCalls = 0;
   let webviewState: Record<string, unknown> = {
     ...(savedDescriptionsCollapsed !== undefined
       ? { documentId: "file:///active.md", descriptionsCollapsed: savedDescriptionsCollapsed } : {}),
@@ -801,6 +804,7 @@ function createRuntimeHarness(configuration: Partial<{
         messages.push(message);
       },
       setState: (state: Record<string, unknown>): void => {
+        setStateCalls += 1;
         webviewState = state;
       },
     }),
@@ -877,6 +881,9 @@ function createRuntimeHarness(configuration: Partial<{
     window,
     document,
     getWebviewState: () => webviewState,
+    get setStateCalls(): number {
+      return setStateCalls;
+    },
     dispatchDocument: (type, event) => dispatch(documentListeners, type, event),
     dispatchMessage: (message) => dispatch(windowListeners, "message", { data: message }),
     dispatchVisualViewportResize: () => {
@@ -1058,10 +1065,31 @@ test("caps sticky heading convergence at three passes", () => {
     heading.rectReadCount = 0;
   });
 
-  harness.dispatchWindow("scroll");
+  // A layout update measures the headings in every pass; a scroll frame reads none (PERF-08).
+  harness.dispatchWindow("resize");
   harness.flushFrames();
 
   assert.equal(harness.headings[0].rectReadCount, 3);
+});
+
+test("PERF-08: a scroll frame reads no heading geometry and writes the webview state at most once per 100 ms", () => {
+  const harness = createRuntimeHarness();
+  harness.flushFrames();
+  harness.headings.forEach((heading) => {
+    heading.rectReadCount = 0;
+  });
+  const statesBefore = harness.setStateCalls;
+  for (let frame = 1; frame <= 5; frame += 1) {
+    harness.windowState.scrollY = frame * 7;
+    harness.dispatchWindow("scroll");
+    harness.flushFrames();
+  }
+  assert.deepEqual(harness.headings.map((heading) => heading.rectReadCount), harness.headings.map(() => 0),
+    "the active heading comes from the tops measured with the layout");
+  assert.ok(harness.setStateCalls - statesBefore <= 1, "five frames within 100 ms write the state at most once");
+  harness.flushTimers();
+  assert.ok(harness.setStateCalls - statesBefore <= 2, "and once more when the window ends");
+  assert.equal(harness.getWebviewState().scrollTop, 35, "the last write carries the last scroll position");
 });
 
 test("maps the frontmatter table for stable top and mid-table scroll round-trips", () => {
@@ -3012,6 +3040,31 @@ test("Escape in an unchanged Markdown block editor closes it without a message",
   assert.equal(harness.messages.length, messageCount);
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null);
   assert.equal(harness.mappings[1].contains(textarea.parentElement as RuntimeElement), false);
+});
+
+test("STAB-03: an editor the host watches reports its close; without a watch the close stays silent", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const editId = harness.messages.filter((message) => message.type === "previewEditOpen").at(-1)?.editId;
+  assert.equal(typeof editId, "string");
+  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///active.md", documentVersion: 7, requestId: 11, editId });
+  const messageCount = harness.messages.length;
+  assert.equal(harness.messages.length, messageCount, "the watch itself posts nothing while the editor is open");
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  const closed = harness.messages.slice(messageCount);
+  assert.deepEqual(closed.map((message) => message.type), ["previewEditClosed"]);
+  assert.equal(closed[0]?.editId, editId);
+  assert.equal(closed[0]?.documentId, "file:///active.md");
+});
+
+test("STAB-03: a watch for an editor that is already closed is answered at once", () => {
+  const harness = createRuntimeHarness();
+  const messageCount = harness.messages.length;
+  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///active.md", documentVersion: 7, requestId: 11, editId: "gone" });
+  assert.deepEqual(harness.messages.slice(messageCount).map((message) => [message.type, message.editId]),
+    [["previewEditClosed", "gone"]]);
+  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///other.md", documentVersion: 7, requestId: 11, editId: "x" });
+  assert.equal(harness.messages.length, messageCount + 1, "a watch for another document is ignored");
 });
 
 function openTableCellEditor(harness: ReturnType<typeof createRuntimeHarness>) {
