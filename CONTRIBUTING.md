@@ -157,6 +157,31 @@ scenarios (`README_BY_ID` in `test/visual/scenarioIds.ts`: file, crop box, width
 `scripts/generate-readme-images.py` reads it from the render manifest. Do not change a README
 scenario's viewport, fixture, theme, scroll or crop unless the image is meant to change.
 
+### Real-window captures: registry and parallel runs
+
+Every screenshot taken in a real VS Code window has a stable id `<group>/rNN-<slug>` registered in
+`test/shared/captureRegistry.ts` (group, suite, one `locks` sentence, `clip`, README and curated
+flags). All five suites (real-input, checkbox, frontmatter, scroll, reload) write through the same
+`RealWindowEvidence` writer (`test/integration/evidence.ts`): it rejects an unregistered id, writes
+`<run folder>/<group>/rNN-<slug>.png` with its `.md` note and `.json` sidecar, lists the capture in
+the `captures` array of the run `manifest.json`, and fails a complete suite when a registered
+capture of it was not taken. A new capture takes the next free number of its group. Entries with
+`capture: false` keep their assertion and note but write no picture. `clip: "preview"` crops to the
+webview frame (falling back to the whole window), `clip: "element"` to the changed excerpt, and
+`clip: "window"` keeps the whole VS Code window, which the README crops need.
+
+The LATEST pointer files, `INDEX.md` and the run folder prefixes (`real-input-`, `checkbox-e2e-`,
+`frontmatter-e2e-`, `scroll-e2e-`, `reload-e2e-`) are unchanged; the per-group folders live inside
+the run folder. `npm run review:gallery` lists the registered captures of the latest runs per group,
+and `scripts/generate-readme-images.py --check <dir>` compares the README images, real-window ones
+included, with a baseline directory.
+
+Several real-window runs can be active at once on one checkout. Each `run-tests` process has an
+instance id (`STUDIO_E2E_INSTANCE`, generated when unset) and gives every VS Code launch its own
+user-data directory, extensions directory, CDP port and evidence folders; the manifests carry
+`instanceId`. The LATEST pointers and `integration-manifest.json` are shared files, so the last run
+to finish wins them; use the run folder named in the console for a specific run.
+
 Run folders of the real-window suites pile up under `out/reports/e2e/screenshots/`.
 `npm run review:finish` keeps the latest 5 per kind (`STUDIO_E2E_KEEP_RUNS` changes it). Run
 `npm run review:prune -- --dry-run` to list what would go, `npm run review:prune -- --keep 3` to

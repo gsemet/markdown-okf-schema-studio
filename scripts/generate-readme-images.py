@@ -30,6 +30,7 @@ class Crop:
 
 
 def latest_real_input_directory() -> Path:
+    """Run folder named by REAL-INPUT-LATEST.md; captures are at `<group>/<rNN-slug>.png` inside it."""
     pointer = SCREENSHOTS / "REAL-INPUT-LATEST.md"
     content = pointer.read_text(encoding="utf-8")
     if "Suite: **passed**" not in content:
@@ -59,10 +60,30 @@ def pixels_equal(first: Path, second: Path) -> bool:
             and left.convert("RGB").tobytes() == right.convert("RGB").tobytes()
 
 
+def real_crops(real_input: Path) -> list[Crop]:
+    """Crops of the real-window captures, from the `readme` entries of `test/shared/captureRegistry.ts`
+    (carried by the render manifest as `realCaptures`)."""
+    if not RENDER_MANIFEST.is_file():
+        raise RuntimeError(f"{RENDER_MANIFEST.relative_to(ROOT)} is missing: run `npm run visual:render`")
+    captures = json.loads(RENDER_MANIFEST.read_text(encoding="utf-8")).get("realCaptures", [])
+    crops = []
+    for capture in captures:
+        for source in capture.get("readme", []):
+            if capture.get("capture") is False:
+                raise RuntimeError(f"README source {capture['id']} is assertion-only")
+            crops.append(Crop(real_input / f"{capture['id']}.png", source["file"], tuple(source["crop"]), source["width"]))
+    return crops
+
+
 def check(baseline: Path) -> int:
-    """Re-render the images whose source is a visual (static page) capture into a temp directory
-    and compare them pixel for pixel with the images of `baseline`. Real-window sources are skipped."""
+    """Re-render the README images into a temp directory and compare them pixel for pixel with the
+    images of `baseline`: the visual-sourced ones always, the real-window ones when the latest
+    real-input run passed (otherwise they are reported as skipped)."""
     crops = visual_crops()
+    try:
+        crops += real_crops(latest_real_input_directory())
+    except (OSError, RuntimeError) as error:
+        print(f"real-window README images skipped: {error}")
     differences = 0
     with tempfile.TemporaryDirectory() as temporary:
         for crop in crops:
@@ -73,7 +94,7 @@ def check(baseline: Path) -> int:
                 differences += 1
             else:
                 print(f"identical: {crop.destination}")
-    print(f"{len(crops)} visual-sourced README images checked, {differences} differences")
+    print(f"{len(crops)} README images checked, {differences} differences")
     return 1 if differences else 0
 
 
@@ -96,16 +117,9 @@ def visual_crops() -> list[Crop]:
 
 
 def build_crops(real_input: Path | None) -> list[Crop]:
-    """Visual crops (metadata) in README order, then the real-window ones (still listed here)."""
+    """Visual crops in README order, then the real-window ones from the capture registry."""
     real_input = real_input or SCREENSHOTS / "_real-input-unavailable"
-    return visual_crops() + [
-        Crop(real_input / "05-open-with-editor.png", "open-with-editor.png", (250, 55, 1400, 470), 760),
-        Crop(real_input / "36-title-bar-button.png", "open-preview-to-side.png", (40, 35, 1390, 430), 760),
-        Crop(real_input / "39-quick-open-beside-preview.png", "preview-beside-editor.png", (45, 35, 1395, 420), 760),
-        Crop(real_input / "22-editor-frame-and-buttons.png", "inline-editing.png", (700, 40, 1390, 410), 720),
-        Crop(real_input / "38-edit-mode-remembered.png", "myst-admonitions.png", (790, 140, 1315, 445), 720),
-        Crop(real_input / "38-edit-mode-remembered.png", "myst-diagrams-and-figure.png", (790, 460, 1315, 860), 720),
-    ]
+    return visual_crops() + real_crops(real_input)
 
 
 def main() -> int:

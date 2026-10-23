@@ -11,6 +11,7 @@ import {
   getActivePreviewForTests,
 } from "../extensionApi";
 import { E2E_SCREENSHOT_ROOT } from "../../reportPaths";
+import { RealWindowEvidence } from "../evidence";
 
 export const MOD: "Meta" | "Control" = process.platform === "darwin" ? "Meta" : "Control";
 
@@ -273,32 +274,33 @@ const geometryChecksSource = fs.readFileSync(path.join(extensionRoot, "test", "s
 
 export interface Evidence {
   directory: string;
-  capture(page: Page, frame: Frame, name: string, note: string, options?: { checks?: CaptureChecks }): Promise<void>;
-  finish(passed: boolean): void;
+  /** `id` is a `<group>/rNN-<slug>` id of the capture registry; unknown ids throw. */
+  capture(page: Page, frame: Frame, id: string, note: string, options?: { checks?: CaptureChecks }): Promise<void>;
+  /** `complete`: the whole suite ran, so every registered capture of it must have been taken. */
+  finish(passed: boolean, complete?: boolean): void;
 }
 
-export function createEvidence(label: string): Evidence {
-  fs.mkdirSync(artifactsRoot, { recursive: true });
-  const directory = fs.mkdtempSync(path.join(artifactsRoot, `${label}-`));
-  const startedAt = new Date().toISOString();
-  const indexPath = path.join(directory, "INDEX.md");
-  fs.writeFileSync(indexPath, `# ${label} capture order\n\nEntries follow execution order.\n\n`);
+export function createEvidence(label: "real-input"): Evidence {
+  const store = new RealWindowEvidence(label, { indexTitle: `${label} capture order` });
+  const directory = store.directory;
   const upper = label.toUpperCase();
   return {
     directory,
     /**
-     * Writes `<name>.png` and `<name>.md` and appends the entry to INDEX.md. Call it only after the
-     * scenario's last action: it scrolls the webview to the top, moves the pointer to the bottom-left
-     * corner of the frame and blurs the toolbar buttons. Mid-scenario calls would disturb the scroll
-     * anchor, hover states and anything below the first screen.
+     * Writes `<group>/<rNN-slug>.png` (unless the entry is assertion-only), `.md` and `.json` and
+     * registers the capture in the run manifest. Call it only after the scenario's last action: it
+     * scrolls the webview to the top, moves the pointer to the bottom-left corner of the frame and
+     * blurs the toolbar buttons. Mid-scenario calls would disturb the scroll anchor, hover states
+     * and anything below the first screen.
      */
     async capture(
       page: Page,
       frame: Frame,
-      name: string,
+      id: string,
       note: string,
       options?: { checks?: CaptureChecks },
     ): Promise<void> {
+      store.paths(id); // unknown ids fail before any action on the page
       await frame.evaluate(() => window.scrollTo(0, 0));
       const frameBounds = await (await frame.frameElement()).boundingBox();
       assert.ok(frameBounds);
@@ -333,52 +335,53 @@ export function createEvidence(label: string): Evidence {
           `- ${!check.applicable ? "n/a" : check.pass ? "PASS" : "FAIL"} \`${check.id}\`: ${check.detail}`).join("\n")
           + "\n"
         : `- not run: ${checkError}\n`);
-      await page.screenshot({ path: path.join(directory, `${name}.png`) });
-      fs.writeFileSync(path.join(directory, `${name}.json`), JSON.stringify({
-        summary: note,
-        info: {
-          id: name,
-          suite: label,
-          runId: process.env.STUDIO_E2E_RUN_ID ?? null,
-          capturedAt: new Date().toISOString(),
-          viewport: page.viewportSize(),
-          host: "Real VS Code window; mouse and keyboard events dispatched through CDP",
+      await store.shoot(page, frame, id);
+      store.record(id, {
+        note,
+        json: {
+          summary: note,
+          info: {
+            viewport: page.viewportSize(),
+            host: "Real VS Code window; mouse and keyboard events dispatched through CDP",
+          },
+          capturedState: { editMode, bufferExcerpt: excerpt },
+          checks: checkResult?.checks ?? [],
+          failures: checkError ? [checkError] : (checkResult?.checks ?? [])
+            .filter((check) => check.applicable && !check.pass).map((check) => check.detail),
+          limitations: "Screenshot captures the final visible state; consult the suite manifest for the overall result.",
         },
-        capturedState: { editMode, bufferExcerpt: excerpt },
-        checks: checkResult?.checks ?? [],
-        failures: checkError ? [checkError] : (checkResult?.checks ?? [])
-          .filter((check) => check.applicable && !check.pass).map((check) => check.detail),
-        limitations: "Screenshot captures the final visible state; consult the suite manifest for the overall result.",
-      }, null, 2) + "\n");
-      fs.writeFileSync(path.join(directory, `${name}.md`), `# ${name}\n\n${note}\n\n`
-        + `Edit mode: ${editMode}.\n\n`
-        + "Real VS Code window; every action is a real mouse or keyboard event dispatched by Playwright "
-        + "through CDP. Buffer excerpt at capture time:\n\n```markdown\n" + excerpt + "\n```\n\n"
-        + machineSection);
-      fs.appendFileSync(indexPath, `- [${name}](${name}.md): [image](${name}.png)\n`);
+        markdown: `Edit mode: ${editMode}.\n\n`
+          + "Real VS Code window; every action is a real mouse or keyboard event dispatched by Playwright "
+          + "through CDP. Buffer excerpt at capture time:\n\n```markdown\n" + excerpt + "\n```\n\n"
+          + machineSection,
+      });
       const failedRequired = checkResult?.checks.find((check) =>
         check.applicable && !check.pass && (checkOptions.required ?? []).includes(check.id));
       if (failedRequired) {
-        throw new Error(`Required machine check ${failedRequired.id} failed in ${name}: ${failedRequired.detail}`);
+        throw new Error(`Required machine check ${failedRequired.id} failed in ${id}: ${failedRequired.detail}`);
       }
       if (checkError !== undefined && (checkOptions.required ?? []).length > 0) {
-        throw new Error(`Required machine checks did not run in ${name}: ${checkError}`);
+        throw new Error(`Required machine checks did not run in ${id}: ${checkError}`);
       }
-      console.log(`PASS real-input screenshot: ${name}`);
+      console.log(`PASS real-input screenshot: ${id}`);
     },
-    finish(passed: boolean): void {
-      fs.writeFileSync(path.join(directory, "manifest.json"), JSON.stringify({
+    finish(passed: boolean, complete = false): void {
+      const missing = passed && complete ? store.missing() : [];
+      const status = passed && missing.length === 0 ? "passed" : "failed";
+      store.writeManifest({
         runId: process.env.STUDIO_E2E_RUN_ID ?? null,
         campaignStartedAt: process.env.STUDIO_E2E_STARTED_AT ?? null,
         campaignCommand: process.env.STUDIO_E2E_COMMAND ?? null,
-        startedAt,
+        startedAt: store.startedAt,
         completedAt: new Date().toISOString(),
-        status: passed ? "passed" : "failed",
-      }, null, 2) + "\n");
+        status,
+        ...(missing.length > 0 ? { missingCaptures: missing } : {}),
+      });
       fs.writeFileSync(path.join(artifactsRoot, `${upper}-LATEST.md`),
-        `# Latest ${label} Evidence\n\nSuite: **${passed ? "passed" : "failed"}**\n\n`
+        `# Latest ${label} Evidence\n\nSuite: **${status}**\n\n`
         + `Run identity: \`${process.env.STUDIO_E2E_RUN_ID ?? "unknown"}\`\n\n`
         + `[Ordered captures](${path.basename(directory)}/INDEX.md)\n`);
+      if (missing.length > 0) store.assertComplete();
     },
   };
 }

@@ -13,6 +13,8 @@ import {
   sendPreviewMessageForTests,
   setRenderDelayForTests,
 } from "./extensionApi";
+import { RealWindowEvidence } from "./evidence";
+import { captureByLegacy } from "../shared/captureRegistry";
 import { E2E_SCREENSHOT_ROOT } from "../reportPaths";
 
 async function waitFor(description: string, predicate: () => boolean, timeoutMs = 5_000): Promise<void> {
@@ -88,10 +90,17 @@ function replaceDocument(document: vscode.TextDocument, text: string): vscode.Wo
   return edit;
 }
 
+/** Registry id of a frontmatter capture known by its former file stem. */
+function frontmatterId(legacy: string): string {
+  const entry = captureByLegacy("frontmatter", legacy);
+  assert.ok(entry, `no registered frontmatter capture was named "${legacy}"`);
+  return entry.id;
+}
+
 async function captureDescriptionState(
+  evidence: RealWindowEvidence,
   page: Page,
   frame: Frame,
-  artifacts: string,
   theme: "white" | "dark",
   state: "expanded" | "collapsed" | "collapsed-after-refresh" | "expanded-again",
   layout: "wide" | "narrow" = "wide",
@@ -148,7 +157,8 @@ async function captureDescriptionState(
       "Narrow layout must contain horizontal overflow rather than scroll the whole page");
   }
   const filename = `description-${theme}-${state}${layout === "narrow" ? "-narrow" : ""}`;
-  await page.screenshot({ path: path.join(artifacts, `${filename}.png`) });
+  const id = frontmatterId(filename);
+  await evidence.shoot(page, frame, id);
   const review = collapsed
     ? "Description header and cells are hidden. Name and Value remain readable, and the expand icon stays visible."
     : "Description header and cells are visible. Check column spacing, text contrast, and the collapse icon beside the frontmatter title.";
@@ -159,31 +169,33 @@ async function captureDescriptionState(
       : state === "collapsed"
         ? "The collapse control was clicked from the expanded state; only Name and Value should remain."
         : "Description was explicitly expanded before this capture; every field description should be visible.";
-  fs.writeFileSync(path.join(artifacts, `${filename}.json`), JSON.stringify({
-    summary: review,
-    info: { id: filename, suite: "frontmatter", runId: process.env.STUDIO_E2E_RUN_ID ?? null,
-      theme, layout, viewport: page.viewportSize(), frameWidth: width, host: "Real VS Code webview" },
-    actions: [transition],
-    capturedState: { collapsed, headers, fieldCount: fields.length },
-    checks: ["Exact description text", "17 unique rows", "Visible description count", "Toggle accessibility and state",
-      "Frame width, theme and overflow policy"],
-    visualChecks: ["Text contrast", "No clipping within cells", "Column spacing"],
-    limitations: "legacy_summary intentionally violates additionalProperties. Native title tooltips are not screenshot evidence.",
-  }, null, 2) + "\n");
-  fs.writeFileSync(path.join(artifacts, `${filename}.md`),
-    `# Description column: ${theme}, ${state}\n\n${review}\n\n${transition}\n\n`
-    + `Setup: finding schema with 17 unique fields; legacy_summary intentionally violates additionalProperties. `
-    + `Target metadata is Updated target description; outside-workspace links are explicitly permitted.\n\n`
-    + `Capture: actual frame width ${width}px, ${layout} layout, top of document; pointer moved away and toolbar blurred; tooltip disappearance awaited.\n\n`
-    + `Actions: expand, collapse, refresh (new completed request ID), expand again, in that order per theme/layout.\n\n`
-    + `Expected exact descriptions: Document type.; Stable finding identity.; Review lifecycle state.; Supporting source document.\n\n`
-    + "Asserted: exact description text, 17 unique rows, visible description count, toggle accessibility/state, frame width, theme and overflow policy. Visual review only: contrast, clipping within cells and spacing. Native title tooltips are not screenshot evidence.\n",
-    "utf8");
-  fs.appendFileSync(path.join(artifacts, "INDEX.md"), `- [${filename}](${filename}.md): [image](${filename}.png)\n`);
-  console.log(`PASS frontmatter screenshot: ${filename}`);
+  evidence.record(id, {
+    note: review,
+    json: {
+      summary: review,
+      info: { theme, layout, viewport: page.viewportSize(), frameWidth: width, host: "Real VS Code webview" },
+      actions: [transition],
+      capturedState: { collapsed, headers, fieldCount: fields.length },
+      checks: ["Exact description text", "17 unique rows", "Visible description count", "Toggle accessibility and state",
+        "Frame width, theme and overflow policy"],
+      visualChecks: ["Text contrast", "No clipping within cells", "Column spacing"],
+      limitations: "legacy_summary intentionally violates additionalProperties. Native title tooltips are not screenshot evidence.",
+    },
+    markdown: `${transition}\n\n`
+      + `Description column: ${theme}, ${state}.\n\n`
+      + `Setup: finding schema with 17 unique fields; legacy_summary intentionally violates additionalProperties. `
+      + `Target metadata is Updated target description; outside-workspace links are explicitly permitted.\n\n`
+      + `Capture: actual frame width ${width}px, ${layout} layout, top of document; pointer moved away and toolbar blurred; tooltip disappearance awaited.\n\n`
+      + `Actions: expand, collapse, refresh (new completed request ID), expand again, in that order per theme/layout.\n\n`
+      + `Expected exact descriptions: Document type.; Stable finding identity.; Review lifecycle state.; Supporting source document.\n\n`
+      + "Asserted: exact description text, 17 unique rows, visible description count, toggle accessibility/state, frame width, theme and overflow policy. Visual review only: contrast, clipping within cells and spacing. Native title tooltips are not screenshot evidence.\n",
+  });
+  console.log(`PASS frontmatter screenshot: ${id}`);
 }
 
-async function captureLinkState(page: Page, frame: Frame, artifacts: string, name: string, expected: string, hovered = false): Promise<void> {
+async function captureLinkState(
+  evidence: RealWindowEvidence, page: Page, frame: Frame, name: string, expected: string, hovered = false,
+): Promise<void> {
   if (!hovered) {
   await frame.evaluate(() => window.scrollTo(0, 0));
   const frameBounds = await (await frame.frameElement()).boundingBox();
@@ -205,22 +217,24 @@ async function captureLinkState(page: Page, frame: Frame, artifacts: string, nam
     }), "Hover tooltip is contained in the captured viewport");
   }
   const width = await frame.evaluate(() => innerWidth);
-  await page.screenshot({ path: path.join(artifacts, `${name}.png`) });
-  fs.writeFileSync(path.join(artifacts, `${name}.json`), JSON.stringify({
-    summary: expected,
-    info: { id: name, suite: "frontmatter", runId: process.env.STUDIO_E2E_RUN_ID ?? null,
-      viewport: page.viewportSize(), frameWidth: width, host: "Real VS Code webview" },
-    capturedState: { hovered, outsideWorkspaceLinks: "permitted" },
-    checks: ["Exact link text, metadata and badges asserted by the test"],
-    visualChecks: ["Color, legibility and spacing", "Hover tooltip stays within the viewport"],
-    limitations: "legacy_summary intentionally produces a schema validation error. Hover tooltips are production UI, not injected overlays.",
-  }, null, 2) + "\n");
-  fs.writeFileSync(path.join(artifacts, `${name}.md`), `# ${name}\n\n${expected}\n\n`
-    + `Real VS Code webview, ${width}px frame; ${hovered ? "pointer on the related link, accessible tooltip visible" : "pointer away, toolbar blurred and tooltip disappearance awaited"}. `
-    + "Outside-workspace links permitted. legacy_summary intentionally produces a red schema validation error. "
-    + "Exact link text/metadata/badges are asserted by the test; color, legibility and spacing require visual review. "
-    + (hovered ? "The visible tooltip is production UI, not an injected screenshot overlay.\n" : "Hover appearance is reviewed in the separate hover checkpoint.\n"));
-  fs.appendFileSync(path.join(artifacts, "INDEX.md"), `- [${name}](${name}.md): [image](${name}.png)\n`);
+  const id = frontmatterId(name);
+  // The saved-target captures are clipped to the changed excerpt (the Related row).
+  await evidence.shoot(page, frame, id, frame.locator('[data-okf-field="related"]').first());
+  evidence.record(id, {
+    note: expected,
+    json: {
+      summary: expected,
+      info: { viewport: page.viewportSize(), frameWidth: width, host: "Real VS Code webview" },
+      capturedState: { hovered, outsideWorkspaceLinks: "permitted" },
+      checks: ["Exact link text, metadata and badges asserted by the test"],
+      visualChecks: ["Color, legibility and spacing", "Hover tooltip stays within the viewport"],
+      limitations: "legacy_summary intentionally produces a schema validation error. Hover tooltips are production UI, not injected overlays.",
+    },
+    markdown: `Real VS Code webview, ${width}px frame; ${hovered ? "pointer on the related link, accessible tooltip visible" : "pointer away, toolbar blurred and tooltip disappearance awaited"}. `
+      + "Outside-workspace links permitted. legacy_summary intentionally produces a red schema validation error. "
+      + "Exact link text/metadata/badges are asserted by the test; color, legibility and spacing require visual review. "
+      + (hovered ? "The visible tooltip is production UI, not an injected screenshot overlay.\n" : "Hover appearance is reviewed in the separate hover checkpoint.\n"),
+  });
 }
 
 export async function run(): Promise<void> {
@@ -230,21 +244,22 @@ export async function run(): Promise<void> {
   assert.ok(page, "the VS Code workbench is attached");
   const extensionRoot = path.resolve(__dirname, "../../..");
   fs.mkdirSync(E2E_SCREENSHOT_ROOT, { recursive: true });
-  const artifacts = fs.mkdtempSync(path.join(E2E_SCREENSHOT_ROOT, "frontmatter-e2e-"));
-  fs.mkdirSync(artifacts, { recursive: true });
-  fs.writeFileSync(path.join(artifacts, "INDEX.md"), "# Frontmatter capture order\n\nIsolated run; entries below follow execution order. See manifest.json for result and limitations.\n\n");
+  const evidence = new RealWindowEvidence("frontmatter", {
+    indexTitle: "Frontmatter capture order\n\nIsolated run; entries below follow execution order. See manifest.json for result and limitations.",
+  });
+  const artifacts = evidence.directory;
   const manifest = {
     runId: process.env.STUDIO_E2E_RUN_ID ?? null,
     campaignStartedAt: process.env.STUDIO_E2E_STARTED_AT ?? null,
     campaignCommand: process.env.STUDIO_E2E_COMMAND ?? null,
     revision: process.env.STUDIO_AUDIT_REVISION ?? "unprovided (working tree)",
     command: process.env.STUDIO_AUDIT_COMMAND ?? "node out/test/integration/run-tests.js --trusted-only",
-    startedAt: new Date().toISOString(), result: "running", captures: 0,
+    startedAt: new Date().toISOString(), result: "running",
     suiteResult: "Parent must record trusted-suite exit after serializer and workspace disposal; this test cannot certify later operations.",
     reload: "Separate real-window campaign: see RELOAD-LATEST.md. Refresh captures here only prove toolbar refresh.",
     tooltip: "Custom accessible link tooltips have dedicated hover captures; native browser popups are not captured.",
   };
-  fs.writeFileSync(path.join(artifacts, "manifest.json"), JSON.stringify(manifest, null, 2));
+  evidence.writeManifest(manifest);
   await page.setViewportSize({ width: 2400, height: 1100 });
   await vscode.commands.executeCommand("workbench.action.closeSidebar");
   await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
@@ -483,10 +498,10 @@ export async function run(): Promise<void> {
       assert.ok(Number(await frame.locator('[data-okf-badge]').getAttribute("data-okf-errors")) > 0,
         "legacy_summary intentionally violates additionalProperties and produces a validation error");
       assert.match(await frame.locator('.okf-info-row.okf-error').allTextContents().then((texts) => texts.join("\n")), /must NOT have additional properties$/u);
-      await captureLinkState(page, frame, artifacts, `links-${theme}-original`,
+      await captureLinkState(evidence, page, frame, `links-${theme}-original`,
         "Setup: original target metadata. Excerpt and title contain Original target description. Both evidence links carry exactly line 2. Check muted italic excerpt and marker labels remain readable.");
       await link.hover();
-      await captureLinkState(page, frame, artifacts, `links-${theme}-hover`,
+      await captureLinkState(evidence, page, frame, `links-${theme}-hover`,
         "Action: hover the related link. Expected: visible target path and description: Original target description, with readable text, preserved line breaks and no viewport clipping.", true);
     }
     const targetExcerpt = (text: string) => () =>
@@ -519,7 +534,7 @@ export async function run(): Promise<void> {
       }
       assert.equal(await frame.locator('[data-okf-field="related"] .okf-link-excerpt').textContent(), "Updated target description");
       assert.match(await frame.locator('[data-okf-field="related"] a').getAttribute("title") ?? "", /description: Updated target description/u);
-      await captureLinkState(page, frame, artifacts, `links-${theme}-saved-target`,
+      await captureLinkState(evidence, page, frame, `links-${theme}-saved-target`,
         "Action: save target description on disk and await linked-file enrichment. Original target description is replaced with exactly Updated target description in excerpt and native title without a full document render.");
     }
     const initialStemRow = schemaPreview.html.match(/<tr\b[^>]*data-okf-field="stem_target"[^]*?<\/tr>/u)?.[0] ?? "";
@@ -551,17 +566,17 @@ export async function run(): Promise<void> {
       if (await frame.locator("[data-okf-description-toggle]:visible").getAttribute("aria-expanded") === "false") {
         await frame.locator("[data-okf-description-toggle]:visible").click();
       }
-      await captureDescriptionState(page, frame, artifacts, theme, "expanded", layout);
+      await captureDescriptionState(evidence, page, frame, theme, "expanded", layout);
       await frame.locator("[data-okf-description-toggle]:visible").click();
-      await captureDescriptionState(page, frame, artifacts, theme, "collapsed", layout);
+      await captureDescriptionState(evidence, page, frame, theme, "collapsed", layout);
       const previousRequestId = currentContext(document).requestId;
       await frame.locator("[data-sphinx-preview-refresh]").click();
       await waitForCurrentPreview(document, previousRequestId);
       const refreshedFrame = await previewFrame(page);
       await refreshedFrame.locator('html[data-okf-descriptions-collapsed="true"]').waitFor();
-      await captureDescriptionState(page, refreshedFrame, artifacts, theme, "collapsed-after-refresh", layout);
+      await captureDescriptionState(evidence, page, refreshedFrame, theme, "collapsed-after-refresh", layout);
       await refreshedFrame.locator("[data-okf-description-toggle]:visible").click();
-      await captureDescriptionState(page, refreshedFrame, artifacts, theme, "expanded-again", layout);
+      await captureDescriptionState(evidence, page, refreshedFrame, theme, "expanded-again", layout);
     }
     }
     await page.setViewportSize({ width: 2400, height: 1100 });
@@ -579,7 +594,7 @@ export async function run(): Promise<void> {
       assert.equal(await excerpt.getAttribute("title"), longDescription);
       assert.equal(await excerpt.evaluate((element) => element.scrollWidth > element.clientWidth
         && getComputedStyle(element).textOverflow === "ellipsis"), true, "Long excerpt actually overflows with ellipsis");
-      await captureLinkState(page, frame, artifacts, `links-${theme}-long-ellipsis`,
+      await captureLinkState(evidence, page, frame, `links-${theme}-long-ellipsis`,
         "Action: save twelve repetitions of Saved target metadata with a deliberately long description. Assert full excerpt/title preserved and actual scrollWidth exceeds clientWidth with text-overflow: ellipsis. Visual review: truncation and contrast.");
     }
     const refreshedFrame = await previewFrame(page);
@@ -604,18 +619,20 @@ export async function run(): Promise<void> {
     await waitFor("the implementation evidence link to open at its marker", () =>
       vscode.window.activeTextEditor?.document.uri.fsPath === implementationPath
       && vscode.window.activeTextEditor.selection.active.line === 1);
-    await page.screenshot({ path: path.join(artifacts, "marker-navigation-destination.png") });
-    fs.writeFileSync(path.join(artifacts, "marker-navigation-destination.json"), JSON.stringify({
-      summary: "Active source editor shows evidence/implementation.py at line 2, containing @implements_req finding-frontmatter-001.",
-      info: { id: "marker-navigation-destination", suite: "frontmatter",
-        runId: process.env.STUDIO_E2E_RUN_ID ?? null, viewport: page.viewportSize(), host: "Real VS Code workbench" },
-      actions: ["Click implemented_in_files link"],
-      checks: ["Exact active source path", "Selected marker line"],
-      visualChecks: ["Destination editor and marker line visible", "Readable selection and line framing"],
-      limitations: "The screenshot shows the destination; automation verifies navigation. Preview validation warnings are intentional fixture state.",
-    }, null, 2) + "\n");
-    fs.writeFileSync(path.join(artifacts, "marker-navigation-destination.md"), "# Marker navigation destination\n\nSetup: Real VS Code workbench, 2400 x 1100, schema-backed finding with implementation evidence.\nAction: Click implemented_in_files link.\nExpected state: Active source editor is evidence/implementation.py at zero-based line 1 (displayed line 2), containing @implements_req finding-frontmatter-001.\nVisual checks: Destination editor and marker line are visible, not merely link styling. Confirm line framing and readable selection.\nAsserted: Exact active source path and selected line.\nLimitations: The screenshot shows the destination; automation verifies the click and navigation. The preview may intentionally show fixture validation warnings.\n");
-    fs.appendFileSync(path.join(artifacts, "INDEX.md"), "- [Marker navigation destination](marker-navigation-destination.md): [image](marker-navigation-destination.png)\n");
+    const markerId = frontmatterId("marker-navigation-destination");
+    await evidence.shoot(page, undefined, markerId);
+    evidence.record(markerId, {
+      note: "Active source editor shows evidence/implementation.py at line 2, containing @implements_req finding-frontmatter-001.",
+      json: {
+        summary: "Active source editor shows evidence/implementation.py at line 2, containing @implements_req finding-frontmatter-001.",
+        info: { viewport: page.viewportSize(), host: "Real VS Code workbench" },
+        actions: ["Click implemented_in_files link"],
+        checks: ["Exact active source path", "Selected marker line"],
+        visualChecks: ["Destination editor and marker line visible", "Readable selection and line framing"],
+        limitations: "The screenshot shows the destination; automation verifies navigation. Preview validation warnings are intentional fixture state.",
+      },
+      markdown: "Setup: Real VS Code workbench, 2400 x 1100, schema-backed finding with implementation evidence.\nAction: Click implemented_in_files link.\nExpected state: Active source editor is evidence/implementation.py at zero-based line 1 (displayed line 2), containing @implements_req finding-frontmatter-001.\nVisual checks: Destination editor and marker line are visible, not merely link styling. Confirm line framing and readable selection.\nAsserted: Exact active source path and selected line.\nLimitations: The screenshot shows the destination; automation verifies the click and navigation. The preview may intentionally show fixture validation warnings.\n",
+    });
     await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
     await waitForCurrentPreview(document);
 
@@ -638,7 +655,7 @@ export async function run(): Promise<void> {
     const noMarkerFrame = await previewFrame(page);
     assert.equal(await noMarkerFrame.locator('[data-okf-field="implemented_in_files"] .okf-link-line').count(), 0);
     assert.equal(await noMarkerFrame.locator('[data-okf-field="tested_in_files"] .okf-link-line').textContent(), "line 2");
-    await captureLinkState(page, noMarkerFrame, artifacts, "links-marker-removed",
+    await captureLinkState(evidence, page, noMarkerFrame, "links-marker-removed",
       "Action: remove implementation marker on disk and await linked-file enrichment. Implementation remains a valid link with zero line badges; test evidence still has exactly line 2.");
 
     for (const [index, expectedPath] of [
@@ -1399,8 +1416,7 @@ export async function run(): Promise<void> {
       vscode.window.activeTextEditor?.document.uri.fsPath === wikiPath);
   } finally {
     manifest.result = "incomplete";
-    manifest.captures = fs.readdirSync(artifacts).filter((file) => file.endsWith(".png")).length;
-    fs.writeFileSync(path.join(artifacts, "manifest.json"), JSON.stringify(manifest, null, 2));
+    evidence.writeManifest(manifest);
     disposeActivePreviewForTests();
     await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
     await browser.close();
@@ -1414,6 +1430,7 @@ export async function run(): Promise<void> {
       vscode.ConfigurationTarget.Workspace,
     );
   }
+  evidence.assertComplete();
   manifest.result = "previewEditing passed including cleanup; trusted-suite result still requires parent exit";
-  fs.writeFileSync(path.join(artifacts, "manifest.json"), JSON.stringify(manifest, null, 2));
+  evidence.writeManifest(manifest);
 }

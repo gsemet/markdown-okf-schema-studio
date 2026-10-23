@@ -1,11 +1,11 @@
 import { execFileSync, spawn } from "node:child_process";
 import * as fs from "node:fs";
-import * as net from "node:net";
 import * as path from "node:path";
 
 import { downloadAndUnzipVSCode, runTests } from "@vscode/test-electron";
 import { runReloadCampaign } from "./reload-suite";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
+import { createRunDirectories, freePort, instanceIdFromEnvironment, instanceTag } from "../shared/runIsolation";
 
 const extensionRoot = path.resolve(__dirname, "../../..");
 const workspaceRoot = extensionRoot;
@@ -14,6 +14,12 @@ const artifactRoot = E2E_REPORT_ROOT;
 const campaignRunId = process.env.STUDIO_E2E_RUN_ID ?? null;
 const campaignStartedAt = process.env.STUDIO_E2E_STARTED_AT ?? null;
 const campaignCommand = process.env.STUDIO_E2E_COMMAND ?? null;
+/**
+ * Identity of THIS run. Every suite of the run shares it (through STUDIO_E2E_INSTANCE) and every
+ * launch gets its own user-data and extensions directories, CDP port and evidence folders, so two
+ * runs of the same checkout can be active at the same time.
+ */
+const instanceId = instanceIdFromEnvironment();
 
 async function codeExecutablePath(): Promise<string> {
   return fs.existsSync(localCodePath) ? localCodePath : downloadAndUnzipVSCode({});
@@ -21,8 +27,8 @@ async function codeExecutablePath(): Promise<string> {
 
 async function runUntrustedScenario(suiteName: string): Promise<void> {
   const executable = await codeExecutablePath();
-  const userDataDirectory = fs.mkdtempSync(path.join("/tmp", "liveview-vscode-"));
-  const extensionsDirectory = fs.mkdtempSync(path.join("/tmp", "liveview-ext-"));
+  const directories = createRunDirectories(instanceId);
+  const { userDataDirectory, extensionsDirectory } = directories;
   const args = [
     "--no-sandbox",
     "--disable-gpu-sandbox",
@@ -37,7 +43,7 @@ async function runUntrustedScenario(suiteName: string): Promise<void> {
   ];
   try {
     const exitCode = await new Promise<number>((resolve, reject) => {
-      const child = spawn(executable, args, { env: process.env, stdio: "inherit" });
+      const child = spawn(executable, args, { env: { ...process.env, STUDIO_E2E_INSTANCE: instanceId }, stdio: "inherit" });
       child.once("error", reject);
       child.once("exit", (code: number | null) => resolve(code ?? 1));
     });
@@ -45,8 +51,7 @@ async function runUntrustedScenario(suiteName: string): Promise<void> {
       throw new Error(`Untrusted extension host exited with code ${exitCode}.`);
     }
   } finally {
-    fs.rmSync(userDataDirectory, { recursive: true, force: true });
-    fs.rmSync(extensionsDirectory, { recursive: true, force: true });
+    directories.dispose();
   }
 }
 
@@ -55,8 +60,9 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
     await runUntrustedScenario(suiteName);
     return;
   }
-  const userDataDirectory = fs.mkdtempSync(path.join("/tmp", "liveview-vscode-"));
-  const workspaceDirectory = fs.mkdtempSync(path.join("/tmp", "liveview-workspace-"));
+  const directories = createRunDirectories(instanceId);
+  const { userDataDirectory, extensionsDirectory } = directories;
+  const workspaceDirectory = fs.mkdtempSync(path.join("/tmp", `studio-${instanceTag(instanceId)}-w-`));
   const workspaceFile = path.join(workspaceDirectory, "liveview.code-workspace");
   fs.writeFileSync(
     workspaceFile,
@@ -73,15 +79,8 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
     }),
   );
   const browserSuite = suiteName === "scroll-sync-suite.js" || suiteName === "trusted-suite.js";
-  const debugPort = browserSuite ? await new Promise<number>((resolve, reject) => {
-    const server = net.createServer();
-    server.once("error", reject);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address() as net.AddressInfo;
-      server.close(() => resolve(address.port));
-    });
-  }) : undefined;
-  const launchArgs = ["--user-data-dir", userDataDirectory, workspaceFile];
+  const debugPort = browserSuite ? await freePort() : undefined;
+  const launchArgs = ["--user-data-dir", userDataDirectory, "--extensions-dir", extensionsDirectory, workspaceFile];
   if (debugPort !== undefined) {
     launchArgs.push(`--remote-debugging-port=${debugPort}`, "--remote-debugging-address=127.0.0.1");
   }
@@ -99,6 +98,7 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
       extensionTestsPath: path.join(__dirname, suiteName),
       extensionTestsEnv: {
         STUDIO_CDP_PORT: String(debugPort ?? ""),
+        STUDIO_E2E_INSTANCE: instanceId,
         STUDIO_AUDIT_REVISION: revision,
         STUDIO_AUDIT_COMMAND: process.env.STUDIO_E2E_COMMAND ?? process.argv.join(" "),
         ...(campaignRunId ? { STUDIO_E2E_RUN_ID: campaignRunId } : {}),
@@ -115,6 +115,7 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
           const manifestPath = path.join(E2E_SCREENSHOT_ROOT, entry.name, "manifest.json");
           if (!fs.existsSync(manifestPath)) continue;
           const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+          if (manifest.instanceId !== instanceId) continue; // another run's folder
           if (campaignRunId && manifest.runId !== campaignRunId) continue;
           if (Date.parse(manifest.startedAt) < startedAt) continue;
           fs.writeFileSync(manifestPath, JSON.stringify({ ...manifest, revision, dirty,
@@ -124,7 +125,7 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
       }
     }
   } finally {
-    fs.rmSync(userDataDirectory, { recursive: true, force: true });
+    directories.dispose();
     fs.rmSync(workspaceDirectory, { recursive: true, force: true });
   }
 }
@@ -149,7 +150,7 @@ async function main(): Promise<void> {
 fs.mkdirSync(artifactRoot, { recursive: true });
 fs.mkdirSync(E2E_SCREENSHOT_ROOT, { recursive: true });
 const integrationManifest = {
-  status: "running", command: process.argv.join(" "), campaignCommand, runId: campaignRunId,
+  status: "running", command: process.argv.join(" "), campaignCommand, runId: campaignRunId, instanceId,
   campaignStartedAt, startedAt: new Date().toISOString(),
   revision: execFileSync("git", ["rev-parse", "HEAD"], { cwd: extensionRoot, encoding: "utf8" }).trim(),
   dirty: execFileSync("git", ["status", "--porcelain"], { cwd: extensionRoot, encoding: "utf8" }).trim().length > 0,

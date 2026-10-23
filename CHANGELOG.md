@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- For contributors: the real VS Code window screenshots now come from one registry
+  (`test/shared/captureRegistry.ts`) and one shared writer, so every capture has a stable
+  `<group>/rNN-<slug>` id, a folder per feature group inside its run folder, a "locks" sentence and
+  an entry in the run manifest and the product-owner gallery. Several real-window runs can now
+  run at the same time (own user-data and extensions directories, debugging port and evidence
+  folders per run). Four captures were taken at a more telling moment (the TODO wrapper
+  after `Ctrl+/`, the open language list, the open link panel, the open field picker before
+  Escape) and the frontmatter ones are cropped to the preview.
 - MyST `{list-table}` directives now render like pipe tables, with their title, `:header-rows:`
   (any number, including none), `:widths:` and `:align:`, and a click on one opens the whole
   directive for editing. New List table and Pipe table buttons (palette and `/` menu) convert the

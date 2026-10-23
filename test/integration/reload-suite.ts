@@ -1,10 +1,12 @@
 import * as assert from "node:assert/strict";
 import { execFileSync, spawn } from "node:child_process";
 import * as fs from "node:fs";
-import * as net from "node:net";
 import * as path from "node:path";
 import { chromium, Frame, Page } from "playwright-core";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
+import { captureByLegacy } from "../shared/captureRegistry";
+import { freePort } from "../shared/runIsolation";
+import { RealWindowEvidence } from "./evidence";
 
 async function waitFor(label: string, predicate: () => boolean | Promise<boolean>): Promise<void> {
   const deadline = Date.now() + 45000;
@@ -34,7 +36,9 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
   const temporary = fs.mkdtempSync("/tmp/studio-reload-");
   fs.mkdirSync(E2E_REPORT_ROOT, { recursive: true });
   fs.mkdirSync(E2E_SCREENSHOT_ROOT, { recursive: true });
-  const output = fs.mkdtempSync(path.join(E2E_SCREENSHOT_ROOT, "reload-e2e-"));
+  // The suite writes its own INDEX.md; the shared writer handles the captures and the manifest list.
+  const evidence = new RealWindowEvidence("reload", { indexTitle: false });
+  const output = evidence.directory;
   const sourcePath = path.join(temporary, "reload-evidence.md");
   const schemaDirectory = path.join(temporary, "_schema");
   fs.mkdirSync(schemaDirectory);
@@ -43,11 +47,7 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
   fs.writeFileSync(path.join(temporary, "index.md"), "# Reload fixture bundle\n");
   const workspaceFile = path.join(temporary, "reload.code-workspace");
   fs.writeFileSync(workspaceFile, JSON.stringify({ folders: [{ path: workspaceRoot }, { path: temporary }], settings: { "workbench.startupEditor": "none" } }));
-  const port = await new Promise<number>((resolve, reject) => {
-    const server = net.createServer();
-    server.once("error", reject);
-    server.listen(0, "127.0.0.1", () => { const address = server.address() as net.AddressInfo; server.close(() => resolve(address.port)); });
-  });
+  const port = await freePort();
   const child = spawn(executable, ["--no-sandbox", "--disable-updates", "--skip-welcome", "--skip-release-notes", "--disable-workspace-trust", `--user-data-dir=${path.join(temporary, "profile")}`, `--extensions-dir=${path.join(temporary, "extensions")}`, `--extensionDevelopmentPath=${extensionRoot}`, `--remote-debugging-port=${port}`, "--remote-debugging-address=127.0.0.1", workspaceFile, "--goto", sourcePath], { stdio: "ignore" });
   let browser: Awaited<ReturnType<typeof chromium.connectOverCDP>> | undefined;
   let passed = false;
@@ -86,16 +86,22 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
       assert.ok(bounds);
       await page.mouse.move(bounds.x + 4, bounds.y + 4);
       await frame.evaluate(() => { if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
-      await page.screenshot({ path: path.join(output, `${name}.png`) });
-      fs.writeFileSync(path.join(output, `${name}.json`), JSON.stringify({
-        summary: "Reload evidence document and its properties remain visible; Description is collapsed. Name and Value remain readable.",
-        info: { id: name, suite: "reload", runId: process.env.STUDIO_E2E_RUN_ID ?? null,
-          viewport: page.viewportSize(), host: "Real VS Code preview; default host theme" },
-        actions: [action],
-        checks: ["Source identity", "Visible current frame", "Collapsed toggle", "Zero visible Description cells"],
-        visualChecks: ["No missing content or blank preview", "No clipping, unexpected tooltips or overlapping controls"],
-        limitations: "The image shows the final state; the external browser controller verifies the lifecycle action. No application restart or injected state is claimed.",
-      }, null, 2) + "\n");
+      const entry = captureByLegacy("reload", name);
+      assert.ok(entry, `no registered reload capture was named "${name}"`);
+      await evidence.shoot(page, frame, entry.id);
+      const summary = "Reload evidence document and its properties remain visible; Description is collapsed. Name and Value remain readable.";
+      evidence.record(entry.id, {
+        note: summary,
+        json: {
+          summary,
+          info: { viewport: page.viewportSize(), host: "Real VS Code preview; default host theme" },
+          actions: [action],
+          checks: ["Source identity", "Visible current frame", "Collapsed toggle", "Zero visible Description cells"],
+          visualChecks: ["No missing content or blank preview", "No clipping, unexpected tooltips or overlapping controls"],
+          limitations: "The image shows the final state; the external browser controller verifies the lifecycle action. No application restart or injected state is claimed.",
+        },
+        markdown: `Action: ${action}\n`,
+      });
     }
     let frame = await frameForDocument();
     if (await frame.locator("[data-okf-description-toggle]:visible").getAttribute("aria-expanded") === "true") await frame.locator("[data-okf-description-toggle]:visible").click();
@@ -162,18 +168,19 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
     await openParagraphEditor(frame);
     assert.equal(await paletteMode(frame), "strict", "a new panel starts in the stored palette mode");
     await frame.locator("main .sphinx-preview-block-editor textarea").press("Escape");
-    fs.writeFileSync(path.join(output, "INDEX.md"), "# Reload and Reopen Review\n\n1. [Before window reload](01-before-window-reload.png) / [notes](01-before-window-reload.json)\n2. [After actual window reload](02-after-window-reload.png) / [notes](02-after-window-reload.json)\n3. [After close and reopen](03-after-close-reopen.png) / [notes](03-after-close-reopen.json)\n");
+    evidence.assertComplete();
+    fs.writeFileSync(path.join(output, "INDEX.md"), "# Reload and Reopen Review\n\n1. [Before window reload](lifecycle-sync/r16-before-window-reload.png) / [notes](lifecycle-sync/r16-before-window-reload.json)\n2. [After actual window reload](lifecycle-sync/r17-after-window-reload.png) / [notes](lifecycle-sync/r17-after-window-reload.json)\n3. [After close and reopen](lifecycle-sync/r18-after-close-reopen.png) / [notes](lifecycle-sync/r18-after-close-reopen.json)\n");
     passed = true;
     fs.writeFileSync(path.join(E2E_REPORT_ROOT, "RELOAD-LATEST.md"), `# Latest Reload Evidence\n\n[Ordered captures](screenshots/${path.basename(output)}/INDEX.md)\n\n[Suite result](screenshots/${path.basename(output)}/manifest.json)\n`);
   } finally {
-    fs.writeFileSync(path.join(output, "manifest.json"), JSON.stringify({ suiteResult: passed ? "passed" : "failed", command: process.argv.join(" "),
+    evidence.writeManifest({ suiteResult: passed ? "passed" : "failed", command: process.argv.join(" "),
       runId: process.env.STUDIO_E2E_RUN_ID ?? null,
       campaignStartedAt: process.env.STUDIO_E2E_STARTED_AT ?? null,
       campaignCommand: process.env.STUDIO_E2E_COMMAND ?? null,
       startedAt: process.env.STUDIO_E2E_STARTED_AT ?? null,
       revision: execFileSync("git", ["rev-parse", "HEAD"], { cwd: extensionRoot, encoding: "utf8" }).trim(),
       dirty: execFileSync("git", ["status", "--porcelain"], { cwd: extensionRoot, encoding: "utf8" }).trim().length > 0,
-      completedAt: new Date().toISOString() }, null, 2));
+      completedAt: new Date().toISOString() });
     await browser?.close();
     child.kill();
     await new Promise<void>(resolve => { if (child.exitCode !== null || child.signalCode !== null) resolve(); else child.once("exit", () => resolve()); });

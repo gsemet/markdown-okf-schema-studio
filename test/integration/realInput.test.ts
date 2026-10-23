@@ -15,6 +15,7 @@ import {
   setRenderDelayForTests,
   setRenderOverrideForTests,
 } from "./extensionApi";
+import { captureByLegacy } from "../shared/captureRegistry";
 import { lineDelta } from "../shared/lineDelta";
 import {
   bufferText,
@@ -142,6 +143,13 @@ async function withDocument(
   }
 }
 
+/** Registry id of a capture whose former name is built from a scenario parameter. */
+function realInputId(legacy: string): string {
+  const entry = captureByLegacy("real-input", legacy);
+  assert.ok(entry, `no registered real-input capture was named "${legacy}"`);
+  return entry.id;
+}
+
 async function captureAfter(
   evidence: Evidence,
   page: Page,
@@ -176,7 +184,7 @@ async function scenarioParagraphBlurCommit(page: Page, evidence: Evidence): Prom
         .evaluateAll((areas) => areas.map((area) => (area as HTMLTextAreaElement).value));
       return paragraphs === 1 && !openValues.some((value) => value.includes("Second paragraph"));
     });
-    await captureAfter(evidence, page, "01-paragraph-blur-commit",
+    await captureAfter(evidence, page, "block-editing/r01-paragraph-blur-commit",
       "Edit mode on; the paragraph gained ` Added.` and the heading click moved focus out. "
       + "The buffer line reads `Second paragraph. Added.`; nothing else changed.");
   });
@@ -236,7 +244,7 @@ async function scenarioReviewComments(page: Page, evidence: Evidence): Promise<v
         assert.match(await popover.textContent() ?? "", /<b>Why\?<\/b>/u);
         assert.equal(await popover.locator("b").count(), 0, "the body is text");
       });
-      await captureAfter(evidence, page, "comments-01-popover", "Edit mode on; the popover shows the thread and no editor is open.");
+      await captureAfter(evidence, page, "review-annotations/r02-review-thread-popover", "Edit mode on; the popover shows the thread and no editor is open.");
       // Plain text of the same block still edits (the click lands on the first words).
       await withCurrentFrame(page, async (frame) => {
         const target = frame.locator(paragraph).first();
@@ -275,7 +283,7 @@ async function scenarioCtrlEnterCommit(page: Page, evidence: Evidence): Promise<
     assert.equal(lines(bufferText(document))[3], "continues on line two. X");
     await waitForRender(document);
     await waitForNoBlockEditor(page, "the block editor to close after the re-render");
-    await captureAfter(evidence, page, "02-ctrl-enter-commit",
+    await captureAfter(evidence, page, "block-editing/r02-mod-enter-commit",
       "Edit mode on; the first paragraph gained ` X` and Cmd/Ctrl+Enter saved it. The editor is closed "
       + "after the re-render, and buffer line 4 reads `continues on line two. X`.");
   });
@@ -306,7 +314,7 @@ async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Promise<vo
     await expectOrder(["Beta", "Gamma", "Alpha"], "the second Alt+Down to move Alpha below Gamma");
     await waitFor("the focus to stay on Alpha", async () => (await activeText()).includes("Alpha"));
     // One undo step per move.
-    await captureAfter(evidence, page, "move-keys-01-alt-down",
+    await captureAfter(evidence, page, "block-editing/r21-alt-down-moves-block",
       "Edit mode on; Alt+Down was pressed twice on Alpha's block: the order is Beta, Gamma, Alpha.");
 
     // In the text box: the chord saves, moves, and reopens on the block with the caret in place.
@@ -337,7 +345,7 @@ async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Promise<vo
     await press(page, "Alt+ArrowDown");
     await new Promise<void>((resolve) => setTimeout(resolve, 300));
     assert.equal(bufferText(document), before, "plain Alt+Arrow moved nothing");
-    await captureAfter(evidence, page, "move-keys-02-chord",
+    await captureAfter(evidence, page, "block-editing/r22-move-chord-keeps-editor",
       "The Cmd/Ctrl+Alt chord saved `Be!ta`, moved the block down and back up; the editor stays open on it.");
   });
 }
@@ -361,7 +369,7 @@ async function scenarioBlockSelection(page: Page, evidence: Evidence): Promise<v
     await waitFor("three blocks to be selected", async () => (await selected()).length === 3);
     assert.equal(await announced(), "3 blocks selected");
     await waitForNoBlockEditor(page, "Shift+click opens no block editor");
-    await captureAfter(evidence, page, "block-selection-01-shift-click",
+    await captureAfter(evidence, page, "block-editing/r20-shift-click-selects-blocks",
       "Shift+click on Alpha then Gamma outlines the three body blocks; no editor is open.");
     await press(page, "Shift+ArrowUp");
     await waitFor("Shift+Up to shrink the selection", async () => (await selected()).length === 2);
@@ -404,7 +412,7 @@ async function scenarioBlockMoveSelection(page: Page, evidence: Evidence): Promi
     await press(page, "Alt+ArrowUp");
     await waitFor("the span to move back up", () =>
       bufferText(document) === document4(["Gamma", "Alpha", "Beta", "Delta"]));
-    await captureAfter(evidence, page, "move-selection-01-alt-arrows",
+    await captureAfter(evidence, page, "block-editing/r23-alt-arrows-move-selection",
       "Alpha and Beta were selected, then moved down twice and up once with Alt+Arrow: the order is Gamma, "
       + "Alpha, Beta, Delta and both stay selected.");
   });
@@ -428,7 +436,7 @@ async function scenarioArrowNavigation(page: Page, evidence: Evidence): Promise<
       if (await textarea.count() !== 1) return false;
       return (await textarea.inputValue()).startsWith("| Name | Value |");
     });
-    await captureAfter(evidence, page, "03-arrow-navigation",
+    await captureAfter(evidence, page, "block-editing/r03-arrow-down-into-table",
       "Edit mode on; ArrowDown at the end of the paragraph moved the raw Markdown editor to the table, "
       + "whose textarea starts with `| Name | Value |`.");
   });
@@ -457,7 +465,7 @@ async function scenarioTableCellEnter(page: Page, evidence: Evidence): Promise<v
     });
     const tableRows = lines(bufferText(document)).filter((line) => line.startsWith("|"));
     assert.equal(tableRows.length, 4, "the table keeps its header, separator and two rows");
-    await captureAfter(evidence, page, "04-table-cell-enter",
+    await captureAfter(evidence, page, "table-editing/r01-cell-enter-saves",
       "Edit mode on; the cell `one` was edited with End, `1` and Enter. The buffer contains "
       + "`| alpha | one1 |` and the table still has four lines.");
   });
@@ -487,7 +495,7 @@ async function scenarioTableCellBold(page: Page, evidence: Evidence): Promise<vo
       if (current === undefined) return false;
       return await current.locator("[data-sphinx-preview-table-cell-editor]").count() === 0;
     });
-    await captureAfter(evidence, page, "t35-table-cell-bold",
+    await captureAfter(evidence, page, "table-editing/r08-cell-bold-shortcut",
       "Edit mode on; the cell `one` was selected, bolded with Cmd/Ctrl+B and saved with Enter. The "
       + "buffer contains `| alpha | **one** |`.");
   });
@@ -519,7 +527,7 @@ async function scenarioTableMinimalDiff(page: Page, evidence: Evidence): Promise
       if (await current.locator("[data-sphinx-preview-table-cell-editor]").count() !== 0) return false;
       return await current.locator("td", { hasText: /^second X$/u }).count() === 1;
     });
-    await captureAfter(evidence, page, "06-table-padded-edit",
+    await captureAfter(evidence, page, "table-editing/r02-padded-table-minimal-diff",
       "Edit mode on; the padded table cell `second` gained ` X` and Enter saved it. The buffer changed "
       + "only the line `| first    | second X |`; the alignment padding is kept.");
 
@@ -543,7 +551,7 @@ async function scenarioTableMinimalDiff(page: Page, evidence: Evidence): Promise
       if (await current.locator("[data-sphinx-preview-table-cell-editor]").count() !== 0) return false;
       return await current.locator("td", { hasText: /^Ana Lee$/u }).count() === 1;
     });
-    await captureAfter(evidence, page, "07-table-compact-edit",
+    await captureAfter(evidence, page, "table-editing/r03-compact-table-minimal-diff",
       "Edit mode on; the compact table cell `Ana` gained ` Lee` and Enter saved it. The buffer changed "
       + "only the line `| Plan | Ana Lee |`; the compact `|---|---|` delimiter is untouched.");
   });
@@ -572,7 +580,7 @@ async function scenarioOpenWithEditor(page: Page, evidence: Evidence): Promise<v
       return current !== undefined
         && await current.locator("p", { hasText: "Second paragraph. Z" }).count() === 1;
     });
-    await captureAfter(evidence, page, "05-open-with-editor",
+    await captureAfter(evidence, page, "lifecycle-sync/r01-open-with-editor",
       "Opened with the Studio Open With editor (no side preview); edit mode on; Cmd/Ctrl+Enter saved "
       + "`Second paragraph. Z` to the buffer.");
   });
@@ -659,7 +667,7 @@ async function scenarioFrontmatterValueMinimalPatch(page: Page, evidence: Eviden
       return current !== undefined
         && await current.locator("[data-okf-frontmatter-editor]").count() === 0;
     });
-    await captureAfter(evidence, page, "08-frontmatter-value-minimal-patch",
+    await captureAfter(evidence, page, "frontmatter-editing/r01-value-minimal-patch",
       "Edit mode on; the status row was changed to `active` by typing `a` on the focused select "
       + "and pressing Enter. The buffer changed only the line `status: active`; the compact sequences and the two-line summary are untouched.");
   }, REQ_SCHEMA);
@@ -696,7 +704,7 @@ async function scenarioFrontmatterStructuralMinimalPatch(page: Page, evidence: E
       return current !== undefined
         && await current.locator("[data-okf-frontmatter-editor]").count() === 0;
     });
-    await captureAfter(evidence, page, "09-frontmatter-rename-minimal-patch",
+    await captureAfter(evidence, page, "frontmatter-editing/r02-rename-minimal-patch",
       "Edit mode on; the name cell `summary` was renamed to `abstract` by select-all, typing and Enter. "
       + "The buffer changed only the line `abstract: When export ...`; the continuation line `  as CSV.` is untouched.");
 
@@ -718,7 +726,7 @@ async function scenarioFrontmatterStructuralMinimalPatch(page: Page, evidence: E
       const current = await findCurrentFrame(page);
       return current !== undefined && await current.locator('tr[data-okf-field="tags"]').count() === 0;
     });
-    await captureAfter(evidence, page, "10-frontmatter-remove-minimal-patch",
+    await captureAfter(evidence, page, "frontmatter-editing/r03-remove-minimal-patch",
       "Edit mode on; the `tags` value was opened and the Remove frontmatter field button pressed. "
       + "The buffer lost exactly the three lines `tags:`, `- alpha` and `- beta`.");
   }, REQ_SCHEMA);
@@ -756,7 +764,7 @@ async function scenarioEnterCommitsTextField(page: Page, evidence: Evidence): Pr
       return current !== undefined
         && await current.locator("[data-okf-frontmatter-editor]").count() === 0;
     });
-    await captureAfter(evidence, page, "11-frontmatter-title-enter",
+    await captureAfter(evidence, page, "frontmatter-editing/r04-title-enter-saves",
       "Edit mode on; the title was replaced and Enter saved it as a one-line scalar.");
 
     await withCurrentFrame(page, (frame) =>
@@ -776,7 +784,7 @@ async function scenarioEnterCommitsTextField(page: Page, evidence: Evidence): Pr
       return current !== undefined
         && await current.locator("[data-okf-frontmatter-editor]").count() === 0;
     });
-    await captureAfter(evidence, page, "12-frontmatter-title-multiline",
+    await captureAfter(evidence, page, "frontmatter-editing/r05-title-multiline",
       "Edit mode on; Shift+Enter added a line and Cmd/Ctrl+Enter saved a two-line title.");
   }, REQ_SCHEMA);
 }
@@ -812,7 +820,7 @@ async function scenarioEscapeCancels(page: Page, evidence: Evidence): Promise<vo
     await waitForRender(document);
     await waitForNoBlockEditor(page, "the block editor to close after Escape");
     assert.equal(bufferText(document), SMOKE);
-    await captureAfter(evidence, page, "13-escape-cancels-block",
+    await captureAfter(evidence, page, "block-editing/r05-escape-cancels-block",
       "Edit mode on; ` DROP ME TOO.` was typed (and autosaved) in the paragraph and Escape closed "
       + "the editor. The preview and the source buffer show the original text again.");
 
@@ -857,7 +865,7 @@ async function scenarioEscapeCancels(page: Page, evidence: Evidence): Promise<vo
         && await current.locator("[data-sphinx-preview-table-cell-editor]").count() === 0;
     });
     assert.equal(bufferText(document), withB);
-    await captureAfter(evidence, page, "14-escape-cancels-table-cell",
+    await captureAfter(evidence, page, "table-editing/r04-escape-cancels-cell",
       "Edit mode on; the cell `two` gained `2` (autosaved) and Escape closed the editor. The cell "
       + "reads `two` again in the preview and in the buffer.");
   });
@@ -905,7 +913,7 @@ async function scenarioTypingUndoGrouping(page: Page, evidence: Evidence): Promi
         throw new Error(String(error) + " Buffer paragraph line: "
           + JSON.stringify(lines(bufferText(document))[5]) + "; changes: " + JSON.stringify(changes));
       }
-      await captureAfter(evidence, page, "15-typing-undo-grouping",
+      await captureAfter(evidence, page, "block-editing/r06-typing-one-undo-step",
         "Typed 20 characters inline; " + changes.length + " content change(s) reached the source "
         + "(" + JSON.stringify(changes) + "), and one undo restored `Second paragraph.`.");
     } finally {
@@ -972,7 +980,7 @@ async function scenarioUndoStaysInEditor(
       const state = await readEditor();
       return state.tag === "TEXTAREA" && state.value === withTyped(" abc def");
     });
-    await captureAfter(evidence, page, "16-undo-stays-" + mode,
+    await captureAfter(evidence, page, realInputId("16-undo-stays-" + mode),
       "Typed ` abc` and ` def` inline (" + mode + "); Cmd/Ctrl+Z undid typing inside the textarea "
       + "and Cmd/Ctrl+Shift+Z restored it; the inline editor stayed open and focused.");
   });
@@ -1017,11 +1025,12 @@ async function scenarioShortcuts(page: Page, evidence: Evidence): Promise<void> 
 
     await press(page, "Control+/");
     await expectValue("Ctrl+/ to wrap the line in a TODO comment", "<!-- TODO: " + original + " -->");
+    // Captured with the TODO wrapper visible, before the undo that restores the line.
+    await captureAfter(evidence, page, "palette-slash/r03-shortcuts-bold-todo",
+      "Edit mode on; Cmd/Ctrl+B bolded the selected word (undone by one Cmd/Ctrl+Z) and Ctrl+/ wrapped the line "
+      + "in a TODO comment; the image shows the wrapped line before its single Cmd/Ctrl+Z, with the focus in the text box.");
     await press(page, MOD + "+z");
     await expectValue("one undo to restore the line", original);
-    await captureAfter(evidence, page, "t20-shortcuts",
-      "Edit mode on; Cmd/Ctrl+B bolded the selected word and Ctrl+/ wrapped the line in a TODO "
-      + "comment, each undone by a single Cmd/Ctrl+Z with the focus staying in the text box.");
     await press(page, "Escape");
     await waitForNoBlockEditor(page, "the block editor to close after Escape");
   });
@@ -1067,7 +1076,7 @@ async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise<void> 
     await press(page, "Enter");
     await typeText(page, "/");
     await waitMenu(true, "the slash menu to open after a line break");
-    await captureAfter(evidence, page, "p11-slash-open",
+    await captureAfter(evidence, page, "palette-slash/r02-slash-open",
       "Edit mode on; typing / on a new line of the paragraph editor opened the command menu under the caret.");
     await typeText(page, "h2");
     await waitFor("the menu to list Heading 2 first", async () => {
@@ -1121,7 +1130,7 @@ async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise<void> 
     await typeText(page, "/zz");
     await waitMenu(true, "the menu to open for /zz");
     await waitFor("the No command row", async () => (await count("[data-slash-none]")) === 1);
-    await captureAfter(evidence, page, "p11-slash-no-command",
+    await captureAfter(evidence, page, "palette-slash/r01-slash-no-command",
       "The query /zz matches nothing: the menu shows a No command row.");
     await press(page, "Escape");
     await waitMenu(false, "Escape to close the menu");
@@ -1186,12 +1195,13 @@ async function scenarioPalette(page: Page, evidence: Evidence): Promise<void> {
     // Escape closes the open list first, and only the next Escape closes the editor.
     await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='codeFence']").click());
     await waitFor("the language list", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
+    // Captured with the language list open, before the Escape that closes it.
+    await captureAfter(evidence, page, "palette-slash/r04-palette-bold-heading",
+      "Edit mode on; Bold then typing wrote inside the markers and Heading 2 was undone by one Cmd/Ctrl+Z; "
+      + "the image shows the open language list that the next Escape closes while the editor stays open.");
     await press(page, "Escape");
     await waitFor("Escape to close the list", async () => await count(".sphinx-preview-edit-palette-menu") === 0);
     assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
-    await captureAfter(evidence, page, "t21-palette",
-      "Edit mode on; Bold then typing wrote inside the markers, Heading 2 was undone by one Cmd/Ctrl+Z "
-      + "and Escape closed the language list while the editor stayed open.");
     await press(page, "Escape");
     await waitForNoBlockEditor(page, "the block editor to close after the second Escape");
   });
@@ -1242,6 +1252,10 @@ async function scenarioLinkPanel(page: Page, evidence: Evidence): Promise<void> 
       "paragraph",
       "the text is prefilled from the selection",
     );
+    // Captured with the link panel open, before the Escape that closes it.
+    await captureAfter(evidence, page, "palette-slash/r05-link-panel",
+      "Edit mode on; Cmd/Ctrl+K opened the link panel with the selected word as its text and the focus in the "
+      + "empty URL field. Escape closes it unchanged and a second round inserts [paragraph](https://example.org).");
 
     // Escape returns to the text box without changing anything, and the editor stays open.
     await press(page, "Escape");
@@ -1262,9 +1276,6 @@ async function scenarioLinkPanel(page: Page, evidence: Evidence): Promise<void> 
     assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
     await press(page, MOD + "+z");
     await expectValue("one undo to remove the link", original);
-    await captureAfter(evidence, page, "t22-link-panel",
-      "Edit mode on; Cmd/Ctrl+K opened the link panel with the selected word as its text, Escape closed it "
-      + "unchanged, and a second round with a typed URL inserted [paragraph](https://example.org), undone by one Cmd/Ctrl+Z.");
     await press(page, "Escape");
     await waitForNoBlockEditor(page, "the block editor to close after Escape");
   });
@@ -1395,7 +1406,7 @@ async function scenarioFigureEditor(page: Page, evidence: Evidence): Promise<voi
       const expected = FIGURE_DOCUMENT.replace(":width: 60%", ":width: 40%");
       await waitFor("the saved figure in the source buffer", () => bufferText(document) === expected);
       await waitForNoBlockEditor(page, "the block editor to close after Cmd/Ctrl+Enter");
-      await captureAfter(evidence, page, "t32-figure-editor",
+      await captureAfter(evidence, page, "palette-slash/r07-figure-editor-form",
         "Edit mode on; hovering the figure showed Edit figure, the form changed the width and the caption "
         + "in one undoable edit, and a second round saved :width: 40% with every other line untouched.");
     } finally {
@@ -1472,7 +1483,7 @@ async function scenarioAlertDropdown(page: Page, evidence: Evidence): Promise<vo
     await waitFor("Escape to close the list", async () => await count(".sphinx-preview-edit-palette-menu") === 0);
     await expectValue("NOTE to remain after Escape", "> [!NOTE]\n> " + original);
     assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
-    await captureAfter(evidence, page, "t25-alert-dropdown",
+    await captureAfter(evidence, page, "palette-slash/r06-alert-dropdown",
       "Edit mode on; the Alert button wrote > [!NOTE], its type list chose Warning, two Cmd/Ctrl+Z "
       + "removed the alert again, and Escape on a second list kept NOTE with the focus in the text box.");
     await press(page, "Escape");
@@ -1511,7 +1522,7 @@ async function scenarioEnterContinuesList(page: Page, evidence: Evidence): Promi
       throw new Error(String(error) + " Buffer: " + JSON.stringify(bufferText(document)));
     }
     await waitForRender(document);
-    await captureAfter(evidence, page, "17-enter-continues-list",
+    await captureAfter(evidence, page, "block-editing/r09-enter-continues-list",
       "Edit mode on; Enter after `Refrigerated goods` continued the list, and `Frozen goods` is a sibling "
       + "at the same indentation while `Deduplication` kept its place.");
   });
@@ -1639,7 +1650,7 @@ async function scenarioSaveKeepsBlockInPlace(page: Page, evidence: Evidence): Pr
     });
   };
 
-  await listCase("realinput-t32-list", "32-save-keeps-list-in-place");
+  await listCase("realinput-t32-list", "block-editing/r19-save-keeps-list-in-place");
 
   await withDocument("realinput-t32-table", TABLE_PINNED, async (document) => {
     await openSidePreview(document);
@@ -1673,7 +1684,7 @@ async function scenarioSaveKeepsBlockInPlace(page: Page, evidence: Evidence): Pr
     assert.ok(t1 >= 0 && t1 <= height, "the table is visible after Save (top " + t1 + ")");
     assert.ok(Math.abs(t1 - tCommit) <= 3,
       "the table moved from " + tCommit + " (at Enter) to " + t1 + " after Save");
-    await captureAfter(evidence, page, "33-save-keeps-table-in-place",
+    await captureAfter(evidence, page, "table-editing/r07-save-keeps-table-in-place",
       "Edit mode on; the cell `Ana` gained `-Lee` and Enter committed it in a visible table. "
       + "Table top " + t0 + " before the click, " + tCommit + " at Enter and " + t1 + " after Save.");
   });
@@ -1717,7 +1728,7 @@ async function scenarioTabIndents(page: Page, evidence: Evidence): Promise<void>
     const restored = await readFocus();
     assert.equal(restored.tag, "TEXTAREA", "Shift+Tab keeps the focus in the editor");
     assert.equal(restored.value, "    - Refrigerated goods", "Shift+Tab restores the line");
-    await captureAfter(evidence, page, "18-tab-indents",
+    await captureAfter(evidence, page, "block-editing/r10-tab-indents",
       "Edit mode on; Tab indented `Refrigerated goods` by 2 spaces and Shift+Tab restored it, "
       + "with the focus staying in the editor.");
     await press(page, "Escape");
@@ -1754,7 +1765,7 @@ async function scenarioPreviewKeepsMarkdown(page: Page, evidence: Evidence): Pro
       await withCurrentFrame(page, async (frame) => {
         await frame.getByText("First heading T13", { exact: false }).first().waitFor({ timeout: 5000 });
       });
-      await captureAfter(evidence, page, "19-preview-keeps-markdown",
+      await captureAfter(evidence, page, "lifecycle-sync/r02-preview-keeps-markdown",
         "A Python file is active in column One; the side preview still shows `First heading T13`.");
       await vscode.window.showTextDocument(second, vscode.ViewColumn.One);
       await waitForRender(second);
@@ -1798,7 +1809,7 @@ async function scenarioCaretAtClick(page: Page, evidence: Evidence): Promise<voi
     const firstLine = lines(bufferText(source)).find((line) => line.includes("X")) ?? "";
     assert.match(firstLine, /^Alpha (?:Xbravo|bXravo|brXavo|braXvo|bravXo|bravoX) charlie$/u, "X lands in or next to bravo: " + firstLine);
     await waitForRender(source);
-    await captureAfter(evidence, page, "20-caret-at-click",
+    await captureAfter(evidence, page, "block-editing/r11-caret-at-click",
       "Edit mode on; clicking the word `bravo` placed the caret there, and the typed `X` landed in line one.");
   });
 }
@@ -1818,14 +1829,14 @@ async function scenarioEditAffordances(page: Page, evidence: Evidence): Promise<
       return current !== undefined
         && await current.locator("ul[data-sphinx-preview-edit-hover='true']").count() === 1;
     });
-    await captureAfter(evidence, page, "21-edit-hover",
+    await captureAfter(evidence, page, "block-editing/r12-edit-hover",
       "Edit mode on; hovering the nested item outlines the list a click would edit.");
 
     await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Alpha paragraph." }).click());
     await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
     await typeText(page, " R");
     await new Promise((resolve) => setTimeout(resolve, 600));
-    await captureAfter(evidence, page, "22-editor-frame-and-buttons",
+    await captureAfter(evidence, page, "block-editing/r13-editor-frame-and-buttons",
       "A paragraph editor is open and ` R` was typed: framed editor, monospace text, status line with Done and Cancel on one row.");
     await withCurrentFrame(page, (frame) => frame.locator(CANCEL).click());
     await waitForNoBlockEditor(page, "the block editor to close after Cancel");
@@ -1880,7 +1891,7 @@ async function scenarioEditModeNoReflow(page: Page, evidence: Evidence): Promise
     await setEditMode(page, true);
     await new Promise((resolve) => setTimeout(resolve, 300));
     const after = await measure();
-    await captureAfter(evidence, page, "23-edit-mode-no-reflow",
+    await captureAfter(evidence, page, "block-editing/r14-edit-mode-no-reflow",
       "Edit mode on; hard-wrapped paragraphs (about 40 characters per source line) keep their reading flow.");
     assert.ok(Math.abs(after.height - before.height) <= 2,
       "scrollHeight changed from " + before.height + " to " + after.height);
@@ -1933,7 +1944,7 @@ async function scenarioTableTab(page: Page, evidence: Evidence): Promise<void> {
       return current !== undefined && await current.locator("[data-sphinx-preview-table-cell-editor]").count() === 0;
     });
     assert.match(bufferText(document), /^\|\s*betaX\s*\|\s*two\s*\|$/mu);
-    await captureAfter(evidence, page, "24-table-tab",
+    await captureAfter(evidence, page, "table-editing/r05-tab-adds-row",
       "Edit mode on; Tab moved from `one` to `beta` (typed `X`) and `two`, on to a new third row where `gamma` and `three` "
       + "were typed; Enter saved. The buffer holds the new row.");
 
@@ -2032,7 +2043,7 @@ async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<voi
       const position = await frame.locator("[data-sphinx-table-menu]").evaluate((element) => getComputedStyle(element).position);
       assert.equal(position, "static");
     });
-    await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "25-table-toolbar",
+    await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "table-editing/r06-cell-bar-in-flow",
       "Edit mode on; the cell `one` is open. The toolbar sits in the flow above the table with text labels, "
       + "and the selected cell is outlined.",
       { checks: { required: ["overlay-covers-text", "overlay-clipped"] } }));
@@ -2083,7 +2094,7 @@ async function scenarioCommentBlockEdit(page: Page, evidence: Evidence): Promise
     await withCurrentFrame(page, async (frame) => {
       assert.equal(await frame.locator("[data-sphinx-preview-block-editor] textarea").inputValue(), "<!--\nkeep this\n-->");
     });
-    await captureAfter(evidence, page, "comment-block-edit",
+    await captureAfter(evidence, page, "review-annotations/r01-comment-block-opens-editor",
       "Edit mode on; a click on the comment block (not its chip) opened the block editor on the three raw comment lines.");
   });
 }
@@ -2115,7 +2126,7 @@ async function scenarioBooleanOneClick(page: Page, evidence: Evidence): Promise<
       return current !== undefined
         && await current.locator("[data-okf-frontmatter-editor]").count() === 0;
     });
-    await captureAfter(evidence, page, "26-boolean-one-click",
+    await captureAfter(evidence, page, "frontmatter-editing/r06-boolean-one-click",
       "Edit mode on; one click on the annotation_exemption checkbox saved `true`. No editor stays open.");
   }, BOOLEAN_SCHEMA);
 }
@@ -2172,7 +2183,7 @@ async function scenarioListEditorClickAndKeys(page: Page, evidence: Evidence): P
       await withCurrentFrame(page, (frame) => frame.locator(linkSelector).first().click());
       await waitForEditor(page, "[data-okf-frontmatter-editor] .okf-list-editor");
       assert.equal(getActivePreviewForTests()?.documentUri, documentUri, "a plain click must not navigate");
-      await captureAfter(evidence, page, "27-list-click-edits",
+      await captureAfter(evidence, page, "frontmatter-editing/r07-list-click-edits",
         "Edit mode on; a plain click on the StRS-A link opened the list editor and the preview kept the document.");
 
       await withCurrentFrame(page, (frame) =>
@@ -2195,7 +2206,7 @@ async function scenarioListEditorClickAndKeys(page: Page, evidence: Evidence): P
         return current !== undefined
           && await current.locator("[data-okf-frontmatter-editor]").count() === 0;
       });
-      await captureAfter(evidence, page, "28-list-enter-adds",
+      await captureAfter(evidence, page, "frontmatter-editing/r08-list-enter-adds",
         "Enter added an item, `StRS-B` was typed, Enter again and Enter on the empty item saved the list.");
 
       // The re-render shows the links unresolved first; the host resolves them asynchronously.
@@ -2257,7 +2268,7 @@ async function scenarioListLinkCompletion(page: Page, evidence: Evidence): Promi
       await typeText(page, "X");
       await waitFor("the unknown-target warning", async () =>
         await withCurrentFrame(page, (frame) => frame.locator(warning).count()) === 1);
-      await captureAfter(evidence, page, "29-list-link-warning",
+      await captureAfter(evidence, page, "frontmatter-editing/r09-list-link-warning",
         "`StRS-BX` typed in a new list item: the datalist offered the known stems and the warning is shown.");
       await press(page, "Enter");
       await press(page, "Enter");
@@ -2336,7 +2347,7 @@ async function scenarioFrontmatterActionsLayout(page: Page, evidence: Evidence):
           (element as HTMLTextAreaElement).rows);
         assert.equal(rows, 1);
       });
-      await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "30-frontmatter-actions-value",
+      await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "frontmatter-editing/r10-row-actions-layout",
         "Window 1100 px wide, preview frame " + Math.round(frameWidth) + " px. The `scope` value editor is open; "
         + "Add field / Remove field sit under the one-row textarea inside the row and cover no other row.",
         { checks: { required } }));
@@ -2347,7 +2358,7 @@ async function scenarioFrontmatterActionsLayout(page: Page, evidence: Evidence):
         return current !== undefined
           && await current.locator(".sphinx-preview-frontmatter-picker:visible").count() === 1;
       });
-      await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "31-frontmatter-actions-picker",
+      await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "frontmatter-editing/r11-add-field-picker-layout",
         "Same row after clicking Add field: the picker and its Add button wrap inside the row, not over other rows.",
         { checks: { required } }));
     }, SCOPE_SCHEMA);
@@ -2402,7 +2413,7 @@ async function scenarioRequiredAndPositionedAdd(page: Page, evidence: Evidence):
       return current !== undefined
         && await current.locator(".sphinx-preview-frontmatter-picker:visible").count() === 1;
     });
-    await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "32-required-remove-disabled",
+    await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "frontmatter-editing/r12-required-remove-disabled",
       "The `scope` value editor is open: Remove field is disabled (required by the schema) and the add picker is open."));
     await withCurrentFrame(page, (frame) =>
       frame.locator("select[aria-label='Frontmatter field to add']").selectOption("depends_on"));
@@ -2469,7 +2480,7 @@ async function scenarioCustomKeyAndOpenNewField(page: Page, evidence: Evidence):
         && await current.locator("tr[data-okf-field=\"reviewer\"]").count() === 1
         && await current.locator("[data-okf-frontmatter-editor]").count() === 0;
     });
-    await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "33-custom-key-added",
+    await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "frontmatter-editing/r13-custom-key-added",
       "A custom `reviewer` key was added after `owner` (the last table row), typed as `Ana` and saved with Enter as `reviewer: Ana`."));
 
     await withCurrentFrame(page, (frame) =>
@@ -2547,7 +2558,7 @@ async function scenarioAddFieldPositionAndEscape(page: Page, evidence: Evidence)
         && await current.locator("[data-okf-frontmatter-editor]").count() === 0;
     });
     assert.equal(bufferText(document), withDependsOn);
-    await captureAfter(evidence, page, "t41-add-field-position",
+    await captureAfter(evidence, page, "frontmatter-editing/r15-add-field-position",
       "`depends_on` was added from the `title` row; the source line sits after `owner` and its row is shown right after `owner`.");
 
     // 2. A custom key typed and saved with Enter, written as a plain scalar.
@@ -2575,7 +2586,7 @@ async function scenarioAddFieldPositionAndEscape(page: Page, evidence: Evidence)
       return current !== undefined
         && await current.locator("[data-okf-frontmatter-editor]").count() === 0;
     });
-    await captureAfter(evidence, page, "t41-custom-key-plain",
+    await captureAfter(evidence, page, "frontmatter-editing/r16-custom-key-plain",
       "A custom `approver` key was added from the `title` row, typed as `Ann` and saved with Enter: the line is `approver: Ann`.");
 
     // 3. Escape on the field picker cancels the open edit, with a typed change that is not saved.
@@ -2589,6 +2600,10 @@ async function scenarioAddFieldPositionAndEscape(page: Page, evidence: Evidence)
       return current !== undefined
         && await current.locator(".sphinx-preview-frontmatter-picker:visible").count() === 1;
     });
+    // Captured with the picker open, before the Escape that cancels the edit.
+    await captureAfter(evidence, page, "frontmatter-editing/r17-escape-on-picker",
+      "The status editor holds the typed `x` and the add-field picker is open; the next Escape closes both and "
+      + "writes nothing.");
     await press(page, "Escape");
     await waitFor("the editor and the picker to close", async () => {
       const current = await findCurrentFrame(page);
@@ -2598,8 +2613,6 @@ async function scenarioAddFieldPositionAndEscape(page: Page, evidence: Evidence)
     });
     await new Promise<void>((resolve) => setTimeout(resolve, 500));
     assert.equal(bufferText(document), withApprover, "Escape on the picker writes nothing");
-    await captureAfter(evidence, page, "t41-escape-on-picker",
-      "Escape with focus on the field picker closed the status editor and the picker; the typed `x` was not written.");
   }, schema);
 }
 
@@ -2661,7 +2674,7 @@ async function scenarioReadableLinkDiagnostics(page: Page, evidence: Evidence): 
       return current !== undefined && (await current.locator(tooltip).allInnerTexts())
         .some((value) => value.includes("does not resolve"));
     });
-    await captureAfter(evidence, page, "34-link-diagnostic-tooltip",
+    await captureAfter(evidence, page, "frontmatter-editing/r14-link-diagnostic-tooltip",
       "The invalid `missing.py` value reads `File not found` and its explanation shows on keyboard focus.");
     await press(page, "Escape");
     await withCurrentFrame(page, (frame) => frame.evaluate(() => globalThis.window.scrollTo(0, 1500)));
@@ -2782,7 +2795,7 @@ async function scenarioPendingOverlayWithoutReload(page: Page, evidence: Evidenc
       const toolbarBottom = await slowFrame.locator("[data-sphinx-preview-toolbar]")
         .evaluate((element) => element.getBoundingClientRect().bottom);
       assert.ok(overlayTop >= toolbarBottom - 1, "the overlay sits below the toolbar");
-      await evidence.capture(page, slowFrame, "43-pending-overlay",
+      await evidence.capture(page, slowFrame, "lifecycle-sync/r09-pending-overlay",
         "A slow render: the previous page stays still and a floating overlay says the preview is pending.");
     } finally {
       resetRenderHooksForTests();
@@ -2892,7 +2905,7 @@ async function scenarioPropertiesTableWithoutReload(page: Page, evidence: Eviden
       assert.equal(await settled.evaluate(() =>
         (globalThis as unknown as { __t30Marker?: boolean }).__t30Marker), true, "the same page, not a reload");
       assert.equal(settled.isDetached(), false);
-      await evidence.capture(page, settled, "30-properties-in-place",
+      await evidence.capture(page, settled, "lifecycle-sync/r05-linked-file-patched-in-place",
         "The linked file changed on disk: the excerpt updated in the open page without a reload.");
     } finally {
       await closeAllEditors();
@@ -2992,7 +3005,7 @@ async function scenarioContentPatchedInPlace(page: Page, evidence: Evidence): Pr
     await waitFor("the Mermaid diagram drawn again in the same frame", async () =>
       await frame.locator(".myst-mermaid-diagram img.myst-mermaid-image").count() === 1);
     assert.equal(await frame.locator(".myst-mermaid-error").count(), 0, "no diagram error");
-    await evidence.capture(page, frame, "34-content-patched",
+    await evidence.capture(page, frame, "lifecycle-sync/r06-content-patched-in-place",
       "Twenty characters typed in the source: the open page shows them and the diagram, without a reload.");
 
     // A slow render: the pending overlay appears over the page, the result lands as a patch, and
@@ -3165,7 +3178,7 @@ async function scenarioInsertBlocksFromPreview(page: Page, evidence: Evidence): 
     await setEditMode(page, true);
     await withCurrentFrame(page, (frame) => frame.getByRole("button", { name: "Start writing" }).click());
     await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
-    await captureAfter(evidence, page, "24-start-writing-open",
+    await captureAfter(evidence, page, "block-editing/r15-start-writing-open",
       "Empty document, edit mode on; Start writing opened an empty editor with its placeholder.");
     await typeText(page, "# Incident review checklist");
     await press(page, "Enter");
@@ -3205,7 +3218,7 @@ async function scenarioInsertBlocksFromPreview(page: Page, evidence: Evidence): 
       const current = await findCurrentFrame(page);
       return current !== undefined && await current.locator("li", { hasText: "check logs" }).count() === 1;
     });
-    await captureAfter(evidence, page, "25-block-inserted",
+    await captureAfter(evidence, page, "block-editing/r16-insert-point-adds-block",
       "Edit mode on; the list was inserted between the heading and the paragraph with the + button.");
 
     // The T16 guarantee still holds with insertion points in the content.
@@ -3245,7 +3258,7 @@ async function scenarioInsertAfterFinalFigure(page: Page, evidence: Evidence): P
         await frame.locator("figure[data-sphinx-source-line] + .sphinx-preview-insert-point button:not([data-sphinx-move])").click();
       });
       await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
-      await captureAfter(evidence, page, "25b-insert-after-figure-" + name,
+      await captureAfter(evidence, page, realInputId("25b-insert-after-figure-" + name),
         "Edit mode on; the + after the final figure opened an empty editor below it.");
       await typeText(page, "After the figure.");
       await withCurrentFrame(page, (frame) => frame.locator(DONE).click());
@@ -3300,7 +3313,7 @@ async function scenarioImageEditing(page: Page, evidence: Evidence): Promise<voi
     await press(page, "ArrowUp");
     await waitFor("the raw image editor after ArrowUp", async () =>
       (await editorValue())?.trim() === images[2][1]);
-    await captureAfter(evidence, page, "07-image-editing",
+    await captureAfter(evidence, page, "block-editing/r04-arrow-up-into-image",
       "Edit mode on; ArrowUp from the last paragraph reached the raw <img> block editor.");
   });
 }
@@ -3354,7 +3367,7 @@ async function scenarioStatusPageTwoLines(page: Page, evidence: Evidence): Promi
     assert.ok(!text.includes("Sphinx"), "no Sphinx in the status page: " + text);
     assert.ok(/Preview source missing\s*\n+\s*\S/u.test(text),
       "title and message on two lines: " + JSON.stringify(text));
-    await evidence.capture(page, shown, "35-status-two-lines",
+    await evidence.capture(page, shown, "lifecycle-sync/r07-status-page-missing-source",
       "Missing-source page: the title and the message sit on separate lines.",
       { checks: { required: ["status-two-lines"] } });
     await vscode.workspace.fs.writeFile(document.uri, Buffer.from(SMOKE, "utf8"));
@@ -3450,7 +3463,7 @@ async function scenarioFocusChangeKeepsPreviewStill(page: Page, evidence: Eviden
       "clicking a table cell moved it on screen from " + top0 + " to " + top1);
     assert.ok(top2 !== undefined && Math.abs(top2 - top0) <= 4,
       "opening the cell editor moved the cell on screen from " + top0 + " to " + top2);
-    await captureAfter(evidence, page, "26-focus-change-still",
+    await captureAfter(evidence, page, "lifecycle-sync/r03-focus-change-keeps-scroll",
       "The preview was scrolled, then the editor was clicked and typed in, then a table cell was "
       + "clicked; the page scroll and the cell's position on screen stayed within 4 px.");
   });
@@ -3519,7 +3532,7 @@ async function scenarioHiddenPreviewCatchesUp(page: Page, evidence: Evidence): P
     });
     console.log("RI-T31b: editor top line " + (editorTop() + 1) + ", anchor distance " + distance);
     assert.ok(editorTop() >= before + 150, "the editor stayed scrolled");
-    await captureAfter(evidence, page, "27-hidden-preview-catches-up",
+    await captureAfter(evidence, page, "lifecycle-sync/r04-hidden-preview-catches-up",
       "The preview was hidden behind another tab, the editor scrolled about 200 lines, and the "
       + "revealed preview shows the editor's top line.");
   });
@@ -3534,7 +3547,7 @@ async function scenarioTitleBarButton(page: Page, evidence: Evidence): Promise<v
     await button.click();
     await waitForRender(document);
     await waitFor("the side preview panel", () => getActivePreviewPanelForTests() !== undefined);
-    await captureAfter(evidence, page, "36-title-bar-button",
+    await captureAfter(evidence, page, "toolbar-navigation/r01-title-bar-button",
       "A Markdown file is active in the text editor; a click on the book icon in the editor title "
       + "bar opened the Studio preview beside it.");
   });
@@ -3593,7 +3606,7 @@ async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<voi
     await withCurrentFrame(page, async (frame) => {
       assert.equal(await anchorButton(frame).getAttribute("title"), "No text editor shows this file");
     });
-    await captureAfter(evidence, page, "38-anchor-disabled",
+    await captureAfter(evidence, page, "toolbar-navigation/r02-anchor-disabled-open-with",
       "The Open With editor is alone: the anchor button is disabled with its tooltip.");
 
     await vscode.window.showTextDocument(document, vscode.ViewColumn.Beside);
@@ -3601,7 +3614,7 @@ async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<voi
       const current = await findCurrentFrame(page);
       return current !== undefined && await anchorButton(current).isEnabled();
     });
-    await captureAfter(evidence, page, "38-anchor-enabled",
+    await captureAfter(evidence, page, "toolbar-navigation/r03-anchor-enabled-with-editor",
       "A text editor now shows the file beside the Open With editor: the anchor button is enabled.");
     await closeAllEditors();
 
@@ -3675,7 +3688,7 @@ async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<voi
               return actual.every((color, index) => color === expected[index]);
             }, { mode, palettes });
           });
-          await captureAfter(evidence, page, `38-toolbar-${host.toLowerCase()}-${mode}`,
+          await captureAfter(evidence, page, realInputId(`38-toolbar-${host.toLowerCase()}-${mode}`),
             `${mode} preview mode updates the document and floating toolbar on the ${host} VS Code theme.`);
         }
       }
@@ -3721,7 +3734,7 @@ async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<voi
       }
     });
     await page.mouse.move(10, 10);
-    await captureAfter(evidence, page, "38-edit-mode-remembered",
+    await captureAfter(evidence, page, "lifecycle-sync/r08-edit-mode-remembered",
       "A white-background preview restores edit mode and renders a nested MyST admonition, "
       + "a Mermaid dispatch flowchart, and a local SVG fleet operating loop.");
   });
@@ -3832,7 +3845,7 @@ async function scenarioPreviewGroupLock(page: Page, evidence: Evidence): Promise
       assert.ok(previewIsActiveTab(), "the preview is still the active tab of its group");
       await waitFor("the preview to follow the opened Markdown file",
         () => getActivePreviewForTests()?.documentUri === other.uri.toString());
-      await captureAfter(evidence, page, "39-quick-open-beside-preview",
+      await captureAfter(evidence, page, "toolbar-navigation/r04-quick-open-beside-preview",
         "Quick Open from the focused preview opened the file in the source group; the preview stayed visible.");
 
       // Case B: the Explorer entry runs the command with a URI while the preview has focus.
@@ -4281,6 +4294,7 @@ export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   const evidence = createEvidence("real-input");
   let passed = false;
+  let complete = false;
   workbenchPage = page;
   try {
     await page.setViewportSize({ width: 1400, height: 900 });
@@ -4288,7 +4302,7 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "toolbar") {
       await scenarioToolbarState(page, evidence);
-      passed = true;
+      passed = true; // a single scenario: the registry completeness check is skipped
       return;
     }
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "link-prefill") {
@@ -4359,8 +4373,9 @@ export async function run(): Promise<void> {
     await scenarioContentPatchedInPlace(page, evidence);
     await scenarioLargeDocumentPatched(page, evidence);
     passed = true;
+    complete = true;
   } finally {
-    evidence.finish(passed);
+    evidence.finish(passed, complete);
     await browser.close();
   }
 }

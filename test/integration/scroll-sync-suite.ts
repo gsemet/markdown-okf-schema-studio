@@ -6,7 +6,8 @@ import { chromium, type Frame, type Locator, type Page } from "playwright-core";
 import * as vscode from "vscode";
 
 import { disposeActivePreviewForTests, getActivePreviewForTests, getActivePreviewPanelForTests } from "./extensionApi";
-import { E2E_SCREENSHOT_ROOT } from "../reportPaths";
+import { captureByLegacy, captureFile } from "../shared/captureRegistry";
+import { RealWindowEvidence } from "./evidence";
 
 async function waitFor(description: string, predicate: () => boolean | Promise<boolean>): Promise<void> {
   const deadline = Date.now() + 15_000;
@@ -280,8 +281,9 @@ export async function run(): Promise<void> {
     "",
   ].join("\n"));
   fs.writeFileSync(filePath, `# Long scroll regression\n\n${sections.join("\n")}\nFinal sentinel.\n`);
-  const artifacts = fs.mkdtempSync(path.join(E2E_SCREENSHOT_ROOT, "scroll-e2e-"));
-  fs.mkdirSync(artifacts, { recursive: true });
+  // The suite writes its own INDEX.md (writeReport); the shared writer handles the captures.
+  const evidence = new RealWindowEvidence("scroll", { indexTitle: false });
+  const artifacts = evidence.directory;
   let scenario = "setup";
   const checkpoints: Array<Record<string, unknown>> = [];
   const passedScenarios: string[] = [];
@@ -292,7 +294,7 @@ export async function run(): Promise<void> {
   try { revision = execFileSync("git", ["rev-parse", "HEAD"], { cwd: __dirname, encoding: "utf8" }).trim(); }
   catch {}
   const writeReport = (): void => {
-    fs.writeFileSync(path.join(artifacts, "manifest.json"), JSON.stringify({
+    evidence.writeManifest({
       outcome, revision, command: process.env.STUDIO_AUDIT_COMMAND ?? "npm run test:scroll",
       runId: process.env.STUDIO_E2E_RUN_ID ?? null,
       campaignStartedAt: process.env.STUDIO_E2E_STARTED_AT ?? null,
@@ -301,7 +303,7 @@ export async function run(): Promise<void> {
       completedAt: new Date().toISOString(),
       scenario, passedScenarios,
       error: suiteError, diagnosticError, checkpoints,
-    }, null, 2));
+    });
     fs.writeFileSync(path.join(artifacts, "INDEX.md"), [
       "# Scroll E2E review", "", `Suite: ${outcome}. Revision: ${revision}.`,
       `Command: ${process.env.STUDIO_AUDIT_COMMAND ?? "npm run test:scroll"}`, "",
@@ -369,17 +371,19 @@ export async function run(): Promise<void> {
         "source checkpoint visibly contains the final sentinel line");
       }
     }
-    const image = `${String(checkpoints.length + 1).padStart(2, "0")}-${name}.png`;
+    const captureId = captureByLegacy("scroll", name)?.id;
+    assert.ok(captureId, `no registered scroll capture was named "${name}"`);
+    const image = captureFile(captureId, "png");
     const note = { summary: expected,
-      info: { id: name, suite: scenario, runId: process.env.STUDIO_E2E_RUN_ID ?? null,
-        viewport: page.viewportSize(), capturedAt: new Date().toISOString() },
+      info: { scenario, viewport: page.viewportSize() },
       name, image, scenario, expected, actions, sourceScroll, ...state, editorValue, editorInViewport,
       mode: "block editing", sync: state.anchored === "true" ? "anchored" : "independent",
       sourceFixture: visibleSource[0]?.document.uri.fsPath ?? null,
       fixture: scenario === "keyboard-navigation" ? "keyboard-navigation.md" : "long-scroll.md",
       setup: "1440x900 viewport; sidebar/chat closed; solo single group or paired source left / preview right",
       limitations: "Screenshot proves final visible state only; ordered actions are assertion-backed." };
-    const screenshot = await page.screenshot({ path: path.join(artifacts, image) });
+    const screenshot = await evidence.shoot(page, frame, captureId);
+    assert.ok(screenshot, "scroll checkpoints are never assertion-only");
     if (state.previewScroll > 3) {
       const pane = await (await frame.frameElement()).boundingBox();
       assert.ok(pane);
@@ -416,9 +420,8 @@ export async function run(): Promise<void> {
       }, { encoded: screenshot.toString("base64"), bounds });
       assert.ok(colors > 8, `captured bottom sentinel must contain rendered text, observed ${colors} colors`);
     }
-    fs.writeFileSync(path.join(artifacts, image.replace(/\.png$/u, ".json")), JSON.stringify(note, null, 2));
-    fs.writeFileSync(path.join(artifacts, image.replace(/\.png$/u, ".md")), [
-      `# ${name}`, "", `![Checkpoint](${image})`, "", `Expected: ${expected}`, "",
+    evidence.record(captureId, { note: `Expected: ${expected}`, json: note, markdown: [
+      `![Checkpoint](${path.basename(image)})`, "",
       `Setup: ${note.setup}`, `Fixture: ${note.fixture}`, `Scenario: ${scenario}`, "",
       `Actions: ${actions}`, "", `Mode: ${note.mode}; sync: ${note.sync}.`,
       `Preview scroll: ${state.previewScroll}/${state.previewMax}; source first line: ${sourceScroll}.`,
@@ -427,7 +430,7 @@ export async function run(): Promise<void> {
       "Visual checklist:", "- Useful pane widths and expected content visible.",
       "- Toolbar selections match mode and sync.", "- Sticky headings sit below the toolbar without overlap.",
       "- Text is unobscured; offscreen editors are intentional at bottom.", "", note.limitations,
-    ].join("\n"));
+    ].join("\n") });
     checkpoints.push(note);
     writeReport();
   };
@@ -677,6 +680,7 @@ export async function run(): Promise<void> {
     scenario = "block-move-keeps-position";
     await runBlockMove(page, directory);
     passedScenarios.push(scenario);
+    evidence.assertComplete();
     outcome = "pass";
   } catch (error) {
     outcome = "fail";
