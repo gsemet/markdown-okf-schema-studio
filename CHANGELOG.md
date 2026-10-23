@@ -21,6 +21,9 @@
   job, started with `gh workflow run ci.yml --ref <branch> -f heavy=true`. New real-window tests
   cover incoming-change bars, review threads (create, reply, resolve), image paste and the
   read-only preview in Restricted Mode.
+- For contributors: the linked-file refresh test now waits until the preview reports that the
+  linked file is watched before saving it, and a timeout prints what each watcher of the file
+  reported (armed or why not, events seen). `just ci-stress` repeats it as `linked-target-save`.
 - For contributors: the real VS Code window screenshots now come from one registry
   (`test/shared/captureRegistry.ts`) and one shared writer, so every capture has a stable
   `<group>/rNN-<slug>` id, a folder per feature group inside its run folder, a "locks" sentence and

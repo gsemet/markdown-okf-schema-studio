@@ -20,6 +20,7 @@ import {
 import { captureByLegacy } from "../shared/captureRegistry";
 import { lineDelta } from "../shared/lineDelta";
 import { hostStressPlan, STRESS_SCENARIOS_BY_HOST } from "../shared/stressPlan";
+import { scenarioLinkedTargetSave } from "./linkedTargetSave";
 import {
   bufferText,
   caretToEnd,
@@ -4420,6 +4421,8 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   "incoming-changes": scenarioIncomingChanges,
   "review-threads": scenarioReviewThreads,
   "image-paste": scenarioImagePaste,
+  // CR 044: the watcher event of a linked target's save (CI run 39848594435).
+  "linked-target-save": scenarioLinkedTargetSave,
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */
