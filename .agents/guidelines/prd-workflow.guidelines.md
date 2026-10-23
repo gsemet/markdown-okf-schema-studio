@@ -154,6 +154,19 @@ main session ── user interface: grill, decisions, merges; supervises the orc
    The same rule holds for every status report to the user: a PR, CR, run or file is named with
    its link.
 3. Start the orchestrator in the background (Sonnet), pointing it to this guideline and the table.
+4. On macOS, when any CR may run app-window tests locally, the orchestrator keeps the machine
+   awake for the whole run, so the screen does not lock while it is unattended:
+
+   ```bash
+   pgrep -x caffeinate >/dev/null || nohup caffeinate -dimsu -t 21600 >/dev/null 2>&1 &
+   ```
+
+   `-d` keeps the display on (an idle display sleep is what locks the screen), `-i`/`-s` keep the
+   system awake, `-m` the disk, `-u` declares user activity; `-t 21600` stops it after 6 hours,
+   and the orchestrator restarts it at a tick if it has ended. It cannot unlock a screen that is
+   already locked: app-window tests then fail fast, the orchestrator reports it in the status file,
+   and CI's on-demand real-window job is the proof until the user unlocks. When the run ends, the
+   orchestrator stops it (`pkill -x caffeinate`) only if it started it.
 
 ### Responsiveness
 
@@ -256,7 +269,8 @@ even in git.
 ### Constraints
 
 - One driver per worktree; PRD folders stay in the main checkout (absolute paths).
-- Two CRs never run app-window tests locally at the same time; CI runs the full gate.
+- Two CRs never run app-window tests locally at the same time; CI runs the full gate. On macOS
+  the machine stays awake during the run (setup step 4).
 - No agent starts a new backlog item or merges a PR: the user decides.
 - Everything written to the repository or GitHub is in English (commits, PR titles and bodies,
   code, docs), whatever language the user speaks. A decision an agent took without the user is
