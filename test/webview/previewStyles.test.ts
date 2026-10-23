@@ -978,3 +978,78 @@ test("an inline thread is a green chip with a bubble, a green titled box, and go
   assert.match(css, /html\[data-okf-show-comments="false"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="thread"\] \{\s*display: none;/u);
   assert.doesNotMatch(css, /style=/u);
 });
+
+/** The rules of the stylesheet as [selector, body] pairs, at-rule blocks flattened (CR 046). */
+function cssRules(css: string): Array<[string, string]> {
+  const rules: Array<[string, string]> = [];
+  const pattern = /([^{}]+)\{([^{}]*)\}/gu;
+  for (const match of css.replace(/\/\*[\s\S]*?\*\//gu, "").matchAll(pattern)) {
+    rules.push([match[1]!.replace(/^[\s\S]*@[^{]*$/u, "").trim().replace(/\s+/gu, " "), match[2]!]);
+  }
+  return rules;
+}
+
+/** The body of the `@media (prefers-reduced-motion: reduce)` block of the theme stylesheet. */
+function reducedMotionBlock(css: string): string {
+  const start = css.indexOf("@media (prefers-reduced-motion: reduce)");
+  assert.ok(start >= 0, "the theme stylesheet has a reduced-motion block");
+  let depth = 0;
+  for (let index = css.indexOf("{", start); index < css.length; index += 1) {
+    if (css[index] === "{") depth += 1;
+    if (css[index] === "}") depth -= 1;
+    if (depth === 0) return css.slice(css.indexOf("{", start) + 1, index);
+  }
+  return "";
+}
+
+test("CR 046: prefers-reduced-motion: reduce turns off every animation and transition of the motion layer", () => {
+  // The page-wide rule ends every transition at once (a tiny duration would still start one).
+  assert.match(reducedMotionBlock(PREVIEW_ACCESSIBILITY_CSS), /transition-duration: 0s !important;/u);
+  const reduced = reducedMotionBlock(PREVIEW_THEME_CSS);
+  assert.match(reduced, /animation: none !important;/u);
+  assert.match(reduced, /transition: none !important;/u);
+  const reducedSelectors = reduced.slice(0, reduced.indexOf("{")).replace(/\s+/gu, " ");
+  const marks = [
+    'html[data-sphinx-preview-motion="on"]',
+    'html[data-sphinx-preview-theme-switching="true"] body *',
+    '[data-sphinx-preview-edit-closed="true"]',
+    '#sphinx-myst-preview-content [data-sphinx-preview-updated="true"]',
+  ];
+  for (const mark of marks) assert.ok(reducedSelectors.includes(mark), `reduced motion covers ${mark}`);
+  // Every part that moves under the motion marks is listed in the reduced-motion rule.
+  for (const part of [".sphinx-preview-block-editor", ".sphinx-preview-table-cell-editor", "[data-okf-frontmatter-editor]",
+    ".sphinx-preview-edit-palette", ".sphinx-preview-table-menu", ".sphinx-preview-frontmatter-menu",
+    ".sphinx-preview-edit-palette-menu", ".sphinx-preview-slash-menu", ".sphinx-preview-frontmatter-picker"]) {
+    assert.match(reducedSelectors, new RegExp(part.replace(/[[\]().*+?^$|]/gu, "\\$&") + "[,)]", "u"), `reduced motion covers ${part}`);
+  }
+  const moving = cssRules(PREVIEW_THEME_CSS)
+    .filter(([selector, body]) => /(?:^|;)\s*(?:animation|transition):/u.test(body)
+      && /data-sphinx-preview-(?:motion|theme-switching|edit-closed|updated)/u.test(selector))
+    .map(([selector]) => selector);
+  assert.ok(moving.length >= 6, "the motion layer animates editors, menus, closing, theme switch and the update glow");
+  for (const selector of moving) {
+    for (const part of selector.split(/,(?![^(]*\))/u).map((entry) => entry.trim())) {
+      assert.ok(reducedSelectors.includes(part.replace(/ :is\(.*$/u, "")), `${part} is turned off by reduced motion`);
+    }
+  }
+});
+
+test("CR 046: the motion layer is short and never animates layout or the table bar's transform", () => {
+  const rules = cssRules(PREVIEW_THEME_CSS).filter(([selector]) =>
+    /data-sphinx-preview-(?:motion|theme-switching|edit-closed|updated)/u.test(selector));
+  for (const [selector, body] of rules) {
+    const transition = /transition:([^;]*);/u.exec(body)?.[1];
+    if (!transition || body.includes("none !important")) continue;
+    assert.doesNotMatch(transition, /\b(?:all|transform|width|height|margin|padding|top|left|inset)\b/u, selector);
+  }
+  for (const name of ["fast", "", "theme"]) {
+    const value = new RegExp(`--sphinx-preview-motion${name ? "-" + name : ""}: (\\d+)ms;`, "u").exec(PREVIEW_THEME_CSS)?.[1];
+    assert.ok(value && Number(value) >= 100 && Number(value) <= 200, `--sphinx-preview-motion${name ? "-" + name : ""} is 100-200 ms`);
+  }
+  // Enter effects need a user action first: the starting styles all sit under the motion mark.
+  const starting = /@starting-style \{([\s\S]*?)\n\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  for (const [selector] of cssRules(starting)) {
+    assert.ok(selector.startsWith('html[data-sphinx-preview-motion="on"]'), selector);
+  }
+  assert.ok(cssRules(starting).length >= 3);
+});

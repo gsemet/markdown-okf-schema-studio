@@ -165,6 +165,7 @@ import {
 } from "./state/previewViewPreferences";
 import { createHeadBaseline, type GitExtensionLike } from "./git/headBaseline";
 import { changedLineRanges } from "./mapping/lineDiff";
+import { isOutsideChange, updatedRangesForPatch } from "./preview/updatedRanges";
 import type { PreviewRuntimeContext } from "./webview/scrollSync";
 import {
   EditorEchoGuard,
@@ -300,6 +301,11 @@ interface ActivePreview {
   flushSequence: number;
   /** Release and deferral decisions of the inline block-edit lock (STAB-02, STAB-03). */
   editLock: EditLock;
+  /**
+   * Document version after the last change made outside the preview, or an undo / redo (CR 046):
+   * the content patch that first shows it makes the updated blocks glow.
+   */
+  outsideChangeVersion?: number;
   /** Edited element position carried across the render that follows a final save (R7). */
   pendingPin?: {
     documentId: string;
@@ -369,6 +375,8 @@ interface ActivePreview {
   contentPatchTimer?: NodeJS.Timeout;
   /** Test hook: how many renders (and deferred updates) were applied as a content patch. */
   contentPatches: number;
+  /** Test hook: the last content patches posted, with the line ranges they asked to glow (CR 046). */
+  updateGlowPatches: { fromVersion: number; toVersion: number; ranges: { start: number; end: number }[] }[];
   /** Sequence number of the last properties-table message posted to the loaded page. */
   propertiesTableSeq: number;
   /**
@@ -512,6 +520,67 @@ function isDocumentEligible(document: vscode.TextDocument): boolean {
 
 function documentKey(document: { uri: vscode.Uri }): string {
   return document.uri.toString();
+}
+
+/**
+ * Documents an edit asked for by a preview is being applied to (CR 046), with the number of such
+ * edits in flight. VS Code reports the change of an edit before the edit's promise settles, so the
+ * change listener can tell the preview's own edits from the others.
+ */
+const previewEditsInFlight = new Map<string, number>();
+
+function trackPreviewEdit<T>(uris: readonly vscode.Uri[], run: () => Thenable<T>): Thenable<T> {
+  const keys = [...new Set(uris.map((uri) => uri.toString()))];
+  for (const key of keys) previewEditsInFlight.set(key, (previewEditsInFlight.get(key) ?? 0) + 1);
+  const settle = (): void => {
+    for (const key of keys) {
+      const left = (previewEditsInFlight.get(key) ?? 1) - 1;
+      if (left > 0) previewEditsInFlight.set(key, left);
+      else previewEditsInFlight.delete(key);
+    }
+  };
+  let result: Thenable<T>;
+  try {
+    result = run();
+  } catch (error) {
+    settle();
+    throw error;
+  }
+  return result.then((value) => {
+    settle();
+    return value;
+  }, (error: unknown) => {
+    settle();
+    throw error;
+  });
+}
+
+/** `workspace.applyEdit` for an edit the preview asked for. */
+function applyPreviewEdit(edit: vscode.WorkspaceEdit): Thenable<boolean> {
+  return trackPreviewEdit(edit.entries().map(([uri]) => uri), () => vscode.workspace.applyEdit(edit));
+}
+
+/** `TextEditor.edit` for an edit the preview asked for. */
+function editInPreview(
+  editor: vscode.TextEditor,
+  callback: (builder: vscode.TextEditorEdit) => void,
+  options?: { undoStopBefore: boolean; undoStopAfter: boolean },
+): Thenable<boolean> {
+  return trackPreviewEdit([editor.document.uri], () => editor.edit(callback, options));
+}
+
+/**
+ * Records a change made outside the preview (or an undo / redo) on the previews of its document. A
+ * change of the active text editor's document is the user typing there: it does not glow.
+ */
+function noteOutsideChange(event: vscode.TextDocumentChangeEvent): void {
+  const key = documentKey(event.document);
+  const activeDocument = vscode.window.activeTextEditor?.document;
+  const inActiveEditor = activeDocument !== undefined && documentKey(activeDocument) === key;
+  if (!isOutsideChange(event.reason, previewEditsInFlight.has(key), inActiveEditor)) return;
+  for (const preview of activePreviews) {
+    if (preview.documentUri === key) preview.outsideChangeVersion = event.document.version;
+  }
 }
 
 function openDocumentAt(filePath: string): PreviewDocument | undefined {
@@ -1040,6 +1109,16 @@ function postContentPatch(
   preview.propertiesTableAwaited = undefined;
   preview.recordKeepsLoadedNonce = true;
   preview.patchedRequestId = next.requestId;
+  const updatedRanges = updatedRangesForPatch(
+    { sourceText: previous.sourceText, version: previous.activeDocumentVersion },
+    { sourceText: next.sourceText, version: next.activeDocumentVersion },
+    preview.outsideChangeVersion,
+  );
+  preview.updateGlowPatches = [...preview.updateGlowPatches.slice(-9), {
+    fromVersion: previous.activeDocumentVersion,
+    toVersion: next.activeDocumentVersion,
+    ranges: updatedRanges.map((range) => ({ start: range.start, end: range.end })),
+  }];
   void preview.panel.webview.postMessage({
     type: "previewContentPatch",
     // The runtime matches this against its own document identity; the page can only be patched
@@ -1057,6 +1136,7 @@ function postContentPatch(
     status: patch.status,
     label: PREVIEW_STATUS_LABELS[patch.status],
     diagnostics: patch.diagnostics,
+    ...(updatedRanges.length > 0 ? { updatedRanges } : {}),
   });
 }
 
@@ -1753,7 +1833,7 @@ function handleFrontmatterSave(preview: ActivePreview, message: PreviewSyncMessa
   const range = new vscode.Range(document.positionAt(patch.start), document.positionAt(patch.end));
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, range, patch.text);
-  return vscode.workspace.applyEdit(edit).then((applied) => {
+  return applyPreviewEdit(edit).then((applied) => {
     if (applied) {
       storePendingPin(preview, message, document.version);
       postFrontmatterEditSaved(preview, message);
@@ -1832,14 +1912,14 @@ function handleCheckboxToggle(preview: ActivePreview, message: PreviewSyncMessag
   const sourceEditor = vscode.window.visibleTextEditors.find((candidate) =>
     documentKey(candidate.document) === documentKey(document));
   const applyEdit = sourceEditor
-    ? sourceEditor.edit((builder) => builder.replace(range, toggle.replacement), {
+    ? editInPreview(sourceEditor, (builder) => builder.replace(range, toggle.replacement), {
       undoStopBefore: true,
       undoStopAfter: true,
     })
     : (() => {
       const edit = new vscode.WorkspaceEdit();
       edit.replace(document.uri, range, toggle.replacement);
-      return vscode.workspace.applyEdit(edit);
+      return applyPreviewEdit(edit);
     })();
   return applyEdit.then((applied) => {
     postCheckboxResult(preview, message, applied
@@ -1904,14 +1984,14 @@ function handleLabelRename(preview: ActivePreview, message: RegisteredPreviewMes
   const sourceEditor = vscode.window.visibleTextEditors.find((candidate) =>
     documentKey(candidate.document) === documentKey(document));
   const applyEdit = sourceEditor
-    ? sourceEditor.edit((builder) => builder.replace(range, rename.text), {
+    ? editInPreview(sourceEditor, (builder) => builder.replace(range, rename.text), {
       undoStopBefore: true,
       undoStopAfter: true,
     })
     : (() => {
       const edit = new vscode.WorkspaceEdit();
       edit.replace(document.uri, range, rename.text);
-      return vscode.workspace.applyEdit(edit);
+      return applyPreviewEdit(edit);
     })();
   return applyEdit.then((applied) => {
     postLabelRenameResult(preview, message, applied
@@ -1970,14 +2050,14 @@ function handleThreadChange(
   const sourceEditor = vscode.window.visibleTextEditors.find((candidate) =>
     documentKey(candidate.document) === documentKey(document));
   const run = (range: vscode.Range, replacement: string): Thenable<boolean> => sourceEditor
-    ? sourceEditor.edit((builder) => builder.replace(range, replacement), {
+    ? editInPreview(sourceEditor, (builder) => builder.replace(range, replacement), {
       undoStopBefore: true,
       undoStopAfter: true,
     })
     : (() => {
       const edit = new vscode.WorkspaceEdit();
       edit.replace(document.uri, range, replacement);
-      return vscode.workspace.applyEdit(edit);
+      return applyPreviewEdit(edit);
     })();
   const finish = (applied: Thenable<boolean>): Thenable<void> => applied.then((done) => {
     postThreadResult(preview, type, message, done
@@ -2084,14 +2164,14 @@ function handleBlockMove(preview: ActivePreview, message: RegisteredPreviewMessa
   const range = new vscode.Range(document.positionAt(plan.start), document.positionAt(plan.end));
   const sourceEditor = visibleEditorFor(preview);
   const applyEdit = sourceEditor
-    ? sourceEditor.edit((builder) => builder.replace(range, plan.text), {
+    ? editInPreview(sourceEditor, (builder) => builder.replace(range, plan.text), {
       undoStopBefore: true,
       undoStopAfter: true,
     })
     : (() => {
       const edit = new vscode.WorkspaceEdit();
       edit.replace(document.uri, range, plan.text);
-      return vscode.workspace.applyEdit(edit);
+      return applyPreviewEdit(edit);
     })();
   return applyEdit.then((applied) => {
     if (!applied) {
@@ -2171,14 +2251,14 @@ function replaceDocumentRange(
   const range = new vscode.Range(document.positionAt(start), document.positionAt(end));
   const sourceEditor = visibleEditorFor(preview);
   if (sourceEditor) {
-    return sourceEditor.edit((builder) => builder.replace(range, text), {
+    return editInPreview(sourceEditor, (builder) => builder.replace(range, text), {
       undoStopBefore: true,
       undoStopAfter: true,
     });
   }
   const edit = new vscode.WorkspaceEdit();
   edit.replace(document.uri, range, text);
-  return vscode.workspace.applyEdit(edit);
+  return applyPreviewEdit(edit);
 }
 
 /**
@@ -2638,7 +2718,7 @@ function drainActiveBlockEdit(preview: ActivePreview, edit: ActiveBlockEdit): vo
     replacement.text,
   );
   edit.applying = true;
-  void vscode.workspace.applyEdit(workspaceEdit).then((applied) => {
+  void applyPreviewEdit(workspaceEdit).then((applied) => {
     if (preview.activeBlockEdit !== edit) {
       return;
     }
@@ -4594,6 +4674,7 @@ function createPreview(
     htmlAssignments: 0,
     renderedStages: 0,
     contentPatches: 0,
+    updateGlowPatches: [],
     propertiesTableSeq: 0,
     recordKeepsLoadedNonce: false,
     pendingOverlayDue: false,
@@ -5033,6 +5114,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.workspace.onDidChangeTextDocument((event) => {
       if (event.contentChanges.length > 0) {
+        noteOutsideChange(event);
         shiftAnchorsForEdits(event);
         shiftCommentsForEdits(event);
         refreshPreview(event.document);
@@ -5180,6 +5262,8 @@ export function getActivePreviewForTests():
     linkedTargetEvents: number;
     /** How many renders and deferred updates were applied as an in-place content patch. */
     contentPatches: number;
+    /** The last content patches (at most 10), with the source line ranges they asked to glow. */
+    updateGlowPatches: { fromVersion: number; toVersion: number; ranges: { start: number; end: number }[] }[];
     /** The preview.incrementalUpdates setting as the preview currently holds it. */
     incrementalUpdates: boolean;
     /** True once the loaded webview document reported ready for the current stage. */
@@ -5238,6 +5322,7 @@ export function getActivePreviewForTests():
     activePathChanges: activePreview.activePathChanges,
     linkedTargetEvents: activePreview.linkedTargetEvents,
     contentPatches: activePreview.contentPatches,
+    updateGlowPatches: activePreview.updateGlowPatches.map((patch) => ({ ...patch, ranges: [...patch.ranges] })),
     incrementalUpdates: activePreview.configuration.incrementalUpdates,
     webviewReady: activePreview.stage !== undefined
       && activePreview.readyRequestId === activePreview.stage.requestId,

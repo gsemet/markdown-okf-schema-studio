@@ -18,7 +18,7 @@ test("the e2e campaign has the 16 frozen feature groups with unique ids", () => 
 test("every visual scenario has a permanent <group>/vNN id whose prefix is its group", () => {
   const ids = new Set(SCENARIOS.map((scenario) => scenario.id));
   assert.equal(ids.size, SCENARIOS.length, "scenario ids are unique");
-  assert.equal(SCENARIOS.length, 300, "245 scenarios minus the 4 exact aliases, plus 14 B4 gap-fill scenarios, plus 2 change-bar scenarios, plus 2 long-words scenarios, plus 3 floating-bar scenarios (CR 034), plus 3 code-block-caption scenarios, plus 4 comment-list scenarios, plus 2 rich-text paste scenarios, plus 5 grid and toctree scenarios, plus 3 inline-thread scenarios, plus 2 list-table scenarios, plus 19 B5 extension-state scenarios");
+  assert.equal(SCENARIOS.length, 303, "245 scenarios minus the 4 exact aliases, plus 14 B4 gap-fill scenarios, plus 2 change-bar scenarios, plus 2 long-words scenarios, plus 3 floating-bar scenarios (CR 034), plus 3 code-block-caption scenarios, plus 4 comment-list scenarios, plus 2 rich-text paste scenarios, plus 5 grid and toctree scenarios, plus 3 inline-thread scenarios, plus 2 list-table scenarios, plus 19 B5 extension-state scenarios, plus 3 update-glow scenarios (CR 046)");
   for (const scenario of SCENARIOS) {
     assert.ok(isGroupId(scenario.group), scenario.id);
     assert.match(scenario.id, new RegExp(`^${scenario.group}/v\\d{2,}-[a-z0-9-]+$`, "u"));
@@ -45,7 +45,7 @@ test("the Mermaid theme-switch check is keyed by a flag, not by an id", () => {
 });
 
 test("integration test rows name existing test files", () => {
-  assert.equal(INTEGRATION_TESTS.length, 27);
+  assert.equal(INTEGRATION_TESTS.length, 28, "27 rows plus the update-glow test (CR 046)");
   for (const row of INTEGRATION_TESTS) {
     assert.ok(isGroupId(row.group), row.file);
     assert.ok(fs.existsSync(path.resolve(__dirname, "../../..", row.file)), row.file);

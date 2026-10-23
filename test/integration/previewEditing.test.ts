@@ -489,6 +489,8 @@ export async function run(): Promise<void> {
       for (let attempt = 0; attempt < 3 && await frame.locator("html").getAttribute("data-sphinx-preview-theme-mode") !== theme; attempt += 1) {
         await frame.locator("[data-sphinx-preview-theme-toggle]").click();
       }
+      // The capture shows the settled colours, not the theme fade (CR 046).
+      await frame.locator("html:not([data-sphinx-preview-theme-switching])").waitFor();
       const link = frame.locator('[data-okf-field="related"] a.okf-frontmatter-link');
       assert.match(await link.getAttribute("title") ?? "", /description: Original target description/u);
       assert.equal(await frame.locator('[data-okf-field="related"] .okf-link-excerpt').textContent(), "Original target description");
@@ -532,6 +534,8 @@ export async function run(): Promise<void> {
       for (let attempt = 0; attempt < 3 && await frame.locator("html").getAttribute("data-sphinx-preview-theme-mode") !== theme; attempt += 1) {
         await frame.locator("[data-sphinx-preview-theme-toggle]").click();
       }
+      // The capture shows the settled colours, not the theme fade (CR 046).
+      await frame.locator("html:not([data-sphinx-preview-theme-switching])").waitFor();
       assert.equal(await frame.locator('[data-okf-field="related"] .okf-link-excerpt').textContent(), "Updated target description");
       assert.match(await frame.locator('[data-okf-field="related"] a').getAttribute("title") ?? "", /description: Updated target description/u);
       await captureLinkState(evidence, page, frame, `links-${theme}-saved-target`,
@@ -563,6 +567,8 @@ export async function run(): Promise<void> {
         && await frame.locator("html").getAttribute("data-sphinx-preview-theme-mode") !== theme; attempt += 1) {
         await frame.locator("[data-sphinx-preview-theme-toggle]").click();
       }
+      // The capture shows the settled colours, not the theme fade (CR 046).
+      await frame.locator("html:not([data-sphinx-preview-theme-switching])").waitFor();
       if (await frame.locator("[data-okf-description-toggle]:visible").getAttribute("aria-expanded") === "false") {
         await frame.locator("[data-okf-description-toggle]:visible").click();
       }
@@ -589,6 +595,8 @@ export async function run(): Promise<void> {
       for (let attempt = 0; attempt < 3 && await frame.locator("html").getAttribute("data-sphinx-preview-theme-mode") !== theme; attempt += 1) {
         await frame.locator("[data-sphinx-preview-theme-toggle]").click();
       }
+      // The capture shows the settled colours, not the theme fade (CR 046).
+      await frame.locator("html:not([data-sphinx-preview-theme-switching])").waitFor();
       const excerpt = frame.locator('[data-okf-field="related"] .okf-link-excerpt');
       assert.equal(await excerpt.textContent(), longDescription);
       assert.equal(await excerpt.getAttribute("title"), longDescription);

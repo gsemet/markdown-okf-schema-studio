@@ -3709,6 +3709,8 @@ async function scenarioToolbarState(page: Page, evidence: Evidence): Promise<voi
         if (await themeButton.getAttribute("data-theme-mode") === "white") break;
         await themeButton.click();
       }
+      // The theme button fades the colours (CR 046): read them once the switch has ended.
+      await frame.locator("html:not([data-sphinx-preview-theme-switching])").waitFor();
       assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-theme-mode"), "white");
       assert.equal(await frame.locator("body").evaluate((body) => getComputedStyle(body).backgroundColor),
         "rgb(255, 255, 255)");

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- The preview now has light, short animations: block, table cell and frontmatter editors, the
+  edition palette, the table bar, the `/` menu and the palette menus fade in softly when you open
+  them, a block fades back in when its editor closes, and a theme switch from the toolbar fades the
+  colours. After a change made outside the preview (another tool or an agent writing the file, a
+  file changed on disk) or an undo or redo, the blocks that changed glow briefly; typing in the
+  active text editor does not glow. Nothing moves the
+  layout, nothing animates when the page loads or follows the editor's scrolling, and the
+  system's "reduce motion" setting turns every animation off.
 - `Ctrl+A` (`Cmd+A` on macOS) in a text box of the preview (a frontmatter value, a block or table
   cell editor) now always selects that box's text. Pressed right after clicking into the box, it
   could select the whole source document in the text editor and close the frontmatter editor.

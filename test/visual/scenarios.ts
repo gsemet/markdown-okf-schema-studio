@@ -193,6 +193,12 @@ export interface Scenario {
   commentToggleChecks?: "visible" | "hidden";
   /** Opens and closes an inline comment thread, checks its box, the reply and delete controls and the show-comments switch. */
   inlineThreadChecks?: boolean;
+  /**
+   * CR 046: sends a content patch with updated ranges (reduced motion first, then motion on), checks
+   * that exactly the updated blocks glow, readable and without moving anything, and leaves the glow
+   * paused at its start for the screenshot.
+   */
+  updateGlowChecks?: true;
   /** Sends the "changed" blocks of the fixture as incoming changes and checks every bar sits in one column at the page margin, square, as tall as its block, and nothing moves. */
   changeBarChecks?: boolean;
   /** Figure width and alignment, and the anchor icon of a (label)= target (T27). */
@@ -2649,6 +2655,25 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     contentAssertions: CHIPS_HIDDEN_ASSERTIONS,
     description: "The show-comments setting off: the gray comment chips are in the document but not displayed, and the TODO chips stay visible.",
   },
+  // CR 046: the update glow of a content patch that follows an outside change or an undo.
+  ...([
+    ["light", undefined, 1],
+    ["dark", undefined, 2],
+    ["dark", "cream", 3],
+  ] as const).map(([theme, mode, number]) => ({
+    id: `lifecycle-sync/v0${number}-update-glow-${mode ?? theme}-900`,
+    fixture: "44-change-bar",
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    updateGlowChecks: true as const,
+    description: `A content patch after an outside change, ${mode ?? theme} ${mode ? "page" : "theme"}: the host's updated ranges `
+      + "make exactly the updated paragraph and bullet glow with a translucent wash of the focus colour; the text stays "
+      + "readable (4.5:1), nothing moves and nothing scrolls sideways. With reduced motion the same patch glows nowhere. "
+      + "The `glow` step shows the glow at its start (paused through the Web Animations API); reduced motion then "
+      + "comes back, so the final frame is the settled page.",
+  })),
 ];
 
 /**
