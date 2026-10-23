@@ -37,7 +37,7 @@ function setup(options: {
   };
   const context = {
     documentId: "file:///a.md",
-    documentVersion: 3,
+    revision: 3,
     requestId: 9,
     initialViewPreferences: options.preferences,
   };
@@ -68,7 +68,7 @@ test("a click hides the comment chips, posts the preference, keeps the state and
   assert.deepEqual({ ...messages[0] }, {
     type: "previewViewPreferenceChanged",
     documentId: "file:///a.md",
-    documentVersion: 3,
+    revision: 3,
     requestId: 9,
     preference: "comments",
     value: false,

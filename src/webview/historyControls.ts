@@ -1,6 +1,6 @@
 export interface HistoryControlsContext {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
 }
 
@@ -24,7 +24,7 @@ export function installHistoryControls(
     const navigate = (): void => vscode.postMessage({
       type: "previewHistoryGo",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       direction,
     });

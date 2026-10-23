@@ -107,7 +107,7 @@ export async function run(): Promise<void> {
     await sendPreviewMessageForTests({
       type: "previewPaletteModeChanged",
       documentId: commandPreview.documentUri,
-      documentVersion: commandPreview.documentVersion,
+      revision: commandPreview.documentVersion,
       requestId: commandPreview.requestId,
       mode: "strict",
     });
@@ -120,7 +120,7 @@ export async function run(): Promise<void> {
       await sendPreviewMessageForTests({
         type: "previewPickImage",
         documentId: commandPreview.documentUri,
-        documentVersion: commandPreview.documentVersion,
+        revision: commandPreview.documentVersion,
         requestId: commandPreview.requestId,
         editId: "untrusted-image",
       });
@@ -134,7 +134,7 @@ export async function run(): Promise<void> {
     await sendPreviewMessageForTests({
       type: "previewPasteImage",
       documentId: commandPreview.documentUri,
-      documentVersion: commandPreview.documentVersion,
+      revision: commandPreview.documentVersion,
       requestId: commandPreview.requestId,
       editId: "untrusted-paste",
       mime: "image/png",

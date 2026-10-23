@@ -115,7 +115,7 @@ export async function run(): Promise<void> {
     sendPreviewMessageForTests({
       type: "previewFrontmatterSave",
       documentId: preview.documentUri,
-      documentVersion: preview.documentVersion,
+      revision: preview.documentVersion,
       requestId: preview.requestId,
       editId: "standalone-edit-attempt",
       fieldName: "status",

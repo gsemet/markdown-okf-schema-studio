@@ -7,7 +7,7 @@
 /** The document the render belongs to. */
 export const DOCUMENT_ID = "documentId";
 /** The version of that document the render was made from. */
-export const DOCUMENT_VERSION = "documentVersion";
+export const DOCUMENT_VERSION = "revision";
 /** The render itself. */
 export const REQUEST_ID = "requestId";
 /** The field of a content patch that carries the identity the page moves to. */

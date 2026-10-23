@@ -41,7 +41,7 @@ const ORIGINAL = [
 function sender(document: vscode.TextDocument, documentUri: string) {
   return (fields: Record<string, unknown>, version: number = document.version) => sendPreviewMessageForTests({
     documentId: documentUri,
-    documentVersion: version,
+    revision: version,
     requestId: getActivePreviewForTests()?.requestId,
     pinViewportTop: 200,
     ...fields,
@@ -162,7 +162,7 @@ export async function runUntrusted(
   try {
     const base = {
       documentId: preview.documentUri,
-      documentVersion: preview.documentVersion,
+      revision: preview.documentVersion,
       requestId: preview.requestId,
     };
     await sendPreviewMessageForTests({ ...base, type: "previewBlocksCopy", line: 1, endLine: 1 });

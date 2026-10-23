@@ -58,7 +58,7 @@ export async function run(): Promise<void> {
     await sendPreviewMessageForTests({
       type: "previewPaletteModeChanged",
       documentId: preview.documentUri,
-      documentVersion: preview.documentVersion,
+      revision: preview.documentVersion,
       requestId: preview.requestId,
       mode: "gfm",
     });
@@ -70,7 +70,7 @@ export async function run(): Promise<void> {
     await sendPreviewMessageForTests({
       type: "previewPaletteModeChanged",
       documentId: preview.documentUri,
-      documentVersion: preview.documentVersion,
+      revision: preview.documentVersion,
       requestId: preview.requestId,
       mode: "html",
     });
@@ -82,7 +82,7 @@ export async function run(): Promise<void> {
     await sendPreviewMessageForTests({
       type: "previewPaletteModeChanged",
       documentId: preview.documentUri,
-      documentVersion: preview.documentVersion,
+      revision: preview.documentVersion,
       requestId: preview.requestId,
       mode: "myst",
     });

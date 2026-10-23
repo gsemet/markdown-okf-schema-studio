@@ -122,8 +122,20 @@ import {
   type RuntimeContextSettings,
 } from "./preview/contentPatch";
 import { FLUSH_WAIT_MS, flushRefusalMessage, LatestRequest, waitForAnswer, waitForSettled } from "./preview/flushWait";
-import { isRegisteredPreviewMessage, type RegisteredPreviewMessage } from "./preview/previewMessages";
-import { pageLiveStateMessages, type PageIdentity } from "./preview/pageLiveState";
+import type { PageIdentity } from "./protocol/envelope";
+import type { HostRequestType, HostToPageMessage } from "./protocol/hostToPage";
+import {
+  isPageStateMessage,
+  isPageToHostMessage,
+  type BlockEditMessage,
+  type PageMessageOf,
+  type PageStateMessageUnion,
+  type PageToHostMessage,
+  type PageToHostType,
+} from "./protocol/pageToHost";
+import type { Revision } from "./protocol/revision";
+import { createMessageRouter } from "./protocol/router";
+import { pageLiveStateMessages } from "./preview/pageLiveState";
 import {
   PreviewDiagnostic,
   PreviewDocument,
@@ -184,60 +196,10 @@ export const REFRESH_COMMAND_ID = "markdown-okf-schema-studio.refreshPreview";
 export const PANEL_VIEW_TYPE = "markdown-okf-schema-studio.preview";
 export const EDITOR_VIEW_TYPE = "markdown-okf-schema-studio.editor";
 
-interface PreviewSyncMessage {
-  type: "previewReady" | "previewScroll" | "previewReveal" | "previewState" | "previewLink" | "previewLinkDiscover" | "previewThemeModeChanged" | "previewRefresh" | "previewAnchorModeChanged" | "previewEditOpen" | "previewEditSave" | "previewEditCancel" | "previewFrontmatterSave" | "previewCheckboxToggle" | "previewEditModeChanged";
-  documentId: string;
-  documentVersion: number;
-  requestId: number;
-  previewThemeMode?: PreviewThemeMode;
-  anchorToEditor?: boolean;
-  editMode?: boolean;
-  line?: number;
-  endLine?: number;
-  /** Zero-based column of a checkbox marker's opening bracket. */
-  column?: number;
-  /** Requested checkbox state. */
-  checked?: boolean;
-  editId?: string;
-  /** Block insertion: the source line after which a new block goes (0 = start of the body). */
-  insertAfterLine?: number;
-  originalText?: string;
-  editedText?: string;
-  final?: boolean;
-  frontmatterAction?: "add" | "remove";
-  fieldName?: string;
-  /** For an add: the existing top-level field after which the new field is inserted. */
-  afterField?: string;
-  newFieldName?: string;
-  fieldValue?: unknown;
-  fieldValueFormat?: "yaml";
-  /** A value edit sent by the flush before a navigation: text that is not valid YAML is kept as typed. */
-  flush?: boolean;
-  /** For a value edit: "plain" writes a safe string as a plain YAML scalar (a new custom key). */
-  fieldValueStyle?: "plain";
-  sourceLine?: number;
-  anchorLine?: number;
-  /** Final saves: source line and viewport top of the edited element (anchoring rule R7). */
-  pinLine?: number;
-  pinViewportTop?: number;
-  sourceFile?: string;
-  scrollTop?: number;
-  focusedBlockId?: string;
-  selectedText?: string;
-  openDisclosures?: number[];
-  descriptionsCollapsed?: boolean;
-  /** previewReady only: true while the page has an inline block editor open. */
-  blockEditOpen?: boolean;
-  request?: string;
-  requests?: string[];
-  selectionLine?: number;
-  activation?: "click" | "double-click" | "keyboard";
-}
-
 interface ActiveBlockEdit {
   editId: string;
   documentId: string;
-  documentVersion: number;
+  revision: Revision;
   requestId: number;
   line: number;
   endLine: number;
@@ -252,7 +214,7 @@ interface ActiveBlockEdit {
   cancelRequested: boolean;
   applying: boolean;
   hasAppliedEdit: boolean;
-  lastMessage: PreviewSyncMessage;
+  lastMessage: BlockEditMessage;
 }
 
 interface ActivePreview {
@@ -636,147 +598,6 @@ function sourceAvailable(preview: ActivePreview): boolean {
     && sourceExists(sourcePath);
 }
 
-function isPreviewSyncMessage(value: unknown): value is PreviewSyncMessage {
-  if (!value || typeof value !== "object" || isRegisteredPreviewMessage(value)) {
-    return false;
-  }
-  const message = value as Partial<PreviewSyncMessage>;
-  const themeModeChange = isPreviewThemeModeChangedMessage(value);
-  const validType = message.type === "previewReady"
-    || message.type === "previewScroll"
-    || message.type === "previewReveal"
-    || message.type === "previewState"
-    || message.type === "previewLink"
-    || message.type === "previewLinkDiscover"
-    || message.type === "previewRefresh"
-    || message.type === "previewAnchorModeChanged"
-    || message.type === "previewEditOpen"
-    || message.type === "previewEditSave"
-    || message.type === "previewEditCancel"
-    || message.type === "previewFrontmatterSave"
-    || message.type === "previewCheckboxToggle"
-    || message.type === "previewEditModeChanged"
-    || themeModeChange;
-  const validLine = message.line === undefined
-    || (Number.isSafeInteger(message.line) && message.line >= 1);
-  const validEndLine = message.endLine === undefined
-    || (Number.isSafeInteger(message.endLine) && message.endLine >= 1);
-  const validSourceLine = message.sourceLine === undefined
-    || (Number.isSafeInteger(message.sourceLine) && message.sourceLine >= 1);
-  const validAnchorLine = message.anchorLine === undefined
-    || (typeof message.anchorLine === "number" && Number.isFinite(message.anchorLine) && message.anchorLine >= 1);
-  const validPin = (message.pinLine === undefined && message.pinViewportTop === undefined)
-    || ((message.type === "previewFrontmatterSave"
-      || (message.type === "previewEditSave" && message.final === true))
-      && Number.isSafeInteger(message.pinLine)
-      && (message.pinLine as number) >= 1
-      && typeof message.pinViewportTop === "number"
-      && Number.isFinite(message.pinViewportTop)
-      && Math.abs(message.pinViewportTop) <= 100000);
-  const validSelectionLine = message.selectionLine === undefined
-    || (Number.isSafeInteger(message.selectionLine) && message.selectionLine >= 1);
-  const validScrollTop = message.scrollTop === undefined
-    || (typeof message.scrollTop === "number" && Number.isFinite(message.scrollTop) && message.scrollTop >= 0);
-  const validThemeMode = message.previewThemeMode === undefined
-    || isPreviewThemeMode(message.previewThemeMode);
-  const validAnchorMode = message.anchorToEditor === undefined
-    || typeof message.anchorToEditor === "boolean";
-  // Every previewState carries the boolean editMode, so only the type-specific message requires it.
-  const validEditMode = message.type === "previewEditModeChanged"
-    ? typeof message.editMode === "boolean"
-    : (message.editMode === undefined || typeof message.editMode === "boolean");
-  const editRequest = message.type === "previewEditOpen"
-    || message.type === "previewEditSave"
-    || message.type === "previewEditCancel"
-    || message.type === "previewFrontmatterSave"
-    || message.type === "previewCheckboxToggle";
-  const validEditRequest = !editRequest || (
-    typeof message.editId === "string"
-    && message.editId.length > 0
-    && (message.type !== "previewFrontmatterSave"
-      || (typeof message.fieldName === "string" && message.fieldName.length > 0))
-    && (message.type === "previewFrontmatterSave"
-      || (message.line !== undefined
-        && message.endLine !== undefined
-        && message.endLine >= message.line))
-  );
-  const validInsertAfterLine = message.insertAfterLine === undefined
-    || ((message.type === "previewEditOpen"
-      || message.type === "previewEditSave"
-      || message.type === "previewEditCancel")
-      && Number.isSafeInteger(message.insertAfterLine)
-      && (message.insertAfterLine as number) >= 0);
-  const validBlockEditOpen = message.blockEditOpen === undefined
-    || (message.type === "previewReady" && typeof message.blockEditOpen === "boolean");
-  const validEditPayload = message.type !== "previewEditSave"
-    || (typeof message.originalText === "string" && typeof message.editedText === "string");
-  const validEditFinal = message.final === undefined
-    || (message.type === "previewEditSave" && typeof message.final === "boolean");
-  const validFrontmatterPayload = message.type !== "previewFrontmatterSave"
-    || message.frontmatterAction === "remove"
-    || Object.prototype.hasOwnProperty.call(message, "fieldValue");
-  const validFrontmatterFormat = message.fieldValueFormat === undefined
-    || (message.type === "previewFrontmatterSave" && message.fieldValueFormat === "yaml");
-  const validFrontmatterStyle = message.fieldValueStyle === undefined
-    || (message.type === "previewFrontmatterSave"
-      && message.fieldValueStyle === "plain"
-      && message.frontmatterAction === undefined
-      && message.fieldValueFormat === undefined);
-  const validFlush = message.flush === undefined
-    || ((message.type === "previewFrontmatterSave" || message.type === "previewEditSave")
-      && message.flush === true);
-  const validFrontmatterKey = message.newFieldName === undefined
-    || (message.type === "previewFrontmatterSave" && typeof message.newFieldName === "string");
-  const validCheckbox = message.type !== "previewCheckboxToggle"
-    ? message.column === undefined && message.checked === undefined
-    : Number.isSafeInteger(message.column) && (message.column as number) >= 0
-      && typeof message.checked === "boolean"
-      && message.line === message.endLine;
-  const validAfterField = message.afterField === undefined
-    || (message.type === "previewFrontmatterSave"
-      && message.frontmatterAction === "add"
-      && typeof message.afterField === "string"
-      && message.afterField.length >= 1
-      && message.afterField.length <= 1024
-      && !/[\r\n]/u.test(message.afterField));
-  const validFrontmatterAction = message.frontmatterAction === undefined
-    || (message.type === "previewFrontmatterSave"
-      && (message.frontmatterAction === "add" || message.frontmatterAction === "remove"));
-  return validType
-    && typeof message.documentId === "string"
-    && Number.isSafeInteger(message.documentVersion)
-    && Number.isSafeInteger(message.requestId)
-    && validLine
-    && validEndLine
-    && validSourceLine
-    && validAnchorLine
-    && validPin
-    && validSelectionLine
-    && validScrollTop
-    && validThemeMode
-    && validAnchorMode
-    && validEditMode
-    && validEditRequest
-    && validInsertAfterLine
-    && validBlockEditOpen
-    && validEditPayload
-    && validEditFinal
-    && validFrontmatterPayload
-    && validFrontmatterFormat
-    && validFrontmatterKey
-    && validFlush
-    && validFrontmatterStyle
-    && validFrontmatterAction
-    && validAfterField
-    && validCheckbox
-    && (message.type !== "previewThemeModeChanged" || themeModeChange)
-    && (message.type !== "previewAnchorModeChanged" || typeof message.anchorToEditor === "boolean")
-    && (message.type !== "previewLinkDiscover" || (Array.isArray(message.requests)
-      && message.requests.length <= 64
-      && message.requests.every((request) => typeof request === "string" && request.length <= 4096)))
-    && (message.request === undefined || typeof message.request === "string");
-}
-
 /** Resolves the thread author (setting, Git user, OS user) for the next page that loads. */
 function refreshThreadAuthor(uri: vscode.Uri | undefined): void {
   void resolveAuthor({
@@ -805,7 +626,7 @@ function scrollContext(
   refreshThreadAuthor(vscode.Uri.file(stage.activeDocumentPath));
   return {
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
     activeSourceFile: stage.activeDocumentPath,
     ...(threadAuthor !== "" ? { threadAuthor } : {}),
@@ -840,12 +661,30 @@ function scrollContext(
   };
 }
 
+/**
+ * The protocol revision of a VS Code document (see src/protocol/revision.ts): its
+ * `TextDocument.version`, which VS Code already counts per document and moves on every change.
+ */
+function revisionOfDocument(document: vscode.TextDocument): Revision {
+  return document.version;
+}
+
+/** The protocol revision of the document text a render stage was made from. */
+function revisionOfStage(stage: RenderStage): Revision {
+  return stage.activeDocumentVersion;
+}
+
+/** Sends a protocol message to the page of a preview; resolves to false when it was not delivered. */
+function postToPage(preview: ActivePreview, message: HostToPageMessage): Thenable<boolean> {
+  return preview.panel.webview.postMessage(message);
+}
+
 function matchesCurrentPreview(
   preview: ActivePreview,
   message: {
     type: string;
     documentId: string;
-    documentVersion: number;
+    revision: Revision;
     requestId: number;
     editId?: string;
   },
@@ -856,14 +695,14 @@ function matchesCurrentPreview(
     && (message.type === "previewEditSave" || message.type === "previewEditCancel")
     && message.editId === activeBlockEdit.editId
     && message.documentId === activeBlockEdit.documentId
-    && message.documentVersion === activeBlockEdit.documentVersion
+    && message.revision === activeBlockEdit.revision
     && message.requestId === activeBlockEdit.requestId;
   return !preview.disposed
     && activePreviews.has(preview)
     && stage !== undefined
     && preview.documentUri === stage.activeDocumentIdentity
     && message.documentId === stage.activeDocumentIdentity
-    && (message.documentVersion === stage.activeDocumentVersion || matchesActiveBlockEdit)
+    && (message.revision === revisionOfStage(stage) || matchesActiveBlockEdit)
     && message.requestId === stage.requestId;
 }
 
@@ -928,10 +767,10 @@ function postPendingOverlay(preview: ActivePreview, visible: boolean): void {
   if (!stage || preview.disposed) {
     return;
   }
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewPendingOverlay",
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
     visible,
     label: PREVIEW_STATUS_LABELS.pending,
@@ -1018,10 +857,10 @@ function patchPropertiesTable(
     preview.webview = { ...preview.webview, html };
     preview.propertiesTableSeq += 1;
     preview.propertiesTableAwaited = preview.propertiesTableSeq;
-    void preview.panel.webview.postMessage({
+    void postToPage(preview, {
       type: "previewPropertiesTable",
       documentId: stage.activeDocumentIdentity,
-      documentVersion: stage.activeDocumentVersion,
+      revision: revisionOfStage(stage),
       requestId: stage.requestId,
       seq: preview.propertiesTableSeq,
       markup,
@@ -1145,15 +984,15 @@ function postContentPatch(
     toVersion: next.activeDocumentVersion,
     ranges: updatedRanges.map((range) => ({ start: range.start, end: range.end })),
   }];
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewContentPatch",
     // The runtime matches this against its own document identity; the page can only be patched
     // when the previous and the next stage show the same document, so previous is also the target.
     documentId: previous.activeDocumentIdentity,
-    documentVersion: previous.activeDocumentVersion,
+    revision: revisionOfStage(previous),
     requestId: previous.requestId,
     next: {
-      documentVersion: next.activeDocumentVersion,
+      revision: revisionOfStage(next),
       requestId: next.requestId,
       ...(patch.initialAnchor !== undefined ? { initialAnchor: patch.initialAnchor } : {}),
       ...(patch.initialPin ? { initialPin: patch.initialPin } : {}),
@@ -1649,7 +1488,7 @@ function showRenderFailure(preview: ActivePreview, error: unknown): void {
   );
 }
 
-function recordPreviewState(preview: ActivePreview, message: PreviewSyncMessage): void {
+function recordPreviewState(preview: ActivePreview, message: PageStateMessageUnion): void {
   const stage = preview.stage;
   if (!stage) {
     return;
@@ -1679,7 +1518,7 @@ function recordPreviewState(preview: ActivePreview, message: PreviewSyncMessage)
 
 function currentPreviewDocument(
   preview: ActivePreview,
-  message: Pick<PreviewSyncMessage, "documentVersion">,
+  message: Pick<PageIdentity, "revision">,
 ): vscode.TextDocument | undefined {
   const document = preview.document;
   const stage = preview.stage;
@@ -1687,7 +1526,7 @@ function currentPreviewDocument(
     !document
     || !stage
     || documentKey(document) !== preview.documentUri
-    || document.version !== message.documentVersion
+    || revisionOfDocument(document) !== message.revision
     || stage.activeDocumentVersion !== document.version
     || !isDocumentEligible(document)
   ) {
@@ -1698,7 +1537,7 @@ function currentPreviewDocument(
 
 function currentSourceEdit(
   preview: ActivePreview,
-  message: PreviewSyncMessage,
+  message: BlockEditMessage,
 ): { document: vscode.TextDocument; range: vscode.Range } | undefined {
   const document = currentPreviewDocument(preview, message);
   if (!document || message.line === undefined || message.endLine === undefined) {
@@ -1715,7 +1554,7 @@ function currentSourceEdit(
 
 function postFrontmatterEditError(
   preview: ActivePreview,
-  message: PreviewSyncMessage,
+  message: PageMessageOf<"previewFrontmatterSave">,
   error: string,
 ): void {
   if (message.flush === true) {
@@ -1726,10 +1565,10 @@ function postFrontmatterEditError(
       error,
     ));
   }
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewFrontmatterResult",
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     editId: message.editId,
     error,
@@ -1738,12 +1577,12 @@ function postFrontmatterEditError(
 
 function postFrontmatterEditSaved(
   preview: ActivePreview,
-  message: PreviewSyncMessage,
+  message: PageMessageOf<"previewFrontmatterSave">,
 ): void {
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewFrontmatterResult",
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     editId: message.editId,
     saved: true,
@@ -1776,7 +1615,7 @@ function frontmatterValueMatchesField(
   }
 }
 
-function handleFrontmatterSave(preview: ActivePreview, message: PreviewSyncMessage): Thenable<void> | undefined {
+function handleFrontmatterSave(preview: ActivePreview, message: PageMessageOf<"previewFrontmatterSave">): Thenable<void> | undefined {
   const document = currentPreviewDocument(preview, message);
   const fieldName = message.fieldName ?? "";
   const action = message.frontmatterAction;
@@ -1937,7 +1776,7 @@ function handleFrontmatterSave(preview: ActivePreview, message: PreviewSyncMessa
 
 function postEditSourceError(
   preview: ActivePreview,
-  message: PreviewSyncMessage,
+  message: BlockEditMessage,
   error: string,
 ): void {
   if (message.flush === true) {
@@ -1946,10 +1785,10 @@ function postEditSourceError(
       : "a block";
     void vscode.window.showWarningMessage(flushRefusalMessage(where, error));
   }
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewEditSource",
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     editId: message.editId,
     error,
@@ -1958,13 +1797,13 @@ function postEditSourceError(
 
 function postCheckboxResult(
   preview: ActivePreview,
-  message: PreviewSyncMessage,
+  message: PageMessageOf<"previewCheckboxToggle">,
   result: { saved: true } | { error: string },
 ): void {
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewCheckboxResult",
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     editId: message.editId,
     ...result,
@@ -1972,7 +1811,7 @@ function postCheckboxResult(
 }
 
 /** Toggles one `[ ]`/`[x]` marker with a single-character edit (one undo step). */
-function handleCheckboxToggle(preview: ActivePreview, message: PreviewSyncMessage): Thenable<void> | undefined {
+function handleCheckboxToggle(preview: ActivePreview, message: PageMessageOf<"previewCheckboxToggle">): Thenable<void> | undefined {
   const document = currentPreviewDocument(preview, message);
   if (!document || message.line === undefined || message.column === undefined || message.checked === undefined) {
     postCheckboxResult(preview, message, { error: "The preview is out of date. Try again once it has refreshed." });
@@ -2018,13 +1857,13 @@ function handleCheckboxToggle(preview: ActivePreview, message: PreviewSyncMessag
 
 function postLabelRenameResult(
   preview: ActivePreview,
-  message: RegisteredPreviewMessage,
+  message: PageMessageOf<"previewLabelRename">,
   result: { ok: true; remainingRefs: number } | { ok: false; reason: string },
 ): void {
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewLabelRenameResult",
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     editId: message.editId,
     ...result,
@@ -2035,7 +1874,7 @@ function postLabelRenameResult(
  * Renames a MyST label from its anchor icon: only the `(oldName)=` line changes, in one undo step.
  * A line that is not exactly `(oldName)=` is refused, never searched for elsewhere.
  */
-function handleLabelRename(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+function handleLabelRename(preview: ActivePreview, message: PageMessageOf<"previewLabelRename">): Thenable<void> | undefined {
   if (preview.readOnly) {
     postLabelRenameResult(preview, message, { ok: false, reason: "Renaming needs a trusted workspace." });
     return undefined;
@@ -2055,9 +1894,9 @@ function handleLabelRename(preview: ActivePreview, message: RegisteredPreviewMes
     });
     return undefined;
   }
-  const oldName = message.oldName as string;
+  const oldName = message.oldName;
   const text = document.getText();
-  const rename = renameLabelLine(text, message.line as number, oldName, message.newName as string);
+  const rename = renameLabelLine(text, message.line, oldName, message.newName);
   if (!rename) {
     postLabelRenameResult(preview, message, {
       ok: false,
@@ -2094,13 +1933,13 @@ function handleLabelRename(preview: ActivePreview, message: RegisteredPreviewMes
 function postThreadResult(
   preview: ActivePreview,
   type: "previewThreadReplyResult" | "previewThreadDeleteResult",
-  message: RegisteredPreviewMessage,
+  message: PageMessageOf<"previewThreadReply" | "previewThreadDelete">,
   result: { ok: true } | { ok: false; reason: string },
 ): void {
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type,
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     editId: message.editId,
     ...result,
@@ -2114,7 +1953,7 @@ function postThreadResult(
  */
 function handleThreadChange(
   preview: ActivePreview,
-  message: RegisteredPreviewMessage,
+  message: PageMessageOf<"previewThreadReply" | "previewThreadDelete">,
   action: "reply" | "delete",
 ): Thenable<void> | undefined {
   const type = action === "reply" ? "previewThreadReplyResult" : "previewThreadDeleteResult";
@@ -2126,8 +1965,8 @@ function handleThreadChange(
   if (preview.activeBlockEdit) return fail("Save or cancel the open Markdown edit before changing a thread.");
   const document = currentPreviewDocument(preview, message);
   if (!document) return fail("The preview is out of date. Try again once it has refreshed.");
-  const first = message.line as number;
-  const last = message.endLine as number;
+  const first = message.line;
+  const last = message.endLine;
   if (last > document.lineCount) return fail("The thread is no longer in the source. Refresh the preview.");
   const threadLines: string[] = [];
   for (let index = first - 1; index <= last - 1; index += 1) threadLines.push(document.lineAt(index).text);
@@ -2181,7 +2020,7 @@ function handleThreadChange(
     if (!current || current.version !== document.version) {
       return fail("The document changed meanwhile. Try again.");
     }
-    const edit = threadReplyEdit(threadLines, author, formatThreadDate(new Date()), message.text as string);
+    const edit = threadReplyEdit(threadLines, author, formatThreadDate(new Date()), (message as PageMessageOf<"previewThreadReply">).text);
     if (!edit) return fail("The reply could not be added to this thread.");
     const lineIndex = first - 1 + edit.fromLine;
     const eol = document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
@@ -2192,13 +2031,13 @@ function handleThreadChange(
 
 function postBlockMoveResult(
   preview: ActivePreview,
-  message: RegisteredPreviewMessage,
+  message: PageMessageOf<"previewBlockMove">,
   result: { ok: true; line: number } | { ok: false; reason: string },
 ): void {
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewBlockMoveResult",
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     ...result,
   });
@@ -2210,7 +2049,7 @@ function postBlockMoveResult(
  * text between the blocks, and a block that opens an `{include}` directive is never moved.
  * The moving range may span several selected blocks (their inner separators travel with it).
  */
-function handleBlockMove(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+function handleBlockMove(preview: ActivePreview, message: PageMessageOf<"previewBlockMove">): Thenable<void> | undefined {
   if (preview.readOnly) {
     postBlockMoveResult(preview, message, { ok: false, reason: "Moving a block needs a trusted workspace." });
     return undefined;
@@ -2230,8 +2069,8 @@ function handleBlockMove(preview: ActivePreview, message: RegisteredPreviewMessa
     });
     return undefined;
   }
-  const moving = { line: message.line as number, endLine: message.endLine as number };
-  const neighbour = { line: message.neighbourLine as number, endLine: message.neighbourEndLine as number };
+  const moving = { line: message.line, endLine: message.endLine };
+  const neighbour = { line: message.neighbourLine, endLine: message.neighbourEndLine };
   const movesDown = message.direction === "down";
   const first = movesDown ? moving : neighbour;
   const second = movesDown ? neighbour : moving;
@@ -2269,7 +2108,7 @@ function handleBlockMove(preview: ActivePreview, message: RegisteredPreviewMessa
     storePendingPin(preview, {
       documentId: message.documentId,
       pinLine: newLine,
-      pinViewportTop: message.pinViewportTop as number | undefined,
+      pinViewportTop: message.pinViewportTop,
     }, document.version);
     postBlockMoveResult(preview, message, { ok: true, line: newLine });
   }, (error: unknown) => {
@@ -2284,14 +2123,14 @@ type BlocksOp = "copy" | "cut" | "paste";
 
 function postBlocksResult(
   preview: ActivePreview,
-  message: RegisteredPreviewMessage,
+  message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksPaste">,
   op: BlocksOp,
   result: { ok: true } | { ok: false; reason: string },
 ): void {
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewBlocksResult",
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     op,
     ...result,
@@ -2301,7 +2140,7 @@ function postBlocksResult(
 /** Read-only, open-editor and stale-version refusals shared by copy, cut and paste of blocks. */
 function blocksDocument(
   preview: ActivePreview,
-  message: RegisteredPreviewMessage,
+  message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksPaste">,
   op: BlocksOp,
 ): vscode.TextDocument | undefined {
   const refuse = (reason: string): undefined => {
@@ -2353,15 +2192,15 @@ function replaceDocumentRange(
  */
 function handleBlocksCopyCut(
   preview: ActivePreview,
-  message: RegisteredPreviewMessage,
+  message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut">,
 ): Thenable<void> | undefined {
   const op: BlocksOp = message.type === "previewBlocksCut" ? "cut" : "copy";
   const document = blocksDocument(preview, message, op);
   if (!document) {
     return undefined;
   }
-  const line = message.line as number;
-  const endLine = message.endLine as number;
+  const line = message.line;
+  const endLine = message.endLine;
   const refuse = (reason: string): undefined => {
     postBlocksResult(preview, message, op, { ok: false, reason });
     return undefined;
@@ -2388,7 +2227,7 @@ function handleBlocksCopyCut(
       return undefined;
     }
     // The clipboard write is asynchronous: the edit only goes in if the text did not change.
-    if (preview.document !== document || document.version !== message.documentVersion) {
+    if (preview.document !== document || revisionOfDocument(document) !== message.revision) {
       postBlocksResult(preview, message, op, {
         ok: false,
         reason: "The document changed while cutting. The blocks are on the clipboard, nothing was removed.",
@@ -2405,7 +2244,8 @@ function handleBlocksCopyCut(
         storePendingPin(preview, {
           documentId: message.documentId,
           pinLine: line,
-          pinViewportTop: message.pinViewportTop as number | undefined,
+          // Only a cut moves blocks; a copy carries no pin.
+          pinViewportTop: (message as { pinViewportTop?: number }).pinViewportTop,
         }, document.version);
       }
       postBlocksResult(preview, message, op, { ok: true });
@@ -2416,13 +2256,13 @@ function handleBlocksCopyCut(
 /** Paste of clipboard text as new blocks after a block or at the start of the body (T40). */
 function handleBlocksPaste(
   preview: ActivePreview,
-  message: RegisteredPreviewMessage,
+  message: PageMessageOf<"previewBlocksPaste">,
 ): Thenable<void> | undefined {
   const document = blocksDocument(preview, message, "paste");
   if (!document) {
     return undefined;
   }
-  const afterLine = message.insertAfterLine as number;
+  const afterLine = message.insertAfterLine;
   const refuse = (reason: string): void => postBlocksResult(preview, message, "paste", { ok: false, reason });
   if (afterLine > 0 && afterLine <= document.lineCount
     && linesOpenInclude(document, afterLine, afterLine)) {
@@ -2430,7 +2270,7 @@ function handleBlocksPaste(
     return undefined;
   }
   return vscode.env.clipboard.readText().then((clipboard) => {
-    if (preview.document !== document || document.version !== message.documentVersion) {
+    if (preview.document !== document || revisionOfDocument(document) !== message.revision) {
       refuse("The document changed while pasting. Try again.");
       return undefined;
     }
@@ -2446,8 +2286,8 @@ function handleBlocksPaste(
       }
       storePendingPin(preview, {
         documentId: message.documentId,
-        pinLine: message.pinLine as number | undefined,
-        pinViewportTop: message.pinViewportTop as number | undefined,
+        pinLine: message.pinLine,
+        pinViewportTop: message.pinViewportTop,
       }, document.version);
       postBlocksResult(preview, message, "paste", { ok: true });
     });
@@ -2460,16 +2300,16 @@ type HostListAnswer =
 
 function postHostResult(
   preview: ActivePreview,
-  message: RegisteredPreviewMessage,
+  message: PageMessageOf<HostRequestType>,
   result: HostListAnswer
     | { ok: true; path?: string; cancelled?: boolean; fileName?: string; markdown?: string }
     | { ok: true; id: string; text: string }
     | { ok: false; reason: string },
 ): void {
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: `${message.type}Result`,
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     editId: message.editId,
     ...result,
@@ -2504,10 +2344,10 @@ export async function listCitationKeysForTests(documentUri: string): Promise<{
  * (only the document's folder and below in Restricted Mode) and watched, so a change draws the
  * diagrams again. It reads only; the answer repeats `editId`.
  */
-function handlePlantUmlInclude(preview: ActivePreview, message: RegisteredPreviewMessage): void {
+function handlePlantUmlInclude(preview: ActivePreview, message: PageMessageOf<"previewPlantUmlInclude">): void {
   const documentPath = preview.document?.uri.fsPath ?? vscode.Uri.parse(preview.documentUri).fsPath;
   const answer = resolvePlantUmlInclude(
-    { path: message.path as string, from: message.from as string | null },
+    { path: message.path, from: message.from },
     { documentPath, workspaceRoot: preview.workspaceRoot, trusted: vscode.workspace.isTrusted },
   );
   if (answer.watch) {
@@ -2518,7 +2358,7 @@ function handlePlantUmlInclude(preview: ActivePreview, message: RegisteredPrevie
     : { ok: false, reason: answer.reason });
 }
 
-function handleListTargets(preview: ActivePreview, message: RegisteredPreviewMessage): void {
+function handleListTargets(preview: ActivePreview, message: PageMessageOf<"previewListTargets">): void {
   const document = currentPreviewDocument(preview, message);
   if (!document) {
     postHostResult(preview, message, { ok: false, reason: "The preview is out of date. Try again once it has refreshed." });
@@ -2527,7 +2367,7 @@ function handleListTargets(preview: ActivePreview, message: RegisteredPreviewMes
   postHostResult(preview, message, targetChoices(document.getText()));
 }
 
-function handleListCitations(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+function handleListCitations(preview: ActivePreview, message: PageMessageOf<"previewListCitations">): Thenable<void> | undefined {
   if (preview.readOnly) {
     postHostResult(preview, message, { ok: false, reason: "Citations are read from the workspace, which needs trust." });
     return undefined;
@@ -2549,7 +2389,7 @@ function handleListCitations(preview: ActivePreview, message: RegisteredPreviewM
 }
 
 /** Native open dialog for a `{doc}` link: answers with the path relative to the document. */
-function handlePickDocument(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+function handlePickDocument(preview: ActivePreview, message: PageMessageOf<"previewPickDocument">): Thenable<void> | undefined {
   if (preview.readOnly) {
     postHostResult(preview, message, { ok: false, reason: "Linking a document needs a trusted workspace." });
     return undefined;
@@ -2586,7 +2426,7 @@ function handlePickDocument(preview: ActivePreview, message: RegisteredPreviewMe
  * relative to the document. Nothing is read or written. A file outside the workspace folders, on
  * another drive, or that is not an image is refused with a message the page shows.
  */
-function handlePickImage(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+function handlePickImage(preview: ActivePreview, message: PageMessageOf<"previewPickImage">): Thenable<void> | undefined {
   if (preview.readOnly) {
     postHostResult(preview, message, { ok: false, reason: "Inserting an image needs a trusted workspace." });
     return undefined;
@@ -2635,7 +2475,7 @@ function handlePickImage(preview: ActivePreview, message: RegisteredPreviewMessa
  * editor open: the page ignores the paste); the host has no state for an editor that is open but
  * not yet saved, and the editor's autosaves move the document version, so neither is checked.
  */
-function handlePasteImage(preview: ActivePreview, message: RegisteredPreviewMessage): Thenable<void> | undefined {
+function handlePasteImage(preview: ActivePreview, message: PageMessageOf<"previewPasteImage">): Thenable<void> | undefined {
   const refuse = (reason: string): undefined => {
     postHostResult(preview, message, { ok: false, reason });
     return undefined;
@@ -2676,7 +2516,7 @@ function handlePasteImage(preview: ActivePreview, message: RegisteredPreviewMess
 }
 
 /** Rich text pasted into the open block editor: the clipboard's HTML as Markdown. No file is touched. */
-function handlePasteHtml(preview: ActivePreview, message: RegisteredPreviewMessage): void {
+function handlePasteHtml(preview: ActivePreview, message: PageMessageOf<"previewPasteHtml">): void {
   try {
     postHostResult(preview, message, { ok: true, markdown: htmlToMarkdown(String(message.html)) });
   } catch (error) {
@@ -2684,7 +2524,7 @@ function handlePasteHtml(preview: ActivePreview, message: RegisteredPreviewMessa
   }
 }
 
-function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessage): void {
+function handlePreviewEditOpen(preview: ActivePreview, message: PageMessageOf<"previewEditOpen">): void {
   if (preview.activeBlockEdit) {
     postEditSourceError(preview, message, "Another Markdown block is already being edited.");
     return;
@@ -2699,10 +2539,10 @@ function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessa
       return;
     }
     openPageEditor(preview, message);
-    void preview.panel.webview.postMessage({
+    void postToPage(preview, {
       type: "previewEditSource",
       documentId: message.documentId,
-      documentVersion: message.documentVersion,
+      revision: message.revision,
       requestId: message.requestId,
       editId: message.editId,
       line: message.line,
@@ -2719,10 +2559,10 @@ function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessa
   }
   const originalText = source.document.getText(source.range);
   openPageEditor(preview, message);
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewEditSource",
     documentId: message.documentId,
-    documentVersion: message.documentVersion,
+    revision: message.revision,
     requestId: message.requestId,
     editId: message.editId,
     line: message.line,
@@ -2732,7 +2572,7 @@ function handlePreviewEditOpen(preview: ActivePreview, message: PreviewSyncMessa
 }
 
 /** The page shows an inline editor from now on: page updates wait for it to close (STAB-03). */
-function openPageEditor(preview: ActivePreview, message: PreviewSyncMessage): void {
+function openPageEditor(preview: ActivePreview, message: BlockEditMessage): void {
   if (typeof message.editId === "string" && message.editId !== "") {
     preview.editLock.openPageEditor(message.editId);
   }
@@ -2890,7 +2730,7 @@ function drainActiveBlockEdit(preview: ActivePreview, edit: ActiveBlockEdit): vo
   });
 }
 
-function handlePreviewEditSave(preview: ActivePreview, message: PreviewSyncMessage): void {
+function handlePreviewEditSave(preview: ActivePreview, message: PageMessageOf<"previewEditSave">): void {
   let edit = preview.activeBlockEdit;
   if (!edit && message.insertAfterLine !== undefined) {
     const document = currentPreviewDocument(preview, message);
@@ -2904,12 +2744,12 @@ function handlePreviewEditSave(preview: ActivePreview, message: PreviewSyncMessa
       return;
     }
     edit = {
-      editId: message.editId as string,
+      editId: message.editId,
       documentId: message.documentId,
-      documentVersion: message.documentVersion,
+      revision: message.revision,
       requestId: message.requestId,
-      line: message.line as number,
-      endLine: message.endLine as number,
+      line: message.line,
+      endLine: message.endLine,
       sourceStartOffset: plan.offset,
       originalText: "",
       lastSavedText: "",
@@ -2934,12 +2774,12 @@ function handlePreviewEditSave(preview: ActivePreview, message: PreviewSyncMessa
       return;
     }
     edit = {
-      editId: message.editId as string,
+      editId: message.editId,
       documentId: message.documentId,
-      documentVersion: message.documentVersion,
+      revision: message.revision,
       requestId: message.requestId,
-      line: message.line as number,
-      endLine: message.endLine as number,
+      line: message.line,
+      endLine: message.endLine,
       sourceStartOffset: source.document.offsetAt(source.range.start),
       originalText,
       lastSavedText: originalText,
@@ -2954,7 +2794,7 @@ function handlePreviewEditSave(preview: ActivePreview, message: PreviewSyncMessa
   if (edit.cancelRequested
     || message.editId !== edit.editId
     || message.documentId !== edit.documentId
-    || message.documentVersion !== edit.documentVersion
+    || message.revision !== edit.revision
     || message.requestId !== edit.requestId
     || message.line !== edit.line
     || message.endLine !== edit.endLine
@@ -2975,12 +2815,12 @@ function handlePreviewEditSave(preview: ActivePreview, message: PreviewSyncMessa
   drainActiveBlockEdit(preview, edit);
 }
 
-function handlePreviewEditCancel(preview: ActivePreview, message: PreviewSyncMessage): void {
+function handlePreviewEditCancel(preview: ActivePreview, message: PageMessageOf<"previewEditCancel">): void {
   const edit = preview.activeBlockEdit;
   if (!edit
     || message.editId !== edit.editId
     || message.documentId !== edit.documentId
-    || message.documentVersion !== edit.documentVersion
+    || message.revision !== edit.revision
     || message.requestId !== edit.requestId
     || message.line !== edit.line
     || message.endLine !== edit.endLine) {
@@ -3036,10 +2876,10 @@ function syncPreviewToEditor(preview: ActivePreview, line: number): void {
     return;
   }
   preview.lastSourceScrollLine = line;
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "sourceScroll",
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
     line,
   });
@@ -3073,10 +2913,10 @@ function syncEditorToPreview(editor: vscode.TextEditor | undefined): void {
         preview.anchor = { line: sourceLine, owner: "editor", documentId: documentIdentity };
       }
       preview.lastSourceScrollLine = sourceLine;
-      void preview.panel.webview.postMessage({
+      void postToPage(preview, {
         type: "sourceScroll",
         documentId: stage.activeDocumentIdentity,
-        documentVersion: stage.activeDocumentVersion,
+        revision: revisionOfStage(stage),
         requestId: stage.requestId,
         line: sourceLine,
         selectionLine: sourceEditor.selection.active.line + 1,
@@ -3094,7 +2934,7 @@ function visibleEditorFor(preview: ActivePreview): vscode.TextEditor | undefined
 /** Remembers the pin of an accepted final save for the render that shows the saved text (R7). */
 function storePendingPin(
   preview: ActivePreview,
-  message: Pick<PreviewSyncMessage, "documentId" | "pinLine" | "pinViewportTop">,
+  message: { documentId: string; pinLine?: number; pinViewportTop?: number },
   minVersion: number,
 ): void {
   if (
@@ -3157,10 +2997,10 @@ function markEditorSelectionInPreview(preview: ActivePreview): void {
   if (!preview.configuration.markEditorSelection || !stage || !editor) {
     return;
   }
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "sourceScroll",
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
     selectionLine: editor.selection.active.line + 1,
   });
@@ -3296,13 +3136,13 @@ async function resolvePreviewLink(preview: ActivePreview, request: string) {
   }, preview.readOnly ? "the standalone document directory" : "the workspace", navigationRoots);
 }
 
-async function handlePreviewLinkDiscovery(preview: ActivePreview, message: PreviewSyncMessage): Promise<void> {
+async function handlePreviewLinkDiscovery(preview: ActivePreview, message: PageMessageOf<"previewLinkDiscover">): Promise<void> {
   try {
     const targets = await Promise.all((message.requests ?? []).map(async (request) => ({
       request, ...await resolvePreviewLink(preview, request),
     })));
     if (!matchesCurrentPreview(preview, message)) return;
-    await preview.panel.webview.postMessage({ type: "previewLinkTargets", ...scrollContext(preview.stage!), targets });
+    await postToPage(preview, { type: "previewLinkTargets", ...scrollContext(preview.stage!), targets });
   } catch (error) {
     if (!preview.disposed) void vscode.window.showWarningMessage(`Preview link discovery failed: ${String(error)}`);
   }
@@ -3335,11 +3175,11 @@ function postHistoryState(preview: ActivePreview): void {
   const history = historyOf(preview);
   const state = { canBack: history.canBack(), canForward: history.canForward() };
   preview.lastHistoryState = state;
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewHistoryState",
     ...state,
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
   });
 }
@@ -3348,11 +3188,11 @@ function postHistoryState(preview: ActivePreview): void {
 function postShowComments(preview: ActivePreview): void {
   const stage = preview.stage;
   if (preview.disposed || !stage) return;
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewShowComments",
     showComments: preview.configuration.showComments,
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
   });
 }
@@ -3388,12 +3228,12 @@ async function postIncomingChanges(preview: ActivePreview): Promise<void> {
   preview.incomingEnabledPosted = enabled;
   preview.incomingPosts += 1;
   preview.lastIncomingChanges = { enabled, ranges };
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewIncomingChanges",
     enabled,
     ranges,
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
   });
 }
@@ -3506,11 +3346,11 @@ async function postComments(preview: ActivePreview): Promise<void> {
   preview.commentsShown = threads.length > 0;
   preview.commentPosts += 1;
   preview.lastComments = threads;
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewComments",
     threads,
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
   });
 }
@@ -3774,11 +3614,11 @@ function postCommentResult(
     ...(threadId !== undefined ? { threadId } : {}),
   };
   preview.lastCommentResult = result;
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewCommentResult",
     ...result,
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
   });
 }
@@ -3798,7 +3638,7 @@ async function answerComment(
   postCommentResult(preview, kind, threadId, outcome);
 }
 
-function handleCommentCreate(preview: ActivePreview, message: RegisteredPreviewMessage): Promise<void> {
+function handleCommentCreate(preview: ActivePreview, message: PageMessageOf<"previewCommentCreate">): Promise<void> {
   const body = normalizeBody(message.body);
   const anchor = message.anchor;
   return answerComment(preview, "create", undefined, async () => {
@@ -3809,7 +3649,7 @@ function handleCommentCreate(preview: ActivePreview, message: RegisteredPreviewM
   });
 }
 
-function handleCommentReply(preview: ActivePreview, message: RegisteredPreviewMessage): Promise<void> {
+function handleCommentReply(preview: ActivePreview, message: PageMessageOf<"previewCommentReply">): Promise<void> {
   const body = normalizeBody(message.body);
   const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
   return answerComment(preview, "reply", threadId, async () => {
@@ -3820,7 +3660,7 @@ function handleCommentReply(preview: ActivePreview, message: RegisteredPreviewMe
   });
 }
 
-function handleCommentResolve(preview: ActivePreview, message: RegisteredPreviewMessage): Promise<void> {
+function handleCommentResolve(preview: ActivePreview, message: PageMessageOf<"previewCommentResolve">): Promise<void> {
   const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
   const resolved = message.resolved === true;
   return answerComment(preview, "resolve", threadId, async () => {
@@ -3830,7 +3670,7 @@ function handleCommentResolve(preview: ActivePreview, message: RegisteredPreview
   });
 }
 
-function handleCommentDelete(preview: ActivePreview, message: RegisteredPreviewMessage): Promise<void> {
+function handleCommentDelete(preview: ActivePreview, message: PageMessageOf<"previewCommentDelete">): Promise<void> {
   const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
   return answerComment(preview, "delete", threadId, async () => {
     if (threadId === undefined) return { ok: false, reason: "the thread is unknown." };
@@ -3888,10 +3728,10 @@ async function handlePreviewHistoryGo(preview: ActivePreview, direction: "back" 
     preview.lastSourceScrollLine = target.line;
     // The stored line is now the reader's place: a stale anchor must not overwrite it on the next jump.
     preview.anchor = { line: target.line, owner: "editor", documentId: preview.documentUri };
-    void preview.panel.webview.postMessage({
+    void postToPage(preview, {
       type: "sourceScroll",
       documentId: stage.activeDocumentIdentity,
-      documentVersion: stage.activeDocumentVersion,
+      revision: revisionOfStage(stage),
       requestId: stage.requestId,
       line: target.line,
     });
@@ -3927,11 +3767,11 @@ async function flushPageEdits(preview: ActivePreview): Promise<void> {
   if (!preview.disposed && !preview.readOnly && stage && preview.readyRequestId !== undefined) {
     const flushId = `flush-${++preview.flushSequence}`;
     const answered = new Promise<void>((resolve) => preview.flushWaiters.set(flushId, resolve));
-    const posted = await preview.panel.webview.postMessage({
+    const posted = await postToPage(preview, {
       type: "previewFlushEdit",
       flushId,
       documentId: stage.activeDocumentIdentity,
-      documentVersion: stage.activeDocumentVersion,
+      revision: revisionOfStage(stage),
       requestId: stage.requestId,
     }).then((ok) => ok, () => false);
     if (posted) {
@@ -3949,7 +3789,7 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
   if (!stage || !matchesCurrentPreview(preview, {
     type: "previewLink",
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
   })) {
     return;
@@ -3976,7 +3816,7 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
     if (fragmentRange) {
       recordNavigation(preview, { uri: preview.documentUri, line: fragmentRange.startLine });
     }
-    void preview.panel.webview.postMessage({
+    void postToPage(preview, {
       type: "navigateAnchor",
       value: navigation.value,
       ...(fragmentRange ? {
@@ -3984,7 +3824,7 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
         sourceEndLine: fragmentRange.endLine,
       } : {}),
       documentId: stage.activeDocumentIdentity,
-      documentVersion: stage.activeDocumentVersion,
+      revision: revisionOfStage(stage),
       requestId: stage.requestId,
     });
     return;
@@ -4037,28 +3877,82 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
   }
 }
 
-/** Registered messages that ignore the document version (see handlePreviewSyncMessage). */
-const COMMENT_MESSAGE_TYPES: ReadonlySet<string> = new Set([
-  "previewCommentCreate", "previewCommentReply", "previewCommentResolve", "previewCommentDelete",
-]);
+/**
+ * How a page message is matched to the preview before its handler runs; a message that does not
+ * pass is dropped. Every type has a gate: the table is typed by the protocol union.
+ * - `render`: it names the render the host holds (document, revision and request).
+ * - `comment`: `render` with any revision of the document. Comments live in the sidecar, not in
+ *   the document text: a newer revision does not stale them (the quote re-anchors), and typed text
+ *   must not be lost to a race with typing.
+ * - `document`: it names the document the preview shows; the render may be one behind (a file read
+ *   is bounded by the include policy anyway; the warning banner belongs to the document).
+ * - `own-id`: matched by an id of its own only, an editor id or a flush id: the answer must reach
+ *   the waiting host even when the stage moved on, or already follows the next document.
+ * - `page-state`: the `render` gate of the page-state family, with what comes around it (see
+ *   handlePageStateMessage).
+ */
+type PageMessageGate = "render" | "comment" | "document" | "own-id" | "page-state";
 
-const registeredMessageHandlers = new Map<
-  string,
-  (preview: ActivePreview, message: RegisteredPreviewMessage) => Thenable<void> | void
->();
+const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGate } = {
+  previewReady: "page-state",
+  previewScroll: "page-state",
+  previewReveal: "page-state",
+  previewState: "page-state",
+  previewLink: "page-state",
+  previewLinkDiscover: "page-state",
+  previewThemeModeChanged: "page-state",
+  previewRefresh: "page-state",
+  previewAnchorModeChanged: "page-state",
+  previewEditModeChanged: "page-state",
+  previewEditOpen: "page-state",
+  previewEditSave: "page-state",
+  previewEditCancel: "page-state",
+  previewFrontmatterSave: "page-state",
+  previewCheckboxToggle: "page-state",
+  previewCopyText: "render",
+  previewHistoryGo: "render",
+  previewViewPreferenceChanged: "render",
+  previewPaletteModeChanged: "render",
+  previewLabelRename: "render",
+  previewThreadReply: "render",
+  previewThreadDelete: "render",
+  previewBlockMove: "render",
+  previewBlocksCopy: "render",
+  previewBlocksCut: "render",
+  previewBlocksPaste: "render",
+  previewListTargets: "render",
+  previewListCitations: "render",
+  previewPickDocument: "render",
+  previewPickImage: "render",
+  previewPasteImage: "render",
+  previewPasteHtml: "render",
+  previewCommentCreate: "comment",
+  previewCommentReply: "comment",
+  previewCommentResolve: "comment",
+  previewCommentDelete: "comment",
+  previewPlantUmlInclude: "document",
+  previewShowProblems: "document",
+  previewWarningBannerClosed: "document",
+  previewEditClosed: "own-id",
+  previewEditFlushed: "own-id",
+};
+
+/** What a page message handler returns: the work it started, when a caller may wait for it. */
+type PageMessageResult = Thenable<void> | void;
+
+/** The host's router of page messages: one handler per type, the preview as context. */
+const pageMessages = createMessageRouter<PageToHostMessage, [ActivePreview], PageMessageResult>();
 
 // Copies the raw code of a code block. It does not edit anything, so a read-only preview allows it.
-registeredMessageHandlers.set("previewCopyText", (_preview, message) =>
-  vscode.env.clipboard.writeText(message.text as string));
+pageMessages.on("previewCopyText", (message) => vscode.env.clipboard.writeText(message.text));
+
+// Back / Next walk the navigation history of the panel. Only navigation, no document edit.
+pageMessages.on("previewHistoryGo", (message, preview) => handlePreviewHistoryGo(preview, message.direction));
 
 // A view preference only changes how the preview looks (workspace state, no document edit), so a
-// read-only or untrusted preview accepts it; the value is validated by the registry.
-// Back / Next walk the navigation history of the panel. Only navigation, no document edit.
-registeredMessageHandlers.set("previewHistoryGo", (preview, message) =>
-  handlePreviewHistoryGo(preview, message.direction as "back" | "forward"));
-
-registeredMessageHandlers.set("previewViewPreferenceChanged", (preview, message) => {
-  setSessionViewPreference(message.preference as ViewPreferenceKey, message.value);
+// read-only or untrusted preview accepts it; the value is validated by the protocol.
+pageMessages.on("previewViewPreferenceChanged", (message, preview) => {
+  setSessionViewPreference(message.preference, message.value);
   if (message.preference === "incomingChanges") {
     scheduleIncomingChanges(preview, 0);
   }
@@ -4066,48 +3960,48 @@ registeredMessageHandlers.set("previewViewPreferenceChanged", (preview, message)
 
 // The palette mode is a workspace choice like the edit mode: it changes buttons only, never the
 // rendering, so it is saved from the page and only a document edit needs a writable preview.
-registeredMessageHandlers.set("previewPaletteModeChanged", (preview, message) => {
+pageMessages.on("previewPaletteModeChanged", (message, preview) => {
   if (!preview.readOnly && isPaletteMode(message.mode)) {
     void editModeStorage?.update(PALETTE_MODE_STORAGE_KEY, message.mode);
   }
 });
 
 // The page saved its open editors and says so (CR 025); the waiting flush goes on. No document edit.
-registeredMessageHandlers.set("previewEditFlushed", (preview, message) => {
-  preview.flushWaiters.get(message.flushId as string)?.();
+pageMessages.on("previewEditFlushed", (message, preview) => {
+  preview.flushWaiters.get(message.flushId)?.();
 });
 
 // CR 050: the warning banner. Opening the Problems view and closing the banner edit nothing, so a
 // read-only or untrusted preview allows them.
-registeredMessageHandlers.set("previewShowProblems", () =>
+pageMessages.on("previewShowProblems", () =>
   vscode.commands.executeCommand("workbench.actions.view.problems"));
-registeredMessageHandlers.set("previewWarningBannerClosed", (preview, message) => {
-  dismissedWarningBanners.set(preview.documentUri, message.key as string);
+pageMessages.on("previewWarningBannerClosed", (message, preview) => {
+  dismissedWarningBanners.set(preview.documentUri, message.key);
 });
 
 // The page closed an inline editor the host was waiting for (STAB-03). It edits nothing.
-registeredMessageHandlers.set("previewEditClosed", (preview, message) => {
-  closePageEditor(preview, message.editId as string);
+pageMessages.on("previewEditClosed", (message, preview) => {
+  closePageEditor(preview, message.editId);
 });
 
-registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
-registeredMessageHandlers.set("previewThreadReply", (preview, message) => handleThreadChange(preview, message, "reply"));
-registeredMessageHandlers.set("previewThreadDelete", (preview, message) => handleThreadChange(preview, message, "delete"));
-registeredMessageHandlers.set("previewBlockMove", handleBlockMove);
-registeredMessageHandlers.set("previewBlocksCopy", handleBlocksCopyCut);
-registeredMessageHandlers.set("previewBlocksCut", handleBlocksCopyCut);
-registeredMessageHandlers.set("previewBlocksPaste", handleBlocksPaste);
-registeredMessageHandlers.set("previewListTargets", handleListTargets);
-registeredMessageHandlers.set("previewPlantUmlInclude", handlePlantUmlInclude);
-registeredMessageHandlers.set("previewListCitations", handleListCitations);
-registeredMessageHandlers.set("previewPickDocument", handlePickDocument);
-registeredMessageHandlers.set("previewPickImage", handlePickImage);
-registeredMessageHandlers.set("previewPasteImage", handlePasteImage);
-registeredMessageHandlers.set("previewPasteHtml", handlePasteHtml);
-registeredMessageHandlers.set("previewCommentCreate", handleCommentCreate);
-registeredMessageHandlers.set("previewCommentReply", handleCommentReply);
-registeredMessageHandlers.set("previewCommentResolve", handleCommentResolve);
-registeredMessageHandlers.set("previewCommentDelete", handleCommentDelete);
+pageMessages.on("previewLabelRename", (message, preview) => handleLabelRename(preview, message));
+pageMessages.on("previewThreadReply", (message, preview) => handleThreadChange(preview, message, "reply"));
+pageMessages.on("previewThreadDelete", (message, preview) => handleThreadChange(preview, message, "delete"));
+pageMessages.on("previewBlockMove", (message, preview) => handleBlockMove(preview, message));
+pageMessages.on("previewBlocksCopy", (message, preview) => handleBlocksCopyCut(preview, message));
+pageMessages.on("previewBlocksCut", (message, preview) => handleBlocksCopyCut(preview, message));
+pageMessages.on("previewBlocksPaste", (message, preview) => handleBlocksPaste(preview, message));
+pageMessages.on("previewListTargets", (message, preview) => handleListTargets(preview, message));
+pageMessages.on("previewPlantUmlInclude", (message, preview) => handlePlantUmlInclude(preview, message));
+pageMessages.on("previewListCitations", (message, preview) => handleListCitations(preview, message));
+pageMessages.on("previewPickDocument", (message, preview) => handlePickDocument(preview, message));
+pageMessages.on("previewPickImage", (message, preview) => handlePickImage(preview, message));
+pageMessages.on("previewPasteImage", (message, preview) => handlePasteImage(preview, message));
+pageMessages.on("previewPasteHtml", (message, preview) => handlePasteHtml(preview, message));
+pageMessages.on("previewCommentCreate", (message, preview) => handleCommentCreate(preview, message));
+pageMessages.on("previewCommentReply", (message, preview) => handleCommentReply(preview, message));
+pageMessages.on("previewCommentResolve", (message, preview) => handleCommentResolve(preview, message));
+pageMessages.on("previewCommentDelete", (message, preview) => handleCommentDelete(preview, message));
 
 function initialPaletteMode(): PaletteMode {
   return initialPaletteModeOf(
@@ -4129,7 +4023,12 @@ function trackPendingSave(preview: ActivePreview, save: Thenable<void> | undefin
  * with an explicit error the editor shows, instead of being dropped: the reader keeps the text and
  * knows it was not saved (STAB-06).
  */
-function reportStaleEdit(preview: ActivePreview, value: PreviewSyncMessage): void {
+/**
+ * A save or cancel of an editor opened on an older page than the one the host holds is refused
+ * with an explicit error the editor shows, instead of being dropped: the reader keeps the text and
+ * knows it was not saved (STAB-06).
+ */
+function reportStaleEdit(preview: ActivePreview, value: PageStateMessageUnion): void {
   if (preview.disposed || preview.readOnly || !activePreviews.has(preview) || value.documentId !== preview.documentUri) {
     return;
   }
@@ -4140,47 +4039,52 @@ function reportStaleEdit(preview: ActivePreview, value: PreviewSyncMessage): voi
   }
 }
 
+/** Runs the handler of a message that passed its gate; the caller may wait for what it started. */
+function routePageMessage(preview: ActivePreview, message: PageToHostMessage): Thenable<void> | undefined {
+  const outcome = pageMessages.dispatch(message, preview);
+  return outcome.handled ? Promise.resolve(outcome.result) : undefined;
+}
+
+/**
+ * Every message of a preview page arrives here: it is validated by the protocol, matched to the
+ * preview by the gate of its type (PAGE_MESSAGE_GATES), then handled. The result is the work the
+ * handler started (a save, a navigation), or undefined when the message was dropped.
+ */
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
-  if (isRegisteredPreviewMessage(value)) {
-    const handler = registeredMessageHandlers.get(value.type);
-    if (value.type === "previewPlantUmlInclude") {
-      // A file read does not depend on the document version: answer a page that is one render
-      // behind too, as long as it shows this document (the policy bounds every read anyway).
-      return preview.disposed || !handler || value.documentId !== preview.documentUri
-        ? undefined
-        : Promise.resolve(handler(preview, value));
-    }
-    if (value.type === "previewShowProblems" || value.type === "previewWarningBannerClosed") {
-      // The banner belongs to the document, not to one render of it: a page one render behind
-      // still opens the Problems view and closes its banner.
-      return preview.disposed || !handler || value.documentId !== preview.documentUri
-        ? undefined
-        : Promise.resolve(handler(preview, value));
-    }
-    if (value.type === "previewEditClosed") {
-      // A close is matched by the editor's id only: the editor was opened on the page the host
-      // holds, which may be one render behind the stage, or still show the previous document while
-      // the host already follows the next one. It edits nothing, and an unknown id is ignored.
-      return preview.disposed || !handler ? undefined : Promise.resolve(handler(preview, value));
-    }
-    if (value.type === "previewEditFlushed") {
-      // The answer to a flush request is matched by its flush id only: it must reach the waiting
-      // host even when a render moved the stage on while the page saved.
-      return preview.disposed || !handler ? undefined : Promise.resolve(handler(preview, value));
-    }
-    // Comments live in the sidecar, not in the document text: a changed document version does not
-    // stale them (the quote re-anchors), and typed text must not be lost to a race with typing.
-    const candidate = COMMENT_MESSAGE_TYPES.has(value.type) && preview.stage
-      ? { ...value, documentVersion: preview.stage.activeDocumentVersion }
-      : value;
-    if (!handler || !matchesCurrentPreview(preview, candidate)) {
-      return;
-    }
-    return Promise.resolve(handler(preview, value));
+  if (!isPageToHostMessage(value)) {
+    return undefined;
   }
-  if (!isPreviewSyncMessage(value)) {
-    return;
+  switch (PAGE_MESSAGE_GATES[value.type]) {
+    case "own-id":
+      return preview.disposed ? undefined : routePageMessage(preview, value);
+    case "document":
+      return preview.disposed || value.documentId !== preview.documentUri
+        ? undefined
+        : routePageMessage(preview, value);
+    case "comment": {
+      const candidate = preview.stage ? { ...value, revision: revisionOfStage(preview.stage) } : value;
+      return matchesCurrentPreview(preview, candidate) ? routePageMessage(preview, value) : undefined;
+    }
+    case "render":
+      return matchesCurrentPreview(preview, value) ? routePageMessage(preview, value) : undefined;
+    case "page-state":
+      return isPageStateMessage(value) ? handlePageStateMessage(preview, value) : undefined;
   }
+}
+
+/** The edit requests of the page-state family: they need a writable preview. */
+const EDIT_REQUEST_TYPES: ReadonlySet<PageToHostType> = new Set([
+  "previewEditOpen", "previewEditSave", "previewEditCancel", "previewFrontmatterSave", "previewCheckboxToggle",
+]);
+
+/**
+ * The gate of the page-state family. Before the render check, a ready report can show that the
+ * webview reloaded an older document, or that it works through a chain of content patches. A stale
+ * edit is answered with an error. A message that passes reports the page's anchor, and an edit
+ * request of a read-only preview is refused with an error the page shows. Unlike the other gates,
+ * the result is the handler's own (undefined when it started nothing).
+ */
+function handlePageStateMessage(preview: ActivePreview, value: PageStateMessageUnion): Thenable<void> | undefined {
   if (value.type === "previewReady" && !preview.disposed && reportsReloadedDocument(value, {
     documentId: preview.stage?.activeDocumentIdentity,
     stageRequestId: preview.stage?.requestId,
@@ -4191,7 +4095,7 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     // content patches it received before: load the current document.
     freshNonceRecord(preview);
     assignWebviewHtml(preview, preview.webview.html);
-    return;
+    return undefined;
   }
   if (
     value.type === "previewReady"
@@ -4203,159 +4107,168 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     // The page handled an earlier patch of a chain: it is alive and works through the rest. Wait
     // again for the newest stage instead of loading the document while the page is catching up.
     armContentPatchFallback(preview, preview.stage);
-    return;
+    return undefined;
   }
   if (!matchesCurrentPreview(preview, value)) {
     reportStaleEdit(preview, value);
-    return;
+    return undefined;
   }
-  if (value.type === "previewLinkDiscover") {
-    void handlePreviewLinkDiscovery(preview, value);
-    return;
-  }
-  if (value.anchorLine !== undefined && value.documentId === preview.documentUri) {
+  if (value.type !== "previewLinkDiscover" && value.anchorLine !== undefined && value.documentId === preview.documentUri) {
     // The preview reports its anchor with every scroll, refresh and inline edit save.
     preview.anchor = { line: value.anchorLine, owner: "preview", documentId: value.documentId };
   }
-  if (value.type === "previewThemeModeChanged") {
-    if (isPreviewThemeMode(value.previewThemeMode)) {
-      setSessionPreviewThemeMode(value.previewThemeMode);
-    }
-    return;
-  }
-  if (value.type === "previewEditModeChanged") {
-    if (!preview.readOnly && typeof value.editMode === "boolean") {
-      void editModeStorage?.update(EDIT_MODE_STORAGE_KEY, value.editMode);
-    }
-    return;
-  }
-  if (preview.readOnly && (
-    value.type === "previewEditOpen"
-    || value.type === "previewEditSave"
-    || value.type === "previewEditCancel"
-    || value.type === "previewFrontmatterSave"
-    || value.type === "previewCheckboxToggle"
-  )) {
+  if (preview.readOnly && EDIT_REQUEST_TYPES.has(value.type)) {
     if (value.type === "previewFrontmatterSave") {
       postFrontmatterEditError(preview, value, "Editing requires a trusted workspace.");
     } else if (value.type === "previewCheckboxToggle") {
       postCheckboxResult(preview, value, { error: "Editing requires a trusted workspace." });
-    } else {
+    } else if (value.type === "previewEditOpen" || value.type === "previewEditSave" || value.type === "previewEditCancel") {
       postEditSourceError(preview, value, "Editing requires a trusted workspace.");
     }
-    return;
+    return undefined;
   }
-  if (value.type === "previewEditOpen") {
-    handlePreviewEditOpen(preview, value);
-    return;
+  const outcome = pageMessages.dispatch(value, preview);
+  return outcome.handled && outcome.result ? outcome.result : undefined;
+}
+
+pageMessages.on("previewLinkDiscover", (message, preview) => {
+  void handlePreviewLinkDiscovery(preview, message);
+});
+
+pageMessages.on("previewThemeModeChanged", (message) => {
+  if (isPreviewThemeMode(message.previewThemeMode)) {
+    setSessionPreviewThemeMode(message.previewThemeMode);
   }
-  if (value.type === "previewEditSave") {
-    handlePreviewEditSave(preview, value);
-    return;
+});
+
+pageMessages.on("previewEditModeChanged", (message, preview) => {
+  if (!preview.readOnly && typeof message.editMode === "boolean") {
+    void editModeStorage?.update(EDIT_MODE_STORAGE_KEY, message.editMode);
   }
-  if (value.type === "previewEditCancel") {
-    handlePreviewEditCancel(preview, value);
-    return;
-  }
-  if (value.type === "previewFrontmatterSave") {
-    return trackPendingSave(preview, handleFrontmatterSave(preview, value));
-  }
-  if (value.type === "previewCheckboxToggle") {
-    return trackPendingSave(preview, handleCheckboxToggle(preview, value));
-  }
+});
+
+pageMessages.on("previewEditOpen", (message, preview) => handlePreviewEditOpen(preview, message));
+pageMessages.on("previewEditSave", (message, preview) => handlePreviewEditSave(preview, message));
+pageMessages.on("previewEditCancel", (message, preview) => handlePreviewEditCancel(preview, message));
+pageMessages.on("previewFrontmatterSave", (message, preview) =>
+  trackPendingSave(preview, handleFrontmatterSave(preview, message)));
+pageMessages.on("previewCheckboxToggle", (message, preview) =>
+  trackPendingSave(preview, handleCheckboxToggle(preview, message)));
+
+// The remaining page-state messages each report the page's scroll state first.
+pageMessages.on("previewState", (message, preview) => {
+  recordPreviewState(preview, message);
+});
+
+pageMessages.on("previewRefresh", (value, preview) => {
   recordPreviewState(preview, value);
-  if (value.type === "previewRefresh") {
-    if (preview.document) {
-      preview.forceNextResult = true;
-      void refreshPreviewDocument(preview, preview.document);
+  if (preview.document) {
+    preview.forceNextResult = true;
+    void refreshPreviewDocument(preview, preview.document);
+  }
+});
+
+pageMessages.on("previewAnchorModeChanged", (value, preview) => {
+  recordPreviewState(preview, value);
+  if (typeof value.anchorToEditor === "boolean") {
+    preview.configuration = {
+      ...preview.configuration,
+      scrollPreviewWithEditor: value.anchorToEditor,
+    };
+    // The page changed its own setting; it is not a difference that needs a new document.
+    if (preview.loadedContext) {
+      preview.loadedContext = { ...preview.loadedContext, scrollPreviewWithEditor: value.anchorToEditor };
     }
+    if (value.anchorToEditor) {
+      syncEditorToPreview(undefined);
+    }
+  }
+});
+
+pageMessages.on("previewReady", (value, preview) => {
+  recordPreviewState(preview, value);
+  preview.readyRequestId = value.requestId;
+  if (preview.activeBlockEdit) {
+    // A page of another render, or one that reports no open editor, has no inline editor: the
+    // lock would block every later edit (STAB-02).
+    const outcome = preview.editLock.onPreviewReady(value.requestId, value.blockEditOpen);
+    if (outcome.released) {
+      releaseActiveBlockEdit(preview, false, outcome.flush);
+    }
+  } else if (preview.editLock.pageEditorOpen && value.blockEditOpen === false) {
+    // The page reports no open editor: the work that waited for one runs now.
+    closePageEditor(preview);
+  }
+  if (preview.status === "pending" && preview.shownStatus !== undefined && !preview.pendingOverlayVisible) {
+    if (preview.pendingOverlayDue) {
+      showPendingOverlay(preview);
+    } else {
+      // A deferred update replaced the page while a render was pending: wait again.
+      armPendingOverlay(preview);
+    }
+  }
+  // The webview already applied the anchor passed at render time; only refresh the
+  // selection marker so a re-render never triggers a second scroll.
+  markEditorSelectionInPreview(preview);
+  // The page starts with both buttons disabled: tell it what the history of this panel allows.
+  postHistoryState(preview);
+  // A pairing or theme change announced before the page listened did not reach it.
+  postPageLiveState(preview, value);
+  postShowComments(preview);
+  // A freshly loaded page has no marks and assumes the marks are enabled; a patched page keeps
+  // what it shows.
+  if (preview.patchedRequestId === undefined) {
+    preview.incomingMarksShown = false;
+    preview.incomingEnabledPosted = true;
+    preview.commentsShown = false;
+  }
+  preview.commentsPosted = undefined;
+  preview.commentsTextHash = undefined;
+  scheduleIncomingChanges(preview, 0);
+  scheduleComments(preview, 0);
+});
+
+pageMessages.on("previewLink", (message, preview) => {
+  recordPreviewState(preview, message);
+  if (message.request) {
+    return handlePreviewLink(preview, message.request);
+  }
+  return undefined;
+});
+
+pageMessages.on("previewScroll", (message, preview) => {
+  recordPreviewState(preview, message);
+  revealFromPage(preview, message);
+});
+pageMessages.on("previewReveal", (message, preview) => {
+  recordPreviewState(preview, message);
+  revealFromPage(preview, message);
+});
+
+/** A scroll of the page or a reveal request moves the text editor, as the settings allow. */
+function revealFromPage(preview: ActivePreview, value: PageMessageOf<"previewScroll" | "previewReveal">): void {
+  if (value.type === "previewScroll" && !preview.configuration.scrollPreviewWithEditor) {
     return;
   }
-  if (value.type === "previewAnchorModeChanged") {
-    if (typeof value.anchorToEditor === "boolean") {
-      preview.configuration = {
-        ...preview.configuration,
-        scrollPreviewWithEditor: value.anchorToEditor,
-      };
-      // The page changed its own setting; it is not a difference that needs a new document.
-      if (preview.loadedContext) {
-        preview.loadedContext = { ...preview.loadedContext, scrollPreviewWithEditor: value.anchorToEditor };
-      }
-      if (value.anchorToEditor) {
-        syncEditorToPreview(undefined);
-      }
-    }
+  if (!preview.configuration.scrollEditorWithPreview) {
     return;
   }
-  if (value.type === "previewReady") {
-    preview.readyRequestId = value.requestId;
-    if (preview.activeBlockEdit) {
-      // A page of another render, or one that reports no open editor, has no inline editor: the
-      // lock would block every later edit (STAB-02).
-      const outcome = preview.editLock.onPreviewReady(value.requestId, value.blockEditOpen);
-      if (outcome.released) {
-        releaseActiveBlockEdit(preview, false, outcome.flush);
-      }
-    } else if (preview.editLock.pageEditorOpen && value.blockEditOpen === false) {
-      // The page reports no open editor: the work that waited for one runs now.
-      closePageEditor(preview);
-    }
-    if (preview.status === "pending" && preview.shownStatus !== undefined && !preview.pendingOverlayVisible) {
-      if (preview.pendingOverlayDue) {
-        showPendingOverlay(preview);
-      } else {
-        // A deferred update replaced the page while a render was pending: wait again.
-        armPendingOverlay(preview);
-      }
-    }
-    // The webview already applied the anchor passed at render time; only refresh the
-    // selection marker so a re-render never triggers a second scroll.
-    markEditorSelectionInPreview(preview);
-    // The page starts with both buttons disabled: tell it what the history of this panel allows.
-    postHistoryState(preview);
-    // A pairing or theme change announced before the page listened did not reach it.
-    postPageLiveState(preview, value);
-    postShowComments(preview);
-    // A freshly loaded page has no marks and assumes the marks are enabled; a patched page keeps
-    // what it shows.
-    if (preview.patchedRequestId === undefined) {
-      preview.incomingMarksShown = false;
-      preview.incomingEnabledPosted = true;
-      preview.commentsShown = false;
-    }
-    preview.commentsPosted = undefined;
-    preview.commentsTextHash = undefined;
-    scheduleIncomingChanges(preview, 0);
-    scheduleComments(preview, 0);
+  if (value.activation === "double-click" && !preview.configuration.doubleClickToSwitchToEditor) {
     return;
   }
-  if (value.type === "previewLink" && value.request) {
-    return handlePreviewLink(preview, value.request);
+  const revealType = value.type === "previewScroll"
+    ? vscode.TextEditorRevealType.AtTop
+    : vscode.TextEditorRevealType.InCenterIfOutsideViewport;
+  if (value.line !== undefined && value.sourceFile === undefined) {
+    revealEditorLine(preview, value.line, revealType);
+    return;
   }
-  if (value.type === "previewScroll" || value.type === "previewReveal") {
-    if (value.type === "previewScroll" && !preview.configuration.scrollPreviewWithEditor) {
-      return;
-    }
-    if (!preview.configuration.scrollEditorWithPreview) {
-      return;
-    }
-    if (value.activation === "double-click" && !preview.configuration.doubleClickToSwitchToEditor) {
-      return;
-    }
-    const revealType = value.type === "previewScroll"
-      ? vscode.TextEditorRevealType.AtTop
-      : vscode.TextEditorRevealType.InCenterIfOutsideViewport;
-    if (value.line !== undefined && value.sourceFile === undefined) {
-      revealEditorLine(preview, value.line, revealType);
-      return;
-    }
-    if (
-      value.line !== undefined
-      && value.sourceFile !== undefined
-      && path.resolve(value.sourceFile) === path.resolve(preview.stage?.activeDocumentPath ?? "")
-    ) {
-      revealEditorLine(preview, value.line, revealType);
-    }
+  if (
+    value.line !== undefined
+    && value.sourceFile !== undefined
+    && path.resolve(value.sourceFile) === path.resolve(preview.stage?.activeDocumentPath ?? "")
+  ) {
+    revealEditorLine(preview, value.line, revealType);
   }
 }
 
@@ -4535,7 +4448,7 @@ function watchPageEditor(preview: ActivePreview): void {
     return;
   }
   preview.watchedPageEditorId = editId;
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewEditorWatch",
     documentId: preview.documentUri,
     editId,
@@ -4594,7 +4507,7 @@ function refreshReferencedPath(preview: ActivePreview, filePath: string): void {
     // The page draws its built-in PlantUML diagrams itself: tell it to read their files again.
     deferWhileEditing(preview, "plantuml-includes", () => {
       if (!preview.disposed) {
-        void preview.panel.webview.postMessage({
+        void postToPage(preview, {
           type: "previewPlantUmlIncludesChanged",
           documentId: preview.documentUri,
         });
@@ -4673,10 +4586,10 @@ function notifyPairing(preview: ActivePreview): void {
   if (preview.disposed || !stage) {
     return;
   }
-  void preview.panel.webview.postMessage({
+  void postToPage(preview, {
     type: "previewPairing",
     documentId: stage.activeDocumentIdentity,
-    documentVersion: stage.activeDocumentVersion,
+    revision: revisionOfStage(stage),
     requestId: stage.requestId,
     pairedTextEditor: visibleEditorFor(preview) !== undefined,
   });
@@ -4694,18 +4607,18 @@ function postPageLiveState(preview: ActivePreview, ready: PageIdentity): void {
     pairedTextEditor: visibleEditorFor(preview) !== undefined,
     themeKind: vscode.window.activeColorTheme.kind,
   })) {
-    void preview.panel.webview.postMessage(message);
+    void postToPage(preview, message);
   }
 }
 
 function notifyTheme(preview: ActivePreview): void {
   const stage = preview.stage;
   if (stage) {
-    void preview.panel.webview.postMessage({
+    void postToPage(preview, {
       type: "themeChanged",
       themeKind: vscode.window.activeColorTheme.kind,
       documentId: stage.activeDocumentIdentity,
-      documentVersion: stage.activeDocumentVersion,
+      revision: revisionOfStage(stage),
       requestId: stage.requestId,
     });
   }

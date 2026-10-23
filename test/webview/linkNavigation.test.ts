@@ -4,7 +4,7 @@ import * as vm from "node:vm";
 
 import { installLinkNavigation } from "../../src/webview/linkNavigation";
 
-const context = { documentId: "file:///active.md", documentVersion: 1, requestId: 2 };
+const context = { documentId: "file:///active.md", revision: 1, requestId: 2 };
 
 function harness(requests: string[]) {
   class Link {
@@ -106,7 +106,7 @@ function rescanHarness(initial: string[]) {
     unobserve() {}
     disconnect() {}
   }
-  const live = { documentId: "file:///active.md", documentVersion: 1, requestId: 2 };
+  const live = { documentId: "file:///active.md", revision: 1, requestId: 2 };
   const installed = vm.runInNewContext(`(${installLinkNavigation.toString()})(document, window, vscode, context)`, {
     Element: Link,
     context: live,
@@ -162,10 +162,10 @@ test("T33: after a rescan, discovery and target hints apply to the new links", (
 test("T33: a context mutated after install is honoured by posts and by the hint check", () => {
   const runtime = rescanHarness(["wiki:Note"]);
   runtime.live.requestId = 3;
-  runtime.live.documentVersion = 4;
+  runtime.live.revision = 4;
   runtime.listeners.get("click")!({ target: runtime.keepLinksAndAdd([])[0], preventDefault: () => undefined });
   assert.equal(runtime.messages[0].requestId, 3);
-  assert.equal(runtime.messages[0].documentVersion, 4);
+  assert.equal(runtime.messages[0].revision, 4);
   const link = runtime.keepLinksAndAdd([])[0];
   runtime.installed.rescan();
   runtime.listeners.get("message")!({ data: { type: "previewLinkTargets", ...runtime.live, targets: [{ request: "wiki:Note", kind: "local", path: "/p.md" }] } });

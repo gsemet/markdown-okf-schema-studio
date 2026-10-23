@@ -85,7 +85,7 @@ export async function run(): Promise<void> {
       await sendPreviewMessageForTests({
         type: "previewCheckboxToggle",
         documentId: uri.toString(),
-        documentVersion: document.version,
+        revision: document.version,
         requestId: getActivePreviewForTests()?.requestId,
         editId: `glow-checkbox-${attempt}`,
         line: 3,

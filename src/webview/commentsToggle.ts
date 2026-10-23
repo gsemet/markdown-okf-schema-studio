@@ -1,6 +1,6 @@
 export interface CommentsToggleContext {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
   initialViewPreferences?: { comments?: boolean };
 }
@@ -52,7 +52,7 @@ export function installCommentsToggle(
     vscode.postMessage({
       type: "previewViewPreferenceChanged",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       preference: "comments",
       value: shown,

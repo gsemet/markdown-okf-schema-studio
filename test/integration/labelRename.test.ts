@@ -46,7 +46,7 @@ export async function run(): Promise<void> {
     const rename = (line: number, oldName: string, newName: string) => sendPreviewMessageForTests({
       type: "previewLabelRename",
       documentId: preview.documentUri,
-      documentVersion: document.version,
+      revision: document.version,
       requestId: preview.requestId,
       editId: "label-test",
       line, oldName, newName,
@@ -76,7 +76,7 @@ export async function run(): Promise<void> {
     await sendPreviewMessageForTests({
       type: "previewLabelRename",
       documentId: preview.documentUri,
-      documentVersion: document.version,
+      revision: document.version,
       requestId: getActivePreviewForTests()?.requestId,
       editId: "label-test-2",
       line: 3, oldName: "old-name", newName: "new-name",

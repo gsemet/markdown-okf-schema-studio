@@ -54,7 +54,7 @@ export async function run(): Promise<void> {
       await sendPreviewMessageForTests({
         type: "previewPasteImage",
         documentId: preview.documentUri,
-        documentVersion: document.version,
+        revision: document.version,
         requestId: preview.requestId,
         editId,
         mime,
@@ -67,7 +67,7 @@ export async function run(): Promise<void> {
     await sendPreviewMessageForTests({
       type: "previewEditOpen",
       documentId: preview.documentUri,
-      documentVersion: document.version,
+      revision: document.version,
       requestId: preview.requestId,
       editId: "paste-edit",
       line: 3,

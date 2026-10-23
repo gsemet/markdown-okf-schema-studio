@@ -83,7 +83,7 @@ async function withThreadPreview(
     const send = (type: string, fields: Record<string, unknown>) => sendPreviewMessageForTests({
       type,
       documentId: preview.documentUri,
-      documentVersion: document.version,
+      revision: document.version,
       requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
       editId: "thread-test",
       ...fields,

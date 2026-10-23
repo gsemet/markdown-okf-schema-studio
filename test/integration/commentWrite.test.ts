@@ -25,7 +25,7 @@ function send(preview: PreviewForTests, type: string, fields: Record<string, unk
   return sendPreviewMessageForTests({
     type,
     documentId: preview.documentUri,
-    documentVersion: version,
+    revision: version,
     requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
     ...fields,
   });
@@ -112,7 +112,7 @@ export async function run(): Promise<void> {
     // A wrong document id is still dropped.
     let before = fs.readFileSync(sidecarPath, "utf8");
     await sendPreviewMessageForTests({
-      type: "previewCommentCreate", documentId: "file:///elsewhere.md", documentVersion: preview.documentVersion,
+      type: "previewCommentCreate", documentId: "file:///elsewhere.md", revision: preview.documentVersion,
       requestId: getActivePreviewForTests()?.requestId, anchor: anchorOf(3, "x"), body: "Wrong document",
     });
     assert.equal(fs.readFileSync(sidecarPath, "utf8"), before);

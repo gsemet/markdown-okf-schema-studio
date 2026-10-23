@@ -604,7 +604,7 @@ def stress_frontmatter_scroll(page: Page, scenario: dict, failures: list[Failure
     def source_scroll(line: int) -> None:
         page.evaluate(
             """({ documentId, line }) => window.dispatchEvent(new MessageEvent("message", {
-              data: { type: "sourceScroll", documentId, documentVersion: 1, requestId: 1, line },
+              data: { type: "sourceScroll", documentId, revision: 1, requestId: 1, line },
             }))""",
             {"documentId": document_id, "line": line},
         )
@@ -2804,7 +2804,7 @@ def check_change_bar(page: Page, scenario: dict, failures: list[Failure]) -> Non
     window.postMessage({
       type: 'previewIncomingChanges', enabled: true, ranges,
       documentId: html.getAttribute('data-sphinx-preview-document-id'),
-      documentVersion: Number(html.getAttribute('data-sphinx-preview-document-version')),
+      revision: Number(html.getAttribute('data-sphinx-preview-document-version')),
       requestId: Number(html.getAttribute('data-sphinx-preview-request-id')),
     }, '*');
     return { before: before.length, ranges, snapshot: before };
@@ -2918,8 +2918,8 @@ def check_update_glow(page: Page, scenario: dict, failures: list[Failure]) -> No
     window.dispatchEvent(new MessageEvent('message', { data: {
       type: 'previewContentPatch',
       documentId: html.getAttribute('data-sphinx-preview-document-id'),
-      documentVersion: version, requestId: request,
-      next: { documentVersion: version + 1, requestId: request + 1 },
+      revision: version, requestId: request,
+      next: { revision: version + 1, requestId: request + 1 },
       contentHtml, status: 'success', label: 'Preview ready', diagnostics: [],
       updatedRanges: lines.map(line => ({ start: line, end: line })),
     } }));
@@ -3090,7 +3090,7 @@ def check_figure_anchors(page: Page, scenario: dict, failures: list[Failure]) ->
     window.postMessage({
       type: 'navigateAnchor', value: '#steps',
       documentId: root.getAttribute('data-sphinx-preview-document-id'),
-      documentVersion: Number(root.getAttribute('data-sphinx-preview-document-version')),
+      revision: Number(root.getAttribute('data-sphinx-preview-document-version')),
       requestId: Number(root.getAttribute('data-sphinx-preview-request-id')),
     }, '*');
   }""")
@@ -3188,7 +3188,7 @@ def check_comment_chips(page: Page, scenario: dict, failures: list[Failure]) -> 
       window.postMessage({
         type: 'previewShowComments', showComments: show,
         documentId: root.getAttribute('data-sphinx-preview-document-id'),
-        documentVersion: Number(root.getAttribute('data-sphinx-preview-document-version')),
+        revision: Number(root.getAttribute('data-sphinx-preview-document-version')),
         requestId: Number(root.getAttribute('data-sphinx-preview-request-id')),
       }, '*');
     }"""
@@ -3405,7 +3405,7 @@ def check_inline_thread(page: Page, scenario: dict, failures: list[Failure]) -> 
       window.postMessage({
         type: 'previewShowComments', showComments: show,
         documentId: root.getAttribute('data-sphinx-preview-document-id'),
-        documentVersion: Number(root.getAttribute('data-sphinx-preview-document-version')),
+        revision: Number(root.getAttribute('data-sphinx-preview-document-version')),
         requestId: Number(root.getAttribute('data-sphinx-preview-request-id')),
       }, '*');
     }"""

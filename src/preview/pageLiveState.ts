@@ -12,11 +12,10 @@
  * This module must not import `vscode`.
  */
 
-export interface PageIdentity {
-  documentId: string;
-  documentVersion: number;
-  requestId: number;
-}
+import type { PageIdentity } from "../protocol/envelope";
+import type { PreviewPairingMessage, ThemeChangedMessage } from "../protocol/hostToPage";
+
+export type { PageIdentity } from "../protocol/envelope";
 
 export interface PageLiveState {
   /** A visible text editor shows the page's file: the anchor button can be used. */
@@ -25,16 +24,14 @@ export interface PageLiveState {
   themeKind: number;
 }
 
-export interface PageLiveStateMessage extends PageIdentity {
-  type: "previewPairing" | "themeChanged";
-  [field: string]: unknown;
-}
+/** A message that brings a page up to the host's live state. */
+export type PageLiveStateMessage = (PreviewPairingMessage | ThemeChangedMessage) & Record<string, unknown>;
 
 /** The messages that bring the page that reported `ready` up to the host's live state. */
 export function pageLiveStateMessages(ready: PageIdentity, live: PageLiveState): PageLiveStateMessage[] {
   const identity = {
     documentId: ready.documentId,
-    documentVersion: ready.documentVersion,
+    revision: ready.revision,
     requestId: ready.requestId,
   };
   return [

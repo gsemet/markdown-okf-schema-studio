@@ -1,0 +1,680 @@
+/**
+ * Page-to-host messages: every message a preview page sends, as one discriminated union with one
+ * validator per type in {@link PAGE_TO_HOST_VALIDATORS}. Pure module: no host API, no DOM, no Node
+ * built-ins, so every host and the tests share it.
+ *
+ * Adding a message type takes three steps:
+ *   1. Add its interface to {@link PageToHostMessage} (the envelope comes from {@link PageMessageBase}).
+ *   2. Add its validator to {@link PAGE_TO_HOST_VALIDATORS}, keyed by the type. It checks the
+ *      payload; {@link isPageToHostMessage} checks the envelope before it runs. The table is typed
+ *      by the union, so a type without a validator does not compile.
+ *   3. Give the host a handler (`on(type, handler)` on its router) and a gate, the rule that drops a
+ *      stale message before the handler runs (`PAGE_MESSAGE_GATES` in `src/extension.ts`).
+ *
+ * Two families share the union. The page-state messages (scrolling, readiness, inline edits; see
+ * {@link PAGE_STATE_MESSAGE_TYPES}) were validated as one group before the registry existed: their
+ * optional fields are checked on every type that carries them, and a field that belongs to one
+ * type (a pin, a checkbox column, a frontmatter action) is refused on every other type. The other
+ * types validate their own payload only, and bound the document id.
+ */
+
+import { isValidAnchor, MAX_BODY_LENGTH, type CommentAnchor } from "../comments/commentModel";
+import { MAX_THREAD_REPLY_LENGTH } from "../comments/inlineThread";
+import { isValidLabelName } from "../mapping/labelRename";
+import { isBase64, MAX_PASTED_IMAGE_BASE64_LENGTH, PASTED_IMAGE_MIME_TYPES } from "../mapping/pastedImage";
+import { isPreviewThemeMode, type PreviewThemeMode } from "../state/previewTheme";
+import type { ViewPreferenceKey } from "../state/previewViewPreferences";
+import {
+  hasPageIdentity,
+  isBoundedString,
+  isOneOf,
+  isSourceLine,
+  MAX_DOCUMENT_ID_LENGTH,
+  type MessageValidator,
+  type PageIdentity,
+} from "./envelope";
+
+/** The envelope of every page message: its type and the identity of the render the page shows. */
+export interface PageMessageBase<T extends string> extends PageIdentity {
+  /** The message type, the discriminant of {@link PageToHostMessage}. */
+  readonly type: T;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Page-state messages
+
+/**
+ * Optional fields any page-state message may carry. The validator checks the first group whenever
+ * it is present; the second group is reported state that the host normalizes before use.
+ */
+export interface PageStateFields {
+  /** A 1-based source line (the block the message is about, or the line to reveal). */
+  line?: number;
+  /** The last source line of that block. */
+  endLine?: number;
+  /** The source line at the reading line of the page. */
+  sourceLine?: number;
+  /** The fractional source line the page's scroll anchor holds (see `docs/scroll-anchoring.md`). */
+  anchorLine?: number;
+  /** The source line of the selection the page marks. */
+  selectionLine?: number;
+  /** The page's scroll offset in CSS pixels. */
+  scrollTop?: number;
+  /** The theme mode the toolbar shows. */
+  previewThemeMode?: PreviewThemeMode;
+  /** The state of the toolbar's anchor button. */
+  anchorToEditor?: boolean;
+  /** The state of the toolbar's edit button. */
+  editMode?: boolean;
+  /** The navigation request of a link (`data-sphinx-preview-navigation`). */
+  request?: string;
+  /** Not checked by the validator: the file of the revealed block. */
+  sourceFile?: string;
+  /** Not checked by the validator: reported page state, normalized by the host. */
+  focusedBlockId?: string;
+  /** Not checked by the validator: reported page state, normalized by the host. */
+  selectedText?: string;
+  /** Not checked by the validator: reported page state, normalized by the host. */
+  openDisclosures?: number[];
+  /** Not checked by the validator: reported page state, normalized by the host. */
+  descriptionsCollapsed?: boolean;
+  /** Not checked by the validator: how a reveal was started. */
+  activation?: "click" | "double-click" | "keyboard";
+}
+
+/** A page-state message: the envelope plus the optional {@link PageStateFields}. */
+export interface PageStateMessage<T extends string> extends PageMessageBase<T>, PageStateFields {}
+
+/** The page listens and shows its render (after a load or a content patch). */
+export interface PreviewReadyMessage extends PageStateMessage<"previewReady"> {
+  /** True while the page has an inline block editor open. */
+  blockEditOpen?: boolean;
+}
+
+/** The reader scrolled the page: the host may move the text editor. */
+export type PreviewScrollMessage = PageStateMessage<"previewScroll">;
+/** The reader asked to reveal a block in the text editor (click, double-click or keyboard). */
+export type PreviewRevealMessage = PageStateMessage<"previewReveal">;
+/** The page's scroll and disclosure state, kept by the host for the next render. */
+export type PreviewStateMessage = PageStateMessage<"previewState">;
+/** The toolbar's Refresh button. */
+export type PreviewRefreshMessage = PageStateMessage<"previewRefresh">;
+/** The reader followed a link; `request` names it. */
+export type PreviewLinkMessage = PageStateMessage<"previewLink">;
+
+/** The links that came into view: the host answers with their targets (`previewLinkTargets`). */
+export interface PreviewLinkDiscoverMessage extends PageStateMessage<"previewLinkDiscover"> {
+  /** At most 64 navigation requests of at most 4096 characters. */
+  requests: string[];
+}
+
+/** The theme mode chosen with the toolbar. */
+export interface PreviewThemeModeChangedMessage extends PageStateMessage<"previewThemeModeChanged"> {
+  previewThemeMode: PreviewThemeMode;
+}
+
+/** The anchor button was toggled: the preview follows the text editor or not. */
+export interface PreviewAnchorModeChangedMessage extends PageStateMessage<"previewAnchorModeChanged"> {
+  anchorToEditor: boolean;
+}
+
+/** The edit button was toggled (remembered for the workspace). */
+export interface PreviewEditModeChangedMessage extends PageStateMessage<"previewEditModeChanged"> {
+  editMode: boolean;
+}
+
+/** Fields shared by the three block-edit messages: which editor and which source lines. */
+export interface BlockEditFields {
+  /** The editor's id, repeated in the host's answer. */
+  editId: string;
+  line: number;
+  endLine: number;
+  /** Block insertion: the source line after which the new block goes (0 = start of the body). */
+  insertAfterLine?: number;
+}
+
+/** The fields of a save that the validator refuses on an open or a cancel. */
+export interface NoSaveFields {
+  final?: undefined;
+  flush?: undefined;
+  pinLine?: undefined;
+  pinViewportTop?: undefined;
+}
+
+/** The page opens an inline block editor: the host answers with the block's source text. */
+export interface PreviewEditOpenMessage extends PageStateMessage<"previewEditOpen">, BlockEditFields, NoSaveFields {
+  line: number;
+  endLine: number;
+}
+
+/** The text of an open block editor: an autosave (`final: false`) or the final save. */
+export interface PreviewEditSaveMessage extends PageStateMessage<"previewEditSave">, BlockEditFields {
+  line: number;
+  endLine: number;
+  originalText: string;
+  editedText: string;
+  /** False for an autosave; true or absent for the final save. */
+  final?: boolean;
+  /** A save sent by the flush before a navigation. */
+  flush?: true;
+  /** Final saves: source line and viewport top of the edited element (anchoring rule R7). */
+  pinLine?: number;
+  pinViewportTop?: number;
+}
+
+/** The block editor was cancelled. */
+export interface PreviewEditCancelMessage extends PageStateMessage<"previewEditCancel">, BlockEditFields, NoSaveFields {
+  line: number;
+  endLine: number;
+}
+
+/** The three block-edit messages. */
+export type BlockEditMessage = PreviewEditOpenMessage | PreviewEditSaveMessage | PreviewEditCancelMessage;
+
+/** A change of one frontmatter field from the properties table. */
+export interface PreviewFrontmatterSaveMessage extends PageStateMessage<"previewFrontmatterSave"> {
+  editId: string;
+  fieldName: string;
+  /** Absent for a value edit. */
+  frontmatterAction?: "add" | "remove";
+  /** For an add: the existing top-level field after which the new field is inserted. */
+  afterField?: string;
+  newFieldName?: string;
+  /** The new value (absent only for a remove). */
+  fieldValue?: unknown;
+  fieldValueFormat?: "yaml";
+  /** For a value edit: "plain" writes a safe string as a plain YAML scalar (a new custom key). */
+  fieldValueStyle?: "plain";
+  /** A value edit sent by the flush before a navigation: text that is not valid YAML is kept as typed. */
+  flush?: true;
+  pinLine?: number;
+  pinViewportTop?: number;
+}
+
+/** A task-list checkbox was clicked. */
+export interface PreviewCheckboxToggleMessage extends PageStateMessage<"previewCheckboxToggle"> {
+  editId: string;
+  line: number;
+  endLine: number;
+  /** Zero-based column of the marker's opening bracket. */
+  column: number;
+  /** The requested state. */
+  checked: boolean;
+}
+
+/** Every page-state message. */
+export type PageStateMessageUnion =
+  | PreviewReadyMessage
+  | PreviewScrollMessage
+  | PreviewRevealMessage
+  | PreviewStateMessage
+  | PreviewLinkMessage
+  | PreviewLinkDiscoverMessage
+  | PreviewThemeModeChangedMessage
+  | PreviewRefreshMessage
+  | PreviewAnchorModeChangedMessage
+  | PreviewEditOpenMessage
+  | PreviewEditSaveMessage
+  | PreviewEditCancelMessage
+  | PreviewFrontmatterSaveMessage
+  | PreviewCheckboxToggleMessage
+  | PreviewEditModeChangedMessage;
+
+/** The type names of the page-state family, which accept a document id of any length. */
+export const PAGE_STATE_MESSAGE_TYPES: ReadonlySet<PageStateMessageUnion["type"]> = new Set([
+  "previewReady", "previewScroll", "previewReveal", "previewState", "previewLink", "previewLinkDiscover",
+  "previewThemeModeChanged", "previewRefresh", "previewAnchorModeChanged", "previewEditOpen",
+  "previewEditSave", "previewEditCancel", "previewFrontmatterSave", "previewCheckboxToggle",
+  "previewEditModeChanged",
+] as const);
+
+/** Whether a page message belongs to the page-state family. */
+export function isPageStateMessage(message: { readonly type: string }): message is PageStateMessageUnion {
+  return (PAGE_STATE_MESSAGE_TYPES as ReadonlySet<string>).has(message.type);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Registered messages
+
+/** A host round trip of the page: the answer (`<type>Result`) repeats `editId`. */
+export interface HostRequestFields {
+  editId: string;
+}
+
+/** Raw code of a code block, copied to the clipboard by the host. */
+export interface PreviewCopyTextMessage extends PageMessageBase<"previewCopyText"> {
+  text: string;
+}
+
+/** Back / Next of toolbar row 2: the host walks the panel's navigation history. */
+export interface PreviewHistoryGoMessage extends PageMessageBase<"previewHistoryGo"> {
+  direction: "back" | "forward";
+}
+
+/** A view preference of toolbar row 2, with a value valid for that preference. */
+export interface PreviewViewPreferenceChangedMessage extends PageMessageBase<"previewViewPreferenceChanged"> {
+  preference: ViewPreferenceKey;
+  value: unknown;
+}
+
+/** The palette mode select of the edition palette (workspace state). */
+export interface PreviewPaletteModeChangedMessage extends PageMessageBase<"previewPaletteModeChanged"> {
+  mode: "strict" | "gfm" | "myst";
+}
+
+/** Rename of a MyST label from its anchor icon. */
+export interface PreviewLabelRenameMessage extends PageMessageBase<"previewLabelRename"> {
+  /** Not checked by the validator: repeated in the answer, which the page matches by it. */
+  editId?: string;
+  /** The source line of `(oldName)=`. */
+  line: number;
+  oldName: string;
+  newName: string;
+}
+
+/** Reply to the inline comment thread (`<!-- THREAD`) at these source lines. */
+export interface PreviewThreadReplyMessage extends PageMessageBase<"previewThreadReply">, HostRequestFields {
+  line: number;
+  endLine: number;
+  text: string;
+}
+
+/** Delete the inline comment thread at these source lines. */
+export interface PreviewThreadDeleteMessage extends PageMessageBase<"previewThreadDelete">, HostRequestFields {
+  line: number;
+  endLine: number;
+}
+
+/** Move of a body block past its neighbour from the "+" bar. */
+export interface PreviewBlockMoveMessage extends PageMessageBase<"previewBlockMove"> {
+  line: number;
+  endLine: number;
+  neighbourLine: number;
+  neighbourEndLine: number;
+  direction: "up" | "down";
+  /** The moved block's viewport top (the host knows the new line). */
+  pinViewportTop?: number;
+}
+
+/** Copy of the selected blocks as Markdown. */
+export interface PreviewBlocksCopyMessage extends PageMessageBase<"previewBlocksCopy"> {
+  line: number;
+  endLine: number;
+}
+
+/** Cut of the selected blocks. */
+export interface PreviewBlocksCutMessage extends PageMessageBase<"previewBlocksCut"> {
+  line: number;
+  endLine: number;
+  pinViewportTop?: number;
+}
+
+/** Paste of the clipboard as blocks after a source line (0 = start of the body). */
+export interface PreviewBlocksPasteMessage extends PageMessageBase<"previewBlocksPaste"> {
+  insertAfterLine: number;
+  pinLine?: number;
+  pinViewportTop?: number;
+}
+
+/** A new review comment thread on a selection. */
+export interface PreviewCommentCreateMessage extends PageMessageBase<"previewCommentCreate"> {
+  anchor: CommentAnchor;
+  body: string;
+}
+
+/** A reply to a review comment thread. */
+export interface PreviewCommentReplyMessage extends PageMessageBase<"previewCommentReply"> {
+  threadId: string;
+  body: string;
+}
+
+/** Resolve or reopen a review comment thread. */
+export interface PreviewCommentResolveMessage extends PageMessageBase<"previewCommentResolve"> {
+  threadId: string;
+  resolved: boolean;
+}
+
+/** Delete a review comment thread. */
+export interface PreviewCommentDeleteMessage extends PageMessageBase<"previewCommentDelete"> {
+  threadId: string;
+}
+
+/** The page's answer to a host flush request: its final saves were posted before it. */
+export interface PreviewEditFlushedMessage extends PageMessageBase<"previewEditFlushed"> {
+  flushId: string;
+  flushed: boolean;
+}
+
+/** The page closed the inline editor the host asked about with `previewEditorWatch`. */
+export interface PreviewEditClosedMessage extends PageMessageBase<"previewEditClosed"> {
+  editId: string;
+}
+
+/** The labels of the document, for the MyST palette. */
+export type PreviewListTargetsMessage = PageMessageBase<"previewListTargets"> & HostRequestFields;
+/** The citation keys of the workspace `.bib` files, for the MyST palette. */
+export type PreviewListCitationsMessage = PageMessageBase<"previewListCitations"> & HostRequestFields;
+/** A native open dialog for a `{doc}` path. */
+export type PreviewPickDocumentMessage = PageMessageBase<"previewPickDocument"> & HostRequestFields;
+/** A native open dialog for an image file. */
+export type PreviewPickImageMessage = PageMessageBase<"previewPickImage"> & HostRequestFields;
+
+/** An image pasted into the text box, as plain base64; the host names and writes the file. */
+export interface PreviewPasteImageMessage extends PageMessageBase<"previewPasteImage">, HostRequestFields {
+  mime: string;
+  dataBase64: string;
+}
+
+/** A local file of a PlantUML `!include` for the built-in engine. */
+export interface PreviewPlantUmlIncludeMessage extends PageMessageBase<"previewPlantUmlInclude">, HostRequestFields {
+  /** The name the directive gives. */
+  path: string;
+  /** The id the host gave the including file, or null for the document itself. */
+  from: string | null;
+}
+
+/** The warning banner's button opens the Problems view. */
+export type PreviewShowProblemsMessage = PageMessageBase<"previewShowProblems">;
+
+/** The warning banner was closed for the warning set named by `key`. */
+export interface PreviewWarningBannerClosedMessage extends PageMessageBase<"previewWarningBannerClosed"> {
+  key: string;
+}
+
+/** Rich text pasted into the text box: the clipboard's HTML, converted to Markdown by the host. */
+export interface PreviewPasteHtmlMessage extends PageMessageBase<"previewPasteHtml">, HostRequestFields {
+  html: string;
+}
+
+/** Every message a preview page sends to its host. */
+export type PageToHostMessage =
+  | PageStateMessageUnion
+  | PreviewCopyTextMessage
+  | PreviewHistoryGoMessage
+  | PreviewViewPreferenceChangedMessage
+  | PreviewPaletteModeChangedMessage
+  | PreviewLabelRenameMessage
+  | PreviewThreadReplyMessage
+  | PreviewThreadDeleteMessage
+  | PreviewBlockMoveMessage
+  | PreviewBlocksCopyMessage
+  | PreviewBlocksCutMessage
+  | PreviewBlocksPasteMessage
+  | PreviewCommentCreateMessage
+  | PreviewCommentReplyMessage
+  | PreviewCommentResolveMessage
+  | PreviewCommentDeleteMessage
+  | PreviewEditFlushedMessage
+  | PreviewEditClosedMessage
+  | PreviewListTargetsMessage
+  | PreviewListCitationsMessage
+  | PreviewPickDocumentMessage
+  | PreviewPickImageMessage
+  | PreviewPasteImageMessage
+  | PreviewPlantUmlIncludeMessage
+  | PreviewShowProblemsMessage
+  | PreviewWarningBannerClosedMessage
+  | PreviewPasteHtmlMessage;
+
+/** The type names of {@link PageToHostMessage}. */
+export type PageToHostType = PageToHostMessage["type"];
+
+/** The page message of one type (or of a union of types). */
+export type PageMessageOf<T extends PageToHostType> = Extract<PageToHostMessage, { type: T }>;
+
+// ---------------------------------------------------------------------------------------------
+// Validators
+
+const VIEW_PREFERENCE_VALIDATORS: Record<string, (value: unknown) => boolean> = {
+  zoom: (value) => Number.isSafeInteger(value) && (value as number) >= 70 && (value as number) <= 200,
+  widthMode: (value) => isOneOf(value, ["margin", "auto", "full"] as const),
+  toc: (value) => typeof value === "boolean",
+  incomingChanges: (value) => typeof value === "boolean",
+  comments: (value) => typeof value === "boolean",
+  toolbarCollapsed: (value) => typeof value === "boolean",
+};
+
+const MAX_COPY_TEXT_LENGTH = 1_000_000;
+
+const MAX_EDIT_ID_LENGTH = 100;
+
+const MAX_PASTED_HTML_LENGTH = 1_000_000;
+
+const MAX_PLANTUML_INCLUDE_PATH_LENGTH = 4096;
+
+const MAX_WARNING_KEY_LENGTH = 32;
+
+/** The list and pick requests of the MyST palette carry only the id their answer is matched by. */
+const isHostRequest: MessageValidator = (message) =>
+  isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "";
+
+const isPinViewportTop = (value: unknown): boolean => value === undefined
+  || (typeof value === "number" && Number.isFinite(value) && Math.abs(value) <= 100000);
+
+const isCommentBody = (value: unknown): boolean =>
+  typeof value === "string" && value.length >= 1 && value.length <= MAX_BODY_LENGTH;
+
+const PALETTE_MODES = ["strict", "gfm", "myst"] as const;
+
+type PageStateType = PageStateMessageUnion["type"];
+
+const BLOCK_EDIT_TYPES: readonly PageStateType[] = ["previewEditOpen", "previewEditSave", "previewEditCancel"];
+
+const EDIT_REQUEST_TYPES: readonly PageStateType[] = [
+  ...BLOCK_EDIT_TYPES, "previewFrontmatterSave", "previewCheckboxToggle",
+];
+
+/**
+ * The optional fields of a page-state message of type `type`: each one is valid when present, and
+ * a field that belongs to other types is absent.
+ */
+function hasValidStateFields(message: Readonly<Record<string, unknown>>, type: PageStateType): boolean {
+  const frontmatter = type === "previewFrontmatterSave";
+  const optionalLine = (value: unknown): boolean => value === undefined || isSourceLine(value);
+  const pinOwner = frontmatter || (type === "previewEditSave" && message.final === true);
+  return optionalLine(message.line)
+    && optionalLine(message.endLine)
+    && optionalLine(message.sourceLine)
+    && (message.anchorLine === undefined
+      || (typeof message.anchorLine === "number" && Number.isFinite(message.anchorLine) && message.anchorLine >= 1))
+    && optionalLine(message.selectionLine)
+    && (message.scrollTop === undefined
+      || (typeof message.scrollTop === "number" && Number.isFinite(message.scrollTop) && message.scrollTop >= 0))
+    && (message.previewThemeMode === undefined || isPreviewThemeMode(message.previewThemeMode))
+    && (message.anchorToEditor === undefined || typeof message.anchorToEditor === "boolean")
+    && (message.editMode === undefined || typeof message.editMode === "boolean")
+    && (message.request === undefined || typeof message.request === "string")
+    && ((message.pinLine === undefined && message.pinViewportTop === undefined)
+      || (pinOwner
+        && isSourceLine(message.pinLine)
+        && typeof message.pinViewportTop === "number"
+        && Number.isFinite(message.pinViewportTop)
+        && Math.abs(message.pinViewportTop) <= 100000))
+    && (message.insertAfterLine === undefined
+      || (BLOCK_EDIT_TYPES.includes(type)
+        && Number.isSafeInteger(message.insertAfterLine) && (message.insertAfterLine as number) >= 0))
+    && (message.blockEditOpen === undefined
+      || (type === "previewReady" && typeof message.blockEditOpen === "boolean"))
+    && (message.final === undefined || (type === "previewEditSave" && typeof message.final === "boolean"))
+    && (message.fieldValueFormat === undefined || (frontmatter && message.fieldValueFormat === "yaml"))
+    && (message.fieldValueStyle === undefined
+      || (frontmatter
+        && message.fieldValueStyle === "plain"
+        && message.frontmatterAction === undefined
+        && message.fieldValueFormat === undefined))
+    && (message.flush === undefined
+      || ((frontmatter || type === "previewEditSave") && message.flush === true))
+    && (message.newFieldName === undefined || (frontmatter && typeof message.newFieldName === "string"))
+    && (type === "previewCheckboxToggle" || (message.column === undefined && message.checked === undefined))
+    && (message.afterField === undefined
+      || (frontmatter
+        && message.frontmatterAction === "add"
+        && typeof message.afterField === "string"
+        && message.afterField.length >= 1
+        && message.afterField.length <= 1024
+        && !/[\r\n]/u.test(message.afterField)))
+    && (message.frontmatterAction === undefined
+      || (frontmatter && (message.frontmatterAction === "add" || message.frontmatterAction === "remove")))
+    && (!EDIT_REQUEST_TYPES.includes(type) || isEditRequest(message, type));
+}
+
+/** An edit request names its editor, and a field or a line range. */
+function isEditRequest(message: Readonly<Record<string, unknown>>, type: PageStateType): boolean {
+  return typeof message.editId === "string"
+    && message.editId.length > 0
+    && (type === "previewFrontmatterSave"
+      ? typeof message.fieldName === "string" && message.fieldName.length > 0
+      : message.line !== undefined && message.endLine !== undefined
+        && (message.endLine as number) >= (message.line as number));
+}
+
+/** The validator of a page-state type: its optional fields, then `payload`. */
+const stateMessage = (type: PageStateType, payload: MessageValidator = () => true): MessageValidator =>
+  (message) => hasValidStateFields(message, type) && payload(message);
+
+/**
+ * One validator per page message type, keyed by the type. A validator checks the payload only; the
+ * envelope is checked by {@link isPageToHostMessage} before it runs.
+ */
+export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageValidator } = {
+  // Page state: readiness, scrolling, reveal, the scroll state, links and the toolbar toggles.
+  previewReady: stateMessage("previewReady"),
+  previewScroll: stateMessage("previewScroll"),
+  previewReveal: stateMessage("previewReveal"),
+  previewState: stateMessage("previewState"),
+  previewLink: stateMessage("previewLink"),
+  previewLinkDiscover: stateMessage("previewLinkDiscover", (message) => Array.isArray(message.requests)
+    && message.requests.length <= 64
+    && message.requests.every((request) => typeof request === "string" && request.length <= 4096)),
+  previewThemeModeChanged: stateMessage("previewThemeModeChanged",
+    (message) => isPreviewThemeMode(message.previewThemeMode)),
+  previewRefresh: stateMessage("previewRefresh"),
+  previewAnchorModeChanged: stateMessage("previewAnchorModeChanged",
+    (message) => typeof message.anchorToEditor === "boolean"),
+  previewEditModeChanged: stateMessage("previewEditModeChanged", (message) => typeof message.editMode === "boolean"),
+  // Inline edits: a block editor, a frontmatter field and a task-list checkbox.
+  previewEditOpen: stateMessage("previewEditOpen"),
+  previewEditSave: stateMessage("previewEditSave",
+    (message) => typeof message.originalText === "string" && typeof message.editedText === "string"),
+  previewEditCancel: stateMessage("previewEditCancel"),
+  previewFrontmatterSave: stateMessage("previewFrontmatterSave", (message) => message.frontmatterAction === "remove"
+    || Object.prototype.hasOwnProperty.call(message, "fieldValue")),
+  previewCheckboxToggle: stateMessage("previewCheckboxToggle", (message) => Number.isSafeInteger(message.column)
+    && (message.column as number) >= 0
+    && typeof message.checked === "boolean"
+    && message.line === message.endLine),
+  // Raw code of a code block, copied to the clipboard by the host.
+  previewCopyText: (message) => isBoundedString(message.text, MAX_COPY_TEXT_LENGTH),
+  // Back / Next of toolbar row 2: the host walks the panel's navigation history.
+  previewHistoryGo: (message) => isOneOf(message.direction, ["back", "forward"] as const),
+  // A view preference of toolbar row 2 (zoom, width mode, TOC, incoming changes, collapsed toolbar).
+  previewViewPreferenceChanged: (message) => typeof message.preference === "string"
+    && Object.hasOwn(VIEW_PREFERENCE_VALIDATORS, message.preference)
+    && VIEW_PREFERENCE_VALIDATORS[message.preference](message.value),
+  // The palette mode select of the edition palette: strict, GFM or MyST buttons (workspace state).
+  previewPaletteModeChanged: (message) => isOneOf(message.mode, PALETTE_MODES),
+  // Rename of a MyST label from its anchor icon: the source line of `(oldName)=` and both names.
+  previewLabelRename: (message) => isSourceLine(message.line)
+    && isValidLabelName(message.oldName) && isValidLabelName(message.newName),
+  // Inline comment threads (`<!-- THREAD`): reply to or delete the thread at these source lines.
+  // The host picks the author and the time and re-checks that the lines are still a thread.
+  previewThreadReply: (message) => isHostRequest(message) && isSourceLine(message.line)
+    && isSourceLine(message.endLine) && (message.endLine as number) >= (message.line as number)
+    && isBoundedString(message.text, MAX_THREAD_REPLY_LENGTH) && message.text.trim() !== "",
+  previewThreadDelete: (message) => isHostRequest(message) && isSourceLine(message.line)
+    && isSourceLine(message.endLine) && (message.endLine as number) >= (message.line as number),
+  // Move of a body block past its neighbour from the "+" bar: both line ranges, the direction and
+  // the moved block's viewport top (the host knows the new line). The host re-checks the ranges.
+  previewBlockMove: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
+    && isSourceLine(message.neighbourLine) && isSourceLine(message.neighbourEndLine)
+    && isOneOf(message.direction, ["up", "down"] as const)
+    && (message.pinViewportTop === undefined
+      || (typeof message.pinViewportTop === "number" && Number.isFinite(message.pinViewportTop)
+        && Math.abs(message.pinViewportTop) <= 100000)),
+  // Copy, cut and paste of selected blocks as Markdown (T40): the source lines of the selection
+  // (or the line to paste after) and the viewport top of the block the screen is held on. The
+  // host re-checks every line against the document.
+  previewBlocksCopy: (message) => isSourceLine(message.line) && isSourceLine(message.endLine),
+  previewBlocksCut: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
+    && isPinViewportTop(message.pinViewportTop),
+  previewBlocksPaste: (message) => Number.isSafeInteger(message.insertAfterLine)
+    && (message.insertAfterLine as number) >= 0
+    && (message.pinLine === undefined || isSourceLine(message.pinLine))
+    && isPinViewportTop(message.pinViewportTop),
+  // Review comments (T43): a new thread on a selection and a reply. The host picks the author, the
+  // ids and the time; it refuses read-only previews and writes the sidecar file.
+  previewCommentCreate: (message) => isValidAnchor(message.anchor) && isCommentBody(message.body),
+  previewCommentReply: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
+    && message.threadId !== "" && isCommentBody(message.body),
+  // Resolve, reopen and delete a thread (T44). The host refuses read-only previews and answers.
+  previewCommentResolve: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
+    && message.threadId !== "" && typeof message.resolved === "boolean",
+  previewCommentDelete: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
+    && message.threadId !== "",
+  // The page's answer to a host flush request (CR 025): it posted the final save of every open
+  // editor before this message, so the host can wait for those saves. It edits nothing.
+  previewEditFlushed: (message) => isBoundedString(message.flushId, MAX_EDIT_ID_LENGTH)
+    && message.flushId !== "" && typeof message.flushed === "boolean",
+  // The page closed an inline editor the host asked about with `previewEditorWatch` (STAB-03): the
+  // page updates that waited for it can run. It edits nothing.
+  previewEditClosed: (message) => isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "",
+  // The MyST palette's pickers: labels of the document, citation keys of the workspace `.bib`
+  // files, and a native open dialog for a `{doc}` path. They read only; the answer repeats `editId`.
+  previewListTargets: isHostRequest,
+  previewListCitations: isHostRequest,
+  previewPickDocument: isHostRequest,
+  // The image button and the Figure button: a native open dialog for an image file.
+  previewPickImage: isHostRequest,
+  // An image pasted into the text box: its MIME type and bytes as plain base64. The host sniffs
+  // the bytes, picks the file name and writes next to the document; the page names nothing.
+  previewPasteImage: (message) => isHostRequest(message)
+    && isOneOf(message.mime, PASTED_IMAGE_MIME_TYPES as readonly string[])
+    && typeof message.dataBase64 === "string"
+    && message.dataBase64.length > 0
+    && message.dataBase64.length <= MAX_PASTED_IMAGE_BASE64_LENGTH
+    && isBase64(message.dataBase64),
+  // A local file of a PlantUML `!include` for the built-in engine: the name the directive gives and
+  // the id (absolute path) the host gave the including file, or null for the document itself. The
+  // host reads it under the rules of `{include}`; the answer repeats `editId`.
+  previewPlantUmlInclude: (message) => isHostRequest(message)
+    && isBoundedString(message.path, MAX_PLANTUML_INCLUDE_PATH_LENGTH) && message.path.trim() !== ""
+    && (message.from === null
+      || (isBoundedString(message.from, MAX_PLANTUML_INCLUDE_PATH_LENGTH) && message.from !== "")),
+  // CR 050: the warning banner's button opens the Problems view; it carries nothing else.
+  previewShowProblems: () => true,
+  // CR 050: the warning banner was closed; the key of its warning set (made by the page) is kept
+  // for the document until the end of the session.
+  previewWarningBannerClosed: (message) => isBoundedString(message.key, MAX_WARNING_KEY_LENGTH)
+    && /^[0-9a-z]+-[0-9a-f]{8}$/u.test(message.key),
+  // Rich text pasted into the text box: the clipboard's HTML, converted to Markdown by the host.
+  previewPasteHtml: (message) => isHostRequest(message)
+    && isBoundedString(message.html, MAX_PASTED_HTML_LENGTH) && message.html !== "",
+};
+
+/**
+ * A checker for a table of validators: the value is an object whose `type` is a key of the table
+ * (never an inherited one), whose envelope is a page identity, and whose validator accepts it. The
+ * document id is at most {@link MAX_DOCUMENT_ID_LENGTH} long, except for the types listed in
+ * `unboundedDocumentIdTypes`.
+ */
+export function createMessageChecker<M extends { type: string }>(
+  validators: Readonly<Record<string, MessageValidator>>,
+  unboundedDocumentIdTypes: ReadonlySet<string> = new Set(),
+): (value: unknown) => value is M {
+  return (value: unknown): value is M => {
+    if (!value || typeof value !== "object") {
+      return false;
+    }
+    const message = value as Readonly<Record<string, unknown>>;
+    const type = message.type;
+    return typeof type === "string"
+      && Object.hasOwn(validators, type)
+      && typeof validators[type] === "function"
+      && hasPageIdentity(message, unboundedDocumentIdTypes.has(type) ? Infinity : MAX_DOCUMENT_ID_LENGTH)
+      && validators[type](message);
+  };
+}
+
+/** Whether a value received from a page is a valid {@link PageToHostMessage}. */
+export const isPageToHostMessage: (value: unknown) => value is PageToHostMessage =
+  createMessageChecker<PageToHostMessage>(PAGE_TO_HOST_VALIDATORS, PAGE_STATE_MESSAGE_TYPES);

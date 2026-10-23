@@ -1,6 +1,6 @@
 export interface WidthModeContext {
   documentId: string;
-  documentVersion: number;
+  revision: number;
   requestId: number;
   initialViewPreferences?: { widthMode?: string };
 }
@@ -164,7 +164,7 @@ export function installWidthMode(
     vscode.postMessage({
       type: "previewViewPreferenceChanged",
       documentId: context.documentId,
-      documentVersion: context.documentVersion,
+      revision: context.revision,
       requestId: context.requestId,
       preference: "widthMode",
       value: mode,

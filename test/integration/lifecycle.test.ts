@@ -70,7 +70,7 @@ export async function run(): Promise<void> {
     sendPreviewMessageForTests({
       type: "previewThemeModeChanged",
       documentId: firstPreview.documentUri,
-      documentVersion: firstPreview.documentVersion ?? 0,
+      revision: firstPreview.documentVersion ?? 0,
       requestId: firstPreview.requestId ?? 0,
       previewThemeMode: "dark",
     });
@@ -104,7 +104,7 @@ export async function run(): Promise<void> {
     sendPreviewMessageForTests({
       type: "previewState",
       documentId: themedPreview.documentUri,
-      documentVersion: themedPreview.documentVersion,
+      revision: themedPreview.documentVersion,
       requestId: themedPreview.requestId,
       sourceLine: 4,
       scrollTop: 88,
@@ -116,7 +116,7 @@ export async function run(): Promise<void> {
     sendPreviewMessageForTests({
       type: "previewReveal",
       documentId: "file:///outside-workspace.md",
-      documentVersion: firstPreview.documentVersion,
+      revision: firstPreview.documentVersion,
       requestId: firstPreview.requestId,
       line: 3,
     });
@@ -138,7 +138,7 @@ export async function run(): Promise<void> {
     sendPreviewMessageForTests({
       type: "previewReveal",
       documentId: firstPreview.documentUri,
-      documentVersion: firstPreview.documentVersion,
+      revision: firstPreview.documentVersion,
       requestId: firstPreview.requestId,
       line: 3,
     });
