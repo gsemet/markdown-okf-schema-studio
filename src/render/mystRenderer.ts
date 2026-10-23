@@ -12,6 +12,7 @@ import {
 } from "./checkboxMarkers";
 import { convertCommentMarkers } from "./commentMarkers";
 import { highlightCodeBlocks } from "./highlight";
+import { expandGrids, expandToctrees } from "./mystGridToctree";
 import { detectMystSyntax, MAX_EXTENSION_WARNINGS, mystExtensionWarning } from "./mystSyntaxDetect";
 
 export interface RenderDiagnostic {
@@ -36,6 +37,11 @@ export interface MystIncludeSource {
 export interface MystRenderContext {
   sourcePath?: string;
   resolveInclude: (request: string, sourcePath: string) => MystIncludeSource | undefined;
+  /**
+   * Lists the documents a `{toctree}` glob entry matches, as requests relative to the source
+   * document's folder (any order). Unset: glob entries show as missing.
+   */
+  listDocuments?: (pattern: string, sourcePath: string) => string[];
   /**
    * MyST extensions the document's Sphinx project enables, when that is known for certain.
    * Set: syntax that needs a missing extension is reported as a warning (rendering is unchanged).
@@ -1771,8 +1777,14 @@ export async function renderMyst(
   const removedPrefix = source.slice(0, source.length - markdown.length);
   const lineOffset = removedPrefix.match(/\r\n|\r|\n/gu)?.length ?? 0;
   const checkboxes = prepareCheckboxMarkers(markdown, lineOffset + 1);
-  const ast = mystParse(expandGithubAlerts(checkboxes.text), MYST_PARSE_OPTIONS);
+  const parsedText = expandGithubAlerts(checkboxes.text);
+  const ast = mystParse(parsedText, MYST_PARSE_OPTIONS);
   shiftSourcePositions(ast, lineOffset);
+  expandGrids(
+    ast,
+    (fragment) => mystParse(fragment, MYST_PARSE_OPTIONS),
+    { lines: parsedText.split(/\r\n|\r|\n/u), firstLine: lineOffset + 1 },
+  );
   repairGroupedContextTagHtml(ast, mystParse);
   if (context?.enabledMystExtensions) {
     const enabled = context.enabledMystExtensions;
@@ -1798,6 +1810,15 @@ export async function renderMyst(
       new Set([context.sourcePath]),
       includeBudget,
     );
+  }
+  {
+    const sourcePath = context?.sourcePath ?? "";
+    expandToctrees(ast, {
+      sourcePath,
+      read: (request) => (context && sourcePath ? context.resolveInclude(request, sourcePath) : undefined),
+      ...(context?.listDocuments ? { list: (pattern) => context.listDocuments?.(pattern, sourcePath) ?? [] } : {}),
+      dependencies,
+    });
   }
   normalizeFigureCaptions(ast);
   normalizeCaptionlessReferences(ast);

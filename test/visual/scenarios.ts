@@ -298,6 +298,26 @@ const GFM_GALLERY_ASSERTIONS: ContentAssertion[] = [
   { message: "the autolink is a link", selector: `${MAIN} a[data-sphinx-preview-navigation='https://example.com/gfm']`, count: 1 },
 ];
 
+const GRID_ASSERTIONS = (columns: number): ContentAssertion[] => [
+  { message: "the outer grid has four items: item, linked card, plain card and nested-grid card", selector: `${MAIN} > .myst-grid > .myst-grid-row > .myst-grid-item`, count: 4 },
+  { message: `the outer grid shows ${columns} column(s) at this pane width`, selector: `${MAIN} .myst-grid-row.myst-grid-md-2`, expr: `getComputedStyle(document.querySelector('#sphinx-myst-preview-content .myst-grid-row.myst-grid-md-2')).gridTemplateColumns.split(' ').length === ${columns}` },
+  { message: "the linked card has header, body, footer and a link to its target", selector: `${MAIN} .myst-grid-card .myst-grid-card-link[data-sphinx-preview-navigation='targets/alpha.md']`, count: 1, text: "Linked card", expr: "(() => { const c = document.querySelector('#sphinx-myst-preview-content .myst-grid-card'); return ['header', 'body', 'footer'].every((p) => c.querySelector('.myst-grid-card-' + p)); })()" },
+  { message: "the card text is readable (non-transparent text colour on the card)", selector: `${MAIN} .myst-grid-card-body`, visible: true },
+  { message: "the nested grid shows two inner items", selector: `${MAIN} .myst-grid .myst-grid .myst-grid-item`, count: 2 },
+  { message: "no grid part leaves the pane", selector: `${MAIN} .myst-grid-card`, insidePane: true },
+  { message: "the text after the grid renders", selector: `${MAIN} p`, text: "Text after the grid renders normally." },
+];
+
+const TOCTREE_ASSERTIONS: ContentAssertion[] = [
+  { message: "two captions render as headings", selector: `${MAIN} .myst-toctree-caption[role='heading']`, count: 2 },
+  { message: "the first tree links the target H1 and the explicit title", selector: `${MAIN} .myst-toctree-link[data-sphinx-preview-navigation='targets/alpha.md']`, min: 1, text: "Alpha target" },
+  { message: "the explicit title wins over the target H1", selector: `${MAIN} .myst-toctree-link[data-sphinx-preview-navigation='targets/beta.md']`, min: 1, text: "Custom title" },
+  { message: "the missing target shows as a warning entry without a link", selector: `${MAIN} .myst-toctree-missing`, count: 1, text: "targets/missing-chapter", visible: true },
+  { message: "the glob lists the two documents of the folder", selector: `${MAIN} .myst-toctree:nth-of-type(2) .myst-toctree-link`, count: 2 },
+  { message: "the hidden tree shows nothing", selector: `${MAIN} .myst-toctree-hidden`, count: 1, expr: "getComputedStyle(document.querySelector('#sphinx-myst-preview-content .myst-toctree-hidden')).display === 'none'" },
+  { message: "the text after the trees renders", selector: `${MAIN} p`, text: "Text after the trees renders normally." },
+];
+
 const MYST_GALLERY_ASSERTIONS: ContentAssertion[] = [
   { message: "a reference links to its label", selector: `${MAIN} a[data-sphinx-preview-navigation='#gallery-target']`, count: 1, text: "Labels and references" },
   { message: "the dropdown is a closed details block with its summary", selector: `${MAIN} details`, count: 1, text: "Read more", expr: "document.querySelector('#sphinx-myst-preview-content details').open === false" },
@@ -2145,6 +2165,26 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     fullPage: true,
     contentAssertions: MYST_GALLERY_ASSERTIONS,
     description: `Every MyST construct on one page (label and references, dropdown, definition list, sub and sup, kbd and abbr roles, footnote, math, glossary), ${theme}, 900 px pane.`,
+  })),
+  ...([["light", 900, 2], ["dark", 900, 2], ["light", 460, 1]] as const).map(([theme, width, columns], index) => ({
+    id: `myst/v${22 + index}-grid-cards-full-${theme}-${width}`,
+    fixture: "46-grid-cards",
+    theme,
+    ...(width === 900 ? WIDE : NARROW),
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: GRID_ASSERTIONS(columns),
+    description: `A {grid} of items and cards with header, body, footer, link and a nested grid, ${theme}, ${width} px pane (${columns} column${columns === 1 ? "" : "s"}).`,
+  })),
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    id: `myst/v${25 + index}-toctree-caption-full-${theme}-900`,
+    fixture: "47-toctree",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: TOCTREE_ASSERTIONS,
+    description: `Three {toctree} lists: with caption and a missing target, a glob and a hidden one, ${theme}, 900 px pane.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
     id: `diagrams/v0${8 + index}-mermaid-syntax-error-${theme}-900`,

@@ -25,7 +25,8 @@ Markdown flavours and extensions:
 | --- | --- | --- |
 | [![JSON Schema-aware OKF properties table](images/readme/schema-properties.png)](images/readme/schema-properties.png) | [![Editing an OKF frontmatter property in place](images/readme/edit-frontmatter.png)](images/readme/edit-frontmatter.png) | [![Edit affordance on rendered Markdown](images/readme/inline-editing.png)](images/readme/inline-editing.png) |
 
-- **MyST rendering:** directives, admonitions, tables, math (including `align` environments),
+- **MyST rendering:** directives, admonitions, `{grid}` cards (columns follow the pane width) and
+  `{toctree}` lists of links to the documents they name, tables, math (including `align` environments),
   Mermaid, PlantUML, images and figures with their `:width:` and `:align:`, media, `(label)=`
   anchors (shown as a small icon; in edit mode a click on it renames the label), and permitted
   external links render in the preview.

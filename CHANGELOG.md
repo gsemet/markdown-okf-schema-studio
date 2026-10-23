@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- MyST `{grid}` and `{toctree}` now render in the preview instead of showing a "not available"
+  placeholder. A grid lays out its `grid-item` and `grid-item-card` blocks (title, header, body,
+  footer, and a link that makes the whole card clickable) in the number of columns given by its
+  `1 1 2 2` argument, and falls back to fewer columns as the pane narrows; it works with ``` and
+  `:::` fences, nested. A toctree lists the documents it names as links that open in the preview,
+  labelled with each document's first heading (or the file name, or your `Title <target>`), with
+  `:caption:` as a heading, `:hidden:` hiding the list, `:glob:` patterns listing matching files in
+  order, and a missing target shown with a warning style.
 - With the caret inside an existing Markdown link, the link button (or Cmd/Ctrl+K) now opens the
   panel pre-filled with the link's text and URL, and Save replaces that link (its title is kept);
   one undo restores it. A reference-style link (`[text][ref]`) is read from its definition when it
