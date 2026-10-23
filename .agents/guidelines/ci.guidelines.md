@@ -31,7 +31,8 @@ The CI only runs what a developer can run locally. All logic lives in the task r
    not a CI setting.
 10. **Every PR uses the template** `.github/PULL_REQUEST_TEMPLATE.md` (Summary, Changes, Impacts,
     Blast radius graded 1 to 3, Test plan), written in English. Fill every section; write "None"
-    rather than delete one.
+    rather than delete one. It is written for a reader outside the team: no internal ids in the
+    text (see "PR body for an external reader" in prd-workflow.guidelines.md).
 11. **Every job has a `timeout-minutes`** (about twice its healthy duration: 30 for the VS Code
     integration and stress jobs, 15 for the others, 10 for the report job). A hung job must fail fast and name
     where it stopped, never run to the platform default of six hours. Never raise a timeout to

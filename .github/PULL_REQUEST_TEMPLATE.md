@@ -1,4 +1,6 @@
-<!-- Write the whole PR (title and body) in English. -->
+<!-- Write the whole PR (title and body) in English, for a reader outside the project team:
+no internal ids (CR, backlog, plan or task numbers). Put any such reference in an optional
+last section "Internal references". -->
 
 ## Summary
 
