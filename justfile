@@ -17,19 +17,51 @@ dev:
     uv run --no-sync --group docs playwright install chromium
 
 # Set up a CI machine (CI only: npm ci replaces node_modules) from the lock files; the runner provides Node.js.
-dev-ci:
+# `just dev-ci visual` also installs what only the visual stage uses: Chromium with its system
+# libraries and fonts, plantuml and graphviz.
+dev-ci STAGE="":
     #!/usr/bin/env bash
     set -euo pipefail
-    if [[ "$(uname -s)" == "Linux" ]] && ! { command -v plantuml && command -v dot; } >/dev/null; then
-        # A stalled or IPv6-only mirror connection must fail and retry (a run spent 28 minutes on a
-        # 90 MB download at 53 kB/s, another hung for an hour), not wait for the job timeout.
-        apt_options=(-o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::ForceIPv4=true)
-        sudo -n apt-get "${apt_options[@]}" update
-        sudo -n apt-get "${apt_options[@]}" install --yes --no-install-recommends plantuml graphviz
-    fi
+    case "{{ STAGE }}" in
+        "" | visual) ;;
+        *)
+            echo "dev-ci: unknown stage '{{ STAGE }}' (expected nothing or 'visual')" >&2
+            exit 1
+            ;;
+    esac
     {{ npm }} ci
     uv sync --group docs --group release
+    [[ "{{ STAGE }}" == "visual" ]] || exit 0
+    if [[ "$(uname -s)" != "Linux" ]]; then
+        uv run --no-sync --group docs playwright install --with-deps chromium
+        exit 0
+    fi
+    # The Ubuntu mirror sometimes serves a runner at 50-100 kB/s (115 MB of packages then outlast
+    # the job timeout), so apt installs from .cache/apt-archives, which CI caches: a cached package
+    # is never downloaded again. A stalled connection fails after 30 s instead of hanging.
+    archives=.cache/apt-archives
+    mkdir -p "$archives"
+    shopt -s nullglob
+    cached=("$archives"/*.deb)
+    echo "dev-ci: ${#cached[@]} package archive(s) restored from $archives"
+    if ((${#cached[@]})); then
+        sudo -n cp "${cached[@]}" /var/cache/apt/archives/
+    fi
+    apt_options=(-o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::ForceIPv4=true)
+    sudo -n apt-get "${apt_options[@]}" update
+    if ! { command -v plantuml && command -v dot; } >/dev/null; then
+        sudo -n apt-get "${apt_options[@]}" install --yes --no-install-recommends plantuml graphviz
+    fi
+    # Playwright runs its own apt-get install, which uses the same archive folder.
     uv run --no-sync --group docs playwright install --with-deps chromium
+    # Keep only the archives of the current package versions for the next run.
+    sudo -n apt-get autoclean
+    rm -f "$archives"/*.deb
+    used=(/var/cache/apt/archives/*.deb)
+    if ((${#used[@]})); then
+        cp "${used[@]}" "$archives"/
+    fi
+    echo "dev-ci: ${#used[@]} package archive(s) saved to $archives"
 
 # Upgrade dependencies from npmjs.org and PyPI and refresh the development environment.
 update:

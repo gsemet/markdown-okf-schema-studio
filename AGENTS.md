@@ -29,7 +29,7 @@ It is MIT licensed and is developed independently from the Agentic Coding White 
 - Run end-to-end tests: `just e2e`
 - Package a VSIX: `just package`
 - Run the complete validation and site-generation pipeline: `just preflight`
-- Set up a CI machine from the lock files: `just dev-ci`
+- Set up a CI machine from the lock files: `just dev-ci` (`just dev-ci visual` for the visual job)
 - CI jobs (run in parallel by `.github/workflows/ci.yml`, in sequence by `just preflight`):
   `just ci-static`, `just ci-visual`, `just ci-integration`, then `just ci-report` (merges the
   visual and integration outputs) and `just ci-gallery` (gallery and site from existing outputs)

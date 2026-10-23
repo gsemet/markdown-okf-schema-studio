@@ -19,7 +19,8 @@ Linux hosts may also need Playwright system libraries; install those using your 
 package manager or run `uv run --group docs playwright install-deps chromium` with the required
 permissions. Integration tests download their isolated VS Code test runtime on first use.
 The full visual campaign also requires `plantuml` and Graphviz on `PATH` for its successful
-diagram cases. GitHub Actions installs both from Ubuntu packages; on macOS use
+diagram cases. In GitHub Actions only the visual job installs them, with Playwright's system
+libraries, through `just dev-ci visual`, from cached Ubuntu package archives; on macOS use
 `brew install plantuml graphviz`.
 
 ## Dependency Updates
