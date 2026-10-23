@@ -1750,6 +1750,7 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
             failures.append(Failure(page_name, f"toolbar control is missing or mislabeled: {label}"))
         elif button.is_hidden():
             failures.append(Failure(page_name, f"toolbar control is hidden: {label}"))
+    comments_setting_off = page.evaluate("document.documentElement.getAttribute('data-okf-show-comments')") == "false"
     for selector, label in (
         ('[data-sphinx-preview-zoom-out]', "Zoom out"),
         ('[data-sphinx-preview-zoom-in]', "Zoom in"),
@@ -1759,6 +1760,11 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
         ('[data-sphinx-preview-comments-toggle]', "Hide comments"),
     ):
         button = toolbar.locator(selector)
+        if selector == '[data-sphinx-preview-comments-toggle]' and comments_setting_off:
+            # preview.showComments off is the master switch: the markup stays but the button is not offered.
+            if button.count() != 1 or button.is_visible():
+                failures.append(Failure(page_name, "the Comments button must be hidden when preview.showComments is off"))
+            continue
         if button.count() != 1 or button.get_attribute("aria-label") != label:
             failures.append(Failure(page_name, f"toolbar control is missing or mislabeled: {label}"))
         elif button.is_hidden():
