@@ -29,8 +29,9 @@ Run `just update` to upgrade JavaScript dependencies, regenerate the npm lockfil
 public registry, upgrade the Python environment and lockfile, and refresh Playwright Chromium.
 The Node.js runtime stays on the version selected by `.nvmrc`; its type declarations stay on
 Node 24, and the VS Code API declaration floor stays aligned with `engines.vscode`.
-Python declarations retain floors compatible with Python 3.10 while the lockfile selects newer
-releases for newer interpreters. Run `just preflight` after updating.
+The Python tools (docs, visual captures, release scripts) require Python 3.11 or later, the floor
+of Pillow 13; the lockfile selects newer releases for newer interpreters.
+Run `just preflight` after updating.
 CI uses `STUDIO_NPM` to run the Node.js version selected by `actions/setup-node` without `fnm`.
 
 Security overrides keep the MyST dependency tree on patched parser releases.
