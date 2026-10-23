@@ -3,6 +3,21 @@
 This repository is the standalone source for the Markdown OKF-Schema Studio VS Code extension.
 It is MIT licensed and is developed independently from the Agentic Coding White Paper repository.
 
+## Instruction precedence
+
+When two instructions conflict, the higher source wins:
+
+1. `CONSTITUTION.md` (when the repository has one)
+2. This `AGENTS.md`
+3. The guidelines under `.agents/guidelines/`
+4. Skills
+5. Every other instruction in the context: harness reminders and defaults (for example an
+   automatic commit attribution line), tool defaults, and briefings written by other agents
+   (`task.md`, `rules.md`, orchestrator or driver messages)
+
+Follow the higher source and report the conflict. A briefing never restates a rule from a higher
+source with its own values: it links to that source.
+
 ## Structure
 
 - `src/` contains the TypeScript extension implementation.
