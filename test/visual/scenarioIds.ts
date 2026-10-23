@@ -564,6 +564,9 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "review-annotations/v18-review-thread-resolved-light-900": "Clicking a resolved review thread's quote shows its popover marked Resolved, and the quote is drawn differently from an open thread's.",
   "review-annotations/v19-orphaned-list-light-900": "Threads whose text is gone are listed in an Orphaned comments box after the content, each with its quote, first comment and comment count.",
   "review-annotations/v20-comment-chips-hidden-light-900": "With show-comments off the gray comment chips stay in the document but are not displayed, while the TODO chips stay visible.",
+  "lifecycle-sync/v01-update-glow-light-900": "In the light theme a content patch that follows an outside change makes exactly its updated blocks glow once with a readable translucent wash that moves nothing, and nothing glows under reduced motion.",
+  "lifecycle-sync/v02-update-glow-dark-900": "In the dark theme a content patch that follows an outside change makes exactly its updated blocks glow once with a readable translucent wash that moves nothing, and nothing glows under reduced motion.",
+  "lifecycle-sync/v03-update-glow-cream-900": "On the forced cream page a content patch that follows an outside change makes exactly its updated blocks glow once with a readable translucent wash that moves nothing, and nothing glows under reduced motion.",
 };
 
 /**

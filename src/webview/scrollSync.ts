@@ -30,6 +30,7 @@ import { installTocColumn } from "./tocColumn";
 import { installChipToggle } from "./chipToggle";
 import { installInlineThreads } from "./inlineThread";
 import { installIncomingChanges } from "./incomingChanges";
+import { installMotion } from "./motion";
 import { installCommentCompose } from "./commentCompose";
 import { installCommentThreads } from "./commentThreads";
 import { installCommentsToggle } from "./commentsToggle";
@@ -269,6 +270,9 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const chipToggle = (${installChipToggle.toString()})(document, vscode, context, keepReadingLine);
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
   const incomingChanges = (${installIncomingChanges.toString()})(document);
+  // Light motion (CR 046): soft appearance after a user action, the theme colour transition, the
+  // fade of a block an editor gives back and the glow of blocks an outside change or an undo updated.
+  const motion = (${installMotion.toString()})(document, window);
   const incomingToggle = (${installIncomingToggle.toString()})(document, vscode, context);
   // Toolbar Comments button: hides the gray chips, which moves the content like expanding one does.
   const commentsToggle = (${installCommentsToggle.toString()})(document, vscode, context, keepReadingLine);
@@ -501,6 +505,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     });
     // Editors are closed without cancelling: the document keeps whatever was already saved.
     editorTrace.record("content patch", "request " + context.requestId + " -> " + next.requestId);
+    // Whatever the patch closes or restores appears at once; only the updated blocks glow.
+    motion.hold();
     deferredPropertiesMarkup = undefined;
     closeFrontmatterEditor("content patch");
     applyingContentPatch = true;
@@ -541,6 +547,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     contentReplaced();
     postPreviewReady();
     applyPendingBlockSelection();
+    // Set by the host only when the change came from outside the preview or was an undo / redo.
+    motion.glow(message.updatedRanges);
   }
 
   function sameContext(candidate) {
@@ -1018,6 +1026,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
 
   function cyclePreviewThemeMode() {
     const currentIndex = themeModes.indexOf(previewThemeMode);
+    motion.themeSwitch();
     applyPreviewThemeMode(themeModes[(currentIndex + 1) % themeModes.length]);
     const state = vscode.getState?.();
     vscode.setState?.({
@@ -1137,6 +1146,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     } else {
       (edit.renderedTarget || edit.target).removeAttribute("data-sphinx-preview-editing");
     }
+    motion.editorClosed(edit.selectedCell || edit.renderedTarget || edit.target);
     edit.element.remove?.();
     edit.host?.remove?.();
     if (edit.host) document.documentElement?.style?.removeProperty?.("scroll-padding-top");
@@ -1162,6 +1172,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     activeFrontmatterEdit.frontmatterMenu?.remove?.();
     activeFrontmatterEdit.displayElement?.removeAttribute("hidden");
+    motion.editorClosed(activeFrontmatterEdit.displayElement);
     activeFrontmatterEdit.valueCell.removeAttribute("data-okf-editing");
     activeFrontmatterEdit.valueCell.removeAttribute("data-okf-key-editing");
     activeFrontmatterEdit.editor.remove?.();

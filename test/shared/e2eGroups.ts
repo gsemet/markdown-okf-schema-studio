@@ -71,6 +71,7 @@ export const INTEGRATION_TESTS: readonly IntegrationTestRow[] = [
   { file: "test/integration/mystPickers.test.ts", group: "palette-slash", locks: "Citation and reference pickers: bounded .bib scan without node_modules, document labels" },
   { file: "test/integration/imagePicker.test.ts", group: "palette-slash", locks: "Image button dialog: relative path, opens in document folder, outside/non-image/stale refused" },
   { file: "test/integration/imagePaste.test.ts", group: "palette-slash", locks: "Pasted image written next to the document with numbered names; type sniffing; refusals write nothing" },
+  { file: "test/integration/updateGlow.test.ts", group: "lifecycle-sync", locks: "Update glow ranges: none for the preview's own edit or typing in the active editor; an outside edit and an undo carry the changed lines" },
   { file: "test/integration/incomingChanges.test.ts", group: "review-annotations", locks: "Untracked file gets no incoming-change message (only the negative case is tested)" },
   { file: "test/integration/reviewComments.test.ts", group: "review-annotations", locks: "Comment sidecar: invalid file posts nothing, valid threads posted as data, file changes followed, deletion clears" },
   { file: "test/integration/inlineThread.test.ts", group: "review-annotations", locks: "Inline comment thread: reply appends one message above the closing marker with the configured author and keeps CRLF, delete removes the thread and one blank line, stale lines refused, one undo each" },

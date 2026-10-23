@@ -6728,6 +6728,36 @@ test("T34: a content patch replaces the content, moves the identifiers and posts
   assert.ok(harness.dispatchedEvents.includes("studio:content-replaced"), "Mermaid is told to render the new content");
 });
 
+test("CR 046: a patch that follows an outside change or an undo makes the updated blocks glow", () => {
+  const harness = createRuntimeHarness();
+  harness.mappings[0]!.setAttribute("data-line", "1");
+  harness.mappings[1]!.setAttribute("data-line", "3");
+  harness.dispatchMessage(patchMessage({ updatedRanges: [{ start: 3, end: 3 }] }));
+  assert.equal(harness.mappings[1]!.getAttribute("data-sphinx-preview-updated"), "true");
+  assert.equal(harness.mappings[0]!.getAttribute("data-sphinx-preview-updated"), null, "an unchanged block does not glow");
+  harness.mappings[1]!.dispatch("animationend", { target: harness.mappings[1] });
+  assert.equal(harness.mappings[1]!.getAttribute("data-sphinx-preview-updated"), null, "the glow goes when it has played");
+});
+
+test("CR 046: a patch of the preview's own edit, without updated ranges, glows nowhere", () => {
+  const harness = createRuntimeHarness();
+  harness.mappings[1]!.setAttribute("data-line", "3");
+  harness.dispatchMessage(patchMessage());
+  assert.equal(harness.mappings[1]!.getAttribute("data-sphinx-preview-updated"), null);
+});
+
+test("CR 046: the theme button fades the colours, a patch holds the soft appearance back", () => {
+  const harness = createRuntimeHarness();
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-switching"), null, "no transition on load");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-motion"), null, "no soft appearance on load");
+  harness.dispatchWindow("pointerdown");
+  harness.themeButton.dispatch("click");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-theme-switching"), "true");
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-motion"), "on");
+  harness.dispatchMessage(patchMessage());
+  assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-motion"), null);
+});
+
 test("STAB-02: previewReady reports that no block editor is open on a fresh page", () => {
   const harness = createRuntimeHarness();
   const ready = harness.messages.find((message) => message.type === "previewReady");

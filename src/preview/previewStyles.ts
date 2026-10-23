@@ -66,12 +66,14 @@ a {
   }
 }
 
+/* No transition at all (0s, not a tiny duration): with the default transition-property "all", a
+   tiny duration would still start a transition on every style change, a theme switch included. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0s !important;
   }
 }
 `;
@@ -4140,6 +4142,98 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
   min-height: 1em;
   max-width: 1em;
   max-height: 1em;
+}
+
+/*
+ * Motion (CR 046): short, opacity-led effects that never move the layout.
+ * - Editors, bars and menus appear softly (@starting-style), only after a pointer or key press:
+ *   the runtime sets data-sphinx-preview-motion="on" then and takes it back for a content patch,
+ *   so a page that loads, restores an editor or follows the editor's scrolling shows no motion.
+ * - A block an editor gives back fades back in (data-sphinx-preview-edit-closed).
+ * - A theme switch from the toolbar fades the colours (data-sphinx-preview-theme-switching).
+ * - Blocks an outside change or an undo updated glow once (data-sphinx-preview-updated).
+ * The table bar never transitions transform: it moves with transform while its table scrolls.
+ * prefers-reduced-motion: reduce turns every one of them off (end of this section).
+ */
+:root {
+  --sphinx-preview-motion-fast: 120ms;
+  --sphinx-preview-motion: 160ms;
+  --sphinx-preview-motion-theme: 200ms;
+  --sphinx-preview-motion-glow: 600ms;
+  --sphinx-preview-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+html[data-sphinx-preview-motion="on"] :is(.sphinx-preview-block-editor, .sphinx-preview-table-cell-editor, [data-okf-frontmatter-editor]) {
+  transition: opacity var(--sphinx-preview-motion) var(--sphinx-preview-motion-ease);
+}
+
+html[data-sphinx-preview-motion="on"] :is(.sphinx-preview-edit-palette, .sphinx-preview-table-menu, .sphinx-preview-frontmatter-menu) {
+  transition: opacity var(--sphinx-preview-motion-fast) var(--sphinx-preview-motion-ease);
+}
+
+html[data-sphinx-preview-motion="on"] :is(.sphinx-preview-edit-palette-menu, .sphinx-preview-slash-menu, .sphinx-preview-frontmatter-picker) {
+  transition: opacity var(--sphinx-preview-motion-fast) var(--sphinx-preview-motion-ease),
+    translate var(--sphinx-preview-motion-fast) var(--sphinx-preview-motion-ease);
+}
+
+@starting-style {
+  html[data-sphinx-preview-motion="on"] :is(.sphinx-preview-block-editor, .sphinx-preview-table-cell-editor, [data-okf-frontmatter-editor]) {
+    opacity: 0.35;
+  }
+
+  html[data-sphinx-preview-motion="on"] :is(.sphinx-preview-edit-palette, .sphinx-preview-table-menu, .sphinx-preview-frontmatter-menu) {
+    opacity: 0;
+  }
+
+  html[data-sphinx-preview-motion="on"] :is(.sphinx-preview-edit-palette-menu, .sphinx-preview-slash-menu, .sphinx-preview-frontmatter-picker) {
+    opacity: 0;
+    translate: 0 -3px;
+  }
+}
+
+[data-sphinx-preview-edit-closed="true"] {
+  animation: sphinx-preview-edit-closed var(--sphinx-preview-motion) var(--sphinx-preview-motion-ease);
+}
+
+@keyframes sphinx-preview-edit-closed {
+  from { opacity: 0.35; }
+}
+
+html[data-sphinx-preview-theme-switching="true"],
+html[data-sphinx-preview-theme-switching="true"] body,
+html[data-sphinx-preview-theme-switching="true"] body * {
+  transition: background-color var(--sphinx-preview-motion-theme) ease,
+    color var(--sphinx-preview-motion-theme) ease,
+    border-color var(--sphinx-preview-motion-theme) ease,
+    outline-color var(--sphinx-preview-motion-theme) ease,
+    fill var(--sphinx-preview-motion-theme) ease,
+    stroke var(--sphinx-preview-motion-theme) ease;
+}
+
+/* A translucent wash of the focus colour: the text stays readable on every theme mode, and the
+   block's own background (code, tables, callouts) comes back as the glow fades. */
+#sphinx-myst-preview-content [data-sphinx-preview-updated="true"] {
+  --sphinx-preview-update-glow: color-mix(in srgb, var(--vscode-focusBorder, Highlight) 24%, transparent);
+  animation: sphinx-preview-update-glow var(--sphinx-preview-motion-glow) ease-out;
+}
+
+@keyframes sphinx-preview-update-glow {
+  from {
+    background-color: var(--sphinx-preview-update-glow);
+    box-shadow: 0 0 0 4px var(--sphinx-preview-update-glow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-sphinx-preview-motion="on"] :is(.sphinx-preview-block-editor, .sphinx-preview-table-cell-editor, [data-okf-frontmatter-editor], .sphinx-preview-edit-palette, .sphinx-preview-table-menu, .sphinx-preview-frontmatter-menu, .sphinx-preview-edit-palette-menu, .sphinx-preview-slash-menu, .sphinx-preview-frontmatter-picker),
+  html[data-sphinx-preview-theme-switching="true"],
+  html[data-sphinx-preview-theme-switching="true"] body,
+  html[data-sphinx-preview-theme-switching="true"] body *,
+  [data-sphinx-preview-edit-closed="true"],
+  #sphinx-myst-preview-content [data-sphinx-preview-updated="true"] {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 `; // end of PREVIEW_THEME_CSS
 

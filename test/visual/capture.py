@@ -2763,6 +2763,102 @@ def check_change_bar(page: Page, scenario: dict, failures: list[Failure]) -> Non
   page.evaluate("window.scrollTo(0, 0)")
 
 
+def check_update_glow(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """CR 046: a content patch that carries updated ranges makes exactly those blocks glow, readable and
+  without moving anything; with prefers-reduced-motion: reduce nothing glows. The glow is paused at its
+  start through the Web Animations API (no sleep), so the final frame shows it."""
+  if not scenario.get("updateGlowChecks"):
+    return
+  page_name = scenario["page"]
+  patch = """(word) => {
+    const root = document.getElementById('sphinx-myst-preview-content');
+    const html = document.documentElement;
+    const pick = [
+      [...root.querySelectorAll('p')].find(p => p.textContent.startsWith('A changed paragraph')),
+      [...root.querySelectorAll('li')].find(li => li.textContent.trim().startsWith('A changed bullet')),
+    ].map(element => element && (element.closest('[data-line]') || element));
+    if (pick.some(element => !element)) return { missing: true };
+    const lines = pick.map(element => Number(element.getAttribute('data-line')));
+    const version = Number(html.getAttribute('data-sphinx-preview-document-version'));
+    const request = Number(html.getAttribute('data-sphinx-preview-request-id'));
+    const contentHtml = root.innerHTML
+      .replace('A changed paragraph', word + ' paragraph')
+      .replace('A changed bullet', word + ' bullet');
+    // Synchronous, like the host's message: the glow exists when this returns.
+    window.dispatchEvent(new MessageEvent('message', { data: {
+      type: 'previewContentPatch',
+      documentId: html.getAttribute('data-sphinx-preview-document-id'),
+      documentVersion: version, requestId: request,
+      next: { documentVersion: version + 1, requestId: request + 1 },
+      contentHtml, status: 'success', label: 'Preview ready', diagnostics: [],
+      updatedRanges: lines.map(line => ({ start: line, end: line })),
+    } }));
+    const glows = document.getAnimations().filter(animation => animation.animationName === 'sphinx-preview-update-glow');
+    glows.forEach(animation => { animation.pause(); animation.currentTime = 0; });
+    return {
+      lines,
+      marked: [...root.querySelectorAll('[data-sphinx-preview-updated]')].map(element => element.textContent.trim().slice(0, 40)),
+      animations: glows.length,
+      duration: glows.length ? Number(glows[0].effect.getTiming().duration) : 0,
+    };
+  }"""
+  # Reduced motion first: the same patch marks and animates nothing.
+  page.emulate_media(reduced_motion="reduce")
+  reduced = page.evaluate(patch, "A changed")
+  if reduced.get("missing"):
+    failures.append(Failure(page_name, "update glow: the fixture lacks the changed paragraph or bullet"))
+    return
+  if reduced["marked"] or reduced["animations"]:
+    failures.append(Failure(page_name, f"update glow: reduced motion still glows {reduced['marked']} ({reduced['animations']} animations)"))
+  page.emulate_media(reduced_motion="no-preference")
+  glow = page.evaluate(patch, "An updated")
+  if len(glow["marked"]) != 2 or not all(text.startswith("An updated") for text in glow["marked"]):
+    failures.append(Failure(page_name, f"update glow: expected the updated paragraph and bullet to glow, got {glow['marked']}"))
+  if glow["animations"] != 2:
+    failures.append(Failure(page_name, f"update glow: expected 2 glow animations, got {glow['animations']}"))
+  if not 300 <= glow["duration"] <= 1000:
+    failures.append(Failure(page_name, f"update glow: the glow lasts {glow['duration']} ms, expected a brief one"))
+  state = page.evaluate("""() => {
+    const root = document.getElementById('sphinx-myst-preview-content');
+    const glows = document.getAnimations().filter(animation => animation.animationName === 'sphinx-preview-update-glow');
+    const boxes = () => [...root.querySelectorAll('*')].map(element => { const r = element.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; });
+    const parse = color => { const v = (color.match(/[\\d.]+/g) || []).map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 }; };
+    const luminance = c => [c.r, c.g, c.b].map(x => { x /= 255; return x <= .04045 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4; })
+      .reduce((sum, x, i) => sum + x * [.2126, .7152, .0722][i], 0);
+    const page = parse(getComputedStyle(document.body).backgroundColor);
+    const glowing = [...root.querySelectorAll('[data-sphinx-preview-updated]')].map(element => {
+      const style = getComputedStyle(element);
+      const wash = parse(style.backgroundColor);
+      const mixed = { r: wash.r * wash.a + page.r * (1 - wash.a), g: wash.g * wash.a + page.g * (1 - wash.a), b: wash.b * wash.a + page.b * (1 - wash.a) };
+      const values = [luminance(parse(style.color)), luminance(mixed)].sort((a, b) => b - a);
+      return { tag: element.tagName, alpha: wash.a, shadow: style.boxShadow, contrast: (values[0] + .05) / (values[1] + .05) };
+    });
+    const peak = boxes();
+    // The end of the glow (still paused, so the mark stays): nothing may have moved.
+    glows.forEach(animation => { animation.currentTime = Number(animation.effect.getTiming().duration) - 1; });
+    const end = boxes();
+    glows.forEach(animation => { animation.currentTime = 0; });
+    let moved = peak.length === end.length ? 0 : -1;
+    if (moved === 0) peak.forEach((box, index) => { if (box.some((value, at) => Math.abs(value - end[index][at]) > 0.5)) moved += 1; });
+    return { glowing, moved, scrollWidth: document.documentElement.scrollWidth, innerWidth };
+  }""")
+  for block in state["glowing"]:
+    if block["alpha"] <= 0 or block["shadow"] in ("none", ""):
+      failures.append(Failure(page_name, f"update glow {block['tag']}: no visible glow at its start ({block})"))
+    if block["contrast"] < 4.5:
+      failures.append(Failure(page_name, f"update glow {block['tag']}: the text contrast drops to {block['contrast']:.2f}:1 under the glow"))
+  if state["moved"] != 0:
+    failures.append(Failure(page_name, f"update glow: the glow moved {state['moved']} elements"))
+  if state["scrollWidth"] > state["innerWidth"] + 1:
+    failures.append(Failure(page_name, "update glow: the glow makes the page scroll horizontally"))
+  save_step(page, scenario, "glow")
+  # Back to the campaign's reduced motion, so the rest of the scenario reads a settled page like
+  # the others: the glow is cancelled and its mark removed.
+  page.emulate_media(reduced_motion="reduce")
+  page.wait_for_function("""() => !document.querySelector('[data-sphinx-preview-updated]')
+    && !document.getAnimations().some(animation => animation.animationName === 'sphinx-preview-update-glow')""", timeout=5000)
+
+
 def check_figure_anchors(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """Figure width and alignment follow data-okf-width and the align class; label anchors are visible and targetable."""
   if not scenario.get("figureAnchorChecks"):
@@ -5868,7 +5964,7 @@ def check_mermaid_error_theme_switch(page: Page, scenario: dict, failures: list[
 # Every step PNG a check can write (`<scenario id>-<step>.png`). A scenario's `steps` list selects
 # which of them are written; the other steps are skipped silently (their check still runs) and a
 # name that is not in this registry fails the check that asks for it.
-STEP_NAMES = frozenset({"alert", "arrowdown", "bar", "cell-bar", "cell-emoji", "collapsed", "colour", "colour-code", "emoji", "end", "filtered", "flip", "grid", "hover", "insert-point", "menu", "nomatch", "open", "palette", "pasted", "selected", "top"})
+STEP_NAMES = frozenset({"alert", "arrowdown", "bar", "cell-bar", "cell-emoji", "collapsed", "colour", "colour-code", "emoji", "end", "filtered", "flip", "glow", "grid", "hover", "insert-point", "menu", "nomatch", "open", "palette", "pasted", "selected", "top"})
 
 
 def save_step(page: Page, scenario: dict, step: str, caret: str = "hide",
@@ -6038,7 +6134,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_inline_thread, check_change_bar, check_code_copy, check_page_actions, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_inline_thread, check_change_bar, check_update_glow, check_code_copy, check_page_actions, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:
@@ -6082,6 +6178,9 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
                 context = browser.new_context(
                     viewport={"width": scenario["width"], "height": scenario["height"]},
                     device_scale_factor=2,
+                    # CR 046: no motion in the campaign, so every reading and capture is of a settled
+                    # page; check_update_glow turns it back on for its own patch.
+                    reduced_motion="reduce",
                 )
                 if scenario.get("mathRenderingChecks"):
                     context.set_offline(True)

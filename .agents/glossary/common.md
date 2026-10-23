@@ -29,6 +29,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Mapped block**: rendered element carrying its source location (`[data-sphinx-source-file][data-sphinx-source-line]`).
 - **Margin mode (planned)**: layout mode that uses the page margins for side content.
 - **Message registry**: map from a webview-to-host message type to its validator and host handler (`src/preview/previewMessages.ts`).
+- **Motion**: the short CSS effects of the preview (soft appearance, editor-closed fade, theme colour transition, update glow), driven by attributes from `src/webview/motion.ts` and turned off by `prefers-reduced-motion: reduce`; soft appearance needs `data-sphinx-preview-motion="on"`, set by the first pointer or key press and taken back by a content patch.
 - **MyST autodetect**: check of used MyST syntax against `myst_enable_extensions` in the nearest `conf.py` (`src/myst/`).
 - **Navigation history**: per-panel Back/Next stack of followed links (`src/state/navigationHistory.ts`).
 - **Open-With editor**: the custom editor offered through "Open With" (`markdown-okf-schema-studio.editor`).
@@ -54,5 +55,6 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Toolbar**: the controls bar at the top of the preview (`[data-sphinx-preview-toolbar]`).
 - **Toolbar row**: `data-sphinx-preview-toolbar-row` `main` (Refresh/Anchor/Edit/Theme) or `view`.
 - **Top-level block**: mapped block that is a direct child of the content container (`topLevelMappedBlocks` in `src/webview/scrollSync.ts`).
+- **Update glow**: one brief wash of the focus colour on the blocks a content patch updated after a change made outside the preview and not in the active text editor, or an undo/redo (`data-sphinx-preview-updated`); the host sends `updatedRanges` (`src/preview/updatedRanges.ts`), the page marks them (`src/webview/motion.ts`).
 - **View preference**: per-workspace preview setting changed from toolbar row 2 (zoom, width mode, TOC, incoming changes), `src/state/previewViewPreferences.ts`.
 - **Width mode**: Margin / Auto / Full width preview column state (`data-sphinx-preview-width`); Auto lets wide tables and figures break out of the column.
