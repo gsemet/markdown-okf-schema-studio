@@ -6,13 +6,15 @@ import { test } from "node:test";
 
 import {
   classifyPreviewReference,
+  createPreviewNavigator,
   markdownFragmentLine,
   markdownFragmentRange,
   markdownMarkerLine,
-  resolvePreviewNavigation,
-  validateResolvedPreviewNavigation,
-  validatePreviewNavigation,
 } from "../../src/navigation/previewNavigation";
+import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
+
+const { resolvePreviewNavigation, validateResolvedPreviewNavigation, validatePreviewNavigation } =
+  createPreviewNavigator(createNodeFileSystem());
 
 test("Markdown fragments select headings and source lines, not fenced examples", () => {
   const source = "```md\n## My Heading\n```\n\n## My Heading\n\nOther Heading\n---\n## Café {#explicit-id}\nParagraph ^block-id\n## Range start\nRange end\n";
@@ -114,29 +116,6 @@ test("classifies relative links without touching the filesystem", () => {
 });
 
 test("discovers wikilinks on demand and refuses ambiguous or escaping targets", async () => {
-
-test("allows document-relative resolved targets outside a workspace root only in that mode", () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-document-relative-"));
-  const sourceDirectory = path.join(root, "docs");
-  const source = path.join(sourceDirectory, "source.md");
-  const outside = path.join(root, "outside.md");
-  try {
-    fs.mkdirSync(sourceDirectory);
-    fs.writeFileSync(source, "# Source\n");
-    fs.writeFileSync(outside, "# Outside\n");
-
-    assert.deepEqual(
-      validateResolvedPreviewNavigation(outside, "", [sourceDirectory], "the workspace", true),
-      { kind: "local", path: fs.realpathSync(outside), suffix: "" },
-    );
-    assert.equal(
-      validateResolvedPreviewNavigation(outside, "", [sourceDirectory], "the workspace").kind,
-      "blocked",
-    );
-  } finally {
-    fs.rmSync(root, { recursive: true, force: true });
-  }
-});
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-wiki-"));
   try {
     fs.mkdirSync(path.join(root, "notes"));
@@ -165,7 +144,30 @@ test("allows document-relative resolved targets outside a workspace root only in
   }
 });
 
-test("classifies anchors, external links, and workspace-local files", () => {
+test("allows document-relative resolved targets outside a workspace root only in that mode", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "studio-document-relative-"));
+  const sourceDirectory = path.join(root, "docs");
+  const source = path.join(sourceDirectory, "source.md");
+  const outside = path.join(root, "outside.md");
+  try {
+    fs.mkdirSync(sourceDirectory);
+    fs.writeFileSync(source, "# Source\n");
+    fs.writeFileSync(outside, "# Outside\n");
+
+    assert.deepEqual(
+      await validateResolvedPreviewNavigation(outside, "", [sourceDirectory], "the workspace", true),
+      { kind: "local", path: fs.realpathSync(outside), suffix: "" },
+    );
+    assert.equal(
+      (await validateResolvedPreviewNavigation(outside, "", [sourceDirectory], "the workspace")).kind,
+      "blocked",
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("classifies anchors, external links, and workspace-local files", async () => {
   const workspaceRoot = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-navigation-test-"));
   try {
     const sourceDirectory = path.join(workspaceRoot, "chapters");
@@ -178,15 +180,15 @@ test("classifies anchors, external links, and workspace-local files", () => {
     fs.writeFileSync(targetPath, "# Target\n");
 
     assert.deepEqual(
-      validatePreviewNavigation("#section-2", activeSourceFile, workspaceRoot),
+      await validatePreviewNavigation("#section-2", activeSourceFile, workspaceRoot),
       { kind: "anchor", value: "#section-2" },
     );
     assert.deepEqual(
-      validatePreviewNavigation("https://example.test/docs", activeSourceFile, workspaceRoot),
+      await validatePreviewNavigation("https://example.test/docs", activeSourceFile, workspaceRoot),
       { kind: "external", value: "https://example.test/docs" },
     );
     assert.deepEqual(
-      validatePreviewNavigation("../docs/target.md?view=1#heading", activeSourceFile, workspaceRoot),
+      await validatePreviewNavigation("../docs/target.md?view=1#heading", activeSourceFile, workspaceRoot),
       { kind: "local", path: fs.realpathSync(targetPath), suffix: "?view=1#heading" },
     );
   } finally {
@@ -194,7 +196,7 @@ test("classifies anchors, external links, and workspace-local files", () => {
   }
 });
 
-test("blocks unsafe anchors, schemes, and paths", () => {
+test("blocks unsafe anchors, schemes, and paths", async () => {
   const workspaceRoot = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-navigation-test-"));
   try {
     const activeSourceFile = path.join(workspaceRoot, "active.md");
@@ -208,7 +210,7 @@ test("blocks unsafe anchors, schemes, and paths", () => {
       "../secret.md",
     ]) {
       assert.equal(
-        validatePreviewNavigation(request, activeSourceFile, workspaceRoot).kind,
+        (await validatePreviewNavigation(request, activeSourceFile, workspaceRoot)).kind,
         "blocked",
         request,
       );

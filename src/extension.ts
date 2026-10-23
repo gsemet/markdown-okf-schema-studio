@@ -12,12 +12,7 @@ import {
   toLineChanges,
 } from "./comments/anchoring";
 import { resolveAuthor } from "./comments/author";
-import {
-  formatThreadDate,
-  threadDeleteRange,
-  threadReplyEdit,
-  isThreadSource,
-} from "./comments/inlineThread";
+import { formatThreadDate } from "./comments/inlineThread";
 import {
   addReply,
   addThread,
@@ -42,14 +37,8 @@ import {
 } from "./configuration/frontmatterConfiguration";
 import {
   analyzeFrontmatter,
-  createFrontmatterFieldPatch,
-  createFrontmatterFieldRemovePatch,
-  createFrontmatterFieldRenamePatch,
-  extractFrontmatter,
-  frontmatterAddPlacement,
   frontmatterLinkIdentity,
   findSchemaDirectory,
-  parseYamlValue,
   type FrontmatterResult,
 } from "./frontmatter/okfFrontmatter";
 import {
@@ -59,14 +48,9 @@ import {
 import { type LinkedTargetWatch, watchLinkedTargetDirectly } from "./frontmatter/linkedTargetWatch";
 import { invalidateConfCache, locateConfFor } from "./myst/confLocator";
 import { renderPropertiesTable, replacePropertiesTableHtml } from "./frontmatter/propertiesTable";
-import { checkboxToggleEdit } from "./render/checkboxMarkers";
 import { sourceRangeForLines, type SourceMappingOptions } from "./mapping/sourceMapping";
 import { insertionText, planInsertion, type InsertionPlan } from "./mapping/insertion";
-import { minimalReplacement } from "./mapping/textDiff";
 import { htmlToMarkdown } from "./paste/htmlToMarkdown";
-import { opensIncludeDirective, planBlockMove } from "./mapping/blockMove";
-import { planCut, planPaste, spanText } from "./mapping/blockRange";
-import { countRefUses, renameLabelLine } from "./mapping/labelRename";
 import {
   imageTypeOfMime,
   isBase64,
@@ -99,10 +83,9 @@ import {
   resolvePlantUmlEngine,
 } from "./configuration/plantUmlConfiguration";
 import {
+  createPreviewNavigator,
   markdownFragmentRange,
   markdownMarkerLine,
-  resolvePreviewNavigation,
-  validateResolvedPreviewNavigation,
 } from "./navigation/previewNavigation";
 import {
   buildPreviewWebviewHtml,
@@ -181,15 +164,45 @@ import {
   type ViewPreferences,
   type ViewPreferencesStorage,
 } from "./state/previewViewPreferences";
-import { createHeadBaseline, type GitExtensionLike } from "./git/headBaseline";
 import { changedLineRanges } from "./mapping/lineDiff";
 import { isOutsideChange, updatedRangesForPatch } from "./preview/updatedRanges";
 import type { PreviewRuntimeContext } from "./webview/scrollSync";
+import {
+  checkFrontmatterCandidate,
+  FRONTMATTER_STALE,
+  planFrontmatterSave,
+} from "./core/edits/frontmatterEdit";
+import {
+  checkBlocksPaste,
+  planBlockMoveEdit,
+  planBlocksCopyCut,
+  planBlocksPaste,
+  planBlockTextEdit,
+  planCheckboxToggle,
+  planLabelRename,
+  planThreadDelete,
+  planThreadReply,
+  readThreadLines,
+} from "./core/edits/sourceEdits";
+import type { TextEdit } from "./core/edits/textEdit";
+import type { HostDocument, TextRange } from "./host-api/documentStore";
+import type { DiagnosticEntry, DiagnosticsSink } from "./host-api/diagnostics";
+import { isFileNotFound } from "./host-api/fileSystem";
+import type { FileWatcher } from "./host-api/watcher";
+import { createVscodeHost } from "./host-vscode/vscodeHost";
 import {
   EditorEchoGuard,
   shiftLineForEdits,
   type ScrollAnchor,
 } from "./webview/anchorPolicy";
+
+/**
+ * The ports of the VS Code host (src/host-vscode/): documents and edits, files, settings, trust
+ * and folders, clipboard and notifications, Git, diagnostics, watchers, navigation and assets.
+ */
+const host = createVscodeHost();
+/** The link checks, reading the disk through the host's file system. */
+const navigator = createPreviewNavigator(host.files);
 
 export const COMMAND_ID = "markdown-okf-schema-studio.openPreview";
 export const REFRESH_COMMAND_ID = "markdown-okf-schema-studio.refreshPreview";
@@ -230,8 +243,8 @@ interface ActivePreview {
   navigationRoots: string[];
   workspaceFolder?: vscode.WorkspaceFolder;
   readOnly: boolean;
-  dependencyWatcher: vscode.FileSystemWatcher;
-  dependencyWatcherSubscriptions: vscode.Disposable[];
+  dependencyWatcher: FileWatcher;
+  dependencyWatcherSubscriptions: Array<{ dispose(): void }>;
   panelSubscriptions: vscode.Disposable[];
   stage?: RenderStage;
   webview: PreviewWebviewResult;
@@ -254,8 +267,10 @@ interface ActivePreview {
   linkEnrichmentTimer?: NodeJS.Timeout;
   linkedTargetWatchers?: Map<string, LinkedTargetWatcher>;
   frontmatterDocumentUri?: string;
-  frontmatterDocumentVersion?: number;
-  frontmatterLinkResultsVersion?: number;
+  /** Revision of the document text the frontmatter analysis was made from. */
+  frontmatterRevision?: number;
+  /** Revision the frontmatter links were resolved for (link enrichment). */
+  frontmatterLinkResultsRevision?: number;
   enrichmentGeneration: number;
   /** Test hook: how many watcher events for the active document refreshReferencedPath saw. */
   activePathChanges: number;
@@ -266,7 +281,7 @@ interface ActivePreview {
   hadFailure: boolean;
   disposed: boolean;
   activeBlockEdit?: ActiveBlockEdit;
-  /** Frontmatter and checkbox saves whose WorkspaceEdit is still being applied (CR 025). */
+  /** Frontmatter and checkbox saves whose edit is still being applied (CR 025). */
   pendingSaves: Set<Promise<unknown>>;
   /** Flush requests posted to the page and not answered yet, by flush id (CR 025). */
   flushWaiters: Map<string, () => void>;
@@ -405,8 +420,8 @@ let editModeStorage: vscode.Memento | undefined;
 const EDIT_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.editMode";
 const PALETTE_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.paletteMode";
 interface StemRootWatcher {
-  watcher: vscode.FileSystemWatcher;
-  subscriptions: vscode.Disposable[];
+  watcher: FileWatcher;
+  subscriptions: Array<{ dispose(): void }>;
 }
 
 const stemRootWatchers = new Map<string, StemRootWatcher>();
@@ -422,9 +437,7 @@ function canonicalWatchRoot(root: string): string {
 function watchStemRoot(root: string): void {
   const canonicalRoot = canonicalWatchRoot(root);
   if (stemRootWatchers.has(canonicalRoot)) return;
-  const watcher = vscode.workspace.createFileSystemWatcher(
-    new vscode.RelativePattern(vscode.Uri.file(canonicalRoot), "**/*.md"),
-  );
+  const watcher = host.watcher.watch(canonicalRoot, "**/*.md");
   const invalidate = (): void => invalidateStemIndex(canonicalRoot);
   const subscriptions = [
     watcher.onDidCreate(invalidate),
@@ -504,50 +517,15 @@ function documentKey(document: { uri: vscode.Uri }): string {
 }
 
 /**
- * Documents an edit asked for by a preview is being applied to (CR 046), with the number of such
- * edits in flight. VS Code reports the change of an edit before the edit's promise settles, so the
- * change listener can tell the preview's own edits from the others.
+ * Applies edits a preview asked for to its document, through the document store (which keeps the
+ * documents with an edit in flight, CR 046). `ownUndoStep`: one undo step in the visible editor.
  */
-const previewEditsInFlight = new Map<string, number>();
-
-function trackPreviewEdit<T>(uris: readonly vscode.Uri[], run: () => Thenable<T>): Thenable<T> {
-  const keys = [...new Set(uris.map((uri) => uri.toString()))];
-  for (const key of keys) previewEditsInFlight.set(key, (previewEditsInFlight.get(key) ?? 0) + 1);
-  const settle = (): void => {
-    for (const key of keys) {
-      const left = (previewEditsInFlight.get(key) ?? 1) - 1;
-      if (left > 0) previewEditsInFlight.set(key, left);
-      else previewEditsInFlight.delete(key);
-    }
-  };
-  let result: Thenable<T>;
-  try {
-    result = run();
-  } catch (error) {
-    settle();
-    throw error;
-  }
-  return result.then((value) => {
-    settle();
-    return value;
-  }, (error: unknown) => {
-    settle();
-    throw error;
-  });
-}
-
-/** `workspace.applyEdit` for an edit the preview asked for. */
-function applyPreviewEdit(edit: vscode.WorkspaceEdit): Thenable<boolean> {
-  return trackPreviewEdit(edit.entries().map(([uri]) => uri), () => vscode.workspace.applyEdit(edit));
-}
-
-/** `TextEditor.edit` for an edit the preview asked for. */
-function editInPreview(
-  editor: vscode.TextEditor,
-  callback: (builder: vscode.TextEditorEdit) => void,
-  options?: { undoStopBefore: boolean; undoStopAfter: boolean },
-): Thenable<boolean> {
-  return trackPreviewEdit([editor.document.uri], () => editor.edit(callback, options));
+function applyPreviewEdits(
+  document: vscode.TextDocument,
+  edits: readonly TextEdit[],
+  ownUndoStep: boolean,
+): PromiseLike<boolean> {
+  return host.documents.applyEdits(host.documents.of(document), edits, ownUndoStep ? { ownUndoStep } : undefined);
 }
 
 /**
@@ -558,9 +536,9 @@ function noteOutsideChange(event: vscode.TextDocumentChangeEvent): void {
   const key = documentKey(event.document);
   const activeDocument = vscode.window.activeTextEditor?.document;
   const inActiveEditor = activeDocument !== undefined && documentKey(activeDocument) === key;
-  if (!isOutsideChange(event.reason, previewEditsInFlight.has(key), inActiveEditor)) return;
+  if (!isOutsideChange(event.reason, host.documents.isApplying(key), inActiveEditor)) return;
   for (const preview of activePreviews) {
-    if (preview.documentUri === key) preview.outsideChangeVersion = event.document.version;
+    if (preview.documentUri === key) preview.outsideChangeVersion = revisionOfDocument(event.document);
   }
 }
 
@@ -587,7 +565,7 @@ function sourceExists(filePath: string): boolean {
 }
 
 function sessionWorkspaceRoots(): string[] {
-  return (vscode.workspace.workspaceFolders ?? []).map((folder) => folder.uri.fsPath);
+  return host.workspace.folders().map((folder) => folder.path);
 }
 
 function sourceAvailable(preview: ActivePreview): boolean {
@@ -598,11 +576,14 @@ function sourceAvailable(preview: ActivePreview): boolean {
     && sourceExists(sourcePath);
 }
 
-/** Resolves the thread author (setting, Git user, OS user) for the next page that loads. */
-function refreshThreadAuthor(uri: vscode.Uri | undefined): void {
+/**
+ * Resolves the thread author (setting, Git user, OS user) for the next page that loads; the Git
+ * user is the one of the repository of `documentId` (a document or folder URI).
+ */
+function refreshThreadAuthor(documentId: string | undefined): void {
   void resolveAuthor({
-    setting: readCommentsConfiguration(vscode.workspace.getConfiguration(COMMENTS_CONFIGURATION_SECTION)).authorName,
-    gitName: uri ? () => headBaseline.userName(uri) : undefined,
+    setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION)).authorName,
+    gitName: documentId ? () => host.vcs.userName(documentId) : undefined,
     osUserName: () => os.userInfo().username,
   }).then((author) => {
     threadAuthor = author;
@@ -623,7 +604,7 @@ function scrollContext(
     commentsEnabled: boolean;
   },
 ): PreviewRuntimeContext {
-  refreshThreadAuthor(vscode.Uri.file(stage.activeDocumentPath));
+  refreshThreadAuthor(host.documents.idOf(stage.activeDocumentPath));
   return {
     documentId: stage.activeDocumentIdentity,
     revision: revisionOfStage(stage),
@@ -643,7 +624,7 @@ function scrollContext(
     ...(dismissedWarningBanners.has(stage.activeDocumentIdentity)
       ? { dismissedWarningBanner: dismissedWarningBanners.get(stage.activeDocumentIdentity) }
       : {}),
-    ...(vscode.workspace.isTrusted ? {} : { warningsInProblems: false }),
+    ...(host.workspace.trusted ? {} : { warningsInProblems: false }),
     ...(sessionPreviewThemeMode ? { previewThemeMode: sessionPreviewThemeMode } : {}),
     initialViewPreferences: sessionViewPreferences,
     ...(state && state.documentId === stage.activeDocumentIdentity
@@ -662,11 +643,11 @@ function scrollContext(
 }
 
 /**
- * The protocol revision of a VS Code document (see src/protocol/revision.ts): its
- * `TextDocument.version`, which VS Code already counts per document and moves on every change.
+ * The protocol revision of a VS Code document (see src/protocol/revision.ts), from the document
+ * store, the only source of revisions (src/host-vscode/documents.ts).
  */
 function revisionOfDocument(document: vscode.TextDocument): Revision {
-  return document.version;
+  return host.documents.revisionOf(document);
 }
 
 /** The protocol revision of the document text a render stage was made from. */
@@ -1082,7 +1063,7 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
   const webview = buildPreviewWebviewHtml(
     result.html,
     result.stage.outputDirectory,
-    preview.panel.webview,
+    host.assets(preview.panel.webview, extensionRootUri),
     context,
     preview.workspaceRoot,
     preview.frontmatter
@@ -1092,7 +1073,6 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
       }
       : undefined,
     preview.configuration.maxContentWidth,
-    extensionRootUri,
     !preview.readOnly,
     !preview.readOnly,
     [],
@@ -1176,13 +1156,13 @@ function setFrontmatterState(
   preview: ActivePreview,
   frontmatter: FrontmatterResult,
   documentUri: string,
-  documentVersion: number,
+  revision: Revision,
   linksResolved: boolean,
 ): void {
   preview.frontmatter = frontmatter.present ? frontmatter : undefined;
   preview.frontmatterDocumentUri = documentUri;
-  preview.frontmatterDocumentVersion = documentVersion;
-  preview.frontmatterLinkResultsVersion = linksResolved ? documentVersion : undefined;
+  preview.frontmatterRevision = revision;
+  preview.frontmatterLinkResultsRevision = linksResolved ? revision : undefined;
   if (linksResolved) {
     const targets = new Set(frontmatter.linkResults?.filter((link) =>
       link.resolvedPath && (link.tooltipFields !== undefined || link.previewFields !== undefined),
@@ -1197,14 +1177,12 @@ function setFrontmatterState(
     for (const target of targets) {
       if (preview.linkedTargetWatchers.has(target)) continue;
       const filename = path.basename(target).replace(/[\[\]{}*?]/gu, (character) => `[${character}]`);
-      const watcher = vscode.workspace.createFileSystemWatcher(
-        new vscode.RelativePattern(vscode.Uri.file(path.dirname(target)), filename),
-      );
+      const watcher = host.watcher.watch(path.dirname(target), filename);
       const refresh = (): void => {
         preview.linkedTargetEvents += 1;
         const document = preview.document;
         if (document && !preview.disposed) {
-          scheduleLinkEnrichment(preview, preview.documentUri, document.version);
+          scheduleLinkEnrichment(preview, preview.documentUri, revisionOfDocument(document));
         }
       };
       // The VS Code watcher of a path inside a workspace folder rides on the shared recursive
@@ -1217,11 +1195,17 @@ function setFrontmatterState(
         entry.vscodeEvents += 1;
         refresh();
       };
-      const disposable = vscode.Disposable.from(
+      // Disposed in this order: the VS Code watcher, its three subscriptions, the direct watch.
+      const parts = [
         watcher, watcher.onDidChange(fromVscode), watcher.onDidCreate(fromVscode), watcher.onDidDelete(fromVscode),
-        new vscode.Disposable(() => direct.dispose()),
-      );
-      entry.dispose = () => disposable.dispose();
+        { dispose: () => direct.dispose() },
+      ];
+      let disposed = false;
+      entry.dispose = () => {
+        if (disposed) return;
+        disposed = true;
+        parts.forEach((part) => part.dispose());
+      };
       preview.linkedTargetWatchers.set(target, entry);
     }
   }
@@ -1232,7 +1216,7 @@ function setFrontmatterState(
  * in an untrusted workspace the JAR pipeline is still asked, and it refuses without a process.
  */
 function plantUmlEngineFor(preview: ActivePreview): "builtin" | "jar" {
-  return resolvePlantUmlEngine(preview.plantUmlEngineSettings, vscode.workspace.isTrusted) === "builtin"
+  return resolvePlantUmlEngine(preview.plantUmlEngineSettings, host.workspace.trusted) === "builtin"
     ? "builtin"
     : "jar";
 }
@@ -1312,7 +1296,7 @@ function scheduleDeferredFrontmatterLinks(
 function scheduleLinkEnrichment(
   preview: ActivePreview,
   documentUri: string,
-  documentVersion: number,
+  revision: number,
   result?: RenderResult,
   generation?: number,
 ): void {
@@ -1327,7 +1311,7 @@ function scheduleLinkEnrichment(
       || preview.documentUri !== documentUri
       || !current
       || documentKey(current) !== documentUri
-      || current.version !== documentVersion
+      || revisionOfDocument(current) !== revision
       || (result !== undefined && !isCurrentRender(preview, result, generation))) {
       return;
     }
@@ -1347,11 +1331,11 @@ function scheduleLinkEnrichment(
       || !activePreviews.has(preview)
       || preview.documentUri !== documentUri
       || preview.document !== current
-      || current.version !== documentVersion
+      || revisionOfDocument(current) !== revision
       || (result !== undefined && !isCurrentRender(preview, result, generation))) {
       return;
     }
-    setFrontmatterState(preview, frontmatter, documentUri, documentVersion, true);
+    setFrontmatterState(preview, frontmatter, documentUri, revision, true);
     const stage = preview.stage;
     const sourceMapping = stage && stage.activeDocumentIdentity === documentUri ? {
       documentId: stage.activeDocumentIdentity,
@@ -1360,7 +1344,7 @@ function scheduleLinkEnrichment(
     deferWhileEditing(preview, "links", () => {
       if (!preview.disposed
         && preview.document === current
-        && current.version === documentVersion
+        && revisionOfDocument(current) === revision
         && preview.stage === stage) {
         patchPropertiesTable(preview, frontmatter, sourceMapping);
       }
@@ -1527,7 +1511,7 @@ function currentPreviewDocument(
     || !stage
     || documentKey(document) !== preview.documentUri
     || revisionOfDocument(document) !== message.revision
-    || stage.activeDocumentVersion !== document.version
+    || stage.activeDocumentVersion !== revisionOfDocument(document)
     || !isDocumentEligible(document)
   ) {
     return undefined;
@@ -1560,7 +1544,7 @@ function postFrontmatterEditError(
   if (message.flush === true) {
     // The page is about to be replaced: only a VS Code warning tells the reader the text was dropped.
     const field = message.newFieldName ?? message.fieldName;
-    void vscode.window.showWarningMessage(flushRefusalMessage(
+    void host.ui.showWarning(flushRefusalMessage(
       field ? `the frontmatter field "${field}"` : "a frontmatter field",
       error,
     ));
@@ -1589,129 +1573,21 @@ function postFrontmatterEditSaved(
   });
 }
 
-function frontmatterValueMatchesField(
-  field: FrontmatterResult["fields"][number],
-  value: unknown,
-  schemaFound: boolean,
-): boolean {
-  if (!schemaFound || field.fieldType === "unknown") return true;
-  if (value === null) return field.nullable;
-  switch (field.fieldType) {
-    case "text":
-    case "date":
-    case "time":
-    case "datetime":
-      return typeof value === "string";
-    case "checkbox":
-      return typeof value === "boolean";
-    case "number":
-      return typeof value === "number" && Number.isFinite(value);
-    case "list":
-      return Array.isArray(value);
-    case "enum":
-      return typeof value === "string" && Boolean(field.enums?.includes(value));
-    default:
-      return false;
-  }
-}
-
 function handleFrontmatterSave(preview: ActivePreview, message: PageMessageOf<"previewFrontmatterSave">): Thenable<void> | undefined {
   const document = currentPreviewDocument(preview, message);
-  const fieldName = message.fieldName ?? "";
-  const action = message.frontmatterAction;
-  const isAdd = action === "add";
-  const isRemove = action === "remove";
-  const field = preview.frontmatter?.fields.find((candidate) => candidate.name === fieldName);
-  if (!document || (isAdd ? field !== undefined : !field)) {
-    postFrontmatterEditError(preview, message, "The frontmatter field is stale or its value does not match the schema.");
+  if (!document) {
+    postFrontmatterEditError(preview, message, FRONTMATTER_STALE);
     return;
   }
-  const currentField = field as FrontmatterResult["fields"][number];
-  const newFieldName = !isAdd && !isRemove ? message.newFieldName : undefined;
-  if ((isAdd && (!fieldName.trim() || fieldName !== fieldName.trim() || /[\r\n]/u.test(fieldName)))
-    || (newFieldName !== undefined && (!newFieldName.trim() || newFieldName !== newFieldName.trim()))) {
-    postFrontmatterEditError(preview, message, "Enter a non-empty frontmatter key without leading or trailing spaces.");
+  const plan = planFrontmatterSave(document.getText(), preview.frontmatter, message);
+  if ("error" in plan) {
+    postFrontmatterEditError(preview, message, plan.error);
     return;
   }
-  let fieldValue = message.fieldValue;
-  if (!isRemove && message.fieldValueFormat === "yaml") {
-    if (typeof fieldValue !== "string") {
-      postFrontmatterEditError(preview, message, "The YAML field value must be text.");
-      return;
-    }
-    const parsed = parseYamlValue(fieldValue);
-    if (parsed.valid) {
-      fieldValue = parsed.value;
-    } else if (message.flush !== true) {
-      postFrontmatterEditError(preview, message, `Invalid YAML value: ${parsed.error}`);
-      return;
-    }
-    // A flush before a navigation keeps text that is not valid YAML as typed (a string value): the
-    // reader leaves the page and could not fix it, and the typed text must not be lost.
-  }
-  const schemaFound = preview.frontmatter?.schemaFound === true;
-  // A flush before a navigation writes the value as typed, whatever the schema says: the reader
-  // leaves the page and could not fix it, and the preview then shows the validation error.
-  const flushed = message.flush === true;
-  if (!isAdd && !isRemove && newFieldName === undefined && !flushed
-    && !frontmatterValueMatchesField(currentField, fieldValue, schemaFound)) {
-    postFrontmatterEditError(preview, message, "The frontmatter field is stale or its value does not match the schema.");
-    return;
-  }
-  const sourceText = document.getText();
-  // With a schema the table lists the fields in schema order, so the new key goes where its row
-  // will be shown. Without one, the table follows the source and the clicked row decides.
-  const clickedAfterField = message.afterField !== undefined
-    && preview.frontmatter?.fields.some((candidate) => candidate.name === message.afterField)
-    ? { afterField: message.afterField }
-    : undefined;
-  const addPlacement = isAdd
-    ? schemaFound && preview.frontmatter?.availableKeys
-      ? frontmatterAddPlacement(
-        Object.keys(extractFrontmatter(sourceText).frontmatter ?? {}),
-        preview.frontmatter.availableKeys,
-        fieldName,
-      )
-      : clickedAfterField
-    : undefined;
-  // Only the empty string a just-added custom key holds may be rewritten as a plain scalar.
-  const plainScalar = !isAdd && !isRemove && newFieldName === undefined
-    && message.fieldValueStyle === "plain"
-    && currentField.value === ""
-    && typeof fieldValue === "string";
-  const patch = isRemove
-    ? createFrontmatterFieldRemovePatch(sourceText, fieldName)
-    : isAdd
-      ? createFrontmatterFieldPatch(sourceText, fieldName, fieldValue, addPlacement)
-      : newFieldName === undefined
-        ? createFrontmatterFieldPatch(
-          sourceText,
-          currentField.name,
-          fieldValue,
-          plainScalar ? { plainScalar: true } : undefined,
-        )
-        : createFrontmatterFieldRenamePatch(sourceText, currentField.name, newFieldName);
-  if (!patch) {
-    const duplicateName = isAdd ? fieldName : newFieldName;
-    const duplicate = duplicateName !== undefined
-      && preview.frontmatter?.fields.some((candidate) => candidate.name === duplicateName);
-    postFrontmatterEditError(
-      preview,
-      message,
-      duplicate
-        ? `A frontmatter field named "${duplicateName}" already exists.`
-        : "The frontmatter YAML could not be updated.",
-    );
-    return;
-  }
-  const targetFieldName = isAdd ? fieldName : newFieldName ?? currentField.name;
-  if (schemaFound && !flushed) {
-    const candidateSource = sourceText.slice(0, patch.start)
-      + patch.text
-      + sourceText.slice(patch.end);
+  if (plan.needsSchemaCheck) {
     const candidate = analyzeFrontmatter({
       filePath: document.uri.fsPath,
-      sourceText: candidateSource,
+      sourceText: plan.candidateSource,
       stopDir: preview.workspaceRoot,
       allowSchemaResolution: !preview.readOnly,
       inspectLinks: false,
@@ -1721,46 +1597,15 @@ function handleFrontmatterSave(preview: ActivePreview, message: PageMessageOf<"p
       allowOutsideWorkspaceLinks: preview.frontmatterConfiguration.allowOutsideWorkspaceLinks,
       workspaceRoots: preview.sessionRoots,
     });
-    if (isRemove) {
-      const existingMissing = new Set(preview.frontmatter?.missingRequiredFields ?? []);
-      const newlyMissing = candidate.missingRequiredFields.find((name) => !existingMissing.has(name));
-      if (newlyMissing) {
-        postFrontmatterEditError(
-          preview,
-          message,
-          `Cannot remove required frontmatter field "${newlyMissing}".`,
-        );
-        return;
-      }
-    }
-    if (!isRemove) {
-      const candidateField = candidate.fields.find((entry) => entry.name === targetFieldName);
-      if (!candidateField) {
-        postFrontmatterEditError(preview, message, "The renamed frontmatter field could not be validated.");
-        return;
-      }
-      const validationError = candidateField.issues.find((issue) =>
-        issue.severity === "error" && issue.origin !== "link");
-      if (validationError) {
-        postFrontmatterEditError(
-          preview,
-          message,
-          `Schema validation failed: ${validationError.message}`,
-        );
-        return;
-      }
-      if (!frontmatterValueMatchesField(candidateField, fieldValue, candidate.schemaFound)) {
-        postFrontmatterEditError(preview, message, "The frontmatter field is stale or its value does not match the schema.");
-        return;
-      }
+    const refusal = checkFrontmatterCandidate(plan, candidate, preview.frontmatter);
+    if (refusal) {
+      postFrontmatterEditError(preview, message, refusal.error);
+      return;
     }
   }
-  const range = new vscode.Range(document.positionAt(patch.start), document.positionAt(patch.end));
-  const edit = new vscode.WorkspaceEdit();
-  edit.replace(document.uri, range, patch.text);
-  return applyPreviewEdit(edit).then((applied) => {
+  return applyPreviewEdits(document, [plan.edit], false).then((applied) => {
     if (applied) {
-      storePendingPin(preview, message, document.version);
+      storePendingPin(preview, message, revisionOfDocument(document));
       postFrontmatterEditSaved(preview, message);
     } else {
       postFrontmatterEditError(preview, message, "VS Code could not apply the frontmatter edit.");
@@ -1783,7 +1628,7 @@ function postEditSourceError(
     const where = message.line !== undefined && message.endLine !== undefined
       ? `the block at lines ${message.line}-${message.endLine}`
       : "a block";
-    void vscode.window.showWarningMessage(flushRefusalMessage(where, error));
+    void host.ui.showWarning(flushRefusalMessage(where, error));
   }
   void postToPage(preview, {
     type: "previewEditSource",
@@ -1821,32 +1666,16 @@ function handleCheckboxToggle(preview: ActivePreview, message: PageMessageOf<"pr
     postCheckboxResult(preview, message, { error: "Save or cancel the open Markdown edit before toggling a checkbox." });
     return undefined;
   }
-  const toggle = message.line <= document.lineCount
-    ? checkboxToggleEdit(document.lineAt(message.line - 1).text, message.column, message.checked)
-    : undefined;
-  if (!toggle) {
-    postCheckboxResult(preview, message, { error: "The checkbox is no longer in the source. Refresh the preview." });
+  const toggle = planCheckboxToggle(document.getText(), message.line, message.column, message.checked);
+  if ("refused" in toggle) {
+    postCheckboxResult(preview, message, { error: toggle.refused });
     return undefined;
   }
-  if (!toggle.changed) {
+  if ("unchanged" in toggle) {
     postCheckboxResult(preview, message, { saved: true });
     return undefined;
   }
-  const start = new vscode.Position(message.line - 1, toggle.column);
-  const range = new vscode.Range(start, start.translate(0, 1));
-  const sourceEditor = vscode.window.visibleTextEditors.find((candidate) =>
-    documentKey(candidate.document) === documentKey(document));
-  const applyEdit = sourceEditor
-    ? editInPreview(sourceEditor, (builder) => builder.replace(range, toggle.replacement), {
-      undoStopBefore: true,
-      undoStopAfter: true,
-    })
-    : (() => {
-      const edit = new vscode.WorkspaceEdit();
-      edit.replace(document.uri, range, toggle.replacement);
-      return applyPreviewEdit(edit);
-    })();
-  return applyEdit.then((applied) => {
+  return applyPreviewEdits(document, [toggle.edit], true).then((applied) => {
     postCheckboxResult(preview, message, applied
       ? { saved: true }
       : { error: "VS Code could not apply the checkbox edit." });
@@ -1894,31 +1723,13 @@ function handleLabelRename(preview: ActivePreview, message: PageMessageOf<"previ
     });
     return undefined;
   }
-  const oldName = message.oldName;
-  const text = document.getText();
-  const rename = renameLabelLine(text, message.line, oldName, message.newName);
-  if (!rename) {
-    postLabelRenameResult(preview, message, {
-      ok: false,
-      reason: "The label is no longer on that line. Refresh the preview.",
-    });
+  const rename = planLabelRename(document.getText(), message.line, message.oldName, message.newName);
+  if ("refused" in rename) {
+    postLabelRenameResult(preview, message, { ok: false, reason: rename.refused });
     return undefined;
   }
-  const remainingRefs = countRefUses(text, oldName);
-  const range = new vscode.Range(document.positionAt(rename.start), document.positionAt(rename.end));
-  const sourceEditor = vscode.window.visibleTextEditors.find((candidate) =>
-    documentKey(candidate.document) === documentKey(document));
-  const applyEdit = sourceEditor
-    ? editInPreview(sourceEditor, (builder) => builder.replace(range, rename.text), {
-      undoStopBefore: true,
-      undoStopAfter: true,
-    })
-    : (() => {
-      const edit = new vscode.WorkspaceEdit();
-      edit.replace(document.uri, range, rename.text);
-      return applyPreviewEdit(edit);
-    })();
-  return applyEdit.then((applied) => {
+  const { remainingRefs } = rename;
+  return applyPreviewEdits(document, [rename.edit], true).then((applied) => {
     postLabelRenameResult(preview, message, applied
       ? { ok: true, remainingRefs }
       : { ok: false, reason: "VS Code could not apply the rename." });
@@ -1965,26 +1776,10 @@ function handleThreadChange(
   if (preview.activeBlockEdit) return fail("Save or cancel the open Markdown edit before changing a thread.");
   const document = currentPreviewDocument(preview, message);
   if (!document) return fail("The preview is out of date. Try again once it has refreshed.");
-  const first = message.line;
-  const last = message.endLine;
-  if (last > document.lineCount) return fail("The thread is no longer in the source. Refresh the preview.");
-  const threadLines: string[] = [];
-  for (let index = first - 1; index <= last - 1; index += 1) threadLines.push(document.lineAt(index).text);
-  if (!isThreadSource(threadLines)) return fail("The thread is no longer in the source. Refresh the preview.");
+  const thread = readThreadLines(document.getText(), message.line, message.endLine);
+  if ("refused" in thread) return fail(thread.refused);
 
-  const sourceEditor = vscode.window.visibleTextEditors.find((candidate) =>
-    documentKey(candidate.document) === documentKey(document));
-  const run = (range: vscode.Range, replacement: string): Thenable<boolean> => sourceEditor
-    ? editInPreview(sourceEditor, (builder) => builder.replace(range, replacement), {
-      undoStopBefore: true,
-      undoStopAfter: true,
-    })
-    : (() => {
-      const edit = new vscode.WorkspaceEdit();
-      edit.replace(document.uri, range, replacement);
-      return applyPreviewEdit(edit);
-    })();
-  const finish = (applied: Thenable<boolean>): Thenable<void> => applied.then((done) => {
+  const finish = (applied: PromiseLike<boolean>): PromiseLike<void> => applied.then((done) => {
     postThreadResult(preview, type, message, done
       ? { ok: true }
       : { ok: false, reason: "VS Code could not apply the change." });
@@ -1996,36 +1791,27 @@ function handleThreadChange(
   });
 
   if (action === "delete") {
-    const before = first >= 2 ? document.lineAt(first - 2).text : undefined;
-    const after = last < document.lineCount ? document.lineAt(last).text : undefined;
-    const removal = threadDeleteRange(threadLines.length, before, after);
-    const startLine = first - 1 + removal.fromOffset;
-    const endLine = startLine + removal.count - 1;
-    // Remove whole lines: through the start of the line after, or the end of the file.
-    const range = endLine + 1 < document.lineCount
-      ? new vscode.Range(startLine, 0, endLine + 1, 0)
-      : new vscode.Range(
-        startLine > 0 ? new vscode.Position(startLine - 1, document.lineAt(startLine - 1).text.length) : new vscode.Position(0, 0),
-        document.lineAt(endLine).range.end,
-      );
-    return finish(run(range, ""));
+    const removal = planThreadDelete(document.getText(), message.line, message.endLine);
+    if ("refused" in removal) return fail(removal.refused);
+    return finish(applyPreviewEdits(document, [removal.edit], true));
   }
 
   return resolveAuthor({
-    setting: readCommentsConfiguration(vscode.workspace.getConfiguration(COMMENTS_CONFIGURATION_SECTION)).authorName,
-    gitName: () => headBaseline.userName(document.uri),
+    setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION)).authorName,
+    gitName: () => host.vcs.userName(documentKey(document)),
     osUserName: () => os.userInfo().username,
   }).then((author) => {
     const current = currentPreviewDocument(preview, message);
-    if (!current || current.version !== document.version) {
+    if (!current || revisionOfDocument(current) !== revisionOfDocument(document)) {
       return fail("The document changed meanwhile. Try again.");
     }
-    const edit = threadReplyEdit(threadLines, author, formatThreadDate(new Date()), (message as PageMessageOf<"previewThreadReply">).text);
-    if (!edit) return fail("The reply could not be added to this thread.");
-    const lineIndex = first - 1 + edit.fromLine;
-    const eol = document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
-    const range = document.lineAt(lineIndex).range;
-    return finish(run(range, edit.lines.join(eol)));
+    const reply = planThreadReply(document.getText(), message.line, message.endLine, {
+      author,
+      date: formatThreadDate(new Date()),
+      body: (message as PageMessageOf<"previewThreadReply">).text,
+    }, host.documents.of(document).eol);
+    if ("refused" in reply) return fail(reply.refused);
+    return finish(applyPreviewEdits(document, [reply.edit], true));
   });
 }
 
@@ -2069,47 +1855,23 @@ function handleBlockMove(preview: ActivePreview, message: PageMessageOf<"preview
     });
     return undefined;
   }
-  const moving = { line: message.line, endLine: message.endLine };
-  const neighbour = { line: message.neighbourLine, endLine: message.neighbourEndLine };
-  const movesDown = message.direction === "down";
-  const first = movesDown ? moving : neighbour;
-  const second = movesDown ? neighbour : moving;
-  const plan = planBlockMove(document.getText(), first, second);
+  const plan = planBlockMoveEdit(document.getText(), message);
   if ("refused" in plan) {
     postBlockMoveResult(preview, message, { ok: false, reason: plan.refused });
     return undefined;
   }
-  if ([first, second].some((block) => opensIncludeDirective(document.lineAt(block.line - 1).text))) {
-    postBlockMoveResult(preview, message, {
-      ok: false,
-      reason: "A block that comes from an included file cannot be moved.",
-    });
-    return undefined;
-  }
-  const range = new vscode.Range(document.positionAt(plan.start), document.positionAt(plan.end));
-  const sourceEditor = visibleEditorFor(preview);
-  const applyEdit = sourceEditor
-    ? editInPreview(sourceEditor, (builder) => builder.replace(range, plan.text), {
-      undoStopBefore: true,
-      undoStopAfter: true,
-    })
-    : (() => {
-      const edit = new vscode.WorkspaceEdit();
-      edit.replace(document.uri, range, plan.text);
-      return applyPreviewEdit(edit);
-    })();
-  return applyEdit.then((applied) => {
+  return applyPreviewEdits(document, [plan.edit], true).then((applied) => {
     if (!applied) {
       postBlockMoveResult(preview, message, { ok: false, reason: "VS Code could not apply the move." });
       return;
     }
     // The moved block keeps its screen position: pin its new first line at the viewport top it had.
-    const newLine = movesDown ? plan.newStartLine : plan.newSecondStartLine;
+    const newLine = plan.line;
     storePendingPin(preview, {
       documentId: message.documentId,
       pinLine: newLine,
       pinViewportTop: message.pinViewportTop,
-    }, document.version);
+    }, revisionOfDocument(document));
     postBlockMoveResult(preview, message, { ok: true, line: newLine });
   }, (error: unknown) => {
     postBlockMoveResult(preview, message, {
@@ -2157,35 +1919,6 @@ function blocksDocument(
     ?? refuse("The preview is out of date. Try again once it has refreshed.");
 }
 
-function linesOpenInclude(document: vscode.TextDocument, line: number, endLine: number): boolean {
-  for (let current = line; current <= Math.min(endLine, document.lineCount); current += 1) {
-    if (opensIncludeDirective(document.lineAt(current - 1).text)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function replaceDocumentRange(
-  preview: ActivePreview,
-  document: vscode.TextDocument,
-  start: number,
-  end: number,
-  text: string,
-): Thenable<boolean> {
-  const range = new vscode.Range(document.positionAt(start), document.positionAt(end));
-  const sourceEditor = visibleEditorFor(preview);
-  if (sourceEditor) {
-    return editInPreview(sourceEditor, (builder) => builder.replace(range, text), {
-      undoStopBefore: true,
-      undoStopAfter: true,
-    });
-  }
-  const edit = new vscode.WorkspaceEdit();
-  edit.replace(document.uri, range, text);
-  return applyPreviewEdit(edit);
-}
-
 /**
  * Copy and cut of selected blocks (T40): the exact Markdown of the lines goes to the clipboard; cut
  * then deletes them (with one blank separator) in one edit. The page ranges are not trusted.
@@ -2200,29 +1933,18 @@ function handleBlocksCopyCut(
     return undefined;
   }
   const line = message.line;
-  const endLine = message.endLine;
-  const refuse = (reason: string): undefined => {
-    postBlocksResult(preview, message, op, { ok: false, reason });
+  const plan = planBlocksCopyCut(document.getText(), line, message.endLine, op === "cut" ? "cut" : "copy");
+  if ("refused" in plan) {
+    postBlocksResult(preview, message, op, { ok: false, reason: plan.refused });
     return undefined;
-  };
-  const text = document.getText();
-  const copied = spanText(text, line, endLine);
-  if (typeof copied !== "string") {
-    return refuse(copied.refused);
-  }
-  if (linesOpenInclude(document, line, endLine)) {
-    return refuse("A block that comes from an included file cannot be copied or cut.");
-  }
-  const plan = op === "cut" ? planCut(text, line, endLine) : undefined;
-  if (plan && "refused" in plan) {
-    return refuse(plan.refused);
   }
   const fail = (error: unknown): void => postBlocksResult(preview, message, op, {
     ok: false,
     reason: error instanceof Error ? error.message : String(error),
   });
-  return vscode.env.clipboard.writeText(copied).then(() => {
-    if (!plan) {
+  const cut = plan.cut;
+  return host.ui.writeClipboard(plan.copied).then(() => {
+    if (!cut) {
       postBlocksResult(preview, message, op, { ok: true });
       return undefined;
     }
@@ -2234,19 +1956,19 @@ function handleBlocksCopyCut(
       });
       return undefined;
     }
-    return replaceDocumentRange(preview, document, plan.start, plan.end, "").then((applied) => {
+    return applyPreviewEdits(document, [cut.edit], true).then((applied) => {
       if (!applied) {
         postBlocksResult(preview, message, op, { ok: false, reason: "VS Code could not apply the cut." });
         return;
       }
-      if (plan.followingLine !== undefined) {
+      if (cut.followingLine !== undefined) {
         // The block after the cut moves up into its place: hold it at the cut blocks' screen position.
         storePendingPin(preview, {
           documentId: message.documentId,
           pinLine: line,
           // Only a cut moves blocks; a copy carries no pin.
           pinViewportTop: (message as { pinViewportTop?: number }).pinViewportTop,
-        }, document.version);
+        }, revisionOfDocument(document));
       }
       postBlocksResult(preview, message, op, { ok: true });
     });
@@ -2264,22 +1986,22 @@ function handleBlocksPaste(
   }
   const afterLine = message.insertAfterLine;
   const refuse = (reason: string): void => postBlocksResult(preview, message, "paste", { ok: false, reason });
-  if (afterLine > 0 && afterLine <= document.lineCount
-    && linesOpenInclude(document, afterLine, afterLine)) {
-    refuse("Text cannot be pasted next to a block that comes from an included file.");
+  const nextToInclude = checkBlocksPaste(document.getText(), afterLine);
+  if (nextToInclude) {
+    refuse(nextToInclude.refused);
     return undefined;
   }
-  return vscode.env.clipboard.readText().then((clipboard) => {
+  return host.ui.readClipboard().then((clipboard) => {
     if (preview.document !== document || revisionOfDocument(document) !== message.revision) {
       refuse("The document changed while pasting. Try again.");
       return undefined;
     }
-    const plan = planPaste(document.getText(), afterLine, clipboard);
+    const plan = planBlocksPaste(document.getText(), afterLine, clipboard);
     if ("refused" in plan) {
       refuse(plan.refused);
       return undefined;
     }
-    return replaceDocumentRange(preview, document, plan.offset, plan.offset, plan.text).then((applied) => {
+    return applyPreviewEdits(document, [plan.edit], true).then((applied) => {
       if (!applied) {
         refuse("VS Code could not apply the paste.");
         return;
@@ -2288,7 +2010,7 @@ function handleBlocksPaste(
         documentId: message.documentId,
         pinLine: message.pinLine,
         pinViewportTop: message.pinViewportTop,
-      }, document.version);
+      }, revisionOfDocument(document));
       postBlocksResult(preview, message, "paste", { ok: true });
     });
   }).then(undefined, (error: unknown) => refuse(error instanceof Error ? error.message : String(error)));
@@ -2335,7 +2057,8 @@ export function listDocumentTargetsForTests(documentUri: string): HostListAnswer
 export async function listCitationKeysForTests(documentUri: string): Promise<{
   items: Array<{ key: string; title?: string }>;
 }> {
-  const { items } = await scanBibKeys(vscode.Uri.parse(documentUri));
+  const uri = vscode.Uri.parse(documentUri);
+  const { items } = await scanBibKeys(uri.scheme === "file" ? uri.fsPath : undefined, host);
   return { items };
 }
 
@@ -2348,7 +2071,7 @@ function handlePlantUmlInclude(preview: ActivePreview, message: PageMessageOf<"p
   const documentPath = preview.document?.uri.fsPath ?? vscode.Uri.parse(preview.documentUri).fsPath;
   const answer = resolvePlantUmlInclude(
     { path: message.path, from: message.from },
-    { documentPath, workspaceRoot: preview.workspaceRoot, trusted: vscode.workspace.isTrusted },
+    { documentPath, workspaceRoot: preview.workspaceRoot, trusted: host.workspace.trusted },
   );
   if (answer.watch) {
     preview.plantUmlIncludeWatch.remember(canonicalPath(answer.watch));
@@ -2377,7 +2100,7 @@ function handleListCitations(preview: ActivePreview, message: PageMessageOf<"pre
     postHostResult(preview, message, { ok: false, reason: "The preview is out of date. Try again once it has refreshed." });
     return undefined;
   }
-  return scanBibKeys(document.uri).then((scan) => {
+  return scanBibKeys(document.uri.scheme === "file" ? document.uri.fsPath : undefined, host).then((scan) => {
     postHostResult(preview, message, {
       ok: true,
       items: scan.items.map((item) => ({ value: item.key, label: item.key, ...(item.title ? { detail: item.title } : {}) })),
@@ -2399,20 +2122,16 @@ function handlePickDocument(preview: ActivePreview, message: PageMessageOf<"prev
     postHostResult(preview, message, { ok: false, reason: "The preview is out of date, or the document is not a file." });
     return undefined;
   }
-  return Promise.resolve(vscode.window.showOpenDialog({
-    canSelectMany: false,
-    canSelectFiles: true,
-    canSelectFolders: false,
-    defaultUri: vscode.Uri.file(path.dirname(document.uri.fsPath)),
+  return host.ui.pickFile({
+    defaultDirectory: path.dirname(document.uri.fsPath),
     filters: { Markdown: ["md", "markdown"] },
     openLabel: "Link document",
-  })).then((picked) => {
-    const file = picked?.[0];
+  }).then((file) => {
     if (!file) {
       postHostResult(preview, message, { ok: true, cancelled: true });
       return;
     }
-    const reference = docReference(document.uri.fsPath, file.fsPath);
+    const reference = docReference(document.uri.fsPath, file.path);
     postHostResult(preview, message, reference === undefined
       ? { ok: false, reason: "That file name cannot be written in a {doc} link." }
       : { ok: true, path: reference });
@@ -2436,28 +2155,24 @@ function handlePickImage(preview: ActivePreview, message: PageMessageOf<"preview
     postHostResult(preview, message, { ok: false, reason: "The preview is out of date, or the document is not a file." });
     return undefined;
   }
-  return Promise.resolve(vscode.window.showOpenDialog({
-    canSelectMany: false,
-    canSelectFiles: true,
-    canSelectFolders: false,
-    defaultUri: vscode.Uri.file(path.dirname(document.uri.fsPath)),
+  return host.ui.pickFile({
+    defaultDirectory: path.dirname(document.uri.fsPath),
     filters: { Images: IMAGE_EXTENSIONS },
     openLabel: "Insert image",
-  })).then((picked) => {
-    const file = picked?.[0];
+  }).then((file) => {
     if (!file) {
       postHostResult(preview, message, { ok: true, cancelled: true });
       return;
     }
-    if (file.scheme !== "file" || !isImageFileName(file.fsPath)) {
+    if (!file.local || !isImageFileName(file.path)) {
       postHostResult(preview, message, { ok: false, reason: "Pick a png, jpeg, gif, webp or svg image." });
       return;
     }
-    if (!vscode.workspace.getWorkspaceFolder(file)) {
+    if (!host.workspace.folderOf(file.path)) {
       postHostResult(preview, message, { ok: false, reason: "The image must be inside a workspace folder." });
       return;
     }
-    const reference = relativeImageReference(document.uri.fsPath, file.fsPath);
+    const reference = relativeImageReference(document.uri.fsPath, file.path);
     postHostResult(preview, message, reference === undefined
       ? { ok: false, reason: "That image cannot be referenced from this document (another drive, or an unusual name)." }
       : { ok: true, path: reference });
@@ -2486,10 +2201,10 @@ function handlePasteImage(preview: ActivePreview, message: PageMessageOf<"previe
     return refuse("Save the document before pasting an image.");
   }
   if (!isDocumentEligible(document)) return refuse("Pasting an image needs a Markdown file.");
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+  const workspaceFolder = host.workspace.folderOf(document.uri.fsPath);
   const folderPath = path.dirname(document.uri.fsPath);
   if (!workspaceFolder
-    || !isPathWithin(canonicalPath(workspaceFolder.uri.fsPath), canonicalPath(folderPath))) {
+    || !isPathWithin(canonicalPath(workspaceFolder.path), canonicalPath(folderPath))) {
     return refuse("The image must be saved inside a workspace folder.");
   }
   const announced = imageTypeOfMime(String(message.mime));
@@ -2501,14 +2216,13 @@ function handlePasteImage(preview: ActivePreview, message: PageMessageOf<"previe
   if (sniffed === undefined || sniffed !== announced) {
     return refuse("The clipboard data is not a png, jpeg, gif or webp image.");
   }
-  const folder = vscode.Uri.file(folderPath);
-  return Promise.resolve(vscode.workspace.fs.readDirectory(folder)).then(async (entries) => {
+  return host.files.readDirectory(folderPath).then(async (entries) => {
     const fileName = nextImageName(new Set(entries.map(([name]) => name)), PASTED_IMAGE_EXTENSION[sniffed]);
     if (fileName === undefined) {
       refuse("Too many pasted images next to this document.");
       return;
     }
-    await vscode.workspace.fs.writeFile(vscode.Uri.joinPath(folder, fileName), bytes);
+    await host.files.writeFile(path.join(folderPath, fileName), bytes);
     postHostResult(preview, message, { ok: true, fileName });
   }).then(undefined, (error: unknown) => {
     refuse(error instanceof Error ? error.message : String(error));
@@ -2658,10 +2372,10 @@ function completeActiveBlockEdit(preview: ActivePreview, edit: ActiveBlockEdit):
   const refreshes = edit.hasAppliedEdit
     && preview.document !== undefined
     && sourceAvailable(preview)
-    && preview.document.version !== preview.stage?.activeDocumentVersion;
+    && revisionOfDocument(preview.document) !== preview.stage?.activeDocumentVersion;
   if (preview.pendingPin && preview.document) {
     // Every apply of this edit has resolved: only a render of this version or later shows it.
-    preview.pendingPin.minVersion = Math.max(preview.pendingPin.minVersion, preview.document.version);
+    preview.pendingPin.minVersion = Math.max(preview.pendingPin.minVersion, revisionOfDocument(preview.document));
   }
   releaseActiveBlockEdit(preview, refreshes);
   if (refreshes && preview.document) {
@@ -2688,22 +2402,13 @@ function drainActiveBlockEdit(preview: ActivePreview, edit: ActiveBlockEdit): vo
     releaseHostEditKeepingEditor(preview);
     return;
   }
-  const replacement = minimalReplacement(edit.lastSavedText, editedText);
-  if (replacement.start === replacement.end && replacement.text === "") {
+  const textEdit = planBlockTextEdit(edit.sourceStartOffset, edit.lastSavedText, editedText);
+  if (!textEdit) {
     drainActiveBlockEdit(preview, edit);
     return;
   }
-  const workspaceEdit = new vscode.WorkspaceEdit();
-  workspaceEdit.replace(
-    source.document.uri,
-    new vscode.Range(
-      source.document.positionAt(edit.sourceStartOffset + replacement.start),
-      source.document.positionAt(edit.sourceStartOffset + replacement.end),
-    ),
-    replacement.text,
-  );
   edit.applying = true;
-  void applyPreviewEdit(workspaceEdit).then((applied) => {
+  void applyPreviewEdits(source.document, [textEdit], false).then((applied) => {
     if (preview.activeBlockEdit !== edit) {
       return;
     }
@@ -2810,7 +2515,7 @@ function handlePreviewEditSave(preview: ActivePreview, message: PageMessageOf<"p
     : message.editedText;
   edit.finalRequested = message.final !== false;
   if (message.final === true) {
-    storePendingPin(preview, message, preview.document?.version ?? 0);
+    storePendingPin(preview, message, preview.document ? revisionOfDocument(preview.document) : 0);
   }
   drainActiveBlockEdit(preview, edit);
 }
@@ -3037,8 +2742,8 @@ async function resolvePreviewLink(preview: ActivePreview, request: string) {
         : await vscode.workspace.openTextDocument(vscode.Uri.file(stage.activeDocumentPath));
       const canReuseResolvedLinks = preview.frontmatter !== undefined
         && preview.frontmatterDocumentUri === currentDocument.uri.toString()
-        && preview.frontmatterDocumentVersion === currentDocument.version
-        && preview.frontmatterLinkResultsVersion === currentDocument.version;
+        && preview.frontmatterRevision === revisionOfDocument(currentDocument)
+        && preview.frontmatterLinkResultsRevision === revisionOfDocument(currentDocument);
       const cachedFrontmatter = canReuseResolvedLinks ? preview.frontmatter : undefined;
       const cachedLink = cachedFrontmatter?.linkResults?.find((candidate) =>
         candidate.fieldPath === identity.fieldPath
@@ -3062,7 +2767,7 @@ async function resolvePreviewLink(preview: ActivePreview, request: string) {
           preview,
           freshFrontmatter,
           currentDocument.uri.toString(),
-          currentDocument.version,
+          revisionOfDocument(currentDocument),
           true,
         );
       }
@@ -3084,7 +2789,10 @@ async function resolvePreviewLink(preview: ActivePreview, request: string) {
         schemaDirectory: findSchemaDirectory(currentDocument.uri.fsPath, preview.workspaceRoot),
       });
       const candidatePath = cachedFrontmatterLinkCandidate(link, currentDocument.uri.fsPath, resolvedRoots);
-      const navigation = validateResolvedPreviewNavigation(
+      // Read the text before the await below: the marker identity must come from the same snapshot
+      // as the link analysis, as it did when the validation was synchronous.
+      const currentText = currentDocument.getText();
+      const navigation = await navigator.validateResolvedPreviewNavigation(
         candidatePath ?? link.resolvedPath,
         suffix,
         [
@@ -3100,7 +2808,7 @@ async function resolvePreviewLink(preview: ActivePreview, request: string) {
       );
       if (navigation.kind !== "local" || !link.basenameMarker) return navigation;
       const markerIdentity = frontmatterLinkIdentity(
-        currentDocument.getText(),
+        currentText,
         currentDocument.uri.fsPath,
         link.idMarker,
       );
@@ -3108,7 +2816,7 @@ async function resolvePreviewLink(preview: ActivePreview, request: string) {
       let targetSource: string;
       try {
         targetSource = Buffer.from(
-          await vscode.workspace.fs.readFile(vscode.Uri.file(navigation.path)),
+          await host.files.readFile(navigation.path),
         ).toString("utf8");
       } catch {
         return navigation;
@@ -3119,14 +2827,14 @@ async function resolvePreviewLink(preview: ActivePreview, request: string) {
       return { kind: "blocked" as const, reason: "The frontmatter link request is invalid." };
     }
   }
-  return resolvePreviewNavigation(request, stage.activeDocumentPath, preview.workspaceRoot, async (name) => {
+  return navigator.resolvePreviewNavigation(request, stage.activeDocumentPath, preview.workspaceRoot, async (name) => {
     preview.linkDiscoveries ??= new Map();
     const existing = preview.linkDiscoveries.get(name);
     if (existing) return existing;
     const literal = name.replace(/[\[\]{}*?]/gu, (character) => `[${character}]`);
     const discovery = Promise.all(navigationRoots.map((root) =>
-      vscode.workspace.findFiles(new vscode.RelativePattern(root, `**/${literal}`)),
-    )).then((uriGroups) => [...new Set(uriGroups.flat().map((uri) => uri.fsPath))]);
+      host.workspace.findFiles({ base: root, pattern: `**/${literal}` }),
+    )).then((pathGroups) => [...new Set(pathGroups.flat())]);
     preview.linkDiscoveries.set(name, discovery);
     try {
       return await discovery;
@@ -3144,7 +2852,7 @@ async function handlePreviewLinkDiscovery(preview: ActivePreview, message: PageM
     if (!matchesCurrentPreview(preview, message)) return;
     await postToPage(preview, { type: "previewLinkTargets", ...scrollContext(preview.stage!), targets });
   } catch (error) {
-    if (!preview.disposed) void vscode.window.showWarningMessage(`Preview link discovery failed: ${String(error)}`);
+    if (!preview.disposed) void host.ui.showWarning(`Preview link discovery failed: ${String(error)}`);
   }
 }
 
@@ -3198,8 +2906,6 @@ function postShowComments(preview: ActivePreview): void {
 }
 
 const INCOMING_CHANGES_DEBOUNCE_MS = 300;
-const headBaseline = createHeadBaseline<vscode.Uri>(() =>
-  vscode.extensions.getExtension("vscode.git") as unknown as GitExtensionLike<vscode.Uri> | undefined);
 
 /**
  * Tells the page which source lines differ from HEAD (T16). Nothing is posted for a file Git does
@@ -3211,14 +2917,14 @@ async function postIncomingChanges(preview: ActivePreview): Promise<void> {
   if (preview.disposed || !stage) return;
   const enabled = preview.configuration.showIncomingChanges;
   let ranges: { start: number; end: number }[] = [];
-  if (enabled && sessionViewPreferences.incomingChanges && vscode.workspace.isTrusted
+  if (enabled && sessionViewPreferences.incomingChanges && host.workspace.trusted
     && preview.documentUri.startsWith("file:")) {
-    const uri = vscode.Uri.file(stage.activeDocumentPath);
-    const base = await headBaseline.read(uri, stage.sourceText.length);
+    const documentId = host.documents.idOf(stage.activeDocumentPath);
+    const base = await host.vcs.headText(documentId, stage.sourceText.length);
     if (preview.disposed || preview.stage !== stage) return;
     if (base) {
       ranges = changedLineRanges(base.text, stage.sourceText);
-      watchIncomingBaseline(preview, uri);
+      watchIncomingBaseline(preview, documentId, stage.activeDocumentPath);
     }
   }
   if (ranges.length === 0 && !preview.incomingMarksShown && enabled === preview.incomingEnabledPosted) {
@@ -3239,12 +2945,12 @@ async function postIncomingChanges(preview: ActivePreview): Promise<void> {
 }
 
 /** Posts again when the HEAD commit of the repository changes (commit, checkout, pull). */
-function watchIncomingBaseline(preview: ActivePreview, uri: vscode.Uri): void {
-  if (preview.incomingWatch?.path === uri.fsPath) return;
+function watchIncomingBaseline(preview: ActivePreview, documentId: string, documentPath: string): void {
+  if (preview.incomingWatch?.path === documentPath) return;
   preview.incomingWatch?.subscription.dispose();
   preview.incomingWatch = undefined;
-  const subscription = headBaseline.watch(uri, () => scheduleIncomingChanges(preview, 0));
-  if (subscription) preview.incomingWatch = { path: uri.fsPath, subscription };
+  const subscription = host.vcs.watchHead(documentId, () => scheduleIncomingChanges(preview, 0));
+  if (subscription) preview.incomingWatch = { path: documentPath, subscription };
 }
 
 function scheduleIncomingChanges(preview: ActivePreview, delay = INCOMING_CHANGES_DEBOUNCE_MS): void {
@@ -3268,14 +2974,14 @@ function clearIncomingChanges(preview: ActivePreview): void {
 const COMMENTS_DEBOUNCE_MS = 150;
 
 /** Reads the sidecar of a document; undefined when there is none. */
-async function readCommentSidecar(sidecar: vscode.Uri): Promise<string | undefined> {
+async function readCommentSidecar(sidecar: string): Promise<string | undefined> {
   try {
-    const stat = await vscode.workspace.fs.stat(sidecar);
+    const stat = await host.files.stat(sidecar);
     if (stat.size > MAX_SIDECAR_BYTES) {
       // Not read: the parser reports the size problem from a stub of the right length.
       return " ".repeat(MAX_SIDECAR_BYTES + 1);
     }
-    return new TextDecoder().decode(await vscode.workspace.fs.readFile(sidecar));
+    return new TextDecoder().decode(await host.files.readFile(sidecar));
   } catch {
     return undefined;
   }
@@ -3290,7 +2996,7 @@ async function postComments(preview: ActivePreview): Promise<void> {
   const stage = preview.stage;
   if (preview.disposed || !stage || !preview.documentUri.startsWith("file:")) return;
   const documentPath = stage.activeDocumentPath;
-  const sidecar = vscode.Uri.file(path.join(path.dirname(documentPath), sidecarNameFor(path.basename(documentPath))));
+  const sidecar = path.join(path.dirname(documentPath), sidecarNameFor(path.basename(documentPath)));
   watchCommentSidecar(preview, sidecar);
   const sequence = ++preview.commentsSeq;
   const text = await readCommentSidecar(sidecar);
@@ -3305,8 +3011,8 @@ async function postComments(preview: ActivePreview): Promise<void> {
     stored = parsed.threads;
     if (parsed.errors.length > 0 && preview.commentsWarned !== text) {
       preview.commentsWarned = text;
-      void vscode.window.showWarningMessage(
-        `The review comments file ${path.basename(sidecar.fsPath)} is not valid and is ignored: ${parsed.errors[0]}.`,
+      void host.ui.showWarning(
+        `The review comments file ${path.basename(sidecar)} is not valid and is ignored: ${parsed.errors[0]}.`,
       );
     }
   }
@@ -3361,9 +3067,8 @@ async function currentDocumentText(documentPath: string): Promise<string | undef
     candidate.uri.scheme === "file" && candidate.uri.fsPath === documentPath);
   if (open) return open.getText();
   try {
-    const uri = vscode.Uri.file(documentPath);
-    if ((await vscode.workspace.fs.stat(uri)).size > 8 * 1024 * 1024) return undefined;
-    return new TextDecoder().decode(await vscode.workspace.fs.readFile(uri));
+    if ((await host.files.stat(documentPath)).size > 8 * 1024 * 1024) return undefined;
+    return new TextDecoder().decode(await host.files.readFile(documentPath));
   } catch {
     return undefined;
   }
@@ -3456,7 +3161,7 @@ async function persistCommentAnchors(document: vscode.TextDocument): Promise<voi
 function warnAnchorsNotSaved(reason: string): void {
   if (lastAnchorWarning === reason) return;
   lastAnchorWarning = reason;
-  void vscode.window.showWarningMessage(`The review comments were not re-anchored in their file: ${reason}`);
+  void host.ui.showWarning(`The review comments were not re-anchored in their file: ${reason}`);
 }
 
 /**
@@ -3474,13 +3179,13 @@ async function moveCommentSidecars(event: vscode.FileRenameEvent): Promise<void>
     const newSidecar = path.join(path.dirname(newUri.fsPath), sidecarNameFor(newName));
     if (oldSidecar === newSidecar) continue;
     try {
-      if ((await vscode.workspace.fs.stat(newUri)).type & vscode.FileType.Directory) continue;
+      if ((await host.files.stat(newUri.fsPath)).kind === "directory") continue;
       const oldText = await readCommentSidecarText(oldSidecar);
       if (oldText === undefined) continue;
       const parsed = parseSidecar(oldText);
       if (parsed.errors.length === 0 && parsed.document !== oldName) continue;
       const keep = (reason: string): void => {
-        void vscode.window.showWarningMessage(
+        void host.ui.showWarning(
           `The review comments of ${oldName} stay in ${path.basename(oldSidecar)}: ${reason}`,
         );
       };
@@ -3498,7 +3203,7 @@ async function moveCommentSidecars(event: vscode.FileRenameEvent): Promise<void>
         keep("it has unsaved changes in an editor.");
         continue;
       }
-      await vscode.workspace.fs.rename(vscode.Uri.file(oldSidecar), vscode.Uri.file(newSidecar), { overwrite: false });
+      await host.files.rename(oldSidecar, newSidecar, { overwrite: false });
       await commentStore.update(newSidecar, newName, (threads) => threads, { renameDocument: true });
     } catch (error) {
       console.error("Failed to move the review comments with the renamed document.", error);
@@ -3507,17 +3212,15 @@ async function moveCommentSidecars(event: vscode.FileRenameEvent): Promise<void>
 }
 
 /** Posts again when the sidecar is created, changed or deleted. */
-function watchCommentSidecar(preview: ActivePreview, sidecar: vscode.Uri): void {
-  if (preview.commentsWatch?.path === sidecar.fsPath) return;
+function watchCommentSidecar(preview: ActivePreview, sidecar: string): void {
+  if (preview.commentsWatch?.path === sidecar) return;
   preview.commentsWatch?.watcher.dispose();
-  const watcher = vscode.workspace.createFileSystemWatcher(
-    new vscode.RelativePattern(vscode.Uri.file(path.dirname(sidecar.fsPath)), path.basename(sidecar.fsPath)),
-  );
+  const watcher = host.watcher.watch(path.dirname(sidecar), path.basename(sidecar));
   const refresh = (): void => scheduleComments(preview, COMMENTS_DEBOUNCE_MS);
   watcher.onDidCreate(refresh);
   watcher.onDidChange(refresh);
   watcher.onDidDelete(refresh);
-  preview.commentsWatch = { path: sidecar.fsPath, watcher };
+  preview.commentsWatch = { path: sidecar, watcher };
 }
 
 function scheduleComments(preview: ActivePreview, delay = COMMENTS_DEBOUNCE_MS): void {
@@ -3534,21 +3237,19 @@ function scheduleComments(preview: ActivePreview, delay = COMMENTS_DEBOUNCE_MS):
 const commentStore = createCommentStore({
   read: readCommentSidecarText,
   write: async (file, text) => {
-    await vscode.workspace.fs.writeFile(vscode.Uri.file(file), new TextEncoder().encode(text));
+    await host.files.writeFile(file, new TextEncoder().encode(text));
   },
 });
 
 /** The text of a sidecar, undefined when there is none; any other failure is thrown. */
 async function readCommentSidecarText(file: string): Promise<string | undefined> {
-  const uri = vscode.Uri.file(file);
   try {
-    await vscode.workspace.fs.stat(uri);
+    await host.files.stat(file);
   } catch (error) {
-    if (error instanceof vscode.FileSystemError && error.code === "FileNotFound") return undefined;
-    if ((error as { code?: string } | undefined)?.code === "ENOENT") return undefined;
+    if (isFileNotFound(error)) return undefined;
     throw error;
   }
-  return new TextDecoder().decode(await vscode.workspace.fs.readFile(uri));
+  return new TextDecoder().decode(await host.files.readFile(file));
 }
 
 type CommentKind = "create" | "reply" | "resolve" | "delete";
@@ -3569,7 +3270,7 @@ async function writeComment(
   change: (author: string, now: Date) => ((threads: CommentThread[]) => CommentThread[] | string),
 ): Promise<CommentOutcome> {
   const refuse = (reason: string): CommentOutcome => {
-    void vscode.window.showWarningMessage(`The comment was not saved: ${reason}`);
+    void host.ui.showWarning(`The comment was not saved: ${reason}`);
     return { ok: false, reason };
   };
   if (preview.readOnly) return refuse("comments need a trusted workspace.");
@@ -3584,10 +3285,10 @@ async function writeComment(
   if (open?.isDirty) {
     return refuse(`${path.basename(sidecar)} has unsaved changes in an editor; save or close it first.`);
   }
-  const documentUri = vscode.Uri.file(documentPath);
+  const documentId = host.documents.idOf(documentPath);
   const author = await resolveAuthor({
-    setting: readCommentsConfiguration(vscode.workspace.getConfiguration(COMMENTS_CONFIGURATION_SECTION)).authorName,
-    gitName: () => headBaseline.userName(documentUri),
+    setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION)).authorName,
+    gitName: () => host.vcs.userName(documentId),
     osUserName: () => os.userInfo().username,
   });
   const now = new Date();
@@ -3695,14 +3396,9 @@ function recordNavigation(preview: ActivePreview, target: NavigationEntry): void
   postHistoryState(preview);
 }
 
-async function openLocalDocument(targetUri: vscode.Uri, selection?: vscode.Range): Promise<void> {
-  const existingGroup = vscode.window.tabGroups.all.find((group) => group.tabs.some((tab) =>
-    tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath === targetUri.fsPath));
-  await vscode.commands.executeCommand("vscode.open", targetUri, {
-    viewColumn: existingGroup?.viewColumn ?? vscode.ViewColumn.One,
-    preview: false,
-    ...(selection ? { selection } : {}),
-  });
+/** The whole lines `first` to `last` (zero-based) of a document, as an editor selection. */
+function lineSelection(document: HostDocument, first: number, last: number): TextRange {
+  return { start: { line: first, character: 0 }, end: { line: last, character: document.lineText(last).length } };
 }
 
 async function handlePreviewHistoryGo(preview: ActivePreview, direction: "back" | "forward"): Promise<void> {
@@ -3738,13 +3434,11 @@ async function handlePreviewHistoryGo(preview: ActivePreview, direction: "back" 
     return;
   }
   try {
-    const targetUri = vscode.Uri.parse(target.uri);
-    const document = await vscode.workspace.openTextDocument(targetUri);
+    const document = await host.documents.open(target.uri);
     const lineIndex = Math.min(Math.max(0, target.line - 1), Math.max(0, document.lineCount - 1));
-    const selection = new vscode.Range(lineIndex, 0, lineIndex, document.lineAt(lineIndex).text.length);
-    await openLocalDocument(targetUri, selection);
+    await host.navigation.showDocument(target.uri, lineSelection(document, lineIndex, lineIndex));
   } catch (error) {
-    void vscode.window.showWarningMessage(
+    void host.ui.showWarning(
       `Markdown OKF-Schema Studio could not go ${direction}: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
@@ -3798,12 +3492,12 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
   try {
     navigation = await resolvePreviewLink(preview, request);
   } catch (error) {
-    void vscode.window.showWarningMessage(`Preview link resolution failed: ${String(error)}`);
+    void host.ui.showWarning(`Preview link resolution failed: ${String(error)}`);
     return;
   }
   if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
   if (navigation.kind === "blocked") {
-    void vscode.window.showWarningMessage(`Markdown OKF-Schema Studio could not follow the link: ${navigation.reason}`);
+    void host.ui.showWarning(`Markdown OKF-Schema Studio could not follow the link: ${navigation.reason}`);
     return;
   }
   if (navigation.kind === "anchor") {
@@ -3830,48 +3524,37 @@ async function handlePreviewLink(preview: ActivePreview, request: string): Promi
     return;
   }
   if (navigation.kind === "external") {
-    await vscode.env.openExternal(vscode.Uri.parse(navigation.value));
+    await host.navigation.openExternal(navigation.value);
     return;
   }
   try {
-    let selection: vscode.Range | undefined;
+    const targetId = host.documents.idOf(navigation.path);
+    let selection: TextRange | undefined;
     if (navigation.markerLine !== undefined) {
-      const document = await vscode.workspace.openTextDocument(vscode.Uri.file(navigation.path));
+      const document = await host.documents.open(targetId);
       const lineIndex = navigation.markerLine - 1;
       if (lineIndex >= 0 && lineIndex < document.lineCount) {
-        selection = new vscode.Range(
-          lineIndex,
-          0,
-          lineIndex,
-          document.lineAt(lineIndex).text.length,
-        );
+        selection = lineSelection(document, lineIndex, lineIndex);
       }
     } else if (navigation.suffix.includes("#") && /\.md$/iu.test(navigation.path)) {
-      const document = await vscode.workspace.openTextDocument(vscode.Uri.file(navigation.path));
+      const document = await host.documents.open(targetId);
       const range = markdownFragmentRange(document.getText(), navigation.suffix);
       if (range !== undefined) {
-        const endLine = range.endLine - 1;
-        selection = new vscode.Range(
-          range.startLine - 1,
-          0,
-          endLine,
-          document.lineAt(endLine).text.length,
-        );
+        selection = lineSelection(document, range.startLine - 1, range.endLine - 1);
       }
     }
     if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
-    const targetUri = vscode.Uri.file(navigation.path);
     if (preview.followsActiveEditor) {
       // A locked preview does not follow the opened file, so only anchor jumps are recorded.
-      const opened = await vscode.workspace.openTextDocument(targetUri).then((document) => document, () => undefined);
+      const opened = await host.documents.open(targetId).then((document) => document, () => undefined);
       if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
-      if (opened && isDocumentEligible(opened)) {
-        recordNavigation(preview, { uri: documentKey(opened), line: (selection?.start.line ?? 0) + 1 });
+      if (opened?.path !== undefined && path.extname(opened.path).toLowerCase() === ".md") {
+        recordNavigation(preview, { uri: opened.id, line: (selection?.start.line ?? 0) + 1 });
       }
     }
-    await openLocalDocument(targetUri, selection);
+    await host.navigation.showDocument(targetId, selection);
   } catch (error) {
-    void vscode.window.showWarningMessage(
+    void host.ui.showWarning(
       `Markdown OKF-Schema Studio could not open ${navigation.path}: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
@@ -3944,7 +3627,7 @@ type PageMessageResult = Thenable<void> | void;
 const pageMessages = createMessageRouter<PageToHostMessage, [ActivePreview], PageMessageResult>();
 
 // Copies the raw code of a code block. It does not edit anything, so a read-only preview allows it.
-pageMessages.on("previewCopyText", (message) => vscode.env.clipboard.writeText(message.text));
+pageMessages.on("previewCopyText", (message) => host.ui.writeClipboard(message.text));
 
 // Back / Next walk the navigation history of the panel. Only navigation, no document edit.
 pageMessages.on("previewHistoryGo", (message, preview) => handlePreviewHistoryGo(preview, message.direction));
@@ -3974,7 +3657,7 @@ pageMessages.on("previewEditFlushed", (message, preview) => {
 // CR 050: the warning banner. Opening the Problems view and closing the banner edit nothing, so a
 // read-only or untrusted preview allows them.
 pageMessages.on("previewShowProblems", () =>
-  vscode.commands.executeCommand("workbench.actions.view.problems"));
+  host.ui.showProblems());
 pageMessages.on("previewWarningBannerClosed", (message, preview) => {
   dismissedWarningBanners.set(preview.documentUri, message.key);
 });
@@ -4006,11 +3689,11 @@ pageMessages.on("previewCommentDelete", (message, preview) => handleCommentDelet
 function initialPaletteMode(): PaletteMode {
   return initialPaletteModeOf(
     editModeStorage?.get(PALETTE_MODE_STORAGE_KEY),
-    vscode.workspace.getConfiguration(EDITING_CONFIGURATION_SECTION),
+    host.settings.section(EDITING_CONFIGURATION_SECTION),
   );
 }
 
-/** Remembers a save until its WorkspaceEdit is applied, so a navigation can wait for it (CR 025). */
+/** Remembers a save until its edit is applied, so a navigation can wait for it (CR 025). */
 function trackPendingSave(preview: ActivePreview, save: Thenable<void> | undefined): Thenable<void> | undefined {
   if (!save) return save;
   const tracked = Promise.resolve(save).finally(() => preview.pendingSaves.delete(tracked));
@@ -4018,11 +3701,6 @@ function trackPendingSave(preview: ActivePreview, save: Thenable<void> | undefin
   return tracked;
 }
 
-/**
- * A save or cancel of an editor opened on an older page than the one the host holds is refused
- * with an explicit error the editor shows, instead of being dropped: the reader keeps the text and
- * knows it was not saved (STAB-06).
- */
 /**
  * A save or cancel of an editor opened on an older page than the one the host holds is refused
  * with an explicit error the editor shows, instead of being dropped: the reader keeps the text and
@@ -4361,7 +4039,7 @@ function switchPreviewDocument(preview: ActivePreview, document: vscode.TextDocu
     return;
   }
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
-  const readOnly = workspaceFolder === undefined || !vscode.workspace.isTrusted;
+  const readOnly = workspaceFolder === undefined || !host.workspace.trusted;
   const resourceRoot = readOnly
     ? path.dirname(path.resolve(document.uri.fsPath))
     : workspaceFolder.uri.fsPath;
@@ -4461,7 +4139,7 @@ function refreshOpenDocument(preview: ActivePreview, isDependencyChange = false)
     && needsRefresh({
       isDependencyChange,
       shownStatus: shown,
-      documentVersion: preview.document.version,
+      documentVersion: revisionOfDocument(preview.document),
       stageVersion: preview.stage?.activeDocumentVersion,
     })) {
     void refreshPreviewDocument(preview, preview.document);
@@ -4483,7 +4161,7 @@ function refreshReferencedPath(preview: ActivePreview, filePath: string): void {
         (preview.status === "pending" ? preview.shownStatus : preview.status) ?? "")
       && isUnchangedSave({
         isActiveDocument: true,
-        documentVersion: preview.document.version,
+        documentVersion: revisionOfDocument(preview.document),
         stageVersion: preview.stage?.activeDocumentIdentity === preview.documentUri
           ? preview.stage.activeDocumentVersion
           : undefined,
@@ -4501,7 +4179,7 @@ function refreshReferencedPath(preview: ActivePreview, filePath: string): void {
   if (preview.document && [...preview.linkedTargetWatchers?.keys() ?? []]
     .some((target) => canonicalPath(target) === candidate)) {
     // Per-target watchers arm asynchronously; the preview-wide watcher backs them up (debounced).
-    scheduleLinkEnrichment(preview, preview.documentUri, preview.document.version);
+    scheduleLinkEnrichment(preview, preview.documentUri, revisionOfDocument(preview.document));
   }
   if (preview.plantUmlIncludeWatch.has(candidate)) {
     // The page draws its built-in PlantUML diagrams itself: tell it to read their files again.
@@ -4631,14 +4309,14 @@ function notifyTheme(preview: ActivePreview): void {
   }
 }
 
-let mystDiagnostics: vscode.DiagnosticCollection | undefined;
+let mystDiagnostics: DiagnosticsSink | undefined;
 
 const MYST_DIAGNOSTIC_SOURCE = "Markdown OKF-Schema Studio";
 
 /** Shows a document's MyST extension warnings in the Problems panel; trusted workspaces only. */
 function publishMystDiagnostics(preview: ActivePreview, result: RenderResult): void {
   const document = preview.document;
-  if (!mystDiagnostics || !document || !vscode.workspace.isTrusted
+  if (!mystDiagnostics || !document || !host.workspace.trusted
     || documentKey(document) !== result.stage.activeDocumentIdentity) {
     return;
   }
@@ -4646,17 +4324,17 @@ function publishMystDiagnostics(preview: ActivePreview, result: RenderResult): v
     .filter((diagnostic) => diagnostic.code === "myst-extension" && diagnostic.line !== undefined)
     .map((diagnostic) => {
       const line = Math.min(Math.max(diagnostic.line! - 1, 0), Math.max(document.lineCount - 1, 0));
-      const entry = new vscode.Diagnostic(
-        document.lineAt(line).range,
-        diagnostic.message,
-        vscode.DiagnosticSeverity.Warning,
-      );
-      entry.source = MYST_DIAGNOSTIC_SOURCE;
-      entry.code = "myst-extension";
+      const entry: DiagnosticEntry = {
+        range: { start: { line, character: 0 }, end: { line, character: document.lineAt(line).text.length } },
+        message: diagnostic.message,
+        severity: "warning",
+        source: MYST_DIAGNOSTIC_SOURCE,
+        code: "myst-extension",
+      };
       return entry;
     });
-  if (entries.length > 0 || mystDiagnostics.has(document.uri)) {
-    mystDiagnostics.set(document.uri, entries);
+  if (entries.length > 0 || mystDiagnostics.has(documentKey(document))) {
+    mystDiagnostics.set(documentKey(document), entries);
   }
 }
 
@@ -4670,7 +4348,7 @@ function clearMystDiagnostics(documentUri: string): void {
       return;
     }
   }
-  mystDiagnostics.delete(vscode.Uri.parse(documentUri));
+  mystDiagnostics.delete(documentUri);
 }
 
 function sameFile(a: string | undefined, b: string): boolean {
@@ -4682,8 +4360,8 @@ function sameFile(a: string | undefined, b: string): boolean {
  * after the event (a created or deleted file can change which one governs). Other previews and
  * unrelated conf.py files are left alone; an open block edit defers the refresh.
  */
-function onConfFileEvent(uri: vscode.Uri): void {
-  if (isIgnoredWatchPath(uri.fsPath)) {
+function onConfFileEvent(filePath: string): void {
+  if (isIgnoredWatchPath(filePath)) {
     return;
   }
   const candidates = [...activePreviews].filter((preview) => preview.document && !preview.disposed);
@@ -4692,7 +4370,7 @@ function onConfFileEvent(uri: vscode.Uri): void {
   const before = new Map(candidates.map((preview) => [preview, locate(preview)]));
   invalidateConfCache();
   for (const preview of candidates) {
-    if (sameFile(before.get(preview), uri.fsPath) || sameFile(locate(preview), uri.fsPath)) {
+    if (sameFile(before.get(preview), filePath) || sameFile(locate(preview), filePath)) {
       deferWhileEditing(preview, "render", () => refreshOpenDocument(preview, true));
     }
   }
@@ -4761,7 +4439,7 @@ function createPreview(
       descriptionsCollapsed: savedDescriptions };
   }
   const documentDirectory = path.dirname(path.resolve(sourcePath));
-  const readOnly = workspaceFolder === undefined || !vscode.workspace.isTrusted;
+  const readOnly = workspaceFolder === undefined || !host.workspace.trusted;
   const resourceRoot = readOnly ? documentDirectory : workspaceFolder.uri.fsPath;
   const sessionRoots = readOnly ? [] : sessionWorkspaceRoots();
   const navigationRoots = readOnly
@@ -4770,13 +4448,15 @@ function createPreview(
   let preview: ActivePreview;
   const queue = new BuildQueue<vscode.TextDocument, RenderResult>({
     debounceMs: 40,
+    revisionOf: (queued) => revisionOfDocument(queued),
     build: (request, signal) => renderPreviewDocument({
       document: request.document as PreviewDocument,
+      revision: revisionOfDocument(request.document),
       workspaceRoot: resourceRoot,
       requestId: request.requestId,
       documentIdentity: documentKey(request.document),
       signal,
-      isWorkspaceTrusted: () => vscode.workspace.isTrusted,
+      isWorkspaceTrusted: () => host.workspace.trusted,
       allowUntrusted: true,
       plantUmlJarPath: preview.plantUmlConfiguration.jarPath,
       plantUmlEngine: plantUmlEngineFor(preview),
@@ -4784,26 +4464,24 @@ function createPreview(
     onState: (state) => handleQueueState(preview, state),
     disposeResult: (result) => result.stage.dispose(),
   });
-  const dependencyWatcher = vscode.workspace.createFileSystemWatcher(
-    new vscode.RelativePattern(vscode.Uri.file(resourceRoot), "**/*"),
-  );
+  const dependencyWatcher = host.watcher.watch(resourceRoot, "**/*");
   const dependencyWatcherSubscriptions = [
-    dependencyWatcher.onDidChange((uri) => {
-      refreshReferencedPath(preview, uri.fsPath);
+    dependencyWatcher.onDidChange((changedPath) => {
+      refreshReferencedPath(preview, changedPath);
     }),
-    dependencyWatcher.onDidCreate((uri) => {
-      refreshReferencedPath(preview, uri.fsPath);
+    dependencyWatcher.onDidCreate((createdPath) => {
+      refreshReferencedPath(preview, createdPath);
       if (preview?.status === "missing-source") {
         recoverMissingSource(preview);
       }
     }),
-    dependencyWatcher.onDidDelete((uri) => {
+    dependencyWatcher.onDidDelete((deletedPath) => {
       const activePath = preview?.document?.uri.fsPath
         ?? (preview ? vscode.Uri.parse(preview.documentUri).fsPath : "");
-      if (preview && canonicalPath(uri.fsPath) === canonicalPath(activePath)) {
+      if (preview && canonicalPath(deletedPath) === canonicalPath(activePath)) {
         setMissingSource(preview, "The active Markdown source was deleted.");
       } else {
-        refreshReferencedPath(preview, uri.fsPath);
+        refreshReferencedPath(preview, deletedPath);
       }
     }),
   ];
@@ -4842,17 +4520,17 @@ function createPreview(
     state: restoredState,
     status: initialStatus,
     configuration: readPreviewConfiguration(
-      vscode.workspace.getConfiguration(PREVIEW_CONFIGURATION_SECTION),
+      host.settings.section(PREVIEW_CONFIGURATION_SECTION),
     ),
     plantUmlConfiguration: readPlantUmlConfiguration(
-      vscode.workspace.getConfiguration(PLANTUML_CONFIGURATION_SECTION),
+      host.settings.section(PLANTUML_CONFIGURATION_SECTION),
     ),
     plantUmlEngineSettings: readPlantUmlEngineSettings(
-      vscode.workspace.getConfiguration(PLANTUML_CONFIGURATION_SECTION),
+      host.settings.section(PLANTUML_CONFIGURATION_SECTION),
     ),
     plantUmlIncludeWatch: new PlantUmlIncludeWatch(),
     frontmatterConfiguration: readFrontmatterConfiguration(
-      vscode.workspace.getConfiguration(FRONTMATTER_CONFIGURATION_SECTION),
+      host.settings.section(FRONTMATTER_CONFIGURATION_SECTION),
     ),
     enrichmentGeneration: 0,
     activePathChanges: 0,
@@ -4958,7 +4636,7 @@ async function openPreview(uri?: unknown): Promise<void> {
         ? { preview: false, viewColumn: columnOutsideSidePreview(sidePreviewForOpen) }
         : { preview: false });
     } catch (error) {
-      void vscode.window.showErrorMessage(
+      void host.ui.showError(
         "Cannot open " + uri.fsPath + ": " + (error instanceof Error ? error.message : String(error)),
       );
       return;
@@ -4966,7 +4644,7 @@ async function openPreview(uri?: unknown): Promise<void> {
   }
   const document = vscode.window.activeTextEditor?.document;
   if (!document || !isDocumentEligible(document)) {
-    void vscode.window.showInformationMessage(
+    void host.ui.showInformation(
       "Open a Markdown file to use Markdown OKF-Schema Studio.",
     );
     return;
@@ -5297,7 +4975,7 @@ function followActiveEditor(editor: vscode.TextEditor | undefined): void {
 
 export function activate(context: vscode.ExtensionContext): void {
   extensionRootUri = context.extensionUri;
-  refreshThreadAuthor(vscode.workspace.workspaceFolders?.[0]?.uri);
+  refreshThreadAuthor(host.workspace.folders()[0]?.id);
   preloadMystEngine();
   previewThemeModeStorage = context.workspaceState;
   previewDescriptionStorage = context.workspaceState;
@@ -5309,12 +4987,12 @@ export function activate(context: vscode.ExtensionContext): void {
   sessionPreviewThemeMode = readPreviewThemeMode(previewThemeModeStorage);
   viewPreferencesStorage = context.workspaceState;
   sessionViewPreferences = readViewPreferences(viewPreferencesStorage);
-  for (const folder of vscode.workspace.workspaceFolders ?? []) {
-    watchStemRoot(folder.uri.fsPath);
+  for (const folder of host.workspace.folders()) {
+    watchStemRoot(folder.path);
   }
-  mystDiagnostics = vscode.languages.createDiagnosticCollection("markdownOkfSchemaStudio.myst");
+  mystDiagnostics = host.diagnostics.create("markdownOkfSchemaStudio.myst");
   // The single conf.py watcher: it also sees the workspace-root fallbacks of decision D29.
-  const confWatcher = vscode.workspace.createFileSystemWatcher("**/conf.py");
+  const confWatcher = host.watcher.watch(undefined, "**/conf.py");
   context.subscriptions.push(
     mystDiagnostics,
     confWatcher,
@@ -5354,28 +5032,28 @@ export function activate(context: vscode.ExtensionContext): void {
       for (const preview of activePreviews) {
         if (!preview.disposed && preview.document && documentKey(document) !== preview.documentUri
           && [...preview.linkedTargetWatchers?.keys() ?? []].some((target) => canonicalPath(target) === saved)) {
-          scheduleLinkEnrichment(preview, preview.documentUri, preview.document.version);
+          scheduleLinkEnrichment(preview, preview.documentUri, revisionOfDocument(preview.document));
         }
       }
       void persistCommentAnchors(document).catch((error: unknown) => {
         console.error("Failed to save the moved review comment anchors.", error);
       });
     }),
-    vscode.workspace.onDidGrantWorkspaceTrust(() => {
+    host.workspace.onDidGrantTrust(() => {
       for (const preview of activePreviews) scheduleIncomingChanges(preview, 0);
     }),
-    vscode.workspace.onDidChangeConfiguration((event) => {
+    host.settings.onDidChange((event) => {
       if (activePreviews.size === 0
-        || (!event.affectsConfiguration(PREVIEW_CONFIGURATION_SECTION)
-          && !event.affectsConfiguration(PLANTUML_CONFIGURATION_SECTION)
-          && !event.affectsConfiguration(FRONTMATTER_CONFIGURATION_SECTION))) {
+        || (!event.affects(PREVIEW_CONFIGURATION_SECTION)
+          && !event.affects(PLANTUML_CONFIGURATION_SECTION)
+          && !event.affects(FRONTMATTER_CONFIGURATION_SECTION))) {
         return;
       }
       for (const preview of activePreviews) {
-        const plantUmlConfigurationChanged = event.affectsConfiguration(PLANTUML_CONFIGURATION_SECTION);
-        if (event.affectsConfiguration(PREVIEW_CONFIGURATION_SECTION)) {
+        const plantUmlConfigurationChanged = event.affects(PLANTUML_CONFIGURATION_SECTION);
+        if (event.affects(PREVIEW_CONFIGURATION_SECTION)) {
           preview.configuration = readPreviewConfiguration(
-            vscode.workspace.getConfiguration(PREVIEW_CONFIGURATION_SECTION),
+            host.settings.section(PREVIEW_CONFIGURATION_SECTION),
           );
           // The switch needs no re-render: the open page follows it at once.
           postShowComments(preview);
@@ -5383,15 +5061,15 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         if (plantUmlConfigurationChanged) {
           preview.plantUmlConfiguration = readPlantUmlConfiguration(
-            vscode.workspace.getConfiguration(PLANTUML_CONFIGURATION_SECTION),
+            host.settings.section(PLANTUML_CONFIGURATION_SECTION),
           );
           preview.plantUmlEngineSettings = readPlantUmlEngineSettings(
-            vscode.workspace.getConfiguration(PLANTUML_CONFIGURATION_SECTION),
+            host.settings.section(PLANTUML_CONFIGURATION_SECTION),
           );
         }
-        if (event.affectsConfiguration(FRONTMATTER_CONFIGURATION_SECTION)) {
+        if (event.affects(FRONTMATTER_CONFIGURATION_SECTION)) {
           preview.frontmatterConfiguration = readFrontmatterConfiguration(
-            vscode.workspace.getConfiguration(FRONTMATTER_CONFIGURATION_SECTION),
+            host.settings.section(FRONTMATTER_CONFIGURATION_SECTION),
           );
         }
         // Re-run the whole pipeline so the table reflects state and settings.
@@ -5706,7 +5384,7 @@ function refreshFrontmatter(preview: ActivePreview, document: vscode.TextDocumen
       return;
     }
     const current = preview.document;
-    if (!current || documentKey(current) !== preview.documentUri || current.version !== document.version) {
+    if (!current || documentKey(current) !== preview.documentUri || revisionOfDocument(current) !== revisionOfDocument(document)) {
       return;
     }
     const result = analyzeFrontmatter({
@@ -5721,13 +5399,13 @@ function refreshFrontmatter(preview: ActivePreview, document: vscode.TextDocumen
       allowOutsideWorkspaceLinks: preview.frontmatterConfiguration.allowOutsideWorkspaceLinks,
       workspaceRoots: preview.sessionRoots,
     });
-    setFrontmatterState(preview, result, preview.documentUri, current.version, false);
+    setFrontmatterState(preview, result, preview.documentUri, revisionOfDocument(current), false);
     const sourceMapping = preview.stage ? {
       documentId: preview.stage.activeDocumentIdentity,
       activeSourceFile: preview.stage.activeDocumentPath,
     } : undefined;
     patchPropertiesTable(preview, result, sourceMapping);
-    scheduleLinkEnrichment(preview, preview.documentUri, current.version);
+    scheduleLinkEnrichment(preview, preview.documentUri, revisionOfDocument(current));
   }, FRONTMATTER_DEBOUNCE_MS);
 }
 

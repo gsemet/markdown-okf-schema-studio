@@ -1,7 +1,6 @@
 import * as path from "node:path";
 
-import * as vscode from "vscode";
-
+import type { AssetResolver } from "../host-api/assetResolver";
 import { type FrontmatterResult } from "../frontmatter/okfFrontmatter";
 import { renderPropertiesTable } from "../frontmatter/propertiesTable";
 import { annotateSourceMappings } from "../mapping/sourceMapping";
@@ -149,12 +148,12 @@ function injectPropertiesTable(html: string, markup: string): string {
 export function buildPreviewWebviewHtml(
   sphinxHtml: string,
   outputDirectory: string,
-  webview: Pick<vscode.Webview, "asWebviewUri" | "cspSource">,
+  /** Where the page loads workspace files and the extension bundle from (see AssetResolver). */
+  assets: AssetResolver,
   scrollContext?: PreviewRuntimeContext,
   workspaceRoot?: string,
   frontmatter?: { result: FrontmatterResult; tableEnabled: boolean },
   maxContentWidth?: number,
-  extensionUri?: vscode.Uri,
   editingEnabled = true,
   allowExternalScripts = true,
   plantUmlDiagrams: readonly PlantUmlDiagramRender[] = [],
@@ -172,7 +171,7 @@ export function buildPreviewWebviewHtml(
     }
     return {
       path: resourcePath,
-      uri: `${webview.asWebviewUri(vscode.Uri.file(resourcePath)).toString()}${resourceReferenceSuffix(request)}`,
+      uri: `${assets.resourceUri(resourcePath)}${resourceReferenceSuffix(request)}`,
     };
   };
   const resolveNavigation = (
@@ -224,10 +223,8 @@ export function buildPreviewWebviewHtml(
     allowExternalScripts,
   });
   const withPlantUml = injectPlantUmlDiagrams(rewritten.html, plantUmlDiagrams);
-  const csp = createContentSecurityPolicy(webview.cspSource, nonce);
-  const bundleUri = (file: string): string | undefined => extensionUri
-    ? webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "out", "bundle", file)).toString()
-    : undefined;
+  const csp = createContentSecurityPolicy(assets.cspSource, nonce);
+  const bundleUri = (file: string): string | undefined => assets.bundleUri(file);
   // The static stylesheet is a bundled file (PERF-11), imported by the page's one nonce style
   // element, which keeps only the rule that depends on the settings.
   const stylesheetUri = bundleUri("preview.css");
@@ -238,18 +235,16 @@ export function buildPreviewWebviewHtml(
       : `${PREVIEW_ACCESSIBILITY_CSS}${PREVIEW_THEME_CSS}${previewContentWidthCss(maxContentWidth)}`,
     nonce,
   );
-  const mermaidRendererUri = extensionUri && rewritten.html.includes('class="myst-mermaid-figure"')
-    ? webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "out", "bundle", "mermaidPreview.js")).toString()
+  const mermaidRendererUri = rewritten.html.includes('class="myst-mermaid-figure"')
+    ? assets.bundleUri("mermaidPreview.js")
     : undefined;
-  const withMath = extensionUri
-    ? renderMathHtml(accessibleHtml, webview.asWebviewUri(
-      vscode.Uri.joinPath(extensionUri, "out", "bundle", "katex", "katex.min.css"),
-    ).toString(), nonce)
+  const katexStylesheetUri = assets.bundleUri("katex", "katex.min.css");
+  const withMath = katexStylesheetUri !== undefined
+    ? renderMathHtml(accessibleHtml, katexStylesheetUri, nonce)
     : accessibleHtml;
-  const plantUmlRendererUri = extensionUri
-    && plantUmlRenderer === "builtin"
+  const plantUmlRendererUri = plantUmlRenderer === "builtin"
     && rewritten.html.includes('class="myst-plantuml-figure"')
-    ? webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "out", "bundle", "plantumlPreview.js")).toString()
+    ? assets.bundleUri("plantumlPreview.js")
     : undefined;
   const withMermaid = mermaidRendererUri
     ? injectMermaidRenderer(withMath, mermaidRendererUri, nonce)

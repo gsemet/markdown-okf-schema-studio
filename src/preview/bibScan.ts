@@ -7,8 +7,8 @@
 
 import * as path from "node:path";
 
-import * as vscode from "vscode";
-
+import type { FileSystem } from "../host-api/fileSystem";
+import type { WorkspaceInfo } from "../host-api/workspaceInfo";
 import { collectBibKeys, type BibKey } from "../mapping/mystTargets";
 
 export const MAX_BIB_FILES = 20;
@@ -23,44 +23,60 @@ export interface BibScanResult {
   files: number;
 }
 
-export async function scanBibKeys(documentUri: vscode.Uri): Promise<BibScanResult> {
-  const cancellation = new vscode.CancellationTokenSource();
-  const timer = setTimeout(() => cancellation.cancel(), SCAN_TIMEOUT_MS);
+/** The ports a scan reads through: the search of the workspace folders and the files. */
+export interface BibScanServices {
+  files: FileSystem;
+  workspace: Pick<WorkspaceInfo, "folderOf" | "findFiles">;
+}
+
+/**
+ * Scans the `.bib` files near a document: its own folder first, then the rest of its workspace
+ * folder. `documentPath` is the document's file system path (undefined for a document that is not
+ * a file: only its workspace folder, if any, would be searched, and it has none).
+ */
+export async function scanBibKeys(documentPath: string | undefined, services: BibScanServices): Promise<BibScanResult> {
+  const cancellation = new AbortController();
+  const timer = setTimeout(() => cancellation.abort(), SCAN_TIMEOUT_MS);
   try {
-    const found = new Map<string, vscode.Uri>();
+    const found = new Set<string>();
     let truncated = false;
-    const search = async (base: vscode.Uri | vscode.WorkspaceFolder): Promise<void> => {
-      if (found.size >= MAX_BIB_FILES || cancellation.token.isCancellationRequested) return;
-      const uris = await vscode.workspace.findFiles(
-        new vscode.RelativePattern(base, "**/*.bib"), BIB_EXCLUDE, MAX_BIB_FILES, cancellation.token);
-      for (const uri of uris) {
+    const search = async (base: string): Promise<void> => {
+      if (found.size >= MAX_BIB_FILES || cancellation.signal.aborted) return;
+      const files = await services.workspace.findFiles({
+        base,
+        pattern: "**/*.bib",
+        exclude: BIB_EXCLUDE,
+        maxResults: MAX_BIB_FILES,
+        signal: cancellation.signal,
+      });
+      for (const file of files) {
         if (found.size >= MAX_BIB_FILES) {
           truncated = true;
           break;
         }
-        found.set(uri.toString(), uri);
+        found.add(file);
       }
-      if (uris.length >= MAX_BIB_FILES) truncated = true;
+      if (files.length >= MAX_BIB_FILES) truncated = true;
     };
     // Nearest first: the document's own folder, then the rest of its workspace folder.
-    if (documentUri.scheme === "file") await search(vscode.Uri.file(path.dirname(documentUri.fsPath)));
-    const folder = vscode.workspace.getWorkspaceFolder(documentUri);
-    if (folder) await search(folder);
+    if (documentPath !== undefined) await search(path.dirname(documentPath));
+    const folder = documentPath !== undefined ? services.workspace.folderOf(documentPath) : undefined;
+    if (folder) await search(folder.path);
     const texts: string[] = [];
     let remaining = MAX_BIB_BYTES;
-    for (const uri of [...found.values()]) {
-      if (cancellation.token.isCancellationRequested) {
+    for (const file of [...found]) {
+      if (cancellation.signal.aborted) {
         truncated = true;
         break;
       }
       try {
-        const { size } = await vscode.workspace.fs.stat(uri);
+        const { size } = await services.files.stat(file);
         if (size > remaining) {
           truncated = true;
           continue;
         }
         remaining -= size;
-        texts.push(new TextDecoder("utf-8").decode(await vscode.workspace.fs.readFile(uri)));
+        texts.push(new TextDecoder("utf-8").decode(await services.files.readFile(file)));
       } catch {
         // An unreadable file is skipped; the others still count.
       }
@@ -69,6 +85,5 @@ export async function scanBibKeys(documentUri: vscode.Uri): Promise<BibScanResul
     return { items: merged.items, truncated: truncated || merged.truncated, files: texts.length };
   } finally {
     clearTimeout(timer);
-    cancellation.dispose();
   }
 }
