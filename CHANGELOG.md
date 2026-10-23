@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Ctrl+A` (`Cmd+A` on macOS) in a text box of the preview (a frontmatter value, a block or table
+  cell editor) now always selects that box's text. Pressed right after clicking into the box, it
+  could select the whole source document in the text editor and close the frontmatter editor.
 - For contributors: the real VS Code window screenshots now come from one registry
   (`test/shared/captureRegistry.ts`) and one shared writer, so every capture has a stable
   `<group>/rNN-<slug>` id, a folder per feature group inside its run folder, a "locks" sentence and

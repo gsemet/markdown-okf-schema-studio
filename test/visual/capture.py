@@ -3275,6 +3275,8 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
       },
       readyState: document.readyState, fonts: document.fonts.status,
       viewport: [window.innerWidth, window.innerHeight],
+      // The page's own view: published values, what its layout gives now, the last trigger.
+      firstClearance: window.__studioDiagnostics?.firstClearance?.() ?? null,
     };
   }"""
 

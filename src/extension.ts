@@ -369,6 +369,14 @@ interface ActivePreview {
   contentPatchTimer?: NodeJS.Timeout;
   /** Test hook: how many renders (and deferred updates) were applied as a content patch. */
   contentPatches: number;
+  /** Sequence number of the last properties-table message posted to the loaded page. */
+  propertiesTableSeq: number;
+  /**
+   * Test hook: seq of a properties-table message the page may not have applied yet (it echoes the
+   * last one it applied on `<html data-okf-properties-seq>`). Cleared by a new document or a content
+   * patch, which carry the latest table themselves.
+   */
+  propertiesTableAwaited?: number;
   /**
    * requestId the page has once it has handled every message sent so far: set when a content patch
    * is posted, cleared when a new document is assigned. The webview handles messages in order, and a
@@ -810,6 +818,7 @@ function assignWebviewHtml(target: ActivePreview | vscode.WebviewPanel, html: st
     }
     // A new document supersedes a patch that was waiting for its acknowledgement.
     clearContentPatchTimer(target);
+    target.propertiesTableAwaited = undefined;
     // The replaced document takes its overlay with it; the new one is not pending until told so.
     clearPendingOverlay(target);
   }
@@ -912,11 +921,14 @@ function patchPropertiesTable(
     // preview.webview is the host's record of the page; the loaded document is patched by the
     // message, so panel.webview.html is deliberately not assigned (no reload).
     preview.webview = { ...preview.webview, html };
+    preview.propertiesTableSeq += 1;
+    preview.propertiesTableAwaited = preview.propertiesTableSeq;
     void preview.panel.webview.postMessage({
       type: "previewPropertiesTable",
       documentId: stage.activeDocumentIdentity,
       documentVersion: stage.activeDocumentVersion,
       requestId: stage.requestId,
+      seq: preview.propertiesTableSeq,
       markup,
     });
     return;
@@ -1024,6 +1036,8 @@ function postContentPatch(
   },
 ): void {
   preview.contentPatches += 1;
+  // The patch carries the page's whole content, the latest properties table included.
+  preview.propertiesTableAwaited = undefined;
   preview.recordKeepsLoadedNonce = true;
   preview.patchedRequestId = next.requestId;
   void preview.panel.webview.postMessage({
@@ -4580,6 +4594,7 @@ function createPreview(
     htmlAssignments: 0,
     renderedStages: 0,
     contentPatches: 0,
+    propertiesTableSeq: 0,
     recordKeepsLoadedNonce: false,
     pendingOverlayDue: false,
     pendingOverlayVisible: false,
@@ -5160,6 +5175,10 @@ export function getActivePreviewForTests():
      * page that opens an editor now can still be patched under it.
      */
     deferredWorkPending: boolean;
+    /** Seq of the last properties table posted that the page may not show yet (see ActivePreview). */
+    propertiesTableAwaited?: number;
+    /** Whether the panel is the active editor of the active group (`WebviewPanel.active`). */
+    panelActive: boolean;
     pendingOverlayVisible: boolean;
     pendingOverlayShown: number;
     incomingChanges: { posts: number; last?: { enabled: boolean; ranges: { start: number; end: number }[] } };
@@ -5211,6 +5230,8 @@ export function getActivePreviewForTests():
       || activePreview.frontmatterRefreshTimer !== undefined
       || activePreview.contentPatchTimer !== undefined
       || activePreview.pendingOverlayTimer !== undefined,
+    propertiesTableAwaited: activePreview.propertiesTableAwaited,
+    panelActive: activePreview.panel.active,
     pendingOverlayVisible: activePreview.pendingOverlayVisible,
     pendingOverlayShown: activePreview.pendingOverlayShown,
     incomingChanges: { posts: activePreview.incomingPosts, last: activePreview.lastIncomingChanges },

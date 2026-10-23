@@ -115,6 +115,39 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
+  # Repeats the flake-prone real-input scenarios (20 rounds, about 12 minutes); a race that a
+  # single run passes by luck fails here. Its reports are not part of the e2e campaign.
+  stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Fetch Git LFS objects
+        run: git lfs pull
+      - name: Verify Git LFS objects
+        run: git lfs fsck
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: extractions/setup-just@v2
+        with:
+          just-version: 1.58.0
+      - run: just dev-ci
+      - run: xvfb-run --auto-servernum just ci-stress
+      - name: Publish reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stress-integration
+          path: out/reports/
+          if-no-files-found: warn
+
   report:
     needs: [visual, integration]
     if: ${{ !cancelled() }}
@@ -192,7 +225,7 @@ jobs:
 
   # Stable aggregate name for branch protection: it depends on every check job.
   checks:
-    needs: [static, visual, integration, report]
+    needs: [static, visual, integration, stress, report]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 15

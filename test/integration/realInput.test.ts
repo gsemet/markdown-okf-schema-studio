@@ -17,6 +17,7 @@ import {
 } from "./extensionApi";
 import { captureByLegacy } from "../shared/captureRegistry";
 import { lineDelta } from "../shared/lineDelta";
+import { stressPlan } from "../shared/stressPlan";
 import {
   bufferText,
   caretToEnd,
@@ -682,12 +683,8 @@ async function scenarioFrontmatterStructuralMinimalPatch(page: Page, evidence: E
     await withCurrentFrame(page, (frame) =>
       frame.locator('tr[data-okf-field="summary"] [data-okf-edit-cell="name"]').click());
     await waitForEditor(page, "[data-okf-frontmatter-editor] > input");
-    await press(page, `${MOD}+A`);
-    // VS Code forwards Cmd/Ctrl+A to the workbench, which echoes `selectAll` into the webview
-    // asynchronously. A key typed before that echo is selected again and replaced (`bstract`), so
-    // wait for the echo. This is a host timing issue, not a frontmatter defect; it also occurs on
-    // the code before T06.
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Cmd/Ctrl+A stays in the control (selectAllKey.ts): no asynchronous workbench echo to wait for.
+    await selectAllInControl(page, "[data-okf-frontmatter-editor] > input", "RI-T06 key editor");
     await typeText(page, "abstract");
     await press(page, "Enter");
 
@@ -748,9 +745,7 @@ async function scenarioEnterCommitsTextField(page: Page, evidence: Evidence): Pr
     await withCurrentFrame(page, (frame) =>
       frame.locator('tr[data-okf-field="title"] [data-okf-edit-cell="value"]').click());
     await waitForEditor(page, "[data-okf-frontmatter-editor] textarea");
-    await press(page, `${MOD}+A`);
-    // See RI-T06: wait for the workbench's asynchronous selectAll echo before typing.
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await selectAllInControl(page, "[data-okf-frontmatter-editor] textarea", "RI-T07 title");
     const title = 'Write CSV output: with quotes "and" colons';
     await typeText(page, title);
     await press(page, "Enter");
@@ -1928,19 +1923,18 @@ async function scenarioTableTab(page: Page, evidence: Evidence): Promise<void> {
       const open = await current.locator("tbody tr:nth-child(3) " + CELL).count();
       return open === 1 && await cellValue() === "";
     });
-    // The new row was saved: the host re-renders it, and a patch that lands after the cell editor
-    // opened would replace the editor under the typed text. Type once the page shows that render.
-    await waitForPageReady("Tab in the new row", document);
-    await waitFor("the cell editor of the new row to be open after the render", async () => {
-      const current = await findCurrentFrame(page);
-      return current !== undefined && await current.locator("tbody tr:nth-child(3) " + CELL).count() === 1;
-    });
+    // The new row exists only in the render of the saved row, whose page reopens the editor
+    // before it reports ready. Type once that render is the host's last one, the page reported it
+    // and no deferred update is armed (nothing can replace the editor any more), and the cell
+    // editor holds the focus of the page.
+    await waitForPageSettled(page, "Tab in the new row", document);
+    await waitForTextInput(page, "tbody tr:nth-child(3) " + CELL, "Tab in the new row");
     await typeText(page, "gamma");
     await press(page, "Tab");
-    await waitFor("Tab to open the second cell of the new row", async () => {
+    await explained(page, () => waitFor("Tab to open the second cell of the new row", async () => {
       const current = await findCurrentFrame(page);
       return current !== undefined && await current.locator("tbody tr:nth-child(3) td:nth-child(2) " + CELL).count() === 1;
-    });
+    }));
     await typeText(page, "three");
     await press(page, "Enter");
     await waitFor("the new row to reach the source buffer", () =>
@@ -2221,21 +2215,13 @@ async function scenarioListEditorClickAndKeys(page: Page, evidence: Evidence): P
         const current = await findCurrentFrame(page);
         return current !== undefined && await current.locator(linkSelector).count() >= 1;
       });
-      // The link exists as soon as the re-render shows it, but a later full page load (the deferred
-      // link check reaching a page that is not ready yet) replaces it, and a box read in between
-      // is null or stale. Read the box only from a page that reports ready for this render, and poll
-      // until the visible link has a size: the click then lands on the link that stays.
-      await waitForPageReady("list editor", document);
-      const linkBox: { value?: { x: number; y: number; width: number; height: number } } = {};
-      await waitFor("the StRS-A link to have a visible box", async () => {
-        const current = await findCurrentFrame(page);
-        if (current === undefined) return false;
-        const found = await current.locator(linkSelector).first().boundingBox({ timeout: 1_000 }).catch(() => null);
-        linkBox.value = found !== null && found.width > 0 && found.height > 0 ? found : undefined;
-        return linkBox.value !== undefined;
-      });
-      const box = linkBox.value;
-      assert.ok(box, "the StRS-A link has a box");
+      // The resolved link can still be replaced: by the properties table of the link check or of
+      // the frontmatter refresh (posted after the render, applied in place) or by a full page load.
+      // A box read from a link that is replaced meanwhile is null (main run 39916805010). Read it once
+      // the page shows the host's last render and last properties table and no update is armed.
+      await waitForPageSettled(page, "list editor", document);
+      const box = await withCurrentFrame(page, (frame) => frame.locator(linkSelector).first().boundingBox());
+      assert.ok(box, `the StRS-A link has a box; ${await previewDiagnostics(page)}`);
       await page.keyboard.down(MOD);
       await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
       await page.keyboard.up(MOD);
@@ -4085,21 +4071,104 @@ async function clickWithoutBlur(
 }
 
 /**
- * Waits until the page itself reports ready for the host's current render. The host reports a
- * render as "ready" before the page has loaded it, and a deferred update that reaches a page not
- * yet ready (the frontmatter link check, about 150 ms after the render) reloads the whole page,
- * which drops an editor opened in the meantime. `webviewReady` is true only when the page echoed
- * the request id of the render the host staged, so it cannot be a stale value from an earlier page.
- * A content patch (the host's deferred updates) replaces the page content and closes the open
- * editors without a page load (CI runs 39922770337 and 39927166017: "page loads 0 since the editor
- * opened", the editor gone), so the editor is opened only when the host holds no timer that would
- * still update this render (`deferredWorkPending`).
+ * Host and page state for a failure message: what the host holds for the current render and
+ * what the page shows (focus, the last properties table, its editor trace: see editorTrace.ts).
  */
-async function waitForPageReady(label: string, document: vscode.TextDocument): Promise<void> {
-  await waitFor(`${label}: the page to report ready for ${path.basename(document.uri.fsPath)}`, () => {
-    const preview = getActivePreviewForTests();
-    return preview?.webviewReady === true && preview.deferredWorkPending === false;
+async function previewDiagnostics(page: Page): Promise<string> {
+  const preview = getActivePreviewForTests();
+  const host = preview === undefined ? "no preview" : JSON.stringify({
+    document: path.basename(vscode.Uri.parse(preview.documentUri).fsPath),
+    phase: preview.phase,
+    version: preview.documentVersion,
+    requestId: preview.requestId,
+    webviewReady: preview.webviewReady,
+    deferredWorkPending: preview.deferredWorkPending,
+    propertiesTableAwaited: preview.propertiesTableAwaited,
+    panelActive: preview.panelActive,
+    pageLoads: preview.htmlAssignments,
+    contentPatches: preview.contentPatches,
   });
+  let shown: string;
+  try {
+    const frame = await findCurrentFrame(page);
+    shown = frame === undefined ? "no current frame" : JSON.stringify(await frame.evaluate(() => {
+      const active = window.document.activeElement;
+      const label = active?.getAttribute("aria-label");
+      const diagnostics = (window as unknown as { __studioDiagnostics?: { trace(): unknown[] } }).__studioDiagnostics;
+      return {
+        active: active ? active.tagName.toLowerCase() + (label ? `[${label}]` : "") : "none",
+        pageFocus: window.document.hasFocus(),
+        propertiesSeq: window.document.documentElement.getAttribute("data-okf-properties-seq"),
+        trace: diagnostics ? diagnostics.trace() : "unavailable",
+      };
+    }));
+  } catch (error) {
+    shown = `unreadable (${String(error)})`;
+  }
+  return `host ${host}; page ${shown}`;
+}
+
+/** Runs `action`; a failure carries the host and page diagnostics (previewDiagnostics). */
+async function explained<T>(page: Page, action: () => Promise<T>): Promise<T> {
+  try {
+    return await action();
+  } catch (error) {
+    throw new Error(`${error instanceof Error ? error.message : String(error)}; ${await previewDiagnostics(page)}`);
+  }
+}
+
+/**
+ * Waits until nothing can replace the page content under an editor opened now: the host's render
+ * is the one of the current buffer version, the page reported ready for it (`webviewReady` is true
+ * only when the page echoed the request id of that render), no deferred host update is armed (the
+ * link check, the properties refresh, a patch waiting for its acknowledgement, the pending overlay),
+ * and the page shows the last properties table the host posted (it echoes the table's seq on
+ * `<html data-okf-properties-seq>`; a table posted by a timer that has just fired is otherwise still
+ * on its way). Each condition is a state the host or the page reports; none is a delay.
+ */
+async function waitForPageSettled(page: Page, label: string, document: vscode.TextDocument): Promise<void> {
+  await explained(page, () => waitFor(`${label}: the page to settle on the last render of ${path.basename(document.uri.fsPath)}`, async () => {
+    const preview = getActivePreviewForTests();
+    if (preview === undefined || preview.documentUri !== document.uri.toString() || preview.phase !== "ready"
+      || preview.documentVersion !== document.version || !preview.webviewReady || preview.deferredWorkPending) {
+      return false;
+    }
+    const frame = await findCurrentFrame(page);
+    if (frame === undefined) return false;
+    return preview.propertiesTableAwaited === undefined
+      || await frame.locator("html").getAttribute("data-okf-properties-seq") === String(preview.propertiesTableAwaited);
+  }));
+}
+
+/**
+ * Waits until the control matching `selector` has the caret: it is the page's active element and
+ * the page has the focus, so the next key press reaches it.
+ */
+async function waitForTextInput(page: Page, selector: string, label: string): Promise<void> {
+  await explained(page, () => waitFor(`${label}: ${selector} to have the caret`, async () => {
+    const frame = await findCurrentFrame(page);
+    return frame !== undefined && await frame.evaluate((query) => {
+      const control = window.document.querySelector(query);
+      return control !== null && window.document.activeElement === control && window.document.hasFocus();
+    }, selector);
+  }));
+}
+
+/**
+ * Cmd/Ctrl+A in the text control matching `selector`, then waits until its whole value is
+ * selected. The page keeps the shortcut to the control (selectAllKey.ts): the browser selects the
+ * text as the key's default action, with no workbench round trip. The control must have the caret.
+ */
+async function selectAllInControl(page: Page, selector: string, label: string): Promise<void> {
+  await waitForTextInput(page, selector, label);
+  await press(page, `${MOD}+a`);
+  await explained(page, () => waitFor(`${label}: the whole value of ${selector} to be selected after ${MOD}+A`, async () => {
+    const frame = await findCurrentFrame(page);
+    if (frame === undefined) return false;
+    if (await frame.locator(selector).count() === 0) throw new Error(`${label}: no ${selector} after ${MOD}+A`);
+    const caret = await focusedCaret(frame);
+    return caret !== undefined && caret.start === 0 && caret.end === caret.length;
+  }));
 }
 
 /** CR 025: a link to another file, right after typing. */
@@ -4168,29 +4237,32 @@ async function scenarioFlushCellAndFrontmatter(page: Page, evidence: Evidence): 
   await withFlushDocuments("realinput-cr25d", async (first, second) => {
     await openSidePreview(first);
     await waitForRender(first);
-    await waitForPageReady("table cell", first);
+    await waitForPageSettled(page, "table cell", first);
     await setEditMode(page, true);
     await withCurrentFrame(page, (frame) => frame.locator("td").filter({ hasText: /^one$/u }).click());
     await waitForEditor(page, "[data-sphinx-preview-table-cell-editor] textarea");
+    await waitForTextInput(page, "[data-sphinx-preview-table-cell-editor] textarea", "table cell");
     await press(page, "End");
     await typeText(page, "1", 5);
     await vscode.window.showTextDocument(second, { viewColumn: vscode.ViewColumn.One, preview: false });
-    await waitFor("the typed cell text to reach the first document", () =>
-      /\|\s*alpha\s*\|\s*one1\s*\|/u.test(bufferText(first)));
+    await explained(page, () => waitFor("the typed cell text to reach the first document", () =>
+      /\|\s*alpha\s*\|\s*one1\s*\|/u.test(bufferText(first))));
     await waitForPreviewOf(second);
 
     await vscode.window.showTextDocument(first, { viewColumn: vscode.ViewColumn.One, preview: false });
     await waitForPreviewOf(first);
     await waitForRender(first);
-    await waitForPageReady("frontmatter title", first);
+    await waitForPageSettled(page, "frontmatter title", first);
     await withCurrentFrame(page, (frame) =>
       frame.locator('tr[data-okf-field="title"] [data-okf-edit-cell="value"]').click());
     await waitForEditor(page, "[data-okf-frontmatter-editor] textarea, [data-okf-frontmatter-editor] input");
+    await waitForTextInput(page, "[data-okf-frontmatter-editor] textarea, [data-okf-frontmatter-editor] input",
+      "frontmatter title");
     await press(page, "End");
     await typeText(page, " more", 5);
     await vscode.window.showTextDocument(second, { viewColumn: vscode.ViewColumn.One, preview: false });
-    await waitFor("the typed title to reach the first document", () =>
-      bufferText(first).includes("title: Flush title more"));
+    await explained(page, () => waitFor("the typed title to reach the first document", () =>
+      bufferText(first).includes("title: Flush title more")));
     await waitForPreviewOf(second);
   });
 }
@@ -4208,19 +4280,6 @@ async function flushEditorValue(page: Page, selector: string, label: string, ste
     throw new Error(`${label}: no ${selector} ${step}; ${await flushFrameState(page)}`);
   }
   return value;
-}
-
-/** Whether the whole value of the textarea matching `selector` is selected; fails when it is gone. */
-async function flushEditorSelection(page: Page, selector: string, label: string): Promise<"all" | "partial"> {
-  const state = await withCurrentFrame(page, (frame) => frame.evaluate((query) => {
-    const control = window.document.querySelector(query) as HTMLTextAreaElement | null;
-    if (control === null) return "missing";
-    return control.selectionStart === 0 && control.selectionEnd === control.value.length ? "all" : "partial";
-  }, selector));
-  if (state === "missing") {
-    throw new Error(`${label}: no ${selector} after ${MOD}+A; ${await flushFrameState(page)}`);
-  }
-  return state;
 }
 
 /** Full page loads counted when the flush scenario opened its editor (see flushFrameState). */
@@ -4251,7 +4310,7 @@ async function flushFrameState(page: Page): Promise<string> {
         status: editor?.querySelector('[role="status"]')?.textContent ?? undefined,
       };
     });
-    return `preview ${shown}, frame ${JSON.stringify(state)}`;
+    return `preview ${shown}, frame ${JSON.stringify(state)}; ${await previewDiagnostics(page)}`;
   } catch (error) {
     return `preview ${shown}, frame unreadable (${String(error)})`;
   }
@@ -4284,35 +4343,32 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
       // update that arrives while the page has not reported ready (the frontmatter link check, about
       // 150 ms after the render) reloads the whole page, and the reload drops an editor opened in
       // the meantime (CI run 39849844386: case 2 clicked right after the switch back, as edit mode
-      // was already on). Open the editor only once the page itself reports ready for this render.
-      await waitForPageReady(label, first);
+      // was already on). Open the editor only once the page has settled on this render.
+      await waitForPageSettled(page, label, first);
       if (!(await withCurrentFrame(page, (frame) => frame.locator("html").getAttribute("data-sphinx-preview-edit-mode")) === "on")) {
         await setEditMode(page, true);
       }
       await withCurrentFrame(page, (frame) =>
         frame.locator(`tr[data-okf-field="${item.field}"] [data-okf-edit-cell="value"]`).click());
       await waitForEditor(page, item.selector);
+      await waitForTextInput(page, item.selector, label);
       // Full page loads so far: a failure message shows whether the page was reloaded under the editor.
       reloadsBefore = htmlAssignmentCount();
       patchesBefore = getActivePreviewForTests()?.contentPatches ?? 0;
       if (item.typed === undefined) {
-        // The number field is emptied with real keys and no Cmd/Ctrl+A. The workbench echoes the
-        // shortcut as `selectAll` (see RI-T06), and a number input exposes no text selection to
-        // that echo, so the page selection can leave the input. The blur then closes the unchanged
-        // editor (CI run 39831790532). End, then one Backspace and one Delete per character, empties
-        // it wherever the caret is (macOS can ignore End in an input).
+        // The number field is emptied with real keys and no Cmd/Ctrl+A: a number input exposes no
+        // text selection to check. (CI run 39831790532 lost this editor after Cmd/Ctrl+A: the same
+        // workbench fallback as case 2, see selectAllKey.ts.) End, then one Backspace and one Delete
+        // per character, empties it wherever the caret is (macOS can ignore End in an input).
         const length = (await flushEditorValue(page, item.selector, label, "before emptying")).length;
         await press(page, "End");
         for (let key = 0; key < length; key += 1) await press(page, "Backspace");
         for (let key = 0; key < length; key += 1) await press(page, "Delete");
       } else {
-        await press(page, `${MOD}+a`);
-        // See RI-T06: VS Code echoes Cmd/Ctrl+A into the webview as an asynchronous `selectAll`. Keys
-        // typed before the echo are selected again and replaced by the next ones (`[unclosed` can end
-        // as `losed`), so wait for the echo and check the whole value is selected before typing.
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        await waitFor(`${label}: the editor value to be fully selected`, async () =>
-          (await flushEditorSelection(page, item.selector, label)) === "all");
+        // Case 2 lost its editor here on every CI run since 2026-10-23 07:29Z (39917471008 to
+        // 39930593934): the workbench ran Cmd/Ctrl+A on the source editor, which took the focus, and
+        // the blur closed the unchanged editor. The page now keeps the shortcut (selectAllKey.ts).
+        await selectAllInControl(page, item.selector, label);
         await typeText(page, item.typed, 5);
       }
       // The frontmatter editor saves on blur and Enter only (no timer): reading its value saves nothing.
@@ -4332,6 +4388,45 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
   });
 }
 
+/**
+ * The scenarios `just ci-stress` repeats (see stressPlan.ts): each one failed on CI as a race at
+ * least once (CR 041). A new flake fix adds its scenario here.
+ */
+const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promise<void>> = {
+  "frontmatter-rename": scenarioFrontmatterStructuralMinimalPatch,
+  "frontmatter-title": scenarioEnterCommitsTextField,
+  "table-tab": scenarioTableTab,
+  "list-editor": scenarioListEditorClickAndKeys,
+  "flush-cell-frontmatter": scenarioFlushCellAndFrontmatter,
+  "flush-frontmatter-typed": scenarioFlushFrontmatterKeptAsTyped,
+};
+
+/** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */
+async function runStress(page: Page): Promise<void> {
+  const plan = stressPlan(process.env, Object.keys(STRESS_SCENARIOS), 10);
+  console.log(`stress: ${plan.repeat} round(s) of ${plan.scenarios.join(", ")}`);
+  for (let round = 1; round <= plan.repeat; round += 1) {
+    const evidence = createEvidence("real-input");
+    let passed = false;
+    try {
+      for (const name of plan.scenarios) {
+        const started = Date.now();
+        try {
+          await STRESS_SCENARIOS[name]!(page, evidence);
+        } catch (error) {
+          throw new Error(`stress round ${round}/${plan.repeat}, scenario ${name}: `
+            + `${error instanceof Error ? error.message : String(error)}`, { cause: error });
+        }
+        console.log(`PASS stress ${round}/${plan.repeat} ${name} (${Date.now() - started} ms)`);
+      }
+      passed = true;
+    } finally {
+      evidence.finish(passed, false);
+    }
+  }
+  console.log(`stress: ${plan.repeat} round(s) passed`);
+}
+
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   const evidence = createEvidence("real-input");
@@ -4345,6 +4440,11 @@ export async function run(): Promise<void> {
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "toolbar") {
       await scenarioToolbarState(page, evidence);
       passed = true; // a single scenario: the registry completeness check is skipped
+      return;
+    }
+    if (process.env.STUDIO_REAL_INPUT_SCENARIO === "stress") {
+      await runStress(page);
+      passed = true; // the stress rounds keep their own evidence; the registry check is skipped
       return;
     }
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "link-prefill") {

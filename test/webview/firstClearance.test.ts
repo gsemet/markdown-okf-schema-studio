@@ -276,3 +276,45 @@ test("a toolbar that reaches its final place without any observed event is measu
   while (frames.length > 0 && guard < 1_000) { frames.shift()?.(); guard += 1; }
   assert.ok(guard < 1_000, "the frame loop stops once the layout is quiet");
 });
+
+test("CR 041: describe() tells a stale published clearance from the layout it measures now", () => {
+  // The diagnostics a visual failure prints: published values, a fresh measurement and the event
+  // that measured last. A layout change that no observed event reported shows as a difference.
+  const column = rect(0, 0, 900, 2000);
+  const state = { toolbar: rect(12, 840, 46, 102) };
+  const toggle = rect(79, 795, 24, 24);
+  const section = {
+    getBoundingClientRect: () => rect(40, 0, 900, 300),
+    querySelectorAll: (selector: string) => (selector.includes(":not(") ? [] : [toggle])
+      .map((control) => ({ getBoundingClientRect: () => control })),
+  };
+  const document = {
+    getElementById: () => ({ getBoundingClientRect: () => column }),
+    querySelector: (selector: string) => {
+      if (selector === "[data-sphinx-preview-toolbar]") return { getBoundingClientRect: () => state.toolbar };
+      if (selector.endsWith("> [data-okf-properties]")) return section;
+      return null;
+    },
+    documentElement: { style: { setProperty: () => undefined } },
+  };
+  const listeners = new Map<string, () => void>();
+  const window = {
+    scrollY: 0,
+    addEventListener: (type: string, listener: () => void) => listeners.set(type, listener),
+    getComputedStyle: () => ({ paddingLeft: "16px", paddingRight: "16px" }),
+  };
+  const clearance = installFirstClearance(document as never, window as never);
+  const before = clearance.describe();
+  assert.equal(before.lastTrigger, "install");
+  assert.equal(before.published.inset, 0);
+  assert.deepEqual(before.measuredNow, { clearance: 0, inset: 0, bottom: 122 });
+  state.toolbar = rect(12, 752, 134, 102); // moved, and nothing reported it
+  const stale = clearance.describe();
+  assert.equal(stale.published.inset, 0, "describe() never publishes");
+  assert.equal(stale.measuredNow.inset, 140, "the fresh measurement shows the missed change");
+  listeners.get("resize")?.();
+  const after = clearance.describe();
+  assert.equal(after.published.inset, 140);
+  assert.equal(after.lastTrigger, "window resize");
+  assert.equal(after.lastChangeTrigger, "window resize");
+});
