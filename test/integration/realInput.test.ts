@@ -2028,7 +2028,7 @@ async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<voi
       const status = await frame.locator("[data-sphinx-table-menu] [data-sphinx-preview-edit-status]").textContent();
       assert.equal(status, "Row 1 of 2 \u00b7 column 2 of 2");
       const labels = await frame.locator(".sphinx-preview-table-menu-label").allTextContents();
-      assert.deepEqual(labels, ["Row +", "Row \u2212", "Col +", "Col \u2212"]);
+      assert.deepEqual(labels, ["Row +", "Row \u2212", "Col +", "Col \u2212", "List table"]);
       const position = await frame.locator("[data-sphinx-table-menu]").evaluate((element) => getComputedStyle(element).position);
       assert.equal(position, "static");
     });
