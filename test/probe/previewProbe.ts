@@ -33,7 +33,7 @@ import { planContentPatch } from "../../src/preview/contentPatch";
 import { renderPreviewDocument } from "../../src/render/renderPipeline";
 import type { buildPreviewWebviewHtml as BuildPreviewWebviewHtml } from "../../src/preview/webview";
 import { REPORTS_ROOT, EXTENSION_ROOT } from "../reportPaths";
-import { frameStats, installFrameProbe, type FrameSample } from "./frameProbe";
+import { frameStats, installFrameProbe, rebuiltBlocks, snapshotBlocks, type FrameSample } from "./frameProbe";
 import { PROBE_EDIT_PARAGRAPH, PROBE_MERMAID_COUNT, probeChapter } from "./largeChapter";
 
 // src/preview/webview.ts imports "vscode"; the probe supplies the members the page builder uses.
@@ -83,6 +83,19 @@ interface BuiltPage {
   documentId: string;
   version: number;
   requestId: number;
+}
+
+/**
+ * The page as VS Code's webview loader shows it (`toContentHtml` in the webview's `pre/index.html`):
+ * every link without a title gets its `href` as title. Only the first page goes through the
+ * loader; content patches reach the page by message, as they are.
+ */
+export function asLoadedByVsCode(html: string): string {
+  return html.replace(/<a(\s[^>]*)?>/gu, (tag: string, attributes: string | undefined) => {
+    if (!attributes || /\stitle\s*=/u.test(attributes)) return tag;
+    const href = /\shref="([^"]*)"/u.exec(attributes);
+    return href ? `<a${attributes} title="${href[1]}">` : tag;
+  });
 }
 
 async function buildPage(text: string, version: number, requestId: number): Promise<BuiltPage> {
@@ -316,7 +329,7 @@ async function main(): Promise<void> {
   let text = source;
   let current = await buildPage(text, version, requestId);
   const pagePath = path.join(PROBE_ROOT, "page.html");
-  fs.writeFileSync(pagePath, current.html, "utf8");
+  fs.writeFileSync(pagePath, asLoadedByVsCode(current.html), "utf8");
 
   const browser = await chromium.launch();
   try {
@@ -367,6 +380,7 @@ async function main(): Promise<void> {
 
     // Ten characters typed at the end of the chapter: ten renders applied as content patches.
     const before = await probeCounters(page);
+    await page.evaluate(snapshotBlocks);
     const patchStarted = Date.now();
     for (const character of TYPED) {
       text = text.replace(/The last paragraph\.[^\n]*/u, (line) => line + character);
@@ -379,6 +393,7 @@ async function main(): Promise<void> {
     }
     await waitForMermaidSettled(page);
     const after = await probeCounters(page);
+    const rebuilt = await page.evaluate(rebuiltBlocks);
     const typing = {
       characters: TYPED.length,
       pageLoads: navigations - loads,
@@ -386,6 +401,9 @@ async function main(): Promise<void> {
       patchApplyMs: Math.round((after.messageMs - before.messageMs) * 1000) / 1000,
       wallMs: Date.now() - patchStarted,
       typedTextShown: await page.locator("#sphinx-myst-preview-content").innerText().then((shown) => shown.includes("The last paragraph." + TYPED)),
+      blocks: rebuilt.blocks,
+      blocksRebuilt: rebuilt.rebuilt,
+      firstUnexpectedDifference: rebuilt.firstDifference,
     };
 
     const editor = await probeEditor(page, current, (id) => buildPage(text, version, id));
@@ -406,6 +424,8 @@ async function main(): Promise<void> {
         scrollFrameUnderBudget: scroll.p95Ms < SCROLL_FRAME_BUDGET_MS && scrollSlowCpu.p95Ms < SCROLL_FRAME_BUDGET_MS,
         noPageLoadWhileTyping: typing.pageLoads === 0,
         noMermaidWorkForEditOutsideDiagrams: typing.mermaidDrawn === 0,
+        // Only the typed paragraph is a new node; the first page went through VS Code's loader.
+        onlyTypedBlockRebuilt: typing.blocksRebuilt === 1,
         editorSurvivesThemeChange: editor.survivesThemeChange,
         editorSurvivesDiagramCompletion: editor.survivesDiagramCompletion,
       },

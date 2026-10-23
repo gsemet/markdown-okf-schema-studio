@@ -26,16 +26,18 @@ import { getActivePreviewForTests } from "./extensionApi";
 import {
   closeAllEditors,
   createFixture,
+  MOD,
   currentPreviewFrame,
   htmlAssignmentCount,
   openSidePreview,
+  press,
   setEditMode,
   typeText,
   waitFor,
   waitForEditor,
   waitForRender,
 } from "./realInput/harness";
-import { frameStats, installFrameProbe, type FrameSample } from "../probe/frameProbe";
+import { frameStats, installFrameProbe, rebuiltBlocks, snapshotBlocks, type FrameSample } from "../probe/frameProbe";
 import { PROBE_EDIT_PARAGRAPH, PROBE_MERMAID_COUNT, probeChapter } from "../probe/largeChapter";
 import { REPORTS_ROOT } from "../reportPaths";
 
@@ -132,20 +134,42 @@ export async function scenarioPerformanceProbe(page: Page): Promise<void> {
     // Typing ten characters at the end of the chapter.
     const editor = await vscode.window.showTextDocument(source, vscode.ViewColumn.One);
     const end = source.positionAt(source.getText().length);
-    editor.selection = new vscode.Selection(end, end);
-    await waitFor("the caret at the end", () => vscode.window.activeTextEditor?.selection.active.isEqual(end) === true);
+    const start = new vscode.Position(0, 0);
+    editor.selection = new vscode.Selection(start, start);
+    await waitFor("the caret at the start", () => vscode.window.activeTextEditor?.selection.active.isEqual(start) === true);
+    // The keys go to whatever has the keyboard focus in the window, and a selection set through
+    // the API may reach the editor after the first key. The caret is moved to the end with the
+    // keyboard instead: once the extension host sees it there, the editor has the focus and the
+    // next key lands at the end (the frontmatter at the start stays intact).
+    // The key is pressed again until the extension host sees the caret there (the focus may
+    // still be on its way to the editor); at the end, the key changes nothing.
+    await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    const caretAtEnd = (): boolean => vscode.window.activeTextEditor?.document === source
+      && vscode.window.activeTextEditor.selection.active.isEqual(end);
+    await waitFor("the caret at the end", async () => {
+      if (caretAtEnd()) return true;
+      await press(page, MOD === "Meta" ? "Meta+ArrowDown" : "Control+End");
+      return caretAtEnd();
+    });
     const assignments0 = htmlAssignmentCount();
     const patches0 = contentPatchCount();
     const drawn0 = await mermaidDrawn(frame);
+    await frame.evaluate(snapshotBlocks);
     await typeText(page, TYPED, 60);
+    assert.ok(source.getText().endsWith(TYPED + "\n") || source.getText().endsWith(TYPED),
+      "the typed text went to the end of the chapter: " + JSON.stringify(source.getText().slice(-40)));
     await waitForRender(source);
     await settle();
+    const rebuilt = frame.isDetached() ? undefined : await frame.evaluate(rebuiltBlocks);
     const typing = {
       characters: TYPED.length,
       htmlAssignments: htmlAssignmentCount() - assignments0,
       contentPatches: contentPatchCount() - patches0,
       pageReloads: frame.isDetached() ? 1 : 0,
       mermaidDrawn: frame.isDetached() ? -1 : await mermaidDrawn(frame) - drawn0,
+      blocks: rebuilt?.blocks ?? -1,
+      blocksRebuilt: rebuilt?.rebuilt ?? -1,
+      firstUnexpectedDifference: rebuilt?.firstDifference,
     };
 
     // Scroll frames.

@@ -3063,8 +3063,23 @@ test("STAB-03: a watch for an editor that is already closed is answered at once"
   harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///active.md", documentVersion: 7, requestId: 11, editId: "gone" });
   assert.deepEqual(harness.messages.slice(messageCount).map((message) => [message.type, message.editId]),
     [["previewEditClosed", "gone"]]);
-  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///other.md", documentVersion: 7, requestId: 11, editId: "x" });
-  assert.equal(harness.messages.length, messageCount + 1, "a watch for another document is ignored");
+});
+
+test("STAB-03: a watch sent while the host already follows another document is still answered", () => {
+  // The host switched to the next document while this page still shows the previous one: the
+  // watch carries the new document id, and the page must answer it by editor id, or the host
+  // waits for an editor that is gone and the preview stays on the old document.
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const editId = harness.messages.filter((message) => message.type === "previewEditOpen").at(-1)?.editId;
+  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///other.md", documentVersion: 1, requestId: 12, editId });
+  const messageCount = harness.messages.length;
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.deepEqual(harness.messages.slice(messageCount).map((message) => [message.type, message.editId]),
+    [["previewEditClosed", editId]], "the open editor reports its close");
+  harness.dispatchMessage({ type: "previewEditorWatch", documentId: "file:///other.md", documentVersion: 1, requestId: 12, editId: "gone" });
+  assert.deepEqual(harness.messages.slice(messageCount + 1).map((message) => [message.type, message.editId]),
+    [["previewEditClosed", "gone"]], "a closed editor is reported at once");
 });
 
 function openTableCellEditor(harness: ReturnType<typeof createRuntimeHarness>) {

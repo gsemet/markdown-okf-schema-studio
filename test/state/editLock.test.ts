@@ -150,3 +150,27 @@ test("release forgets the page editor (the page was replaced) and a replaced def
   assert.equal(lock.pageEditorOpen, false);
   assert.equal(lock.shouldDeferReload(), false);
 });
+
+test("a document switch forgets the page editor and drops the old document's work (STAB-03)", () => {
+  // An editor opened and left unchanged closes silently when the host flushes it before a switch.
+  // The next document's render must not wait for it, and the old document's work must not run.
+  const lock = new EditLock();
+  const ran: string[] = [];
+  const discarded: string[] = [];
+  lock.openPageEditor("edit-1");
+  lock.defer("render-result", () => ran.push("old result"), () => discarded.push("old result"));
+  lock.defer("theme-render", () => ran.push("old theme render"));
+  lock.forgetPage();
+  assert.equal(lock.pageEditorOpen, false);
+  assert.equal(lock.shouldDeferResult(), false, "the next document's render reaches the page at once");
+  assert.equal(lock.shouldDeferReload(), false);
+  assert.deepEqual(discarded, ["old result"], "the old result frees its stage");
+  assert.deepEqual(lock.release(), [], "nothing of the old document is left to run");
+  assert.deepEqual(ran, []);
+  const held = new EditLock();
+  held.openPageEditor("edit-2");
+  held.acquire(3);
+  held.forgetPage();
+  assert.equal(held.isHeld, true, "a final save the host still applies keeps its lock");
+  assert.equal(held.shouldDeferResult(), false);
+});

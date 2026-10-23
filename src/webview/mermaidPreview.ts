@@ -118,8 +118,11 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
         const rendered = await mermaid.render(id, source);
         const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(normalizeSvgForDataImage(rendered.svg))}`;
         drawings.store(key, src);
-        showImage(diagram, src);
+        // A later pass (a newer theme) may have planned this node while Mermaid drew: the drawing
+        // stays in the cache, but only the drawing of the node's current key is shown.
+        if (drawnKeys.get(diagram) === key) showImage(diagram, src);
       } catch (err) {
+        if (drawnKeys.get(diagram) !== key) return;
         showMermaidError(diagram, err instanceof Error ? err.message : String(err));
         diagram.dataset.renderState = "error";
       }

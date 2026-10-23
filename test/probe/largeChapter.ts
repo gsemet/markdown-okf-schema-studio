@@ -1,7 +1,7 @@
 /**
  * The large document of the preview performance probe: about 110 KB of Markdown in the shape of a
- * long book chapter (frontmatter, about 80 sections with wrapped paragraphs, sub-headings, tables,
- * lists, code and a Mermaid diagram every tenth section). Generated, so every run measures the
+ * long book chapter (frontmatter, about 80 sections with wrapped paragraphs, links, sub-headings,
+ * tables, lists, code and a Mermaid diagram every tenth section). Generated, so every run measures the
  * same text; the windowless and the real-window probes share it.
  */
 
@@ -39,6 +39,8 @@ export function probeChapter(): string {
     parts.push(`## Section ${section}`, "");
     parts.push(section === 41 ? PROBE_EDIT_PARAGRAPH : wrappedParagraph(section, "Opening", 6), "");
     parts.push(wrappedParagraph(section, "Second **bold** and `code`", 4), "");
+    // A link per section: VS Code gives every link of a loaded page a title (its href).
+    parts.push(`Read more in [the notes of section ${section}](https://example.com/notes/${section}).`, "");
     parts.push(`### Details of section ${section}`, "");
     parts.push(
       "| Name | Value | Note |",
