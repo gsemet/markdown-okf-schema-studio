@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { MAX_STRESS_REPEAT, stressPlan } from "../shared/stressPlan";
+import { hostStressPlan, MAX_STRESS_REPEAT, STRESS_SCENARIOS_BY_HOST, stressPlan } from "../shared/stressPlan";
 
 const AVAILABLE = ["table-tab", "list-editor", "flush-frontmatter-typed"];
 
@@ -25,4 +25,24 @@ test("CR 041: an invalid repeat count or an unknown scenario fails before any wi
   assert.throws(() => stressPlan({ STUDIO_STRESS_SCENARIOS: "table-tab,nope" }, AVAILABLE),
     /Unknown stress scenario\(s\) nope; available: table-tab, list-editor, flush-frontmatter-typed/u);
   assert.throws(() => stressPlan({}, []), /No stress scenario/u);
+});
+
+test("CR 043: each window runs only its own stress scenarios, and a filter may name either window", () => {
+  const trusted = hostStressPlan({ STUDIO_STRESS_REPEAT: "3" }, "trusted");
+  assert.deepEqual(trusted, { repeat: 3, scenarios: [...STRESS_SCENARIOS_BY_HOST.trusted] });
+  assert.deepEqual(hostStressPlan({}, "untrusted"), { repeat: 10, scenarios: ["untrusted-read-only"] });
+  const filter = { STUDIO_STRESS_SCENARIOS: "untrusted-read-only,label-rename" };
+  assert.deepEqual(hostStressPlan(filter, "trusted")?.scenarios, ["label-rename"]);
+  assert.deepEqual(hostStressPlan(filter, "untrusted")?.scenarios, ["untrusted-read-only"]);
+  assert.equal(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "table-tab" }, "untrusted"), undefined);
+  assert.throws(() => hostStressPlan({ STUDIO_STRESS_SCENARIOS: "nope" }, "untrusted"), /Unknown stress scenario\(s\) nope/u);
+});
+
+test("CR 043: every T2 real-window scenario is in the stress plan, and no name is listed twice", () => {
+  const all = [...STRESS_SCENARIOS_BY_HOST.trusted, ...STRESS_SCENARIOS_BY_HOST.untrusted];
+  assert.equal(new Set(all).size, all.length);
+  for (const name of ["incoming-changes", "conf-warning", "review-threads", "image-paste", "label-rename",
+    "back-next", "keybinding-refresh", "double-click", "standalone-read-only", "untrusted-read-only"]) {
+    assert.ok(all.includes(name), name);
+  }
 });

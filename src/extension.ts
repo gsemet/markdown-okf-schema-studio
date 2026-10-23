@@ -5259,6 +5259,12 @@ export function getActivePreviewForTests():
   };
 }
 
+/** The edit mode the workspace remembers for the next preview (`undefined`: never stored). */
+export function storedEditModeForTests(): boolean | undefined {
+  const stored = editModeStorage?.get(EDIT_MODE_STORAGE_KEY);
+  return typeof stored === "boolean" ? stored : undefined;
+}
+
 /** Live previews and whether each follows the active editor, oldest first. */
 export function getLivePreviewRolesForTests(): { documentUri: string; followsActiveEditor: boolean; title: string }[] {
   return [...activePreviews].filter((preview) => !preview.disposed).map((preview) => ({

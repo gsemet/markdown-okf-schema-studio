@@ -48,6 +48,7 @@ ${failures.length > 0 ? `Freshness failures:\n${failures.map((failure) => `- ${f
 4. [Actual window reload and close/reopen](RELOAD-LATEST.md): before reload, after reload, after reopen. No injected state.
 5. [Real checkbox toggles](CHECKBOX-LATEST.md): \`[ ]\`/\`[x]\` markers clicked in reading mode and edit mode, unchecked and checked states.
 6. [Real-input editing](screenshots/REAL-INPUT-LATEST.md): real mouse and keyboard edits in the side preview and the Open With editor, with the buffer checked after each action.
+7. [Restricted Mode window](screenshots/UNTRUSTED-LATEST.md) and [file outside the workspace](screenshots/STANDALONE-LATEST.md): the read-only previews of an untrusted workspace and of a standalone file.
 
 ## Reading Each Capture
 

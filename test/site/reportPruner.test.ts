@@ -4,7 +4,8 @@ import * as os from "node:os";
 import * as path from "node:path";
 import test from "node:test";
 
-import { applyPrune, planPrune, pointerProtectedFolders } from "./reportPruner";
+import { RUN_FOLDER_PREFIX, SUITES } from "../shared/captureRegistry";
+import { applyPrune, planPrune, pointerProtectedFolders, RUN_FOLDER_PATTERN } from "./reportPruner";
 
 function fixture(): { reports: string; screenshots: string; cleanup: () => void } {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), "pruner-"));
@@ -135,4 +136,12 @@ test("apply skips a folder that vanished and goes on with the others", () => {
   } finally {
     cleanup();
   }
+});
+
+test("CR 043: the pruner knows the run folder of every real-window suite, the untrusted and standalone ones too", () => {
+  for (const suite of SUITES) {
+    assert.match(`${RUN_FOLDER_PREFIX[suite]}AbC123`, RUN_FOLDER_PATTERN, suite);
+  }
+  assert.match("untrusted-e2e-x1", RUN_FOLDER_PATTERN);
+  assert.match("standalone-e2e-x1", RUN_FOLDER_PATTERN);
 });

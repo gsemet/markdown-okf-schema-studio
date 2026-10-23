@@ -10,6 +10,8 @@ import {
   getActivePreviewForTests,
   sendPreviewMessageForTests,
 } from "./extensionApi";
+import { connectWorkbench, createEvidence } from "./realInput/harness";
+import { scenarioStandaloneReadOnly } from "./realWindowGaps";
 
 async function waitForPreview(): Promise<void> {
   const deadline = Date.now() + 10_000;
@@ -126,5 +128,24 @@ export async function run(): Promise<void> {
   } finally {
     disposeActivePreviewForTests();
     fs.rmSync(directory, { recursive: true, force: true });
+  }
+  await runCapture();
+}
+
+/** The real-window capture of this suite (CR 043), through the window's loopback CDP port. */
+async function runCapture(): Promise<void> {
+  const { browser, page } = await connectWorkbench();
+  const evidence = createEvidence("standalone");
+  let passed = false;
+  try {
+    await page.setViewportSize({ width: 1400, height: 900 });
+    await vscode.commands.executeCommand("workbench.action.closeSidebar");
+    await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
+    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+    await scenarioStandaloneReadOnly(page, evidence);
+    passed = true;
+  } finally {
+    evidence.finish(passed, passed);
+    await browser.close();
   }
 }

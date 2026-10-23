@@ -14,6 +14,9 @@ import { runUntrusted as runBlockMoveUntrusted } from "./blockMove.test";
 import { runUntrusted as runBlockClipboardUntrusted } from "./blockClipboard.test";
 import { runUntrusted as runCommentWriteUntrusted } from "./commentWrite.test";
 import { runUntrusted as runMystDiagnostics } from "./mystDiagnostics.test";
+import { closeAllEditors, connectWorkbench, createEvidence } from "./realInput/harness";
+import { scenarioUntrustedReadOnly } from "./realWindowGaps";
+import { hostStressPlan } from "../shared/stressPlan";
 
 async function waitForPreview(): Promise<void> {
   const deadline = Date.now() + 10_000;
@@ -27,8 +30,64 @@ async function waitForPreview(): Promise<void> {
   throw new Error("Timed out waiting for the untrusted preview to render.");
 }
 
+/**
+ * The real-window capture of this window (CR 043): the read-only side preview of Restricted Mode,
+ * through the window's own loopback CDP port. In stress mode (`just ci-stress`) it runs the rounds
+ * of the untrusted stress plan instead, each round with its own evidence folder.
+ */
+async function runCaptures(): Promise<void> {
+  const { browser, page } = await connectWorkbench();
+  try {
+    await page.setViewportSize({ width: 1400, height: 900 });
+    await vscode.commands.executeCommand("workbench.action.closeSidebar");
+    await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
+    await closeAllEditors();
+    if (process.env.STUDIO_REAL_INPUT_SCENARIO === "stress") {
+      const plan = hostStressPlan(process.env, "untrusted", 10);
+      if (plan === undefined) {
+        console.log("stress: no scenario of the untrusted window was asked for");
+        return;
+      }
+      console.log(`stress: ${plan.repeat} round(s) of ${plan.scenarios.join(", ")}`);
+      for (let round = 1; round <= plan.repeat; round += 1) {
+        const evidence = createEvidence("untrusted");
+        let passed = false;
+        try {
+          const started = Date.now();
+          try {
+            await scenarioUntrustedReadOnly(page, evidence);
+          } catch (error) {
+            throw new Error(`stress round ${round}/${plan.repeat}, scenario untrusted-read-only: `
+              + `${error instanceof Error ? error.message : String(error)}`, { cause: error });
+          }
+          console.log(`PASS stress ${round}/${plan.repeat} untrusted-read-only (${Date.now() - started} ms)`);
+          passed = true;
+        } finally {
+          evidence.finish(passed, false);
+        }
+      }
+      console.log(`stress: ${plan.repeat} round(s) passed`);
+      return;
+    }
+    const evidence = createEvidence("untrusted");
+    let passed = false;
+    try {
+      await scenarioUntrustedReadOnly(page, evidence);
+      passed = true;
+    } finally {
+      evidence.finish(passed, passed);
+    }
+  } finally {
+    await browser.close();
+  }
+}
+
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, false);
+  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "stress") {
+    await runCaptures();
+    return;
+  }
   try {
     const fixturePath = vscode.Uri.file(
       vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, "test/integration/fixtures/preview.md").fsPath,
@@ -94,4 +153,5 @@ export async function run(): Promise<void> {
   } finally {
     disposeActivePreviewForTests();
   }
+  await runCaptures();
 }

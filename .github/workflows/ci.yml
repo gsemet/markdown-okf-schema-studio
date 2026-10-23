@@ -140,8 +140,9 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
-  # Repeats the flake-prone real-input scenarios (20 rounds, about 12 minutes); a race that a
-  # single run passes by luck fails here. Its reports are not part of the e2e campaign.
+  # Repeats the flake-prone and the new real-window scenarios (20 rounds, in the trusted window then
+  # in the Restricted Mode window); a race that a single run passes by luck fails here. Its reports
+  # are not part of the e2e campaign.
   # Advisory: a red stress run flags a flake to fix (CI rule 12) but does not block merges.
   stress:
     runs-on: ubuntu-latest

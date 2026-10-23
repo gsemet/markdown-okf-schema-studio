@@ -183,14 +183,15 @@ ci-integration:
         exit 1
     fi
 
-# Filter with STUDIO_STRESS_SCENARIOS=name,name (test/shared/stressPlan.ts). CI only: it opens a
-# VS Code window, and preflight already runs each of these scenarios once.
-# CI job "stress": repeat the flake-prone real-input scenarios REPEAT times in one VS Code window.
+# Filter with STUDIO_STRESS_SCENARIOS=name,name (test/shared/stressPlan.ts). CI only: it opens VS
+# Code windows, and preflight already runs each of these scenarios once.
+# CI job "stress": repeat the flake-prone real-window scenarios REPEAT times, in the trusted window
+# then in the Restricted Mode window (one window each).
 ci-stress REPEAT="20":
     #!/usr/bin/env bash
     set -uo pipefail
     export STUDIO_REAL_INPUT_SCENARIO=stress STUDIO_STRESS_REPEAT="{{ REPEAT }}"
-    if {{ npm }} run test:integration -- --trusted-only; then
+    if {{ npm }} run test:integration -- --trusted-only && node out/test/integration/run-tests.js --untrusted-only; then
         echo "ci-stress: passed ({{ REPEAT }} rounds)"
     else
         echo "ci-stress: FAILED" >&2

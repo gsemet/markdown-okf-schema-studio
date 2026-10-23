@@ -36,3 +36,53 @@ export function stressPlan(
   if (scenarios.length === 0) throw new Error("No stress scenario to run");
   return { repeat, scenarios };
 }
+
+/**
+ * The two VS Code windows the stress job opens: the trusted one (`--trusted-only`, the real-input
+ * suite) and the Restricted Mode one (`--untrusted-only`). Each window runs only its own names.
+ */
+export type StressHost = "trusted" | "untrusted";
+
+/**
+ * Every stress scenario, by the window that runs it (CI rule 12: a new real-window scenario is added
+ * here and proved by the `stress` job before it stays in the required integration job). The
+ * trusted list is the key list of the real-input suite's stress table, which checks it at start.
+ */
+export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly string[]>> = {
+  trusted: [
+    // CR 041: each failed on CI as a race at least once.
+    "frontmatter-rename",
+    "frontmatter-title",
+    "table-tab",
+    "list-editor",
+    "flush-cell-frontmatter",
+    "flush-frontmatter-typed",
+    // CR 043 (P9 T2): new real-window captures.
+    "incoming-changes",
+    "conf-warning",
+    "review-threads",
+    "image-paste",
+    "label-rename",
+    "back-next",
+    "keybinding-refresh",
+    "double-click",
+    "standalone-read-only",
+  ],
+  untrusted: ["untrusted-read-only"],
+};
+
+/**
+ * The plan of one window. `STUDIO_STRESS_SCENARIOS` may name scenarios of either window (unknown
+ * names fail in both); the window keeps the ones it runs. `undefined`: nothing to run here.
+ */
+export function hostStressPlan(
+  environment: { STUDIO_STRESS_REPEAT?: string; STUDIO_STRESS_SCENARIOS?: string },
+  host: StressHost,
+  defaultRepeat = 10,
+): StressPlan | undefined {
+  const all = [...STRESS_SCENARIOS_BY_HOST.trusted, ...STRESS_SCENARIOS_BY_HOST.untrusted];
+  const plan = stressPlan(environment, all, defaultRepeat);
+  const own = STRESS_SCENARIOS_BY_HOST[host];
+  const scenarios = plan.scenarios.filter((name) => own.includes(name));
+  return scenarios.length === 0 ? undefined : { repeat: plan.repeat, scenarios };
+}

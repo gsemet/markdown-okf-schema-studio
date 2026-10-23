@@ -162,7 +162,8 @@ scenario's viewport, fixture, theme, scroll or crop unless the image is meant to
 
 Every screenshot taken in a real VS Code window has a stable id `<group>/rNN-<slug>` registered in
 `test/shared/captureRegistry.ts` (group, suite, one `locks` sentence, `clip`, README and curated
-flags). All five suites (real-input, checkbox, frontmatter, scroll, reload) write through the same
+flags). All seven suites (real-input, checkbox, frontmatter, scroll, reload, untrusted, standalone)
+write through the same
 `RealWindowEvidence` writer (`test/integration/evidence.ts`): it rejects an unregistered id, writes
 `<run folder>/<group>/rNN-<slug>.png` with its `.md` note and `.json` sidecar, lists the capture in
 the `captures` array of the run `manifest.json`, and fails a complete suite when a registered
@@ -172,8 +173,16 @@ webview frame (falling back to the whole window), `clip: "element"` to the chang
 `clip: "window"` keeps the whole VS Code window, which the README crops need.
 
 The LATEST pointer files, `INDEX.md` and the run folder prefixes (`real-input-`, `checkbox-e2e-`,
-`frontmatter-e2e-`, `scroll-e2e-`, `reload-e2e-`) are unchanged; the per-group folders live inside
-the run folder. `npm run review:gallery` lists the registered captures of the latest runs per group,
+`frontmatter-e2e-`, `scroll-e2e-`, `reload-e2e-`, and `untrusted-e2e-`, `standalone-e2e-` with
+`UNTRUSTED-LATEST.md` and `STANDALONE-LATEST.md`) are unchanged; the per-group folders live inside
+the run folder. Every window with captures gets a loopback CDP port (`STUDIO_CDP_PORT`): the
+trusted, scroll and standalone launches, and the Restricted Mode window, which `run-tests` spawns
+directly (`--untrusted-only` runs it alone).
+
+A new real-window scenario goes into the stress plan (`STRESS_SCENARIOS_BY_HOST` in
+`test/shared/stressPlan.ts`, by the window that runs it) and must pass the `stress` CI job before it
+stays in the required integration job (CI rule 12). `just ci-stress` runs the trusted window, then
+the Restricted Mode window. `npm run review:gallery` lists the registered captures of the latest runs per group,
 and `scripts/generate-readme-images.py --check <dir>` compares the README images, real-window ones
 included, with a baseline directory.
 
