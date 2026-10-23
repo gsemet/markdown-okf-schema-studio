@@ -5,8 +5,8 @@ import * as path from "node:path";
 import { parse, serialize } from "parse5";
 
 import { RenderDiagnostic } from "./mystRenderer";
+import { MAX_PLANTUML_SOURCE_LENGTH } from "./plantUmlLimits";
 
-const MAX_PLANTUML_SOURCE_LENGTH = 1024 * 1024;
 const MAX_PLANTUML_OUTPUT_LENGTH = 8 * 1024 * 1024;
 const MAX_PLANTUML_STDERR_LENGTH = 64 * 1024;
 export const PLANTUML_TIMEOUT_MS = 30_000;

@@ -1,0 +1,4 @@
+@startuml
+Alice -> Bob: read from sequence.puml
+Bob --> Alice: drawn without Java
+@enduml

@@ -19,6 +19,7 @@ import { createBlockSelection } from "./blockSelection";
 import { installCodeCopy } from "./codeCopy";
 import { installLabelRename } from "./labelRename";
 import { installHostRequests } from "./hostRequests";
+import { installPlantUmlFileRequests, PLANTUML_FILE_REQUEST_TIMEOUT_MS } from "./plantumlFileRequests";
 import { installPasteHtml } from "./pasteHtml";
 import { installPasteImage } from "./pasteImage";
 import { installFirstClearance } from "./firstClearance";
@@ -250,6 +251,19 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
       requestId: context.requestId,
     }),
   });
+  // Local files of PlantUML \`!include\` lines, read by the host for the built-in engine (its bundle
+  // asks through a document event). Requests of their own: closing an editor must not cancel them.
+  let plantUmlFileSequence = 0;
+  const plantUmlFileRequests = (${installHostRequests.toString()})(window, {
+    nextEditId: () => "plantuml-" + (++plantUmlFileSequence),
+    post: (request) => vscode.postMessage({
+      ...request,
+      documentId: context.documentId,
+      documentVersion: context.documentVersion,
+      requestId: context.requestId,
+    }),
+  });
+  (${installPlantUmlFileRequests.toString()})(document, plantUmlFileRequests, ${PLANTUML_FILE_REQUEST_TIMEOUT_MS});
   // Pasting an image into the text box: the host saves it next to the document and names it.
   const pasteImage = (${installPasteImage.toString()})(window);
   const pasteHtml = (${installPasteHtml.toString()})();
@@ -5219,6 +5233,13 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       return;
     }
     if (message?.type === "previewLabelRenameResult" && labelRename.receive(message)) return;
+    if (message?.type === "previewPlantUmlIncludeResult" && plantUmlFileRequests.receive(message)) return;
+    if (message?.type === "previewPlantUmlIncludesChanged" && message.documentId === context.documentId) {
+      if (typeof CustomEvent === "function") {
+        document.dispatchEvent(new CustomEvent("studio:plantuml-includes-changed"));
+      }
+      return;
+    }
     if (message?.type === "previewBlocksResult" && sameContext(message)) {
       receiveBlocksResult(message);
       return;

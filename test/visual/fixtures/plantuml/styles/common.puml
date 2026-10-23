@@ -1,0 +1,3 @@
+' Shared look of the review diagrams; the participants come from a nested include.
+skinparam sequenceMessageAlign center
+!include participants.puml

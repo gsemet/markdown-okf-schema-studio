@@ -76,7 +76,8 @@ ADMONITION_DIRECTIVE = re.compile(
 GFM_ALERT = re.compile(r"^>[ \t]*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]", re.MULTILINE)
 FIGURE_DIRECTIVE = re.compile(r"^(?:`{3,}|:{3,})\{figure\}\s+\S+", re.MULTILINE)
 MERMAID_BLOCK = re.compile(r"^`{3,}(?:\{)?mermaid(?:\})?(?:\s|$)", re.MULTILINE)
-PLANTUML_BLOCK = re.compile(r"^`{3,}(?:\{)?plantuml(?:\})?(?:\s|$)", re.MULTILINE)
+# `{uml} path.puml` (sphinxcontrib-plantuml) is a PlantUML diagram too.
+PLANTUML_BLOCK = re.compile(r"^`{3,}(?:\{)?plantuml(?:\})?(?:\s|$)|^`{3,}\{uml\}(?:\s|$)", re.MULTILINE)
 CONTEXT_TAG_OPEN = re.compile(
   r"^[ \t]*<[a-z][a-z0-9_-]*>[ \t]*$",
     re.MULTILINE,

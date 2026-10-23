@@ -12,6 +12,24 @@ export interface SecurityDiagnostic {
   value?: string;
 }
 
+export type ResourceRefusalCode =
+  | "invalid-resource-path"
+  | "blocked-resource-scheme"
+  | "resource-outside-root"
+  | "missing-resource"
+  | "symlink-escape";
+
+export type ResourceResolution =
+  | { path: string }
+  | { refusal: ResourceRefusalCode; candidate?: string };
+
+/** Largest file `{include}`, `{uml}` and a PlantUML `!include` read for the preview. */
+export const MAX_INCLUDED_FILE_BYTES = 5 * 1024 * 1024;
+
+export type BoundedTextRead =
+  | { ok: true; path: string; source: string }
+  | { ok: false; refusal: ResourceRefusalCode | "too-large" | "unreadable"; candidate?: string };
+
 export type NavigationResult =
   | { kind: "anchor"; value: string }
   | { kind: "external"; value: string }
@@ -121,6 +139,15 @@ export class ResourcePolicy {
   }
 
   public resolveResource(request: string, baseDirectory: string): string | undefined {
+    const resolution = this.resolveResourceDetailed(request, baseDirectory);
+    return "path" in resolution ? resolution.path : undefined;
+  }
+
+  /**
+   * `resolveResource` with the reason of a refusal (the diagnostic code it records), and for a
+   * missing file inside the roots the absolute path it would have, so a caller can watch for it.
+   */
+  public resolveResourceDetailed(request: string, baseDirectory: string): ResourceResolution {
     const decoded = decodePath(resourcePathPart(request));
     if (!decoded || decoded.includes("\0") || decoded.includes("\\")) {
       diagnostic(
@@ -129,7 +156,7 @@ export class ResourcePolicy {
         "The resource path could not be decoded safely.",
         request,
       );
-      return undefined;
+      return { refusal: "invalid-resource-path" };
     }
 
     if (
@@ -143,7 +170,7 @@ export class ResourcePolicy {
         "Only relative resources inside the staged roots are allowed.",
         request,
       );
-      return undefined;
+      return { refusal: "blocked-resource-scheme" };
     }
 
     const candidate = path.resolve(baseDirectory, decoded);
@@ -155,7 +182,7 @@ export class ResourcePolicy {
         "The resource is outside the staged preview roots.",
         request,
       );
-      return undefined;
+      return { refusal: "resource-outside-root" };
     }
 
     let realCandidate: string;
@@ -171,7 +198,7 @@ export class ResourcePolicy {
         "The staged resource does not exist or is not a regular file.",
         request,
       );
-      return undefined;
+      return { refusal: "missing-resource", candidate };
     }
 
     if (!isWithin(root.realDirectory, realCandidate)) {
@@ -181,10 +208,10 @@ export class ResourcePolicy {
         `The resource escapes the ${root.label} root through a symlink.`,
         request,
       );
-      return undefined;
+      return { refusal: "symlink-escape" };
     }
 
-    return realCandidate;
+    return { path: realCandidate };
   }
 
   public resolveNavigation(request: string, baseDirectory: string): NavigationResult {
@@ -245,4 +272,28 @@ export function rewriteSrcset(
     return safeRequest ? [`${safeRequest}${descriptor.length ? ` ${descriptor.join(" ")}` : ""}`] : [];
   });
   return rewritten.length > 0 ? rewritten.join(", ") : undefined;
+}
+
+/**
+ * Reads a text file the way `{include}` does: through `policy` (relative path, inside the roots,
+ * no symlink escape), a regular file of at most `maxBytes`, as UTF-8.
+ */
+export function readBoundedText(
+  policy: ResourcePolicy,
+  request: string,
+  baseDirectory: string,
+  maxBytes = MAX_INCLUDED_FILE_BYTES,
+): BoundedTextRead {
+  const resolution = policy.resolveResourceDetailed(request, baseDirectory);
+  if (!("path" in resolution)) {
+    return { ok: false, refusal: resolution.refusal, ...(resolution.candidate ? { candidate: resolution.candidate } : {}) };
+  }
+  try {
+    if (fs.statSync(resolution.path).size > maxBytes) {
+      return { ok: false, refusal: "too-large" };
+    }
+    return { ok: true, path: resolution.path, source: fs.readFileSync(resolution.path, "utf8") };
+  } catch {
+    return { ok: false, refusal: "unreadable" };
+  }
 }

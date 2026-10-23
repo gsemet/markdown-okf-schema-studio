@@ -1,0 +1,2 @@
+participant "Alice" as Alice
+participant "Included Carol" as Carol

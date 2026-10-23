@@ -1,0 +1,7 @@
+@startuml
+class Document {
+  +path: String
+}
+class DiagramFile
+Document "1" o-- "many" DiagramFile : names
+@enduml

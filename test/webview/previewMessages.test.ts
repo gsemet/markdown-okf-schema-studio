@@ -271,3 +271,18 @@ test("previewThreadReply and previewThreadDelete validate the lines, the edit id
   assert.equal(isRegisteredPreviewMessage(remove), true);
   assert.equal(isRegisteredPreviewMessage({ ...remove, line: 8 }), false);
 });
+
+test("previewPlantUmlInclude carries a bounded file name, the including file id or null, and an edit id", () => {
+  const base = { type: "previewPlantUmlInclude", documentId: "doc", documentVersion: 1, requestId: 1, editId: "plantuml-1", path: "styles/common.puml", from: null };
+  assert.equal(isRegisteredPreviewMessage(base), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, from: "/docs/styles/common.puml" }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, path: "x".repeat(4096) }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, path: "x".repeat(4097) }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, path: "  " }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, path: 3 }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, from: "" }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, from: undefined }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, from: 1 }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, editId: "" }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base, editId: undefined }), false);
+});

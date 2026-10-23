@@ -76,6 +76,8 @@ const MAX_EDIT_ID_LENGTH = 100;
 
 const MAX_PASTED_HTML_LENGTH = 1_000_000;
 
+const MAX_PLANTUML_INCLUDE_PATH_LENGTH = 4096;
+
 /** The list and pick requests of the MyST palette carry only the id their answer is matched by. */
 const isHostRequest: MessageValidator = (message) =>
   isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "";
@@ -156,6 +158,13 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
     && message.dataBase64.length > 0
     && message.dataBase64.length <= MAX_PASTED_IMAGE_BASE64_LENGTH
     && isBase64(message.dataBase64),
+  // A local file of a PlantUML `!include` for the built-in engine: the name the directive gives and
+  // the id (absolute path) the host gave the including file, or null for the document itself. The
+  // host reads it under the rules of `{include}`; the answer repeats `editId`.
+  previewPlantUmlInclude: (message) => isHostRequest(message)
+    && isBoundedString(message.path, MAX_PLANTUML_INCLUDE_PATH_LENGTH) && message.path.trim() !== ""
+    && (message.from === null
+      || (isBoundedString(message.from, MAX_PLANTUML_INCLUDE_PATH_LENGTH) && message.from !== "")),
   // Rich text pasted into the text box: the clipboard's HTML, converted to Markdown by the host.
   previewPasteHtml: (message) => isHostRequest(message)
     && isBoundedString(message.html, MAX_PASTED_HTML_LENGTH) && message.html !== "",
