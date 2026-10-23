@@ -146,7 +146,7 @@ export async function run(): Promise<void> {
     const editorPreview = getActivePreviewForTests();
     assert.ok(editorPreview);
     assert.equal(editorPreview.readOnly, true);
-    assert.match(editorPreview.html, /"initialPaletteMode":"myst"/u, "the refused message stored nothing");
+    assert.match(editorPreview.html, /"initialPaletteMode":"gfm"/u, "the refused message stored nothing: the default GFM mode");
     assert.doesNotMatch(editorPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
     disposeActivePreviewForTests();
     await runMystDiagnostics();

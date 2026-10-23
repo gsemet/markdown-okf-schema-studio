@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- New starting points for a workspace that has not chosen yet: the preview opens in the cream
+  theme, the floating toolbar is collapsed to its first row (the chevron shows rows 2 and 3) and
+  the edition palette offers the GFM buttons (`editing.defaultPaletteMode` now defaults to `gfm`).
+  If you already picked a theme, expanded the toolbar or chose a palette mode in a workspace, that
+  choice is kept; a palette mode you set in your settings is kept too. In the Settings UI the
+  settings are now grouped in five categories, most used first: Preview, Editing, Frontmatter,
+  Comments and PlantUML. No setting was renamed.
 - The preview now has light, short animations: block, table cell and frontmatter editors, the
   edition palette, the table bar, the `/` menu and the palette menus fade in softly when you open
   them, a block fades back in when its editor closes, and a theme switch from the toolbar fades the

@@ -35,9 +35,11 @@ import { run as runSourceMapping } from "./sourceMapping.test";
 import { run as runStockCoexistence } from "./stockCoexistence.test";
 import { run as runWorkspaceDisposal } from "./workspaceDisposal.test";
 import { attribute, findElements, parseHtml } from "../rendering/dom";
+import { pinStoredWorkspaceChoices } from "./storedChoices";
 
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
+  await pinStoredWorkspaceChoices();
   const extensionRoot = path.resolve(__dirname, "../../..");
   const workspaceRoot = extensionRoot;
   const fixturePath = path.join(extensionRoot, "test", "integration", "fixtures", "preview.md");

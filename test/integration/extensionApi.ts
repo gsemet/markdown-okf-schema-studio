@@ -3,6 +3,7 @@ import type * as ExtensionApi from "../../src/extension";
 const extensionApi = require("../../bundle/extension") as typeof ExtensionApi;
 
 export const {
+  clearStoredPaletteModeForTests,
   COMMAND_ID,
   deserializePreviewPanelForTests,
   disposeActivePreviewForTests,
@@ -22,5 +23,6 @@ export const {
   setRenderDelayForTests,
   setRenderOverrideForTests,
   storedEditModeForTests,
+  storeWorkspaceChoicesForTests,
   syncActiveEditorForTests,
 } = extensionApi;

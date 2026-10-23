@@ -104,6 +104,11 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
       });
     }
     let frame = await frameForDocument();
+    // A fresh workspace opens with the floating toolbar collapsed: show the view controls first,
+    // and the expanded toolbar is a stored choice that the reloads below keep.
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-toolbar-state"), "collapsed", "a fresh workspace starts with the toolbar collapsed");
+    await frame.locator("[data-sphinx-preview-toolbar-collapse]").click();
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-toolbar-state"), "expanded");
     if (await frame.locator("[data-okf-description-toggle]:visible").getAttribute("aria-expanded") === "true") await frame.locator("[data-okf-description-toggle]:visible").click();
     for (let step = 0; step < 3; step += 1) await frame.locator("[data-sphinx-preview-zoom-in]").click();
     assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "130");
@@ -114,6 +119,7 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
     const nonce = await frame.evaluate(() => document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce);
     await command(page, "Developer: Reload Window");
     frame = await frameForDocument(nonce);
+    assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-toolbar-state"), "expanded", "the expanded toolbar survives the window reload");
     assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-zoom"), "130", "zoom survives the window reload");
     assert.equal(await frame.locator("html").getAttribute("data-sphinx-preview-incoming"), "off", "the Diff off state survives the window reload");
     assert.equal(await frame.locator("[data-sphinx-preview-diff-toggle]").getAttribute("aria-pressed"), "false");
@@ -144,7 +150,7 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
       return await target.locator(".sphinx-preview-edit-palette").getAttribute("data-palette-mode") ?? "";
     }
     await openParagraphEditor(frame);
-    assert.equal(await paletteMode(frame), "myst", "a workspace with no choice starts in MyST");
+    assert.equal(await paletteMode(frame), "gfm", "a workspace with no choice starts in GFM");
     await frame.locator(".sphinx-preview-edit-palette select").selectOption("strict");
     assert.equal(await paletteMode(frame), "strict");
     assert.equal(await frame.locator("main .sphinx-preview-block-editor").count(), 1, "choosing a mode keeps the editor open");

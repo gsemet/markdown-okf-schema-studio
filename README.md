@@ -64,7 +64,8 @@ Markdown flavours and extensions:
   alt text selected). Pasting rich text (from Google Docs, Word, a web page or VS Code) into a
   block editor inserts it as Markdown (headings, bold, italic, strikethrough, links, lists, code,
   quotes, simple tables, images as links) in one undo step; Cmd/Ctrl+Shift+V pastes plain text. A select at its start
-  (Cmd/Ctrl+Shift+M) chooses the Strict, GFM or MyST button set for the workspace.
+  (Cmd/Ctrl+Shift+M) chooses the Strict, GFM or MyST button set for the workspace (GFM until you
+  choose, or the `editing.defaultPaletteMode` setting).
   The palette sits just above the text box, never over its text; when you scroll so the top of the
   box is out of view, it stays at the top of the viewport (below the preview controls) until the
   box ends, in narrow panes too, where it wraps inside the pane. The table toolbar of a cell
@@ -118,8 +119,9 @@ The floating toolbar at the top right of the preview has three rows:
    Comments toggle (hides or shows the gray comment chips, in preview and in edit mode).
 
 The chevron button collapses the toolbar to its first row when you want the most room for the
-text. The choice is remembered per workspace; the toolbar is expanded by default. Hidden rows are
-skipped by the Tab key.
+text, and expands it again. The choice is remembered per workspace; a new workspace starts with
+the toolbar collapsed, so click the chevron to reach rows 2 and 3. Hidden rows are skipped by the
+Tab key.
 
 | Expanded | Collapsed |
 | --- | --- |
@@ -152,8 +154,9 @@ moved the highlight, so a literal ` /ock` followed by Enter is never swallowed.
 ## Preview Themes
 
 The theme button on the third toolbar row cycles through the current VS Code theme, dark,
-white, and cream. Cream is a warm, low-glare paper palette with clay-coloured links. The choice is
-remembered per workspace. These three captures use the same document, viewport, and scroll state.
+white, and cream. Cream is a warm, low-glare paper palette with clay-coloured links and the theme
+a new workspace starts with. The choice is remembered per workspace. These three captures use the
+same document, viewport, and scroll state.
 
 | Dark | White | Cream |
 | --- | --- | --- |
@@ -368,7 +371,13 @@ there is no `conf.py`, nothing is reported. The preview itself renders the same 
 
 ## Settings
 
-The preview settings are available under **Markdown OKF-Schema Studio** in VS Code settings.
+The settings are available under **Markdown OKF-Schema Studio** in VS Code settings, in five
+categories: Preview, Editing, Frontmatter, Comments and PlantUML. A new workspace starts with the
+cream preview theme, the floating toolbar collapsed to its first row and the GFM palette. The
+theme and the toolbar state are built-in starting points, not settings; the palette follows
+`editing.defaultPaletteMode`. A choice you make in the preview is remembered per workspace.
+
+**Preview**
 
 - `preview.maxContentWidth` (default 960): width of the text column in pixels; `0` is full width.
   The Width button on the third toolbar row switches between Margin (this column), Auto (tables,
@@ -379,28 +388,32 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
   remembered per workspace, hidden on panes narrower than 760 px); click an entry to scroll there,
   fold sections with the twisty; the current section is highlighted.
 - `preview.stickyHeadingDepth` (default 3): heading levels pinned at the top while scrolling (1-6).
+- `preview.incrementalUpdates` (default on): update changed parts in place; off reloads the page.
 - `preview.showComments` (default on): show HTML comments as gray chips; click one (or press Enter
   or Space on it) to open the comment text in a box under the line. Each chip is labelled
   "comment". The Comments button of the toolbar hides and shows them in both preview and edit mode
   (remembered per workspace, shown by default). Off here hides the gray chips and the green thread chips in open
   previews at once and removes that button. TODO chips always show.
-- `comments.authorName` (default empty): the name stored with the review comments you write in the
-  preview. Empty uses your Git `user.name`, then your operating system user name.
 - `preview.showIncomingChanges` (default on): mark blocks changed since the last Git commit
   (unsaved edits included) with a green bar on the left, like the editor gutter. Needs the built-in
   Git extension; files that are not in Git, and untrusted workspaces, show nothing. Off turns the
   marks, and their toolbar toggle, off.
-- `preview.incrementalUpdates` (default on): update changed parts in place; off reloads the page.
 - `preview.scrollPreviewWithEditor` (default on): editor scrolling moves the preview; the toolbar
   anchor button overrides it per panel.
 - `preview.scrollEditorWithPreview` (default on): preview scrolling and clicks reveal the source.
 - `preview.markEditorSelection` (default off): mark the cursor's source line in the preview.
 - `preview.doubleClickToSwitchToEditor` (default off): double-click rendered content to reveal its
   source; needs `scrollEditorWithPreview`.
-- `editing.defaultPaletteMode` (default `myst`): buttons the edition palette shows in a workspace
+
+**Editing**
+
+- `editing.defaultPaletteMode` (default `gfm`): buttons the edition palette shows in a workspace
   that has not chosen yet: `strict` (plain Markdown), `gfm` (strict plus GitHub Flavored Markdown)
   or `myst` (GFM plus MyST). The select at the start of the palette changes it and the choice is
   remembered per workspace; it changes the buttons only, never the rendering.
+
+**Frontmatter**
+
 - `frontmatter.propertiesTable` (default on): show the properties table above the preview.
 - `frontmatter.strictAdditionalProperties` (default off): warn on fields the OKF schema omits.
 - `frontmatter.bundleRoot` and `frontmatter.projectRoot` (default empty): roots for `x-okf-link`
@@ -409,6 +422,14 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
   git root inside the workspace; otherwise such links cannot be resolved.
 - `frontmatter.allowOutsideWorkspaceLinks` (default off): resolve document-relative links that
   leave the workspace.
+
+**Comments**
+
+- `comments.authorName` (default empty): the name stored with the review comments you write in the
+  preview. Empty uses your Git `user.name`, then your operating system user name.
+
+**PlantUML**
+
 - `plantuml.useJar` (default off): off, PlantUML diagrams are drawn by the built-in engine, with
   no Java and no network; on, by Java with `plantuml.jarPath` or by `plantuml` from PATH (trusted
   workspaces only). See [PlantUML Diagrams](#plantuml-diagrams).

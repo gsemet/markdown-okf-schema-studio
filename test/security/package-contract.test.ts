@@ -5,6 +5,18 @@ import { test } from "node:test";
 
 const extensionRoot = path.resolve(__dirname, "../../..");
 
+/** One category of the Settings UI (`contributes.configuration` in its array form). */
+interface ConfigurationCategory {
+  title: string;
+  order: number;
+  properties: Record<string, Record<string, unknown>>;
+}
+
+/** Every contributed setting, whatever its category. */
+function contributedSettings(categories: ConfigurationCategory[]): Record<string, Record<string, unknown>> {
+  return Object.assign({}, ...categories.map((category) => category.properties)) as Record<string, Record<string, unknown>>;
+}
+
 test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the shared logo", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as { icon: string };
   assert.equal(manifest.icon, "images/logo.png");
@@ -27,7 +39,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       commands: Array<{ command: string; title: string; category?: string; icon?: string }>;
       customEditors: Array<{ viewType: string; displayName: string; selector: Array<{ filenamePattern: string }>; priority: string }>;
       menus: Record<string, unknown>;
-      configuration: { title: string; properties: Record<string, unknown> };
+      configuration: ConfigurationCategory[];
       [key: string]: unknown;
     };
   };
@@ -90,9 +102,23 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       when: "editorTextFocus && resourceExtname == .md",
     },
   ]);
-  assert.equal(packageJson.contributes.configuration.title, "Markdown OKF-Schema Studio");
+  // The Settings UI shows the categories in this order, most used first; every setting sits in the
+  // category of its key prefix.
+  const categories = packageJson.contributes.configuration;
+  assert.ok(Array.isArray(categories), "the settings are contributed as ordered categories");
   assert.deepEqual(
-    Object.keys(packageJson.contributes.configuration.properties).sort(),
+    categories.map((category) => [category.title, category.order]),
+    [["Preview", 1], ["Editing", 2], ["Frontmatter", 3], ["Comments", 4], ["PlantUML", 5]],
+  );
+  for (const category of categories) {
+    const prefix = `markdownOkfSchemaStudio.${category.title.toLowerCase()}.`;
+    for (const key of Object.keys(category.properties)) {
+      assert.ok(key.startsWith(prefix), `${key} belongs to the ${category.title} category`);
+    }
+  }
+  const properties = contributedSettings(categories);
+  assert.deepEqual(
+    Object.keys(properties).sort(),
     [
       "markdownOkfSchemaStudio.comments.authorName",
       "markdownOkfSchemaStudio.editing.defaultPaletteMode",
@@ -114,14 +140,14 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.preview.stickyHeadingDepth",
     ],
   );
-  const showComments = packageJson.contributes.configuration.properties[
+  const showComments = properties[
     "markdownOkfSchemaStudio.preview.showComments"
   ] as { type: string; default: boolean; order: number; markdownDescription: string };
   assert.equal(showComments.type, "boolean");
   assert.equal(showComments.default, true);
   assert.equal(showComments.order, 21);
   assert.match(showComments.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
-  const authorName = packageJson.contributes.configuration.properties[
+  const authorName = properties[
     "markdownOkfSchemaStudio.comments.authorName"
   ] as { type: string; default: string; order: number; markdownDescription: string; description?: string };
   assert.equal(authorName.type, "string");
@@ -130,14 +156,14 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.match(authorName.markdownDescription, /Git/u);
   assert.match(authorName.markdownDescription, /empty/iu);
   assert.match(authorName.markdownDescription, /user name/iu);
-  const showIncomingChanges = packageJson.contributes.configuration.properties[
+  const showIncomingChanges = properties[
     "markdownOkfSchemaStudio.preview.showIncomingChanges"
   ] as { type: string; default: boolean; order: number; markdownDescription: string };
   assert.equal(showIncomingChanges.type, "boolean");
   assert.equal(showIncomingChanges.default, true);
   assert.equal(showIncomingChanges.order, 22);
   assert.match(showIncomingChanges.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
-  const paletteMode = packageJson.contributes.configuration.properties[
+  const paletteMode = properties[
     "markdownOkfSchemaStudio.editing.defaultPaletteMode"
   ] as {
     type: string;
@@ -148,7 +174,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
     markdownDescription: string;
   };
   assert.equal(paletteMode.type, "string");
-  assert.equal(paletteMode.default, "myst");
+  assert.equal(paletteMode.default, "gfm");
   assert.equal(paletteMode.order, 40);
   assert.deepEqual(paletteMode.enum, ["strict", "gfm", "myst"]);
   assert.equal(paletteMode.enumDescriptions.length, paletteMode.enum.length);
@@ -156,8 +182,9 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
     assert.ok(description.trim().length > 0);
   }
   assert.match(paletteMode.markdownDescription, /\*\*strict\*\*.*\*\*gfm\*\*.*\*\*myst\*\*/u);
+  assert.match(paletteMode.markdownDescription, /\*\*gfm\*\* \(the default\)/u);
   assert.equal(
-    packageJson.contributes.configuration.properties["markdown.preview.scrollPreviewWithEditor"],
+    properties["markdown.preview.scrollPreviewWithEditor"],
     undefined,
   );
   assert.equal(packageJson.contributes.languages, undefined);
@@ -183,9 +210,9 @@ test("pins Node 24 and keeps the lockfile on the official npm registry", () => {
 
 test("every contributed setting is explained with a markdownDescription and a unique order", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
-    contributes: { configuration: { properties: Record<string, Record<string, unknown>> } };
+    contributes: { configuration: ConfigurationCategory[] };
   };
-  const properties = packageJson.contributes.configuration.properties;
+  const properties = contributedSettings(packageJson.contributes.configuration);
   const orders: number[] = [];
   for (const [key, property] of Object.entries(properties)) {
     const text = property.markdownDescription;
@@ -210,11 +237,12 @@ test("the built-in PlantUML engine ships pinned and the JAR is an explicit opt-i
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     dependencies: Record<string, string>;
     scripts: Record<string, string>;
-    contributes: { configuration: { properties: Record<string, Record<string, unknown>> } };
+    contributes: { configuration: ConfigurationCategory[] };
   };
+  const properties = contributedSettings(packageJson.contributes.configuration);
   // An exact pin: versions before 1.2026.6 are GPL, and the engine internals still move between releases.
   assert.match(packageJson.dependencies["@plantuml/core"] ?? "", /^\d+\.\d+\.\d+$/u);
-  const useJar = packageJson.contributes.configuration.properties["markdownOkfSchemaStudio.plantuml.useJar"] as {
+  const useJar = properties["markdownOkfSchemaStudio.plantuml.useJar"] as {
     type: string; default: boolean; order: number; markdownDescription: string; scope?: string;
   };
   assert.equal(useJar.type, "boolean");
@@ -223,8 +251,7 @@ test("the built-in PlantUML engine ships pinned and the JAR is an explicit opt-i
   assert.match(useJar.markdownDescription, /built-in/u);
   assert.match(useJar.markdownDescription, /jarPath/u);
   assert.match(useJar.markdownDescription, /Restricted Mode|untrusted/u);
-  const jarText = packageJson.contributes.configuration.properties["markdownOkfSchemaStudio.plantuml.jarPath"]
-    .markdownDescription as string;
+  const jarText = properties["markdownOkfSchemaStudio.plantuml.jarPath"].markdownDescription as string;
   assert.match(jarText, /useJar/u, "jarPath must say it is only used with useJar");
   const esbuild = fs.readFileSync(path.join(extensionRoot, "esbuild.mjs"), "utf8");
   assert.match(esbuild, /src\/webview\/plantumlPreview\.ts/u);

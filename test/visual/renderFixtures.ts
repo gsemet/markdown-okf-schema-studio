@@ -39,8 +39,9 @@ import { CAPTURES } from "../shared/captureRegistry";
 import { GROUPS, groupIndex } from "../shared/e2eGroups";
 import { THEMES } from "./themes";
 import { writeGeneratedFixtures } from "./generatedFixtures";
-import { pageFileName, pageKey, type PageIdentity, type ScenarioRenderOptions } from "./renderOptions";
+import { PINNED_WORKSPACE_CHOICES, pageFileName, pageKey, type PageIdentity, type ScenarioRenderOptions } from "./renderOptions";
 import { DEFAULT_VIEW_PREFERENCES } from "../../src/state/previewViewPreferences";
+import { DEFAULT_EDITING_CONFIGURATION } from "../../src/configuration/editingConfiguration";
 import { previewContentWidthCss } from "../../src/preview/previewStyles";
 import { VISUAL_REPORT_ROOT } from "../reportPaths";
 
@@ -195,20 +196,23 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     /(<body(?:\s[^>]*)?>)/iu,
     (opening) => `${opening}${renderPreviewToolbar(editingEnabled)}${renderPreviewStickyHeadings()}`,
   );
+  // Like the real host: a stored theme mode is sent only when there is one, the view preferences
+  // and the palette mode always are (the built-in defaults when nothing is stored).
+  const stored = options.freshWorkspace === true ? undefined : PINNED_WORKSPACE_CHOICES;
   const runtimeContext = {
     activeSourceFile: sourcePath,
     documentId: pathToFileURL(sourcePath).toString(),
     documentVersion: 1,
     requestId: 1,
     stickyHeadingDepth,
-    ...(options.paletteMode === undefined ? {} : { initialPaletteMode: options.paletteMode }),
-    ...(options.zoom === undefined && options.incomingChanges === undefined ? {} : {
-      initialViewPreferences: {
-        ...DEFAULT_VIEW_PREFERENCES,
-        ...(options.zoom === undefined ? {} : { zoom: options.zoom }),
-        ...(options.incomingChanges === undefined ? {} : { incomingChanges: options.incomingChanges }),
-      },
-    }),
+    ...(stored === undefined ? {} : { previewThemeMode: stored.previewThemeMode }),
+    initialPaletteMode: options.paletteMode ?? stored?.paletteMode ?? DEFAULT_EDITING_CONFIGURATION.defaultPaletteMode,
+    initialViewPreferences: {
+      ...DEFAULT_VIEW_PREFERENCES,
+      ...(stored === undefined ? {} : { toolbarCollapsed: stored.toolbarCollapsed }),
+      ...(options.zoom === undefined ? {} : { zoom: options.zoom }),
+      ...(options.incomingChanges === undefined ? {} : { incomingChanges: options.incomingChanges }),
+    },
     ...(options.markEditorSelection === true ? { markEditorSelection: true } : {}),
   };
   const serializedSource = JSON.stringify(source).replace(/</gu, "\\u003c");

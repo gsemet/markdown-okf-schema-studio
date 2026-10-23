@@ -2,6 +2,12 @@ export type PreviewThemeMode = "current" | "dark" | "white" | "cream";
 
 export const PREVIEW_THEME_MODE_STORAGE_KEY = "previewThemeMode";
 
+/**
+ * The theme mode of a workspace that has stored no choice: the warm, low-glare cream palette. A
+ * mode stored by the toolbar theme button always wins over it.
+ */
+export const DEFAULT_PREVIEW_THEME_MODE: PreviewThemeMode = "cream";
+
 export interface PreviewThemeModeStorage {
   get<T>(key: string): T | undefined;
   update(key: string, value: unknown): PromiseLike<void>;

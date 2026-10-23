@@ -43,7 +43,8 @@ import { createEditorTrace } from "./editorTrace";
 import { installSelectAllInControls, isTextSelectAll } from "./selectAllKey";
 import { installEditorKeyContainment, isHandledEditorKey } from "./editorKeys";
 import type { ViewPreferences } from "../state/previewViewPreferences";
-import type { PreviewThemeMode } from "../state/previewTheme";
+import { DEFAULT_PREVIEW_THEME_MODE, type PreviewThemeMode } from "../state/previewTheme";
+import { DEFAULT_EDITING_CONFIGURATION } from "../configuration/editingConfiguration";
 import type { PreviewPanelState } from "../state/previewState";
 
 export interface ScrollContext {
@@ -325,7 +326,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     ? context.previewThemeMode
     : themeModes.includes(savedState?.previewThemeMode)
       ? savedState.previewThemeMode
-      : "current";
+      : ${JSON.stringify(DEFAULT_PREVIEW_THEME_MODE)};
   let anchorToEditor = typeof savedState?.anchorToEditor === "boolean"
     ? savedState.anchorToEditor
     : settings.scrollPreviewWithEditor;
@@ -335,7 +336,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const paletteModes = ["strict", "gfm", "myst"];
   let paletteMode = paletteModes.includes(savedState?.paletteMode)
     ? savedState.paletteMode
-    : paletteModes.includes(context.initialPaletteMode) ? context.initialPaletteMode : "myst";
+    : paletteModes.includes(context.initialPaletteMode) ? context.initialPaletteMode : ${JSON.stringify(DEFAULT_EDITING_CONFIGURATION.defaultPaletteMode)};
   let activeBlockEdit;
   let activeFrontmatterEdit;
   // Latest properties-table markup the host sent while a frontmatter editor was open (T30).
@@ -1027,7 +1028,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   }
 
   function applyPreviewThemeMode(mode) {
-    if (!themeModes.includes(mode)) mode = "current";
+    if (!themeModes.includes(mode)) mode = ${JSON.stringify(DEFAULT_PREVIEW_THEME_MODE)};
     previewThemeMode = mode;
     document.documentElement?.setAttribute?.("data-sphinx-preview-theme-mode", mode);
     themeButton?.setAttribute?.("data-theme-mode", mode);

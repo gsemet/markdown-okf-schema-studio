@@ -2,7 +2,7 @@
  * Per-scenario options of the static visual page (the mock of the webview host).
  *
  * Every field is optional and means "different from the default page"; a scenario without
- * `render` keeps the page it always had (byte-identical HTML). The options are part of the page
+ * `render` keeps the page file it always had. The options are part of the page
  * identity: `pageFileName` appends a hash of them, so two scenarios with the same fixture, theme,
  * sticky depth and PlantUML expectation but other options never share a page.
  */
@@ -35,6 +35,12 @@ export interface ScenarioRenderOptions {
   /** `true`: the page marks the block under the editor selection (`markEditorSelection` setting). Default off. */
   readonly markEditorSelection?: true;
   /**
+   * `true`: a fresh workspace that stored no choice, so the page starts with the built-in defaults
+   * (cream theme mode, collapsed toolbar, GFM palette mode). Default: the workspace of
+   * `PINNED_WORKSPACE_CHOICES`.
+   */
+  readonly freshWorkspace?: true;
+  /**
    * Messages the mock host sends to the page after load, in order. The document id, version and
    * request id of the page are added to each message unless `data` sets them.
    */
@@ -44,7 +50,20 @@ export interface ScenarioRenderOptions {
 const OPTION_ORDER: readonly (keyof ScenarioRenderOptions)[] = [
   "trusted", "readOnly", "strictAdditionalProperties", "propertiesTable",
   "maxContentWidth", "paletteMode", "zoom", "incomingChanges", "markEditorSelection", "hostMessages",
+  "freshWorkspace",
 ];
+
+/**
+ * The choices the mock host reports as stored for the workspace of every page that is not a
+ * `freshWorkspace` one: the state the campaign was written against before the fresh defaults
+ * changed (theme mode "current", toolbar expanded, MyST palette mode). Pinning them keeps the
+ * screenshots and the assertions of those scenarios as they were.
+ */
+export const PINNED_WORKSPACE_CHOICES = Object.freeze({
+  previewThemeMode: "current",
+  toolbarCollapsed: false,
+  paletteMode: "myst",
+} as const);
 
 /** Stable text of the options that are set (empty for none): the cache key part. */
 export function renderOptionsKey(options: ScenarioRenderOptions | undefined): string {

@@ -10,7 +10,8 @@ export interface ToolbarCollapseContext {
  * takes them out of the Tab order). Injected into the page script with `.toString()`, so the body
  * must not use anything defined outside it. The choice is the `toolbarCollapsed` view preference:
  * posted to the host (kept per workspace) and mirrored on `<html>` as
- * `data-sphinx-preview-toolbar-state` ("expanded" / "collapsed"). `onChange` runs after a click, when
+ * `data-sphinx-preview-toolbar-state` ("expanded" / "collapsed"). Without a stored choice the toolbar
+ * starts collapsed, like `DEFAULT_VIEW_PREFERENCES`. `onChange` runs after a click, when
  * the toolbar changed size.
  */
 export function installToolbarCollapse(
@@ -28,7 +29,7 @@ export function installToolbarCollapse(
   const saved = vscode.getState?.() as { viewToolbarCollapsed?: unknown } | undefined;
   let collapsed = typeof saved?.viewToolbarCollapsed === "boolean"
     ? saved.viewToolbarCollapsed
-    : context.initialViewPreferences?.toolbarCollapsed === true;
+    : context.initialViewPreferences?.toolbarCollapsed !== false;
 
   const apply = (): void => {
     document.documentElement.setAttribute("data-sphinx-preview-toolbar-state", collapsed ? "collapsed" : "expanded");
