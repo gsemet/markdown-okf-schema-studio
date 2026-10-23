@@ -1,4 +1,3 @@
-import * as fs from "node:fs";
 import { performance } from "node:perf_hooks";
 import * as path from "node:path";
 
@@ -10,7 +9,7 @@ import {
 } from "./plantUmlRenderer";
 import type { PlantUmlEngine } from "../configuration/plantUmlConfiguration";
 import { enabledMystExtensionsFor } from "../myst/confLocator";
-import { createPreviewResourcePolicy } from "../security/resource-policy";
+import { createPreviewResourcePolicy, readBoundedText } from "../security/resource-policy";
 
 export interface PreviewDocument {
   uri: { scheme: string; fsPath: string };
@@ -175,19 +174,11 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
         sourcePath: stage.activeDocumentPath,
         enabledMystExtensions: enabledMystExtensionsFor(stage.activeDocumentPath, options.workspaceRoot),
         resolveInclude: (request, sourcePath) => {
-          const includePath = resourcePolicy.resolveResource(request, path.dirname(sourcePath));
-          if (!includePath) {
-            return undefined;
-          }
-          try {
-            if (fs.statSync(includePath).size > 5 * 1024 * 1024) {
-              return undefined;
-            }
-            return { path: includePath, source: fs.readFileSync(includePath, "utf8") };
-          } catch {
-            return undefined;
-          }
+          const read = readBoundedText(resourcePolicy, request, path.dirname(sourcePath));
+          return read.ok ? { path: read.path, source: read.source } : undefined;
         },
+        // `{uml} file.puml`: the same read as `{include}`, with the reason of a refusal.
+        readDiagramFile: (request, sourcePath) => readBoundedText(resourcePolicy, request, path.dirname(sourcePath)),
         listDocuments: (pattern, sourcePath) => listGlobDocuments(
           pattern,
           path.dirname(sourcePath),

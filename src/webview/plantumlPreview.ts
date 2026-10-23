@@ -6,6 +6,10 @@
  * The engine runs with the page's Content Security Policy unchanged: it is a plain script from
  * the extension, uses no eval, no worker and no WebAssembly (Graphviz `viz-global.js` is not
  * bundled; layouts use PlantUML's own Smetana engine), and `connect-src 'none'` stays.
+ *
+ * Local `!include` files are asked of the host through the page script, which owns the VS Code
+ * API: this script dispatches `studio:plantuml-file-request` with the request and a `respond`
+ * callback (see `plantumlFileRequests.ts`), and draws again on `studio:plantuml-includes-changed`.
  */
 import { renderToString } from "@plantuml/core";
 // Bundled `!theme` definitions and OpenIconic sprites: registered as globals, nothing is fetched.
@@ -16,13 +20,23 @@ import {
   createPlantUmlDiagramRenderer,
   installPlantUmlLoaders,
   isDarkBackground,
+  type PlantUmlFileAnswer,
+  type PlantUmlFileHost,
 } from "./plantumlDiagram";
+import { PLANTUML_FILE_REQUEST_EVENT, PLANTUML_INCLUDES_CHANGED_EVENT, type PlantUmlFileRequestDetail } from "./plantumlFileRequests";
 
-installPlantUmlLoaders(globalThis as unknown as Record<string, unknown>);
+const askHost: PlantUmlFileHost = (request) => new Promise<PlantUmlFileAnswer>((resolve) => {
+  const detail: PlantUmlFileRequestDetail = { request, accepted: false, respond: resolve };
+  document.dispatchEvent(new CustomEvent(PLANTUML_FILE_REQUEST_EVENT, { detail }));
+  if (!detail.accepted) {
+    resolve({ ok: false, reason: `${request.path} cannot be read: this page has no connection to the editor.` });
+  }
+});
 
 const diagramSelector = ".myst-plantuml-diagram";
 const renderer = createPlantUmlDiagramRenderer((lines, onSuccess, onError, options) =>
-  renderToString(lines, onSuccess, onError, options));
+  renderToString(lines, onSuccess, onError, options), { host: askHost });
+installPlantUmlLoaders(globalThis as unknown as Record<string, unknown>, renderer.loadFile);
 
 function previewIsDark(): boolean {
   return isDarkBackground(getComputedStyle(document.body).backgroundColor);
@@ -42,6 +56,14 @@ renderDiagrams(Array.from(document.querySelectorAll<HTMLElement>(diagramSelector
 document.addEventListener("studio:content-replaced", () => {
   renderDiagrams(Array.from(document.querySelectorAll<HTMLElement>(diagramSelector))
     .filter((diagram) => !diagram.hasAttribute("data-render-state")));
+});
+
+// An included file changed on disk: draw again the diagrams that read files (and those still drawing).
+document.addEventListener(PLANTUML_INCLUDES_CHANGED_EVENT, () => {
+  renderer.forgetIncludedFiles();
+  renderDiagrams(Array.from(document.querySelectorAll<HTMLElement>(diagramSelector))
+    .filter((diagram) => diagram.getAttribute("data-plantuml-includes") === "true"
+      || !diagram.hasAttribute("data-render-state")));
 });
 
 // A theme switch between light and dark draws every diagram again in the other variant.

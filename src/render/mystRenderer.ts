@@ -3,6 +3,7 @@ import { html as parse5Html, parseFragment, serialize } from "parse5";
 
 import { extractFrontmatter, matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { sanitizeTableStyle } from "../security/html-sanitizer";
+import type { BoundedTextRead } from "../security/resource-policy";
 import {
   type CheckboxMarker,
   hasCheckboxPlaceholder,
@@ -14,6 +15,7 @@ import { convertCommentMarkers } from "./commentMarkers";
 import { highlightCodeBlocks } from "./highlight";
 import { expandGrids, expandToctrees } from "./mystGridToctree";
 import { detectMystSyntax, MAX_EXTENSION_WARNINGS, mystExtensionWarning } from "./mystSyntaxDetect";
+import { describePlantUmlFileRefusal } from "./plantUmlIncludes";
 
 export interface RenderDiagnostic {
   /** Set for MyST extension warnings; every other diagnostic gets the pipeline's default code. */
@@ -37,6 +39,12 @@ export interface MystIncludeSource {
 export interface MystRenderContext {
   sourcePath?: string;
   resolveInclude: (request: string, sourcePath: string) => MystIncludeSource | undefined;
+  /**
+   * Reads the diagram file of `{uml} path.puml` (and of `{plantuml} path.puml` without a body)
+   * under the rules of `{include}`, with the reason of a refusal. Unset: `resolveInclude` is used
+   * and every refusal reads as a missing file.
+   */
+  readDiagramFile?: (request: string, sourcePath: string) => BoundedTextRead;
   /**
    * Lists the documents a `{toctree}` glob entry matches, as requests relative to the source
    * document's folder (any order). Unset: glob entries show as missing.
@@ -524,7 +532,12 @@ function sourcePositionProperties(node: MystNode, line?: number): Record<string,
   };
 }
 
-function normalizeDiagram(node: MystNode, line: number | undefined, kind: "mermaid" | "plantuml"): void {
+function normalizeDiagram(
+  node: MystNode,
+  line: number | undefined,
+  kind: "mermaid" | "plantuml",
+  diagramProperties: Record<string, string> = {},
+): void {
   const source = node.value ?? "";
   const label = kind === "mermaid" ? "Mermaid" : "PlantUML";
   setHast(node, "figure", {
@@ -534,7 +547,7 @@ function normalizeDiagram(node: MystNode, line: number | undefined, kind: "merma
     {
       type: "element",
       tagName: "div",
-      properties: { className: [`myst-${kind}-diagram`], "aria-label": `${label} diagram` },
+      properties: { className: [`myst-${kind}-diagram`], "aria-label": `${label} diagram`, ...diagramProperties },
       children: [{ type: "text", value: source }],
     },
     {
@@ -723,6 +736,94 @@ function resolveIncludeOnce(
   return entry ?? undefined;
 }
 
+function includeBudgetDiagnostic(line: number | undefined): RenderDiagnostic {
+  return {
+    message: "Include budget exhausted: "
+      + `at most ${INCLUDE_BUDGET_MAX_EXPANSIONS} includes or `
+      + `${Math.round(INCLUDE_BUDGET_MAX_CHARS / (1024 * 1024))} Mi characters of included text are `
+      + "expanded per render; the remaining includes are shown as placeholders.",
+    severity: "warning",
+    ...(line === undefined ? {} : { line }),
+  };
+}
+
+/** A body made only of directive options (`:caption: ...`) is no diagram source. */
+const OPTION_ONLY_BODY = /^(?:[ \t]*:[\w-]+:.*(?:\r\n|\r|\n|$))*\s*$/u;
+
+function isPlantUmlNode(node: MystNode): boolean {
+  return node.type === "plantuml"
+    || (node.type === "mystDirective" && ["plantuml", "uml"].includes(node.name?.toLowerCase() ?? ""))
+    || (node.type === "code" && node.lang?.toLowerCase() === "plantuml");
+}
+
+/**
+ * `{uml} path.puml` (sphinxcontrib-plantuml) and `{plantuml} path.puml` without a body name the
+ * diagram file. Options in the body (`:caption:`) are not rendered.
+ */
+function plantUmlFileRequest(node: MystNode): string | undefined {
+  if (node.type !== "mystDirective" || !["plantuml", "uml"].includes(node.name?.toLowerCase() ?? "")) {
+    return undefined;
+  }
+  const request = node.args?.trim() ?? "";
+  return request && OPTION_ONLY_BODY.test(node.value ?? "") ? request : undefined;
+}
+
+/**
+ * Reads the diagram file of a `{uml}` / `{plantuml}` directive into its body, charged to the
+ * include budget and recorded as a dependency (a missing file inside the roots too, so the preview
+ * renders again once it appears). A refusal is kept for `normalizeNode` to show.
+ */
+function resolvePlantUmlFile(
+  node: MystNode,
+  request: string,
+  sourcePath: string,
+  context: MystRenderContext,
+  diagnostics: RenderDiagnostic[],
+  dependencies: Set<string>,
+  budget: IncludeBudget,
+): void {
+  const line = node.position?.start?.line;
+  const refuse = (message: string, report = true): void => {
+    node.data = { ...node.data, plantUmlFileError: message };
+    if (report) {
+      diagnostics.push({ message, severity: "warning", ...(line === undefined ? {} : { line }) });
+    }
+  };
+  if (budget.exhausted) {
+    refuse(`PlantUML file ${request} was not read: the include budget of this render is exhausted.`, false);
+    return;
+  }
+  const read: BoundedTextRead = context.readDiagramFile
+    ? context.readDiagramFile(request, sourcePath)
+    : (() => {
+      const included = context.resolveInclude(request, sourcePath);
+      return included
+        ? { ok: true as const, path: included.path, source: included.source }
+        : { ok: false as const, refusal: "missing-resource" as const };
+    })();
+  if (!read.ok) {
+    if (read.candidate) {
+      dependencies.add(read.candidate);
+    }
+    refuse(describePlantUmlFileRefusal(request, read.refusal));
+    return;
+  }
+  dependencies.add(read.path);
+  if (
+    budget.expansions >= INCLUDE_BUDGET_MAX_EXPANSIONS
+    || budget.bytes + read.source.length > INCLUDE_BUDGET_MAX_CHARS
+  ) {
+    budget.exhausted = true;
+    diagnostics.push(includeBudgetDiagnostic(line));
+    refuse(`PlantUML file ${request} was not read: the include budget of this render is exhausted.`, false);
+    return;
+  }
+  budget.expansions += 1;
+  budget.bytes += read.source.length;
+  node.value = read.source;
+  node.data = { ...node.data, plantUmlFile: request, plantUmlBase: read.path };
+}
+
 function expandIncludes(
   node: MystNode,
   sourcePath: string,
@@ -739,6 +840,16 @@ function expandIncludes(
 
   const expandedChildren: MystNode[] = [];
   for (const child of node.children) {
+    const plantUmlFile = plantUmlFileRequest(child);
+    if (plantUmlFile) {
+      resolvePlantUmlFile(child, plantUmlFile, sourcePath, context, diagnostics, dependencies, budget);
+      expandedChildren.push(child);
+      continue;
+    }
+    if (isPlantUmlNode(child) && includeStack.size > 1) {
+      // A diagram of an included document: its `!include` lines are relative to that document.
+      child.data = { ...child.data, plantUmlBase: sourcePath };
+    }
     if (child.type === "mystDirective" && child.name === "include") {
       const includeNode = findNode(child, "include");
       const request = child.args?.trim() ?? includeNode?.file ?? "";
@@ -765,14 +876,7 @@ function expandIncludes(
         || budget.bytes + included.source.length > INCLUDE_BUDGET_MAX_CHARS
       ) {
         budget.exhausted = true;
-        diagnostics.push({
-          message: "Include budget exhausted: "
-            + `at most ${INCLUDE_BUDGET_MAX_EXPANSIONS} includes or `
-            + `${Math.round(INCLUDE_BUDGET_MAX_CHARS / (1024 * 1024))} Mi characters of included text are `
-            + "expanded per render; the remaining includes are shown as placeholders.",
-          severity: "warning",
-          ...(child.position?.start?.line === undefined ? {} : { line: child.position.start.line }),
-        });
+        diagnostics.push(includeBudgetDiagnostic(child.position?.start?.line));
         child.data = { ...child.data, includeBudgetExhausted: true };
         expandedChildren.push(child);
         continue;
@@ -1097,12 +1201,39 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
     return;
   }
 
-  if (
-    node.type === "plantuml"
-    || (node.type === "mystDirective" && node.name?.toLowerCase() === "plantuml")
-    || (node.type === "code" && node.lang?.toLowerCase() === "plantuml")
-  ) {
-    normalizeDiagram(node, line, "plantuml");
+  if (isPlantUmlNode(node)) {
+    const fileRequest = plantUmlFileRequest(node);
+    const fileError = typeof node.data?.plantUmlFileError === "string"
+      ? node.data.plantUmlFileError
+      : fileRequest && typeof node.data?.plantUmlFile !== "string"
+        ? `PlantUML file ${fileRequest} could not be read.`
+        : node.type === "mystDirective" && node.name?.toLowerCase() === "uml" && !(node.value ?? "").trim()
+          ? "The {uml} directive needs a diagram file path or a diagram body."
+          : undefined;
+    if (fileError !== undefined) {
+      if (typeof node.data?.plantUmlFileError !== "string") {
+        diagnostics.push({ message: fileError, severity: "warning", ...(line === undefined ? {} : { line }) });
+      }
+      // Not a `.myst-plantuml-diagram`: neither engine treats the message as diagram source.
+      setHast(node, "div", { class: "myst-plantuml-file-error", ...sourcePositionProperties(node, line) }, [{
+        type: "element",
+        tagName: "p",
+        properties: { className: ["myst-plantuml-error"] },
+        children: [{ type: "text", value: fileError }],
+      }]);
+      node.children = [];
+      node.type = "plantumlFileError";
+      return;
+    }
+    const diagramProperties: Record<string, string> = {};
+    if (typeof node.data?.plantUmlFile === "string") {
+      diagramProperties["data-plantuml-file"] = node.data.plantUmlFile;
+    }
+    if (typeof node.data?.plantUmlBase === "string") {
+      // `!include` lines resolve next to this file instead of the previewed document.
+      diagramProperties["data-plantuml-base"] = node.data.plantUmlBase;
+    }
+    normalizeDiagram(node, line, "plantuml", diagramProperties);
     return;
   }
 

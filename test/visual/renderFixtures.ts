@@ -76,6 +76,23 @@ ${fragment}
 </html>`;
 }
 
+/** The diagram files of the visual fixtures by absolute path (the ids the host would give). */
+function plantUmlFixtureFiles(): Record<string, string> {
+  const files: Record<string, string> = {};
+  const visit = (directory: string): void => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        visit(entryPath);
+      } else if (entry.name.endsWith(".puml")) {
+        files[entryPath.split(path.sep).join("/")] = fs.readFileSync(entryPath, "utf8");
+      }
+    }
+  };
+  visit(path.join(fixtureDirectory, "plantuml"));
+  return files;
+}
+
 async function renderPage(identity: PageIdentity): Promise<string[]> {
   const { fixture, theme: themeId, stickyHeadingDepth, plantumlExpectation } = identity;
   const options: ScenarioRenderOptions = identity.render ?? {};
@@ -195,8 +212,14 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     ...(options.markEditorSelection === true ? { markEditorSelection: true } : {}),
   };
   const serializedSource = JSON.stringify(source).replace(/</gu, "\\u003c");
+  // The host side of local PlantUML `!include` files for the built-in engine: the files of
+  // fixtures/plantuml, answered asynchronously like the real host (which also applies the
+  // resource policy; that is covered by the unit tests).
+  const plantUmlFiles = builtinPlantUml ? plantUmlFixtureFiles() : {};
+  const serializedPlantUmlFiles = JSON.stringify(plantUmlFiles).replace(/</gu, "\\u003c");
   const visualHostScript = `<script>
 const visualSource = ${serializedSource};
+const visualPlantUmlFiles = ${serializedPlantUmlFiles};
 const sourceRangeForLines = (${sourceRangeForLines.toString()});
 window.visualMessages = [];
 window.acquireVsCodeApi = () => ({
@@ -204,6 +227,25 @@ window.acquireVsCodeApi = () => ({
   setState: () => {},
   postMessage: (message) => {
     window.visualMessages.push(message);
+    if (message.type === "previewPlantUmlInclude") {
+      const base = message.from === null ? ${JSON.stringify(documentDirectory)} : message.from.slice(0, message.from.lastIndexOf("/"));
+      const segments = [];
+      for (const segment of (base + "/" + message.path).split("/")) {
+        if (segment === "..") segments.pop();
+        else if (segment !== "." && segment !== "") segments.push(segment);
+      }
+      const id = "/" + segments.join("/");
+      const text = visualPlantUmlFiles[id];
+      setTimeout(() => window.dispatchEvent(new MessageEvent("message", { data: {
+        type: "previewPlantUmlIncludeResult",
+        documentId: message.documentId,
+        documentVersion: message.documentVersion,
+        requestId: message.requestId,
+        editId: message.editId,
+        ...(text === undefined ? { ok: false, reason: "PlantUML file not found: " + message.path + "." } : { ok: true, id, text }),
+      } })), 0);
+      return;
+    }
     if (message.type !== "previewEditOpen") return;
     // An insertion opens an empty editor, like the host reply for \`insertAfterLine\`.
     const range = message.insertAfterLine !== undefined

@@ -388,13 +388,55 @@ function plantUmlBuiltinAssertions(dark: boolean): ContentAssertion[] {
 
 const PLANTUML_UNSUPPORTED_ASSERTIONS: ContentAssertion[] = [
   { message: "the diagram is refused by the built-in engine, not drawn", selector: '.myst-plantuml-diagram[data-plantuml-engine="builtin"][data-render-state="unavailable"]', count: 1 },
-  { message: "one visible message names the include and its line", selector: ".myst-plantuml-error", count: 1, visible: true, text: "!include styles/common.puml (line 2)" },
+  { message: "one visible message names the standard-library include and its line", selector: ".myst-plantuml-error", count: 1, visible: true, text: "!include <C4/C4_Context> (line 2)" },
   { message: "the message hints at the useJar setting", selector: ".myst-plantuml-error", text: "markdownOkfSchemaStudio.plantuml.useJar" },
   { message: "no picture, not even the engine error picture", selector: "img.myst-plantuml-image", count: 0 },
-  { message: "the source stays available", selector: "details.myst-plantuml-source", count: 1, text: "!include styles/common.puml" },
+  { message: "the source stays available", selector: "details.myst-plantuml-source", count: 1, text: "!include <C4/C4_Context>" },
+  { message: "the host is never asked for a file", selector: MAIN, expr: "!window.visualMessages.some((message) => message.type === 'previewPlantUmlInclude')" },
   { message: "nothing is fetched from the network", selector: MAIN, expr: "performance.getEntriesByType('resource').every((entry) => entry.name.startsWith('file:'))" },
   { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
 ];
+
+/** The decoded SVG text of the built-in PlantUML picture number `index` (an expression for `expr`). */
+function plantUmlSvg(index: number): string {
+  return `decodeURIComponent(document.querySelectorAll('img.myst-plantuml-image')[${index}].getAttribute('src').split(',').slice(1).join(','))`;
+}
+
+const NO_NETWORK: ContentAssertion = { message: "nothing is fetched from the network", selector: MAIN, expr: "performance.getEntriesByType('resource').every((entry) => entry.name.startsWith('file:'))" };
+
+function plantUmlFileAssertions(dark: boolean): ContentAssertion[] {
+  return [
+    { message: "both diagram files are rendered by the built-in engine", selector: '.myst-plantuml-diagram[data-plantuml-engine="builtin"][data-render-state="rendered"]', count: 2 },
+    { message: "the {uml} diagram names its file", selector: '.myst-plantuml-diagram[data-plantuml-file="plantuml/sequence.puml"]', count: 1 },
+    { message: "the {plantuml} directive without a body names its file", selector: '.myst-plantuml-diagram[data-plantuml-file="plantuml/classes.puml"]', count: 1 },
+    { message: "each diagram is one visible picture", selector: "img.myst-plantuml-image", count: 2, visible: true, insidePane: true },
+    { message: "no error message", selector: ".myst-plantuml-error", count: 0 },
+    { message: `the engine drew the ${dark ? "dark" : "light"} variant`, selector: ".myst-plantuml-diagram", attr: { name: "data-plantuml-dark", value: String(dark) } },
+    { message: "the first picture is the sequence read from the file", selector: "img.myst-plantuml-image", expr: `${plantUmlSvg(0)}.includes('read from sequence.puml')` },
+    { message: "the second picture is the class diagram read from the file", selector: "img.myst-plantuml-image", expr: `${plantUmlSvg(1)}.includes('DiagramFile')` },
+    { message: "the source of the file stays available", selector: "details.myst-plantuml-source", count: 2, text: "read from sequence.puml" },
+    { message: "the diagram files have no include to ask the host for", selector: MAIN, expr: "!window.visualMessages.some((message) => message.type === 'previewPlantUmlInclude')" },
+    NO_NETWORK,
+    { message: "the text after the diagrams continues", selector: `${MAIN} > p`, text: "continues normally" },
+  ];
+}
+
+function plantUmlIncludeAssertions(dark: boolean): ContentAssertion[] {
+  const requests = "window.visualMessages.filter((message) => message.type === 'previewPlantUmlInclude')";
+  return [
+    { message: "the diagram is rendered by the built-in engine", selector: '.myst-plantuml-diagram[data-plantuml-engine="builtin"][data-render-state="rendered"]', count: 1 },
+    { message: "the diagram is marked as reading local files", selector: '.myst-plantuml-diagram[data-plantuml-includes="true"]', count: 1 },
+    { message: "one visible picture", selector: "img.myst-plantuml-image", count: 1, visible: true, insidePane: true },
+    { message: "no error message", selector: ".myst-plantuml-error", count: 0 },
+    { message: `the engine drew the ${dark ? "dark" : "light"} variant`, selector: ".myst-plantuml-diagram", attr: { name: "data-plantuml-dark", value: String(dark) } },
+    { message: "the picture holds the participant of the nested include", selector: "img.myst-plantuml-image", expr: `${plantUmlSvg(0)}.includes('Included Carol')` },
+    { message: "the page asked the host for the include, then for the nested one next to it", selector: MAIN, expr: `${requests}.length === 2 && ${requests}[0].path === 'plantuml/styles/common.puml' && ${requests}[0].from === null && ${requests}[1].path === 'participants.puml' && ${requests}[1].from.endsWith('/plantuml/styles/common.puml')` },
+    { message: "the include requests carry the document context and an edit id", selector: MAIN, expr: `${requests}.every((message) => message.documentId && message.requestId === 1 && /^plantuml-\\d+$/u.test(message.editId))` },
+    { message: "the source stays available", selector: "details.myst-plantuml-source", count: 1, text: "!include plantuml/styles/common.puml" },
+    NO_NETWORK,
+    { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
+  ];
+}
 
 const INVALID_YAML_ASSERTIONS: ContentAssertion[] = [
   { message: "the parse error is shown as an alert row", selector: "[data-okf-properties] tr.okf-error[role=alert], [data-okf-properties] .okf-error [role=alert]", count: 1, text: "Invalid frontmatter YAML" },
@@ -2493,9 +2535,34 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     fullPage: true,
     contentAssertions: PLANTUML_UNSUPPORTED_ASSERTIONS,
-    description: "A diagram with a local !include in the built-in engine: instead of a broken picture, one message names the "
-      + "directive and its line and says to tick markdownOkfSchemaStudio.plantuml.useJar; the source stays available.",
+    description: "A diagram with a standard-library !include in the built-in engine: instead of a broken picture, one message "
+      + "names the directive and its line and says to tick markdownOkfSchemaStudio.plantuml.useJar; the host is never asked "
+      + "for a file and the source stays available.",
   },
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    id: `diagrams/v${13 + index}-plantuml-file-${theme}-900`,
+    fixture: "50-plantuml-file",
+    theme,
+    plantumlExpectation: "builtin" as const,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: plantUmlFileAssertions(theme === "dark"),
+    description: `A {uml} directive and a body-less {plantuml} directive naming .puml files in the ${theme} preview: the host `
+      + "reads the files like {include} and the built-in engine draws both, with the file text as the source below them.",
+  })),
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    id: `diagrams/v${15 + index}-plantuml-include-${theme}-900`,
+    fixture: "51-plantuml-include",
+    theme,
+    plantumlExpectation: "builtin" as const,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: plantUmlIncludeAssertions(theme === "dark"),
+    description: `A diagram with a local !include whose file includes another one, in the ${theme} preview: the page asks `
+      + "the host for both files (the nested one next to the including file) and the built-in engine draws the result.",
+  })),
   {
     id: "frontmatter-schema/v20-invalid-yaml-dark-900",
     fixture: "41-invalid-yaml",

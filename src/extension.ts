@@ -135,6 +135,7 @@ import {
   setRenderOverrideForTests,
 } from "./render/renderPipeline";
 import { injectPlantUmlDiagrams } from "./render/plantUmlRenderer";
+import { PlantUmlIncludeWatch, resolvePlantUmlInclude } from "./render/plantUmlIncludes";
 import {
   BoundedMap,
   loadCollapsedMap,
@@ -281,6 +282,8 @@ interface ActivePreview {
   plantUmlConfiguration: PlantUmlConfiguration;
   /** `useJar` off (default): the bundled engine draws in the webview, also in Restricted Mode. */
   plantUmlEngineSettings: PlantUmlEngineSettings;
+  /** Files the built-in engine was served for `!include` (canonical paths): a change draws again. */
+  plantUmlIncludeWatch: PlantUmlIncludeWatch;
   frontmatterConfiguration: FrontmatterConfiguration;
   frontmatter?: FrontmatterResult;
   frontmatterRefreshTimer?: NodeJS.Timeout;
@@ -2410,7 +2413,10 @@ type HostListAnswer =
 function postHostResult(
   preview: ActivePreview,
   message: RegisteredPreviewMessage,
-  result: HostListAnswer | { ok: true; path?: string; cancelled?: boolean; fileName?: string; markdown?: string } | { ok: false; reason: string },
+  result: HostListAnswer
+    | { ok: true; path?: string; cancelled?: boolean; fileName?: string; markdown?: string }
+    | { ok: true; id: string; text: string }
+    | { ok: false; reason: string },
 ): void {
   void preview.panel.webview.postMessage({
     type: `${message.type}Result`,
@@ -2443,6 +2449,25 @@ export async function listCitationKeysForTests(documentUri: string): Promise<{
 }> {
   const { items } = await scanBibKeys(vscode.Uri.parse(documentUri));
   return { items };
+}
+
+/**
+ * A local `!include` file for the built-in PlantUML engine: read under the rules of `{include}`
+ * (only the document's folder and below in Restricted Mode) and watched, so a change draws the
+ * diagrams again. It reads only; the answer repeats `editId`.
+ */
+function handlePlantUmlInclude(preview: ActivePreview, message: RegisteredPreviewMessage): void {
+  const documentPath = preview.document?.uri.fsPath ?? vscode.Uri.parse(preview.documentUri).fsPath;
+  const answer = resolvePlantUmlInclude(
+    { path: message.path as string, from: message.from as string | null },
+    { documentPath, workspaceRoot: preview.workspaceRoot, trusted: vscode.workspace.isTrusted },
+  );
+  if (answer.watch) {
+    preview.plantUmlIncludeWatch.remember(canonicalPath(answer.watch));
+  }
+  postHostResult(preview, message, answer.ok
+    ? { ok: true, id: answer.id, text: answer.text }
+    : { ok: false, reason: answer.reason });
 }
 
 function handleListTargets(preview: ActivePreview, message: RegisteredPreviewMessage): void {
@@ -3975,6 +4000,7 @@ registeredMessageHandlers.set("previewBlocksCopy", handleBlocksCopyCut);
 registeredMessageHandlers.set("previewBlocksCut", handleBlocksCopyCut);
 registeredMessageHandlers.set("previewBlocksPaste", handleBlocksPaste);
 registeredMessageHandlers.set("previewListTargets", handleListTargets);
+registeredMessageHandlers.set("previewPlantUmlInclude", handlePlantUmlInclude);
 registeredMessageHandlers.set("previewListCitations", handleListCitations);
 registeredMessageHandlers.set("previewPickDocument", handlePickDocument);
 registeredMessageHandlers.set("previewPickImage", handlePickImage);
@@ -4006,6 +4032,13 @@ function trackPendingSave(preview: ActivePreview, save: Thenable<void> | undefin
 function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thenable<void> | undefined {
   if (isRegisteredPreviewMessage(value)) {
     const handler = registeredMessageHandlers.get(value.type);
+    if (value.type === "previewPlantUmlInclude") {
+      // A file read does not depend on the document version: answer a page that is one render
+      // behind too, as long as it shows this document (the policy bounds every read anyway).
+      return preview.disposed || !handler || value.documentId !== preview.documentUri
+        ? undefined
+        : Promise.resolve(handler(preview, value));
+    }
     if (value.type === "previewEditFlushed") {
       // The answer to a flush request is matched by its flush id only: it must reach the waiting
       // host even when a render moved the stage on while the page saved.
@@ -4299,6 +4332,7 @@ function switchPreviewDocument(preview: ActivePreview, document: vscode.TextDocu
   preview.queue.clearLastGood();
   const previousDocumentUri = preview.documentUri;
   preview.documentUri = documentKey(document);
+  preview.plantUmlIncludeWatch.clear();
   clearMystDiagnostics(previousDocumentUri);
   preview.document = document;
   preview.state = preview.states.get(preview.documentUri);
@@ -4383,6 +4417,17 @@ function refreshReferencedPath(preview: ActivePreview, filePath: string): void {
     .some((target) => canonicalPath(target) === candidate)) {
     // Per-target watchers arm asynchronously; the preview-wide watcher backs them up (debounced).
     scheduleLinkEnrichment(preview, preview.documentUri, preview.document.version);
+  }
+  if (preview.plantUmlIncludeWatch.has(candidate)) {
+    // The page draws its built-in PlantUML diagrams itself: tell it to read their files again.
+    deferWhileEditing(preview, "plantuml-includes", () => {
+      if (!preview.disposed) {
+        void preview.panel.webview.postMessage({
+          type: "previewPlantUmlIncludesChanged",
+          documentId: preview.documentUri,
+        });
+      }
+    });
   }
   if (!preview.queue.dependsOn(filePath) || !preview.document || !sourceAvailable(preview)) {
     return;
@@ -4698,6 +4743,7 @@ function createPreview(
     plantUmlEngineSettings: readPlantUmlEngineSettings(
       vscode.workspace.getConfiguration(PLANTUML_CONFIGURATION_SECTION),
     ),
+    plantUmlIncludeWatch: new PlantUmlIncludeWatch(),
     frontmatterConfiguration: readFrontmatterConfiguration(
       vscode.workspace.getConfiguration(FRONTMATTER_CONFIGURATION_SECTION),
     ),

@@ -23,12 +23,36 @@ With `plantuml.useJar` off (the default) the host renders no PlantUML: the page 
 light/dark variant, so a content patch with unchanged diagrams does not run the engine again, and
 draws new diagrams after `studio:content-replaced`. The page's Content Security Policy is the same
 as before: the engine is a script from the extension, uses no eval, no worker and no WebAssembly
-(Graphviz `viz-global.js` is not bundled), and `connect-src 'none'` stays; its file and library
-loaders refuse every request. While it builds a picture the engine sets `style` attributes on SVG
+(Graphviz `viz-global.js` is not bundled), and `connect-src 'none'` stays; its library loader
+refuses every request and it fetches nothing. While it builds a picture the engine sets `style` attributes on SVG
 nodes of the page; the policy blocks applying them (the webview console reports `style-src-attr`
 violations), which is harmless: text is measured with a canvas, the attributes are still
 serialized, and the SVG is shown as a data-URI image, outside the page policy. The output is
 identical with and without the policy.
+
+Local PlantUML files never reach the page by a URL. `{uml} path.puml` (and `{plantuml} path.puml`
+without a body) is read by the host during the MyST render, through the same resource policy,
+5 MiB cap and include budget as `{include}`, and becomes the diagram text; the file is a render
+dependency, so the dependency watcher renders the document again when it changes, and a missing
+file inside the roots is a dependency too. The diagram element carries `data-plantuml-file` and,
+for a diagram whose `!include` lines must resolve elsewhere than the document (a `.puml` file or an
+included document), `data-plantuml-base`.
+
+The engine asks for `!include` files while it renders (`PLANTUML_FILE_LOADER`, answered later; the
+engine renders again once every answer is in). The page renders one diagram at a time, so each
+request belongs to the diagram being drawn. The bundle dispatches `studio:plantuml-file-request`;
+the page script, which owns the VS Code API, posts the registered `previewPlantUmlInclude`
+(`path`, and `from`: the id of the including file or null) with its own edit id and a 10 s timeout,
+and hands the `previewPlantUmlIncludeResult` with the same edit id back; any other answer is
+dropped. The host answers a page that is one render behind as well (a read does not depend on the
+document version), as long as it shows the same document. It resolves `path` next to `from`, or next
+to the document, with the resource policy (the workspace, or only the document's folder in
+Restricted Mode), and the id it returns is the file's real path. The page refuses an include deeper
+than 8 files, beyond 64 files or 1 MiB of text per diagram, and a file that includes one of its
+includers (a cycle). A refused include is not cached. The host remembers every file it served (and
+a missing one inside the roots); when the watcher reports one of them, it posts
+`previewPlantUmlIncludesChanged` and the page forgets the cached pictures that read files and draws
+those diagrams again.
 
 ## Commands and Results
 
