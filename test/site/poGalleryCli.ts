@@ -13,6 +13,8 @@ const POINTERS: readonly { file: string; label: string }[] = [
   { file: "../FRONTMATTER-LATEST.md", label: "Frontmatter and link interactions" },
   { file: "../RELOAD-LATEST.md", label: "Reload and close/reopen" },
   { file: "../CHECKBOX-LATEST.md", label: "Checkbox toggles" },
+  { file: "UNTRUSTED-LATEST.md", label: "Restricted Mode window" },
+  { file: "STANDALONE-LATEST.md", label: "File outside the workspace" },
 ];
 
 /** The "ordered captures" link of each real-window LATEST pointer, relative to `out/reports/e2e/`. */
@@ -43,6 +45,8 @@ const SUITE_POINTER: Readonly<Record<CaptureSuite, string>> = {
   frontmatter: "../FRONTMATTER-LATEST.md",
   scroll: "LATEST.md",
   reload: "../RELOAD-LATEST.md",
+  untrusted: "UNTRUSTED-LATEST.md",
+  standalone: "STANDALONE-LATEST.md",
 };
 
 interface RunCapture {

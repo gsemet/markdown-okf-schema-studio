@@ -25,10 +25,20 @@ async function codeExecutablePath(): Promise<string> {
   return fs.existsSync(localCodePath) ? localCodePath : downloadAndUnzipVSCode({});
 }
 
+/**
+ * The Restricted Mode window is spawned directly (runTests would trust the workspace). It gets its
+ * own loopback CDP port like the browser suites, for its real-window capture (CR 043), and a user
+ * setting that keeps the startup trust prompt away: the workspace stays untrusted (the suite checks
+ * it), the modal dialog would only cover the window in the capture.
+ */
 async function runUntrustedScenario(suiteName: string): Promise<void> {
   const executable = await codeExecutablePath();
   const directories = createRunDirectories(instanceId);
   const { userDataDirectory, extensionsDirectory } = directories;
+  const debugPort = await freePort();
+  fs.mkdirSync(path.join(userDataDirectory, "User"), { recursive: true });
+  fs.writeFileSync(path.join(userDataDirectory, "User", "settings.json"),
+    JSON.stringify({ "security.workspace.trust.startupPrompt": "never" }, null, 2));
   const args = [
     "--no-sandbox",
     "--disable-gpu-sandbox",
@@ -39,11 +49,16 @@ async function runUntrustedScenario(suiteName: string): Promise<void> {
     `--extensions-dir=${extensionsDirectory}`,
     `--extensionTestsPath=${path.join(__dirname, suiteName)}`,
     `--extensionDevelopmentPath=${extensionRoot}`,
+    `--remote-debugging-port=${debugPort}`,
+    "--remote-debugging-address=127.0.0.1",
     workspaceRoot,
   ];
   try {
     const exitCode = await new Promise<number>((resolve, reject) => {
-      const child = spawn(executable, args, { env: { ...process.env, STUDIO_E2E_INSTANCE: instanceId }, stdio: "inherit" });
+      const child = spawn(executable, args, {
+        env: { ...process.env, STUDIO_E2E_INSTANCE: instanceId, STUDIO_CDP_PORT: String(debugPort) },
+        stdio: "inherit",
+      });
       child.once("error", reject);
       child.once("exit", (code: number | null) => resolve(code ?? 1));
     });
@@ -78,7 +93,8 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
       },
     }),
   );
-  const browserSuite = suiteName === "scroll-sync-suite.js" || suiteName === "trusted-suite.js";
+  const browserSuite = suiteName === "scroll-sync-suite.js" || suiteName === "trusted-suite.js"
+    || suiteName === "standalone-suite.js";
   const debugPort = browserSuite ? await freePort() : undefined;
   const launchArgs = ["--user-data-dir", userDataDirectory, "--extensions-dir", extensionsDirectory, workspaceFile];
   if (debugPort !== undefined) {
@@ -139,6 +155,10 @@ async function main(): Promise<void> {
     await runScenario("trusted-suite.js", false);
     return;
   }
+  if (process.argv.includes("--untrusted-only")) {
+    await runScenario("untrusted-suite.js", true);
+    return;
+  }
   await runScenario("scroll-sync-suite.js", false);
   if (process.argv.includes("--scroll-only")) return;
   await runScenario("untrusted-suite.js", true);
@@ -154,7 +174,8 @@ const integrationManifest = {
   campaignStartedAt, startedAt: new Date().toISOString(),
   revision: execFileSync("git", ["rev-parse", "HEAD"], { cwd: extensionRoot, encoding: "utf8" }).trim(),
   dirty: execFileSync("git", ["status", "--porcelain"], { cwd: extensionRoot, encoding: "utf8" }).trim().length > 0,
-  scope: process.argv.includes("--reload-only") ? "reload" : process.argv.includes("--trusted-only") ? "trusted" : process.argv.includes("--scroll-only") ? "scroll" : "all",
+  scope: process.argv.includes("--reload-only") ? "reload" : process.argv.includes("--trusted-only") ? "trusted"
+    : process.argv.includes("--untrusted-only") ? "untrusted" : process.argv.includes("--scroll-only") ? "scroll" : "all",
 };
 fs.writeFileSync(path.join(artifactRoot, "integration-manifest.json"), JSON.stringify(integrationManifest, null, 2));
 void main().then(() => {

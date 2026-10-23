@@ -33,8 +33,8 @@ It is MIT licensed and is developed independently from the Agentic Coding White 
 - CI jobs (run in parallel by `.github/workflows/ci.yml`, in sequence by `just preflight`):
   `just ci-static`, `just ci-visual`, `just ci-integration`, then `just ci-report` (merges the
   visual and integration outputs) and `just ci-gallery` (gallery and site from existing outputs)
-- CI only: `just ci-stress [REPEAT]` repeats the flake-prone real-input scenarios in one VS Code
-  window (job `stress`; see rule 12 of the CI guidelines)
+- CI only: `just ci-stress [REPEAT]` repeats the flake-prone and new real-window scenarios, in the
+  trusted window then in the Restricted Mode window (job `stress`; see rule 12 of the CI guidelines)
 
 ## Guidelines
 

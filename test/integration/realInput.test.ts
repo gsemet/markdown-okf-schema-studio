@@ -19,7 +19,7 @@ import {
 } from "./extensionApi";
 import { captureByLegacy } from "../shared/captureRegistry";
 import { lineDelta } from "../shared/lineDelta";
-import { stressPlan } from "../shared/stressPlan";
+import { hostStressPlan, STRESS_SCENARIOS_BY_HOST } from "../shared/stressPlan";
 import {
   bufferText,
   caretToEnd,
@@ -44,6 +44,17 @@ import {
   writeSchema,
   type Evidence,
 } from "./realInput/harness";
+import {
+  scenarioBackNextAcrossDocuments,
+  scenarioConfExtensionWarning,
+  scenarioDoubleClickRevealsSource,
+  scenarioImagePaste,
+  scenarioIncomingChanges,
+  scenarioKeybindingAndRefresh,
+  scenarioLabelRename,
+  scenarioReviewThreads,
+  scenarioStandaloneReadOnly,
+} from "./realWindowGaps";
 
 const SMOKE = [
   "# Smoke document",
@@ -4403,8 +4414,9 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
 }
 
 /**
- * The scenarios `just ci-stress` repeats (see stressPlan.ts): each one failed on CI as a race at
- * least once (CR 041). A new flake fix adds its scenario here.
+ * The scenarios `just ci-stress` repeats in this window (see stressPlan.ts): the CR 041 ones failed
+ * on CI as a race at least once; the CR 043 ones are the new real-window captures, proved here
+ * before they stay in the required integration job. A new flake fix adds its scenario here.
  */
 const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promise<void>> = {
   "frontmatter-rename": scenarioFrontmatterStructuralMinimalPatch,
@@ -4413,11 +4425,36 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   "list-editor": scenarioListEditorClickAndKeys,
   "flush-cell-frontmatter": scenarioFlushCellAndFrontmatter,
   "flush-frontmatter-typed": scenarioFlushFrontmatterKeptAsTyped,
+  "incoming-changes": scenarioIncomingChanges,
+  "conf-warning": scenarioConfExtensionWarning,
+  "review-threads": scenarioReviewThreads,
+  "image-paste": scenarioImagePaste,
+  "label-rename": scenarioLabelRename,
+  "back-next": scenarioBackNextAcrossDocuments,
+  "keybinding-refresh": scenarioKeybindingAndRefresh,
+  "double-click": scenarioDoubleClickRevealsSource,
+  // The standalone suite's capture: it writes to a standalone evidence folder of its own.
+  "standalone-read-only": async (page) => {
+    const standalone = createEvidence("standalone");
+    let passed = false;
+    try {
+      await scenarioStandaloneReadOnly(page, standalone);
+      passed = true;
+    } finally {
+      standalone.finish(passed, false);
+    }
+  },
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */
 async function runStress(page: Page): Promise<void> {
-  const plan = stressPlan(process.env, Object.keys(STRESS_SCENARIOS), 10);
+  assert.deepEqual(Object.keys(STRESS_SCENARIOS), STRESS_SCENARIOS_BY_HOST.trusted,
+    "the stress table of the trusted window is the list in test/shared/stressPlan.ts");
+  const plan = hostStressPlan(process.env, "trusted", 10);
+  if (plan === undefined) {
+    console.log("stress: no scenario of the trusted window was asked for");
+    return;
+  }
   console.log(`stress: ${plan.repeat} round(s) of ${plan.scenarios.join(", ")}`);
   for (let round = 1; round <= plan.repeat; round += 1) {
     const evidence = createEvidence("real-input");
@@ -4528,6 +4565,15 @@ export async function run(): Promise<void> {
     await scenarioPropertiesTableWithoutReload(page, evidence);
     await scenarioContentPatchedInPlace(page, evidence);
     await scenarioLargeDocumentPatched(page, evidence);
+    // CR 043 (P9 T2): real-window gap fill, also in the stress plan.
+    await scenarioIncomingChanges(page, evidence);
+    await scenarioConfExtensionWarning(page, evidence);
+    await scenarioReviewThreads(page, evidence);
+    await scenarioImagePaste(page, evidence);
+    await scenarioLabelRename(page, evidence);
+    await scenarioBackNextAcrossDocuments(page, evidence);
+    await scenarioKeybindingAndRefresh(page, evidence);
+    await scenarioDoubleClickRevealsSource(page, evidence);
     passed = true;
     complete = true;
   } finally {

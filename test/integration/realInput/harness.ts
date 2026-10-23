@@ -24,7 +24,7 @@ const artifactsRoot = E2E_SCREENSHOT_ROOT;
 const liveFixtureDirectories = new Set<string>();
 
 export async function connectWorkbench(): Promise<{ browser: Browser; page: Page }> {
-  assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
+  assert.ok(process.env.STUDIO_CDP_PORT, "a real-window suite must expose a loopback CDP port (STUDIO_CDP_PORT)");
   const browser: Browser = await chromium.connectOverCDP(`http://127.0.0.1:${process.env.STUDIO_CDP_PORT}`);
   const page = browser.contexts()[0]?.pages().find((candidate) => candidate.url().includes("workbench"));
   assert.ok(page, "the VS Code workbench is attached");
@@ -281,7 +281,10 @@ export interface Evidence {
   finish(passed: boolean, complete?: boolean): void;
 }
 
-export function createEvidence(label: "real-input"): Evidence {
+/** The suites that write through this capture helper; each has its own `<LABEL>-LATEST.md` pointer. */
+export type EvidenceLabel = "real-input" | "untrusted" | "standalone";
+
+export function createEvidence(label: EvidenceLabel): Evidence {
   const store = new RealWindowEvidence(label, { indexTitle: `${label} capture order` });
   const directory = store.directory;
   const upper = label.toUpperCase();
@@ -364,7 +367,7 @@ export function createEvidence(label: "real-input"): Evidence {
       if (checkError !== undefined && (checkOptions.required ?? []).length > 0) {
         throw new Error(`Required machine checks did not run in ${id}: ${checkError}`);
       }
-      console.log(`PASS real-input screenshot: ${id}`);
+      console.log(`PASS ${label} screenshot: ${id}`);
     },
     finish(passed: boolean, complete = false): void {
       const missing = passed && complete ? store.missing() : [];

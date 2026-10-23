@@ -11,9 +11,9 @@
 import { isGroupId, type GroupId } from "./e2eGroups";
 
 /** The real-window suites that write captures. Each has a run folder prefix. */
-export type CaptureSuite = "real-input" | "checkbox" | "frontmatter" | "scroll" | "reload";
+export type CaptureSuite = "real-input" | "checkbox" | "frontmatter" | "scroll" | "reload" | "untrusted" | "standalone";
 
-export const SUITES: readonly CaptureSuite[] = ["real-input", "checkbox", "frontmatter", "scroll", "reload"];
+export const SUITES: readonly CaptureSuite[] = ["real-input", "checkbox", "frontmatter", "scroll", "reload", "untrusted", "standalone"];
 
 /** Run folder prefix per suite, below `out/reports/e2e/screenshots/`. Part of the LATEST contract. */
 export const RUN_FOLDER_PREFIX: Readonly<Record<CaptureSuite, string>> = {
@@ -22,6 +22,8 @@ export const RUN_FOLDER_PREFIX: Readonly<Record<CaptureSuite, string>> = {
   frontmatter: "frontmatter-e2e-",
   scroll: "scroll-e2e-",
   reload: "reload-e2e-",
+  untrusted: "untrusted-e2e-",
+  standalone: "standalone-e2e-",
 };
 
 /**
@@ -115,6 +117,8 @@ export const CAPTURES: readonly CaptureEntry[] = [
   { id: "toolbar-navigation/r02-anchor-disabled-open-with", group: "toolbar-navigation", suite: "real-input", legacy: "38-anchor-disabled", locks: "The anchor (sync) button is disabled in the Open With editor.", clip: "window" },
   { id: "toolbar-navigation/r03-anchor-enabled-with-editor", group: "toolbar-navigation", suite: "real-input", legacy: "38-anchor-enabled", locks: "The anchor (sync) button is enabled when a source editor is beside the preview.", clip: "window" },
   { id: "toolbar-navigation/r04-quick-open-beside-preview", group: "toolbar-navigation", suite: "real-input", legacy: "39-quick-open-beside-preview", locks: "Quick Open lists the Studio command and the preview opens beside the editor.", clip: "window", readme: [{ file: "preview-beside-editor.png", crop: [45, 35, 1395, 420], width: 760 }] },
+  { id: "toolbar-navigation/r05-back-next-across-documents", group: "toolbar-navigation", suite: "real-input", legacy: "t2-back-next", locks: "After a link opened a second document, Back shows the first document again and enables Next.", clip: "window" },
+  { id: "toolbar-navigation/r06-double-click-reveals-source", group: "toolbar-navigation", suite: "real-input", legacy: "t2-double-click", locks: "With doubleClickToSwitchToEditor on, a double-click on a block in reading mode reveals its source line; in edit mode it reveals nothing.", capture: false, clip: "window" },
   { id: "block-editing/r01-paragraph-blur-commit", group: "block-editing", suite: "real-input", legacy: "01-paragraph-blur-commit", locks: "Leaving a paragraph editor commits the edit to the document buffer.", clip: "window", curated: "01-paragraph-blur-commit.png" },
   { id: "block-editing/r02-mod-enter-commit", group: "block-editing", suite: "real-input", legacy: "02-ctrl-enter-commit", locks: "Mod+Enter commits a block edit and closes the editor.", clip: "window" },
   { id: "block-editing/r03-arrow-down-into-table", group: "block-editing", suite: "real-input", legacy: "03-arrow-navigation", locks: "ArrowDown at the end of a block moves the editor into the next table.", clip: "window" },
@@ -147,6 +151,7 @@ export const CAPTURES: readonly CaptureEntry[] = [
   { id: "palette-slash/r06-alert-dropdown", group: "palette-slash", suite: "real-input", legacy: "t25-alert-dropdown", locks: "The alert dropdown lists the alert kinds.", clip: "window" },
   { id: "palette-slash/r07-figure-editor-form", group: "palette-slash", suite: "real-input", legacy: "t32-figure-editor", locks: "The figure editor shows its form fields.", clip: "window" },
   { id: "palette-slash/r08-link-panel-prefilled", group: "palette-slash", suite: "real-input", legacy: "cr035-link-panel-prefilled", locks: "The link panel opens pre-filled with the text and the URL when the caret is inside an existing link.", clip: "window" },
+  { id: "palette-slash/r09-image-paste-inserted", group: "palette-slash", suite: "real-input", legacy: "t2-image-paste", locks: "A PNG pasted into a block editor is saved next to the document and the committed block shows the image.", clip: "window" },
   { id: "table-editing/r01-cell-enter-saves", group: "table-editing", suite: "real-input", legacy: "04-table-cell-enter", locks: "Enter in a table cell saves the cell.", clip: "window" },
   { id: "table-editing/r02-padded-table-minimal-diff", group: "table-editing", suite: "real-input", legacy: "06-table-padded-edit", locks: "Editing a padded table changes only the edited cell in the source.", clip: "window" },
   { id: "table-editing/r03-compact-table-minimal-diff", group: "table-editing", suite: "real-input", legacy: "07-table-compact-edit", locks: "Editing a compact table changes only the edited cell in the source.", capture: false, clip: "window" },
@@ -157,6 +162,10 @@ export const CAPTURES: readonly CaptureEntry[] = [
   { id: "table-editing/r08-cell-bold-shortcut", group: "table-editing", suite: "real-input", legacy: "t35-table-cell-bold", locks: "The bold shortcut in a cell wraps the selection in the cell.", clip: "window" },
   { id: "review-annotations/r01-comment-block-opens-editor", group: "review-annotations", suite: "real-input", legacy: "comment-block-edit", locks: "A block holding a comment opens its editor with the comment text intact.", clip: "window" },
   { id: "review-annotations/r02-review-thread-popover", group: "review-annotations", suite: "real-input", legacy: "comments-01-popover", locks: "A review thread chip opens its popover in edit mode.", clip: "window" },
+  { id: "review-annotations/r03-incoming-change-bars", group: "review-annotations", suite: "real-input", legacy: "t2-incoming-changes", locks: "Blocks whose source lines differ from Git HEAD carry a green change bar.", clip: "window" },
+  { id: "review-annotations/r04-thread-created", group: "review-annotations", suite: "real-input", legacy: "t2-thread-created", locks: "Selecting text and saving the Comment box writes a thread to the sidecar and highlights the quote.", clip: "window" },
+  { id: "review-annotations/r05-thread-reply", group: "review-annotations", suite: "real-input", legacy: "t2-thread-reply", locks: "A reply sent from the thread popover is saved and listed after the first comment.", clip: "window" },
+  { id: "review-annotations/r06-thread-resolved", group: "review-annotations", suite: "real-input", legacy: "t2-thread-resolved", locks: "Resolve marks the thread resolved in the popover and in the sidecar.", clip: "window" },
   { id: "lifecycle-sync/r01-open-with-editor", group: "lifecycle-sync", suite: "real-input", legacy: "05-open-with-editor", locks: "Open With opens the Studio editor with the rendered document.", clip: "window", readme: [{ file: "open-with-editor.png", crop: [250, 55, 1400, 470], width: 760 }] },
   { id: "lifecycle-sync/r02-preview-keeps-markdown", group: "lifecycle-sync", suite: "real-input", legacy: "19-preview-keeps-markdown", locks: "The preview keeps the Markdown source editor open beside it.", clip: "window" },
   { id: "lifecycle-sync/r03-focus-change-keeps-scroll", group: "lifecycle-sync", suite: "real-input", legacy: "26-focus-change-still", locks: "Changing focus between editors keeps the preview scroll.", clip: "window" },
@@ -175,6 +184,12 @@ export const CAPTURES: readonly CaptureEntry[] = [
   { id: "lifecycle-sync/r16-before-window-reload", group: "lifecycle-sync", suite: "reload", legacy: "01-before-window-reload", locks: "Collapsed Description and zoom 130 % are set before the window reload.", clip: "window" },
   { id: "lifecycle-sync/r17-after-window-reload", group: "lifecycle-sync", suite: "reload", legacy: "02-after-window-reload", locks: "Collapsed Description and zoom 130 % survive Developer: Reload Window.", clip: "window" },
   { id: "lifecycle-sync/r18-after-close-reopen", group: "lifecycle-sync", suite: "reload", legacy: "03-after-close-reopen", locks: "A closed and reopened preview keeps the collapsed Description state.", clip: "window" },
+  { id: "lifecycle-sync/r19-keybinding-opens-preview", group: "lifecycle-sync", suite: "real-input", legacy: "t2-keybinding", locks: "Cmd/Ctrl+K Shift+V in a Markdown editor opens the Studio preview beside it.", clip: "window" },
+  { id: "lifecycle-sync/r20-refresh-command", group: "lifecycle-sync", suite: "real-input", legacy: "t2-refresh", locks: "Refresh Preview renders the active document again in the open panel.", capture: false, clip: "window" },
+  { id: "myst/r01-conf-extension-warning", group: "myst", suite: "real-input", legacy: "t2-conf-warning", locks: "A colon fence that conf.py does not enable gets a warning naming colon_fence and myst_enable_extensions, in the preview and in Problems.", clip: "window" },
+  { id: "myst/r02-label-rename", group: "myst", suite: "real-input", legacy: "t2-label-rename", locks: "Renaming a label from its anchor icon rewrites only the label line and reports the uses that remain.", clip: "window" },
+  { id: "trust-security/r01-untrusted-read-only", group: "trust-security", suite: "untrusted", legacy: "untrusted-read-only", locks: "In Restricted Mode the side preview is read-only: no Edit button and no edit affordance.", clip: "window" },
+  { id: "trust-security/r02-standalone-read-only", group: "trust-security", suite: "standalone", legacy: "standalone-read-only", locks: "A Markdown file outside the workspace opens in a read-only preview without the Edit button.", clip: "window" },
 ];
 
 const ID_PATTERN = /^([a-z0-9-]+)\/r(\d{2,})-([a-z0-9]+(?:-[a-z0-9]+)*)$/u;

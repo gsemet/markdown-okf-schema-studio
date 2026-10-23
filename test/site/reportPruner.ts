@@ -13,7 +13,7 @@ export const DEFAULT_KEEP = 5;
 export const RECENT_PROTECTION_MS = 15 * 60 * 1000;
 
 /** The run folders of the real-window suites: `<kind>-<random suffix>`. */
-export const RUN_FOLDER_PATTERN = /^(checkbox-e2e|frontmatter-e2e|real-input|reload-e2e|scroll-e2e)-[A-Za-z0-9_]+$/u;
+export const RUN_FOLDER_PATTERN = /^(checkbox-e2e|frontmatter-e2e|real-input|reload-e2e|scroll-e2e|standalone-e2e|untrusted-e2e)-[A-Za-z0-9_]+$/u;
 
 export interface PruneOptions {
   /** `<repo>/out/reports`. */

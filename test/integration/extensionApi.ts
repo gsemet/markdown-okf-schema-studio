@@ -21,5 +21,6 @@ export const {
   sendPreviewMessageForTests,
   setRenderDelayForTests,
   setRenderOverrideForTests,
+  storedEditModeForTests,
   syncActiveEditorForTests,
 } = extensionApi;
