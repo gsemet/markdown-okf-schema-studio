@@ -10,6 +10,7 @@ import {
   getActivePreviewForTests,
 } from "./extensionApi";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
+import { RealWindowEvidence } from "./evidence";
 
 async function waitFor(description: string, predicate: () => boolean | Promise<boolean>, timeoutMs = 10_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -58,7 +59,10 @@ function checkboxAtLine(frame: Frame, line: number): Locator {
   return frame.locator(`input.myst-checkbox[data-myst-checkbox-line="${line}"]`);
 }
 
-async function capture(page: Page, frame: Frame, artifacts: string, name: string, note: string): Promise<void> {
+async function capture(
+  evidence: RealWindowEvidence, page: Page, frame: Frame, id: string, note: string,
+): Promise<void> {
+  evidence.paths(id); // unknown ids fail before any action on the page
   await frame.evaluate(() => window.scrollTo(0, 0));
   const frameBounds = await (await frame.frameElement()).boundingBox();
   assert.ok(frameBounds);
@@ -75,22 +79,22 @@ async function capture(page: Page, frame: Frame, artifacts: string, name: string
   const states = await frame.locator("input.myst-checkbox").evaluateAll((boxes) => boxes.map((box) =>
     `line ${box.getAttribute("data-myst-checkbox-line")}: ${(box as HTMLInputElement).checked ? "checked" : "unchecked"}`));
   const editMode = await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode");
-  await page.screenshot({ path: path.join(artifacts, `${name}.png`) });
-  fs.writeFileSync(path.join(artifacts, `${name}.json`), JSON.stringify({
-    summary: note,
-    info: { id: name, suite: "checkbox", runId: process.env.STUDIO_E2E_RUN_ID ?? null,
-      viewport: page.viewportSize(), host: "Real VS Code window; mouse events dispatched through CDP" },
-    capturedState: { editMode, checkboxStates: states },
-    checks: states,
-    visualChecks: ["Checkbox aligned with text", "Checked mark uses focus accent", "No task list bullets", "Table cell alignment preserved"],
-  }, null, 2) + "\n");
-  fs.writeFileSync(path.join(artifacts, `${name}.md`), `# ${name}\n\n${note}\n\n`
-    + `Edit mode: ${editMode}. Checkbox states asserted by the test: ${states.join("; ")}.\n\n`
-    + "Real VS Code window; the click is a real mouse event dispatched by Playwright through CDP. "
-    + "Visual review: the checkbox is aligned with its text, the checked mark uses the focus accent, "
-    + "task list items have no bullet, and the table cell keeps its alignment.\n");
-  fs.appendFileSync(path.join(artifacts, "INDEX.md"), `- [${name}](${name}.md): [image](${name}.png)\n`);
-  console.log(`PASS checkbox screenshot: ${name}`);
+  await evidence.shoot(page, frame, id);
+  evidence.record(id, {
+    note,
+    json: {
+      summary: note,
+      info: { viewport: page.viewportSize(), host: "Real VS Code window; mouse events dispatched through CDP" },
+      capturedState: { editMode, checkboxStates: states },
+      checks: states,
+      visualChecks: ["Checkbox aligned with text", "Checked mark uses focus accent", "No task list bullets", "Table cell alignment preserved"],
+    },
+    markdown: `Edit mode: ${editMode}. Checkbox states asserted by the test: ${states.join("; ")}.\n\n`
+      + "Real VS Code window; the click is a real mouse event dispatched by Playwright through CDP. "
+      + "Visual review: the checkbox is aligned with its text, the checked mark uses the focus accent, "
+      + "task list items have no bullet, and the table cell keeps its alignment.\n",
+  });
+  console.log(`PASS checkbox screenshot: ${id}`);
 }
 
 export async function run(): Promise<void> {
@@ -101,8 +105,9 @@ export async function run(): Promise<void> {
   const extensionRoot = path.resolve(__dirname, "../../..");
   fs.mkdirSync(E2E_REPORT_ROOT, { recursive: true });
   fs.mkdirSync(E2E_SCREENSHOT_ROOT, { recursive: true });
-  const artifacts = fs.mkdtempSync(path.join(E2E_SCREENSHOT_ROOT, "checkbox-e2e-"));
-  fs.writeFileSync(path.join(artifacts, "INDEX.md"), "# Checkbox capture order\n\nEntries follow execution order.\n\n");
+  const evidence = new RealWindowEvidence("checkbox", { indexTitle: "Checkbox capture order" });
+  const artifacts = evidence.directory;
+  const startedAt = new Date().toISOString();
   const directory = fs.mkdtempSync(path.join(extensionRoot, "test", "integration", "fixtures", "checkbox-e2e-"));
   const filePath = path.join(directory, "tasks.md");
   const source = [
@@ -137,7 +142,7 @@ export async function run(): Promise<void> {
     assert.equal(await checkboxAtLine(frame, 3).isChecked(), false);
     assert.equal(await checkboxAtLine(frame, 4).isChecked(), true);
     assert.equal(await checkboxAtLine(frame, 3).isEnabled(), true);
-    await capture(page, frame, artifacts, "01-reading-unchecked",
+    await capture(evidence, page, frame, "gfm/r01-task-reading-unchecked",
       "Reading mode before any click: the first task and the Unit tests cell are unchecked.");
 
     // Reading mode: a click checks the task and edits exactly one character of the source.
@@ -148,7 +153,7 @@ export async function run(): Promise<void> {
     frame = await currentPreviewFrame(page);
     assert.equal(await checkboxAtLine(frame, 3).isChecked(), true);
     assert.equal(await frame.locator("[data-sphinx-preview-block-editor]").count(), 0);
-    await capture(page, frame, artifacts, "02-reading-checked",
+    await capture(evidence, page, frame, "gfm/r02-task-reading-checked",
       "Reading mode after clicking the first task: it is checked in the preview and `- [x]` in the source.");
 
     // The toggle is a single undo step in the source editor.
@@ -170,7 +175,7 @@ export async function run(): Promise<void> {
     await frame.locator("[data-sphinx-preview-edit-toggle]").click();
     await waitFor("edit mode", async () =>
       await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode") === "on");
-    await capture(page, frame, artifacts, "03-edit-mode-unchecked",
+    await capture(evidence, page, frame, "gfm/r03-task-edit-unchecked",
       "Edit mode is on (pencil pressed); the Unit tests table cell checkbox is unchecked.");
     await checkboxAtLine(frame, 8).click();
     const cellSource = source.replace("| Unit tests | [ ] |", "| Unit tests | [x] |");
@@ -181,13 +186,20 @@ export async function run(): Promise<void> {
     assert.equal(await checkboxAtLine(frame, 8).isChecked(), true);
     assert.equal(await frame.locator("[data-sphinx-preview-block-editor]").count(), 0,
       "a checkbox click must not open the cell editor");
-    await capture(page, frame, artifacts, "04-edit-mode-checked",
+    await capture(evidence, page, frame, "gfm/r04-task-edit-checked",
       "Edit mode after clicking the Unit tests cell: it is checked, no cell editor opened, and the table row reads `| Unit tests | [x] |`.");
 
     // Unchecking works the same way and leaves the rest of the table untouched.
     await checkboxAtLine(frame, 9).click();
     const uncheckedSource = cellSource.replace("| E2E screenshots | [x] |", "| E2E screenshots | [ ] |");
     await waitFor("the unchecked cell to reach the source buffer", () => document.getText() === uncheckedSource);
+    evidence.assertComplete();
+    evidence.writeManifest({
+      runId: process.env.STUDIO_E2E_RUN_ID ?? null,
+      campaignStartedAt: process.env.STUDIO_E2E_STARTED_AT ?? null,
+      campaignCommand: process.env.STUDIO_E2E_COMMAND ?? null,
+      startedAt, completedAt: new Date().toISOString(), status: "passed",
+    });
     fs.writeFileSync(path.join(E2E_REPORT_ROOT, "CHECKBOX-LATEST.md"),
       `# Latest Checkbox Evidence\n\nSuite: **passed**\n\n[Ordered captures](screenshots/${path.basename(artifacts)}/INDEX.md)\n`);
   } finally {

@@ -2,8 +2,12 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT, EXTENSION_ROOT } from "../reportPaths";
+import { CAPTURES } from "../shared/captureRegistry";
 
 interface GallerySelection {
+  /** Capture id in the real-input run folder (`<group>/rNN-<slug>`); the registry says it is curated. */
+  id: string;
+  /** File below `images/`; named by the registry (`curated`). */
   file: string;
   title: string;
   description: string;
@@ -21,16 +25,19 @@ const MIME_TYPES: Record<string, string> = {
 
 const selections: GallerySelection[] = [
   {
+    id: "block-editing/r01-paragraph-blur-commit",
     file: "01-paragraph-blur-commit.png",
     title: "Commit an edited paragraph",
     description: "A real preview edit is committed into the VS Code document buffer.",
   },
   {
+    id: "block-editing/r12-edit-hover",
     file: "21-edit-hover.png",
     title: "Reveal the edit affordance",
     description: "A real hover state shows which rendered block will be edited.",
   },
   {
+    id: "lifecycle-sync/r08-edit-mode-remembered",
     file: "38-edit-mode-remembered.png",
     title: "MyST and diagrams on white",
     description: "A white preview renders nested MyST admonitions, a Mermaid flowchart, and a local SVG with edit mode restored.",
@@ -78,13 +85,17 @@ function copySelection(sourceDirectory: string, selection: GallerySelection): {
   title: string;
   description: string;
 } {
-  const source = path.join(sourceDirectory, selection.file);
-  if (!fs.existsSync(source)) fail(`required capture ${selection.file} is missing`);
+  const registered = CAPTURES.find((entry) => entry.id === selection.id);
+  if (registered === undefined || registered.suite !== "real-input" || registered.curated !== selection.file) {
+    fail(`${selection.id} is not registered as the curated source of images/${selection.file}`);
+  }
+  const source = path.join(sourceDirectory, `${selection.id}.png`);
+  if (!fs.existsSync(source)) fail(`required capture ${selection.id} is missing`);
   const extension = path.extname(selection.file).toLowerCase();
   const mimeType = MIME_TYPES[extension];
   if (!mimeType) fail(`unsupported gallery media type ${selection.file}`);
-  const note = path.join(sourceDirectory, `${path.basename(selection.file, extension)}.md`);
-  if (!fs.existsSync(note)) fail(`sidecar note for ${selection.file} is missing`);
+  const note = path.join(sourceDirectory, `${selection.id}.md`);
+  if (!fs.existsSync(note)) fail(`sidecar note for ${selection.id} is missing`);
   const destination = path.join(EXTENSION_ROOT, "images", selection.file);
   fs.copyFileSync(source, destination);
   const metadata = fs.statSync(source);

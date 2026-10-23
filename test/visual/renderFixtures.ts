@@ -35,6 +35,7 @@ import {
   resourceReferenceSuffix,
 } from "../../src/security/resource-policy";
 import { SCENARIOS } from "./scenarios";
+import { CAPTURES } from "../shared/captureRegistry";
 import { GROUPS, groupIndex } from "../shared/e2eGroups";
 import { THEMES } from "./themes";
 import { writeGeneratedFixtures } from "./generatedFixtures";
@@ -306,6 +307,8 @@ async function main(): Promise<void> {
     completedAt: new Date().toISOString(),
     pageDirectory,
     groups: GROUPS,
+    // The real-window capture registry: README sources and ids for the Python scripts.
+    realCaptures: CAPTURES,
     // Group order, then declaration order in scenarios.ts (the sort is stable).
     scenarios: [...SCENARIOS].sort((first, second) =>
       groupIndex(first.group) - groupIndex(second.group)

@@ -188,3 +188,36 @@ test("a run made on a dirty tree, or a tree that changed since, is stale", () =>
   // Not detectable (no status in the manifest): no reason.
   assert.equal(assessFreshness(scenarios, manifest(), undefined, () => true, " M a.ts").stale, false);
 });
+
+test("registered real-window captures get their own section per group, with a count line and the index table", () => {
+  const output = build({
+    realCaptures: [
+      { id: "alpha/r02-second", group: "alpha", suite: "real-input", locks: "Second locks.", assertionOnly: false, png: "real-input-x/alpha/r02-second.png", note: "real-input-x/alpha/r02-second.md", runStatus: "passed" },
+      { id: "alpha/r01-first", group: "alpha", suite: "real-input", locks: "First locks.", assertionOnly: false, readme: true, png: "real-input-x/alpha/r01-first.png", note: "real-input-x/alpha/r01-first.md" },
+      { id: "alpha/r03-cancelled", group: "alpha", suite: "real-input", locks: "Cancel keeps | text.", assertionOnly: true },
+      { id: "alpha/r04-lost", group: "alpha", suite: "scroll", locks: "Lost locks.", assertionOnly: false },
+      { id: "beta/r01-other", group: "beta", suite: "reload", locks: "Other locks.", assertionOnly: false, png: "reload-e2e-y/beta/r01-other.png" },
+    ],
+    imageExists: (capture) => capture !== "reload-e2e-y/beta/r01-other.png",
+  });
+  const page = output.files["gallery/alpha.md"]!;
+  assert.match(page, /## Real VS Code window captures/u);
+  assert.match(page, /4 captures registered: 2 with an image, 1 assertion-only, 1 not in the latest run\./u);
+  assert.ok(page.indexOf("### r01-first") < page.indexOf("### r02-second"), "ordered by capture number");
+  assert.match(page, /### r01-first \*\*README\*\*/u);
+  assert.match(page, /<a href="\.\.\/screenshots\/real-input-x\/alpha\/r01-first\.png"><img src="\.\.\/screenshots\/real-input-x\/alpha\/r01-first\.png" width="360"/u);
+  assert.match(page, /\[Note\]\(\.\.\/screenshots\/real-input-x\/alpha\/r02-second\.md\)/u);
+  assert.match(page, /\| `r03-cancelled` \| real-input \| Cancel keeps \\\| text\. \|/u);
+  assert.match(page, /### r04-lost[^]*Not in the latest run of this suite\./u);
+  assert.deepEqual(output.realCounts.alpha, { registered: 4, withImage: 2, assertionOnly: 1, missing: 1 });
+  assert.deepEqual(output.realCounts.beta, { registered: 1, withImage: 0, assertionOnly: 0, missing: 1 }, "an image missing on disk counts as missing");
+  assert.match(output.files["GALLERY.md"]!, /\| \[Alpha group\]\(gallery\/alpha\.md\) \| 4 \| 2 \| 1 \| 1 \|/u);
+  assert.match(output.files["GALLERY.md"]!, /\| \*\*Total\*\* \| \*\*5\*\* \| \*\*2\*\* \| \*\*1\*\* \| \*\*2\*\* \|/u);
+});
+
+test("without real-window rows the pages and counts are unchanged", () => {
+  const output = build();
+  assert.deepEqual(output.realCounts, {});
+  assert.doesNotMatch(output.files["gallery/alpha.md"]!, /Real VS Code window captures/u);
+  assert.doesNotMatch(output.files["GALLERY.md"]!, /Real VS Code window captures by group/u);
+});

@@ -2,9 +2,10 @@ import { execFileSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT, EXTENSION_ROOT } from "../reportPaths";
+import { CAPTURES, RUN_FOLDER_PREFIX, SUITES, type CaptureSuite } from "../shared/captureRegistry";
 import { GROUPS, INTEGRATION_TESTS } from "../shared/e2eGroups";
 import { SCENARIOS } from "../visual/scenarios";
-import { buildPoGallery, type GalleryOutput, type RealWindowLink, type VisualManifest } from "./poGallery";
+import { buildPoGallery, type GalleryOutput, type RealCaptureRow, type RealWindowLink, type VisualManifest } from "./poGallery";
 
 const POINTERS: readonly { file: string; label: string }[] = [
   { file: "LATEST.md", label: "Scroll synchronization (real window)" },
@@ -33,6 +34,63 @@ export function latestRunLinks(): RealWindowLink[] {
     });
   }
   return links;
+}
+
+/** The LATEST pointer of each real-window suite (relative to `screenshots/`). */
+const SUITE_POINTER: Readonly<Record<CaptureSuite, string>> = {
+  "real-input": "REAL-INPUT-LATEST.md",
+  checkbox: "../CHECKBOX-LATEST.md",
+  frontmatter: "../FRONTMATTER-LATEST.md",
+  scroll: "LATEST.md",
+  reload: "../RELOAD-LATEST.md",
+};
+
+interface RunCapture {
+  readonly id: string;
+  readonly png: string | null;
+  readonly note: string;
+}
+
+/** Run folder named by the pointer of `suite`, with the `captures` of its manifest. */
+export function latestRun(suite: CaptureSuite): { folder: string; status?: string; captures: readonly RunCapture[] } | undefined {
+  const pointer = path.join(E2E_SCREENSHOT_ROOT, SUITE_POINTER[suite]);
+  if (!fs.existsSync(pointer)) return undefined;
+  const content = fs.readFileSync(pointer, "utf8");
+  const link = /\]\(([^)]+)\/INDEX\.md\)/u.exec(content)?.[1];
+  if (link === undefined) return undefined;
+  const directory = path.resolve(path.dirname(pointer), link);
+  const folder = path.relative(E2E_SCREENSHOT_ROOT, directory).split(path.sep).join("/");
+  if (folder.startsWith("..") || !path.basename(folder).startsWith(RUN_FOLDER_PREFIX[suite])) return undefined;
+  const manifestPath = path.join(directory, "manifest.json");
+  if (!fs.existsSync(manifestPath)) return undefined;
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as { captures?: unknown; status?: string; suiteResult?: string };
+  if (!Array.isArray(manifest.captures)) return { folder, captures: [] };
+  const status = manifest.status ?? manifest.suiteResult;
+  return {
+    folder,
+    ...(status === undefined ? {} : { status }),
+    captures: (manifest.captures as RunCapture[]).filter((capture) => typeof capture?.id === "string"),
+  };
+}
+
+/** Every registered capture with the files the latest run of its suite wrote for it. */
+export function realCaptureRows(): RealCaptureRow[] {
+  const runs = new Map(SUITES.map((suite) => [suite, latestRun(suite)]));
+  return CAPTURES.map((entry): RealCaptureRow => {
+    const run = runs.get(entry.suite);
+    const taken = run?.captures.find((capture) => capture.id === entry.id);
+    return {
+      id: entry.id,
+      group: entry.group,
+      suite: entry.suite,
+      locks: entry.locks,
+      assertionOnly: entry.capture === false,
+      ...(entry.readme !== undefined || entry.curated !== undefined ? { readme: true } : {}),
+      ...(taken?.png ? { png: `${run!.folder}/${taken.png}` } : {}),
+      ...(taken ? { note: `${run!.folder}/${taken.note}` } : {}),
+      ...(run?.status === undefined ? {} : { runStatus: run.status }),
+    };
+  });
 }
 
 function headRevision(): string | undefined {
@@ -81,6 +139,7 @@ export function generatePoGallery(): GalleryOutput {
     ...(status === undefined ? {} : { worktreeStatus: status }),
     imageExists: (capture) => fs.existsSync(path.join(E2E_SCREENSHOT_ROOT, capture)),
     realWindow: latestRunLinks(),
+    realCaptures: realCaptureRows(),
     generatedAt: new Date().toISOString(),
   });
   removeStaleGalleryPages(E2E_REPORT_ROOT, output.files);

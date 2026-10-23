@@ -77,6 +77,31 @@ export interface RealWindowLink {
   readonly note?: string;
 }
 
+/** One registered real-window capture and what the latest run of its suite produced. */
+export interface RealCaptureRow {
+  readonly id: string;
+  readonly group: string;
+  readonly suite: string;
+  readonly locks: string;
+  /** Registered with `capture: false`: the note is written, no picture. */
+  readonly assertionOnly: boolean;
+  /** Sources an `images/readme/` file. */
+  readonly readme?: boolean;
+  /** PNG of the latest run, relative to `out/reports/e2e/screenshots/`; absent when not taken. */
+  readonly png?: string;
+  /** Note of the latest run, relative to `out/reports/e2e/screenshots/`; absent when not taken. */
+  readonly note?: string;
+  readonly runStatus?: string;
+}
+
+export interface RealCounts {
+  readonly registered: number;
+  readonly withImage: number;
+  readonly assertionOnly: number;
+  /** Expected by the registry but not found in the latest run of the suite. */
+  readonly missing: number;
+}
+
 export interface GalleryInput {
   readonly groups: readonly GalleryGroup[];
   readonly scenarios: readonly GalleryScenario[];
@@ -89,6 +114,8 @@ export interface GalleryInput {
   /** Does a capture path (relative to `screenshots/`) exist on disk? Omitted: assume it does. */
   readonly imageExists?: (capture: string) => boolean;
   readonly realWindow?: readonly RealWindowLink[];
+  /** Every registered real-window capture with the latest run's files (see `captureRegistry.ts`). */
+  readonly realCaptures?: readonly RealCaptureRow[];
   readonly generatedAt: string;
 }
 
@@ -112,6 +139,8 @@ export interface GalleryOutput {
   readonly freshness: Freshness;
   readonly counts: Readonly<Record<string, GroupCounts>>;
   readonly totals: GroupCounts;
+  /** Real-window counts per group; empty when the input carried no `realCaptures`. */
+  readonly realCounts: Readonly<Record<string, RealCounts>>;
 }
 
 const THUMBNAIL_WIDTH = 360;
@@ -282,6 +311,41 @@ function assertionTable(scenarios: readonly GalleryScenario[], results: Readonly
   return lines.join("\n");
 }
 
+/** Number after the `r` of `<group>/rNN-slug`. */
+function captureNumber(id: string): number {
+  const match = /\/r(\d+)-/u.exec(id);
+  return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+}
+
+function realCountsOf(rows: readonly RealCaptureRow[], imageExists: (capture: string) => boolean): RealCounts {
+  const assertionOnly = rows.filter((row) => row.assertionOnly).length;
+  const withImage = rows.filter((row) => !row.assertionOnly && row.png !== undefined && imageExists(row.png)).length;
+  return {
+    registered: rows.length,
+    withImage,
+    assertionOnly,
+    missing: rows.length - assertionOnly - withImage,
+  };
+}
+
+function realCaptureBlock(row: RealCaptureRow, imageExists: (capture: string) => boolean): string {
+  const lines = [
+    `### ${shortId(row.id)}${row.readme === true ? " **README**" : ""}`,
+    "",
+    `\`${row.id}\` · suite \`${row.suite}\`${row.runStatus === undefined ? "" : ` · latest run ${row.runStatus}`}`,
+    "",
+    `**Locks:** ${row.locks}`,
+    "",
+  ];
+  if (row.png !== undefined && imageExists(row.png)) {
+    lines.push(image(`../screenshots/${row.png}`, row.id, THUMBNAIL_WIDTH), "");
+  } else {
+    lines.push("Not in the latest run of this suite.", "");
+  }
+  if (row.note !== undefined) lines.push(`[Note](../screenshots/${row.note})`, "");
+  return lines.join("\n");
+}
+
 function freshnessBanner(freshness: Freshness): string[] {
   if (!freshness.stale) return [];
   return [
@@ -298,6 +362,8 @@ export function buildPoGallery(input: GalleryInput): GalleryOutput {
   const results = new Map<string, ManifestResult>((manifest?.results ?? []).map((result) => [result.id, result]));
   const files: Record<string, string> = {};
   const counts: Record<string, GroupCounts> = {};
+  const realCounts: Record<string, RealCounts> = {};
+  const realRows = input.realCaptures ?? [];
 
   const groupIds = new Set(input.groups.map((group) => group.id));
   const orphans = input.scenarios.filter((scenario) => !groupIds.has(scenario.group));
@@ -337,6 +403,31 @@ export function buildPoGallery(input: GalleryInput): GalleryOutput {
       page.push("## Images", "");
       for (const scenario of captured) page.push(scenarioBlock(scenario, results.get(scenario.id), "../screenshots/", imageExists));
     }
+    const real = realRows.filter((row) => row.group === group.id).sort((first, second) =>
+      captureNumber(first.id) - captureNumber(second.id) || first.id.localeCompare(second.id));
+    if (real.length > 0) {
+      const entry = realCountsOf(real, imageExists);
+      realCounts[group.id] = entry;
+      page.push(
+        "## Real VS Code window captures",
+        "",
+        `Taken in a real extension host. ${plural(entry.registered, "capture")} registered: ${entry.withImage} with an image, `
+          + `${entry.assertionOnly} assertion-only, ${entry.missing} not in the latest run.`,
+        "",
+      );
+      for (const row of real.filter((candidate) => !candidate.assertionOnly)) page.push(realCaptureBlock(row, imageExists));
+      const noPicture = real.filter((candidate) => candidate.assertionOnly);
+      if (noPicture.length > 0) {
+        page.push(
+          "Assertion-only real-window captures (the check and the note stay, no picture):",
+          "",
+          "| Capture | Suite | Locks |",
+          "| --- | --- | --- |",
+          ...noPicture.map((row) => `| \`${cell(shortId(row.id))}\` | ${cell(row.suite)} | ${cell(row.locks)} |`),
+          "",
+        );
+      }
+    }
     if (assertionOnly.length > 0) {
       page.push(
         "## Assertion-only scenarios",
@@ -359,7 +450,7 @@ export function buildPoGallery(input: GalleryInput): GalleryOutput {
         "",
       );
     }
-    if (own.length === 0 && integration.length === 0) page.push("No visual scenario or integration test yet.", "");
+    if (own.length === 0 && integration.length === 0 && real.length === 0) page.push("No visual scenario or integration test yet.", "");
     files[`gallery/${group.id}.md`] = `${page.join("\n").trimEnd()}\n`;
   }
 
@@ -416,12 +507,30 @@ export function buildPoGallery(input: GalleryInput): GalleryOutput {
     index.push(key.map((scenario) => image(`screenshots/${pictureOf(results.get(scenario.id)).primary!.file}`, scenario.id, KEY_WIDTH)).join(" "), "");
   }
 
+  if (realRows.length > 0) {
+    index.push(
+      "## Real VS Code window captures by group",
+      "",
+      "| Group | Registered | With image | Assertion-only | Not in latest run |",
+      "| --- | --- | --- | --- | --- |",
+    );
+    for (const group of input.groups) {
+      const entry = realCounts[group.id];
+      if (entry !== undefined) {
+        index.push(`| [${cell(group.title)}](gallery/${group.id}.md) | ${entry.registered} | ${entry.withImage} | ${entry.assertionOnly} | ${entry.missing} |`);
+      }
+    }
+    const all = Object.values(realCounts);
+    const total = (pick: (entry: RealCounts) => number): number => all.reduce((sum, entry) => sum + pick(entry), 0);
+    index.push(`| **Total** | **${total((e) => e.registered)}** | **${total((e) => e.withImage)}** | **${total((e) => e.assertionOnly)}** | **${total((e) => e.missing)}** |`, "");
+  }
+
   const realWindow = input.realWindow ?? [];
   if (realWindow.length > 0) {
     index.push(
       "## Real VS Code window evidence (latest runs)",
       "",
-      "Captured in a real extension host; not yet grouped like the pages above.",
+      "Run folders of the latest real-window suites (the captures are grouped above).",
       "",
       ...realWindow.map((link) => `- [${link.label}](${link.href})${link.note === undefined ? "" : `: ${link.note}`}`),
       "",
@@ -437,5 +546,5 @@ export function buildPoGallery(input: GalleryInput): GalleryOutput {
   );
   files["GALLERY.md"] = `${index.join("\n").trimEnd()}\n`;
 
-  return { files, freshness, counts, totals };
+  return { files, freshness, counts, totals, realCounts };
 }
