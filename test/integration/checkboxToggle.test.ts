@@ -11,6 +11,7 @@ import {
 } from "./extensionApi";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { RealWindowEvidence } from "./evidence";
+import { traceDocumentChanges, windowFocusReport } from "./windowFocus";
 
 async function waitFor(description: string, predicate: () => boolean | Promise<boolean>, timeoutMs = 10_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -157,6 +158,7 @@ export async function run(): Promise<void> {
       "Reading mode after clicking the first task: it is checked in the preview and `- [x]` in the source.");
 
     // The toggle is a single undo step in the source editor.
+    const undoTrace = traceDocumentChanges(document);
     await vscode.window.showTextDocument(document, {
       viewColumn: vscode.ViewColumn.One,
       preserveFocus: false,
@@ -166,7 +168,14 @@ export async function run(): Promise<void> {
     const editorText = page.locator(".monaco-editor:visible .view-lines").first();
     await editorText.click();
     await page.keyboard.press(process.platform === "darwin" ? "Meta+z" : "Control+z");
-    await waitFor("one undo to restore the original source", () => document.getText() === source);
+    try {
+      await waitFor("one undo to restore the original source", () => document.getText() === source);
+    } catch (error) {
+      throw new Error(`${String(error)} Window focus: ${await windowFocusReport(page)}; `
+        + `buffer changes since the undo step: ${undoTrace.report()}`);
+    } finally {
+      undoTrace.dispose();
+    }
     await waitForRender(document);
     frame = await currentPreviewFrame(page);
     assert.equal(await checkboxAtLine(frame, 3).isChecked(), false);

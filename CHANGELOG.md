@@ -32,6 +32,14 @@
   the preview redraws a diagram when one of its files changes. In Restricted Mode only files in the
   document's folder and below are read. A missing file, a path outside the workspace or an include
   cycle shows a message instead of the diagram.
+- For contributors: the real VS Code window tests now pass on macOS when the test window was
+  launched behind another app. Each test window (the three window suites and the reload campaign)
+  is first brought to the front, and the run waits until VS Code reports it focused. Before, a
+  window macOS had left in the background failed every undo step ("one undo to restore …"),
+  on any VS Code version. On a locked screen, or without the macOS Automation permission for
+  System Events, the run now fails at once and says why. `STUDIO_VSCODE_EXECUTABLE` runs the
+  tests against another VS Code build. The `/` menu scenario waits for the page to settle and for
+  the caret in its text box before typing, and joins the stress plan.
 - `Ctrl+A` (`Cmd+A` on macOS) in a text box of the preview (a frontmatter value, a block or table
   cell editor) now always selects that box's text. Pressed right after clicking into the box, it
   could select the whole source document in the text editor and close the frontmatter editor.

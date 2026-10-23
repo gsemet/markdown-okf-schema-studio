@@ -17,6 +17,7 @@ import { runUntrusted as runMystDiagnostics } from "./mystDiagnostics.test";
 import { closeAllEditors, connectWorkbench, createEvidence } from "./realInput/harness";
 import { scenarioUntrustedReadOnly } from "./realWindowGaps";
 import { hostStressPlan } from "../shared/stressPlan";
+import { ensureTestWindowFocused } from "./windowFocus";
 
 async function waitForPreview(): Promise<void> {
   const deadline = Date.now() + 10_000;
@@ -84,6 +85,8 @@ async function runCaptures(): Promise<void> {
 
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, false);
+  // CDP input needs a window macOS has activated (windowFocus.ts).
+  await ensureTestWindowFocused();
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "stress") {
     await runCaptures();
     return;

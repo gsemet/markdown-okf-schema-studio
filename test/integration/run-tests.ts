@@ -9,7 +9,11 @@ import { createRunDirectories, freePort, instanceIdFromEnvironment, instanceTag 
 
 const extensionRoot = path.resolve(__dirname, "../../..");
 const workspaceRoot = extensionRoot;
-const localCodePath = "/Applications/Visual Studio Code.app/Contents/MacOS/Code";
+/** `STUDIO_VSCODE_EXECUTABLE` picks another VS Code build (its `Contents/MacOS/Code` on macOS). */
+const localCodePath = process.env.STUDIO_VSCODE_EXECUTABLE ?? "/Applications/Visual Studio Code.app/Contents/MacOS/Code";
+if (process.env.STUDIO_VSCODE_EXECUTABLE !== undefined && !fs.existsSync(localCodePath)) {
+  throw new Error(`STUDIO_VSCODE_EXECUTABLE does not exist: ${localCodePath}`);
+}
 const artifactRoot = E2E_REPORT_ROOT;
 const campaignRunId = process.env.STUDIO_E2E_RUN_ID ?? null;
 const campaignStartedAt = process.env.STUDIO_E2E_STARTED_AT ?? null;

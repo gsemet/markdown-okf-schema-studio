@@ -67,6 +67,20 @@ Playwright browser runtime. They can be run with `just integration`, `just visua
 Generated reports are stored under `out/reports/`; the README-derived Pages tree is stored under
 `out/site/`. `just preflight` runs every stage and returns a failure if any stage fails.
 
+On macOS the real VS Code window tests use `/Applications/Visual Studio Code.app` when it exists
+(CI downloads the current stable build); set `STUDIO_VSCODE_EXECUTABLE` to the `Contents/MacOS/Code`
+binary of another build to run them there. They need an unlocked session: each test window must
+become the active window once, or VS Code sees no focused editor and undo, cursor commands and
+typed keys reach nothing. macOS keeps a newly launched app in the background while you work in
+another app, so each test window (the trusted, untrusted and scroll-sync suites and the reload
+campaign) is first brought to the front, and the run waits until VS Code reports the window
+focused; on a locked screen it fails at once with the window state instead of timing out later.
+Losing the focus afterwards, for example by switching to another app, does not affect the run.
+Bringing a window to the front goes through System Events, so the first run asks once per app
+(each VS Code build, and the terminal or editor that runs `npm`) to allow it under System Settings >
+Privacy & Security > Automation; allow it, or the run fails with a message that names the
+permission.
+
 CI runs the same stages as parallel jobs, each calling one target after `just dev-ci`:
 `just ci-static` (justfile format, `check`, `sphinx-check`), `just ci-visual`,
 `just ci-integration`, then `just ci-report` (merges the visual and integration outputs into the
