@@ -9,7 +9,7 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 
 - **Backlog item**: an idea, bug or request not yet scheduled. One folder
   `.agents/changes/backlog/<P1|P2|P3>/<slug>/` holding the intent (`01-intent.md`, plus any
-  analysis). P1 = do first, P3 = later. `backlog/INDEX.md` lists them.
+  analysis). P1 = do first, P3 = later. The Backlog table of `requests/ORCHESTRATOR.md` lists them.
 - **Change request (CR)**: one unit of delivered work. One CR = one branch = one PR with green CI,
   shipping code, tests (unit + e2e), documentation and screenshots for any visible change.
 - **PRD folder**: the working folder of a CR in progress, `.agents/changes/requests/NNN-<slug>/`.
@@ -23,9 +23,8 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 
 ```text
 .agents/changes/
-├── backlog/INDEX.md              ← priority table of backlog items + closed decisions
 ├── backlog/P1|P2|P3/<slug>/      ← items not started
-├── requests/ORCHESTRATOR.md      ← CR table only (parallel mode)
+├── requests/ORCHESTRATOR.md      ← CR tables: Active, Backlog, Landed (parallel mode)
 ├── requests/ORCHESTRATOR-STATUS.md ← rebuilt by the orchestrator from the STATE.md headers
 ├── requests/NNN-<slug>/          ← PRD folder
 │   ├── 00-request.md             ← intent + user decisions
@@ -62,7 +61,7 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 | --- | --- | --- |
 | 1 Pick | main | In the highest priority with work, propose the easiest item: problem, file:line, fix, PR content. |
 | 2 Grill | main | Ask only the questions that change the result, each with a recommended answer. "ok" accepts all. Record answers in `00-request.md`. |
-| 3 Open | main | Create the PRD folder, move the backlog content in (partial item: copy the part, note the split in the backlog item), update `INDEX.md`, create the worktree and branch from fresh `origin/main`. |
+| 3 Open | main | Create the PRD folder, move the backlog content in (partial item: copy the part, note the split in the backlog item), create the worktree and branch from fresh `origin/main`. |
 | 4 Brief | main | Write `task.md`, `rules.md`, the `STATE.md` header, and the row in `ORCHESTRATOR.md`. |
 | 5 Code | coder | Implement round n, run local gates, write `reports/T1-r<n>.md`. |
 | 6 Review | reviewer | Write `reviews/T1-r<n>.md` starting with `Verdict: APPROVE` or `Verdict: FIX-REQUIRED`. FIX-REQUIRED → step 5, round n+1. |
