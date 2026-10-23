@@ -19,12 +19,12 @@ import {
 import { isGroupId } from "../shared/e2eGroups";
 import { SCENARIOS } from "../visual/scenarios";
 
-test("the real-window registry has 117 captures, 102 with a PNG and 15 assertion-only", () => {
-  assert.equal(CAPTURES.length, 117);
-  assert.equal(CAPTURES.filter((entry) => entry.capture !== false).length, 102);
+test("the real-window registry has 119 captures, 104 with a PNG and 15 assertion-only", () => {
+  assert.equal(CAPTURES.length, 119);
+  assert.equal(CAPTURES.filter((entry) => entry.capture !== false).length, 104);
   assert.equal(CAPTURES.filter((entry) => entry.capture === false).length, 15);
   const bySuite = Object.fromEntries(SUITES.map((suite) => [suite, capturesOfSuite(suite).length]));
-  assert.deepEqual(bySuite, { "real-input": 78, checkbox: 4, frontmatter: 26, scroll: 6, reload: 3 });
+  assert.deepEqual(bySuite, { "real-input": 80, checkbox: 4, frontmatter: 26, scroll: 6, reload: 3 });
 });
 
 test("the registry is valid: <group>/rNN ids, unique, gapless numbers per group, a locks sentence each", () => {
