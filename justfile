@@ -21,8 +21,11 @@ dev-ci:
     #!/usr/bin/env bash
     set -euo pipefail
     if [[ "$(uname -s)" == "Linux" ]] && ! { command -v plantuml && command -v dot; } >/dev/null; then
-        sudo -n apt-get update
-        sudo -n apt-get install --yes --no-install-recommends plantuml graphviz
+        # A stalled or IPv6-only mirror connection must fail and retry (a run spent 28 minutes on a
+        # 90 MB download at 53 kB/s, another hung for an hour), not wait for the job timeout.
+        apt_options=(-o Acquire::Retries=5 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::ForceIPv4=true)
+        sudo -n apt-get "${apt_options[@]}" update
+        sudo -n apt-get "${apt_options[@]}" install --yes --no-install-recommends plantuml graphviz
     fi
     {{ npm }} ci
     uv sync --group docs --group release

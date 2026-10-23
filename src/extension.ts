@@ -5154,6 +5154,12 @@ export function getActivePreviewForTests():
     incrementalUpdates: boolean;
     /** True once the loaded webview document reported ready for the current stage. */
     webviewReady: boolean;
+    /**
+     * True while the host still holds a timer that will update the page of the current render (the
+     * link check, the properties refresh, an in-place patch waiting for its acknowledgement): a
+     * page that opens an editor now can still be patched under it.
+     */
+    deferredWorkPending: boolean;
     pendingOverlayVisible: boolean;
     pendingOverlayShown: number;
     incomingChanges: { posts: number; last?: { enabled: boolean; ranges: { start: number; end: number }[] } };
@@ -5201,6 +5207,10 @@ export function getActivePreviewForTests():
     incrementalUpdates: activePreview.configuration.incrementalUpdates,
     webviewReady: activePreview.stage !== undefined
       && activePreview.readyRequestId === activePreview.stage.requestId,
+    deferredWorkPending: activePreview.linkEnrichmentTimer !== undefined
+      || activePreview.frontmatterRefreshTimer !== undefined
+      || activePreview.contentPatchTimer !== undefined
+      || activePreview.pendingOverlayTimer !== undefined,
     pendingOverlayVisible: activePreview.pendingOverlayVisible,
     pendingOverlayShown: activePreview.pendingOverlayShown,
     incomingChanges: { posts: activePreview.incomingPosts, last: activePreview.lastIncomingChanges },
