@@ -118,8 +118,34 @@ main session ── user interface: grill, decisions, merges; supervises the orc
    ln -s "$PWD/node_modules" ../<repo>-wt-NNN/node_modules
    ```
 
-2. `requests/ORCHESTRATOR.md` holds only the CR table: CR, PRD folder, worktree, branch, PR. The
-   situation of each CR lives in its `STATE.md` header, the driver prompt in this guideline.
+2. `requests/ORCHESTRATOR.md` holds only the CR tables (template below). Every cell that names a
+   file or a PR is a link: the CR number opens its spec (`00-request.md`), the status opens its
+   `STATE.md`, the PR number opens the PR on GitHub. Links are relative to `requests/`. The
+   situation of each CR lives in its `STATE.md` header; the orchestrator copies the status into
+   the table at each tick. A landed CR moves to "Landed" and links to its archived `report.md`.
+
+   ```markdown
+   # CR table
+
+   Repository: [<owner>/<repo>](https://github.com/<owner>/<repo>). Process:
+   [prd-workflow.guidelines.md](../../guidelines/prd-workflow.guidelines.md). Live status:
+   [ORCHESTRATOR-STATUS.md](ORCHESTRATOR-STATUS.md). Worktree of CR NNN: `../<repo>-wt-NNN`.
+
+   ## Active
+
+   | CR (spec) | Subject | Status (STATE.md) | Branch | PR |
+   | --- | --- | --- | --- | --- |
+   | [044](044-<slug>/00-request.md) | <one line> | [working 5 Code 1/3](044-<slug>/STATE.md) | `fix/<slug>` | [#38](https://github.com/<owner>/<repo>/pull/38) open |
+
+   ## Landed
+
+   | CR (spec) | Report | Branch | PR |
+   | --- | --- | --- | --- |
+   | [041](../archives/041-<slug>/00-request.md) | [report](../archives/041-<slug>/report.md) | `fix/<slug>` | [#35](https://github.com/<owner>/<repo>/pull/35) merged |
+   ```
+
+   The same rule holds for every status report to the user: a PR, CR, run or file is named with
+   its link.
 3. Start the orchestrator in the background (Sonnet), pointing it to this guideline and the table.
 
 ### Responsiveness
