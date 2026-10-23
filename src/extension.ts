@@ -50,6 +50,7 @@ import {
   invalidateStemIndex,
   resolveFrontmatterLinkRoots,
 } from "./frontmatter/fileLinks";
+import { watchLinkedTargetDirectly } from "./frontmatter/linkedTargetWatch";
 import { invalidateConfCache, locateConfFor } from "./myst/confLocator";
 import { renderPropertiesTable, replacePropertiesTableHtml } from "./frontmatter/propertiesTable";
 import { checkboxToggleEdit } from "./render/checkboxMarkers";
@@ -1202,8 +1203,13 @@ function setFrontmatterState(
           scheduleLinkEnrichment(preview, preview.documentUri, document.version);
         }
       };
+      // The VS Code watcher of a path inside a workspace folder rides on the shared recursive
+      // workspace watcher, which can miss a write on Linux: the folder is also watched directly.
+      // Both may report the same write; the link enrichment they schedule is debounced.
+      const direct = watchLinkedTargetDirectly(target, refresh);
       preview.linkedTargetWatchers.set(target, vscode.Disposable.from(
         watcher, watcher.onDidChange(refresh), watcher.onDidCreate(refresh), watcher.onDidDelete(refresh),
+        new vscode.Disposable(direct),
       ));
     }
   }
