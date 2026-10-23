@@ -70,7 +70,7 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 | 8 PR | driver | Rebase on `origin/main`, push, open the PR with the template from [ci.guidelines.md](ci.guidelines.md), written for an external reader (see "PR body for an external reader"), screenshots in Impacts. |
 | 9 CI | driver | Watch the checks (see "Responsiveness"). Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. Never weaken a test. |
 | 10 Notify | driver | CI green: `status: ready` in the header, then return. |
-| 11 Land | orchestrator | After the user merges: write `report.md`, move the PRD folder to `archives/`, update `INDEX.md`, remove the worktree and branch. |
+| 11 Land | orchestrator | After the user merges: write `report.md`, move the PRD folder to `archives/`, update `INDEX.md`, remove the worktree and the CR branch (keep its `-assets` branch). |
 
 **Round limit**: a round is one coder pass, whether a review or a CI failure triggered it. At most
 3 rounds per CR, all causes together. After round 3 without green CI, the driver sets
@@ -114,9 +114,16 @@ main session ── user interface: grill, decisions, merges; supervises the orc
 1. One worktree per CR, dependencies symlinked, never staged:
 
    ```bash
-   git worktree add -b <type>/<slug> ../<repo>-wt-NNN origin/main --no-track
+   git worktree add -b changes-requests/NNN-<slug> ../<repo>-wt-NNN origin/main --no-track
    ln -s "$PWD/node_modules" ../<repo>-wt-NNN/node_modules
    ```
+
+   **Branch names** follow the CR, never the PR: `NNN` is the three-digit CR number (with its
+   leading zeros) and `<slug>` the CR folder name, so `requests/042-docs-stacked-prs` is worked on
+   branch `changes-requests/042-docs-stacked-prs`. Its screenshot branch is
+   `changes-requests/042-docs-stacked-prs-assets` (see "Screenshots in the PR"). The change type
+   (`feat`, `fix`, `docs`…) lives in the commit messages and the PR title, not in the branch name.
+   Branches created before this rule keep their names.
 
 2. `requests/ORCHESTRATOR.md` holds only the CR tables (template below). Every cell that names a
    file or a PR is a link: the CR number opens its spec (`00-request.md`), the status opens its
@@ -276,12 +283,14 @@ as raw blobs to a side branch (bypasses Git LFS) and link the raw URLs:
 tree=$(for f in shots/*.png; do
   printf '100644 blob %s\t%s\n' "$(git hash-object -w --no-filters "$f")" "$(basename "$f")"
 done | git mktree)
-commit=$(git commit-tree "$tree" -m "PR #<n> screenshots")
-git push origin "${commit}:refs/heads/pr-assets/<n>"  # braces: zsh reads $commit:r as a modifier
+commit=$(git commit-tree "$tree" -m "CR NNN screenshots")
+git push origin "${commit}:refs/heads/changes-requests/NNN-<slug>-assets"  # braces: zsh reads $commit:r as a modifier
 # URL: https://raw.githubusercontent.com/<owner>/<repo>/${commit}/<name>.png
 ```
 
-Keep `pr-assets/<n>` after merge: the PR body points at it.
+Keep `changes-requests/NNN-<slug>-assets` after merge: the PR body points at it. Landing removes
+the CR branch only. Older PRs use `pr-assets/<n>` branches: keep them, their PR bodies point at
+them.
 
 ## `report.md` (archive)
 
