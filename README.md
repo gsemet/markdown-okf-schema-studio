@@ -110,6 +110,12 @@ Markdown flavours and extensions:
 Checkboxes in task lists, paragraphs, and table cells are editable in place. In an untrusted
 workspace they remain read-only until the workspace is trusted.
 
+An inline block editor that is open in the preview keeps its text and caret while you save the
+file, switch the colour theme or a diagram finishes drawing; the preview shows the newer render
+when you close the editor. A change made in the text editor outside the block you edit leaves the
+editor open; a change inside that block shows an error in the editor, and your text stays there to
+copy.
+
 ## Floating Toolbar
 
 The floating toolbar at the top right of the preview has three rows:

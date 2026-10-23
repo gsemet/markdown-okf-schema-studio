@@ -1,5 +1,5 @@
 import { build } from "esbuild";
-import { cpSync, mkdirSync } from "node:fs";
+import { cpSync, mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import * as path from "node:path";
 
@@ -43,6 +43,26 @@ await build({
 });
 
 const require = createRequire(import.meta.url);
+
+// The preview runtime and its stylesheet are files the page loads (cacheable webview resources)
+// instead of text inlined in every render. The runtime is assembled from the same minified
+// modules the extension bundle used to serialise at render time.
+const runtime = await build({
+  entryPoints: ["src/webview/previewRuntimeEntry.ts"],
+  bundle: true,
+  platform: "node",
+  target: "node20",
+  format: "cjs",
+  minify: true,
+  write: false,
+  logLevel: "info",
+});
+const runtimeModule = { exports: {} };
+new Function("module", "exports", "require", runtime.outputFiles[0].text)(runtimeModule, runtimeModule.exports, require);
+mkdirSync("out/bundle", { recursive: true });
+writeFileSync("out/bundle/preview.js", runtimeModule.exports.previewRuntimeScript(), "utf8");
+writeFileSync("out/bundle/preview.css", runtimeModule.exports.previewStylesheet(), "utf8");
+
 const katexDirectory = path.dirname(require.resolve("katex"));
 const mathAssets = "out/bundle/katex";
 mkdirSync(mathAssets, { recursive: true });

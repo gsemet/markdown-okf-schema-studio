@@ -14,6 +14,13 @@
 - An image written inside a paragraph (`Text ![logo](logo.png) more text`) now sits in its line of
   text, centred on it, instead of looking like a picture above the paragraph. An image alone in its
   paragraph stays a centred figure.
+- The preview is faster on long documents and keeps what you are doing. Typing never reloads the
+  page, unchanged blocks and Mermaid diagrams stay in place while the changed ones update, and
+  scrolling does much less work per frame. An inline editor that is open in the preview now stays
+  open, with its text and caret, when you save the file, switch the colour theme or a diagram
+  finishes drawing: the preview catches up when you close the editor. A change made in the text
+  editor above or below the block you edit no longer closes it; a change inside that block shows an
+  explicit error in the editor instead of losing your text.
 - New starting points for a workspace that has not chosen yet: the preview opens in the cream
   theme, the floating toolbar is collapsed to its first row (the chevron shows rows 2 and 3) and
   the edition palette offers the GFM buttons (`editing.defaultPaletteMode` now defaults to `gfm`).

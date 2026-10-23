@@ -26,7 +26,12 @@ import {
   injectPlantUmlDiagrams,
   PlantUmlDiagramRender,
 } from "../render/plantUmlRenderer";
-import { createScrollSyncScript, PreviewRuntimeContext } from "../webview/scrollSync";
+import {
+  createScrollSyncScript,
+  PreviewRuntimeContext,
+  RUNTIME_CONTEXT_ATTRIBUTE,
+  serializeRuntimeContext,
+} from "../webview/scrollSync";
 import { renderMathHtml } from "../render/mathRenderer";
 import { classifyPreviewReference } from "../navigation/previewNavigation";
 import {
@@ -65,7 +70,22 @@ export function buildStatusWebviewHtml(
 }
 
 function injectScrollSyncScript(html: string, script: string, nonce: string): string {
-  const tag = `<script nonce="${nonce}" data-sphinx-preview-scroll-sync>${script}</script>`;
+  return injectRuntimeTags(html, `<script nonce="${nonce}" data-sphinx-preview-scroll-sync>${script}</script>`);
+}
+
+/**
+ * The runtime as a file (PERF-11): the context of this render in an inert JSON element, then the
+ * bundled runtime script, which reads it. Only the JSON changes from one render to the next.
+ */
+function injectRuntimeFile(html: string, context: PreviewRuntimeContext, runtimeUri: string, nonce: string): string {
+  return injectRuntimeTags(
+    html,
+    `<script type="application/json" ${RUNTIME_CONTEXT_ATTRIBUTE}>${serializeRuntimeContext(context)}</script>`
+      + `<script nonce="${escapeHtml(nonce)}" src="${escapeHtml(runtimeUri)}" data-sphinx-preview-scroll-sync></script>`,
+  );
+}
+
+function injectRuntimeTags(html: string, tag: string): string {
   if (/<\/body>/iu.test(html)) {
     return html.replace(/<\/body>/iu, () => `${tag}</body>`);
   }
@@ -205,9 +225,17 @@ export function buildPreviewWebviewHtml(
   });
   const withPlantUml = injectPlantUmlDiagrams(rewritten.html, plantUmlDiagrams);
   const csp = createContentSecurityPolicy(webview.cspSource, nonce);
+  const bundleUri = (file: string): string | undefined => extensionUri
+    ? webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "out", "bundle", file)).toString()
+    : undefined;
+  // The static stylesheet is a bundled file (PERF-11), imported by the page's one nonce style
+  // element, which keeps only the rule that depends on the settings.
+  const stylesheetUri = bundleUri("preview.css");
   const accessibleHtml = injectAccessibilityStyles(
     scrollContext ? injectPreviewThemeControl(withPlantUml, editingEnabled) : withPlantUml,
-    `${PREVIEW_ACCESSIBILITY_CSS}${PREVIEW_THEME_CSS}${previewContentWidthCss(maxContentWidth)}`,
+    stylesheetUri
+      ? `@import url("${stylesheetUri.replace(/["\\\n]/gu, encodeURIComponent)}");${previewContentWidthCss(maxContentWidth)}`
+      : `${PREVIEW_ACCESSIBILITY_CSS}${PREVIEW_THEME_CSS}${previewContentWidthCss(maxContentWidth)}`,
     nonce,
   );
   const mermaidRendererUri = extensionUri && rewritten.html.includes('class="myst-mermaid-figure"')
@@ -229,13 +257,12 @@ export function buildPreviewWebviewHtml(
   const withMermaidRenderer = plantUmlRendererUri
     ? injectPlantUmlRenderer(withMermaid, plantUmlRendererUri, nonce)
     : withMermaid;
-  const html = scrollContext
-    ? injectScrollSyncScript(
-      withMermaidRenderer,
-      createScrollSyncScript(scrollContext),
-      nonce,
-    )
-    : withMermaidRenderer;
+  const runtimeUri = bundleUri("preview.js");
+  const html = !scrollContext
+    ? withMermaidRenderer
+    : runtimeUri
+      ? injectRuntimeFile(withMermaidRenderer, scrollContext, runtimeUri, nonce)
+      : injectScrollSyncScript(withMermaidRenderer, createScrollSyncScript(scrollContext), nonce);
   const withFrontmatter = injectPropertiesTable(
     html,
     frontmatter

@@ -53,8 +53,10 @@ function isStatusRegion(node: TreeNode): boolean {
   return "tagName" in node && node.tagName === "aside" && hasAttribute(node, "data-sphinx-preview-status");
 }
 
+/** The runtime script, inline or as a file, and the JSON element with the context it reads. */
 function isRuntimeScript(node: TreeNode): node is TreeElement {
-  return "tagName" in node && node.tagName === "script" && hasAttribute(node, "data-sphinx-preview-scroll-sync");
+  return "tagName" in node && node.tagName === "script"
+    && (hasAttribute(node, "data-sphinx-preview-scroll-sync") || hasAttribute(node, "data-sphinx-preview-runtime-context"));
 }
 
 function analyze(html: string): PageAnalysis {
@@ -80,7 +82,7 @@ function analyze(html: string): PageAnalysis {
         continue;
       }
       if (isRuntimeScript(child)) {
-        // The runtime script embeds the identifiers of its render; the patch updates them itself.
+        // The runtime context embeds the identifiers of its render; the patch updates them itself.
         child.childNodes = [];
         continue;
       }

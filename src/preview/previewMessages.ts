@@ -145,6 +145,9 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
   // editor before this message, so the host can wait for those saves. It edits nothing.
   previewEditFlushed: (message) => isBoundedString(message.flushId, MAX_EDIT_ID_LENGTH)
     && message.flushId !== "" && typeof message.flushed === "boolean",
+  // The page closed an inline editor the host asked about with `previewEditorWatch` (STAB-03): the
+  // page updates that waited for it can run. It edits nothing.
+  previewEditClosed: (message) => isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "",
   // The MyST palette's pickers: labels of the document, citation keys of the workspace `.bib`
   // files, and a native open dialog for a `{doc}` path. They read only; the answer repeats `editId`.
   previewListTargets: isHostRequest,

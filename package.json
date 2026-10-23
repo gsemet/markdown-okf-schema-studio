@@ -246,6 +246,7 @@
     "postinstall": "node scripts/patch-myst-imports.mjs",
     "compile": "tsc -p .",
     "bundle": "node esbuild.mjs",
+    "probe": "npm run compile && npm run bundle && node out/test/probe/previewProbe.js --check",
     "check-types": "tsc --noEmit -p .",
     "watch": "tsc -watch -p .",
     "test": "npm run compile && npm run test:unit && npm run test:contracts && npm run test:security",

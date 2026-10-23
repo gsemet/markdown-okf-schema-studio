@@ -254,6 +254,14 @@ test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
   }
 });
 
+test("STAB-03: previewEditClosed carries the id of the closed editor", () => {
+  const closed = { type: "previewEditClosed", documentId: "doc", documentVersion: 1, requestId: 1, editId: "edit-3" };
+  assert.equal(isRegisteredPreviewMessage(closed), true);
+  for (const patch of [{ editId: "" }, { editId: 3 }, { editId: undefined }, { editId: "e".repeat(101) }]) {
+    assert.equal(isRegisteredPreviewMessage({ ...closed, ...patch }), false, JSON.stringify(patch));
+  }
+});
+
 test("previewThreadReply and previewThreadDelete validate the lines, the edit id and the text", () => {
   const reply = {
     type: "previewThreadReply", documentId: "doc", documentVersion: 1, requestId: 1, editId: "host-1",
