@@ -969,3 +969,12 @@ test("K1: long words and bare URLs wrap inside text blocks, links and table cell
     assert.ok(selectors.includes(tag), `expected ${tag} to wrap long words`);
   }
 });
+
+test("an inline thread is a green chip with a bubble, a green titled box, and goes with the gray chips", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /\.okf-chip--thread \{[^}]*border-color: var\(--vscode-charts-green/u);
+  assert.match(css, /\.okf-chip--thread::before \{[^}]*mask: url\("data:image\/svg\+xml/u);
+  assert.match(css, /\.okf-comment\[data-okf-comment-kind="thread"\] > \.okf-comment-body:not\(\[hidden\]\)::before \{\s*content: "Thread";/u);
+  assert.match(css, /html\[data-okf-show-comments="false"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="thread"\] \{\s*display: none;/u);
+  assert.doesNotMatch(css, /style=/u);
+});

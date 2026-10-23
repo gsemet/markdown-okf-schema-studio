@@ -154,7 +154,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     [
       "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote",
       "rule", "table",
-      "emoji", "todo", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+      "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
       "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd",
     ],
@@ -1315,4 +1315,23 @@ test("CR035: the image action replaces the image around the caret and keeps alt 
   assert.equal(selected.value, "![alt](<n (1).png>)");
   // Outside any image the behaviour is unchanged.
   assert.equal(applyTo("image", "![alt](old.png) ", [16, 16], "n.png")!.value, "![alt](old.png) ![n](n.png)");
+});
+
+test("thread inserts an empty comment thread after the block, with the author and the local date", () => {
+  const threaded = createEditActions([], createMarkdownTableTools(), isSafeOkfColor, "Ada\nLovelace");
+  const apply = (value: string, caret: number) => threaded.byId.get("thread")!.apply({
+    value, selectionStart: caret, selectionEnd: caret, scope: "block",
+  })!;
+  const edit = apply("A paragraph.", 4);
+  assert.match(edit.text, /^\n\n<!-- THREAD\nAda Lovelace \(\d{4}-\d\d-\d\d \d\d:\d\d\):\n  \n-->\n\n$/u);
+  assert.equal(edit.start, "A paragraph.".length);
+  assert.equal(edit.text.slice(0, edit.selectionStart - edit.start).endsWith("):\n  "), true, "caret on the message line");
+  const blank = apply("", 0);
+  assert.match(blank.text, /^<!-- THREAD\n/u, "no blank lines above an empty block");
+  const anonymous = createEditActions().byId.get("thread")!.apply({ value: "", selectionStart: 0, selectionEnd: 0, scope: "block" })!;
+  assert.match(anonymous.text, /^<!-- THREAD\nAnonymous \(/u);
+  const action = registry.byId.get("thread")!;
+  assert.deepEqual(action.modes, ["strict"]);
+  assert.equal(action.group, "annotation");
+  assert.deepEqual(action.scopes, ["block"]);
 });

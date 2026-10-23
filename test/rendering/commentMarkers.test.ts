@@ -218,3 +218,46 @@ test("a list item can hold a comment chip between its items", async () => {
   const { doc } = await render("- one\n<!-- between -->\n- two\n");
   assert.deepEqual(chips(doc).map((chip) => textContent(chip)), ["comment"]);
 });
+
+const THREAD = "<!-- THREAD\nAda (2026-10-16 10:47):\n  first line\n  second line\nBob (2026-10-16 10:52):\n  a reply\n-->";
+
+test("a THREAD comment is a green thread chip with one entry per message", async () => {
+  const { doc } = await render(`Before\n\n${THREAD}\n\nAfter\n`);
+  const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
+  assert.ok(block);
+  assert.equal(attribute(block, "data-okf-comment-kind"), "thread");
+  assert.equal(attribute(block, "data-line"), "3");
+  assert.equal(attribute(block, "data-end-line"), "9");
+  const chip = chips(doc)[0];
+  assert.ok(hasClass(chip, "okf-chip--thread"));
+  assert.equal(attribute(chip, "role"), "button");
+  assert.equal(attribute(chip, "aria-expanded"), "false");
+  assert.equal(textContent(chip), "Ada (2)");
+  const body = findElement(doc, (e) => hasClass(e, "okf-comment-body"));
+  assert.ok(body && attribute(body, "hidden") !== undefined);
+  const messages = findElements(body, (e) => hasClass(e, "okf-thread-message"));
+  assert.equal(messages.length, 2);
+  assert.equal(textContent(findElement(messages[0], (e) => hasClass(e, "okf-thread-author"))!), "Ada");
+  assert.equal(textContent(findElement(messages[0], (e) => hasClass(e, "okf-thread-date"))!), "2026-10-16 10:47");
+  assert.equal(textContent(findElement(messages[0], (e) => hasClass(e, "okf-thread-text"))!), "first line\nsecond line");
+  assert.equal(textContent(findElement(messages[1], (e) => hasClass(e, "okf-thread-text"))!), "a reply");
+});
+
+test("a THREAD comment with CRLF line ends and trailing spaces renders the same", async () => {
+  const { doc } = await render(`${THREAD.replace(/\n/gu, "  \r\n")}\r\n`);
+  const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
+  assert.equal(attribute(block!, "data-okf-comment-kind"), "thread");
+  assert.equal(findElements(doc, (e) => hasClass(e, "okf-thread-message")).length, 2);
+});
+
+test("a single-message thread chip shows only the author", async () => {
+  const { doc } = await render("<!-- THREAD\nAda (2026-10-16 10:47):\n  one\n-->\n");
+  assert.equal(textContent(chips(doc)[0]), "Ada");
+});
+
+test("a THREAD without a valid message, or inside a paragraph, stays an ordinary comment", async () => {
+  const bad = await render("<!-- THREAD\nno header\n-->\n");
+  assert.equal(attribute(findElement(bad.doc, (e) => hasClass(e, "okf-comment"))!, "data-okf-comment-kind"), "comment");
+  const inline = await render("a <!-- THREAD\nAda (2026-10-16 10:47):\n  x\n--> b\n");
+  assert.equal(findElements(inline.doc, (e) => hasClass(e, "okf-chip--thread")).length, 0);
+});

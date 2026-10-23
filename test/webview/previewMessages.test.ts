@@ -253,3 +253,21 @@ test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
     assert.equal(isRegisteredPreviewMessage({ ...flushed, ...patch }), false, JSON.stringify(patch));
   }
 });
+
+test("previewThreadReply and previewThreadDelete validate the lines, the edit id and the text", () => {
+  const reply = {
+    type: "previewThreadReply", documentId: "doc", documentVersion: 1, requestId: 1, editId: "host-1",
+    line: 3, endLine: 7, text: "an answer",
+  };
+  assert.equal(isRegisteredPreviewMessage(reply), true);
+  for (const patch of [
+    { text: "" }, { text: "   " }, { text: "x".repeat(10001) }, { text: 4 }, { text: undefined },
+    { line: 0 }, { endLine: 2 }, { endLine: undefined }, { editId: "" }, { editId: undefined },
+  ]) {
+    assert.equal(isRegisteredPreviewMessage({ ...reply, ...patch }), false, JSON.stringify(patch));
+  }
+  const { text: _text, ...rest } = reply;
+  const remove = { ...rest, type: "previewThreadDelete" };
+  assert.equal(isRegisteredPreviewMessage(remove), true);
+  assert.equal(isRegisteredPreviewMessage({ ...remove, line: 8 }), false);
+});

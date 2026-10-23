@@ -2475,6 +2475,26 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   color: var(--vscode-charts-green, #16825d);
 }
 
+/* Inline thread: a green chip led by a speech bubble; the bubble is a mask, so it takes the chip
+   color in every theme. */
+#sphinx-myst-preview-content .okf-chip--thread {
+  border-color: var(--vscode-charts-green, #16825d);
+  background: color-mix(in srgb, var(--vscode-charts-green, #16825d) 16%, transparent);
+  color: var(--vscode-charts-green, #16825d);
+}
+
+#sphinx-myst-preview-content .okf-chip--thread::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-inline-end: 0.35em;
+  vertical-align: -0.15em;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linejoin='round'%3E%3Cpath d='M4 4h16v12H10l-5 4v-4H4z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linejoin='round'%3E%3Cpath d='M4 4h16v12H10l-5 4v-4H4z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
 #sphinx-myst-preview-content .okf-chip:focus-visible {
   outline: 1px solid var(--vscode-focusBorder, #007fd4);
   outline-offset: 1px;
@@ -2521,6 +2541,103 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 
 #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="todo"] > .okf-comment-body:not([hidden])::before {
   content: "TODO";
+}
+
+/* An open thread: one entry per message, then the reply box and Delete. The message text is a text
+   node, so its line breaks are kept; the body itself wraps normally. */
+#sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="thread"] > .okf-comment-body:not([hidden]) {
+  --sphinx-preview-accent: var(--vscode-charts-green, #16825d);
+  white-space: normal;
+}
+
+#sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="thread"] > .okf-comment-body:not([hidden])::before {
+  content: "Thread";
+}
+
+#sphinx-myst-preview-content .okf-thread-message + .okf-thread-message {
+  margin-top: 0.6em;
+  padding-top: 0.5em;
+  border-top: 1px solid var(--sphinx-preview-border);
+}
+
+#sphinx-myst-preview-content .okf-thread-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em 0.8em;
+  align-items: baseline;
+}
+
+#sphinx-myst-preview-content .okf-thread-author {
+  font-weight: 600;
+}
+
+#sphinx-myst-preview-content .okf-thread-date {
+  color: var(--vscode-descriptionForeground, #717171);
+  font-size: 0.85em;
+}
+
+#sphinx-myst-preview-content .okf-thread-text {
+  margin-top: 0.2em;
+  white-space: pre-wrap;
+}
+
+#sphinx-myst-preview-content .okf-thread-actions {
+  margin-top: 0.8em;
+  padding-top: 0.6em;
+  border-top: 1px solid var(--sphinx-preview-border);
+}
+
+#sphinx-myst-preview-content .okf-thread-actions textarea {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-height: 3.6em;
+  padding: 0.4em 0.5em;
+  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border-radius: 3px;
+  background: var(--vscode-input-background, transparent);
+  color: var(--vscode-input-foreground, inherit);
+  font: inherit;
+  resize: vertical;
+}
+
+#sphinx-myst-preview-content .okf-thread-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  align-items: center;
+  margin-top: 0.5em;
+}
+
+#sphinx-myst-preview-content .okf-thread-buttons button {
+  padding: 0.25em 0.8em;
+  border: 1px solid var(--vscode-button-border, transparent);
+  border-radius: 2px;
+  background: var(--vscode-button-background, #0e639c);
+  color: var(--vscode-button-foreground, #fff);
+  font: inherit;
+  cursor: pointer;
+}
+
+#sphinx-myst-preview-content .okf-thread-buttons button[data-okf-thread-delete] {
+  background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.2));
+  color: var(--vscode-button-secondaryForeground, inherit);
+}
+
+#sphinx-myst-preview-content .okf-thread-buttons button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+#sphinx-myst-preview-content .okf-thread-buttons button:focus-visible,
+#sphinx-myst-preview-content .okf-thread-actions textarea:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: 1px;
+}
+
+#sphinx-myst-preview-content .okf-thread-status {
+  color: var(--vscode-errorForeground, #f14c4c);
+  font-size: 0.9em;
 }
 
 /* Incoming-change mark: a green bar for each block changed since the last commit. All bars sit in
@@ -2848,6 +2965,11 @@ html[data-sphinx-preview-comments="off"] #sphinx-myst-preview-content .okf-comme
 }
 
 html[data-okf-show-comments="false"] [data-sphinx-preview-comments-toggle] {
+  display: none;
+}
+
+/* The thread chips are hidden with the gray ones. */
+html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="thread"] {
   display: none;
 }
 

@@ -13,6 +13,12 @@ import {
 } from "./comments/anchoring";
 import { resolveAuthor } from "./comments/author";
 import {
+  formatThreadDate,
+  threadDeleteRange,
+  threadReplyEdit,
+  isThreadSource,
+} from "./comments/inlineThread";
+import {
   addReply,
   addThread,
   deleteThread,
@@ -388,6 +394,8 @@ interface ActivePreview {
 
 const activePreviews = new Set<ActivePreview>();
 let activePreview: ActivePreview | undefined;
+// The name a new inline comment thread starts with; the Git user once it is known (see refresh).
+let threadAuthor = "";
 let extensionRootUri: vscode.Uri | undefined;
 let sessionPreviewThemeMode: PreviewThemeMode | undefined;
 let previewThemeModeStorage: PreviewThemeModeStorage | undefined;
@@ -673,6 +681,17 @@ function isPreviewSyncMessage(value: unknown): value is PreviewSyncMessage {
     && (message.request === undefined || typeof message.request === "string");
 }
 
+/** Resolves the thread author (setting, Git user, OS user) for the next page that loads. */
+function refreshThreadAuthor(uri: vscode.Uri | undefined): void {
+  void resolveAuthor({
+    setting: readCommentsConfiguration(vscode.workspace.getConfiguration(COMMENTS_CONFIGURATION_SECTION)).authorName,
+    gitName: uri ? () => headBaseline.userName(uri) : undefined,
+    osUserName: () => os.userInfo().username,
+  }).then((author) => {
+    threadAuthor = author;
+  }, () => undefined);
+}
+
 function scrollContext(
   stage: RenderStage,
   state?: PreviewPanelState,
@@ -687,11 +706,13 @@ function scrollContext(
     commentsEnabled: boolean;
   },
 ): PreviewRuntimeContext {
+  refreshThreadAuthor(vscode.Uri.file(stage.activeDocumentPath));
   return {
     documentId: stage.activeDocumentIdentity,
     documentVersion: stage.activeDocumentVersion,
     requestId: stage.requestId,
     activeSourceFile: stage.activeDocumentPath,
+    ...(threadAuthor !== "" ? { threadAuthor } : {}),
     ...(initialAnchor !== undefined ? { initialAnchor } : {}),
     ...(initialPin ? { initialPin } : {}),
     scrollPreviewWithEditor: configuration.scrollPreviewWithEditor,
@@ -1887,6 +1908,105 @@ function handleLabelRename(preview: ActivePreview, message: RegisteredPreviewMes
       ok: false,
       reason: error instanceof Error ? error.message : String(error),
     });
+  });
+}
+
+function postThreadResult(
+  preview: ActivePreview,
+  type: "previewThreadReplyResult" | "previewThreadDeleteResult",
+  message: RegisteredPreviewMessage,
+  result: { ok: true } | { ok: false; reason: string },
+): void {
+  void preview.panel.webview.postMessage({
+    type,
+    documentId: message.documentId,
+    documentVersion: message.documentVersion,
+    requestId: message.requestId,
+    editId: message.editId,
+    ...result,
+  });
+}
+
+/**
+ * Reply to or delete an inline comment thread (`<!-- THREAD`). The page only names the source
+ * lines: the host re-reads them, refuses anything that is not exactly one thread comment, and
+ * changes those lines alone (one undo step), so the rest of the file stays as it was.
+ */
+function handleThreadChange(
+  preview: ActivePreview,
+  message: RegisteredPreviewMessage,
+  action: "reply" | "delete",
+): Thenable<void> | undefined {
+  const type = action === "reply" ? "previewThreadReplyResult" : "previewThreadDeleteResult";
+  const fail = (reason: string): undefined => {
+    postThreadResult(preview, type, message, { ok: false, reason });
+    return undefined;
+  };
+  if (preview.readOnly) return fail("Editing a thread needs a trusted workspace.");
+  if (preview.activeBlockEdit) return fail("Save or cancel the open Markdown edit before changing a thread.");
+  const document = currentPreviewDocument(preview, message);
+  if (!document) return fail("The preview is out of date. Try again once it has refreshed.");
+  const first = message.line as number;
+  const last = message.endLine as number;
+  if (last > document.lineCount) return fail("The thread is no longer in the source. Refresh the preview.");
+  const threadLines: string[] = [];
+  for (let index = first - 1; index <= last - 1; index += 1) threadLines.push(document.lineAt(index).text);
+  if (!isThreadSource(threadLines)) return fail("The thread is no longer in the source. Refresh the preview.");
+
+  const sourceEditor = vscode.window.visibleTextEditors.find((candidate) =>
+    documentKey(candidate.document) === documentKey(document));
+  const run = (range: vscode.Range, replacement: string): Thenable<boolean> => sourceEditor
+    ? sourceEditor.edit((builder) => builder.replace(range, replacement), {
+      undoStopBefore: true,
+      undoStopAfter: true,
+    })
+    : (() => {
+      const edit = new vscode.WorkspaceEdit();
+      edit.replace(document.uri, range, replacement);
+      return vscode.workspace.applyEdit(edit);
+    })();
+  const finish = (applied: Thenable<boolean>): Thenable<void> => applied.then((done) => {
+    postThreadResult(preview, type, message, done
+      ? { ok: true }
+      : { ok: false, reason: "VS Code could not apply the change." });
+  }, (error: unknown) => {
+    postThreadResult(preview, type, message, {
+      ok: false,
+      reason: error instanceof Error ? error.message : String(error),
+    });
+  });
+
+  if (action === "delete") {
+    const before = first >= 2 ? document.lineAt(first - 2).text : undefined;
+    const after = last < document.lineCount ? document.lineAt(last).text : undefined;
+    const removal = threadDeleteRange(threadLines.length, before, after);
+    const startLine = first - 1 + removal.fromOffset;
+    const endLine = startLine + removal.count - 1;
+    // Remove whole lines: through the start of the line after, or the end of the file.
+    const range = endLine + 1 < document.lineCount
+      ? new vscode.Range(startLine, 0, endLine + 1, 0)
+      : new vscode.Range(
+        startLine > 0 ? new vscode.Position(startLine - 1, document.lineAt(startLine - 1).text.length) : new vscode.Position(0, 0),
+        document.lineAt(endLine).range.end,
+      );
+    return finish(run(range, ""));
+  }
+
+  return resolveAuthor({
+    setting: readCommentsConfiguration(vscode.workspace.getConfiguration(COMMENTS_CONFIGURATION_SECTION)).authorName,
+    gitName: () => headBaseline.userName(document.uri),
+    osUserName: () => os.userInfo().username,
+  }).then((author) => {
+    const current = currentPreviewDocument(preview, message);
+    if (!current || current.version !== document.version) {
+      return fail("The document changed meanwhile. Try again.");
+    }
+    const edit = threadReplyEdit(threadLines, author, formatThreadDate(new Date()), message.text as string);
+    if (!edit) return fail("The reply could not be added to this thread.");
+    const lineIndex = first - 1 + edit.fromLine;
+    const eol = document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
+    const range = document.lineAt(lineIndex).range;
+    return finish(run(range, edit.lines.join(eol)));
   });
 }
 
@@ -3719,6 +3839,8 @@ registeredMessageHandlers.set("previewEditFlushed", (preview, message) => {
 });
 
 registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
+registeredMessageHandlers.set("previewThreadReply", (preview, message) => handleThreadChange(preview, message, "reply"));
+registeredMessageHandlers.set("previewThreadDelete", (preview, message) => handleThreadChange(preview, message, "delete"));
 registeredMessageHandlers.set("previewBlockMove", handleBlockMove);
 registeredMessageHandlers.set("previewBlocksCopy", handleBlocksCopyCut);
 registeredMessageHandlers.set("previewBlocksCut", handleBlocksCopyCut);
@@ -4840,6 +4962,7 @@ function followActiveEditor(editor: vscode.TextEditor | undefined): void {
 
 export function activate(context: vscode.ExtensionContext): void {
   extensionRootUri = context.extensionUri;
+  refreshThreadAuthor(vscode.workspace.workspaceFolders?.[0]?.uri);
   preloadMystEngine();
   previewThemeModeStorage = context.workspaceState;
   previewDescriptionStorage = context.workspaceState;
