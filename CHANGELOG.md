@@ -7,6 +7,9 @@
   scroll so the top of the block is out of view it stays at the top of the viewport (below the
   preview controls) until the block ends. It also stays visible in narrow panes (360 and 460 px),
   where it wraps onto several rows inside the pane. The text and the cursor never move.
+- A linked file changed on disk (by a save, git or another tool) now refreshes its excerpt and
+  title in the preview reliably on Linux too: the file's folder is watched directly instead of
+  only through VS Code's workspace watcher, which could miss the change.
 - Long words and bare URLs now wrap inside their paragraph, list item, quote or table cell instead
   of widening the page and making it scroll horizontally.
 - An invalid Mermaid diagram now shows one error line, however many times the theme changes, with
