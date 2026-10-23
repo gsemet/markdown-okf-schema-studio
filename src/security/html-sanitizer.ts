@@ -103,6 +103,9 @@ function safeTableStyleValue(property: string, value: string): string | undefine
   if (property === "background" && SAFE_LINEAR_GRADIENT.test(value)) {
     return value;
   }
+  if (property === "width" && /^(?:\d{1,2}(?:\.\d{1,2})?|100)%$/u.test(value)) {
+    return value;
+  }
   if (property === "-webkit-background-clip" && value === "text") {
     return value;
   }

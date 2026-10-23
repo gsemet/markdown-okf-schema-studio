@@ -28,6 +28,8 @@ export interface EditPaletteDeps {
   getCaretRect?(): CaretRect | undefined;
   /** Runs an edit as one native, undoable step in the control (and autosaves). */
   applyTextEdit(edit: TextEdit): void;
+  /** Says why an action made no edit (`EditAction.explain`), for example in the editor's status line. */
+  notify?(message: string): void;
   /** Asks the host for the entries of a `hostList` action; `done` is called once, maybe late. */
   requestList?(kind: "targets" | "citations", done: (result: EditPaletteChoiceList) => void): void;
   /**
@@ -155,6 +157,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     thread: svg("M4 4h16v12H10l-5 4v-4H4z"),
     alert: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5v5.5M12 16v.5") + caret,
     checkbox: svg("M5 5h14v14H5zM8.5 12l2.5 2.5 4.5-5"),
+    listTable: svg("M4 5h16v14H4zM4 10h16M9 5v14M6 7.5h.01M6 14.5h.01M12 14.5h6"),
+    pipeTable: svg("M4 5h16v14H4zM4 10h16M10 5v14M15 5v14"),
     htmlTable: svg("M4 5h16v14H4zM4 10h16M9 12.5l-1.7 1.7L9 16M15 12.5l1.7 1.7L15 16"),
     details: svg("M5 5l4 4 4-4M5 14h14M5 19h10"),
     footnote: svg("M5 9h8M9 5v10M5 19h14M16 5.5l1.5-1v5"),
@@ -334,7 +338,22 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       ...(arg === undefined ? {} : { arg }),
     });
     if (edit) deps.applyTextEdit(edit);
-    else control.focus({ preventScroll: true });
+    else {
+      control.focus({ preventScroll: true });
+      explainRefusal(action, arg);
+    }
+  }
+
+  function explainRefusal(action: EditAction, arg?: string): void {
+    const control = deps.getControl();
+    const reason = action.explain?.({
+      value: String(control.value ?? ""),
+      selectionStart: Number(control.selectionStart),
+      selectionEnd: Number(control.selectionEnd),
+      scope,
+      ...(arg === undefined ? {} : { arg }),
+    });
+    if (reason) deps.notify?.(reason);
   }
 
   /** Focus left the popover for something outside the editor frame: the normal final save. */
@@ -1036,6 +1055,14 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       if (!edit) {
         deps.applyTextEdit({ start, end, text: "", selectionStart: start, selectionEnd: start });
         control.focus({ preventScroll: true });
+        const reason = action.explain?.({
+          value: removed,
+          selectionStart: start,
+          selectionEnd: start,
+          scope,
+          ...(entry.arg === undefined ? {} : { arg: entry.arg }),
+        });
+        if (reason) deps.notify?.(reason);
         return;
       }
       // Positions of the text without the query, mapped back onto the original text.

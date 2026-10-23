@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- MyST `{list-table}` directives now render like pipe tables, with their title, `:header-rows:`
+  (any number, including none), `:widths:` and `:align:`, and a click on one opens the whole
+  directive for editing. New List table and Pipe table buttons (palette and `/` menu) convert the
+  table at the caret between pipe, `{list-table}` and simple HTML tables, never to HTML, in one
+  undo step; the table bar also gets a List table button. A conversion that would lose content (a
+  list-table cell with several lines or block content, a title, a label or several header rows
+  going to a pipe table) shows a message and changes nothing.
 - New inline comment threads: a `<!-- THREAD` comment with `Author (YYYY-MM-DD HH:MM):` headers and
   indented messages shows in the preview as a green chip with a speech bubble. Click it to read the
   messages in a box, reply (your name and the time are added) or delete the thread; the rest of the

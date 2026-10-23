@@ -120,7 +120,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   const gfmReal = gfm.filter((id) => id !== "gfmOnly");
   assert.deepEqual(myst, [
     ...gfmReal, "admonition", "deflist", "math", "sub", "sup", "label",
-    "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd", "gfmOnly", "mystOnly",
+    "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd", "gfmOnly", "mystOnly",
   ]);
 });
 
@@ -141,7 +141,7 @@ test("P6: the real registry shows the MyST-specific buttons in MyST mode only, p
   const gfmOnly = ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"];
   const mystOnly = [
     "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
-    "tableCaption", "figure", "roleKbd",
+    "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",
   ];
   assert.deepEqual(gfm, [...strict, ...gfmOnly]);
   assert.deepEqual(myst, [...gfm, ...mystOnly]);
@@ -934,4 +934,68 @@ test("T34: the code swatch button shows only with the caret in a colour code and
   byAttr(menu, "data-color-swatch")[0]!.dispatch("click", click);
   assert.equal(h.textbox.value.startsWith("a #c00 b #"), true);
   assert.equal(h.textbox.value.includes("rgb("), false);
+});
+
+// CR 038: the table conversion buttons.
+function openTableConversion(value: string, caret: number) {
+  const textbox = {
+    value, selectionStart: caret, selectionEnd: caret, focused: 0,
+    focus() { textbox.focused += 1; },
+  };
+  const notices: string[] = [];
+  const edits: Array<{ start: number; end: number; text: string }> = [];
+  const palette = createEditPalette(fakeDocument(), {
+    actions: createEditActions([], createMarkdownTableTools()),
+    getControl: () => textbox,
+    applyTextEdit: (edit) => {
+      edits.push(edit);
+      textbox.value = textbox.value.slice(0, edit.start) + edit.text + textbox.value.slice(edit.end);
+    },
+    notify: (message) => notices.push(message),
+    mode: "myst",
+  });
+  palette.updateAvailability();
+  return { palette, root: palette.element as unknown as FakeElement, textbox, notices, edits };
+}
+
+test("CR038: List table shows with the caret in a pipe table, Pipe table with it in a list-table", () => {
+  const pipe = openTableConversion("| a | b |\n| --- | --- |\n| 1 | 2 |", 3);
+  assert.equal(button(pipe.root, "listTable").getAttribute("hidden"), null);
+  assert.equal(button(pipe.root, "pipeTable").getAttribute("hidden"), "true");
+  button(pipe.root, "listTable").dispatch("click", click);
+  assert.equal(pipe.edits.length, 1, "one edit, so one undo step");
+  assert.equal(pipe.textbox.value.startsWith("```{list-table}"), true);
+  const text = openTableConversion("just text", 3);
+  assert.equal(button(text.root, "listTable").getAttribute("hidden"), "true");
+  assert.equal(button(text.root, "pipeTable").getAttribute("hidden"), "true");
+});
+
+test("CR038: a refused conversion changes nothing and tells why through notify", () => {
+  const source = "```{list-table} A title\n:header-rows: 1\n\n* - a\n  - b\n```";
+  const h = openTableConversion(source, 5);
+  button(h.root, "pipeTable").dispatch("click", click);
+  assert.equal(h.edits.length, 0);
+  assert.equal(h.textbox.value, source);
+  assert.equal(h.notices.length, 1);
+  assert.match(h.notices[0], /title/u);
+  assert.equal(h.textbox.focused > 0, true, "the focus stays in the text box");
+});
+
+test("CR038: the slash menu offers the conversion only inside a table of the other form", () => {
+  const pipe = openTableConversion("| a |\n| --- |\n| 1 |", 3);
+  assert.deepEqual(pipe.palette.menuEntries().map((entry) => entry.id).filter((id) => id.endsWith("Table") && id !== "htmlTable" && id !== "tableCaption"),
+    ["listTable"]);
+  const list = openTableConversion("```{list-table}\n\n* - a\n```", 20);
+  assert.equal(list.palette.menuEntries().some((entry) => entry.id === "pipeTable"), true);
+  assert.equal(list.palette.menuEntries().some((entry) => entry.id === "listTable"), false);
+});
+
+test("CR038: a refused conversion from the slash menu removes the query and tells why", () => {
+  const source = "```{list-table} A title\n\n* - a\n/pipe\n```";
+  const h = openTableConversion(source, 5);
+  const start = source.indexOf("/pipe");
+  h.palette.runMenuEntry("pipeTable", { start, end: start + 5 });
+  assert.equal(h.textbox.value, source.slice(0, start) + source.slice(start + 5));
+  assert.equal(h.notices.length, 1);
+  assert.match(h.notices[0], /title/u);
 });

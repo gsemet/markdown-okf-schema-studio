@@ -156,7 +156,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
       "rule", "table",
       "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
-      "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd",
+      "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",
     ],
   );
   for (const action of registry.actions) {
@@ -167,7 +167,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
       "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     ].includes(action.id);
     const myst = ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
-      "tableCaption", "figure", "roleKbd"].includes(action.id);
+      "tableCaption", "listTable", "pipeTable", "figure", "roleKbd"].includes(action.id);
     assert.deepEqual(action.modes, myst ? ["myst"] : github ? ["gfm"] : ["strict"], action.id);
     if (action.slash?.menuOnly) assert.equal(action.shortcut, undefined, "no shortcut: " + action.id);
     assert.ok(action.scopes.includes("block"));
@@ -1334,4 +1334,90 @@ test("thread inserts an empty comment thread after the block, with the author an
   assert.deepEqual(action.modes, ["strict"]);
   assert.equal(action.group, "annotation");
   assert.deepEqual(action.scopes, ["block"]);
+});
+
+// CR 038: converting between pipe tables, {list-table} directives and simple HTML tables.
+const LT_PIPE = "| Name | Qty |\n| --- | --- |\n| apple | 3 |";
+const LT_LIST = "```{list-table}\n:header-rows: 1\n\n* - Name\n  - Qty\n* - apple\n  - 3\n```";
+
+test("CR038: listTable and pipeTable are MyST block actions with no shortcut", () => {
+  for (const id of ["listTable", "pipeTable"]) {
+    const action = registry.byId.get(id)!;
+    assert.deepEqual(action.modes, ["myst"], id);
+    assert.deepEqual(action.scopes, ["block"], id);
+    assert.equal(action.shortcut, undefined, id);
+  }
+});
+
+test("CR038: listTable converts the pipe table under the caret in place", () => {
+  const value = "Intro\n\n" + LT_PIPE + "\n\nAfter";
+  const caret = value.indexOf("apple") + 2;
+  const out = applyTo("listTable", value, [caret, caret])!;
+  assert.equal(out.value, "Intro\n\n" + LT_LIST + "\n\nAfter");
+  assert.equal(out.value.slice(out.selection[0]).startsWith("\n\nAfter"), true, "caret after the fence");
+});
+
+test("CR038: pipeTable converts the list-table under the caret from any line of it", () => {
+  const value = "Intro\n\n" + LT_LIST + "\n\nAfter";
+  for (const at of [value.indexOf("```{"), value.indexOf("* - apple") + 3, value.lastIndexOf("```")]) {
+    const out = applyTo("pipeTable", value, [at, at])!;
+    assert.equal(out.value, "Intro\n\n" + LT_PIPE + "\n\nAfter", String(at));
+  }
+});
+
+test("CR038: the conversion round-trips and keeps the neighbouring tables and lines", () => {
+  const value = LT_PIPE + "\n\ntext\n\n" + LT_PIPE;
+  const caret = value.lastIndexOf("apple");
+  const listed = applyTo("listTable", value, [caret, caret])!;
+  assert.equal(listed.value, LT_PIPE + "\n\ntext\n\n" + LT_LIST);
+  const back = applyTo("pipeTable", listed.value, [listed.value.lastIndexOf("apple"), listed.value.lastIndexOf("apple")])!;
+  assert.equal(back.value, value);
+});
+
+test("CR038: a simple HTML table converts to either form", () => {
+  const html = "<table>\n  <thead>\n    <tr>\n      <th>Name</th>\n      <th>Qty</th>\n    </tr>\n  </thead>\n"
+    + "  <tbody>\n    <tr>\n      <td>apple</td>\n      <td>3</td>\n    </tr>\n  </tbody>\n</table>";
+  const value = "before\n\n" + html + "\n\nafter";
+  const caret = value.indexOf("apple");
+  assert.equal(applyTo("pipeTable", value, [caret, caret])!.value, "before\n\n" + LT_PIPE + "\n\nafter");
+  assert.equal(applyTo("listTable", value, [caret, caret])!.value, "before\n\n" + LT_LIST + "\n\nafter");
+});
+
+test("CR038: no edit and no table: the buttons are not available outside a table", () => {
+  for (const id of ["listTable", "pipeTable"]) {
+    const action = registry.byId.get(id)!;
+    const ctx = { value: "plain text", selectionStart: 2, selectionEnd: 2, scope: "block" as const };
+    assert.equal(action.apply(ctx), undefined, id);
+    assert.equal(action.explain!(ctx), undefined, id);
+    assert.equal(action.available!(ctx), false, id);
+  }
+});
+
+test("CR038: availability follows the form of the table at the caret", () => {
+  const at = (value: string, id: string): boolean => {
+    const caret = value.indexOf("apple");
+    return registry.byId.get(id)!.available!({ value, selectionStart: caret, selectionEnd: caret, scope: "block" });
+  };
+  assert.deepEqual([at(LT_PIPE, "listTable"), at(LT_PIPE, "pipeTable")], [true, false]);
+  assert.deepEqual([at(LT_LIST, "listTable"), at(LT_LIST, "pipeTable")], [false, true]);
+});
+
+test("CR038: a conversion that would lose content changes nothing and says why", () => {
+  const multiLine = "```{list-table}\n:header-rows: 1\n\n* - a\n  - b\n* - c\n  - d\n\n    second paragraph\n```";
+  const caret = multiLine.indexOf("- c");
+  const ctx = { value: multiLine, selectionStart: caret, selectionEnd: caret, scope: "block" as const };
+  const action = registry.byId.get("pipeTable")!;
+  assert.equal(action.apply(ctx), undefined);
+  assert.match(action.explain!(ctx)!, /several lines or block content/u);
+  const titled = "```{list-table} Title\n:header-rows: 1\n\n* - a\n  - b\n```";
+  const titledCtx = { value: titled, selectionStart: 5, selectionEnd: 5, scope: "block" as const };
+  assert.equal(action.apply(titledCtx), undefined);
+  assert.match(action.explain!(titledCtx)!, /title/u);
+});
+
+test("CR038: the conversion actions without table tools never throw", () => {
+  const bare = createEditActions();
+  const ctx = { value: LT_PIPE, selectionStart: 3, selectionEnd: 3, scope: "block" as const };
+  assert.equal(bare.byId.get("listTable")!.apply(ctx), undefined);
+  assert.equal(bare.byId.get("pipeTable")!.available!(ctx), false);
 });

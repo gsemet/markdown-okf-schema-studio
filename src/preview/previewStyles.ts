@@ -847,12 +847,12 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   stroke-width: 1.7;
 }
 
-.sphinx-preview-table-menu [data-sphinx-table-group="column"] {
+.sphinx-preview-table-menu :is([data-sphinx-table-group="column"], [data-sphinx-table-group="table"]) {
   position: relative;
   margin-inline-start: 4px;
 }
 
-.sphinx-preview-table-menu [data-sphinx-table-group="column"]::before {
+.sphinx-preview-table-menu :is([data-sphinx-table-group="column"], [data-sphinx-table-group="table"])::before {
   position: absolute;
   inset-block: 6px;
   inset-inline-start: -4px;
@@ -3573,6 +3573,16 @@ html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > 
 #sphinx-myst-preview-content table[align="right"] {
   margin-inline-start: auto;
   margin-inline-end: 0;
+}
+
+/* A {list-table} cell holds a paragraph: it adds no space of its own, so the rows are as tall as a pipe table's. */
+#sphinx-myst-preview-content :where(th, td) > p:first-child { margin-top: 0; }
+#sphinx-myst-preview-content :where(th, td) > p:last-child { margin-bottom: 0; }
+
+/* A table with :widths: (a colgroup) fills the column and splits it by those widths. */
+#sphinx-myst-preview-content table:has(> colgroup) {
+  display: table;
+  width: 100%;
 }
 
 #sphinx-myst-preview-content hr {

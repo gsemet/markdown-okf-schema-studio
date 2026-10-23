@@ -216,13 +216,16 @@ test("P11: a slash typed while text is selected does not open the menu", () => {
 // ---------------------------------------------------------------------------------------------
 // One source of truth: the palette's registry and mode filter
 
+const CARET_DEPENDENT = ["colorCode", "listTable", "pipeTable"];
+
 test("P11: the menu lists exactly the actions of the palette for each mode", () => {
   const expected: Record<string, string[]> = {};
   for (const mode of ["strict", "gfm", "myst"] as const) {
     const h = setup(mode);
     const buttons = buttonIds(h.palette.element as unknown as FakeElement);
     assert.equal(buttons.includes("bulletList") || buttons.includes("numberedList"), false, "the list entries have no button");
-    const fromPalette = buttons.filter((id) => id !== "colorCode");
+    // The caret-dependent buttons are listed only with the caret in what they act on.
+    const fromPalette = buttons.filter((id) => !CARET_DEPENDENT.includes(id));
     const fromMenu = [...new Set(h.palette.menuEntries().map((entry) => entry.id))];
     // The palette's actions in the same order, plus exactly the two menu-only list entries.
     assert.deepEqual(fromMenu.filter((id) => id !== "bulletList" && id !== "numberedList"), fromPalette, mode + ": same actions, same order");
@@ -242,7 +245,7 @@ test("P11: the table cell palette lists only the actions allowed in a cell", () 
   const h = setup("myst", "", "cell");
   const entries = h.palette.menuEntries();
   const ids = [...new Set(entries.map((entry) => entry.id))];
-  assert.deepEqual(ids, buttonIds(h.palette.element as unknown as FakeElement).filter((id) => id !== "colorCode"));
+  assert.deepEqual(ids, buttonIds(h.palette.element as unknown as FakeElement).filter((id) => !CARET_DEPENDENT.includes(id)));
   assert.equal(ids.includes("bulletList") || ids.includes("numberedList"), false, "no list entries in a cell");
   for (const blockOnly of ["table", "codeFence", "quote", "rule", "alert", "admonition", "figure", "image"]) {
     assert.equal(ids.includes(blockOnly), false, blockOnly + " is a block action");

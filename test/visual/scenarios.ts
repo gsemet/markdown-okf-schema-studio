@@ -320,6 +320,18 @@ const TOCTREE_ASSERTIONS: ContentAssertion[] = [
   { message: "the text after the trees renders", selector: `${MAIN} p`, text: "Text after the trees renders normally." },
 ];
 
+const LIST_TABLE_ASSERTIONS: ContentAssertion[] = [
+  { message: "the pipe table and the two list-tables are three tables", selector: `${MAIN} table`, count: 3 },
+  { message: "the list-table title is the caption of its figure", selector: `${MAIN} figure figcaption`, count: 1, text: "Fruit prices" },
+  { message: "the list-table header cells look like the pipe table's", selector: `${MAIN} figure:has(figcaption) table th`, count: 2, css: { fontWeight: "600" } },
+  { message: "the list-table keeps one header row and two body rows", selector: `${MAIN} figure:has(figcaption) table`, count: 1, expr: "(() => { const t = document.querySelector('#sphinx-myst-preview-content figure:has(figcaption) table'); return t.querySelectorAll('thead tr').length === 1 && t.querySelectorAll('tbody tr').length === 2; })()" },
+  { message: "the list-table cell shows its inline Markdown", selector: `${MAIN} figure:has(figcaption) table td strong`, count: 1, text: "kilo" },
+  { message: "the cell paragraph adds no space above or below the text", selector: `${MAIN} figure:has(figcaption) table td > p`, min: 1, css: { marginTop: "0px", marginBottom: "0px" } },
+  { message: ":widths: gives the first column a quarter of the table", selector: `${MAIN} figure:has(figcaption) table col`, count: 2, expr: "(() => { const t = document.querySelector('#sphinx-myst-preview-content figure:has(figcaption) table'); const ratio = t.querySelector('th:nth-child(1)').getBoundingClientRect().width / t.getBoundingClientRect().width; return ratio > 0.2 && ratio < 0.3; })()" },
+  { message: "the second list-table has two header rows", selector: `${MAIN} table`, min: 3, expr: "(() => { const tables = document.querySelectorAll('#sphinx-myst-preview-content table'); return tables[2].querySelectorAll('thead tr').length === 2 && tables[2].querySelectorAll('tbody tr').length === 2; })()" },
+  { message: "every table is inside the pane", selector: `${MAIN} table`, insidePane: true },
+];
+
 const MYST_GALLERY_ASSERTIONS: ContentAssertion[] = [
   { message: "a reference links to its label", selector: `${MAIN} a[data-sphinx-preview-navigation='#gallery-target']`, count: 1, text: "Labels and references" },
   { message: "the dropdown is a closed details block with its summary", selector: `${MAIN} details`, count: 1, text: "Read more", expr: "document.querySelector('#sphinx-myst-preview-content details').open === false" },
@@ -2206,6 +2218,16 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     fullPage: true,
     contentAssertions: TOCTREE_ASSERTIONS,
     description: `Three {toctree} lists: with caption and a missing target, a glob and a hidden one, ${theme}, 900 px pane.`,
+  })),
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    id: `myst/v${27 + index}-list-table-full-${theme}-900`,
+    fixture: "46-list-table",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: LIST_TABLE_ASSERTIONS,
+    description: `A pipe table and two {list-table} directives (a titled one with :widths: and a centred table, one with two header rows), ${theme}, 900 px pane: the list-tables use the pipe table's cell, header and border styles.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
     id: `diagrams/v0${8 + index}-mermaid-syntax-error-${theme}-900`,

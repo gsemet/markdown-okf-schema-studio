@@ -104,6 +104,11 @@ export interface EditAction {
    */
   available?(ctx: EditActionContext): boolean;
   /**
+   * Why `apply` returned no edit, when the user should be told (a table conversion that would lose
+   * content). The palette shows it through its `notify` hook. Absent or `undefined`: nothing to say.
+   */
+  explain?(ctx: EditActionContext): string | undefined;
+  /**
    * The value the button stands for at the caret (the colour code under it): the button shows it
    * as a swatch and its popover starts on it, with no tabs, and replaces it in place.
    */
@@ -1060,6 +1065,77 @@ export function createEditActions(
       "    </tr>", "  </tbody>", "</table>",
     ].join("\n");
     return insertBlockAfterSelection(ctx, body, "Column 1");
+  }
+
+  /**
+   * The table around the caret in any form the conversion reads, as the text range to replace: a
+   * `{list-table}` directive (its fences included), an HTML `<table>` block or a pipe table.
+   */
+  function anyTableAtCaret(ctx: EditActionContext): { start: number; end: number; text: string } | undefined {
+    if (!tableTools) return undefined;
+    const { value } = ctx;
+    const lines = value.split("\n");
+    const offsets: number[] = [];
+    let running = 0;
+    for (const line of lines) {
+      offsets.push(running);
+      running += line.length + 1;
+    }
+    const caretLine = Math.max(0, value.slice(0, ctx.selectionStart).split("\n").length - 1);
+    const rangeOf = (first: number, last: number) => ({
+      start: offsets[first],
+      end: offsets[last] + lines[last].length,
+      text: value.slice(offsets[first], offsets[last] + lines[last].length),
+    });
+    // A `{list-table}` directive: the nearest opener at or above the caret whose closing fence is
+    // at or below it.
+    for (let first = caretLine; first >= 0; first -= 1) {
+      const opener = /^([ \t]*)(`{3,}|~{3,}|:{3,})\{list-table\}/u.exec(lines[first]);
+      if (!opener) continue;
+      for (let last = first + 1; last < lines.length; last += 1) {
+        const text = lines[last].trim();
+        if (text.length >= opener[2].length && text === opener[2][0].repeat(text.length)) {
+          if (last >= caretLine) return rangeOf(first, last);
+          break;
+        }
+      }
+    }
+    // An HTML table: its `<table` line at or above the caret to its `</table>` line below.
+    let first = caretLine;
+    while (first >= 0 && lines[first].trim() !== "" && !/^\s*<table[\s>]/iu.test(lines[first])) first -= 1;
+    if (first >= 0 && /^\s*<table[\s>]/iu.test(lines[first])) {
+      for (let last = first; last < lines.length && lines[last].trim() !== ""; last += 1) {
+        if (/<\/table\s*>\s*$/iu.test(lines[last])) {
+          if (last >= caretLine) return rangeOf(first, last);
+          break;
+        }
+      }
+    }
+    const pipe = tableAtCaret(ctx);
+    return pipe ? { start: pipe.start, end: pipe.end, text: value.slice(pipe.start, pipe.end) } : undefined;
+  }
+
+  /** The conversion of the table at the caret to `target`, or the reason it cannot be done. */
+  function convertTableAtCaret(
+    ctx: EditActionContext, target: "pipe" | "list-table",
+  ): { edit?: TextEdit; reason?: string } {
+    if (!validSelection(ctx) || !tableTools) return {};
+    const found = anyTableAtCaret(ctx);
+    if (!found) return {};
+    const result = tableTools.convertTable(found.text, target);
+    if (!result) return {};
+    if (!result.ok) return { reason: result.reason };
+    const end = found.start + result.text.length;
+    return {
+      edit: { start: found.start, end: found.end, text: result.text, selectionStart: end, selectionEnd: end },
+    };
+  }
+
+  /** Shown for the table-conversion buttons while the caret is in a table of another form. */
+  function tableKindAt(ctx: EditActionContext): "pipe" | "list-table" | "html" | undefined {
+    if (!validSelection(ctx) || !tableTools) return undefined;
+    const found = anyTableAtCaret(ctx);
+    return found ? tableTools.detectTable(found.text) : undefined;
   }
 
   const ALIGNMENTS = ["left", "center", "right"];
@@ -2145,6 +2221,38 @@ export function createEditActions(
       modes: ["myst"],
       scopes: ["block"],
       apply: tableCaption,
+    },
+    {
+      id: "listTable",
+      slash: { aliases: ["list-table", "table", "convert"] },
+      label: "List table",
+      title: "Convert the pipe or HTML table at the caret to a {list-table}",
+      icon: "listTable",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      available: (ctx) => {
+        const kind = tableKindAt(ctx);
+        return kind === "pipe" || kind === "html";
+      },
+      explain: (ctx) => convertTableAtCaret(ctx, "list-table").reason,
+      apply: (ctx) => convertTableAtCaret(ctx, "list-table").edit,
+    },
+    {
+      id: "pipeTable",
+      slash: { aliases: ["pipe", "table", "convert"] },
+      label: "Pipe table",
+      title: "Convert the {list-table} or HTML table at the caret to a Markdown pipe table",
+      icon: "pipeTable",
+      group: "myst",
+      modes: ["myst"],
+      scopes: ["block"],
+      available: (ctx) => {
+        const kind = tableKindAt(ctx);
+        return kind === "list-table" || kind === "html";
+      },
+      explain: (ctx) => convertTableAtCaret(ctx, "pipe").reason,
+      apply: (ctx) => convertTableAtCaret(ctx, "pipe").edit,
     },
     {
       id: "figure",
