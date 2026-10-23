@@ -91,7 +91,12 @@ export interface Scenario {
   theme: string;
   /** Options of the static page (read-only, strict fields, content width, ...). Default: the standard page. */
   render?: ScenarioRenderOptions;
-  plantumlExpectation?: "success" | "executable-not-found" | "unconfigured";
+  /**
+   * The PlantUML outcome the page checks. "success", "executable-not-found" and "unconfigured" are
+   * rendered by the host through the JAR/PATH pipeline (useJar on); "builtin" and
+   * "builtin-unsupported" by the engine bundled into the webview (the default).
+   */
+  plantumlExpectation?: "success" | "executable-not-found" | "unconfigured" | "builtin" | "builtin-unsupported";
   linkDetailsChecks?: boolean;
   horizontalOverflow?: boolean;
   previewThemeMode?: "white" | "cream" | "dark";
@@ -361,6 +366,33 @@ const MERMAID_ERROR_ASSERTIONS: ContentAssertion[] = [
   { message: "the error holds one closed details block with the parser message", selector: ".myst-mermaid-error details.myst-mermaid-error-details", count: 1, expr: "(() => { const d = document.querySelector('.myst-mermaid-error details'); return d.open === false && d.querySelector('pre').textContent.trim().length > 0; })()" },
   { message: "no rendered picture", selector: "img.myst-mermaid-image", count: 0 },
   { message: "the source stays available", selector: "details.myst-mermaid-source", count: 1, text: "flowchart TD" },
+  { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
+];
+
+/** The decoded SVG text of the first built-in PlantUML picture (an expression for `expr`). */
+const FIRST_PLANTUML_SVG = "decodeURIComponent(document.querySelector('img.myst-plantuml-image').getAttribute('src').split(',').slice(1).join(','))";
+
+function plantUmlBuiltinAssertions(dark: boolean): ContentAssertion[] {
+  return [
+    { message: "both diagrams are rendered by the built-in engine", selector: '.myst-plantuml-diagram[data-plantuml-engine="builtin"][data-render-state="rendered"]', count: 2 },
+    { message: "each diagram is one visible picture", selector: "img.myst-plantuml-image", count: 2, visible: true, insidePane: true },
+    { message: "no error message", selector: ".myst-plantuml-error", count: 0 },
+    { message: `the engine drew the ${dark ? "dark" : "light"} variant`, selector: ".myst-plantuml-diagram", attr: { name: "data-plantuml-dark", value: String(dark) } },
+    { message: "the picture holds the diagram labels", selector: "img.myst-plantuml-image", expr: `${FIRST_PLANTUML_SVG}.includes('>Alice<')` },
+    { message: `the labels are ${dark ? "light on the dark" : "dark on the light"} page`, selector: "img.myst-plantuml-image", expr: `/<text[^>]*fill="${dark ? "#FFFFFF" : "#000000"}"[^>]*>Alice</.test(${FIRST_PLANTUML_SVG})` },
+    { message: "the source stays available", selector: "details.myst-plantuml-source", count: 2, text: "Alice -> Bob" },
+    { message: "nothing is fetched from the network", selector: MAIN, expr: "performance.getEntriesByType('resource').every((entry) => entry.name.startsWith('file:'))" },
+    { message: "the text after the diagrams continues", selector: `${MAIN} > p`, text: "continues normally" },
+  ];
+}
+
+const PLANTUML_UNSUPPORTED_ASSERTIONS: ContentAssertion[] = [
+  { message: "the diagram is refused by the built-in engine, not drawn", selector: '.myst-plantuml-diagram[data-plantuml-engine="builtin"][data-render-state="unavailable"]', count: 1 },
+  { message: "one visible message names the include and its line", selector: ".myst-plantuml-error", count: 1, visible: true, text: "!include styles/common.puml (line 2)" },
+  { message: "the message hints at the useJar setting", selector: ".myst-plantuml-error", text: "markdownOkfSchemaStudio.plantuml.useJar" },
+  { message: "no picture, not even the engine error picture", selector: "img.myst-plantuml-image", count: 0 },
+  { message: "the source stays available", selector: "details.myst-plantuml-source", count: 1, text: "!include styles/common.puml" },
+  { message: "nothing is fetched from the network", selector: MAIN, expr: "performance.getEntriesByType('resource').every((entry) => entry.name.startsWith('file:'))" },
   { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
 ];
 
@@ -2440,6 +2472,30 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
     contentAssertions: MERMAID_ERROR_ASSERTIONS,
     description: `An invalid Mermaid diagram in the ${theme} theme: the error message replaces the picture, the source stays available and the text after it continues.`,
   })),
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    id: `diagrams/v${10 + index}-plantuml-builtin-${theme}-900`,
+    fixture: "48-plantuml-builtin",
+    theme,
+    plantumlExpectation: "builtin" as const,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: plantUmlBuiltinAssertions(theme === "dark"),
+    description: `A sequence and a class diagram in the ${theme} preview, drawn by the PlantUML engine bundled in the extension `
+      + "(no Java, no plantuml command, no network): two pictures in the theme colours and the sources below them.",
+  })),
+  {
+    id: "diagrams/v12-plantuml-builtin-unsupported-light-900",
+    fixture: "49-plantuml-unsupported",
+    theme: "light",
+    plantumlExpectation: "builtin-unsupported" as const,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: PLANTUML_UNSUPPORTED_ASSERTIONS,
+    description: "A diagram with a local !include in the built-in engine: instead of a broken picture, one message names the "
+      + "directive and its line and says to tick markdownOkfSchemaStudio.plantuml.useJar; the source stays available.",
+  },
   {
     id: "frontmatter-schema/v20-invalid-yaml-dark-900",
     fixture: "41-invalid-yaml",

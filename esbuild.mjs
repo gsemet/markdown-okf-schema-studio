@@ -29,6 +29,19 @@ await build({
   logLevel: "info",
 });
 
+// The PlantUML engine (@plantuml/core, MIT) needs a DOM, so it runs in the webview. Smetana layout
+// only: viz-global.js (Graphviz as WebAssembly) would need 'wasm-unsafe-eval' in the CSP.
+await build({
+  entryPoints: ["src/webview/plantumlPreview.ts"],
+  outfile: "out/bundle/plantumlPreview.js",
+  bundle: true,
+  platform: "browser",
+  target: "es2020",
+  format: "iife",
+  minify: true,
+  logLevel: "info",
+});
+
 const require = createRequire(import.meta.url);
 const katexDirectory = path.dirname(require.resolve("katex"));
 const mathAssets = "out/bundle/katex";
@@ -36,3 +49,6 @@ mkdirSync(mathAssets, { recursive: true });
 cpSync(path.join(katexDirectory, "katex.min.css"), path.join(mathAssets, "katex.min.css"));
 cpSync(path.join(katexDirectory, "fonts"), path.join(mathAssets, "fonts"), { recursive: true });
 cpSync(path.join(katexDirectory, "..", "LICENSE"), path.join(mathAssets, "LICENSE"));
+const plantUmlDirectory = path.dirname(require.resolve("@plantuml/core/package.json"));
+mkdirSync("out/bundle/plantuml", { recursive: true });
+cpSync(path.join(plantUmlDirectory, "LICENSE"), "out/bundle/plantuml/LICENSE");
