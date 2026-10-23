@@ -182,9 +182,10 @@ export async function scenarioConfExtensionWarning(page: Page, evidence: Evidenc
       await waitFor("the entry in the Problems view", async () =>
         await page.getByText(/myst_enable_extensions/u).first().isVisible().catch(() => false));
       await captureNow(evidence, page, "myst/r01-conf-extension-warning",
-        "Reading mode; conf.py enables dollarmath only and the document uses a `:::` fence. The preview "
-        + "status lists the warning (names colon_fence and myst_enable_extensions) and the Problems view "
-        + "shows the same entry at the fence line.");
+        "Reading mode; conf.py enables dollarmath only and the document uses a `:::` fence. The Problems "
+        + "view shows the warning at the fence line (it names colon_fence and myst_enable_extensions); the "
+        + "preview lists the same text in its status region, which a successful render keeps visually "
+        + "hidden (screen readers announce it).");
     } finally {
       await vscode.commands.executeCommand("workbench.action.closePanel");
     }
@@ -469,13 +470,17 @@ export async function scenarioDoubleClickRevealsSource(page: Page, evidence: Evi
         await setEditMode(page, true);
         await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: /^Paragraph 52\.$/u }).dblclick());
         await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
-        await waitFor("the host to hold the block edit", () => getActivePreviewForTests()?.blockEditOpen === true);
+        // The host holds a block edit from its first autosave on. The page posts in order, so once
+        // the autosave of a key typed after the double-click is in, a reveal of that double-click
+        // would have reached the host before it.
+        await typeText(page, "x");
+        await waitFor("the host to hold the block edit (first autosave)", () =>
+          getActivePreviewForTests()?.blockEditOpen === true);
         await press(page, "Escape");
-        // The page posts in order: a reveal of the double-click would reach the host before the cancel.
         await waitFor("the host to drop the block edit", () => getActivePreviewForTests()?.blockEditOpen === false);
+        await waitFor("Escape to restore the paragraph", () => bufferText(document) === text);
         assert.equal(getActivePreviewForTests()?.lastRevealedSourceLine, lineOf(50),
           "a double-click in edit mode reveals nothing");
-        assert.equal(bufferText(document), text, "cancelling the editor changed nothing");
         await captureNow(evidence, page, "toolbar-navigation/r06-double-click-reveals-source",
           "doubleClickToSwitchToEditor on: a double-click on Paragraph 50 in reading mode revealed its line in "
           + "the editor; in edit mode a double-click opened the block editor and revealed nothing.");
@@ -525,6 +530,8 @@ export async function scenarioUntrustedReadOnly(page: Page, evidence: Evidence):
     const frame = await currentPreviewFrame(page);
     assert.equal(await frame.locator("[data-sphinx-preview-edit-toggle]").count(), 0, "no Edit button");
     assert.notEqual(await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode"), "on");
+    // The refusal toasts of the suite's earlier checks would cover the preview.
+    await vscode.commands.executeCommand("notifications.clearAll");
     await captureNow(evidence, page, "trust-security/r01-untrusted-read-only",
       "Restricted Mode window: the side preview renders the document read-only and the toolbar has no Edit button.");
   });
