@@ -56,7 +56,7 @@ import {
   invalidateStemIndex,
   resolveFrontmatterLinkRoots,
 } from "./frontmatter/fileLinks";
-import { watchLinkedTargetDirectly } from "./frontmatter/linkedTargetWatch";
+import { type LinkedTargetWatch, watchLinkedTargetDirectly } from "./frontmatter/linkedTargetWatch";
 import { invalidateConfCache, locateConfFor } from "./myst/confLocator";
 import { renderPropertiesTable, replacePropertiesTableHtml } from "./frontmatter/propertiesTable";
 import { checkboxToggleEdit } from "./render/checkboxMarkers";
@@ -280,7 +280,7 @@ interface ActivePreview {
   frontmatter?: FrontmatterResult;
   frontmatterRefreshTimer?: NodeJS.Timeout;
   linkEnrichmentTimer?: NodeJS.Timeout;
-  linkedTargetWatchers?: Map<string, vscode.Disposable>;
+  linkedTargetWatchers?: Map<string, LinkedTargetWatcher>;
   frontmatterDocumentUri?: string;
   frontmatterDocumentVersion?: number;
   frontmatterLinkResultsVersion?: number;
@@ -1296,6 +1296,14 @@ function isCurrentRender(
     && (generation === undefined || preview.enrichmentGeneration === generation);
 }
 
+/** The watchers of one linked target: the VS Code one and the direct operating-system one. */
+interface LinkedTargetWatcher {
+  dispose(): void;
+  direct: LinkedTargetWatch;
+  /** Events the VS Code watcher delivered (the direct watch counts its own). */
+  vscodeEvents: number;
+}
+
 function setFrontmatterState(
   preview: ActivePreview,
   frontmatter: FrontmatterResult,
@@ -1333,12 +1341,20 @@ function setFrontmatterState(
       };
       // The VS Code watcher of a path inside a workspace folder rides on the shared recursive
       // workspace watcher, which can miss a write on Linux: the folder is also watched directly.
-      // Both may report the same write; the link enrichment they schedule is debounced.
+      // Both may report the same write; the link enrichment they schedule is debounced. The direct
+      // watch is armed when it returns, before the properties table shows the link as resolved.
       const direct = watchLinkedTargetDirectly(target, refresh);
-      preview.linkedTargetWatchers.set(target, vscode.Disposable.from(
-        watcher, watcher.onDidChange(refresh), watcher.onDidCreate(refresh), watcher.onDidDelete(refresh),
-        new vscode.Disposable(direct),
-      ));
+      const entry: LinkedTargetWatcher = { dispose: () => undefined, direct, vscodeEvents: 0 };
+      const fromVscode = (): void => {
+        entry.vscodeEvents += 1;
+        refresh();
+      };
+      const disposable = vscode.Disposable.from(
+        watcher, watcher.onDidChange(fromVscode), watcher.onDidCreate(fromVscode), watcher.onDidDelete(fromVscode),
+        new vscode.Disposable(() => direct.dispose()),
+      );
+      entry.dispose = () => disposable.dispose();
+      preview.linkedTargetWatchers.set(target, entry);
     }
   }
 }
@@ -5260,6 +5276,15 @@ export function getActivePreviewForTests():
     activePathChanges: number;
     /** How many events the per-target watchers of linked files delivered. */
     linkedTargetEvents: number;
+    /**
+     * The linked targets the preview watches, with the state of the direct watch and the events
+     * each source delivered: what a wait for a watcher event prints when it fails.
+     */
+    linkedTargets: {
+      target: string;
+      direct: { status: "watching" | "failed" | "closed"; error?: string; events: number };
+      vscodeEvents: number;
+    }[];
     /** How many renders and deferred updates were applied as an in-place content patch. */
     contentPatches: number;
     /** The last content patches (at most 10), with the source line ranges they asked to glow. */
@@ -5321,6 +5346,11 @@ export function getActivePreviewForTests():
     renderedStages: activePreview.renderedStages,
     activePathChanges: activePreview.activePathChanges,
     linkedTargetEvents: activePreview.linkedTargetEvents,
+    linkedTargets: [...activePreview.linkedTargetWatchers ?? []].map(([target, watcher]) => ({
+      target,
+      direct: watcher.direct.state(),
+      vscodeEvents: watcher.vscodeEvents,
+    })),
     contentPatches: activePreview.contentPatches,
     updateGlowPatches: activePreview.updateGlowPatches.map((patch) => ({ ...patch, ranges: [...patch.ranges] })),
     incrementalUpdates: activePreview.configuration.incrementalUpdates,

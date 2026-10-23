@@ -61,6 +61,8 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "incoming-changes",
     "review-threads",
     "image-paste",
+    // CR 044: the watcher event of a linked target's save.
+    "linked-target-save",
   ],
   untrusted: ["untrusted-read-only"],
 };
