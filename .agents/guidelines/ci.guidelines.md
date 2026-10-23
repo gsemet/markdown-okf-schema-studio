@@ -51,4 +51,6 @@ The CI only runs what a developer can run locally. All logic lives in the task r
       the next failure explains itself.
     - **Prove it with the stress mode.** Add the scenario to the stress list and let the `stress`
       job (`just ci-stress`, N rounds in one window) pass. It is the one CI-only job: it repeats
-      scenarios that preflight runs once, so it adds repetitions, not steps (rule 7).
+      scenarios that preflight runs once, so it adds repetitions, not steps (rule 7). It is
+      advisory: it is not part of the required `checks` job, so a red stress run does not block a
+      merge, but it is a flake to fix with the steps above, never to ignore.

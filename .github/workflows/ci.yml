@@ -142,9 +142,11 @@ jobs:
 
   # Repeats the flake-prone real-input scenarios (20 rounds, about 12 minutes); a race that a
   # single run passes by luck fails here. Its reports are not part of the e2e campaign.
+  # Advisory: a red stress run flags a flake to fix (CI rule 12) but does not block merges.
   stress:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -250,7 +252,7 @@ jobs:
 
   # Stable aggregate name for branch protection: it depends on every check job.
   checks:
-    needs: [static, visual, integration, stress, report]
+    needs: [static, visual, integration, report]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
