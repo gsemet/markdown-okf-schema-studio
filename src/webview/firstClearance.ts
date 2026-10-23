@@ -19,10 +19,20 @@
  * otherwise. The edition palette sticks below it, except the palette of a first-block editor that
  * gave up the toolbar's width, which uses `--sphinx-preview-first-bar-bottom` (0 in that case).
  */
+/** What the page published, what its layout gives now, and which event measured last (tests only). */
+export interface FirstClearanceDiagnostics {
+  published: { clearance: number; inset: number; toolbarBottom: number };
+  measuredNow: { clearance: number; inset: number; bottom: number };
+  lastTrigger: string;
+  lastChangeTrigger: string;
+  updates: number;
+  settling: boolean;
+}
+
 export function installFirstClearance(
   document: Document,
   window: Window & typeof globalThis,
-): { update(): void; value(): number; inset(): number } {
+): { update(): void; value(): number; inset(): number; describe(): FirstClearanceDiagnostics } {
   const contentId = "sphinx-myst-preview-content";
   const property = "--sphinx-preview-first-clearance";
   const insetProperty = "--sphinx-preview-first-inset";
@@ -129,7 +139,19 @@ export function installFirstClearance(
     observedSection = section;
     if (section) sectionObserver.observe(section);
   };
+  // Diagnostics only: the event that ran the last update and the last one that changed a value.
+  let trigger = "install";
+  let lastTrigger = "";
+  let lastChangeTrigger = "";
+  let updates = 0;
+  const on = (name: string) => (): void => {
+    trigger = name;
+    update();
+  };
   const update = (): void => {
+    lastTrigger = trigger;
+    trigger = "page call";
+    updates += 1;
     const now = Date.now();
     if (now - windowStart > 1000) {
       windowStart = now;
@@ -139,6 +161,7 @@ export function installFirstClearance(
       if (trailing === undefined) {
         trailing = window.setTimeout(() => {
           trailing = undefined;
+          trigger = "trailing update";
           update();
         }, Math.max(0, windowStart + 1000 - now) + 1);
       }
@@ -146,6 +169,7 @@ export function installFirstClearance(
     }
     armSection();
     const changed = apply();
+    if (changed) lastChangeTrigger = lastTrigger;
     // Whatever moved the layout, it may not be done: look again on the next frames until nothing
     // changes for a while (see settle).
     if (changed) settle();
@@ -180,13 +204,13 @@ export function installFirstClearance(
     return changed;
   };
 
-  // The observers cover the events a layout announces, not every cause of a move: the toolbar can
-  // reach its final width or position (late fonts, a stylesheet, the host's own layout pass) without
-  // a size change on an observed element, and a measurement taken meanwhile stays published, wrong,
-  // until the next unrelated event (CI run 39916805010: a Description toggle under the toolbar with
-  // no inset published). After a change, the layout is therefore measured again on every animation
-  // frame until it has been unchanged for quietFrames frames in a row, so a late layout always
-  // gets a final measurement. A layout that never settles stops at maxFrames.
+  // The observers cover the events a layout announces. CI run 39916805010 published no inset while
+  // a Description toggle sat under the toolbar, with the toolbar's own bottom already final: some
+  // input of measure() moved after the last measurement without an observed event, and which one
+  // is not proved (describe() now tells on the next failure). After a change, the layout is
+  // therefore measured again on every animation frame until it has been unchanged for quietFrames
+  // frames in a row, so a late layout always gets a final measurement. A layout that never settles
+  // stops at maxFrames.
   const quietFrames = 60;
   const maxFrames = 300;
   let quiet = 0;
@@ -200,8 +224,12 @@ export function installFirstClearance(
     const tick = (): void => {
       frames += 1;
       armSection();
-      if (apply()) quiet = 0;
-      else quiet += 1;
+      if (apply()) {
+        quiet = 0;
+        lastChangeTrigger = "animation frame " + frames;
+      } else {
+        quiet += 1;
+      }
       if (quiet < quietFrames && frames < maxFrames) {
         window.requestAnimationFrame(tick);
         return;
@@ -211,10 +239,10 @@ export function installFirstClearance(
     window.requestAnimationFrame(tick);
   };
 
-  window.addEventListener("resize", update);
+  window.addEventListener("resize", on("window resize"));
   if (typeof ResizeObserver !== "undefined") {
-    sectionObserver = new ResizeObserver(update);
-    const observer = new ResizeObserver(update);
+    sectionObserver = new ResizeObserver(on("properties section resize"));
+    const observer = new ResizeObserver(on("content or toolbar resize"));
     const content = document.getElementById(contentId);
     const toolbar = document.querySelector("[data-sphinx-preview-toolbar]");
     if (content) observer.observe(content);
@@ -223,12 +251,12 @@ export function installFirstClearance(
   // Toolbar rows appear and disappear (edit mode, width mode, zoom) through attributes.
   if (typeof MutationObserver !== "undefined") {
     const toolbar = document.querySelector("[data-sphinx-preview-toolbar]");
-    if (toolbar) new MutationObserver(update).observe(toolbar, { childList: true, subtree: true, attributes: true });
+    if (toolbar) new MutationObserver(on("toolbar mutation")).observe(toolbar, { childList: true, subtree: true, attributes: true });
     // The first-block editor and the Start writing button come and go inside the column.
     const content = document.getElementById(contentId);
     // Link states, hidden toggles and text changes resize controls without adding or removing nodes.
     if (content) {
-      new MutationObserver(update).observe(content, {
+      new MutationObserver(on("content mutation")).observe(content, {
         childList: true,
         subtree: true,
         characterData: true,
@@ -236,14 +264,27 @@ export function installFirstClearance(
         attributeFilter: ["data-sphinx-preview-link-state", "hidden", "href"],
       });
     }
-    new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class", "data-sphinx-preview-edit-mode", "data-sphinx-preview-zoom", "data-sphinx-preview-width"] });
+    new MutationObserver(on("root attribute")).observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class", "data-sphinx-preview-edit-mode", "data-sphinx-preview-zoom", "data-sphinx-preview-width"] });
   }
   // A late web font (the toolbar icons, the text) changes widths without any element event.
   (document as Document & { fonts?: { addEventListener?: (type: string, listener: () => void) => void } })
-    .fonts?.addEventListener?.("loadingdone", update);
+    .fonts?.addEventListener?.("loadingdone", on("fonts loadingdone"));
   // Stylesheets, images and fonts that finish after the script ran move the controls without an event.
-  window.addEventListener("load", update);
-  (document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts?.ready?.then(update, () => undefined);
-  update();
-  return { update, value: () => Math.max(0, current), inset: () => Math.max(0, currentInset) };
+  window.addEventListener("load", on("window load"));
+  (document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts?.ready?.then(on("fonts ready"), () => undefined);
+  on("install")();
+  return {
+    update,
+    value: () => Math.max(0, current),
+    inset: () => Math.max(0, currentInset),
+    // Read-only: measuredNow differing from published means no event re-measured the last change.
+    describe: () => ({
+      published: { clearance: current, inset: currentInset, toolbarBottom: currentBottom },
+      measuredNow: measure(),
+      lastTrigger,
+      lastChangeTrigger,
+      updates,
+      settling: frameRequested,
+    }),
+  };
 }

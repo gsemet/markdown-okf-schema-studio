@@ -37,6 +37,8 @@ import { installIncomingToggle } from "./incomingToggle";
 import { installToolbarCollapse } from "./toolbarCollapse";
 import { installViewControls } from "./viewControls";
 import { installWidthMode } from "./widthMode";
+import { createEditorTrace } from "./editorTrace";
+import { installSelectAllInControls, isTextSelectAll } from "./selectAllKey";
 import type { ViewPreferences } from "../state/previewViewPreferences";
 import type { PreviewThemeMode } from "../state/previewTheme";
 import type { PreviewPanelState } from "../state/previewState";
@@ -108,6 +110,24 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   const figureTools = (${createFigureTools.toString()})();
   const createFigurePanel = ${createFigurePanel.toString()};
   const anchorPolicy = (${createAnchorPolicy.toString()})();
+  // Diagnostics only (they change nothing in the page): the last editor events, read by the tests
+  // through window.__studioDiagnostics so that a missing editor names what closed it.
+  const editorTrace = (${createEditorTrace.toString()})(40, () => (window.performance?.now?.() ?? Date.now()));
+  const traceFocus = () => {
+    const active = document.activeElement;
+    const focused = typeof document.hasFocus === "function" ? String(document.hasFocus()) : "unknown";
+    return "active=" + (active ? String(active.tagName).toLowerCase() : "none") + " pageFocus=" + focused;
+  };
+  const traceStack = () => editorTrace.callers(new Error().stack, 2);
+  editorTrace.record("page", "request " + context.requestId + " version " + context.documentVersion);
+  window.addEventListener("focus", () => editorTrace.record("page focus", traceFocus()));
+  window.addEventListener("blur", () => editorTrace.record("page blur", traceFocus()));
+  // Cmd/Ctrl+A in a text control selects that control's text and never reaches the workbench
+  // (see selectAllKey.ts: the workbench would otherwise focus the text editor in some cases).
+  (${installSelectAllInControls.toString()})(document, ${isTextSelectAll.toString()},
+    isApplePlatform(),
+    (target) => editorTrace.record("select-all kept in control",
+      (target && target.tagName ? String(target.tagName).toLowerCase() : "unknown") + " " + traceFocus()));
   const settings = {
     scrollPreviewWithEditor: context.scrollPreviewWithEditor !== false,
     scrollEditorWithPreview: context.scrollEditorWithPreview !== false,
@@ -172,6 +192,17 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   }, true);
   const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context, (navigate) => flushOpenEditorsThen(navigate));
   const firstClearance = (${installFirstClearance.toString()})(document, window);
+  try {
+    Object.defineProperty(window, "__studioDiagnostics", {
+      configurable: true,
+      value: Object.freeze({
+        trace: () => editorTrace.entries(),
+        firstClearance: () => firstClearance.describe(),
+      }),
+    });
+  } catch {
+    // Diagnostics are optional: a page that cannot expose them still works.
+  }
   const applyFigureSizes = ${applyFigureSizes.toString()};
   const applySpanColors = ${applySpanColors.toString()};
   const codeCopy = (${installCodeCopy.toString()})(document, window, (text) => vscode.postMessage({
@@ -282,6 +313,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   let activeFrontmatterEdit;
   // Latest properties-table markup the host sent while a frontmatter editor was open (T30).
   let deferredPropertiesMarkup;
+  let deferredPropertiesSeq;
   let editSequence = 0;
   let pendingBlockNavigation = savedState?.pendingBlockNavigation;
   // After a move of a block selection: where the selection sits once the move is rendered, by
@@ -459,8 +491,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       if (request && state) linkHints.set(request, { state, title: link.getAttribute("title") });
     });
     // Editors are closed without cancelling: the document keeps whatever was already saved.
+    editorTrace.record("content patch", "request " + context.requestId + " -> " + next.requestId);
     deferredPropertiesMarkup = undefined;
-    closeFrontmatterEditor();
+    closeFrontmatterEditor("content patch");
     applyingContentPatch = true;
     closeBlockEdit(false);
     applyingContentPatch = false;
@@ -1052,6 +1085,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   function closeBlockEdit(cancel = false) {
     const edit = activeBlockEdit;
     if (!edit) return;
+    editorTrace.record(edit.selectedCell ? "cell editor closed" : "block editor closed",
+      (cancel ? "cancel " : "") + "line=" + edit.line + " " + traceFocus(), traceStack());
     activeBlockEdit = undefined;
     // An editor that closes without the patch of its save has nothing left to wait for.
     if (!applyingContentPatch) pendingBlockSelection = undefined;
@@ -1108,8 +1143,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (refreshButton) refreshButton.disabled = false;
   }
 
-  function closeFrontmatterEditor() {
+  function closeFrontmatterEditor(reason) {
     if (!activeFrontmatterEdit) return;
+    editorTrace.record("frontmatter editor closed",
+      (reason || "unspecified") + " field=" + activeFrontmatterEdit.fieldName + " " + traceFocus(), traceStack());
     if (pendingEditorOpen) {
       pendingEditorOpen = false;
       clearPendingFrontmatterEdit();
@@ -1125,13 +1162,19 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (deferredPropertiesMarkup !== undefined) {
       const markup = deferredPropertiesMarkup;
       deferredPropertiesMarkup = undefined;
-      applyPropertiesMarkup(markup);
+      applyPropertiesMarkup(markup, deferredPropertiesSeq);
     }
   }
 
   // Swaps the host-rendered properties section in place (T30) instead of reloading the page. The
   // markup is built and escaped by the host (propertiesTable.ts); it goes through no other path.
-  function applyPropertiesMarkup(markup) {
+  // seq numbers the host's properties messages: the page shows which one it applied last on
+  // <html data-okf-properties-seq>, so a test can wait until the page shows the host's last table.
+  function applyPropertiesMarkup(markup, seq) {
+    if (Number.isSafeInteger(seq)) {
+      document.documentElement?.setAttribute?.("data-okf-properties-seq", String(seq));
+    }
+    editorTrace.record("properties table applied", "seq " + seq);
     closeLinkTooltip();
     const main = document.getElementById?.("sphinx-myst-preview-content");
     if (!main) return;
@@ -1844,7 +1887,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       const newFieldName = flushingEditors ? control.value.trim() : control.value;
       if (newFieldName === name || (flushingEditors && newFieldName === "")) {
         cancelled = true;
-        closeFrontmatterEditor();
+        closeFrontmatterEditor("key unchanged");
         return;
       }
       if (!newFieldName.trim() || newFieldName !== newFieldName.trim()) {
@@ -1895,7 +1938,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       if (event.key === "Escape") {
         event.preventDefault?.();
         cancelled = true;
-        closeFrontmatterEditor();
+        closeFrontmatterEditor("Escape in key editor");
       } else if (event.key === "Enter") {
         event.preventDefault?.();
         saveKey();
@@ -2368,7 +2411,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         : JSON.stringify(fieldValue) === JSON.stringify(value);
       if (unchanged) {
         cancelled = true;
-        closeFrontmatterEditor();
+        closeFrontmatterEditor("save of an unchanged value");
         return;
       }
       const editId = context.requestId + "-field-" + (++editSequence);
@@ -2410,7 +2453,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       if (event.key === "Escape") {
         event.preventDefault?.();
         cancelled = true;
-        closeFrontmatterEditor();
+        closeFrontmatterEditor("Escape in value editor");
       } else if (!useListEditorValue && event.key === "Enter" && !event.isComposing) {
         const commitShortcut = event.metaKey || event.ctrlKey;
         const isTextField = control.tagName === "TEXTAREA" && fieldType === "text" && !useYamlEditor;
@@ -2444,6 +2487,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     } else {
       control.addEventListener("blur", (event) => {
         const relatedTarget = event.relatedTarget;
+        editorTrace.record("frontmatter control blur", "field=" + name + " related="
+          + (relatedTarget && relatedTarget.tagName ? String(relatedTarget.tagName).toLowerCase() : "none") + " " + traceFocus());
         if ((setNullButton && relatedTarget === setNullButton)
           || relatedTarget?.closest?.("[data-okf-frontmatter-menu]")) return;
         saveValue();
@@ -2458,6 +2503,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     displayElement?.setAttribute("hidden", "");
     valueCell.appendChild(editor);
     activeFrontmatterEdit = edit;
+    editorTrace.record("frontmatter editor opened", "field=" + name + " control=" + String(control.tagName).toLowerCase());
     if (refreshButton) refreshButton.disabled = true;
     createFrontmatterMenu(edit, valueCell, valueCell.closest?.("[data-okf-properties]"));
     resizeTextarea?.();
@@ -2857,7 +2903,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (!target || typeof target.closest !== "function" || !target.closest("[data-okf-properties]")) return;
     event.preventDefault?.();
     edit.cancel?.();
-    closeFrontmatterEditor();
+    closeFrontmatterEditor("Escape in properties");
   });
 
   document.addEventListener("keydown", (event) => {
@@ -3909,7 +3955,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       clearBlockSelection();
       labelRename.close();
       setEditHover(undefined);
-      closeFrontmatterEditor();
+      if (editMode) editorTrace.record("edit mode off", traceFocus(), traceStack());
+      closeFrontmatterEditor("edit mode off");
       if (activeBlockEdit && typeof activeBlockEdit.originalText === "string") {
         postBlockEditSave(true);
       } else {
@@ -5051,10 +5098,12 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (sameContext(message) && message.type === "previewPropertiesTable") {
       if (typeof message.markup !== "string") return;
       if (activeFrontmatterEdit) {
+        editorTrace.record("properties table deferred", "seq " + message.seq);
         deferredPropertiesMarkup = message.markup;
+        deferredPropertiesSeq = message.seq;
         return;
       }
-      applyPropertiesMarkup(message.markup);
+      applyPropertiesMarkup(message.markup, message.seq);
       return;
     }
     if (sameContext(message) && message.type === "previewPairing") {

@@ -33,3 +33,19 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     integration job, 15 for the others, 10 for the report job). A hung job must fail fast and name
     where it stopped, never run to the platform default of six hours. Never raise a timeout to
     make a slow or flaky run pass: find what waits.
+12. **A flake is a bug, fixed at its cause and proved by repetition.** A test that fails without a
+    change is not retried, and its timeout is not raised: it is a race in the product or the test.
+    - **Root cause with evidence.** Collect every failing run (`gh run view <id> --log-failed`),
+      write down what the logs prove and what they do not, and trace each code path that can
+      produce the observed state. A theory the next failure contradicts is dropped, not patched.
+    - **Fix with a deterministic readiness signal.** The test waits for a state the product
+      reports (the page echoed the render's request id, no deferred update is armed, the control
+      has the caret), never for time: no sleep, no "poll until it works", no retry loop around an
+      action. When the product itself misbehaves (an editor closes when it should not), fix the
+      product.
+    - **Failure messages carry diagnostics.** A wait or an assertion that can fail on a race says
+      what the host and the page held when it failed (state, focus, the page's event trace), so
+      the next failure explains itself.
+    - **Prove it with the stress mode.** Add the scenario to the stress list and let the `stress`
+      job (`just ci-stress`, N rounds in one window) pass. It is the one CI-only job: it repeats
+      scenarios that preflight runs once, so it adds repetitions, not steps (rule 7).

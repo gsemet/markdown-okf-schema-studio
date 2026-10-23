@@ -151,6 +151,20 @@ ci-integration:
         exit 1
     fi
 
+# Filter with STUDIO_STRESS_SCENARIOS=name,name (test/shared/stressPlan.ts). CI only: it opens a
+# VS Code window, and preflight already runs each of these scenarios once.
+# CI job "stress": repeat the flake-prone real-input scenarios REPEAT times in one VS Code window.
+ci-stress REPEAT="20":
+    #!/usr/bin/env bash
+    set -uo pipefail
+    export STUDIO_REAL_INPUT_SCENARIO=stress STUDIO_STRESS_REPEAT="{{ REPEAT }}"
+    if {{ npm }} run test:integration -- --trusted-only; then
+        echo "ci-stress: passed ({{ REPEAT }} rounds)"
+    else
+        echo "ci-stress: FAILED" >&2
+        exit 1
+    fi
+
 # CI job "report": merge the visual and integration outputs into the review index and e2e manifest.
 ci-report:
     #!/usr/bin/env bash

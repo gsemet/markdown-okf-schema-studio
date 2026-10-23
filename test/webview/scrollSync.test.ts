@@ -10814,3 +10814,56 @@ test("CR 025: a key typed with surrounding spaces is trimmed on a flush and refu
   assert.equal(saves[0].newFieldName, "renamed");
   assert.equal(saves[0].flush, true);
 });
+
+// CR 041: an editor that disappears in CI must say why. The page keeps a small trace of editor
+// events (test diagnostics only) and the value control keeps Cmd/Ctrl+A to itself.
+function traceOf(harness: ReturnType<typeof createRuntimeHarness>): Array<{ event: string; detail?: string; stack?: string }> {
+  const diagnostics = harness.window.__studioDiagnostics as { trace(): Array<{ event: string; detail?: string }> } | undefined;
+  assert.ok(diagnostics, "the page exposes its diagnostics");
+  return diagnostics.trace();
+}
+
+test("CR 041: the trace records the open, the blur and why the unchanged frontmatter editor closed", () => {
+  const { harness, textarea } = openTextFieldEditor("Alpha");
+  textarea.dispatch("blur", { relatedTarget: null });
+  const events = traceOf(harness);
+  const names = events.map((entry) => entry.event);
+  assert.equal(names[0], "page");
+  assert.ok(names.includes("frontmatter editor opened"), JSON.stringify(names));
+  const blur = names.indexOf("frontmatter control blur");
+  const closed = events.findIndex((entry) => entry.event === "frontmatter editor closed");
+  assert.ok(blur >= 0 && closed > blur, JSON.stringify(names));
+  assert.match(events[closed]?.detail ?? "", /^save of an unchanged value field=\S+ active=\S+ pageFocus=\S+$/u);
+});
+
+test("CR 041: Cmd/Ctrl+A in the frontmatter value control stops at the document; other keys go on", () => {
+  for (const [platform, modifier] of [[undefined, { ctrlKey: true }], ["MacIntel", { metaKey: true }]] as const) {
+    const harness = createRuntimeHarness(platform === undefined ? {} : { platform });
+    harness.frontmatterRow.setAttribute("data-okf-type", "text");
+    harness.frontmatterRow.setAttribute("data-okf-value", JSON.stringify("Alpha"));
+    openFrontmatterValueEditor(harness);
+    const control = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+    assert.ok(control, "the text field opens a textarea");
+    let stopped = 0;
+    const key = (event: Record<string, unknown>): void => harness.dispatchDocument("keydown", {
+      target: control, preventDefault: noop, stopPropagation: () => { stopped += 1; }, ...event,
+    });
+    key({ key: "a", ...modifier });
+    assert.equal(stopped, 1, `${platform ?? "Linux"}: select-all stays in the control`);
+    key({ key: "b", ...modifier });
+    key({ key: "a" });
+    assert.equal(stopped, 1, "other keys keep reaching VS Code");
+    assert.ok(traceOf(harness).some((entry) => entry.event === "select-all kept in control"));
+  }
+});
+
+test("CR 041: the page echoes the seq of the properties table it applied, also after a deferral", () => {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.dispatchMessage(propertiesMessage(cellMarkup("first"), { seq: 3 }));
+  assert.equal(harness.documentElement.getAttribute("data-okf-properties-seq"), "3");
+  openFrontmatterValueEditor(harness);
+  harness.dispatchMessage(propertiesMessage(cellMarkup("second"), { seq: 4 }));
+  assert.equal(harness.documentElement.getAttribute("data-okf-properties-seq"), "3", "deferred while editing");
+  harness.dispatchDocument("keydown", { key: "Escape", target: harness.frontmatterValueCell, preventDefault: noop });
+  assert.equal(harness.documentElement.getAttribute("data-okf-properties-seq"), "4", "applied on close");
+});
