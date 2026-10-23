@@ -142,7 +142,7 @@ import {
 import { EditLock, isUnchangedSave, needsRefresh } from "./state/editLock";
 import { preloadMystEngine } from "./render/mystRenderer";
 import { createNonce } from "./security/csp";
-import { focusGroupCommand } from "./navigation/groupFocus";
+import { createFocusWorkTracker, focusGroupCommand, type GroupFocusMove } from "./navigation/groupFocus";
 import { NavigationHistory, type NavigationEntry } from "./state/navigationHistory";
 import { parsePreviewPanelState, PreviewPanelState } from "./state/previewState";
 import {
@@ -4753,12 +4753,23 @@ async function lockNewPreviewGroup(panel: vscode.WebviewPanel, preview: ActivePr
   }
 }
 
+/**
+ * Group unlocks still running. Each one can move the workbench focus (a group focus command, then
+ * the restore) for up to about 1.7 s after its preview closed, so a preview opened meanwhile can
+ * lose the focus. Tests wait for them (previewGroupUnlocksSettledForTests) before they open the
+ * next preview; the product does not read this.
+ */
+const groupFocusWork = createFocusWorkTracker(20, () => Date.now());
+
 /** Called when a preview's panel goes away: unlock its group one tick later, if this extension locked it. */
 function releasePreviewGroupLock(preview: ActivePreview): void {
   const lockedColumn = preview.lockedColumn;
   if (lockedColumn === undefined) return;
   preview.lockedColumn = undefined;
-  setTimeout(() => void unlockPreviewGroup(lockedColumn), 0);
+  const unlock = new Promise<void>((resolve) => {
+    setTimeout(() => void unlockPreviewGroup(lockedColumn).finally(resolve), 0);
+  });
+  groupFocusWork.track(unlock);
 }
 
 function hasLivePreviewIn(column: vscode.ViewColumn): boolean {
@@ -4800,6 +4811,7 @@ async function unlockPreviewGroup(column: vscode.ViewColumn): Promise<void> {
     for (const group of unlocked) {
       const command = focusGroupCommand(group.viewColumn, vscode.window.tabGroups.all.length);
       if (command === undefined) continue;
+      groupFocusWork.record(command);
       await vscode.commands.executeCommand(command);
       await vscode.commands.executeCommand("workbench.action.unlockEditorGroup");
     }
@@ -4810,7 +4822,10 @@ async function unlockPreviewGroup(column: vscode.ViewColumn): Promise<void> {
     if (unlocked.length > 0 && !unlocked.includes(remembered) && !remembered.isActive
       && vscode.window.tabGroups.all.includes(remembered)) {
       const restore = focusGroupCommand(remembered.viewColumn, vscode.window.tabGroups.all.length);
-      if (restore !== undefined) await vscode.commands.executeCommand(restore);
+      if (restore !== undefined) {
+        groupFocusWork.record(restore + " (restore)");
+        await vscode.commands.executeCommand(restore);
+      }
     }
   } catch {
     // Never throw from dispose.
@@ -5279,6 +5294,20 @@ export async function deserializePreviewPanelForTests(
   rawState: unknown,
 ): Promise<void> {
   await deserializePreviewPanel(panel, rawState);
+}
+
+/**
+ * Resolves once no group unlock of a closed preview is running (see groupFocusWork): from
+ * then on nothing of a closed preview moves the workbench focus. Unlocks that start while waiting
+ * are waited for too.
+ */
+export async function previewGroupUnlocksSettledForTests(): Promise<void> {
+  await groupFocusWork.settled();
+}
+
+/** The focus commands the group unlock ran since `since` (epoch ms), oldest first. */
+export function previewGroupFocusMovesForTests(since = 0): GroupFocusMove[] {
+  return groupFocusWork.moves(since);
 }
 
 export function disposeActivePreviewForTests(): void {

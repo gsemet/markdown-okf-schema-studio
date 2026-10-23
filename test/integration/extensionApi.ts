@@ -13,6 +13,8 @@ export const {
   listCitationKeysForTests,
   listDocumentTargetsForTests,
   PANEL_VIEW_TYPE,
+  previewGroupFocusMovesForTests,
+  previewGroupUnlocksSettledForTests,
   REFRESH_COMMAND_ID,
   resetPreviewThemeModeForTests,
   resetRenderHooksForTests,

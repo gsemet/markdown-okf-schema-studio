@@ -76,23 +76,30 @@ jobs:
           just-version: 1.58.0
       # Only this job installs Ubuntu packages (just dev-ci visual); it keeps their archives in a
       # cache so a slow mirror cannot stall it. The key changes only when the package set changes.
+      # The key names the runner image (ImageOS, for example ubuntu24), so a new image release
+      # starts its own archive set. ImageOS is a runner variable, which the env context does not
+      # see until it is written to GITHUB_ENV.
+      - name: Name the runner image for the package cache
+        run: echo "RUNNER_IMAGE_OS=${ImageOS:-unknown}" >> "$GITHUB_ENV"
       - name: Restore Ubuntu package archives
         id: apt-archives
         uses: actions/cache/restore@v4
         with:
           path: .cache/apt-archives
-          key: apt-archives-visual-${{ runner.os }}-${{ runner.arch }}
-          restore-keys: apt-archives-visual-${{ runner.os }}-${{ runner.arch }}-
+          key: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}
+          restore-keys: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}-
       - run: just dev-ci visual
       - name: Save Ubuntu package archives
-        # Skipped when the restored archives are exactly the ones this run used.
+        # Skipped when no archive was kept, or when the restored archives are exactly the ones this
+        # run used.
         if: >-
-          steps.apt-archives.outputs.cache-matched-key != format('apt-archives-visual-{0}-{1}-{2}',
-          runner.os, runner.arch, hashFiles('.cache/apt-archives/*.deb'))
+          hashFiles('.cache/apt-archives/*.deb') != '' &&
+          steps.apt-archives.outputs.cache-matched-key != format('apt-archives-visual-{0}-{1}-{2}-{3}',
+          runner.os, env.RUNNER_IMAGE_OS, runner.arch, hashFiles('.cache/apt-archives/*.deb'))
         uses: actions/cache/save@v4
         with:
           path: .cache/apt-archives
-          key: apt-archives-visual-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.cache/apt-archives/*.deb') }}
+          key: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}-${{ hashFiles('.cache/apt-archives/*.deb') }}
       - run: just ci-visual
       - name: Publish reports
         if: always()

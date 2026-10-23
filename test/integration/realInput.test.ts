@@ -11,6 +11,8 @@ import {
   getActivePreviewForTests,
   getActivePreviewPanelForTests,
   PANEL_VIEW_TYPE,
+  previewGroupFocusMovesForTests,
+  previewGroupUnlocksSettledForTests,
   resetRenderHooksForTests,
   setRenderDelayForTests,
   setRenderOverrideForTests,
@@ -3810,8 +3812,8 @@ async function scenarioPreviewGroupLock(page: Page, evidence: Evidence): Promise
     const fourthDocument = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("fourth-t39.md")));
     const fourth = fourthDocument.uri;
     try {
-      // The previous scenario's preview group is unlocked shortly after it closes (no observable state).
-      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+      // The previous scenario's preview group unlock has finished (closeAllEditors waits for it).
+      await previewGroupUnlocksSettledForTests();
       // (a) Leak canary: before any preview exists, Quick Open must reuse the source group.
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
       const sourceColumn = editorColumnOf(document.uri);
@@ -3867,9 +3869,8 @@ async function scenarioPreviewGroupLock(page: Page, evidence: Evidence): Promise
       assert.ok(previewTab, "the preview tab exists");
       await vscode.window.tabGroups.close(previewTab);
       await waitFor("the preview to close", () => getActivePreviewPanelForTests() === undefined);
-      // The unlock runs one tick after dispose and moves focus briefly; it has no observable state.
-      // 400 ms is enough: the unlock only waits for the preview's own tab, which is already gone here.
-      await new Promise<void>((resolve) => setTimeout(resolve, 400));
+      // The unlock runs one tick after dispose and moves focus briefly: wait until it has finished.
+      await previewGroupUnlocksSettledForTests();
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
       await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
       const countBeforeReuse = groupCount();
@@ -3889,8 +3890,8 @@ async function scenarioPreviewGroupLock(page: Page, evidence: Evidence): Promise
       assert.ok(lastTab, "the preview is the last tab");
       await vscode.window.tabGroups.close(lastTab);
       await waitFor("the second preview to close", () => getActivePreviewPanelForTests() === undefined);
-      // The unlock runs one tick after dispose and has no observable state; give it that tick.
-      await new Promise<void>((resolve) => setTimeout(resolve, 400));
+      // The unlock runs one tick after dispose: wait until it has finished.
+      await previewGroupUnlocksSettledForTests();
       await vscode.window.showTextDocument(document);
       await waitFor("the file to open", () => editorColumnOf(document.uri) !== undefined);
       assert.equal(groupCount(), 1, "a file opened after the last preview closed stayed in the single group");
@@ -3952,7 +3953,7 @@ async function scenarioPreviewGroupLock(page: Page, evidence: Evidence): Promise
       assert.ok(restoredTab, "the restored preview is the last tab");
       await vscode.window.tabGroups.close(restoredTab);
       await waitFor("the restored preview to close", () => getActivePreviewPanelForTests() === undefined);
-      await new Promise<void>((resolve) => setTimeout(resolve, 400));
+      await previewGroupUnlocksSettledForTests();
       await vscode.window.showTextDocument(document);
       await waitFor("the file to open", () => editorColumnOf(document.uri) !== undefined);
       assert.equal(groupCount(), 1, "a restored preview releases its lock too");
@@ -3972,8 +3973,7 @@ async function scenarioPreviewGroupLock(page: Page, evidence: Evidence): Promise
         // Best effort: unlocking must not hide the scenario's own result.
       }
       await closeAllEditors();
-      // The preview's group is unlocked one tick after it closes; let that settle before the next suite.
-      await new Promise<void>((resolve) => setTimeout(resolve, 400));
+      // closeAllEditors has waited for the unlock of the preview's group before the next suite.
     }
   } finally {
     fixture.dispose();
@@ -4089,23 +4089,37 @@ async function previewDiagnostics(page: Page): Promise<string> {
     contentPatches: preview.contentPatches,
   });
   let shown: string;
+  // Focus commands the extension ran on its own (group unlock of a closed preview), with "at" on
+  // the page trace's clock: a negative value is before the page started.
+  let focusMoves = "";
   try {
     const frame = await findCurrentFrame(page);
-    shown = frame === undefined ? "no current frame" : JSON.stringify(await frame.evaluate(() => {
-      const active = window.document.activeElement;
-      const label = active?.getAttribute("aria-label");
-      const diagnostics = (window as unknown as { __studioDiagnostics?: { trace(): unknown[] } }).__studioDiagnostics;
-      return {
-        active: active ? active.tagName.toLowerCase() + (label ? `[${label}]` : "") : "none",
-        pageFocus: window.document.hasFocus(),
-        propertiesSeq: window.document.documentElement.getAttribute("data-okf-properties-seq"),
-        trace: diagnostics ? diagnostics.trace() : "unavailable",
-      };
-    }));
+    if (frame === undefined) {
+      shown = "no current frame";
+    } else {
+      const state = await frame.evaluate(() => {
+        const active = window.document.activeElement;
+        const label = active?.getAttribute("aria-label");
+        const diagnostics = (window as unknown as {
+          __studioDiagnostics?: { trace(): unknown[]; startedAt?: () => number };
+        }).__studioDiagnostics;
+        return {
+          active: active ? active.tagName.toLowerCase() + (label ? `[${label}]` : "") : "none",
+          pageFocus: window.document.hasFocus(),
+          propertiesSeq: window.document.documentElement.getAttribute("data-okf-properties-seq"),
+          startedAt: diagnostics?.startedAt?.(),
+          trace: diagnostics ? diagnostics.trace() : "unavailable",
+        };
+      });
+      shown = JSON.stringify(state);
+      const startedAt = typeof state.startedAt === "number" ? state.startedAt : 0;
+      focusMoves = JSON.stringify(previewGroupFocusMovesForTests(startedAt - 5_000)
+        .map((move) => ({ at: move.at - startedAt, command: move.command })));
+    }
   } catch (error) {
     shown = `unreadable (${String(error)})`;
   }
-  return `host ${host}; page ${shown}`;
+  return `host ${host}; page ${shown}${focusMoves === "" ? "" : `; host focus moves ${focusMoves}`}`;
 }
 
 /** Runs `action`; a failure carries the host and page diagnostics (previewDiagnostics). */
