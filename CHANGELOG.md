@@ -8,6 +8,11 @@
 - Tab, Enter, Escape and the arrow keys that a preview editor (block, table cell, frontmatter)
   acts on now stay in the preview. VS Code no longer also runs its own shortcut for a key the
   editor has already used; keys the editor does not use, such as `Ctrl+Tab`, still reach VS Code.
+- For contributors: pull request CI now runs only the simulated tests (static checks and the
+  Playwright visual tests); the real VS Code window tests (integration and stress) are a manual
+  job, started with `gh workflow run ci.yml --ref <branch> -f heavy=true`. New real-window tests
+  cover incoming-change bars, review threads (create, reply, resolve), image paste and the
+  read-only preview in Restricted Mode.
 - For contributors: the real VS Code window screenshots now come from one registry
   (`test/shared/captureRegistry.ts`) and one shared writer, so every capture has a stable
   `<group>/rNN-<slug>` id, a folder per feature group inside its run folder, a "locks" sentence and

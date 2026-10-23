@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { validateReviewEvidence, type CampaignIdentity, type EvidenceManifest } from "./reviewEvidence";
+import { validateReviewEvidence, validateVisualEvidence, type CampaignIdentity, type EvidenceManifest } from "./reviewEvidence";
 
 const campaign: CampaignIdentity = {
   runId: "run-current",
@@ -85,4 +85,11 @@ test("validates each stage against its own campaign identity when the stages ran
     validateReviewEvidence(campaign, integration, visual, { ...visualCampaign, runId: "other" }).join("\n"),
     /different campaigns/u,
   );
+});
+
+test("the visual-only check accepts the current visual stage and judges nothing about integration", () => {
+  const visual = artifact({ status: "passed", duplicateImages: [], renderRunId: campaign.runId, renderCampaignStartedAt: campaign.startedAt });
+  assert.deepEqual(validateVisualEvidence(campaign, visual), []);
+  assert.deepEqual(validateVisualEvidence(campaign, { ...visual, status: "failed" }), ["visual campaign did not pass"]);
+  assert.ok(validateVisualEvidence(campaign, { ...visual, runId: "run-old" }).includes("visual run identity does not match review start"));
 });

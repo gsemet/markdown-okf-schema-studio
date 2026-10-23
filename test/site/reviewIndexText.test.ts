@@ -37,3 +37,16 @@ test("a visual run from another revision than the integration run is flagged", (
   assert.match(text, /different revision \(`abcdef1`\) than the integration run \(`1111111`\)/u);
   assert.match(text, /Freshness failures:\n- visual run identity/u);
 });
+
+test("a campaign without the real VS Code stage says so", () => {
+  const text = reviewIndexText({
+    status: "passed",
+    campaign: { runId: "r", startedAt: "s", command: "just ci-visual" },
+    integration: { status: "skipped" },
+    visual,
+    failures: [],
+    integrationSkipped: true,
+  });
+  assert.match(text, /Real VS Code stage: \*\*not run\*\*/u);
+  assert.doesNotMatch(reviewIndexText({ status: "passed", campaign: undefined, integration: {}, visual, failures: [] }), /not run/u);
+});

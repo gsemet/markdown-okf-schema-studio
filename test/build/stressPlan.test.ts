@@ -31,8 +31,8 @@ test("CR 043: each window runs only its own stress scenarios, and a filter may n
   const trusted = hostStressPlan({ STUDIO_STRESS_REPEAT: "3" }, "trusted");
   assert.deepEqual(trusted, { repeat: 3, scenarios: [...STRESS_SCENARIOS_BY_HOST.trusted] });
   assert.deepEqual(hostStressPlan({}, "untrusted"), { repeat: 10, scenarios: ["untrusted-read-only"] });
-  const filter = { STUDIO_STRESS_SCENARIOS: "untrusted-read-only,label-rename" };
-  assert.deepEqual(hostStressPlan(filter, "trusted")?.scenarios, ["label-rename"]);
+  const filter = { STUDIO_STRESS_SCENARIOS: "untrusted-read-only,image-paste" };
+  assert.deepEqual(hostStressPlan(filter, "trusted")?.scenarios, ["image-paste"]);
   assert.deepEqual(hostStressPlan(filter, "untrusted")?.scenarios, ["untrusted-read-only"]);
   assert.equal(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "table-tab" }, "untrusted"), undefined);
   assert.throws(() => hostStressPlan({ STUDIO_STRESS_SCENARIOS: "nope" }, "untrusted"), /Unknown stress scenario\(s\) nope/u);
@@ -41,8 +41,7 @@ test("CR 043: each window runs only its own stress scenarios, and a filter may n
 test("CR 043: every T2 real-window scenario is in the stress plan, and no name is listed twice", () => {
   const all = [...STRESS_SCENARIOS_BY_HOST.trusted, ...STRESS_SCENARIOS_BY_HOST.untrusted];
   assert.equal(new Set(all).size, all.length);
-  for (const name of ["incoming-changes", "conf-warning", "review-threads", "image-paste", "label-rename",
-    "back-next", "keybinding-refresh", "double-click", "standalone-read-only", "untrusted-read-only"]) {
+  for (const name of ["incoming-changes", "review-threads", "image-paste", "untrusted-read-only"]) {
     assert.ok(all.includes(name), name);
   }
 });

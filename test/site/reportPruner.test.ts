@@ -138,10 +138,9 @@ test("apply skips a folder that vanished and goes on with the others", () => {
   }
 });
 
-test("CR 043: the pruner knows the run folder of every real-window suite, the untrusted and standalone ones too", () => {
+test("CR 043: the pruner knows the run folder of every real-window suite, the untrusted one too", () => {
   for (const suite of SUITES) {
     assert.match(`${RUN_FOLDER_PREFIX[suite]}AbC123`, RUN_FOLDER_PATTERN, suite);
   }
   assert.match("untrusted-e2e-x1", RUN_FOLDER_PATTERN);
-  assert.match("standalone-e2e-x1", RUN_FOLDER_PATTERN);
 });

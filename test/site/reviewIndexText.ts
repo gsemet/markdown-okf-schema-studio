@@ -6,6 +6,8 @@ export interface ReviewIndexInput {
   integration: EvidenceManifest;
   visual: EvidenceManifest;
   failures: readonly string[];
+  /** The real VS Code stage did not run (the manual heavy CI job): its sections are not this campaign. */
+  integrationSkipped?: boolean;
 }
 
 function count(value: unknown): number {
@@ -39,7 +41,7 @@ Run identity: \`${campaign?.runId ?? "unknown"}\`
 Revision: \`${integration.revision ?? "unknown"}\`; dirty worktree: ${Boolean(integration.dirty)}.
 Visual run revision: \`${shortRevision(visual.revision)}\`; completed ${typeof visual.completedAt === "string" ? visual.completedAt : "unknown"}.${revisionNote}
 
-${failures.length > 0 ? `Freshness failures:\n${failures.map((failure) => `- ${failure}`).join("\n")}\n\n` : ""}## Review Order
+${input.integrationSkipped ? "Real VS Code stage: **not run** in this campaign (it is the manual heavy CI job). The real-window entries below are from an earlier run, if any.\n\n" : ""}${failures.length > 0 ? `Freshness failures:\n${failures.map((failure) => `- ${failure}`).join("\n")}\n\n` : ""}## Review Order
 
 0. [Product-owner gallery by feature](GALLERY.md): every scenario grouped by feature, with its \`locks\` statement, images and the assertion-only scenarios. Start here.
 1. [Static document and interaction cases](screenshots/INDEX.md): ${visualSummary(visual)}. Includes light/dark, wide/narrow, loading, errors, editing, diagrams and link details.
@@ -48,7 +50,7 @@ ${failures.length > 0 ? `Freshness failures:\n${failures.map((failure) => `- ${f
 4. [Actual window reload and close/reopen](RELOAD-LATEST.md): before reload, after reload, after reopen. No injected state.
 5. [Real checkbox toggles](CHECKBOX-LATEST.md): \`[ ]\`/\`[x]\` markers clicked in reading mode and edit mode, unchecked and checked states.
 6. [Real-input editing](screenshots/REAL-INPUT-LATEST.md): real mouse and keyboard edits in the side preview and the Open With editor, with the buffer checked after each action.
-7. [Restricted Mode window](screenshots/UNTRUSTED-LATEST.md) and [file outside the workspace](screenshots/STANDALONE-LATEST.md): the read-only previews of an untrusted workspace and of a standalone file.
+7. [Restricted Mode window](screenshots/UNTRUSTED-LATEST.md): the read-only side preview of an untrusted workspace.
 
 ## Reading Each Capture
 

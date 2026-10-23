@@ -34,7 +34,7 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     rather than delete one. It is written for a reader outside the team: no internal ids in the
     text (see "PR body for an external reader" in prd-workflow.guidelines.md).
 11. **Every job has a `timeout-minutes`** (about twice its healthy duration: 30 for the VS Code
-    integration job, 15 for the others, 10 for the report job). A hung job must fail fast and name
+    integration and stress jobs, 15 for the others, 10 for the report job). A hung job must fail fast and name
     where it stopped, never run to the platform default of six hours. Never raise a timeout to
     make a slow or flaky run pass: find what waits.
 12. **A flake is a bug, fixed at its cause and proved by repetition.** A test that fails without a
@@ -50,8 +50,16 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     - **Failure messages carry diagnostics.** A wait or an assertion that can fail on a race says
       what the host and the page held when it failed (state, focus, the page's event trace), so
       the next failure explains itself.
-    - **Prove it with the stress mode.** Add the scenario to the stress list and let the `stress`
-      job (`just ci-stress`, N rounds in one window) pass. It is the one CI-only job: it repeats
-      scenarios that preflight runs once, so it adds repetitions, not steps (rule 7). It is
-      advisory: it is not part of the required `checks` job, so a red stress run does not block a
-      merge, but it is a flake to fix with the steps above, never to ignore.
+    - **Prove it with the stress mode.** Add the scenario to the stress list
+      (`test/shared/stressPlan.ts`) and let the `stress` job (`just ci-stress`, N rounds per window)
+      pass. It is the one CI-only job: it repeats scenarios that preflight runs once, so it adds
+      repetitions, not steps (rule 7). It is advisory: it is not part of the required `checks` job,
+      so a red stress run does not block a merge, but it is a flake to fix with the steps above,
+      never to ignore.
+13. **Real VS Code jobs are manual.** The required path (`checks`) runs the simulated tests only:
+    static checks and the Playwright/Chromium visual tests against a mock host, then `ci-report`
+    with the real VS Code stage reported as skipped (`just ci-report visual`). The real VS Code
+    window jobs, `integration` and `stress`, run only on demand:
+    `gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery
+    and site). Run them before merging a change to the extension host, the webview or the
+    real-window tests, and run `npm run test:integration` locally (one VS Code window at a time).

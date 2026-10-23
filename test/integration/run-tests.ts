@@ -93,8 +93,7 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
       },
     }),
   );
-  const browserSuite = suiteName === "scroll-sync-suite.js" || suiteName === "trusted-suite.js"
-    || suiteName === "standalone-suite.js";
+  const browserSuite = suiteName === "scroll-sync-suite.js" || suiteName === "trusted-suite.js";
   const debugPort = browserSuite ? await freePort() : undefined;
   const launchArgs = ["--user-data-dir", userDataDirectory, "--extensions-dir", extensionsDirectory, workspaceFile];
   if (debugPort !== undefined) {

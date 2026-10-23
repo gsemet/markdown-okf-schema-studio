@@ -19,45 +19,34 @@ import {
 import { isGroupId } from "../shared/e2eGroups";
 import { SCENARIOS } from "../visual/scenarios";
 
-/** The real-window gap fill of CR 043 (P9 T2): 13 entries, 2 of them assertion-only. */
+/** The real-window gap fill of CR 043 (P9 T2, reduced scope): 6 window captures. */
 const T2_CAPTURES = [
-  "toolbar-navigation/r05-back-next-across-documents",
-  "toolbar-navigation/r06-double-click-reveals-source",
   "palette-slash/r09-image-paste-inserted",
   "review-annotations/r03-incoming-change-bars",
   "review-annotations/r04-thread-created",
   "review-annotations/r05-thread-reply",
   "review-annotations/r06-thread-resolved",
-  "lifecycle-sync/r19-keybinding-opens-preview",
-  "lifecycle-sync/r20-refresh-command",
-  "myst/r01-conf-extension-warning",
-  "myst/r02-label-rename",
   "trust-security/r01-untrusted-read-only",
-  "trust-security/r02-standalone-read-only",
 ];
-const T2_ASSERTION_ONLY = ["toolbar-navigation/r06-double-click-reveals-source", "lifecycle-sync/r20-refresh-command"];
 
-test("the real-window registry has 132 captures, 115 with a PNG and 17 assertion-only", () => {
-  assert.equal(CAPTURES.length, 132);
-  assert.equal(CAPTURES.filter((entry) => entry.capture !== false).length, 115);
-  assert.equal(CAPTURES.filter((entry) => entry.capture === false).length, 17);
+test("the real-window registry has 125 captures, 110 with a PNG and 15 assertion-only", () => {
+  assert.equal(CAPTURES.length, 125);
+  assert.equal(CAPTURES.filter((entry) => entry.capture !== false).length, 110);
+  assert.equal(CAPTURES.filter((entry) => entry.capture === false).length, 15);
   const bySuite = Object.fromEntries(SUITES.map((suite) => [suite, capturesOfSuite(suite).length]));
   assert.deepEqual(bySuite, {
-    "real-input": 91, checkbox: 4, frontmatter: 26, scroll: 6, reload: 3, untrusted: 1, standalone: 1,
+    "real-input": 85, checkbox: 4, frontmatter: 26, scroll: 6, reload: 3, untrusted: 1,
   });
 });
 
-test("CR 043: the T2 gap fill registers 13 window captures, the untrusted and standalone ones in their own suites", () => {
+test("CR 043: the T2 gap fill registers 6 window captures, the Restricted Mode one in its own suite", () => {
   for (const id of T2_CAPTURES) {
     const entry = captureById(id);
     assert.ok(entry, `${id} is registered`);
-    assert.equal(entry.clip, "window", `${id}: whole window (Restricted Mode banner, Problems, editor beside)`);
-    assert.equal(entry.capture === false, T2_ASSERTION_ONLY.includes(id), `${id}: PNG or assertion-only`);
+    assert.equal(entry.clip, "window", `${id}: whole window (Restricted Mode banner, editor beside)`);
+    assert.notEqual(entry.capture, false, `${id} writes a PNG`);
   }
-  assert.equal(captureById("trust-security/r01-untrusted-read-only")?.suite, "untrusted");
-  assert.equal(captureById("trust-security/r02-standalone-read-only")?.suite, "standalone");
   assert.deepEqual(capturesOfSuite("untrusted").map((entry) => entry.id), ["trust-security/r01-untrusted-read-only"]);
-  assert.deepEqual(capturesOfSuite("standalone").map((entry) => entry.id), ["trust-security/r02-standalone-read-only"]);
   assert.ok(T2_CAPTURES.filter((id) => !id.startsWith("trust-security/"))
     .every((id) => captureById(id)?.suite === "real-input"));
 });
@@ -90,9 +79,8 @@ test("the former frontmatter rows moved: r01-r17 to frontmatter-editing, the res
   assert.equal(captureByLegacy("scroll", "solo-bottom")?.id, "lifecycle-sync/r10-scroll-solo-bottom");
 });
 
-test("exactly the 15 byte-duplicate rows are assertion-only (besides the 2 T2 checks)", () => {
-  const ids = CAPTURES.filter((entry) => entry.capture === false && !T2_ASSERTION_ONLY.includes(entry.id))
-    .map((entry) => entry.id).sort();
+test("exactly the 15 byte-duplicate rows are assertion-only", () => {
+  const ids = CAPTURES.filter((entry) => entry.capture === false).map((entry) => entry.id).sort();
   assert.equal(ids.length, 15);
   assert.ok(ids.includes("block-editing/r05-escape-cancels-block"));
   assert.ok(ids.includes("theme-zoom/r03-host-dark-mode-dark"));
@@ -142,7 +130,7 @@ test("parseCaptureId splits group, number and slug", () => {
 test("run folder prefixes stay the ones the LATEST readers and the pruner know", () => {
   assert.deepEqual(RUN_FOLDER_PREFIX, {
     "real-input": "real-input-", checkbox: "checkbox-e2e-", frontmatter: "frontmatter-e2e-",
-    scroll: "scroll-e2e-", reload: "reload-e2e-", untrusted: "untrusted-e2e-", standalone: "standalone-e2e-",
+    scroll: "scroll-e2e-", reload: "reload-e2e-", untrusted: "untrusted-e2e-",
   });
 });
 

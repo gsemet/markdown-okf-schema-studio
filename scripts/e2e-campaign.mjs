@@ -4,6 +4,9 @@
 //   eval "$(node scripts/e2e-campaign.mjs begin visual)"   exports STUDIO_E2E_* for the stage and
 //                                                          writes out/reports/e2e/campaign-visual.json
 //   node scripts/e2e-campaign.mjs report                   writes e2e-manifest.json and tests-e2e.xml
+//   node scripts/e2e-campaign.mjs report --visual-only     the same for the visual stage alone: the
+//                                                          real VS Code stage (integration) did not
+//                                                          run, which the manifest records as skipped
 //
 // Both stages share a run id, never a start time: each records its real start, and the report
 // validates every stage against its own identity. A stage always records a fresh start time and
@@ -85,7 +88,47 @@ function stageFrom(name, command, manifest, missing, campaign) {
   };
 }
 
+/**
+ * The pull request path of CI runs only the simulated stages (static, visual); the real VS Code
+ * stage is a manual job. `--visual-only` reports that path: only the visual stage and the review
+ * index are required, and the integration stage is listed as skipped, never as passed.
+ */
+function reportVisualOnly() {
+  const visualCampaign = validCampaign(readJson(campaignPath("visual")));
+  if (!visualCampaign) {
+    console.error("ci-report: no campaign identity for visual; run ci-visual first");
+    process.exitCode = 1;
+    return;
+  }
+  const visual = readJson(path.join(reportRoot, "screenshots", "run-manifest.json"));
+  const review = readJson(path.join(reportRoot, "review.json"));
+  const stages = [
+    stageFrom("visual", "just ci-visual", visual, "visual manifest is missing (ci-visual did not run or its reports were not downloaded)", visualCampaign),
+    stageFrom("review-index", "npm run review:finish -- --visual-only", review, "review.json is missing (review:finish did not run)", visualCampaign),
+  ];
+  for (const stage of stages) {
+    console.log(`${stage.status === "passed" ? "ok    " : "FAILED"} ${stage.name}${stage.error ? `: ${stage.error}` : ""}`);
+  }
+  console.log("skipped integration: the real VS Code stage did not run (manual heavy CI job)");
+  const status = stages.every((stage) => stage.status === "passed") ? "passed" : "failed";
+  writeFileSync(path.join(reportRoot, "e2e-manifest.json"), JSON.stringify({
+    status,
+    command: visualCampaign.command,
+    runId: visualCampaign.runId,
+    startedAt: visualCampaign.startedAt,
+    completedAt: new Date().toISOString(),
+    stages,
+    skipped: ["integration"],
+  }, null, 2) + "\n");
+  writeJUnit(stages);
+  if (status !== "passed") process.exitCode = 1;
+}
+
 function report() {
+  if (process.argv.includes("--visual-only")) {
+    reportVisualOnly();
+    return;
+  }
   const visualCampaign = validCampaign(readJson(campaignPath("visual")));
   const integrationCampaign = validCampaign(readJson(campaignPath("integration")));
   const missing = stageNames.filter((name) => !validCampaign(readJson(campaignPath(name))));
@@ -133,6 +176,6 @@ const mode = process.argv[2];
 if (mode === "begin") begin(process.argv[3]);
 else if (mode === "report") report();
 else {
-  console.error("usage: e2e-campaign.mjs begin <visual|integration>|report");
+  console.error("usage: e2e-campaign.mjs begin <visual|integration>|report [--visual-only]");
   process.exitCode = 2;
 }

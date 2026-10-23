@@ -56,3 +56,20 @@ export function validateReviewEvidence(
   }
   return failures;
 }
+
+/**
+ * Validate the visual evidence alone, for the CI path where the real VS Code stage did not run
+ * (it is a manual job). The integration stage is not judged at all: the review says it was skipped.
+ */
+export function validateVisualEvidence(visualCampaign: CampaignIdentity, visual: EvidenceManifest): string[] {
+  const failures = validateIdentity("visual", visual, visualCampaign);
+  if (visual.status !== "passed") failures.push("visual campaign did not pass");
+  if (!Array.isArray(visual.duplicateImages) || visual.duplicateImages.length !== 0) {
+    failures.push("visual campaign has duplicate or missing duplicateImages evidence");
+  }
+  if (visual.renderRunId !== visualCampaign.runId) failures.push("visual render identity does not match review start");
+  if (visual.renderCampaignStartedAt !== visualCampaign.startedAt) {
+    failures.push("visual render start time does not match review start");
+  }
+  return failures;
+}
