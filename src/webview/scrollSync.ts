@@ -39,6 +39,7 @@ import { installViewControls } from "./viewControls";
 import { installWidthMode } from "./widthMode";
 import { createEditorTrace } from "./editorTrace";
 import { installSelectAllInControls, isTextSelectAll } from "./selectAllKey";
+import { installEditorKeyContainment, isHandledEditorKey } from "./editorKeys";
 import type { ViewPreferences } from "../state/previewViewPreferences";
 import type { PreviewThemeMode } from "../state/previewTheme";
 import type { PreviewPanelState } from "../state/previewState";
@@ -113,6 +114,8 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   // Diagnostics only (they change nothing in the page): the last editor events, read by the tests
   // through window.__studioDiagnostics so that a missing editor names what closed it.
   const editorTrace = (${createEditorTrace.toString()})(40, () => (window.performance?.now?.() ?? Date.now()));
+  // Wall-clock time of the trace's "at" 0, so a test can line the trace up with host-side events.
+  const traceStartedAt = Date.now();
   const traceFocus = () => {
     const active = document.activeElement;
     const focused = typeof document.hasFocus === "function" ? String(document.hasFocus()) : "unknown";
@@ -128,6 +131,11 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
     isApplePlatform(),
     (target) => editorTrace.record("select-all kept in control",
       (target && target.tagName ? String(target.tagName).toLowerCase() : "unknown") + " " + traceFocus()));
+  // Tab, Enter, Escape and the arrow keys an open editor has handled stay in the page (see
+  // editorKeys.ts): the workbench never runs its own binding for a key the page has already used.
+  (${installEditorKeyContainment.toString()})(document, ${isHandledEditorKey.toString()},
+    (key, target) => editorTrace.record("editor key kept in page", key + " in "
+      + (target && target.tagName ? String(target.tagName).toLowerCase() : "unknown") + " " + traceFocus()));
   const settings = {
     scrollPreviewWithEditor: context.scrollPreviewWithEditor !== false,
     scrollEditorWithPreview: context.scrollEditorWithPreview !== false,
@@ -197,6 +205,7 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
       configurable: true,
       value: Object.freeze({
         trace: () => editorTrace.entries(),
+        startedAt: () => traceStartedAt,
         firstClearance: () => firstClearance.describe(),
       }),
     });
@@ -2604,6 +2613,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       renderedTarget.insertAdjacentElement("afterend", element);
     }
     beginEditAnchor(selectedCell ?? element);
+    editorTrace.record(selectedCell ? "cell editor opened" : "block editor opened",
+      "line=" + line + (selectedCell ? " row=" + rowIndex + " column=" + columnIndex : "") + " " + traceFocus(),
+      traceStack());
     activeBlockEdit = {
       target,
       renderedTarget,
@@ -3246,6 +3258,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       }
     });
     focusTextControlAtLastContent(input, edit.initialCaretPosition);
+    editorTrace.record("cell editor focused", "line=" + edit.line + " row=" + edit.tableRowIndex
+      + " column=" + edit.tableColumnIndex + " " + traceFocus());
   }
 
   function isApplePlatform() {
@@ -3801,6 +3815,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       }
     });
     focusTextControlAtLastContent(textarea, edit.initialCaretPosition);
+    editorTrace.record("block editor focused", "line=" + edit.line + " " + traceFocus());
     if (edit.openFigureForm) {
       edit.openFigureForm = false;
       openFigurePanel(textarea, () => {

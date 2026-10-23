@@ -9,6 +9,7 @@ import {
   disposeActivePreviewForTests,
   EDITOR_VIEW_TYPE,
   getActivePreviewForTests,
+  previewGroupUnlocksSettledForTests,
 } from "../extensionApi";
 import { E2E_SCREENSHOT_ROOT } from "../../reportPaths";
 import { RealWindowEvidence } from "../evidence";
@@ -404,7 +405,11 @@ export function writeSchema(directory: string, typeName: string, schemaYaml: str
 }
 
 /**
- * Disposes the test preview, then closes every editor. Two facts matter for suites that run later:
+ * Disposes the test preview, then closes every editor, then waits until the group unlock of every
+ * closed preview has finished. That unlock runs focus commands for up to about 1.7 s after the
+ * close; a preview the next scenario opened meanwhile lost the focus to it (CI run 39945708423,
+ * stress `table-tab`: `panelActive` false, page blur, the caret never came back). Two facts matter
+ * for suites that run later:
  * `revertAndCloseActiveEditor` reverts whatever editor is active, which after a webview click is
  * usually none, so fixture buffers are not reverted explicitly. Dirty editors left by earlier suites
  * are closed too, and VS Code's extension-test mode answers "Don't Save", so no file changes on disk.
@@ -415,4 +420,5 @@ export async function closeAllEditors(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.revertAndCloseActiveEditor");
   }
   await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+  await previewGroupUnlocksSettledForTests();
 }

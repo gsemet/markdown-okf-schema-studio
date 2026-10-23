@@ -10857,6 +10857,45 @@ test("CR 041: Cmd/Ctrl+A in the frontmatter value control stops at the document;
   }
 });
 
+test("CR 041: Tab handled by the table cell editor stops at the document; Ctrl+Tab goes on", () => {
+  const harness = createRuntimeHarness();
+  const { input } = openTableCellEditorForTab(harness);
+  let stopped = 0;
+  // The browser's bubbling order: the control's own listener, then the document's.
+  const key = (event: Record<string, unknown>): void => {
+    const control = input();
+    let prevented = false;
+    const keydown = {
+      target: control,
+      preventDefault: () => { prevented = true; },
+      stopPropagation: () => { stopped += 1; },
+      ...event,
+    };
+    control.dispatch("keydown", keydown);
+    harness.dispatchDocument("keydown", { ...keydown, defaultPrevented: prevented });
+  };
+  key({ key: "Tab" });
+  assert.equal(input().value, "y", "the page moved to the next cell");
+  assert.equal(stopped, 1, "the workbench never receives the Tab the page used");
+  key({ key: "Tab", ctrlKey: true });
+  assert.equal(stopped, 1, "Ctrl+Tab (VS Code's editor switch) still reaches the workbench");
+  assert.ok(traceOf(harness).some((entry) => entry.event === "editor key kept in page"
+    && /^Tab in textarea /u.test(entry.detail ?? "")), JSON.stringify(traceOf(harness)));
+});
+
+test("CR 041: the trace records the cell editor opening and getting the focus, on a known clock", () => {
+  const harness = createRuntimeHarness();
+  openTableCellEditorForTab(harness);
+  const events = traceOf(harness);
+  const opened = events.findIndex((entry) => entry.event === "cell editor opened");
+  const focused = events.findIndex((entry) => entry.event === "cell editor focused");
+  assert.ok(opened >= 0 && focused > opened, JSON.stringify(events));
+  assert.match(events[opened]?.detail ?? "", /^line=20 row=1 column=0 active=\S+ pageFocus=\S+$/u);
+  assert.match(events[focused]?.detail ?? "", /^line=20 row=1 column=0 active=\S+ pageFocus=\S+$/u);
+  const diagnostics = harness.window.__studioDiagnostics as { startedAt?: () => number } | undefined;
+  assert.equal(typeof diagnostics?.startedAt?.(), "number", "the trace's wall-clock start is exposed");
+});
+
 test("CR 041: the page echoes the seq of the properties table it applied, also after a deferral", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.dispatchMessage(propertiesMessage(cellMarkup("first"), { seq: 3 }));
