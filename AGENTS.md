@@ -7,7 +7,7 @@ It is MIT licensed and is developed independently from the Agentic Coding White 
 
 When two instructions conflict, the higher source wins:
 
-1. `CONSTITUTION.md` (when the repository has one)
+1. `CONSTITUTION.md`: none yet; the inviolable rules move there when this file grows too large
 2. This `AGENTS.md`
 3. The guidelines under `.agents/guidelines/`
 4. Skills
