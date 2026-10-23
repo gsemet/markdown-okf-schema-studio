@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The Python build and documentation tools now require Python 3.11 or later (was 3.10), so the
+  docs dependencies can move to Pillow 13 and a current `certifi`, which fix the reported security
+  advisories. `uv` picks a matching interpreter automatically.
 - When the page uses MyST syntax that its `conf.py` does not enable (a missing extension such as
   `dollarmath` or `colon_fence`), the preview now says so: a discreet one-line banner at the top
   counts the warnings, with an **Open Problems** button and a close button. Closed, it stays closed

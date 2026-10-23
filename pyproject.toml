@@ -2,14 +2,14 @@
 name = "markdown-okf-schema-studio"
 version = "0.1.0"
 description = "Schema-aware Markdown editor and live preview for OKF bundles."
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = []
 
 [dependency-groups]
 release = ["commitizen>=4.9.1"]
 docs = [
   "myst-parser>=4.0.1",
-  "pillow>=12.0.0",
+  "pillow>=13.0.0",
   "playwright>=1.64.0",
   "pytest>=9.1.1",
   "sphinx>=8.1.3",
