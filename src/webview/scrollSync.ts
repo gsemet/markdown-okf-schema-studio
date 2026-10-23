@@ -21,7 +21,8 @@ import { installLabelRename } from "./labelRename";
 import { installHostRequests } from "./hostRequests";
 import { installPlantUmlFileRequests, PLANTUML_FILE_REQUEST_TIMEOUT_MS } from "./plantumlFileRequests";
 import { installPasteHtml } from "./pasteHtml";
-import { installPasteImage } from "./pasteImage";
+import { imageParagraphEdit, installPasteImage } from "./pasteImage";
+import { installWarningBanner, warningBannerState, warningBannerText } from "./warningBanner";
 import { installFirstClearance } from "./firstClearance";
 import { applyFigureSizes } from "./figureSizes";
 import { applySpanColors, isSafeOkfColor } from "./spanColors";
@@ -85,6 +86,10 @@ export interface PreviewRuntimeContext extends ScrollContext {
   initialAnchor?: number;
   /** Set after an inline save: the edited element's source line and viewport top (rule R7). */
   initialPin?: { line: number; viewportTop: number };
+  /** CR 050: the key of the warning set whose banner the user closed for this document. */
+  dismissedWarningBanner?: string;
+  /** CR 050: false in Restricted Mode, where the Problems view does not list the conf.py warnings. */
+  warningsInProblems?: boolean;
   initialState?: Pick<PreviewPanelState, "sourceLine" | "scrollTop" | "focusedBlockId" | "selectedText" | "openDisclosures" | "descriptionsCollapsed">;
 }
 
@@ -267,7 +272,11 @@ export function createScrollSyncScript(context: PreviewRuntimeContext): string {
   (${installPlantUmlFileRequests.toString()})(document, plantUmlFileRequests, ${PLANTUML_FILE_REQUEST_TIMEOUT_MS});
   // Pasting an image into the text box: the host saves it next to the document and names it.
   const pasteImage = (${installPasteImage.toString()})(window);
+  const imageParagraphEdit = ${imageParagraphEdit.toString()};
   const pasteHtml = (${installPasteHtml.toString()})();
+  // CR 050: the conf.py warnings of a successful render, as a closable banner over the top of the page.
+  const warningBanner = (${installWarningBanner.toString()})(document, vscode, context,
+    ${warningBannerState.toString()}, ${warningBannerText.toString()});
   // Edit mode: the "Edit figure" button over a hovered figure opens its block editor with the form.
   const figureEditButton = (${installFigureEditButton.toString()})(document, window, {
     isEditMode: () => editMode,
@@ -468,7 +477,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     return Array.isArray(message.diagnostics)
       && message.diagnostics.length <= MAX_PATCH_DIAGNOSTICS
       && message.diagnostics.every((entry) => entry && typeof entry.severity === "string"
-        && entry.severity.length <= 50 && typeof entry.text === "string" && entry.text.length <= 20000);
+        && entry.severity.length <= 50 && typeof entry.text === "string" && entry.text.length <= 20000
+        && (entry.code === undefined || (typeof entry.code === "string" && entry.code.length <= 100)));
   }
 
   // The status region of a rendered page: label, optional message, optional diagnostics list. Every
@@ -493,6 +503,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       message.diagnostics.forEach((entry) => {
         const item = document.createElement("li");
         item.setAttribute("data-sphinx-preview-diagnostic-severity", entry.severity);
+        if (entry.code !== undefined) item.setAttribute("data-sphinx-preview-diagnostic-code", entry.code);
         item.textContent = entry.text;
         list.appendChild(item);
       });
@@ -3627,14 +3638,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         status: (text) => { edit.status.textContent = text; },
         isCurrent: () => activeBlockEdit === edit && !edit.finishing && edit.textarea === textarea,
         restoreStatus: () => { edit.status.textContent = hint; },
+        // CR 050: the image goes on a paragraph of its own, never at the end of a text line.
         insert: (name, start, end) => {
-          const length = textarea.value.length;
-          const from = Math.min(start, length);
-          const to = Math.max(from, Math.min(end, length));
-          applyTextEdit(textarea, {
-            start: from, end: to, text: "![" + name + "](" + name + ")",
-            selectionStart: from + 2, selectionEnd: from + 2 + name.length,
-          }, () => {
+          applyTextEdit(textarea, imageParagraphEdit(textarea.value, start, end, name), () => {
             resizeTextarea();
             autosaveBlockEdit();
           });
@@ -5009,6 +5015,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // posts previewReady; this function never does.
   function initializeContent(options) {
     applyEditMode(editMode);
+    warningBanner.update();
     initializeCheckboxes();
     updateStickyHeadings();
     applyDescriptionVisibility();

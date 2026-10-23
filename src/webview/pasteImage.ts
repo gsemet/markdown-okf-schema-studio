@@ -9,12 +9,47 @@ export interface PasteImageHooks {
   /** Posts the image to the host; `done` receives the host's answer. */
   send(mime: string, dataBase64: string, done: (result: { ok?: boolean; fileName?: unknown; reason?: unknown }) => void): void;
   status(text: string): void;
-  /** Inserts `![name](name)` over `[start, end)` of the text box with `name` selected. */
+  /** Inserts `![name](name)` over `[start, end)` of the text box, as its own paragraph, with `name` selected. */
   insert(name: string, start: number, end: number): void;
   /** The editor that was open at the paste is still the open one. */
   isCurrent(): boolean;
   /** The status text of an editor that is just open. */
   restoreStatus(): void;
+}
+
+export interface ImageParagraphEdit {
+  start: number;
+  end: number;
+  text: string;
+  selectionStart: number;
+  selectionEnd: number;
+}
+
+/**
+ * CR 050: the edit that puts `![name](name)` over `[start, end)` of `value` as a paragraph of its
+ * own, like GitHub and Obsidian do: a blank line before it unless it starts the text or follows a
+ * blank line, and one after it unless it ends the text or a blank line follows. The spaces and tabs
+ * around the caret go with the break, so no line keeps trailing blanks. The name is selected.
+ * Self-contained: it is injected into the page script with `.toString()`.
+ */
+export function imageParagraphEdit(value: string, start: number, end: number, name: string): ImageParagraphEdit {
+  const length = value.length;
+  let from = Math.max(0, Math.min(start, length));
+  let to = Math.max(from, Math.min(end, length));
+  while (from > 0 && (value[from - 1] === " " || value[from - 1] === "\t")) from -= 1;
+  while (to < length && (value[to] === " " || value[to] === "\t")) to += 1;
+  const before = value.slice(0, from);
+  const after = value.slice(to);
+  const lead = before === "" || /\n[ \t]*\n$/u.test(before) ? "" : before.endsWith("\n") ? "\n" : "\n\n";
+  const trail = after === "" || /^\n[ \t]*\n/u.test(after) ? "" : after.startsWith("\n") ? "\n" : "\n\n";
+  const at = from + lead.length + 2;
+  return {
+    start: from,
+    end: to,
+    text: lead + "![" + name + "](" + name + ")" + trail,
+    selectionStart: at,
+    selectionEnd: at + name.length,
+  };
 }
 
 export interface PasteImage {

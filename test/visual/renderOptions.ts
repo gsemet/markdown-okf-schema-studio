@@ -41,6 +41,12 @@ export interface ScenarioRenderOptions {
    */
   readonly freshWorkspace?: true;
   /**
+   * CR 050: the MyST extensions the governing conf.py enables. Set, the page is rendered with the
+   * conf.py checks and carries the host's success status region with their warnings. Default: no
+   * conf.py (no checks, no status region).
+   */
+  readonly mystExtensions?: readonly string[];
+  /**
    * Messages the mock host sends to the page after load, in order. The document id, version and
    * request id of the page are added to each message unless `data` sets them.
    */
@@ -50,7 +56,7 @@ export interface ScenarioRenderOptions {
 const OPTION_ORDER: readonly (keyof ScenarioRenderOptions)[] = [
   "trusted", "readOnly", "strictAdditionalProperties", "propertiesTable",
   "maxContentWidth", "paletteMode", "zoom", "incomingChanges", "markEditorSelection", "hostMessages",
-  "freshWorkspace",
+  "freshWorkspace", "mystExtensions",
 ];
 
 /**

@@ -13,6 +13,7 @@ indistinguishable from the page background.
 from __future__ import annotations
 
 import argparse
+import base64
 import glob
 import hashlib
 import json
@@ -2106,6 +2107,74 @@ def check_paste_rich_text(page: Page, scenario: dict, failures: list[Failure]) -
   after = page.evaluate("window.visualMessages.filter(m => m.type === 'previewPasteHtml').length")
   if plain_prevented or after != before:
     failures.append(Failure(page_name, "a paste right after Cmd/Ctrl+Shift+V was converted instead of left plain"))
+
+
+def check_paste_image(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """CR 050: an image pasted in a paragraph editor goes on a paragraph of its own (mid-line, then at the end)."""
+  if not scenario.get("pasteImageChecks"):
+    return
+  page_name = scenario["page"]
+  page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
+  if page.locator("html").get_attribute("data-sphinx-preview-edit-mode") != "on":
+    page.locator("[data-sphinx-preview-edit-toggle]").click()
+  page.locator("main p", has_text="A paragraph after the standalone image.").click()
+  editor = page.locator('textarea[aria-label="Raw Markdown block"]')
+  editor.wait_for(state="visible")
+  original = editor.input_value()
+  if original != "A paragraph after the standalone image.":
+    failures.append(Failure(page_name, f"unexpected paragraph source {original!r}"))
+    return
+  png = base64.b64encode((HERE / "external-img" / "markdown-logo.png").read_bytes()).decode("ascii")
+  paste = """(base64) => {
+    const element = document.querySelector('textarea[aria-label="Raw Markdown block"]');
+    const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+    const data = new DataTransfer();
+    data.items.add(new File([bytes], 'clipboard.png', { type: 'image/png' }));
+    const event = new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true });
+    element.dispatchEvent(event);
+    return event.defaultPrevented;
+  }"""
+
+  def paste_image(file_name: str) -> bool:
+    before = page.evaluate("window.visualMessages.filter(m => m.type === 'previewPasteImage').length")
+    if not page.evaluate(paste, png):
+      failures.append(Failure(page_name, "an image paste was not taken over by the editor"))
+      return False
+    page.wait_for_function(
+      "(count) => window.visualMessages.filter(m => m.type === 'previewPasteImage').length > count", arg=before)
+    page.evaluate("""(fileName) => {
+      const request = window.visualMessages.filter(m => m.type === 'previewPasteImage').at(-1);
+      const result = { type: 'previewPasteImageResult', editId: request.editId, ok: true, fileName };
+      window.dispatchEvent(new MessageEvent('message', { data: result }));
+    }""", file_name)
+    return True
+
+  def selected() -> str:
+    return editor.evaluate("element => element.value.slice(element.selectionStart, element.selectionEnd)")
+
+  # In the middle of the text: the paragraph is split around the image.
+  editor.evaluate("element => { element.focus(); const at = element.value.indexOf(' after'); element.setSelectionRange(at, at); }")
+  if not paste_image("image.png"):
+    return
+  expected = "A paragraph\n\n![image.png](image.png)\n\nafter the standalone image."
+  if editor.input_value() != expected:
+    failures.append(Failure(page_name, f"a mid-line paste is not a paragraph of its own: {editor.input_value()!r}"))
+  if selected() != "image.png":
+    failures.append(Failure(page_name, f"the pasted file name is not selected: {selected()!r}"))
+  undo = "Meta+Z" if sys.platform == "darwin" else "Control+Z"
+  page.keyboard.press(undo)
+  if editor.input_value() != original:
+    failures.append(Failure(page_name, f"one undo did not remove the whole image paste: {editor.input_value()!r}"))
+  # At the end, after a typed space (as in the real-window capture): no image glued to the line.
+  editor.evaluate("element => { element.focus(); element.setSelectionRange(element.value.length, element.value.length); }")
+  page.keyboard.type(" ")
+  if not paste_image("image-1.png"):
+    return
+  expected = original + "\n\n![image-1.png](image-1.png)"
+  if editor.input_value() != expected:
+    failures.append(Failure(page_name, f"a paste at the end of the line is not a paragraph of its own: {editor.input_value()!r}"))
+  if selected() != "image-1.png":
+    failures.append(Failure(page_name, f"the pasted file name is not selected: {selected()!r}"))
 
 
 def check_insert_after_figure(page: Page, scenario: dict, failures: list[Failure]) -> None:
@@ -6203,7 +6272,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_inline_thread, check_change_bar, check_update_glow, check_code_copy, check_page_actions, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_inline_thread, check_change_bar, check_update_glow, check_code_copy, check_page_actions, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, check_paste_image, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

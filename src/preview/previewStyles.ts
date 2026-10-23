@@ -344,6 +344,92 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending
   overflow-wrap: anywhere;
 }
 
+/* CR 050: the conf.py warnings of a successful render. Absolute in the 40px gap above the first
+   element, left of the floating toolbar: it takes no room in the flow, so showing or closing it
+   moves no content and no scroll-sync anchor, and it scrolls away with the top of the page (the
+   sticky band is never covered). One line; the text ends in an ellipsis in a very narrow pane. */
+[data-sphinx-preview-warning-banner] {
+  position: absolute;
+  inset-block-start: 6px;
+  inset-inline-start: 14px;
+  z-index: 1098;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 14px - var(--sphinx-preview-warning-banner-reserve));
+  height: 30px;
+  padding-block: 0;
+  padding-inline: 8px 2px;
+  border: 1px solid var(--vscode-editorWidget-border, var(--sphinx-preview-border));
+  border-inline-start: 3px solid var(--sphinx-preview-warning-accent);
+  border-radius: 6px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
+  color: var(--vscode-foreground, var(--vscode-editor-foreground, CanvasText));
+  font-family: var(--vscode-font-family, var(--sphinx-preview-font));
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  --sphinx-preview-warning-banner-reserve: 196px;
+  --sphinx-preview-warning-accent: color-mix(in srgb, var(--vscode-charts-yellow, #bf8803) 75%, var(--vscode-editor-foreground, CanvasText));
+}
+
+/* Rows 2-3 collapsed: the toolbar is one row of at most four buttons. */
+html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning-banner] {
+  --sphinx-preview-warning-banner-reserve: 164px;
+}
+
+[data-sphinx-preview-warning-icon] {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background: var(--sphinx-preview-warning-accent);
+  -webkit-mask: ${ICONS.triangle} center / contain no-repeat;
+  mask: ${ICONS.triangle} center / contain no-repeat;
+}
+
+[data-sphinx-preview-warning-text] {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-sphinx-preview-warning-banner] button {
+  flex: none;
+  height: 24px;
+  margin: 0;
+  padding-block: 0;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--vscode-textLink-foreground, LinkText);
+  font: inherit;
+  cursor: pointer;
+}
+
+[data-sphinx-preview-warning-banner] button:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.16));
+}
+
+[data-sphinx-preview-warning-banner] [data-sphinx-preview-warning-close] {
+  width: 24px;
+  padding: 0;
+  color: inherit;
+  font-size: 16px;
+  line-height: 1;
+}
+
+@media (forced-colors: active) {
+  [data-sphinx-preview-warning-banner] {
+    border-color: CanvasText;
+  }
+
+  [data-sphinx-preview-warning-icon] {
+    background: CanvasText;
+  }
+}
+
 [data-sphinx-preview-toolbar] button {
   display: grid;
   width: 30px;
@@ -2978,6 +3064,13 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
 #sphinx-myst-preview-content img {
   max-width: 100%;
   height: auto;
+}
+
+/* CR 050: an image written inside a paragraph is part of its line of text: the line runs through
+   its middle, so a tall image does not read as a picture above the text. A paragraph holding only
+   an image is a figure (centred block, data-sphinx-preview-figure) and keeps the default. */
+#sphinx-myst-preview-content p:not([data-sphinx-preview-figure]) img {
+  vertical-align: middle;
 }
 
 #sphinx-myst-preview-content figure {

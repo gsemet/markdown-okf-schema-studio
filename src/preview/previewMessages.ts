@@ -78,6 +78,8 @@ const MAX_PASTED_HTML_LENGTH = 1_000_000;
 
 const MAX_PLANTUML_INCLUDE_PATH_LENGTH = 4096;
 
+const MAX_WARNING_KEY_LENGTH = 32;
+
 /** The list and pick requests of the MyST palette carry only the id their answer is matched by. */
 const isHostRequest: MessageValidator = (message) =>
   isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "";
@@ -165,6 +167,12 @@ export const REGISTERED_PREVIEW_MESSAGES: Record<string, MessageValidator> = {
     && isBoundedString(message.path, MAX_PLANTUML_INCLUDE_PATH_LENGTH) && message.path.trim() !== ""
     && (message.from === null
       || (isBoundedString(message.from, MAX_PLANTUML_INCLUDE_PATH_LENGTH) && message.from !== "")),
+  // CR 050: the warning banner's button opens the Problems view; it carries nothing else.
+  previewShowProblems: () => true,
+  // CR 050: the warning banner was closed; the key of its warning set (made by the page) is kept
+  // for the document until the end of the session.
+  previewWarningBannerClosed: (message) => isBoundedString(message.key, MAX_WARNING_KEY_LENGTH)
+    && /^[0-9a-z]+-[0-9a-f]{8}$/u.test(message.key),
   // Rich text pasted into the text box: the clipboard's HTML, converted to Markdown by the host.
   previewPasteHtml: (message) => isHostRequest(message)
     && isBoundedString(message.html, MAX_PASTED_HTML_LENGTH) && message.html !== "",

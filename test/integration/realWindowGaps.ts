@@ -271,10 +271,11 @@ export async function scenarioImagePaste(page: Page, evidence: Evidence): Promis
         await frame.locator("[data-sphinx-preview-block-editor]").count() === 0
         && await frame.locator('img[src*="image.png"]').count() === 1
         && await frame.locator('img[src*="image.png"]').evaluate((image) => (image as HTMLImageElement).naturalWidth > 0)));
-      assert.equal(bufferText(document), "# Chapter\n\nText before the image. ![image.png](image.png)\n");
+      // CR 050: the image goes on a paragraph of its own; the typed space does not stay on the text line.
+      assert.equal(bufferText(document), "# Chapter\n\nText before the image.\n\n![image.png](image.png)\n");
       await captureNow(evidence, page, "palette-slash/r09-image-paste-inserted",
         "Edit mode on; a PNG was pasted at the end of the paragraph editor and committed with Mod+Enter. "
-        + "The host saved it as image.png next to the document and the block shows the image.");
+        + "The host saved it as image.png next to the document and the image is a paragraph of its own under the text.");
     } finally {
       await leaveEditMode(page);
     }

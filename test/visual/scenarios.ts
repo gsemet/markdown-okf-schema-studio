@@ -132,6 +132,8 @@ export interface Scenario {
   editorKeyboardChecks?: boolean;
   /** CR 036: a rich-text (HTML) paste in a paragraph editor becomes Markdown in one undo step; Cmd/Ctrl+Shift+V stays plain. */
   pasteRichTextChecks?: boolean;
+  /** CR 050: an image pasted in a paragraph editor (at the end, then mid-line) becomes a paragraph of its own. */
+  pasteImageChecks?: boolean;
   /** Hover outline, then an open paragraph editor with frame, hint and buttons (T15). */
   editAffordances?: boolean;
   /**
@@ -652,6 +654,52 @@ const MAX_WIDTH_ASSERTIONS: ContentAssertion[] = [
   { message: "the column is centred in the 2000 px pane", selector: MAIN,
     expr: "(() => { const box = document.querySelector('#sphinx-myst-preview-content').getBoundingClientRect(); return Math.abs(box.left - (window.innerWidth - box.width) / 2) <= 1; })()" },
   { message: "the page does not scroll sideways", selector: "html", expr: NO_HORIZONTAL_SCROLL },
+];
+
+/** CR 050: WCAG contrast of two computed colours (resolved through a canvas, so color-mix() works). */
+const CONTRAST_JS = `(() => { const rgb = (color) => { const context = document.createElement('canvas').getContext('2d'); context.fillStyle = '#000'; context.fillStyle = color; context.fillRect(0, 0, 1, 1); return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3); }; const luminance = (color) => { const [r, g, b] = rgb(color).map((v) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; }; return (a, b) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); }; })()`;
+
+const BANNER = "[data-sphinx-preview-warning-banner]";
+
+/** CR 050: the conf.py warning banner of a successful render, open. */
+const WARNING_BANNER_ASSERTIONS: ContentAssertion[] = [
+  { message: "one warning banner is shown, as a status", selector: BANNER, count: 1, visible: true, attr: { name: "role", value: "status" } },
+  { message: "the banner counts the two conf.py warnings of the page", selector: `${BANNER} [data-sphinx-preview-warning-text]`, text: "2 MyST syntax warnings from conf.py" },
+  { message: "the banner has its warning icon", selector: `${BANNER} [data-sphinx-preview-warning-icon]`, count: 1, visible: true },
+  { message: "the Open Problems button is offered", selector: `${BANNER} button[data-sphinx-preview-warning-problems]`, count: 1, visible: true, text: "Open Problems" },
+  { message: "the close button is a labelled, focusable button", selector: `${BANNER} button[data-sphinx-preview-warning-close]`, count: 1, visible: true, attr: { name: "aria-label", value: "Close the warning" },
+    expr: "(() => { const close = document.querySelector('[data-sphinx-preview-warning-close]'); close.focus(); const focused = document.activeElement === close; close.blur(); return focused; })()" },
+  { message: "the banner takes no room in the flow (absolute), so the content and the scroll-sync anchors do not move", selector: BANNER, css: { position: "absolute" },
+    expr: "Math.abs(document.querySelector('#sphinx-myst-preview-content > h1').getBoundingClientRect().top + scrollY - 40) <= 1" },
+  { message: "the banner stays clear of the floating toolbar", selector: BANNER,
+    expr: "(() => { const a = document.querySelector('[data-sphinx-preview-warning-banner]').getBoundingClientRect(); const b = document.querySelector('[data-sphinx-preview-toolbar]').getBoundingClientRect(); return a.right <= b.left - 4 || a.bottom <= b.top || a.top >= b.bottom; })()" },
+  { message: "the banner sits above the first heading without covering it", selector: BANNER,
+    expr: "document.querySelector('[data-sphinx-preview-warning-banner]').getBoundingClientRect().bottom <= document.querySelector('#sphinx-myst-preview-content > h1').getBoundingClientRect().top + 1" },
+  { message: "the banner text and its buttons are readable on the banner (4.5:1) and the icon stands out (3:1)", selector: BANNER,
+    expr: `(() => { const contrast = ${CONTRAST_JS}; const banner = document.querySelector('[data-sphinx-preview-warning-banner]'); const bg = getComputedStyle(banner).backgroundColor; const text = getComputedStyle(banner.querySelector('[data-sphinx-preview-warning-text]')).color; const link = getComputedStyle(banner.querySelector('[data-sphinx-preview-warning-problems]')).color; const close = getComputedStyle(banner.querySelector('[data-sphinx-preview-warning-close]')).color; const icon = getComputedStyle(banner.querySelector('[data-sphinx-preview-warning-icon]')).backgroundColor; return contrast(text, bg) >= 4.5 && contrast(link, bg) >= 4.5 && contrast(close, bg) >= 4.5 && contrast(icon, bg) >= 3; })()` },
+  { message: "the page does not scroll sideways", selector: "html", expr: NO_HORIZONTAL_SCROLL },
+];
+
+/** CR 050: the banner after a click on its close button. */
+const WARNING_BANNER_CLOSED_ASSERTIONS: ContentAssertion[] = [
+  { message: "the closed banner is gone", selector: BANNER, count: 0 },
+  { message: "the page told the host which warning set was closed", selector: "html",
+    expr: "window.visualMessages.filter((m) => m.type === 'previewWarningBannerClosed').length === 1 && /^[0-9a-z]+-[0-9a-f]{8}$/.test(window.visualMessages.find((m) => m.type === 'previewWarningBannerClosed').key)" },
+  { message: "closing moved no content", selector: "html",
+    expr: "Math.abs(document.querySelector('#sphinx-myst-preview-content > h1').getBoundingClientRect().top + scrollY - 40) <= 1" },
+  { message: "the warnings stay in the status region for assistive technology", selector: "[data-sphinx-preview-status=\"success\"] li[data-sphinx-preview-diagnostic-code=\"myst-extension\"]", count: 2 },
+];
+
+/** CR 050: an image written inside a paragraph, then a standalone image. */
+const INLINE_IMAGE_ASSERTIONS: ContentAssertion[] = [
+  { message: "the inline image is an inline element of its paragraph", selector: `${MAIN} p:not([data-sphinx-preview-figure]) > img`, count: 1, css: { display: "inline" } },
+  { message: "the inline image sits on the text line, after the text before it and before the text after it", selector: `${MAIN} p:not([data-sphinx-preview-figure]) > img`,
+    expr: "(() => { const image = document.querySelector('#sphinx-myst-preview-content p:not([data-sphinx-preview-figure]) > img'); const box = image.getBoundingClientRect(); const range = document.createRange(); const before = image.previousSibling; const after = image.nextSibling; range.selectNodeContents(before); const b = [...range.getClientRects()].pop(); range.selectNodeContents(after); const a = range.getClientRects()[0]; return b.right <= box.left + 1 && a.left >= box.right - 1 && b.bottom > box.top && b.top < box.bottom && a.bottom > box.top && a.top < box.bottom; })()" },
+  { message: "the text line runs through the middle of the image, so the image reads as part of the line and not as a picture above the text", selector: `${MAIN} p:not([data-sphinx-preview-figure]) > img`,
+    expr: "(() => { const image = document.querySelector('#sphinx-myst-preview-content p:not([data-sphinx-preview-figure]) > img'); const box = image.getBoundingClientRect(); const range = document.createRange(); range.selectNodeContents(image.previousSibling); const text = [...range.getClientRects()].pop(); return Math.abs((text.top + text.bottom) / 2 - (box.top + box.bottom) / 2) <= Math.max(6, box.height * 0.2); })()" },
+  { message: "the standalone image keeps its figure behaviour (a centred block of its own)", selector: `${MAIN} p[data-sphinx-preview-figure] > img`, count: 1,
+    expr: "getComputedStyle(document.querySelector('#sphinx-myst-preview-content p[data-sphinx-preview-figure]')).textAlign === 'center'" },
+  { message: "both images loaded", selector: `${MAIN} img`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content img')].every((image) => image.complete && image.naturalWidth > 0)" },
 ];
 
 const WIDE = { width: 900, height: 1000 };
@@ -2822,6 +2870,85 @@ const SCENARIO_DEFINITIONS: ScenarioDefinition[] = [
       + "The `glow` step shows the glow at its start (paused through the Web Animations API); reduced motion then "
       + "comes back, so the final frame is the settled page.",
   })),
+  // CR 050: the conf.py warning banner of a successful render.
+  ...([
+    ["light", undefined, 29],
+    ["dark", undefined, 30],
+    ["light", "cream", 31],
+  ] as const).map(([theme, mode, number]) => ({
+    id: `myst/v${number}-conf-warning-banner-${mode ?? theme}-900`,
+    fixture: "53-conf-warnings",
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { mystExtensions: [] },
+    contentAssertions: WARNING_BANNER_ASSERTIONS,
+    description: `A page whose conf.py enables no MyST extension uses dollar math and a colon fence, ${mode ?? theme} ${mode ? "page" : "theme"}: `
+      + "the render succeeds and a one-line banner above the first heading, left of the floating toolbar, says "
+      + "\"2 MyST syntax warnings from conf.py\" with a warning icon, an Open Problems button and a close button. "
+      + "It is readable, covers neither the toolbar nor the heading and moves no content.",
+  })),
+  {
+    id: "myst/v32-conf-warning-banner-narrow-dark-460",
+    fixture: "53-conf-warnings",
+    theme: "dark",
+    ...NARROW,
+    scroll: { kind: "top" as const },
+    render: { mystExtensions: [] },
+    contentAssertions: WARNING_BANNER_ASSERTIONS,
+    description: "The conf.py warning banner in a 460 px dark pane: still one line left of the toolbar, above the first heading, "
+      + "with its icon, text and both buttons.",
+  },
+  {
+    id: "myst/v33-conf-warning-banner-closed-light-900",
+    fixture: "53-conf-warnings",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: { mystExtensions: [] },
+    pageActions: [{ click: "[data-sphinx-preview-warning-close]" }],
+    contentAssertions: WARNING_BANNER_CLOSED_ASSERTIONS,
+    description: "The conf.py warning banner after a click on its close button: the banner is gone, nothing moved, "
+      + "the page told the host which set of warnings was closed (so it stays closed for this document), "
+      + "and the warnings stay in the status region.",
+  },
+  // CR 050: an image inside a paragraph stays in the text; a standalone image stays a figure.
+  {
+    id: "rendering-core/v23-inline-image-in-text-light-900",
+    fixture: "52-inline-image",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    contentAssertions: INLINE_IMAGE_ASSERTIONS,
+    description: "A paragraph with an image between two pieces of text, then an image on its own: the first image is drawn "
+      + "in the line of text, after \"Text before the logo\" and before \"and text after it\"; the standalone image stays a "
+      + "centred block of its own.",
+  },
+  {
+    id: "rendering-core/v24-inline-image-in-text-edit-dark-900",
+    fixture: "52-inline-image",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    contentAssertions: INLINE_IMAGE_ASSERTIONS,
+    description: "The same page in edit mode, dark theme: the inline image stays in its line of text and the standalone image "
+      + "stays a centred figure.",
+  },
+  // CR 050: an image pasted into a paragraph editor becomes a paragraph of its own.
+  {
+    id: "palette-slash/v22-pasted-image-paragraph-light-900",
+    fixture: "52-inline-image",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    pasteImageChecks: true,
+    description: "An image pasted at the end of a paragraph editor (after a typed space) and in the middle of its text: "
+      + "each time the reference goes on a paragraph of its own, with a blank line before and after it, and its name is "
+      + "selected. The final frame shows the editor after the paste at the end.",
+  },
 ];
 
 /**
