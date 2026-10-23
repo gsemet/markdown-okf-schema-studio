@@ -132,8 +132,8 @@ manifests cannot certify a later run.
 
 ### Preview performance probe
 
-The probe measures the live preview on a large generated chapter (about 93 KB, 80 sections,
-8 Mermaid diagrams, see `test/probe/largeChapter.ts`). Run it before and after a change to the
+The probe measures the live preview on a large generated chapter (about 99 KB, 80 sections,
+80 links, 8 Mermaid diagrams, see `test/probe/largeChapter.ts`). Run it before and after a change to the
 webview runtime, the content patch or the edit lock, and compare the JSON reports.
 
 ```bash
@@ -142,11 +142,13 @@ npm run probe
 
 It runs without a VS Code window: it builds the real preview page, opens it in headless Chromium
 with a stub host and writes `out/reports/probe/preview-probe.json`. It reports the page size, the
-script time of each scroll frame (normal CPU and four times slower), the page loads and Mermaid
-redraws while ten characters are typed as content patches, and whether an open inline editor
-survives a theme change and the Mermaid redraw. With `--check` (the npm script passes it), it
-exits with an error when a scroll frame's 95th percentile goes over 4 ms, a page reloads while
-typing, or the open editor is lost.
+script time of each scroll frame (normal CPU and four times slower), the page loads, the Mermaid
+redraws and the content blocks rebuilt while ten characters are typed as content patches, and
+whether an open inline editor survives a theme change and the Mermaid redraw. The first page is
+loaded as VS Code's webview loader shows it (every link without a title gets its address as
+title). With `--check` (the npm script passes it), it exits with an error when a scroll frame's
+95th percentile goes over 4 ms, a page reloads while typing, typing redraws a diagram or rebuilds
+another block than the typed one, or the open editor is lost.
 
 The real-window probe measures the same in VS Code: `webview.html` assignments while typing in the
 text editor, scroll frames of the webview, and an open editor through a save, a colour theme change

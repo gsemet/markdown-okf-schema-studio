@@ -115,3 +115,42 @@ export function frameStats(samples: readonly FrameSample[]): FrameStats {
     postsPerFrame: round(sum(samples.map((sample) => sample.posts)) / count),
   };
 }
+
+/**
+ * Remembers the content's top-level blocks (the nodes, their HTML and text) before the typing.
+ * Runs inside the page (self-contained).
+ */
+export function snapshotBlocks(): void {
+  const main = document.getElementById("sphinx-myst-preview-content");
+  const children = Array.from(main?.children ?? []);
+  (window as unknown as { __probeBlocks: unknown }).__probeBlocks = {
+    nodes: new WeakSet(children),
+    html: children.map((child) => child.outerHTML),
+    text: children.map((child) => child.textContent),
+  };
+}
+
+/**
+ * How many top-level blocks the typing replaced, and the first replaced block whose text did not
+ * change but whose HTML did (what made the keyed morph miss it), with the text around the change.
+ * Runs inside the page (self-contained), after {@link snapshotBlocks}.
+ */
+export function rebuiltBlocks(): { blocks: number; rebuilt: number; firstDifference?: { index: number; before: string; after: string } } {
+  const snapshot = (window as unknown as { __probeBlocks: { nodes: WeakSet<Element>; html: string[]; text: (string | null)[] } }).__probeBlocks;
+  const children = Array.from(document.getElementById("sphinx-myst-preview-content")?.children ?? []);
+  let firstDifference: { index: number; before: string; after: string } | undefined;
+  let rebuilt = 0;
+  children.forEach((child, index) => {
+    if (snapshot.nodes.has(child)) return;
+    rebuilt += 1;
+    if (firstDifference || child.querySelector(".myst-mermaid-diagram")) return;
+    const was = snapshot.text.indexOf(child.textContent);
+    if (was < 0) return;
+    const before = snapshot.html[was] ?? "";
+    const after = child.outerHTML;
+    let at = 0;
+    while (at < before.length && before[at] === after[at]) at += 1;
+    firstDifference = { index, before: before.slice(Math.max(0, at - 80), at + 120), after: after.slice(Math.max(0, at - 80), at + 120) };
+  });
+  return { blocks: children.length, rebuilt, ...(firstDifference ? { firstDifference } : {}) };
+}

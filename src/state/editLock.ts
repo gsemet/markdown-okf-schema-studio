@@ -56,6 +56,19 @@ export class EditLock {
   }
 
   /**
+   * The page moves on to another document: its editors were flushed and closed before the switch.
+   * Forgets the page editor and discards the work queued for the old document (a deferred render
+   * result frees its stage), so the new document's render reaches the page at once. The host's own
+   * edit lock, if a final save is still being applied, is kept.
+   */
+  public forgetPage(): void {
+    this.pageEditorId = undefined;
+    const queued = [...this.deferred.values()];
+    this.deferred.clear();
+    queued.forEach((entry) => entry.discard?.());
+  }
+
+  /**
    * The page reported ready for the render `requestId`. A page for another render than the one the
    * edit opened on, or a page that reports no open editor (`blockEditOpen === false`), has no
    * inline editor: the lock is released. Returns the queued work if it was.

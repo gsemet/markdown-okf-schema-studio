@@ -33,7 +33,7 @@ import { installChipToggle } from "./chipToggle";
 import { installInlineThreads } from "./inlineThread";
 import { installIncomingChanges } from "./incomingChanges";
 import { installMotion } from "./motion";
-import { installContentMorph, planKeyedMorph } from "./contentMorph";
+import { installContentMorph, morphKey, planKeyedMorph } from "./contentMorph";
 import { installCommentCompose } from "./commentCompose";
 import { installCommentThreads } from "./commentThreads";
 import { installCommentsToggle } from "./commentsToggle";
@@ -129,7 +129,7 @@ function runtimeScript(contextExpression: string): string {
   document.documentElement.setAttribute("data-sphinx-preview-document-version", String(context.documentVersion));
   document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
   // Keyed content updates (PERF-05): the host HTML of every block, recorded before anything changes it.
-  const contentMorph = (${installContentMorph.toString()})(document, ${planKeyedMorph.toString()});
+  const contentMorph = (${installContentMorph.toString()})(document, ${planKeyedMorph.toString()}, ${morphKey.toString()});
   const initialContent = document.getElementById?.("sphinx-myst-preview-content");
   if (initialContent) contentMorph.record(initialContent);
   const tableTools = (${createMarkdownTableTools.toString()})();
@@ -5291,9 +5291,9 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       applyPendingOverlay(message);
       return;
     }
-    if (message && message.type === "previewEditorWatch" && message.documentId === context.documentId
-      && typeof message.editId === "string") {
-      // The host holds page updates back until this editor closes (STAB-03): report the close.
+    if (message && message.type === "previewEditorWatch" && typeof message.editId === "string") {
+      // The host holds page updates back until this editor closes (STAB-03): report the close. The
+      // editor id is the match; the document id may already be the next document the host follows.
       if (activeBlockEdit && activeBlockEdit.editId === message.editId) activeBlockEdit.reportClose = true;
       else postEditClosed(message.editId);
       return;

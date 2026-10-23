@@ -4157,11 +4157,10 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
         : Promise.resolve(handler(preview, value));
     }
     if (value.type === "previewEditClosed") {
-      // A close is matched by the editor's id: the editor was opened on the page the host holds,
-      // which may be one render behind the stage when a render finished while it was open.
-      return preview.disposed || !handler || value.documentId !== preview.documentUri
-        ? undefined
-        : Promise.resolve(handler(preview, value));
+      // A close is matched by the editor's id only: the editor was opened on the page the host
+      // holds, which may be one render behind the stage, or still show the previous document while
+      // the host already follows the next one. It edits nothing, and an unknown id is ignored.
+      return preview.disposed || !handler ? undefined : Promise.resolve(handler(preview, value));
     }
     if (value.type === "previewEditFlushed") {
       // The answer to a flush request is matched by its flush id only: it must reach the waiting
@@ -4425,8 +4424,17 @@ function switchPreviewDocumentAfterFlush(preview: ActivePreview, document: vscod
     .catch((error: unknown) => console.error("Failed to flush the open editor before the switch.", error))
     .then(() => {
       const target = queue.settle();
-      if (target && !preview.disposed && activePreviews.has(preview)) {
+      if (preview.disposed || !activePreviews.has(preview)) {
+        return;
+      }
+      if (target && documentKey(target) !== preview.documentUri) {
         switchPreviewDocument(preview, target);
+      } else if (preview.editLock.pageEditorOpen) {
+        // The reader came back before the switch ran. The flush closed the page editor, which
+        // tells the host nothing when its text was unchanged: ask the page again. It answers at
+        // once when the editor is gone, and on its close when it is still open (a refused save).
+        preview.watchedPageEditorId = undefined;
+        watchPageEditor(preview);
       }
     });
   switchChains.set(panel, chain);
@@ -4456,6 +4464,12 @@ function switchPreviewDocument(preview: ActivePreview, document: vscode.TextDocu
     });
     return;
   }
+  // The flush before the switch saved and closed the page's editors; an editor closed unchanged
+  // tells the host nothing. The page work that waited for it belongs to the old document (its
+  // render, its theme render, its diagrams): it is dropped, and the new document renders at once
+  // instead of waiting for an editor that is gone (STAB-03).
+  preview.editLock.forgetPage();
+  preview.watchedPageEditorId = undefined;
   if (preview.state) {
     preview.states.set(preview.documentUri, preview.state);
   }
@@ -4508,6 +4522,11 @@ function deferWhileEditing(preview: ActivePreview, key: string, work: () => void
  */
 function deferPageWork(preview: ActivePreview, key: string, work: () => void, discard?: () => void): void {
   preview.editLock.defer(key, work, discard);
+  watchPageEditor(preview);
+}
+
+/** Asks the page, once per editor, to report when its open inline editor closes (STAB-03). */
+function watchPageEditor(preview: ActivePreview): void {
   const editId = preview.editLock.pageEditor;
   if (editId === undefined || preview.watchedPageEditorId === editId || preview.disposed) {
     return;
