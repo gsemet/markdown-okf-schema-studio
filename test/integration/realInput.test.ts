@@ -1309,7 +1309,7 @@ async function scenarioLinkPanelPrefill(page: Page, evidence: Evidence): Promise
     });
     assert.equal(await field("text"), "the docs", "the text is prefilled from the link");
     assert.equal(await field("url"), "https://example.org/docs", "the URL is prefilled from the link");
-    await captureAfter(evidence, page, "cr035-link-panel-prefilled",
+    await captureAfter(evidence, page, "palette-slash/r08-link-panel-prefilled",
       "Edit mode on; Cmd/Ctrl+K with the caret inside [the docs](https://example.org/docs) opened the link panel "
       + "pre-filled with the text and the URL.");
     await (await findCurrentFrame(page))!.locator("[data-link-field='url']").fill("https://example.org/new");
@@ -4119,7 +4119,7 @@ async function scenarioFlushBeforeTabSwitch(page: Page, evidence: Evidence): Pro
     await waitForRender(first);
     await waitForNoOpenEditor(page);
     assert.equal(bufferText(first), FLUSH_FIRST.replace("Typed target paragraph.", "Typed target paragraph. Added."));
-    await captureAfter(evidence, page, "40-flush-before-tab-switch",
+    await captureAfter(evidence, page, "block-editing/r24-flush-before-tab-switch",
       "Edit mode on; ` Added.` was typed in the paragraph and the editor tab was switched at once. "
       + "Coming back, the preview shows `Typed target paragraph. Added.` and no editor is open; the "
       + "source buffer holds the same text.");
