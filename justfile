@@ -199,13 +199,20 @@ ci-stress REPEAT="20":
     fi
 
 # CI job "report": merge the visual and integration outputs into the review index and e2e manifest.
-ci-report:
+# STAGES=visual: the real VS Code stage did not run (the pull request path of CI); it is reported as
+# skipped and only the visual stage counts.
+ci-report STAGES="all":
     #!/usr/bin/env bash
     set -uo pipefail
+    case "{{ STAGES }}" in
+        all) only="" ;;
+        visual) only="--visual-only" ;;
+        *) echo "ci-report: STAGES must be all or visual, got {{ STAGES }}" >&2; exit 2 ;;
+    esac
     failed=0
     {{ npm }} run compile || failed=1
-    {{ npm }} run review:finish || failed=1
-    node scripts/e2e-campaign.mjs report || failed=1
+    {{ npm }} run review:finish -- $only || failed=1
+    node scripts/e2e-campaign.mjs report $only || failed=1
     if [[ "$failed" -eq 0 ]]; then
         echo "ci-report: passed"
     else

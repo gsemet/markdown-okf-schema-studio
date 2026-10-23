@@ -282,7 +282,7 @@ export interface Evidence {
 }
 
 /** The suites that write through this capture helper; each has its own `<LABEL>-LATEST.md` pointer. */
-export type EvidenceLabel = "real-input" | "untrusted" | "standalone";
+export type EvidenceLabel = "real-input" | "untrusted";
 
 export function createEvidence(label: EvidenceLabel): Evidence {
   const store = new RealWindowEvidence(label, { indexTitle: `${label} capture order` });

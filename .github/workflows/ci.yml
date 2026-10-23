@@ -6,8 +6,12 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      heavy:
+        description: Also run the real VS Code jobs (integration and stress, about 10 and 20 minutes)
+        type: boolean
+        default: false
       gallery:
-        description: Also build the gallery and the site from the end-to-end reports
+        description: Also build the gallery and the site from the end-to-end reports (needs heavy)
         type: boolean
         default: false
 
@@ -109,7 +113,11 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
+  # Heavy, manual: the real VS Code window tests. They do not run on push or pull request; start
+  # them with `gh workflow run ci.yml --ref <branch> -f heavy=true` (or "Run workflow" in Actions).
+  # Not part of `checks`.
   integration:
+    if: github.event_name == 'workflow_dispatch' && inputs.heavy
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -140,11 +148,12 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
-  # Repeats the flake-prone and the new real-window scenarios (20 rounds, in the trusted window then
-  # in the Restricted Mode window); a race that a single run passes by luck fails here. Its reports
-  # are not part of the e2e campaign.
+  # Heavy, manual (with integration): repeats the flake-prone and the new real-window scenarios (20
+  # rounds, in the trusted window then in the Restricted Mode window); a race that a single run
+  # passes by luck fails here. Its reports are not part of the e2e campaign.
   # Advisory: a red stress run flags a flake to fix (CI rule 12) but does not block merges.
   stress:
+    if: github.event_name == 'workflow_dispatch' && inputs.heavy
     runs-on: ubuntu-latest
     timeout-minutes: 30
     continue-on-error: true
@@ -205,7 +214,8 @@ jobs:
           pattern: e2e-*
           path: out/reports/
           merge-multiple: true
-      - run: just ci-report
+      # Without the heavy jobs the real VS Code stage is reported as skipped (visual only).
+      - run: just ci-report ${{ (github.event_name == 'workflow_dispatch' && inputs.heavy) && 'all' || 'visual' }}
       - name: Publish merged reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -216,7 +226,8 @@ jobs:
 
   gallery:
     needs: report
-    if: github.event_name == 'workflow_dispatch' && inputs.gallery
+    # The gallery and its README images need the real-window captures of the heavy jobs.
+    if: github.event_name == 'workflow_dispatch' && inputs.gallery && inputs.heavy
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -251,9 +262,10 @@ jobs:
           path: out/site/
           if-no-files-found: warn
 
-  # Stable aggregate name for branch protection: it depends on every check job.
+  # Stable aggregate name for branch protection: it depends on every required check job, the
+  # simulated ones (the real VS Code jobs are manual and optional).
   checks:
-    needs: [static, visual, integration, report]
+    needs: [static, visual, report]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 15

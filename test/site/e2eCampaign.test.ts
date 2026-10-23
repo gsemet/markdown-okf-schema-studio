@@ -62,3 +62,29 @@ test("the report fails when the two stages started more than two hours apart", (
   assert.equal(result.status, 1);
   assert.match(result.stderr, /minutes apart/u);
 });
+
+test("the visual-only report needs only the visual stage and lists the real VS Code stage as skipped", () => {
+  const { root, e2e } = workspace();
+  const now = hoursAgo(0.1);
+  writeCampaign(e2e, "visual", "run-v", now);
+  fs.writeFileSync(path.join(e2e, "screenshots", "run-manifest.json"), JSON.stringify({ status: "passed", startedAt: now, completedAt: now }));
+  fs.writeFileSync(path.join(e2e, "review.json"), JSON.stringify({ status: "passed", startedAt: now, completedAt: now }));
+  const result = run(root, "report", "--visual-only");
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /skipped integration/u);
+  const manifest = JSON.parse(fs.readFileSync(path.join(e2e, "e2e-manifest.json"), "utf8")) as { status: string; skipped: string[]; stages: { name: string }[] };
+  assert.equal(manifest.status, "passed");
+  assert.deepEqual(manifest.skipped, ["integration"]);
+  assert.deepEqual(manifest.stages.map((stage) => stage.name), ["visual", "review-index"]);
+  // The full report still requires the integration stage.
+  assert.equal(run(root, "report").status, 1);
+});
+
+test("the visual-only report fails when the visual stage failed or did not run", () => {
+  const { root, e2e } = workspace();
+  assert.equal(run(root, "report", "--visual-only").status, 1);
+  writeCampaign(e2e, "visual", "run-v", hoursAgo(0.1));
+  fs.writeFileSync(path.join(e2e, "screenshots", "run-manifest.json"), JSON.stringify({ status: "failed" }));
+  fs.writeFileSync(path.join(e2e, "review.json"), JSON.stringify({ status: "failed" }));
+  assert.equal(run(root, "report", "--visual-only").status, 1);
+});

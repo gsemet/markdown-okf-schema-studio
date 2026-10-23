@@ -5,7 +5,7 @@ import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { reviewIndexText } from "../site/reviewIndexText";
 import { generatePoGallery } from "../site/poGalleryCli";
 import { automaticKeep, pruneReports } from "../site/pruneReportsCli";
-import { validateReviewEvidence, type CampaignIdentity, type EvidenceManifest } from "../site/reviewEvidence";
+import { validateReviewEvidence, validateVisualEvidence, type CampaignIdentity, type EvidenceManifest } from "../site/reviewEvidence";
 
 const artifacts = E2E_REPORT_ROOT;
 const screenshots = E2E_SCREENSHOT_ROOT;
@@ -35,14 +35,20 @@ function finishReview(): void {
   // Stages run as separate jobs (ci-visual, ci-integration) each record their own identity;
   // `npm run test:e2e` records a single review-start.json.
   const visualCampaign = readCampaign("campaign-visual.json");
-  const integrationCampaign = readCampaign("campaign-integration.json");
+  // `--visual-only`: the real VS Code stage did not run (manual CI job); only the visual stage counts.
+  const visualOnly = process.argv.includes("--visual-only");
+  const integrationCampaign = visualOnly ? undefined : readCampaign("campaign-integration.json");
   const split = visualCampaign !== undefined || integrationCampaign !== undefined;
   const campaign = split ? integrationCampaign ?? visualCampaign : readCampaign("review-start.json");
   const integrationPath = path.join(artifacts, "integration-manifest.json");
   const visualPath = path.join(screenshots, "run-manifest.json");
-  const integration = readJson(integrationPath, { status: "failed", scope: "missing", error: "integration manifest is missing" });
+  const integration = visualOnly
+    ? { status: "skipped", scope: "none", note: "the real VS Code stage did not run (manual CI job)" }
+    : readJson(integrationPath, { status: "failed", scope: "missing", error: "integration manifest is missing" });
   const visual = readJson(visualPath, { status: "failed", error: "visual manifest is missing" });
-  const failures = split
+  const failures = visualOnly
+    ? visualCampaign ? validateVisualEvidence(visualCampaign, visual) : ["visual campaign identity is missing"]
+    : split
     ? [
       ...(integrationCampaign ? [] : ["integration campaign identity is missing"]),
       ...(visualCampaign ? [] : ["visual campaign identity is missing"]),
@@ -63,7 +69,7 @@ function finishReview(): void {
     if (!fs.existsSync(destination)) fs.renameSync(source, destination);
   }
   fs.writeFileSync(path.join(history, "README.md"), "# Historical Evidence\n\nThese captures predate the current checkpoint/sidecar contract. They are retained for diagnosis, not stakeholder approval. Missing notes, failed states and unknown provenance are not reconstructed as current passing evidence. Use ../REVIEW.md for the current campaign.\n");
-  fs.writeFileSync(index, reviewIndexText({ status, campaign, integration, visual, failures }));
+  fs.writeFileSync(index, reviewIndexText({ status, campaign, integration, visual, failures, integrationSkipped: visualOnly }));
   fs.writeFileSync(path.join(artifacts, "review.json"), JSON.stringify({
     status,
     runId: campaign?.runId ?? null,

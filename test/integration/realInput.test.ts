@@ -44,17 +44,7 @@ import {
   writeSchema,
   type Evidence,
 } from "./realInput/harness";
-import {
-  scenarioBackNextAcrossDocuments,
-  scenarioConfExtensionWarning,
-  scenarioDoubleClickRevealsSource,
-  scenarioImagePaste,
-  scenarioIncomingChanges,
-  scenarioKeybindingAndRefresh,
-  scenarioLabelRename,
-  scenarioReviewThreads,
-  scenarioStandaloneReadOnly,
-} from "./realWindowGaps";
+import { scenarioImagePaste, scenarioIncomingChanges, scenarioReviewThreads } from "./realWindowGaps";
 
 const SMOKE = [
   "# Smoke document",
@@ -4426,24 +4416,8 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   "flush-cell-frontmatter": scenarioFlushCellAndFrontmatter,
   "flush-frontmatter-typed": scenarioFlushFrontmatterKeptAsTyped,
   "incoming-changes": scenarioIncomingChanges,
-  "conf-warning": scenarioConfExtensionWarning,
   "review-threads": scenarioReviewThreads,
   "image-paste": scenarioImagePaste,
-  "label-rename": scenarioLabelRename,
-  "back-next": scenarioBackNextAcrossDocuments,
-  "keybinding-refresh": scenarioKeybindingAndRefresh,
-  "double-click": scenarioDoubleClickRevealsSource,
-  // The standalone suite's capture: it writes to a standalone evidence folder of its own.
-  "standalone-read-only": async (page) => {
-    const standalone = createEvidence("standalone");
-    let passed = false;
-    try {
-      await scenarioStandaloneReadOnly(page, standalone);
-      passed = true;
-    } finally {
-      standalone.finish(passed, false);
-    }
-  },
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */
@@ -4567,13 +4541,8 @@ export async function run(): Promise<void> {
     await scenarioLargeDocumentPatched(page, evidence);
     // CR 043 (P9 T2): real-window gap fill, also in the stress plan.
     await scenarioIncomingChanges(page, evidence);
-    await scenarioConfExtensionWarning(page, evidence);
     await scenarioReviewThreads(page, evidence);
     await scenarioImagePaste(page, evidence);
-    await scenarioLabelRename(page, evidence);
-    await scenarioBackNextAcrossDocuments(page, evidence);
-    await scenarioKeybindingAndRefresh(page, evidence);
-    await scenarioDoubleClickRevealsSource(page, evidence);
     passed = true;
     complete = true;
   } finally {

@@ -72,6 +72,13 @@ CI runs the same stages as parallel jobs, each calling one target after `just de
 `just ci-integration`, then `just ci-report` (merges the visual and integration outputs into the
 review index and `out/reports/e2e/e2e-manifest.json`; it fails when a stage manifest is missing or
 failed) and `just ci-gallery` (gallery and site from the existing outputs, no E2E re-run).
+On push and pull request, CI runs only the simulated tests, which make up the required `checks` job:
+`ci-static`, `ci-visual` (Playwright/Chromium against a mock host) and `just ci-report visual`, which
+reports the real VS Code stage as skipped. The real VS Code window jobs (`ci-integration` and the
+`stress` repetitions) are heavy and manual: start them with
+`gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery and site
+artifact), or with "Run workflow" in the Actions tab. Run them, or `npm run test:integration`
+locally, before merging a change to the extension host, the webview or the real-window tests.
 `just preflight` calls these targets in sequence. Each stage records its own start time and they share
 a run id, so `just ci-visual`, `just ci-integration` and `just ci-report` also work one by one; `just
 clean` starts a fresh campaign. `just dev-ci` is for CI machines only: `npm ci` replaces
@@ -162,8 +169,8 @@ scenario's viewport, fixture, theme, scroll or crop unless the image is meant to
 
 Every screenshot taken in a real VS Code window has a stable id `<group>/rNN-<slug>` registered in
 `test/shared/captureRegistry.ts` (group, suite, one `locks` sentence, `clip`, README and curated
-flags). All seven suites (real-input, checkbox, frontmatter, scroll, reload, untrusted, standalone)
-write through the same
+flags). All six suites (real-input, checkbox, frontmatter, scroll, reload, untrusted) write
+through the same
 `RealWindowEvidence` writer (`test/integration/evidence.ts`): it rejects an unregistered id, writes
 `<run folder>/<group>/rNN-<slug>.png` with its `.md` note and `.json` sidecar, lists the capture in
 the `captures` array of the run `manifest.json`, and fails a complete suite when a registered
@@ -173,16 +180,15 @@ webview frame (falling back to the whole window), `clip: "element"` to the chang
 `clip: "window"` keeps the whole VS Code window, which the README crops need.
 
 The LATEST pointer files, `INDEX.md` and the run folder prefixes (`real-input-`, `checkbox-e2e-`,
-`frontmatter-e2e-`, `scroll-e2e-`, `reload-e2e-`, and `untrusted-e2e-`, `standalone-e2e-` with
-`UNTRUSTED-LATEST.md` and `STANDALONE-LATEST.md`) are unchanged; the per-group folders live inside
-the run folder. Every window with captures gets a loopback CDP port (`STUDIO_CDP_PORT`): the
-trusted, scroll and standalone launches, and the Restricted Mode window, which `run-tests` spawns
-directly (`--untrusted-only` runs it alone).
+`frontmatter-e2e-`, `scroll-e2e-`, `reload-e2e-`, and `untrusted-e2e-` with `UNTRUSTED-LATEST.md`)
+are unchanged; the per-group folders live inside the run folder. Every window with captures gets a
+loopback CDP port (`STUDIO_CDP_PORT`): the trusted and scroll launches, and the Restricted Mode
+window, which `run-tests` spawns directly (`--untrusted-only` runs it alone).
 
 A new real-window scenario goes into the stress plan (`STRESS_SCENARIOS_BY_HOST` in
 `test/shared/stressPlan.ts`, by the window that runs it) and must pass the `stress` CI job before it
-stays in the required integration job (CI rule 12). `just ci-stress` runs the trusted window, then
-the Restricted Mode window. `npm run review:gallery` lists the registered captures of the latest runs per group,
+stays in the integration job (CI rule 12). `just ci-stress` runs the trusted window, then the
+Restricted Mode window. `npm run review:gallery` lists the registered captures of the latest runs per group,
 and `scripts/generate-readme-images.py --check <dir>` compares the README images, real-window ones
 included, with a baseline directory.
 

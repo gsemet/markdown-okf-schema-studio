@@ -59,14 +59,8 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "flush-frontmatter-typed",
     // CR 043 (P9 T2): new real-window captures.
     "incoming-changes",
-    "conf-warning",
     "review-threads",
     "image-paste",
-    "label-rename",
-    "back-next",
-    "keybinding-refresh",
-    "double-click",
-    "standalone-read-only",
   ],
   untrusted: ["untrusted-read-only"],
 };

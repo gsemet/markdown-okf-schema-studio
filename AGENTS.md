@@ -32,9 +32,13 @@ It is MIT licensed and is developed independently from the Agentic Coding White 
 - Set up a CI machine from the lock files: `just dev-ci` (`just dev-ci visual` for the visual job)
 - CI jobs (run in parallel by `.github/workflows/ci.yml`, in sequence by `just preflight`):
   `just ci-static`, `just ci-visual`, `just ci-integration`, then `just ci-report` (merges the
-  visual and integration outputs) and `just ci-gallery` (gallery and site from existing outputs)
+  visual and integration outputs) and `just ci-gallery` (gallery and site from existing outputs).
+  On push and pull request CI runs only the simulated jobs (static, visual, `just ci-report
+  visual`); the real VS Code jobs (integration, stress) are manual:
+  `gh workflow run ci.yml --ref <branch> -f heavy=true`
 - CI only: `just ci-stress [REPEAT]` repeats the flake-prone and new real-window scenarios, in the
-  trusted window then in the Restricted Mode window (job `stress`; see rule 12 of the CI guidelines)
+  trusted window then in the Restricted Mode window (manual job `stress`; see rules 12 and 13 of the
+  CI guidelines)
 
 ## Guidelines
 

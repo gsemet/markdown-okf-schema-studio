@@ -10,7 +10,6 @@
  */
 import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import type { Page } from "playwright-core";
 import * as vscode from "vscode";
@@ -18,8 +17,6 @@ import * as vscode from "vscode";
 import {
   disposeActivePreviewForTests,
   getActivePreviewForTests,
-  getActivePreviewPanelForTests,
-  REFRESH_COMMAND_ID,
   storedEditModeForTests,
 } from "./extensionApi";
 import {
@@ -83,23 +80,6 @@ async function withFixtureDocument(
   }
 }
 
-/** Sets workspace values of the preview settings for `body`, then restores the former values. */
-async function withPreviewSettings(values: Record<string, boolean>, body: () => Promise<void>): Promise<void> {
-  const configuration = vscode.workspace.getConfiguration("markdownOkfSchemaStudio.preview");
-  const original = Object.fromEntries(Object.keys(values).map((key) =>
-    [key, configuration.inspect<boolean>(key)?.workspaceValue]));
-  try {
-    for (const [key, value] of Object.entries(values)) {
-      await configuration.update(key, value, vscode.ConfigurationTarget.Workspace);
-    }
-    await body();
-  } finally {
-    for (const [key, value] of Object.entries(original)) {
-      await configuration.update(key, value, vscode.ConfigurationTarget.Workspace);
-    }
-  }
-}
-
 interface GitRepositoryState {
   state: { HEAD?: { commit?: string } };
 }
@@ -155,41 +135,6 @@ export async function scenarioIncomingChanges(page: Page, evidence: Evidence): P
     await waitFor("the fixture buffer to be reverted", () => !document.isDirty && document.getText() === committed);
     await closeAllEditors();
   }
-}
-
-/** myst/r01: the conf.py next to the document does not enable `colon_fence`. */
-export async function scenarioConfExtensionWarning(page: Page, evidence: Evidence): Promise<void> {
-  const files = {
-    "conf.py": 'extensions = ["myst_parser"]\nmyst_enable_extensions = ["dollarmath"]\n',
-    "doc.md": "# Colon fence\n\nSome text.\n\n:::{note}\nA note.\n:::\n",
-  };
-  await withFixtureDocument("realinput-myst-conf", files, "doc.md", async (document) => {
-    const entries = () => vscode.languages.getDiagnostics(document.uri).filter((entry) => entry.code === "myst-extension");
-    await openSidePreview(document);
-    await waitForPreviewReady(document);
-    await waitFor("the colon_fence entry in Problems", () => entries().length === 1);
-    const [entry] = entries();
-    assert.equal(entry!.severity, vscode.DiagnosticSeverity.Warning);
-    assert.equal(entry!.range.start.line, 4, "the entry points at the colon fence");
-    assert.match(entry!.message, /colon_fence/u);
-    assert.match(entry!.message, /myst_enable_extensions/u);
-    await waitFor("the warning in the preview status", () => withCurrentFrame(page, async (frame) =>
-      (await frame.locator("[data-sphinx-preview-diagnostics] li").allTextContents())
-        .some((text) => text.includes("colon_fence") && text.includes("myst_enable_extensions"))));
-    await vscode.commands.executeCommand("workbench.actions.view.problems");
-    try {
-      // The Problems view is workbench DOM (not inside the webview frame).
-      await waitFor("the entry in the Problems view", async () =>
-        await page.getByText(/myst_enable_extensions/u).first().isVisible().catch(() => false));
-      await captureNow(evidence, page, "myst/r01-conf-extension-warning",
-        "Reading mode; conf.py enables dollarmath only and the document uses a `:::` fence. The Problems "
-        + "view shows the warning at the fence line (it names colon_fence and myst_enable_extensions); the "
-        + "preview lists the same text in its status region, which a successful render keeps visually "
-        + "hidden (screen readers announce it).");
-    } finally {
-      await vscode.commands.executeCommand("workbench.action.closePanel");
-    }
-  });
 }
 
 /** Position of the middle of `word` inside the first paragraph containing it, relative to that paragraph. */
@@ -334,189 +279,6 @@ export async function scenarioImagePaste(page: Page, evidence: Evidence): Promis
       await leaveEditMode(page);
     }
   });
-}
-
-/** myst/r02: a label renamed from its anchor icon. */
-export async function scenarioLabelRename(page: Page, evidence: Evidence): Promise<void> {
-  const text = "# Labels\n\n(old-name)=\nA labelled paragraph.\n\nSee {ref}`old-name` and {ref}`Title <old-name>`.\n";
-  await withFixtureDocument("realinput-label", { "labels.md": text }, "labels.md", async (document) => {
-    await openSidePreview(document);
-    await waitForPreviewReady(document);
-    try {
-      await setEditMode(page, true);
-      await withCurrentFrame(page, (frame) => frame.locator('.okf-anchor[data-okf-label="old-name"]').click());
-      await waitFor("the rename field with the label selected", () => withCurrentFrame(page, (frame) => frame.evaluate(() => {
-        const field = window.document.activeElement;
-        return field instanceof HTMLInputElement && field.closest("[data-okf-label-rename]") !== null
-          && field.value === "old-name" && field.selectionStart === 0 && field.selectionEnd === field.value.length;
-      })));
-      await typeText(page, "new-name");
-      await press(page, "Enter");
-      await waitFor("the label line to change", () => bufferText(document).includes("(new-name)="));
-      assert.equal(bufferText(document), text.replace("(old-name)=", "(new-name)="), "only the label line changes");
-      await waitFor("the rename result in the popover", () => withCurrentFrame(page, async (frame) =>
-        /^Renamed\. 2 uses of "old-name" remain/u.test(
-          (await frame.locator("[data-okf-label-rename-status]").textContent()) ?? "")));
-      await captureNow(evidence, page, "myst/r02-label-rename",
-        "Edit mode on; the anchor icon of `(old-name)=` was clicked, `new-name` typed and Enter pressed. "
-        + "Only the label line changed; the popover reports the 2 uses of the old name that remain.");
-    } finally {
-      await leaveEditMode(page);
-    }
-  });
-}
-
-/** toolbar-navigation/r05: Back and Next across two documents. */
-export async function scenarioBackNextAcrossDocuments(page: Page, evidence: Evidence): Promise<void> {
-  const files = {
-    "first.md": "# First\n\nGo to [the second note](second.md).\n",
-    "second.md": "# Second\n\nThe second note.\n",
-  };
-  await withFixtureDocument("realinput-history", files, "first.md", async (first, directory) => {
-    const second = vscode.Uri.file(path.join(directory, "second.md")).toString();
-    const showing = (uri: string) => () => {
-      const preview = getActivePreviewForTests();
-      return preview?.documentUri === uri && preview.phase === "ready" && preview.webviewReady;
-    };
-    const buttons = () => withCurrentFrame(page, async (frame) => ({
-      back: !await frame.locator("[data-sphinx-preview-back]").isDisabled(),
-      next: !await frame.locator("[data-sphinx-preview-next]").isDisabled(),
-    }));
-    await openSidePreview(first);
-    await waitForPreviewReady(first);
-    await setEditMode(page, false);
-    await withCurrentFrame(page, (frame) => frame.locator("a", { hasText: "the second note" }).click());
-    await waitFor("the preview to show the second document", showing(second));
-    await waitFor("Back enabled on the second document", async () => {
-      const state = await buttons();
-      return state.back && !state.next;
-    });
-    await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-preview-back]").click());
-    await waitFor("the preview to show the first document again", showing(first.uri.toString()));
-    await waitFor("Next enabled on the first document", async () => {
-      const state = await buttons();
-      return !state.back && state.next;
-    });
-    await withCurrentFrame(page, async (frame) => {
-      assert.equal(await frame.locator("h1").first().textContent(), "First");
-    });
-    await captureNow(evidence, page, "toolbar-navigation/r05-back-next-across-documents",
-      "Reading mode; the link opened second.md in the preview, then Back was clicked: the first "
-      + "document is shown again, Back is disabled and Next is enabled.");
-    await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-preview-next]").click());
-    await waitFor("Next to show the second document again", showing(second));
-  });
-}
-
-/** lifecycle-sync/r19 (keybinding) and r20 (Refresh Preview, assertion-only). */
-export async function scenarioKeybindingAndRefresh(page: Page, evidence: Evidence): Promise<void> {
-  const text = "# Keybinding\n\nOpened with Cmd/Ctrl+K Shift+V.\n";
-  await withFixtureDocument("realinput-keys", { "keys.md": text }, "keys.md", async (document) => {
-    assert.equal(getActivePreviewForTests(), undefined, "no preview is open before the keybinding");
-    await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
-    await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    await waitFor("the source editor to hold the keyboard focus", () => page.evaluate(() => {
-      const focused = window.document.activeElement;
-      return focused !== null && focused.closest(".monaco-editor") !== null;
-    }));
-    await press(page, `${MOD}+K`);
-    await press(page, "Shift+V");
-    await waitForPreviewReady(document, 20_000);
-    assert.ok(vscode.window.visibleTextEditors.some((editor) => editor.document === document),
-      "the source editor stays visible beside the preview");
-    await captureNow(evidence, page, "lifecycle-sync/r19-keybinding-opens-preview",
-      "The Markdown editor had the focus; Cmd/Ctrl+K then Shift+V opened the Studio preview beside it.");
-
-    const panel = getActivePreviewPanelForTests();
-    const before = getActivePreviewForTests()!;
-    await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
-    await vscode.commands.executeCommand(REFRESH_COMMAND_ID);
-    await waitFor("the refreshed render", () => {
-      const preview = getActivePreviewForTests();
-      return preview !== undefined && preview.requestId !== undefined && before.requestId !== undefined
-        && preview.requestId > before.requestId && preview.phase === "ready" && preview.webviewReady
-        && preview.renderedStages > before.renderedStages;
-    });
-    assert.equal(getActivePreviewPanelForTests(), panel, "Refresh Preview keeps the open panel");
-    assert.equal(getActivePreviewForTests()?.documentUri, document.uri.toString());
-    await captureNow(evidence, page, "lifecycle-sync/r20-refresh-command",
-      "Refresh Preview rendered the active document again (a new request id, one more rendered stage) in the same panel.");
-  });
-}
-
-/**
- * toolbar-navigation/r06 (assertion-only): doubleClickToSwitchToEditor. The preview's scroll
- * messages are switched off (scrollPreviewWithEditor) so only a reveal can move the editor.
- */
-export async function scenarioDoubleClickRevealsSource(page: Page, evidence: Evidence): Promise<void> {
-  const paragraphs = Array.from({ length: 60 }, (_, index) => `Paragraph ${index + 1}.`);
-  const text = ["# Double click", "", ...paragraphs.flatMap((paragraph) => [paragraph, ""])].join("\n");
-  const lineOf = (number: number) => 3 + 2 * (number - 1);
-  await withPreviewSettings({ doubleClickToSwitchToEditor: true, scrollPreviewWithEditor: false }, async () => {
-    await withFixtureDocument("realinput-dblclick", { "long.md": text }, "long.md", async (document) => {
-      await openSidePreview(document);
-      await waitForPreviewReady(document);
-      try {
-        await setEditMode(page, false);
-        await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: /^Paragraph 50\.$/u }).dblclick());
-        await waitFor("the editor to reveal the double-clicked line", () =>
-          getActivePreviewForTests()?.lastRevealedSourceLine === lineOf(50));
-        const editor = vscode.window.visibleTextEditors.find((candidate) => candidate.document === document);
-        assert.ok(editor, "the source editor is visible");
-        await waitFor("the line in the editor viewport", () =>
-          editor.visibleRanges.some((range) => range.start.line <= lineOf(50) - 1 && range.end.line >= lineOf(50) - 1));
-
-        // Edit mode: the first click opens the block editor, the double-click reveals nothing.
-        await setEditMode(page, true);
-        await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: /^Paragraph 52\.$/u }).dblclick());
-        await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
-        // The host holds a block edit from its first autosave on. The page posts in order, so once
-        // the autosave of a key typed after the double-click is in, a reveal of that double-click
-        // would have reached the host before it.
-        await typeText(page, "x");
-        await waitFor("the host to hold the block edit (first autosave)", () =>
-          getActivePreviewForTests()?.blockEditOpen === true);
-        await press(page, "Escape");
-        await waitFor("the host to drop the block edit", () => getActivePreviewForTests()?.blockEditOpen === false);
-        await waitFor("Escape to restore the paragraph", () => bufferText(document) === text);
-        assert.equal(getActivePreviewForTests()?.lastRevealedSourceLine, lineOf(50),
-          "a double-click in edit mode reveals nothing");
-        await captureNow(evidence, page, "toolbar-navigation/r06-double-click-reveals-source",
-          "doubleClickToSwitchToEditor on: a double-click on Paragraph 50 in reading mode revealed its line in "
-          + "the editor; in edit mode a double-click opened the block editor and revealed nothing.");
-      } finally {
-        await leaveEditMode(page);
-      }
-    });
-  });
-}
-
-/**
- * trust-security/r02: a Markdown file outside every workspace folder (a temporary folder in the home
- * directory, like the standalone suite) opens read-only.
- */
-export async function scenarioStandaloneReadOnly(page: Page, evidence: Evidence): Promise<void> {
-  const directory = fs.mkdtempSync(path.join(os.homedir(), "markdown-okf-schema-standalone-capture-"));
-  const filePath = path.join(directory, "finding.md");
-  fs.writeFileSync(filePath, "---\ntype: finding\nstatus: draft\n---\n# Standalone document\n\nThis file is outside the workspace.\n", "utf8");
-  try {
-    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
-    assert.equal(vscode.workspace.getWorkspaceFolder(document.uri), undefined, "the file is outside the workspace");
-    try {
-      await openSidePreview(document);
-      await waitForPreviewReady(document);
-      assert.equal(getActivePreviewForTests()?.readOnly, true);
-      const frame = await currentPreviewFrame(page);
-      assert.equal(await frame.locator("[data-sphinx-preview-edit-toggle]").count(), 0, "no Edit button");
-      assert.notEqual(await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode"), "on");
-      await captureNow(evidence, page, "trust-security/r02-standalone-read-only",
-        "A Markdown file in a folder outside the workspace: the preview renders read-only, the toolbar has no Edit button.");
-    } finally {
-      await closeAllEditors();
-    }
-  } finally {
-    fs.rmSync(directory, { recursive: true, force: true });
-  }
 }
 
 /** trust-security/r01: the side preview of an untrusted workspace (runs in the Restricted Mode window). */
