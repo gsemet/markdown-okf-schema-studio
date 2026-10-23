@@ -237,3 +237,42 @@ test("a late load or font settlement measures again", (context) => {
   page.listeners.get("load")?.();
   assert.equal(page.clearance.inset(), 192);
 });
+
+test("a toolbar that reaches its final place without any observed event is measured on a later frame", () => {
+  // CI run 39916805010: the toolbar grew to its final width after the last measurement and no
+  // observer fired, so a Description toggle stayed under it with no inset published.
+  const published = new Map<string, string>();
+  const column = rect(0, 0, 900, 2000);
+  const state = { toolbar: rect(12, 840, 46, 102) };
+  const toggle = rect(79, 795, 24, 24);
+  const section = {
+    getBoundingClientRect: () => rect(40, 0, 900, 300),
+    querySelectorAll: (selector: string) => (selector.includes(":not(") ? [] : [toggle])
+      .map((control) => ({ getBoundingClientRect: () => control })),
+  };
+  const document = {
+    getElementById: () => ({ getBoundingClientRect: () => column }),
+    querySelector: (selector: string) => {
+      if (selector === "[data-sphinx-preview-toolbar]") return { getBoundingClientRect: () => state.toolbar };
+      if (selector.endsWith("> [data-okf-properties]")) return section;
+      return null;
+    },
+    documentElement: { style: { setProperty: (name: string, value: string) => published.set(name, value) } },
+  };
+  const frames: Array<() => void> = [];
+  const window = {
+    scrollY: 0,
+    addEventListener: () => undefined,
+    getComputedStyle: () => ({ paddingLeft: "16px", paddingRight: "16px" }),
+    requestAnimationFrame: (run: () => void) => frames.push(run),
+  };
+  const clearance = installFirstClearance(document as never, window as never);
+  assert.equal(clearance.inset(), 0, "the narrow toolbar is not over the toggle");
+  state.toolbar = rect(12, 752, 134, 102); // the final layout, with no event
+  frames.shift()?.();
+  assert.equal(clearance.inset(), 140, "the next frame measures the final toolbar");
+  assert.equal(published.get("--sphinx-preview-first-inset"), "140px");
+  let guard = 0;
+  while (frames.length > 0 && guard < 1_000) { frames.shift()?.(); guard += 1; }
+  assert.ok(guard < 1_000, "the frame loop stops once the layout is quiet");
+});

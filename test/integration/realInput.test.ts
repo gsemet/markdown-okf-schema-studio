@@ -1928,6 +1928,13 @@ async function scenarioTableTab(page: Page, evidence: Evidence): Promise<void> {
       const open = await current.locator("tbody tr:nth-child(3) " + CELL).count();
       return open === 1 && await cellValue() === "";
     });
+    // The new row was saved: the host re-renders it, and a patch that lands after the cell editor
+    // opened would replace the editor under the typed text. Type once the page shows that render.
+    await waitForPageReady("Tab in the new row", document);
+    await waitFor("the cell editor of the new row to be open after the render", async () => {
+      const current = await findCurrentFrame(page);
+      return current !== undefined && await current.locator("tbody tr:nth-child(3) " + CELL).count() === 1;
+    });
     await typeText(page, "gamma");
     await press(page, "Tab");
     await waitFor("Tab to open the second cell of the new row", async () => {
@@ -2214,8 +2221,20 @@ async function scenarioListEditorClickAndKeys(page: Page, evidence: Evidence): P
         const current = await findCurrentFrame(page);
         return current !== undefined && await current.locator(linkSelector).count() >= 1;
       });
-      const box = await withCurrentFrame(page, (frame) =>
-        frame.locator(linkSelector).first().boundingBox());
+      // The link exists as soon as the re-render shows it, but a later full page load (the deferred
+      // link check reaching a page that is not ready yet) replaces it, and a box read in between
+      // is null or stale. Read the box only from a page that reports ready for this render, and poll
+      // until the visible link has a size: the click then lands on the link that stays.
+      await waitForPageReady("list editor", document);
+      const linkBox: { value?: { x: number; y: number; width: number; height: number } } = {};
+      await waitFor("the StRS-A link to have a visible box", async () => {
+        const current = await findCurrentFrame(page);
+        if (current === undefined) return false;
+        const found = await current.locator(linkSelector).first().boundingBox({ timeout: 1_000 }).catch(() => null);
+        linkBox.value = found !== null && found.width > 0 && found.height > 0 ? found : undefined;
+        return linkBox.value !== undefined;
+      });
+      const box = linkBox.value;
       assert.ok(box, "the StRS-A link has a box");
       await page.keyboard.down(MOD);
       await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
@@ -4065,6 +4084,24 @@ async function clickWithoutBlur(
   });
 }
 
+/**
+ * Waits until the page itself reports ready for the host's current render. The host reports a
+ * render as "ready" before the page has loaded it, and a deferred update that reaches a page not
+ * yet ready (the frontmatter link check, about 150 ms after the render) reloads the whole page,
+ * which drops an editor opened in the meantime. `webviewReady` is true only when the page echoed
+ * the request id of the render the host staged, so it cannot be a stale value from an earlier page.
+ * A content patch (the host's deferred updates) replaces the page content and closes the open
+ * editors without a page load (CI runs 39922770337 and 39927166017: "page loads 0 since the editor
+ * opened", the editor gone), so the editor is opened only when the host holds no timer that would
+ * still update this render (`deferredWorkPending`).
+ */
+async function waitForPageReady(label: string, document: vscode.TextDocument): Promise<void> {
+  await waitFor(`${label}: the page to report ready for ${path.basename(document.uri.fsPath)}`, () => {
+    const preview = getActivePreviewForTests();
+    return preview?.webviewReady === true && preview.deferredWorkPending === false;
+  });
+}
+
 /** CR 025: a link to another file, right after typing. */
 async function scenarioFlushBeforeLink(page: Page, evidence: Evidence): Promise<void> {
   await withFlushDocuments("realinput-cr25a", async (first, second) => {
@@ -4131,6 +4168,7 @@ async function scenarioFlushCellAndFrontmatter(page: Page, evidence: Evidence): 
   await withFlushDocuments("realinput-cr25d", async (first, second) => {
     await openSidePreview(first);
     await waitForRender(first);
+    await waitForPageReady("table cell", first);
     await setEditMode(page, true);
     await withCurrentFrame(page, (frame) => frame.locator("td").filter({ hasText: /^one$/u }).click());
     await waitForEditor(page, "[data-sphinx-preview-table-cell-editor] textarea");
@@ -4144,6 +4182,7 @@ async function scenarioFlushCellAndFrontmatter(page: Page, evidence: Evidence): 
     await vscode.window.showTextDocument(first, { viewColumn: vscode.ViewColumn.One, preview: false });
     await waitForPreviewOf(first);
     await waitForRender(first);
+    await waitForPageReady("frontmatter title", first);
     await withCurrentFrame(page, (frame) =>
       frame.locator('tr[data-okf-field="title"] [data-okf-edit-cell="value"]').click());
     await waitForEditor(page, "[data-okf-frontmatter-editor] textarea, [data-okf-frontmatter-editor] input");
@@ -4186,13 +4225,16 @@ async function flushEditorSelection(page: Page, selector: string, label: string)
 
 /** Full page loads counted when the flush scenario opened its editor (see flushFrameState). */
 let reloadsBefore = 0;
+/** In-place content patches counted at the same moment: a patch closes an open editor too. */
+let patchesBefore = 0;
 
 /** Describes the preview for a flush failure message: which document, edit mode, open editors. */
 async function flushFrameState(page: Page): Promise<string> {
   const preview = getActivePreviewForTests();
   const shown = preview
     ? `${path.basename(vscode.Uri.parse(preview.documentUri).fsPath)} (${preview.phase}, page ready `
-      + `${String(preview.webviewReady)}, page loads ${preview.htmlAssignments - reloadsBefore} since the editor opened)`
+      + `${String(preview.webviewReady)}, page loads ${preview.htmlAssignments - reloadsBefore}, content patches `
+      + `${preview.contentPatches - patchesBefore} since the editor opened)`
     : "none";
   try {
     const frame = await findCurrentFrame(page);
@@ -4243,8 +4285,7 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
       // 150 ms after the render) reloads the whole page, and the reload drops an editor opened in
       // the meantime (CI run 39849844386: case 2 clicked right after the switch back, as edit mode
       // was already on). Open the editor only once the page itself reports ready for this render.
-      await waitFor(`${label}: the page to report ready for ${path.basename(first.uri.fsPath)}`, () =>
-        getActivePreviewForTests()?.webviewReady === true);
+      await waitForPageReady(label, first);
       if (!(await withCurrentFrame(page, (frame) => frame.locator("html").getAttribute("data-sphinx-preview-edit-mode")) === "on")) {
         await setEditMode(page, true);
       }
@@ -4253,6 +4294,7 @@ async function scenarioFlushFrontmatterKeptAsTyped(page: Page, evidence: Evidenc
       await waitForEditor(page, item.selector);
       // Full page loads so far: a failure message shows whether the page was reloaded under the editor.
       reloadsBefore = htmlAssignmentCount();
+      patchesBefore = getActivePreviewForTests()?.contentPatches ?? 0;
       if (item.typed === undefined) {
         // The number field is emptied with real keys and no Cmd/Ctrl+A. The workbench echoes the
         // shortcut as `selectAll` (see RI-T06), and a number input exposes no text selection to

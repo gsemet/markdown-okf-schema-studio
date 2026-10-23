@@ -145,24 +145,70 @@ export function installFirstClearance(
       return;
     }
     armSection();
+    const changed = apply();
+    // Whatever moved the layout, it may not be done: look again on the next frames until nothing
+    // changes for a while (see settle).
+    if (changed) settle();
+  };
+
+  // Publishes one measurement; true when any published value changed.
+  const apply = (): boolean => {
+    let changed = false;
     const measured = measure();
     if (measured.bottom !== currentBottom) {
       currentBottom = measured.bottom;
+      changed = true;
       document.documentElement.style.setProperty(bottomProperty, measured.bottom + "px");
     }
     const firstBottom = measured.inset > 0 ? 0 : measured.bottom;
     if (firstBottom !== currentFirstBottom) {
       currentFirstBottom = firstBottom;
+      changed = true;
       document.documentElement.style.setProperty(firstBottomProperty, firstBottom + "px");
     }
     if (measured.inset !== currentInset) {
       currentInset = measured.inset;
+      changed = true;
       document.documentElement.style.setProperty(insetProperty, measured.inset + "px");
     }
     const next = measured.clearance;
-    if (next === current) return;
-    current = next;
-    document.documentElement.style.setProperty(property, next + "px");
+    if (next !== current) {
+      current = next;
+      changed = true;
+      document.documentElement.style.setProperty(property, next + "px");
+    }
+    return changed;
+  };
+
+  // The observers cover the events a layout announces, not every cause of a move: the toolbar can
+  // reach its final width or position (late fonts, a stylesheet, the host's own layout pass) without
+  // a size change on an observed element, and a measurement taken meanwhile stays published, wrong,
+  // until the next unrelated event (CI run 39916805010: a Description toggle under the toolbar with
+  // no inset published). After a change, the layout is therefore measured again on every animation
+  // frame until it has been unchanged for quietFrames frames in a row, so a late layout always
+  // gets a final measurement. A layout that never settles stops at maxFrames.
+  const quietFrames = 60;
+  const maxFrames = 300;
+  let quiet = 0;
+  let frames = 0;
+  let frameRequested = false;
+  const settle = (): void => {
+    quiet = 0;
+    if (frameRequested || typeof window.requestAnimationFrame !== "function") return;
+    frameRequested = true;
+    frames = 0;
+    const tick = (): void => {
+      frames += 1;
+      armSection();
+      if (apply()) quiet = 0;
+      else quiet += 1;
+      if (quiet < quietFrames && frames < maxFrames) {
+        window.requestAnimationFrame(tick);
+        return;
+      }
+      frameRequested = false;
+    };
+    window.requestAnimationFrame(tick);
   };
 
   window.addEventListener("resize", update);
