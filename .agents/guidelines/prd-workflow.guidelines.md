@@ -129,7 +129,8 @@ main session ── user interface: grill, decisions, merges; supervises the orc
    file or a PR is a link: the CR number opens its spec (`00-request.md`), the status opens its
    `STATE.md`, the PR number opens the PR on GitHub. Links are relative to `requests/`. The
    situation of each CR lives in its `STATE.md` header; the orchestrator copies the status into
-   the table at each tick. A landed CR moves to "Landed" and links to its archived `report.md`.
+   the table at each tick. A landed CR moves to "Landed" and links to its archived `report.md`. "Backlog", between the two, lists the items of `backlog/P*/` not yet
+   started (a CR moved out of the backlog leaves it; a finished backlog item moves to `archives/`).
 
    ```markdown
    # CR table
@@ -143,6 +144,12 @@ main session ── user interface: grill, decisions, merges; supervises the orc
    | CR (spec) | Subject | Status (STATE.md) | Branch | PR |
    | --- | --- | --- | --- | --- |
    | [044](044-<slug>/00-request.md) | <one line> | [working 5 Code 1/3](044-<slug>/STATE.md) | `fix/<slug>` | [#38](https://github.com/<owner>/<repo>/pull/38) open |
+
+   ## Backlog
+
+   | Priority | Item | Title | Files |
+   | --- | --- | --- | --- |
+   | P3 | [drawio-block](../backlog/P3/drawio-block/01-intent.md) | Draw IO Integration | 1 |
 
    ## Landed
 
