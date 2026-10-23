@@ -10,6 +10,14 @@
   active text editor does not glow. Nothing moves the
   layout, nothing animates when the page loads or follows the editor's scrolling, and the
   system's "reduce motion" setting turns every animation off.
+- PlantUML diagrams now render out of the box: the preview draws them with the PlantUML engine
+  bundled with the extension, without Java, without the `plantuml` command and without any
+  network access, also in Restricted Mode. They follow the light or dark preview theme. The
+  built-in engine cannot read `!include` files or libraries (such diagrams show a message saying
+  so) and lays out class-like diagrams with PlantUML's Smetana engine, so a few layouts differ from
+  the JAR. The new setting `markdownOkfSchemaStudio.plantuml.useJar` (off by default) switches back
+  to Java with `plantuml.jarPath`, or to `plantuml` on PATH, in trusted workspaces. **If you had set
+  `plantuml.jarPath`, the preview now uses the built-in engine until you tick `useJar`.**
 - `Ctrl+A` (`Cmd+A` on macOS) in a text box of the preview (a frontmatter value, a block or table
   cell editor) now always selects that box's text. Pressed right after clicking into the box, it
   could select the whole source document in the text editor and close the frontmatter editor.

@@ -93,7 +93,10 @@ import {
 import {
   PLANTUML_CONFIGURATION_SECTION,
   PlantUmlConfiguration,
+  PlantUmlEngineSettings,
   readPlantUmlConfiguration,
+  readPlantUmlEngineSettings,
+  resolvePlantUmlEngine,
 } from "./configuration/plantUmlConfiguration";
 import {
   markdownFragmentRange,
@@ -276,6 +279,8 @@ interface ActivePreview {
   status: PreviewStatus;
   configuration: PreviewConfiguration;
   plantUmlConfiguration: PlantUmlConfiguration;
+  /** `useJar` off (default): the bundled engine draws in the webview, also in Restricted Mode. */
+  plantUmlEngineSettings: PlantUmlEngineSettings;
   frontmatterConfiguration: FrontmatterConfiguration;
   frontmatter?: FrontmatterResult;
   frontmatterRefreshTimer?: NodeJS.Timeout;
@@ -1183,7 +1188,10 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
   );
   const localResourceRoots = [vscode.Uri.file(preview.workspaceRoot)];
   const hasMermaidDiagram = result.html.includes('class="myst-mermaid-figure"');
-  if (hasMermaidDiagram && extensionRootUri) {
+  const plantUmlRenderer = result.plantUmlEngine === "builtin" ? "builtin" : "host";
+  const hasBuiltinPlantUml = plantUmlRenderer === "builtin"
+    && result.html.includes('class="myst-plantuml-figure"');
+  if ((hasMermaidDiagram || hasBuiltinPlantUml) && extensionRootUri) {
     localResourceRoots.push(vscode.Uri.joinPath(extensionRootUri, "out", "bundle"));
   }
   const frontmatter = analyzeFrontmatter({
@@ -1229,6 +1237,7 @@ function updatePreview(preview: ActivePreview, result: RenderResult): void {
     !preview.readOnly,
     !preview.readOnly,
     [],
+    plantUmlRenderer,
   );
   const status: PreviewStatus = preview.hadFailure ? "recovery" : "success";
   const html = setPreviewStatus(webview.html, status, undefined, result.diagnostics);
@@ -1357,6 +1366,16 @@ function setFrontmatterState(
       preview.linkedTargetWatchers.set(target, entry);
     }
   }
+}
+
+/**
+ * The engine for this preview's next render: the bundled one unless `useJar` is on. With `useJar`
+ * in an untrusted workspace the JAR pipeline is still asked, and it refuses without a process.
+ */
+function plantUmlEngineFor(preview: ActivePreview): "builtin" | "jar" {
+  return resolvePlantUmlEngine(preview.plantUmlEngineSettings, vscode.workspace.isTrusted) === "builtin"
+    ? "builtin"
+    : "jar";
 }
 
 function scheduleDeferredPreviewWork(preview: ActivePreview, result: RenderResult): void {
@@ -4608,6 +4627,7 @@ function createPreview(
       isWorkspaceTrusted: () => vscode.workspace.isTrusted,
       allowUntrusted: true,
       plantUmlJarPath: preview.plantUmlConfiguration.jarPath,
+      plantUmlEngine: plantUmlEngineFor(preview),
     }),
     onState: (state) => handleQueueState(preview, state),
     disposeResult: (result) => result.stage.dispose(),
@@ -4673,6 +4693,9 @@ function createPreview(
       vscode.workspace.getConfiguration(PREVIEW_CONFIGURATION_SECTION),
     ),
     plantUmlConfiguration: readPlantUmlConfiguration(
+      vscode.workspace.getConfiguration(PLANTUML_CONFIGURATION_SECTION),
+    ),
+    plantUmlEngineSettings: readPlantUmlEngineSettings(
       vscode.workspace.getConfiguration(PLANTUML_CONFIGURATION_SECTION),
     ),
     frontmatterConfiguration: readFrontmatterConfiguration(
@@ -5173,6 +5196,9 @@ export function activate(context: vscode.ExtensionContext): void {
         }
         if (plantUmlConfigurationChanged) {
           preview.plantUmlConfiguration = readPlantUmlConfiguration(
+            vscode.workspace.getConfiguration(PLANTUML_CONFIGURATION_SECTION),
+          );
+          preview.plantUmlEngineSettings = readPlantUmlEngineSettings(
             vscode.workspace.getConfiguration(PLANTUML_CONFIGURATION_SECTION),
           );
         }

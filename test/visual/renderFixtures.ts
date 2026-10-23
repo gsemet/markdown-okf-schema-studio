@@ -51,6 +51,9 @@ const pageDirectory = path.join(outputDirectory, "pages");
 const mermaidRendererUri = pathToFileURL(
   path.resolve(__dirname, "../../../out/bundle/mermaidPreview.js"),
 ).toString();
+const plantUmlRendererUri = pathToFileURL(
+  path.resolve(__dirname, "../../../out/bundle/plantumlPreview.js"),
+).toString();
 
 function themeBlock(variables: Record<string, string>): string {
   const declarations = Object.entries(variables)
@@ -123,7 +126,9 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     resolveNavigation: (request) => ({ kind: "deferred", value: request }),
     ...(options.trusted === false ? { allowExternalScripts: false } : {}),
   });
-  const plantUml = await renderPlantUmlDiagrams(rewritten.html, {
+  // The built-in engine (the default) draws in the page; the JAR/PATH pipeline (useJar) in the host.
+  const builtinPlantUml = plantumlExpectation === "builtin" || plantumlExpectation === "builtin-unsupported";
+  const plantUml = builtinPlantUml ? { diagrams: [] } : await renderPlantUmlDiagrams(rewritten.html, {
     executablePath: fixture === "13-plantuml-executable-not-found"
       ? "plantuml-screenshot-executable-not-found"
       : plantumlExpectation === "unconfigured" ? "plantuml-visual-intentionally-unconfigured"
@@ -254,6 +259,12 @@ window.resolveVisualFrontmatterLinks = () => {
   page = renderMathHtml(page, pathToFileURL(
     path.resolve(__dirname, "../../../out/bundle/katex/katex.min.css"),
   ).toString(), "visual-math");
+  if (builtinPlantUml && page.includes('class="myst-plantuml-figure"')) {
+    page = page.replace(
+      /<\/body>/iu,
+      `<script src="${plantUmlRendererUri}" defer></script></body>`,
+    );
+  }
   if (page.includes('class="myst-mermaid-figure"')) {
     page = page.replace(
       /<\/body>/iu,

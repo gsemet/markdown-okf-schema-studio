@@ -11,10 +11,24 @@ The preview follows the active Markdown editor and never displays another docume
 current document.
 
 The queue reaches `ready` when the base MyST HTML and a schema-aware frontmatter table have been
-assigned to the Webview. Filesystem-backed frontmatter link inspection and PlantUML rendering run
-afterward against the same render stage and update the existing page only when that stage is still
-current. Disposing a stage cancels its deferred PlantUML process, and a newer enrichment generation
-discards late results from an older assignment.
+assigned to the Webview. Filesystem-backed frontmatter link inspection and, with
+`plantuml.useJar` on, PlantUML rendering through the JAR run afterward against the same render
+stage and update the existing page only when that stage is still current. Disposing a stage
+cancels its deferred PlantUML process, and a newer enrichment generation discards late results
+from an older assignment.
+
+With `plantuml.useJar` off (the default) the host renders no PlantUML: the page loads
+`out/bundle/plantumlPreview.js` (the bundled `@plantuml/core` engine) and draws each
+`.myst-plantuml-diagram` itself, as it does for Mermaid. It caches the pictures by source and
+light/dark variant, so a content patch with unchanged diagrams does not run the engine again, and
+draws new diagrams after `studio:content-replaced`. The page's Content Security Policy is the same
+as before: the engine is a script from the extension, uses no eval, no worker and no WebAssembly
+(Graphviz `viz-global.js` is not bundled), and `connect-src 'none'` stays; its file and library
+loaders refuse every request. While it builds a picture the engine sets `style` attributes on SVG
+nodes of the page; the policy blocks applying them (the webview console reports `style-src-attr`
+violations), which is harmless: text is measured with a canvas, the attributes are still
+serialized, and the SVG is shown as a data-URI image, outside the page policy. The output is
+identical with and without the policy.
 
 ## Commands and Results
 

@@ -170,10 +170,16 @@
           "markdownDescription": "Chooses which buttons the edition palette shows in a workspace that has not picked a mode yet. The select at the start of the palette changes it for the workspace and is remembered. **strict**: plain Markdown only. **gfm**: strict plus GitHub Flavored Markdown. **myst**: GFM plus MyST (the default). The mode only changes the buttons, never how the preview renders.",
           "order": 40
         },
+        "markdownOkfSchemaStudio.plantuml.useJar": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Chooses the engine that draws PlantUML diagrams. **On**: Java with the JAR of `#markdownOkfSchemaStudio.plantuml.jarPath#`, or the `plantuml` command on your PATH; trusted workspaces only, and needed for `!include` files and remote libraries. **Off** (default): the built-in engine bundled with the extension, with no Java, no process and no network; it also works in Restricted Mode.",
+          "order": 79
+        },
         "markdownOkfSchemaStudio.plantuml.jarPath": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Path to `plantuml.jar` used to render PlantUML diagrams. A relative path is resolved from the workspace folder. **Empty**: the `plantuml` command found on your PATH is used.",
+          "markdownDescription": "Path to `plantuml.jar`, used only when `#markdownOkfSchemaStudio.plantuml.useJar#` is on. A relative path is resolved from the workspace folder. **Empty**: the `plantuml` command found on your PATH is used.",
           "order": 80
         },
         "markdownOkfSchemaStudio.frontmatter.propertiesTable": {
@@ -237,6 +243,7 @@
     "package": "npm run compile && npm run bundle && node scripts/package-extension.mjs"
   },
   "dependencies": {
+    "@plantuml/core": "1.2026.9",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "highlight.js": "^11.12.0",

@@ -151,6 +151,14 @@ function injectMermaidRenderer(html: string, rendererUri: string, nonce: string)
   return `${html}${tag}`;
 }
 
+function injectPlantUmlRenderer(html: string, rendererUri: string, nonce: string): string {
+  const tag = `<script nonce="${escapeHtml(nonce)}" src="${escapeHtml(rendererUri)}" defer data-sphinx-preview-plantuml></script>`;
+  if (/<\/body>/iu.test(html)) {
+    return html.replace(/<\/body>/iu, () => `${tag}</body>`);
+  }
+  return `${html}${tag}`;
+}
+
 function injectAccessibilityStyles(html: string, css: string, nonce: string): string {
   const style = `<style nonce="${escapeHtml(nonce)}" data-sphinx-preview-accessibility>${css}</style>`;
   if (/<\/head>/iu.test(html)) {
@@ -198,6 +206,8 @@ export function buildPreviewWebviewHtml(
   editingEnabled = true,
   allowExternalScripts = true,
   plantUmlDiagrams: readonly PlantUmlDiagramRender[] = [],
+  /** `builtin`: the page loads the bundled PlantUML engine; `host`: the diagrams come injected. */
+  plantUmlRenderer: "builtin" | "host" = "host",
 ): PreviewWebviewResult {
   const policy = createPreviewResourcePolicy(outputDirectory, workspaceRoot);
   const nonce = createNonce();
@@ -276,9 +286,17 @@ export function buildPreviewWebviewHtml(
       vscode.Uri.joinPath(extensionUri, "out", "bundle", "katex", "katex.min.css"),
     ).toString(), nonce)
     : accessibleHtml;
-  const withMermaidRenderer = mermaidRendererUri
+  const plantUmlRendererUri = extensionUri
+    && plantUmlRenderer === "builtin"
+    && rewritten.html.includes('class="myst-plantuml-figure"')
+    ? webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "out", "bundle", "plantumlPreview.js")).toString()
+    : undefined;
+  const withMermaid = mermaidRendererUri
     ? injectMermaidRenderer(withMath, mermaidRendererUri, nonce)
     : withMath;
+  const withMermaidRenderer = plantUmlRendererUri
+    ? injectPlantUmlRenderer(withMermaid, plantUmlRendererUri, nonce)
+    : withMermaid;
   const html = scrollContext
     ? injectScrollSyncScript(
       withMermaidRenderer,

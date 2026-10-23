@@ -185,6 +185,24 @@ The capture uses the cream theme.
 
 [![Cream preview in Auto width: a narrow text column with a wide table and a wide figure breaking out of it, centred](images/readme/margin-break-cream.png)](images/readme/margin-break-cream.png)
 
+## PlantUML Diagrams
+
+`plantuml` fences and `{plantuml}` directives are drawn by the PlantUML engine bundled with the
+extension (the official JavaScript build, `@plantuml/core`). It needs no Java, starts no process
+and sends nothing over the network, so it also works in Restricted Mode. The diagrams follow the
+preview theme (light or dark), and the bundled `!theme` library and OpenIconic `<&icon>` sprites
+are available. Layouts use PlantUML's own Smetana engine instead of Graphviz, so class or
+component diagrams can be placed slightly differently than with the JAR.
+
+The built-in engine reads no file and loads no library: a diagram with `!include` (a local file,
+a URL or the standard library such as `<C4/C4_Context>`), `!import`, `!theme ... from` or emoji
+shows a message instead of a picture. For those, tick `markdownOkfSchemaStudio.plantuml.useJar`:
+the preview then runs Java with `plantuml.jarPath`, or the `plantuml` command from PATH when the
+path is empty, as before. The JAR runs only in a trusted workspace.
+
+If you already set `plantuml.jarPath`, the preview now uses the built-in engine until you tick
+`plantuml.useJar`; your path is kept and used again as soon as you do.
+
 ## Review Comments
 
 A file named like the document with `.comments.json` instead of its extension, for example
@@ -364,8 +382,11 @@ The preview settings are available under **Markdown OKF-Schema Studio** in VS Co
   git root inside the workspace; otherwise such links cannot be resolved.
 - `frontmatter.allowOutsideWorkspaceLinks` (default off): resolve document-relative links that
   leave the workspace.
+- `plantuml.useJar` (default off): off, PlantUML diagrams are drawn by the built-in engine, with
+  no Java and no network; on, by Java with `plantuml.jarPath` or by `plantuml` from PATH (trusted
+  workspaces only). See [PlantUML Diagrams](#plantuml-diagrams).
 - `plantuml.jarPath` (default empty): path to `plantuml.jar`, relative to the workspace folder;
-  empty uses `plantuml` from PATH.
+  empty uses `plantuml` from PATH. Used only when `plantuml.useJar` is on.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, validation, packaging, and release
 evidence procedures.

@@ -102,6 +102,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.frontmatter.propertiesTable",
       "markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties",
       "markdownOkfSchemaStudio.plantuml.jarPath",
+      "markdownOkfSchemaStudio.plantuml.useJar",
       "markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor",
       "markdownOkfSchemaStudio.preview.incrementalUpdates",
       "markdownOkfSchemaStudio.preview.markEditorSelection",
@@ -203,4 +204,31 @@ test("every contributed setting is explained with a markdownDescription and a un
   const doubleClick = properties["markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor"]
     .markdownDescription as string;
   assert.ok(doubleClick.includes("scrollEditorWithPreview"));
+});
+
+test("the built-in PlantUML engine ships pinned and the JAR is an explicit opt-in setting", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
+    dependencies: Record<string, string>;
+    scripts: Record<string, string>;
+    contributes: { configuration: { properties: Record<string, Record<string, unknown>> } };
+  };
+  // An exact pin: versions before 1.2026.6 are GPL, and the engine internals still move between releases.
+  assert.match(packageJson.dependencies["@plantuml/core"] ?? "", /^\d+\.\d+\.\d+$/u);
+  const useJar = packageJson.contributes.configuration.properties["markdownOkfSchemaStudio.plantuml.useJar"] as {
+    type: string; default: boolean; order: number; markdownDescription: string; scope?: string;
+  };
+  assert.equal(useJar.type, "boolean");
+  assert.equal(useJar.default, false);
+  assert.match(useJar.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/su);
+  assert.match(useJar.markdownDescription, /built-in/u);
+  assert.match(useJar.markdownDescription, /jarPath/u);
+  assert.match(useJar.markdownDescription, /Restricted Mode|untrusted/u);
+  const jarText = packageJson.contributes.configuration.properties["markdownOkfSchemaStudio.plantuml.jarPath"]
+    .markdownDescription as string;
+  assert.match(jarText, /useJar/u, "jarPath must say it is only used with useJar");
+  const esbuild = fs.readFileSync(path.join(extensionRoot, "esbuild.mjs"), "utf8");
+  assert.match(esbuild, /src\/webview\/plantumlPreview\.ts/u);
+  assert.match(esbuild, /out\/bundle\/plantumlPreview\.js/u);
+  const ignore = fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8").split(/\r?\n/u);
+  assert.ok(!ignore.some((line) => /^out\/bundle|^out\/\*\*/u.test(line.trim())), "the webview bundles must ship in the VSIX");
 });

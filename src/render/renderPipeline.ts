@@ -8,6 +8,7 @@ import {
   renderPlantUmlDiagrams,
   type PlantUmlRenderResult,
 } from "./plantUmlRenderer";
+import type { PlantUmlEngine } from "../configuration/plantUmlConfiguration";
 import { enabledMystExtensionsFor } from "../myst/confLocator";
 import { createPreviewResourcePolicy } from "../security/resource-policy";
 
@@ -50,6 +51,8 @@ export interface RenderResult {
   stage: RenderStage;
   html: string;
   resolvePlantUml: () => Promise<PlantUmlRenderResult>;
+  /** The engine this render was made for: `builtin` pages load the bundled engine. */
+  plantUmlEngine: PlantUmlEngine;
   diagnostics: PreviewDiagnostic[];
   latencyMs: number;
 }
@@ -63,6 +66,13 @@ export interface RenderOptions {
   isWorkspaceTrusted: () => boolean;
   allowUntrusted?: boolean;
   plantUmlJarPath?: string;
+  /**
+   * `builtin`: the diagrams stay placeholders for the engine bundled into the webview, and
+   * `resolvePlantUml` reports nothing (no process, no file read). `jar`: the host renders them
+   * through `plantUmlJarPath` or `plantuml` on PATH, in a trusted workspace only. Omitted: `jar`,
+   * the behaviour of callers that predate the built-in engine; the extension always passes it.
+   */
+  plantUmlEngine?: PlantUmlEngine;
 }
 
 export class WorkspaceTrustError extends Error {
@@ -201,7 +211,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
     for (const diagnostic of rendered.diagnostics ?? []) {
       diagnostics.push({ ...diagnostic, code: diagnostic.code === "myst-extension" ? diagnostic.code : "myst-diagnostic", file: stage.activeDocumentPath });
     }
-    if (!renderOverride) {
+    if (!renderOverride && options.plantUmlEngine !== "builtin") {
       let plantUmlPromise: Promise<PlantUmlRenderResult> | undefined;
       resolvePlantUml = (): Promise<PlantUmlRenderResult> => {
         plantUmlPromise ??= renderPlantUmlDiagrams(html, {
@@ -239,6 +249,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
     stage,
     html,
     resolvePlantUml,
+    plantUmlEngine: options.plantUmlEngine ?? "jar",
     diagnostics,
     latencyMs: performance.now() - started,
   };

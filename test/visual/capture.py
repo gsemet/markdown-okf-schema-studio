@@ -225,6 +225,14 @@ PAGE_CHECKS = """
       if (message || !image || !image.complete || image.naturalWidth <= 0 || image.naturalHeight <= 0) {
         failures.push(`PlantUML diagram ${index + 1} requires a loaded image without an error; install PlantUML for success coverage`);
       }
+    } else if (__PLANTUML_EXPECTATION__ === 'builtin') {
+      if (message || !image || !image.complete || image.naturalWidth <= 0 || image.naturalHeight <= 0) {
+        failures.push(`PlantUML diagram ${index + 1} was not drawn by the built-in engine as a loaded image without an error`);
+      }
+    } else if (__PLANTUML_EXPECTATION__ === 'builtin-unsupported') {
+      if (image || !message || !message.textContent.includes('markdownOkfSchemaStudio.plantuml.useJar')) {
+        failures.push(`PlantUML diagram ${index + 1} must show the built-in engine limit with the useJar hint and no image`);
+      }
     } else if (__PLANTUML_EXPECTATION__ === 'unconfigured') {
       if (image || !message || !message.textContent.includes('Set markdownOkfSchemaStudio.plantuml.jarPath')) {
         failures.push(`PlantUML fallback ${index + 1} must show explicit configuration guidance without an image`);
@@ -6098,6 +6106,14 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
     }""")
     for detail in contrast_errors:
       failures.append(Failure(scenario['page'], detail))
+  expected_plantuml = count_plantuml_blocks(scenario["fixture"])
+  if expected_plantuml:
+    # The built-in engine draws in the page after load; the host pipeline sets the state before.
+    page.wait_for_function(
+      "expected => { const diagrams = [...document.querySelectorAll('.myst-plantuml-diagram')]; "
+      "return diagrams.length === expected && diagrams.every(diagram => diagram.dataset.renderState); }",
+      arg=expected_plantuml,
+    )
   expected_width = scenario.get("expectedContentWidth")
   if expected_width is not None:
     geometry = page.locator("#sphinx-myst-preview-content").bounding_box()
