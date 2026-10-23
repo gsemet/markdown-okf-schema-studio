@@ -29,6 +29,12 @@ import {
 import { createScrollSyncScript, PreviewRuntimeContext } from "../webview/scrollSync";
 import { renderMathHtml } from "../render/mathRenderer";
 import { classifyPreviewReference } from "../navigation/previewNavigation";
+import {
+  escapeHtml,
+  type PreviewStatus,
+  type PreviewStatusDiagnostic,
+  statusMarkup,
+} from "./previewStatus";
 
 export interface PreviewWebviewResult {
   html: string;
@@ -37,88 +43,14 @@ export interface PreviewWebviewResult {
   frontmatter?: FrontmatterResult;
 }
 
-export type PreviewStatus =
-  | "pending"
-  | "success"
-  | "stale"
-  | "error"
-  | "missing-source"
-  | "recovery";
-
-export interface PreviewStatusDiagnostic {
-  message: string;
-  file?: string;
-  line?: number;
-  column?: number;
-  severity?: string;
-}
-
-export const PREVIEW_STATUS_LABELS: Record<PreviewStatus, string> = {
-  pending: "Preview pending",
-  success: "Preview ready",
-  stale: "Preview is stale",
-  error: "Preview unavailable",
-  "missing-source": "Preview source missing",
-  recovery: "Preview recovered",
-};
-
-function escapeHtml(value: string): string {
-
-  return value
-    .replace(/&/gu, "&amp;")
-    .replace(/</gu, "&lt;")
-    .replace(/>/gu, "&gt;")
-    .replace(/"/gu, "&quot;");
-}
-
-/** One line of the status region: the severity attribute and the formatted location and message. */
-export interface PreviewStatusDiagnosticItem {
-  severity: string;
-  text: string;
-}
-
-/**
- * The text of one diagnostic as the status region shows it. The page markup and the in-place
- * content patch (T34) both use it, so a patched page shows the same lines as a loaded one.
- */
-export function formatStatusDiagnostic(diagnostic: PreviewStatusDiagnostic): PreviewStatusDiagnosticItem {
-  const location = diagnostic.file
-    ? `${diagnostic.file}${diagnostic.line ? `:${diagnostic.line}` : ""}${diagnostic.column ? `:${diagnostic.column}` : ""}: `
-    : "";
-  return { severity: diagnostic.severity ?? "error", text: location + diagnostic.message };
-}
-
-function statusMarkup(
-  status: PreviewStatus,
-  message?: string,
-  diagnostics: readonly PreviewStatusDiagnostic[] = [],
-): string {
-  const detail = message ? `<span data-sphinx-preview-status-message>${escapeHtml(message)}</span>` : "";
-  const diagnosticItems = diagnostics.length > 0
-    ? `<ul data-sphinx-preview-diagnostics>${diagnostics.map((diagnostic) => {
-      const item = formatStatusDiagnostic(diagnostic);
-      return `<li data-sphinx-preview-diagnostic-severity="${escapeHtml(item.severity)}">${escapeHtml(item.text)}</li>`;
-    }).join("")}</ul>`
-    : "";
-  return `<aside data-sphinx-preview-status="${status}" role="status" aria-live="polite"><strong>${PREVIEW_STATUS_LABELS[status]}</strong>${detail}${diagnosticItems}</aside>`;
-}
-
-export function setPreviewStatus(
-  html: string,
-  status: PreviewStatus,
-  message?: string,
-  diagnostics: readonly PreviewStatusDiagnostic[] = [],
-): string {
-  const markup = statusMarkup(status, message, diagnostics);
-  const withoutStatus = html.replace(
-    /<aside\s+data-sphinx-preview-status="[^"]+"[^>]*>[\s\S]*?<\/aside>/iu,
-    "",
-  );
-  if (/<body(?:\s[^>]*)?>/iu.test(withoutStatus)) {
-    return withoutStatus.replace(/(<body(?:\s[^>]*)?>)/iu, `$1${markup}`);
-  }
-  return `${withoutStatus}${markup}`;
-}
+export {
+  formatStatusDiagnostic,
+  PREVIEW_STATUS_LABELS,
+  setPreviewStatus,
+  type PreviewStatus,
+  type PreviewStatusDiagnostic,
+  type PreviewStatusDiagnosticItem,
+} from "./previewStatus";
 
 export function buildStatusWebviewHtml(
   status: PreviewStatus,

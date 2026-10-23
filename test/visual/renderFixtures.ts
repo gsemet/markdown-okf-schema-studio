@@ -17,6 +17,7 @@ import { renderMyst } from "../../src/render/mystRenderer";
 import { renderMathHtml } from "../../src/render/mathRenderer";
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
 import { PREVIEW_ACCESSIBILITY_CSS, PREVIEW_THEME_CSS } from "../../src/preview/previewStyles";
+import { setPreviewStatus } from "../../src/preview/previewStatus";
 import {
   renderPreviewStickyHeadings,
   renderPreviewToolbar,
@@ -107,6 +108,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
   const source = fs.readFileSync(sourcePath, "utf8");
   const { html, diagnostics } = await renderMyst(source, {
     sourcePath,
+    ...(options.mystExtensions === undefined ? {} : { enabledMystExtensions: new Set(options.mystExtensions) }),
     resolveInclude: (request, from) => {
       const target = path.resolve(path.dirname(from), request);
       if (!target.startsWith(fixtureDirectory + path.sep) || !fs.existsSync(target) || !fs.statSync(target).isFile()) {
@@ -186,12 +188,19 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
     )
     : withPlantUml;
   // The host reports a successful render even for an empty file; the runtime offers "Start writing" only then.
+  // With a conf.py (CR 050), the status region the host writes, with the conf.py warnings.
   const withStatus = source.trim() === ""
     ? withPlantUmlAndTable.replace(
       /(<body(?:\s[^>]*)?>)/iu,
       (opening) => `${opening}<aside data-sphinx-preview-status="success" hidden></aside>`,
     )
-    : withPlantUmlAndTable;
+    : options.mystExtensions !== undefined
+      ? setPreviewStatus(withPlantUmlAndTable, "success", undefined, diagnostics.map((diagnostic) => ({
+        ...diagnostic,
+        code: diagnostic.code === "myst-extension" ? diagnostic.code : "myst-diagnostic",
+        file: sourcePath,
+      })))
+      : withPlantUmlAndTable;
   const withToolbar = withStatus.replace(
     /(<body(?:\s[^>]*)?>)/iu,
     (opening) => `${opening}${renderPreviewToolbar(editingEnabled)}${renderPreviewStickyHeadings()}`,
@@ -214,6 +223,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
       ...(options.incomingChanges === undefined ? {} : { incomingChanges: options.incomingChanges }),
     },
     ...(options.markEditorSelection === true ? { markEditorSelection: true } : {}),
+    ...(options.trusted === false ? { warningsInProblems: false } : {}),
   };
   const serializedSource = JSON.stringify(source).replace(/</gu, "\\u003c");
   // The host side of local PlantUML `!include` files for the built-in engine: the files of

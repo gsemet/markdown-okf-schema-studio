@@ -286,3 +286,13 @@ test("previewPlantUmlInclude carries a bounded file name, the including file id 
   assert.equal(isRegisteredPreviewMessage({ ...base, editId: "" }), false);
   assert.equal(isRegisteredPreviewMessage({ ...base, editId: undefined }), false);
 });
+
+test("CR 050: the warning banner messages are registered with a bounded key", () => {
+  const envelope = { documentId: "file:///chapter.md", documentVersion: 3, requestId: 7 };
+  assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewShowProblems" }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewWarningBannerClosed", key: "2-0a1b2c3d" }), true);
+  for (const key of [undefined, 2, "", "2-0A1B2C3D", "2-0a1b2c3", "x".repeat(40), "2-0a1b2c3d\n"]) {
+    assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewWarningBannerClosed", key }), false, String(key));
+  }
+  assert.equal(isRegisteredPreviewMessage({ type: "previewShowProblems" }), false, "the envelope is required");
+});

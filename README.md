@@ -60,8 +60,10 @@ Markdown flavours and extensions:
   (a Colour picker with 16 swatches and a hex field; a swatch button appears when the caret is in a
   colour code), code blocks with a language,
   blockquotes, horizontal rules and images picked from a file dialog (or pasted: a screenshot on the
-  clipboard is saved next to the document as `image.png`, `image-1.png`, … and inserted with its
-  alt text selected). Pasting rich text (from Google Docs, Word, a web page or VS Code) into a
+  clipboard is saved next to the document as `image.png`, `image-1.png`, … and inserted as a
+  paragraph of its own, with a blank line before and after it, and its alt text selected). An image
+  written inside a paragraph is drawn in its line of text; an image alone in its paragraph is a
+  centred figure. Pasting rich text (from Google Docs, Word, a web page or VS Code) into a
   block editor inserts it as Markdown (headings, bold, italic, strikethrough, links, lists, code,
   quotes, simple tables, images as links) in one undo step; Cmd/Ctrl+Shift+V pastes plain text. A select at its start
   (Cmd/Ctrl+Shift+M) chooses the Strict, GFM or MyST button set for the workspace (GFM until you
@@ -366,6 +368,12 @@ the workspace root; failing that, the single `conf.py` among `docs/`, `doc/`, `s
 with `myst_enable_extensions`. Syntax whose extension is missing (`colon_fence`, `dollarmath`,
 `amsmath`, `deflist`, `fieldlist`, `tasklist`, `strikethrough`, `substitution`, `attrs_inline`,
 `html_image`, `html_admonition`) gets one warning per extension, with the first line using it.
+The warnings are listed in the Problems view and underlined in the editor. When the page renders,
+a one-line banner at the top of the preview counts them ("2 MyST syntax warnings from conf.py"),
+with an **Open Problems** button and a close button. A closed banner stays closed for that document
+until VS Code restarts, and comes back when the set of warnings changes. It takes no room in the
+page, so showing or closing it moves nothing. In Restricted Mode the Problems view does not list
+them: the banner shows them in its tooltip instead.
 The file is only read, never run: if a list is computed rather than written as plain strings, or
 there is no `conf.py`, nothing is reported. The preview itself renders the same either way.
 

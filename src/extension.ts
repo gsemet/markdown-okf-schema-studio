@@ -424,6 +424,11 @@ let extensionRootUri: vscode.Uri | undefined;
 let sessionPreviewThemeMode: PreviewThemeMode | undefined;
 let previewThemeModeStorage: PreviewThemeModeStorage | undefined;
 let sessionViewPreferences: ViewPreferences = { ...DEFAULT_VIEW_PREFERENCES };
+/**
+ * CR 050: the warning banner closed per document for this session, by the key of the warning set it
+ * showed. A new set (another key) shows the banner again.
+ */
+const dismissedWarningBanners = new Map<string, string>();
 let viewPreferencesStorage: ViewPreferencesStorage | undefined;
 let previewDescriptionStorage: vscode.Memento | undefined;
 /** Bounded per-document `descriptionsCollapsed` memory, persisted under one workspaceState key. */
@@ -808,6 +813,10 @@ function scrollContext(
     showComments: configuration.showComments,
     themeKind: vscode.window.activeColorTheme.kind,
     ...(toolbarState ?? {}),
+    ...(dismissedWarningBanners.has(stage.activeDocumentIdentity)
+      ? { dismissedWarningBanner: dismissedWarningBanners.get(stage.activeDocumentIdentity) }
+      : {}),
+    ...(vscode.workspace.isTrusted ? {} : { warningsInProblems: false }),
     ...(sessionPreviewThemeMode ? { previewThemeMode: sessionPreviewThemeMode } : {}),
     initialViewPreferences: sessionViewPreferences,
     ...(state && state.documentId === stage.activeDocumentIdentity
@@ -3992,6 +4001,14 @@ registeredMessageHandlers.set("previewEditFlushed", (preview, message) => {
   preview.flushWaiters.get(message.flushId as string)?.();
 });
 
+// CR 050: the warning banner. Opening the Problems view and closing the banner edit nothing, so a
+// read-only or untrusted preview allows them.
+registeredMessageHandlers.set("previewShowProblems", () =>
+  vscode.commands.executeCommand("workbench.actions.view.problems"));
+registeredMessageHandlers.set("previewWarningBannerClosed", (preview, message) => {
+  dismissedWarningBanners.set(preview.documentUri, message.key as string);
+});
+
 registeredMessageHandlers.set("previewLabelRename", handleLabelRename);
 registeredMessageHandlers.set("previewThreadReply", (preview, message) => handleThreadChange(preview, message, "reply"));
 registeredMessageHandlers.set("previewThreadDelete", (preview, message) => handleThreadChange(preview, message, "delete"));
@@ -4032,6 +4049,13 @@ function handlePreviewSyncMessage(preview: ActivePreview, value: unknown): Thena
     if (value.type === "previewPlantUmlInclude") {
       // A file read does not depend on the document version: answer a page that is one render
       // behind too, as long as it shows this document (the policy bounds every read anyway).
+      return preview.disposed || !handler || value.documentId !== preview.documentUri
+        ? undefined
+        : Promise.resolve(handler(preview, value));
+    }
+    if (value.type === "previewShowProblems" || value.type === "previewWarningBannerClosed") {
+      // The banner belongs to the document, not to one render of it: a page one render behind
+      // still opens the Problems view and closes its banner.
       return preview.disposed || !handler || value.documentId !== preview.documentUri
         ? undefined
         : Promise.resolve(handler(preview, value));

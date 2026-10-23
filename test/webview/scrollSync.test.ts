@@ -6903,6 +6903,30 @@ test("T34: the patch removes the pending overlay and the link tooltip", () => {
   assert.equal(link.getAttribute("title"), "target", "the link title was restored");
 });
 
+test("CR 050: a patch keeps the code of each status line and refuses a malformed one", () => {
+  const harness = createRuntimeHarness({ previewStatus: "success" });
+  harness.dispatchMessage(patchMessage({
+    diagnostics: [
+      { severity: "warning", text: "active.md:3: Warning: dollar math", code: "myst-extension" },
+      { severity: "warning", text: "plain" },
+    ],
+  }));
+  const region = harness.body.childElements.find((child) =>
+    child.getAttribute("data-sphinx-preview-status") !== null && !child.removed)!;
+  const list = region.childElements.find((child) => child.tagName === "UL")!;
+  assert.deepEqual(list.childElements.map((item) => item.getAttribute("data-sphinx-preview-diagnostic-code")),
+    ["myst-extension", null]);
+  assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>");
+  harness.dispatchMessage(patchMessage({
+    documentVersion: 8,
+    requestId: 12,
+    next: { documentVersion: 9, requestId: 13 },
+    contentHtml: "<p>refused</p>",
+    diagnostics: [{ severity: "warning", text: "x", code: 7 }],
+  }));
+  assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>", "a code that is not a string refuses the patch");
+});
+
 test("T34: the patch rebuilds the status region from plain text", () => {
   const harness = createRuntimeHarness({ previewStatus: "success" });
   const old = harness.statusRegion!;
@@ -9851,7 +9875,8 @@ test("T38: pasting an image posts it to the host with the selection remembered",
   const status = harness.createdElements.find((element) => element.getAttribute("data-sphinx-preview-edit-status") !== null);
   assert.equal(status?.textContent, "Saving image…");
   harness.dispatchMessage({ type: "previewPasteImageResult", editId: request.editId, ok: true, fileName: "image.png" });
-  assert.equal(textarea.value, "See ![image.png](image.png) here");
+  // CR 050: the image is a paragraph of its own; the spaces around the caret go with the breaks.
+  assert.equal(textarea.value, "See\n\n![image.png](image.png)\n\nhere");
   assert.equal(textarea.value.slice(textarea.selectionStart, textarea.selectionEnd), "image.png");
 });
 

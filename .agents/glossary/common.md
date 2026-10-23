@@ -58,4 +58,5 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Top-level block**: mapped block that is a direct child of the content container (`topLevelMappedBlocks` in `src/webview/scrollSync.ts`).
 - **Update glow**: one brief wash of the focus colour on the blocks a content patch updated after a change made outside the preview and not in the active text editor, or an undo/redo (`data-sphinx-preview-updated`); the host sends `updatedRanges` (`src/preview/updatedRanges.ts`), the page marks them (`src/webview/motion.ts`).
 - **View preference**: per-workspace preview setting changed from toolbar row 2 (zoom, width mode, TOC, incoming changes), `src/state/previewViewPreferences.ts`.
+- **Warning banner**: one-line notice at the top of a successfully rendered page counting the `conf.py` MyST extension warnings, with Open Problems and close buttons; out of the flow, closed per document for the session (`[data-sphinx-preview-warning-banner]`, `src/webview/warningBanner.ts`).
 - **Width mode**: Margin / Auto / Full width preview column state (`data-sphinx-preview-width`); Auto lets wide tables and figures break out of the column.

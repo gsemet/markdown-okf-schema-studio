@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- When the page uses MyST syntax that its `conf.py` does not enable (a missing extension such as
+  `dollarmath` or `colon_fence`), the preview now says so: a discreet one-line banner at the top
+  counts the warnings, with an **Open Problems** button and a close button. Closed, it stays closed
+  for that document until VS Code restarts and comes back when the warnings change. It never covers
+  the floating toolbar and moves no content. Until now these warnings were only in the Problems
+  view and as editor squiggles.
+- A pasted image now goes on a paragraph of its own, with a blank line before and after it (like
+  GitHub and Obsidian), instead of being glued to the end of the text line. Pasted in the middle of
+  a line, it splits the paragraph there.
+- An image written inside a paragraph (`Text ![logo](logo.png) more text`) now sits in its line of
+  text, centred on it, instead of looking like a picture above the paragraph. An image alone in its
+  paragraph stays a centred figure.
 - New starting points for a workspace that has not chosen yet: the preview opens in the cream
   theme, the floating toolbar is collapsed to its first row (the chevron shows rows 2 and 3) and
   the edition palette offers the GFM buttons (`editing.defaultPaletteMode` now defaults to `gfm`).
