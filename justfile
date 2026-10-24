@@ -1,6 +1,7 @@
 set dotenv-load
 
 npm := env("STUDIO_NPM", "fnm exec -- npm --registry=https://registry.npmjs.org/")
+okfreq := env("STUDIO_OKFREQ", "uv run --no-sync --group requirements okfreq")
 
 _default:
     @just --list --list-heading $'Available Studio targets:\n'
@@ -13,7 +14,7 @@ format:
 dev:
     fnm install
     {{ npm }} ci
-    uv sync --group docs --group release
+    uv sync --group docs --group release --group requirements
     uv run --no-sync --group docs playwright install chromium
 
 # Set up a CI machine (CI only: npm ci replaces node_modules) from the lock files; the runner provides Node.js.
@@ -30,7 +31,7 @@ dev-ci STAGE="":
             ;;
     esac
     {{ npm }} ci
-    uv sync --group docs --group release
+    uv sync --group docs --group release --group requirements
     [[ "{{ STAGE }}" == "visual" ]] || exit 0
     if [[ "$(uname -s)" != "Linux" ]]; then
         uv run --no-sync --group docs playwright install --with-deps chromium
@@ -71,7 +72,7 @@ update:
     {{ npm }} install --package-lock-only --ignore-scripts
     {{ npm }} install --save-dev @types/node@24 --package-lock-only --ignore-scripts
     {{ npm }} ci
-    uv sync --upgrade --group docs --group release
+    uv sync --upgrade --group docs --group release --group requirements
     uv run --no-sync --group docs playwright install chromium
 
 update-guidelines:
@@ -123,8 +124,27 @@ check-settings:
 generate-settings:
     {{ npm }} run generate:settings
 
-# Format the justfile and run TypeScript, boundary, size, settings schema, unit, contract, and security checks.
-check: format compile check-boundaries check-limits check-settings unit contracts security release-tests
+# Format the justfile and run TypeScript, boundary, size, settings schema, unit, contract, security and requirements checks.
+check: format compile check-boundaries check-limits check-settings unit contracts security release-tests requirements-lint
+
+# Validate the okfreq requirements bundle: schemas, links, navigation and generated coverage.
+requirements-lint:
+    {{ okfreq }} validate requirements --check-links --project-root .
+    {{ okfreq }} lint requirements --check --check-links --project-root .
+    {{ okfreq }} update-coverage requirements --check
+
+# Refresh generated coverage fields and navigation after adding requirements or markers.
+requirements-update:
+    {{ okfreq }} update-coverage requirements
+    {{ okfreq }} lint requirements --prose --check-links --project-root .
+
+# Write the requirements traceability report (JSON and Markdown) under out/reports/requirements.
+requirements-report:
+    mkdir -p out/reports/requirements
+    {{ okfreq }} generate-report requirements \
+        --output-json out/reports/requirements/requirements-report.json \
+        --output-summary-md out/reports/requirements/requirements-report.md
+    {{ okfreq }} status requirements
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
@@ -164,11 +184,11 @@ site: e2e
     {{ npm }} run site:gallery
     {{ npm }} run site
 
-# CI job "static": justfile format check, TypeScript, boundary, size, settings schema, unit, contract and security checks, Sphinx contract.
+# CI job "static": justfile format check, TypeScript, boundary, size, settings schema, unit, contract, security and requirements checks, Sphinx contract, requirements report.
 ci-static:
     #!/usr/bin/env bash
     set -uo pipefail
-    if just --unstable --fmt --check && just check && just sphinx-check; then
+    if just --unstable --fmt --check && just check && just sphinx-check && just requirements-report; then
         echo "ci-static: passed"
     else
         echo "ci-static: FAILED" >&2

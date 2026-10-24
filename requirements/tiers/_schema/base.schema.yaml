@@ -1,0 +1,132 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: base.schema.yaml
+title: okfreq requirement base profile
+description: >-
+  Shared frontmatter contract for every okfreq requirement. It owns stable
+  identity, ownership, lifecycle, provenance, and relationship fields.
+type: object
+properties:
+  type:
+    type: string
+    description: Configured level and schema discriminator.
+  id:
+    type: string
+    pattern: '^[A-Za-z][A-Za-z0-9_-]*$'
+    description: Stable requirement identifier, for example
+      StRS-MDOKFSTUDIO-CORE-001.
+  uuid:
+    type: string
+    format: uuid
+    description: Stable UUID retained when the document moves or is renamed.
+  title:
+    type: string
+    minLength: 1
+    description: Concise human-readable subject of the requirement.
+  description:
+    type: string
+    minLength: 1
+    description: Normative requirement statement supplied by the author.
+  project:
+    type: string
+    minLength: 1
+    description: Project or product that owns the requirement.
+  scope:
+    type: string
+    minLength: 1
+    description: Domain used for organization, ID allocation, and evidence
+      scanning.
+  lifecycle:
+    type: string
+    enum: [draft, proposed, approved, deprecated, superseded]
+    description: Explicit human-controlled lifecycle state.
+  origin:
+    type: string
+    minLength: 1
+    description: Producer or source, such as native or imported.
+  tier:
+    type: string
+    description: Configured level label; the tier schema constrains its value.
+  derives_from:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: filename-stem
+        syntax: plain
+        id_marker: id
+        tooltip_shows_fields: [description]
+        preview_shows_fields: [description]
+    description: Authored parent IDs; file navigation uses matching Markdown
+      filename stems.
+  derived_by:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: filename-stem
+        syntax: plain
+        id_marker: id
+        tooltip_shows_fields: [description]
+        preview_shows_fields: [description]
+    description: Generated reverse IDs; file navigation uses matching Markdown
+      filename stems.
+  depends_on:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: filename-stem
+        syntax: plain
+        id_marker: id
+    description: Authored dependency IDs; file navigation uses matching Markdown
+      filename stems.
+  external_id:
+    type: string
+    minLength: 1
+    description: Identifier of the corresponding requirement in an external
+      system.
+  external_url:
+    type: string
+    format: uri
+    description: Link to the corresponding requirement in an external system.
+  documentation_files:
+    type: array
+    description: Human documentation explaining this behavior.
+    items:
+      type: string
+      x-okf-link:
+        resolution: project-relative
+        syntax: plain
+  agent_skill_files:
+    type: array
+    description: Standalone agent guidance shipped for this behavior.
+    items:
+      type: string
+      x-okf-link:
+        resolution: project-relative
+        syntax: plain
+  example_files:
+    type: array
+    description: Runnable concrete examples exercising this behavior.
+    items:
+      type: string
+      x-okf-link:
+        resolution: project-relative
+        syntax: plain
+  owner:
+    type: string
+    description: Project team responsible for maintaining the contract.
+required: [type, id, uuid, title, description, project, scope, lifecycle, origin,
+  tier]
+additionalProperties: true
+examples:
+- type: StRS
+  id: StRS-MDOKFSTUDIO-CORE-001
+  uuid: 00000000-0000-4000-8000-000000000001
+  title: Validate requirements
+  description: The tool SHALL validate requirement frontmatter.
+  project: markdown-okf-schema-studio
+  scope: core
+  lifecycle: draft
+  origin: native
+  tier: StRS
