@@ -303,6 +303,9 @@ even in git.
 - Run only the gates `task.md` lists, in the foreground; leave nothing running.
 - Touch only the files the task needs. Never change an existing assertion's intent. New tests must
   fail on the unchanged code.
+- A behaviour change updates its SwRS and the `@implements_req` / `@tests_req` markers in the same
+  task; a refactor moves the markers with the code
+  (`requirements/guidelines/requirements.guidelines.md`).
 - Report: files changed, tests added and their failure before the change, changed assertions and
   why, gate results with counts, screenshot paths, open points.
 
