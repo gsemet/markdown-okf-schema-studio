@@ -288,7 +288,6 @@
   },
   "overrides": {
     "csv-parse": "^7.0.3",
-    "linkify-it": "^5.0.2",
     "markdown-it": "^14.3.1"
   },
   "devDependencies": {
