@@ -299,6 +299,7 @@ even in git.
 ## Sub-agent rules (copy into `rules.md`)
 
 - Work on the CR branch only. Never commit, push, stash or switch branches (driver's job).
+- Read `.agents/constitution.md` first; it ranks above this briefing.
 - No installs, no network unless `AGENTS.md` allows it.
 - Run only the gates `task.md` lists, in the foreground; leave nothing running.
 - Touch only the files the task needs. Never change an existing assertion's intent. New tests must
