@@ -34,7 +34,7 @@ import { run as runSerializer } from "./serializer.test";
 import { run as runSourceMapping } from "./sourceMapping.test";
 import { run as runStockCoexistence } from "./stockCoexistence.test";
 import { run as runWorkspaceDisposal } from "./workspaceDisposal.test";
-import { attribute, findElements, parseHtml } from "../rendering/dom";
+import { attribute, findElements, parseHtml } from "../core/render/dom";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
 

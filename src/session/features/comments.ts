@@ -7,8 +7,8 @@
 
 import * as path from "node:path";
 
-import { createDocumentIndex, reanchorThreads, shiftThreadLines, toLineChanges } from "../../comments/anchoring";
-import { resolveAuthor } from "../../comments/author";
+import { createDocumentIndex, reanchorThreads, shiftThreadLines, toLineChanges } from "../../core/comments/anchoring";
+import { resolveAuthor } from "../../core/comments/author";
 import {
   addReply,
   addThread,
@@ -20,15 +20,16 @@ import {
   setResolved,
   sidecarNameFor,
   type CommentThread,
-} from "../../comments/commentModel";
-import { createCommentStore, hashText, newId } from "../../comments/commentStore";
-import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../../configuration/commentsConfiguration";
+} from "../../core/comments/commentModel";
+import { createCommentStore, hashText, newId } from "../../core/comments/commentStore";
+import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../../core/configuration/commentsConfiguration";
 import type { DocumentChange, HostDocument } from "../../host-api/documentStore";
 import { isFileNotFound } from "../../host-api/fileSystem";
 import { osUserName } from "../../node-services/paths";
-import type { PageMessageOf } from "../../protocol/pageToHost";
+import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
-import type { PreviewManager, RenamedFile } from "../previewManager";
+import type { RenamedFile } from "../hostEvents";
+import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { revisionOfStage } from "../sessionDocuments";
 

@@ -9,7 +9,7 @@
 import * as vscode from "vscode";
 
 import type { PanelGroups, PreviewPanel } from "../host-api/previewPanel";
-import { createFocusWorkTracker, focusGroupCommand, type GroupFocusMove } from "../navigation/groupFocus";
+import { createFocusWorkTracker, focusGroupCommand, type GroupFocusMove } from "./groupFocus";
 import type { VscodePreviewPanel } from "./previewPanel";
 
 /** The group lock of the VS Code host, with what the tests wait for. */

@@ -27,11 +27,11 @@ import { pathToFileURL } from "node:url";
 
 import { chromium, type Page } from "playwright-core";
 
-import { analyzeFrontmatter } from "../../src/frontmatter/okfFrontmatter";
-import { sourceRangeForLines } from "../../src/mapping/sourceMapping";
-import { planContentPatch } from "../../src/preview/contentPatch";
-import { renderPreviewDocument } from "../../src/render/renderPipeline";
-import * as webviewModule from "../../src/preview/webview";
+import { analyzeFrontmatter } from "../../src/core/frontmatter/okfFrontmatter";
+import { sourceRangeForLines } from "../../src/core/mapping/sourceMapping";
+import { planContentPatch } from "../../src/core/preview/contentPatch";
+import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
+import * as webviewModule from "../../src/session/webview";
 import { REPORTS_ROOT, EXTENSION_ROOT } from "../reportPaths";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 import { frameStats, installFrameProbe, rebuiltBlocks, snapshotBlocks, type FrameSample } from "./frameProbe";

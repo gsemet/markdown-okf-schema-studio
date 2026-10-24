@@ -6,9 +6,9 @@
  * applies, each as one undo step.
  */
 
-import { resolveAuthor } from "../../comments/author";
-import { formatThreadDate } from "../../comments/inlineThread";
-import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../../configuration/commentsConfiguration";
+import { resolveAuthor } from "../../core/comments/author";
+import { formatThreadDate } from "../../core/comments/inlineThread";
+import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../../core/configuration/commentsConfiguration";
 import {
   checkBlocksPaste,
   planBlockMoveEdit,
@@ -23,7 +23,7 @@ import {
 import type { TextEdit } from "../../core/edits/textEdit";
 import type { HostDocument } from "../../host-api/documentStore";
 import { osUserName } from "../../node-services/paths";
-import type { PageMessageOf } from "../../protocol/pageToHost";
+import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

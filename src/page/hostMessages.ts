@@ -1,13 +1,13 @@
 /**
- * Host messages on the page side (src/protocol/hostToPage.ts): the filter checks that a message is
+ * Host messages on the page side (src/core/protocol/hostToPage.ts): the filter checks that a message is
  * addressed to this page and has a valid payload, then the typed router runs the handler of its
  * type. Feature modules register their handlers on {@link PageHostMessages.router}; one handler per
  * type.
  */
 
-import type { PageIdentity } from "../protocol/envelope";
-import { createHostMessageFilter, type HostToPageMessage } from "../protocol/hostToPage";
-import { createMessageRouter, type MessageRouter } from "../protocol/router";
+import type { PageIdentity } from "../core/protocol/envelope";
+import { createHostMessageFilter, type HostToPageMessage } from "../core/protocol/hostToPage";
+import { createMessageRouter, type MessageRouter } from "../core/protocol/router";
 import type { HostTransport } from "./hostTransport";
 
 /** The router of host messages a page feature registers its handlers on. */

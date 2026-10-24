@@ -4,13 +4,13 @@
  * is ready), and the `!include` files the bundled engine reads through the host.
  */
 
-import { resolvePlantUmlEngine } from "../../configuration/plantUmlConfiguration";
-import { formatStatusDiagnostic, setPreviewStatus } from "../../preview/webview";
-import { diagnosticsFitPatch, planContentPatch } from "../../preview/contentPatch";
-import type { PageMessageOf } from "../../protocol/pageToHost";
-import { PlantUmlIncludeWatch, resolvePlantUmlInclude } from "../../render/plantUmlIncludes";
-import { injectPlantUmlDiagrams } from "../../render/plantUmlRenderer";
-import type { RenderResult } from "../../render/renderPipeline";
+import { resolvePlantUmlEngine } from "../../core/configuration/plantUmlConfiguration";
+import { formatStatusDiagnostic, setPreviewStatus } from "../webview";
+import { diagnosticsFitPatch, planContentPatch } from "../../core/preview/contentPatch";
+import type { PageMessageOf } from "../../core/protocol/pageToHost";
+import { PlantUmlIncludeWatch, resolvePlantUmlInclude } from "../../core/render/plantUmlIncludes";
+import { injectPlantUmlDiagrams } from "../../core/render/plantUmlRenderer";
+import type { RenderResult } from "../../core/render/renderPipeline";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

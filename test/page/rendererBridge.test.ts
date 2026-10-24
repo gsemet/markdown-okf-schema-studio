@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import { CONTENT_REPLACED_EVENT, installRendererBridge } from "../../src/page/features/rendererBridge";
 import { createPageBus, type PageEvents } from "../../src/page/pageBus";
-import { PLANTUML_INCLUDES_CHANGED_EVENT } from "../../src/webview/plantumlFileRequests";
+import { PLANTUML_INCLUDES_CHANGED_EVENT } from "../../src/page/modules/plantumlFileRequests";
 
 test("page events reach the diagram renderers as the DOM events they listen for", () => {
   const bus = createPageBus<PageEvents>();

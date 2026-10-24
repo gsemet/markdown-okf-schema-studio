@@ -1,6 +1,6 @@
 /**
  * The `Settings` port: the user's settings, read by section. The setting names and defaults belong
- * to the core (`src/configuration/`); a host maps them onto its own settings store (VS Code: the
+ * to the core (`src/core/configuration/`); a host maps them onto its own settings store (VS Code: the
  * `contributes.configuration` of `package.json`).
  */
 

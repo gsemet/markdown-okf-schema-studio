@@ -10,6 +10,7 @@ __pycache__/**
 **/*.pyc
 out/src/**
 out/test/**
+out/boundaries/**
 test/**
 tests/**
 sphinx/tests/**
@@ -28,3 +29,4 @@ tsconfig.json
 .uv_cache
 uv.lock
 .gitignore
+.dependency-cruiser.cjs

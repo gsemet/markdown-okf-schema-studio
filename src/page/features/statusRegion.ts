@@ -3,7 +3,7 @@
  * a content patch rebuilds (T34). Both are built from plain text (textContent), never from markup.
  */
 
-import type { PreviewContentPatchMessage, PreviewPendingOverlayMessage } from "../../protocol/hostToPage";
+import type { PreviewContentPatchMessage, PreviewPendingOverlayMessage } from "../../core/protocol/hostToPage";
 import type { HostMessageRouter } from "../hostMessages";
 
 /** What the overlay shows: hidden, or a label and a message. */

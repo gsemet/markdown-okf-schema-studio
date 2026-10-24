@@ -9,7 +9,7 @@
 
 import * as vscode from "vscode";
 
-import { createHeadBaseline, type GitExtensionLike } from "../git/headBaseline";
+import { createHeadBaseline, type GitExtensionLike } from "./headBaseline";
 import type { AssetResolver } from "../host-api/assetResolver";
 import type { DiagnosticEntry, DiagnosticSeverity, Diagnostics } from "../host-api/diagnostics";
 import type { TextRange } from "../host-api/documentStore";

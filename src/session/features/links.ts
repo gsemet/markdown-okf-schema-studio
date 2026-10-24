@@ -11,11 +11,11 @@ import {
   findSchemaDirectory,
   frontmatterLinkIdentity,
   type FrontmatterResult,
-} from "../../frontmatter/okfFrontmatter";
-import { resolveFrontmatterLinkRoots } from "../../frontmatter/fileLinks";
+} from "../../core/frontmatter/okfFrontmatter";
+import { resolveFrontmatterLinkRoots } from "../../core/frontmatter/fileLinks";
 import type { TextRange } from "../../host-api/documentStore";
-import { markdownFragmentRange, markdownMarkerLine } from "../../navigation/previewNavigation";
-import type { PageMessageOf } from "../../protocol/pageToHost";
+import { markdownFragmentRange, markdownMarkerLine } from "../../core/navigation/previewNavigation";
+import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

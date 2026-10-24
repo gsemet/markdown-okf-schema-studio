@@ -14,7 +14,7 @@ import type {
   HostDocument,
 } from "../host-api/documentStore";
 import { EventSource } from "../host-api/events";
-import { RevisionCounter, type Revision } from "../protocol/revision";
+import { RevisionCounter, type Revision } from "../core/protocol/revision";
 
 /** The zero-based line of `offset` in `text` (lines split as an editor does: LF, CRLF or CR). */
 function lineAtOffset(text: string, offset: number): number {

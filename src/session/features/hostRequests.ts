@@ -7,8 +7,8 @@
 
 import * as path from "node:path";
 
-import { IMAGE_EXTENSIONS, isImageFileName, relativeImageReference } from "../../mapping/imageReference";
-import { docReference, documentTargets } from "../../mapping/mystTargets";
+import { IMAGE_EXTENSIONS, isImageFileName, relativeImageReference } from "../../core/mapping/imageReference";
+import { docReference, documentTargets } from "../../core/mapping/mystTargets";
 import {
   imageTypeOfMime,
   isBase64,
@@ -16,11 +16,11 @@ import {
   nextImageName,
   PASTED_IMAGE_EXTENSION,
   sniffImage,
-} from "../../mapping/pastedImage";
-import { htmlToMarkdown } from "../../paste/htmlToMarkdown";
-import { scanBibKeys } from "../../preview/bibScan";
-import type { HostRequestType } from "../../protocol/hostToPage";
-import type { PageMessageOf } from "../../protocol/pageToHost";
+} from "../../core/mapping/pastedImage";
+import { htmlToMarkdown } from "../../core/paste/htmlToMarkdown";
+import { scanBibKeys } from "../bibScan";
+import type { HostRequestType } from "../../core/protocol/hostToPage";
+import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

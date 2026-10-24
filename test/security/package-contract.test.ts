@@ -254,7 +254,7 @@ test("the built-in PlantUML engine ships pinned and the JAR is an explicit opt-i
   const jarText = properties["markdownOkfSchemaStudio.plantuml.jarPath"].markdownDescription as string;
   assert.match(jarText, /useJar/u, "jarPath must say it is only used with useJar");
   const esbuild = fs.readFileSync(path.join(extensionRoot, "esbuild.mjs"), "utf8");
-  assert.match(esbuild, /src\/webview\/plantumlPreview\.ts/u);
+  assert.match(esbuild, /src\/page\/modules\/plantumlPreview\.ts/u);
   assert.match(esbuild, /out\/bundle\/plantumlPreview\.js/u);
   const ignore = fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8").split(/\r?\n/u);
   assert.ok(!ignore.some((line) => /^out\/bundle|^out\/\*\*/u.test(line.trim())), "the webview bundles must ship in the VSIX");

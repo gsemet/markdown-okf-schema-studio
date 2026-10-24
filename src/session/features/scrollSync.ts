@@ -10,10 +10,10 @@ import * as path from "node:path";
 
 import type { DocumentChange } from "../../host-api/documentStore";
 import type { PairedEditor } from "../../host-api/textEditors";
-import { pageLiveStateMessages } from "../../preview/pageLiveState";
-import type { PageIdentity } from "../../protocol/envelope";
-import type { PageMessageOf } from "../../protocol/pageToHost";
-import { EditorEchoGuard, shiftLineForEdits, type ScrollAnchor } from "../../webview/anchorPolicy";
+import { pageLiveStateMessages } from "../../core/preview/pageLiveState";
+import type { PageIdentity } from "../../core/protocol/envelope";
+import type { PageMessageOf } from "../../core/protocol/pageToHost";
+import { EditorEchoGuard, shiftLineForEdits, type ScrollAnchor } from "../../core/scroll/anchorPolicy";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

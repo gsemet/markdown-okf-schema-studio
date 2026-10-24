@@ -14,8 +14,8 @@ import {
   frontmatterAddPlacement,
   parseYamlValue,
   type FrontmatterResult,
-} from "../../frontmatter/okfFrontmatter";
-import type { PageMessageOf } from "../../protocol/pageToHost";
+} from "../frontmatter/okfFrontmatter";
+import type { PageMessageOf } from "../protocol/pageToHost";
 import type { TextEdit } from "./textEdit";
 
 /** Refusal of a field that no longer exists, or a value of the wrong type. */

@@ -1,10 +1,10 @@
 /**
  * Forwards page events to the diagram renderers, which are separate scripts of the page (Mermaid,
- * PlantUML, see `src/webview/mermaidPreview.ts` and `plantumlPreview.ts`) and listen for DOM events
+ * PlantUML, see `src/page/modules/mermaidPreview.ts` and `plantumlPreview.ts`) and listen for DOM events
  * on the document rather than on the page bus.
  */
 
-import { PLANTUML_INCLUDES_CHANGED_EVENT } from "../../webview/plantumlFileRequests";
+import { PLANTUML_INCLUDES_CHANGED_EVENT } from "../modules/plantumlFileRequests";
 import type { PageBus, PageEvents } from "../pageBus";
 
 /** The DOM event the renderers draw the replaced content on. */

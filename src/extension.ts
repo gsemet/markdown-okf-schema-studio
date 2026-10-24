@@ -28,7 +28,7 @@ export {
   storeWorkspaceChoicesForTests,
   syncActiveEditorForTests,
 } from "./host-vscode/testHooks";
-export { resetRenderHooksForTests, setRenderDelayForTests, setRenderOverrideForTests } from "./render/renderPipeline";
+export { resetRenderHooksForTests, setRenderDelayForTests, setRenderOverrideForTests } from "./core/render/renderPipeline";
 
 /** The activation that runs; undefined before `activate` and after `deactivate`. */
 let activation: StudioActivation | undefined;

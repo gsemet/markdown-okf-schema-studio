@@ -107,8 +107,16 @@ unit:
 contracts:
     {{ npm }} run test:contracts
 
-# Format the justfile and run TypeScript, unit, contract, and security checks.
-check: format compile unit contracts security release-tests
+# Check the import boundaries between the layers of src/ (dependency-cruiser; rules in .dependency-cruiser.cjs).
+check-boundaries:
+    {{ npm }} run check:boundaries
+
+# Check the file-size ratchet (scripts/file-size-baseline.json) and the type-check suppressions of src/.
+check-limits:
+    {{ npm }} run check:limits
+
+# Format the justfile and run TypeScript, boundary, size, unit, contract, and security checks.
+check: format compile check-boundaries check-limits unit contracts security release-tests
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
@@ -148,7 +156,7 @@ site: e2e
     {{ npm }} run site:gallery
     {{ npm }} run site
 
-# CI job "static": justfile format check, TypeScript, unit, contract and security checks, Sphinx contract.
+# CI job "static": justfile format check, TypeScript, boundary, size, unit, contract and security checks, Sphinx contract.
 ci-static:
     #!/usr/bin/env bash
     set -uo pipefail

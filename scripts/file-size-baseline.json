@@ -1,0 +1,20 @@
+{
+  "description": "Files above the line limit (src/ 800, test/ 1500) when the ratchet started, with their current size. They may only shrink: lower an entry when its file shrinks (node scripts/check-file-sizes.mjs --update), and remove it once the file is under the limit.",
+  "limits": {
+    "src": 800,
+    "test": 1500
+  },
+  "files": {
+    "src/core/frontmatter/okfFrontmatter.ts": 1720,
+    "src/core/preview/previewStyles.ts": 4340,
+    "src/core/render/mystRenderer.ts": 2120,
+    "src/page/modules/editActions.ts": 2317,
+    "src/page/modules/editPalette.ts": 1236,
+    "src/page/runtime.ts": 4965,
+    "test/core/render/mystFeatures.test.ts": 1711,
+    "test/integration/realInput.test.ts": 4580,
+    "test/page/runtime.test.ts": 10225,
+    "test/visual/capture.py": 6577,
+    "test/visual/scenarios.ts": 2984
+  }
+}

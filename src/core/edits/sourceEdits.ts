@@ -9,12 +9,12 @@
  * The page's line numbers are never trusted: every operation re-reads the lines it changes.
  */
 
-import { isThreadSource, threadDeleteRange, threadReplyEdit } from "../../comments/inlineThread";
-import { opensIncludeDirective, planBlockMove, type BlockLines } from "../../mapping/blockMove";
-import { planCut, planPaste, spanText } from "../../mapping/blockRange";
-import { countRefUses, renameLabelLine } from "../../mapping/labelRename";
-import { minimalReplacement } from "../../mapping/textDiff";
-import { checkboxToggleEdit } from "../../render/checkboxMarkers";
+import { isThreadSource, threadDeleteRange, threadReplyEdit } from "../comments/inlineThread";
+import { opensIncludeDirective, planBlockMove, type BlockLines } from "../mapping/blockMove";
+import { planCut, planPaste, spanText } from "../mapping/blockRange";
+import { countRefUses, renameLabelLine } from "../mapping/labelRename";
+import { minimalReplacement } from "../mapping/textDiff";
+import { checkboxToggleEdit } from "../render/checkboxMarkers";
 import { sourceLines, type EditRefusal, type SourceLines, type TextEdit } from "./textEdit";
 
 /** Refusal of a checkbox whose marker is gone. */

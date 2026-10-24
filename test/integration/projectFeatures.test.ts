@@ -14,7 +14,7 @@ import {
   hasClass,
   parseHtml,
   textContent,
-} from "../rendering/dom";
+} from "../core/render/dom";
 
 const extensionRoot = path.resolve(__dirname, "../../..");
 const workspaceRoot = extensionRoot;

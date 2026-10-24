@@ -4,7 +4,7 @@
  */
 
 import type { DiagnosticEntry, DiagnosticsSink } from "../../host-api/diagnostics";
-import type { RenderResult } from "../../render/renderPipeline";
+import type { RenderResult } from "../../core/render/renderPipeline";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 

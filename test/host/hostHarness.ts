@@ -13,7 +13,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import type { MockTimers } from "node:test";
 
-import { RUNTIME_CONTEXT_ATTRIBUTE } from "../../src/protocol/bootContext";
+import { RUNTIME_CONTEXT_ATTRIBUTE } from "../../src/core/protocol/bootContext";
 import { identityOf, type PageIdentity } from "../shared/previewIdentity";
 import { createFakeVscode, missingMembers, type FakeTextDocument, type FakeWebviewPanel } from "./fakeVscode";
 

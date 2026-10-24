@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { readBootContext } from "../../src/page/bootContext";
 import { createPageHostMessages } from "../../src/page/hostMessages";
 import { createVsCodeTransport, type HostTransport } from "../../src/page/hostTransport";
-import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/protocol/bootContext";
+import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/core/protocol/bootContext";
 
 function pushTransport(): { transport: HostTransport; send(data: unknown): void } {
   let listener: ((data: unknown) => void) | undefined;

@@ -4,67 +4,67 @@ Shared vocabulary for the Studio's UI parts and code concepts, so people and age
 words. Add new terms here, alphabetical, one line each; keep code names in backticks. Terms marked
 "(planned)" do not exist in the code yet; drop the marker when one is built.
 
-- **Alert**: GitHub `> [!TYPE]` callout; inserted by the Alert button of the GFM group, whose type list opens at the caret (`popoverAtCaret` in `src/webview/editActions.ts`).
+- **Alert**: GitHub `> [!TYPE]` callout; inserted by the Alert button of the GFM group, whose type list opens at the caret (`popoverAtCaret` in `src/page/modules/editActions.ts`).
 - **Anchor icon**: marker rendered for a MyST `(label)=` target (`span.okf-anchor`, tooltip "Anchor: name"; first child of the next paragraph or heading, else in a `div.okf-anchor-row`).
 - **Anchor button**: toolbar toggle that ties preview scrolling to the editor (`data-sphinx-preview-anchor`).
 - **Block editor**: raw Markdown text box that replaces a mapped block in edit mode (`.sphinx-preview-block-editor`, `openBlockEditor` in `src/page/runtime.ts`).
-- **Block move**: swap of a top-level block with its neighbour from the insert point arrows (`planBlockMove` in `src/mapping/blockMove.ts`, `SourceEditController` in `src/session/features/sourceEdits.ts`).
-- **Blur commit suspension**: while a host round trip marked `dialog` is pending (`hostRequests.ask(…, { dialog: true }, …)` in `src/webview/hostRequests.ts`: the `{doc}` and image file pickers), the text box blur and the palette `onLeave` do not save, so the block editor stays open under the native dialog; `cancelAll()` in `closeBlockEdit` and the request timeout clear it.
-- **Block selection**: contiguous run of top-level body blocks selected in edit mode with Shift+click or Shift+Up/Down (`data-sphinx-preview-block-selected`, model in `src/webview/blockSelection.ts`).
-- **Chip**: small inline marker in the preview, gray for an HTML comment and green for TODO (`.okf-chip`, `src/render/commentMarkers.ts`).
-- **Comment thread**: review discussion attached to quoted text, stored in a sidecar file (`src/comments/commentModel.ts`, `src/webview/commentThreads.ts`).
-- **Content patch**: in-place replacement of the content container `#sphinx-myst-preview-content` instead of a full page reload (`src/preview/contentPatch.ts`).
-- **Copy button**: floating button over a hovered code block that copies its raw code (`data-sphinx-preview-code-copy`, `src/webview/codeCopy.ts`).
+- **Block move**: swap of a top-level block with its neighbour from the insert point arrows (`planBlockMove` in `src/core/mapping/blockMove.ts`, `SourceEditController` in `src/session/features/sourceEdits.ts`).
+- **Blur commit suspension**: while a host round trip marked `dialog` is pending (`hostRequests.ask(…, { dialog: true }, …)` in `src/page/modules/hostRequests.ts`: the `{doc}` and image file pickers), the text box blur and the palette `onLeave` do not save, so the block editor stays open under the native dialog; `cancelAll()` in `closeBlockEdit` and the request timeout clear it.
+- **Block selection**: contiguous run of top-level body blocks selected in edit mode with Shift+click or Shift+Up/Down (`data-sphinx-preview-block-selected`, model in `src/page/modules/blockSelection.ts`).
+- **Chip**: small inline marker in the preview, gray for an HTML comment and green for TODO (`.okf-chip`, `src/core/render/commentMarkers.ts`).
+- **Comment thread**: review discussion attached to quoted text, stored in a sidecar file (`src/core/comments/commentModel.ts`, `src/page/modules/commentThreads.ts`).
+- **Content patch**: in-place replacement of the content container `#sphinx-myst-preview-content` instead of a full page reload (`src/core/preview/contentPatch.ts`).
+- **Copy button**: floating button over a hovered code block that copies its raw code (`data-sphinx-preview-code-copy`, `src/page/modules/codeCopy.ts`).
 - **Document store**: the port that holds the documents a host shows: their text, revision and line breaks, and the edits applied to them (`DocumentStore` in `src/host-api/documentStore.ts`); the VS Code host wraps `TextDocument`, `src/host-memory/` keeps them in memory.
-- **Edit action**: one registered editing operation (`src/webview/editActions.ts`) used by shortcuts and the palette.
-- **Edit lock**: host-side record that an inline edit is open, deferring work that would replace the page (`src/state/editLock.ts`).
+- **Edit action**: one registered editing operation (`src/page/modules/editActions.ts`) used by shortcuts and the palette.
+- **Edit lock**: host-side record that an inline edit is open, deferring work that would replace the page (`src/core/state/editLock.ts`).
 - **Edit mode**: toolbar toggle that makes preview blocks editable (`data-sphinx-preview-edit-toggle`).
-- **Edition palette**: bar of edit actions above an open block editor (`src/webview/editPalette.ts`, `.sphinx-preview-edit-palette`).
-- **Figure editor**: form for `{figure}` options above the block text box (`src/webview/figureDirective.ts`, `src/webview/figurePanel.ts`).
+- **Edition palette**: bar of edit actions above an open block editor (`src/page/modules/editPalette.ts`, `.sphinx-preview-edit-palette`).
+- **Figure editor**: form for `{figure}` options above the block text box (`src/page/modules/figureDirective.ts`, `src/page/modules/figurePanel.ts`).
 - **Fresh workspace**: a workspace that has stored no theme mode, toolbar state or palette mode; it starts with the built-in defaults (`DEFAULT_PREVIEW_THEME_MODE` cream, `DEFAULT_VIEW_PREFERENCES.toolbarCollapsed`, `editing.defaultPaletteMode` gfm). A stored choice always wins. The visual mock host pins `PINNED_WORKSPACE_CHOICES` (`test/visual/renderOptions.ts`) except for `freshWorkspace` pages.
-- **First-element gap**: fixed 40 px space above the first rendered element; `--sphinx-preview-first-clearance` (`src/webview/firstClearance.ts`) adds room only under the toolbar.
+- **First-element gap**: fixed 40 px space above the first rendered element; `--sphinx-preview-first-clearance` (`src/page/modules/firstClearance.ts`) adds room only under the toolbar.
 - **Host adapter**: the implementation of the ports for one host, the only code that calls that host's API (`src/host-vscode/` for VS Code).
 - **Host API**: the host-neutral interfaces (ports) the core and the extension reach the host through: documents, files, settings, workspace, UI, Git, diagnostics, watchers, processes, assets and navigation (`src/host-api/`); no host API, DOM or Node imports.
 - **Included block**: rendered block that comes from an `{include}`; maps to the directive lines and carries `data-sphinx-preview-included`.
-- **Incoming-change mark**: green left bar on a block changed since HEAD (`data-sphinx-preview-changed`), from `src/webview/incomingChanges.ts`; ranges come from `src/mapping/lineDiff.ts` and `src/git/headBaseline.ts`.
+- **Incoming-change mark**: green left bar on a block changed since HEAD (`data-sphinx-preview-changed`), from `src/page/modules/incomingChanges.ts`; ranges come from `src/core/mapping/lineDiff.ts` and `src/host-vscode/headBaseline.ts`.
 - **Insert point**: "+" bar after each top-level block that opens an insertion editor (`.sphinx-preview-insert-point`).
 - **Insertion editor**: block editor opened from an insert point or from "Start writing".
-- **Link panel**: two-field Text/URL panel under the palette, opened by the Link button or Cmd/Ctrl+K (`src/webview/linkPanel.ts`).
+- **Link panel**: two-field Text/URL panel under the palette, opened by the Link button or Cmd/Ctrl+K (`src/page/modules/linkPanel.ts`).
 - **Mapped block**: rendered element carrying its source location (`[data-sphinx-source-file][data-sphinx-source-line]`).
 - **Margin mode (planned)**: layout mode that uses the page margins for side content.
 - **Message gate**: host rule that matches a page message to the preview before its handler runs (`render`, `comment`, `document`, `own-id`, `page-state`; `PAGE_MESSAGE_GATES` in `src/session/pageMessages.ts`).
-- **Message registry**: map from a page-to-host message type to its validator (`PAGE_TO_HOST_VALIDATORS` in `src/protocol/pageToHost.ts`); the host handler is registered on the host's message router.
-- **Message router**: typed `on(type, handler)` / `dispatch` table of one side of the protocol (`createMessageRouter` in `src/protocol/router.ts`), used by the host and by the page runtime.
-- **Motion**: the short CSS effects of the preview (soft appearance, editor-closed fade, theme colour transition, update glow), driven by attributes from `src/webview/motion.ts` and turned off by `prefers-reduced-motion: reduce`; soft appearance needs `data-sphinx-preview-motion="on"`, set by the first pointer or key press and taken back by a content patch.
-- **MyST autodetect**: check of used MyST syntax against `myst_enable_extensions` in the nearest `conf.py` (`src/myst/`).
-- **Navigation history**: per-panel Back/Next stack of followed links (`src/state/navigationHistory.ts`).
+- **Message registry**: map from a page-to-host message type to its validator (`PAGE_TO_HOST_VALIDATORS` in `src/core/protocol/pageToHost.ts`); the host handler is registered on the host's message router.
+- **Message router**: typed `on(type, handler)` / `dispatch` table of one side of the protocol (`createMessageRouter` in `src/core/protocol/router.ts`), used by the host and by the page runtime.
+- **Motion**: the short CSS effects of the preview (soft appearance, editor-closed fade, theme colour transition, update glow), driven by attributes from `src/page/modules/motion.ts` and turned off by `prefers-reduced-motion: reduce`; soft appearance needs `data-sphinx-preview-motion="on"`, set by the first pointer or key press and taken back by a content patch.
+- **MyST autodetect**: check of used MyST syntax against `myst_enable_extensions` in the nearest `conf.py` (`src/core/myst/`).
+- **Navigation history**: per-panel Back/Next stack of followed links (`src/core/state/navigationHistory.ts`).
 - **Open-With editor**: the custom editor offered through "Open With" (`markdown-okf-schema-studio.editor`).
-- **Orphaned thread**: comment thread whose quote can no longer be found; listed in the "Orphaned comments" box, never deleted (`src/webview/commentThreads.ts`).
-- **Palette mode**: Strict / GFM / MyST button set of the edition palette, per workspace (`PALETTE_MODE_STORAGE_KEY` in `src/session/workspaceChoices.ts`, select in `src/webview/editPalette.ts`).
+- **Orphaned thread**: comment thread whose quote can no longer be found; listed in the "Orphaned comments" box, never deleted (`src/page/modules/commentThreads.ts`).
+- **Palette mode**: Strict / GFM / MyST button set of the edition palette, per workspace (`PALETTE_MODE_STORAGE_KEY` in `src/session/workspaceChoices.ts`, select in `src/page/modules/editPalette.ts`).
 - **Preview panel**: the webview panel that shows the rendered preview.
 - **Properties table**: rendered frontmatter table at the top of a document (`[data-okf-properties]`).
-- **Protocol**: the typed messages between host and page, both directions, as discriminated unions with their validators (`src/protocol/`); no host API, DOM or Node imports.
-- **Re-anchoring**: moving a thread's stored lines to follow its quoted text (`src/comments/anchoring.ts`).
+- **Protocol**: the typed messages between host and page, both directions, as discriminated unions with their validators (`src/core/protocol/`); no host API, DOM or Node imports.
+- **Re-anchoring**: moving a thread's stored lines to follow its quoted text (`src/core/comments/anchoring.ts`).
 - **Reading offset**: strip at the top of the viewport reserved for the sticky heading band (`refreshReadingOffset`, `docs/scroll-anchoring.md`).
-- **Revision**: the protocol's name for one state of the document text (`revision` on the wire, `src/protocol/revision.ts`); compared for equality only. The VS Code host uses `TextDocument.version`; a host without versions counts with `RevisionCounter`.
+- **Revision**: the protocol's name for one state of the document text (`revision` on the wire, `src/core/protocol/revision.ts`); compared for equality only. The VS Code host uses `TextDocument.version`; a host without versions counts with `RevisionCounter`.
 - **Runtime**: the page script injected into the preview, bundled from `src/page/main.ts` into `out/bundle/preview.js`; it reads its boot context from an inert JSON element.
 - **Runtime context**: the settings and ids the host passes to the runtime (`PreviewRuntimeContext`).
 - **Scroll anchor**: the block and offset that keep the reading position stable across re-renders (`docs/scroll-anchoring.md`).
 - **Shell**: the part of the preview page outside the content container; unchanged between renders of one document.
-- **Shell key**: string identifying the shell, compared to decide whether a content patch is possible (`shellKey` in `src/preview/contentPatch.ts`).
+- **Shell key**: string identifying the shell, compared to decide whether a content patch is possible (`shellKey` in `src/core/preview/contentPatch.ts`).
 - **Side channel**: host-to-page message carrying data that is not rendered HTML, for example `previewPropertiesTable`.
 - **Sidecar file**: `<name>.comments.json` next to the document, holding its review comment threads.
-- **Slash menu**: the `/` command menu of the block text boxes; it lists the palette's actions (`EditPalette.menuEntries`) and filters them as you type (`src/webview/slashMenu.ts`).
+- **Slash menu**: the `/` command menu of the block text boxes; it lists the palette's actions (`EditPalette.menuEntries`) and filters them as you type (`src/page/modules/slashMenu.ts`).
 - **Sticky heading band**: fixed band at the top of the preview showing the current heading path (`docs/scroll-anchoring.md`).
 - **Table bar**: menu shown on a table in edit mode (`.sphinx-preview-table-menu`).
 - **Table-cell editor**: block editor opened on one table cell ("Markdown table cell editor").
 - **Text edit**: a replacement of the UTF-16 offsets `start` to `end` of a document text by `text` (`TextEdit` in `src/core/edits/textEdit.ts`); the pure planners of `src/core/edits/` return them and the document store applies them.
-- **Theme mode**: preview colour scheme, one of `current`, `dark`, `white`, `cream` (`PreviewThemeMode` in `src/state/previewTheme.ts`).
-- **TOC column**: runtime-created right column listing h1-h4 headings (`[data-sphinx-preview-toc]`), built by `src/webview/tocColumn.ts`.
+- **Theme mode**: preview colour scheme, one of `current`, `dark`, `white`, `cream` (`PreviewThemeMode` in `src/core/state/previewTheme.ts`).
+- **TOC column**: runtime-created right column listing h1-h4 headings (`[data-sphinx-preview-toc]`), built by `src/page/modules/tocColumn.ts`.
 - **Toolbar**: the controls bar at the top of the preview (`[data-sphinx-preview-toolbar]`).
 - **Toolbar row**: `data-sphinx-preview-toolbar-row` `main` (Refresh/Anchor/Edit/Theme) or `view`.
 - **Top-level block**: mapped block that is a direct child of the content container (`topLevelMappedBlocks` in `src/page/runtime.ts`).
-- **Update glow**: one brief wash of the focus colour on the blocks a content patch updated after a change made outside the preview and not in the active text editor, or an undo/redo (`data-sphinx-preview-updated`); the host sends `updatedRanges` (`src/preview/updatedRanges.ts`), the page marks them (`src/webview/motion.ts`).
-- **View preference**: per-workspace preview setting changed from toolbar row 2 (zoom, width mode, TOC, incoming changes), `src/state/previewViewPreferences.ts`.
-- **Warning banner**: one-line notice at the top of a successfully rendered page counting the `conf.py` MyST extension warnings, with Open Problems and close buttons; out of the flow, closed per document for the session (`[data-sphinx-preview-warning-banner]`, `src/webview/warningBanner.ts`).
+- **Update glow**: one brief wash of the focus colour on the blocks a content patch updated after a change made outside the preview and not in the active text editor, or an undo/redo (`data-sphinx-preview-updated`); the host sends `updatedRanges` (`src/core/preview/updatedRanges.ts`), the page marks them (`src/page/modules/motion.ts`).
+- **View preference**: per-workspace preview setting changed from toolbar row 2 (zoom, width mode, TOC, incoming changes), `src/core/state/previewViewPreferences.ts`.
+- **Warning banner**: one-line notice at the top of a successfully rendered page counting the `conf.py` MyST extension warnings, with Open Problems and close buttons; out of the flow, closed per document for the session (`[data-sphinx-preview-warning-banner]`, `src/page/modules/warningBanner.ts`).
 - **Width mode**: Margin / Auto / Full width preview column state (`data-sphinx-preview-width`); Auto lets wide tables and figures break out of the column.

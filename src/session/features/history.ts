@@ -6,7 +6,7 @@
 
 import type { HostDocument, TextRange } from "../../host-api/documentStore";
 import type { PreviewPanel } from "../../host-api/previewPanel";
-import { NavigationHistory, type NavigationEntry } from "../../state/navigationHistory";
+import { NavigationHistory, type NavigationEntry } from "../../core/state/navigationHistory";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

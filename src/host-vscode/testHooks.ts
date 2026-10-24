@@ -7,16 +7,16 @@
 
 import type * as vscode from "vscode";
 
-import type { BuildQueueState } from "../build/buildQueue";
-import type { CommentThread } from "../comments/commentModel";
-import type { PaletteMode } from "../configuration/editingConfiguration";
+import type { BuildQueueState } from "../node-services/build/buildQueue";
+import type { CommentThread } from "../core/comments/commentModel";
+import type { PaletteMode } from "../core/configuration/editingConfiguration";
 import type { HostDocument } from "../host-api/documentStore";
-import type { GroupFocusMove } from "../navigation/groupFocus";
-import type { PreviewStatus, PreviewWebviewResult } from "../preview/webview";
-import type { RenderResult } from "../render/renderPipeline";
+import type { GroupFocusMove } from "./groupFocus";
+import type { PreviewStatus, PreviewWebviewResult } from "../session/webview";
+import type { RenderResult } from "../core/render/renderPipeline";
 import { targetChoices, type HostListAnswer } from "../session/features/hostRequests";
 import type { PreviewSession } from "../session/previewSession";
-import type { PreviewThemeMode } from "../state/previewTheme";
+import type { PreviewThemeMode } from "../core/state/previewTheme";
 import type { StudioActivation } from "./activation";
 import type { VscodePreviewPanel } from "./previewPanel";
 

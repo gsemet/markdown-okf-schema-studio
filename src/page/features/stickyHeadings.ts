@@ -5,7 +5,7 @@
  * while the band changes content.
  */
 
-import type { AnchorPolicy } from "../../webview/anchorPolicy";
+import type { AnchorPolicy } from "../../core/scroll/anchorPolicy";
 
 /** The sticky heading band and reading offset of a page. */
 export interface StickyHeadings {

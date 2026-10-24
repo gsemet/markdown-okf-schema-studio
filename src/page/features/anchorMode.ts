@@ -3,7 +3,7 @@
  * text editor shows the previewed file at all (`previewPairing`).
  */
 
-import type { PreviewRuntimeContext } from "../../protocol/bootContext";
+import type { PreviewRuntimeContext } from "../../core/protocol/bootContext";
 import type { HostMessageRouter } from "../hostMessages";
 import type { PageHostApi, PageSavedState } from "../pageHost";
 import type { PageSettings } from "../pageSettings";

@@ -6,7 +6,7 @@
  * the wrong place. Each produces a PNG and a sidecar note explaining what to look at.
  */
 
-import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
+import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/core/configuration/previewConfiguration";
 import { isGroupId, type GroupId } from "../shared/e2eGroups";
 import type { ScenarioRenderOptions } from "./renderOptions";
 import { ASSERTION_ONLY_IDS, LOCKS_BY_ID, README_BY_ID, REMOVED_ALIASES, SCENARIO_ID_BY_LEGACY_ID, STEPS_BY_ID } from "./scenarioIds";

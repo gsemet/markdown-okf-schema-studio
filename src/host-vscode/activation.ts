@@ -9,12 +9,12 @@ import * as path from "node:path";
 
 import * as vscode from "vscode";
 
-import { preloadMystEngine } from "../render/mystRenderer";
-import { buildStatusWebviewHtml } from "../preview/webview";
+import { preloadMystEngine } from "../core/render/mystRenderer";
+import { buildStatusWebviewHtml } from "../session/webview";
 import { PreviewManager } from "../session/previewManager";
 import { isDocumentEligible, isPathWithin } from "../session/sessionDocuments";
-import { parsePreviewPanelState } from "../state/previewState";
-import { resetRenderHooksForTests } from "../render/renderPipeline";
+import { parsePreviewPanelState } from "../core/state/previewState";
+import { resetRenderHooksForTests } from "../core/render/renderPipeline";
 import { createVscodePanelGroups, type VscodePanelGroups } from "./groupLock";
 import { createVscodePreviewPanel, type VscodePreviewPanel } from "./previewPanel";
 import { createVscodeHost, type VscodeHost } from "./vscodeHost";
@@ -52,19 +52,19 @@ export class StudioActivation {
     preloadMystEngine();
     manager.choices.load(context.workspaceState);
     for (const folder of host.workspace.folders()) {
-      manager.watchStemRoot(folder.path);
+      manager.events.watchStemRoot(folder.path);
     }
     const diagnostics = manager.diagnostics.start();
     // The single conf.py watcher: it also sees the workspace-root fallbacks of decision D29.
     const confWatcher = host.watcher.watch(undefined, "**/conf.py");
-    const onConfFileEvent = (filePath: string): void => manager.onConfFileEvent(filePath);
+    const onConfFileEvent = (filePath: string): void => manager.events.onConfFileEvent(filePath);
     context.subscriptions.push(
       diagnostics,
       confWatcher,
       confWatcher.onDidChange(onConfFileEvent),
       confWatcher.onDidCreate(onConfFileEvent),
       confWatcher.onDidDelete(onConfFileEvent),
-      vscode.workspace.onDidCloseTextDocument((document) => manager.onDocumentClosed(document.uri.toString())),
+      vscode.workspace.onDidCloseTextDocument((document) => manager.events.onDocumentClosed(document.uri.toString())),
       vscode.commands.registerCommand(COMMAND_ID, (uri?: unknown) => this.openPreview(uri)),
       vscode.window.registerCustomEditorProvider(EDITOR_VIEW_TYPE, {
         resolveCustomTextEditor: (document, panel) => this.resolvePreviewEditor(document, panel),
@@ -76,17 +76,17 @@ export class StudioActivation {
       vscode.window.registerWebviewPanelSerializer(PANEL_VIEW_TYPE, {
         deserializeWebviewPanel: (panel, state) => this.deserializePreviewPanel(panel, state),
       }),
-      host.documents.onDidChange((event) => manager.onDocumentChanged(event)),
-      vscode.workspace.onDidSaveTextDocument((document) => manager.onDocumentSaved(host.documents.of(document))),
-      host.workspace.onDidGrantTrust(() => manager.onTrustGranted()),
-      host.settings.onDidChange((event) => manager.onSettingsChanged(event)),
+      host.documents.onDidChange((event) => manager.events.onDocumentChanged(event)),
+      vscode.workspace.onDidSaveTextDocument((document) => manager.events.onDocumentSaved(host.documents.of(document))),
+      host.workspace.onDidGrantTrust(() => manager.events.onTrustGranted()),
+      host.settings.onDidChange((event) => manager.events.onSettingsChanged(event)),
       vscode.window.onDidChangeActiveTextEditor((editor) =>
-        manager.onActiveEditorChanged(editor ? host.editorOf(editor) : undefined)),
-      vscode.window.onDidChangeVisibleTextEditors(() => manager.onVisibleEditorsChanged()),
+        manager.events.onActiveEditorChanged(editor ? host.editorOf(editor) : undefined)),
+      vscode.window.onDidChangeVisibleTextEditors(() => manager.events.onVisibleEditorsChanged()),
       vscode.window.onDidChangeTextEditorVisibleRanges((event) =>
-        manager.onVisibleRangesChanged(host.editorOf(event.textEditor))),
-      vscode.window.onDidChangeActiveColorTheme(() => manager.onThemeChanged()),
-      vscode.workspace.onDidRenameFiles((event) => manager.onFilesRenamed(event.files.map((file) => ({
+        manager.events.onVisibleRangesChanged(host.editorOf(event.textEditor))),
+      vscode.window.onDidChangeActiveColorTheme(() => manager.events.onThemeChanged()),
+      vscode.workspace.onDidRenameFiles((event) => manager.events.onFilesRenamed(event.files.map((file) => ({
         oldPath: file.oldUri.fsPath,
         newPath: file.newUri.fsPath,
         local: file.oldUri.scheme === "file" && file.newUri.scheme === "file",
@@ -97,7 +97,7 @@ export class StudioActivation {
           path: folder.uri.fsPath,
           name: folder.name,
         });
-        manager.onFoldersChanged(event.added.map(info), event.removed.map(info));
+        manager.events.onFoldersChanged(event.added.map(info), event.removed.map(info));
       }),
     );
   }
@@ -107,7 +107,7 @@ export class StudioActivation {
     const { manager } = this;
     manager.disposeAll(false);
     manager.diagnostics.stop();
-    manager.disposeStemRootWatchers();
+    manager.events.disposeStemRootWatchers();
     manager.choices.unload();
     resetRenderHooksForTests();
   }

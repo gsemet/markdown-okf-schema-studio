@@ -12,38 +12,38 @@ import { execFileSync } from "node:child_process";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { listGlobDocuments } from "../../src/render/documentGlob";
-import { renderMyst } from "../../src/render/mystRenderer";
-import { renderMathHtml } from "../../src/render/mathRenderer";
-import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/configuration/previewConfiguration";
-import { PREVIEW_ACCESSIBILITY_CSS, PREVIEW_THEME_CSS } from "../../src/preview/previewStyles";
-import { setPreviewStatus } from "../../src/preview/previewStatus";
+import { listGlobDocuments } from "../../src/core/render/documentGlob";
+import { renderMyst } from "../../src/core/render/mystRenderer";
+import { renderMathHtml } from "../../src/core/render/mathRenderer";
+import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/core/configuration/previewConfiguration";
+import { PREVIEW_ACCESSIBILITY_CSS, PREVIEW_THEME_CSS } from "../../src/core/preview/previewStyles";
+import { setPreviewStatus } from "../../src/core/preview/previewStatus";
 import {
   renderPreviewStickyHeadings,
   renderPreviewToolbar,
-} from "../../src/preview/previewToolbar";
-import { analyzeFrontmatter } from "../../src/frontmatter/okfFrontmatter";
-import { renderPropertiesTable } from "../../src/frontmatter/propertiesTable";
-import { annotateSourceMappings, sourceRangeForLines } from "../../src/mapping/sourceMapping";
-import { rewriteSphinxHtml, ResolvedResource } from "../../src/security/html-sanitizer";
-import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/protocol/bootContext";
+} from "../../src/core/preview/previewToolbar";
+import { analyzeFrontmatter } from "../../src/core/frontmatter/okfFrontmatter";
+import { renderPropertiesTable } from "../../src/core/frontmatter/propertiesTable";
+import { annotateSourceMappings, sourceRangeForLines } from "../../src/core/mapping/sourceMapping";
+import { rewriteSphinxHtml, ResolvedResource } from "../../src/core/security/html-sanitizer";
+import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/core/protocol/bootContext";
 import {
   injectPlantUmlDiagrams,
   renderPlantUmlDiagrams,
-} from "../../src/render/plantUmlRenderer";
+} from "../../src/core/render/plantUmlRenderer";
 import {
   createPreviewResourcePolicy,
   resourceReferenceSuffix,
-} from "../../src/security/resource-policy";
+} from "../../src/core/security/resource-policy";
 import { SCENARIOS } from "./scenarios";
 import { CAPTURES } from "../shared/captureRegistry";
 import { GROUPS, groupIndex } from "../shared/e2eGroups";
 import { THEMES } from "./themes";
 import { writeGeneratedFixtures } from "./generatedFixtures";
 import { PINNED_WORKSPACE_CHOICES, pageFileName, pageKey, type PageIdentity, type ScenarioRenderOptions } from "./renderOptions";
-import { DEFAULT_VIEW_PREFERENCES } from "../../src/state/previewViewPreferences";
-import { DEFAULT_EDITING_CONFIGURATION } from "../../src/configuration/editingConfiguration";
-import { previewContentWidthCss } from "../../src/preview/previewStyles";
+import { DEFAULT_VIEW_PREFERENCES } from "../../src/core/state/previewViewPreferences";
+import { DEFAULT_EDITING_CONFIGURATION } from "../../src/core/configuration/editingConfiguration";
+import { previewContentWidthCss } from "../../src/core/preview/previewStyles";
 import { VISUAL_REPORT_ROOT } from "../reportPaths";
 
 const visualRoot = path.resolve(__dirname, "../../../test/visual");

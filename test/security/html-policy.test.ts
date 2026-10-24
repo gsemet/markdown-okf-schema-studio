@@ -4,13 +4,13 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { afterEach, test } from "node:test";
 
-import { createContentSecurityPolicy } from "../../src/security/csp";
+import { createContentSecurityPolicy } from "../../src/core/security/csp";
 import {
   injectContentSecurityPolicy,
   rewriteSphinxHtml,
   sanitizeCss,
-} from "../../src/security/html-sanitizer";
-import { ResourcePolicy } from "../../src/security/resource-policy";
+} from "../../src/core/security/html-sanitizer";
+import { ResourcePolicy } from "../../src/core/security/resource-policy";
 
 const temporaryDirectories: string[] = [];
 
