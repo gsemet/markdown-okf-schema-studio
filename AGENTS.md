@@ -44,6 +44,8 @@ source with its own values: it links to that source.
   security checks: `just check`
 - Write the `package.json` settings schema from the settings registry: `just generate-settings`
 - Run the Python Sphinx source-mapping contract: `just sphinx-check`
+- Validate the requirements bundle: `just requirements-lint`; refresh generated coverage and
+  navigation: `just requirements-update`; write the traceability report: `just requirements-report`
 - Run end-to-end tests: `just e2e`
 - Package a VSIX: `just package`
 - Run the complete validation and site-generation pipeline: `just preflight`
@@ -66,6 +68,26 @@ source with its own values: it links to that source.
 - When picking up backlog work, change requests or PRs (`.agents/changes/`), including
   Parallel Change Requests Orchestration: [.agents/guidelines/prd-workflow.guidelines.md](.agents/guidelines/prd-workflow.guidelines.md)
 - Shared vocabulary (UI and code terms): [.agents/glossary/common.md](.agents/glossary/common.md). Use these words in code, tests, commits and docs; add new terms there.
+
+## Requirements (okfreq)
+
+- The product contract lives in `requirements/` (okfreq bundle, two tiers): StRS = user use
+  cases, SwRS = directly testable behaviour. IDs `StRS-MDOKFSTUDIO-<TOKEN>-NNN` /
+  `SwRS-MDOKFSTUDIO-<TOKEN>-NNN`; scopes = the 16 e2e groups of `test/shared/e2eGroups.ts`.
+- okfreq is a project dependency: run it with `uv run --no-sync --group requirements okfreq`
+  (installed by `just dev`), never a global install.
+- Before touching requirements, read `requirements/guidelines/requirements.guidelines.md` (local
+  rules, marker syntax for TypeScript/Python) and the okfreq baseline it links to. Skills:
+  `.agents/skills/okfreq` (authoring, traceability) and `.agents/skills/okfreq-gardening` (audits).
+- Every feature or fix updates its SwRS (or creates one with `okfreq new`), adds
+  `// @implements_req <SwRS-ID>` next to the implementation and `// @tests_req <SwRS-ID>` next to
+  the test, then runs `just requirements-update`; append a dated entry to
+  `requirements/tiers/log.md` for substantive changes.
+- Never reuse or hand-allocate IDs, never hand-edit `derived_by`, `implemented_in_files`,
+  `tested_in_files` or the generated index blocks.
+- `just check` runs `just requirements-lint`; `just requirements-report` writes the traceability
+  report to `out/reports/requirements/` (also run by `just ci-static`, hence by `just preflight`
+  and CI).
 
 ## Completion gate
 
