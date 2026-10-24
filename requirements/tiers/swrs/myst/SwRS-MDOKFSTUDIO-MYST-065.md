@@ -24,7 +24,9 @@ tested_in_files: []
 
 ### Normative behavior
 
-When a document holds a `{table}` directive, the extension SHALL render a table with its caption, its `:label:` as id and its `:align:`, k### Scenario: Nominal
+When a document holds a `{table}` directive, the extension SHALL render a table with its caption, its `:label:` as id and its `:align:`, keeping GFM column alignment on every cell.
+
+### Scenario: Nominal
 
 - GIVEN a `{table}` with caption, `:label:` and `:align: center` around a pipe table with aligned columns
 - WHEN the preview renders
