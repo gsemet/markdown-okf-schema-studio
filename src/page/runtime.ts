@@ -8,45 +8,45 @@
  * host wrote into the page and the transport to the host (see `./main.ts`).
  */
 
-import { createAnchorPolicy } from "../webview/anchorPolicy";
-import { createMarkdownTableTools } from "../webview/markdownTable";
-import { createEditActions } from "../webview/editActions";
-import { createEditPalette } from "../webview/editPalette";
-import { caretRectOf, caretRevealDelta } from "../webview/caretRect";
-import { stickyBarShift } from "../webview/stickyBar";
-import { createSlashMenu } from "../webview/slashMenu";
-import { createLinkPanel } from "../webview/linkPanel";
-import { createFigureTools } from "../webview/figureDirective";
-import { createFigurePanel, installFigureEditButton } from "../webview/figurePanel";
-import { createTextEditingTools } from "../webview/textEditing";
-import { createBlockSelection } from "../webview/blockSelection";
-import { installCodeCopy } from "../webview/codeCopy";
-import { installLabelRename } from "../webview/labelRename";
-import { installHostRequests } from "../webview/hostRequests";
-import { installPlantUmlFileRequests, PLANTUML_FILE_REQUEST_TIMEOUT_MS } from "../webview/plantumlFileRequests";
-import { installPasteHtml } from "../webview/pasteHtml";
-import { imageParagraphEdit, installPasteImage } from "../webview/pasteImage";
-import { installWarningBanner, warningBannerState, warningBannerText } from "../webview/warningBanner";
-import { installFirstClearance } from "../webview/firstClearance";
-import { applyFigureSizes } from "../webview/figureSizes";
-import { applySpanColors, isSafeOkfColor } from "../webview/spanColors";
-import { installLinkNavigation } from "../webview/linkNavigation";
-import { installHistoryControls } from "../webview/historyControls";
-import { installTocColumn } from "../webview/tocColumn";
-import { installChipToggle } from "../webview/chipToggle";
-import { installInlineThreads } from "../webview/inlineThread";
-import { installIncomingChanges } from "../webview/incomingChanges";
-import { installMotion } from "../webview/motion";
-import { installContentMorph, morphKey, planKeyedMorph } from "../webview/contentMorph";
-import { installCommentCompose } from "../webview/commentCompose";
-import { installCommentThreads } from "../webview/commentThreads";
-import { installCommentsToggle } from "../webview/commentsToggle";
-import { installIncomingToggle } from "../webview/incomingToggle";
-import { installToolbarCollapse } from "../webview/toolbarCollapse";
-import { installViewControls } from "../webview/viewControls";
-import { installWidthMode } from "../webview/widthMode";
-import { DEFAULT_EDITING_CONFIGURATION } from "../configuration/editingConfiguration";
-import type { PreviewRuntimeContext } from "../protocol/bootContext";
+import { createAnchorPolicy } from "../core/scroll/anchorPolicy";
+import { createMarkdownTableTools } from "./modules/markdownTable";
+import { createEditActions } from "./modules/editActions";
+import { createEditPalette } from "./modules/editPalette";
+import { caretRectOf, caretRevealDelta } from "./modules/caretRect";
+import { stickyBarShift } from "./modules/stickyBar";
+import { createSlashMenu } from "./modules/slashMenu";
+import { createLinkPanel } from "./modules/linkPanel";
+import { createFigureTools } from "./modules/figureDirective";
+import { createFigurePanel, installFigureEditButton } from "./modules/figurePanel";
+import { createTextEditingTools } from "./modules/textEditing";
+import { createBlockSelection } from "./modules/blockSelection";
+import { installCodeCopy } from "./modules/codeCopy";
+import { installLabelRename } from "./modules/labelRename";
+import { installHostRequests } from "./modules/hostRequests";
+import { installPlantUmlFileRequests, PLANTUML_FILE_REQUEST_TIMEOUT_MS } from "./modules/plantumlFileRequests";
+import { installPasteHtml } from "./modules/pasteHtml";
+import { imageParagraphEdit, installPasteImage } from "./modules/pasteImage";
+import { installWarningBanner, warningBannerState, warningBannerText } from "./modules/warningBanner";
+import { installFirstClearance } from "./modules/firstClearance";
+import { applyFigureSizes } from "./modules/figureSizes";
+import { applySpanColors, isSafeOkfColor } from "./modules/spanColors";
+import { installLinkNavigation } from "./modules/linkNavigation";
+import { installHistoryControls } from "./modules/historyControls";
+import { installTocColumn } from "./modules/tocColumn";
+import { installChipToggle } from "./modules/chipToggle";
+import { installInlineThreads } from "./modules/inlineThread";
+import { installIncomingChanges } from "./modules/incomingChanges";
+import { installMotion } from "./modules/motion";
+import { installContentMorph, morphKey, planKeyedMorph } from "./modules/contentMorph";
+import { installCommentCompose } from "./modules/commentCompose";
+import { installCommentThreads } from "./modules/commentThreads";
+import { installCommentsToggle } from "./modules/commentsToggle";
+import { installIncomingToggle } from "./modules/incomingToggle";
+import { installToolbarCollapse } from "./modules/toolbarCollapse";
+import { installViewControls } from "./modules/viewControls";
+import { installWidthMode } from "./modules/widthMode";
+import { DEFAULT_EDITING_CONFIGURATION } from "../core/configuration/editingConfiguration";
+import type { PreviewRuntimeContext } from "../core/protocol/bootContext";
 import { HIGHLIGHT_LANGUAGES } from "./buildConstants";
 import type { HostTransport } from "./hostTransport";
 import { installPageDiagnostics } from "./pageDiagnostics";
@@ -358,7 +358,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // In-place content patch (T34). The host sends the sanitized inner HTML of the content container
   // instead of loading a new document; the runtime keeps running and moves to the new render. The
   // status region is rebuilt from plain text and never goes through innerHTML. The patch was
-  // validated by the host message filter (src/protocol/hostToPage.ts) before it got here.
+  // validated by the host message filter (src/core/protocol/hostToPage.ts) before it got here.
 
   function applyContentPatch(message) {
     const main = document.getElementById?.("sphinx-myst-preview-content");

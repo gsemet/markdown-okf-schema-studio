@@ -108,8 +108,8 @@ function literals(source: string): Literal[] {
 
 function scannedFiles(): string[] {
   const root = path.resolve(__dirname, "../../..");
-  const files = [path.join(root, "src", "extension.ts"), path.join(root, "src", "preview", "webview.ts")];
-  const renderDirectory = path.join(root, "src", "render");
+  const files = [path.join(root, "src", "extension.ts"), path.join(root, "src", "session", "webview.ts")];
+  const renderDirectory = path.join(root, "src", "core", "render");
   for (const name of fs.readdirSync(renderDirectory)) {
     if (name.endsWith(".ts")) files.push(path.join(renderDirectory, name));
   }

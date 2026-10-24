@@ -7,7 +7,7 @@ import { afterEach, test } from "node:test";
 import {
   ResourcePolicy,
   rewriteSrcset,
-} from "../../src/security/resource-policy";
+} from "../../src/core/security/resource-policy";
 
 const temporaryDirectories: string[] = [];
 

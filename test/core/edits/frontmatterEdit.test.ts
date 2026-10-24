@@ -10,7 +10,7 @@ import {
   planFrontmatterSave,
 } from "../../../src/core/edits/frontmatterEdit";
 import { applyTextEdits } from "../../../src/core/edits/textEdit";
-import type { FrontmatterResult } from "../../../src/frontmatter/okfFrontmatter";
+import type { FrontmatterResult } from "../../../src/core/frontmatter/okfFrontmatter";
 
 function field(name: string, value: unknown, fieldType: string, extra: Partial<FrontmatterField> = {}): FrontmatterField {
   return { name, value, fieldType, nullable: false, issues: [], ...extra } as unknown as FrontmatterField;

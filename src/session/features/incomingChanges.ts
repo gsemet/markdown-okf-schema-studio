@@ -3,7 +3,7 @@
  * read through the `VcsInfo` port, and posts them again when HEAD moves.
  */
 
-import { changedLineRanges } from "../../mapping/lineDiff";
+import { changedLineRanges } from "../../core/mapping/lineDiff";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { revisionOfStage } from "../sessionDocuments";

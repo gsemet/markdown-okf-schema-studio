@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { pageSettings, stickyHeadingDepthOf } from "../../src/page/pageSettings";
-import type { PreviewRuntimeContext } from "../../src/protocol/bootContext";
+import type { PreviewRuntimeContext } from "../../src/core/protocol/bootContext";
 
 const BASE: PreviewRuntimeContext = { documentId: "file:///a.md", revision: 1, requestId: 1, activeSourceFile: "/a.md" };
 

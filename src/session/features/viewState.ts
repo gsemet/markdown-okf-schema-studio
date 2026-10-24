@@ -5,10 +5,10 @@
  * Refresh button. None of these messages edit the document, so read-only previews accept them.
  */
 
-import { isPaletteMode } from "../../configuration/editingConfiguration";
-import type { PageStateMessageUnion } from "../../protocol/pageToHost";
-import { isPreviewThemeMode } from "../../state/previewTheme";
-import { parsePreviewPanelState } from "../../state/previewState";
+import { isPaletteMode } from "../../core/configuration/editingConfiguration";
+import type { PageStateMessageUnion } from "../../core/protocol/pageToHost";
+import { isPreviewThemeMode } from "../../core/state/previewTheme";
+import { parsePreviewPanelState } from "../../core/state/previewState";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

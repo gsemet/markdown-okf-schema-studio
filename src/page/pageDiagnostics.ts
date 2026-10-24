@@ -4,10 +4,10 @@
  * containment of text controls and open editors, whose decisions it records.
  */
 
-import type { PreviewRuntimeContext } from "../protocol/bootContext";
-import { createEditorTrace, type EditorTraceEntry } from "../webview/editorTrace";
-import { installEditorKeyContainment, isHandledEditorKey } from "../webview/editorKeys";
-import { installSelectAllInControls, isTextSelectAll } from "../webview/selectAllKey";
+import type { PreviewRuntimeContext } from "../core/protocol/bootContext";
+import { createEditorTrace, type EditorTraceEntry } from "./modules/editorTrace";
+import { installEditorKeyContainment, isHandledEditorKey } from "./modules/editorKeys";
+import { installSelectAllInControls, isTextSelectAll } from "./modules/selectAllKey";
 import { isApplePlatform } from "./pageSettings";
 
 /** The editor trace of a page and the helpers its records use. */

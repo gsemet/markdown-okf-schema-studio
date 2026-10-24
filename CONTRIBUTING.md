@@ -50,6 +50,38 @@ and source fixtures are preserved. Campaign screenshots are generated under
 `just mr-proper` also removes `.env`, `node_modules/`, `.venv/`, the downloaded VS Code test
 runtime, and local tool caches. It returns the local build environment to an uninstalled checkout.
 
+## Architecture
+
+`src/` is split into layers, one folder each. The dependencies point down the list: a layer may
+import the layers below it, never one above it.
+
+| Folder | What it holds | May import |
+| --- | --- | --- |
+| `src/core/` | Host-neutral logic: protocol (`core/protocol/`), rendering, sanitizing, source mapping, edit operations, comments, frontmatter, settings normalization, page assets built in Node (`core/preview/`) | `core` and npm packages; no `vscode`, no DOM-only package, no Node built-in |
+| `src/host-api/` | The port interfaces every host implements (documents, files, settings, watchers, processes...) | `core` types |
+| `src/page/` | The preview page, bundled for the browser: runtime, typed features, page modules (`page/modules/`) | `core`, npm packages |
+| `src/node-services/` | Node implementations of ports and Node-only services (file system, processes, Sphinx build, watchers) | `core`, `host-api`, Node, npm packages |
+| `src/session/` | The host-neutral controllers: `PreviewManager`, `PreviewSession`, feature controllers, page HTML | `core`, `host-api`, `node:path` |
+| `src/host-memory/` | An in-memory host for tests and future headless hosts | `core`, `host-api` |
+| `src/host-vscode/` | The VS Code host (with `src/extension.ts`): activation, port adapters, test hooks | everything except `page` and other hosts; the only code that imports `vscode` |
+
+Tests mirror this tree under `test/` (`test/core/render/` tests `src/core/render/`).
+`test/security/`, `test/integration/` and `test/visual/` are suites that span the layers.
+
+`just check` enforces the layout:
+
+- `just check-boundaries` runs dependency-cruiser with the rules of `.dependency-cruiser.cjs` over
+  a transpiled copy of `src/` (type-only imports count). The few known exceptions are listed there,
+  each with its reason: Node built-ins still used by some core files (synchronous file access and
+  the PlantUML process, before the ports cover them) and three node-services modules the session
+  layer still imports directly. Never add an exception to make a new import pass: move the code,
+  or put the access behind a port.
+- `just check-limits` holds the file-size ratchet: at most 800 lines per file in `src/` and 1 500
+  in `test/`. The files that were larger are listed in `scripts/file-size-baseline.json` and may
+  only shrink; when one shrinks, lower its entry with `node scripts/check-file-sizes.mjs --update`
+  (the check says so). The same target fails on any `@ts-nocheck` or `@ts-ignore` in `src/`
+  outside `src/page/runtime.ts`.
+
 ## Checks
 
 Run the package-local checks before opening a pull request:

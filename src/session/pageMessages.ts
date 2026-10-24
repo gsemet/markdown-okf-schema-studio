@@ -10,9 +10,9 @@ import {
   type PageStateMessageUnion,
   type PageToHostMessage,
   type PageToHostType,
-} from "../protocol/pageToHost";
-import { reportsReloadedDocument } from "../preview/contentPatch";
-import type { MessageRouter } from "../protocol/router";
+} from "../core/protocol/pageToHost";
+import { reportsReloadedDocument } from "../core/preview/contentPatch";
+import type { MessageRouter } from "../core/protocol/router";
 import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
 import { revisionOfStage } from "./sessionDocuments";

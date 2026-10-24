@@ -12,7 +12,7 @@ import {
   getActivePreviewPanelForTests,
   setRenderDelayForTests,
 } from "./extensionApi";
-import { buildStatusWebviewHtml } from "../../src/preview/webview";
+import { buildStatusWebviewHtml } from "../../src/session/webview";
 
 async function waitFor(
   description: string,

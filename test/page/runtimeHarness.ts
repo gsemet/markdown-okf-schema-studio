@@ -5,15 +5,15 @@
  * delay-aware clock (`advanceTimers`, `virtualClock`) and `runtimeScript` are opt-in additions that
  * leave the behaviour the existing tests see unchanged.
  */
-import type { ViewPreferences } from "../../src/state/previewViewPreferences";
+import type { ViewPreferences } from "../../src/core/state/previewViewPreferences";
 import * as assert from "node:assert/strict";
 import * as path from "node:path";
 import * as vm from "node:vm";
 
 import { buildSync, type BuildOptions } from "esbuild";
 
-import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/protocol/bootContext";
-import { highlightLanguageNames } from "../../src/render/highlight";
+import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/core/protocol/bootContext";
+import { highlightLanguageNames } from "../../src/core/render/highlight";
 import { HARNESS_PAGE } from "../shared/previewIdentity";
 
 const repositoryRoot = path.resolve(__dirname, "../../..");

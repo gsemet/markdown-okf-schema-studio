@@ -18,22 +18,22 @@ export interface E2eGroup {
 
 /** Declaration order is the display order everywhere (index, gallery, manifests). */
 export const GROUPS = [
-  { id: "rendering-core", title: "Rendering core", scope: "CommonMark blocks, inline code, long documents, CJK/RTL text, missing images (admonition colours and layouts belong to `myst`)", srcAnchors: "src/render, src/security/html-sanitizer, src/preview/previewStyles" },
-  { id: "code-blocks", title: "Code blocks", scope: "Fenced code, syntax highlighting, diff fences, unknown grammar, copy button", srcAnchors: "src/render, src/webview (copy)" },
-  { id: "gfm", title: "GitHub Flavored Markdown", scope: "Autolinks, task lists and toggles, strikethrough, alerts, footnotes, raw HTML, colour spans", srcAnchors: "src/render, src/mapping (checkbox)" },
-  { id: "myst", title: "MyST syntax", scope: "Directives, roles, admonitions, context tags, math, figures and labels, citations, conf.py checks, label rename", srcAnchors: "src/render, src/mapping/labelRename, src/myst*" },
-  { id: "diagrams", title: "Diagrams", scope: "Mermaid (themes, fallback, errors) and PlantUML (built-in engine light/dark, {uml} diagram files and local !include light/dark, unsupported standard-library include; JAR success, unconfigured, executable not found)", srcAnchors: "src/render/plantUmlRenderer, src/webview/plantumlDiagram, mermaid and plantuml bundles" },
-  { id: "frontmatter-schema", title: "Frontmatter and OKF schema", scope: "Properties table, schema validation and errors, generic YAML, x-okf-link details", srcAnchors: "src/frontmatter" },
-  { id: "frontmatter-editing", title: "Frontmatter editing", scope: "Editing the properties table: field values, lists, booleans, enum and key suggestions, add/remove/rename, title", srcAnchors: "src/frontmatter, src/webview, src/mapping" },
-  { id: "layout-width", title: "Layout and width", scope: "First-element gap, Margin/Auto/Full width, max content width, overflow, narrow and wide panes", srcAnchors: "src/preview/previewStyles, src/webview/scrollSync" },
-  { id: "theme-zoom", title: "Theme and zoom", scope: "Host themes, forced white/cream/dark modes, high contrast, zoom 70-200 %", srcAnchors: "src/preview/previewStyles, src/preview/previewToolbar" },
-  { id: "toolbar-navigation", title: "Toolbar and navigation", scope: "Toolbar rows and collapse, sticky headings, TOC, Back/Next, anchor, title-bar and Quick Open entries", srcAnchors: "src/preview/previewToolbar, src/webview" },
-  { id: "block-editing", title: "Block editing", scope: "Edit mode, block editors, keyboard, undo, insert points, move, selection, clipboard", srcAnchors: "src/webview, src/mapping" },
-  { id: "palette-slash", title: "Edition palette and slash menu", scope: "Palette modes, popups, shortcuts, link panel, figure form, slash menu, image pick and paste", srcAnchors: "src/webview/editPalette, src/webview/editActions" },
-  { id: "table-editing", title: "Table editing", scope: "Cell editors, cell bar, Tab/Enter navigation, minimal diffs", srcAnchors: "src/webview, src/mapping" },
-  { id: "review-annotations", title: "Review annotations", scope: "Comment and TODO chips, review threads, sidecar, orphans, incoming changes", srcAnchors: "src/comments, src/webview/incomingChanges" },
-  { id: "lifecycle-sync", title: "Lifecycle and sync", scope: "Open, refresh, reload and restore, Open With, scroll sync, incremental patches, status pages, coexistence", srcAnchors: "src/extension.ts, src/preview, src/webview/scrollSync" },
-  { id: "trust-security", title: "Trust and security", scope: "Restricted Mode, read-only and standalone previews, refused messages, CSP, resource policy", srcAnchors: "src/security, src/preview/previewMessages" },
+  { id: "rendering-core", title: "Rendering core", scope: "CommonMark blocks, inline code, long documents, CJK/RTL text, missing images (admonition colours and layouts belong to `myst`)", srcAnchors: "src/core/render, src/core/security/html-sanitizer, src/core/preview/previewStyles" },
+  { id: "code-blocks", title: "Code blocks", scope: "Fenced code, syntax highlighting, diff fences, unknown grammar, copy button", srcAnchors: "src/core/render, src/page/modules (copy)" },
+  { id: "gfm", title: "GitHub Flavored Markdown", scope: "Autolinks, task lists and toggles, strikethrough, alerts, footnotes, raw HTML, colour spans", srcAnchors: "src/core/render, src/core/mapping (checkbox)" },
+  { id: "myst", title: "MyST syntax", scope: "Directives, roles, admonitions, context tags, math, figures and labels, citations, conf.py checks, label rename", srcAnchors: "src/core/render, src/core/mapping/labelRename, src/core/myst" },
+  { id: "diagrams", title: "Diagrams", scope: "Mermaid (themes, fallback, errors) and PlantUML (built-in engine light/dark, {uml} diagram files and local !include light/dark, unsupported standard-library include; JAR success, unconfigured, executable not found)", srcAnchors: "src/core/render/plantUmlRenderer, src/page/modules/plantumlDiagram, mermaid and plantuml bundles" },
+  { id: "frontmatter-schema", title: "Frontmatter and OKF schema", scope: "Properties table, schema validation and errors, generic YAML, x-okf-link details", srcAnchors: "src/core/frontmatter" },
+  { id: "frontmatter-editing", title: "Frontmatter editing", scope: "Editing the properties table: field values, lists, booleans, enum and key suggestions, add/remove/rename, title", srcAnchors: "src/core/frontmatter, src/page/modules, src/core/mapping" },
+  { id: "layout-width", title: "Layout and width", scope: "First-element gap, Margin/Auto/Full width, max content width, overflow, narrow and wide panes", srcAnchors: "src/core/preview/previewStyles, src/page/runtime" },
+  { id: "theme-zoom", title: "Theme and zoom", scope: "Host themes, forced white/cream/dark modes, high contrast, zoom 70-200 %", srcAnchors: "src/core/preview/previewStyles, src/core/preview/previewToolbar" },
+  { id: "toolbar-navigation", title: "Toolbar and navigation", scope: "Toolbar rows and collapse, sticky headings, TOC, Back/Next, anchor, title-bar and Quick Open entries", srcAnchors: "src/core/preview/previewToolbar, src/page/modules" },
+  { id: "block-editing", title: "Block editing", scope: "Edit mode, block editors, keyboard, undo, insert points, move, selection, clipboard", srcAnchors: "src/page/modules, src/core/mapping" },
+  { id: "palette-slash", title: "Edition palette and slash menu", scope: "Palette modes, popups, shortcuts, link panel, figure form, slash menu, image pick and paste", srcAnchors: "src/page/modules/editPalette, src/page/modules/editActions" },
+  { id: "table-editing", title: "Table editing", scope: "Cell editors, cell bar, Tab/Enter navigation, minimal diffs", srcAnchors: "src/page/modules, src/core/mapping" },
+  { id: "review-annotations", title: "Review annotations", scope: "Comment and TODO chips, review threads, sidecar, orphans, incoming changes", srcAnchors: "src/core/comments, src/page/modules/incomingChanges" },
+  { id: "lifecycle-sync", title: "Lifecycle and sync", scope: "Open, refresh, reload and restore, Open With, scroll sync, incremental patches, status pages, coexistence", srcAnchors: "src/extension.ts, src/core/preview, src/page/runtime" },
+  { id: "trust-security", title: "Trust and security", scope: "Restricted Mode, read-only and standalone previews, refused messages, CSP, resource policy", srcAnchors: "src/core/security, src/core/protocol" },
 ] as const satisfies readonly E2eGroup[];
 
 export type GroupId = (typeof GROUPS)[number]["id"];

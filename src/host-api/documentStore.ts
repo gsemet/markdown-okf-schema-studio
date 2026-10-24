@@ -5,7 +5,7 @@
  */
 
 import type { TextEdit } from "../core/edits/textEdit";
-import type { Revision } from "../protocol/revision";
+import type { Revision } from "../core/protocol/revision";
 import type { HostEvent } from "./events";
 
 export type { TextEdit } from "../core/edits/textEdit";
@@ -35,7 +35,7 @@ export interface HostDocument {
   /** The file system path of a file document; undefined for any other document (untitled, virtual). */
   readonly path: string | undefined;
   /**
-   * The revision of the current text (see `src/protocol/revision.ts`). The store is the only source
+   * The revision of the current text (see `src/core/protocol/revision.ts`). The store is the only source
    * of revisions: every revision the host compares or sends comes from here.
    */
   readonly revision: Revision;

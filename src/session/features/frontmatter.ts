@@ -7,15 +7,15 @@
 import * as path from "node:path";
 
 import { checkFrontmatterCandidate, FRONTMATTER_STALE, planFrontmatterSave } from "../../core/edits/frontmatterEdit";
-import { type LinkedTargetWatch, watchLinkedTargetDirectly } from "../../frontmatter/linkedTargetWatch";
-import { analyzeFrontmatter, type FrontmatterResult } from "../../frontmatter/okfFrontmatter";
-import { renderPropertiesTable, replacePropertiesTableHtml } from "../../frontmatter/propertiesTable";
+import { type LinkedTargetWatch, watchLinkedTargetDirectly } from "../../node-services/linkedTargetWatch";
+import { analyzeFrontmatter, type FrontmatterResult } from "../../core/frontmatter/okfFrontmatter";
+import { renderPropertiesTable, replacePropertiesTableHtml } from "../../core/frontmatter/propertiesTable";
 import type { HostDocument } from "../../host-api/documentStore";
-import type { SourceMappingOptions } from "../../mapping/sourceMapping";
-import { flushRefusalMessage } from "../../preview/flushWait";
-import type { PageMessageOf } from "../../protocol/pageToHost";
-import type { Revision } from "../../protocol/revision";
-import type { RenderResult } from "../../render/renderPipeline";
+import type { SourceMappingOptions } from "../../core/mapping/sourceMapping";
+import { flushRefusalMessage } from "../../core/preview/flushWait";
+import type { PageMessageOf } from "../../core/protocol/pageToHost";
+import type { Revision } from "../../core/protocol/revision";
+import type { RenderResult } from "../../core/render/renderPipeline";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

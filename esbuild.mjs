@@ -21,7 +21,7 @@ await build({
 });
 
 await build({
-  entryPoints: ["src/webview/mermaidPreview.ts"],
+  entryPoints: ["src/page/modules/mermaidPreview.ts"],
   outfile: "out/bundle/mermaidPreview.js",
   bundle: true,
   platform: "browser",
@@ -34,7 +34,7 @@ await build({
 // The PlantUML engine (@plantuml/core, MIT) needs a DOM, so it runs in the webview. Smetana layout
 // only: viz-global.js (Graphviz as WebAssembly) would need 'wasm-unsafe-eval' in the CSP.
 await build({
-  entryPoints: ["src/webview/plantumlPreview.ts"],
+  entryPoints: ["src/page/modules/plantumlPreview.ts"],
   outfile: "out/bundle/plantumlPreview.js",
   bundle: true,
   platform: "browser",
@@ -47,9 +47,9 @@ await build({
 const require = createRequire(import.meta.url);
 
 // The page stylesheet and the build-time values of the page come from TypeScript modules that run
-// once here, in Node (src/preview/pageBuildEntry.ts).
+// once here, in Node (src/core/preview/pageBuildEntry.ts).
 const pageAssets = await build({
-  entryPoints: ["src/preview/pageBuildEntry.ts"],
+  entryPoints: ["src/core/preview/pageBuildEntry.ts"],
   bundle: true,
   platform: "node",
   target: "node20",

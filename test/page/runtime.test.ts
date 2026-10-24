@@ -1,11 +1,11 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { pageLiveStateMessages, type PageIdentity } from "../../src/preview/pageLiveState";
-import { PREVIEW_THEME_CSS } from "../../src/preview/previewStyles";
-import { highlightLanguageNames } from "../../src/render/highlight";
-import type { SourceBlockMapping } from "../../src/mapping/sourceMapping";
-import { serializeRuntimeContext } from "../../src/protocol/bootContext";
+import { pageLiveStateMessages, type PageIdentity } from "../../src/core/preview/pageLiveState";
+import { PREVIEW_THEME_CSS } from "../../src/core/preview/previewStyles";
+import { highlightLanguageNames } from "../../src/core/render/highlight";
+import type { SourceBlockMapping } from "../../src/core/mapping/sourceMapping";
+import { serializeRuntimeContext } from "../../src/core/protocol/bootContext";
 import { createRuntimeHarness, RuntimeElement, type RuntimeHarness } from "./runtimeHarness";
 
 /** A mapped source block with its measured position in the page. */

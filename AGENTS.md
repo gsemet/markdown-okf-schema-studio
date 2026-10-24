@@ -20,7 +20,8 @@ source with its own values: it links to that source.
 
 ## Structure
 
-- `src/` contains the TypeScript extension implementation.
+- `src/` contains the TypeScript extension implementation, in layers (`core`, `host-api`, `page`,
+  `node-services`, `session`, `host-memory`, `host-vscode`); see "Architecture" in CONTRIBUTING.md.
 - `test/` contains unit, contract, integration, and visual tests.
 - `sphinx/` contains the minimal package-owned Sphinx configuration and source-mapping extension.
 - `tests/fixtures/` contains the Python Sphinx contract fixtures.
@@ -39,7 +40,8 @@ source with its own values: it links to that source.
 - Upgrade dependencies and refresh the development environment: `just update`
 - Format the justfile: `just format`
 - Build the extension: `just compile`
-- Run formatting, TypeScript, unit, contract, and security checks: `just check`
+- Run formatting, TypeScript, import boundary, file size, unit, contract, and security checks:
+  `just check`
 - Run the Python Sphinx source-mapping contract: `just sphinx-check`
 - Run end-to-end tests: `just e2e`
 - Package a VSIX: `just package`

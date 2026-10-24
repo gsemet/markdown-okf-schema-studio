@@ -1,11 +1,11 @@
 /**
  * The page's colours: the host theme kind (`themeChanged`) and the preview theme mode the toolbar
  * theme button cycles through (current, dark, white, cream). The stylesheet maps each mode to the
- * neutral `--studio-*` tokens (src/preview/themeTokens.ts).
+ * neutral `--studio-*` tokens (src/core/preview/themeTokens.ts).
  */
 
-import type { PreviewRuntimeContext } from "../../protocol/bootContext";
-import { DEFAULT_PREVIEW_THEME_MODE, type PreviewThemeMode } from "../../state/previewTheme";
+import type { PreviewRuntimeContext } from "../../core/protocol/bootContext";
+import { DEFAULT_PREVIEW_THEME_MODE, type PreviewThemeMode } from "../../core/state/previewTheme";
 import type { HostMessageRouter } from "../hostMessages";
 import type { PageHostApi, PageSavedState } from "../pageHost";
 

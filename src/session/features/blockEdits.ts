@@ -6,13 +6,13 @@
 
 import { planBlockTextEdit } from "../../core/edits/sourceEdits";
 import type { HostDocument } from "../../host-api/documentStore";
-import { sourceRangeForLines } from "../../mapping/sourceMapping";
-import { insertionText, planInsertion, type InsertionPlan } from "../../mapping/insertion";
-import { FLUSH_WAIT_MS, flushRefusalMessage, waitForAnswer, waitForSettled } from "../../preview/flushWait";
-import type { BlockEditMessage, PageMessageOf } from "../../protocol/pageToHost";
-import type { Revision } from "../../protocol/revision";
-import { rebaseBlockRange, type BlockRangeChange } from "../../state/blockRange";
-import { EditLock } from "../../state/editLock";
+import { sourceRangeForLines } from "../../core/mapping/sourceMapping";
+import { insertionText, planInsertion, type InsertionPlan } from "../../core/mapping/insertion";
+import { FLUSH_WAIT_MS, flushRefusalMessage, waitForAnswer, waitForSettled } from "../../core/preview/flushWait";
+import type { BlockEditMessage, PageMessageOf } from "../../core/protocol/pageToHost";
+import type { Revision } from "../../core/protocol/revision";
+import { rebaseBlockRange, type BlockRangeChange } from "../../core/state/blockRange";
+import { EditLock } from "../../core/state/editLock";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

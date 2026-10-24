@@ -3,7 +3,7 @@ import * as path from "node:path";
 
 import { parseFragment, serialize } from "parse5";
 
-import { renderMyst } from "../../src/render/mystRenderer";
+import { renderMyst } from "../../src/core/render/mystRenderer";
 import { E2E_SCREENSHOT_ROOT, EXTENSION_ROOT, REPORTS_ROOT } from "../reportPaths";
 import {
   outputPathForMarkdown,

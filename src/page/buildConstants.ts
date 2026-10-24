@@ -5,5 +5,5 @@
 
 declare const STUDIO_HIGHLIGHT_LANGUAGES: readonly string[];
 
-/** The code languages the preview highlights (`src/render/highlight.ts`), for the palette. */
+/** The code languages the preview highlights (`src/core/render/highlight.ts`), for the palette. */
 export const HIGHLIGHT_LANGUAGES: readonly string[] = STUDIO_HIGHLIGHT_LANGUAGES;

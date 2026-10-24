@@ -7,7 +7,7 @@
 
 /** The channel between a preview page and its host. */
 export interface HostTransport {
-  /** Sends a page-to-host message (see `src/protocol/pageToHost.ts`). */
+  /** Sends a page-to-host message (see `src/core/protocol/pageToHost.ts`). */
   postMessage(message: unknown): void;
   /** The state the host keeps for this page across reloads, or `undefined` when there is none. */
   getState(): unknown;
@@ -15,7 +15,7 @@ export interface HostTransport {
   setState(state: unknown): void;
   /**
    * Calls `listener` with the data of every message the host sends (unfiltered: the page filters
-   * and routes them, see `src/protocol/hostToPage.ts`).
+   * and routes them, see `src/core/protocol/hostToPage.ts`).
    */
   onMessage(listener: (data: unknown) => void): void;
 }

@@ -4,7 +4,7 @@
  * shows why. Read-only previews disable the boxes.
  */
 
-import type { PreviewRuntimeContext } from "../../protocol/bootContext";
+import type { PreviewRuntimeContext } from "../../core/protocol/bootContext";
 import type { HostMessageRouter } from "../hostMessages";
 import type { PageHostApi } from "../pageHost";
 

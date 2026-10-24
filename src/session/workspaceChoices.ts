@@ -5,9 +5,9 @@
  * a new inline thread starts with.
  */
 
-import { resolveAuthor } from "../comments/author";
-import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../configuration/commentsConfiguration";
-import { EDITING_CONFIGURATION_SECTION, initialPaletteModeOf, PaletteMode } from "../configuration/editingConfiguration";
+import { resolveAuthor } from "../core/comments/author";
+import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../core/configuration/commentsConfiguration";
+import { EDITING_CONFIGURATION_SECTION, initialPaletteModeOf, PaletteMode } from "../core/configuration/editingConfiguration";
 import type { HostServices } from "../host-api/index";
 import type { KeyValueStore } from "../host-api/keyValueStore";
 import { osUserName } from "../node-services/paths";
@@ -16,13 +16,13 @@ import {
   loadCollapsedMap,
   migrateLegacyCollapsedKeys,
   saveCollapsedMap,
-} from "../state/boundedState";
+} from "../core/state/boundedState";
 import {
   clearPreviewThemeMode,
   readPreviewThemeMode,
   type PreviewThemeMode,
   writePreviewThemeMode,
-} from "../state/previewTheme";
+} from "../core/state/previewTheme";
 import {
   applyViewPreference,
   DEFAULT_VIEW_PREFERENCES,
@@ -30,7 +30,7 @@ import {
   writeViewPreferences,
   type ViewPreferenceKey,
   type ViewPreferences,
-} from "../state/previewViewPreferences";
+} from "../core/state/previewViewPreferences";
 
 /** Storage key of the edit mode the next preview starts in. */
 export const EDIT_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.editMode";

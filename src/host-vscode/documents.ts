@@ -16,7 +16,7 @@ import type {
   HostDocument,
 } from "../host-api/documentStore";
 import type { HostEvent } from "../host-api/events";
-import type { Revision } from "../protocol/revision";
+import type { Revision } from "../core/protocol/revision";
 
 /** A VS Code text document as a {@link HostDocument}: every read goes to the live document. */
 class VscodeHostDocument implements HostDocument {

@@ -6,28 +6,28 @@
  * reached through the ports of `src/host-api/`.
  */
 
-import type { BuildQueue } from "../build/buildQueue";
-import type { FrontmatterConfiguration } from "../configuration/frontmatterConfiguration";
-import type { PlantUmlConfiguration, PlantUmlEngineSettings } from "../configuration/plantUmlConfiguration";
-import type { PreviewConfiguration } from "../configuration/previewConfiguration";
-import type { CommentThread } from "../comments/commentModel";
+import type { BuildQueue } from "../node-services/build/buildQueue";
+import type { FrontmatterConfiguration } from "../core/configuration/frontmatterConfiguration";
+import type { PlantUmlConfiguration, PlantUmlEngineSettings } from "../core/configuration/plantUmlConfiguration";
+import type { PreviewConfiguration } from "../core/configuration/previewConfiguration";
+import type { CommentThread } from "../core/comments/commentModel";
 import type { HostDocument } from "../host-api/documentStore";
 import type { Disposable } from "../host-api/events";
 import type { PreviewPanel } from "../host-api/previewPanel";
 import type { FileWatcher } from "../host-api/watcher";
 import type { WorkspaceFolderInfo } from "../host-api/workspaceInfo";
-import type { PreviewStatus, PreviewWebviewResult } from "../preview/webview";
-import type { HostToPageMessage } from "../protocol/hostToPage";
-import type { RenderResult, RenderStage } from "../render/renderPipeline";
-import type { BoundedMap } from "../state/boundedState";
-import type { PreviewPanelState } from "../state/previewState";
+import type { PreviewStatus, PreviewWebviewResult } from "./webview";
+import type { HostToPageMessage } from "../core/protocol/hostToPage";
+import type { RenderResult, RenderStage } from "../core/render/renderPipeline";
+import type { BoundedMap } from "../core/state/boundedState";
+import type { PreviewPanelState } from "../core/state/previewState";
 import { createEditState, type EditState } from "./features/blockEdits";
 import { createCommentsState, type CommentsState } from "./features/comments";
 import { createFrontmatterState, type FrontmatterState } from "./features/frontmatter";
 import { createIncomingState, type IncomingState } from "./features/incomingChanges";
 import { createLinkState, type LinkState } from "./features/links";
 import { createPlantUmlState, type PlantUmlState } from "./features/plantUml";
-import { createOverlayState, createPageLoadState, type OverlayState, type PageLoadState } from "./features/rendering";
+import { createOverlayState, createPageLoadState, type OverlayState, type PageLoadState } from "./features/pageLoadState";
 import { createScrollState, type ScrollState } from "./features/scrollSync";
 
 /**

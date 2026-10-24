@@ -3,7 +3,7 @@
  * as they are configured; the page applies the defaults and bounds).
  */
 
-import type { PreviewRuntimeContext } from "../protocol/bootContext";
+import type { PreviewRuntimeContext } from "../core/protocol/bootContext";
 
 /** The scroll and reveal settings of a page; the anchor button changes `scrollPreviewWithEditor`. */
 export interface PageSettings {
