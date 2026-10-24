@@ -28,6 +28,8 @@ export interface SnapshotOptions {
   sphinxRoot?: string;
   requestId: number;
   documentIdentity?: string;
+  /** The revision of the document text, as the host's document store gives it; omitted: 0. */
+  revision?: number;
   /** Existing staging root to rebuild into, so Sphinx keeps its doctree cache. */
   rootDirectory?: string;
   getDocument?: (filePath: string) => PreviewDocument | undefined;
@@ -41,7 +43,8 @@ export interface StagedPreview {
   activeSourcePath: string;
   activeDocumentPath: string;
   activeDocumentIdentity: string;
-  activeDocumentVersion: number;
+  /** The revision of the document text the stage was made from (see `SnapshotOptions.revision`). */
+  activeDocumentRevision: number;
   requestId: number;
   dependencies: readonly string[];
   sourceOrigins: ReadonlyMap<string, string>;
@@ -422,7 +425,7 @@ export function stageSnapshot(options: SnapshotOptions): StagedPreview {
       activeSourcePath,
       activeDocumentPath: documentPath,
       activeDocumentIdentity: options.documentIdentity ?? documentPath,
-      activeDocumentVersion: options.document.version ?? 0,
+      activeDocumentRevision: options.revision ?? 0,
       requestId: options.requestId,
       dependencies: [...dependencies],
       sourceOrigins,

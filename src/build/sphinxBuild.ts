@@ -27,6 +27,8 @@ export interface SphinxBuildOptions {
   sphinxRoot?: string;
   requestId: number;
   documentIdentity?: string;
+  /** The revision of the document text (see `SnapshotOptions.revision`). */
+  revision?: number;
   rootDirectory?: string;
   signal?: AbortSignal;
   isWorkspaceTrusted: () => boolean;
@@ -294,6 +296,7 @@ export async function buildSphinxSnapshot(
       sphinxRoot: options.sphinxRoot,
       requestId: options.requestId,
       documentIdentity: options.documentIdentity,
+      revision: options.revision,
       rootDirectory: options.rootDirectory,
       getDocument: options.getDocument,
     });

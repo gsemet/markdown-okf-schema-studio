@@ -9,7 +9,7 @@ test("a memory document applies text edits, moves its revision on and reports th
   const store = createMemoryDocumentStore();
   const document = store.add("file:///a.md", "one\r\ntwo\r\n", "/a.md");
   const before = document.revision;
-  const changes: Array<{ start: number; length: number; text: string }> = [];
+  const changes: Array<{ start: number; length: number; startLine: number; endLine: number; text: string }> = [];
   const subscription = store.onDidChange((change) => changes.push(...change.changes));
   assert.equal(document.eol, "\r\n");
   assert.equal(document.lineCount, 3);
@@ -19,13 +19,27 @@ test("a memory document applies text edits, moves its revision on and reports th
   assert.equal(document.getText(), "ONE\r\ntwo\r\n");
   assert.ok(document.revision > before);
   assert.equal(document.isDirty, true);
-  assert.deepEqual(changes, [{ start: 0, length: 3, text: "ONE" }]);
+  assert.deepEqual(changes, [{ start: 0, length: 3, startLine: 0, endLine: 0, text: "ONE" }]);
   assert.deepEqual(store.applied.map((entry) => entry.options), [{ ownUndoStep: true }]);
   subscription.dispose();
 
   assert.equal(await store.save(document), true);
   assert.equal(document.isDirty, false);
   assert.equal(store.isApplying(document.id), false);
+});
+
+test("a memory document change names the lines of the replaced text, line breaks of any kind", async () => {
+  const store = createMemoryDocumentStore();
+  const document = store.add("file:///b.md", "one\r\ntwo\nthree\rfour\n", "/b.md");
+  const changes: Array<{ startLine: number; endLine: number }> = [];
+  const subscription = store.onDidChange((change) => changes.push(...change.changes));
+  // "two\nthree" spans the second and the third line.
+  assert.equal(await store.applyEdits(document, [{ start: 5, end: 14, text: "x" }]), true);
+  // "four" is the fourth line, after a lone "\r".
+  assert.equal(await store.applyEdits(document, [{ start: 7, end: 11, text: "4" }]), true);
+  subscription.dispose();
+  assert.equal(document.getText(), "one\r\nx\r4\n");
+  assert.deepEqual(changes.map(({ startLine, endLine }) => [startLine, endLine]), [[1, 2], [2, 2]]);
 });
 
 test("a refusing memory store changes nothing, and a bad edit rejects", async () => {

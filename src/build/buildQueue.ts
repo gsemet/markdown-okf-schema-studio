@@ -1,9 +1,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+/** A document the queue builds: its text; the queue reads its revision through `revisionOf`. */
 export interface QueueDocument {
-  uri: { fsPath: string };
-  version?: number;
   getText(): string;
 }
 
@@ -49,9 +48,9 @@ export interface BuildQueueOptions<
   disposeError?: (error: unknown) => void;
   /**
    * The revision of a document, as the host's document store gives it; a request records it as
-   * `documentVersion`. Defaults to `document.version`.
+   * `documentVersion`.
    */
-  revisionOf?: (document: TDocument) => number;
+  revisionOf: (document: TDocument) => number;
 }
 
 interface PendingBuild<TDocument extends QueueDocument, TResult> {
@@ -62,10 +61,6 @@ interface PendingBuild<TDocument extends QueueDocument, TResult> {
 interface ActiveBuild<TDocument extends QueueDocument, TResult>
   extends PendingBuild<TDocument, TResult> {
   controller: AbortController;
-}
-
-function documentVersion(document: QueueDocument): number {
-  return document.version ?? 0;
 }
 
 function canonicalPath(filePath: string): string {
@@ -101,7 +96,7 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
     this.onState = options.onState ?? (() => undefined);
     this.disposeResult = options.disposeResult ?? (() => undefined);
     this.disposeError = options.disposeError ?? (() => undefined);
-    this.revisionOf = options.revisionOf ?? documentVersion;
+    this.revisionOf = options.revisionOf;
   }
 
   public getState(): BuildQueueState<TResult, TDocument> {

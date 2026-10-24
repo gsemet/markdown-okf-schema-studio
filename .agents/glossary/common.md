@@ -8,7 +8,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Anchor icon**: marker rendered for a MyST `(label)=` target (`span.okf-anchor`, tooltip "Anchor: name"; first child of the next paragraph or heading, else in a `div.okf-anchor-row`).
 - **Anchor button**: toolbar toggle that ties preview scrolling to the editor (`data-sphinx-preview-anchor`).
 - **Block editor**: raw Markdown text box that replaces a mapped block in edit mode (`.sphinx-preview-block-editor`, `openBlockEditor` in `src/webview/scrollSync.ts`).
-- **Block move**: swap of a top-level block with its neighbour from the insert point arrows (`planBlockMove` in `src/mapping/blockMove.ts`, `handleBlockMove` in `src/extension.ts`).
+- **Block move**: swap of a top-level block with its neighbour from the insert point arrows (`planBlockMove` in `src/mapping/blockMove.ts`, `SourceEditController` in `src/session/features/sourceEdits.ts`).
 - **Blur commit suspension**: while a host round trip marked `dialog` is pending (`hostRequests.ask(…, { dialog: true }, …)` in `src/webview/hostRequests.ts`: the `{doc}` and image file pickers), the text box blur and the palette `onLeave` do not save, so the block editor stays open under the native dialog; `cancelAll()` in `closeBlockEdit` and the request timeout clear it.
 - **Block selection**: contiguous run of top-level body blocks selected in edit mode with Shift+click or Shift+Up/Down (`data-sphinx-preview-block-selected`, model in `src/webview/blockSelection.ts`).
 - **Chip**: small inline marker in the preview, gray for an HTML comment and green for TODO (`.okf-chip`, `src/render/commentMarkers.ts`).
@@ -32,7 +32,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Link panel**: two-field Text/URL panel under the palette, opened by the Link button or Cmd/Ctrl+K (`src/webview/linkPanel.ts`).
 - **Mapped block**: rendered element carrying its source location (`[data-sphinx-source-file][data-sphinx-source-line]`).
 - **Margin mode (planned)**: layout mode that uses the page margins for side content.
-- **Message gate**: host rule that matches a page message to the preview before its handler runs (`render`, `comment`, `document`, `own-id`, `page-state`; `PAGE_MESSAGE_GATES` in `src/extension.ts`).
+- **Message gate**: host rule that matches a page message to the preview before its handler runs (`render`, `comment`, `document`, `own-id`, `page-state`; `PAGE_MESSAGE_GATES` in `src/session/pageMessages.ts`).
 - **Message registry**: map from a page-to-host message type to its validator (`PAGE_TO_HOST_VALIDATORS` in `src/protocol/pageToHost.ts`); the host handler is registered on the host's message router.
 - **Message router**: typed `on(type, handler)` / `dispatch` table of one side of the protocol (`createMessageRouter` in `src/protocol/router.ts`), used by the host and by the page runtime.
 - **Motion**: the short CSS effects of the preview (soft appearance, editor-closed fade, theme colour transition, update glow), driven by attributes from `src/webview/motion.ts` and turned off by `prefers-reduced-motion: reduce`; soft appearance needs `data-sphinx-preview-motion="on"`, set by the first pointer or key press and taken back by a content patch.
@@ -40,7 +40,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Navigation history**: per-panel Back/Next stack of followed links (`src/state/navigationHistory.ts`).
 - **Open-With editor**: the custom editor offered through "Open With" (`markdown-okf-schema-studio.editor`).
 - **Orphaned thread**: comment thread whose quote can no longer be found; listed in the "Orphaned comments" box, never deleted (`src/webview/commentThreads.ts`).
-- **Palette mode**: Strict / GFM / MyST button set of the edition palette, per workspace (`PALETTE_MODE_STORAGE_KEY` in `src/extension.ts`, select in `src/webview/editPalette.ts`).
+- **Palette mode**: Strict / GFM / MyST button set of the edition palette, per workspace (`PALETTE_MODE_STORAGE_KEY` in `src/session/workspaceChoices.ts`, select in `src/webview/editPalette.ts`).
 - **Preview panel**: the webview panel that shows the rendered preview.
 - **Properties table**: rendered frontmatter table at the top of a document (`[data-okf-properties]`).
 - **Protocol**: the typed messages between host and page, both directions, as discriminated unions with their validators (`src/protocol/`); no host API, DOM or Node imports.

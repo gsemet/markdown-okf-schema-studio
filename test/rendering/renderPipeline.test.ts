@@ -17,12 +17,12 @@ function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
     document: {
       uri: { scheme: "file", fsPath: "/workspace/active.md" },
       languageId: "markdown",
-      version: 7,
       getText: () => "# Unsaved buffer\n",
     },
     workspaceRoot: "/workspace",
     requestId: 11,
     documentIdentity: "file:///active.md",
+    revision: 7,
     isWorkspaceTrusted: () => true,
     ...overrides,
   };
@@ -41,7 +41,7 @@ test("the render pipeline retains buffer identity and attaches source diagnostic
   assert.equal(observed, "# Unsaved buffer\n");
   assert.equal(result.html, "<h1>Unsaved buffer</h1>");
   assert.equal(result.stage.activeDocumentIdentity, "file:///active.md");
-  assert.equal(result.stage.activeDocumentVersion, 7);
+  assert.equal(result.stage.activeDocumentRevision, 7);
   assert.equal(result.stage.requestId, 11);
   assert.equal(result.stage.sourceText, observed);
   assert.deepEqual(result.diagnostics, [{

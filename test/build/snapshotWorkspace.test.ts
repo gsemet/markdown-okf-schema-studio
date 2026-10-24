@@ -48,12 +48,13 @@ test("stages the dirty active buffer and only its referenced inputs", () => {
       document: documentAt(activePath, dirtyText, 7),
       workspaceRoot,
       requestId: 12,
+      revision: 7,
       getDocument: (filePath) => fs.realpathSync(filePath) === fs.realpathSync(includePath)
         ? dirtyInclude
         : undefined,
     });
     try {
-      assert.equal(stage.activeDocumentVersion, 7);
+      assert.equal(stage.activeDocumentRevision, 7);
       assert.equal(stage.requestId, 12);
       assert.equal(fs.readFileSync(activePath, "utf8"), onDisk);
       assert.match(fs.readFileSync(stage.activeSourcePath, "utf8"), /Unsaved title/u);

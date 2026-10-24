@@ -1,7 +1,8 @@
 /**
  * The VS Code host: every port of `src/host-api/` on the VS Code API. The extension reaches VS
  * Code through this adapter for documents and edits, files, settings, trust and folders, the
- * clipboard and notifications, Git, diagnostics, watchers, navigation and webview assets. Each
+ * clipboard and notifications, Git, diagnostics, watchers, navigation, text editors, the color
+ * theme and webview assets. Each
  * port reads the VS Code API when it is called, never at creation, so the adapter can be created
  * when the extension module loads.
  */
@@ -15,8 +16,10 @@ import type { TextRange } from "../host-api/documentStore";
 import type { FileKind, FileSystem } from "../host-api/fileSystem";
 import type { HostUi } from "../host-api/hostUi";
 import type { HostServices } from "../host-api/index";
+import type { ColorTheme } from "../host-api/colorTheme";
 import type { Navigation } from "../host-api/navigation";
 import type { Settings } from "../host-api/settings";
+import type { PairedEditor, TextEditors } from "../host-api/textEditors";
 import type { VcsInfo } from "../host-api/vcsInfo";
 import type { FileWatcher, Watcher } from "../host-api/watcher";
 import type { WorkspaceFolderInfo, WorkspaceInfo } from "../host-api/workspaceInfo";
@@ -32,6 +35,8 @@ export interface VscodeHost extends HostServices {
    * Without `extensionUri` the page gets no bundle URLs.
    */
   assets(webview: Pick<vscode.Webview, "asWebviewUri" | "cspSource">, extensionUri: vscode.Uri | undefined): AssetResolver;
+  /** The port's view of a VS Code text editor. */
+  editorOf(editor: vscode.TextEditor): PairedEditor;
 }
 
 /** A VS Code range from a host-neutral one. */
@@ -218,8 +223,54 @@ function createVscodeNavigation(): Navigation {
   };
 }
 
+/** A VS Code text editor as a {@link PairedEditor}: every read goes to the live editor. */
+function pairedEditor(editor: vscode.TextEditor, documents: VscodeDocumentStore): PairedEditor {
+  return {
+    document: documents.of(editor.document),
+    get fsPath() {
+      return editor.document.uri.fsPath;
+    },
+    get firstVisibleLine() {
+      return editor.visibleRanges[0]?.start.line;
+    },
+    isLineVisible: (line) => editor.visibleRanges[0]?.contains(new vscode.Position(line, 0)) ?? false,
+    get selectionLine() {
+      return editor.selection.active.line;
+    },
+    get column() {
+      return editor.viewColumn;
+    },
+    revealLine(line, position) {
+      const at = new vscode.Position(line, 0);
+      editor.revealRange(
+        new vscode.Range(at, at),
+        position === "top" ? vscode.TextEditorRevealType.AtTop : vscode.TextEditorRevealType.InCenterIfOutsideViewport,
+      );
+    },
+  };
+}
+
+function createVscodeEditors(documents: VscodeDocumentStore): TextEditors {
+  return {
+    active: () => {
+      const editor = vscode.window.activeTextEditor;
+      return editor ? pairedEditor(editor, documents) : undefined;
+    },
+    visible: () => vscode.window.visibleTextEditors.map((editor) => pairedEditor(editor, documents)),
+  };
+}
+
+function createVscodeTheme(): ColorTheme {
+  return {
+    get kind() {
+      return vscode.window.activeColorTheme.kind;
+    },
+  };
+}
+
 /** Creates the VS Code host. */
 export function createVscodeHost(): VscodeHost {
+  const documents = createVscodeDocumentStore();
   return {
     capabilities: {
       undo: true,
@@ -229,7 +280,7 @@ export function createVscodeHost(): VscodeHost {
       editorPairing: true,
       trust: true,
     },
-    documents: createVscodeDocumentStore(),
+    documents,
     files: createVscodeFileSystem(),
     settings: createVscodeSettings(),
     workspace: createVscodeWorkspaceInfo(),
@@ -239,6 +290,9 @@ export function createVscodeHost(): VscodeHost {
     watcher: createVscodeWatcher(),
     processes: createNodeProcessRunner(),
     navigation: createVscodeNavigation(),
+    editors: createVscodeEditors(documents),
+    theme: createVscodeTheme(),
+    editorOf: (editor) => pairedEditor(editor, documents),
     assets: (webview, extensionUri) => ({
       get cspSource() {
         return webview.cspSource;
