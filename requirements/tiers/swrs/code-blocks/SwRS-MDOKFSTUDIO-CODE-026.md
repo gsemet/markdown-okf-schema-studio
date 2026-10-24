@@ -26,6 +26,8 @@ tested_in_files: []
 
 When a copy request carries text that is not a string or is longer than 1 000 000 characters, the extension SHALL refuse it without writing the clipboard and without a message.
 
+Known issue: the copy button still shows Copied although the host refused the request, because the host sends no acknowledgement (backlog P2/copy-button-false-copied).
+
 ### Scenario: nominal behavior
 
 - GIVEN a copy request with 1 000 000 characters
