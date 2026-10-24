@@ -34,10 +34,27 @@ of Pillow 13; the lockfile selects newer releases for newer interpreters.
 Run `just preflight` after updating.
 CI uses `STUDIO_NPM` to run the Node.js version selected by `actions/setup-node` without `fnm`.
 
-Security overrides keep the MyST dependency tree on patched parser releases.
-The install script applies two import-path corrections for MyST's current packages so they
-work with Markdown-It 14. Revisit these corrections when updating `myst-to-html` or
-`markdown-it-dollarmath`; installation fails if their versions or expected imports change.
+### Dependency overrides
+
+The `overrides` field in `package.json` forces two parsers of the MyST packages onto current
+releases. The MyST packages still declare release lines that no longer get fixes:
+
+- `markdown-it` `^14.3.1`: `myst-parser`, `myst-to-html`, `markdown-it-myst`,
+  `markdown-it-dollarmath` and `markdown-it-amsmath` ask for `^13` (or `^12 || ^13`).
+  Markdown-It 13 has had no release since 13.0.2 (2023), so parser fixes only reach the 14 line.
+  Markdown-It 14 also brings `linkify-it` 5, so `linkify-it` needs no override of its own.
+- `csv-parse` `^7.0.3`: `myst-directives` asks for `^5.5.5`, a line without releases since
+  5.6.0 (2024). It parses the CSV of the `csv-table` directive.
+
+The install script applies two import-path corrections so `myst-to-html` and
+`markdown-it-dollarmath` work with Markdown-It 14; installation fails if their versions or
+expected imports change.
+
+Revisit the overrides when you update a MyST package, during `just update`, or when an advisory
+names one of these parsers. Run `npm ls markdown-it csv-parse`: remove an override once every
+package that pulls the parser asks for the forced line itself. Check that the parser is still on a
+patched release, and remove the matching import-path correction when Markdown-It 14 support
+arrives in the MyST packages.
 
 ## Cleanup
 
