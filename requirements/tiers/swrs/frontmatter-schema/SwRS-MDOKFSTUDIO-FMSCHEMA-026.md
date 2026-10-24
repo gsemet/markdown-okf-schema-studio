@@ -1,0 +1,45 @@
+---
+type: SwRS
+id: SwRS-MDOKFSTUDIO-FMSCHEMA-026
+uuid: 137fa9c6-6eb2-4ea0-9318-357d81d7ee63
+title: A schema that cannot be compiled gives a red row
+description: 'When the validator cannot compile a schema, the extension SHALL show
+  a red alert row "Schema validation failed to run: {diagnostic}" that spans every
+  visible column and counts one error in the badge, while still listing the fields
+  in schema order.'
+project: markdown-okf-schema-studio
+scope: frontmatter-schema
+lifecycle: draft
+origin: native
+tier: SwRS
+derives_from:
+- StRS-MDOKFSTUDIO-FMSCHEMA-008
+annotation_exemption: false
+exemption_reason:
+derived_by: []
+implemented_in_files: []
+tested_in_files: []
+---
+
+## A schema that cannot be compiled gives a red row
+
+### Normative behavior
+
+When the validator cannot compile a schema, the extension SHALL show a red alert row "Schema validation failed to run: {diagnostic}" that spans every visible column and counts one error in the badge, while still listing the fields in schema order.
+
+### Scenario: Invalid type keyword
+
+- GIVEN a schema declaring a property with `type: nonsense`
+- WHEN a document of type Note is analysed
+- THEN one red alert row reads Schema validation failed to run: schema is invalid: ... and the badge reads 1 error
+
+### Scenario: Narrow preview
+
+- GIVEN the same table in a 460 px preview with the Description column hidden
+- WHEN the preview is rendered
+- THEN the row spans two columns and no text overflows
+
+### Verification notes
+
+- Method: Unit test of the analysis; visual scenario (dark and light, 900 px and 460 px).
+- Criteria: The same error is reported at every analysis; the declared fields keep their schema order and documentation.
