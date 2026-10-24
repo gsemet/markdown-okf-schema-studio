@@ -26,7 +26,7 @@ tested_in_files: []
 
 When a copy request comes from a page whose document version or render request is no longer current, the extension SHALL drop it without writing the clipboard.
 
-Known issue: the copy button still shows Copied although the host dropped the request and the clipboard is unchanged; the version check is stricter than needed for a copy, which edits nothing (backlog P2/copy-button-false-copied).
+Known issue: the copy button still shows Copied although the host dropped the request and the clipboard is unchanged; the version check is stricter than needed for a copy, which edits nothing.
 
 ### Scenario: nominal behavior
 

@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LAYOUT-018
 - SwRS-MDOKFSTUDIO-LAYOUT-019
 - SwRS-MDOKFSTUDIO-LAYOUT-037
+- SwRS-MDOKFSTUDIO-LAYOUT-042
 ---
 
 ## Nothing clickable hides under the floating toolbar

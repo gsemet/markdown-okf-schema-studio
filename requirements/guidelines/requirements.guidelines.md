@@ -12,7 +12,9 @@ They are not a wish list and not the desired state.
 - Write each SwRS from the current behaviour, including a behaviour that looks wrong. Do not
   specify the intended fix.
 - A suspected bug is still specified as it behaves. Say so in the body ("Known issue: …"), and
-  file the fix as a backlog item that names the SwRS.
+  file the fix as a backlog item.
+- The requirement text never names a backlog item: the link goes from the backlog item to the
+  SwRS, so the requirement stays true when the item moves or is archived.
 - The fix changes the code, the test and the SwRS in the same change (edit the SwRS, or
   `okfreq supersede` it when the contract changes).
 - A behaviour with no requirement yet is a coverage gap, not a reason to describe a future state.
