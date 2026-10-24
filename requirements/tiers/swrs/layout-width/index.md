@@ -44,5 +44,6 @@
 - [SwRS-MDOKFSTUDIO-LAYOUT-039 — Full width centres the content with gutters of at least 15 px](SwRS-MDOKFSTUDIO-LAYOUT-039.md) — When the width mode is Full width, the extension SHALL centre text, tables, code blocks and figures on the pane with gutters of at least 15 px.
 - [SwRS-MDOKFSTUDIO-LAYOUT-040 — A width mode change keeps the reading line](SwRS-MDOKFSTUDIO-LAYOUT-040.md) — When the reader changes the width mode, the extension SHALL keep the line at the reading position of the page.
 - [SwRS-MDOKFSTUDIO-LAYOUT-041 — A width mode change measures the first-element clearance again](SwRS-MDOKFSTUDIO-LAYOUT-041.md) — When the reader changes the width mode, the extension SHALL measure the first-element clearance again.
+- [SwRS-MDOKFSTUDIO-LAYOUT-042 — A first-block editor's palette keeps its place unless the frame is under the toolbar](SwRS-MDOKFSTUDIO-LAYOUT-042.md) — When the floating toolbar overlaps an open first-block editor, the extension SHALL publish --sphinx-preview-first-bar-bottom as 0 px when the frame gave up the toolbar width and as the toolbar bottom edge plus 8 px otherwise.
 
 <!-- okfreq:index:end -->

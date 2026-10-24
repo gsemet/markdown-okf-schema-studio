@@ -25,7 +25,7 @@ tested_in_files: []
 
 When the host refuses a checkbox toggle, the extension SHALL revert the checkbox and put the reason in its tooltip.
 
-Known issue: the reason is set only as the checkbox tooltip (`title`), with no visible message next to the box, so a refusal is easy to miss. Backlog: P3/checkbox-refusal-feedback.
+Known issue: the reason is set only as the checkbox tooltip (`title`), with no visible message next to the box, so a refusal is easy to miss.
 
 ### Scenario: Stale refusal reverts the box
 

@@ -43,7 +43,6 @@ When the writer clicks the anchor icon of a label whose name starts with an unde
 - Known issue: the anchor icon accepts a leading `_`, `.` or `-` (`ANCHOR_LABEL`), but the rename
   pattern requires a letter or digit first (`LABEL_NAME`, the page `namePattern`). The click is
   swallowed before that test, so the writer gets no editor, no popover and no message.
-  Backlog: `label-rename-dead-click`.
 
 ### Verification notes
 
