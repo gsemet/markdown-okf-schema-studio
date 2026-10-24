@@ -9,7 +9,8 @@
  *      payload; {@link isPageToHostMessage} checks the envelope before it runs. The table is typed
  *      by the union, so a type without a validator does not compile.
  *   3. Give the host a handler (`on(type, handler)` on its router) and a gate, the rule that drops a
- *      stale message before the handler runs (`PAGE_MESSAGE_GATES` in `src/extension.ts`).
+ *      stale message before the handler runs (`PAGE_MESSAGE_GATES` in
+ *      `src/session/pageMessages.ts`).
  *
  * Two families share the union. The page-state messages (scrolling, readiness, inline edits; see
  * {@link PAGE_STATE_MESSAGE_TYPES}) were validated as one group before the registry existed: their

@@ -23,6 +23,7 @@ import {
   renderPreviewToolbar,
 } from "../../src/core/preview/previewToolbar";
 import { analyzeFrontmatter } from "../../src/core/frontmatter/okfFrontmatter";
+import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 import { renderPropertiesTable } from "../../src/core/frontmatter/propertiesTable";
 import { annotateSourceMappings, sourceRangeForLines } from "../../src/core/mapping/sourceMapping";
 import { rewriteSphinxHtml, ResolvedResource } from "../../src/core/security/html-sanitizer";
@@ -165,6 +166,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
   const deferredFrontmatterLinks = SCENARIOS.some((scenario) =>
     scenario.fixture === fixture && scenario.frontmatterLinkState !== undefined);
   const frontmatter = analyzeFrontmatter({
+    schemaFiles: nodeSchemaFiles,
     sourceText: source,
     filePath: sourcePath,
     strictAdditionalProperties: options.strictAdditionalProperties === true,
@@ -178,6 +180,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
   const markup = renderPropertiesTable(frontmatter, tableEnabled, sourceMapping, editingEnabled);
   const deferredMarkup = deferredFrontmatterLinks
     ? renderPropertiesTable(analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       sourceText: source,
       filePath: sourcePath,
       strictAdditionalProperties: options.strictAdditionalProperties === true,

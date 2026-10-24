@@ -69,8 +69,7 @@ export interface SlashMenu {
  * start of a line or after whitespace opens a floating list of the palette's actions at the caret,
  * filtered as the user types. It owns no action: entries come from the palette (the same registry
  * and mode filter) and `run` applies one. Styled through the stylesheet and the CSSOM only; entry
- * text is set with `textContent`. Injected into the page script with `.toString()`: the body must
- * not use anything defined outside it.
+ * text is set with `textContent`.
  */
 export function createSlashMenu(
   document: Document,

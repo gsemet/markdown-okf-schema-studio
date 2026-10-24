@@ -1,11 +1,12 @@
+import { readPreviewBootSettings } from "../../core/configuration/previewConfiguration";
+
 export interface ChipToggleContext {
   /** False hides the gray comment chips; true (the default) shows them. */
   showComments?: boolean;
 }
 
 /**
- * Expansion of the comment and TODO chips, and the show-comments switch. Injected into the page
- * script with `.toString()`, so the body must not use anything defined outside it.
+ * Expansion of the comment and TODO chips, and the show-comments switch.
  *
  * A comment is `.okf-comment` holding an `.okf-chip` and a hidden `.okf-comment-body` (text only).
  * Clicking the chip, or Enter or Space on it, shows or hides the body. A chip without a body (the
@@ -112,7 +113,7 @@ export function installChipToggle(
     document.documentElement.setAttribute("data-okf-show-comments", next ? "true" : "false");
     if (changed) onLayoutChange();
   };
-  setShowComments(context.showComments !== false);
+  setShowComments(readPreviewBootSettings(context).showComments);
 
   return {
     // Re-applies the saved state to the current content (after a load or a content patch).

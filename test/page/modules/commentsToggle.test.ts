@@ -1,6 +1,5 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { installCommentsToggle } from "../../../src/page/modules/commentsToggle";
 
@@ -41,10 +40,7 @@ function setup(options: {
     requestId: 9,
     initialViewPreferences: options.preferences,
   };
-  const toggle = vm.runInNewContext(
-    `(${installCommentsToggle.toString()})(document, vscode, context, onLayout)`,
-    { document, vscode, context, onLayout: () => layout.push(1) },
-  ) as ReturnType<typeof installCommentsToggle>;
+  const toggle = installCommentsToggle(document as never, vscode as never, context as never, () => layout.push(1));
   return { root, button, toggle, messages, layout, state: () => state };
 }
 

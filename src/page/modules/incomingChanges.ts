@@ -5,8 +5,7 @@ export interface IncomingChangeRange {
 
 /**
  * Incoming-change marks: a green bar on the blocks whose source lines changed since the last
- * commit. Injected into the page script with `.toString()`, so the body must not use anything
- * defined outside it.
+ * commit.
  *
  * The host sends line ranges (1-based, whole file). The innermost mapped elements (`data-line`
  * with an optional `data-end-line`) whose lines meet a range get `data-sphinx-preview-changed`;

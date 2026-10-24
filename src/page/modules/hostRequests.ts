@@ -4,8 +4,6 @@
  * context is not used to match). A request marked `dialog` stands for a native dialog the host
  * opens (a file picker): while one is open `isDialogOpen()` is true and the block editor must not
  * treat the focus loss as leaving; the image picker (T31) reuses this.
- * Self-contained: it is injected into the page script with `.toString()`, so it must not use
- * anything defined outside its own body.
  */
 export interface HostRequestOptions {
   /** Sends the registered message; the page adds the document context. */

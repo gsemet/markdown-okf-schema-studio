@@ -26,8 +26,7 @@ export interface LinkPanel {
 /**
  * The link panel: Text and URL fields with Insert and Cancel, shown under the edition palette.
  * It only collects the two values; the caller applies the edit and restores the text box
- * selection. Tab cycles Text, URL, Insert, Cancel and wraps. Injected into the page script with
- * `.toString()`: the body must not use anything defined outside it.
+ * selection. Tab cycles Text, URL, Insert, Cancel and wraps.
  */
 export function createLinkPanel(document: Document, deps: LinkPanelDeps): LinkPanel {
   let closed = false;

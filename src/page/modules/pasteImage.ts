@@ -2,8 +2,7 @@
  * Pasting an image into the text box of the block editor. Text on the clipboard wins (the paste
  * stays native); otherwise the first png, jpeg, gif or webp file of the clipboard is read as
  * base64 and handed to `hooks.send`, and the host answers with the file name it chose. The page
- * never names the file. Self-contained: it is injected into the page script with `.toString()`,
- * so it must not use anything defined outside its own body.
+ * never names the file.
  */
 export interface PasteImageHooks {
   /** Posts the image to the host; `done` receives the host's answer. */
@@ -30,7 +29,6 @@ export interface ImageParagraphEdit {
  * own, like GitHub and Obsidian do: a blank line before it unless it starts the text or follows a
  * blank line, and one after it unless it ends the text or a blank line follows. The spaces and tabs
  * around the caret go with the break, so no line keeps trailing blanks. The name is selected.
- * Self-contained: it is injected into the page script with `.toString()`.
  */
 export function imageParagraphEdit(value: string, start: number, end: number, name: string): ImageParagraphEdit {
   const length = value.length;

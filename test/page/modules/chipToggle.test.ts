@@ -1,6 +1,5 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { installChipToggle } from "../../../src/page/modules/chipToggle";
 
@@ -62,10 +61,8 @@ function setup(initialState: Record<string, unknown> | undefined = undefined, sh
     getState: () => state,
     setState: (next: Record<string, unknown>) => { state = next; },
   };
-  const toggle = vm.runInNewContext(
-    `(${installChipToggle.toString()})(document, vscode, context, onLayout)`,
-    { document, vscode, context: showComments === undefined ? {} : { showComments }, onLayout: () => layoutChanges.push(1) },
-  ) as ReturnType<typeof installChipToggle>;
+  const toggle = installChipToggle(document as never, vscode as never,
+    (showComments === undefined ? {} : { showComments }) as never, () => layoutChanges.push(1));
   const fire = (type: string, event: Record<string, unknown>) => {
     const calls = { prevented: 0 };
     for (const handler of handlers.get(type) ?? []) {

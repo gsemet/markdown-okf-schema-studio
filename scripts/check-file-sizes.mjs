@@ -6,8 +6,7 @@
  *    size; they may only shrink. The check fails when a listed file grows, when a file that is not
  *    listed goes over its limit, and when the baseline is stale (a listed file shrank, went under
  *    its limit or is gone): `--update` lowers the stale entries, never raises one or adds a file.
- * 2. Type-check suppressions. No `@ts-nocheck` or `@ts-ignore` in `src/`, except in the files of
- *    SUPPRESSION_ALLOWLIST.
+ * 2. Type-check suppressions. No `@ts-nocheck` or `@ts-ignore` in `src/`, without exception.
  *
  * Files are the ones git tracks or would track (`.gitignore` applies), so new files count too.
  */
@@ -24,11 +23,6 @@ const relativeBaseline = path.relative(root, baselinePath);
 const LIMITS = { src: 800, test: 1500 };
 /** Extensions of the files the ratchet measures (code and styles, not fixtures or data). */
 const MEASURED = /\.(ts|mts|cts|js|mjs|cjs|py|css)$/u;
-/**
- * Files that may still suppress type checking, each with the step that removes the suppression.
- * `src/page/runtime.ts`: the part of the page runtime not yet split into typed feature modules.
- */
-const SUPPRESSION_ALLOWLIST = new Set(["src/page/runtime.ts"]);
 const SUPPRESSION = /@ts-(nocheck|ignore)\b/u;
 
 function sourceFiles() {
@@ -78,7 +72,7 @@ for (const file of files) {
   } catch {
     continue; // deleted in the working tree, not yet in the index
   }
-  if (top === "src" && SUPPRESSION.test(text) && !SUPPRESSION_ALLOWLIST.has(file)) {
+  if (top === "src" && SUPPRESSION.test(text)) {
     errors.push(`${file}: type checking is suppressed (@ts-nocheck / @ts-ignore); type the code instead`);
   }
   if (!limit || !MEASURED.test(file)) continue;

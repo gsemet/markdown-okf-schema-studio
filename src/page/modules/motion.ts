@@ -4,8 +4,7 @@ export interface UpdatedRange {
 }
 
 /**
- * Light motion of the preview: the page side of the stylesheet's "Motion" section. Injected into
- * the page script with `.toString()`, so the body must not use anything defined outside it.
+ * Light motion of the preview: the page side of the stylesheet's "Motion" section.
  *
  * Every effect is a class of attribute the stylesheet animates; nothing here sets a style.
  *

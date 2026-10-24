@@ -71,6 +71,7 @@ export class FrontmatterController {
     workspaceRoots: string[] = preview.sessionRoots,
   ): FrontmatterResult {
     return analyzeFrontmatter({
+      schemaFiles: this.manager.host.schemaFiles,
       filePath,
       sourceText,
       stopDir: preview.workspaceRoot,

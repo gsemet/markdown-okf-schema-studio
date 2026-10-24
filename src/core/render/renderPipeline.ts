@@ -1,4 +1,3 @@
-import { performance } from "node:perf_hooks";
 import * as path from "node:path";
 
 import { listGlobDocuments } from "./documentGlob";
@@ -11,6 +10,7 @@ import type { PlantUmlEngine } from "../configuration/plantUmlConfiguration";
 import { enabledMystExtensionsFor } from "../myst/confLocator";
 import { createPreviewResourcePolicy, readBoundedText } from "../security/resource-policy";
 
+/** The document to render, as the host's text document gives it. */
 export interface PreviewDocument {
   uri: { scheme: string; fsPath: string };
   languageId: string;
@@ -18,6 +18,7 @@ export interface PreviewDocument {
   getText(): string;
 }
 
+/** A render diagnostic with its code and the file and column it points at. */
 export interface PreviewDiagnostic extends RenderDiagnostic {
   code: string;
   file?: string;
@@ -47,6 +48,7 @@ export interface RenderStage {
   dispose(): void;
 }
 
+/** What one render produced: the stage, the HTML and the deferred PlantUML work. */
 export interface RenderResult {
   stage: RenderStage;
   html: string;
@@ -57,6 +59,7 @@ export interface RenderResult {
   latencyMs: number;
 }
 
+/** The inputs of one render. */
 export interface RenderOptions {
   document: PreviewDocument;
   /**
@@ -81,6 +84,7 @@ export interface RenderOptions {
   plantUmlEngine?: PlantUmlEngine;
 }
 
+/** Thrown when the workspace is untrusted and the render is not allowed there. */
 export class WorkspaceTrustError extends Error {
   public constructor() {
     super("The MyST preview is disabled until the workspace is trusted.");
@@ -88,6 +92,7 @@ export class WorkspaceTrustError extends Error {
   }
 }
 
+/** Thrown when a newer edit cancelled the render. */
 export class RenderCanceledError extends Error {
   public constructor() {
     super("The MyST render was canceled because a newer edit arrived.");
@@ -95,6 +100,7 @@ export class RenderCanceledError extends Error {
   }
 }
 
+/** A failed render, with the stage and the diagnostics that explain it. */
 export class RenderError extends Error {
   public readonly diagnostics: PreviewDiagnostic[];
   public readonly stage: RenderStage;
@@ -107,19 +113,23 @@ export class RenderError extends Error {
   }
 }
 
+/** Test hook: replaces the MyST render of a source. */
 export type RenderOverride = (source: string) => Promise<{ html: string; diagnostics?: PreviewDiagnostic[] }>;
 
 let renderOverride: RenderOverride | undefined;
 let testDelayMs = 0;
 
+/** Test hook: sets or clears the render override. */
 export function setRenderOverrideForTests(override: RenderOverride | undefined): void {
   renderOverride = override;
 }
 
+/** Test hook: delays every render by `delayMs` milliseconds. */
 export function setRenderDelayForTests(delayMs: number): void {
   testDelayMs = Math.max(0, delayMs);
 }
 
+/** Test hook: removes the override and the delay. */
 export function resetRenderHooksForTests(): void {
   renderOverride = undefined;
   testDelayMs = 0;
@@ -152,6 +162,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
   if (!options.allowUntrusted && !options.isWorkspaceTrusted()) {
     throw new WorkspaceTrustError();
   }
+  // The host-neutral clock (`globalThis.performance`): Node, browsers and webviews all provide it.
   const started = performance.now();
   const diagnostics: PreviewDiagnostic[] = [];
   const deferredController = new AbortController();

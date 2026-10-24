@@ -7,8 +7,7 @@ export interface TocColumnContext {
 
 /**
  * TOC column: a right-hand column below the toolbar that lists the h1-h4 headings of the content.
- * Injected into the page script with `.toString()`, so the body must not use anything defined
- * outside it. The column is runtime UI appended to the body (never part of the page shell) and is
+ * The column is runtime UI appended to the body (never part of the page shell) and is
  * built only while it is open. `scrollToHeading` reveals a heading at the reading line; `onChange`
  * runs after the column opened or closed, because that changes the available width. CSS reserves
  * the width and hides the column on narrow panes. Parent entries fold with a twisty (the folded

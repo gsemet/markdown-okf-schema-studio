@@ -10,6 +10,7 @@ import type { ColorTheme } from "./colorTheme";
 import type { Diagnostics } from "./diagnostics";
 import type { DocumentStore } from "./documentStore";
 import type { FileSystem } from "./fileSystem";
+import type { SchemaFiles } from "../core/frontmatter/schemaFiles";
 import type { HostUi } from "./hostUi";
 import type { Navigation } from "./navigation";
 import type { ProcessRunner } from "./processRunner";
@@ -37,6 +38,7 @@ export type {
 export { EventSource, type Disposable, type HostEvent } from "./events";
 export { isFileNotFound, readTextFile, type FileKind, type FileStat, type FileSystem } from "./fileSystem";
 export type { HostUi, PickedFile, PickFileOptions } from "./hostUi";
+export type { SchemaFiles } from "../core/frontmatter/schemaFiles";
 export type { KeyValueStore } from "./keyValueStore";
 export type { Navigation } from "./navigation";
 export type { PanelGroups, PreviewPanel } from "./previewPanel";
@@ -52,6 +54,11 @@ export interface HostServices {
   readonly capabilities: HostCapabilities;
   readonly documents: DocumentStore;
   readonly files: FileSystem;
+  /**
+   * Synchronous, read-only access to the frontmatter schema files (the frontmatter analysis runs
+   * synchronously inside a render).
+   */
+  readonly schemaFiles: SchemaFiles;
   readonly settings: Settings;
   readonly workspace: WorkspaceInfo;
   readonly ui: HostUi;

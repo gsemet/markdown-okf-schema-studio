@@ -1,8 +1,8 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { installCommentThreads } from "../../../src/page/modules/commentThreads";
+import { provideGlobalElement } from "./fakeDom";
 
 type Listener = (event: any) => void;
 
@@ -122,9 +122,8 @@ class FakeDocument extends FakeElement {
 function setup() {
   const document = new FakeDocument();
   const window = { innerWidth: 800, innerHeight: 600 };
-  const sandbox = { document, window, Element: FakeElement, Date, Number, Array, Math };
-  const comments = vm.runInNewContext(`(${installCommentThreads.toString()})(document, window)`, sandbox) as
-    ReturnType<typeof installCommentThreads>;
+  provideGlobalElement(FakeElement);
+  const comments = installCommentThreads(document as never, window as never);
   return { document, comments };
 }
 
@@ -337,9 +336,8 @@ function setupWithReply() {
   };
   const replies: Array<[string, string]> = [];
   const hooks = { reply: (threadId: string, body: string) => { replies.push([threadId, body]); } };
-  const sandbox = { document, window, hooks, Element: FakeElement, Date, Number, Array, Math };
-  const comments = vm.runInNewContext(`(${installCommentThreads.toString()})(document, window, hooks)`, sandbox) as
-    ReturnType<typeof installCommentThreads>;
+  provideGlobalElement(FakeElement);
+  const comments = installCommentThreads(document as never, window as never, hooks as never);
   const fireTimers = () => { for (const [id, callback] of [...timers]) { timers.delete(id); callback(); } };
   return { document, comments, replies, fireTimers };
 }
@@ -469,9 +467,8 @@ function setupWithActions() {
     resolve: (threadId: string, resolved: boolean) => { calls.push(["resolve", threadId, resolved]); },
     remove: (threadId: string) => { calls.push(["delete", threadId]); },
   };
-  const sandbox = { document, window, hooks, Element: FakeElement, Date, Number, Array, Math };
-  const comments = vm.runInNewContext(`(${installCommentThreads.toString()})(document, window, hooks)`, sandbox) as
-    ReturnType<typeof installCommentThreads>;
+  provideGlobalElement(FakeElement);
+  const comments = installCommentThreads(document as never, window as never, hooks as never);
   const fireTimers = () => { for (const [id, callback] of [...timers]) { timers.delete(id); callback(); } };
   return { document, comments, calls, fireTimers };
 }

@@ -295,9 +295,7 @@ export interface HostMessageFilter {
   accepts(value: unknown, page: PageIdentity): value is HostToPageMessage;
 }
 
-/**
- * The page's filter of host messages. Every constant it uses is declared in its body.
- */
+/** The page's filter of host messages. */
 export function createHostMessageFilter(): HostMessageFilter {
   // In-place content patch (T34): the limits the host's patch stays within.
   const PATCH_STATUSES = ["pending", "success", "stale", "error", "missing-source", "recovery"];

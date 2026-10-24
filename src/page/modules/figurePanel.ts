@@ -41,8 +41,6 @@ type KeyEventLike = {
  * under the edition palette. It only collects the values; the caller writes the directive.
  * Enter in a one-line field and Cmd/Ctrl+Enter anywhere apply; Escape cancels; Tab cycles inside
  * the panel. An invalid value shows its message under the field and keeps the panel open.
- * Injected into the page script with `.toString()`: the body must not use anything defined
- * outside it.
  */
 export function createFigurePanel(document: Document, deps: FigurePanelDeps): FigurePanel {
   let closed = false;
@@ -273,7 +271,7 @@ export interface FigureEditButton {
 /**
  * Edit mode: the "Edit figure" button over the hovered figure. It lives outside the rendered
  * content (a child of the body, placed through the CSSOM), so content patches never touch it and
- * a press does not move the focus. Injected with `.toString()`.
+ * a press does not move the focus.
  */
 export function installFigureEditButton(
   document: Document,

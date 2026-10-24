@@ -28,6 +28,7 @@ import { pathToFileURL } from "node:url";
 import { chromium, type Page } from "playwright-core";
 
 import { analyzeFrontmatter } from "../../src/core/frontmatter/okfFrontmatter";
+import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 import { sourceRangeForLines } from "../../src/core/mapping/sourceMapping";
 import { planContentPatch } from "../../src/core/preview/contentPatch";
 import { renderPreviewDocument } from "../../src/core/render/renderPipeline";
@@ -82,6 +83,7 @@ async function buildPage(text: string, version: number, requestId: number): Prom
     plantUmlEngine: "builtin",
   });
   const frontmatter = analyzeFrontmatter({
+    schemaFiles: nodeSchemaFiles,
     filePath: SOURCE_PATH,
     sourceText: text,
     stopDir: EXTENSION_ROOT,

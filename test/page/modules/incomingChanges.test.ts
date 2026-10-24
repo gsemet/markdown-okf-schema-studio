@@ -1,6 +1,5 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { installIncomingChanges } from "../../../src/page/modules/incomingChanges";
 
@@ -45,8 +44,7 @@ function setup() {
       return all().filter((element) => element.attrs.has(name));
     },
   };
-  const marks = vm.runInNewContext(`(${installIncomingChanges.toString()})(document)`, { document }) as
-    ReturnType<typeof installIncomingChanges>;
+  const marks = installIncomingChanges(document as never);
   const block = (parent: FakeElement, line: number, end?: number) =>
     parent.append(new FakeElement("div", { "data-line": String(line), ...(end ? { "data-end-line": String(end) } : {}) }));
   const marked = () => all().filter((element) => element.attrs.has("data-sphinx-preview-changed"));
@@ -165,8 +163,7 @@ test("T16: one bar per marked block in a layer, at the block's top and height, n
       return all().filter((element) => element.attrs.has(name));
     },
   };
-  const marks = vm.runInNewContext(`(${installIncomingChanges.toString()})(document)`, { document }) as
-    ReturnType<typeof installIncomingChanges>;
+  const marks = installIncomingChanges(document as never);
   marks.setRanges([{ start: 1, end: 1 }, { start: 3, end: 3 }, { start: 6, end: 6 }]);
   const layer = body.children.find((child) => child.hasAttribute("data-sphinx-preview-change-layer")) as Box;
   assert.ok(layer, "the layer is appended to the body");

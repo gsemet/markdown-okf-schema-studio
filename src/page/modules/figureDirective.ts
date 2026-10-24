@@ -6,8 +6,7 @@
  * body whose caption and legend were not edited keeps its original text. A `---` YAML option
  * block is not understood: `parseFigure` refuses it and the text box stays the way to edit it.
  *
- * The factory is injected into the page script with `.toString()`: its body must not use anything
- * defined outside it. Pure text, no DOM.
+ * Pure text, no DOM.
  */
 
 export interface FigureOption {

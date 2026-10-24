@@ -1,9 +1,9 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { highlightCodeBlocks } from "../../../src/core/render/highlight";
 import { installCodeCopy } from "../../../src/page/modules/codeCopy";
+import { provideGlobalElement } from "./fakeDom";
 
 type Handler = (event: any) => void;
 
@@ -137,9 +137,8 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
     clearTimeout: (id: number) => { const index = timers.findIndex((timer) => timer.id === id); if (index >= 0) timers.splice(index, 1); },
     addEventListener: (type: string, handler: Handler) => windowListeners.set(type, [...(windowListeners.get(type) ?? []), handler]),
   };
-  const runtime = vm.runInNewContext(`(${installCodeCopy.toString()})(document, window, post)`, {
-    document, window, Element: FakeElement, post: (text: string) => posted.push(text),
-  }) as { hide(): void };
+  provideGlobalElement(FakeElement);
+  const runtime: { hide(): void } = installCodeCopy(document as never, window as never, (text: string) => posted.push(text));
   return {
     button(): any { return body.querySelector("[data-sphinx-preview-code-copy]") as any; },
     body, content, band, makePre, posted, timers, runtime, window,

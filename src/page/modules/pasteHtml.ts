@@ -4,8 +4,6 @@
  * answer replaces the selection of the moment of the paste in one undo step. Cmd/Ctrl+Shift+V
  * (paste as plain text) is left to the browser, and so is a clipboard without HTML. When the
  * conversion fails or leaves nothing, the plain text of the clipboard is inserted instead.
- * Self-contained: it is injected into the page script with `.toString()`, so it must not use
- * anything defined outside its own body.
  */
 export interface PasteHtmlHooks {
   /** Posts the HTML to the host; `done` receives the host's answer. */

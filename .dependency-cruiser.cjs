@@ -30,14 +30,11 @@
  * too: a browser build would need a path shim.
  *
  * Removal plans:
- *   RENDERER_SPLIT  the planned split of the renderer and frontmatter internals (later step of the
- *                   host-neutral core refactor) removes it.
  *   PORT_FOLLOW_UP  a follow-up change moves the access behind the `FileSystem` / `ProcessRunner`
  *                   port (async, so it changes timing and is out of a pure move step).
  *   PATH_SHIM       pure path arithmetic: stays until a browser build of the core adds a path shim.
  *   WEB_CRYPTO      follow-up: replace the import with WebCrypto (`globalThis.crypto`).
  */
-const RENDERER_SPLIT = "removed by the renderer/frontmatter split (later step of this refactor)";
 const PORT_FOLLOW_UP = "follow-up change: move the access behind the FileSystem / ProcessRunner port";
 const PATH_SHIM = "kept: pure path arithmetic, needs a path shim for a browser build";
 const WEB_CRYPTO = "follow-up change: use WebCrypto (globalThis.crypto) instead of node:crypto";
@@ -47,8 +44,7 @@ const NODE_DEBT = {
   "src/core/frontmatter/fileLinks.ts": {
     builtins: ["fs", "path"], reason: "sync existence checks of linked files", removal: PORT_FOLLOW_UP },
   "src/core/frontmatter/okfFrontmatter.ts": {
-    builtins: ["fs", "path", "util"], reason: "sync schema lookup next to the document, isDeepStrictEqual",
-    removal: RENDERER_SPLIT },
+    builtins: ["path"], reason: "schema directory and $ref path resolution", removal: PATH_SHIM },
   "src/core/frontmatter/stemIndex.ts": {
     builtins: ["fs", "path"], reason: "sync walk of the workspace for filename stems", removal: PORT_FOLLOW_UP },
   "src/core/mapping/imageReference.ts": {
@@ -67,8 +63,7 @@ const NODE_DEBT = {
     builtins: ["child_process", "fs", "path"], reason: "runs the PlantUML jar",
     removal: "follow-up change: spawn the jar through the existing ProcessRunner port" },
   "src/core/render/renderPipeline.ts": {
-    builtins: ["path", "perf_hooks"], reason: "include roots (path), render timings (perf_hooks)",
-    removal: `perf_hooks ${RENDERER_SPLIT} (use the global performance); path ${PATH_SHIM}` },
+    builtins: ["path"], reason: "include roots", removal: PATH_SHIM },
   "src/core/security/csp.ts": {
     builtins: ["crypto"], reason: "CSP nonce", removal: WEB_CRYPTO },
   "src/core/security/resource-policy.ts": {

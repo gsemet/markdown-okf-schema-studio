@@ -4,8 +4,8 @@ import { test } from "node:test";
 import type { PageIdentity } from "../../../src/core/protocol/envelope";
 import { createHostMessageFilter, type HostToPageType } from "../../../src/core/protocol/hostToPage";
 
-/** The filter as the page runs it: rebuilt from its source text alone. */
-const filter = (new Function(`return (${createHostMessageFilter.toString()});`)() as typeof createHostMessageFilter)();
+/** The filter as the page runs it (the page bundle imports it). */
+const filter = createHostMessageFilter();
 
 const page: PageIdentity = { documentId: "file:///doc.md", revision: 7, requestId: 11 };
 

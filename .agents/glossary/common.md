@@ -7,7 +7,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **Alert**: GitHub `> [!TYPE]` callout; inserted by the Alert button of the GFM group, whose type list opens at the caret (`popoverAtCaret` in `src/page/modules/editActions.ts`).
 - **Anchor icon**: marker rendered for a MyST `(label)=` target (`span.okf-anchor`, tooltip "Anchor: name"; first child of the next paragraph or heading, else in a `div.okf-anchor-row`).
 - **Anchor button**: toolbar toggle that ties preview scrolling to the editor (`data-sphinx-preview-anchor`).
-- **Block editor**: raw Markdown text box that replaces a mapped block in edit mode (`.sphinx-preview-block-editor`, `openBlockEditor` in `src/page/runtime.ts`).
+- **Block editor**: raw Markdown text box that replaces a mapped block in edit mode (`.sphinx-preview-block-editor`, `openBlockEditor` in `src/page/features/blockEditor.ts`).
 - **Block move**: swap of a top-level block with its neighbour from the insert point arrows (`planBlockMove` in `src/core/mapping/blockMove.ts`, `SourceEditController` in `src/session/features/sourceEdits.ts`).
 - **Blur commit suspension**: while a host round trip marked `dialog` is pending (`hostRequests.ask(…, { dialog: true }, …)` in `src/page/modules/hostRequests.ts`: the `{doc}` and image file pickers), the text box blur and the palette `onLeave` do not save, so the block editor stays open under the native dialog; `cancelAll()` in `closeBlockEdit` and the request timeout clear it.
 - **Block selection**: contiguous run of top-level body blocks selected in edit mode with Shift+click or Shift+Up/Down (`data-sphinx-preview-block-selected`, model in `src/page/modules/blockSelection.ts`).
@@ -63,7 +63,7 @@ words. Add new terms here, alphabetical, one line each; keep code names in backt
 - **TOC column**: runtime-created right column listing h1-h4 headings (`[data-sphinx-preview-toc]`), built by `src/page/modules/tocColumn.ts`.
 - **Toolbar**: the controls bar at the top of the preview (`[data-sphinx-preview-toolbar]`).
 - **Toolbar row**: `data-sphinx-preview-toolbar-row` `main` (Refresh/Anchor/Edit/Theme) or `view`.
-- **Top-level block**: mapped block that is a direct child of the content container (`topLevelMappedBlocks` in `src/page/runtime.ts`).
+- **Top-level block**: mapped block that is a direct child of the content container (`topLevelMappedBlocks` in `src/page/features/mappedBlocks.ts`).
 - **Update glow**: one brief wash of the focus colour on the blocks a content patch updated after a change made outside the preview and not in the active text editor, or an undo/redo (`data-sphinx-preview-updated`); the host sends `updatedRanges` (`src/core/preview/updatedRanges.ts`), the page marks them (`src/page/modules/motion.ts`).
 - **View preference**: per-workspace preview setting changed from toolbar row 2 (zoom, width mode, TOC, incoming changes), `src/core/state/previewViewPreferences.ts`.
 - **Warning banner**: one-line notice at the top of a successfully rendered page counting the `conf.py` MyST extension warnings, with Open Problems and close buttons; out of the flow, closed per document for the session (`[data-sphinx-preview-warning-banner]`, `src/page/modules/warningBanner.ts`).

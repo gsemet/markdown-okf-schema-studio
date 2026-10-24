@@ -17,7 +17,7 @@ EXT = REPO
 
 # Source path pattern -> use-case areas. First match wins; keep in step with use-cases.md.
 AREAS = [
-    (r"src/webview/scrollSync\.ts", "B2 D1 D2 D4 D7 E2 E3"),
+    (r"src/page/(runtime\.ts|features/)", "B2 D1 D2 D4 D7 E2 E3"),
     (r"src/page/modules/(markdownTable|textEditing)\.ts", "D1 D2 D3 D7"),
     (r"src/core/scroll/anchorPolicy\.ts", "B2 C1"),
     (r"src/page/modules/(linkNavigation|mermaidPreview)\.ts", "B3 C4"),
@@ -67,14 +67,16 @@ def main():
     if real.exists():
         names = re.findall(r"^async function scenario(\w+)", real.read_text(encoding="utf-8"), re.M)
         print(f"real-input E2E ({len(names)}): " + "; ".join(words(n) for n in names))
-    visual = EXT / "test/visual/scenarios.ts"
-    if visual.exists():
-        ids = re.findall(r"^\s+id: [\"']([\w-]+)", visual.read_text(encoding="utf-8"), re.M)
+    visual = sorted((EXT / "test/visual").glob("scenario*.ts"))
+    if visual:
+        text = "".join(path.read_text(encoding="utf-8") for path in visual)
+        ids = re.findall(r"^\s+id: [\"']([\w-]+)", text, re.M)
         groups = Counter(i.split("-")[0] for i in ids)
         print(f"visual scenarios ({len(ids)}): " + ", ".join(f"{g}×{n}" for g, n in groups.most_common()))
-    capture = EXT / "test/visual/capture.py"
-    if capture.exists():
-        checks = re.findall(r"^def check_(\w+)", capture.read_text(encoding="utf-8"), re.M)
+    capture = sorted((EXT / "test/visual").glob("capture*.py"))
+    if capture:
+        text = "".join(path.read_text(encoding="utf-8") for path in capture)
+        checks = re.findall(r"^def check_(\w+)", text, re.M)
         print(f"screenshot machine checks ({len(checks)}): " + ", ".join(checks))
     for suite in sorted((EXT / "test/integration").glob("*.test.ts")):
         if suite.name == real.name:

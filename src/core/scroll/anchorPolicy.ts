@@ -20,10 +20,6 @@
  * 5. The pane that received user input leads; programmatic scrolls never emit
  *    synchronization messages, and the anchor survives re-renders and layout
  *    changes instead of being re-derived from the current scroll position.
- *
- * `createAnchorPolicy` is self-contained so the webview runtime can inline it
- * with `Function.prototype.toString()`; the host and the tests import it
- * directly. Do not reference module-level bindings from inside it.
  */
 
 /** A mapped preview block measured in absolute document coordinates. */

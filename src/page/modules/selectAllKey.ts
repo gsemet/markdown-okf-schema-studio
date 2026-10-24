@@ -11,7 +11,6 @@ export interface SelectAllKeyEvent {
 /**
  * True when `event` is the platform's select-all shortcut (Cmd+A on macOS, Ctrl+A elsewhere)
  * typed in a text control of the page: a textarea, a text-like input or an editable element.
- * Injected into the page script with `.toString()`: the body uses nothing defined outside it.
  */
 export function isTextSelectAll(event: SelectAllKeyEvent, mac: boolean): boolean {
   if (event.altKey || event.shiftKey) return false;

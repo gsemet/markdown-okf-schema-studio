@@ -6,7 +6,7 @@ export { isSafeOkfColor } from "../../core/security/spanColors";
 
 /**
  * Applies the validated colours kept by the sanitizer. The value is validated again here with the
- * same grammar (passed in), so a hand-edited attribute can never reach `style`. Self-contained.
+ * same grammar (passed in), so a hand-edited attribute can never reach `style`.
  */
 export function applySpanColors(document: Document, isSafe: (value: string) => boolean): void {
   const targets: Array<[string, string]> = [["data-okf-color", "color"], ["data-okf-background", "background-color"]];

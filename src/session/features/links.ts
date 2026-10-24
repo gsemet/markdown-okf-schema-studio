@@ -120,7 +120,7 @@ export class LinkController {
           bundleRoot: preview.frontmatterConfiguration.bundleRoot,
           projectRoot: preview.frontmatterConfiguration.projectRoot,
           workspaceRoots: analysisRoots,
-          schemaDirectory: findSchemaDirectory(currentPath, preview.workspaceRoot),
+          schemaDirectory: findSchemaDirectory(host.schemaFiles, currentPath, preview.workspaceRoot),
         });
         const candidatePath = cachedFrontmatterLinkCandidate(link, currentPath, resolvedRoots);
         // Read the text before the await below: the marker identity must come from the same snapshot

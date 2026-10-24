@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { ADMONITION_TITLES } from "../../../src/core/directives/admonition";
 import { OKF_WIDTH } from "../../../src/core/directives/figure";
 import {
+  directiveAttributeAllowed,
   directiveAttributeRule,
   directiveNamed,
   directiveStyle,
@@ -76,4 +77,14 @@ test("the figure rule accepts a plain width only (the sanitizer applies it, see 
   for (const width of ["calc(1px)", "50vw", "-3px", ""]) assert.equal(rule.valid(width, "img"), false, width);
   assert.equal(directiveAttributeRule("data-line"), undefined);
   assert.deepEqual(rule.diagnostic, { code: "blocked-okf-width", message: "Removed an unsupported figure width." });
+});
+
+test("plug-in attribute rules are for data-* attributes the sanitizer does not handle itself", () => {
+  for (const directive of MYST_DIRECTIVES) {
+    for (const attribute of Object.keys(directive.attributes ?? {})) assert.ok(directiveAttributeAllowed(attribute), attribute);
+  }
+  assert.equal(directiveAttributeAllowed("data-okf-width"), true);
+  for (const attribute of ["style", "onclick", "href", "src", "srcset", "srcdoc", "class", "data-okf-color", "data-okf-background", "data-myst-table-style"]) {
+    assert.equal(directiveAttributeAllowed(attribute), false, attribute);
+  }
 });

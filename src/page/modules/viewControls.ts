@@ -6,9 +6,8 @@ export interface ViewControlsContext {
 }
 
 /**
- * Zoom controls of toolbar row 2. Injected into the page script with `.toString()`, so the body
- * must not use anything defined outside it. `onZoomChange` runs after the zoom variable changed
- * and lets the page keep its reading line.
+ * Zoom controls of toolbar row 2. `onZoomChange` runs after the zoom variable changed and lets
+ * the page keep its reading line.
  */
 export function installViewControls(
   document: Document,

@@ -2,8 +2,7 @@
  * Vertical shift that keeps a bar in view while the block it belongs to scrolls: the bar rides
  * down from its natural place to just under the usable top of the viewport, but never past the
  * bottom of its block, so it leaves with the block. A shift never moves the block's text (the
- * bar is translated, not laid out). Self-contained: the preview runtime embeds it through
- * `toString()`.
+ * bar is translated, not laid out).
  *
  * - `naturalTop`: where the bar sits with no shift, in viewport coordinates.
  * - `barHeight`: the bar's height.

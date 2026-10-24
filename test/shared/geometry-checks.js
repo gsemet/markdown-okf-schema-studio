@@ -1,5 +1,5 @@
 // Plain browser JavaScript, evaluated in the preview page or webview frame by the visual capture
-// (test/visual/capture.py) and by the real-input harness (test/integration/realInput/harness.ts).
+// (test/visual/capture_support.py) and by the real-input harness (test/integration/realInput/harness.ts).
 // It declares exactly one function and reads layout only; it never changes the DOM.
 // options.overlays and options.ignoreWithin replace the defaults when they are non-empty; an empty
 // or missing array keeps the defaults, so a caller cannot drop a default by passing a short list.

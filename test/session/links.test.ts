@@ -9,6 +9,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
 
+import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 import { LinkController } from "../../src/session/features/links";
 import type { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
@@ -43,6 +44,7 @@ test("a frontmatter link finds its marker with the identity of the text it was a
     host: {
       documents: { open: () => Promise.resolve(document), idOf: (filePath: string) => `file://${filePath}` },
       files: { readFile: () => Promise.resolve(Buffer.from("# Target\n@ref alpha\n@ref beta\n")) },
+      schemaFiles: nodeSchemaFiles,
     },
     navigator: {
       validateResolvedPreviewNavigation: async (candidate: string, suffix: string) => {

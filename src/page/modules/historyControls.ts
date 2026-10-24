@@ -5,9 +5,8 @@ export interface HistoryControlsContext {
 }
 
 /**
- * Back and Next buttons of toolbar row 2. Injected into the page script with `.toString()`, so the
- * body must not use anything defined outside it. The host owns the history and reports which
- * buttons are usable with `previewHistoryState`; both start disabled.
+ * Back and Next buttons of toolbar row 2. The host owns the history and reports which buttons are
+ * usable with `previewHistoryState`; both start disabled.
  */
 export function installHistoryControls(
   document: Document,

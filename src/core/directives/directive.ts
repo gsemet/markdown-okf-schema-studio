@@ -30,9 +30,15 @@ export interface MystDirectiveDescriptor {
    * titles, data the writer or a later pass reads).
    */
   readonly render?: (node: MystNode, line: number | undefined) => void;
-  /** Sanitizer rules of the attributes the render pass writes, by attribute name. */
+  /**
+   * Sanitizer rules of the attributes the render pass writes, by attribute name: `data-*`
+   * attributes only (see `directiveAttributeAllowed`), the registry refuses any other.
+   */
   readonly attributes?: Readonly<Record<string, DirectiveAttributeRule>>;
-  /** The preview stylesheet rules of the directive's output (placed by `previewStyles.ts`). */
+  /**
+   * The preview stylesheet rules of the directive's output, placed in the theme sheet
+   * (`preview/styles/contentBlockStyles.ts`).
+   */
   readonly style?: string;
   /** The palette actions that insert or convert the directive (`PALETTE_ACTIONS` ids). */
   readonly paletteActions?: readonly PaletteActionId[];
