@@ -1,0 +1,44 @@
+---
+type: SwRS
+id: SwRS-MDOKFSTUDIO-CORE-011
+uuid: dc5147ae-f2ca-4ea3-b44b-2f9ac4eb94c3
+title: Leave wikilink syntax untouched where it is not text
+description: When `[[...]]` appears in code, an existing link, an image, math or
+  raw HTML, or as an `![[...]]` embed, the extension SHALL NOT convert it to a
+  wikilink.
+project: markdown-okf-schema-studio
+scope: rendering-core
+lifecycle: draft
+origin: native
+tier: SwRS
+derives_from:
+- StRS-MDOKFSTUDIO-CORE-001
+annotation_exemption: false
+exemption_reason:
+derived_by: []
+implemented_in_files: []
+tested_in_files: []
+---
+
+## Leave wikilink syntax untouched where it is not text
+
+### Normative behavior
+
+When `[[...]]` appears in code, an existing link, an image, math or raw HTML, or as an `![[...]]` embed, the extension SHALL NOT convert it to a wikilink.
+
+### Scenario: Nominal leave wikilink syntax untouched where it is not text
+
+- GIVEN `[[Note]]` inside inline code
+- WHEN it is rendered
+- THEN the text stays literal code
+
+### Scenario: Boundary or refusal of leave wikilink syntax untouched where it is not text
+
+- GIVEN an `![[Note]]` embed
+- WHEN it is rendered
+- THEN it is not converted to a link
+
+### Verification notes
+
+- Method: test
+- Criteria: Wikilinks are converted only in plain text.
