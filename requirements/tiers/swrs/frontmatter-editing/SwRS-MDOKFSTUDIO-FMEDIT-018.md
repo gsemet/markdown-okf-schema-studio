@@ -1,0 +1,44 @@
+---
+type: SwRS
+id: SwRS-MDOKFSTUDIO-FMEDIT-018
+uuid: ee591230-ea84-4b37-a389-5e99bc31030e
+title: "A null value is refused for a field that is not nullable"
+description: "When the host receives a null value for a schema field that does not
+  allow null, the extension SHALL refuse the save with the stale-field message."
+project: markdown-okf-schema-studio
+scope: frontmatter-editing
+lifecycle: draft
+origin: native
+tier: SwRS
+derives_from:
+- StRS-MDOKFSTUDIO-FMEDIT-009
+- StRS-MDOKFSTUDIO-FMEDIT-002
+annotation_exemption: false
+exemption_reason:
+derived_by: []
+implemented_in_files: []
+tested_in_files: []
+---
+
+## A null value is refused for a field that is not nullable
+
+### Normative behavior
+
+When the host receives a null value for a schema field that does not allow null, the extension SHALL refuse the save with the stale-field message.
+
+### Scenario: Nominal
+
+- GIVEN a schema field that is not nullable
+- WHEN a save with fieldValue null arrives
+- THEN the answer is "The frontmatter field is stale or its value does not match the schema." and the document is unchanged
+
+### Scenario: Boundary or refusal
+
+- GIVEN a nullable schema field
+- WHEN a save with fieldValue null arrives
+- THEN the save is accepted
+
+### Verification notes
+
+- Method: Unit test on the save plan (test/core/edits/frontmatterEdit.test.ts).
+- Criteria: Null passes the type check only when the field is nullable.
