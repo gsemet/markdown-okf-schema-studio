@@ -3,9 +3,8 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-GFM-012
 uuid: ed79bfa4-41a0-4fea-bc9f-b1b85ab1de33
 title: Alert markers inside fences stay literal
-description: When an alert marker appears inside a fenced code block or the
-  quoted lines end, the extension SHALL keep fenced markers literal and end the
-  alert at the first unquoted line.
+description: When an alert marker appears inside a fenced code block, the
+  extension SHALL keep it as literal code.
 project: markdown-okf-schema-studio
 scope: gfm
 lifecycle: draft

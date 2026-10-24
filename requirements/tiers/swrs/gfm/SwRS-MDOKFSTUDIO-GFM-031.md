@@ -5,8 +5,7 @@ uuid: 613ef830-cae4-48be-9f33-636d3747085f
 title: Raw HTML tables keep cell attributes
 description: When a document contains a raw HTML table, the extension SHALL
   render its cells with rowspan and colspan from 1 to 999, align, scope, simple
-  class names and title, and SHALL remove script, style, iframe, svg, form,
-  embed and object elements with their content.
+  class names and title.
 project: markdown-okf-schema-studio
 scope: gfm
 lifecycle: draft
