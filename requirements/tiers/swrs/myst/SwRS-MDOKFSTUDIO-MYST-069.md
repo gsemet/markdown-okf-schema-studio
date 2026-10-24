@@ -24,7 +24,9 @@ tested_in_files: []
 
 ### Normative behavior
 
-When a conf.py writes `extensions` or `myst_enable_extensions` as list or tuple literals, the extension SHALL read their elements whatever the quoting, prefix, comment, continuation or line ending.### Scenario: Nominal
+When a conf.py writes `extensions` or `myst_enable_extensions` as list or tuple literals, the extension SHALL read their elements whatever the quoting, prefix, comment, continuation or line ending.
+
+### Scenario: Nominal
 
 - GIVEN lists with single, double and triple quotes, comments, trailing commas, implicit string joins and backslash or bracket continuations
 - WHEN the file is read
