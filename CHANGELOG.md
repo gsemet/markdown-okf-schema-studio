@@ -5,7 +5,10 @@
 - For contributors: the source is organised in layers (`src/core`, `src/host-api`, `src/page`,
   `src/node-services`, `src/session`, `src/host-vscode`), and `just check` now enforces their import
   boundaries (dependency-cruiser) and a file-size ratchet (800 lines per file in `src/`, 1 500 in
-  `test/`; larger files may only shrink). See "Architecture" in CONTRIBUTING.md.
+  `test/`; larger files may only shrink). Settings, palette actions and MyST directives each have
+  one registry; the `package.json` settings schema is generated from the settings registry
+  (`just generate-settings`) and `just check` fails when it was edited by hand. See "Architecture"
+  in CONTRIBUTING.md.
 - The Python build and documentation tools now require Python 3.11 or later (was 3.10), so the
   docs dependencies can move to Pillow 13 and a current `certifi`, which fix the reported security
   advisories. `uv` picks a matching interpreter automatically.

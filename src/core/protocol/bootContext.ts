@@ -6,6 +6,7 @@
  * module: no host API, no DOM, no Node built-ins.
  */
 
+import type { PreviewBootSettings } from "../configuration/previewConfiguration";
 import type { ViewPreferences } from "../state/previewViewPreferences";
 import type { PreviewThemeMode } from "../state/previewTheme";
 import type { PreviewPanelState } from "../state/previewState";
@@ -21,30 +22,23 @@ export interface ScrollContext {
   requestId: number;
 }
 
-/** The boot context of a page: its render identity, the source file and the settings it starts with. */
-export interface PreviewRuntimeContext extends ScrollContext {
+/**
+ * The boot context of a page: its render identity, the source file and the settings it starts with.
+ * The preview settings with a `boot` entry in the settings registry (`PREVIEW_SETTINGS`) travel
+ * under their own names; the host writes them as configured and the page reads them through
+ * `readPreviewBootSettings`.
+ */
+export interface PreviewRuntimeContext extends ScrollContext, Partial<PreviewBootSettings> {
   /** The file system path of the previewed document. */
   activeSourceFile: string;
   /** The theme mode the page starts in (the toolbar theme button; saved state wins). */
   previewThemeMode?: PreviewThemeMode;
   /** The per-workspace view preferences; the webview's own saved state wins (zoom). */
   initialViewPreferences?: ViewPreferences;
-  /** False: the page does not follow the text editor's scroll position. */
-  scrollPreviewWithEditor?: boolean;
-  /** False: the text editor does not follow the page's scroll position. */
-  scrollEditorWithPreview?: boolean;
-  /** True: the page marks the block of the editor selection. */
-  markEditorSelection?: boolean;
-  /** True: a double click in the page reveals the source line in the text editor. */
-  doubleClickToSwitchToEditor?: boolean;
-  /** How many heading levels the sticky heading bar shows (the page clamps it to 1..6, default 3). */
-  stickyHeadingDepth?: number;
   /** True in writable previews: the page offers the Comment button and the reply box (T43). */
   commentsEnabled?: boolean;
   /** The name a new inline comment thread starts with (comments.authorName, else the Git user). */
   threadAuthor?: string;
-  /** False hides the gray comment chips (preview.showComments). */
-  showComments?: boolean;
   /** The host's color theme kind (VS Code `ColorThemeKind` numbering). */
   themeKind?: number;
   /** False when no visible text editor shows the previewed document. */

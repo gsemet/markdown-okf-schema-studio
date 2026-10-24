@@ -1,8 +1,26 @@
+import {
+  ADMONITION_TYPES,
+  ALERT_TYPES,
+  COLUMN_ALIGNMENTS,
+  type EditActionOption,
+  type EditActionScope,
+  PALETTE_ACTION_IDS,
+  PALETTE_ACTIONS,
+  type PaletteActionDescriptor,
+  type PaletteActionId,
+} from "../../core/palette/paletteActions";
 import type { MarkdownTableTools } from "./markdownTable";
 import type { TextEdit } from "./textEditing";
 
-export type EditActionMode = "strict" | "gfm" | "myst";
-export type EditActionScope = "block" | "cell";
+export type {
+  EditActionMode,
+  EditActionOption,
+  EditActionScope,
+  EditActionShortcut,
+  EditActionSlash,
+  EmojiCategory,
+  EmojiEntry,
+} from "../../core/palette/paletteActions";
 
 /** What an action receives: the text box value, its selection and where the text box lives. */
 export interface EditActionContext {
@@ -14,88 +32,13 @@ export interface EditActionContext {
   arg?: string;
 }
 
-/** Keyboard binding of an action. `anyShift` lets layouts that type the key with Shift match. */
-export interface EditActionShortcut {
-  /** `KeyboardEvent.code` values accepted for the key (layout independent). */
-  codes: string[];
-  /** `KeyboardEvent.key` values accepted when the code differs (for example "/" on AZERTY). */
-  keys?: string[];
-  anyShift?: boolean;
-  /**
-   * `primary` needs the platform's command key (Cmd on macOS, Ctrl elsewhere); `any` accepts
-   * either Cmd or Ctrl. Defaults to `primary`.
-   */
-  modifier?: "primary" | "any";
-}
-
-export interface EditActionOption {
-  value: string;
-  label: string;
-}
-
-/** One emoji of the picker: the Unicode character and its English name (used by the filter). */
-export interface EmojiEntry {
-  char: string;
-  name: string;
-}
-
-export interface EmojiCategory {
-  id: string;
-  label: string;
-  items: EmojiEntry[];
-}
-
 /**
- * One registered editing operation. The palette renders `label`, `icon` and `group`; a shortcut
- * and the palette button run the same `apply`, which returns the edit to run as one native step.
- * Modes are additive: an action listed for `strict` shows in every mode, `gfm` in GFM and MyST.
+ * The code of one palette action, bound by id to its descriptor (`PALETTE_ACTIONS` in
+ * `src/core/palette/paletteActions.ts`): `apply` returns the edit to run as one native step.
  */
-export interface EditAction {
-  id: string;
-  label: string;
-  icon: string;
-  group: string;
-  modes: EditActionMode[];
-  scopes: EditActionScope[];
-  shortcut?: EditActionShortcut;
-  /** Tooltip text without the shortcut; defaults to `label`. */
-  title?: string;
-  /** Name of the popover the palette opens to pick `ctx.arg`; absent for one-click actions. */
-  popover?: string;
-  /** What the popover lists: `value` becomes `ctx.arg`, `label` is shown. */
+export interface PaletteActionHandler {
+  /** Options computed by the page, replacing the descriptor's (the code block languages). */
   options?: EditActionOption[];
-  /** Popover `grid`: the size picker (`ctx.arg` becomes "<rows>x<columns>"). */
-  grid?: { rows: number; cols: number };
-  /** Popover `emoji`: the picker's categories (`ctx.arg` becomes the chosen character). */
-  emoji?: EmojiCategory[];
-  /**
-   * Name of the small panel the palette button and the shortcut open instead of running `apply`
-   * directly; the panel collects the values and the page then runs the edit.
-   */
-  panel?: string;
-  /**
-   * With the caret inside syntax that already exists (`figure`: a `{figure}` directive or a lone
-   * Markdown image), the button opens the panel of that name instead of running its own action.
-   */
-  panelWhenInside?: "figure";
-  /**
-   * The button and the shortcut first run `apply` without an argument, then open the popover at
-   * the caret; choosing an option runs `apply` again with it (the Alert button inserts the alert,
-   * then the dropdown changes its type).
-   */
-  popoverAtCaret?: boolean;
-  /**
-   * The button opens a filterable list the host fills (`targets`: labels of the document,
-   * `citations`: keys of the workspace `.bib` files); the chosen value becomes `ctx.arg`.
-   */
-  hostList?: "targets" | "citations";
-  /**
-   * The button asks the host for a native open dialog (`document`: a Markdown file, `image`: an
-   * image file); the answer, a path relative to the document, is `ctx.arg`.
-   */
-  hostDialog?: "document" | "image";
-  /** Popover `color`: the swatches offered, as colours the sanitizer keeps. */
-  colors?: string[];
   /** Popover `color`: whether a typed colour is acceptable (the hex field's live validation). */
   validateColor?(value: string): boolean;
   /**
@@ -113,23 +56,19 @@ export interface EditAction {
    * as a swatch and its popover starts on it, with no tabs, and replaces it in place.
    */
   current?(ctx: EditActionContext): string | undefined;
-  /** How the `/` menu offers the action (see `EditActionSlash`); absent: listed under its label. */
-  slash?: EditActionSlash;
   apply(ctx: EditActionContext): TextEdit | undefined;
 }
 
+/** One handler per registered palette action. */
+export type PaletteActionHandlers = { [K in PaletteActionId]: PaletteActionHandler };
+
 /**
- * Data of the `/` command menu, next to the action it belongs to. `aliases` are short names the
- * completion also matches (`/hr` finds the horizontal rule). `variants` are extra entries that run
- * the action with a ready-made argument, as if the palette popover had been opened and the option
- * chosen (`/h2`, `/warning`); `variantsOnly` lists only the variants, not the action itself.
+ * One registered editing operation: a descriptor of the palette registry and its handler. The
+ * palette renders `label`, `icon` and `group`; a shortcut and the palette button run the same
+ * `apply`.
  */
-export interface EditActionSlash {
-  aliases?: string[];
-  variants?: Array<{ label: string; arg: string; aliases?: string[] }>;
-  variantsOnly?: boolean;
-  /** Listed by the `/` menu only: no palette button (and no shortcut). */
-  menuOnly?: boolean;
+export interface EditAction extends PaletteActionDescriptor, PaletteActionHandler {
+  id: string;
 }
 
 /** The subset of a keyboard event the shortcut matcher reads. */
@@ -183,9 +122,10 @@ export interface EditActionRegistry {
 }
 
 /**
- * Action registry of the raw-Markdown block editor. Later palette tasks only append entries to
- * `actions`. The factory is stringified into the webview runtime, so its body must stay
- * self-contained. `languages` are the fence languages the preview highlights; the code block
+ * Action registry of the raw-Markdown block editor: the descriptors of the palette registry
+ * (`src/core/palette/paletteActions.ts`) bound to their handlers, in the registry's order. A new
+ * action is a descriptor there and a handler in `handlers` below (the type requires both).
+ * `languages` are the fence languages the preview highlights; the code block
  * action offers them after "text". `tableTools` (the Markdown table parser and HTML writer) lets
  * the HTML table action convert the table under the caret; without it the action only inserts.
  * `isSafeColor` is the sanitizer's colour grammar (`isSafeOkfColor`): the colour actions write
@@ -789,55 +729,6 @@ export function createEditActions(
   }
 
 
-  // Emoji are plain data: "<character> <english name>" per entry, no network, Unicode only (flags
-  // are left out on purpose). The filter matches the words of the name.
-  const EMOJI_SOURCE: Array<[string, string, string]> = [
-    ["smileys", "Smileys", "😀 grinning face;😃 smiling face with big eyes;😄 smiling face with smiling eyes;"
-      + "😁 beaming face;😆 grinning squinting face laugh;😅 grinning face with sweat;"
-      + "😂 face with tears of joy;🙂 slightly smiling face;🙃 upside-down face;😉 winking face;"
-      + "😊 smiling face with blush;😇 smiling face with halo angel;😍 smiling face with heart eyes;"
-      + "🤩 star-struck;😘 face blowing a kiss;😋 face savoring food yum;😎 smiling face with sunglasses cool;"
-      + "🤔 thinking face;😐 neutral face;😴 sleeping face;"
-      + "😢 crying face sad;😭 loudly crying face;😡 pouting face angry;😱 face screaming in fear;"
-      + "🤯 exploding head mind blown;🥳 partying face"],
-    ["people", "People and hands", "👍 thumbs up like;👎 thumbs down dislike;👏 clapping hands applause;"
-      + "🙌 raising hands celebration;🙏 folded hands please thanks pray;🤝 handshake agreement;"
-      + "👋 waving hand hello;✋ raised hand stop;👌 ok hand;✌️ victory hand peace;🤞 crossed fingers luck;"
-      + "👉 backhand index pointing right;👈 backhand index pointing left;👆 backhand index pointing up;"
-      + "👇 backhand index pointing down;💪 flexed biceps strong;🤷 person shrugging;🤦 person facepalming;"
-      + "🙋 person raising hand;👀 eyes look;🧠 brain;👤 bust in silhouette user;"
-      + "👨‍💻 man technologist;👩‍💻 woman technologist"],
-    ["nature", "Nature", "🌱 seedling sprout;🌲 evergreen tree;🌳 deciduous tree;"
-      + "🌸 cherry blossom;🌹 rose;🌻 sunflower;🍀 four leaf clover;🍁 maple leaf;🔥 fire flame;"
-      + "💧 droplet water;🌊 water wave;⚡ high voltage lightning;☀️ sun;🌙 crescent moon;⭐ star;"
-      + "🌟 glowing star;❄️ snowflake;🌈 rainbow;☁️ cloud;🐛 bug insect;🐞 lady beetle;🐝 honeybee;"
-      + "🦋 butterfly;🐙 octopus;🐧 penguin;🦊 fox;🐱 cat face"],
-    ["food", "Food and drink", "🍎 red apple;🍏 green apple;🍌 banana;🍇 grapes;🍓 strawberry;🍋 lemon;"
-      + "🥑 avocado;🥕 carrot;🌽 ear of corn;🍞 bread;🧀 cheese wedge;🍕 pizza;🍔 hamburger;🍟 french fries;"
-      + "🌮 taco;🍣 sushi;🍪 cookie;🍰 shortcake cake;🍫 chocolate bar;🍩 doughnut;☕ hot beverage coffee;"
-      + "🍵 teacup tea;🍺 beer mug;🍷 wine glass"],
-    ["objects", "Objects", "💻 laptop computer;🖥️ desktop computer;⌨️ keyboard;📱 mobile phone;"
-      + "💡 light bulb idea;🔧 wrench tool;🔨 hammer;⚙️ gear settings;🔒 locked padlock;🔓 unlocked padlock;"
-      + "🔑 key;📁 file folder;📂 open file folder;📄 page facing up document;📝 memo note;"
-      + "📎 paperclip;📅 calendar;📊 bar chart;📈 chart increasing;📉 chart decreasing;🔍 magnifying glass search;"
-      + "📦 package box;🚀 rocket launch;🎯 direct hit target;🎉 party popper tada;🏆 trophy;"
-      + "📚 books;🔔 bell notification"],
-    ["symbols", "Symbols and status", "✅ check mark button done;☑️ check box with check;✔️ check mark;"
-      + "❌ cross mark;❎ cross mark button;⚠️ warning;🚫 prohibited;⛔ no entry;❗ red exclamation mark;"
-      + "❓ red question mark;ℹ️ information;➕ plus;➖ minus;➡️ right arrow;⬅️ left arrow;⬆️ up arrow;"
-      + "⬇️ down arrow;🔄 counterclockwise arrows button refresh;🔁 repeat button;❤️ red heart;💔 broken heart;"
-      + "💯 hundred points;🆗 ok button;🔴 red circle;"
-      + "🟢 green circle;🔵 blue circle"],
-  ];
-  const EMOJI_CATEGORIES: EmojiCategory[] = EMOJI_SOURCE.map(([id, label, list]) => ({
-    id,
-    label,
-    items: list.split(";").map((entry) => {
-      const space = entry.indexOf(" ");
-      return { char: entry.slice(0, space), name: entry.slice(space + 1) };
-    }),
-  }));
-
   /** A table of `rows` x `cols` (the header counts as a row) set apart by blank lines. */
   function insertTable(ctx: EditActionContext): TextEdit | undefined {
     if (!validSelection(ctx)) return undefined;
@@ -879,13 +770,7 @@ export function createEditActions(
     };
   }
 
-  const ALERT_TYPES = ["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"];
   const ALERT_HEAD = /^(\s{0,3}>\s?\[!)(NOTE|TIP|IMPORTANT|WARNING|CAUTION)(\][ \t]*)$/iu;
-  const ALERT_OPTIONS: EditActionOption[] = ALERT_TYPES.map((type) => ({
-    value: type,
-    label: type.charAt(0) + type.slice(1).toLowerCase(),
-  }));
-
   /**
    * The type word of the alert the caret is in: the head line is the first line of the run of
    * quoted lines around the caret (`> [!TYPE]`).
@@ -1138,7 +1023,6 @@ export function createEditActions(
     return found ? tableTools.detectTable(found.text) : undefined;
   }
 
-  const ALIGNMENTS = ["left", "center", "right"];
 
   /**
    * Sets the alignment of the table column the caret is in, rewriting only that cell of the
@@ -1147,7 +1031,7 @@ export function createEditActions(
    */
   function alignColumn(ctx: EditActionContext): TextEdit | undefined {
     if (!validSelection(ctx)) return undefined;
-    if (ctx.arg === undefined || !ALIGNMENTS.includes(ctx.arg)) return undefined;
+    if (ctx.arg === undefined || !COLUMN_ALIGNMENTS.includes(ctx.arg)) return undefined;
     const found = tableAtCaret(ctx);
     const tools = tableTools;
     if (!found || !tools || found.caretLine < 0) return undefined;
@@ -1226,17 +1110,6 @@ export function createEditActions(
     const caret = at + text.length;
     return { start: at, end: ctx.value.length, text: text + trailing, selectionStart: caret, selectionEnd: caret };
   }
-
-  const ADMONITION_TYPES = [
-    "note", "tip", "important", "warning", "caution", "danger", "attention", "error", "hint", "seealso",
-  ];
-  const ADMONITION_OPTIONS: EditActionOption[] = [
-    ...ADMONITION_TYPES.map((type) => ({
-      value: type,
-      label: type === "seealso" ? "See also" : type.charAt(0).toUpperCase() + type.slice(1),
-    })),
-    { value: "custom", label: "Custom\u2026" },
-  ];
 
   /** Inserts `body` as a block after the selection; the selection starts `offset` in, `length` long. */
   function insertBlockAt(ctx: EditActionContext, body: string, offset: number, length: number): TextEdit {
@@ -1747,15 +1620,6 @@ export function createEditActions(
   }
 
   // Eight hues at two intensities, whatever the theme: they are colours of the document.
-  const COLOUR_SWATCHES = [
-    "#e53935", "#fb8c00", "#fdd835", "#43a047", "#00897b", "#1e88e5", "#8e24aa", "#757575",
-    "#ffcdd2", "#ffe0b2", "#fff9c4", "#c8e6c9", "#b2dfdb", "#bbdefb", "#e1bee7", "#e0e0e0",
-  ];
-
-  const HEADING_OPTIONS: EditActionOption[] = [
-    { value: "0", label: "Paragraph" },
-    ...[1, 2, 3, 4, 5].map((level) => ({ value: String(level), label: "Heading " + level })),
-  ];
   const LANGUAGE_OPTIONS: EditActionOption[] = [
     { value: "text", label: "text" },
     ...Array.from(new Set(languages))
@@ -1764,435 +1628,53 @@ export function createEditActions(
       .map((name) => ({ value: name, label: name })),
   ];
 
-  // `/` menu variants: the options of the popovers that are worth a direct entry.
-  const HEADING_SLASH = [
-    ...[1, 2, 3, 4, 5].map((level) => ({
-      label: "Heading " + level,
-      arg: String(level),
-      aliases: level === 1 ? ["h1", "title", "heading1"] : ["h" + level, "heading" + level],
-    })),
-    { label: "Paragraph", arg: "0", aliases: ["text", "plain", "p"] },
-  ];
-  const ALERT_SLASH = ALERT_OPTIONS.map((option) => ({
-    label: option.label + " alert",
-    arg: option.value,
-    aliases: [option.label.toLowerCase(), "callout", "github"],
-  }));
-  const ADMONITION_SLASH = ADMONITION_OPTIONS.map((option) => ({
-    label: option.value === "custom" ? "Custom admonition" : option.label + " admonition",
-    arg: option.value,
-    aliases: [option.value === "seealso" ? "see also" : option.value, "callout", "admonition"],
-  }));
-
-  const actions: EditAction[] = [
-    {
-      id: "heading",
-      slash: { variantsOnly: true, variants: HEADING_SLASH },
-      label: "Heading",
-      title: "Heading level",
-      icon: "heading",
-      group: "block",
-      modes: ["strict"],
-      scopes: ["block"],
-      popover: "heading",
-      options: HEADING_OPTIONS,
-      apply: setHeading,
-    },
-    {
-      id: "bold",
-      slash: { aliases: ["strong", "b"] },
-      label: "Bold",
-      icon: "bold",
-      group: "inline",
-      modes: ["strict"],
-      scopes: ["block", "cell"],
-      shortcut: { codes: ["KeyB"], keys: ["b"] },
-      apply: (ctx) => toggleAsterisks(ctx, 2),
-    },
-    {
-      id: "italic",
-      slash: { aliases: ["emphasis", "em", "i"] },
-      label: "Italic",
-      icon: "italic",
-      group: "inline",
-      modes: ["strict"],
-      scopes: ["block", "cell"],
-      shortcut: { codes: ["KeyI"], keys: ["i"] },
-      apply: (ctx) => toggleAsterisks(ctx, 1),
-    },
-    {
-      id: "strikethrough",
-      slash: { aliases: ["strike", "del", "delete"] },
-      label: "Strikethrough",
-      icon: "strikethrough",
-      group: "inline",
-      modes: ["strict"],
-      scopes: ["block", "cell"],
-      apply: toggleStrikethrough,
-    },
-    {
-      id: "color",
-      slash: { aliases: ["color", "highlight", "background"] },
-      label: "Colour",
-      title: "Colour the text or its background",
-      icon: "color",
-      group: "inline",
-      modes: ["strict"],
-      scopes: ["block", "cell"],
-      popover: "color",
-      colors: COLOUR_SWATCHES,
+  // One handler per descriptor of the palette registry; the descriptors give the order.
+  const handlers: PaletteActionHandlers = {
+    heading: { apply: setHeading },
+    bold: { apply: (ctx) => toggleAsterisks(ctx, 2) },
+    italic: { apply: (ctx) => toggleAsterisks(ctx, 1) },
+    strikethrough: { apply: toggleStrikethrough },
+    color: {
       validateColor: (value) => colourOk(value.trim()),
       apply: applyColour,
     },
-    {
-      id: "colorCode",
-      label: "Colour code",
-      title: "Change this colour code",
-      icon: "colorCode",
-      group: "inline",
-      modes: ["strict"],
-      scopes: ["block", "cell"],
-      popover: "color",
-      colors: COLOUR_SWATCHES,
+    colorCode: {
       validateColor: (value) => colourOk(value.trim()),
       available: (ctx) => colourCodeAt(ctx) !== undefined,
       current: (ctx) => colourCodeAt(ctx)?.text,
       apply: applyColourCode,
     },
-    {
-      id: "link",
-      slash: { aliases: ["url", "hyperlink"] },
-      label: "Link",
-      title: "Link",
-      icon: "link",
-      group: "inline",
-      modes: ["strict"],
-      scopes: ["block", "cell"],
-      shortcut: { codes: ["KeyK"], keys: ["k"] },
-      panel: "link",
-      apply: (ctx) => linkEdit(ctx, linkDraft(ctx).text, ctx.arg ?? ""),
-    },
-    {
-      id: "image",
-      slash: { aliases: ["img", "picture", "photo"] },
-      label: "Image",
-      title: "Image (pick a file next to the document)",
-      icon: "image",
-      group: "inline",
-      modes: ["strict"],
-      scopes: ["block"],
-      hostDialog: "image",
-      apply: insertImage,
-    },
-    {
-      id: "codeFence",
-      slash: { aliases: ["code", "fence", "snippet", "pre"] },
-      label: "Code block",
-      title: "Code block (choose a language)",
-      icon: "code",
-      group: "block",
-      modes: ["strict"],
-      scopes: ["block"],
-      popover: "language",
+    link: { apply: (ctx) => linkEdit(ctx, linkDraft(ctx).text, ctx.arg ?? "") },
+    image: { apply: insertImage },
+    codeFence: {
       options: LANGUAGE_OPTIONS,
       apply: insertCodeFence,
     },
-    {
-      id: "bulletList",
-      slash: { menuOnly: true, aliases: ["bullet", "bullets", "ul", "unordered", "list", "-", "*"] },
-      label: "Bulleted list",
-      icon: "bulletList",
-      group: "block",
-      modes: ["strict"],
-      scopes: ["block"],
-      apply: (ctx) => toggleList(ctx, false),
-    },
-    {
-      id: "numberedList",
-      slash: { menuOnly: true, aliases: ["numbered", "ol", "ordered", "list", "1."] },
-      label: "Numbered list",
-      icon: "numberedList",
-      group: "block",
-      modes: ["strict"],
-      scopes: ["block"],
-      apply: (ctx) => toggleList(ctx, true),
-    },
-    {
-      id: "quote",
-      slash: { aliases: ["quote", "citation", "bq"] },
-      label: "Blockquote",
-      icon: "quote",
-      group: "block",
-      modes: ["strict"],
-      scopes: ["block"],
-      apply: toggleQuote,
-    },
-    {
-      id: "rule",
-      slash: { aliases: ["hr", "divider", "line", "separator"] },
-      label: "Horizontal rule",
-      icon: "rule",
-      group: "block",
-      modes: ["strict"],
-      scopes: ["block"],
-      apply: insertRule,
-    },
-    {
-      id: "table",
-      slash: { aliases: ["grid", "tbl"] },
-      label: "Table",
-      title: "Table (choose a size)",
-      icon: "table",
-      group: "block",
-      modes: ["strict"],
-      scopes: ["block"],
-      popover: "grid",
-      grid: { rows: 9, cols: 9 },
-      apply: insertTable,
-    },
-    {
-      id: "emoji",
-      slash: { aliases: ["smiley", "emoticon", "face"] },
-      label: "Emoji",
-      title: "Emoji",
-      icon: "emoji",
-      group: "insert",
-      modes: ["strict"],
-      scopes: ["block", "cell"],
-      popover: "emoji",
-      emoji: EMOJI_CATEGORIES,
-      apply: insertEmoji,
-    },
-    {
-      id: "todo",
-      slash: { aliases: ["todo", "fixme", "task"] },
-      label: "TODO",
-      title: "Toggle TODO comment",
-      icon: "todo",
-      group: "annotation",
-      modes: ["strict"],
-      scopes: ["block"],
-      shortcut: { codes: ["Slash"], keys: ["/"], anyShift: true, modifier: "any" },
-      apply: toggleTodo,
-    },
-    {
-      id: "thread",
-      slash: { aliases: ["thread", "discussion", "comment"] },
-      label: "Thread",
-      title: "Insert a comment thread",
-      icon: "thread",
-      group: "annotation",
-      modes: ["strict"],
-      scopes: ["block"],
-      apply: insertThread,
-    },
-    {
-      id: "alert",
-      slash: { aliases: ["callout", "github"], variants: ALERT_SLASH },
-      label: "Alert",
-      title: "GitHub alert (choose a type)",
-      icon: "alert",
-      group: "github",
-      modes: ["gfm"],
-      scopes: ["block"],
-      popover: "alert",
-      popoverAtCaret: true,
-      options: ALERT_OPTIONS,
-      apply: insertAlert,
-    },
-    {
-      id: "checkbox",
-      slash: { aliases: ["todo", "task", "checklist", "tasklist"] },
-      label: "Checkbox",
-      title: "Toggle checkbox",
-      icon: "checkbox",
-      group: "github",
-      modes: ["gfm"],
-      scopes: ["block"],
-      apply: toggleCheckbox,
-    },
-    {
-      id: "htmlTable",
-      slash: { aliases: ["table", "html"] },
-      label: "HTML table",
-      title: "HTML table (converts the table at the caret)",
-      icon: "htmlTable",
-      group: "github",
-      modes: ["gfm"],
-      scopes: ["block"],
-      apply: htmlTable,
-    },
-    {
-      id: "details",
-      slash: { aliases: ["collapse", "toggle", "spoiler", "accordion"] },
-      label: "Collapsible",
-      title: "Collapsible section (details)",
-      icon: "details",
-      group: "github",
-      modes: ["gfm"],
-      scopes: ["block"],
-      apply: insertDetails,
-    },
-    {
-      id: "footnote",
-      slash: { aliases: ["fn", "endnote"] },
-      label: "Footnote",
-      title: "Footnote",
-      icon: "footnote",
-      group: "github",
-      modes: ["gfm"],
-      scopes: ["block"],
-      apply: insertFootnote,
-    },
-    {
-      id: "mermaid",
-      slash: { aliases: ["diagram", "chart", "graph", "flowchart"] },
-      label: "Mermaid",
-      title: "Mermaid diagram",
-      icon: "mermaid",
-      group: "github",
-      modes: ["gfm"],
-      scopes: ["block"],
-      apply: insertMermaid,
-    },
-    {
-      id: "columnAlign",
-      slash: { aliases: ["align", "left", "center", "right"] },
-      label: "Column alignment",
-      title: "Table column alignment (choose)",
-      icon: "columnAlign",
-      group: "github",
-      modes: ["gfm"],
-      scopes: ["block"],
-      popover: "align",
-      options: [
-        { value: "left", label: "Left" },
-        { value: "center", label: "Center" },
-        { value: "right", label: "Right" },
-      ],
-      apply: alignColumn,
-    },
-    {
-      id: "kbd",
-      slash: { aliases: ["kbd", "key", "keyboard", "shortcut"] },
-      label: "Key",
-      title: "Keyboard key (kbd)",
-      icon: "kbd",
-      group: "github",
-      modes: ["gfm"],
-      scopes: ["block", "cell"],
-      apply: toggleKbd,
-    },
-    {
-      id: "admonition",
-      slash: { aliases: ["callout"], variants: ADMONITION_SLASH },
-      label: "Admonition",
-      title: "Admonition (choose a type)",
-      icon: "admonition",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      popover: "admonition",
-      options: ADMONITION_OPTIONS,
-      apply: insertAdmonition,
-    },
-    {
-      id: "deflist",
-      slash: { aliases: ["definition", "dl", "glossary"] },
-      label: "Definition list",
-      title: "Definition list",
-      icon: "deflist",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      apply: insertDefinitionList,
-    },
-    {
-      id: "math",
-      slash: { aliases: ["equation", "latex", "formula", "katex"] },
-      label: "Math",
-      title: "Math (choose inline, display or aligned)",
-      icon: "math",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      popover: "math",
-      options: [
-        { value: "inline", label: "Inline $\u2026$" },
-        { value: "display", label: "Display $$" },
-        { value: "aligned", label: "Aligned equations" },
-      ],
-      apply: insertMath,
-    },
-    {
-      id: "sub",
-      slash: { aliases: ["subscript"] },
-      label: "Subscript",
-      title: "Subscript",
-      icon: "sub",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block", "cell"],
-      apply: (ctx) => wrapRole(ctx, "sub"),
-    },
-    {
-      id: "sup",
-      slash: { aliases: ["superscript", "power", "exponent"] },
-      label: "Superscript",
-      title: "Superscript",
-      icon: "sup",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block", "cell"],
-      apply: (ctx) => wrapRole(ctx, "sup"),
-    },
-    {
-      id: "label",
-      slash: { aliases: ["anchor", "target"] },
-      label: "Label",
-      title: "Label (anchor for {ref})",
-      icon: "label",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      apply: insertLabel,
-    },
-    {
-      id: "ref",
-      slash: { aliases: ["reference", "xref", "crossref"] },
-      label: "Reference",
-      title: "Reference to a label ({ref})",
-      icon: "ref",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      popover: "choices",
-      hostList: "targets",
-      apply: (ctx) => insertTargetRole(ctx, "ref", true),
-    },
-    {
-      id: "doc",
-      slash: { aliases: ["document", "file", "page"] },
-      label: "Document link",
-      title: "Link to another document ({doc})",
-      icon: "doc",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      hostDialog: "document",
-      apply: (ctx) => insertTargetRole(ctx, "doc", true),
-    },
-    {
-      id: "cite",
-      slash: { aliases: ["cite", "citation", "bibtex", "bibliography"] },
-      label: "Citation",
-      title: "Citation from the workspace .bib files ({cite})",
-      icon: "cite",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      popover: "choices",
-      hostList: "citations",
+    bulletList: { apply: (ctx) => toggleList(ctx, false) },
+    numberedList: { apply: (ctx) => toggleList(ctx, true) },
+    quote: { apply: toggleQuote },
+    rule: { apply: insertRule },
+    table: { apply: insertTable },
+    emoji: { apply: insertEmoji },
+    todo: { apply: toggleTodo },
+    thread: { apply: insertThread },
+    alert: { apply: insertAlert },
+    checkbox: { apply: toggleCheckbox },
+    htmlTable: { apply: htmlTable },
+    details: { apply: insertDetails },
+    footnote: { apply: insertFootnote },
+    mermaid: { apply: insertMermaid },
+    columnAlign: { apply: alignColumn },
+    kbd: { apply: toggleKbd },
+    admonition: { apply: insertAdmonition },
+    deflist: { apply: insertDefinitionList },
+    math: { apply: insertMath },
+    sub: { apply: (ctx) => wrapRole(ctx, "sub") },
+    sup: { apply: (ctx) => wrapRole(ctx, "sup") },
+    label: { apply: insertLabel },
+    ref: { apply: (ctx) => insertTargetRole(ctx, "ref", true) },
+    doc: { apply: (ctx) => insertTargetRole(ctx, "doc", true) },
+    cite: {
       apply: (ctx) => {
         if (!validSelection(ctx) || !roleArgument(ctx.arg) || /[\s,]/u.test(ctx.arg)) return undefined;
         const text = "{cite}`" + ctx.arg + "`";
@@ -2200,37 +1682,9 @@ export function createEditActions(
         return { start: ctx.selectionStart, end: ctx.selectionEnd, text, selectionStart: caret, selectionEnd: caret };
       },
     },
-    {
-      id: "dropdown",
-      slash: { aliases: ["details", "collapse"] },
-      label: "Dropdown",
-      title: "Dropdown (collapsible admonition)",
-      icon: "dropdown",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      apply: insertDropdown,
-    },
-    {
-      id: "tableCaption",
-      slash: { aliases: ["table", "caption", "list-table"] },
-      label: "Table with caption",
-      title: "Table with caption (wraps the table at the caret)",
-      icon: "tableCaption",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      apply: tableCaption,
-    },
-    {
-      id: "listTable",
-      slash: { aliases: ["list-table", "table", "convert"] },
-      label: "List table",
-      title: "Convert the pipe or HTML table at the caret to a {list-table}",
-      icon: "listTable",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
+    dropdown: { apply: insertDropdown },
+    tableCaption: { apply: tableCaption },
+    listTable: {
       available: (ctx) => {
         const kind = tableKindAt(ctx);
         return kind === "pipe" || kind === "html";
@@ -2238,15 +1692,7 @@ export function createEditActions(
       explain: (ctx) => convertTableAtCaret(ctx, "list-table").reason,
       apply: (ctx) => convertTableAtCaret(ctx, "list-table").edit,
     },
-    {
-      id: "pipeTable",
-      slash: { aliases: ["pipe", "table", "convert"] },
-      label: "Pipe table",
-      title: "Convert the {list-table} or HTML table at the caret to a Markdown pipe table",
-      icon: "pipeTable",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
+    pipeTable: {
       available: (ctx) => {
         const kind = tableKindAt(ctx);
         return kind === "list-table" || kind === "html";
@@ -2254,31 +1700,14 @@ export function createEditActions(
       explain: (ctx) => convertTableAtCaret(ctx, "pipe").reason,
       apply: (ctx) => convertTableAtCaret(ctx, "pipe").edit,
     },
-    {
-      id: "figure",
-      slash: { aliases: ["fig", "image", "picture"] },
-      label: "Figure",
-      title: "Figure (pick an image file; with the caret in a figure, edit it)",
-      icon: "figure",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block"],
-      hostDialog: "image",
-      panelWhenInside: "figure",
-      apply: insertFigure,
-    },
-    {
-      id: "roleKbd",
-      slash: { aliases: ["key", "kbd", "keyboard"] },
-      label: "Key (MyST)",
-      title: "Keyboard key ({kbd} role)",
-      icon: "kbd",
-      group: "myst",
-      modes: ["myst"],
-      scopes: ["block", "cell"],
-      apply: insertKbdRole,
-    },
-  ];
+    figure: { apply: insertFigure },
+    roleKbd: { apply: insertKbdRole },
+  };
+  const actions: EditAction[] = PALETTE_ACTION_IDS.map((id): EditAction => ({
+    id,
+    ...(PALETTE_ACTIONS[id] as PaletteActionDescriptor),
+    ...handlers[id],
+  }));
 
   const byId = new Map<string, EditAction>();
   for (const action of actions) byId.set(action.id, action);

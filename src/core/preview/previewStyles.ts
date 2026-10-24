@@ -2,7 +2,9 @@ import {
   DEFAULT_PREVIEW_CONTENT_WIDTH,
   normalizePreviewContentWidth,
 } from "../configuration/previewConfiguration";
+import { directiveStyle } from "../directives/registry";
 import { gridColumnCss } from "../render/mystGridToctree";
+import { CALLOUT_ICONS } from "./calloutIcons";
 import { VSCODE_THEME_TOKEN_CSS } from "./themeTokens";
 
 /**
@@ -80,35 +82,6 @@ a {
   }
 }
 `;
-
-/** Builds a mask image from a 16x16 path, so the badge inherits the callout accent. */
-function icon(path: string): string {
-  return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' fill-rule='evenodd' d='${path}'/%3E%3C/svg%3E")`;
-}
-
-const ICONS = {
-  info: icon(
-    "M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 1.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11ZM7.25 6.9h1.5v4.6h-1.5V6.9ZM8 4a.95.95 0 1 1 0 1.9A.95.95 0 0 1 8 4Z",
-  ),
-  bulb: icon(
-    "M8 1a4.4 4.4 0 0 0-2.65 7.92c.35.27.55.63.55 1v.58h4.2v-.58c0-.37.2-.73.55-1A4.4 4.4 0 0 0 8 1ZM5.9 11.9h4.2v1.2H5.9v-1.2Zm.5 2.3h3.2a1.6 1.6 0 0 1-3.2 0Z",
-  ),
-  triangle: icon(
-    "M8 1.1 15.5 14.6H.5L8 1.1Zm0 3.1L3.1 13.1h9.8L8 4.2ZM7.3 6.8h1.4v3.4H7.3V6.8Zm0 4.2h1.4v1.4H7.3V11Z",
-  ),
-  octagon: icon(
-    "M5 1h6l4 4v6l-4 4H5l-4-4V5l4-4Zm.62 1.5L2.5 5.62v4.76l3.12 3.12h4.76l3.12-3.12V5.62L10.38 2.5H5.62ZM7.3 4.6h1.4v4.2H7.3V4.6Zm0 5.2h1.4v1.4H7.3V9.8Z",
-  ),
-  cross: icon(
-    "M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 1.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Zm2.6 1.84L8 6.94 5.4 4.34 4.34 5.4 6.94 8 4.34 10.6 5.4 11.66 8 9.06l2.6 2.6 1.06-1.06L9.06 8l2.6-2.6-1.06-1.06Z",
-  ),
-  star: icon(
-    "M8 1.2 10.06 5.6 14.8 6.32l-3.44 3.42.82 4.86L8 12.3l-4.18 2.28.82-4.86L1.2 6.32 5.94 5.6 8 1.2Z",
-  ),
-  arrow: icon(
-    "M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 1.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11ZM7.4 4.9 6.34 5.96 8.38 8l-2.04 2.04L7.4 11.1 10.5 8 7.4 4.9Z",
-  ),
-};
 
 /**
  * Realigns the Sphinx theme with VS Code's built-in Markdown preview.
@@ -387,8 +360,8 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
   width: 14px;
   height: 14px;
   background: var(--sphinx-preview-warning-accent);
-  -webkit-mask: ${ICONS.triangle} center / contain no-repeat;
-  mask: ${ICONS.triangle} center / contain no-repeat;
+  -webkit-mask: ${CALLOUT_ICONS.triangle} center / contain no-repeat;
+  mask: ${CALLOUT_ICONS.triangle} center / contain no-repeat;
 }
 
 [data-sphinx-preview-warning-text] {
@@ -3076,42 +3049,7 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   vertical-align: middle;
 }
 
-#sphinx-myst-preview-content figure {
-  margin: 1.4em 0;
-  text-align: center;
-}
-
-/* Figure and image alignment (MyST :align:) and size (:width:, applied by the page script from
-   data-okf-width). A figure floats beside the text; a lone image is centred or floats too. A
-   floating figure gets the width itself and its image fills it, so percentages stay relative to the
-   column. */
-#sphinx-myst-preview-content img.align-center {
-  display: block;
-  margin-inline: auto;
-}
-
-#sphinx-myst-preview-content :is(img, figure).align-left {
-  float: left;
-  max-width: 100%;
-  margin: 0.3em 1.4em 0.8em 0;
-}
-
-#sphinx-myst-preview-content :is(img, figure).align-right {
-  float: right;
-  max-width: 100%;
-  margin: 0.3em 0 0.8em 1.4em;
-}
-
-#sphinx-myst-preview-content figure > img.align-left,
-#sphinx-myst-preview-content figure > img.align-right {
-  float: none;
-  margin: 0;
-}
-
-#sphinx-myst-preview-content figure:is(.align-left, .align-right) > img[data-okf-width] {
-  width: 100%;
-}
-
+${directiveStyle("figure")}
 #sphinx-myst-preview-content > :is(h1, h2, h3, h4, h5, h6) {
   clear: both;
 }
@@ -3247,97 +3185,7 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   border-top-right-radius: 0;
 }
 
-/* Admonitions: tinted panel with a thick accent bar, matching VS Code alert styling. */
-#sphinx-myst-preview-content :where(.admonition, div[class*="admonition-"], .attention, .caution, .danger, .error, .hint, .important, .note, .seealso, .tip, .tips, .warning) {
-  --sphinx-preview-accent: var(--studio-textLink-foreground, #4488dd);
-  --sphinx-preview-icon: ${ICONS.info};
-  display: block;
-  margin: 1.2em 0;
-  padding: 0.85em 1em;
-  border: 1px solid var(--sphinx-preview-border);
-  border-inline-start: 4px solid var(--sphinx-preview-accent);
-  /* Fallback first: themes without color-mix still get a panel distinct from the page. */
-  background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.08));
-  background: color-mix(in srgb, var(--sphinx-preview-accent) 14%, var(--studio-editor-background, Canvas));
-  color: var(--studio-editor-foreground, CanvasText);
-  overflow: auto;
-}
-
-#sphinx-myst-preview-content :where(.admonition, .attention, .caution, .danger, .error, .hint, .important, .note, .seealso, .tip, .tips, .warning) > :where(.admonition-title, p.admonition-title) {
-  display: flex;
-  align-items: center;
-  gap: 0.45em;
-  margin: 0 0 0.5em;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--sphinx-preview-accent);
-  font-weight: 600;
-  font-size: 1em;
-  line-height: var(--sphinx-preview-line-height);
-}
-
-/* The badge is a mask, not an image, so it takes the accent colour of its callout. */
-#sphinx-myst-preview-content :where(.admonition-title, p.admonition-title)::before {
-  content: "";
-  flex: none;
-  width: 1.05em;
-  height: 1.05em;
-  background-color: currentColor;
-  -webkit-mask: var(--sphinx-preview-icon) no-repeat center / contain;
-  mask: var(--sphinx-preview-icon) no-repeat center / contain;
-}
-
-#sphinx-myst-preview-content :where(.admonition, .attention, .caution, .danger, .error, .hint, .important, .note, .seealso, .tip, .tips, .warning) > :last-child {
-  margin-bottom: 0;
-}
-
-#sphinx-myst-preview-content .admonition.simple {
-  padding: 0.45em 0 0.45em 1em;
-  border: 0;
-  border-inline-start: 3px solid var(--sphinx-preview-accent);
-  background: none;
-  overflow: visible;
-}
-
-#sphinx-myst-preview-content .admonition.no-icon > :where(.admonition-title, p.admonition-title)::before {
-  display: none;
-}
-
-#sphinx-myst-preview-content .note {
-  --sphinx-preview-accent: var(--studio-charts-blue, #3794ff);
-}
-
-#sphinx-myst-preview-content .seealso {
-  --sphinx-preview-accent: var(--studio-charts-blue, #3794ff);
-  --sphinx-preview-icon: ${ICONS.arrow};
-}
-
-#sphinx-myst-preview-content :where(.tip, .tips, .hint, .versionadded) {
-  --sphinx-preview-accent: var(--studio-charts-green, #89d185);
-  --sphinx-preview-icon: ${ICONS.bulb};
-}
-
-#sphinx-myst-preview-content .important {
-  --sphinx-preview-accent: var(--studio-charts-purple, #b180d7);
-  --sphinx-preview-icon: ${ICONS.star};
-}
-
-#sphinx-myst-preview-content :where(.warning, .attention, .versionchanged) {
-  --sphinx-preview-accent: var(--studio-charts-yellow, #cca700);
-  --sphinx-preview-icon: ${ICONS.triangle};
-}
-
-#sphinx-myst-preview-content .caution {
-  --sphinx-preview-accent: var(--studio-charts-red, #f14c4c);
-  --sphinx-preview-icon: ${ICONS.octagon};
-}
-
-#sphinx-myst-preview-content :where(.danger, .error, .deprecated) {
-  --sphinx-preview-accent: var(--studio-charts-red, #f14c4c);
-  --sphinx-preview-icon: ${ICONS.cross};
-}
-
+${directiveStyle("admonition")}
 #sphinx-myst-preview-content blockquote {
   margin: 1em 0;
   padding: 0 1em;
@@ -3673,16 +3521,7 @@ html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > 
   margin-inline-end: 0;
 }
 
-/* A {list-table} cell holds a paragraph: it adds no space of its own, so the rows are as tall as a pipe table's. */
-#sphinx-myst-preview-content :where(th, td) > p:first-child { margin-top: 0; }
-#sphinx-myst-preview-content :where(th, td) > p:last-child { margin-bottom: 0; }
-
-/* A table with :widths: (a colgroup) fills the column and splits it by those widths. */
-#sphinx-myst-preview-content table:has(> colgroup) {
-  display: table;
-  width: 100%;
-}
-
+${directiveStyle("tables")}
 #sphinx-myst-preview-content hr {
   height: 1px;
   margin: 2em 0;

@@ -1,92 +1,79 @@
-export const PREVIEW_CONFIGURATION_SECTION = "markdownOkfSchemaStudio.preview";
-export const MAX_PREVIEW_CONTENT_WIDTH = 2400;
-export const DEFAULT_PREVIEW_CONTENT_WIDTH = 960;
-export const MAX_STICKY_HEADING_DEPTH = 6;
-export const DEFAULT_STICKY_HEADING_DEPTH = 3;
+/**
+ * The `markdownOkfSchemaStudio.preview.*` settings, read through the settings registry
+ * (`settingsRegistry.ts`, where the names, defaults, bounds and descriptions live).
+ */
 
-export interface PreviewConfigurationSource {
-  get<T>(section: string, defaultValue: T): T;
+import {
+  bootSettingKeys,
+  type BootSettingKeys,
+  PREVIEW_SETTINGS,
+  readSettings,
+  settingDefaults,
+  settingSection,
+  type SettingsSource,
+  type SettingValues,
+} from "./settingsRegistry";
+
+export {
+  DEFAULT_PREVIEW_CONTENT_WIDTH,
+  DEFAULT_STICKY_HEADING_DEPTH,
+  MAX_PREVIEW_CONTENT_WIDTH,
+  MAX_STICKY_HEADING_DEPTH,
+  normalizePreviewContentWidth,
+  normalizeStickyHeadingDepth,
+} from "./settingsRegistry";
+
+/** The full name of the preview section. */
+export const PREVIEW_CONFIGURATION_SECTION = settingSection("preview");
+
+/** Where the preview settings are read from (the section of the host's settings store). */
+export type PreviewConfigurationSource = SettingsSource;
+
+/** The preview settings, normalized (see `PREVIEW_SETTINGS` for each field). */
+export type PreviewConfiguration = SettingValues<typeof PREVIEW_SETTINGS>;
+
+/** The preview settings when none is set. */
+export const DEFAULT_PREVIEW_CONFIGURATION: PreviewConfiguration = settingDefaults(PREVIEW_SETTINGS);
+
+/** The preview settings of `source`, normalized. */
+export function readPreviewConfiguration(source: PreviewConfigurationSource): PreviewConfiguration {
+  return readSettings(PREVIEW_SETTINGS, source);
 }
 
-export interface PreviewConfiguration {
-  scrollPreviewWithEditor: boolean;
-  scrollEditorWithPreview: boolean;
-  markEditorSelection: boolean;
-  doubleClickToSwitchToEditor: boolean;
-  maxContentWidth: number;
-  stickyHeadingDepth: number;
-  /** Patch the preview content in place instead of reloading the page (kill switch, T34). */
-  incrementalUpdates: boolean;
-  /** Show the gray chips of HTML comments; TODO chips always show (T15). */
-  showComments: boolean;
-  /** Mark blocks changed since the last commit with a green bar (T16). */
-  showIncomingChanges: boolean;
-}
+/**
+ * The preview settings the page gets in its boot context (`PreviewRuntimeContext`), under the same
+ * names: the settings of `PREVIEW_SETTINGS` that have a `boot` entry.
+ */
+export type PreviewBootSettings = Pick<PreviewConfiguration, BootSettingKeys<typeof PREVIEW_SETTINGS>>;
 
-export const DEFAULT_PREVIEW_CONFIGURATION: PreviewConfiguration = {
-  scrollPreviewWithEditor: true,
-  scrollEditorWithPreview: true,
-  markEditorSelection: false,
-  doubleClickToSwitchToEditor: false,
-  maxContentWidth: DEFAULT_PREVIEW_CONTENT_WIDTH,
-  stickyHeadingDepth: DEFAULT_STICKY_HEADING_DEPTH,
-  incrementalUpdates: true,
-  showComments: true,
-  showIncomingChanges: true,
-};
-
-export function normalizePreviewContentWidth(value: number): number {
-  if (!Number.isFinite(value) || value < 0) {
-    return DEFAULT_PREVIEW_CONFIGURATION.maxContentWidth;
+/** The boot context entries of the preview settings, in table order (the host writes them). */
+export function previewBootSettings(configuration: PreviewConfiguration): PreviewBootSettings {
+  const values: Record<string, unknown> = {};
+  for (const key of bootSettingKeys(PREVIEW_SETTINGS)) {
+    values[key] = configuration[key as keyof PreviewConfiguration];
   }
-  return Math.min(MAX_PREVIEW_CONTENT_WIDTH, Math.round(value));
+  return values as PreviewBootSettings;
 }
 
-export function normalizeStickyHeadingDepth(value: number): number {
-  if (!Number.isFinite(value)) {
-    return DEFAULT_STICKY_HEADING_DEPTH;
+/** The page's values of the preview boot settings: absent or odd entries get the page defaults. */
+export function readPreviewBootSettings(
+  context: Partial<Record<keyof PreviewBootSettings, unknown>>,
+): PreviewBootSettings {
+  const values: Record<string, unknown> = {};
+  for (const [key, descriptor] of Object.entries(PREVIEW_SETTINGS)) {
+    if (descriptor.boot !== undefined) {
+      values[key] = descriptor.boot.read(context[key as keyof PreviewBootSettings]);
+    }
   }
-  return Math.max(1, Math.min(MAX_STICKY_HEADING_DEPTH, Math.round(value)));
+  return values as PreviewBootSettings;
 }
 
-export function readPreviewConfiguration(
-  source: PreviewConfigurationSource,
-): PreviewConfiguration {
-  const maxContentWidth = source.get(
-    "maxContentWidth",
-    DEFAULT_PREVIEW_CONFIGURATION.maxContentWidth,
-  );
-  const stickyHeadingDepth = source.get(
-    "stickyHeadingDepth",
-    DEFAULT_PREVIEW_CONFIGURATION.stickyHeadingDepth,
-  );
-  return {
-    scrollPreviewWithEditor: source.get(
-      "scrollPreviewWithEditor",
-      DEFAULT_PREVIEW_CONFIGURATION.scrollPreviewWithEditor,
-    ),
-    scrollEditorWithPreview: source.get(
-      "scrollEditorWithPreview",
-      DEFAULT_PREVIEW_CONFIGURATION.scrollEditorWithPreview,
-    ),
-    markEditorSelection: source.get(
-      "markEditorSelection",
-      DEFAULT_PREVIEW_CONFIGURATION.markEditorSelection,
-    ),
-    doubleClickToSwitchToEditor: source.get(
-      "doubleClickToSwitchToEditor",
-      DEFAULT_PREVIEW_CONFIGURATION.doubleClickToSwitchToEditor,
-    ),
-    maxContentWidth: normalizePreviewContentWidth(maxContentWidth),
-    stickyHeadingDepth: normalizeStickyHeadingDepth(stickyHeadingDepth),
-    incrementalUpdates: source.get(
-      "incrementalUpdates",
-      DEFAULT_PREVIEW_CONFIGURATION.incrementalUpdates,
-    ),
-    showComments: source.get("showComments", DEFAULT_PREVIEW_CONFIGURATION.showComments),
-    showIncomingChanges: source.get(
-      "showIncomingChanges",
-      DEFAULT_PREVIEW_CONFIGURATION.showIncomingChanges,
-    ),
-  };
-}
+/**
+ * The names of the boot settings the page reads only at startup, in table order: a content patch
+ * needs the same values (see `runtimeContextKey`).
+ */
+export const PREVIEW_STARTUP_SETTING_KEYS: readonly (keyof PreviewStartupSettings)[] =
+  bootSettingKeys(PREVIEW_SETTINGS, "startup") as (keyof PreviewStartupSettings)[];
+
+/** The preview boot settings the page reads only at startup (see `PREVIEW_STARTUP_SETTING_KEYS`). */
+export type PreviewStartupSettings = Pick<PreviewConfiguration, BootSettingKeys<typeof PREVIEW_SETTINGS, "startup">>;

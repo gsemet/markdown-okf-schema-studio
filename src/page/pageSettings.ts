@@ -3,6 +3,7 @@
  * as they are configured; the page applies the defaults and bounds).
  */
 
+import { readPreviewBootSettings } from "../core/configuration/previewConfiguration";
 import type { PreviewRuntimeContext } from "../core/protocol/bootContext";
 
 /** The scroll and reveal settings of a page; the anchor button changes `scrollPreviewWithEditor`. */
@@ -20,23 +21,20 @@ export interface PageSettings {
 /** Delay between the last keystroke in a block editor and its autosave. */
 export const AUTOSAVE_DELAY_MS = 400;
 
-/** The scroll and reveal settings of a boot context, with their defaults. */
+/** The scroll and reveal settings of a boot context, read as the settings registry says. */
 export function pageSettings(context: PreviewRuntimeContext): PageSettings {
+  const boot = readPreviewBootSettings(context);
   return {
-    scrollPreviewWithEditor: context.scrollPreviewWithEditor !== false,
-    scrollEditorWithPreview: context.scrollEditorWithPreview !== false,
-    markEditorSelection: context.markEditorSelection === true,
-    doubleClickToSwitchToEditor: context.doubleClickToSwitchToEditor === true,
+    scrollPreviewWithEditor: boot.scrollPreviewWithEditor,
+    scrollEditorWithPreview: boot.scrollEditorWithPreview,
+    markEditorSelection: boot.markEditorSelection,
+    doubleClickToSwitchToEditor: boot.doubleClickToSwitchToEditor,
   };
 }
 
 /** How many heading levels the sticky band shows: the setting rounded and clamped to 1..6, else 3. */
 export function stickyHeadingDepthOf(context: PreviewRuntimeContext): number {
-  const requestedStickyHeadingDepth = context.stickyHeadingDepth;
-  return typeof requestedStickyHeadingDepth === "number"
-      && Number.isFinite(requestedStickyHeadingDepth)
-    ? Math.max(1, Math.min(6, Math.round(requestedStickyHeadingDepth)))
-    : 3;
+  return readPreviewBootSettings(context).stickyHeadingDepth;
 }
 
 /** True on macOS and iOS (Cmd instead of Ctrl); false when the platform cannot be read. */

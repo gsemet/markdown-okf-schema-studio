@@ -15,6 +15,11 @@
 
 import { parse, serialize, type DefaultTreeAdapterTypes } from "parse5";
 
+import {
+  PREVIEW_STARTUP_SETTING_KEYS,
+  type PreviewStartupSettings,
+} from "../configuration/previewConfiguration";
+
 type TreeNode = DefaultTreeAdapterTypes.Node;
 type TreeElement = DefaultTreeAdapterTypes.Element;
 type TreeChildNode = DefaultTreeAdapterTypes.ChildNode;
@@ -151,27 +156,20 @@ export function diagnosticsFitPatch(diagnostics: readonly { severity: string; te
  * document can change: which document it shows and the interaction settings. A patch keeps the
  * running page, so it is allowed only when the new render has the same key. The theme, the pairing
  * with a text editor, the theme mode and the edit mode are not in the key: the page follows them
- * with messages or owns them.
+ * with messages or owns them. The settings are the preview settings the settings registry marks as
+ * read at startup (`PREVIEW_STARTUP_SETTING_KEYS`).
  */
-export interface RuntimeContextSettings {
+export type RuntimeContextSettings = {
   documentId: string;
   activeSourceFile: string;
-  scrollPreviewWithEditor?: boolean;
-  scrollEditorWithPreview?: boolean;
-  markEditorSelection?: boolean;
-  doubleClickToSwitchToEditor?: boolean;
-  stickyHeadingDepth?: number;
-}
+} & Partial<PreviewStartupSettings>;
 
+/** The key of {@link RuntimeContextSettings}: the document, then the startup settings in table order. */
 export function runtimeContextKey(context: RuntimeContextSettings): string {
   return JSON.stringify([
     context.documentId,
     context.activeSourceFile,
-    context.scrollPreviewWithEditor ?? null,
-    context.scrollEditorWithPreview ?? null,
-    context.markEditorSelection ?? null,
-    context.doubleClickToSwitchToEditor ?? null,
-    context.stickyHeadingDepth ?? null,
+    ...PREVIEW_STARTUP_SETTING_KEYS.map((key) => context[key] ?? null),
   ]);
 }
 

@@ -57,7 +57,7 @@ import the layers below it, never one above it.
 
 | Folder | What it holds | May import |
 | --- | --- | --- |
-| `src/core/` | Host-neutral logic: protocol (`core/protocol/`), rendering, sanitizing, source mapping, edit operations, comments, frontmatter, settings normalization, page assets built in Node (`core/preview/`) | `core` and npm packages; no `vscode`, no DOM-only package, no Node built-in |
+| `src/core/` | Host-neutral logic: protocol (`core/protocol/`), rendering, sanitizing, source mapping, edit operations, comments, frontmatter, the registries of settings (`core/configuration/`), palette actions (`core/palette/`) and MyST directives (`core/directives/`), page assets built in Node (`core/preview/`) | `core` and npm packages; no `vscode`, no DOM-only package, no Node built-in |
 | `src/host-api/` | The port interfaces every host implements (documents, files, settings, watchers, processes...) | `core` types |
 | `src/page/` | The preview page, bundled for the browser: runtime, typed features, page modules (`page/modules/`) | `core`, npm packages |
 | `src/node-services/` | Node implementations of ports and Node-only services (file system, processes, Sphinx build, watchers) | `core`, `host-api`, Node, npm packages |
@@ -81,6 +81,56 @@ Tests mirror this tree under `test/` (`test/core/render/` tests `src/core/render
   only shrink; when one shrinks, lower its entry with `node scripts/check-file-sizes.mjs --update`
   (the check says so). The same target fails on any `@ts-nocheck` or `@ts-ignore` in `src/`
   outside `src/page/runtime.ts`.
+- `just check-settings` fails when the `contributes.configuration` of `package.json` differs from
+  what the settings registry generates (see "Add a setting").
+
+### Extension points
+
+Three registries hold what used to be spread over many files. Each keeps the pure data in `core`
+and the code that needs the page or a host in its own layer.
+
+**Add a palette action** (a button of the edition palette, an entry of the `/` menu):
+
+1. Add its descriptor to `PALETTE_ACTIONS` in `src/core/palette/paletteActions.ts`, at the place
+   it should show: label, icon, group, modes (`strict` shows in every mode, `gfm` in GFM and MyST,
+   `myst` in MyST only), scopes, and the optional shortcut, popover, panel, host list or dialog and
+   `/` menu data (`slash`: aliases, variants, `menuOnly`).
+2. A new icon goes in `PALETTE_ICONS` (`src/core/palette/paletteIcons.ts`); the descriptor's
+   `icon` must name one.
+3. Add its handler to `handlers` in `createEditActions` (`src/page/modules/editActions.ts`):
+   `apply` returns the text edit; `available`, `explain`, `current`, `validateColor` and computed
+   `options` are optional. TypeScript refuses a descriptor without a handler and the reverse.
+4. The palette and the `/` menu pick the action up from the registry; nothing else to wire. Test
+   the edit in `test/page/modules/editActions.test.ts`.
+
+**Add a MyST directive plug-in** (a directive that needs more than what the MyST writer does):
+
+1. Create `src/core/directives/<name>.ts` exporting a `MystDirectiveDescriptor`
+   (`src/core/directives/directive.ts`): the directive `names`, the `render` pass on the parsed
+   `mystDirective` node (helpers in `src/core/render/mystNode.ts`), the sanitizer `attributes`
+   rules of the HTML attributes the pass writes, the `style` rules of its output and the
+   `paletteActions` that insert it (ids of `PALETTE_ACTIONS`).
+2. Register it in `MYST_DIRECTIVES` (`src/core/directives/registry.ts`). The renderer runs the pass
+   for every directive of those names and the sanitizer applies the attribute rules.
+3. Place its stylesheet with `${directiveStyle("<id>")}` in `src/core/preview/previewStyles.ts`,
+   where the rules belong in the cascade.
+4. Test the plug-in in `test/core/directives/` and its rendering in
+   `test/core/render/mystFeatures.test.ts`.
+
+**Add a setting**:
+
+1. Add it to its section table in `src/core/configuration/settingsRegistry.ts`
+   (`PREVIEW_SETTINGS`, `EDITING_SETTINGS`, …; a new section also needs an entry in
+   `SETTING_CATEGORIES`): the `package.json` schema fields in the order they are written (`type`,
+   `enum`, `enumDescriptions`, `default`, `minimum`, `maximum`, `step`, `markdownDescription`,
+   `order`), and `normalize`, which turns the stored value into the value the core uses. A setting
+   the page needs at startup is a `startupSetting` (the content patch then compares it) and one it
+   also follows by message a `liveSetting`; both give the page's `read` of the boot context entry.
+2. Run `just generate-settings`: it writes the `contributes.configuration` of `package.json`, which
+   is never edited by hand (`just check-settings` fails otherwise).
+3. Read it on the host with `readSettings` (or the section module, `previewConfiguration.ts`, …),
+   which also types it. Boot settings reach the page without more code: the host writes
+   `previewBootSettings(configuration)` and the page reads `readPreviewBootSettings(context)`.
 
 ## Checks
 

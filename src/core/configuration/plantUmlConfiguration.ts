@@ -1,27 +1,32 @@
-export const PLANTUML_CONFIGURATION_SECTION = "markdownOkfSchemaStudio.plantuml";
+/**
+ * The `markdownOkfSchemaStudio.plantuml.*` settings, read through the settings registry
+ * (`settingsRegistry.ts`, where the names, defaults and descriptions live).
+ */
 
-export interface PlantUmlConfigurationSource {
-  get<T>(section: string, defaultValue: T): T;
-}
+import { PLANTUML_SETTINGS, readSetting, settingSection, type SettingsSource } from "./settingsRegistry";
 
+/** The full name of the PlantUML section. */
+export const PLANTUML_CONFIGURATION_SECTION = settingSection("plantuml");
+
+/** Where the PlantUML settings are read from (the section of the host's settings store). */
+export type PlantUmlConfigurationSource = SettingsSource;
+
+/** The JAR pipeline settings. */
 export interface PlantUmlConfiguration {
+  /** Path to `plantuml.jar`, trimmed; empty: the `plantuml` command on the PATH. */
   jarPath: string;
 }
 
+/** The JAR pipeline settings when none is set. */
 export const DEFAULT_PLANTUML_CONFIGURATION: PlantUmlConfiguration = {
-  jarPath: "",
+  jarPath: PLANTUML_SETTINGS.jarPath.schema.default,
 };
 
+/** The JAR pipeline settings of `source`, normalized. */
 export function readPlantUmlConfiguration(
   source: PlantUmlConfigurationSource,
 ): PlantUmlConfiguration {
-  const jarPath = source.get(
-    "jarPath",
-    DEFAULT_PLANTUML_CONFIGURATION.jarPath,
-  );
-  return {
-    jarPath: typeof jarPath === "string" ? jarPath.trim() : DEFAULT_PLANTUML_CONFIGURATION.jarPath,
-  };
+  return { jarPath: readSetting(source, "jarPath", PLANTUML_SETTINGS.jarPath) };
 }
 
 /** The full name of the switch between the built-in engine and the JAR/PATH pipeline. */
@@ -32,18 +37,20 @@ export const PLANTUML_USE_JAR_SETTING = `${PLANTUML_CONFIGURATION_SECTION}.useJa
  * default) or, with `useJar`, the external `java -jar` / `plantuml` pipeline (`jarPath`).
  */
 export interface PlantUmlEngineSettings {
+  /** True: the external pipeline (only a real `true` starts a process). */
   useJar: boolean;
 }
 
+/** The engine settings when none is set. */
 export const DEFAULT_PLANTUML_ENGINE_SETTINGS: PlantUmlEngineSettings = {
-  useJar: false,
+  useJar: PLANTUML_SETTINGS.useJar.schema.default,
 };
 
+/** The engine settings of `source`: only a real `true` starts a process. */
 export function readPlantUmlEngineSettings(
   source: PlantUmlConfigurationSource,
 ): PlantUmlEngineSettings {
-  // Only a real `true` starts a process; anything else keeps the engine that spawns nothing.
-  return { useJar: source.get("useJar", DEFAULT_PLANTUML_ENGINE_SETTINGS.useJar) === true };
+  return { useJar: readSetting(source, "useJar", PLANTUML_SETTINGS.useJar) };
 }
 
 /**
@@ -58,6 +65,7 @@ export type PlantUmlEngineChoice = "builtin" | "jar" | "jar-untrusted";
 /** The engine the render pipeline is asked to use (trust is checked again by the JAR renderer). */
 export type PlantUmlEngine = "builtin" | "jar";
 
+/** The engine to use for these settings: the built-in one unless `useJar`, which needs trust. */
 export function resolvePlantUmlEngine(
   settings: PlantUmlEngineSettings,
   trusted: boolean,

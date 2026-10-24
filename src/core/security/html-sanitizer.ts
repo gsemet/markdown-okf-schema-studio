@@ -1,4 +1,5 @@
 import { parse, serialize, type DefaultTreeAdapterTypes } from "parse5";
+import { directiveAttributeRule } from "../directives/registry";
 import { isSafeOkfColor } from "./spanColors";
 
 import {
@@ -117,9 +118,6 @@ function safeTableStyleValue(property: string, value: string): string | undefine
   }
   return undefined;
 }
-
-/** The only value the page script applies as a width: a number with an optional unit. */
-const SAFE_OKF_WIDTH = /^\d+(?:\.\d+)?(?:px|%|em|rem)?$/u;
 
 function attr(node: HtmlNode, name: string): HtmlAttribute | undefined {
   return node.attrs?.find((candidate) => candidate.name === name);
@@ -254,10 +252,11 @@ function rewriteNode(
       }
       continue;
     }
-    if (name === "data-okf-width") {
-      if (!SAFE_OKF_WIDTH.test(attribute.value.trim())) {
+    const directiveRule = directiveAttributeRule(name);
+    if (directiveRule) {
+      if (!directiveRule.valid(attribute.value, tagName)) {
         removeAttr(node, attribute.name);
-        addDiagnostic(diagnostics, "blocked-okf-width", "Removed an unsupported figure width.");
+        addDiagnostic(diagnostics, directiveRule.diagnostic.code, directiveRule.diagnostic.message);
       }
       continue;
     }
