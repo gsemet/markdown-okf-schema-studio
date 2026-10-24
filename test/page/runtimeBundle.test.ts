@@ -1,17 +1,15 @@
 /**
- * The page runtime is assembled from functions turned back into source text
- * (`Function.prototype.toString()`), so each of them must be self-contained: a reference to a
- * helper defined outside its body type-checks in its module but is an undefined name in the page.
- * The shipped file is built by esbuild with minification, which renames such helpers, so a script
- * that works unminified can still break once bundled. These tests pin the property on the scripts
- * the page really runs, whatever builds them: the runtime of this build and the bundled file
- * `out/bundle/preview.js` produced by the project's own bundle step (built in a temporary
- * directory), and a page session whose trace is pinned as a literal value.
+ * The page runtime is a browser bundle (src/page/main.ts) that the page loads as a file. These
+ * tests pin, on the file the page really runs, that it reads no name it does not declare (a page
+ * defines no other global than the webview API) and the trace of a page session as a literal
+ * value. The shipped file is built by the project's own bundle step (in a temporary directory),
+ * minified; the test build of the harness is the same bundle unminified.
  *
- * When the runtime stops being assembled with `toString()`, the tests of that mechanism retire with
- * it: the undeclared-name check of `createPreviewRuntimeScript()` and the pinned trace of the inline
- * and context-free runtimes. The undeclared-name check of the shipped file and its pinned trace
- * (`EXPECTED_TRACE`) are the ones that must survive, unchanged.
+ * Until the runtime became a bundle it was assembled from functions turned back into source text
+ * (`Function.prototype.toString()`). The tests of that mechanism retired with it: the
+ * undeclared-name check of `createPreviewRuntimeScript()` and the pinned trace of the inline and
+ * context-free runtimes. The undeclared-name check of the shipped file and its pinned trace
+ * (`EXPECTED_TRACE`) are unchanged; the test build of the harness is checked the same way.
  */
 import * as assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -20,7 +18,6 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
 
-import { createPreviewRuntimeScript } from "../../src/webview/scrollSync";
 import {
   DOCUMENT_ID,
   HARNESS_PAGE,
@@ -30,7 +27,7 @@ import {
   renderIdentity,
   REQUEST_ID,
 } from "../shared/previewIdentity";
-import { createRuntimeHarness, type RuntimeHarness } from "./runtimeHarness";
+import { createRuntimeHarness, pageRuntimeScript, type RuntimeHarness } from "./runtimeHarness";
 
 const repositoryRoot = path.resolve(__dirname, "../../..");
 
@@ -84,8 +81,8 @@ function undeclaredNames(script: string): string[] {
   }
 }
 
-test("the runtime of this build reads no name it does not declare, except the webview API", () => {
-  assert.deepEqual(undeclaredNames(createPreviewRuntimeScript()), HOST_GLOBALS);
+test("the test build of the page bundle reads no name it does not declare, except the webview API", () => {
+  assert.deepEqual(undeclaredNames(pageRuntimeScript()), HOST_GLOBALS);
 });
 
 test("the bundled runtime file reads no name it does not declare, except the webview API", () => {
@@ -163,12 +160,8 @@ const EXPECTED_TRACE: readonly unknown[] = [
   { type: "previewReady", ...patched },
 ];
 
-test("the inline runtime gives the pinned trace of a page session", () => {
+test("the test build of the page bundle gives the pinned trace of a page session", () => {
   assert.deepEqual(session(undefined), EXPECTED_TRACE);
-});
-
-test("the context-free runtime of this build gives the pinned trace of a page session", () => {
-  assert.deepEqual(session(createPreviewRuntimeScript()), EXPECTED_TRACE);
 });
 
 test("the bundled runtime file gives the pinned trace of a page session", () => {

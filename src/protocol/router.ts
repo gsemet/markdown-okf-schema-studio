@@ -3,9 +3,8 @@
  * type with `on(type, handler)` and `dispatch` runs the one registered for a message's type. Pure
  * module: no host API, no DOM, no Node built-ins.
  *
- * {@link createMessageRouter} is self-contained: the page runtime is still assembled with
- * `Function.prototype.toString()`, so its body must not use anything defined outside it. When the
- * page becomes a bundle with normal imports, it is imported like any other module.
+ * The page bundle imports {@link createMessageRouter} like any other module (see
+ * `src/page/hostMessages.ts`).
  */
 
 /**
@@ -31,7 +30,7 @@ export interface MessageRouter<M extends { readonly type: string }, C extends un
   dispatch(message: M, ...context: C): RouteOutcome<R>;
 }
 
-/** A new, empty {@link MessageRouter}. Self-contained (see the module comment). */
+/** A new, empty {@link MessageRouter}. */
 export function createMessageRouter<M extends { readonly type: string }, C extends unknown[] = [], R = unknown>(
 ): MessageRouter<M, C, R> {
   const handlers = new Map<string, (message: M, ...context: C) => R | false>();

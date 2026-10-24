@@ -1,3 +1,5 @@
+import type { PreviewLinkTargetsMessage } from "../protocol/hostToPage";
+
 export interface LinkRuntimeContext {
   documentId: string;
   revision: number;
@@ -10,7 +12,7 @@ export function installLinkNavigation(
   vscode: { postMessage(message: unknown): void },
   context: LinkRuntimeContext,
   beforeNavigate?: (navigate: () => void) => void,
-): { rescan(): void } {
+): { rescan(): void; applyTargets(message: Pick<PreviewLinkTargetsMessage, "targets">): void } {
   const selector = "a[data-sphinx-preview-navigation]";
   let links = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
   const discovered = new Set<string>();
@@ -74,25 +76,23 @@ export function installLinkNavigation(
   document.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") activate(event);
   });
-  window.addEventListener("message", (event: MessageEvent) => {
-    const message = event.data;
-    if (message?.type !== "previewLinkTargets" || message.documentId !== context.documentId
-      || message.revision !== context.revision || message.requestId !== context.requestId
-      || !Array.isArray(message.targets)) return;
-    for (const target of message.targets) {
-      for (const link of links) {
-        if (link.getAttribute("data-sphinx-preview-navigation") !== target.request) continue;
-        link.setAttribute("data-sphinx-preview-link-state", target.kind);
-        link.setAttribute("title", target.path ?? target.reason ?? target.request);
-      }
-    }
-  });
   // Called after the content was replaced: observes the links that are not observed yet and makes
   // the target hints apply to the links of the new content.
   return {
     rescan(): void {
       links = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
       links.forEach(observe);
+    },
+    // The host's answer to a discovery (previewLinkTargets, routed by the page once the host
+    // message filter has matched it to this render): a hint per link, never a new target.
+    applyTargets(message): void {
+      for (const target of message.targets) {
+        for (const link of links) {
+          if (link.getAttribute("data-sphinx-preview-navigation") !== target.request) continue;
+          link.setAttribute("data-sphinx-preview-link-state", target.kind as string);
+          link.setAttribute("title", target.path ?? target.reason ?? target.request);
+        }
+      }
     },
   };
 }

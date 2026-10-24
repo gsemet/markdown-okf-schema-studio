@@ -1,262 +1,103 @@
-import {
-  parseSourceMappings,
-  type MappingElement,
-  type SourceBlockMapping,
-} from "../mapping/sourceMapping";
-import { createAnchorPolicy } from "./anchorPolicy";
-import { createMarkdownTableTools } from "./markdownTable";
-import { createEditActions } from "./editActions";
-import { createEditPalette } from "./editPalette";
-import { caretRectOf, caretRevealDelta } from "./caretRect";
-import { stickyBarShift } from "./stickyBar";
-import { createSlashMenu } from "./slashMenu";
-import { createLinkPanel } from "./linkPanel";
-import { createFigureTools } from "./figureDirective";
-import { createFigurePanel, installFigureEditButton } from "./figurePanel";
-import { highlightLanguageNames } from "../render/highlight";
-import { createTextEditingTools } from "./textEditing";
-import { createBlockSelection } from "./blockSelection";
-import { installCodeCopy } from "./codeCopy";
-import { installLabelRename } from "./labelRename";
-import { installHostRequests } from "./hostRequests";
-import { installPlantUmlFileRequests, PLANTUML_FILE_REQUEST_TIMEOUT_MS } from "./plantumlFileRequests";
-import { installPasteHtml } from "./pasteHtml";
-import { imageParagraphEdit, installPasteImage } from "./pasteImage";
-import { installWarningBanner, warningBannerState, warningBannerText } from "./warningBanner";
-import { installFirstClearance } from "./firstClearance";
-import { applyFigureSizes } from "./figureSizes";
-import { applySpanColors, isSafeOkfColor } from "./spanColors";
-import { installLinkNavigation } from "./linkNavigation";
-import { installHistoryControls } from "./historyControls";
-import { installTocColumn } from "./tocColumn";
-import { installChipToggle } from "./chipToggle";
-import { installInlineThreads } from "./inlineThread";
-import { installIncomingChanges } from "./incomingChanges";
-import { installMotion } from "./motion";
-import { installContentMorph, morphKey, planKeyedMorph } from "./contentMorph";
-import { installCommentCompose } from "./commentCompose";
-import { installCommentThreads } from "./commentThreads";
-import { installCommentsToggle } from "./commentsToggle";
-import { installIncomingToggle } from "./incomingToggle";
-import { installToolbarCollapse } from "./toolbarCollapse";
-import { installViewControls } from "./viewControls";
-import { installWidthMode } from "./widthMode";
-import { createEditorTrace } from "./editorTrace";
-import { installSelectAllInControls, isTextSelectAll } from "./selectAllKey";
-import { installEditorKeyContainment, isHandledEditorKey } from "./editorKeys";
-import type { ViewPreferences } from "../state/previewViewPreferences";
-import { DEFAULT_PREVIEW_THEME_MODE, type PreviewThemeMode } from "../state/previewTheme";
+// @ts-nocheck -- TYPING DEBT (CR 056, step S5): the part of the page runtime not split into typed
+// modules yet. It was the template string of src/webview/scrollSync.ts and moved here as is; each
+// feature that leaves it becomes a typed module under src/page/. The bundle test
+// (test/page/runtimeBundle.test.ts) checks that the bundle reads no undeclared name.
+/**
+ * The preview page runtime: scroll sync, block and frontmatter editing, toolbar, comments, TOC and
+ * content patches. {@link startPreviewRuntime} runs once per page load with the boot context the
+ * host wrote into the page and the transport to the host (see `./main.ts`).
+ */
+
+import { createAnchorPolicy } from "../webview/anchorPolicy";
+import { createMarkdownTableTools } from "../webview/markdownTable";
+import { createEditActions } from "../webview/editActions";
+import { createEditPalette } from "../webview/editPalette";
+import { caretRectOf, caretRevealDelta } from "../webview/caretRect";
+import { stickyBarShift } from "../webview/stickyBar";
+import { createSlashMenu } from "../webview/slashMenu";
+import { createLinkPanel } from "../webview/linkPanel";
+import { createFigureTools } from "../webview/figureDirective";
+import { createFigurePanel, installFigureEditButton } from "../webview/figurePanel";
+import { createTextEditingTools } from "../webview/textEditing";
+import { createBlockSelection } from "../webview/blockSelection";
+import { installCodeCopy } from "../webview/codeCopy";
+import { installLabelRename } from "../webview/labelRename";
+import { installHostRequests } from "../webview/hostRequests";
+import { installPlantUmlFileRequests, PLANTUML_FILE_REQUEST_TIMEOUT_MS } from "../webview/plantumlFileRequests";
+import { installPasteHtml } from "../webview/pasteHtml";
+import { imageParagraphEdit, installPasteImage } from "../webview/pasteImage";
+import { installWarningBanner, warningBannerState, warningBannerText } from "../webview/warningBanner";
+import { installFirstClearance } from "../webview/firstClearance";
+import { applyFigureSizes } from "../webview/figureSizes";
+import { applySpanColors, isSafeOkfColor } from "../webview/spanColors";
+import { installLinkNavigation } from "../webview/linkNavigation";
+import { installHistoryControls } from "../webview/historyControls";
+import { installTocColumn } from "../webview/tocColumn";
+import { installChipToggle } from "../webview/chipToggle";
+import { installInlineThreads } from "../webview/inlineThread";
+import { installIncomingChanges } from "../webview/incomingChanges";
+import { installMotion } from "../webview/motion";
+import { installContentMorph, morphKey, planKeyedMorph } from "../webview/contentMorph";
+import { installCommentCompose } from "../webview/commentCompose";
+import { installCommentThreads } from "../webview/commentThreads";
+import { installCommentsToggle } from "../webview/commentsToggle";
+import { installIncomingToggle } from "../webview/incomingToggle";
+import { installToolbarCollapse } from "../webview/toolbarCollapse";
+import { installViewControls } from "../webview/viewControls";
+import { installWidthMode } from "../webview/widthMode";
 import { DEFAULT_EDITING_CONFIGURATION } from "../configuration/editingConfiguration";
-import type { PreviewPanelState } from "../state/previewState";
-import { createHostMessageFilter } from "../protocol/hostToPage";
-import { createMessageRouter } from "../protocol/router";
-import type { Revision } from "../protocol/revision";
+import type { PreviewRuntimeContext } from "../protocol/bootContext";
+import { HIGHLIGHT_LANGUAGES } from "./buildConstants";
+import type { HostTransport } from "./hostTransport";
+import { installPageDiagnostics } from "./pageDiagnostics";
+import { installAnchorMode } from "./features/anchorMode";
+import { installCheckboxes } from "./features/checkboxes";
+import { installRendererBridge } from "./features/rendererBridge";
+import { installLinkTooltip } from "./features/linkTooltip";
+import { installStatusRegion } from "./features/statusRegion";
+import { installStickyHeadings } from "./features/stickyHeadings";
+import { installThemeMode } from "./features/themeMode";
+import { createPageHostMessages } from "./hostMessages";
+import { createPageBus, type PageEvents } from "./pageBus";
+import { createPageHost } from "./pageHost";
+import { AUTOSAVE_DELAY_MS, isApplePlatform, pageSettings, stickyHeadingDepthOf } from "./pageSettings";
 
-export interface ScrollContext {
-  documentId: string;
-  /** The revision of the document text the render was made from (see src/protocol/revision.ts). */
-  revision: Revision;
-  requestId: number;
-}
-
-export interface PositionedSourceMapping extends SourceBlockMapping {
-  top: number;
-  height: number;
-}
-
-export interface PreviewRuntimeContext extends ScrollContext {
-  activeSourceFile: string;
-  previewThemeMode?: PreviewThemeMode;
-  /** The per-workspace view preferences; the webview's own saved state wins (zoom). */
-  initialViewPreferences?: ViewPreferences;
-  scrollPreviewWithEditor?: boolean;
-  scrollEditorWithPreview?: boolean;
-  markEditorSelection?: boolean;
-  doubleClickToSwitchToEditor?: boolean;
-  stickyHeadingDepth?: number;
-  /** True in writable previews: the page offers the Comment button and the reply box (T43). */
-  commentsEnabled?: boolean;
-  /** The name a new inline comment thread starts with (comments.authorName, else the Git user). */
-  threadAuthor?: string;
-  /** False hides the gray comment chips (preview.showComments). */
-  showComments?: boolean;
-  themeKind?: number;
-  /** False when no visible text editor shows the previewed document. */
-  pairedTextEditor?: boolean;
-  /** The workspace-wide edit mode choice, used when the webview has no saved state. */
-  initialEditMode?: boolean;
-  /** The workspace's palette mode (stored choice, else the setting); saved state wins on load. */
-  initialPaletteMode?: "strict" | "gfm" | "myst";
-  /** Fractional source line to show at the preview reading line on load (see anchorPolicy). */
-  initialAnchor?: number;
-  /** Set after an inline save: the edited element's source line and viewport top (rule R7). */
-  initialPin?: { line: number; viewportTop: number };
-  /** CR 050: the key of the warning set whose banner the user closed for this document. */
-  dismissedWarningBanner?: string;
-  /** CR 050: false in Restricted Mode, where the Problems view does not list the conf.py warnings. */
-  warningsInProblems?: boolean;
-  initialState?: Pick<PreviewPanelState, "sourceLine" | "scrollTop" | "focusedBlockId" | "selectedText" | "openDisclosures" | "descriptionsCollapsed">;
-}
-
-/** JSON of the runtime context that is safe inside a `<script>` element (no `</script>`). */
-export function serializeRuntimeContext(context: PreviewRuntimeContext): string {
-  return JSON.stringify(context).replace(/</gu, "\\u003c");
-}
-
-/**
- * Marks the `<script type="application/json">` element that carries the runtime context of a page
- * whose runtime is loaded as a file (PERF-11).
- */
-export const RUNTIME_CONTEXT_ATTRIBUTE = "data-sphinx-preview-runtime-context";
-
-/** The runtime with its context inlined: the visual pages and the unit tests run this. */
-export function createScrollSyncScript(context: PreviewRuntimeContext): string {
-  return runtimeScript(serializeRuntimeContext(context));
-}
-
-/**
- * The runtime as one context-free script, the file `out/bundle/preview.js` (PERF-11). It reads its
- * context from the JSON element marked with {@link RUNTIME_CONTEXT_ATTRIBUTE}, which the page puts
- * before the script, so one cacheable file serves every render.
- */
-export function createPreviewRuntimeScript(): string {
-  return runtimeScript(
-    `JSON.parse(document.querySelector("script[${RUNTIME_CONTEXT_ATTRIBUTE}]")?.textContent || "{}")`,
-  );
-}
-
-function runtimeScript(contextExpression: string): string {
-  return `(function () {
-  "use strict";
-  const context = ${contextExpression};
+/** Starts the page runtime of one page load. */
+export function startPreviewRuntime(context: PreviewRuntimeContext, transport: HostTransport): void {
   document.documentElement.setAttribute("data-sphinx-preview-document-id", context.documentId);
   document.documentElement.setAttribute("data-sphinx-preview-document-version", String(context.revision));
   document.documentElement.setAttribute("data-sphinx-preview-request-id", String(context.requestId));
   // Keyed content updates (PERF-05): the host HTML of every block, recorded before anything changes it.
-  const contentMorph = (${installContentMorph.toString()})(document, ${planKeyedMorph.toString()}, ${morphKey.toString()});
+  const contentMorph = installContentMorph(document, planKeyedMorph, morphKey);
   const initialContent = document.getElementById?.("sphinx-myst-preview-content");
   if (initialContent) contentMorph.record(initialContent);
-  const tableTools = (${createMarkdownTableTools.toString()})();
-  const textEditing = (${createTextEditingTools.toString()})();
-  const blockSelection = (${createBlockSelection.toString()})();
-  const isSafeOkfColor = ${isSafeOkfColor.toString()};
-  const editActions = (${createEditActions.toString()})(${JSON.stringify(highlightLanguageNames())}, tableTools, isSafeOkfColor, context.threadAuthor);
-  const createEditPalette = ${createEditPalette.toString()};
-  const caretRectOf = ${caretRectOf.toString()};
-  const createSlashMenu = ${createSlashMenu.toString()};
-  const caretRevealDelta = ${caretRevealDelta.toString()};
-  const stickyBarShift = ${stickyBarShift.toString()};
-  const createLinkPanel = ${createLinkPanel.toString()};
-  const figureTools = (${createFigureTools.toString()})();
-  const createFigurePanel = ${createFigurePanel.toString()};
-  const anchorPolicy = (${createAnchorPolicy.toString()})();
-  // Diagnostics only (they change nothing in the page): the last editor events, read by the tests
-  // through window.__studioDiagnostics so that a missing editor names what closed it.
-  const editorTrace = (${createEditorTrace.toString()})(40, () => (window.performance?.now?.() ?? Date.now()));
-  // Wall-clock time of the trace's "at" 0, so a test can line the trace up with host-side events.
-  const traceStartedAt = Date.now();
-  const traceFocus = () => {
-    const active = document.activeElement;
-    const focused = typeof document.hasFocus === "function" ? String(document.hasFocus()) : "unknown";
-    return "active=" + (active ? String(active.tagName).toLowerCase() : "none") + " pageFocus=" + focused;
-  };
-  const traceStack = () => editorTrace.callers(new Error().stack, 2);
-  editorTrace.record("page", "request " + context.requestId + " version " + context.revision);
-  window.addEventListener("focus", () => editorTrace.record("page focus", traceFocus()));
-  window.addEventListener("blur", () => editorTrace.record("page blur", traceFocus()));
-  // Cmd/Ctrl+A in a text control selects that control's text and never reaches the workbench
-  // (see selectAllKey.ts: the workbench would otherwise focus the text editor in some cases).
-  (${installSelectAllInControls.toString()})(document, ${isTextSelectAll.toString()},
-    isApplePlatform(),
-    (target) => editorTrace.record("select-all kept in control",
-      (target && target.tagName ? String(target.tagName).toLowerCase() : "unknown") + " " + traceFocus()));
-  // Tab, Enter, Escape and the arrow keys an open editor has handled stay in the page (see
-  // editorKeys.ts): the workbench never runs its own binding for a key the page has already used.
-  (${installEditorKeyContainment.toString()})(document, ${isHandledEditorKey.toString()},
-    (key, target) => editorTrace.record("editor key kept in page", key + " in "
-      + (target && target.tagName ? String(target.tagName).toLowerCase() : "unknown") + " " + traceFocus()));
-  const settings = {
-    scrollPreviewWithEditor: context.scrollPreviewWithEditor !== false,
-    scrollEditorWithPreview: context.scrollEditorWithPreview !== false,
-    markEditorSelection: context.markEditorSelection === true,
-    doubleClickToSwitchToEditor: context.doubleClickToSwitchToEditor === true,
-  };
-  const requestedStickyHeadingDepth = context.stickyHeadingDepth;
-  const stickyHeadingDepth = typeof requestedStickyHeadingDepth === "number"
-      && Number.isFinite(requestedStickyHeadingDepth)
-    ? Math.max(1, Math.min(6, Math.round(requestedStickyHeadingDepth)))
-    : 3;
-  const AUTOSAVE_DELAY_MS = 400;
-  const hostApi = acquireVsCodeApi();
-  // Webview state written while scrolling is throttled (PERF-08): at most one write per
-  // STATE_THROTTLE_MS, the last one always written (trailing, and when the page is hidden). Every
-  // other write goes through at once and replaces a pending one; a read sees the pending state.
-  const STATE_THROTTLE_MS = 100;
-  const throttleClock = () => window.performance?.now?.() ?? Date.now();
-  let pendingState;
-  let pendingStateTimer;
-  let lastStateWrite = Number.NEGATIVE_INFINITY;
-  function cancelPendingState() {
-    if (pendingStateTimer !== undefined) window.clearTimeout(pendingStateTimer);
-    pendingStateTimer = undefined;
-    pendingState = undefined;
-  }
-  function flushPendingState() {
-    const state = pendingState;
-    cancelPendingState();
-    if (state !== undefined) {
-      lastStateWrite = throttleClock();
-      hostApi.setState?.(state);
-    }
-  }
-  function setStateThrottled(state) {
-    const now = throttleClock();
-    if (pendingStateTimer === undefined && now - lastStateWrite >= STATE_THROTTLE_MS) {
-      lastStateWrite = now;
-      hostApi.setState?.(state);
-      return;
-    }
-    pendingState = state;
-    if (pendingStateTimer === undefined) {
-      pendingStateTimer = window.setTimeout(flushPendingState, Math.max(0, STATE_THROTTLE_MS - (now - lastStateWrite)));
-    }
-  }
-  const vscode = {
-    postMessage: (message) => hostApi.postMessage(message),
-    getState: () => pendingState !== undefined ? pendingState : hostApi.getState?.(),
-    setState: (state) => {
-      cancelPendingState();
-      lastStateWrite = throttleClock();
-      hostApi.setState?.(state);
-    },
-  };
-  // The host's copy of the scroll state (previewState) follows the same rule; a previewScroll,
-  // which moves the text editor, is never held back.
-  let pendingStateMessage;
-  let pendingStateMessageTimer;
-  let lastStateMessage = Number.NEGATIVE_INFINITY;
-  function flushStateMessage() {
-    const message = pendingStateMessage;
-    if (pendingStateMessageTimer !== undefined) window.clearTimeout(pendingStateMessageTimer);
-    pendingStateMessageTimer = undefined;
-    pendingStateMessage = undefined;
-    if (message !== undefined) {
-      lastStateMessage = throttleClock();
-      vscode.postMessage(message);
-    }
-  }
-  function postStateMessageThrottled(message) {
-    const now = throttleClock();
-    if (pendingStateMessageTimer === undefined && now - lastStateMessage >= STATE_THROTTLE_MS) {
-      lastStateMessage = now;
-      vscode.postMessage(message);
-      return;
-    }
-    pendingStateMessage = message;
-    if (pendingStateMessageTimer === undefined) {
-      pendingStateMessageTimer = window.setTimeout(flushStateMessage, Math.max(0, STATE_THROTTLE_MS - (now - lastStateMessage)));
-    }
-  }
+  const tableTools = createMarkdownTableTools();
+  const textEditing = createTextEditingTools();
+  const blockSelection = createBlockSelection();
+  const editActions = createEditActions(HIGHLIGHT_LANGUAGES, tableTools, isSafeOkfColor, context.threadAuthor);
+  const figureTools = createFigureTools();
+  const anchorPolicy = createAnchorPolicy();
+  // Diagnostics only (they change nothing in the page): the editor trace, read by the tests through
+  // window.__studioDiagnostics, and the key containment of controls and editors (pageDiagnostics.ts).
+  const pageDiagnostics = installPageDiagnostics(document, window, context);
+  const { editorTrace, traceFocus, traceStack } = pageDiagnostics;
+  const settings = pageSettings(context);
+  const stickyHeadingDepth = stickyHeadingDepthOf(context);
+  // The sticky heading band and the reading offset it reserves (features/stickyHeadings.ts).
+  const stickyBand = installStickyHeadings(document, window, anchorPolicy, stickyHeadingDepth);
+  const { refreshReadingOffset, refreshStickyHeadingPosition, updateStickyHeadings } = stickyBand;
+  const stickyHeadings = stickyBand.element;
+  // Messages and the saved state, with the state write throttle of PERF-08 (see pageHost.ts).
+  const pageHost = createPageHost(transport, window);
+  const vscode = pageHost.api;
+  const { setStateThrottled, flushPendingState, postStateMessageThrottled, flushStateMessage } = pageHost;
+  // Host messages: features register their handlers on this router (see hostMessages.ts).
+  const pageHostMessages = createPageHostMessages();
+  const hostMessages = pageHostMessages.router;
+  const bus = createPageBus<PageEvents>();
+  installRendererBridge(document, bus);
+  // The pending overlay and the status region (features/statusRegion.ts).
+  const { applyPendingOverlay, applyStatusRegion } = installStatusRegion(document, hostMessages);
   // Review comments. Installed before every click handler below: a click on a highlight or badge
   // opens the popover and must not edit the block, follow a link or reveal the source.
   const postCommentMessage = (type, fields) => vscode.postMessage({
@@ -267,7 +108,7 @@ function runtimeScript(contextExpression: string): string {
     ...fields,
   });
   const commentsEnabled = context.commentsEnabled === true;
-  const commentThreads = (${installCommentThreads.toString()})(document, window, commentsEnabled
+  const commentThreads = installCommentThreads(document, window, commentsEnabled
     ? {
       reply: (threadId, body) => postCommentMessage("previewCommentReply", { threadId, body }),
       resolve: (threadId, resolved) => postCommentMessage("previewCommentResolve", { threadId, resolved }),
@@ -276,7 +117,7 @@ function runtimeScript(contextExpression: string): string {
     : undefined);
   // The Comment button of a text selection (writable previews only, T43). Not shown while a block
   // editor is open or blocks are selected; it never changes the selection.
-  const commentCompose = commentsEnabled ? (${installCommentCompose.toString()})(document, window, {
+  const commentCompose = commentsEnabled ? installCommentCompose(document, window, {
     post: postCommentMessage,
     busy: () => Boolean(activeBlockEdit || activeFrontmatterEdit || blockSelection.isActive()),
     beforeOpen: () => commentThreads.close(),
@@ -306,23 +147,10 @@ function runtimeScript(contextExpression: string): string {
     event.stopImmediatePropagation?.();
     openMappedEditor(block, event.target, "end");
   }, true);
-  const linkNavigation = (${installLinkNavigation.toString()})(document, window, vscode, context, (navigate) => flushOpenEditorsThen(navigate));
-  const firstClearance = (${installFirstClearance.toString()})(document, window);
-  try {
-    Object.defineProperty(window, "__studioDiagnostics", {
-      configurable: true,
-      value: Object.freeze({
-        trace: () => editorTrace.entries(),
-        startedAt: () => traceStartedAt,
-        firstClearance: () => firstClearance.describe(),
-      }),
-    });
-  } catch {
-    // Diagnostics are optional: a page that cannot expose them still works.
-  }
-  const applyFigureSizes = ${applyFigureSizes.toString()};
-  const applySpanColors = ${applySpanColors.toString()};
-  const codeCopy = (${installCodeCopy.toString()})(document, window, (text) => vscode.postMessage({
+  const linkNavigation = installLinkNavigation(document, window, vscode, context, (navigate) => flushOpenEditorsThen(navigate));
+  const firstClearance = installFirstClearance(document, window);
+  pageDiagnostics.expose(firstClearance);
+  const codeCopy = installCodeCopy(document, window, (text) => vscode.postMessage({
     type: "previewCopyText",
     documentId: context.documentId,
     revision: context.revision,
@@ -331,7 +159,7 @@ function runtimeScript(contextExpression: string): string {
   }));
   // Edit mode: the anchor icon of a label renames it. The result is matched by edit id: the edit
   // itself moves the document version before the answer arrives.
-  const labelRename = (${installLabelRename.toString()})(document, window, {
+  const labelRename = installLabelRename(document, window, {
     isEditMode: () => editMode,
     blockedReason: () => activeBlockEdit || activeFrontmatterEdit
       ? "Save or cancel the open edit before renaming a label." : undefined,
@@ -348,7 +176,7 @@ function runtimeScript(contextExpression: string): string {
   // Host round trips of the MyST palette (labels, citation keys, the {doc} file dialog). The answer
   // is matched by edit id. While a native dialog is open the editor's blur handlers stand down:
   // the dialog takes the focus, which is not leaving the editor.
-  const hostRequests = (${installHostRequests.toString()})(window, {
+  const hostRequests = installHostRequests(window, {
     nextEditId: () => "host-" + context.requestId + "-" + (++editSequence),
     post: (request) => vscode.postMessage({
       ...request,
@@ -357,10 +185,10 @@ function runtimeScript(contextExpression: string): string {
       requestId: context.requestId,
     }),
   });
-  // Local files of PlantUML \`!include\` lines, read by the host for the built-in engine (its bundle
+  // Local files of PlantUML `!include` lines, read by the host for the built-in engine (its bundle
   // asks through a document event). Requests of their own: closing an editor must not cancel them.
   let plantUmlFileSequence = 0;
-  const plantUmlFileRequests = (${installHostRequests.toString()})(window, {
+  const plantUmlFileRequests = installHostRequests(window, {
     nextEditId: () => "plantuml-" + (++plantUmlFileSequence),
     post: (request) => vscode.postMessage({
       ...request,
@@ -369,16 +197,15 @@ function runtimeScript(contextExpression: string): string {
       requestId: context.requestId,
     }),
   });
-  (${installPlantUmlFileRequests.toString()})(document, plantUmlFileRequests, ${PLANTUML_FILE_REQUEST_TIMEOUT_MS});
+  installPlantUmlFileRequests(document, plantUmlFileRequests, PLANTUML_FILE_REQUEST_TIMEOUT_MS);
   // Pasting an image into the text box: the host saves it next to the document and names it.
-  const pasteImage = (${installPasteImage.toString()})(window);
-  const imageParagraphEdit = ${imageParagraphEdit.toString()};
-  const pasteHtml = (${installPasteHtml.toString()})();
+  const pasteImage = installPasteImage(window);
+  const pasteHtml = installPasteHtml();
   // CR 050: the conf.py warnings of a successful render, as a closable banner over the top of the page.
-  const warningBanner = (${installWarningBanner.toString()})(document, vscode, context,
-    ${warningBannerState.toString()}, ${warningBannerText.toString()});
+  const warningBanner = installWarningBanner(document, vscode, context,
+    warningBannerState, warningBannerText);
   // Edit mode: the "Edit figure" button over a hovered figure opens its block editor with the form.
-  const figureEditButton = (${installFigureEditButton.toString()})(document, window, {
+  const figureEditButton = installFigureEditButton(document, window, {
     isEditMode: () => editMode,
     open: (figure) => openFigureEditor(figure),
   });
@@ -391,61 +218,57 @@ function runtimeScript(contextExpression: string): string {
     stabilizeLayout();
   };
   // Expanding a chip changes the height of the content: keep the reading line like zoom does.
-  const chipToggle = (${installChipToggle.toString()})(document, vscode, context, keepReadingLine);
+  const chipToggle = installChipToggle(document, vscode, context, keepReadingLine);
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
-  const incomingChanges = (${installIncomingChanges.toString()})(document);
+  const incomingChanges = installIncomingChanges(document);
   // Light motion (CR 046): soft appearance after a user action, the theme colour transition, the
   // fade of a block an editor gives back and the glow of blocks an outside change or an undo updated.
-  const motion = (${installMotion.toString()})(document, window);
-  const incomingToggle = (${installIncomingToggle.toString()})(document, vscode, context);
+  const motion = installMotion(document, window);
+  const incomingToggle = installIncomingToggle(document, vscode, context);
   // Toolbar Comments button: hides the gray chips, which moves the content like expanding one does.
-  const commentsToggle = (${installCommentsToggle.toString()})(document, vscode, context, keepReadingLine);
-  const historyControls = (${installHistoryControls.toString()})(document, vscode, context, (navigate) => flushOpenEditorsThen(navigate));
-  const viewControls = (${installViewControls.toString()})(document, vscode, context, keepReadingLine);
+  const commentsToggle = installCommentsToggle(document, vscode, context, keepReadingLine);
+  const historyControls = installHistoryControls(document, vscode, context, (navigate) => flushOpenEditorsThen(navigate));
+  const viewControls = installViewControls(document, vscode, context, keepReadingLine);
   // The toolbar changes size when rows 2-3 are collapsed: re-measure everything placed around it.
-  const toolbarCollapse = (${installToolbarCollapse.toString()})(document, vscode, context, () => {
+  const toolbarCollapse = installToolbarCollapse(document, vscode, context, () => {
     firstClearance.update();
     refreshStickyHeadingPosition();
     tocColumn.layout();
     widthMode.update();
   });
   // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.
-  const widthMode = (${installWidthMode.toString()})(document, window, vscode, context, () => {
+  const widthMode = installWidthMode(document, window, vscode, context, () => {
     firstClearance.update();
     keepReadingLine();
   });
   // The TOC column changes the available width: re-measure Auto and keep the reading line.
-  const tocColumn = (${installTocColumn.toString()})(document, window, vscode, context, (heading) => revealElement(heading), () => {
+  const tocColumn = installTocColumn(document, window, vscode, context, (heading) => revealElement(heading), () => {
     firstClearance.update();
     widthMode.update();
     keepReadingLine();
-  }, () => readingOffsetValue);
-  const themeModes = ["current", "dark", "white", "cream"];
-  const themeLabels = { current: "Current theme", dark: "Dark theme", white: "White theme", cream: "Cream theme" };
-  const themeButton = document.querySelector?.("[data-sphinx-preview-theme-toggle]");
+  }, () => stickyBand.readingOffset());
   const refreshButton = document.querySelector?.("[data-sphinx-preview-refresh]");
-  const anchorButton = document.querySelector?.("[data-sphinx-preview-anchor]");
   const editModeButton = document.querySelector?.("[data-sphinx-preview-edit-toggle]");
-  const stickyHeadings = document.querySelector?.("[data-sphinx-preview-sticky-headings]");
   const savedState = vscode.getState?.();
   let descriptionsCollapsed = (savedState?.documentId === context.documentId ? savedState.descriptionsCollapsed : undefined)
     ?? context.initialState?.descriptionsCollapsed
     ?? (window.innerWidth <= 640);
-  let previewThemeMode = themeModes.includes(context.previewThemeMode)
-    ? context.previewThemeMode
-    : themeModes.includes(savedState?.previewThemeMode)
-      ? savedState.previewThemeMode
-      : ${JSON.stringify(DEFAULT_PREVIEW_THEME_MODE)};
-  let anchorToEditor = typeof savedState?.anchorToEditor === "boolean"
-    ? savedState.anchorToEditor
-    : settings.scrollPreviewWithEditor;
+  // The preview theme mode and the host theme kind (features/themeMode.ts).
+  const themeMode = installThemeMode(document, window, hostMessages, {
+    host: vscode,
+    context,
+    savedState,
+    themeSwitch: () => motion.themeSwitch(),
+  });
+  // Whether the page and the text editor scroll together (features/anchorMode.ts).
+  const anchorMode = installAnchorMode(document, hostMessages, { host: vscode, context, settings, savedState });
   let editMode = editModeButton
     ? (typeof savedState?.editMode === "boolean" ? savedState.editMode : context.initialEditMode === true)
     : false;
   const paletteModes = ["strict", "gfm", "myst"];
   let paletteMode = paletteModes.includes(savedState?.paletteMode)
     ? savedState.paletteMode
-    : paletteModes.includes(context.initialPaletteMode) ? context.initialPaletteMode : ${JSON.stringify(DEFAULT_EDITING_CONFIGURATION.defaultPaletteMode)};
+    : paletteModes.includes(context.initialPaletteMode) ? context.initialPaletteMode : DEFAULT_EDITING_CONFIGURATION.defaultPaletteMode;
   let activeBlockEdit;
   let activeFrontmatterEdit;
   // Latest properties-table markup the host sent while a frontmatter editor was open (T30).
@@ -465,10 +288,17 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   let pendingEditorOpen = false;
   // The edit toggle is only rendered when the document may be edited (trusted workspace).
   const checkboxEditingEnabled = Boolean(editModeButton);
-  const checkboxSelector = "input.myst-checkbox";
-  const pendingCheckboxToggles = new Map();
+  // Task list checkboxes (features/checkboxes.ts).
+  const checkboxes = installCheckboxes(document, hostMessages, {
+    host: vscode,
+    context,
+    editingEnabled: checkboxEditingEnabled,
+    openEdit: () => activeBlockEdit || activeFrontmatterEdit,
+    nextEditSequence: () => ++editSequence,
+    anchorField: () => anchorField(),
+  });
   // Inline threads (<!-- THREAD): the reply box and Delete of an open thread; the host edits the file.
-  const inlineThreads = (${installInlineThreads.toString()})(document, {
+  const inlineThreads = installInlineThreads(document, {
     enabled: checkboxEditingEnabled,
     blockedReason: () => activeBlockEdit || activeFrontmatterEdit
       ? "Save or cancel the open edit before changing a thread." : undefined,
@@ -477,9 +307,6 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   const mappingsSelector = "[data-sphinx-source-file][data-sphinx-source-line]";
   let layout = [];
   let anchorMap = [];
-  let readingOffsetValue = 0;
-  let observedBandHeight = 0;
-  let observedWidth;
   // The single scroll anchor of this preview (see anchorPolicy.ts / docs/scroll-anchoring.md).
   let anchor;
   // While an inline editor is open, layout changes keep the edited block still on screen.
@@ -512,8 +339,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       ...(pendingFrontmatterEdit ? { pendingFrontmatterEdit } : {}),
       ...(pendingFrontmatterEdit && pendingEditOpenedIn !== undefined
         ? { pendingFrontmatterEditOpenedIn: pendingEditOpenedIn } : {}),
-      previewThemeMode,
-      anchorToEditor,
+      previewThemeMode: themeMode.mode(),
+      anchorToEditor: anchorMode.anchored(),
       editMode,
       paletteMode,
       descriptionsCollapsed,
@@ -528,70 +355,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     return state;
   }
 
-  // Floating "Preview pending" overlay (D-22). It is fixed-position and pointer-transparent, so it
-  // never changes layout; the next ready render replaces the whole document, which removes it.
-  let pendingOverlay = null;
-
-  function applyPendingOverlay(message) {
-    if (typeof message.visible !== "boolean"
-      || typeof message.label !== "string" || message.label.length > 500
-      || typeof message.message !== "string" || message.message.length > 500) {
-      return;
-    }
-    if (!message.visible) {
-      if (pendingOverlay) pendingOverlay.remove();
-      pendingOverlay = null;
-      return;
-    }
-    if (!pendingOverlay) {
-      pendingOverlay = document.createElement("aside");
-      pendingOverlay.setAttribute("data-sphinx-preview-pending-overlay", "");
-      pendingOverlay.setAttribute("role", "status");
-      pendingOverlay.setAttribute("aria-live", "polite");
-      pendingOverlay.appendChild(document.createElement("strong"));
-      pendingOverlay.appendChild(document.createElement("span"));
-      document.body.appendChild(pendingOverlay);
-    }
-    pendingOverlay.childNodes[0].textContent = message.label;
-    pendingOverlay.childNodes[1].textContent = message.message;
-  }
-
   // In-place content patch (T34). The host sends the sanitized inner HTML of the content container
   // instead of loading a new document; the runtime keeps running and moves to the new render. The
   // status region is rebuilt from plain text and never goes through innerHTML. The patch was
   // validated by the host message filter (src/protocol/hostToPage.ts) before it got here.
-
-  // The status region of a rendered page: label, optional message, optional diagnostics list. Every
-  // field is set with textContent.
-  function applyStatusRegion(message) {
-    const region = document.createElement("aside");
-    region.setAttribute("data-sphinx-preview-status", message.status);
-    region.setAttribute("role", "status");
-    region.setAttribute("aria-live", "polite");
-    const label = document.createElement("strong");
-    label.textContent = message.label;
-    region.appendChild(label);
-    if (message.message) {
-      const detail = document.createElement("span");
-      detail.setAttribute("data-sphinx-preview-status-message", "");
-      detail.textContent = message.message;
-      region.appendChild(detail);
-    }
-    if (message.diagnostics.length > 0) {
-      const list = document.createElement("ul");
-      list.setAttribute("data-sphinx-preview-diagnostics", "");
-      message.diagnostics.forEach((entry) => {
-        const item = document.createElement("li");
-        item.setAttribute("data-sphinx-preview-diagnostic-severity", entry.severity);
-        if (entry.code !== undefined) item.setAttribute("data-sphinx-preview-diagnostic-code", entry.code);
-        item.textContent = entry.text;
-        list.appendChild(item);
-      });
-      region.appendChild(list);
-    }
-    document.querySelector("[data-sphinx-preview-status]")?.remove?.();
-    document.body.insertBefore(region, document.body.firstChild || null);
-  }
 
   function applyContentPatch(message) {
     const main = document.getElementById?.("sphinx-myst-preview-content");
@@ -617,10 +384,10 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     applyingContentPatch = true;
     closeBlockEdit(false);
     applyingContentPatch = false;
-    closeLinkTooltip();
+    linkTooltip.close();
     codeCopy.hide();
     setEditHover(undefined);
-    pendingCheckboxToggles.clear();
+    checkboxes.clearPending();
     clearBlockSelection(true);
     applyPendingOverlay({ visible: false, label: "", message: "" });
     // Blocks whose HTML did not change stay in place with what the page did to them (PERF-05).
@@ -650,7 +417,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     pinApplied = false;
     initializeContent({ restore: true });
     linkNavigation.rescan();
-    contentReplaced();
+    bus.emit("contentReplaced", undefined);
     postPreviewReady();
     applyPendingBlockSelection();
     // Set by the host only when the change came from outside the preview or was an undo / redo.
@@ -658,7 +425,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   }
 
   function normalize(value) {
-    return value.replaceAll("\\\\", "/");
+    return value.replaceAll("\\", "/");
   }
 
   function isVisible(element, rectangle) {
@@ -684,7 +451,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       const text = String(node.data || "");
       for (let index = 0; index < text.length; index += 1) {
         const character = text[index];
-        if (character === "\\n") {
+        if (character === "\n") {
           waiting += 1;
           continue;
         }
@@ -708,7 +475,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         const parsedSourceLine = sourceLine ? Number(sourceLine) : Number.NaN;
         if (!sourceFile || !sourceLine || !documentId || documentId !== context.documentId
           || normalize(sourceFile) !== normalize(context.activeSourceFile)
-          || !/^[1-9]\\d*$/.test(sourceLine)
+          || !/^[1-9]\d*$/.test(sourceLine)
           || !Number.isSafeInteger(parsedSourceLine)) {
           return undefined;
         }
@@ -753,69 +520,16 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     nearest?.element?.setAttribute?.("aria-current", "location");
   }
 
-  function visibleStickyHeadingHeight() {
-    if (!stickyHeadings || stickyHeadings.hidden) return 0;
-    return Math.max(0, stickyHeadings.getBoundingClientRect().height);
-  }
-
-  function visibleStickyHeadingBottom() {
-    if (!stickyHeadings || stickyHeadings.hidden) return 0;
-    const rectangle = stickyHeadings.getBoundingClientRect?.();
-    return rectangle && Number.isFinite(rectangle.bottom) ? Math.max(0, rectangle.bottom) : 0;
-  }
-
-  function refreshStickyHeadingPosition() {
-    if (!stickyHeadings) return;
-    const toolbar = document.querySelector?.("[data-sphinx-preview-toolbar]");
-    const toolbarBounds = toolbar?.getBoundingClientRect?.();
-    const toolbarWidth = toolbarBounds && Number.isFinite(toolbarBounds.width)
-      ? Math.max(0, toolbarBounds.width) + 22
-      : 0;
-    stickyHeadings.style?.setProperty?.("--sphinx-preview-toolbar-width", toolbarWidth + "px");
-  }
-
   function maxScrollTop() {
     return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
   }
 
-  // Reading offset R: the strip reserved at the top of the viewport for the fixed sticky
-  // heading band. It only grows for a given width, so the reading line never moves while
-  // the band changes content.
-  function refreshReadingOffset() {
-    if (!stickyHeadings) {
-      readingOffsetValue = 0;
-      return;
-    }
-    refreshStickyHeadingPosition();
-    const width = document.documentElement?.clientWidth;
-    if (width !== observedWidth) {
-      observedWidth = width;
-      observedBandHeight = 0;
-    }
-    observedBandHeight = Math.max(observedBandHeight, visibleStickyHeadingHeight());
-    const style = window.getComputedStyle?.(stickyHeadings);
-    const rawLineHeight = String(style?.lineHeight ?? "");
-    const fontSize = Number.parseFloat(style?.fontSize);
-    let lineHeight = 20;
-    if (rawLineHeight.endsWith("px") && Number.parseFloat(rawLineHeight) > 0) {
-      lineHeight = Number.parseFloat(rawLineHeight);
-    } else if (fontSize > 0) {
-      lineHeight = fontSize * 1.5;
-    }
-    readingOffsetValue = Math.max(
-      anchorPolicy.readingOffset(stickyHeadingDepth, lineHeight, 5),
-      observedBandHeight,
-      visibleStickyHeadingBottom(),
-    );
-    document.documentElement.style?.setProperty?.("--sphinx-preview-reading-offset", readingOffsetValue + "px");
-  }
-
   function lineAtScroll(scrollTop) {
-    return anchorPolicy.lineAtScrollTop(anchorMap, scrollTop, readingOffsetValue);
+    return anchorPolicy.lineAtScrollTop(anchorMap, scrollTop, stickyBand.readingOffset());
   }
 
   function scrollAtLine(sourceLine) {
-    return anchorPolicy.scrollTopForLine(anchorMap, sourceLine, readingOffsetValue, maxScrollTop());
+    return anchorPolicy.scrollTopForLine(anchorMap, sourceLine, stickyBand.readingOffset(), maxScrollTop());
   }
 
   // Programmatic scrolls are silent: the resulting scroll event is recognized and dropped.
@@ -963,115 +677,6 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   }
 
 
-  // A comment chip and its hidden body are not part of a heading's wording.
-  function headingLabel(heading) {
-    if (typeof heading.cloneNode !== "function" || !heading.querySelector?.(".okf-comment")) {
-      return heading.textContent;
-    }
-    const copy = heading.cloneNode(true);
-    copy.querySelectorAll(".okf-comment").forEach((comment) => comment.remove());
-    return copy.textContent;
-  }
-
-  // Heading tops in document coordinates, measured on every layout update; a scroll frame reads
-  // no heading geometry and finds the active heading by binary search (PERF-08).
-  let headingList = [];
-  let headingTops = [];
-
-  function measureHeadings() {
-    headingList = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"));
-    const scrollY = window.scrollY;
-    headingTops = [];
-    headingList.forEach((heading, index) => {
-      const bounds = heading.getBoundingClientRect();
-      if (bounds.height > 0) headingTops.push({ index, top: bounds.top + scrollY });
-    });
-    headingTops.sort((left, right) => left.top - right.top || left.index - right.index);
-  }
-
-  // The visible heading with the greatest top at or above the threshold (viewport y), the first one
-  // in document order on a tie; -1 when there is none.
-  function activeHeadingIndex(threshold) {
-    const scrollY = window.scrollY;
-    let low = 0;
-    let high = headingTops.length - 1;
-    let found = -1;
-    while (low <= high) {
-      const middle = (low + high) >> 1;
-      if (headingTops[middle].top - scrollY <= threshold) {
-        found = middle;
-        low = middle + 1;
-      } else {
-        high = middle - 1;
-      }
-    }
-    if (found < 0) return -1;
-    while (found > 0 && headingTops[found - 1].top === headingTops[found].top) found -= 1;
-    return headingTops[found].index;
-  }
-
-  // fromScroll: only the scroll position changed since the last layout update, so the measured
-  // heading tops still hold. Every other caller measures them again.
-  function updateStickyHeadings(fromScroll = false) {
-    if (!stickyHeadings) return;
-    refreshStickyHeadingPosition();
-    if (fromScroll && headingList.length === 0) measureHeadings();
-    let previousActiveIndex = -2;
-    for (let pass = 0; pass < 3; pass += 1) {
-      if (!fromScroll) measureHeadings();
-      const headings = headingList;
-      const activeThreshold = stickyHeadings.hidden || window.scrollY <= 1
-        ? 0
-        : stickyHeadings.getBoundingClientRect().bottom;
-      const activeIndex = activeHeadingIndex(activeThreshold);
-      if (activeIndex === previousActiveIndex) return;
-      previousActiveIndex = activeIndex;
-      const readingOffsetBefore = readingOffsetValue;
-      if (activeIndex < 0) {
-        if (!stickyHeadings.hidden || stickyHeadings.textContent !== "") {
-          stickyHeadings.hidden = true;
-          stickyHeadings.textContent = "";
-        }
-        if (document.body) document.body.removeAttribute("data-sphinx-preview-sticky-headings-active");
-        continue;
-      }
-
-      const active = headings[activeIndex];
-      const activeLevel = Number(active.tagName.slice(1));
-      const labels = [];
-      let childLevel = activeLevel;
-      for (
-        let index = activeIndex - 1;
-        index >= 0 && labels.length < stickyHeadingDepth - 1;
-        index -= 1
-      ) {
-        const heading = headings[index];
-        const level = Number(heading.tagName.slice(1));
-        const text = headingLabel(heading).trim();
-        if (level < childLevel && text) {
-          labels.unshift("#".repeat(level) + " " + text);
-          childLevel = level;
-        }
-      }
-      const activeText = headingLabel(active).trim();
-      if (activeText) labels.push("#".repeat(activeLevel) + " " + activeText);
-      // Written only when it changes: rewriting the same text would dirty the layout every frame.
-      const bandText = labels.join("\\n");
-      if (stickyHeadings.textContent !== bandText) stickyHeadings.textContent = bandText;
-      if (stickyHeadings.hidden !== (labels.length === 0)) stickyHeadings.hidden = labels.length === 0;
-      if (visibleStickyHeadingHeight() > observedBandHeight) refreshReadingOffset();
-      if (document.body) {
-        if (labels.length > 0) {
-          document.body.setAttribute("data-sphinx-preview-sticky-headings-active", "true");
-        } else {
-          document.body.removeAttribute("data-sphinx-preview-sticky-headings-active");
-        }
-      }
-      // A new reading offset can move the content: the next pass measures the headings again.
-      if (readingOffsetValue !== readingOffsetBefore) measureHeadings();
-    }
-  }
-
   function postScroll() {
     frame = undefined;
     updateStickyHeadings(true);
@@ -1090,7 +695,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     }
     const state = stateSnapshot(line, true);
     const sourceLine = anchorPolicy.editorTopLine(line);
-    const leadsEditor = anchorToEditor && settings.scrollEditorWithPreview && sourceLine !== lastPostedLine;
+    const leadsEditor = anchorMode.anchored() && settings.scrollEditorWithPreview && sourceLine !== lastPostedLine;
     if (leadsEditor) lastPostedLine = sourceLine;
     (leadsEditor ? vscode.postMessage : postStateMessageThrottled)({
       type: leadsEditor ? "previewScroll" : "previewState",
@@ -1119,7 +724,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       if (table.closest("[data-okf-properties]")) return;
       table.querySelectorAll("th, td").forEach((cell) => {
         if (cell.getAttribute("data-sphinx-short-cell") !== null) return;
-        if (/^\\S{1,24}$/u.test((cell.textContent ?? "").trim())) {
+        if (/^\S{1,24}$/u.test((cell.textContent ?? "").trim())) {
           cell.setAttribute("data-sphinx-short-cell", "true");
         }
       });
@@ -1142,81 +747,6 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       updateStickyHeadings();
       tocColumn.remeasure();
       incomingChanges.layout();
-    });
-  }
-
-  function applyTheme(themeKind) {
-    const target = document.documentElement ?? document.body;
-    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    target?.setAttribute?.("data-sphinx-preview-theme", String(themeKind ?? "default"));
-    target?.setAttribute?.("data-sphinx-preview-reduced-motion", reducedMotion ? "true" : "false");
-  }
-
-  function applyPreviewThemeMode(mode) {
-    if (!themeModes.includes(mode)) mode = ${JSON.stringify(DEFAULT_PREVIEW_THEME_MODE)};
-    previewThemeMode = mode;
-    document.documentElement?.setAttribute?.("data-sphinx-preview-theme-mode", mode);
-    themeButton?.setAttribute?.("data-theme-mode", mode);
-    const nextMode = themeModes[(themeModes.indexOf(mode) + 1) % themeModes.length];
-    themeButton?.setAttribute?.("aria-label", "Preview theme: " + themeLabels[mode]);
-    const tooltip = themeLabels[mode] + " (click for " + themeLabels[nextMode].toLowerCase() + ")";
-    themeButton?.setAttribute?.("title", tooltip);
-    themeButton?.setAttribute?.("data-tooltip", tooltip);
-  }
-
-  function cyclePreviewThemeMode() {
-    const currentIndex = themeModes.indexOf(previewThemeMode);
-    motion.themeSwitch();
-    applyPreviewThemeMode(themeModes[(currentIndex + 1) % themeModes.length]);
-    const state = vscode.getState?.();
-    vscode.setState?.({
-      ...(state && typeof state === "object" ? state : {}),
-      previewThemeMode,
-    });
-    vscode.postMessage({
-      type: "previewThemeModeChanged",
-      documentId: context.documentId,
-      revision: context.revision,
-      requestId: context.requestId,
-      previewThemeMode,
-    });
-  }
-
-  function applyAnchorMode(enabled) {
-    anchorToEditor = enabled;
-    settings.scrollPreviewWithEditor = enabled;
-    anchorButton?.setAttribute?.("data-anchor-mode", enabled ? "on" : "off");
-    anchorButton?.setAttribute?.("aria-pressed", String(enabled));
-    const tooltip = enabled
-      ? "Preview and text editor scroll together"
-      : "Preview and text editor scroll independently";
-    anchorButton?.setAttribute?.("title", tooltip);
-    anchorButton?.setAttribute?.("data-tooltip", tooltip);
-  }
-
-  function applyPairing(paired) {
-    if (!anchorButton) return;
-    anchorButton.disabled = !paired;
-    if (!paired) {
-      const tooltip = "No text editor shows this file";
-      anchorButton.setAttribute?.("title", tooltip);
-      anchorButton.setAttribute?.("data-tooltip", tooltip);
-      anchorButton.setAttribute?.("aria-label", tooltip);
-      // A disabled button must not look active: the pressed colour applies to aria-pressed="true".
-      anchorButton.setAttribute?.("aria-pressed", "false");
-      return;
-    }
-    anchorButton.setAttribute?.("aria-label", "Anchor preview to text editor");
-    applyAnchorMode(anchorToEditor);
-  }
-
-  function postAnchorModeChanged() {
-    vscode.postMessage({
-      type: "previewAnchorModeChanged",
-      documentId: context.documentId,
-      revision: context.revision,
-      requestId: context.requestId,
-      anchorToEditor,
     });
   }
 
@@ -1347,7 +877,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       document.documentElement?.setAttribute?.("data-okf-properties-seq", String(seq));
     }
     editorTrace.record("properties table applied", "seq " + seq);
-    closeLinkTooltip();
+    linkTooltip.close();
     const main = document.getElementById?.("sphinx-myst-preview-content");
     if (!main) return;
     const existing = main.querySelector?.("[data-okf-properties]");
@@ -1549,7 +1079,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       if (properties?.getAttribute?.("data-okf-additional-properties") !== "false") {
         const customOption = document.createElement("option");
         customOption.value = "__custom__";
-        customOption.textContent = "Custom key\\u2026";
+        customOption.textContent = "Custom key\u2026";
         fieldControl.appendChild(customOption);
       }
     } else {
@@ -1596,7 +1126,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         showCustomError("The field name cannot start or end with spaces.");
         return;
       }
-      if (/[\\r\\n]/u.test(name)) {
+      if (/[\r\n]/u.test(name)) {
         showCustomError("The field name cannot contain a line break.");
         return;
       }
@@ -1747,8 +1277,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (event.key === "ArrowRight" && position === value.length) {
       return { step: 1, caretPosition: "start" };
     }
-    const firstLineEnd = value.indexOf("\\n");
-    const lastLineStart = value.lastIndexOf("\\n") + 1;
+    const firstLineEnd = value.indexOf("\n");
+    const lastLineStart = value.lastIndexOf("\n") + 1;
     // Up/Down leave only from the first/last VISUAL line: a long logical line wraps in the field
     // and the native caret movement must run first.
     if (
@@ -1797,7 +1327,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
         const element = document.createElement("span");
         // U+2060 WORD JOINER: zero width and no line-break opportunity, so a marker inside a word
         // cannot split a word that the textarea wraps whole.
-        element.textContent = "\u2060";
+        element.textContent = "⁠";
         return element;
       };
       const first = marker();
@@ -1849,7 +1379,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (typeof control.setSelectionRange !== "function") return false;
     event.preventDefault?.();
     // Block sources end with a line break; End stops before it rather than on an empty last line.
-    const target = event.key === "Home" ? 0 : String(control.value ?? "").replace(/[\\r\\n]+$/u, "").length;
+    const target = event.key === "Home" ? 0 : String(control.value ?? "").replace(/[\r\n]+$/u, "").length;
     if (!event.shiftKey) {
       control.setSelectionRange(target, target);
       return true;
@@ -2167,7 +1697,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     // A key that was just added as a custom key holds an empty string: it is edited as one line
     // of text, like a text field, and saved as a plain YAML scalar when that is safe.
     const newCustomKey = Boolean(options && options.newField) && value === ""
-      && declaredType === "unknown" && /\\bokf-unknown\\b/u.test(row.getAttribute("class") || "");
+      && declaredType === "unknown" && /\bokf-unknown\b/u.test(row.getAttribute("class") || "");
     const fieldType = newCustomKey ? "text" : declaredType;
     const useYamlEditor = !newCustomKey && !useListEditor
       && (!schemaFound || fieldType === "list" || fieldType === "unknown" || structuredValue);
@@ -2497,15 +2027,15 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       control.value = row.getAttribute("data-okf-value-yaml") || "";
       // A field that was just added holds an empty string, shown as "" in YAML. Start empty so
       // that the first typed text is the value, not text appended after the quotes.
-      if (options && options.newField && control.value === '""\\n') control.value = "";
+      if (options && options.newField && control.value === '""\n') control.value = "";
       control.setAttribute("spellcheck", "false");
-      control.rows = Math.max(1, Math.min(20, control.value.split(/\\r?\\n/u).length));
+      control.rows = Math.max(1, Math.min(20, control.value.split(/\r?\n/u).length));
     } else if (fieldType === "text") {
       control.value = value === null || value === undefined ? "" : String(value);
       control.setAttribute("data-okf-text-value", "true");
       control.rows = 1;
       control.setAttribute("aria-keyshortcuts", "Enter Shift+Enter");
-      control.setAttribute("title", "Enter saves \\u00b7 Shift+Enter adds a line");
+      control.setAttribute("title", "Enter saves \u00b7 Shift+Enter adds a line");
     } else if (fieldType === "checkbox") {
       control.type = "checkbox";
       control.className = "okf-value-checkbox";
@@ -2557,8 +2087,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const saveValue = (forcedValue) => {
       if (cancelled || edit.saving || control.disabled) return;
       if (forcedValue === undefined && fieldType === "text" && !useYamlEditor && !useListEditorValue
-        && control.tagName === "TEXTAREA" && (typeof value !== "string" || !value.endsWith("\\n"))) {
-        control.value = String(control.value).replace(/(?:\\r?\\n)+$/u, "");
+        && control.tagName === "TEXTAREA" && (typeof value !== "string" || !value.endsWith("\n"))) {
+        control.value = String(control.value).replace(/(?:\r?\n)+$/u, "");
       }
       let fieldValue = forcedValue === undefined
         ? useListEditorValue ? readListValue()
@@ -2629,7 +2159,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       } else if (!useListEditorValue && event.key === "Enter" && !event.isComposing) {
         const commitShortcut = event.metaKey || event.ctrlKey;
         const isTextField = control.tagName === "TEXTAREA" && fieldType === "text" && !useYamlEditor;
-        const multiline = String(control.value).includes("\\n");
+        const multiline = String(control.value).includes("\n");
         if (control.tagName !== "TEXTAREA"
           || commitShortcut
           || (isTextField && !multiline && !event.shiftKey && !event.altKey)) {
@@ -3103,7 +2633,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // yet (a menu that is still being filled) is checked again when it grows.
   function toolbarUsableTop(bar, content) {
     refreshReadingOffset();
-    let usableTop = readingOffsetValue;
+    let usableTop = stickyBand.readingOffset();
     if (stickyHeadings && !stickyHeadings.hidden) {
       const band = stickyHeadings.getBoundingClientRect?.();
       if (band && Number.isFinite(band.bottom)) usableTop = Math.max(usableTop, band.bottom);
@@ -3272,14 +2802,14 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     addAction("Insert row after selected row", tableActionIcons.addRow, "Row +", () => {
       edit.tableRowIndex = tableTools.insertRowAfter(edit.tableModel, edit.tableRowIndex);
     }, false, "row");
-    addAction("Delete selected row", tableActionIcons.deleteRow, "Row \u2212", () => {
+    addAction("Delete selected row", tableActionIcons.deleteRow, "Row −", () => {
       const nextRow = tableTools.deleteRow(edit.tableModel, edit.tableRowIndex);
       if (nextRow !== undefined) edit.tableRowIndex = nextRow;
     }, edit.tableRowIndex === 0 || edit.tableModel.rows.length <= 3, "row");
     addAction("Insert column after selected column", tableActionIcons.addColumn, "Col +", () => {
       edit.tableColumnIndex = tableTools.insertColumnAfter(edit.tableModel, edit.tableColumnIndex);
     }, false, "column");
-    addAction("Delete selected column", tableActionIcons.deleteColumn, "Col \u2212", () => {
+    addAction("Delete selected column", tableActionIcons.deleteColumn, "Col −", () => {
       const nextColumn = tableTools.deleteColumn(edit.tableModel, edit.tableColumnIndex);
       if (nextColumn !== undefined) edit.tableColumnIndex = nextColumn;
     }, edit.tableModel.rows[0].length <= 1, "column");
@@ -3358,8 +2888,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const columnCount = edit.tableModel.rows[0].length;
     const columnText = "column " + (edit.tableColumnIndex + 1) + " of " + columnCount;
     edit.status.textContent = edit.tableRowIndex === 0
-      ? "Header \u00b7 " + columnText
-      : "Row " + edit.tableRowIndex + " of " + (edit.tableModel.rows.length - 2) + " \u00b7 " + columnText;
+      ? "Header · " + columnText
+      : "Row " + edit.tableRowIndex + " of " + (edit.tableModel.rows.length - 2) + " · " + columnText;
     menu.appendChild(edit.status);
     // The menu now has its items: check them against the floating controls.
     applyAnchor();
@@ -3427,26 +2957,15 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       + " column=" + edit.tableColumnIndex + " " + traceFocus());
   }
 
-  function isApplePlatform() {
-    try {
-      const platform = typeof navigator === "undefined"
-        ? ""
-        : String((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "");
-      return /mac|iphone|ipad/iu.test(platform);
-    } catch {
-      return false;
-    }
-  }
-
   function blockEditHint(edit) {
     const applePlatform = isApplePlatform();
     const lines = edit.insertAfterLine !== undefined
       ? "New block"
       : edit.endLine > edit.line
-      ? "Lines " + edit.line + "\u2013" + edit.endLine
+      ? "Lines " + edit.line + "–" + edit.endLine
       : "Line " + edit.line;
-    return lines + " \u00b7 Enter: new line \u00b7 Tab: indent \u00b7 Esc: cancel \u00b7 "
-      + (applePlatform ? "\u2318\u21a9" : "Ctrl+Enter") + ": done";
+    return lines + " · Enter: new line · Tab: indent · Esc: cancel · "
+      + (applePlatform ? "⌘↩" : "Ctrl+Enter") + ": done";
   }
 
   // Done and Cancel, shared by the block editor and the table-cell editor. The mousedown default is
@@ -4463,8 +3982,8 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // The two move buttons of a body block's insert point (backlog move-block-up-down). The host
   // swaps the block above the bar with its neighbour; it re-checks every range it is sent.
   const moveButtonSpecs = [
-    { direction: "up", label: "Move the block above up", text: "\u2191" },
-    { direction: "down", label: "Move the block above down", text: "\u2193" },
+    { direction: "up", label: "Move the block above up", text: "↑" },
+    { direction: "down", label: "Move the block above down", text: "↓" },
   ];
   let moveStatusTimer;
 
@@ -4823,143 +4342,17 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     });
   }
 
-  // Every frontmatter link that is not still resolving: valid anchors and invalid or unavailable
-  // spans (which are keyboard-focusable) all show the custom tooltip.
-  const linkTooltipSelector = ".okf-frontmatter-link:not([data-okf-link-status=\\"pending\\"])";
-  let closeLinkTooltip = () => {};
-  let tooltipLink;
-  let linkTooltipSequence = 0;
-
-  function showLinkTooltip(event) {
-    const link = event.target?.closest?.(linkTooltipSelector);
-    if (!link || link === tooltipLink) return;
-    closeLinkTooltip();
-    const title = link.getAttribute("title");
-    if (title === null) return;
-    const describedBy = link.getAttribute("aria-describedby");
-    const tooltip = document.createElement("div");
-    const id = "sphinx-preview-link-tooltip-" + (++linkTooltipSequence);
-    tooltip.className = "sphinx-preview-link-tooltip";
-    tooltip.setAttribute("id", id);
-    tooltip.setAttribute("role", "tooltip");
-    tooltip.textContent = title;
-    link.removeAttribute("title");
-    link.setAttribute("aria-describedby", describedBy ? describedBy + " " + id : id);
-    tooltipLink = link;
-    closeLinkTooltip = () => {
-      tooltip.remove();
-      link.setAttribute("title", title);
-      if (describedBy === null) link.removeAttribute("aria-describedby");
-      else link.setAttribute("aria-describedby", describedBy);
-      tooltipLink = undefined;
-      closeLinkTooltip = () => {};
-    };
-    const margin = 8;
-    const controlsHeight = Number.parseFloat(window.getComputedStyle?.(document.documentElement)
-      ?.getPropertyValue?.("--sphinx-preview-controls-height")) || 116;
-    const minimumTop = controlsHeight + margin;
-    tooltip.style.setProperty("max-width", Math.max(1, Math.min(480, window.innerWidth - margin * 2)) + "px");
-    tooltip.style.setProperty("max-height", Math.max(1, window.innerHeight - minimumTop - margin) + "px");
-    document.body.appendChild(tooltip);
-    const linkRect = link.getBoundingClientRect();
-    const tooltipRect = tooltip.getBoundingClientRect();
-    const below = linkRect.bottom + margin;
-    const preferredTop = below + tooltipRect.height <= window.innerHeight - margin
-      ? below : linkRect.top - tooltipRect.height - margin;
-    tooltip.style.setProperty("left", Math.max(margin, Math.min(
-      linkRect.left, window.innerWidth - tooltipRect.width - margin,
-    )) + "px");
-    tooltip.style.setProperty("top", Math.max(minimumTop, Math.min(
-      preferredTop, window.innerHeight - tooltipRect.height - margin,
-    )) + "px");
-  }
-
-  function leaveLinkTooltip(event) {
-    if (tooltipLink && event.target?.closest?.(linkTooltipSelector) === tooltipLink
-      && !tooltipLink.contains(event.relatedTarget)) closeLinkTooltip();
-  }
-
-  document.addEventListener("mouseover", showLinkTooltip);
-  document.addEventListener("focusin", showLinkTooltip);
-  document.addEventListener("mouseout", leaveLinkTooltip);
-  document.addEventListener("focusout", leaveLinkTooltip);
-  document.addEventListener("pointerdown", (event) => {
-    if (event.target?.closest?.(linkTooltipSelector) !== tooltipLink) closeLinkTooltip();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeLinkTooltip();
-  });
-  window.addEventListener("scroll", () => closeLinkTooltip(), true);
-  window.addEventListener("resize", () => closeLinkTooltip());
-  window.visualViewport?.addEventListener("resize", () => closeLinkTooltip());
+  // The tooltip of frontmatter links (features/linkTooltip.ts).
+  const linkTooltip = installLinkTooltip(document, window);
   window.addEventListener("resize", () => {
     if (activeBlockEdit?.host) syncPaletteSticky(activeBlockEdit);
   });
   window.addEventListener("scroll", () => {
     if (activeBlockEdit?.host) syncPaletteSticky(activeBlockEdit);
   }, { passive: true });
-  window.addEventListener("pagehide", () => closeLinkTooltip());
-  window.addEventListener("beforeunload", () => closeLinkTooltip());
-
-  function initializeCheckboxes() {
-    document.querySelectorAll?.(checkboxSelector).forEach((checkbox) => {
-      if (checkboxEditingEnabled) return;
-      checkbox.disabled = true;
-      checkbox.setAttribute("title", "Editing requires a trusted workspace.");
-    });
-  }
-
-  function toggleCheckbox(checkbox, event) {
-    const line = Number(checkbox.getAttribute("data-myst-checkbox-line"));
-    const column = Number(checkbox.getAttribute("data-myst-checkbox-column"));
-    if (
-      !checkboxEditingEnabled
-      || !Number.isSafeInteger(line) || line < 1
-      || !Number.isSafeInteger(column) || column < 0
-      || checkbox.getAttribute("aria-busy") === "true"
-    ) {
-      event.preventDefault?.();
-      return;
-    }
-    const pendingEdit = activeBlockEdit || activeFrontmatterEdit;
-    if (pendingEdit) {
-      // Toggling now would race the open editor's save and be rejected as stale.
-      event.preventDefault?.();
-      pendingEdit.status.textContent = "Save or cancel this edit before toggling a checkbox.";
-      pendingEdit.status.setAttribute?.("data-visible", "true");
-      return;
-    }
-    // The browser has already flipped the box; the host confirms or the result reverts it.
-    const checked = checkbox.checked === true;
-    const editId = "checkbox-" + context.requestId + "-" + (++editSequence);
-    checkbox.setAttribute("aria-busy", "true");
-    pendingCheckboxToggles.set(editId, { checkbox, checked });
-    vscode.postMessage({
-      type: "previewCheckboxToggle",
-      documentId: context.documentId,
-      revision: context.revision,
-      requestId: context.requestId,
-      editId,
-      line,
-      endLine: line,
-      column,
-      checked,
-      ...anchorField(),
-    });
-  }
-
-  function receiveCheckboxResult(message) {
-    const pending = pendingCheckboxToggles.get(message.editId);
-    if (!pending) return;
-    pendingCheckboxToggles.delete(message.editId);
-    pending.checkbox.removeAttribute("aria-busy");
-    if (message.saved === true) return;
-    pending.checkbox.checked = !pending.checked;
-    if (typeof message.error === "string") pending.checkbox.setAttribute("title", message.error);
-  }
 
   function refreshPreview() {
-    closeLinkTooltip();
+    linkTooltip.close();
     if (activeBlockEdit || activeFrontmatterEdit) {
       (activeBlockEdit || activeFrontmatterEdit).status.textContent = "Save or cancel this edit before refreshing.";
       return;
@@ -5144,7 +4537,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   function initializeContent(options) {
     applyEditMode(editMode);
     warningBanner.update();
-    initializeCheckboxes();
+    checkboxes.initialize();
     updateStickyHeadings();
     applyDescriptionVisibility();
     applyFigureSizes(document);
@@ -5191,7 +4584,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     if (line === undefined) return;
     anchor = { line, owner: "preview" };
     const sourceLine = anchorPolicy.editorTopLine(line);
-    if (anchorToEditor && settings.scrollEditorWithPreview && sourceLine !== lastPostedLine) {
+    if (anchorMode.anchored() && settings.scrollEditorWithPreview && sourceLine !== lastPostedLine) {
       lastPostedLine = sourceLine;
       vscode.postMessage({
         type: "previewScroll",
@@ -5209,36 +4602,15 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   function revealElement(target) {
     const rectangle = target.getBoundingClientRect?.();
     if (!rectangle) return;
-    revealAt(anchorPolicy.scrollTopForY(rectangle.top + window.scrollY, readingOffsetValue, maxScrollTop()));
+    revealAt(anchorPolicy.scrollTopForY(rectangle.top + window.scrollY, stickyBand.readingOffset(), maxScrollTop()));
   }
 
-  // Announces replaced content to scripts that render it themselves (Mermaid).
-  function contentReplaced() {
-    if (typeof CustomEvent === "function") {
-      document.dispatchEvent(new CustomEvent("studio:content-replaced"));
-    }
-  }
-
-  applyPreviewThemeMode(previewThemeMode);
-  applyAnchorMode(anchorToEditor);
-  applyPairing(context.pairedTextEditor !== false);
-  themeButton?.addEventListener?.("click", cyclePreviewThemeMode);
+  themeMode.applyPreviewThemeMode(themeMode.mode());
+  anchorMode.applyAnchorMode(anchorMode.anchored());
+  anchorMode.applyPairing(context.pairedTextEditor !== false);
+  themeMode.bindButton();
   refreshButton?.addEventListener?.("click", refreshPreview);
-  anchorButton?.addEventListener?.("click", () => {
-    applyAnchorMode(!anchorToEditor);
-    const state = vscode.getState?.();
-    vscode.setState?.({
-      ...(state && typeof state === "object" ? state : {}),
-      anchorToEditor,
-    });
-    postAnchorModeChanged();
-  });
-  if (
-    typeof savedState?.anchorToEditor === "boolean"
-    && savedState.anchorToEditor !== (context.scrollPreviewWithEditor !== false)
-  ) {
-    postAnchorModeChanged();
-  }
+  anchorMode.start();
   editModeButton?.addEventListener?.("click", () => {
     const nextEditMode = !editMode;
     // Posted before the toggle applies: leaving edit mode may post a block save, which stays last.
@@ -5256,18 +4628,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       editMode,
     });
   });
-  applyTheme(context.themeKind);
+  themeMode.applyTheme(context.themeKind);
 
   window.addEventListener("scroll", scheduleScroll, { passive: true });
   window.addEventListener("resize", stabilizeLayout, { passive: true });
   window.visualViewport?.addEventListener("resize", stabilizeLayout, { passive: true });
-  // Host messages (src/protocol/hostToPage.ts): the filter checks that a message is addressed to
-  // this page and has a valid payload, then the router runs the handler of its type.
-  const hostMessageFilter = (${createHostMessageFilter.toString()})();
-  const hostMessages = (${createMessageRouter.toString()})();
-  hostMessages.on("previewPendingOverlay", (message) => {
-    applyPendingOverlay(message);
-  });
   hostMessages.on("previewEditorWatch", (message) => {
     // The host holds page updates back until this editor closes (STAB-03): report the close. The
     // editor id is the match; the document id may already be the next document the host follows.
@@ -5285,12 +4650,6 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       return;
     }
     applyPropertiesMarkup(message.markup, message.seq);
-  });
-  hostMessages.on("previewPairing", (message) => {
-    applyPairing(message.pairedTextEditor !== false);
-  });
-  hostMessages.on("themeChanged", (message) => {
-    applyTheme(message.themeKind);
   });
   hostMessages.on("previewShowComments", (message) => {
     chipToggle.setShowComments(message.showComments !== false);
@@ -5335,7 +4694,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       } catch {
         return undefined;
       }
-      return /%[\da-f]{2}/iu.test(decoded) ? undefined : decoded;
+      return /%[da-f]{2}/iu.test(decoded) ? undefined : decoded;
     };
     const fragmentSourceLine = Number(message.sourceLine ?? message.line);
     const mappedEntry = Number.isInteger(fragmentSourceLine) && fragmentSourceLine > 0
@@ -5354,11 +4713,11 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     const rectangle = target.getBoundingClientRect?.();
     if (!rectangle) return;
     const mappedScrollTop = mappedEntry && Number.isInteger(fragmentSourceLine)
-      ? anchorPolicy.scrollTopForLine(anchorMap, fragmentSourceLine, readingOffsetValue, maxScrollTop())
+      ? anchorPolicy.scrollTopForLine(anchorMap, fragmentSourceLine, stickyBand.readingOffset(), maxScrollTop())
       : undefined;
     const targetTop = mappedScrollTop ?? anchorPolicy.scrollTopForY(
         rectangle.top + window.scrollY,
-        readingOffsetValue,
+        stickyBand.readingOffset(),
         maxScrollTop(),
       );
     revealAt(targetTop);
@@ -5366,12 +4725,12 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   // A label rename and a PlantUML include read are matched by edit id; an answer they do not
   // recognise is left to the host round trips below.
   hostMessages.on("previewLabelRenameResult", (message) => labelRename.receive(message));
-  hostMessages.on("previewPlantUmlIncludeResult", (message) => plantUmlFileRequests.receive(message));
-  hostMessages.on("previewPlantUmlIncludesChanged", () => {
-    if (typeof CustomEvent === "function") {
-      document.dispatchEvent(new CustomEvent("studio:plantuml-includes-changed"));
-    }
+  // Target hints for the links the page asked about (link discovery, see linkNavigation.ts).
+  hostMessages.on("previewLinkTargets", (message) => {
+    linkNavigation.applyTargets(message);
   });
+  hostMessages.on("previewPlantUmlIncludeResult", (message) => plantUmlFileRequests.receive(message));
+  hostMessages.on("previewPlantUmlIncludesChanged", () => bus.emit("plantUmlIncludesChanged", undefined));
   hostMessages.on("previewBlocksResult", (message) => {
     receiveBlocksResult(message);
   });
@@ -5383,9 +4742,6 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   });
   hostMessages.on("previewFrontmatterResult", (message) => {
     receiveFrontmatterResult(message);
-  });
-  hostMessages.on("previewCheckboxResult", (message) => {
-    receiveCheckboxResult(message);
   });
   hostMessages.on("sourceScroll", (message) => {
     markSourceLine(Number(message.selectionLine ?? message.line));
@@ -5410,9 +4766,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
       applyAnchor();
     });
   });
-  window.addEventListener("message", (event) => {
-    const message = event.data;
-    if (hostMessageFilter.accepts(message, context) && hostMessages.dispatch(message).handled) return;
+  pageHostMessages.listen(transport, context, (message) => {
     // Every other answer may close a host round trip of the palette: matched by edit id.
     if (message && typeof message.type === "string" && message.type.endsWith("Result")) {
       hostRequests.receive(message);
@@ -5432,12 +4786,7 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
     });
   }
   // Registered first so a checkbox click never opens a block editor or reveals the source.
-  document.addEventListener("click", (event) => {
-    const checkbox = event.target instanceof Element ? event.target.closest(checkboxSelector) : undefined;
-    if (!checkbox) return;
-    event.stopImmediatePropagation?.();
-    toggleCheckbox(checkbox, event);
-  });
+  checkboxes.bindClicks();
   // The header issue badge jumps to the first row with a problem. It must run before the mapped
   // block click handlers, which would otherwise reveal or edit the properties section.
   document.addEventListener("click", (event) => {
@@ -5613,22 +4962,4 @@ let pendingEditOpenedIn = savedState?.pendingFrontmatterEditOpenedIn;
   }
   initializeContent({ restore: true });
   postPreviewReady();
-})();`;
 }
-
-export function layoutMappings(
-  mappings: readonly SourceBlockMapping[],
-  positions: readonly { top: number; height: number }[],
-): PositionedSourceMapping[] {
-  return mappings
-    .map((mapping, index) => {
-      const position = positions[index];
-      return position && Number.isFinite(position.top) && Number.isFinite(position.height)
-        ? { ...mapping, top: position.top, height: position.height }
-        : undefined;
-    })
-    .filter((mapping): mapping is PositionedSourceMapping => mapping !== undefined);
-}
-
-export { parseSourceMappings };
-export type { MappingElement, SourceBlockMapping };

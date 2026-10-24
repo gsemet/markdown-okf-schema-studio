@@ -26,11 +26,10 @@ import {
   PlantUmlDiagramRender,
 } from "../render/plantUmlRenderer";
 import {
-  createScrollSyncScript,
-  PreviewRuntimeContext,
+  type PreviewRuntimeContext,
   RUNTIME_CONTEXT_ATTRIBUTE,
   serializeRuntimeContext,
-} from "../webview/scrollSync";
+} from "../protocol/bootContext";
 import { renderMathHtml } from "../render/mathRenderer";
 import { classifyPreviewReference } from "../navigation/previewNavigation";
 import {
@@ -68,19 +67,19 @@ export function buildStatusWebviewHtml(
   return injectAccessibilityStyles(html, PREVIEW_ACCESSIBILITY_CSS, nonce);
 }
 
-function injectScrollSyncScript(html: string, script: string, nonce: string): string {
-  return injectRuntimeTags(html, `<script nonce="${nonce}" data-sphinx-preview-scroll-sync>${script}</script>`);
-}
-
 /**
- * The runtime as a file (PERF-11): the context of this render in an inert JSON element, then the
- * bundled runtime script, which reads it. Only the JSON changes from one render to the next.
+ * The runtime as a file (PERF-11): the boot context of this render in an inert JSON element, then
+ * the bundled runtime script (src/page/main.ts), which reads it. Only the JSON changes from one
+ * render to the next. Without a bundle URL (a host that serves no bundle) the page gets the context
+ * only: the runtime exists as the bundle file alone.
  */
-function injectRuntimeFile(html: string, context: PreviewRuntimeContext, runtimeUri: string, nonce: string): string {
+function injectRuntimeFile(html: string, context: PreviewRuntimeContext, runtimeUri: string | undefined, nonce: string): string {
   return injectRuntimeTags(
     html,
     `<script type="application/json" ${RUNTIME_CONTEXT_ATTRIBUTE}>${serializeRuntimeContext(context)}</script>`
-      + `<script nonce="${escapeHtml(nonce)}" src="${escapeHtml(runtimeUri)}" data-sphinx-preview-scroll-sync></script>`,
+      + (runtimeUri === undefined
+        ? ""
+        : `<script nonce="${escapeHtml(nonce)}" src="${escapeHtml(runtimeUri)}" data-sphinx-preview-scroll-sync></script>`),
   );
 }
 
@@ -255,9 +254,7 @@ export function buildPreviewWebviewHtml(
   const runtimeUri = bundleUri("preview.js");
   const html = !scrollContext
     ? withMermaidRenderer
-    : runtimeUri
-      ? injectRuntimeFile(withMermaidRenderer, scrollContext, runtimeUri, nonce)
-      : injectScrollSyncScript(withMermaidRenderer, createScrollSyncScript(scrollContext), nonce);
+    : injectRuntimeFile(withMermaidRenderer, scrollContext, runtimeUri, nonce);
   const withFrontmatter = injectPropertiesTable(
     html,
     frontmatter

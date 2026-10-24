@@ -8,11 +8,11 @@
  *   1. Add its interface to {@link HostToPageMessage}.
  *   2. Add its rule to the table in {@link createHostMessageFilter}: the addressing (see
  *      {@link HostMessageAddressing}) and, when the page must refuse some payloads, a validator.
- *   3. Register the page handler with `hostMessages.on(type, handler)` in the page runtime
- *      (`src/webview/scrollSync.ts`), and send it from the host through its typed `postToPage`.
+ *   3. Register the page handler on the page's router (`router.on(type, handler)`, see
+ *      `src/page/hostMessages.ts`) in the page feature that owns it (`src/page/`), and send it from
+ *      the host through its typed `postToPage`.
  *
- * {@link createHostMessageFilter} is self-contained: the page runtime is still assembled with
- * `Function.prototype.toString()`, so its body must not use anything defined outside it.
+ * The page imports {@link createHostMessageFilter} through its bundle (`src/page/main.ts`).
  */
 
 import type { CommentThread } from "../comments/commentModel";
@@ -296,8 +296,7 @@ export interface HostMessageFilter {
 }
 
 /**
- * The page's filter of host messages. Self-contained (see the module comment): every constant it
- * uses is declared in its body.
+ * The page's filter of host messages. Every constant it uses is declared in its body.
  */
 export function createHostMessageFilter(): HostMessageFilter {
   // In-place content patch (T34): the limits the host's patch stays within.

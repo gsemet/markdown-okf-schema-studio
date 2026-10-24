@@ -3,30 +3,33 @@ import {
   normalizePreviewContentWidth,
 } from "../configuration/previewConfiguration";
 import { gridColumnCss } from "../render/mystGridToctree";
+import { VSCODE_THEME_TOKEN_CSS } from "./themeTokens";
 
 /**
  * Stylesheets injected into every preview webview.
  *
- * Kept free of `vscode` imports so the CSS contract can be unit tested directly.
+ * Kept free of `vscode` imports so the CSS contract can be unit tested directly. The rules read
+ * the neutral `--studio-*` theme tokens only; the accessibility sheet, which every page loads
+ * first, maps them to the host's variables (themeTokens.ts).
  */
 
-export const PREVIEW_ACCESSIBILITY_CSS = `
+export const PREVIEW_ACCESSIBILITY_CSS = `${VSCODE_THEME_TOKEN_CSS}
 :root {
   color-scheme: light dark;
 }
 
 body {
-  background: var(--vscode-editor-background, Canvas);
-  color: var(--vscode-editor-foreground, CanvasText);
+  background: var(--studio-editor-background, Canvas);
+  color: var(--studio-editor-foreground, CanvasText);
   margin: 0;
 }
 
 a {
-  color: var(--vscode-textLink-foreground, LinkText);
+  color: var(--studio-textLink-foreground, LinkText);
 }
 
 :where(a, button, input, select, textarea, summary, [tabindex="0"]):focus-visible {
-  outline: 2px solid var(--vscode-focusBorder, Highlight);
+  outline: 2px solid var(--studio-focusBorder, Highlight);
   outline-offset: 2px;
 }
 
@@ -55,7 +58,7 @@ a {
 }
 
 [data-sphinx-preview-current="true"] {
-  outline: 2px solid var(--vscode-editor-findMatchHighlightBackground, Highlight);
+  outline: 2px solid var(--studio-editor-findMatchHighlightBackground, Highlight);
   outline-offset: 2px;
 }
 
@@ -116,9 +119,9 @@ const ICONS = {
  */
 export const PREVIEW_THEME_CSS = `
 :root {
-  --sphinx-preview-font: var(--vscode-markdown-font-family, var(--vscode-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, sans-serif));
-  --sphinx-preview-font-size: var(--vscode-markdown-font-size, 14px);
-  --sphinx-preview-line-height: var(--vscode-markdown-line-height, 1.6);
+  --sphinx-preview-font: var(--studio-markdown-font-family, var(--studio-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, sans-serif));
+  --sphinx-preview-font-size: var(--studio-markdown-font-size, 14px);
+  --sphinx-preview-line-height: var(--studio-markdown-line-height, 1.6);
   --sphinx-preview-content-max-width: ${DEFAULT_PREVIEW_CONTENT_WIDTH}px;
   /* Set by the runtime (toolbar Zoom - / +); text and column scale together. */
   --sphinx-preview-zoom: 1;
@@ -126,18 +129,18 @@ export const PREVIEW_THEME_CSS = `
   --sphinx-preview-column-width: calc(var(--sphinx-preview-content-max-width) * var(--sphinx-preview-zoom, 1));
   --sphinx-preview-controls-height: 116px;
   --sphinx-preview-content-gutter: clamp(16px, 8vw, 78px);
-  --sphinx-preview-diff-addition: var(--vscode-charts-green, #2da44e);
-  --sphinx-preview-diff-deletion: var(--vscode-charts-red, #cf222e);
-  --sphinx-preview-scrollbar-thumb: var(--vscode-scrollbarSlider-background, rgba(128, 128, 128, 0.4));
-  --sphinx-preview-scrollbar-hover: var(--vscode-scrollbarSlider-hoverBackground, rgba(128, 128, 128, 0.7));
+  --sphinx-preview-diff-addition: var(--studio-charts-green, #2da44e);
+  --sphinx-preview-diff-deletion: var(--studio-charts-red, #cf222e);
+  --sphinx-preview-scrollbar-thumb: var(--studio-scrollbarSlider-background, rgba(128, 128, 128, 0.4));
+  --sphinx-preview-scrollbar-hover: var(--studio-scrollbarSlider-hoverBackground, rgba(128, 128, 128, 0.7));
 }
 
 body {
-  --sphinx-preview-border: var(--vscode-widget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
+  --sphinx-preview-border: var(--studio-widget-border, var(--studio-panel-border, rgba(128, 128, 128, 0.35)));
 }
 
 * {
-  scrollbar-color: var(--sphinx-preview-scrollbar-thumb) var(--vscode-editor-background, Canvas);
+  scrollbar-color: var(--sphinx-preview-scrollbar-thumb) var(--studio-editor-background, Canvas);
 }
 
 ::-webkit-scrollbar {
@@ -147,7 +150,7 @@ body {
 
 ::-webkit-scrollbar-track,
 ::-webkit-scrollbar-corner {
-  background: var(--vscode-editor-background, Canvas);
+  background: var(--studio-editor-background, Canvas);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -163,39 +166,39 @@ html[data-sphinx-preview-theme-mode="dark"] body {
   color-scheme: dark;
   --sphinx-preview-scrollbar-thumb: #686868;
   --sphinx-preview-scrollbar-hover: #9e9e9e;
-  --vscode-editor-background: #1e1e1e;
-  --vscode-editor-foreground: #d4d4d4;
-  --vscode-foreground: #d4d4d4;
-  --vscode-editorWidget-background: #252526;
-  --vscode-editorWidget-border: #454545;
-  --vscode-icon-foreground: #d4d4d4;
-  --vscode-toolbar-hoverBackground: rgba(255, 255, 255, 0.1);
-  --vscode-input-background: #3c3c3c;
-  --vscode-input-foreground: #d4d4d4;
-  --vscode-input-border: #454545;
-  --vscode-button-background: #0e639c;
-  --vscode-button-foreground: #ffffff;
-  --vscode-errorForeground: #f48771;
-  --vscode-descriptionForeground: #9d9d9d;
-  --vscode-textLink-foreground: #3794ff;
-  --vscode-focusBorder: #007fd4;
-  --vscode-editor-findMatchHighlightBackground: #ea5c0055;
-  --vscode-list-hoverBackground: rgba(255, 255, 255, 0.1);
-  --vscode-widget-border: #454545;
-  --vscode-editorHoverWidget-background: #252526;
-  --vscode-editorHoverWidget-foreground: #d4d4d4;
-  --vscode-editorHoverWidget-border: #454545;
-  --vscode-panel-border: #454545;
-  --vscode-textBlockQuote-background: #292929;
-  --vscode-textCodeBlock-background: #292929;
-  --vscode-button-secondaryBackground: #3a3d41;
-  --vscode-button-secondaryForeground: #d4d4d4;
-  --vscode-charts-blue: #75beff;
-  --vscode-charts-green: #89d185;
-  --vscode-charts-purple: #d3a0ff;
-  --vscode-charts-yellow: #e2c08d;
-  --vscode-charts-red: #f48771;
-  --vscode-charts-orange: #d18616;
+  --studio-editor-background: #1e1e1e;
+  --studio-editor-foreground: #d4d4d4;
+  --studio-foreground: #d4d4d4;
+  --studio-editorWidget-background: #252526;
+  --studio-editorWidget-border: #454545;
+  --studio-icon-foreground: #d4d4d4;
+  --studio-toolbar-hoverBackground: rgba(255, 255, 255, 0.1);
+  --studio-input-background: #3c3c3c;
+  --studio-input-foreground: #d4d4d4;
+  --studio-input-border: #454545;
+  --studio-button-background: #0e639c;
+  --studio-button-foreground: #ffffff;
+  --studio-errorForeground: #f48771;
+  --studio-descriptionForeground: #9d9d9d;
+  --studio-textLink-foreground: #3794ff;
+  --studio-focusBorder: #007fd4;
+  --studio-editor-findMatchHighlightBackground: #ea5c0055;
+  --studio-list-hoverBackground: rgba(255, 255, 255, 0.1);
+  --studio-widget-border: #454545;
+  --studio-editorHoverWidget-background: #252526;
+  --studio-editorHoverWidget-foreground: #d4d4d4;
+  --studio-editorHoverWidget-border: #454545;
+  --studio-panel-border: #454545;
+  --studio-textBlockQuote-background: #292929;
+  --studio-textCodeBlock-background: #292929;
+  --studio-button-secondaryBackground: #3a3d41;
+  --studio-button-secondaryForeground: #d4d4d4;
+  --studio-charts-blue: #75beff;
+  --studio-charts-green: #89d185;
+  --studio-charts-purple: #d3a0ff;
+  --studio-charts-yellow: #e2c08d;
+  --studio-charts-red: #f48771;
+  --studio-charts-orange: #d18616;
 }
 
 html[data-sphinx-preview-theme-mode="white"],
@@ -203,39 +206,39 @@ html[data-sphinx-preview-theme-mode="white"] body {
   color-scheme: light;
   --sphinx-preview-scrollbar-thumb: #b3b3b3;
   --sphinx-preview-scrollbar-hover: #808080;
-  --vscode-editor-background: #ffffff;
-  --vscode-editor-foreground: #1f1f1f;
-  --vscode-foreground: #1f1f1f;
-  --vscode-editorWidget-background: #f3f3f3;
-  --vscode-editorWidget-border: #c8c8c8;
-  --vscode-icon-foreground: #333333;
-  --vscode-toolbar-hoverBackground: rgba(0, 0, 0, 0.08);
-  --vscode-input-background: #ffffff;
-  --vscode-input-foreground: #1f1f1f;
-  --vscode-input-border: #c8c8c8;
-  --vscode-button-background: #005fb8;
-  --vscode-button-foreground: #ffffff;
-  --vscode-errorForeground: #b5200d;
-  --vscode-descriptionForeground: #5f5f5f;
-  --vscode-textLink-foreground: #006ab1;
-  --vscode-focusBorder: #005fb8;
-  --vscode-editor-findMatchHighlightBackground: #ffdf5d80;
-  --vscode-list-hoverBackground: rgba(0, 0, 0, 0.08);
-  --vscode-widget-border: #c8c8c8;
-  --vscode-editorHoverWidget-background: #f3f3f3;
-  --vscode-editorHoverWidget-foreground: #1f1f1f;
-  --vscode-editorHoverWidget-border: #c8c8c8;
-  --vscode-panel-border: #e5e5e5;
-  --vscode-textBlockQuote-background: #f3f3f3;
-  --vscode-textCodeBlock-background: #f0f0f0;
-  --vscode-button-secondaryBackground: #ededed;
-  --vscode-button-secondaryForeground: #333333;
-  --vscode-charts-blue: #005fb8;
-  --vscode-charts-green: #16825d;
-  --vscode-charts-purple: #652d90;
-  --vscode-charts-yellow: #8f6100;
-  --vscode-charts-red: #b5200d;
-  --vscode-charts-orange: #a65e00;
+  --studio-editor-background: #ffffff;
+  --studio-editor-foreground: #1f1f1f;
+  --studio-foreground: #1f1f1f;
+  --studio-editorWidget-background: #f3f3f3;
+  --studio-editorWidget-border: #c8c8c8;
+  --studio-icon-foreground: #333333;
+  --studio-toolbar-hoverBackground: rgba(0, 0, 0, 0.08);
+  --studio-input-background: #ffffff;
+  --studio-input-foreground: #1f1f1f;
+  --studio-input-border: #c8c8c8;
+  --studio-button-background: #005fb8;
+  --studio-button-foreground: #ffffff;
+  --studio-errorForeground: #b5200d;
+  --studio-descriptionForeground: #5f5f5f;
+  --studio-textLink-foreground: #006ab1;
+  --studio-focusBorder: #005fb8;
+  --studio-editor-findMatchHighlightBackground: #ffdf5d80;
+  --studio-list-hoverBackground: rgba(0, 0, 0, 0.08);
+  --studio-widget-border: #c8c8c8;
+  --studio-editorHoverWidget-background: #f3f3f3;
+  --studio-editorHoverWidget-foreground: #1f1f1f;
+  --studio-editorHoverWidget-border: #c8c8c8;
+  --studio-panel-border: #e5e5e5;
+  --studio-textBlockQuote-background: #f3f3f3;
+  --studio-textCodeBlock-background: #f0f0f0;
+  --studio-button-secondaryBackground: #ededed;
+  --studio-button-secondaryForeground: #333333;
+  --studio-charts-blue: #005fb8;
+  --studio-charts-green: #16825d;
+  --studio-charts-purple: #652d90;
+  --studio-charts-yellow: #8f6100;
+  --studio-charts-red: #b5200d;
+  --studio-charts-orange: #a65e00;
 }
 
 html[data-sphinx-preview-theme-mode="cream"],
@@ -243,39 +246,39 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   color-scheme: light;
   --sphinx-preview-scrollbar-thumb: #cfc5b2;
   --sphinx-preview-scrollbar-hover: #a89d89;
-  --vscode-editor-background: #f5f1e8;
-  --vscode-editor-foreground: #2b2a27;
-  --vscode-foreground: #2b2a27;
-  --vscode-descriptionForeground: #5e5850;
-  --vscode-textLink-foreground: #a14e32;
-  --vscode-focusBorder: #b05a3c;
-  --vscode-editor-findMatchHighlightBackground: #e6c36a80;
-  --vscode-list-hoverBackground: rgba(43, 42, 39, 0.07);
-  --vscode-widget-border: #d6cdbd;
-  --vscode-editorWidget-background: #fbf8f1;
-  --vscode-editorWidget-border: #d6cdbd;
-  --vscode-editorHoverWidget-background: #ede6da;
-  --vscode-editorHoverWidget-foreground: #2b2a27;
-  --vscode-editorHoverWidget-border: #d6cdbd;
-  --vscode-panel-border: #e2dacb;
-  --vscode-textBlockQuote-background: #efe9dd;
-  --vscode-textCodeBlock-background: #ede6da;
-  --vscode-icon-foreground: #4a463d;
-  --vscode-toolbar-hoverBackground: rgba(43, 42, 39, 0.09);
-  --vscode-input-background: #fbf8f1;
-  --vscode-input-foreground: #2b2a27;
-  --vscode-input-border: #cfc5b2;
-  --vscode-button-background: #9a4a2a;
-  --vscode-button-foreground: #ffffff;
-  --vscode-button-secondaryBackground: #e8e0d2;
-  --vscode-button-secondaryForeground: #3a372f;
-  --vscode-errorForeground: #b3261e;
-  --vscode-charts-blue: #2f6690;
-  --vscode-charts-green: #34703f;
-  --vscode-charts-purple: #6b4a8a;
-  --vscode-charts-yellow: #7d5500;
-  --vscode-charts-red: #ae3a2a;
-  --vscode-charts-orange: #94500c;
+  --studio-editor-background: #f5f1e8;
+  --studio-editor-foreground: #2b2a27;
+  --studio-foreground: #2b2a27;
+  --studio-descriptionForeground: #5e5850;
+  --studio-textLink-foreground: #a14e32;
+  --studio-focusBorder: #b05a3c;
+  --studio-editor-findMatchHighlightBackground: #e6c36a80;
+  --studio-list-hoverBackground: rgba(43, 42, 39, 0.07);
+  --studio-widget-border: #d6cdbd;
+  --studio-editorWidget-background: #fbf8f1;
+  --studio-editorWidget-border: #d6cdbd;
+  --studio-editorHoverWidget-background: #ede6da;
+  --studio-editorHoverWidget-foreground: #2b2a27;
+  --studio-editorHoverWidget-border: #d6cdbd;
+  --studio-panel-border: #e2dacb;
+  --studio-textBlockQuote-background: #efe9dd;
+  --studio-textCodeBlock-background: #ede6da;
+  --studio-icon-foreground: #4a463d;
+  --studio-toolbar-hoverBackground: rgba(43, 42, 39, 0.09);
+  --studio-input-background: #fbf8f1;
+  --studio-input-foreground: #2b2a27;
+  --studio-input-border: #cfc5b2;
+  --studio-button-background: #9a4a2a;
+  --studio-button-foreground: #ffffff;
+  --studio-button-secondaryBackground: #e8e0d2;
+  --studio-button-secondaryForeground: #3a372f;
+  --studio-errorForeground: #b3261e;
+  --studio-charts-blue: #2f6690;
+  --studio-charts-green: #34703f;
+  --studio-charts-purple: #6b4a8a;
+  --studio-charts-yellow: #7d5500;
+  --studio-charts-red: #ae3a2a;
+  --studio-charts-orange: #94500c;
 }
 
 [data-sphinx-preview-toolbar] {
@@ -290,8 +293,8 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   padding: 3px;
   border: 1px solid var(--sphinx-preview-border);
   border-radius: 14px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-icon-foreground, var(--vscode-editor-foreground, CanvasText));
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-icon-foreground, var(--studio-editor-foreground, CanvasText));
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
 }
 
@@ -323,10 +326,10 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   box-sizing: border-box;
   max-width: min(320px, calc(100vw - 28px));
   padding: 6px 10px;
-  border: 1px solid var(--vscode-editorWidget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-editorWidget-border, var(--sphinx-preview-border));
   border-radius: 6px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-foreground, var(--vscode-editor-foreground, CanvasText));
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-foreground, var(--studio-editor-foreground, CanvasText));
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
   font-size: 12px;
   line-height: 1.4;
@@ -361,17 +364,17 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending
   height: 30px;
   padding-block: 0;
   padding-inline: 8px 2px;
-  border: 1px solid var(--vscode-editorWidget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-editorWidget-border, var(--sphinx-preview-border));
   border-inline-start: 3px solid var(--sphinx-preview-warning-accent);
   border-radius: 6px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-foreground, var(--vscode-editor-foreground, CanvasText));
-  font-family: var(--vscode-font-family, var(--sphinx-preview-font));
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-foreground, var(--studio-editor-foreground, CanvasText));
+  font-family: var(--studio-font-family, var(--sphinx-preview-font));
   font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
   --sphinx-preview-warning-banner-reserve: 196px;
-  --sphinx-preview-warning-accent: color-mix(in srgb, var(--vscode-charts-yellow, #bf8803) 75%, var(--vscode-editor-foreground, CanvasText));
+  --sphinx-preview-warning-accent: color-mix(in srgb, var(--studio-charts-yellow, #bf8803) 75%, var(--studio-editor-foreground, CanvasText));
 }
 
 /* Rows 2-3 collapsed: the toolbar is one row of at most four buttons. */
@@ -403,13 +406,13 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--vscode-textLink-foreground, LinkText);
+  color: var(--studio-textLink-foreground, LinkText);
   font: inherit;
   cursor: pointer;
 }
 
 [data-sphinx-preview-warning-banner] button:hover {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.16));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.16));
 }
 
 [data-sphinx-preview-warning-banner] [data-sphinx-preview-warning-close] {
@@ -444,12 +447,12 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
 }
 
 [data-sphinx-preview-toolbar] button:hover {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
 [data-sphinx-preview-toolbar] button[aria-pressed="true"] {
-  background: var(--vscode-button-background, #0e639c);
-  color: var(--vscode-button-foreground, #ffffff);
+  background: var(--studio-button-background, #0e639c);
+  color: var(--studio-button-foreground, #ffffff);
 }
 
 [data-sphinx-preview-toolbar] button[aria-pressed="true"]:focus-visible {
@@ -474,10 +477,10 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
   height: 26px;
   place-items: center;
   padding: 0;
-  border: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.45));
+  border: 1px solid var(--studio-editorWidget-border, rgba(128, 128, 128, 0.45));
   border-radius: 4px;
-  background: var(--vscode-editorWidget-background, #252526);
-  color: var(--vscode-icon-foreground, var(--vscode-editor-foreground, inherit));
+  background: var(--studio-editorWidget-background, #252526);
+  color: var(--studio-icon-foreground, var(--studio-editor-foreground, inherit));
   cursor: pointer;
 }
 
@@ -486,7 +489,7 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
 }
 
 [data-sphinx-preview-code-copy]:hover {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
 [data-sphinx-preview-code-copy] > svg {
@@ -518,10 +521,10 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
   width: max-content;
   max-width: min(240px, calc(100vw - 16px));
   padding: 5px 8px;
-  border: 1px solid var(--vscode-editorHoverWidget-border, var(--vscode-widget-border, currentColor));
+  border: 1px solid var(--studio-editorHoverWidget-border, var(--studio-widget-border, currentColor));
   border-radius: 4px;
-  background: var(--vscode-editorHoverWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-editorHoverWidget-foreground, var(--vscode-editor-foreground, CanvasText));
+  background: var(--studio-editorHoverWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-editorHoverWidget-foreground, var(--studio-editor-foreground, CanvasText));
   content: attr(data-tooltip);
   font-size: 11px;
   font-weight: 400;
@@ -580,8 +583,8 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
   border: 0;
   border-bottom: 1px solid var(--sphinx-preview-border);
   border-radius: 0;
-  background: var(--vscode-editor-background, Canvas);
-  color: var(--vscode-editor-foreground, CanvasText);
+  background: var(--studio-editor-background, Canvas);
+  color: var(--studio-editor-foreground, CanvasText);
   font-family: var(--sphinx-preview-font);
   font-size: calc(var(--sphinx-preview-zoomed-font-size) + 2px);
   font-weight: 700;
@@ -610,12 +613,12 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-source-file][data-sphinx-s
 }
 
 html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-edit-hover="true"] {
-  outline: 1px dashed var(--vscode-focusBorder, Highlight);
+  outline: 1px dashed var(--studio-focusBorder, Highlight);
   outline-offset: 3px;
 }
 
 html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-block-selected="true"] {
-  outline: 2px solid var(--vscode-focusBorder, Highlight);
+  outline: 2px solid var(--studio-focusBorder, Highlight);
   outline-offset: 3px;
 }
 
@@ -654,10 +657,10 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   width: 1.4em;
   height: 1.4em;
   padding: 0;
-  border: 1px solid var(--vscode-focusBorder, Highlight);
+  border: 1px solid var(--studio-focusBorder, Highlight);
   border-radius: 50%;
-  background: var(--vscode-button-background, Highlight);
-  color: var(--vscode-button-foreground, HighlightText);
+  background: var(--studio-button-background, Highlight);
+  color: var(--studio-button-foreground, HighlightText);
   font: inherit;
   font-size: 0.9em;
   line-height: 1;
@@ -682,8 +685,8 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
 
 .sphinx-preview-insert-point button.sphinx-preview-move:disabled {
   cursor: default;
-  background: var(--vscode-button-secondaryBackground, GrayText);
-  color: var(--vscode-button-secondaryForeground, Canvas);
+  background: var(--studio-button-secondaryBackground, GrayText);
+  color: var(--studio-button-secondaryForeground, Canvas);
 }
 
 [data-sphinx-source-line]:hover + .sphinx-preview-insert-point button.sphinx-preview-move:disabled,
@@ -702,10 +705,10 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   z-index: 2;
   max-width: 24em;
   padding: 2px 8px;
-  border: 1px solid var(--vscode-focusBorder, Highlight);
+  border: 1px solid var(--studio-focusBorder, Highlight);
   border-radius: 3px;
-  background: var(--vscode-editorWidget-background, Canvas);
-  color: var(--vscode-editorWidget-foreground, CanvasText);
+  background: var(--studio-editorWidget-background, Canvas);
+  color: var(--studio-editorWidget-foreground, CanvasText);
   font-size: 0.85em;
 }
 
@@ -729,10 +732,10 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   position: relative;
   z-index: 1;
   margin: 0;
-  border: 1px solid var(--vscode-focusBorder, Highlight);
+  border: 1px solid var(--studio-focusBorder, Highlight);
   border-radius: 4px;
   padding: 6px 8px;
-  background: var(--vscode-editor-background, Canvas);
+  background: var(--studio-editor-background, Canvas);
   color: inherit;
 }
 
@@ -750,8 +753,8 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   outline: none;
   background: transparent;
   color: inherit;
-  font-family: var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: calc(var(--vscode-editor-font-size, 0.95em) - 1px);
+  font-family: var(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: calc(var(--studio-editor-font-size, 0.95em) - 1px);
   tab-size: 4;
   line-height: inherit;
   white-space: pre-wrap;
@@ -794,20 +797,20 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   padding: 4px 10px;
   border: 1px solid var(--sphinx-preview-border);
   border-radius: 3px;
-  background: var(--vscode-button-secondaryBackground, ButtonFace);
-  color: var(--vscode-button-secondaryForeground, ButtonText);
+  background: var(--studio-button-secondaryBackground, ButtonFace);
+  color: var(--studio-button-secondaryForeground, ButtonText);
   cursor: pointer;
 }
 
 .sphinx-preview-block-editor-buttons button:first-child {
   border-color: transparent;
-  background: var(--vscode-button-background, Highlight);
-  color: var(--vscode-button-foreground, HighlightText);
+  background: var(--studio-button-background, Highlight);
+  color: var(--studio-button-foreground, HighlightText);
 }
 
 .sphinx-preview-block-editor [data-sphinx-preview-edit-status] {
   margin: 6px 0 0;
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   font-size: 0.75em;
 }
 
@@ -834,7 +837,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   margin: 0;
   padding: 0;
   background: transparent;
-  color: var(--vscode-editor-foreground, CanvasText);
+  color: var(--studio-editor-foreground, CanvasText);
 }
 
 /* Font family, size and line-height come from the block editor rule above. */
@@ -844,7 +847,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   border: 0;
   outline: none;
   background: transparent;
-  color: var(--vscode-editor-foreground, CanvasText);
+  color: var(--studio-editor-foreground, CanvasText);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   overflow: hidden;
@@ -884,10 +887,10 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   padding: 3px;
   width: max-content;
   max-width: 100%;
-  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-widget-border, var(--sphinx-preview-border));
   border-radius: 18px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-icon-foreground, var(--vscode-editor-foreground, CanvasText));
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-icon-foreground, var(--studio-editor-foreground, CanvasText));
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
 }
 
@@ -917,11 +920,11 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 }
 
 .sphinx-preview-table-menu button:hover {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
 .sphinx-preview-table-menu button:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline: 1px solid var(--studio-focusBorder, Highlight);
   outline-offset: -2px;
 }
 
@@ -954,7 +957,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   align-self: center;
   margin: 0 4px;
   line-height: 1.2;
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   font-size: 0.85em;
 }
 
@@ -979,12 +982,12 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   max-width: 100%;
   margin: 0 0 6px;
   padding: 3px;
-  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-widget-border, var(--sphinx-preview-border));
   border-radius: 18px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-icon-foreground, var(--vscode-editor-foreground, CanvasText));
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-icon-foreground, var(--studio-editor-foreground, CanvasText));
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
-  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  font-family: var(--studio-font-family, system-ui, sans-serif);
   line-height: 1.2;
 }
 
@@ -1044,10 +1047,10 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   height: 26px;
   margin-inline: 2px 6px;
   padding: 0 4px;
-  border: 1px solid var(--vscode-dropdown-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-dropdown-border, var(--sphinx-preview-border));
   border-radius: 13px;
-  background: var(--vscode-dropdown-background, transparent);
-  color: var(--vscode-dropdown-foreground, inherit);
+  background: var(--studio-dropdown-background, transparent);
+  color: var(--studio-dropdown-foreground, inherit);
   font: inherit;
   font-size: 0.8em;
   cursor: pointer;
@@ -1076,15 +1079,15 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 .sphinx-preview-edit-palette > button:hover,
 .sphinx-preview-edit-palette-menu > button:hover,
 .sphinx-preview-edit-palette-menu > button[data-active="true"] {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
 .sphinx-preview-edit-palette > button:active {
-  background: var(--vscode-toolbar-activeBackground, rgba(128, 128, 128, 0.35));
+  background: var(--studio-toolbar-activeBackground, rgba(128, 128, 128, 0.35));
 }
 
 .sphinx-preview-edit-palette > button[aria-expanded="true"] {
-  background: var(--vscode-toolbar-activeBackground, rgba(128, 128, 128, 0.35));
+  background: var(--studio-toolbar-activeBackground, rgba(128, 128, 128, 0.35));
 }
 
 .sphinx-preview-edit-palette > button[data-edit-group-start="true"] {
@@ -1146,10 +1149,10 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   max-height: 15em;
   overflow-y: auto;
   padding: 3px;
-  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-widget-border, var(--sphinx-preview-border));
   border-radius: 8px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-editor-foreground, CanvasText);
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-editor-foreground, CanvasText);
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.25);
 }
 
@@ -1196,15 +1199,15 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 }
 
 .sphinx-preview-edit-grid-cell[data-grid-on="true"] {
-  border-color: var(--vscode-focusBorder, #007fd4);
-  background: color-mix(in srgb, var(--vscode-focusBorder, #007fd4) 45%, transparent);
+  border-color: var(--studio-focusBorder, #007fd4);
+  background: color-mix(in srgb, var(--studio-focusBorder, #007fd4) 45%, transparent);
 }
 
 .sphinx-preview-edit-grid-label {
   margin-top: 5px;
   font-size: 0.8em;
   text-align: center;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
 }
 
 /* Emoji picker: filter field and categories as button grids, inside the frame. */
@@ -1221,10 +1224,10 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   width: 100%;
   margin: 0 0 4px;
   padding: 3px 6px;
-  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-input-border, var(--sphinx-preview-border));
   border-radius: 5px;
-  background: var(--vscode-input-background, transparent);
-  color: var(--vscode-input-foreground, inherit);
+  background: var(--studio-input-background, transparent);
+  color: var(--studio-input-foreground, inherit);
   font: inherit;
   font-size: 0.85em;
 }
@@ -1240,7 +1243,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   font-size: 0.72em;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
 }
 
 .sphinx-preview-edit-emoji-grid {
@@ -1262,7 +1265,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 
 .sphinx-preview-edit-emoji-grid > button:hover,
 .sphinx-preview-edit-emoji-grid > button:focus-visible {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
 .sphinx-preview-edit-emoji-grid > button[hidden],
@@ -1302,7 +1305,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 
 .sphinx-preview-edit-choice-list > button:hover,
 .sphinx-preview-edit-choice-list > button:focus-visible {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
 .sphinx-preview-edit-choice-list > button[hidden] {
@@ -1312,7 +1315,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 .sphinx-preview-edit-choice-note {
   padding: 3px 6px;
   font-size: 0.8em;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
 }
 
 /* Colour picker (Colour button) and the colour-code swatch button. */
@@ -1325,7 +1328,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   box-sizing: border-box;
   width: 16px;
   height: 16px;
-  border: 1px solid var(--vscode-icon-foreground, currentColor);
+  border: 1px solid var(--studio-icon-foreground, currentColor);
   border-radius: 4px;
 }
 
@@ -1347,7 +1350,7 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 .sphinx-preview-edit-color-remove {
   flex: 1 1 0;
   padding: 3px 6px;
-  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-widget-border, var(--sphinx-preview-border));
   border-radius: 5px;
   background: transparent;
   color: inherit;
@@ -1357,13 +1360,13 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 }
 
 .sphinx-preview-edit-color-tabs > button[aria-selected="true"] {
-  border-color: var(--vscode-focusBorder, #007fd4);
-  background: color-mix(in srgb, var(--vscode-focusBorder, #007fd4) 25%, transparent);
+  border-color: var(--studio-focusBorder, #007fd4);
+  background: color-mix(in srgb, var(--studio-focusBorder, #007fd4) 25%, transparent);
 }
 
 .sphinx-preview-edit-color-tabs > button:hover,
 .sphinx-preview-edit-color-remove:hover {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
 .sphinx-preview-edit-color-grid {
@@ -1385,12 +1388,12 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 
 .sphinx-preview-edit-color-grid > button:hover,
 .sphinx-preview-edit-color-grid > button:focus-visible {
-  outline: 2px solid var(--vscode-focusBorder, #007fd4);
+  outline: 2px solid var(--studio-focusBorder, #007fd4);
   outline-offset: 1px;
 }
 
 .sphinx-preview-edit-color-hex[aria-invalid="true"] {
-  border-color: var(--vscode-inputValidation-errorBorder, #be1100);
+  border-color: var(--studio-inputValidation-errorBorder, #be1100);
 }
 
 .sphinx-preview-edit-color-remove {
@@ -1436,19 +1439,19 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   max-height: 320px;
   overflow-y: auto;
   padding: 4px;
-  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-widget-border, var(--sphinx-preview-border));
   border-radius: 8px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-editor-foreground, CanvasText);
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-editor-foreground, CanvasText);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  font-family: var(--studio-font-family, system-ui, sans-serif);
   font-size: 13px;
   line-height: 1.3;
 }
 
 .sphinx-preview-slash-heading {
   padding: 6px 8px 2px;
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   font-size: 0.82em;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -1465,8 +1468,8 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 }
 
 .sphinx-preview-slash-option[data-active="true"] {
-  background: var(--vscode-list-activeSelectionBackground, rgba(128, 128, 128, 0.3));
-  color: var(--vscode-list-activeSelectionForeground, inherit);
+  background: var(--studio-list-activeSelectionBackground, rgba(128, 128, 128, 0.3));
+  color: var(--studio-list-activeSelectionForeground, inherit);
 }
 
 .sphinx-preview-slash-icon {
@@ -1503,14 +1506,14 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 .sphinx-preview-slash-category,
 .sphinx-preview-slash-shortcut {
   flex: none;
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   font-size: 0.85em;
   white-space: nowrap;
 }
 
 .sphinx-preview-slash-none {
   padding: 6px 8px;
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
 }
 
 .sphinx-preview-slash-live {
@@ -1557,12 +1560,12 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   max-width: 100%;
   margin: 0 0 6px;
   padding: 6px 8px;
-  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-widget-border, var(--sphinx-preview-border));
   border-radius: 8px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-editor-foreground, CanvasText);
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-editor-foreground, CanvasText);
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
-  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  font-family: var(--studio-font-family, system-ui, sans-serif);
   font-size: 0.85em;
 }
 
@@ -1577,15 +1580,15 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   width: 16em;
   max-width: 100%;
   padding: 3px 6px;
-  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-input-border, var(--sphinx-preview-border));
   border-radius: 4px;
-  background: var(--vscode-input-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-input-foreground, var(--vscode-editor-foreground, CanvasText));
+  background: var(--studio-input-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-input-foreground, var(--studio-editor-foreground, CanvasText));
   font: inherit;
 }
 
 .sphinx-preview-link-panel-row > input:focus {
-  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline: 1px solid var(--studio-focusBorder, Highlight);
   outline-offset: -1px;
 }
 
@@ -1596,21 +1599,21 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 
 .sphinx-preview-link-panel-actions > button {
   padding: 3px 10px;
-  border: 1px solid var(--vscode-button-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-button-border, var(--sphinx-preview-border));
   border-radius: 4px;
-  background: var(--vscode-button-secondaryBackground, transparent);
-  color: var(--vscode-button-secondaryForeground, inherit);
+  background: var(--studio-button-secondaryBackground, transparent);
+  color: var(--studio-button-secondaryForeground, inherit);
   font: inherit;
   cursor: pointer;
 }
 
 .sphinx-preview-link-panel-actions > button[data-link-action="insert"] {
-  background: var(--vscode-button-background, Highlight);
-  color: var(--vscode-button-foreground, HighlightText);
+  background: var(--studio-button-background, Highlight);
+  color: var(--studio-button-foreground, HighlightText);
 }
 
 .sphinx-preview-link-panel-actions > button:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline: 1px solid var(--studio-focusBorder, Highlight);
   outline-offset: 1px;
 }
 
@@ -1624,12 +1627,12 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   width: 100%;
   margin: 0 0 6px;
   padding: 8px;
-  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-widget-border, var(--sphinx-preview-border));
   border-radius: 8px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-editor-foreground, CanvasText);
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-editor-foreground, CanvasText);
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
-  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  font-family: var(--studio-font-family, system-ui, sans-serif);
   font-size: 0.85em;
 }
 
@@ -1668,10 +1671,10 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   min-width: 0;
   width: 100%;
   padding: 3px 6px;
-  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-input-border, var(--sphinx-preview-border));
   border-radius: 4px;
-  background: var(--vscode-input-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-input-foreground, var(--vscode-editor-foreground, CanvasText));
+  background: var(--studio-input-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-input-foreground, var(--studio-editor-foreground, CanvasText));
   font: inherit;
 }
 
@@ -1680,18 +1683,18 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 }
 
 .sphinx-preview-figure-panel [aria-invalid="true"] {
-  border-color: var(--vscode-inputValidation-errorBorder, #be1100);
+  border-color: var(--studio-inputValidation-errorBorder, #be1100);
 }
 
 .sphinx-preview-figure-panel input:focus,
 .sphinx-preview-figure-panel textarea:focus,
 .sphinx-preview-figure-panel select:focus {
-  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline: 1px solid var(--studio-focusBorder, Highlight);
   outline-offset: -1px;
 }
 
 .sphinx-preview-figure-panel-error {
-  color: var(--vscode-errorForeground, #be1100);
+  color: var(--studio-errorForeground, #be1100);
 }
 
 .sphinx-preview-figure-panel-error[hidden] {
@@ -1706,21 +1709,21 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
 
 .sphinx-preview-figure-panel button {
   padding: 3px 10px;
-  border: 1px solid var(--vscode-button-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-button-border, var(--sphinx-preview-border));
   border-radius: 4px;
-  background: var(--vscode-button-secondaryBackground, transparent);
-  color: var(--vscode-button-secondaryForeground, inherit);
+  background: var(--studio-button-secondaryBackground, transparent);
+  color: var(--studio-button-secondaryForeground, inherit);
   font: inherit;
   cursor: pointer;
 }
 
 .sphinx-preview-figure-panel button[data-figure-action="apply"] {
-  background: var(--vscode-button-background, Highlight);
-  color: var(--vscode-button-foreground, HighlightText);
+  background: var(--studio-button-background, Highlight);
+  color: var(--studio-button-foreground, HighlightText);
 }
 
 .sphinx-preview-figure-panel button:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline: 1px solid var(--studio-focusBorder, Highlight);
   outline-offset: 1px;
 }
 
@@ -1729,11 +1732,11 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   position: fixed;
   z-index: 20;
   padding: 2px 8px;
-  border: 1px solid var(--vscode-button-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-button-border, var(--sphinx-preview-border));
   border-radius: 4px;
-  background: var(--vscode-button-background, Highlight);
-  color: var(--vscode-button-foreground, HighlightText);
-  font: 0.8em var(--vscode-font-family, system-ui, sans-serif);
+  background: var(--studio-button-background, Highlight);
+  color: var(--studio-button-foreground, HighlightText);
+  font: 0.8em var(--studio-font-family, system-ui, sans-serif);
   cursor: pointer;
 }
 
@@ -1756,10 +1759,10 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-figure-edit-butto
   margin: 4px 0 0;
   padding: 3px;
   overflow: visible;
-  border: 1px solid var(--vscode-widget-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-widget-border, var(--sphinx-preview-border));
   border-radius: 18px;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-icon-foreground, var(--vscode-editor-foreground, CanvasText));
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-icon-foreground, var(--studio-editor-foreground, CanvasText));
   box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
 }
 
@@ -1779,11 +1782,11 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-figure-edit-butto
 }
 
 .sphinx-preview-frontmatter-menu button:hover {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
 .sphinx-preview-frontmatter-menu button:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline: 1px solid var(--studio-focusBorder, Highlight);
   outline-offset: -2px;
 }
 
@@ -1831,15 +1834,15 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-figure-edit-butto
   max-width: 100%;
   height: 30px;
   padding: 2px 6px;
-  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-input-border, var(--sphinx-preview-border));
   border-radius: 3px;
-  background: var(--vscode-input-background, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-input-foreground, var(--vscode-editor-foreground, CanvasText));
+  background: var(--studio-input-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-input-foreground, var(--studio-editor-foreground, CanvasText));
   font: inherit;
 }
 
 [data-okf-frontmatter-editor] > select[data-okf-empty-select="true"] {
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
 }
 
 html[data-sphinx-preview-edit-mode="on"] [data-okf-edit-cell] {
@@ -1847,16 +1850,16 @@ html[data-sphinx-preview-edit-mode="on"] [data-okf-edit-cell] {
 }
 
 html[data-sphinx-preview-edit-mode="on"] [data-okf-edit-cell]:hover {
-  background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.12));
+  background: var(--studio-list-hoverBackground, rgba(128, 128, 128, 0.12));
 }
 
 html[data-sphinx-preview-edit-mode="on"] [data-okf-edit-cell]:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline: 1px solid var(--studio-focusBorder, Highlight);
   outline-offset: -2px;
 }
 
 html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selected="true"] {
-  outline: 2px solid var(--vscode-focusBorder, Highlight);
+  outline: 2px solid var(--studio-focusBorder, Highlight);
   outline-offset: -2px;
 }
 
@@ -1868,7 +1871,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--vscode-editor-foreground, CanvasText);
+  color: var(--studio-editor-foreground, CanvasText);
 }
 
 [data-okf-editing="true"] {
@@ -1898,7 +1901,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   border-radius: 0;
   outline: none;
   background: transparent;
-  color: var(--vscode-editor-foreground, CanvasText);
+  color: var(--studio-editor-foreground, CanvasText);
   font: inherit;
 }
 
@@ -1909,7 +1912,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
 .okf-value-checkbox {
   margin: 0;
   vertical-align: middle;
-  accent-color: var(--vscode-checkbox-background, var(--vscode-focusBorder, currentColor));
+  accent-color: var(--studio-checkbox-background, var(--studio-focusBorder, currentColor));
 }
 
 .okf-boolean-value {
@@ -1951,7 +1954,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   position: absolute;
   inset-inline: 0;
   height: 2px;
-  background: var(--vscode-focusBorder, Highlight);
+  background: var(--studio-focusBorder, Highlight);
   pointer-events: none;
   content: "";
 }
@@ -1971,7 +1974,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   border: 0;
   border-radius: 2px;
   background: transparent;
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   font: inherit;
 }
 
@@ -1981,7 +1984,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   padding: 0.1em 0.25em;
   border: 0;
   background: transparent;
-  color: var(--vscode-textLink-foreground, var(--vscode-descriptionForeground, GrayText));
+  color: var(--studio-textLink-foreground, var(--studio-descriptionForeground, GrayText));
   cursor: pointer;
   font: inherit;
   font-size: 0.88em;
@@ -2048,8 +2051,8 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
 .okf-list-editor-add:hover,
 .okf-list-editor-null:hover,
 .okf-frontmatter-null:hover {
-  color: var(--vscode-foreground, currentColor);
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.12));
+  color: var(--studio-foreground, currentColor);
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.12));
 }
 
 .okf-list-editor-handle:focus-visible,
@@ -2058,7 +2061,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
 .okf-list-editor-null:focus-visible,
 .okf-frontmatter-null:focus-visible,
 .okf-list-editor-input:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, Highlight);
+  outline: 1px solid var(--studio-focusBorder, Highlight);
   outline-offset: -1px;
 }
 
@@ -2068,23 +2071,23 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   min-width: 0;
   min-height: 1.8em;
   padding: 0.15em 0.35em;
-  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-input-border, var(--sphinx-preview-border));
   border-radius: 2px;
   outline: none;
-  background: var(--vscode-editor-background, Canvas);
-  color: var(--vscode-editor-foreground, CanvasText);
+  background: var(--studio-editor-background, Canvas);
+  color: var(--studio-editor-foreground, CanvasText);
   font: inherit;
   line-height: inherit;
 }
 
 .okf-list-editor-input:focus {
-  border-color: var(--vscode-focusBorder, Highlight);
+  border-color: var(--studio-focusBorder, Highlight);
 }
 
 .okf-list-editor-add {
   margin: 0.25em 0 0 1.45em;
   padding: 0.1em 0.25em;
-  color: var(--vscode-textLink-foreground, var(--vscode-descriptionForeground, GrayText));
+  color: var(--studio-textLink-foreground, var(--studio-descriptionForeground, GrayText));
   cursor: pointer;
   font-size: 0.88em;
   text-align: left;
@@ -2103,15 +2106,15 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   min-height: 1.6em;
   max-height: none;
   resize: none;
-  font-family: var(--vscode-editor-font-family, monospace);
+  font-family: var(--studio-editor-font-family, monospace);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   overflow: hidden;
 }
 
 [data-okf-frontmatter-editor] > textarea:not([data-okf-text-value]) {
-  font-family: var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: var(--vscode-editor-font-size, 0.95em);
+  font-family: var(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--studio-editor-font-size, 0.95em);
   tab-size: 4;
 }
 
@@ -2138,7 +2141,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   overflow: visible;
   clip-path: none;
   white-space: normal;
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   font-size: 0.9em;
 }
 
@@ -2148,10 +2151,10 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
   gap: 0.4em;
   margin: 3px 0 0;
   padding: 3px 6px;
-  border: 1px solid var(--vscode-inputValidation-errorBorder, rgba(190, 45, 45, 0.55));
+  border: 1px solid var(--studio-inputValidation-errorBorder, rgba(190, 45, 45, 0.55));
   border-radius: 3px;
-  background: var(--vscode-inputValidation-errorBackground, rgba(235, 80, 80, 0.12));
-  color: var(--vscode-inputValidation-errorForeground, var(--vscode-errorForeground, #a12626));
+  background: var(--studio-inputValidation-errorBackground, rgba(235, 80, 80, 0.12));
+  color: var(--studio-inputValidation-errorForeground, var(--studio-errorForeground, #a12626));
   font-size: 0.78em;
   line-height: 1.3;
 }
@@ -2172,7 +2175,7 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-table-cell-selecte
 }
 
 .sphinx-preview-frontmatter-editor [role="status"][data-visible="true"][data-state="warning"] {
-  color: var(--vscode-editorWarning-foreground, #bf8803);
+  color: var(--studio-editorWarning-foreground, #bf8803);
   font-size: 0.78em;
   line-height: 1.3;
 }
@@ -2236,8 +2239,8 @@ nav[data-sphinx-preview-toc] {
     padding: 8px 6px;
     border: 1px solid var(--sphinx-preview-border);
     border-radius: 8px;
-    background: var(--vscode-editor-background, Canvas);
-    color: var(--vscode-editor-foreground, CanvasText);
+    background: var(--studio-editor-background, Canvas);
+    color: var(--studio-editor-foreground, CanvasText);
     font-family: var(--sphinx-preview-font);
     font-size: 13px;
     line-height: 1.35;
@@ -2287,7 +2290,7 @@ nav[data-sphinx-preview-toc] li button[data-sphinx-preview-toc-twisty][aria-expa
 nav[data-sphinx-preview-toc] li[data-sphinx-preview-toc-current] > button:not([data-sphinx-preview-toc-twisty]) {
   background: color-mix(in srgb, currentColor 14%, transparent);
   border-radius: 0;
-  box-shadow: inset 3px 0 0 var(--vscode-focusBorder, Highlight);
+  box-shadow: inset 3px 0 0 var(--studio-focusBorder, Highlight);
   font-weight: 600;
 }
 
@@ -2309,7 +2312,7 @@ nav[data-sphinx-preview-toc] li button {
 
 nav[data-sphinx-preview-toc] li button:hover,
 nav[data-sphinx-preview-toc] li button:focus-visible {
-  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.18));
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.18));
 }
 
 nav[data-sphinx-preview-toc] [data-sphinx-preview-toc-empty] {
@@ -2424,7 +2427,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   font-weight: 600;
   line-height: 1.25;
   margin: 1.6em 0 0.6em;
-  color: var(--vscode-editor-foreground, CanvasText);
+  color: var(--studio-editor-foreground, CanvasText);
 }
 
 #sphinx-myst-preview-content h1 {
@@ -2511,7 +2514,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   height: 1em;
   margin: 0 0.35em 0 0;
   vertical-align: -0.125em;
-  accent-color: var(--vscode-focusBorder, #007fd4);
+  accent-color: var(--studio-focusBorder, #007fd4);
   cursor: pointer;
 }
 
@@ -2524,7 +2527,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 }
 
 #sphinx-myst-preview-content input.myst-checkbox:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline: 1px solid var(--studio-focusBorder, #007fd4);
   outline-offset: 2px;
 }
 
@@ -2544,11 +2547,11 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   box-sizing: border-box;
   margin: 0 0.15em;
   padding: 0 0.5em;
-  border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, 0.4));
+  border: 1px solid var(--studio-widget-border, rgba(128, 128, 128, 0.4));
   border-radius: 0.75em;
-  background: var(--vscode-editorWidget-background, rgba(128, 128, 128, 0.12));
-  color: var(--vscode-descriptionForeground, #717171);
-  font-family: var(--vscode-editor-font-family, monospace);
+  background: var(--studio-editorWidget-background, rgba(128, 128, 128, 0.12));
+  color: var(--studio-descriptionForeground, #717171);
+  font-family: var(--studio-editor-font-family, monospace);
   font-size: 0.78em;
   font-weight: 600;
   line-height: 1.4;
@@ -2558,17 +2561,17 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 }
 
 #sphinx-myst-preview-content .okf-chip--todo {
-  border-color: var(--vscode-charts-green, #16825d);
-  background: color-mix(in srgb, var(--vscode-charts-green, #16825d) 16%, transparent);
-  color: var(--vscode-charts-green, #16825d);
+  border-color: var(--studio-charts-green, #16825d);
+  background: color-mix(in srgb, var(--studio-charts-green, #16825d) 16%, transparent);
+  color: var(--studio-charts-green, #16825d);
 }
 
 /* Inline thread: a green chip led by a speech bubble; the bubble is a mask, so it takes the chip
    color in every theme. */
 #sphinx-myst-preview-content .okf-chip--thread {
-  border-color: var(--vscode-charts-green, #16825d);
-  background: color-mix(in srgb, var(--vscode-charts-green, #16825d) 16%, transparent);
-  color: var(--vscode-charts-green, #16825d);
+  border-color: var(--studio-charts-green, #16825d);
+  background: color-mix(in srgb, var(--studio-charts-green, #16825d) 16%, transparent);
+  color: var(--studio-charts-green, #16825d);
 }
 
 #sphinx-myst-preview-content .okf-chip--thread::before {
@@ -2584,7 +2587,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 }
 
 #sphinx-myst-preview-content .okf-chip:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline: 1px solid var(--studio-focusBorder, #007fd4);
   outline-offset: 1px;
 }
 
@@ -2600,22 +2603,22 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 /* An opened comment reads like an admonition: accent bar, tinted panel and a title (Comment or
    TODO) taken from the comment kind. The text is a plain text node, so line breaks are kept. */
 #sphinx-myst-preview-content .okf-comment > .okf-comment-body:not([hidden]) {
-  --sphinx-preview-accent: var(--vscode-descriptionForeground, #717171);
+  --sphinx-preview-accent: var(--studio-descriptionForeground, #717171);
   display: block;
   margin: 0.4em 0;
   padding: 0.6em 1em;
   border: 1px solid var(--sphinx-preview-border);
   border-inline-start: 4px solid var(--sphinx-preview-accent);
   border-radius: 0;
-  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
-  background: color-mix(in srgb, var(--sphinx-preview-accent) 14%, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-editor-foreground, CanvasText);
+  background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.08));
+  background: color-mix(in srgb, var(--sphinx-preview-accent) 14%, var(--studio-editor-background, Canvas));
+  color: var(--studio-editor-foreground, CanvasText);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
 #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="todo"] > .okf-comment-body:not([hidden]) {
-  --sphinx-preview-accent: var(--vscode-charts-green, #16825d);
+  --sphinx-preview-accent: var(--studio-charts-green, #16825d);
 }
 
 #sphinx-myst-preview-content .okf-comment > .okf-comment-body:not([hidden])::before {
@@ -2634,7 +2637,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 /* An open thread: one entry per message, then the reply box and Delete. The message text is a text
    node, so its line breaks are kept; the body itself wraps normally. */
 #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="thread"] > .okf-comment-body:not([hidden]) {
-  --sphinx-preview-accent: var(--vscode-charts-green, #16825d);
+  --sphinx-preview-accent: var(--studio-charts-green, #16825d);
   white-space: normal;
 }
 
@@ -2660,7 +2663,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 }
 
 #sphinx-myst-preview-content .okf-thread-date {
-  color: var(--vscode-descriptionForeground, #717171);
+  color: var(--studio-descriptionForeground, #717171);
   font-size: 0.85em;
 }
 
@@ -2681,10 +2684,10 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   width: 100%;
   min-height: 3.6em;
   padding: 0.4em 0.5em;
-  border: 1px solid var(--vscode-input-border, var(--sphinx-preview-border));
+  border: 1px solid var(--studio-input-border, var(--sphinx-preview-border));
   border-radius: 3px;
-  background: var(--vscode-input-background, transparent);
-  color: var(--vscode-input-foreground, inherit);
+  background: var(--studio-input-background, transparent);
+  color: var(--studio-input-foreground, inherit);
   font: inherit;
   resize: vertical;
 }
@@ -2699,17 +2702,17 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 
 #sphinx-myst-preview-content .okf-thread-buttons button {
   padding: 0.25em 0.8em;
-  border: 1px solid var(--vscode-button-border, transparent);
+  border: 1px solid var(--studio-button-border, transparent);
   border-radius: 2px;
-  background: var(--vscode-button-background, #0e639c);
-  color: var(--vscode-button-foreground, #fff);
+  background: var(--studio-button-background, #0e639c);
+  color: var(--studio-button-foreground, #fff);
   font: inherit;
   cursor: pointer;
 }
 
 #sphinx-myst-preview-content .okf-thread-buttons button[data-okf-thread-delete] {
-  background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.2));
-  color: var(--vscode-button-secondaryForeground, inherit);
+  background: var(--studio-button-secondaryBackground, rgba(128, 128, 128, 0.2));
+  color: var(--studio-button-secondaryForeground, inherit);
 }
 
 #sphinx-myst-preview-content .okf-thread-buttons button:disabled {
@@ -2719,12 +2722,12 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 
 #sphinx-myst-preview-content .okf-thread-buttons button:focus-visible,
 #sphinx-myst-preview-content .okf-thread-actions textarea:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline: 1px solid var(--studio-focusBorder, #007fd4);
   outline-offset: 1px;
 }
 
 #sphinx-myst-preview-content .okf-thread-status {
-  color: var(--vscode-errorForeground, #f14c4c);
+  color: var(--studio-errorForeground, #f14c4c);
   font-size: 0.9em;
 }
 
@@ -2749,13 +2752,13 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   inset-inline-start: 8px;
   width: 3px;
   border-radius: 0;
-  background: var(--vscode-editorGutter-addedBackground, #2ea043);
+  background: var(--studio-editorGutter-addedBackground, #2ea043);
 }
 
 /* Review comments: a highlighted quote (or a badge on its block) opens a popover with the thread.
    Marks only paint; badges and the popover are out of the flow, so nothing moves. */
 #sphinx-myst-preview-content mark[data-okf-comment-thread] {
-  background: var(--vscode-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
+  background: var(--studio-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
   color: inherit;
   border-radius: 2px;
   cursor: pointer;
@@ -2764,7 +2767,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 #sphinx-myst-preview-content mark[data-okf-comment-thread][data-okf-comment-resolved="true"] {
   background: transparent;
   text-decoration: underline dotted;
-  text-decoration-color: var(--vscode-descriptionForeground, currentColor);
+  text-decoration-color: var(--studio-descriptionForeground, currentColor);
 }
 
 #sphinx-myst-preview-content [data-okf-comment-badged] {
@@ -2779,9 +2782,9 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   height: 14px;
   padding: 0;
   margin: 0;
-  border: 1px solid var(--vscode-focusBorder, #007fd4);
+  border: 1px solid var(--studio-focusBorder, #007fd4);
   border-radius: 7px 7px 7px 0;
-  background: var(--vscode-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
+  background: var(--studio-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
   cursor: pointer;
 }
 
@@ -2802,11 +2805,11 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   max-height: 50vh;
   overflow-y: auto;
   padding: 8px 10px;
-  border: 1px solid var(--vscode-editorWidget-border, var(--vscode-focusBorder, #454545));
+  border: 1px solid var(--studio-editorWidget-border, var(--studio-focusBorder, #454545));
   border-radius: 0;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
-  color: var(--vscode-editorWidget-foreground, var(--vscode-editor-foreground));
-  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
+  background: var(--studio-editorWidget-background, var(--studio-editor-background));
+  color: var(--studio-editorWidget-foreground, var(--studio-editor-foreground));
+  box-shadow: 0 2px 8px var(--studio-widget-shadow, rgba(0, 0, 0, 0.36));
   font-size: 0.9em;
 }
 
@@ -2822,7 +2825,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 [data-okf-comment-popover] [data-okf-comment-entry] + [data-okf-comment-entry] {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+  border-top: 1px solid var(--studio-editorWidget-border, rgba(128, 128, 128, 0.4));
 }
 
 [data-okf-comment-popover] [data-okf-comment-head] {
@@ -2845,18 +2848,18 @@ button[data-okf-comment-create] {
   position: fixed;
   z-index: 50;
   padding: 2px 10px;
-  border: 1px solid var(--vscode-button-border, transparent);
+  border: 1px solid var(--studio-button-border, transparent);
   border-radius: 3px;
-  background: var(--vscode-button-background);
-  color: var(--vscode-button-foreground);
-  box-shadow: 0 2px 6px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
+  background: var(--studio-button-background);
+  color: var(--studio-button-foreground);
+  box-shadow: 0 2px 6px var(--studio-widget-shadow, rgba(0, 0, 0, 0.36));
   font: inherit;
   font-size: 0.85em;
   cursor: pointer;
 }
 
 button[data-okf-comment-create]:hover {
-  background: var(--vscode-button-hoverBackground, var(--vscode-button-background));
+  background: var(--studio-button-hoverBackground, var(--studio-button-background));
 }
 
 [data-okf-comment-compose] {
@@ -2865,11 +2868,11 @@ button[data-okf-comment-create]:hover {
   box-sizing: border-box;
   width: min(320px, calc(100vw - 16px));
   padding: 8px 10px;
-  border: 1px solid var(--vscode-editorWidget-border, var(--vscode-focusBorder, #454545));
+  border: 1px solid var(--studio-editorWidget-border, var(--studio-focusBorder, #454545));
   border-radius: 0;
-  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
-  color: var(--vscode-editorWidget-foreground, var(--vscode-editor-foreground));
-  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
+  background: var(--studio-editorWidget-background, var(--studio-editor-background));
+  color: var(--studio-editorWidget-foreground, var(--studio-editor-foreground));
+  box-shadow: 0 2px 8px var(--studio-widget-shadow, rgba(0, 0, 0, 0.36));
   font-size: 0.9em;
 }
 
@@ -2890,15 +2893,15 @@ button[data-okf-comment-create]:hover {
   min-height: 3.2em;
   resize: vertical;
   padding: 4px 6px;
-  border: 1px solid var(--vscode-input-border, rgba(128, 128, 128, 0.5));
-  background: var(--vscode-input-background);
-  color: var(--vscode-input-foreground);
+  border: 1px solid var(--studio-input-border, rgba(128, 128, 128, 0.5));
+  background: var(--studio-input-background);
+  color: var(--studio-input-foreground);
   font: inherit;
 }
 
 [data-okf-comment-compose] textarea:focus,
 [data-okf-comment-popover] textarea:focus {
-  outline: 1px solid var(--vscode-focusBorder);
+  outline: 1px solid var(--studio-focusBorder);
   outline-offset: -1px;
 }
 
@@ -2913,7 +2916,7 @@ button[data-okf-comment-create]:hover {
 [data-okf-comment-popover] [data-okf-comment-reply] {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+  border-top: 1px solid var(--studio-editorWidget-border, rgba(128, 128, 128, 0.4));
 }
 
 [data-okf-comment-popover] [data-okf-comment-reply] textarea {
@@ -2923,18 +2926,18 @@ button[data-okf-comment-create]:hover {
 [data-okf-comment-compose] button,
 [data-okf-comment-popover] [data-okf-comment-reply] button {
   padding: 2px 10px;
-  border: 1px solid var(--vscode-button-border, transparent);
+  border: 1px solid var(--studio-button-border, transparent);
   border-radius: 3px;
-  background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.25));
-  color: var(--vscode-button-secondaryForeground, inherit);
+  background: var(--studio-button-secondaryBackground, rgba(128, 128, 128, 0.25));
+  color: var(--studio-button-secondaryForeground, inherit);
   font: inherit;
   cursor: pointer;
 }
 
 [data-okf-comment-compose] button[data-okf-comment-compose-save],
 [data-okf-comment-popover] button[data-okf-comment-reply-send] {
-  background: var(--vscode-button-background);
-  color: var(--vscode-button-foreground);
+  background: var(--studio-button-background);
+  color: var(--studio-button-foreground);
 }
 
 /* Resolve / Reopen, Delete and its question in the thread popover (T44). */
@@ -2945,15 +2948,15 @@ button[data-okf-comment-create]:hover {
   gap: 6px;
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+  border-top: 1px solid var(--studio-editorWidget-border, rgba(128, 128, 128, 0.4));
 }
 
 [data-okf-comment-popover] [data-okf-comment-thread-actions] button {
   padding: 2px 10px;
-  border: 1px solid var(--vscode-button-border, transparent);
+  border: 1px solid var(--studio-button-border, transparent);
   border-radius: 3px;
-  background: var(--vscode-button-secondaryBackground, rgba(128, 128, 128, 0.25));
-  color: var(--vscode-button-secondaryForeground, inherit);
+  background: var(--studio-button-secondaryBackground, rgba(128, 128, 128, 0.25));
+  color: var(--studio-button-secondaryForeground, inherit);
   font: inherit;
   cursor: pointer;
 }
@@ -2964,14 +2967,14 @@ button[data-okf-comment-create]:hover {
 }
 
 [data-okf-comment-popover] [data-okf-comment-thread-actions] button[data-okf-comment-delete-yes] {
-  background: var(--vscode-button-background);
-  color: var(--vscode-button-foreground);
+  background: var(--studio-button-background);
+  color: var(--studio-button-foreground);
 }
 
 [data-okf-comment-popover] [data-okf-comment-action-error],
 [data-okf-comment-popover] [data-okf-comment-error] {
   flex: 1 1 100%;
-  color: var(--vscode-errorForeground, #f48771);
+  color: var(--studio-errorForeground, #f48771);
   overflow-wrap: anywhere;
 }
 
@@ -2992,7 +2995,7 @@ button[data-okf-comment-create]:hover {
 [data-okf-orphans] [data-okf-orphans-title] {
   margin-bottom: 4px;
   padding-top: 8px;
-  border-top: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+  border-top: 1px solid var(--studio-editorWidget-border, rgba(128, 128, 128, 0.4));
   font-weight: 600;
   opacity: 0.8;
 }
@@ -3003,7 +3006,7 @@ button[data-okf-comment-create]:hover {
   width: 100%;
   margin-top: 4px;
   padding: 4px 8px;
-  border: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.4));
+  border: 1px solid var(--studio-editorWidget-border, rgba(128, 128, 128, 0.4));
   border-radius: 3px;
   background: transparent;
   color: inherit;
@@ -3121,7 +3124,7 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   box-sizing: border-box;
   width: 1.1em;
   margin-inline: -1.5em 0.4em;
-  color: var(--vscode-descriptionForeground, #717171);
+  color: var(--studio-descriptionForeground, #717171);
   font-size: 0.8em;
   font-style: normal;
   font-weight: 400;
@@ -3152,25 +3155,25 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   gap: 4px;
   width: min(22em, calc(100vw - 16px));
   padding: 6px;
-  border: 1px solid var(--vscode-editorWidget-border, rgba(128, 128, 128, 0.45));
+  border: 1px solid var(--studio-editorWidget-border, rgba(128, 128, 128, 0.45));
   border-radius: 4px;
-  background: var(--vscode-editorWidget-background, #252526);
-  color: var(--vscode-editorWidget-foreground, var(--vscode-editor-foreground, inherit));
-  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
+  background: var(--studio-editorWidget-background, #252526);
+  color: var(--studio-editorWidget-foreground, var(--studio-editor-foreground, inherit));
+  box-shadow: 0 2px 8px var(--studio-widget-shadow, rgba(0, 0, 0, 0.36));
 }
 
 [data-okf-label-rename] > input {
   box-sizing: border-box;
   width: 100%;
   padding: 3px 6px;
-  border: 1px solid var(--vscode-input-border, rgba(128, 128, 128, 0.45));
-  background: var(--vscode-input-background, transparent);
-  color: var(--vscode-input-foreground, inherit);
+  border: 1px solid var(--studio-input-border, rgba(128, 128, 128, 0.45));
+  background: var(--studio-input-background, transparent);
+  color: var(--studio-input-foreground, inherit);
   font: inherit;
 }
 
 [data-okf-label-rename] > input:focus {
-  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline: 1px solid var(--studio-focusBorder, #007fd4);
   outline-offset: -1px;
 }
 
@@ -3180,7 +3183,7 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
 
 [data-okf-label-rename-status] {
   font-size: 0.9em;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
 }
 
 #sphinx-myst-preview-content .okf-anchor-row {
@@ -3201,7 +3204,7 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
 #sphinx-myst-preview-content figure > p:last-child {
   margin-top: 0.6em;
   margin-bottom: 0;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
   font-size: 0.9em;
   font-style: italic;
   text-align: center;
@@ -3224,9 +3227,9 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   border: 1px solid var(--sphinx-preview-border);
   border-bottom: 0;
   border-radius: 4px 4px 0 0;
-  background: linear-gradient(rgba(128, 128, 128, 0.12), rgba(128, 128, 128, 0.12)), var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.15));
-  color: var(--vscode-editor-foreground, inherit);
-  font-family: var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+  background: linear-gradient(rgba(128, 128, 128, 0.12), rgba(128, 128, 128, 0.12)), var(--studio-textCodeBlock-background, rgba(128, 128, 128, 0.15));
+  color: var(--studio-editor-foreground, inherit);
+  font-family: var(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
   font-size: 0.85em;
   font-style: normal;
   text-align: left;
@@ -3246,7 +3249,7 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
 
 /* Admonitions: tinted panel with a thick accent bar, matching VS Code alert styling. */
 #sphinx-myst-preview-content :where(.admonition, div[class*="admonition-"], .attention, .caution, .danger, .error, .hint, .important, .note, .seealso, .tip, .tips, .warning) {
-  --sphinx-preview-accent: var(--vscode-textLink-foreground, #4488dd);
+  --sphinx-preview-accent: var(--studio-textLink-foreground, #4488dd);
   --sphinx-preview-icon: ${ICONS.info};
   display: block;
   margin: 1.2em 0;
@@ -3254,9 +3257,9 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   border: 1px solid var(--sphinx-preview-border);
   border-inline-start: 4px solid var(--sphinx-preview-accent);
   /* Fallback first: themes without color-mix still get a panel distinct from the page. */
-  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
-  background: color-mix(in srgb, var(--sphinx-preview-accent) 14%, var(--vscode-editor-background, Canvas));
-  color: var(--vscode-editor-foreground, CanvasText);
+  background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.08));
+  background: color-mix(in srgb, var(--sphinx-preview-accent) 14%, var(--studio-editor-background, Canvas));
+  color: var(--studio-editor-foreground, CanvasText);
   overflow: auto;
 }
 
@@ -3302,36 +3305,36 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
 }
 
 #sphinx-myst-preview-content .note {
-  --sphinx-preview-accent: var(--vscode-charts-blue, #3794ff);
+  --sphinx-preview-accent: var(--studio-charts-blue, #3794ff);
 }
 
 #sphinx-myst-preview-content .seealso {
-  --sphinx-preview-accent: var(--vscode-charts-blue, #3794ff);
+  --sphinx-preview-accent: var(--studio-charts-blue, #3794ff);
   --sphinx-preview-icon: ${ICONS.arrow};
 }
 
 #sphinx-myst-preview-content :where(.tip, .tips, .hint, .versionadded) {
-  --sphinx-preview-accent: var(--vscode-charts-green, #89d185);
+  --sphinx-preview-accent: var(--studio-charts-green, #89d185);
   --sphinx-preview-icon: ${ICONS.bulb};
 }
 
 #sphinx-myst-preview-content .important {
-  --sphinx-preview-accent: var(--vscode-charts-purple, #b180d7);
+  --sphinx-preview-accent: var(--studio-charts-purple, #b180d7);
   --sphinx-preview-icon: ${ICONS.star};
 }
 
 #sphinx-myst-preview-content :where(.warning, .attention, .versionchanged) {
-  --sphinx-preview-accent: var(--vscode-charts-yellow, #cca700);
+  --sphinx-preview-accent: var(--studio-charts-yellow, #cca700);
   --sphinx-preview-icon: ${ICONS.triangle};
 }
 
 #sphinx-myst-preview-content .caution {
-  --sphinx-preview-accent: var(--vscode-charts-red, #f14c4c);
+  --sphinx-preview-accent: var(--studio-charts-red, #f14c4c);
   --sphinx-preview-icon: ${ICONS.octagon};
 }
 
 #sphinx-myst-preview-content :where(.danger, .error, .deprecated) {
-  --sphinx-preview-accent: var(--vscode-charts-red, #f14c4c);
+  --sphinx-preview-accent: var(--studio-charts-red, #f14c4c);
   --sphinx-preview-icon: ${ICONS.cross};
 }
 
@@ -3339,7 +3342,7 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   margin: 1em 0;
   padding: 0 1em;
   border-inline-start: 4px solid var(--sphinx-preview-border);
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
 }
 
 /*
@@ -3349,7 +3352,7 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
  * on its own now, so the only stylesheet in the page is this one.
  */
 #sphinx-myst-preview-content :where(code, pre, samp, kbd) {
-  font-family: var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-family: var(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
   font-size: 0.92em;
 }
 
@@ -3385,7 +3388,7 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
 
 html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content :not(pre) > code,
 html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(pre) > code {
-  color: var(--vscode-textLink-foreground, #006ab1);
+  color: var(--studio-textLink-foreground, #006ab1);
 }
 
 #sphinx-myst-preview-content pre {
@@ -3393,8 +3396,8 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   padding: 0.9em 1em;
   border: 1px solid var(--sphinx-preview-border);
   border-radius: 4px;
-  background: var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.15));
-  color: var(--vscode-editor-foreground, inherit);
+  background: var(--studio-textCodeBlock-background, rgba(128, 128, 128, 0.15));
+  color: var(--studio-editor-foreground, inherit);
   overflow-x: auto;
   line-height: 1.45;
 }
@@ -3419,7 +3422,7 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 #sphinx-myst-preview-content .myst-code-filename {
   display: block;
   margin-bottom: 0.65em;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
   font-size: 0.85em;
   white-space: normal;
 }
@@ -3438,14 +3441,14 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   position: absolute;
   inset-inline-start: 0;
   width: 3ch;
-  color: var(--vscode-descriptionForeground, #808080);
+  color: var(--studio-descriptionForeground, #808080);
   content: attr(data-line-number);
   text-align: end;
   user-select: none;
 }
 
 #sphinx-myst-preview-content .myst-code-line-emphasized {
-  background: color-mix(in srgb, var(--vscode-editor-findMatchHighlightBackground, #ea5c0055) 35%, transparent);
+  background: color-mix(in srgb, var(--studio-editor-findMatchHighlightBackground, #ea5c0055) 35%, transparent);
 }
 
 #sphinx-myst-preview-content :where(.myst-diff-line-addition, .myst-diff-line-deletion) {
@@ -3466,16 +3469,16 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 #sphinx-myst-preview-content .myst-code-cell-output {
   margin: 0 0 1em;
   padding: 0.55em 0.8em;
-  border-inline-start: 3px solid var(--vscode-descriptionForeground, #808080);
-  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
-  color: var(--vscode-descriptionForeground, inherit);
+  border-inline-start: 3px solid var(--studio-descriptionForeground, #808080);
+  background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.08));
+  color: var(--studio-descriptionForeground, inherit);
   font-style: italic;
 }
 
 #sphinx-myst-preview-content .myst-mermaid-diagram {
   min-height: 1.5em;
   overflow-x: auto;
-  font-family: var(--vscode-editor-font-family, monospace);
+  font-family: var(--studio-editor-font-family, monospace);
   text-align: start;
   white-space: pre-wrap;
 }
@@ -3493,13 +3496,13 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 }
 
 #sphinx-myst-preview-content .myst-mermaid-source summary {
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
   cursor: pointer;
   font-size: 0.9em;
 }
 
 #sphinx-myst-preview-content .myst-mermaid-error {
-  color: var(--vscode-errorForeground, #f14c4c);
+  color: var(--studio-errorForeground, #f14c4c);
   text-align: start;
 }
 
@@ -3514,7 +3517,7 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 }
 
 #sphinx-myst-preview-content .myst-mermaid-error-details summary {
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
   cursor: pointer;
 }
 
@@ -3524,9 +3527,9 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   overflow-x: auto;
   border: 1px solid var(--sphinx-preview-border);
   border-radius: 4px;
-  background: var(--vscode-textCodeBlock-background);
-  color: var(--vscode-editor-foreground);
-  font-family: var(--vscode-editor-font-family, monospace);
+  background: var(--studio-textCodeBlock-background);
+  color: var(--studio-editor-foreground);
+  font-family: var(--studio-editor-font-family, monospace);
   font-style: normal;
   white-space: pre-wrap;
 }
@@ -3534,7 +3537,7 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 #sphinx-myst-preview-content .myst-plantuml-diagram {
   min-height: 1.5em;
   overflow-x: auto;
-  font-family: var(--vscode-editor-font-family, monospace);
+  font-family: var(--studio-editor-font-family, monospace);
   text-align: start;
   white-space: pre-wrap;
 }
@@ -3552,13 +3555,13 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
 }
 
 #sphinx-myst-preview-content .myst-plantuml-source summary {
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
   cursor: pointer;
   font-size: 0.9em;
 }
 
 #sphinx-myst-preview-content .myst-plantuml-error {
-  color: var(--vscode-errorForeground, #f14c4c);
+  color: var(--studio-errorForeground, #f14c4c);
   font-style: italic;
 }
 
@@ -3566,7 +3569,7 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content pre > 
 html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content pre > code.language-yaml *,
 html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > code.language-yaml,
 html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > code.language-yaml * {
-  color: var(--vscode-textLink-foreground, #006ab1);
+  color: var(--studio-textLink-foreground, #006ab1);
 }
 
 /*
@@ -3577,32 +3580,32 @@ html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > 
  * dark variants.
  */
 #sphinx-myst-preview-content :where(.hljs-comment, .hljs-quote) {
-  color: var(--vscode-descriptionForeground, #808080);
+  color: var(--studio-descriptionForeground, #808080);
   font-style: italic;
 }
 
 #sphinx-myst-preview-content :where(.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-type, .hljs-built_in, .hljs-name, .hljs-tag) {
-  color: var(--vscode-charts-blue, #3794ff);
+  color: var(--studio-charts-blue, #3794ff);
 }
 
 #sphinx-myst-preview-content :where(.hljs-string, .hljs-meta .hljs-string, .hljs-regexp, .hljs-char.escape_, .hljs-selector-attr, .hljs-selector-pseudo) {
-  color: var(--vscode-charts-orange, #d18616);
+  color: var(--studio-charts-orange, #d18616);
 }
 
 #sphinx-myst-preview-content :where(.hljs-number, .hljs-symbol, .hljs-bullet, .hljs-link, .hljs-addition) {
-  color: var(--vscode-charts-green, #89d185);
+  color: var(--studio-charts-green, #89d185);
 }
 
 #sphinx-myst-preview-content :where(.hljs-title, .hljs-title.function_, .hljs-title.class_, .hljs-section, .hljs-doctag, .hljs-meta, .hljs-meta .hljs-keyword) {
-  color: var(--vscode-charts-purple, #b180d7);
+  color: var(--studio-charts-purple, #b180d7);
 }
 
 #sphinx-myst-preview-content :where(.hljs-attr, .hljs-attribute, .hljs-property, .hljs-variable, .hljs-template-variable, .hljs-params, .hljs-selector-id, .hljs-selector-class) {
-  color: var(--vscode-charts-yellow, #cca700);
+  color: var(--studio-charts-yellow, #cca700);
 }
 
 #sphinx-myst-preview-content :where(.hljs-deletion, .hljs-formula) {
-  color: var(--vscode-charts-red, #f14c4c);
+  color: var(--studio-charts-red, #f14c4c);
 }
 
 #sphinx-myst-preview-content .hljs-emphasis { font-style: italic; }
@@ -3643,10 +3646,10 @@ html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > 
 
 #sphinx-myst-preview-content table[data-sphinx-table-overflow="true"] {
   background:
-    linear-gradient(to right, var(--vscode-editor-background, Canvas) 30%, transparent) left center / 2rem 100% no-repeat local,
-    linear-gradient(to left, var(--vscode-editor-background, Canvas) 30%, transparent) right center / 2rem 100% no-repeat local,
-    radial-gradient(farthest-side at 0 50%, color-mix(in srgb, var(--vscode-editor-foreground, var(--vscode-foreground, CanvasText)) 35%, transparent), transparent) left center / 1rem 100% no-repeat scroll,
-    radial-gradient(farthest-side at 100% 50%, color-mix(in srgb, var(--vscode-editor-foreground, var(--vscode-foreground, CanvasText)) 35%, transparent), transparent) right center / 1rem 100% no-repeat scroll;
+    linear-gradient(to right, var(--studio-editor-background, Canvas) 30%, transparent) left center / 2rem 100% no-repeat local,
+    linear-gradient(to left, var(--studio-editor-background, Canvas) 30%, transparent) right center / 2rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, color-mix(in srgb, var(--studio-editor-foreground, var(--studio-foreground, CanvasText)) 35%, transparent), transparent) left center / 1rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, color-mix(in srgb, var(--studio-editor-foreground, var(--studio-foreground, CanvasText)) 35%, transparent), transparent) right center / 1rem 100% no-repeat scroll;
 }
 
 #sphinx-myst-preview-content :where(th, td) {
@@ -3657,7 +3660,7 @@ html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > 
 }
 
 #sphinx-myst-preview-content th {
-  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.12));
+  background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.12));
   font-weight: 600;
 }
 
@@ -3702,7 +3705,7 @@ html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > 
 
 /* Constructs that only a project-wide build can resolve, shown as inert placeholders. */
 #sphinx-myst-preview-content .myst-unresolved {
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
 }
 
 #sphinx-myst-preview-content .myst-notebook-output {
@@ -3753,8 +3756,8 @@ ${gridColumnCss()}
   overflow: hidden;
   border: 1px solid var(--sphinx-preview-border);
   border-radius: 6px;
-  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
-  color: var(--vscode-editor-foreground, inherit);
+  background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.08));
+  color: var(--studio-editor-foreground, inherit);
 }
 
 #sphinx-myst-preview-content .myst-grid-card-title {
@@ -3768,7 +3771,7 @@ ${gridColumnCss()}
   border-color: var(--sphinx-preview-border);
   border-style: solid;
   border-width: 0;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
   font-size: 0.9em;
 }
 
@@ -3819,7 +3822,7 @@ ${gridColumnCss()}
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
 }
 
 #sphinx-myst-preview-content .myst-toctree-list {
@@ -3828,8 +3831,8 @@ ${gridColumnCss()}
 }
 
 #sphinx-myst-preview-content .myst-toctree-missing {
-  border-bottom: 1px dashed var(--vscode-charts-orange, #d18616);
-  color: var(--vscode-charts-orange, #d18616);
+  border-bottom: 1px dashed var(--studio-charts-orange, #d18616);
+  color: var(--studio-charts-orange, #d18616);
   cursor: help;
 }
 
@@ -3841,12 +3844,12 @@ ${gridColumnCss()}
   margin: 1.2em 0;
   padding: 0.6em 0.9em;
   border: 1px dashed var(--sphinx-preview-border);
-  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
+  background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.08));
 }
 
 #sphinx-myst-preview-content .myst-directive-name {
   margin: 0;
-  font-family: var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-family: var(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
   font-size: 0.9em;
 }
 
@@ -3856,7 +3859,7 @@ ${gridColumnCss()}
 }
 
 #sphinx-myst-preview-content :where(.math-inline, .math-display) {
-  font-family: var(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-family: var(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
 }
 
 #sphinx-myst-preview-content .math-display {
@@ -3881,7 +3884,7 @@ ${gridColumnCss()}
   font-size: 1em;
   font-weight: 600;
   background: none;
-  color: var(--vscode-descriptionForeground, #6e6e6e);
+  color: var(--studio-descriptionForeground, #6e6e6e);
 }
 
 [data-okf-properties] [data-okf-badge] {
@@ -3903,12 +3906,12 @@ ${gridColumnCss()}
 }
 
 [data-okf-properties] [data-okf-badge]:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, currentColor);
+  outline: 1px solid var(--studio-focusBorder, currentColor);
   outline-offset: 2px;
 }
 
 #sphinx-myst-preview-content [data-okf-properties] [data-okf-issue-highlight="true"] {
-  outline: 2px solid var(--vscode-errorForeground, #f14c4c);
+  outline: 2px solid var(--studio-errorForeground, #f14c4c);
   outline-offset: -2px;
 }
 
@@ -3966,7 +3969,7 @@ ${gridColumnCss()}
 
 [data-okf-properties] .okf-properties-docs th,
 [data-okf-properties] .okf-properties-docs td.okf-doc {
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
 }
 
 [data-okf-properties] .okf-properties-docs th {
@@ -3981,14 +3984,14 @@ ${gridColumnCss()}
 
 #sphinx-myst-preview-content [data-okf-properties] .okf-missing-required {
   margin: 0.5em 0 0;
-  color: var(--vscode-errorForeground, #f14c4c);
+  color: var(--studio-errorForeground, #f14c4c);
   font-size: 0.9em;
   font-weight: 600;
 }
 
 #sphinx-myst-preview-content [data-okf-properties] .okf-info-row.okf-error th {
-  color: var(--vscode-errorForeground, #f14c4c);
-  background: var(--vscode-inputValidation-errorBackground, rgba(235, 80, 80, 0.12));
+  color: var(--studio-errorForeground, #f14c4c);
+  background: var(--studio-inputValidation-errorBackground, rgba(235, 80, 80, 0.12));
   white-space: normal;
   overflow-wrap: anywhere;
 }
@@ -3996,7 +3999,7 @@ ${gridColumnCss()}
 #sphinx-myst-preview-content [data-okf-properties] .okf-properties thead th {
   font-size: 0.9em;
   font-weight: 600;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
   border-bottom: 1px solid var(--sphinx-preview-border);
   padding-bottom: 0.4em;
   background: rgba(128, 128, 128, 0.12);
@@ -4046,7 +4049,7 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-properties] .okf-descript
 }
 
 [data-okf-description-toggle]:hover {
-  background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.12));
+  background: var(--studio-list-hoverBackground, rgba(128, 128, 128, 0.12));
 }
 
 [data-okf-description-toggle] .okf-description-expand,
@@ -4067,7 +4070,7 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
 }
 
 #sphinx-myst-preview-content [data-okf-properties] .okf-type-label {
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   font-size: 0.84em;
   font-weight: 400;
   white-space: nowrap;
@@ -4099,14 +4102,14 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
   position: absolute;
   inset-block-start: 0;
   inset-inline-start: 0;
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   content: "-";
   font-weight: 600;
 }
 
 #sphinx-myst-preview-content [data-okf-properties] .okf-list-more,
 #sphinx-myst-preview-content [data-okf-properties] .okf-list-empty {
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   font-size: 0.88em;
 }
 
@@ -4117,12 +4120,12 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
   width: max-content;
   max-width: min(480px, calc(100vw - 16px));
   padding: 8px 10px;
-  border: 1px solid var(--vscode-editorHoverWidget-border, var(--vscode-widget-border, #808080));
+  border: 1px solid var(--studio-editorHoverWidget-border, var(--studio-widget-border, #808080));
   border-radius: 3px;
-  background: var(--vscode-editorHoverWidget-background, var(--vscode-editor-background, #f3f3f3));
-  color: var(--vscode-editorHoverWidget-foreground, var(--vscode-editor-foreground, #333333));
-  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.2));
-  font-family: var(--vscode-font-family, sans-serif);
+  background: var(--studio-editorHoverWidget-background, var(--studio-editor-background, #f3f3f3));
+  color: var(--studio-editorHoverWidget-foreground, var(--studio-editor-foreground, #333333));
+  box-shadow: 0 2px 8px var(--studio-widget-shadow, rgba(0, 0, 0, 0.2));
+  font-family: var(--studio-font-family, sans-serif);
   font-size: 13px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -4147,7 +4150,7 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
 
 #sphinx-myst-preview-content [data-okf-properties] .okf-link-excerpt,
 #sphinx-myst-preview-content [data-okf-properties] .okf-link-line {
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   font-style: italic;
   font-size: 0.9em;
 }
@@ -4168,13 +4171,13 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
 
 #sphinx-myst-preview-content [data-okf-properties] .okf-link-invalid {
   border-bottom-style: wavy;
-  color: var(--vscode-errorForeground, #f14c4c);
+  color: var(--studio-errorForeground, #f14c4c);
   cursor: help;
 }
 
 #sphinx-myst-preview-content [data-okf-properties] .okf-link-unavailable {
   border-bottom-style: dotted;
-  color: var(--vscode-descriptionForeground, GrayText);
+  color: var(--studio-descriptionForeground, GrayText);
   cursor: help;
 }
 
@@ -4205,7 +4208,7 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
 }
 
 #sphinx-myst-preview-content [data-okf-properties] .okf-frontmatter-link:focus-visible {
-  outline: 1px solid var(--vscode-focusBorder, currentColor);
+  outline: 1px solid var(--studio-focusBorder, currentColor);
   outline-offset: 2px;
 }
 
@@ -4223,7 +4226,7 @@ html[data-okf-descriptions-collapsed="true"] [data-okf-description-toggle] .okf-
   height: 1em;
   line-height: 1;
   overflow: hidden;
-  color: var(--vscode-descriptionForeground, inherit);
+  color: var(--studio-descriptionForeground, inherit);
   opacity: 0.85;
 }
 
@@ -4306,7 +4309,7 @@ html[data-sphinx-preview-theme-switching="true"] body * {
 /* A translucent wash of the focus colour: the text stays readable on every theme mode, and the
    block's own background (code, tables, callouts) comes back as the glow fades. */
 #sphinx-myst-preview-content [data-sphinx-preview-updated="true"] {
-  --sphinx-preview-update-glow: color-mix(in srgb, var(--vscode-focusBorder, Highlight) 24%, transparent);
+  --sphinx-preview-update-glow: color-mix(in srgb, var(--studio-focusBorder, Highlight) 24%, transparent);
   animation: sphinx-preview-update-glow var(--sphinx-preview-motion-glow) ease-out;
 }
 

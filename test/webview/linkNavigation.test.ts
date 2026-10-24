@@ -26,7 +26,7 @@ function harness(requests: string[]) {
     unobserve(link: Link) { unobserved.push(link); }
     disconnect() {}
   }
-  vm.runInNewContext(`(${installLinkNavigation.toString()})(document, window, vscode, context)`, {
+  const installed = vm.runInNewContext(`(${installLinkNavigation.toString()})(document, window, vscode, context)`, {
     Element: Link,
     context,
     document: { querySelectorAll: () => links, addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback) },
@@ -36,8 +36,8 @@ function harness(requests: string[]) {
       addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback),
     },
     vscode: { postMessage: (message: Record<string, any>) => messages.push(message) },
-  });
-  return { links, messages, listeners, unobserved,
+  }) as ReturnType<typeof installLinkNavigation>;
+  return { installed, links, messages, listeners, unobserved,
     intersect: (entries: Array<{ target: Link; isIntersecting: boolean }>) => intersect(entries),
     flush: () => { while (microtasks.length) microtasks.shift()!(); },
   };
@@ -75,13 +75,13 @@ test("local and wiki clicks are host-routed even before discovery, including mid
   assert.equal(runtime.messages[0].requestId, context.requestId);
 });
 
-test("discovery hints ignore stale renders and never replace the original target", () => {
+// The stale-render half of this test moved to test/page/runtime.test.ts ("link target hints of a
+// stale render are ignored"): the page's host message filter now matches previewLinkTargets to the
+// render before the router hands it to applyTargets.
+test("discovery hints never replace the original target", () => {
   const runtime = harness(["wiki:Note"]);
   const target = { request: "wiki:Note", kind: "local", path: "/workspace/Note.md" };
-  const receive = runtime.listeners.get("message")!;
-  receive({ data: { type: "previewLinkTargets", ...context, requestId: 1, targets: [target] } });
-  assert.equal(runtime.links[0].getAttribute("title"), undefined);
-  receive({ data: { type: "previewLinkTargets", ...context, targets: [target] } });
+  runtime.installed.applyTargets({ targets: [target] });
   assert.equal(runtime.links[0].getAttribute("title"), target.path);
   assert.equal(runtime.links[0].getAttribute("data-sphinx-preview-navigation"), "wiki:Note");
 });
@@ -117,7 +117,7 @@ function rescanHarness(initial: string[]) {
       addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback),
     },
     vscode: { postMessage: (message: Record<string, any>) => messages.push(message) },
-  }) as { rescan(): void };
+  }) as ReturnType<typeof installLinkNavigation>;
   return {
     installed, messages, listeners, observed, live,
     replaceLinks: (requests: string[]) => { current = requests.map((request) => new Link(request)); return current; },
@@ -153,12 +153,14 @@ test("T33: after a rescan, discovery and target hints apply to the new links", (
   assert.equal(runtime.messages.length, 1);
   assert.equal(runtime.messages[0].type, "previewLinkDiscover");
   assert.equal(JSON.stringify(runtime.messages[0].requests), JSON.stringify(["wiki:New"]));
-  const receive = runtime.listeners.get("message")!;
-  receive({ data: { type: "previewLinkTargets", ...runtime.live, targets: [{ request: "wiki:New", kind: "local", path: "/workspace/New.md" }] } });
+  runtime.installed.applyTargets({ targets: [{ request: "wiki:New", kind: "local", path: "/workspace/New.md" }] });
   assert.equal(fresh[0].getAttribute("title"), "/workspace/New.md");
   assert.equal(fresh[0].getAttribute("data-sphinx-preview-link-state"), "local");
 });
 
+// The hint check against the mutated context is the page's host message filter now; the runtime
+// test "T34: links of the new content keep known target hints and discover new targets" covers
+// it on a patched page.
 test("T33: a context mutated after install is honoured by posts and by the hint check", () => {
   const runtime = rescanHarness(["wiki:Note"]);
   runtime.live.requestId = 3;
@@ -168,6 +170,6 @@ test("T33: a context mutated after install is honoured by posts and by the hint 
   assert.equal(runtime.messages[0].revision, 4);
   const link = runtime.keepLinksAndAdd([])[0];
   runtime.installed.rescan();
-  runtime.listeners.get("message")!({ data: { type: "previewLinkTargets", ...runtime.live, targets: [{ request: "wiki:Note", kind: "local", path: "/p.md" }] } });
+  runtime.installed.applyTargets({ targets: [{ request: "wiki:Note", kind: "local", path: "/p.md" }] });
   assert.equal(link.getAttribute("title"), "/p.md");
 });

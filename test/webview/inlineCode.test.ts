@@ -63,12 +63,12 @@ function modeVariables(mode: string): Record<string, string> {
 
 test("inline code text keeps 4.5:1 on the tinted background in every forced mode", () => {
   const tint = Number(/background: color-mix\(in srgb, currentColor (\d+)%/u.exec(INLINE_CODE)?.[1]) / 100;
-  const linkCoded = /theme-mode="cream"\] #sphinx-myst-preview-content :not\(pre\) > code,\s*html\[data-sphinx-preview-theme-mode="white"\][^{]*\{\s*color: var\(--vscode-textLink-foreground/u;
+  const linkCoded = /theme-mode="cream"\] #sphinx-myst-preview-content :not\(pre\) > code,\s*html\[data-sphinx-preview-theme-mode="white"\][^{]*\{\s*color: var\(--studio-textLink-foreground/u;
   assert.match(PREVIEW_THEME_CSS, linkCoded);
   for (const [mode, usesLinkColour] of [["dark", false], ["white", true], ["cream", true]] as const) {
     const variables = modeVariables(mode);
-    const page = channels(variables["--vscode-editor-background"]);
-    const text = channels(variables[usesLinkColour ? "--vscode-textLink-foreground" : "--vscode-editor-foreground"]);
+    const page = channels(variables["--studio-editor-background"]);
+    const text = channels(variables[usesLinkColour ? "--studio-textLink-foreground" : "--studio-editor-foreground"]);
     const tinted = page.map((channel, index) => channel * (1 - tint) + text[index] * tint);
     const ratio = contrast(text, tinted);
     assert.ok(ratio >= 4.5, `${mode}: ${ratio.toFixed(2)}:1`);

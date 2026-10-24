@@ -26,7 +26,7 @@ import { analyzeFrontmatter } from "../../src/frontmatter/okfFrontmatter";
 import { renderPropertiesTable } from "../../src/frontmatter/propertiesTable";
 import { annotateSourceMappings, sourceRangeForLines } from "../../src/mapping/sourceMapping";
 import { rewriteSphinxHtml, ResolvedResource } from "../../src/security/html-sanitizer";
-import { createScrollSyncScript } from "../../src/webview/scrollSync";
+import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/protocol/bootContext";
 import {
   injectPlantUmlDiagrams,
   renderPlantUmlDiagrams,
@@ -52,6 +52,9 @@ const outputDirectory = VISUAL_REPORT_ROOT;
 const pageDirectory = path.join(outputDirectory, "pages");
 const mermaidRendererUri = pathToFileURL(
   path.resolve(__dirname, "../../../out/bundle/mermaidPreview.js"),
+).toString();
+const runtimeUri = pathToFileURL(
+  path.resolve(__dirname, "../../../out/bundle/preview.js"),
 ).toString();
 const plantUmlRendererUri = pathToFileURL(
   path.resolve(__dirname, "../../../out/bundle/plantumlPreview.js"),
@@ -302,7 +305,7 @@ window.resolveVisualFrontmatterLinks = () => {
     : "";
   const withScrollRuntime = withToolbar.replace(
     /<\/body>/iu,
-    () => `${deferredLinkScript}${visualHostScript}<script>${createScrollSyncScript(runtimeContext)}</script>${hostMessageScript}</body>`,
+    () => `${deferredLinkScript}${visualHostScript}<script type="application/json" ${RUNTIME_CONTEXT_ATTRIBUTE}>${serializeRuntimeContext(runtimeContext)}</script><script src="${runtimeUri}"></script>${hostMessageScript}</body>`,
   );
 
   const css = [
