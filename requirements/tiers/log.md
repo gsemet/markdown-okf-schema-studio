@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-24 (batch 1)
+
+- Added the first requirements: 27 StRS and 237 SwRS for rendering-core (5 / 68), code-blocks
+  (4 / 38), gfm (4 / 38) and myst (14 / 93). Each SwRS derives from a StRS and has a nominal
+  and a boundary scenario. No traceability markers yet. Verification: `okfreq validate
+  --prose --check-links`, `lint --check` and `update-coverage --check` pass (264 requirements).
+
 ## 2026-10-24
 
 - Created the okfreq requirements bundle for the Markdown OKF-Schema Studio: two tiers (StRS,

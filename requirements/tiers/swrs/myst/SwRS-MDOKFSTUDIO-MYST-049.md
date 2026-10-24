@@ -1,0 +1,43 @@
+---
+type: SwRS
+id: SwRS-MDOKFSTUDIO-MYST-049
+uuid: 5564091c-7c41-43ae-992b-9204e170a1e1
+title: The rename field times out after 6 seconds
+description: When the host does not answer a rename within 6 s, the extension
+  SHALL enable the field again with The editor did not answer. Try again.
+project: markdown-okf-schema-studio
+scope: myst
+lifecycle: draft
+origin: native
+tier: SwRS
+derives_from:
+- StRS-MDOKFSTUDIO-MYST-010
+annotation_exemption: false
+exemption_reason:
+derived_by: []
+implemented_in_files: []
+tested_in_files: []
+---
+
+## The rename field times out after 6 seconds
+
+### Normative behavior
+
+When the host does not answer a rename within 6 s, the extension SHALL enable the field again with The editor did not answer. Try again.
+
+### Scenario: Nominal
+
+- GIVEN no host answer
+- WHEN 6 s pass
+- THEN the field is editable with that message
+
+### Scenario: Boundary or refusal
+
+- GIVEN an answer arriving before 6 s
+- WHEN it is matched
+- THEN no timeout message is shown
+
+### Verification notes
+
+- Method: test
+- Criteria: The timer is cleared by the answer.
