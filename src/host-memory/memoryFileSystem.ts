@@ -102,6 +102,9 @@ export function createMemoryFileSystem(): MemoryFileSystem {
       write(target, data);
       files.delete(source);
     },
+    async delete(path) {
+      if (!files.delete(normalizePosixPath(path))) throw notFound(path);
+    },
     async realpath(path) {
       const target = normalizePosixPath(path);
       if (!kindAt(target)) throw notFound(path);

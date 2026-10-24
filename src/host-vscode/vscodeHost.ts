@@ -74,6 +74,9 @@ function createVscodeFileSystem(): FileSystem {
     async rename(from, to, options) {
       await vscode.workspace.fs.rename(vscode.Uri.file(from), vscode.Uri.file(to), { overwrite: options?.overwrite === true });
     },
+    async delete(path) {
+      await vscode.workspace.fs.delete(vscode.Uri.file(path), { recursive: false, useTrash: false });
+    },
     realpath: (path) => node.realpath(path),
   };
 }

@@ -26,6 +26,8 @@ export interface FileSystem {
   readDirectory(path: string): Promise<Array<[string, FileKind]>>;
   /** Renames `from` to `to`. Without `overwrite`, rejects when `to` exists. */
   rename(from: string, to: string, options?: { overwrite?: boolean }): Promise<void>;
+  /** Deletes a file (not a directory); rejects with a not-found error when it does not exist. */
+  delete(path: string): Promise<void>;
   /** The canonical path: symbolic links resolved. */
   realpath(path: string): Promise<string>;
 }

@@ -55,6 +55,9 @@ export function createNodeFileSystem(): FileSystem {
       }
       await fs.rename(from, to);
     },
+    async delete(file) {
+      await fs.unlink(file);
+    },
     /** Resolves symbolic links like `fs.realpathSync` (the JS implementation, see {@link realpathLikeSync}). */
     realpath(file) {
       return realpathLikeSync(file);

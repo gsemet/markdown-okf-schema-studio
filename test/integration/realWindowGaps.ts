@@ -262,10 +262,25 @@ export async function scenarioImagePaste(page: Page, evidence: Evidence): Promis
         data.items.add(new File([bytes], "clipboard.png", { type: "image/png" }));
         textarea.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
       }, png.toString("base64")));
-      await waitFor("the image file next to the document", () => fs.existsSync(path.join(directory, "image.png")));
-      assert.deepEqual(fs.readFileSync(path.join(directory, "image.png")), png, "the pasted bytes are saved unchanged");
-      await waitFor("the reference in the editor", () => withCurrentFrame(page, async (frame) =>
-        (await frame.locator("[data-sphinx-preview-block-editor] textarea").inputValue()).includes("![image.png](image.png)")));
+      // The page inserts the reference only on the host's answer, which the host sends once
+      // the file is complete under its name (hidden file + rename). Waiting for the file to exist
+      // read it while VS Code's writeFile had created it but not written it (CI run 40016132398).
+      const imagePath = path.join(directory, "image.png");
+      const pasteState = async (): Promise<string> => {
+        const value = await withCurrentFrame(page, (frame) =>
+          frame.locator("[data-sphinx-preview-block-editor] textarea").inputValue()).catch((error: unknown) => `<${String(error)}>`);
+        const listing = fs.readdirSync(directory).map((name) => `${name} (${fs.statSync(path.join(directory, name)).size} B)`);
+        return `folder: ${listing.join(", ")}; editor text: ${JSON.stringify(value)}`;
+      };
+      try {
+        await waitFor("the reference in the editor", () => withCurrentFrame(page, async (frame) =>
+          (await frame.locator("[data-sphinx-preview-block-editor] textarea").inputValue()).includes("![image.png](image.png)")));
+      } catch (error) {
+        throw new Error(`${String(error)} ${await pasteState()}`);
+      }
+      const saved = fs.existsSync(imagePath) ? fs.readFileSync(imagePath) : undefined;
+      assert.deepEqual(saved, png,
+        `the pasted bytes are saved unchanged (expected ${png.length} B, saved ${saved?.length ?? "no file"}; ${await pasteState()})`);
       await press(page, `${MOD}+Enter`);
       await waitFor("the committed block with the image", () => withCurrentFrame(page, async (frame) =>
         await frame.locator("[data-sphinx-preview-block-editor]").count() === 0
