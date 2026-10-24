@@ -26,6 +26,8 @@ tested_in_files: []
 
 When the host receives a checkbox toggle message, the extension SHALL accept it only with a safe non-negative integer column, a boolean state and a single line.
 
+Known issue: a message the validator rejects is dropped without a result, so the box that sent it stays busy (`aria-busy`) until the next render; the shipped page checks line and column before sending, so only a malformed message from another sender reaches this. Backlog: P3/checkbox-refusal-feedback.
+
 ### Scenario: Valid message
 
 - GIVEN a message with line 3, endLine 3, column 4, checked true
