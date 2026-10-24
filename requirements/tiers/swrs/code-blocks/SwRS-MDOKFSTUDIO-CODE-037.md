@@ -1,0 +1,44 @@
+---
+type: SwRS
+id: SwRS-MDOKFSTUDIO-CODE-037
+uuid: c1ffdcbf-c10c-45f6-8990-7ebd47e1dc63
+title: Fall back to escaped text lines when a grammar fails
+description: When a grammar throws while highlighting a numbered, emphasized or
+  diff block, the extension SHALL show the block's escaped text in wrapped
+  lines.
+project: markdown-okf-schema-studio
+scope: code-blocks
+lifecycle: draft
+origin: native
+tier: SwRS
+derives_from:
+- StRS-MDOKFSTUDIO-CODE-001
+annotation_exemption: false
+exemption_reason:
+derived_by: []
+implemented_in_files: []
+tested_in_files: []
+---
+
+## Fall back to escaped text lines when a grammar fails
+
+### Normative behavior
+
+When a grammar throws while highlighting a numbered, emphasized or diff block, the extension SHALL show the block's escaped text in wrapped lines.
+
+### Scenario: nominal behavior
+
+- GIVEN a numbered block whose grammar throws while highlighting
+- WHEN the preview renders it
+- THEN the lines show the escaped source text
+
+### Scenario: boundary or refusal behavior
+
+- GIVEN an unwrapped block whose grammar throws
+- WHEN the preview renders it
+- THEN the original block is returned unchanged
+
+### Verification notes
+
+- Method: Unit test with a throwing grammar stub.
+- Criteria: Output is escaped, wrapped text for wrapped blocks; original block otherwise.
