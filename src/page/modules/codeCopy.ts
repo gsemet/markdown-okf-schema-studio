@@ -1,6 +1,5 @@
 /**
- * Copy button over the hovered code block. Self-contained: it is injected into the page script
- * with `.toString()`, so it must not use anything defined outside its own body.
+ * Copy button over the hovered code block.
  */
 export function installCodeCopy(
   document: Document,

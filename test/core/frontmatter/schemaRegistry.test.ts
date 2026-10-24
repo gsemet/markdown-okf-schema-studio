@@ -8,6 +8,7 @@ import {
   analyzeFrontmatter,
   setSchemaFileReaderForTests,
 } from "../../../src/core/frontmatter/okfFrontmatter";
+import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
 import { resetSchemaRegistryForTests } from "../../../src/core/frontmatter/schemaRegistry";
 import { schemaValidatorCacheSizeForTests } from "../../../src/core/frontmatter/schemaValidator";
 
@@ -33,6 +34,7 @@ function fixture(): { root: string; schemaPath: string; analyze: (source?: strin
   const filePath = path.join(root, "doc.md");
   const analyze = (source = "---\ntype: note\ntitle: Hi\nstatus: done\ntags: [a]\n---\n") =>
     analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath,
       sourceText: source,
       stopDir: root,

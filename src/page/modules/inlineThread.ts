@@ -16,8 +16,7 @@ export interface InlineThreadDeps {
  * messages and the expansion are the comment chip's (see chipToggle); this adds the controls to
  * the body of each thread comment. Idempotent: `apply` runs after every load and content patch and
  * skips a body that already has its controls. The host rewrites the file; the page refreshes from
- * the content patch that follows. Injected into the page script with `.toString()`, so the body
- * must not use anything defined outside it.
+ * the content patch that follows.
  */
 export function installInlineThreads(
   document: Document,

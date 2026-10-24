@@ -72,21 +72,40 @@ Tests mirror this tree under `test/` (`test/core/render/` tests `src/core/render
 
 - `just check-boundaries` runs dependency-cruiser with the rules of `.dependency-cruiser.cjs` over
   a transpiled copy of `src/` (type-only imports count). The few known exceptions are listed there,
-  each with its reason: Node built-ins still used by some core files (synchronous file access and
-  the PlantUML process, before the ports cover them) and three node-services modules the session
-  layer still imports directly. Never add an exception to make a new import pass: move the code,
-  or put the access behind a port.
+  each with its reason and its removal plan: Node built-ins still used by some core files
+  (synchronous file access and the PlantUML process before the ports cover them, and pure `path`
+  arithmetic) and three node-services modules the session layer still imports directly. The list
+  only shrinks. Never add an exception to make a new import pass: move the code, or put the access
+  behind a port, as the frontmatter schema discovery does with the `SchemaFiles` port
+  (`src/core/frontmatter/schemaFiles.ts`, implemented in `src/node-services/schemaFiles.ts` and
+  handed over as `HostServices.schemaFiles`).
 - `just check-limits` holds the file-size ratchet: at most 800 lines per file in `src/` and 1 500
   in `test/`. The files that were larger are listed in `scripts/file-size-baseline.json` and may
   only shrink; when one shrinks, lower its entry with `node scripts/check-file-sizes.mjs --update`
-  (the check says so). The same target fails on any `@ts-nocheck` or `@ts-ignore` in `src/`
-  outside `src/page/runtime.ts`.
+  (the check says so). The same target fails on any `@ts-nocheck` or `@ts-ignore` in `src/`.
 - `just check-settings` fails when the `contributes.configuration` of `package.json` differs from
   what the settings registry generates (see "Add a setting").
 
+### Inside the core
+
+- The renderer (`src/core/render/mystRenderer.ts`) is an ordered list of named passes:
+  `TREE_PASSES` on the parsed MyST tree, then `HTML_PASSES` on the produced HTML. Each pass lives
+  in a module of its theme (`mystBlockTransforms.ts`, `mystInlineTransforms.ts`,
+  `mystContextTags.ts`, `mystTables.ts`, `mystNormalize.ts`, ...). The order is part of the
+  output: add a pass at the place it must run. `normalizeNode` dispatches on the node kind through
+  the `NODE_RULES` table of `mystNormalize.ts`.
+- The frontmatter is split by job in `src/core/frontmatter/`: `frontmatterParse.ts` (find and
+  parse the block), `frontmatterValidate.ts` (schema fields), `frontmatterSerialize.ts` (the text
+  patches of the properties editor) and `okfFrontmatter.ts` (schema discovery and the analysis,
+  which reads schema files only through the `SchemaFiles` port).
+- The page stylesheet is built in TypeScript: `src/core/preview/previewStyles.ts` concatenates the
+  per-feature modules of `src/core/preview/styles/` in cascade order. The modules stay TypeScript
+  strings, not `.css` files, because the unit, visual and integration suites import the stylesheet
+  from the compiled `out/` tree, where a `.css` import would not resolve.
+
 ### Extension points
 
-Three registries hold what used to be spread over many files. Each keeps the pure data in `core`
+Four registries hold what used to be spread over many files. Each keeps the pure data in `core`
 and the code that needs the page or a host in its own layer.
 
 **Add a palette action** (a button of the edition palette, an entry of the `/` menu):
@@ -99,7 +118,9 @@ and the code that needs the page or a host in its own layer.
    `icon` must name one.
 3. Add its handler to `handlers` in `createEditActions` (`src/page/modules/editActions.ts`):
    `apply` returns the text edit; `available`, `explain`, `current`, `validateColor` and computed
-   `options` are optional. TypeScript refuses a descriptor without a handler and the reverse.
+   `options` are optional; the edit functions live in the subject modules next to it
+   (`inlineEditActions.ts`, `blockEditActions.ts`, `linkEditActions.ts`, `tableEditActions.ts`,
+   `colourEditActions.ts`). TypeScript refuses a descriptor without a handler and the reverse.
 4. The palette and the `/` menu pick the action up from the registry; nothing else to wire. Test
    the edit in `test/page/modules/editActions.test.ts`.
 
@@ -108,14 +129,15 @@ and the code that needs the page or a host in its own layer.
 1. Create `src/core/directives/<name>.ts` exporting a `MystDirectiveDescriptor`
    (`src/core/directives/directive.ts`): the directive `names`, the `render` pass on the parsed
    `mystDirective` node (helpers in `src/core/render/mystNode.ts`), the sanitizer `attributes`
-   rules of the HTML attributes the pass writes, the `style` rules of its output and the
+   rules of the HTML attributes the pass writes (`data-*` attributes only: the registry refuses
+   any other name), the `style` rules of its output and the
    `paletteActions` that insert it (ids of `PALETTE_ACTIONS`).
 2. Register it in `MYST_DIRECTIVES` (`src/core/directives/registry.ts`). The renderer runs the pass
    for every directive of those names and the sanitizer applies the attribute rules.
-3. Place its stylesheet with `${directiveStyle("<id>")}` in `src/core/preview/previewStyles.ts`,
-   where the rules belong in the cascade.
-4. Test the plug-in in `test/core/directives/` and its rendering in
-   `test/core/render/mystFeatures.test.ts`.
+3. Place its stylesheet with `${directiveStyle("<id>")}` in
+   `src/core/preview/styles/contentBlockStyles.ts`, where the rules belong in the cascade.
+4. Test the plug-in in `test/core/directives/` and its rendering in `test/core/render/`
+   (`mystFeatures.test.ts`, or `mystPaletteRendering.test.ts` for what the palette inserts).
 
 **Add a setting**:
 
@@ -125,12 +147,41 @@ and the code that needs the page or a host in its own layer.
    `enum`, `enumDescriptions`, `default`, `minimum`, `maximum`, `step`, `markdownDescription`,
    `order`), and `normalize`, which turns the stored value into the value the core uses. A setting
    the page needs at startup is a `startupSetting` (the content patch then compares it) and one it
-   also follows by message a `liveSetting`; both give the page's `read` of the boot context entry.
+   also follows while open a `liveSetting`; both give the page's `read` of the boot context entry.
+   A `liveSetting` still needs its own update message: add it to `src/core/protocol/hostToPage.ts`,
+   post it from the session when the setting changes (as `postShowComments` does for
+   `preview.showComments`) and handle it in `src/page/features/hostHandlers.ts`.
 2. Run `just generate-settings`: it writes the `contributes.configuration` of `package.json`, which
    is never edited by hand (`just check-settings` fails otherwise).
 3. Read it on the host with `readSettings` (or the section module, `previewConfiguration.ts`, …),
-   which also types it. Boot settings reach the page without more code: the host writes
+   which also types it. Boot settings (the `startupSetting` and `liveSetting` entries of
+   `PREVIEW_SETTINGS`) reach the page at startup without more code: the host writes
    `previewBootSettings(configuration)` and the page reads `readPreviewBootSettings(context)`.
+
+**Add a message** (between the page and the host; both sides use the typed router of
+`src/core/protocol/router.ts`, one handler per type):
+
+1. Page to host: add its interface to the `PageToHostMessage` union and its payload validator to
+   `PAGE_TO_HOST_VALIDATORS` in `src/core/protocol/pageToHost.ts`. The envelope (document id,
+   revision, request) is checked before the validator runs. The table is typed by the union, so a
+   type without a validator does not compile.
+2. Host to page: add its interface to the `HostToPageMessage` union and its rule to the table in
+   `createHostMessageFilter` (`src/core/protocol/hostToPage.ts`): the addressing (`render`,
+   `document` or `own-id`) and, when the page must refuse some payloads, a validator. The filter
+   only matches the message to the page and checks its payload; it cannot tell whether the host
+   had a reason to send it.
+3. Give a page-to-host message its gate in `PAGE_MESSAGE_GATES` (`src/session/pageMessages.ts`),
+   the rule that drops a stale message before its handler runs, and its handler with
+   `router.on(type, …)` in the `register` method of the session feature controller that owns it
+   (`src/session/features/`). The page posts it through its `PageHost`.
+4. Register the handler of a host-to-page message with `hostMessages.on(type, …)` in the page
+   feature that owns it, or in `src/page/features/hostHandlers.ts` for the runtime's own features.
+   The host sends it with `preview.postToPage(…)`.
+5. Test the validator or the filter rule in `test/core/protocol/` (`pageToHost.test.ts`,
+   `hostToPage.test.ts`). `test/session/previewManager.test.ts` checks that every page-to-host
+   type has exactly one handler and pins their count: raise it by one. `tsc` refuses a page-to-host
+   type without a gate or a validator, and a host-to-page type without a filter rule. Run
+   `npx tsc -p .` and `npm run test:unit`.
 
 ## Checks
 

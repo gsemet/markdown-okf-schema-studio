@@ -1,6 +1,5 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { installInlineThreads } from "../../../src/page/modules/inlineThread";
 
@@ -65,7 +64,7 @@ function setup(options: { enabled?: boolean; blocked?: string } = {}) {
     blockedReason: () => options.blocked,
     ask: (type: string, payload: Record<string, unknown>, done: typeof answer) => { asked.push({ type, payload }); answer = done; },
   };
-  const threads = vm.runInNewContext(`(${installInlineThreads.toString()})(document, deps)`, { document, deps }) as ReturnType<typeof installInlineThreads>;
+  const threads = installInlineThreads(document as never, deps as never);
   return { root, threads, asked, answer: (result: { ok?: boolean; reason?: string }) => answer!(result) };
 }
 

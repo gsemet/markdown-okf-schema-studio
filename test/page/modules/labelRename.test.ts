@@ -1,8 +1,8 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { installLabelRename } from "../../../src/page/modules/labelRename";
+import { provideGlobalElement } from "./fakeDom";
 
 type Handler = (event: any) => void;
 
@@ -58,15 +58,13 @@ function harness(options: { editMode?: boolean; blocked?: string } = {}) {
   const posted: Array<{ message: any; editId: string }> = [];
   const state = { editMode: options.editMode ?? true, blocked: options.blocked };
   let sequence = 0;
-  const runtime = vm.runInNewContext(`(${installLabelRename.toString()})(document, window, opts)`, {
-    document, window, Element: FakeElement,
-    opts: {
-      isEditMode: () => state.editMode,
-      blockedReason: () => state.blocked,
-      nextEditId: () => `label-${++sequence}`,
-      post: (message: unknown, editId: string) => posted.push({ message, editId }),
-    },
-  }) as ReturnType<typeof installLabelRename>;
+  provideGlobalElement(FakeElement);
+  const runtime = installLabelRename(document as never, window as never, {
+    isEditMode: () => state.editMode,
+    blockedReason: () => state.blocked,
+    nextEditId: () => `label-${++sequence}`,
+    post: (message: unknown, editId: string) => posted.push({ message, editId }),
+  });
   const anchor = new FakeElement("span", ["okf-anchor"]);
   anchor.setAttribute("data-okf-label", "old");
   anchor.setAttribute("data-okf-label-line", "7");

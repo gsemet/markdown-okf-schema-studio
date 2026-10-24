@@ -17,6 +17,18 @@ export const MYST_DIRECTIVES: readonly MystDirectiveDescriptor[] = [
   TABLES_DIRECTIVE,
 ];
 
+/** The `data-*` attributes the sanitizer handles itself: no plug-in rule may replace its handling. */
+const SANITIZER_DATA_ATTRIBUTES = new Set(["data-myst-table-style", "data-okf-color", "data-okf-background"]);
+
+/**
+ * True when a plug-in may declare a sanitizer rule for `attribute`: a `data-*` attribute the
+ * sanitizer does not already handle. The rules run before the sanitizer's generic checks (event
+ * handlers, `style`, URL attributes), so a rule for any other attribute would bypass them.
+ */
+export function directiveAttributeAllowed(attribute: string): boolean {
+  return attribute.startsWith("data-") && !SANITIZER_DATA_ATTRIBUTES.has(attribute);
+}
+
 const BY_NAME = new Map<string, MystDirectiveDescriptor>();
 const ATTRIBUTE_RULES = new Map<string, DirectiveAttributeRule>();
 for (const directive of MYST_DIRECTIVES) {
@@ -25,6 +37,9 @@ for (const directive of MYST_DIRECTIVES) {
     BY_NAME.set(name, directive);
   }
   for (const [attribute, rule] of Object.entries(directive.attributes ?? {})) {
+    if (!directiveAttributeAllowed(attribute)) {
+      throw new Error(`Directive rule for ${attribute}: plug-in attribute rules are for data-* attributes only.`);
+    }
     if (ATTRIBUTE_RULES.has(attribute)) throw new Error(`Attribute ${attribute} has two directive rules.`);
     ATTRIBUTE_RULES.set(attribute, rule);
   }

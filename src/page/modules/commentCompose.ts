@@ -1,6 +1,5 @@
 /**
- * Writing a review comment in the page (T43). Injected into the page script with `.toString()`, so
- * the body must not use anything defined outside it.
+ * Writing a review comment in the page (T43).
  *
  * Selecting text inside mapped body blocks shows a small "Comment" button near the selection
  * rectangle; the button, or Cmd/Ctrl+Alt+M, opens a box with a text area. Save (or Cmd/Ctrl+Enter)

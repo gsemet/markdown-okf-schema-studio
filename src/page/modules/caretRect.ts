@@ -9,8 +9,7 @@ export interface CaretRect {
  * Measures the caret (the end of the selection) of a textarea with a hidden mirror element that
  * copies the text box's text styles, wraps the same way and ends in a marker. Returns `undefined`
  * where the page cannot measure (no layout), so callers fall back to another anchor. The mirror
- * is styled through the CSSOM and always removed again. Injected into the page script with
- * `.toString()`: the body must not use anything defined outside it.
+ * is styled through the CSSOM and always removed again.
  */
 export function caretRectOf(
   document: Document,
@@ -67,7 +66,7 @@ export function caretRectOf(
 /**
  * How far to scroll (positive: down) so the caret is neither under the stuck edition palette nor
  * below the viewport. 0 when the palette is not stuck (it is still above the frame) or when the
- * caret is already clear. Injected into the page script with `.toString()`: self-contained.
+ * caret is already clear.
  */
 export function caretRevealDelta(
   caret: { top: number; bottom: number },

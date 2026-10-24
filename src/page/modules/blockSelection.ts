@@ -29,9 +29,8 @@ export interface BlockSelection {
 
 /**
  * The contiguous block selection of edit mode: a pure model over the list of top-level body
- * blocks (properties are not in the list). Injected into the page script with `.toString()`, so
- * the body must not use anything defined outside it. Blocks from an include stop a range: the
- * selection ends before the first one, and an included block cannot be the anchor.
+ * blocks (properties are not in the list). Blocks from an include stop a range: the selection
+ * ends before the first one, and an included block cannot be the anchor.
  */
 export function createBlockSelection(): BlockSelection {
   let blocks: readonly SelectableBlock[] = [];

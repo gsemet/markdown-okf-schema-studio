@@ -22,6 +22,7 @@ import {
   resolveSchemaRefs,
   setSchemaFileReaderForTests,
 } from "../../../src/core/frontmatter/okfFrontmatter";
+import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
 import { inspectFrontmatterLinks } from "../../../src/core/frontmatter/fileLinks";
 
 interface SyntheticFs {
@@ -213,7 +214,7 @@ test("findSchemaDirectory walks ancestors and prefers _schema over _schemas", ()
   });
   try {
     assert.equal(
-      findSchemaDirectory(path.join(fsRoot.root, "bundle/findings/doc.md")),
+      findSchemaDirectory(nodeSchemaFiles, path.join(fsRoot.root, "bundle/findings/doc.md")),
       path.join(fsRoot.root, "bundle/_schema"),
     );
   } finally {
@@ -228,7 +229,7 @@ test("findSchemaDirectory still finds _schemas when _schema is absent", () => {
   });
   try {
     assert.equal(
-      findSchemaDirectory(path.join(fsRoot.root, "bundle/notes/doc.md")),
+      findSchemaDirectory(nodeSchemaFiles, path.join(fsRoot.root, "bundle/notes/doc.md")),
       path.join(fsRoot.root, "bundle/_schemas"),
     );
   } finally {
@@ -244,13 +245,13 @@ test("matchSchemaFile matches case-insensitively on the stem before .schema", ()
   });
   try {
     const schemaDir = fsRoot.root;
-    const concept = matchSchemaFile(schemaDir, "concept");
+    const concept = matchSchemaFile(nodeSchemaFiles, schemaDir, "concept");
     assert.ok(concept);
     assert.equal(concept.path, path.join(schemaDir, "Concept.schema.yaml"));
-    const story = matchSchemaFile(schemaDir, "WHAT-A-STORY");
+    const story = matchSchemaFile(nodeSchemaFiles, schemaDir, "WHAT-A-STORY");
     assert.ok(story);
     assert.equal(story.extension, ".yml");
-    assert.equal(matchSchemaFile(schemaDir, "missing"), undefined);
+    assert.equal(matchSchemaFile(nodeSchemaFiles, schemaDir, "missing"), undefined);
   } finally {
     fs.rmSync(fsRoot.root, { recursive: true, force: true });
   }
@@ -265,7 +266,7 @@ test("resolveSchemaRefs inlines relative references with extension fallbacks", (
     const schemaPath = path.join(fsRoot.root, "_schema/finding.schema.yaml");
     const schemaText = fs.readFileSync(schemaPath, "utf8");
     const parsed = parseDocument(schemaText).toJS() as Record<string, unknown>;
-    const resolved = resolveSchemaRefs(parsed, path.join(fsRoot.root, "_schema"));
+    const resolved = resolveSchemaRefs(nodeSchemaFiles, parsed, path.join(fsRoot.root, "_schema"));
     const allOf = resolved.allOf as Record<string, unknown>[];
     assert.ok(Array.isArray(allOf));
     const inlined = allOf[0] as Record<string, unknown>;
@@ -312,6 +313,7 @@ test("analyzeFrontmatter yields schema-ordered fields with docs and enums", () =
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "findings/F-1.md"),
       sourceText: fs.readFileSync(path.join(fsRoot.root, "findings/F-1.md"), "utf8"),
       stopDir: fsRoot.root,
@@ -364,6 +366,7 @@ test("nullable reset metadata preserves declared nullability while conditional v
   try {
     for (const exempt of [false, true]) {
       const result = analyzeFrontmatter({
+        schemaFiles: nodeSchemaFiles,
         filePath: path.join(fsRoot.root, "requirement.md"),
         sourceText: `---\ntype: SwRS\nannotation_exemption: ${exempt}\nexemption_reason: null\n---\n`,
         stopDir: fsRoot.root,
@@ -377,6 +380,7 @@ test("nullable reset metadata preserves declared nullability while conditional v
       assert.equal(field.issues.some((issue) => issue.severity === "error"), exempt);
 
       const missing = analyzeFrontmatter({
+        schemaFiles: nodeSchemaFiles,
         filePath: path.join(fsRoot.root, "requirement.md"),
         sourceText: `---\ntype: SwRS\nannotation_exemption: ${exempt}\n---\n`,
         stopDir: fsRoot.root,
@@ -406,6 +410,7 @@ test("frontmatter without a type skips schema discovery and validation", () => {
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "docs/D-1.md"),
       sourceText: "---\nuuid: nope\nlifecycle: frozen\n---\nBody.\n",
       stopDir: fsRoot.root,
@@ -427,6 +432,7 @@ test("analyzeFrontmatter surfaces an info when the type has no schema", () => {
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "docs/D-1.md"),
       sourceText: "---\ntype: mystery\nname: x\n---\nBody.\n",
       stopDir: fsRoot.root,
@@ -447,6 +453,7 @@ test("reduced mode explains that schema validation needs a trusted workspace", (
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "docs/finding.md"),
       sourceText: "---\ntype: finding\nstatus: draft\n---\nBody.\n",
       stopDir: fsRoot.root,
@@ -499,6 +506,7 @@ test("unmatched OKF-like SKILL frontmatter remains generic and skips schema vali
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "skills/dev/SKILL.md"),
       sourceText: source,
       stopDir: fsRoot.root,
@@ -549,6 +557,7 @@ test("analyzeFrontmatter validates enums, consts, and formats against the schema
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "findings/F-2.md"),
       sourceText: fs.readFileSync(path.join(fsRoot.root, "findings/F-2.md"), "utf8"),
       stopDir: fsRoot.root,
@@ -595,6 +604,7 @@ test("analyzeFrontmatter inspects annotated scalar and array links without AJV k
   try {
     const sourcePath = path.join(fsRoot.root, "docs/source.md");
     const fast = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: sourcePath,
       sourceText: fs.readFileSync(sourcePath, "utf8"),
       stopDir: fsRoot.root,
@@ -610,6 +620,7 @@ test("analyzeFrontmatter inspects annotated scalar and array links without AJV k
     assert.equal(fast.summary.errors, 0);
 
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: sourcePath,
       sourceText: fs.readFileSync(sourcePath, "utf8"),
       stopDir: fsRoot.root,
@@ -677,6 +688,7 @@ test("analyzeFrontmatter attaches nested link results to the parent field", () =
   try {
     const sourcePath = path.join(fsRoot.root, "docs/source.md");
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: sourcePath,
       sourceText: fs.readFileSync(sourcePath, "utf8"),
       stopDir: fsRoot.root,
@@ -885,6 +897,7 @@ test("strict mode warns on unknown fields; lenient mode does not", () => {
   const source = "---\ntype: note\nbonus: surprise\n---\nBody.\n";
   try {
     const lenient = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsLenient.root, "docs/D.md"),
       sourceText: source,
       stopDir: fsLenient.root,
@@ -892,6 +905,7 @@ test("strict mode warns on unknown fields; lenient mode does not", () => {
     });
     assert.equal(lenient.summary.warnings, 0);
     const strict = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsStrict.root, "docs/D.md"),
       sourceText: source,
       stopDir: fsStrict.root,
@@ -922,6 +936,7 @@ test("missing required fields are exposed as an ordered schema summary", () => {
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "docs/D.md"),
       sourceText: "---\ntype: note\n---\nBody.\n",
       stopDir: fsRoot.root,
@@ -948,6 +963,7 @@ test("json5 and json schema formats parse correctly", () => {
   });
   try {
     const playbook = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "notes/P-1.md"),
       sourceText: "---\ntype: playbook\n---\n",
       stopDir: fsRoot.root,
@@ -956,6 +972,7 @@ test("json5 and json schema formats parse correctly", () => {
     assert.equal(playbook.schemaFound, true);
     assert.equal(playbook.summary.errors, 0);
     const concept = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "notes/C-1.md"),
       sourceText: "---\ntype: concept\nsummary: ok\n---\n",
       stopDir: fsRoot.root,
@@ -991,6 +1008,7 @@ test("schema declarations do not become description annotations", () => {
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "swrs/S-1.md"),
       sourceText: fs.readFileSync(path.join(fsRoot.root, "swrs/S-1.md"), "utf8"),
       stopDir: fsRoot.root,
@@ -1222,6 +1240,7 @@ test("T22: linkSuggestions are set only for filename-stem fields and only when l
   try {
     const sourcePath = path.join(fsRoot.root, "docs/source.md");
     const analyze = (inspectLinks: boolean) => analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: sourcePath,
       sourceText: fs.readFileSync(sourcePath, "utf8"),
       stopDir: fsRoot.root,
@@ -1259,6 +1278,7 @@ test("T24: analyzeFrontmatter flags schema-required fields only", () => {
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "docs/D-1.md"),
       sourceText,
       stopDir: fsRoot.root,
@@ -1282,6 +1302,7 @@ test("T25: additionalPropertiesAllowed is false only for a schema forbidding ext
     });
     try {
       return analyzeFrontmatter({
+        schemaFiles: nodeSchemaFiles,
         filePath: path.join(fsRoot.root, "docs/D-1.md"),
         sourceText,
         stopDir: fsRoot.root,
@@ -1412,6 +1433,7 @@ test("inherited Object.prototype names are not treated as present or declared fi
   });
   try {
     const result = analyzeFrontmatter({
+      schemaFiles: nodeSchemaFiles,
       filePath: path.join(fsRoot.root, "docs/D.md"),
       sourceText: "---\ntype: note\n---\nBody.\n",
       stopDir: fsRoot.root,
@@ -1427,4 +1449,20 @@ test("inherited Object.prototype names are not treated as present or declared fi
   } finally {
     fs.rmSync(fsRoot.root, { recursive: true, force: true });
   }
+});
+
+test("frontmatter patches stay minimal when the block holds a recursive alias", () => {
+  const source = "---\ntitle: a\nloop: &x\n  self: *x\nother: [1,2]\n---\nbody\n";
+  const apply = (patch: { start: number; end: number; text: string } | undefined): string => {
+    assert.ok(patch);
+    return source.slice(0, patch.start) + patch.text + source.slice(patch.end);
+  };
+
+  assert.deepEqual(createFrontmatterFieldPatch(source, "title", "b"), { start: 4, end: 12, text: "title: b" });
+  assert.equal(apply(createFrontmatterFieldPatch(source, "new", "v")),
+    "---\ntitle: a\nloop: &x\n  self: *x\nother: [1,2]\nnew: v\n---\nbody\n");
+  assert.equal(apply(createFrontmatterFieldRemovePatch(source, "title")),
+    "---\nloop: &x\n  self: *x\nother: [1,2]\n---\nbody\n");
+  assert.equal(apply(createFrontmatterFieldRenamePatch(source, "title", "t2")),
+    "---\nt2: a\nloop: &x\n  self: *x\nother: [1,2]\n---\nbody\n");
 });

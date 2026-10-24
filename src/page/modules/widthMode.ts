@@ -9,9 +9,8 @@ export interface WidthModeContext {
  * Width button of toolbar row 2: Margin (the configured column), Auto (the column stays, but
  * tables, figures, images and code blocks wider than it break out, up to the available width and
  * centred on it; code blocks stay in the list and are not centred when narrow) and Full
- * width (no column limit). Injected into the page script with `.toString()`, so the body must not
- * use anything defined outside it. `onChange` runs after the mode changed and lets the page keep
- * its reading line; `update()` re-measures the wide elements (Auto only).
+ * width (no column limit). `onChange` runs after the mode changed and lets the page keep its
+ * reading line; `update()` re-measures the wide elements (Auto only).
  */
 export function installWidthMode(
   document: Document,

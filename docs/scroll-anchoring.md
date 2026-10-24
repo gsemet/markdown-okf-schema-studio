@@ -82,7 +82,7 @@ With no source editor open, scrolling the preview does not create one.
 - [`test/core/scroll/anchorPolicy.test.ts`](../test/core/scroll/anchorPolicy.test.ts) covers the map,
   long paragraphs, the round trip between lines and scroll positions, the top ramp, the echo
   guard, and anchor shifts.
-- [`test/page/runtime.test.ts`](../test/page/runtime.test.ts) runs the webview runtime
+- [`test/page/runtimeScroll.test.ts`](../test/page/runtimeScroll.test.ts) runs the webview runtime
   through source scrolls, layout changes, sticky band activation, anchor navigation,
   and returning to a previously reported line after the source editor takes control.
 - [`test/integration/scroll-sync-suite.ts`](../test/integration/scroll-sync-suite.ts) drives a real

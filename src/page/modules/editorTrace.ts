@@ -11,8 +11,7 @@ export interface EditorTraceEntry {
 /**
  * A small ring buffer of editor lifecycle events (open, close and why, focus moves, content
  * replacements). It changes nothing in the page: tests read it through the page's diagnostics
- * when an editor is missing, so a failure names what closed it. Injected into the page script with
- * `.toString()`: the body uses nothing defined outside it.
+ * when an editor is missing, so a failure names what closed it.
  */
 export function createEditorTrace(
   limit: number,

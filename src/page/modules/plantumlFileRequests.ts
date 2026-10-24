@@ -32,8 +32,7 @@ interface FileRequestAsker {
 
 /**
  * Forwards the bundle's file requests to the host through `requests` (an `installHostRequests`
- * instance of its own, so closing an editor does not cancel them). Self-contained: it is injected
- * into the page script with `.toString()`, so it must not use anything defined outside its body.
+ * instance of its own, so closing an editor does not cancel them).
  */
 export function installPlantUmlFileRequests(
   document: Pick<Document, "addEventListener">,

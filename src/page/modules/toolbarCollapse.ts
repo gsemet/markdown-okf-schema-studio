@@ -7,8 +7,7 @@ export interface ToolbarCollapseContext {
 
 /**
  * Collapse button of toolbar row 1: hides or shows rows 2 and 3 (the `hidden` attribute also
- * takes them out of the Tab order). Injected into the page script with `.toString()`, so the body
- * must not use anything defined outside it. The choice is the `toolbarCollapsed` view preference:
+ * takes them out of the Tab order). The choice is the `toolbarCollapsed` view preference:
  * posted to the host (kept per workspace) and mirrored on `<html>` as
  * `data-sphinx-preview-toolbar-state` ("expanded" / "collapsed"). Without a stored choice the toolbar
  * starts collapsed, like `DEFAULT_VIEW_PREFERENCES`. `onChange` runs after a click, when

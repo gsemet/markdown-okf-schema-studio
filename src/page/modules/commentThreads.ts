@@ -20,8 +20,7 @@ export interface PageCommentThread {
 }
 
 /**
- * Review comments in the page (T42). Injected into the page script with `.toString()`, so the body
- * must not use anything defined outside it.
+ * Review comments in the page (T42).
  *
  * Thread content comes from a file next to the document and is untrusted: every string reaches the
  * page through `textContent` or `setAttribute`, never as markup. For each thread the innermost

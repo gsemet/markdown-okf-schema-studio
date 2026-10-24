@@ -25,6 +25,7 @@ import type { FileWatcher, Watcher } from "../host-api/watcher";
 import type { WorkspaceFolderInfo, WorkspaceInfo } from "../host-api/workspaceInfo";
 import { createNodeFileSystem } from "../node-services/nodeFileSystem";
 import { createNodeProcessRunner } from "../node-services/processRunner";
+import { nodeSchemaFiles } from "../node-services/schemaFiles";
 import { createVscodeDocumentStore, type VscodeDocumentStore } from "./documents";
 
 /** The VS Code host's ports, with the VS Code-only parts of its document store and its assets. */
@@ -282,6 +283,8 @@ export function createVscodeHost(): VscodeHost {
     },
     documents,
     files: createVscodeFileSystem(),
+    // The extension host runs in Node: the synchronous schema lookup reads the disk directly.
+    schemaFiles: nodeSchemaFiles,
     settings: createVscodeSettings(),
     workspace: createVscodeWorkspaceInfo(),
     ui: createVscodeUi(),

@@ -118,3 +118,11 @@ export class FakeDocument extends FakeElement {
   }
 }
 
+
+/**
+ * Puts the class the page modules test with `instanceof Element` on the global object (Node has no
+ * DOM). Each test file runs in its own process, so the global never reaches another file.
+ */
+export function provideGlobalElement(element: abstract new (...args: never[]) => unknown): void {
+  (globalThis as { Element?: unknown }).Element = element;
+}

@@ -164,7 +164,7 @@ site: e2e
     {{ npm }} run site:gallery
     {{ npm }} run site
 
-# CI job "static": justfile format check, TypeScript, boundary, size, unit, contract and security checks, Sphinx contract.
+# CI job "static": justfile format check, TypeScript, boundary, size, settings schema, unit, contract and security checks, Sphinx contract.
 ci-static:
     #!/usr/bin/env bash
     set -uo pipefail

@@ -34,9 +34,16 @@ test("the Mermaid theme-switch check is keyed by a flag, not by an id", () => {
   const flagged = SCENARIOS.filter((scenario) => scenario.mermaidThemeSwitch);
   assert.equal(flagged.length, 1);
   assert.match(flagged[0]!.fixture, /mermaid/u);
-  const source = fs.readFileSync(path.resolve(__dirname, "../../../test/visual/capture.py"), "utf8");
-  // Everything before the campaign driver (`capture_scenarios`, `main`) is check code.
-  const capture = source.slice(0, source.indexOf("def capture_scenarios"));
+  const visual = path.resolve(__dirname, "../../../test/visual");
+  const source = fs.readFileSync(path.join(visual, "capture.py"), "utf8");
+  // The check code: the capture_*.py modules, and capture.py before the campaign driver
+  // (`capture_scenarios`, `main`).
+  const modules = fs.readdirSync(visual).filter((name) => /^capture_\w+\.py$/u.test(name)).sort();
+  assert.ok(modules.length > 0);
+  const capture = [
+    ...modules.map((name) => fs.readFileSync(path.join(visual, name), "utf8")),
+    source.slice(0, source.indexOf("def capture_scenarios")),
+  ].join("\n");
   assert.ok(capture.length > 1000);
   // No check may branch on a scenario id: not by comparison, membership or prefix/suffix tests.
   assert.doesNotMatch(capture, /scenario\[["']id["']\]\s*(==|!=|in\b|not in\b)/u);

@@ -704,7 +704,7 @@ export const ASSERTION_ONLY_IDS: ReadonlySet<string> = new Set([
 ] as const);
 
 /**
- * P9 B2b: step PNGs kept per scenario (names registered in `STEP_NAMES` of capture.py). A scenario
+ * P9 B2b: step PNGs kept per scenario (names registered in `STEP_NAMES` of capture_support.py). A scenario
  * absent here writes every step its checks produce; a dropped step's check still runs.
  */
 export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {

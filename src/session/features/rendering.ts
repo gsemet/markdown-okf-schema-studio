@@ -398,6 +398,7 @@ export class RenderingController {
       localResourceRoots.push(bundleRoot);
     }
     const frontmatter = analyzeFrontmatter({
+      schemaFiles: manager.host.schemaFiles,
       filePath: result.stage.activeDocumentPath,
       sourceText: result.stage.sourceText,
       stopDir: preview.workspaceRoot,

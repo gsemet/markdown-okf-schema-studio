@@ -4,7 +4,6 @@
  * `data-okf-background` and the page sets it through the CSSOM. Accepted: `#rgb`, `#rgba`,
  * `#rrggbb`, `#rrggbbaa`, and comma-separated `rgb()` / `rgba()` (channels 0-255 or 0-100%, alpha
  * 0-1 or 0-100%). Nothing else: no comments, `!important`, `var()`, `url()`, named colours.
- * Self-contained: injected into the page script with `.toString()`.
  */
 export function isSafeOkfColor(value: string): boolean {
   const text = value.trim();

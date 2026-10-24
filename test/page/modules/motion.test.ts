@@ -1,6 +1,5 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { installMotion } from "../../../src/page/modules/motion";
 
@@ -65,8 +64,7 @@ function setup(options: { reduced?: boolean } = {}) {
     setTimeout: (callback: () => void) => { const id = nextTimer++; timers.set(id, callback); return id; },
     clearTimeout: (id: number) => { timers.delete(id); },
   };
-  const motion = vm.runInNewContext(`(${installMotion.toString()})(document, window)`, { document, window }) as
-    ReturnType<typeof installMotion>;
+  const motion = installMotion(document as never, window as never);
   const press = (type = "pointerdown") => {
     for (const listener of windowListeners.get(type) ?? []) listener({ type, target: window });
   };

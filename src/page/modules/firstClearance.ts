@@ -1,7 +1,6 @@
 /**
  * Keeps the gap above the first element uniform (40px) while the floating toolbar stays clear of
- * everything clickable. Self-contained: it is injected into the page script with `.toString()`, so
- * it must not use anything defined outside its own body.
+ * everything clickable.
  *
  * The page always starts its first element 40px below the top. The toolbar (fixed, top right, two
  * rows) reaches lower than that, so only an interactive first element that really sits under it

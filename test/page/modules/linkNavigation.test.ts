@@ -1,8 +1,8 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { installLinkNavigation } from "../../../src/page/modules/linkNavigation";
+import { provideGlobalElement } from "./fakeDom";
 
 const context = { documentId: "file:///active.md", revision: 1, requestId: 2 };
 
@@ -26,17 +26,17 @@ function harness(requests: string[]) {
     unobserve(link: Link) { unobserved.push(link); }
     disconnect() {}
   }
-  const installed = vm.runInNewContext(`(${installLinkNavigation.toString()})(document, window, vscode, context)`, {
-    Element: Link,
-    context,
-    document: { querySelectorAll: () => links, addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback) },
-    window: {
+  provideGlobalElement(Link);
+  const installed = installLinkNavigation(
+    { querySelectorAll: () => links, addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback) } as never,
+    {
       IntersectionObserver: Observer,
       queueMicrotask: (callback: () => void) => microtasks.push(callback),
       addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback),
-    },
-    vscode: { postMessage: (message: Record<string, any>) => messages.push(message) },
-  }) as ReturnType<typeof installLinkNavigation>;
+    } as never,
+    { postMessage: (message: Record<string, any>) => messages.push(message) } as never,
+    context as never,
+  );
   return { installed, links, messages, listeners, unobserved,
     intersect: (entries: Array<{ target: Link; isIntersecting: boolean }>) => intersect(entries),
     flush: () => { while (microtasks.length) microtasks.shift()!(); },
@@ -75,7 +75,7 @@ test("local and wiki clicks are host-routed even before discovery, including mid
   assert.equal(runtime.messages[0].requestId, context.requestId);
 });
 
-// The stale-render half of this test moved to test/page/runtime.test.ts ("link target hints of a
+// The stale-render half of this test moved to test/page/runtimeContentPatch.test.ts ("link target hints of a
 // stale render are ignored"): the page's host message filter now matches previewLinkTargets to the
 // render before the router hands it to applyTargets.
 test("discovery hints never replace the original target", () => {
@@ -107,17 +107,17 @@ function rescanHarness(initial: string[]) {
     disconnect() {}
   }
   const live = { documentId: "file:///active.md", revision: 1, requestId: 2 };
-  const installed = vm.runInNewContext(`(${installLinkNavigation.toString()})(document, window, vscode, context)`, {
-    Element: Link,
-    context: live,
-    document: { querySelectorAll: () => current, addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback) },
-    window: {
+  provideGlobalElement(Link);
+  const installed = installLinkNavigation(
+    { querySelectorAll: () => current, addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback) } as never,
+    {
       IntersectionObserver: Observer,
       queueMicrotask: (callback: () => void) => microtasks.push(callback),
       addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback),
-    },
-    vscode: { postMessage: (message: Record<string, any>) => messages.push(message) },
-  }) as ReturnType<typeof installLinkNavigation>;
+    } as never,
+    { postMessage: (message: Record<string, any>) => messages.push(message) } as never,
+    live as never,
+  );
   return {
     installed, messages, listeners, observed, live,
     replaceLinks: (requests: string[]) => { current = requests.map((request) => new Link(request)); return current; },

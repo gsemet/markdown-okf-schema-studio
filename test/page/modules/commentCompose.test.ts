@@ -1,9 +1,8 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import * as vm from "node:vm";
 
 import { installCommentCompose } from "../../../src/page/modules/commentCompose";
-import { FakeDocument, FakeElement, FakeText } from "./fakeDom";
+import { FakeDocument, FakeElement, FakeText, provideGlobalElement } from "./fakeDom";
 
 interface Posted { type: string; fields: Record<string, any> }
 
@@ -29,9 +28,8 @@ function setup(options: { busy?: () => boolean } = {}) {
     busy: options.busy ?? (() => false),
     beforeOpen: () => undefined,
   };
-  const sandbox = { document, window, hooks, Element: FakeElement, Math, Number, Array, String };
-  const compose = vm.runInNewContext(`(${installCommentCompose.toString()})(document, window, hooks)`, sandbox) as
-    ReturnType<typeof installCommentCompose>;
+  provideGlobalElement(FakeElement);
+  const compose = installCommentCompose(document as never, window as never, hooks);
   const select = (start: [any, number], end: [any, number], text: string, rect = { left: 20, top: 40, right: 120, bottom: 60 }) => {
     selection = {
       rangeCount: 1,

@@ -10,11 +10,11 @@ import { SCENARIOS } from "../visual/scenarios";
 const ROOT = path.resolve(__dirname, "../../..");
 const ids = new Set(SCENARIOS.map((scenario) => scenario.id));
 
-/** The step names `capture.py` registers (`STEP_NAMES`), read from its source. */
+/** The step names the screenshot campaign registers (`STEP_NAMES`), read from its source. */
 function registeredSteps(): Set<string> {
-  const source = fs.readFileSync(path.join(ROOT, "test/visual/capture.py"), "utf8");
+  const source = fs.readFileSync(path.join(ROOT, "test/visual/capture_support.py"), "utf8");
   const match = /^STEP_NAMES = frozenset\(\{([^}]*)\}\)/mu.exec(source);
-  assert.ok(match, "capture.py declares STEP_NAMES");
+  assert.ok(match, "capture_support.py declares STEP_NAMES");
   return new Set([...match[1]!.matchAll(/"([^"]+)"/gu)].map((entry) => entry[1]!));
 }
 

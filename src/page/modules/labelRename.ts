@@ -1,7 +1,6 @@
 /**
  * Edit mode: a click on a label's anchor icon opens a one-field popover to rename the label.
- * Self-contained: it is injected into the page script with `.toString()`, so it must not use
- * anything defined outside its own body. The host re-checks everything it is sent.
+ * The host re-checks everything it is sent.
  */
 export interface LabelRenameOptions {
   isEditMode(): boolean;

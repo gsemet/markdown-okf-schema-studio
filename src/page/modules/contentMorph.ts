@@ -1,6 +1,5 @@
 /**
- * Keyed replacement of the preview content (PERF-05 step 2). Injected into the page script with
- * `.toString()`, so the bodies must not use anything defined outside them.
+ * Keyed replacement of the preview content (PERF-05 step 2).
  *
  * A content patch carries the whole sanitised content of the new render. Instead of replacing
  * every node, the page keeps each top-level block whose host HTML is unchanged: the node, and what

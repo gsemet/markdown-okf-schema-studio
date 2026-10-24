@@ -19,7 +19,6 @@ export interface WarningBannerState {
 /**
  * Whether the banner shows for this status and these `myst-extension` lines, and the key of the
  * set. Only a successful render shows it: every other status shows its region, warnings included.
- * Self-contained: it is injected into the page script with `.toString()`.
  */
 export function warningBannerState(
   status: string | null | undefined,
@@ -62,8 +61,8 @@ export interface WarningBanner {
 }
 
 /**
- * Installs the banner. Self-contained (injected with `.toString()`); `stateOf` and `textOf` are
- * `warningBannerState` and `warningBannerText`, passed in for the same reason.
+ * Installs the banner. `stateOf` and `textOf` are `warningBannerState` and `warningBannerText`,
+ * passed in so the tests can replace them.
  */
 export function installWarningBanner(
   document: any,

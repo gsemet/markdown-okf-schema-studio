@@ -7,8 +7,7 @@ export interface TextEdit {
 }
 
 /**
- * Pure text-editing helpers for the raw-Markdown block editor. The factory is stringified into the
- * webview runtime, so its body must stay self-contained.
+ * Pure text-editing helpers for the raw-Markdown block editor.
  */
 export function createTextEditingTools() {
   /**

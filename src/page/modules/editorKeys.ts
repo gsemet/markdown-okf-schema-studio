@@ -11,7 +11,7 @@ export interface EditorKeyEvent {
  * has already handled `event`: the key is one the editors act on (Tab, Enter, Escape, the arrow
  * keys), the editor's own listener prevented the default action, and the target sits inside an
  * editor. A key the page did not handle (Ctrl+Tab, an arrow key in the middle of the text) is not
- * matched. Injected into the page script with `.toString()`: the body uses nothing defined outside it.
+ * matched.
  */
 export function isHandledEditorKey(event: EditorKeyEvent): boolean {
   if (event.defaultPrevented !== true || event.isComposing === true) return false;

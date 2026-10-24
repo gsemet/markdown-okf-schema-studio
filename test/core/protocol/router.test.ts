@@ -27,9 +27,8 @@ test("a second handler for the same type throws", () => {
   assert.throws(() => router.on("a", () => undefined), /already registered for a/u);
 });
 
-test("the router works from its source text alone, as the page runtime injects it", () => {
-  const create = new Function(`return (${createMessageRouter.toString()});`)() as typeof createMessageRouter;
-  const router = create<Sample>();
+test("the router works as the page runtime bundles it", () => {
+  const router = createMessageRouter<Sample>();
   const seen: unknown[] = [];
   router.on("b", (message) => { seen.push(message.text); });
   assert.deepEqual(router.dispatch({ type: "b", text: "hi" }), { handled: true, result: undefined });
