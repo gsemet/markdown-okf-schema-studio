@@ -1,0 +1,44 @@
+---
+type: SwRS
+id: SwRS-MDOKFSTUDIO-MYST-048
+uuid: ea256d16-10b8-4e44-8600-d909de1f3fdd
+title: The rename field shows progress and refusals
+description: When the host works on a rename, the extension SHALL disable the
+  field with Renaming..., match the answer by edit id and leave it editable
+  after a refusal showing its reason.
+project: markdown-okf-schema-studio
+scope: myst
+lifecycle: draft
+origin: native
+tier: SwRS
+derives_from:
+- StRS-MDOKFSTUDIO-MYST-010
+annotation_exemption: false
+exemption_reason:
+derived_by: []
+implemented_in_files: []
+tested_in_files: []
+---
+
+## The rename field shows progress and refusals
+
+### Normative behavior
+
+When the host works on a rename, the extension SHALL disable the field with Renaming..., match the answer by edit id and leave it editable after a refusal showing its reason.
+
+### Scenario: Nominal
+
+- GIVEN a posted rename
+- WHEN the host has not answered
+- THEN the field is disabled and reads Renaming...
+
+### Scenario: Boundary or refusal
+
+- GIVEN an answer with another edit id, or a refusal with a reason
+- WHEN the answer arrives
+- THEN the foreign answer is ignored and the refusal reason is shown with the field editable
+
+### Verification notes
+
+- Method: test
+- Criteria: Matching is by edit id.
