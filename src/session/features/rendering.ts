@@ -6,7 +6,12 @@
  */
 
 import { BuildQueueState } from "../../node-services/build/buildQueue";
-import { DEFAULT_PREVIEW_CONFIGURATION, PreviewConfiguration } from "../../core/configuration/previewConfiguration";
+import {
+  DEFAULT_PREVIEW_CONFIGURATION,
+  PREVIEW_STARTUP_SETTING_KEYS,
+  previewBootSettings,
+  PreviewConfiguration,
+} from "../../core/configuration/previewConfiguration";
 import { analyzeFrontmatter } from "../../core/frontmatter/okfFrontmatter";
 import type { HostDocument } from "../../host-api/documentStore";
 import {
@@ -43,15 +48,14 @@ function diagnosticDetails(error: unknown): PreviewDiagnostic[] {
 }
 
 function runtimeContextSettings(context: PreviewRuntimeContext): RuntimeContextSettings {
-  return {
+  const settings: Record<string, unknown> = {
     documentId: context.documentId,
     activeSourceFile: context.activeSourceFile,
-    scrollPreviewWithEditor: context.scrollPreviewWithEditor,
-    scrollEditorWithPreview: context.scrollEditorWithPreview,
-    markEditorSelection: context.markEditorSelection,
-    doubleClickToSwitchToEditor: context.doubleClickToSwitchToEditor,
-    stickyHeadingDepth: context.stickyHeadingDepth,
   };
+  for (const key of PREVIEW_STARTUP_SETTING_KEYS) {
+    settings[key] = context[key];
+  }
+  return settings as RuntimeContextSettings;
 }
 
 function sameResourceRoots(previous: readonly string[], next: readonly string[]): boolean {
@@ -88,12 +92,7 @@ export class RenderingController {
       ...(threadAuthor !== "" ? { threadAuthor } : {}),
       ...(initialAnchor !== undefined ? { initialAnchor } : {}),
       ...(initialPin ? { initialPin } : {}),
-      scrollPreviewWithEditor: configuration.scrollPreviewWithEditor,
-      scrollEditorWithPreview: configuration.scrollEditorWithPreview,
-      markEditorSelection: configuration.markEditorSelection,
-      doubleClickToSwitchToEditor: configuration.doubleClickToSwitchToEditor,
-      stickyHeadingDepth: configuration.stickyHeadingDepth,
-      showComments: configuration.showComments,
+      ...previewBootSettings(configuration),
       themeKind: host.theme.kind,
       ...(toolbarState ?? {}),
       ...(choices.dismissedWarningBanners.has(stage.activeDocumentIdentity)

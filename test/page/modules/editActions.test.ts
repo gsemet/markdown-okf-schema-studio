@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { PALETTE_ACTION_IDS, PALETTE_ACTIONS } from "../../../src/core/palette/paletteActions";
 import { createEditActions } from "../../../src/page/modules/editActions";
 import { createMarkdownTableTools } from "../../../src/page/modules/markdownTable";
 import { isSafeOkfColor } from "../../../src/core/security/spanColors";
@@ -1420,4 +1421,18 @@ test("CR038: the conversion actions without table tools never throw", () => {
   const ctx = { value: LT_PIPE, selectionStart: 3, selectionEnd: 3, scope: "block" as const };
   assert.equal(bare.byId.get("listTable")!.apply(ctx), undefined);
   assert.equal(bare.byId.get("pipeTable")!.available!(ctx), false);
+});
+
+test("the registry binds one handler to every palette descriptor, in the descriptors' order", () => {
+  assert.deepEqual(registry.actions.map((action) => action.id), PALETTE_ACTION_IDS);
+  for (const action of registry.actions) {
+    const { options: _options, ...descriptor } = PALETTE_ACTIONS[action.id as keyof typeof PALETTE_ACTIONS] as { options?: unknown };
+    for (const [key, value] of Object.entries(descriptor)) assert.equal(action[key as keyof typeof action], value, `${action.id}.${key}`);
+    assert.equal(typeof action.apply, "function", action.id);
+    assert.equal(registry.byId.get(action.id), action);
+  }
+  const fence = registry.actions.find((action) => action.id === "codeFence");
+  assert.deepEqual(createEditActions(["python", "text", "bash"]).byId.get("codeFence")?.options?.map((option) => option.value),
+    ["text", "bash", "python"], "the page computes the language options");
+  assert.deepEqual(fence?.options, [{ value: "text", label: "text" }]);
 });

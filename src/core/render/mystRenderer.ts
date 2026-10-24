@@ -2,6 +2,9 @@ import * as path from "node:path";
 import { html as parse5Html, parseFragment, serialize } from "parse5";
 
 import { extractFrontmatter, matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
+import { ADMONITION_TITLES } from "../directives/admonition";
+import { OKF_WIDTH } from "../directives/figure";
+import { directiveNamed } from "../directives/registry";
 import { sanitizeTableStyle } from "../security/html-sanitizer";
 import type { BoundedTextRead } from "../security/resource-policy";
 import {
@@ -16,6 +19,17 @@ import { highlightCodeBlocks } from "./highlight";
 import { expandGrids, expandToctrees } from "./mystGridToctree";
 import { detectMystSyntax, MAX_EXTENSION_WARNINGS, mystExtensionWarning } from "./mystSyntaxDetect";
 import { describePlantUmlFileRefusal } from "./plantUmlIncludes";
+import {
+  containsRawTable,
+  findNode,
+  mergeProperties,
+  type MystNode,
+  normalizeTableAlignment,
+  type RawHtmlNode,
+  setHast,
+  sourcePositionProperties,
+  takeAdmonitionTitle,
+} from "./mystNode";
 
 export interface RenderDiagnostic {
   /** Set for MyST extension warnings; every other diagnostic gets the pipeline's default code. */
@@ -56,34 +70,6 @@ export interface MystRenderContext {
    * Unset: no check.
    */
   enabledMystExtensions?: ReadonlySet<string>;
-}
-
-interface MystNode {
-  type: string;
-  children?: MystNode[];
-  position?: { start?: { line?: number }; end?: { line?: number } };
-  data?: Record<string, unknown>;
-  name?: string;
-  /** A table cell the parser marked as a header cell. */
-  header?: boolean;
-  args?: string;
-  label?: string;
-  identifier?: string;
-  value?: string;
-  kind?: string;
-  lang?: string;
-  class?: string;
-  icon?: boolean;
-  open?: boolean;
-  align?: string;
-  options?: Record<string, unknown>;
-  emphasizeLines?: number[];
-  showLineNumbers?: boolean;
-  startingLineNumber?: number | string;
-  filename?: string;
-  file?: string;
-  literal?: boolean;
-  url?: string;
 }
 
 /** Parser options shared by every `mystParse` call so all parse sites agree. */
@@ -135,19 +121,6 @@ const BLOCK_TYPES = new Set([
   "definitionList",
 ]);
 
-const ADMONITION_TITLES: Record<string, string> = {
-  attention: "Attention",
-  caution: "Caution",
-  danger: "Danger",
-  error: "Error",
-  hint: "Hint",
-  important: "Important",
-  note: "Note",
-  seealso: "See Also",
-  tip: "Tip",
-  warning: "Warning",
-};
-
 const VERSION_ADMONITION_TITLES: Record<string, string> = {
   versionadded: "Added in version",
   versionchanged: "Changed in version",
@@ -164,7 +137,6 @@ const GITHUB_ALERT_TYPES = new Map([
 
 const ALERT_MARKER = /^(\s*)>\s*\[!([A-Za-z]+)\](?:[ \t]+(\S(?:.*?\S)?))?[ \t]*$/u;
 const GITHUB_BOLD_ALERT_MARKER = /^(\s*)>\s*\*\*(Note|Important|Warning)\*\*[ \t]*$/iu;
-const TABLE_ALIGNMENTS = new Set(["left", "center", "right"]);
 const MAX_INCLUDE_DEPTH = 8;
 /** Per-render ceilings on include expansion; beyond them includes stay placeholders. */
 export const INCLUDE_BUDGET_MAX_EXPANSIONS = 2000;
@@ -177,15 +149,6 @@ const SAFE_HTML_TABLE_TAGS = new Set([
 const BLOCKED_HTML_TABLE_TAGS = new Set([
   "embed", "form", "iframe", "object", "script", "style", "svg",
 ]);
-
-interface RawHtmlNode {
-  nodeName: string;
-  namespaceURI?: string;
-  tagName?: string;
-  attrs?: Array<{ name: string; value: string }>;
-  childNodes?: RawHtmlNode[];
-  value?: string;
-}
 
 interface TableAlignmentSpec {
   table?: string;
@@ -504,34 +467,6 @@ const BUILD_ONLY_TYPES = new Set([
   "bibliography",
 ]);
 
-function setHast(node: MystNode, name: string, properties: Record<string, unknown>, children?: unknown[]): void {
-  node.data = {
-    ...(node.data ?? {}),
-    hName: name,
-    hProperties: { ...(node.data?.hProperties as object ?? {}), ...properties },
-    ...(children ? { hChildren: children } : {}),
-  };
-}
-
-function mergeProperties(node: MystNode, properties: Record<string, unknown>): void {
-  node.data = {
-    ...(node.data ?? {}),
-    hProperties: { ...(node.data?.hProperties as object ?? {}), ...properties },
-  };
-}
-
-function sourcePositionProperties(node: MystNode, line?: number): Record<string, number | string> {
-  if (line === undefined) {
-    return {};
-  }
-  const endLine = node.position?.end?.line;
-  return {
-    "data-line": line,
-    ...(node.data?.included === true ? { "data-sphinx-preview-included": "true" } : {}),
-    ...(endLine !== undefined && endLine >= line ? { "data-end-line": endLine } : {}),
-  };
-}
-
 function normalizeDiagram(
   node: MystNode,
   line: number | undefined,
@@ -575,32 +510,6 @@ function normalizeDiagram(
   ]);
   node.children = [];
   node.type = `${kind}Diagram`;
-}
-
-function findNode(node: MystNode, type: string): MystNode | undefined {
-  if (node.type === type) {
-    return node;
-  }
-  for (const child of node.children ?? []) {
-    const found = findNode(child, type);
-    if (found) {
-      return found;
-    }
-  }
-  return undefined;
-}
-
-function normalizeTableAlignment(value: unknown): string | undefined {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-  const alignment = value.toLowerCase();
-  return TABLE_ALIGNMENTS.has(alignment) ? alignment : undefined;
-}
-
-function containsRawTable(node: RawHtmlNode): boolean {
-  return node.tagName?.toLowerCase() === "table"
-    || (node.childNodes ?? []).some(containsRawTable);
 }
 
 function countRawTables(node: RawHtmlNode): number {
@@ -667,27 +576,6 @@ function normalizeRawHtmlTable(node: MystNode, line?: number): void {
     ...sourcePositionProperties(node, line),
   }, rawHtmlChildren(fragment));
   node.type = "rawHtmlTableBlock";
-}
-
-function takeAdmonitionTitle(children: MystNode[]): { title: MystNode; body: MystNode[] } | undefined {
-  const first = children[0];
-  if (first?.type === "heading") {
-    return {
-      title: { type: "admonitionTitle", children: first.children ?? [] },
-      body: children.slice(1),
-    };
-  }
-  if (first?.type === "paragraph") {
-    const meaningfulChildren = (first.children ?? []).filter((child) =>
-      child.type !== "text" || Boolean(child.value?.trim()));
-    if (meaningfulChildren.length === 1 && meaningfulChildren[0].type === "strong") {
-      return {
-        title: { type: "admonitionTitle", children: meaningfulChildren[0].children ?? [] },
-        body: children.slice(1),
-      };
-    }
-  }
-  return undefined;
 }
 
 /**
@@ -1104,26 +992,6 @@ function findRawRow(node: RawHtmlNode): RawHtmlNode | undefined {
   return undefined;
 }
 
-/** The number of leading rows of a table AST whose cells are marked as header cells. */
-function leadingHeaderRows(table: MystNode): number {
-  let count = 0;
-  for (const row of table.children ?? []) {
-    if (row.children?.[0]?.header !== true) break;
-    count += 1;
-  }
-  return count;
-}
-
-/** The `:widths:` of a list-table as percentages that add up to 100; `auto`, `grid` or junk: none. */
-function listTableWidths(value: unknown): number[] | undefined {
-  const parts = Array.isArray(value)
-    ? value.map(Number)
-    : typeof value === "string" ? value.trim().split(/[\s,]+/u).map(Number) : [];
-  if (parts.length === 0 || parts.some((part) => !Number.isFinite(part) || part <= 0)) return undefined;
-  const total = parts.reduce((sum, part) => sum + part, 0);
-  return parts.map((part) => Math.round((part / total) * 10000) / 100);
-}
-
 function applyTableAlignments(
   html: string,
   alignments: Array<TableAlignmentSpec | undefined>,
@@ -1270,27 +1138,9 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
     return;
   }
 
+  // The render pass of a registered directive plug-in (src/core/directives/registry.ts).
   if (node.type === "mystDirective") {
-    const isAdmonitionDirective = node.name === "admonition"
-      || Boolean(node.name && ADMONITION_TITLES[node.name]);
-    const admonition = isAdmonitionDirective ? findNode(node, "admonition") : undefined;
-    if (admonition && node.position) {
-      admonition.position = {
-        ...node.position,
-        ...(admonition.position ?? {}),
-        end: node.position.end ?? admonition.position?.end,
-      };
-    }
-    if (
-      admonition
-      && !node.args?.trim()
-      && !admonition.children?.some((child) => child.type === "admonitionTitle")
-    ) {
-      const inferredTitle = takeAdmonitionTitle(admonition.children ?? []);
-      if (inferredTitle) {
-        admonition.children = [inferredTitle.title, ...inferredTitle.body];
-      }
-    }
+    directiveNamed(node.name)?.render?.(node, line);
   }
 
   if (node.type === "div") {
@@ -1327,41 +1177,6 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
 
   if (node.type === "table" && node.align !== undefined) {
     node.align = normalizeTableAlignment(node.align);
-  }
-
-  if (node.type === "mystDirective" && node.name === "figure") {
-    const figure = node.children?.find((child) =>
-      child.type === "container" && child.kind === "figure");
-    if (figure && line !== undefined) {
-      mergeProperties(figure, sourcePositionProperties(node, line));
-    }
-  }
-
-  if (
-    node.type === "mystDirective"
-    && ["table", "list-table", "csv-table"].includes(node.name ?? "")
-  ) {
-    const alignment = normalizeTableAlignment(node.options?.align);
-    const table = findNode(node, "table");
-    if (node.name === "list-table" && table) {
-      // The parser gives the table no position: it spans the directive, so the table is one
-      // editable block.
-      table.position ??= node.position;
-      table.data = {
-        ...(table.data ?? {}),
-        listTable: true,
-        widths: listTableWidths(node.options?.widths),
-        headerRows: leadingHeaderRows(table),
-      };
-    }
-    if (alignment && table) {
-      table.align = alignment;
-    } else if (alignment) {
-      const rawTable = findNode(node, "html");
-      if (rawTable && containsRawTable(parseFragment(rawTable.value ?? "") as unknown as RawHtmlNode)) {
-        rawTable.data = { ...(rawTable.data ?? {}), mystTableAlignment: alignment };
-      }
-    }
   }
 
   // A citeGroup emits a <div>, which the HTML parser hoists out of its enclosing
@@ -1512,7 +1327,6 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
   }
 }
 
-const FIGURE_WIDTH = /^\d+(?:\.\d+)?(?:px|%|em|rem)?$/u;
 const FIGURE_ALIGNMENTS = new Set(["left", "center", "right"]);
 
 function isFigureAlignment(value: unknown): value is "left" | "center" | "right" {
@@ -1527,7 +1341,7 @@ function normalizeImageSize(node: MystNode): void {
   const image = node as MystNode & { width?: unknown };
   const width = typeof image.width === "string" ? image.width.trim() : undefined;
   delete image.width;
-  if (width && FIGURE_WIDTH.test(width)) {
+  if (width && OKF_WIDTH.test(width)) {
     mergeProperties(node, { "data-okf-width": width });
   }
   if (node.align !== undefined && !isFigureAlignment(node.align)) {

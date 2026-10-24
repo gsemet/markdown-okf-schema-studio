@@ -45,7 +45,7 @@ import { installIncomingToggle } from "./modules/incomingToggle";
 import { installToolbarCollapse } from "./modules/toolbarCollapse";
 import { installViewControls } from "./modules/viewControls";
 import { installWidthMode } from "./modules/widthMode";
-import { DEFAULT_EDITING_CONFIGURATION } from "../core/configuration/editingConfiguration";
+import { DEFAULT_EDITING_CONFIGURATION, PALETTE_MODES } from "../core/configuration/editingConfiguration";
 import type { PreviewRuntimeContext } from "../core/protocol/bootContext";
 import { HIGHLIGHT_LANGUAGES } from "./buildConstants";
 import type { HostTransport } from "./hostTransport";
@@ -265,7 +265,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   let editMode = editModeButton
     ? (typeof savedState?.editMode === "boolean" ? savedState.editMode : context.initialEditMode === true)
     : false;
-  const paletteModes = ["strict", "gfm", "myst"];
+  const paletteModes: readonly string[] = PALETTE_MODES;
   let paletteMode = paletteModes.includes(savedState?.paletteMode)
     ? savedState.paletteMode
     : paletteModes.includes(context.initialPaletteMode) ? context.initialPaletteMode : DEFAULT_EDITING_CONFIGURATION.defaultPaletteMode;

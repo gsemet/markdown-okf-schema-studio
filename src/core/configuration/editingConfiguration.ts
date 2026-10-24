@@ -1,34 +1,36 @@
-export const EDITING_CONFIGURATION_SECTION = "markdownOkfSchemaStudio.editing";
+/**
+ * The `markdownOkfSchemaStudio.editing.*` settings, read through the settings registry
+ * (`settingsRegistry.ts`, where the names, defaults and descriptions live).
+ */
 
-export const PALETTE_MODES = ["strict", "gfm", "myst"] as const;
+import {
+  EDITING_SETTINGS,
+  isPaletteMode,
+  type PaletteMode,
+  readSettings,
+  settingDefaults,
+  settingSection,
+  type SettingsSource,
+  type SettingValues,
+} from "./settingsRegistry";
 
-export type PaletteMode = (typeof PALETTE_MODES)[number];
+export { isPaletteMode, PALETTE_MODES, type PaletteMode } from "./settingsRegistry";
 
-export function isPaletteMode(value: unknown): value is PaletteMode {
-  return typeof value === "string" && (PALETTE_MODES as readonly string[]).includes(value);
-}
+/** The full name of the editing section. */
+export const EDITING_CONFIGURATION_SECTION = settingSection("editing");
 
-export interface EditingConfigurationSource {
-  get<T>(section: string, defaultValue: T): T;
-}
+/** Where the editing settings are read from (the section of the host's settings store). */
+export type EditingConfigurationSource = SettingsSource;
 
-export interface EditingConfiguration {
-  /** The palette buttons a workspace starts with, until the user picks another mode. */
-  defaultPaletteMode: PaletteMode;
-}
+/** The editing settings, normalized (see `EDITING_SETTINGS` for each field). */
+export type EditingConfiguration = SettingValues<typeof EDITING_SETTINGS>;
 
-export const DEFAULT_EDITING_CONFIGURATION: EditingConfiguration = {
-  defaultPaletteMode: "gfm",
-};
+/** The editing settings when none is set. */
+export const DEFAULT_EDITING_CONFIGURATION: EditingConfiguration = settingDefaults(EDITING_SETTINGS);
 
+/** The editing settings of `source`, normalized. */
 export function readEditingConfiguration(source: EditingConfigurationSource): EditingConfiguration {
-  const mode: unknown = source.get(
-    "defaultPaletteMode",
-    DEFAULT_EDITING_CONFIGURATION.defaultPaletteMode,
-  );
-  return {
-    defaultPaletteMode: isPaletteMode(mode) ? mode : DEFAULT_EDITING_CONFIGURATION.defaultPaletteMode,
-  };
+  return readSettings(EDITING_SETTINGS, source);
 }
 
 /**

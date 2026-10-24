@@ -1,42 +1,32 @@
-export const FRONTMATTER_CONFIGURATION_SECTION = "markdownOkfSchemaStudio.frontmatter";
+/**
+ * The `markdownOkfSchemaStudio.frontmatter.*` settings, read through the settings registry
+ * (`settingsRegistry.ts`, where the names, defaults and descriptions live).
+ */
 
-export interface FrontmatterConfigurationSource {
-  get<T>(section: string, defaultValue: T): T;
-}
+import {
+  FRONTMATTER_SETTINGS,
+  readSettings,
+  settingDefaults,
+  settingSection,
+  type SettingsSource,
+  type SettingValues,
+} from "./settingsRegistry";
 
-export interface FrontmatterConfiguration {
-  propertiesTable: boolean;
-  strictAdditionalProperties: boolean;
-  bundleRoot: string;
-  projectRoot: string;
-  allowOutsideWorkspaceLinks: boolean;
-}
+/** The full name of the frontmatter section. */
+export const FRONTMATTER_CONFIGURATION_SECTION = settingSection("frontmatter");
 
-export const DEFAULT_FRONTMATTER_CONFIGURATION: FrontmatterConfiguration = {
-  propertiesTable: true,
-  strictAdditionalProperties: false,
-  bundleRoot: "",
-  projectRoot: "",
-  allowOutsideWorkspaceLinks: false,
-};
+/** Where the frontmatter settings are read from (the section of the host's settings store). */
+export type FrontmatterConfigurationSource = SettingsSource;
 
+/** The frontmatter settings, normalized (see `FRONTMATTER_SETTINGS` for each field). */
+export type FrontmatterConfiguration = SettingValues<typeof FRONTMATTER_SETTINGS>;
+
+/** The frontmatter settings when none is set. */
+export const DEFAULT_FRONTMATTER_CONFIGURATION: FrontmatterConfiguration = settingDefaults(FRONTMATTER_SETTINGS);
+
+/** The frontmatter settings of `source`, normalized. */
 export function readFrontmatterConfiguration(
   source: FrontmatterConfigurationSource,
 ): FrontmatterConfiguration {
-  return {
-    propertiesTable: source.get(
-      "propertiesTable",
-      DEFAULT_FRONTMATTER_CONFIGURATION.propertiesTable,
-    ),
-    strictAdditionalProperties: source.get(
-      "strictAdditionalProperties",
-      DEFAULT_FRONTMATTER_CONFIGURATION.strictAdditionalProperties,
-    ),
-    bundleRoot: source.get("bundleRoot", DEFAULT_FRONTMATTER_CONFIGURATION.bundleRoot).trim(),
-    projectRoot: source.get("projectRoot", DEFAULT_FRONTMATTER_CONFIGURATION.projectRoot).trim(),
-    allowOutsideWorkspaceLinks: source.get(
-      "allowOutsideWorkspaceLinks",
-      DEFAULT_FRONTMATTER_CONFIGURATION.allowOutsideWorkspaceLinks,
-    ),
-  };
+  return readSettings(FRONTMATTER_SETTINGS, source);
 }

@@ -1,17 +1,30 @@
-export const COMMENTS_CONFIGURATION_SECTION = "markdownOkfSchemaStudio.comments";
+/**
+ * The `markdownOkfSchemaStudio.comments.*` settings, read through the settings registry
+ * (`settingsRegistry.ts`, where the names, defaults and descriptions live).
+ */
 
-export interface CommentsConfigurationSource {
-  get<T>(section: string, defaultValue: T): T;
-}
+import {
+  COMMENTS_SETTINGS,
+  readSettings,
+  settingDefaults,
+  settingSection,
+  type SettingsSource,
+  type SettingValues,
+} from "./settingsRegistry";
 
-export interface CommentsConfiguration {
-  /** Author of new review comments; empty means Git user.name, then the OS user name (T43). */
-  authorName: string;
-}
+/** The full name of the comments section. */
+export const COMMENTS_CONFIGURATION_SECTION = settingSection("comments");
 
-export const DEFAULT_COMMENTS_CONFIGURATION: CommentsConfiguration = { authorName: "" };
+/** Where the comments settings are read from (the section of the host's settings store). */
+export type CommentsConfigurationSource = SettingsSource;
 
+/** The comments settings, normalized (see `COMMENTS_SETTINGS` for each field). */
+export type CommentsConfiguration = SettingValues<typeof COMMENTS_SETTINGS>;
+
+/** The comments settings when none is set. */
+export const DEFAULT_COMMENTS_CONFIGURATION: CommentsConfiguration = settingDefaults(COMMENTS_SETTINGS);
+
+/** The comments settings of `source`, normalized. */
 export function readCommentsConfiguration(source: CommentsConfigurationSource): CommentsConfiguration {
-  const authorName = source.get("authorName", DEFAULT_COMMENTS_CONFIGURATION.authorName);
-  return { authorName: typeof authorName === "string" ? authorName : DEFAULT_COMMENTS_CONFIGURATION.authorName };
+  return readSettings(COMMENTS_SETTINGS, source);
 }

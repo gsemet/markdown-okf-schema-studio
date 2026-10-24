@@ -115,8 +115,16 @@ check-boundaries:
 check-limits:
     {{ npm }} run check:limits
 
-# Format the justfile and run TypeScript, boundary, size, unit, contract, and security checks.
-check: format compile check-boundaries check-limits unit contracts security release-tests
+# Check that the package.json settings schema matches the settings registry (src/core/configuration/settingsRegistry.ts).
+check-settings:
+    {{ npm }} run check:settings
+
+# Generate the package.json settings schema from the settings registry (src/core/configuration/settingsRegistry.ts).
+generate-settings:
+    {{ npm }} run generate:settings
+
+# Format the justfile and run TypeScript, boundary, size, settings schema, unit, contract, and security checks.
+check: format compile check-boundaries check-limits check-settings unit contracts security release-tests
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
