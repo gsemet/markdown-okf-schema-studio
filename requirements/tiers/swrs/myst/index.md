@@ -96,5 +96,7 @@
 - [SwRS-MDOKFSTUDIO-MYST-091 — The figure directive renders with its own styles and actions](SwRS-MDOKFSTUDIO-MYST-091.md) — When a document holds a `{figure}` directive, the extension SHALL render it with the figure styles and offer the figure palette action.
 - [SwRS-MDOKFSTUDIO-MYST-092 — The table directive family renders with its own styles and actions](SwRS-MDOKFSTUDIO-MYST-092.md) — When a document holds a `{table}`, `{list-table}` or `{csv-table}` directive, the extension SHALL render it with the table styles and offer the table palette action.
 - [SwRS-MDOKFSTUDIO-MYST-093 — A directive name registered twice is refused](SwRS-MDOKFSTUDIO-MYST-093.md) — When two directive families declare the same directive name, the extension SHALL refuse the second registration with an error naming the duplicate.
+- [SwRS-MDOKFSTUDIO-MYST-094 — A label starting with underscore, dot or hyphen cannot be renamed](SwRS-MDOKFSTUDIO-MYST-094.md) — When the writer clicks the anchor icon of a label whose name starts with an underscore, a dot or a hyphen in edit mode, the extension SHALL open no rename field.
+- [SwRS-MDOKFSTUDIO-MYST-095 — Doc and download roles render as plain links](SwRS-MDOKFSTUDIO-MYST-095.md) — When a document uses the doc or download role, the extension SHALL render it as a plain link to the written target.
 
 <!-- okfreq:index:end -->

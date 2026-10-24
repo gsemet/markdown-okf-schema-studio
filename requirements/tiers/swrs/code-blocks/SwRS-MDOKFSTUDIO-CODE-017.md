@@ -26,6 +26,8 @@ tested_in_files: []
 
 When the pointer is over a code block of the preview content, the extension SHALL show a 26 px Copy code button 6 px inside the block's top-right corner.
 
+Known issue: the button is revealed by the pointer only (mouseover and mousemove), there is no keyboard path to show or focus it (backlog P2/copy-button-keyboard).
+
 ### Scenario: nominal behavior
 
 - GIVEN a code block under the pointer

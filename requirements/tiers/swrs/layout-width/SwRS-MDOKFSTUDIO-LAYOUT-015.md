@@ -1,0 +1,44 @@
+---
+type: SwRS
+id: SwRS-MDOKFSTUDIO-LAYOUT-015
+uuid: 87aa1d19-0851-4d6e-9cab-2c8195c2104f
+title: The Start writing button is pushed only when it sits under the toolbar
+description: When the Start writing button itself shares horizontal space with
+  the floating toolbar and the toolbar reaches below the 40 px gap, the
+  extension SHALL push the button down just far enough to clear the toolbar.
+project: markdown-okf-schema-studio
+scope: layout-width
+lifecycle: draft
+origin: native
+tier: SwRS
+derives_from:
+- StRS-MDOKFSTUDIO-LAYOUT-005
+annotation_exemption: false
+exemption_reason:
+derived_by: []
+implemented_in_files: []
+tested_in_files: []
+---
+
+## The Start writing button is pushed only when it sits under the toolbar
+
+### Normative behavior
+
+When the Start writing button itself shares horizontal space with the floating toolbar and the toolbar reaches below the 40 px gap, the extension SHALL push the button down just far enough to clear the toolbar.
+
+### Scenario: Button under the toolbar
+
+- GIVEN a 460 px column, a toolbar from 200 to 450 px reaching down to 84 px and a Start writing button from 16 to 316 px
+- WHEN the clearance is measured
+- THEN the clearance is 52 px
+
+### Scenario: Button beside the toolbar
+
+- GIVEN a 900 px column, a toolbar from 600 px and a Start writing button from 16 to 121 px
+- WHEN the clearance is measured
+- THEN the clearance is 0 px
+
+### Verification notes
+
+- Method: Unit test P3 the Start writing button is pushed only when the button itself is under the toolbar; visual checks v39 to v41, v54, v59 and v62.
+- Criteria: Clearance is greater than 0 only when the rectangles of the button and the toolbar share horizontal space.
