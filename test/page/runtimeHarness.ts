@@ -7,14 +7,38 @@
  */
 import type { ViewPreferences } from "../../src/state/previewViewPreferences";
 import * as assert from "node:assert/strict";
+import * as path from "node:path";
 import * as vm from "node:vm";
 
-import {
-  createScrollSyncScript,
-  RUNTIME_CONTEXT_ATTRIBUTE,
-  serializeRuntimeContext,
-} from "../../src/webview/scrollSync";
+import { buildSync, type BuildOptions } from "esbuild";
+
+import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/protocol/bootContext";
+import { highlightLanguageNames } from "../../src/render/highlight";
 import { HARNESS_PAGE } from "../shared/previewIdentity";
+
+const repositoryRoot = path.resolve(__dirname, "../../..");
+
+let pageBundle: string | undefined;
+
+/**
+ * The page runtime the tests run: the page bundle (src/page/main.ts) built in memory with the
+ * options of the shipped bundle (scripts/page-bundle.mjs), not minified, once per test process.
+ */
+export function pageRuntimeScript(): string {
+  if (pageBundle === undefined) {
+    const { pageBundleOptions } = require(path.join(repositoryRoot, "scripts", "page-bundle.mjs")) as {
+      pageBundleOptions(options: { highlightLanguages: readonly string[]; minify: boolean }): BuildOptions;
+    };
+    const result = buildSync({
+      ...pageBundleOptions({ highlightLanguages: highlightLanguageNames(), minify: false }),
+      absWorkingDir: repositoryRoot,
+      write: false,
+      logLevel: "silent",
+    });
+    pageBundle = result.outputFiles[0]!.text;
+  }
+  return pageBundle;
+}
 
 export type RuntimeListener = (event: unknown) => void;
 
@@ -367,6 +391,8 @@ export interface RuntimeHarness {
   /** How many times the runtime wrote the webview state. */
   readonly setStateCalls: number;
   dispatchDocument(type: string, event: unknown): void;
+  /** How many listeners the page registered on the document for an event type. */
+  documentListenerCount(type: string): number;
   dispatchMessage(message: Record<string, unknown>): void;
   dispatchVisualViewportResize(): void;
   dispatchWindow(type: string, event?: unknown): void;
@@ -424,8 +450,8 @@ export function createRuntimeHarness(configuration: Partial<{
    */
   virtualClock: boolean;
   /**
-   * A context-free runtime script to run instead of the inline one (`createPreviewRuntimeScript`
-   * or the bundled file): the page then carries the context as the JSON element it reads.
+   * A runtime script to run instead of the test build of the page bundle (the shipped, minified
+   * file). The page carries the context as the JSON element the runtime reads.
    */
   runtimeScript: string;
 }> = {}, savedThemeMode?: string, sharedThemeMode?: "current" | "dark" | "white", savedAnchorMode?: boolean): RuntimeHarness {
@@ -835,19 +861,17 @@ export function createRuntimeHarness(configuration: Partial<{
     ...(sharedThemeMode ? { previewThemeMode: sharedThemeMode } : {}),
     ...runtimeConfiguration,
   };
-  if (runtimeScript !== undefined) {
-    // The page of a bundled runtime: the context is the JSON element the script reads first.
-    const pageQuerySelector = document.querySelector;
-    document.querySelector = (selector: string): RuntimeElement | null => {
-      if (selector === `script[${RUNTIME_CONTEXT_ATTRIBUTE}]`) {
-        const contextElement = new RuntimeElement({ [RUNTIME_CONTEXT_ATTRIBUTE]: "" }, windowState, 0, 0, "script");
-        contextElement.textContent = serializeRuntimeContext(runtimeContext);
-        return contextElement;
-      }
-      return pageQuerySelector(selector);
-    };
-  }
-  vm.runInNewContext(runtimeScript ?? createScrollSyncScript(runtimeContext), context);
+  // The boot context is the JSON element the runtime reads first (src/page/bootContext.ts).
+  const pageQuerySelector = document.querySelector;
+  document.querySelector = (selector: string): RuntimeElement | null => {
+    if (selector === `script[${RUNTIME_CONTEXT_ATTRIBUTE}]`) {
+      const contextElement = new RuntimeElement({ [RUNTIME_CONTEXT_ATTRIBUTE]: "" }, windowState, 0, 0, "script");
+      contextElement.textContent = serializeRuntimeContext(runtimeContext);
+      return contextElement;
+    }
+    return pageQuerySelector(selector);
+  };
+  vm.runInNewContext(runtimeScript ?? pageRuntimeScript(), context);
 
   return {
     anchor,
@@ -905,6 +929,7 @@ export function createRuntimeHarness(configuration: Partial<{
       return setStateCalls;
     },
     dispatchDocument: (type, event) => dispatch(documentListeners, type, event),
+    documentListenerCount: (type) => documentListeners.get(type)?.length ?? 0,
     dispatchMessage: (message) => dispatch(windowListeners, "message", { data: message }),
     dispatchVisualViewportResize: () => {
       for (const listener of viewportListeners) {

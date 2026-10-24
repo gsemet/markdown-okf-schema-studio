@@ -3296,7 +3296,7 @@ def check_inline_thread(page: Page, scenario: dict, failures: list[Failure]) -> 
     const style = getComputedStyle(body);
     const shown = style.display !== 'none';
     const root = document.documentElement;
-    const green = getComputedStyle(document.documentElement).getPropertyValue('--vscode-charts-green').trim();
+    const green = getComputedStyle(document.documentElement).getPropertyValue('--studio-charts-green').trim();
     const bubble = getComputedStyle(chip, '::before');
     return {
       expanded: chip.getAttribute('aria-expanded'),
@@ -6051,7 +6051,7 @@ def check_mermaid_theme_switch(page: Page, scenario: dict, failures: list[Failur
       host.appendChild(document.importNode(svg.documentElement, true));
       document.body.appendChild(host);
       const expected = document.createElement('span');
-      expected.style.backgroundColor = getComputedStyle(document.body).getPropertyValue('--vscode-textCodeBlock-background');
+      expected.style.backgroundColor = getComputedStyle(document.body).getPropertyValue('--studio-textCodeBlock-background');
       host.appendChild(expected);
       const state = {
         expected: getComputedStyle(expected).backgroundColor,

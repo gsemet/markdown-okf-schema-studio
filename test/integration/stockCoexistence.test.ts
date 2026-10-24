@@ -77,8 +77,11 @@ export async function run(): Promise<void> {
     const html = buildStatusWebviewHtml(status, "vscode-webview://unit", "Sphinx message");
     const nonce = html.match(/<style nonce="([^"]+)"/u)?.[1];
     assert.ok(nonce);
-    assert.match(html, /color: var\(--vscode-editor-foreground, CanvasText\)/u);
-    assert.match(html, /background: var\(--vscode-editor-background, Canvas\)/u);
+    // CR 056: the page reads the neutral theme tokens, which map to the VS Code variables in one place.
+    assert.match(html, /--studio-editor-foreground: var\(--vscode-editor-foreground\);/u);
+    assert.match(html, /--studio-editor-background: var\(--vscode-editor-background\);/u);
+    assert.match(html, /color: var\(--studio-editor-foreground, CanvasText\)/u);
+    assert.match(html, /background: var\(--studio-editor-background, Canvas\)/u);
     assert.match(html, /Sphinx message/u);
     // T35: the two-line status layout is scoped to status pages through this body marker.
     assert.match(html, /<body data-sphinx-preview-status-page>/u);

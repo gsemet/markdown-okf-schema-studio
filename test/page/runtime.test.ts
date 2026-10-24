@@ -4,11 +4,15 @@ import { test } from "node:test";
 import { pageLiveStateMessages, type PageIdentity } from "../../src/preview/pageLiveState";
 import { PREVIEW_THEME_CSS } from "../../src/preview/previewStyles";
 import { highlightLanguageNames } from "../../src/render/highlight";
-import {
-  createScrollSyncScript,
-  type PositionedSourceMapping,
-} from "../../src/webview/scrollSync";
+import type { SourceBlockMapping } from "../../src/mapping/sourceMapping";
+import { serializeRuntimeContext } from "../../src/protocol/bootContext";
 import { createRuntimeHarness, RuntimeElement, type RuntimeHarness } from "./runtimeHarness";
+
+/** A mapped source block with its measured position in the page. */
+interface PositionedSourceMapping extends SourceBlockMapping {
+  top: number;
+  height: number;
+}
 
 function mapping(sourceLine: number, top: number): PositionedSourceMapping {
   return {
@@ -317,8 +321,8 @@ test("source anchoring does not reserve a row for floating controls", () => {
   assert.equal(harness.mappings[1].getBoundingClientRect().top, 65);
 });
 
-test("runtime script cannot terminate its containing script element", () => {
-  const script = createScrollSyncScript({
+test("the boot context cannot terminate its containing script element", () => {
+  const script = serializeRuntimeContext({
     documentId: "file:///active.md</script><script>alert(1)</script>",
     revision: 7,
     requestId: 11,
@@ -329,7 +333,7 @@ test("runtime script cannot terminate its containing script element", () => {
 });
 
 test("T43: the Comment button and the reply box are installed only for writable previews", () => {
-  const source = (commentsEnabled: boolean) => createScrollSyncScript({
+  const source = (commentsEnabled: boolean) => serializeRuntimeContext({
     documentId: "file:///active.md",
     revision: 7,
     requestId: 11,
@@ -338,11 +342,15 @@ test("T43: the Comment button and the reply box are installed only for writable 
   });
   assert.match(source(true), /"commentsEnabled":true/u);
   assert.match(source(false), /"commentsEnabled":false/u);
-  assert.match(source(true), /const commentsEnabled = context\.commentsEnabled === true;/u);
-  assert.match(source(true), /commentsEnabled \? \(\s*function installCommentCompose/u);
   // Both pages load; the read-only one never lists a Comment button hook.
   assert.doesNotThrow(() => createRuntimeHarness({ commentsEnabled: true }));
   assert.doesNotThrow(() => createRuntimeHarness({ commentsEnabled: false }));
+  // The Comment button listens for the end of a text selection (mouseup) in writable previews only.
+  assert.equal(
+    createRuntimeHarness({ commentsEnabled: true }).documentListenerCount("mouseup")
+      - createRuntimeHarness({ commentsEnabled: false }).documentListenerCount("mouseup"),
+    1,
+  );
 });
 
 test("observes preview content instead of the document body", () => {
@@ -6312,6 +6320,22 @@ test("T34: links of the new content keep known target hints and discover new tar
   });
   assert.equal(typed.getAttribute("data-sphinx-preview-link-state"), "local");
   assert.equal(typed.getAttribute("title"), "/ws/Typed.md");
+});
+
+// Moved from test/webview/linkNavigation.test.ts ("discovery hints ignore stale renders and never
+// replace the original target"): the page's host message filter matches previewLinkTargets to the
+// render it shows before the router hands it to the link navigation.
+test("link target hints of a stale render are ignored", () => {
+  const harness = createRuntimeHarness();
+  const link = linkElement(harness, "wiki:Note");
+  harness.contentLinks.push(link);
+  harness.dispatchMessage(patchMessage());
+  const target = { request: "wiki:Note", kind: "local", path: "/workspace/Note.md" };
+  harness.dispatchMessage({ type: "previewLinkTargets", ...NEXT_IDENTIFIERS, requestId: 1, targets: [target] });
+  assert.equal(link.getAttribute("title"), null);
+  harness.dispatchMessage({ type: "previewLinkTargets", ...NEXT_IDENTIFIERS, targets: [target] });
+  assert.equal(link.getAttribute("title"), target.path);
+  assert.equal(link.getAttribute("data-sphinx-preview-navigation"), "wiki:Note");
 });
 
 test("T34: edit mode rebuilds the insertion points for the new content", () => {

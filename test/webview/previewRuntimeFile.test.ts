@@ -6,12 +6,10 @@ import { renderPreviewDocument } from "../../src/render/renderPipeline";
 import { buildPreviewWebviewHtml } from "../../src/preview/webview";
 import { shellKey } from "../../src/preview/contentPatch";
 import {
-  createPreviewRuntimeScript,
-  createScrollSyncScript,
   RUNTIME_CONTEXT_ATTRIBUTE,
-  serializeRuntimeContext,
   type PreviewRuntimeContext,
-} from "../../src/webview/scrollSync";
+} from "../../src/protocol/bootContext";
+import { pageRuntimeScript } from "../page/runtimeHarness";
 import { attribute, findElements, parseHtml, type HtmlElement } from "../rendering/dom";
 import { fakeAssetResolver } from "../shared/fakeAssets";
 
@@ -94,23 +92,14 @@ test("PERF-11: the static stylesheet is a bundle file; the page keeps only the p
   assert.doesNotMatch(policy, /unsafe-inline|unsafe-eval/u);
 });
 
-test("PERF-11: the bundled runtime is the inline runtime with its context read from the page", () => {
-  const context: PreviewRuntimeContext = {
-    documentId: "file:///workspace/a.md",
-    revision: 4,
-    requestId: 9,
-    activeSourceFile: "/workspace/a.md",
-    initialAnchor: 3,
-  };
-  const inline = createScrollSyncScript(context);
-  const file = createPreviewRuntimeScript();
-  assert.ok(inline.includes(serializeRuntimeContext(context)));
+// The runtime is one bundle for every render (src/page/main.ts): the program holds no render's
+// context and reads it from the page's context element. (Before the bundle, this compared the
+// inline runtime with the context-free one; the inline runtime retired with the toString()
+// assembly.)
+test("PERF-11: the bundled runtime holds no render's context and reads it from the page", () => {
+  const file = pageRuntimeScript();
   assert.doesNotMatch(file, /documentId":"file:/u, "the file runtime holds no render's context");
-  assert.equal(
-    inline.replace(serializeRuntimeContext(context), `JSON.parse(document.querySelector("script[${RUNTIME_CONTEXT_ATTRIBUTE}]")?.textContent || "{}")`),
-    file,
-    "the same program apart from where the context comes from",
-  );
+  assert.ok(file.includes(RUNTIME_CONTEXT_ATTRIBUTE), "the runtime reads the context element");
 });
 
 test("PERF-11: two renders share the page shell although their context elements differ", async () => {

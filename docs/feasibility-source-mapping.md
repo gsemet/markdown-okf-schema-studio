@@ -42,7 +42,7 @@ Preview-to-editor reveals are limited to the active original file.
 | `sphinx/tests/fixtures/sphinx-preview-mapping/` | Heading, paragraph, list, note, figure, code, visible and hidden `{only}`, include, and a generated draft banner. |
 | `test/integration/fixtures/preview.md` | Real project Sphinx configuration, admonition, math, figure, dirty-buffer render, and active-document identity. |
 | `test/mapping/sourceMapping.test.ts` | Active-file filtering, DOM-order preservation, Windows path normalization, and document identity. |
-| `test/webview/scrollSync.test.ts` | Top/middle/end interpolation, bounded source targets, stale versions, alternating scroll, echo suppression, and execution of the generated runtime against a fake DOM. |
+| `test/page/runtime.test.ts` | Top/middle/end interpolation, bounded source targets, stale versions, alternating scroll, echo suppression, and execution of the generated runtime against a fake DOM. |
 
 The source fixture proves that included content still renders but has no active-document mapping.
 The visible HTML-only block is mapped, while the LaTeX-only block is absent from HTML. The HTML

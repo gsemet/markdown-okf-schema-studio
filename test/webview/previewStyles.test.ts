@@ -11,36 +11,36 @@ import { renderPreviewToolbar } from "../../src/preview/previewToolbar";
 test("frontmatter link tooltips wrap text in a fixed theme-aware pointer-transparent surface", () => {
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-link-tooltip\s*\{[^}]*position: fixed;[^}]*white-space: pre-wrap;[^}]*overflow-wrap: anywhere;[^}]*pointer-events: none;/u);
   for (const variable of ["background", "foreground", "border"]) {
-    assert.ok(PREVIEW_THEME_CSS.includes("--vscode-editorHoverWidget-" + variable));
+    assert.ok(PREVIEW_THEME_CSS.includes("--studio-editorHoverWidget-" + variable));
   }
 });
 
 test("typography is driven by VS Code markdown preview variables", () => {
   for (const variable of [
-    "--vscode-markdown-font-family",
-    "--vscode-markdown-font-size",
-    "--vscode-markdown-line-height",
+    "--studio-markdown-font-family",
+    "--studio-markdown-font-size",
+    "--studio-markdown-line-height",
   ]) {
     assert.ok(PREVIEW_THEME_CSS.includes(variable), `expected ${variable} in the preview theme`);
   }
 });
 
 test("shared borders resolve against the body palette rather than inherited host root colors", () => {
-  assert.match(PREVIEW_THEME_CSS, /(?:^|\})\s*body\s*\{\s*--sphinx-preview-border: var\(--vscode-widget-border, var\(--vscode-panel-border, rgba\(128, 128, 128, 0\.35\)\)\);/u);
+  assert.match(PREVIEW_THEME_CSS, /(?:^|\})\s*body\s*\{\s*--sphinx-preview-border: var\(--studio-widget-border, var\(--studio-panel-border, rgba\(128, 128, 128, 0\.35\)\)\);/u);
   const root = /:root\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   assert.doesNotMatch(root, /--sphinx-preview-border:/u);
 });
 
 test("scrollbar tracks and thumbs follow the preview theme", () => {
-  assert.match(PREVIEW_THEME_CSS, /scrollbar-color: var\(--sphinx-preview-scrollbar-thumb\) var\(--vscode-editor-background, Canvas\);/u);
-  assert.match(PREVIEW_THEME_CSS, /::-webkit-scrollbar-track,\s*::-webkit-scrollbar-corner \{\s*background: var\(--vscode-editor-background, Canvas\);/u);
+  assert.match(PREVIEW_THEME_CSS, /scrollbar-color: var\(--sphinx-preview-scrollbar-thumb\) var\(--studio-editor-background, Canvas\);/u);
+  assert.match(PREVIEW_THEME_CSS, /::-webkit-scrollbar-track,\s*::-webkit-scrollbar-corner \{\s*background: var\(--studio-editor-background, Canvas\);/u);
   for (const mode of ["white", "dark"]) {
     assert.match(PREVIEW_THEME_CSS, new RegExp(`html\\[data-sphinx-preview-theme-mode="${mode}"\\] body \\{[^}]*--sphinx-preview-scrollbar-thumb: #[0-9a-f]+;`, "u"));
   }
 });
 
 test("linked file details are muted, italic, and clipped to the available line", () => {
-  assert.match(PREVIEW_THEME_CSS, /\.okf-link-excerpt,\s*[^{}]*\.okf-link-line \{[^}]*color: var\(--vscode-descriptionForeground, GrayText\);[^}]*font-style: italic;/u);
+  assert.match(PREVIEW_THEME_CSS, /\.okf-link-excerpt,\s*[^{}]*\.okf-link-line \{[^}]*color: var\(--studio-descriptionForeground, GrayText\);[^}]*font-style: italic;/u);
   assert.match(PREVIEW_THEME_CSS, /\.okf-link-excerpt \{[^}]*width: 0;[^}]*min-width: 0;[^}]*overflow: hidden;[^}]*white-space: nowrap;[^}]*text-overflow: ellipsis;/u);
 });
 
@@ -48,7 +48,7 @@ test("list insertion lines show the drop boundary without moving the rows", () =
   assert.match(PREVIEW_THEME_CSS, /\.okf-list-editor-item \{[^}]*position: relative;/u);
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.okf-list-editor-item\[data-okf-list-drop\]::after \{[^}]*position: absolute;[^}]*inset-inline: 0;[^}]*height: 2px;[^}]*background: var\(--vscode-focusBorder, Highlight\);[^}]*pointer-events: none;/u,
+    /\.okf-list-editor-item\[data-okf-list-drop\]::after \{[^}]*position: absolute;[^}]*inset-inline: 0;[^}]*height: 2px;[^}]*background: var\(--studio-focusBorder, Highlight\);[^}]*pointer-events: none;/u,
   );
   assert.match(PREVIEW_THEME_CSS, /\[data-okf-list-drop="before"\]::after \{\s*top: -0\.1em;/u);
   assert.match(PREVIEW_THEME_CSS, /\[data-okf-list-drop="after"\]::after \{\s*bottom: -0\.1em;/u);
@@ -188,23 +188,23 @@ test("block editing grows without internal scrolling and is framed", () => {
   const frame = PREVIEW_THEME_CSS.match(/\.sphinx-preview-block-editor\s*\{([^}]*)\}/u)?.[1];
   assert.ok(frame);
   assert.match(frame, /position: relative;[^}]*z-index: 1;/u);
-  assert.match(frame, /border: 1px solid var\(--vscode-focusBorder, Highlight\);/u);
+  assert.match(frame, /border: 1px solid var\(--studio-focusBorder, Highlight\);/u);
   assert.match(frame, /border-radius: 4px;/u);
   assert.match(frame, /padding: 6px 8px;/u);
-  assert.match(frame, /background: var\(--vscode-editor-background, Canvas\);/u);
+  assert.match(frame, /background: var\(--studio-editor-background, Canvas\);/u);
 });
 
 test("edit mode outlines the hovered block without moving the layout", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-edit-mode="on"\] \[data-sphinx-preview-edit-hover="true"\]\s*\{[^}]*outline: 1px dashed var\(--vscode-focusBorder, Highlight\);[^}]*outline-offset: 3px;/u,
+    /html\[data-sphinx-preview-edit-mode="on"\] \[data-sphinx-preview-edit-hover="true"\]\s*\{[^}]*outline: 1px dashed var\(--studio-focusBorder, Highlight\);[^}]*outline-offset: 3px;/u,
   );
 });
 
 test("selected blocks get a solid focus outline and the count is announced off screen", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-edit-mode="on"\] \[data-sphinx-preview-block-selected="true"\]\s*\{[^}]*outline: 2px solid var\(--vscode-focusBorder, Highlight\);[^}]*outline-offset: 3px;/u,
+    /html\[data-sphinx-preview-edit-mode="on"\] \[data-sphinx-preview-block-selected="true"\]\s*\{[^}]*outline: 2px solid var\(--studio-focusBorder, Highlight\);[^}]*outline-offset: 3px;/u,
   );
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-selection-status\s*\{[^}]*clip-path: inset\(50%\);/u);
 });
@@ -212,7 +212,7 @@ test("selected blocks get a solid focus outline and the count is announced off s
 test("raw Markdown and YAML editors use the editor font, text fields keep the preview font", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-block-editor textarea\s*\{[^}]*font-family: var\(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace\);[^}]*font-size: calc\(var\(--vscode-editor-font-size, 0\.95em\) - 1px\);[^}]*tab-size: 4;/u,
+    /\.sphinx-preview-block-editor textarea\s*\{[^}]*font-family: var\(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace\);[^}]*font-size: calc\(var\(--studio-editor-font-size, 0\.95em\) - 1px\);[^}]*tab-size: 4;/u,
   );
   assert.doesNotMatch(
     PREVIEW_THEME_CSS.match(/\.sphinx-preview-block-editor textarea\s*\{([^}]*)\}/u)?.[1] ?? "",
@@ -220,7 +220,7 @@ test("raw Markdown and YAML editors use the editor font, text fields keep the pr
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /\[data-okf-frontmatter-editor\] > textarea:not\(\[data-okf-text-value\]\)\s*\{[^}]*font-family: var\(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace\);[^}]*font-size: var\(--vscode-editor-font-size, 0\.95em\);[^}]*tab-size: 4;/u,
+    /\[data-okf-frontmatter-editor\] > textarea:not\(\[data-okf-text-value\]\)\s*\{[^}]*font-family: var\(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace\);[^}]*font-size: var\(--studio-editor-font-size, 0\.95em\);[^}]*tab-size: 4;/u,
   );
 });
 
@@ -231,8 +231,8 @@ test("the table cell editor shares the block editor textarea rule and grows with
   );
   assert.ok(shared);
   assert.match(shared[1], /\.sphinx-preview-block-editor textarea/u);
-  assert.match(shared[2], /font-family: var\(--vscode-editor-font-family, ui-monospace/u);
-  assert.match(shared[2], /font-size: calc\(var\(--vscode-editor-font-size, 0\.95em\) - 1px\);/u);
+  assert.match(shared[2], /font-family: var\(--studio-editor-font-family, ui-monospace/u);
+  assert.match(shared[2], /font-size: calc\(var\(--studio-editor-font-size, 0\.95em\) - 1px\);/u);
   assert.match(shared[2], /line-height: inherit;/u);
   const cellEditor = PREVIEW_THEME_CSS.match(/\.sphinx-preview-table-cell-editor\s*\{([^}]*)\}/u)?.[1] ?? "";
   assert.doesNotMatch(cellEditor, /position: absolute;/u);
@@ -285,22 +285,22 @@ test("active paragraph editors share the rendered paragraph spacing", () => {
 test("Sphinx version admonitions use success, warning, and danger accents", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /:where\(\.tip, \.tips, \.hint, \.versionadded\)\s*\{[^}]*--sphinx-preview-accent: var\(--vscode-charts-green/u,
+    /:where\(\.tip, \.tips, \.hint, \.versionadded\)\s*\{[^}]*--sphinx-preview-accent: var\(--studio-charts-green/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /:where\(\.warning, \.attention, \.versionchanged\)\s*\{[^}]*--sphinx-preview-accent: var\(--vscode-charts-yellow/u,
+    /:where\(\.warning, \.attention, \.versionchanged\)\s*\{[^}]*--sphinx-preview-accent: var\(--studio-charts-yellow/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /:where\(\.danger, \.error, \.deprecated\)\s*\{[^}]*--sphinx-preview-accent: var\(--vscode-charts-red/u,
+    /:where\(\.danger, \.error, \.deprecated\)\s*\{[^}]*--sphinx-preview-accent: var\(--studio-charts-red/u,
   );
 });
 
 test("caution callouts are red with the octagon icon, not the warning amber", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /#sphinx-myst-preview-content \.caution\s*\{[^}]*--sphinx-preview-accent: var\(--vscode-charts-red/u,
+    /#sphinx-myst-preview-content \.caution\s*\{[^}]*--sphinx-preview-accent: var\(--studio-charts-red/u,
   );
   const rule = /#sphinx-myst-preview-content \.caution\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   const octagon = /--sphinx-preview-icon: (url\("[^"]*"\))/u.exec(rule)?.[1] ?? "";
@@ -398,7 +398,7 @@ test("a captioned code block is left-aligned with its caption as a title bar on 
   // The caption (after the code in the markup) is drawn above it, joined to the block.
   assert.match(
     css,
-    /#sphinx-myst-preview-content figure:has\(> pre\) > figcaption \{[^}]*order: -1;[^}]*border-bottom: 0;[^}]*border-radius: 4px 4px 0 0;[^}]*font-family: var\(--vscode-editor-font-family[^}]*font-style: normal;[^}]*text-align: left;/u,
+    /#sphinx-myst-preview-content figure:has\(> pre\) > figcaption \{[^}]*order: -1;[^}]*border-bottom: 0;[^}]*border-radius: 4px 4px 0 0;[^}]*font-family: var\(--studio-editor-font-family[^}]*font-style: normal;[^}]*text-align: left;/u,
   );
   assert.match(
     css,
@@ -410,7 +410,7 @@ test("a captioned code block is left-aligned with its caption as a title bar on 
 test("the caption title bar takes its colours from theme variables only", () => {
   const rule = /figure:has\(> pre\) > figcaption \{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
   assert.notEqual(rule, "", "the title bar rule is missing");
-  assert.match(rule, /color: var\(--vscode-editor-foreground/u);
+  assert.match(rule, /color: var\(--studio-editor-foreground/u);
   assert.match(rule, /border: 1px solid var\(--sphinx-preview-border\)/u);
   assert.doesNotMatch(rule, /#[0-9a-fA-F]{3,8}\b/u);
 });
@@ -424,11 +424,11 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar\]\s*\{[^}]*display: flex;[^}]*border-radius: 14px;/u);
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="dark"\]\s*,\s*html\[data-sphinx-preview-theme-mode="dark"\] body\s*\{[^}]*--vscode-editor-background: #1e1e1e;/u,
+    /html\[data-sphinx-preview-theme-mode="dark"\]\s*,\s*html\[data-sphinx-preview-theme-mode="dark"\] body\s*\{[^}]*--studio-editor-background: #1e1e1e;/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="white"\]\s*,\s*html\[data-sphinx-preview-theme-mode="white"\] body\s*\{[^}]*--vscode-editor-background: #ffffff;/u,
+    /html\[data-sphinx-preview-theme-mode="white"\]\s*,\s*html\[data-sphinx-preview-theme-mode="white"\] body\s*\{[^}]*--studio-editor-background: #ffffff;/u,
   );
   assert.match(PREVIEW_THEME_CSS, /data-theme-mode="current"/u);
   assert.match(PREVIEW_THEME_CSS, /data-theme-mode="dark"/u);
@@ -484,14 +484,14 @@ test("control tooltips retain their offset while sticky headings remain at the t
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*position: fixed;[^}]*inset-block-start: 0;/u);
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-table-menu \{[^}]*flex-wrap: wrap;/u);
   assert.match(PREVIEW_THEME_CSS, /width: max-content;[\s\S]*max-width: min\(240px, calc\(100vw - 16px\)\);/u);
-  assert.match(PREVIEW_THEME_CSS, /background: var\(--vscode-editorHoverWidget-background, var\(--vscode-editor-background, Canvas\)\);/u);
+  assert.match(PREVIEW_THEME_CSS, /background: var\(--studio-editorHoverWidget-background, var\(--studio-editor-background, Canvas\)\);/u);
   assert.match(PREVIEW_THEME_CSS, /\.caption-number::after\s*\{\s*content: "\\00a0";/u);
 });
 
 test("white mode keeps code backgrounds soft and code text readable blue", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="white"\][\s\S]*?--vscode-textCodeBlock-background: #f0f0f0;/u,
+    /html\[data-sphinx-preview-theme-mode="white"\][\s\S]*?--studio-textCodeBlock-background: #f0f0f0;/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
@@ -499,22 +499,22 @@ test("white mode keeps code backgrounds soft and code text readable blue", () =>
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /#sphinx-myst-preview-content pre\s*\{[^}]*background: var\(--vscode-textCodeBlock-background/u,
+    /#sphinx-myst-preview-content pre\s*\{[^}]*background: var\(--studio-textCodeBlock-background/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="white"\] #sphinx-myst-preview-content :not\(pre\) > code\s*\{\s*color: var\(--vscode-textLink-foreground/u,
+    /html\[data-sphinx-preview-theme-mode="white"\] #sphinx-myst-preview-content :not\(pre\) > code\s*\{\s*color: var\(--studio-textLink-foreground/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="white"\] #sphinx-myst-preview-content pre > code\.language-yaml,[\s\S]*?color: var\(--vscode-textLink-foreground/u,
+    /html\[data-sphinx-preview-theme-mode="white"\] #sphinx-myst-preview-content pre > code\.language-yaml,[\s\S]*?color: var\(--studio-textLink-foreground/u,
   );
 });
 
 test("fenced code uses the editor foreground and one font scale", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /#sphinx-myst-preview-content pre\s*\{[^}]*border-radius: 4px;[^}]*color: var\(--vscode-editor-foreground, inherit\);/u,
+    /#sphinx-myst-preview-content pre\s*\{[^}]*border-radius: 4px;[^}]*color: var\(--studio-editor-foreground, inherit\);/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
@@ -525,7 +525,7 @@ test("fenced code uses the editor foreground and one font scale", () => {
 test("frontmatter properties label is inset, table-matched, and unboxed", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.okf-properties-title\s*\{[^}]*margin: 0\.75em 0 0\.5em;[^}]*font-family: inherit;[^}]*font-size: 1em;[^}]*font-weight: 600;[^}]*background: none;[^}]*color: var\(--vscode-descriptionForeground, #6e6e6e\);/u,
+    /\.okf-properties-title\s*\{[^}]*margin: 0\.75em 0 0\.5em;[^}]*font-family: inherit;[^}]*font-size: 1em;[^}]*font-weight: 600;[^}]*background: none;[^}]*color: var\(--studio-descriptionForeground, #6e6e6e\);/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
@@ -536,15 +536,15 @@ test("frontmatter properties label is inset, table-matched, and unboxed", () => 
 test("frontmatter edit hover colors follow the selected preview theme", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="dark"\],[\s\S]*?--vscode-list-hoverBackground: rgba\(255, 255, 255, 0\.1\);/u,
+    /html\[data-sphinx-preview-theme-mode="dark"\],[\s\S]*?--studio-list-hoverBackground: rgba\(255, 255, 255, 0\.1\);/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="white"\],[\s\S]*?--vscode-list-hoverBackground: rgba\(0, 0, 0, 0\.08\);/u,
+    /html\[data-sphinx-preview-theme-mode="white"\],[\s\S]*?--studio-list-hoverBackground: rgba\(0, 0, 0, 0\.08\);/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-edit-mode="on"\] \[data-okf-edit-cell\]:hover\s*\{\s*background: var\(--vscode-list-hoverBackground,/u,
+    /html\[data-sphinx-preview-edit-mode="on"\] \[data-okf-edit-cell\]:hover\s*\{\s*background: var\(--studio-list-hoverBackground,/u,
   );
 });
 
@@ -556,7 +556,7 @@ test("frontmatter edits stay inline while edit mode preserves source newlines", 
   assert.doesNotMatch(PREVIEW_THEME_CSS, /data-okf-edit-field/u);
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-block-editor\s*\{[^}]*border: 1px solid var\(--vscode-focusBorder, Highlight\);[^}]*padding: 6px 8px;[^}]*background: var\(--vscode-editor-background, Canvas\);/u,
+    /\.sphinx-preview-block-editor\s*\{[^}]*border: 1px solid var\(--studio-focusBorder, Highlight\);[^}]*padding: 6px 8px;[^}]*background: var\(--studio-editor-background, Canvas\);/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
@@ -564,7 +564,7 @@ test("frontmatter edits stay inline while edit mode preserves source newlines", 
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-block-editor textarea\s*\{[^}]*resize: none;[^}]*padding: 0;[^}]*border: 0;[^}]*background: transparent;[^}]*font-family: var\(--vscode-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace\);/u,
+    /\.sphinx-preview-block-editor textarea\s*\{[^}]*resize: none;[^}]*padding: 0;[^}]*border: 0;[^}]*background: transparent;[^}]*font-family: var\(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace\);/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
@@ -572,7 +572,7 @@ test("frontmatter edits stay inline while edit mode preserves source newlines", 
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-frontmatter-editor \[role="status"\]\[data-visible="true"\]\[data-state="error"\]\s*\{[^}]*display: flex;[^}]*padding: 3px 6px;[^}]*background: var\(--vscode-inputValidation-errorBackground,/u,
+    /\.sphinx-preview-frontmatter-editor \[role="status"\]\[data-visible="true"\]\[data-state="error"\]\s*\{[^}]*display: flex;[^}]*padding: 3px 6px;[^}]*background: var\(--studio-inputValidation-errorBackground,/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
@@ -619,15 +619,15 @@ test("active toolbar toggles do not show a redundant focus ring", () => {
 test("frontmatter and table editors keep the active cell surface without nested input frames", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /\[data-okf-frontmatter-editor\] > input\[list\],[\s\S]*?\{[^}]*border: 0;[^}]*outline: none;[^}]*background: transparent;[^}]*color: var\(--vscode-editor-foreground,/u,
+    /\[data-okf-frontmatter-editor\] > input\[list\],[\s\S]*?\{[^}]*border: 0;[^}]*outline: none;[^}]*background: transparent;[^}]*color: var\(--studio-editor-foreground,/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-table-cell-editor\s*\{[^}]*background: transparent;[^}]*color: var\(--vscode-editor-foreground,/u,
+    /\.sphinx-preview-table-cell-editor\s*\{[^}]*background: transparent;[^}]*color: var\(--studio-editor-foreground,/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-table-cell-editor textarea\s*\{[^}]*border: 0;[^}]*outline: none;[^}]*background: transparent;[^}]*color: var\(--vscode-editor-foreground,/u,
+    /\.sphinx-preview-table-cell-editor textarea\s*\{[^}]*border: 0;[^}]*outline: none;[^}]*background: transparent;[^}]*color: var\(--studio-editor-foreground,/u,
   );
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-table-cell-content="true"\]\s*\{[^}]*display: block;[^}]*visibility: hidden;/u);
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-table-cell-editor textarea\s*\{[^}]*white-space: pre-wrap;[^}]*overflow-wrap: anywhere;[^}]*resize: none;/u);
@@ -658,7 +658,7 @@ test("table toolbar sits in the document flow above the table with labelled butt
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-edit-mode="on"\] \[data-sphinx-preview-table-cell-selected="true"\]\s*\{\s*outline: 2px solid var\(--vscode-focusBorder, Highlight\);\s*outline-offset: -2px;/u,
+    /html\[data-sphinx-preview-edit-mode="on"\] \[data-sphinx-preview-table-cell-selected="true"\]\s*\{\s*outline: 2px solid var\(--studio-focusBorder, Highlight\);\s*outline-offset: -2px;/u,
   );
 });
 
@@ -669,7 +669,7 @@ test("overflowing content tables keep short cells whole and show scroll shadows"
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /#sphinx-myst-preview-content table\[data-sphinx-table-overflow="true"\]\s*\{[^}]*linear-gradient\(to right[^}]*linear-gradient\(to left[^}]*radial-gradient\(farthest-side at 0 50%[^}]*radial-gradient\(farthest-side at 100% 50%, color-mix\(in srgb, var\(--vscode-editor-foreground, var\(--vscode-foreground/u,
+    /#sphinx-myst-preview-content table\[data-sphinx-table-overflow="true"\]\s*\{[^}]*linear-gradient\(to right[^}]*linear-gradient\(to left[^}]*radial-gradient\(farthest-side at 0 50%[^}]*radial-gradient\(farthest-side at 100% 50%, color-mix\(in srgb, var\(--studio-editor-foreground, var\(--studio-foreground/u,
   );
 });
 
@@ -697,10 +697,10 @@ test("the issue badge is a plain button and a clicked badge highlights its row",
     PREVIEW_THEME_CSS,
     /\[data-okf-properties\] button\[data-okf-badge\]\s*\{[^}]*border: 0;[^}]*background: none;[^}]*font: inherit;[^}]*color: inherit;[^}]*cursor: pointer;/u,
   );
-  assert.match(PREVIEW_THEME_CSS, /\[data-okf-badge\]:focus-visible\s*\{[^}]*outline: 1px solid var\(--vscode-focusBorder/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-okf-badge\]:focus-visible\s*\{[^}]*outline: 1px solid var\(--studio-focusBorder/u);
   assert.match(
     PREVIEW_THEME_CSS,
-    /\[data-okf-issue-highlight="true"\]\s*\{[^}]*outline: 2px solid var\(--vscode-errorForeground/u,
+    /\[data-okf-issue-highlight="true"\]\s*\{[^}]*outline: 2px solid var\(--studio-errorForeground/u,
   );
 });
 
@@ -862,18 +862,18 @@ test("the comment boxes (compose, thread popover, open comment) have square corn
 test("T16: the change bars sit in one column of a layer, square, with no layout shift", () => {
   const css = PREVIEW_THEME_CSS;
   // The bar is no longer an inset shadow against the text edge, nor a pseudo-element of the block.
-  assert.doesNotMatch(css, /inset 3px 0 0 var\(--vscode-editorGutter-addedBackground/u);
+  assert.doesNotMatch(css, /inset 3px 0 0 var\(--studio-editorGutter-addedBackground/u);
   assert.doesNotMatch(css, /\[data-sphinx-preview-changed\][^{]*(?:::before|\{[^}]*box-shadow)/u);
   assert.match(css, /\[data-sphinx-preview-change-layer\] \{[^}]*position: absolute;[^}]*inset-inline: 0;[^}]*height: 0;[^}]*pointer-events: none;/u);
   // One column for every bar: a fixed inline-start offset, 3px wide, square ends, the gutter colour.
-  assert.match(css, /\[data-sphinx-preview-change-layer\] > span \{[^}]*position: absolute;[^}]*inset-inline-start: 8px;[^}]*width: 3px;[^}]*border-radius: 0;[^}]*background: var\(--vscode-editorGutter-addedBackground, #2ea043\);/u);
+  assert.match(css, /\[data-sphinx-preview-change-layer\] > span \{[^}]*position: absolute;[^}]*inset-inline-start: 8px;[^}]*width: 3px;[^}]*border-radius: 0;[^}]*background: var\(--studio-editorGutter-addedBackground, #2ea043\);/u);
   // The Diff toggle off hides the layer.
   assert.match(css, /data-sphinx-preview-incoming="off"\] \[data-sphinx-preview-change-layer\] \{\s*display: none;/u);
 });
 
 test("T16b: only the current TOC entry loses its rounded corners", () => {
   const css = PREVIEW_THEME_CSS;
-  assert.match(css, /li\[data-sphinx-preview-toc-current\] > button:not\(\[data-sphinx-preview-toc-twisty\]\) \{[^}]*border-radius: 0;[^}]*box-shadow: inset 3px 0 0 var\(--vscode-focusBorder, Highlight\)/u);
+  assert.match(css, /li\[data-sphinx-preview-toc-current\] > button:not\(\[data-sphinx-preview-toc-twisty\]\) \{[^}]*border-radius: 0;[^}]*box-shadow: inset 3px 0 0 var\(--studio-focusBorder, Highlight\)/u);
   assert.match(css, /nav\[data-sphinx-preview-toc\] li button \{[^}]*border-radius: 4px;/u);
 });
 
@@ -972,7 +972,7 @@ test("K1: long words and bare URLs wrap inside text blocks, links and table cell
 
 test("an inline thread is a green chip with a bubble, a green titled box, and goes with the gray chips", () => {
   const css = PREVIEW_THEME_CSS;
-  assert.match(css, /\.okf-chip--thread \{[^}]*border-color: var\(--vscode-charts-green/u);
+  assert.match(css, /\.okf-chip--thread \{[^}]*border-color: var\(--studio-charts-green/u);
   assert.match(css, /\.okf-chip--thread::before \{[^}]*mask: url\("data:image\/svg\+xml/u);
   assert.match(css, /\.okf-comment\[data-okf-comment-kind="thread"\] > \.okf-comment-body:not\(\[hidden\]\)::before \{\s*content: "Thread";/u);
   assert.match(css, /html\[data-okf-show-comments="false"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="thread"\] \{\s*display: none;/u);

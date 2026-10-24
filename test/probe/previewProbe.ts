@@ -266,7 +266,7 @@ async function probeEditor(page: Page, current: BuiltPage, rebuild: (requestId: 
   // the page redraws every Mermaid diagram with the new colours.
   const drawnBefore = (await probeCounters(page)).mermaidDrawn;
   await page.evaluate(() => {
-    // On the body: a forced theme mode of the page sets these variables on html and body itself.
+    // On the body, as a host may: the page maps them to its --studio-* tokens on html and on body.
     document.body.style.setProperty("--vscode-editor-foreground", "#e0e0e0");
     document.body.style.setProperty("--vscode-editor-background", "#1e1e1e");
   });

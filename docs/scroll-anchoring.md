@@ -2,7 +2,7 @@
 
 The preview and the text editor share one scroll anchor: a **source line**. One module implements
 the policy, [`src/webview/anchorPolicy.ts`](../src/webview/anchorPolicy.ts). The webview runtime
-injects it with `createAnchorPolicy.toString()`, and the extension host imports the same file.
+imports it through the page bundle, and the extension host imports the same file.
 Every editing mode goes through it, so a change to the rules is made in one place.
 
 ## Rules
@@ -82,7 +82,7 @@ With no source editor open, scrolling the preview does not create one.
 - [`test/webview/anchorPolicy.test.ts`](../test/webview/anchorPolicy.test.ts) covers the map,
   long paragraphs, the round trip between lines and scroll positions, the top ramp, the echo
   guard, and anchor shifts.
-- [`test/webview/scrollSync.test.ts`](../test/webview/scrollSync.test.ts) runs the webview runtime
+- [`test/page/runtime.test.ts`](../test/page/runtime.test.ts) runs the webview runtime
   through source scrolls, layout changes, sticky band activation, anchor navigation,
   and returning to a previously reported line after the source editor takes control.
 - [`test/integration/scroll-sync-suite.ts`](../test/integration/scroll-sync-suite.ts) drives a real

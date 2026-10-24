@@ -46,7 +46,7 @@ test("cream defines a light warm palette for every variable white mode overrides
     assert.ok(name in cream, `cream is missing ${name}`);
   }
   assert.match(PREVIEW_THEME_CSS, /html\[data-sphinx-preview-theme-mode="cream"\][^{]*\{[^}]*color-scheme: light;/u);
-  const background = cream["--vscode-editor-background"];
+  const background = cream["--studio-editor-background"];
   assert.match(background, /^#[0-9a-f]{6}$/iu);
   const [red, green, blue] = [1, 3, 5].map((index) => Number.parseInt(background.slice(index, index + 2), 16));
   assert.ok(red > 0xe8 && red > green && green > blue, `${background} is not a warm light paper colour`);
@@ -55,24 +55,24 @@ test("cream defines a light warm palette for every variable white mode overrides
 test("cream text and background pairs meet WCAG AA 4.5:1", () => {
   const cream = creamVariables();
   const surfaces = [
-    "--vscode-editor-background",
-    "--vscode-textCodeBlock-background",
-    "--vscode-textBlockQuote-background",
-    "--vscode-editorHoverWidget-background",
-    "--vscode-editorWidget-background",
-    "--vscode-input-background",
+    "--studio-editor-background",
+    "--studio-textCodeBlock-background",
+    "--studio-textBlockQuote-background",
+    "--studio-editorHoverWidget-background",
+    "--studio-editorWidget-background",
+    "--studio-input-background",
   ];
   const texts = [
-    "--vscode-editor-foreground",
-    "--vscode-descriptionForeground",
-    "--vscode-textLink-foreground",
-    "--vscode-charts-blue",
-    "--vscode-charts-green",
-    "--vscode-charts-purple",
-    "--vscode-charts-yellow",
-    "--vscode-charts-red",
-    "--vscode-charts-orange",
-    "--vscode-errorForeground",
+    "--studio-editor-foreground",
+    "--studio-descriptionForeground",
+    "--studio-textLink-foreground",
+    "--studio-charts-blue",
+    "--studio-charts-green",
+    "--studio-charts-purple",
+    "--studio-charts-yellow",
+    "--studio-charts-red",
+    "--studio-charts-orange",
+    "--studio-errorForeground",
   ];
   for (const surface of surfaces) {
     for (const text of texts) {
@@ -82,11 +82,11 @@ test("cream text and background pairs meet WCAG AA 4.5:1", () => {
     }
   }
   for (const [foreground, background] of [
-    ["--vscode-editorHoverWidget-foreground", "--vscode-editorHoverWidget-background"],
-    ["--vscode-button-secondaryForeground", "--vscode-button-secondaryBackground"],
-    ["--vscode-button-foreground", "--vscode-button-background"],
-    ["--vscode-input-foreground", "--vscode-input-background"],
-    ["--vscode-icon-foreground", "--vscode-editorWidget-background"],
+    ["--studio-editorHoverWidget-foreground", "--studio-editorHoverWidget-background"],
+    ["--studio-button-secondaryForeground", "--studio-button-secondaryBackground"],
+    ["--studio-button-foreground", "--studio-button-background"],
+    ["--studio-input-foreground", "--studio-input-background"],
+    ["--studio-icon-foreground", "--studio-editorWidget-background"],
   ]) {
     const ratio = contrast(cream[foreground], cream[background]);
     assert.ok(ratio >= 4.5, `${foreground} on ${background} is ${ratio.toFixed(2)}:1`);
@@ -106,11 +106,11 @@ test("explicit themes override the same host colors, including the floating tool
 test("cream mirrors the white-mode code colouring", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="cream"\] #sphinx-myst-preview-content :not\(pre\) > code,\s*html\[data-sphinx-preview-theme-mode="white"\][^{]*\{\s*color: var\(--vscode-textLink-foreground/u,
+    /html\[data-sphinx-preview-theme-mode="cream"\] #sphinx-myst-preview-content :not\(pre\) > code,\s*html\[data-sphinx-preview-theme-mode="white"\][^{]*\{\s*color: var\(--studio-textLink-foreground/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="cream"\] #sphinx-myst-preview-content pre > code\.language-yaml,[\s\S]*?color: var\(--vscode-textLink-foreground/u,
+    /html\[data-sphinx-preview-theme-mode="cream"\] #sphinx-myst-preview-content pre > code\.language-yaml,[\s\S]*?color: var\(--studio-textLink-foreground/u,
   );
 });
 

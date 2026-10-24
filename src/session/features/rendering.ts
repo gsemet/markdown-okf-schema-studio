@@ -32,7 +32,7 @@ import { PreviewDiagnostic, RenderError, RenderResult, RenderStage } from "../..
 import { createNonce } from "../../security/csp";
 import { needsRefresh } from "../../state/editLock";
 import type { PreviewPanelState } from "../../state/previewState";
-import type { PreviewRuntimeContext } from "../../webview/scrollSync";
+import type { PreviewRuntimeContext } from "../../protocol/bootContext";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";

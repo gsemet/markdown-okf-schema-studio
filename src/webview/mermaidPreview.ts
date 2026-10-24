@@ -64,12 +64,12 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
   const renderDiagrams = async (pending: readonly HTMLElement[]): Promise<void> => {
     const themeVariables = {
       background: "transparent",
-      primaryColor: themeVariable("--vscode-textCodeBlock-background", "#f0f0f0"),
-      primaryTextColor: themeVariable("--vscode-editor-foreground", "#1f1f1f"),
+      primaryColor: themeVariable("--studio-textCodeBlock-background", "#f0f0f0"),
+      primaryTextColor: themeVariable("--studio-editor-foreground", "#1f1f1f"),
       primaryBorderColor: themeVariable("--sphinx-preview-border", "#808080"),
-      lineColor: themeVariable("--vscode-editor-foreground", "#1f1f1f"),
-      secondaryColor: themeVariable("--vscode-textBlockQuote-background", "#f0f0f0"),
-      tertiaryColor: themeVariable("--vscode-editor-background", "#ffffff"),
+      lineColor: themeVariable("--studio-editor-foreground", "#1f1f1f"),
+      secondaryColor: themeVariable("--studio-textBlockQuote-background", "#f0f0f0"),
+      tertiaryColor: themeVariable("--studio-editor-background", "#ffffff"),
       fontFamily: themeVariable("--sphinx-preview-font", "sans-serif"),
     };
     const themeKey = JSON.stringify(themeVariables);
