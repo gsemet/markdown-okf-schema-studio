@@ -16,6 +16,10 @@ They are not a wish list and not the desired state.
 - The fix changes the code, the test and the SwRS in the same change (edit the SwRS, or
   `okfreq supersede` it when the contract changes).
 - A behaviour with no requirement yet is a coverage gap, not a reason to describe a future state.
+- The markers are the anchor: `@implements_req` at the code that produces the behaviour,
+  `@tests_req` at a test that checks it (see
+  [Traceability markers](#traceability-markers-typescript-javascript-python)). Write the SwRS from
+  that code and that test. When the code or the test moves, its markers move in the same commit.
 
 ## Running okfreq
 

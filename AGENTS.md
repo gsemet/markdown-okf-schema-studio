@@ -76,11 +76,18 @@ source with its own values: it links to that source.
   `SwRS-MDOKFSTUDIO-<TOKEN>-NNN`; scopes = the 16 e2e groups of `test/shared/e2eGroups.ts`.
 - okfreq is a project dependency: run it with `uv run --no-sync --group requirements okfreq`
   (installed by `just dev`), never a global install.
-- Before touching requirements, read `requirements/guidelines/requirements.guidelines.md` (local
-  rules, marker syntax for TypeScript/Python) and the okfreq baseline it links to. Requirements
-  are anchored to the code: they state what the extension does today, not the desired state. A
-  known bug is specified as it behaves and its fix goes to the backlog. Skills:
-  `.agents/skills/okfreq` (authoring, traceability) and `.agents/skills/okfreq-gardening` (audits).
+- Read `requirements/guidelines/requirements.guidelines.md` (local rules, marker syntax for
+  TypeScript/Python) and the okfreq baseline it links to before any of these:
+  - adding, changing or fixing a behaviour in `src/` (every feature or fix touches an SwRS);
+  - moving, renaming, splitting or deleting code or tests that carry `@implements_req` or
+    `@tests_req` markers, refactors included (the markers move with the code);
+  - editing anything under `requirements/`;
+  - filing a bug found while writing or checking an SwRS.
+- Requirements are anchored to the code: each SwRS states what the extension does today, with an
+  `@implements_req` marker at the code that produces the behaviour and a `@tests_req` marker in
+  the test that checks it. Never the desired state: a known bug is specified as it behaves
+  ("Known issue") and its fix goes to the backlog. Skills: `.agents/skills/okfreq` (authoring,
+  traceability) and `.agents/skills/okfreq-gardening` (audits).
 - Every feature or fix updates its SwRS (or creates one with `okfreq new`), adds
   `// @implements_req <SwRS-ID>` next to the implementation and `// @tests_req <SwRS-ID>` next to
   the test, then runs `just requirements-update`; append a dated entry to
