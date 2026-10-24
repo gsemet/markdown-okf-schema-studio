@@ -4,6 +4,19 @@ This file specializes the [okfreq baseline](okfreq-baseline.guidelines.md) for t
 OKF-Schema Studio VS Code extension. Read and follow the baseline first; the rules below supply
 our paths, scopes, marker syntax and checks.
 
+## Anchored to the code
+
+The requirements describe what the code does today, checked against the source and the tests.
+They are not a wish list and not the desired state.
+
+- Write each SwRS from the current behaviour, including a behaviour that looks wrong. Do not
+  specify the intended fix.
+- A suspected bug is still specified as it behaves. Say so in the body ("Known issue: …"), and
+  file the fix as a backlog item that names the SwRS.
+- The fix changes the code, the test and the SwRS in the same change (edit the SwRS, or
+  `okfreq supersede` it when the contract changes).
+- A behaviour with no requirement yet is a coverage gap, not a reason to describe a future state.
+
 ## Running okfreq
 
 okfreq is a project dependency (dependency group `requirements`). Run it through uv, never through
