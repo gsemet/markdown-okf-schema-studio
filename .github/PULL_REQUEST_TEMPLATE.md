@@ -35,6 +35,8 @@ Grade: <!-- 1 | 2 | 3 -->
 ## Test plan
 
 - [ ] New or changed tests (they fail on the previous code)
+- [ ] Requirements: SwRS updated or added, markers in code and tests, `just requirements-update`
+      <!-- or "No behaviour change" -->
 - [ ] Local gates: <!-- targets run and their counts -->
 - [ ] Review
 - [ ] CI green
