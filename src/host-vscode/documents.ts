@@ -115,8 +115,11 @@ export function createVscodeDocumentStore(): VscodeDocumentStore {
       changes: event.contentChanges.map((change) => ({
         start: change.rangeOffset,
         length: change.rangeLength,
+        startLine: change.range.start.line,
+        endLine: change.range.end.line,
         text: change.text,
       })),
+      ...(event.reason === 1 ? { reason: "undo" as const } : event.reason === 2 ? { reason: "redo" as const } : {}),
     }));
 
   return {
@@ -128,6 +131,7 @@ export function createVscodeDocumentStore(): VscodeDocumentStore {
     },
     open: (id) => vscode.workspace.openTextDocument(vscode.Uri.parse(id)).then(of),
     idOf: (path) => vscode.Uri.file(path).toString(),
+    pathOf: (id) => vscode.Uri.parse(id).fsPath,
     applyEdits(document: HostDocument, edits: readonly TextEdit[], options?: ApplyEditOptions): Thenable<boolean> {
       const textDocument = textDocumentOf(document);
       if (!textDocument) return Promise.resolve(false);

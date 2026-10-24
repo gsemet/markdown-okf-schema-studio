@@ -28,6 +28,7 @@ test("lets an in-flight build finish and starts the newest queued edit right aft
   let aborted = false;
   const queue = new BuildQueue<TestDocument, string>({
     debounceMs: 0,
+    revisionOf: (queued) => queued.version,
     build: async (request, signal) => new Promise((resolve) => {
       resolvers.set(request.requestId, resolve);
       signal.addEventListener("abort", () => { aborted = true; }, { once: true });
@@ -63,6 +64,7 @@ test("retains a successful result as stale after a failed newer build", async (c
   const states: string[] = [];
   const queue = new BuildQueue<TestDocument, string>({
     debounceMs: 0,
+    revisionOf: (queued) => queued.version,
     build: async (request) => new Promise((resolve, reject) => {
       pending.set(request.requestId, { resolve, reject });
     }),
@@ -92,6 +94,7 @@ test("still renders a build whose buffer already moved on, and cleans up on disp
   let aborted = false;
   const queue = new BuildQueue<TestDocument, string>({
     debounceMs: 0,
+    revisionOf: (queued) => queued.version,
     build: async (request, signal) => new Promise((resolve) => {
       resolvers.set(request.requestId, resolve);
       signal.addEventListener("abort", () => { aborted = true; }, { once: true });
@@ -120,6 +123,7 @@ test("tracks referenced dependencies for refresh decisions", async (context) => 
   context.mock.timers.enable({ apis: ["setTimeout"] });
   const queue = new BuildQueue<TestDocument, { stage: { dependencies: readonly string[] } }>({
     debounceMs: 0,
+    revisionOf: (queued) => queued.version,
     build: async () => ({ stage: { dependencies: ["/workspace/image.png"] } }),
   });
   context.after(() => queue.dispose());
@@ -136,6 +140,7 @@ test("debounces pending edits and cancels them without invoking the builder", as
   let builds = 0;
   const queue = new BuildQueue<TestDocument, string>({
     debounceMs: 120,
+    revisionOf: (queued) => queued.version,
     build: async () => { builds += 1; return "result"; },
   });
   context.after(() => queue.dispose());
@@ -160,6 +165,7 @@ test("cancellation discards late results and permits a fresh build", async (cont
   let signal: AbortSignal | undefined;
   const queue = new BuildQueue<TestDocument, string>({
     debounceMs: 0,
+    revisionOf: (queued) => queued.version,
     build: (request, activeSignal) => {
       signal = activeSignal;
       return request.requestId === 1
@@ -189,6 +195,7 @@ test("disposal releases the last result once and rejects future requests", async
   const disposed: string[] = [];
   const queue = new BuildQueue<TestDocument, string>({
     debounceMs: 0,
+    revisionOf: (queued) => queued.version,
     build: async () => "result",
     disposeResult: (result) => disposed.push(result),
   });

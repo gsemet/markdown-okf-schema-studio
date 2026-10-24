@@ -67,6 +67,10 @@ export interface DocumentContentChange {
   start: number;
   /** Length of the replaced text. */
   length: number;
+  /** Zero-based line where the replaced text starts. */
+  startLine: number;
+  /** Zero-based line where the replaced text ends. */
+  endLine: number;
   /** The new text. */
   text: string;
 }
@@ -75,6 +79,8 @@ export interface DocumentContentChange {
 export interface DocumentChange {
   document: HostDocument;
   changes: readonly DocumentContentChange[];
+  /** Set when the change is an undo or a redo of the host's editor; undefined for any other change. */
+  reason?: "undo" | "redo";
 }
 
 /** The documents the host holds and how their text changes. */
@@ -85,6 +91,8 @@ export interface DocumentStore {
   open(id: string): PromiseLike<HostDocument>;
   /** The id of the document stored at a file system path. */
   idOf(path: string): string;
+  /** The file system path of a document id (for an id that is not a file, the path part of it). */
+  pathOf(id: string): string;
   /**
    * Applies `edits`, all planned on the document's current text, as one change. Resolves to false
    * when the host refused the edit; the document then keeps its text. The revision moves on success.

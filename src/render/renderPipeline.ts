@@ -34,7 +34,8 @@ export interface PreviewDiagnostic extends RenderDiagnostic {
 export interface RenderStage {
   activeDocumentPath: string;
   activeDocumentIdentity: string;
-  activeDocumentVersion: number;
+  /** The revision of the document text the stage was made from (see `RenderOptions.revision`). */
+  activeDocumentRevision: number;
   requestId: number;
   /** Base directory for resolving relative assets; the document's own folder. */
   outputDirectory: string;
@@ -60,8 +61,8 @@ export interface RenderOptions {
   document: PreviewDocument;
   /**
    * The revision of the document text, as the host's document store gives it (see
-   * `src/host-api/documentStore.ts`); the stage carries it as `activeDocumentVersion`. Defaults to
-   * `document.version` for callers without a store.
+   * `src/host-api/documentStore.ts`); the stage carries it as `activeDocumentRevision`. Callers
+   * without a store may omit it (0).
    */
   revision?: number;
   workspaceRoot: string;
@@ -129,7 +130,7 @@ function createStage(options: RenderOptions, diagnostics: PreviewDiagnostic[]): 
   return {
     activeDocumentPath: documentPath,
     activeDocumentIdentity: options.documentIdentity ?? documentPath,
-    activeDocumentVersion: options.revision ?? options.document.version ?? 0,
+    activeDocumentRevision: options.revision ?? 0,
     requestId: options.requestId,
     outputDirectory: path.dirname(documentPath),
     sourceText: options.document.getText(),

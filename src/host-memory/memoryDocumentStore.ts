@@ -16,6 +16,11 @@ import type {
 import { EventSource } from "../host-api/events";
 import { RevisionCounter, type Revision } from "../protocol/revision";
 
+/** The zero-based line of `offset` in `text` (lines split as an editor does: LF, CRLF or CR). */
+function lineAtOffset(text: string, offset: number): number {
+  return (text.slice(0, offset).match(/\r\n|\n|\r/gu) ?? []).length;
+}
+
 /** One document of a {@link MemoryDocumentStore}. */
 class MemoryDocument implements HostDocument {
   public isDirty = false;
@@ -98,6 +103,7 @@ export function createMemoryDocumentStore(options: MemoryDocumentStoreOptions = 
     },
     // Each segment is escaped on its own, so `#`, `?` and `%` in a name survive the `open` decode.
     idOf: (path) => `file://${path.split("/").map(encodeURIComponent).join("/")}`,
+    pathOf: (id) => decodeURIComponent(id.startsWith("file://") ? id.slice("file://".length) : id.replace(/^[a-z][\w+.-]*:/iu, "")),
     applyEdits(document, edits, editOptions) {
       const stored = documents.get(document.id);
       if (!stored || refusing) return Promise.resolve(false);
@@ -108,6 +114,7 @@ export function createMemoryDocumentStore(options: MemoryDocumentStoreOptions = 
         return Promise.reject(error);
       }
       applied.push({ id: stored.id, edits, ...(editOptions ? { options: editOptions } : {}) });
+      const previous = stored.text;
       stored.text = next;
       stored.isDirty = true;
       revisions.advance(stored.id);
@@ -118,6 +125,8 @@ export function createMemoryDocumentStore(options: MemoryDocumentStoreOptions = 
           changes: [...edits].sort((left, right) => right.start - left.start).map((edit) => ({
             start: edit.start,
             length: edit.end - edit.start,
+            startLine: lineAtOffset(previous, edit.start),
+            endLine: lineAtOffset(previous, edit.end),
             text: edit.text,
           })),
         });
