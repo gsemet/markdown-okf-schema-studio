@@ -40,7 +40,7 @@ When a Mermaid picture is wider than the content column, the extension SHALL sca
 
 ### Known issues
 
-- Known issue: There is no minimum scale and no zoom: a very wide diagram is scaled until its labels become small (UX-46, not fixed, absent from docs/known-limitations.md). The unit test locks the containment, not a minimum label size.
+- Known issue: There is no minimum scale and no zoom: a very wide diagram is scaled until its labels become small. The unit test locks the containment, not a minimum label size.
 
 ### Verification notes
 
