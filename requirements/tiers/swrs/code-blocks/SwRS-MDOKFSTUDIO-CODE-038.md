@@ -1,0 +1,44 @@
+---
+type: SwRS
+id: SwRS-MDOKFSTUDIO-CODE-038
+uuid: 7e5e23b3-077a-43f3-8f08-f39ad37dde73
+title: Colour YAML code text with the link colour in the forced white and cream
+  themes
+description: When the white or cream theme is forced, the extension SHALL colour
+  YAML code text with the link colour.
+project: markdown-okf-schema-studio
+scope: code-blocks
+lifecycle: draft
+origin: native
+tier: SwRS
+derives_from:
+- StRS-MDOKFSTUDIO-CODE-001
+annotation_exemption: false
+exemption_reason:
+derived_by: []
+implemented_in_files: []
+tested_in_files: []
+---
+
+## Colour YAML code text with the link colour in the forced white and cream themes
+
+### Normative behavior
+
+When the white or cream theme is forced, the extension SHALL colour YAML code text with the link colour.
+
+### Scenario: nominal behavior
+
+- GIVEN the cream theme is forced and a YAML block is shown
+- WHEN the preview renders it
+- THEN its text uses the link colour
+
+### Scenario: boundary or refusal behavior
+
+- GIVEN the white theme is forced and a Python block is shown
+- WHEN the preview renders it
+- THEN the Python text does not use the link colour
+
+### Verification notes
+
+- Method: Stylesheet unit test.
+- Criteria: The YAML language rule sets the link colour in white and cream only.
