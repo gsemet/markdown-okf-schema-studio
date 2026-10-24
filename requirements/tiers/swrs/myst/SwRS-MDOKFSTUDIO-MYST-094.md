@@ -47,4 +47,4 @@ When the writer clicks the anchor icon of a label whose name starts with an unde
 ### Verification notes
 
 - Method: inspection (`src/page/modules/labelRename.ts` click handler, `src/core/mapping/labelRename.ts`).
-- Criteria: verification pending (no test covers a label starting with `_`, `.` or `-`).
+- Criteria: No test covers a label starting with `_`, `.` or `-`.
