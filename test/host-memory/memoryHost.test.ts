@@ -105,5 +105,8 @@ test("the memory file system reads, writes, lists and renames files", async () =
   assert.equal(await readTextFile(files, "/w/docs/b.md"), "# A");
   await assert.rejects(files.stat("/w/docs/a.md"), { code: "ENOENT" });
   assert.equal(await files.realpath("/w/docs/../docs/./b.md"), "/w/docs/b.md");
+  await files.delete("/w/docs/b.md");
+  await assert.rejects(files.stat("/w/docs/b.md"), { code: "ENOENT" });
+  await assert.rejects(files.delete("/w/docs/b.md"), { code: "ENOENT" });
   assert.equal(normalizePosixPath("//a/./b/../c/"), "/a/c");
 });

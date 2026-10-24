@@ -18,6 +18,7 @@ import {
   sniffImage,
 } from "../../core/mapping/pastedImage";
 import { htmlToMarkdown } from "../../core/paste/htmlToMarkdown";
+import type { FileSystem } from "../../host-api/fileSystem";
 import { scanBibKeys } from "../bibScan";
 import type { HostRequestType } from "../../core/protocol/hostToPage";
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
@@ -39,6 +40,31 @@ export function targetChoices(text: string): HostListAnswer & { ok: true } {
     items: items.map((item) => ({ value: item.name, label: item.name, ...(item.title ? { detail: item.title } : {}) })),
     truncated,
   };
+}
+
+/**
+ * Writes `bytes` as the new file `fileName` of `folderPath` so that the name never shows partial
+ * bytes: a host's `writeFile` creates the file before its bytes are written (VS Code's disk
+ * provider opens it with `w`, then writes), and a reader in between sees an empty file (CI run
+ * 40016132398). The bytes go to a hidden file of the same folder, which is then renamed without
+ * overwrite, so the name appears complete and a file another writer created in between is kept.
+ * On failure the hidden file is removed and nothing is left under either name.
+ */
+export async function writeNewFileAtomically(
+  files: FileSystem,
+  folderPath: string,
+  fileName: string,
+  bytes: Uint8Array,
+): Promise<void> {
+  const partialPath = path.join(folderPath, `.${fileName}.${Math.random().toString(36).slice(2, 10)}.partial`);
+  let placed = false;
+  try {
+    await files.writeFile(partialPath, bytes);
+    await files.rename(partialPath, path.join(folderPath, fileName), { overwrite: false });
+    placed = true;
+  } finally {
+    if (!placed) await files.delete(partialPath).then(undefined, () => undefined);
+  }
 }
 
 /** The page's requests to the host that edit no document. */
@@ -235,7 +261,7 @@ export class HostRequestController {
         refuse("Too many pasted images next to this document.");
         return;
       }
-      await host.files.writeFile(path.join(folderPath, fileName), bytes);
+      await writeNewFileAtomically(host.files, folderPath, fileName, bytes);
       this.postHostResult(preview, message, { ok: true, fileName });
     }).then(undefined, (error: unknown) => {
       refuse(error instanceof Error ? error.message : String(error));

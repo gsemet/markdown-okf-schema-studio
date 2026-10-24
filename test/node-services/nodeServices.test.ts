@@ -27,6 +27,9 @@ test("the Node file system reads, writes, lists, renames and resolves links", as
   const missing = await files.stat(path.join(root, "docs", "a.md")).then(() => undefined, (error: unknown) => error);
   assert.equal(isFileNotFound(missing), true);
   assert.equal(isFileNotFound(new Error("other")), false);
+  await files.delete(path.join(root, "docs", "c.md"));
+  assert.equal(fs.existsSync(path.join(root, "docs", "c.md")), false);
+  assert.equal(isFileNotFound(await files.delete(path.join(root, "docs", "c.md")).then(() => undefined, (error: unknown) => error)), true);
 });
 
 test("the Node file system keeps the case of the input path on a case-insensitive file system, like fs.realpathSync", async (t) => {
