@@ -77,7 +77,9 @@ source with its own values: it links to that source.
 - okfreq is a project dependency: run it with `uv run --no-sync --group requirements okfreq`
   (installed by `just dev`), never a global install.
 - Before touching requirements, read `requirements/guidelines/requirements.guidelines.md` (local
-  rules, marker syntax for TypeScript/Python) and the okfreq baseline it links to. Skills:
+  rules, marker syntax for TypeScript/Python) and the okfreq baseline it links to. Requirements
+  are anchored to the code: they state what the extension does today, not the desired state. A
+  known bug is specified as it behaves and its fix goes to the backlog. Skills:
   `.agents/skills/okfreq` (authoring, traceability) and `.agents/skills/okfreq-gardening` (audits).
 - Every feature or fix updates its SwRS (or creates one with `okfreq new`), adds
   `// @implements_req <SwRS-ID>` next to the implementation and `// @tests_req <SwRS-ID>` next to
