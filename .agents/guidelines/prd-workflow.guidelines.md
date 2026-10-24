@@ -271,6 +271,18 @@ even in git.
 - The title follows the same rule: a Conventional Commit subject that says what changes.
 - Update the body whenever the scope changes (re-scope, dropped item, follow-up); it describes
   the PR as it is now, not its history.
+- Add a "How it works" section right after Summary, with one or more small visuals, each placed
+  next to the one or two sentences it supports. Use one, sometimes several, rarely every kind.
+  Keep only the calls, files, props and boundaries the reviewer needs, with real names checked
+  against the code:
+  - a Mermaid `flowchart` of the modules or layers that change, arrows for the calls or allowed
+    imports (about 10 nodes at most);
+  - a Mermaid `sequenceDiagram` of one real flow (an edit, a message, a write), before and after
+    when the order is the fix;
+  - a before/after tree or table (files moved or split, sizes, settings);
+  - a short code sketch (5 to 15 lines) of the new interface, message or registration that a
+    contributor will reuse, with `...` for the rest.
+  A one-line fix may skip the section; a structural change never does.
 
 ### Constraints
 
