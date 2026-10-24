@@ -43,7 +43,7 @@ When a document uses the doc or download role, the extension SHALL render it as 
 
 - Known issue: the preview adds no resolution of its own. `{doc}` and `{download}` targets are not
   checked against the workspace, `{numref}` is never resolved to a number, and a `{doc}` or
-  `{download}` written without a label renders an empty link. Backlog: `doc-numref-download-resolution`.
+  `{download}` written without a label renders an empty link.
 
 ### Verification notes
 

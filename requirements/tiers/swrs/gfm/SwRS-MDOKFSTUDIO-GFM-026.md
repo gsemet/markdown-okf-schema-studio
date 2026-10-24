@@ -26,7 +26,7 @@ tested_in_files: []
 
 When the preview cannot edit the document, the extension SHALL disable checkboxes with the tooltip 'Editing requires a trusted workspace.' and refuse a toggle message with the same text.
 
-Known issue: the read-only text "Editing requires a trusted workspace." is also shown for a standalone file outside any workspace folder, where trusting a workspace does not help (read-only is decided by "no workspace folder or untrusted"). Backlog: P3/checkbox-refusal-feedback.
+Known issue: the read-only text "Editing requires a trusted workspace." is also shown for a standalone file outside any workspace folder, where trusting a workspace does not help (read-only is decided by "no workspace folder or untrusted").
 
 ### Scenario: Untrusted workspace
 
