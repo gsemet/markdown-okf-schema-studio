@@ -62,6 +62,7 @@ body {
 html[data-sphinx-preview-theme-mode="dark"],
 html[data-sphinx-preview-theme-mode="dark"] body {
   color-scheme: dark;
+  --sphinx-preview-band-shadow: rgba(0, 0, 0, 0.6);
   --sphinx-preview-scrollbar-thumb: #686868;
   --sphinx-preview-scrollbar-hover: #9e9e9e;
   --studio-editor-background: #1e1e1e;
@@ -101,6 +102,7 @@ html[data-sphinx-preview-theme-mode="dark"] body {
 
 html[data-sphinx-preview-theme-mode="white"],
 html[data-sphinx-preview-theme-mode="white"] body {
+  --sphinx-preview-band-shadow: rgba(0, 0, 0, 0.18);
   color-scheme: light;
   --sphinx-preview-scrollbar-thumb: #b3b3b3;
   --sphinx-preview-scrollbar-hover: #808080;
@@ -142,6 +144,7 @@ html[data-sphinx-preview-theme-mode="white"] body {
 html[data-sphinx-preview-theme-mode="cream"],
 html[data-sphinx-preview-theme-mode="cream"] body {
   color-scheme: light;
+  --sphinx-preview-band-shadow: rgba(43, 42, 39, 0.2);
   --sphinx-preview-scrollbar-thumb: #cfc5b2;
   --sphinx-preview-scrollbar-hover: #a89d89;
   --studio-editor-background: #f5f1e8;
@@ -496,5 +499,12 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   pointer-events: none;
+}
+
+/* A soft shadow under the band while content scrolls under it. A box-shadow takes no layout space
+   (no shift of the content or the reading offset) and the band is below the toolbar (z-index). It
+   appears and disappears at once, so there is no motion to reduce. */
+[data-sphinx-preview-sticky-headings][data-scrolled-under] {
+  box-shadow: 0 6px 8px -5px var(--sphinx-preview-band-shadow, rgba(0, 0, 0, 0.28));
 }
 `;

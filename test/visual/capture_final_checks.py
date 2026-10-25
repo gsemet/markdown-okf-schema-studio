@@ -215,6 +215,7 @@ def check_sticky_headings(
         paddingBlockEnd: Number.parseFloat(computed.paddingBlockEnd),
       borderRadius: computed.borderRadius,
       boxShadow: computed.boxShadow,
+        scrolledUnder: element.hasAttribute('data-scrolled-under'),
         mainDocumentTop: mainBounds.top + window.scrollY,
       };
     }""")
@@ -230,7 +231,9 @@ def check_sticky_headings(
     expected_text_right = min(style["contentRight"], toolbar_left - 8)
     if abs(style["textLeft"] - style["contentLeft"]) > 1 or abs(style["textRight"] - expected_text_right) > 1:
       failures.append(Failure(page_name, "sticky heading text is not aligned with the article content"))
-    if style["borderRadius"] != "0px" or style["boxShadow"] != "none":
+    # The only shadow is the soft one under the band while text scrolls under it (marked
+    # data-scrolled-under); a card look (rounded corners, a shadow at rest) stays refused.
+    if style["borderRadius"] != "0px" or (style["boxShadow"] != "none") != style["scrolledUnder"]:
       failures.append(Failure(page_name, "sticky heading still has floating-card styling"))
     if style["borderBottomWidth"] != 1 or style["borderBottomColor"] != style["headingBorderBottomColor"]:
       failures.append(Failure(page_name, "sticky heading divider does not match the article heading rule"))

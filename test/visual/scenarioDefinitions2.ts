@@ -27,6 +27,7 @@ import {
   LONG_WORDS_ASSERTIONS,
   MAIN,
   MARK_EDITOR_SELECTION_ASSERTIONS,
+  STICKY_SHADOW_ASSERTIONS,
   MAX_WIDTH_ASSERTIONS,
   MERMAID_ERROR_ASSERTIONS,
   MISSING_IMAGE_ASSERTIONS,
@@ -1031,6 +1032,49 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     contentAssertions: MARK_EDITOR_SELECTION_ASSERTIONS,
     description: "With the mark-editor-selection setting on, the text editor's selection on line 12 outlines the paragraph that holds it "
       + "(the dispatch path sentence) in the preview, and only that block.",
+  },
+  {
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-002
+    id: "toolbar-navigation/v32-sticky-shadow-light-900",
+    fixture: "05-long-chapter",
+    theme: "light",
+    stickyHeadingDepth: 3,
+    ...WIDE,
+    scroll: { kind: "stickyHeading", value: 'h3[data-line="125"]' },
+    expectedStickyHeadings: "# Operating the fleet\n## Incident patterns\n### Split arbiter",
+    contentAssertions: STICKY_SHADOW_ASSERTIONS,
+    description: "In the light preview scrolled under three pinned headings, a soft shadow separates the sticky band from the text "
+      + "that scrolls under it, the band keeps its place and the toolbar stays above it.",
+  },
+  {
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-002
+    id: "toolbar-navigation/v33-sticky-shadow-dark-900",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    stickyHeadingDepth: 3,
+    ...WIDE,
+    scroll: { kind: "stickyHeading", value: 'h3[data-line="125"]' },
+    expectedStickyHeadings: "# Operating the fleet\n## Incident patterns\n### Split arbiter",
+    contentAssertions: STICKY_SHADOW_ASSERTIONS,
+    description: "In the dark preview scrolled under three pinned headings, a soft shadow separates the sticky band from the text "
+      + "that scrolls under it, the band keeps its place and the toolbar stays above it.",
+  },
+  {
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-002
+    id: "toolbar-navigation/v34-sticky-shadow-cream-900",
+    fixture: "05-long-chapter",
+    theme: "dark",
+    previewThemeMode: "cream",
+    stickyHeadingDepth: 3,
+    ...WIDE,
+    scroll: { kind: "stickyHeading", value: 'h3[data-line="125"]' },
+    expectedStickyHeadings: "# Operating the fleet\n## Incident patterns\n### Split arbiter",
+    contentAssertions: STICKY_SHADOW_ASSERTIONS,
+    description: "In the cream preview scrolled under three pinned headings, a soft shadow separates the sticky band from the text "
+      + "that scrolls under it, the band keeps its place and the toolbar stays above it.",
   },
   {
     // @tests_req StRS-MDOKFSTUDIO-BLOCK-016

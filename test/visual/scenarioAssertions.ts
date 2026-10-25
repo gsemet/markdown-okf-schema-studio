@@ -422,6 +422,19 @@ export const MARK_EDITOR_SELECTION_ASSERTIONS: ContentAssertion[] = [
   { message: "the marker is an outline in the find-match colour", selector: "[data-sphinx-preview-current=\"true\"]", css: { outlineStyle: "solid", outlineWidth: "2px" } },
 ];
 
+export const STICKY_SHADOW_ASSERTIONS: ContentAssertion[] = [
+  { message: "the band is marked as having content scrolled under it", selector: "[data-sphinx-preview-sticky-headings]", count: 1, visible: true,
+    attr: { name: "data-scrolled-under", value: "" } },
+  { message: "the band casts a soft shadow below it, offset downward and blurred",
+    selector: "[data-sphinx-preview-sticky-headings]",
+    expr: "(() => { const shadow = getComputedStyle(document.querySelector('[data-sphinx-preview-sticky-headings]')).boxShadow; const parts = shadow.match(/-?\\d+(?:\\.\\d+)?px/g) || []; return shadow !== 'none' && parts.length >= 3 && Number.parseFloat(parts[1]) > 0 && Number.parseFloat(parts[2]) > 0; })()" },
+  { message: "the band stays fixed at the top of the pane, so the shadow shifts nothing",
+    selector: "[data-sphinx-preview-sticky-headings]",
+    expr: "getComputedStyle(document.querySelector('[data-sphinx-preview-sticky-headings]')).position === 'fixed' && document.querySelector('[data-sphinx-preview-sticky-headings]').getBoundingClientRect().top === 0" },
+  { message: "the toolbar is stacked above the band", selector: "[data-sphinx-preview-toolbar]",
+    expr: "Number.parseInt(getComputedStyle(document.querySelector('[data-sphinx-preview-toolbar]')).zIndex, 10) > Number.parseInt(getComputedStyle(document.querySelector('[data-sphinx-preview-sticky-headings]')).zIndex, 10)" },
+];
+
 export const BACK_ENABLED_ASSERTIONS: ContentAssertion[] = [
   { message: "Back is enabled once the host reports a place to go back to", selector: "[data-sphinx-preview-back]", count: 1, expr: "document.querySelector('[data-sphinx-preview-back]').disabled === false" },
   { message: "Next stays disabled", selector: "[data-sphinx-preview-next]", count: 1, expr: "document.querySelector('[data-sphinx-preview-next]').disabled === true" },

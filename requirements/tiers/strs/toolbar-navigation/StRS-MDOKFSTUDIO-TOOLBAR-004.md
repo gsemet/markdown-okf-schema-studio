@@ -17,6 +17,7 @@ user_need: As a reader, I always know which section I am in while I scroll a
   I choose how much of the heading path stays visible, from the current heading
   alone up to six levels.
 derived_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-002
 - SwRS-MDOKFSTUDIO-TOOLBAR-018
 - SwRS-MDOKFSTUDIO-TOOLBAR-022
 - SwRS-MDOKFSTUDIO-TOOLBAR-025

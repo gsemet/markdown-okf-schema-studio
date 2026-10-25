@@ -1,5 +1,10 @@
 # Update Log
 
+## 2026-10-25 (a soft shadow under the sticky heading band)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-002 (new): the sticky heading band casts a soft theme-coloured shadow
+  while text scrolls under it, none at the top. Added three visual scenarios (light, dark, cream).
+
 ## 2026-10-25 (the copy button says Copied only when the text was copied)
 
 - SwRS-MDOKFSTUDIO-CODE-019, CODE-026: the host now answers every copy request (`previewCopyTextResult`,
