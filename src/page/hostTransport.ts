@@ -37,14 +37,14 @@ interface MessageSource {
 }
 
 /** The window members the transport uses. */
-export type TransportWindow = Pick<Window, "addEventListener"> & Partial<Pick<Window, "parent" | "location">>;
+export type TransportWindow = Pick<Window, "addEventListener"> & Partial<Pick<Window, "parent" | "location" | "opener">>;
 
 /**
  * Whether a `message` event comes from a sender the page trusts: the frame that hosts the page (in
- * a VS Code webview the host posts through the parent frame, whose origin varies by VS Code
- * version, so the sender frame is checked, not the origin), the page's own window with its own
- * origin, or an event dispatched in the page itself (no sender, empty origin). A message from any
- * other window, frame or opener is dropped.
+ * a VS Code webview the host posts from the parent frame or from another frame of the webview
+ * host, which has the page's own origin, so a sender with that origin is accepted), the page's own
+ * window with its own origin, or an event dispatched in the page itself (no sender, empty origin).
+ * A message from any other window, frame or opener is dropped.
  */
 export function isTrustedMessageSender(event: MessageSource, window: TransportWindow): boolean {
   const { source, origin } = event;
@@ -54,7 +54,11 @@ export function isTrustedMessageSender(event: MessageSource, window: TransportWi
   if (source === window.parent) {
     return true;
   }
-  return source === window && (origin === undefined || origin === window.location?.origin || origin === "null");
+  const own = window.location?.origin;
+  if (source === window) {
+    return origin === undefined || origin === own || origin === "null";
+  }
+  return source !== window.opener && own !== undefined && own !== "null" && origin === own;
 }
 
 /**

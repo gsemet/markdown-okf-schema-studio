@@ -63,12 +63,14 @@ test("the VS Code transport passes the webview API through and unwraps window me
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-059
-test("a window message event reaches the page only from the parent frame or the page itself", () => {
+test("a window message event reaches the page only from the host frames, the page itself or an event without a sender", () => {
   const parent = {};
   const other = {};
+  const opener = {};
   let onWindowMessage: ((event: Event) => void) | undefined;
   const fakeWindow = {
     parent,
+    opener,
     location: { origin: "https://page.test" },
     addEventListener: ((type: string, listener: (event: Event) => void) => { if (type === "message") onWindowMessage = listener; }) as Window["addEventListener"],
   };
@@ -78,12 +80,13 @@ test("a window message event reaches the page only from the parent frame or the 
   const send = (data: unknown, source: unknown, origin: string): void => onWindowMessage?.({ data, source, origin } as unknown as Event);
   send("parent", parent, "vscode-webview://abc");
   send("foreign-window", other, "https://evil.test");
-  send("foreign-same-origin-string", other, "https://page.test");
+  send("webview-host-frame", other, "https://page.test");
   send("opener-null", null, "https://evil.test");
+  send("opener-same-origin", opener, "https://page.test");
   send("self", fakeWindow, "https://page.test");
   send("self-foreign-origin", fakeWindow, "https://evil.test");
   send("dispatched", null, "");
-  assert.deepEqual(received, ["parent", "self", "dispatched"]);
+  assert.deepEqual(received, ["parent", "webview-host-frame", "self", "dispatched"]);
 });
 
 test("the boot context round-trips through its inert JSON element; a page without one reads {}", () => {
