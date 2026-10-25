@@ -106,6 +106,18 @@ test("the top-aligned sticky band grows and shrinks with the active heading hier
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-002
+test("the sticky band is marked as having content scrolled under it only below the top", () => {
+  const harness = createRuntimeHarness();
+  harness.stickyHeadings.height = 50;
+  for (const [scrollY, marked] of [[0, false], [1, false], [250, true], [0, false]] as const) {
+    harness.windowState.scrollY = scrollY;
+    harness.dispatchWindow("scroll");
+    harness.flushFrames();
+    assert.equal(harness.stickyHeadings.getAttribute("data-scrolled-under") !== null, marked, `scrollY ${scrollY}`);
+  }
+});
+
 test("sticks to the active Markdown heading hierarchy in up to three lines", () => {
   const harness = createRuntimeHarness();
   harness.stickyHeadings.height = 50;

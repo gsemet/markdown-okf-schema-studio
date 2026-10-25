@@ -138,9 +138,16 @@ export function installStickyHeadings(
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-002
   function updateStickyHeadings(fromScroll = false): void {
     if (!stickyHeadings) return;
     refreshStickyHeadingPosition();
+    // The shadow under the band shows only while content scrolls under it (none at the top).
+    const scrolledUnder = window.scrollY > 1;
+    if (scrolledUnder !== (stickyHeadings.getAttribute?.("data-scrolled-under") != null)) {
+      if (scrolledUnder) stickyHeadings.setAttribute?.("data-scrolled-under", "");
+      else stickyHeadings.removeAttribute?.("data-scrolled-under");
+    }
     if (fromScroll && headingList.length === 0) measureHeadings();
     let previousActiveIndex = -2;
     for (let pass = 0; pass < 3; pass += 1) {
