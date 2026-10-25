@@ -13,6 +13,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import type { Page } from "playwright-core";
 import * as vscode from "vscode";
+import { describeFolder } from "./folderListing";
 
 import {
   disposeActivePreviewForTests,
@@ -271,8 +272,7 @@ export async function scenarioImagePaste(page: Page, evidence: Evidence): Promis
       const pasteState = async (): Promise<string> => {
         const value = await withCurrentFrame(page, (frame) =>
           frame.locator("[data-sphinx-preview-block-editor] textarea").inputValue()).catch((error: unknown) => `<${String(error)}>`);
-        const listing = fs.readdirSync(directory).map((name) => `${name} (${fs.statSync(path.join(directory, name)).size} B)`);
-        return `folder: ${listing.join(", ")}; editor text: ${JSON.stringify(value)}`;
+        return `folder: ${describeFolder(directory)}; editor text: ${JSON.stringify(value)}`;
       };
       try {
         await waitFor("the reference in the editor", () => withCurrentFrame(page, async (frame) =>
