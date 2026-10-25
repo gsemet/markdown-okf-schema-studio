@@ -89,6 +89,10 @@ async function runCaptures(): Promise<void> {
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-006
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, false);
+  // A development extension is not disabled in Restricted Mode, a packaged one is unless its manifest
+  // declares the limited support: this window cannot tell, so it checks the declaration VS Code reads.
+  const installed = vscode.extensions.getExtension("GaetanSemet.markdown-okf-schema-studio");
+  assert.equal(installed?.packageJSON.capabilities?.untrustedWorkspaces?.supported, "limited");
   // CDP input needs a window macOS has activated (windowFocus.ts).
   await ensureTestWindowFocused();
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "stress") {

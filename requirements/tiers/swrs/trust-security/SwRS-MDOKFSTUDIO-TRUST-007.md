@@ -87,7 +87,6 @@ When the extension shows a document, it SHALL allow the webview to load local fi
 | The same preview and an include of ../other.md | The file is refused as outside the roots |
 
 ### Known issues
-- Known issue: with a packaged VSIX, VS Code disables the extension in Restricted Mode unless a user setting or the product configuration overrides it (SwRS-MDOKFSTUDIO-TRUST-001); the Restricted Mode case of this requirement is then reached only with that override. Deduced from the VS Code source, not run with a packaged build.
 - Known issue: the text of SwRS-MDOKFSTUDIO-CORE-012 says an include is expanded for a trusted document, and docs/known-limitations.md says that file includes are supported only when the workspace is trusted; the code reads includes in Restricted Mode and for a file outside the workspace too, from the folder of the document.
 
 ### Related requirements

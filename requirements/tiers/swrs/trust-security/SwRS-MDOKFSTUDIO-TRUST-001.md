@@ -123,18 +123,22 @@ The refusal of write requests is that of SwRS-MDOKFSTUDIO-TRUST-005.
 | A preview created read-only in an untrusted workspace, then the reader trusts the workspace | The preview still refuses edits until it switches to a document that creates a new session or is reopened |
 | A preview created in a trusted workspace, then trust is granted again | It stays writable |
 
-### Scenario (boundary): The manifest declares no capabilities entry
+### Scenario (boundary): The manifest declares limited support for untrusted workspaces
+
+- GIVEN the package.json of the extension, which has a main entry point
+- WHEN VS Code decides whether the extension runs in a window in Restricted Mode
+- THEN the extension runs, because the manifest declares the limited support, and its read-only preview is the one described above
 
 | Input | Outcome |
 | --- | --- |
-| The package.json of the extension, its keys read | None of them is capabilities |
-| A manifest that gains a capabilities key | The check fails |
+| capabilities.untrustedWorkspaces.supported in package.json | "limited", with a description that says the preview is read-only |
+| capabilities.untrustedWorkspaces.restrictedConfigurations | The PlantUML engine settings plantuml.useJar and plantuml.jarPath: a value from the workspace is ignored in Restricted Mode |
+| A manifest without the declaration, or with another value | The check fails (VS Code then disables a packaged extension in Restricted Mode) |
 
 ### Known issues
 
 - Known issue: session.readOnly is fixed when the session is created and nothing resets it on a trust grant, so a preview opened in Restricted Mode stays read-only after the reader trusts the workspace until a document switch creates a new session or the panel is reopened.
 - Known issue: the first load of a read-only page is built in src/session/webview.ts without the read-only flag, so its properties table carries edit cells and rows that say data-okf-editable true; the host replaces the table with a non-editable one after the frontmatter links are resolved, shortly after the render. No editor can open in between, because every frontmatter editor needs edit mode, which a page without an Edit button never switches on. Deduced from the code, not run.
-- Known issue: in the VS Code 1.143.1 workbench installed on the build machine, the rule that decides whether an extension runs in Restricted Mode returns false for an extension that has a main entry point and no capabilities.untrustedWorkspaces declaration, unless a user setting or the product configuration overrides it. A packaged Studio is then disabled in Restricted Mode (the Restricted Mode case only: a file outside the workspace in a trusted window needs no override), so the Restricted Mode case of the first scenario is reached with a packaged VSIX only with that override. README.md line 203, CHANGELOG.md line 82 and package.json line 232 (the useJar text) state that the built-in PlantUML engine works in Restricted Mode, and no test or document supports that for a packaged build. Deduced from the VS Code source, not run with a packaged build.
 
 ### Related requirements
 
@@ -155,5 +159,5 @@ The refusal of write requests is that of SwRS-MDOKFSTUDIO-TRUST-005.
 - Method: Unit tests `T43: no reply box without a reply hook (read-only previews)` and `T44: without resolve and delete hooks (read-only) the popover has neither button` in test/page/modules/commentThreads.test.ts (thread popover rows).
 - Method: Visual scenarios trust-security/v01-read-only-page-dark-900 and trust-security/v02-read-only-page-light-460 in test/visual/scenarioDefinitions2.ts (READ_ONLY_ASSERTIONS: no edit cell, every row not editable), and trust-security/v03-read-only-no-hover-outline-light-900 (READ_ONLY_NO_HOVER_ASSERTIONS: no edit-target mark, no outline, cursor not a pointer; no block editor after the paragraph click). These scenarios build the page in test/visual/renderFixtures.ts with the read-only flag, not through the host page build, so no test covers the properties table Known issue. The table cell click and the frontmatter click rows are untested; they are deduced from the code: the click handlers of src/page/features/pageInput.ts open editors only when edit mode is on, which a page without an Edit button never is.
 - Method: Unit test "granting trust does not make an open read-only preview writable (Known issue)" in test/host/lifeReq.requirements.test.ts, checked by reading onTrustGranted, which only schedules the incoming-change marks, and createSession and switchDocument where the read-only state is set (trust granted scenario).
-- Method: Unit test "the extension manifest declares no capabilities entry (Known issue: Restricted Mode)" in test/security/trustReq.requirements.test.ts, which asserts that the key capabilities is not in package.json. The Restricted Mode integration suite test/integration/untrusted-suite.ts loads the extension from the development path, not from a packaged VSIX, so the Restricted Mode Known issue is not run.
-- Criteria: The readOnly flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; a read-only page has no Edit button, no palette, no Comment button, no reply, Resolve or Delete control, no edit cell, no edit-target mark and no editor element after the clicks; session.readOnly is unchanged by onTrustGranted; package.json has no capabilities key.
+- Method: Unit test "the manifest declares limited support for untrusted workspaces" in test/security/trustReq.requirements.test.ts, which asserts the declaration, its description and the restricted settings in package.json, the inputs VS Code reads to decide (extensionManifestPropertiesService, VS Code 1.143.1 bundle: an extension with a main entry point and no declaration is disabled in Restricted Mode). The Restricted Mode integration suite test/integration/untrusted-suite.ts loads the extension from the development path, which is not disabled either way, so it asserts the declaration through the installed extension manifest instead; a packaged VSIX is not run in a Restricted Mode window.
+- Criteria: The readOnly flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; a read-only page has no Edit button, no palette, no Comment button, no reply, Resolve or Delete control, no edit cell, no edit-target mark and no editor element after the clicks; session.readOnly is unchanged by onTrustGranted; package.json declares capabilities.untrustedWorkspaces.supported as limited.

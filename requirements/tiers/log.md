@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-25 (Restricted Mode support declared)
+
+- SwRS-MDOKFSTUDIO-TRUST-001: the manifest now declares `capabilities.untrustedWorkspaces`
+  (limited, with the PlantUML engine settings as restricted configurations); the boundary scenario
+  and the unit test changed from "no capabilities entry" to that declaration. Removed the
+  Known issue lines about a packaged VSIX being disabled in Restricted Mode from
+  StRS-MDOKFSTUDIO-TRUST-001, SwRS-MDOKFSTUDIO-TRUST-001, -007 and -011.
+
 ## 2026-10-25 (site Requirements page)
 
 - Added SwRS-MDOKFSTUDIO-CORE-069: the Pages site build writes a Requirements page with the
