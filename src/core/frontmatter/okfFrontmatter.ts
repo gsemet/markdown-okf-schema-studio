@@ -176,7 +176,13 @@ function parseSchemaFile(files: SchemaFiles, candidate: SchemaCandidate): Record
     const stripped = stripJson5Comments(raw);
     return JSON.parse(stripped) as Record<string, unknown>;
   }
+  // An empty or comment-only YAML file parses to null: the schema has no content yet.
   return parseDocument(raw).toJS() as Record<string, unknown>;
+}
+
+/** True for a parsed schema with no content (an empty or comment-only file). */
+function isEmptySchema(schema: unknown): boolean {
+  return schema === null || schema === undefined;
 }
 
 const REF_SUFFIX_FALLBACKS = ["", ".json", ".json5", ".yaml", ".yml"] as const;
@@ -386,6 +392,19 @@ function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult 
   let schema: Record<string, unknown>;
   try {
     schema = resolveCandidateSchema(options.schemaFiles, candidate);
+    if (isEmptySchema(schema)) {
+      // A schema file with no content yet (just created): the type stays without schema and the
+      // note carries okf-schema's wording.
+      return {
+        present: true,
+        fields: fieldsFromYaml(frontmatter, undefined, false),
+        orderMode: "yaml",
+        schemaFound: false,
+        missingRequiredFields: [],
+        info: [{ severity: "info", message: `schema file '${path.basename(candidate.path)}' is empty` }],
+        summary: { errors: 0, warnings: 0, infos: 1 },
+      };
+    }
   } catch (error) {
     return {
       present: true,

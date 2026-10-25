@@ -34,5 +34,5 @@ As a schema author, I see immediately that my schema is broken and why, instead 
 
 ### Rationale and constraints
 
-- A JSON or JSON5 schema that cannot be read or parsed gives the generic table with the warning row "Schema could not be parsed: {error}". Known issue: a YAML syntax error is not reported (the partly parsed schema is applied silently) and an empty YAML schema file makes the analysis throw.
+- A JSON or JSON5 schema that cannot be read or parsed gives the generic table with the warning row "Schema could not be parsed: {error}". An empty or comment-only YAML schema file has no content yet: the type stays without schema, the table is generic and one informational row reads "schema file '{name}' is empty". Known issue: a YAML syntax error is not reported (the partly parsed schema is applied silently).
 - A schema that cannot be compiled shows a red row "Schema validation failed to run: {diagnostic}" spanning every visible column, counted as one error in the badge; the fields stay listed in schema order with their documentation.

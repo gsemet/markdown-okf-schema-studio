@@ -89,6 +89,22 @@ test("a JSON5 schema that cannot be parsed gives the generic table and one warni
   assert.equal(messages.some((message) => message.startsWith("Schema could not be parsed")), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
+test("an empty or comment-only YAML schema is reported as empty: generic table, one info note, no throw", () => {
+  const source = "---\ntype: Note\ntitle: Hello\n---\n";
+  for (const content of ["", "\n  \n", "# TODO: write the schema\n"]) {
+    resetSchemaRegistryForTests();
+    const root = temporaryRoot();
+    fs.mkdirSync(path.join(root, "_schema"));
+    fs.writeFileSync(path.join(root, "_schema", "Note.schema.yaml"), content);
+    const result = analyze(root, source);
+    assert.equal(result.schemaFound, false);
+    assert.deepEqual(result.info, [{ severity: "info", message: "schema file 'Note.schema.yaml' is empty" }]);
+    assert.deepEqual(result.summary, { errors: 0, warnings: 0, infos: 1 });
+    assert.deepEqual(result.fields.map((field) => field.name), ["type", "title"]);
+  }
+});
+
 const LINK = { resolution: "bundle-relative", syntax: "plain" };
 const linkSchema = (annotation: Record<string, unknown> = LINK): Record<string, unknown> => ({
   type: "object",
