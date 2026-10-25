@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/modules/tableEditActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
+- test/page/modules/tableInsertAfterTable.test.ts
 ---
 
 ## Table with caption wraps the table at the caret in a table directive
@@ -48,14 +49,11 @@ When the writer runs Table with caption, the extension SHALL wrap the pipe table
 ### Scenario (boundary): Caret in another table form
 - GIVEN the caret in a {list-table} or an HTML table
 - WHEN the action is run
-- THEN a new captioned table is inserted after the selection
-
-### Known issues
-- Known issue: Only a pipe table is wrapped: with the caret inside a {list-table} or an HTML table the action does not recognise it and inserts a new captioned table at the caret position, which can land in the middle of that table.
+- THEN a new captioned table is inserted on its own lines after the last line of that table, which stays whole
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TABLE-106: the palette modes in which Table with caption is offered (MyST mode).
 
 ### Verification notes
-- Method: test/page/modules/editActions.test.ts (T30: tableCaption wraps the pipe table at the caret, or inserts a new one; wrap and paragraph scenarios; the "Already captioned" refusal and the other table forms are read from tableCaption in src/page/modules/tableEditActions.ts and are untested; the mode rule is checked by the test that ref, doc, cite, dropdown, tableCaption and roleKbd are myst-only without shortcut).
+- Method: test/page/modules/editActions.test.ts (T30: tableCaption wraps the pipe table at the caret, or inserts a new one; wrap and paragraph scenarios; the list-table and HTML table rows are in test/page/modules/tableInsertAfterTable.test.ts; the "Already captioned" refusal is read from tableCaption in src/page/modules/tableEditActions.ts and is untested; the mode rule is checked by the test that ref, doc, cite, dropdown, tableCaption and roleKbd are myst-only without shortcut).
 - Criteria: The wrapped or inserted text and the selection of the word Caption.

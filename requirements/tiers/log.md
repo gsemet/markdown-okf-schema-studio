@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-25 (a table inserted with the caret in a table goes after it)
+
+- SwRS-MDOKFSTUDIO-TABLE-106, TABLE-115, TABLE-117: Table, Table with caption and HTML table now
+  insert the new table after the table that holds the caret (pipe, `{list-table}` or HTML) instead
+  of splitting it. Removed the three Known issue lines and added scenarios.
+- StRS-MDOKFSTUDIO-TABLE-012: stated that an inserted table never splits the table at the caret.
+
 ## 2026-10-25 (a line break pasted into a table cell becomes a space)
 
 - SwRS-MDOKFSTUDIO-TABLE-091: a line break pasted into the cell text box is now replaced by a

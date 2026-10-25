@@ -45,6 +45,6 @@ As a writer, I format text in a cell from the bar or with a shortcut and the tab
 
 - The cell formatting group joins the table bar after a separator and offers only the actions that make sense in a cell (never block-only actions).
 - A pipe typed in a cell is saved escaped; text inserted from the bar or pasted into the cell cannot split the row.
-- Table inserts a pipe table of 1 to 9 rows and 1 to 9 columns (the header counts as a row) after the selection and on its own lines.
+- Table inserts a pipe table of 1 to 9 rows and 1 to 9 columns (the header counts as a row) after the selection and on its own lines; with the caret inside a pipe table, a `{list-table}` or an HTML table, the new table (Table, HTML table, Table with caption) goes after that table and never splits it.
 - Column alignment (GFM and MyST) rewrites only the delimiter cell of the caret's column; Table with caption (MyST) wraps the pipe table at the caret in a `{table}` directive.
 - The size chooser popover and the palette buttons and slash entries themselves belong to the palette-slash scope.
