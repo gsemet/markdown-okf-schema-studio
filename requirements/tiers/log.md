@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-10-25 (dollar amounts in the preview are specified as they render)
+
+- SwRS-MDOKFSTUDIO-MYST-024: added a boundary scenario and a Known issue line: the preview typesets
+  the text between two dollar amounts (`$5 and $6`) as inline maths, unlike Sphinx. Added a visual
+  scenario pair (light and dark) with a real `$x$` span as control.
+
 ## 2026-10-25 (a pasted image removes the leftovers of an interrupted save)
 
 - SwRS-MDOKFSTUDIO-PALETTE-196: the next paste into a folder now deletes hidden `.partial` files of

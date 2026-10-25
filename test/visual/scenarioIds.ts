@@ -589,6 +589,8 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "frontmatter-schema/v23-readme-showcase-schema-cream-1000": "On the cream page at 1000 px, the demo handbook frontmatter renders a properties table for type handbook in schema order with its field descriptions.",
   "review-annotations/v21-readme-showcase-diff-cream-1000": "On the cream page at 1000 px, the blocks the host reports as changed since the last commit in the demo handbook carry the green bar at the left margin.",
   "diagrams/v17-readme-showcase-diagrams-cream-1000": "On the cream page at 1000 px, the demo handbook shows a Mermaid flowchart and a PlantUML sequence diagram, both drawn inline.",
+  "myst/v35-dollar-prices-full-light-900": "In the light theme a paragraph with a price such as $19 ... ($200), $5 and $6 or $100–$380 shows the text between the two dollar signs typeset as maths (no dollar sign left as text), the same as a real $x$ span.",
+  "myst/v36-dollar-prices-full-dark-900": "In the dark theme a paragraph with a price such as $19 ... ($200), $5 and $6 or $100–$380 shows the text between the two dollar signs typeset as maths (no dollar sign left as text), the same as a real $x$ span.",
 };
 
 /**
