@@ -282,3 +282,39 @@ export function convertCheckboxPlaceholders(
   });
   markTaskList(node);
 }
+
+// @implements_req SwRS-MDOKFSTUDIO-MYST-024
+/**
+ * Gives dollar amounts back to the text, as markdown-it dollarmath does: the parser reads the text
+ * between $5 and $6 as inline maths, but a $...$ span is maths only when the opening $ is
+ * not followed by whitespace and the closing $ neither follows whitespace nor precedes a digit.
+ * A span that fails these rules becomes text again, its dollar signs included.
+ */
+export function restoreDollarAmounts(node: MystNode): void {
+  const children = node.children;
+  if (!children) return;
+  let changed = false;
+  children.forEach((child, index) => {
+    if (child.type !== "inlineMath") {
+      restoreDollarAmounts(child);
+      return;
+    }
+    const value = child.value ?? "";
+    const next = children[index + 1];
+    const followedByDigit = next?.type === "text" && /^\d/u.test(next.value ?? "");
+    if (/^\s/u.test(value) || /\s$/u.test(value) || followedByDigit) {
+      Object.assign(child, { type: "text", value: "$" + value + "$" });
+      changed = true;
+    }
+  });
+  if (!changed) return;
+  node.children = children.reduce<MystNode[]>((merged, child) => {
+    const last = merged[merged.length - 1];
+    if (child.type === "text" && last?.type === "text") {
+      last.value = (last.value ?? "") + (child.value ?? "");
+    } else {
+      merged.push(child);
+    }
+    return merged;
+  }, []);
+}
