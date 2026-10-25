@@ -2,7 +2,9 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { renderMathHtml } from "../../../src/core/render/mathRenderer";
+import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElements, hasClass, parseHtml, textContent } from "./dom";
+import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-024
 test("typesets inline and display math with local assets and CSP-compatible styles", () => {
@@ -46,4 +48,16 @@ test("math cannot inject trusted HTML commands or external links", () => {
   assert.doesNotMatch(result, /<a\b|href="https:|style="/u);
   const styles = findElements(parseHtml(result), (element) => element.tagName === "style");
   assert.doesNotMatch(styles.map(textContent).join(""), /background:url/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-024
+test("dollar amounts stay text while a real dollar span is maths", async () => {
+  const source = "Plans: $19 base ($200), $5 and $6, $100\u2013$380, and $x$ typeset.\n";
+  const document = inlineDocument(source);
+  const result = await renderPreviewDocument({ document, workspaceRoot, requestId: 1,
+    documentIdentity: document.uri.fsPath, isWorkspaceTrusted: () => true });
+  const page = parseHtml(renderMathHtml(result.html, "katex.css", "nonce"));
+  const paragraph = findElements(page, (element) => element.tagName === "p")[0];
+  assert.equal(findElements(paragraph, (element) => hasClass(element, "katex")).length, 1);
+  assert.match(textContent(paragraph), /\$19 base \(\$200\), \$5 and \$6, \$100\u2013\$380/u);
 });

@@ -29,6 +29,7 @@ import {
   expandWikiLinks,
   normalizeAnchors,
   resolveAnchorIds,
+  restoreDollarAmounts,
 } from "./mystInlineTransforms";
 import { findNode, type MystNode, sourcePositionProperties } from "./mystNode";
 import { isPlantUmlNode, plantUmlFileRequest, walk } from "./mystNormalize";
@@ -355,6 +356,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   { name: "figure captions", run: (state) => normalizeFigureCaptions(state.ast) },
   { name: "caption-less references", run: (state) => normalizeCaptionlessReferences(state.ast) },
   { name: "version admonitions", run: (state) => expandVersionAdmonitions(state.ast, state.mystParse) },
+  { name: "dollar amounts", run: (state) => restoreDollarAmounts(state.ast) },
   { name: "wiki links", run: (state) => expandWikiLinks(state.ast) },
   {
     name: "checkboxes",
