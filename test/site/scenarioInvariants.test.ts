@@ -56,8 +56,8 @@ test("the TOC scenarios v22-v28 say that the fixture starts with a wide table", 
   }
 });
 
-test("assertion-only scenarios: 110 real ids, never a PNG, no kept step", () => {
-  assert.equal(ASSERTION_ONLY_IDS.size, 110);
+test("assertion-only scenarios: 111 real ids, never a PNG, no kept step", () => {
+  assert.equal(ASSERTION_ONLY_IDS.size, 111);
   for (const id of ASSERTION_ONLY_IDS) {
     assert.ok(ids.has(id), `${id} is not a scenario`);
   }

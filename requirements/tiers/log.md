@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-10-25 (Comments button hides the thread chips too)
+
+- SwRS-MDOKFSTUDIO-REVIEW-152: the toolbar Comments button now hides the inline thread chips together
+  with the gray chips (TODO chips stay), like the preview.showComments setting. The scenario states
+  it and the Known issue line is removed.
+
 ## 2026-10-25 (empty YAML schema reported as empty)
 
 - SwRS-MDOKFSTUDIO-FMSCHEMA-023: an empty or comment-only YAML schema file no longer makes the

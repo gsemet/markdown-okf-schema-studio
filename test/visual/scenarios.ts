@@ -202,6 +202,8 @@ export interface Scenario {
    * is the state left for the screenshot.
    */
   commentToggleChecks?: "visible" | "hidden";
+  /** The toolbar Comments button hides the gray and the thread chips (TODO stays) and brings them back. */
+  commentButtonThreadChecks?: boolean;
   /** Opens and closes an inline comment thread, checks its box, the reply and delete controls and the show-comments switch. */
   inlineThreadChecks?: boolean;
   /**
