@@ -65,6 +65,7 @@ test("clicking a checkbox posts a source toggle instead of revealing the block",
   assert.equal(harness.checkbox.checked, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021
 test("a rejected checkbox toggle reverts the box and explains why", () => {
   const harness = createRuntimeHarness();
   harness.checkbox.checked = true;
@@ -80,6 +81,13 @@ test("a rejected checkbox toggle reverts the box and explains why", () => {
   assert.equal(harness.checkbox.checked, false);
   assert.equal(harness.checkbox.getAttribute("aria-busy"), null);
   assert.match(harness.checkbox.getAttribute("title") ?? "", /out of date/u);
+  const note = harness.checkbox.insertedElements.at(-1)!;
+  assert.equal(note.className, "myst-checkbox-refusal");
+  assert.equal(note.getAttribute("role"), "status");
+  assert.match(note.textContent, /out of date/u);
+  assert.equal(note.parentElement, harness.checkbox.parentElement);
+  harness.advanceTimers(6000);
+  assert.equal(note.parentElement, undefined);
 });
 
 test("in edit mode a checkbox click toggles the box without opening a block editor", () => {

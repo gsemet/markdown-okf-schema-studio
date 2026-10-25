@@ -326,6 +326,62 @@ def check_comment_button_thread(page: Page, scenario: dict, failures: list[Failu
     failures.append(Failure(page_name, "the Comments button did not bring the gray and thread chips back"))
 
 
+def check_checkbox_refusal(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """A refused checkbox toggle: the box returns to its state and the reason shows next to it, readable."""
+  if not scenario.get("checkboxRefusalChecks"):
+    return
+  page_name = scenario["page"]
+  box = page.locator("#sphinx-myst-preview-content input.myst-checkbox").nth(1)
+  box.scroll_into_view_if_needed()
+  page.evaluate("window.visualMessages.length = 0")
+  box.click()
+  page.wait_for_timeout(100)
+  sent = page.evaluate("window.visualMessages.filter(m => m.type === 'previewCheckboxToggle')")
+  if len(sent) != 1 or not box.is_checked() or box.get_attribute("aria-busy") != "true":
+    failures.append(Failure(page_name, f"a click must send one toggle and leave the box checked and busy: {sent}"))
+    return
+  # Keep the note for the screenshot: the page removes it after six seconds.
+  page.evaluate("""() => { const set = window.setTimeout; window.setTimeout = (fn, ms, ...rest) => set(fn, ms === 6000 ? 600000 : ms, ...rest); }""")
+  reason = "Editing needs the file's folder opened as a workspace folder in VS Code."
+  page.evaluate("""([editId, error]) => window.dispatchEvent(new MessageEvent('message', { data: {
+    type: 'previewCheckboxResult', documentId: window.visualMessages[0].documentId,
+    revision: window.visualMessages[0].revision, requestId: window.visualMessages[0].requestId, editId, error } }))""",
+    [sent[0]["editId"], reason])
+  page.wait_for_timeout(100)
+  note = page.locator("#sphinx-myst-preview-content .myst-checkbox-refusal")
+  if box.is_checked() or box.get_attribute("aria-busy") is not None:
+    failures.append(Failure(page_name, "a refused toggle must put the box back and clear its busy state"))
+  if note.count() != 1 or not note.is_visible() or note.text_content() != reason:
+    failures.append(Failure(page_name, "the reason of the refusal must show next to the box"))
+    return
+  geometry = page.evaluate("""() => {
+    const box = document.querySelectorAll('#sphinx-myst-preview-content input.myst-checkbox')[1];
+    const note = document.querySelector('.myst-checkbox-refusal');
+    const a = box.getBoundingClientRect(), b = note.getBoundingClientRect();
+    return { sameLine: Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2) < a.height * 2,
+      after: b.left >= a.right - 1, inside: b.right <= document.documentElement.clientWidth,
+      color: getComputedStyle(note).color, background: getComputedStyle(note).backgroundColor };
+  }""")
+  if not (geometry["sameLine"] and geometry["after"] and geometry["inside"]):
+    failures.append(Failure(page_name, f"the refusal note must sit right after its box inside the pane: {geometry}"))
+  ratio = page.evaluate("""() => {
+    const note = document.querySelector('.myst-checkbox-refusal');
+    const parse = (c) => c.match(/[\\d.]+/g).map(Number);
+    const lum = ([r, g, b]) => [r, g, b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; })
+      .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+    const style = getComputedStyle(note);
+    const a = lum(parse(style.color)) + 0.05, b = lum(parse(style.backgroundColor)) + 0.05;
+    return Math.max(a, b) / Math.min(a, b);
+  }""")
+  if ratio < 4.5:
+    failures.append(Failure(page_name, f"the refusal note text needs a contrast of 4.5 against its background, got {ratio:.2f}"))
+  dark = scenario["theme"] == "dark"
+  background = page.evaluate("getComputedStyle(document.querySelector('.myst-checkbox-refusal')).backgroundColor")
+  channels = [float(v) for v in re.findall(r"[\d.]+", background)[:3]]
+  if dark and sum(channels) / 3 > 100:
+    failures.append(Failure(page_name, f"the refusal note must be dark in the dark theme, got {background}"))
+
+
 def check_inline_thread(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """An inline comment thread: green chip with a bubble, a titled green box, reply and delete requests, the switch."""
   if not scenario.get("inlineThreadChecks"):

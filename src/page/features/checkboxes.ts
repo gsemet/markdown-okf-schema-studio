@@ -10,6 +10,9 @@ import type { PageHostApi } from "../pageHost";
 
 const CHECKBOX_SELECTOR = "input.myst-checkbox";
 
+/** How long the reason of a refused toggle stays visible next to its box. */
+const REFUSAL_VISIBLE_MS = 6000;
+
 /** An open editor that a toggle would race (its status line says why the toggle waits). */
 export interface BlockingEdit {
   readonly status: Element;
@@ -44,6 +47,24 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
   const { host, context } = deps;
   const checkboxEditingEnabled = deps.editingEnabled;
   const pendingCheckboxToggles = new Map<string, { checkbox: HTMLInputElement; checked: boolean }>();
+  const refusals = new WeakMap<Element, { note: Element; timer: number }>();
+
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-021
+  /** Shows the reason of a refused toggle next to its box for a short time (and as its tooltip). */
+  function showRefusal(checkbox: HTMLInputElement, reason: string): void {
+    checkbox.setAttribute("title", reason);
+    const previous = refusals.get(checkbox);
+    if (previous) {
+      window.clearTimeout(previous.timer);
+      previous.note.remove();
+    }
+    const note = document.createElement("span");
+    note.className = "myst-checkbox-refusal";
+    note.setAttribute("role", "status");
+    note.textContent = reason;
+    checkbox.insertAdjacentElement("afterend", note);
+    refusals.set(checkbox, { note, timer: window.setTimeout(() => note.remove(), REFUSAL_VISIBLE_MS) });
+  }
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
   function initializeCheckboxes(): void {
@@ -102,7 +123,7 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
     pending.checkbox.removeAttribute("aria-busy");
     if (message.saved === true) return;
     pending.checkbox.checked = !pending.checked;
-    if (typeof message.error === "string") pending.checkbox.setAttribute("title", message.error);
+    if (typeof message.error === "string") showRefusal(pending.checkbox, message.error);
   });
   return {
     initialize: initializeCheckboxes,

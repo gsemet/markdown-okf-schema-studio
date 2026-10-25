@@ -50,10 +50,6 @@ When the host refuses a checkbox toggle, the extension SHALL revert the checkbox
 - WHEN the host applies the toggle
 - THEN it is refused with 'VS Code could not apply the checkbox edit.' or the edit error
 
-### Known issues
-
-- Known issue: the reason is set only as the checkbox tooltip (`title`), with no visible message next to the box, so a refusal is easy to miss.
-
 ### Verification notes
 
 - Method: Unit test "a rejected checkbox toggle reverts the box and explains why" in test/page/runtimePageControls.test.ts. Untested: the host refusal paths.

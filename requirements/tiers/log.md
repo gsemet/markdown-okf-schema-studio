@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-10-26 (a refused checkbox toggle is visible and always answered)
+
+- SwRS-MDOKFSTUDIO-GFM-021: the reason of a refused toggle now also shows in a short status note next to
+  the box; a toggle in a preview of a file outside every workspace folder names the missing folder. The
+  Known issue line is removed here and from the superseded GFM-024 and GFM-026.
+- SwRS-MDOKFSTUDIO-GFM-027: a toggle message the validator rejects is answered with a refusal, so the box
+  no longer stays busy; the Known issue line is removed.
+- SwRS-MDOKFSTUDIO-TRUST-005: the checkbox row of the table gives the two read-only reasons; the Known
+  issue narrows to the other request types and the tooltip of a disabled checkbox.
+
 ## 2026-10-26 (a failed preference write warns the reader)
 
 - SwRS-MDOKFSTUDIO-LIFE-169: when the workspace storage rejects the write of the theme mode or a view

@@ -368,6 +368,17 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   outline-offset: 2px;
 }
 
+/* The reason of a refused toggle, shown next to its box for a few seconds. */
+#sphinx-myst-preview-content .myst-checkbox-refusal {
+  margin-inline-end: 0.5em;
+  padding: 1px 6px;
+  border: 1px solid var(--studio-editorWarning-foreground, var(--studio-charts-yellow, #b89500));
+  border-radius: 3px;
+  background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));
+  color: var(--studio-editorWidget-foreground, var(--studio-editor-foreground, CanvasText));
+  font-size: 0.85em;
+}
+
 /* Task list items show the checkbox in the bullet gutter, as GitHub does. */
 #sphinx-myst-preview-content li.task-list-item {
   list-style: none;

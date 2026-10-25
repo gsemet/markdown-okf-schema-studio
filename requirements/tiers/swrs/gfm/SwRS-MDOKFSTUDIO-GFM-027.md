@@ -6,7 +6,8 @@ title: The host validates checkbox toggle messages
 description: When the host receives a previewCheckboxToggle message, the
   extension SHALL accept it only with a safe non-negative integer column, a
   boolean checked state and a single line, and accept column and checked on no
-  other message type.
+  other message type, and answer a rejected message that names its box with a
+  refusal.
 project: markdown-okf-schema-studio
 scope: gfm
 lifecycle: draft
@@ -25,15 +26,17 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/protocol/pageToHost.ts
+- src/session/pageMessages.ts
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
+- test/session/checkboxRefusal.test.ts
 ---
 
 ## The host validates checkbox toggle messages
 
 ### Normative behavior
 
-When the host receives a previewCheckboxToggle message, the extension SHALL accept it only with a safe non-negative integer column, a boolean checked state and a single line, and accept column and checked on no other message type.
+When the host receives a previewCheckboxToggle message, the extension SHALL accept it only with a safe non-negative integer column, a boolean checked state and a single line, and accept column and checked on no other message type. A rejected message that names its document, render and box is answered with a refusal, so the box does not stay busy.
 
 ### Scenario (nominal): Valid message
 
@@ -56,9 +59,12 @@ When the host receives a previewCheckboxToggle message, the extension SHALL acce
 - WHEN it is checked
 - THEN it is refused
 
-### Known issues
+### Scenario (refusal): A rejected message is answered
 
-- Known issue: a message the validator rejects is dropped without a result, so the box that sent it stays busy (`aria-busy`) until the next render; the shipped page checks line and column before sending, so only a malformed message from another sender reaches this.
+| Input | Outcome |
+| --- | --- |
+| a rejected toggle that names the shown document, a render and an edit id | the page is answered with the error 'The checkbox request was not understood. Refresh the preview.' and no edit is made |
+| a rejected toggle without an edit id, or for another document | dropped without an answer |
 
 ### Related requirements
 
@@ -66,5 +72,6 @@ When the host receives a previewCheckboxToggle message, the extension SHALL acce
 
 ### Verification notes
 
+- Method: test/session/checkboxRefusal.test.ts (a malformed toggle is answered; one without a box or for another document is not).
 - Method: test/core/protocol/pageStateMessages.test.ts (valid message, invalid shapes, column and checked on another type: unit tests on the validators, which accept exactly what the frozen validator accepted).
 - Criteria: Only well-formed messages are accepted; the toggle needs a non-negative integer column, a boolean state and one line, and column and checked are accepted only on previewCheckboxToggle.

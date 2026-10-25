@@ -22,6 +22,18 @@ export const CHECKBOX_GONE = "The checkbox is no longer in the source. Refresh t
 /** Refusal of a label rename whose `(name)=` line is gone. */
 export const LABEL_GONE = "The label is no longer on that line. Refresh the preview.";
 
+/** Why a preview is read-only when the workspace is not trusted. */
+export const READ_ONLY_UNTRUSTED = "Editing requires a trusted workspace.";
+/** Why a preview is read-only when the file is outside every workspace folder. */
+export const READ_ONLY_NO_FOLDER = "Editing needs the file's folder opened as a workspace folder in VS Code.";
+/** Refusal of a checkbox toggle whose message is malformed. */
+export const MALFORMED_TOGGLE = "The checkbox request was not understood. Refresh the preview.";
+
+/** The reason a read-only preview refuses an edit: the missing folder, else the missing trust. */
+export function readOnlyReason(hasWorkspaceFolder: boolean): string {
+  return hasWorkspaceFolder ? READ_ONLY_UNTRUSTED : READ_ONLY_NO_FOLDER;
+}
+
 /** The reason of a request that names an older render than the one the host holds. */
 export const STALE_REQUEST = "The preview is out of date. Try again once it has refreshed.";
 /** Refusal of a thread change whose `<!-- THREAD` comment is gone. */
