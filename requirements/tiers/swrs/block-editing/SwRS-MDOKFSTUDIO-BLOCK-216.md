@@ -50,6 +50,7 @@ When the host refuses to open a block editor or to save its text, the extension 
 | A first previewEditSave whose originalText differs from the block in the document, for example "Not the current source" | The answer carries "The source block changed while it was being edited." and nothing is written |
 | A first previewEditSave for lines beyond the document, also the save of an insertion after a missing line, or a revision that does not fit | The answer carries "The preview is stale. Reopen the block before saving." and nothing is written |
 | A previewEditSave with another editId, document, range, original text or revision than the held edit | The answer carries "The preview block edit is stale. Reopen the block before saving." and the document is unchanged |
+| A previewEditOpen that names an older render than the host holds | The answer carries "The preview is out of date. Try again once it has refreshed." and no page editor is registered; the reason is not visible yet (see the Known issue below), only the pending state is cleared |
 | A previewEditCancel with another editId, document, range, original text or revision than the held edit | The answer carries "The preview block edit is stale. Reopen the block before cancelling." and nothing changes |
 
 ### Scenario (refusal): A refused open leaves the frame without a text box
@@ -75,7 +76,6 @@ When the host refuses to open a block editor or to save its text, the extension 
 
 ### Known issues
 - Known issue: the status line of a block editor is attached to the frame only when the source arrives, so after a refused open the writer sees an empty frame and not the reason (a table cell editor does show it). The frame has no Done and no Cancel button and no Escape handling, the Refresh button stays disabled, and a click on another block opens nothing; the frame closes only when a render patches the page or when edit mode is turned off.
-- Known issue: an open that names an older render than the host holds gets no answer at all (see SwRS-MDOKFSTUDIO-TRUST-065).
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TRUST-065: the gate of each page message, including the stale write

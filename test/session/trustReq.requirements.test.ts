@@ -44,12 +44,14 @@ function harness(options: { stage?: boolean; activeEdit?: { editId: string; revi
     },
     page: {},
     scroll: {},
+    postToPage: () => Promise.resolve(true),
   } as unknown as PreviewSession;
   const manager = {
     live: new Set<unknown>([session]),
     matchesCurrent: PreviewManager.prototype.matchesCurrent,
     has: () => true,
     edits: { postEditSourceError: (_preview: unknown, _message: unknown, text: string) => errors.push(text) },
+    sourceEdits: { postCheckboxResult: (_preview: unknown, _message: unknown, result: { error?: string }) => errors.push(String(result.error)) },
     frontmatter: { postEditError: (_preview: unknown, _message: unknown, text: string) => errors.push(text) },
   };
   const router = {
@@ -225,4 +227,43 @@ test("the pending page that clears the content and the missing-source page allow
   assert.deepEqual(roots, [[], []]);
   assert.deepEqual(missing.page.resourceRoots, []);
   assert.match(missing.panel.html, /data-sphinx-preview-status="missing-source"/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+test("every request of the render gate from an older render is answered with the out-of-date reason", () => {
+  const { dispatcher, session, handled, errors } = harness();
+  const posted: Array<Record<string, unknown>> = [];
+  (session as unknown as { postToPage: unknown }).postToPage = (message: Record<string, unknown>) => {
+    posted.push(message);
+    return Promise.resolve(true);
+  };
+  const stale = { documentId: DOCUMENT, revision: 3, requestId: 9 };
+  const reason = "The preview is out of date. Try again once it has refreshed.";
+  const requests: Array<[Record<string, unknown>, string, Record<string, unknown>]> = [
+    [{ type: "previewBlockMove", line: 3, endLine: 4, neighbourLine: 6, neighbourEndLine: 7, direction: "down" }, "previewBlockMoveResult", {}],
+    [{ type: "previewBlocksCopy", line: 3, endLine: 4 }, "previewBlocksResult", { op: "copy" }],
+    [{ type: "previewBlocksCut", line: 3, endLine: 4 }, "previewBlocksResult", { op: "cut" }],
+    [{ type: "previewBlocksPaste", insertAfterLine: 3 }, "previewBlocksResult", { op: "paste" }],
+    [{ type: "previewThreadReply", editId: "e", line: 3, endLine: 4, text: "x" }, "previewThreadReplyResult", { editId: "e" }],
+    [{ type: "previewThreadDelete", editId: "e", line: 3, endLine: 4 }, "previewThreadDeleteResult", { editId: "e" }],
+    [{ type: "previewListTargets", editId: "e" }, "previewListTargetsResult", { editId: "e" }],
+    [{ type: "previewListCitations", editId: "e" }, "previewListCitationsResult", { editId: "e" }],
+    [{ type: "previewPickDocument", editId: "e" }, "previewPickDocumentResult", { editId: "e" }],
+    [{ type: "previewPickImage", editId: "e" }, "previewPickImageResult", { editId: "e" }],
+    [{ type: "previewPasteImage", editId: "e", mime: "image/png", dataBase64: "AA==" }, "previewPasteImageResult", { editId: "e" }],
+    [{ type: "previewPasteHtml", editId: "e", html: "<b>x</b>" }, "previewPasteHtmlResult", { editId: "e" }],
+  ];
+  for (const [request, answer, extra] of requests) {
+    posted.length = 0;
+    assert.equal(dispatcher.handle(session, { ...request, ...stale }), undefined, String(request.type));
+    assert.equal(posted.length, 1, String(request.type));
+    assert.deepEqual(posted[0], { ...stale, type: answer, ok: false, reason, ...extra }, String(request.type));
+  }
+  assert.deepEqual(handled, []);
+
+  // An open of an editor is answered through the block editor error.
+  dispatcher.handle(session, { type: "previewEditOpen", editId: "e", line: 3, endLine: 4, ...stale });
+  assert.deepEqual(errors, [reason]);
+  dispatcher.handle(session, { type: "previewCheckboxToggle", editId: "c", line: 3, endLine: 3, column: 2, checked: true, ...stale });
+  assert.deepEqual(errors, [reason, reason]);
 });

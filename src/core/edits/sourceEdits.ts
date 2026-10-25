@@ -21,6 +21,9 @@ import { sourceLines, type EditRefusal, type SourceLines, type TextEdit } from "
 export const CHECKBOX_GONE = "The checkbox is no longer in the source. Refresh the preview.";
 /** Refusal of a label rename whose `(name)=` line is gone. */
 export const LABEL_GONE = "The label is no longer on that line. Refresh the preview.";
+
+/** The reason of a request that names an older render than the one the host holds. */
+export const STALE_REQUEST = "The preview is out of date. Try again once it has refreshed.";
 /** Refusal of a thread change whose `<!-- THREAD` comment is gone. */
 export const THREAD_GONE = "The thread is no longer in the source. Refresh the preview.";
 /** Refusal of a reply that cannot be added (empty, too long, or no closing `-->`). */

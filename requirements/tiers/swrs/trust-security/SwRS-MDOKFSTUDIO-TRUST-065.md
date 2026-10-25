@@ -59,7 +59,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When a page message reaches the host, the extension SHALL pass it only to the handler of its type after it matches the render or document the host holds by the gate of that type (render, comment, document, own-id or page-state), drop a message that fails the gate without an answer, and answer a write whose document is newer than the render with "The preview is out of date. Try again once it has refreshed." or a reopen hint.
+When a page message reaches the host, the extension SHALL pass it only to the handler of its type after it matches the render or document the host holds by the gate of that type (render, comment, document, own-id or page-state), drop a message that fails the gate without an answer (except a request that waits for an answer, which it answers with "The preview is out of date. Try again once it has refreshed." when it names an older render), and answer a write whose document is newer than the render with "The preview is out of date. Try again once it has refreshed." or a reopen hint.
 
 ### Scenario (nominal): Current render passes the render gate
 
@@ -73,7 +73,7 @@ Every page message type has one gate. A message with a registered type and a val
 
 | Gate | Message types | Passes when | Otherwise |
 | --- | --- | --- | --- |
-| render | previewHistoryGo, previewViewPreferenceChanged, previewPaletteModeChanged, previewLabelRename, previewThreadReply, previewThreadDelete, previewBlockMove, previewBlocksCopy, previewBlocksCut, previewBlocksPaste, previewListTargets, previewListCitations, previewPickDocument, previewPickImage, previewPasteImage, previewPasteHtml | its document, revision and request identifiers equal those of the render the host holds, the preview is alive and has a rendered stage | dropped, with no answer and no change |
+| render | previewHistoryGo, previewViewPreferenceChanged, previewPaletteModeChanged, previewLabelRename, previewThreadReply, previewThreadDelete, previewBlockMove, previewBlocksCopy, previewBlocksCut, previewBlocksPaste, previewListTargets, previewListCitations, previewPickDocument, previewPickImage, previewPasteImage, previewPasteHtml | its document, revision and request identifiers equal those of the render the host holds, the preview is alive and has a rendered stage | dropped with no change; a request that waits for an answer (see the scenario below) is answered with the out-of-date reason, previewHistoryGo, previewViewPreferenceChanged and previewPaletteModeChanged are not requests and get no answer |
 | comment | previewCommentCreate, previewCommentReply, previewCommentResolve, previewCommentDelete | its document and request identifiers equal those of the render the host holds, whatever its revision (comments live in a sidecar file and the quote is anchored again, so typed text is not lost to a race with typing) | dropped, with no answer and no write |
 | document | previewCopyText, previewPlantUmlInclude, previewShowProblems, previewWarningBannerClosed | the preview is alive and its documentId equals that of the document the preview shows, even one render behind; revision and request are not compared | dropped without an answer |
 | own-id | previewEditClosed, previewEditFlushed | the preview is not disposed, whatever document, revision and request the message names (the waiting host matches the answer by the identifier it sent) | dropped (disposed preview) |
@@ -81,12 +81,15 @@ Every page message type has one gate. A message with a registered type and a val
 
 The page-state exceptions are the ready reports (see SwRS-MDOKFSTUDIO-LIFE-071), the save or cancel of the block editor the host has open for exactly the render that message names (same editId, document, revision and request), and the stale save, cancel or frontmatter save of the second table.
 
-### Scenario (refusal): Older or foreign render is dropped
+### Scenario (refusal): Older render is answered, foreign render is dropped
 
 | Input | Outcome |
 | --- | --- |
-| previewBlockMove naming revision 3 while the host holds revision 4 | dropped, with no answer and no change |
-| previewBlockMove, previewBlocksCopy, previewBlocksCut or previewBlocksPaste naming an earlier request id | dropped and nothing is answered |
+| previewBlockMove naming revision 3 while the host holds revision 4 | answered with previewBlockMoveResult ok false and "The preview is out of date. Try again once it has refreshed."; nothing changes |
+| previewBlockMove, previewBlocksCopy, previewBlocksCut or previewBlocksPaste naming an earlier request id | answered with ok false and the out-of-date reason (previewBlocksResult carries the operation); nothing changes |
+| previewThreadReply, previewThreadDelete, previewListTargets, previewListCitations, previewPickDocument, previewPickImage, previewPasteImage or previewPasteHtml naming an older render | answered with its Result message, ok false and the out-of-date reason; no file is read and no dialog is opened, and the page clears its pending request |
+| previewEditOpen or previewCheckboxToggle naming an older render of a writable preview | answered with the out-of-date reason (the block editor error, the checkbox error); for the open, only the pending state is cleared, because the status line of the block editor is attached to the frame only when the source arrives (see SwRS-MDOKFSTUDIO-BLOCK-216) |
+| a request of the render gate naming another document, or of a disposed preview | dropped without an answer |
 | previewCopyText of a page whose document version or render request is no longer current | handled: the text is written to the clipboard and the page is answered, because a copy edits nothing |
 | previewCopyText naming another document | dropped, the clipboard is not written |
 | previewLink with another document identity, revision or request than the host render | ignored: nothing opens and nothing is recorded |
@@ -138,7 +141,6 @@ A message that passes its gate but writes for a document newer than the render i
 
 ### Known issues
 
-- Known issue: a request of the render gate that names an older render than the one the host holds is dropped by the gate without any answer. No reason is shown; an arrow click stays marked pending; a keyboard move and a selection move are forgotten by the page after five seconds; and an open request (which the host answers only for saves and cancels) leaves its frame empty.
 - Known issue: the include request (previewPlantUmlInclude) is not an edit: it is allowed in read-only previews and in Restricted Mode.
 
 ### Related requirements

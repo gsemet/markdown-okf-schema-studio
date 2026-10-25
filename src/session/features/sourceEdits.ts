@@ -19,6 +19,7 @@ import {
   planThreadDelete,
   planThreadReply,
   readThreadLines,
+  STALE_REQUEST,
 } from "../../core/edits/sourceEdits";
 import type { TextEdit } from "../../core/edits/textEdit";
 import type { HostDocument } from "../../host-api/documentStore";
@@ -76,7 +77,7 @@ export class SourceEditController {
   private handleCheckboxToggle(preview: PreviewSession, message: PageMessageOf<"previewCheckboxToggle">): PromiseLike<void> | undefined {
     const document = currentPreviewDocument(preview, message);
     if (!document || message.line === undefined || message.column === undefined || message.checked === undefined) {
-      this.postCheckboxResult(preview, message, { error: "The preview is out of date. Try again once it has refreshed." });
+      this.postCheckboxResult(preview, message, { error: STALE_REQUEST });
       return undefined;
     }
     if (preview.edits.active) {
@@ -141,7 +142,7 @@ export class SourceEditController {
     if (!document) {
       this.postLabelRenameResult(preview, message, {
         ok: false,
-        reason: "The preview is out of date. Try again once it has refreshed.",
+        reason: STALE_REQUEST,
       });
       return undefined;
     }
@@ -200,7 +201,7 @@ export class SourceEditController {
     if (preview.readOnly) return fail("Editing a thread needs a trusted workspace.");
     if (preview.edits.active) return fail("Save or cancel the open Markdown edit before changing a thread.");
     const document = currentPreviewDocument(preview, message);
-    if (!document) return fail("The preview is out of date. Try again once it has refreshed.");
+    if (!document) return fail(STALE_REQUEST);
     const thread = readThreadLines(document.getText(), message.line, message.endLine);
     if ("refused" in thread) return fail(thread.refused);
 
@@ -276,7 +277,7 @@ export class SourceEditController {
     if (!document) {
       this.postBlockMoveResult(preview, message, {
         ok: false,
-        reason: "The preview is out of date. Try again once it has refreshed.",
+        reason: STALE_REQUEST,
       });
       return undefined;
     }
@@ -339,7 +340,7 @@ export class SourceEditController {
       return refuse("Save or cancel the open Markdown edit first.");
     }
     return currentPreviewDocument(preview, message)
-      ?? refuse("The preview is out of date. Try again once it has refreshed.");
+      ?? refuse(STALE_REQUEST);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-166

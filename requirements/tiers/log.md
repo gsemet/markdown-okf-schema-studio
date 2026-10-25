@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-25 (a request of an older render is answered, not dropped)
+
+- SwRS-MDOKFSTUDIO-TRUST-065, TRUST-090, BLOCK-216: the render gate answers a request that names an older
+  render with the out-of-date reason (block move, block copy, cut and paste, thread, list, picker and
+  paste requests, block open, checkbox toggle), so the page clears its pending state and shows it.
+  Removed the Known issue lines of TRUST-065 and TRUST-090 and the one of BLOCK-216 about the unanswered open; the open answer clears the pending state, its reason stays hidden (Known issue kept). History, view preference and palette mode messages are no
+  requests and stay unanswered.
+
 ## 2026-10-25 (every label with an anchor icon can be renamed)
 
 - SwRS-MDOKFSTUDIO-MYST-038: one label name pattern for the icon, the field and the host, so a

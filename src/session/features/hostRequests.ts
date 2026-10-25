@@ -5,6 +5,7 @@
  * the open block editor. Each answer repeats the request's identity (`<type>Result`).
  */
 
+import { STALE_REQUEST } from "../../core/edits/sourceEdits";
 import * as path from "node:path";
 
 import { IMAGE_EXTENSIONS, isImageFileName, relativeImageReference } from "../../core/mapping/imageReference";
@@ -159,7 +160,7 @@ export class HostRequestController {
   private handleListTargets(preview: PreviewSession, message: PageMessageOf<"previewListTargets">): void {
     const document = currentPaletteDocument(preview, message);
     if (!document) {
-      this.postHostResult(preview, message, { ok: false, reason: "The preview is out of date. Try again once it has refreshed." });
+      this.postHostResult(preview, message, { ok: false, reason: STALE_REQUEST });
       return;
     }
     this.postHostResult(preview, message, targetChoices(document.getText()));
@@ -177,7 +178,7 @@ export class HostRequestController {
     }
     const document = currentPaletteDocument(preview, message);
     if (!document) {
-      this.postHostResult(preview, message, { ok: false, reason: "The preview is out of date. Try again once it has refreshed." });
+      this.postHostResult(preview, message, { ok: false, reason: STALE_REQUEST });
       return undefined;
     }
     return this.listCitations(document.path).then((scan) => {

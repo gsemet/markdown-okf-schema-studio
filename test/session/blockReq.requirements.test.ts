@@ -213,7 +213,7 @@ test("a second open while the host holds an edit is refused", async () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065
-test("a save or cancel from an older page of a writable preview is answered with an error", async () => {
+test("an open, save or cancel from an older page of a writable preview is answered with an error", async () => {
   const stale = "The preview changed while this block was being edited. Copy your text, then reopen the block.";
   const writable = fixture();
   const old = (type: string, extra: Record<string, unknown>) => writable.manager.handlePageMessage(
@@ -225,7 +225,7 @@ test("a save or cancel from an older page of a writable preview is answered with
   await old("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
   await settle();
   const errors = writable.of("previewEditSource").map((entry) => entry.error);
-  assert.deepEqual(errors, [stale, stale], "the open of an older page stays unanswered");
+  assert.deepEqual(errors, [stale, stale, "The preview is out of date. Try again once it has refreshed."]);
   assert.equal(writable.document.getText(), MARKDOWN);
 
   const readOnly = fixture({ readOnly: true });

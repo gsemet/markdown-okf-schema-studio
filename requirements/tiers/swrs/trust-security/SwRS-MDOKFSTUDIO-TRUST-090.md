@@ -94,7 +94,7 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 | previewPlantUmlInclude | 10 seconds (set by the PlantUML bridge) | the bundle receives ok false and the reason The editor did not answer. Try again. |
 | previewPickDocument, previewPickImage | 10 minutes (a request marked as a dialog) | ok false and the reason The editor did not answer. Try again. |
 
-- A request answered before its timeout produces no timeout result.
+- A request answered before its timeout produces no timeout result. A request that names an older render is answered at once by the host, so none of the timeouts above applies to it.
 - A request that ended on its timeout is forgotten, so an answer that arrives later is ignored.
 - While a dialog request is pending, the block editor does not treat the focus loss as leaving; this holds also until its timeout.
 
@@ -143,15 +143,18 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 - THEN it is ignored: nothing is shown and nothing is inserted
 - AND an answer that arrives for the editor still open is used (the entries are shown, the Markdown is inserted)
 
-### Known issues
+### Scenario (refusal): A request of an older render is answered
 
-- Known issue: a request that names an older render than the host holds is dropped by the host without an answer (SwRS-MDOKFSTUDIO-TRUST-065), so the page waits for its own timeout: 6 seconds for a list, 10 minutes for a file dialog, during which the blur commit stays suspended.
+- GIVEN a list, picker, paste or thread request that names an older render than the host holds
+- WHEN the host receives it
+- THEN it answers with ok false and "The preview is out of date. Try again once it has refreshed."
+- AND the page clears the pending request at once and shows the reason, without waiting for its own timeout
 
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TRUST-052: the envelope and the accepted fields of the request messages
 - SwRS-MDOKFSTUDIO-TRUST-059: the acceptance of the result messages by the page
-- SwRS-MDOKFSTUDIO-TRUST-065: the gates that drop a request of an older render
+- SwRS-MDOKFSTUDIO-TRUST-065: the gates, and the out-of-date answer to a request of an older render
 - SwRS-MDOKFSTUDIO-TRUST-005: the refusal of the write requests of a read-only preview
 
 ### Verification notes
