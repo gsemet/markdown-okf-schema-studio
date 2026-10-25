@@ -1205,6 +1205,16 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "A page with a gray comment chip, a green thread chip and a TODO chip: the toolbar Comments button hides the gray "
       + "and the thread chips at once, the TODO chip stays, and a second press brings them back.",
   },
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-GFM-021
+    id: `gfm/v0${5 + index}-checkbox-refusal-${theme}-900`,
+    fixture: "37-gfm-gallery",
+    theme,
+    ...WIDE,
+    scroll: { kind: "selector" as const, value: "#sphinx-myst-preview-content input.myst-checkbox", offset: 200 },
+    checkboxRefusalChecks: true,
+    description: `The host refuses a checkbox toggle: the box goes back to unchecked and the reason shows in a note next to it, ${theme}, 900 px pane.`,
+  })),
   // CR 046: the update glow of a content patch that follows an outside change or an undo.
   ...([
     ["light", undefined, 1],

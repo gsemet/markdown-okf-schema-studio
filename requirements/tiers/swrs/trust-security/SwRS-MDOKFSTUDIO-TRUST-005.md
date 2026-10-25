@@ -46,6 +46,7 @@ tested_in_files:
 - test/integration/untrusted-suite.ts
 - test/page/runtimePageControls.test.ts
 - test/session/blockReq.requirements.test.ts
+- test/session/checkboxRefusal.test.ts
 - test/session/paletteReq.requirements.test.ts
 - test/session/renderReq.labelRename.requirements.test.ts
 - test/session/reviewReqComments.requirements.test.ts
@@ -68,7 +69,7 @@ When the host receives a write request from a read-only preview for the render i
 | --- | --- | --- |
 | previewEditOpen, previewEditSave, previewEditCancel | Editing requires a trusted workspace. | block edit error |
 | previewFrontmatterSave | Editing requires a trusted workspace. | frontmatter edit error |
-| previewCheckboxToggle | Editing requires a trusted workspace. | checkbox result with an error |
+| previewCheckboxToggle | Editing needs the file's folder opened as a workspace folder in VS Code. (file outside every workspace folder); Editing requires a trusted workspace. (untrusted workspace) | checkbox result with an error |
 | previewBlockMove | Moving a block needs a trusted workspace. | move result, ok false |
 | previewBlocksCopy, previewBlocksCut, previewBlocksPaste | Copying, cutting and pasting blocks needs a trusted workspace. | blocks result, ok false |
 | previewLabelRename | Renaming needs a trusted workspace. | rename result, ok false |
@@ -102,7 +103,7 @@ When the host receives a write request from a read-only preview for the render i
 
 - GIVEN a read-only preview of a document with task checkboxes
 - WHEN it is rendered
-- THEN the checkboxes are disabled with the tooltip "Editing requires a trusted workspace.", and a previewCheckboxToggle sent anyway is refused with the same text
+- THEN the checkboxes are disabled with the tooltip "Editing requires a trusted workspace.", and a previewCheckboxToggle sent anyway is refused with the reason of the table (the tooltip of the disabled box keeps the trusted-workspace text)
 
 ### Scenario (boundary): Host-side writes that a read-only preview never starts
 
@@ -113,7 +114,7 @@ When the host receives a write request from a read-only preview for the render i
 
 ### Known issues
 
-- Known issue: the read-only text "Editing requires a trusted workspace." is also shown for a standalone file outside any workspace folder, where trusting a workspace does not help (read-only is decided by "no workspace folder or untrusted").
+- Known issue: the read-only text "Editing requires a trusted workspace." (every edit request except the checkbox toggle, and the tooltip of a disabled checkbox) is also shown for a standalone file outside any workspace folder, where trusting a workspace does not help (read-only is decided by "no workspace folder or untrusted").
 - Known issue: the comment refusal text "comments need a trusted workspace." blames the workspace trust, but a preview is also read-only for a file outside every workspace folder, where trust is not the cause. The page offers no comment control in either case, so the text appears only when a message is sent without the controls.
 - Known issue: the thread refusal text "Editing a thread needs a trusted workspace." blames the workspace trust, but a preview is also read-only for a file outside every workspace folder, where trust is not the cause. The page adds no thread control in either case, so the text appears only for a request sent without the controls.
 
@@ -127,7 +128,7 @@ When the host receives a write request from a read-only preview for the render i
 - Method: test/integration/standalone-suite.ts sends previewFrontmatterSave to a read-only preview and checks that the document text is unchanged (frontmatter row, document unchanged). The older render scenario, the order of the checks and the missing handler call for the other types are untested through the dispatcher: no unit test covers PageMessageDispatcher in src/session/pageMessages.ts.
 - Method: test/session/blockReq.requirements.test.ts, unit tests `a read-only preview answers the open, save and cancel of a block with the trust error` (block edit row) and `a read-only preview posts no flush request before a switch, a writable preview does` (flush row, writable scenario). The page does not offer the Edit button in such a preview, so the refusal is a second line of defence.
 - Method: test/host/fmtableReq.requirements.test.ts, unit test a frontmatter save in an untrusted workspace is refused with the trust message and changes nothing (frontmatter row). Untested: the file outside the workspace (standalone) branch; it gets the same wording.
-- Method: test/page/runtimePageControls.test.ts, unit test "checkboxes are disabled when the preview cannot edit the document" (disabled checkbox scenario). Untested: the host refusal of previewCheckboxToggle.
+- Method: test/page/runtimePageControls.test.ts, unit test "checkboxes are disabled when the preview cannot edit the document" (disabled checkbox scenario). The host refusal of previewCheckboxToggle (both reasons) is tested in test/session/checkboxRefusal.test.ts.
 - Method: test/integration/blockMove.test.ts (a read-only preview must not move a block; move row and writable scenario).
 - Method: test/integration/blockClipboard.test.ts and test/integration/untrusted-suite.ts (an untrusted preview leaves document and clipboard unchanged; copy, cut and paste row; the untrusted suite also shows that a read-only preview opens no image dialog and writes no file; the answered image picker text is untested).
 - Method: test/session/renderReq.labelRename.requirements.test.ts, unit test "a rename in an untrusted or read-only preview changes nothing and answers Renaming needs a trusted workspace" (rename row).

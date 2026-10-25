@@ -5,8 +5,8 @@ uuid: 316e3fc1-d2a8-43ab-9eaf-a67304f9bd1f
 title: Clicking a checkbox toggles one source character
 description: When a writer clicks a checkbox in reading or edit mode, the
   extension SHALL edit only the character between its brackets, without opening
-  a block editor, and revert the checkbox with the reason in its tooltip when
-  the host refuses the toggle.
+  a block editor, and revert the checkbox and show the reason next to it for a
+  few seconds (and as its tooltip) when the host refuses the toggle.
 project: markdown-okf-schema-studio
 scope: gfm
 lifecycle: draft
@@ -32,13 +32,14 @@ tested_in_files:
 - test/core/edits/sourceEdits.test.ts
 - test/page/runtimeContentPatch.test.ts
 - test/page/runtimePageControls.test.ts
+- test/visual/scenarioDefinitions2.ts
 ---
 
 ## Clicking a checkbox toggles one source character
 
 ### Normative behavior
 
-When a writer clicks a checkbox in reading or edit mode, the extension SHALL edit only the character between its brackets, without opening a block editor, and revert the checkbox with the reason in its tooltip when the host refuses the toggle.
+When a writer clicks a checkbox in reading or edit mode, the extension SHALL edit only the character between its brackets, without opening a block editor, and revert the checkbox and show the reason next to it for a few seconds (and as its tooltip) when the host refuses the toggle.
 
 ### Scenario (nominal): Toggle in reading mode
 
@@ -71,10 +72,14 @@ For the open editor, the stale render and the read-only preview, see SwRS-MDOKFS
 
 | Input | Outcome |
 | --- | --- |
-| a toggle refused as out of date | the checkbox returns to its previous state and the tooltip reads 'The preview is out of date. Try again once it has refreshed.' |
+| a toggle refused as out of date | the checkbox returns to its previous state, and the tooltip and a short status note next to the box read 'The preview is out of date. Try again once it has refreshed.' |
 | a toggle for a marker removed from the source | refused with 'The checkbox is no longer in the source. Refresh the preview.' |
 | a toggle while a Markdown edit is open | refused with 'Save or cancel the open Markdown edit before toggling a checkbox.' |
 | VS Code fails to apply the edit | refused with 'VS Code could not apply the checkbox edit.' or the edit error |
+| a toggle message the validator rejects (see SwRS-MDOKFSTUDIO-GFM-027) | refused with 'The checkbox request was not understood. Refresh the preview.' |
+| a toggle in a preview of a file outside every workspace folder | refused with "Editing needs the file's folder opened as a workspace folder in VS Code." (in an untrusted workspace: 'Editing requires a trusted workspace.') |
+
+The reason appears in a status note right after the box and disappears after about six seconds; a second refusal of the same box replaces the note.
 
 ### Scenario (boundary): Content patches clear pending toggles
 
@@ -83,10 +88,6 @@ For the open editor, the stale render and the read-only preview, see SwRS-MDOKFS
 | a pending toggle of old content, then an in-place patch and the old result | the new content checkbox is unchanged |
 | no pending toggle, then a patch | patching succeeds without effect on checkboxes |
 
-### Known issues
-
-- Known issue: the reason is set only as the checkbox tooltip (`title`), with no visible message next to the box, so a refusal is easy to miss.
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-GFM-027: the host validates the checkbox toggle message this click sends
@@ -94,6 +95,6 @@ For the open editor, the stale render and the read-only preview, see SwRS-MDOKFS
 ### Verification notes
 
 - Method: test/core/edits/sourceEdits.test.ts (toggle in reading mode, table cell, uppercase marker: unit tests of the one-character edit).
-- Method: test/page/runtimePageControls.test.ts (toggle with no block editor, busy checkbox, missing position attributes, unit test "a rejected checkbox toggle reverts the box and explains why"). Untested: the host refusal paths (marker gone, open Markdown edit, apply failure).
+- Method: test/page/runtimePageControls.test.ts (toggle with no block editor, busy checkbox, missing position attributes, unit test "a rejected checkbox toggle reverts the box and explains why", which also checks the status note and its removal). test/session/checkboxRefusal.test.ts (read-only reasons). Untested: the host refusal paths (marker gone, open Markdown edit, apply failure). The visual scenario of the refusal note is in the visual suite.
 - Method: test/page/runtimeContentPatch.test.ts (content patch scenario: page unit tests).
-- Criteria: The edit replaces exactly one character; exactly one message per pending toggle; the box is reverted and the matching reason shown for every refusal; new content is unaffected by stale results.
+- Criteria: The edit replaces exactly one character; exactly one message per pending toggle; the box is reverted and the matching reason shown, beside the box and as a tooltip, for every refusal; new content is unaffected by stale results.

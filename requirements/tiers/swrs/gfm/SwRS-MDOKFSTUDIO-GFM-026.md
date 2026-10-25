@@ -39,10 +39,6 @@ When the preview cannot edit the document, the extension SHALL disable checkboxe
 - WHEN the host receives it
 - THEN it is refused with the same text and no edit is made
 
-### Known issues
-
-- Known issue: the read-only text "Editing requires a trusted workspace." is also shown for a standalone file outside any workspace folder, where trusting a workspace does not help (read-only is decided by "no workspace folder or untrusted").
-
 ### Verification notes
 
 - Method: Unit test "checkboxes are disabled when the preview cannot edit the document" in test/page/runtimePageControls.test.ts. Untested: the host refusal.

@@ -204,6 +204,8 @@ export interface Scenario {
   commentToggleChecks?: "visible" | "hidden";
   /** The toolbar Comments button hides the gray and the thread chips (TODO stays) and brings them back. */
   commentButtonThreadChecks?: boolean;
+  /** A refused checkbox toggle puts the box back and shows the reason next to it. */
+  checkboxRefusalChecks?: boolean;
   /** Opens and closes an inline comment thread, checks its box, the reply and delete controls and the show-comments switch. */
   inlineThreadChecks?: boolean;
   /**

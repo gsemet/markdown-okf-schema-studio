@@ -610,6 +610,8 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "rendering-core/v25-readme-showcase-hero-cream-1200": "On the cream page at 1200 px, the demo handbook shows its properties table, its title, a three-card grid, a nested admonition and a captioned figure.",
   "myst/v34-readme-showcase-edit-cream-1000": "In edit mode on the cream page at 1000 px, the card grid and the captioned figure of the demo handbook stay rendered and the clicked admonition opens in its Markdown editor.",
   "frontmatter-schema/v23-readme-showcase-schema-cream-1000": "On the cream page at 1000 px, the demo handbook frontmatter renders a properties table for type handbook in schema order with its field descriptions.",
+  "gfm/v05-checkbox-refusal-light-900": "In the light theme at 900 px, a refused checkbox toggle puts the unchecked box back and shows the reason in a readable note right after the box, inside the pane.",
+  "gfm/v06-checkbox-refusal-dark-900": "In the dark theme at 900 px, a refused checkbox toggle puts the unchecked box back and shows the reason in a readable note right after the box, inside the pane.",
   "review-annotations/v22-comments-button-hides-thread-light-900": "The toolbar Comments button hides the gray and the thread chips at once, the TODO chip stays, and a second press brings them back.",
   "review-annotations/v21-readme-showcase-diff-cream-1000": "On the cream page at 1000 px, the blocks the host reports as changed since the last commit in the demo handbook carry the green bar at the left margin.",
   "diagrams/v17-readme-showcase-diagrams-cream-1000": "On the cream page at 1000 px, the demo handbook shows a Mermaid flowchart and a PlantUML sequence diagram, both drawn inline.",

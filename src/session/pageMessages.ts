@@ -16,7 +16,7 @@ import { reportsReloadedDocument } from "../core/preview/contentPatch";
 import type { MessageRouter } from "../core/protocol/router";
 import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
-import { LABEL_GONE, STALE_REQUEST } from "../core/edits/sourceEdits";
+import { LABEL_GONE, MALFORMED_TOGGLE, readOnlyReason, STALE_REQUEST } from "../core/edits/sourceEdits";
 import { revisionOfStage } from "./sessionDocuments";
 
 /** What a page message handler returns: the work it started, when a caller may wait for it. */
@@ -105,6 +105,7 @@ export class PageMessageDispatcher {
    */
   public handle(preview: PreviewSession, value: unknown): PromiseLike<void> | undefined {
     if (!isPageToHostMessage(value)) {
+      this.answerMalformedToggle(preview, value);
       return undefined;
     }
     const { manager } = this;
@@ -126,6 +127,27 @@ export class PageMessageDispatcher {
       case "page-state":
         return isPageStateMessage(value) ? this.handlePageState(preview, value) : undefined;
     }
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-027
+  /**
+   * A checkbox toggle the validator rejected is still answered (when it names its box and render),
+   * so the box on the page never stays busy.
+   */
+  private answerMalformedToggle(preview: PreviewSession, value: unknown): void {
+    if (typeof value !== "object" || value === null || preview.disposed || !this.manager.has(preview)) return;
+    const { type, documentId, revision, requestId, editId } = value as Record<string, unknown>;
+    if (
+      type !== "previewCheckboxToggle"
+      || documentId !== preview.documentUri
+      || typeof revision !== "number" || typeof requestId !== "number"
+      || typeof editId !== "string" || editId === "" || editId.length > 100
+    ) return;
+    this.manager.sourceEdits.postCheckboxResult(
+      preview,
+      { type, documentId, revision, requestId, editId } as PageMessageOf<"previewCheckboxToggle">,
+      { error: MALFORMED_TOGGLE },
+    );
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-MYST-038
@@ -251,7 +273,9 @@ export class PageMessageDispatcher {
       if (value.type === "previewFrontmatterSave") {
         manager.frontmatter.postEditError(preview, value, "Editing requires a trusted workspace.");
       } else if (value.type === "previewCheckboxToggle") {
-        manager.sourceEdits.postCheckboxResult(preview, value, { error: "Editing requires a trusted workspace." });
+        manager.sourceEdits.postCheckboxResult(preview, value, {
+          error: readOnlyReason(preview.workspaceFolder !== undefined),
+        });
       } else if (value.type === "previewEditOpen" || value.type === "previewEditSave" || value.type === "previewEditCancel") {
         manager.edits.postEditSourceError(preview, value, "Editing requires a trusted workspace.");
       }
