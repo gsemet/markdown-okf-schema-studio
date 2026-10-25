@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-10-25 (site Requirements page)
+
+- Added SwRS-MDOKFSTUDIO-CORE-069: the Pages site build writes a Requirements page with the
+  chain diagram from use case to test and the figures of the okfreq report (active requirements
+  only), and degrades to a "not generated" text when the report is missing. Filed in
+  `rendering-core`, the closest scope, deriving from StRS-MDOKFSTUDIO-TRUST-014 (maintainer
+  builds), because the lowest free `trust-security` number is a retired id.
+- Marked at `test/site/requirementsPage.test.ts` (`@tests_req`) and, because the code lives in
+  `test/site/`, outside the configured `source_dirs`, at the companion
+  `src/core/render/requirementsPage.markers.ts` (`@implements_req`).
+
 ## 2026-10-25 (complete baseline)
 
 - Completed the baseline for all 16 scopes: **76 StRS (one per use case) and 364 SwRS (one per

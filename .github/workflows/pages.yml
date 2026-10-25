@@ -57,7 +57,7 @@ jobs:
       - name: Install PlantUML and Graphviz
         run: sudo -n apt-get update && sudo -n apt-get install --yes --no-install-recommends plantuml graphviz
       - run: npm ci
-      - run: uv sync --group docs
+      - run: uv sync --group docs --group requirements
       - run: uv run --no-sync --group docs playwright install --with-deps chromium
       - name: Verify deployment tag
         shell: bash

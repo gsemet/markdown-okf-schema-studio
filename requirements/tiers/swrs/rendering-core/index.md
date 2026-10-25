@@ -71,5 +71,6 @@
 - [SwRS-MDOKFSTUDIO-CORE-066 — Ignore invalid page messages](SwRS-MDOKFSTUDIO-CORE-066.md) — When the preview page sends a message, the extension SHALL validate it against the page-to-host protocol, ignoring an invalid one without user-visible change.
 - [SwRS-MDOKFSTUDIO-CORE-067 — Refuse oversize included files](SwRS-MDOKFSTUDIO-CORE-067.md) — When an included file is larger than 5 MiB, the extension SHALL leave its include directive as an unresolved placeholder.
 - [SwRS-MDOKFSTUDIO-CORE-068 — Disable soft appearance after a content patch](SwRS-MDOKFSTUDIO-CORE-068.md) — When a content patch replaces the content, the extension SHALL turn the soft appearance of editors, bars and menus off until the next pointer or key press.
+- [SwRS-MDOKFSTUDIO-CORE-069 — The site Requirements page shows the requirements chain and the report figures](SwRS-MDOKFSTUDIO-CORE-069.md) — When a maintainer builds the Pages site, the build SHALL write a Requirements page that draws the chain from use case to test and shows the figures of active requirements from the okfreq report, or states that the report was not generated when it is missing or unreadable, without failing the build.
 
 <!-- okfreq:index:end -->
