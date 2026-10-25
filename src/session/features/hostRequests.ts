@@ -67,6 +67,9 @@ export async function writeNewFileAtomically(
   }
 }
 
+/** How many times a paste chooses a name again when another program took the chosen one. */
+const PASTE_NAME_ATTEMPTS = 5;
+
 /** The page's requests to the host that edit no document. */
 export class HostRequestController {
   public constructor(private readonly manager: PreviewManager) {}
@@ -227,7 +230,7 @@ export class HostRequestController {
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-196
   /**
    * An image pasted into the open block editor: saved next to the document under a name chosen
-   * here (`image.png`, `image-1.png`, …), never a name from the page. Refused in a read-only
+   * here (`image.png`, `image-1.png`, …; chosen again when another program takes it meanwhile), never a name from the page. Refused in a read-only
    * preview, for a document that is not a saved file, for a folder that
    * is not inside a workspace folder (symlinks resolved), for bytes that are not the announced
    * png, jpeg, gif or webp, and above 10 MB. Only a block editor's text box posts this message (no
@@ -263,17 +266,32 @@ export class HostRequestController {
     if (sniffed === undefined || sniffed !== announced) {
       return refuse("The clipboard data is not a png, jpeg, gif or webp image.");
     }
-    return host.files.readDirectory(folderPath).then(async (entries) => {
-      const fileName = nextImageName(new Set(entries.map(([name]) => name)), PASTED_IMAGE_EXTENSION[sniffed]);
-      if (fileName === undefined) {
-        refuse("Too many pasted images next to this document.");
-        return;
-      }
-      await writeNewFileAtomically(host.files, folderPath, fileName, bytes);
-      this.postHostResult(preview, message, { ok: true, fileName });
-    }).then(undefined, (error: unknown) => {
+    return this.saveNewImage(host.files, folderPath, PASTED_IMAGE_EXTENSION[sniffed], bytes).then((result) => {
+      if (result === undefined) refuse("Too many pasted images next to this document.");
+      else this.postHostResult(preview, message, { ok: true, fileName: result });
+    }, (error: unknown) => {
       refuse(error instanceof Error ? error.message : String(error));
     });
+  }
+
+  /**
+   * Picks the next free image name and writes the bytes under it. When another program takes the
+   * chosen name between the choice and the rename, the name is chosen again from a fresh listing,
+   * up to `PASTE_NAME_ATTEMPTS` times. Resolves the file name, or `undefined` when no name is free.
+   */
+  private async saveNewImage(files: FileSystem, folderPath: string, extension: string, bytes: Uint8Array): Promise<string | undefined> {
+    for (let attempt = 1; ; attempt += 1) {
+      const entries = await files.readDirectory(folderPath);
+      const fileName = nextImageName(new Set(entries.map(([name]) => name)), extension);
+      if (fileName === undefined) return undefined;
+      try {
+        await writeNewFileAtomically(files, folderPath, fileName, bytes);
+        return fileName;
+      } catch (error) {
+        const taken = await files.stat(path.join(folderPath, fileName)).then(() => true, () => false);
+        if (!taken || attempt >= PASTE_NAME_ATTEMPTS) throw error;
+      }
+    }
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-213

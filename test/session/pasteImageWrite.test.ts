@@ -110,13 +110,16 @@ test("a failed write leaves no file, empty or partial, and the page gets the rea
   assert.deepEqual(await images(), [], "the folder keeps no file of the failed paste");
 });
 
-test("a file created under the chosen name during the write is kept, not overwritten", async () => {
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
+test("a file created under the chosen name during the write is kept and the paste takes the next name", async () => {
   const other = new TextEncoder().encode("written by someone else");
   const { files, paste, images } = harness({
     beforeWrite: (memory) => memory.writeFile(`${FOLDER}/image.png`, other),
   });
   const result = await paste();
-  assert.equal(result?.ok, false, `host answer: ${JSON.stringify(result)}`);
+  assert.equal(result?.ok, true, `host answer: ${JSON.stringify(result)}`);
+  assert.equal(result?.fileName, "image-1.png");
   assert.deepEqual(await files.readFile(`${FOLDER}/image.png`), other, "the other writer's file is unchanged");
-  assert.deepEqual(await images(), ["image.png"], "the hidden file of the paste is removed");
+  assert.deepEqual(Buffer.from(await files.readFile(`${FOLDER}/image-1.png`)), PNG);
+  assert.deepEqual(await images(), ["image-1.png", "image.png"], "the hidden file of the paste is removed");
 });

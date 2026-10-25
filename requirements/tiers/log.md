@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-10-25 (a pasted image that loses a file-name race takes the next name)
+
+- SwRS-MDOKFSTUDIO-PALETTE-196: when another program creates a file under the chosen name
+  between the name choice and the rename, the paste now keeps that file and saves the image under
+  the next free name (up to 5 attempts) instead of refusing with the raw "file exists" error.
+
 ## 2026-10-25 (an include with no path keeps the document rendering)
 
 - SwRS-MDOKFSTUDIO-CORE-012: an `{include}` with an empty argument now leaves the include
