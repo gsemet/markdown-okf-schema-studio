@@ -56,10 +56,12 @@ export interface ContentAssertion {
   expr?: string;
 }
 
-/** A user action `check_page_actions` performs: click (optionally with held keys) or hover the first match. */
+/** A user action `check_page_actions` performs: click (optionally with held keys), hover or drag the first match. */
 export type PageAction =
   | { click: string; modifiers?: string[]; waitMs?: number }
-  | { hover: string; waitMs?: number };
+  | { hover: string; waitMs?: number }
+  /** Presses the mouse on `drag` and moves it over `over`; with `hold` the button stays down (a drag in progress). */
+  | { drag: string; over: string; hold?: true; waitMs?: number };
 
 export interface Scenario {
   id: string;

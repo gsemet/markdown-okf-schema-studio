@@ -511,6 +511,9 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
     page_name = scenario["page"]
     button = page.locator("[data-sphinx-preview-edit-toggle]")
     button.click()
+    # Edit mode puts a handle gutter in front of the first column of a pipe table, which re-lays the page out;
+    # two frames let the resize observer and the reading-line anchor settle before a check scrolls.
+    page.evaluate("() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
     if button.get_attribute("aria-pressed") != "true":
         failures.append(Failure(page_name, "edit mode toggle did not become active"))
     if page.locator("html").get_attribute("data-sphinx-preview-edit-mode") != "on":

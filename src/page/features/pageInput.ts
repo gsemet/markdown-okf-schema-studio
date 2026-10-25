@@ -179,6 +179,8 @@ export function installPageInput(rt: PageRuntime): PageInput {
         const extendsSelection = state.editMode && event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey;
         if (state.editMode && !extendsSelection) rt.selection.clearBlockSelection();
         if (event.target instanceof Element && event.target.closest(".sphinx-preview-insert-point")) return;
+        // A row handle only moves its row: a click on it opens no editor.
+        if (event.target instanceof Element && event.target.closest("[data-okf-row-handle]")) return;
         // A chip is reserved for expanding its comment; the rest of the block edits.
         if (event.target instanceof Element && event.target.closest(".okf-chip")) return;
         // The open thread is a small form of its own: clicking in it never opens the block editor.
