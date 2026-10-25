@@ -6,7 +6,11 @@
 
 export const MAX_LABEL_LENGTH = 100;
 
-const LABEL_NAME = /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/u;
+/**
+ * The one label name pattern: the renderer (anchor icon), the page (rename field) and the host
+ * (message validator and rename) all use it, so every label with an icon can be renamed.
+ */
+export const LABEL_NAME = /^[A-Za-z0-9_.:-]+$/u;
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-038
 export function isValidLabelName(value: unknown): value is string {

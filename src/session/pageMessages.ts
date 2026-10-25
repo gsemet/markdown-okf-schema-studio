@@ -7,6 +7,7 @@
 import {
   isPageStateMessage,
   isPageToHostMessage,
+  type PageMessageOf,
   type PageStateMessageUnion,
   type PageToHostMessage,
   type PageToHostType,
@@ -15,6 +16,7 @@ import { reportsReloadedDocument } from "../core/preview/contentPatch";
 import type { MessageRouter } from "../core/protocol/router";
 import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
+import { LABEL_GONE } from "../core/edits/sourceEdits";
 import { revisionOfStage } from "./sessionDocuments";
 
 /** What a page message handler returns: the work it started, when a caller may wait for it. */
@@ -118,10 +120,27 @@ export class PageMessageDispatcher {
         return manager.matchesCurrent(preview, candidate) ? this.route(preview, value) : undefined;
       }
       case "render":
-        return manager.matchesCurrent(preview, value) ? this.route(preview, value) : undefined;
+        if (manager.matchesCurrent(preview, value)) return this.route(preview, value);
+        if (value.type === "previewLabelRename") this.refuseStaleLabelRename(preview, value);
+        return undefined;
       case "page-state":
         return isPageStateMessage(value) ? this.handlePageState(preview, value) : undefined;
     }
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-038
+  /** A rename sent from an older render is answered with the stale-line refusal, not dropped. */
+  private refuseStaleLabelRename(preview: PreviewSession, value: PageMessageOf<"previewLabelRename">): void {
+    if (preview.disposed || !this.manager.has(preview) || value.documentId !== preview.documentUri) return;
+    void preview.postToPage({
+      type: "previewLabelRenameResult",
+      documentId: value.documentId,
+      revision: value.revision,
+      requestId: value.requestId,
+      editId: value.editId,
+      ok: false,
+      reason: LABEL_GONE,
+    });
   }
 
   /** Runs the handler of a message that passed its gate; the caller may wait for what it started. */

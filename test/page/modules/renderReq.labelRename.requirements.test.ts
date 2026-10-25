@@ -139,16 +139,13 @@ test("a successful rename closes the field 5 s later and a new action cancels th
   assert.equal(pending.live, false, "closing cleared the timer: no stale close");
 });
 
-test("a label starting with an underscore, dot or hyphen opens no field and swallows the click (Known issue)", () => {
+test("a label starting with an underscore, dot or hyphen opens the rename field like any other", () => {
   for (const name of ["_draft", ".hidden", "-dash"]) {
     const t = harness(name);
     const event = t.click();
-    assert.equal(t.popover(), undefined, `${name}: no rename field, popover or message`);
-    assert.equal(event.defaultPrevented, true, `${name}: the click is swallowed`);
+    assert.equal(t.input()!.value, name, `${name}: the rename field opens`);
+    assert.equal(t.input()!.selected, true, `${name}: the name is selected`);
+    assert.equal(event.defaultPrevented, true, `${name}: the click is still swallowed`);
     assert.equal(event.stoppedImmediate, true, `${name}: no block editor opens`);
   }
-  const allowed = harness("draft_1");
-  allowed.click();
-  assert.equal(allowed.input()!.value, "draft_1");
-  assert.equal(allowed.input()!.selected, true, "the name is selected");
 });

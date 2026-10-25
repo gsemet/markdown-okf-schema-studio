@@ -9,11 +9,11 @@ import {
   restoreCheckboxPlaceholders,
   splitCheckboxPlaceholders,
 } from "./checkboxMarkers";
+import { LABEL_NAME } from "../mapping/labelRename";
 import { mergeProperties, type MystNode, setHast } from "./mystNode";
 
 // `(name)=` labels. MyST drops the target and gives its id to the next heading or figure; the
 // preview also shows a small anchor icon there, which is the target for every other block.
-const ANCHOR_LABEL = /^[A-Za-z0-9_.:-]+$/u;
 const NATIVE_TARGET_TYPES = new Set(["heading", "container", "math"]);
 const ANCHOR_INLINE_HOSTS = new Set(["paragraph", "heading"]);
 
@@ -50,7 +50,7 @@ export function normalizeAnchors(root: MystNode): ReadonlySet<string> {
     if (!children) return;
     for (let index = 0; index < children.length; index += 1) {
       const target = children[index];
-      if (target.type === "mystTarget" && target.label && ANCHOR_LABEL.test(target.label)) {
+      if (target.type === "mystTarget" && target.label && LABEL_NAME.test(target.label)) {
         let next = index + 1;
         while (children[next]?.type === "mystTarget") next += 1;
         const following = children[next];

@@ -127,7 +127,7 @@ test("Enter posts one rename with the label line; Escape cancels", () => {
 test("an invalid or unchanged name is not sent", () => {
   const t = harness();
   t.click(t.anchor);
-  for (const bad of ["", "-x", "a b", "x".repeat(101)]) {
+  for (const bad of ["", "a b", "a/b", "x".repeat(101)]) {
     t.input()!.value = bad;
     t.key("Enter");
     assert.equal(t.posted.length, 0, bad);

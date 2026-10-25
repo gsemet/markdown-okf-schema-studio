@@ -95,6 +95,35 @@ test("a render-gated page message must name the render the host holds", () => {
   assert.deepEqual(bare.handled, []);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+test("a label rename from an older render is answered with the stale-line refusal", () => {
+  const { dispatcher, session, handled, state } = harness();
+  const posted: Array<Record<string, unknown>> = [];
+  (session as unknown as { postToPage: unknown }).postToPage = (message: Record<string, unknown>) => {
+    posted.push(message);
+    return Promise.resolve(true);
+  };
+  const rename = (identity: Record<string, unknown>): Record<string, unknown> => ({
+    type: "previewLabelRename", documentId: DOCUMENT, line: 3, oldName: "a", newName: "b", editId: "label-1", ...identity,
+  });
+
+  assert.equal(dispatcher.handle(session, rename({ revision: 3, requestId: 9 })), undefined);
+  assert.deepEqual(handled, []);
+  assert.equal(posted.length, 1);
+  assert.equal(posted[0].type, "previewLabelRenameResult");
+  assert.equal(posted[0].editId, "label-1");
+  assert.equal(posted[0].ok, false);
+  assert.equal(posted[0].reason, "The label is no longer on that line. Refresh the preview.");
+
+  // Another document or a disposed preview gets no answer.
+  dispatcher.handle(session, rename({ revision: 3, requestId: 9, documentId: "file:///other.md" }));
+  assert.equal(posted.length, 1);
+  state.disposed = true;
+  dispatcher.handle(session, rename({ revision: 3, requestId: 9 }));
+  assert.equal(posted.length, 1);
+});
+
 test("a document-gated page message must name the shown document", () => {
   const { dispatcher, session, handled, state } = harness();
   const banner = { type: "previewWarningBannerClosed", key: "ab-0123abcd", revision: 1, requestId: 1 };

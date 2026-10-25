@@ -95,7 +95,7 @@ The page-state exceptions are the ready reports (see SwRS-MDOKFSTUDIO-LIFE-071),
 | previewCommentReply naming another request | dropped, nothing is written |
 | previewCommentCreate naming another document id | dropped, nothing is written |
 | previewScroll naming request 8 while the host holds request 9 | dropped, the text editor does not scroll |
-| previewLabelRename for a stale render revision | dropped without an answer; the page ends with its timeout text |
+| previewLabelRename for a stale render revision | answered with ok false and The label is no longer on that line. Refresh the preview.; nothing is written |
 | previewPlantUmlInclude, previewShowProblems or previewWarningBannerClosed naming another document | dropped without an answer |
 | previewEditFlushed or previewEditClosed on a disposed preview | dropped |
 
@@ -157,7 +157,7 @@ A message that passes its gate but writes for a document newer than the render i
 - Method: test/session/renderReq.codeCopy.requirements.test.ts (stale copy request copied and answered, another document dropped).
 - Method: test/session/diagReq.plantuml.requirements.test.ts (include request handled for the current document even one render behind, dropped otherwise).
 - Method: test/host/fmtableReq.requirements.test.ts (frontmatter save from an older render answered with the reopen hint; another document gets no answer).
-- Method: test/integration/labelRename.test.ts (rename out-of-date answer; stale revision dropped, the page ends with the timeout text).
+- Method: test/integration/labelRename.test.ts (rename out-of-date answer) and test/session/trustReq.requirements.test.ts (stale revision answered with the stale-line refusal).
 - Method: test/session/paletteReq.requirements.test.ts (label, citation, image picker and document picker requests answered with the out-of-date reason; current requests answered, and answered while a block editor is open on the render after its autosave moved the document, but not when no editor is open or it is open on another render; no file read and no dialog opened for a refused request).
 - Method: test/session/reviewReqThreads.requirements.test.ts (thread request that names another revision gets the out-of-date answer).
 - Method: test/session/toolbarReq.requirements.test.ts (link request of a stale page or a disposed preview is ignored).

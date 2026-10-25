@@ -25,7 +25,7 @@ test("documentTargets lists (label)= names with the heading or text that follows
 });
 
 test("documentTargets ignores labels in code fences and malformed names", () => {
-  const text = "```\n(hidden)=\n```\n\n~~~md\n(hidden2)=\n~~~\n\n(bad name)=\n(-bad)=\n(ok)=\n";
+  const text = "```\n(hidden)=\n```\n\n~~~md\n(hidden2)=\n~~~\n\n(bad name)=\n(ok)=\n";
   assert.deepEqual(documentTargets(text).items.map((item) => item.name), ["ok"]);
 });
 

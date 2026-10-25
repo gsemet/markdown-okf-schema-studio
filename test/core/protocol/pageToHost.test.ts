@@ -131,7 +131,7 @@ test("previewLabelRename validates the line and both label names", () => {
   assert.equal(isRegisteredPreviewMessage(rename), true);
   assert.equal(isRegisteredPreviewMessage({ ...rename, newName: "x".repeat(100) }), true);
   for (const patch of [
-    { newName: "x".repeat(101) }, { newName: "" }, { newName: "-x" }, { newName: "a b" }, { newName: "a)=" },
+    { newName: "x".repeat(101) }, { newName: "" }, { newName: "a b" }, { newName: "a)=" },
     { oldName: "a b" }, { oldName: undefined }, { newName: 4 },
     { line: 0 }, { line: 1.5 }, { line: "3" }, { line: undefined },
   ]) {

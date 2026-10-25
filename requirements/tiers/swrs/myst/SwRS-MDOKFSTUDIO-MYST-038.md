@@ -22,11 +22,13 @@ derived_by: []
 implemented_in_files:
 - src/core/mapping/labelRename.ts
 - src/page/modules/labelRename.ts
+- src/session/pageMessages.ts
 tested_in_files:
 - test/core/mapping/labelRename.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/page/modules/labelRename.test.ts
 - test/page/modules/renderReq.labelRename.requirements.test.ts
+- test/session/trustReq.requirements.test.ts
 ---
 
 ## The anchor icon opens a rename field that sends valid names
@@ -44,7 +46,6 @@ When a reader clicks the anchor icon of a label in edit mode, the extension SHAL
 | Input | Outcome |
 | --- | --- |
 | Anchor icon clicked with edit mode off | Nothing opens and the icon stays a link target |
-| Anchor icon of the label `(_draft)=` clicked in edit mode (label starting with `_`, `.` or `-`) | No rename field, popover or message appears and the click opens no block editor |
 
 ### Scenario (nominal): Enter sends the rename or closes
 | Input (Enter pressed in the field) | Outcome |
@@ -55,12 +56,25 @@ When a reader clicks the anchor icon of a label in edit mode, the extension SHAL
 ### Scenario (refusal): Invalid names are not sent
 | Input (Enter pressed in the field) | Outcome |
 | --- | --- |
-| `-bad` (starts with a non letter or digit) | The message is shown and nothing is posted |
+| `bad name` (a space) | The message is shown and nothing is posted |
 | An empty name | The same message is shown and nothing is posted |
 | A 101-character name | The same message is shown and nothing is posted |
 | A name with characters other than letters, digits and `_ . : -` | The same message is shown and nothing is posted |
 
-The message reads: Use letters, digits and _ . : - only, starting with a letter or digit (100 characters at most). The host and the message validator repeat the check.
+The message reads: Use letters, digits and _ . : - only (100 characters at most). The host and the message validator repeat the check.
+
+### Scenario (nominal): Labels starting with a symbol
+| Input | Outcome |
+| --- | --- |
+| Anchor icon of the label `(_draft)=`, `(.hidden)=` or `(-dash)=` clicked in edit mode | The rename field opens prefilled and selected, like for any other label, and no block editor opens |
+| `-new` typed for `_draft` and Enter pressed | One rename is posted |
+
+The anchor icon, the field and the host share one name pattern: letters, digits and `_ . : -`, 100 characters at most. Every label that shows an icon can be renamed.
+
+### Scenario (refusal): A rename from a stale render
+| Input | Outcome |
+| --- | --- |
+| A rename sent from an older render | The host answers ok false with The label is no longer on that line. Refresh the preview.; the field shows it and is editable again |
 
 ### Scenario (boundary): Escape or an outside press closes the field
 | Input (field open) | Outcome |
@@ -85,9 +99,6 @@ Only `{ref}` forms are counted. The field closes itself 5 s after the success me
 | No host answer within 6 s | The field is editable again with The editor did not answer. Try again. |
 | An answer arriving before 6 s | The answer is matched by edit id, the timer is cleared and no timeout message is shown |
 
-### Known issues
-- Known issue: the anchor icon accepts a leading `_`, `.` or `-` (`ANCHOR_LABEL`), but the rename pattern requires a letter or digit first (`LABEL_NAME`, the page `namePattern`). The click is swallowed before that test, so the writer gets no editor, no popover and no message.
-
 ### Related requirements
 - SwRS-MDOKFSTUDIO-BLOCK-041: an open editor blocks a rename; see it for the refusal reason.
 - SwRS-MDOKFSTUDIO-MYST-045: the host side of the rename.
@@ -95,8 +106,9 @@ Only `{ref}` forms are counted. The field closes itself 5 s after the success me
 
 ### Verification notes
 - Method: test/page/modules/labelRename.test.ts ("a click on the anchor in edit mode opens a prefilled, selected field before the block handlers": click opens and edit mode off; "Enter posts one rename with the label line; Escape cancels": Enter and Escape; "an invalid or unchanged name is not sent": invalid names and unchanged name; "the result shows how many {ref} uses of the old name remain": remaining uses, progress and refusal)
-- Method: test/page/modules/renderReq.labelRename.requirements.test.ts ("without an answer after 6 s the field is editable again with a message; an answer clears the timer": silence of the host; "a successful rename closes the field 5 s later and a new action cancels the stale close": 5 s close; "a label starting with an underscore, dot or hyphen opens no field and swallows the click (Known issue)": symbol label)
-- Method: test/core/mapping/labelRename.test.ts ("label names follow the MyST pattern and the length limit": invalid names; "counts {ref} uses with and without a title, not other roles or names": remaining uses)
+- Method: test/page/modules/renderReq.labelRename.requirements.test.ts ("without an answer after 6 s the field is editable again with a message; an answer clears the timer": silence of the host; "a successful rename closes the field 5 s later and a new action cancels the stale close": 5 s close; "a label starting with an underscore, dot or hyphen opens the rename field like any other": symbol label)
+- Method: test/session/trustReq.requirements.test.ts ("a label rename from an older render is answered with the stale-line refusal": stale render, other document, disposed preview)
+- Method: test/core/mapping/labelRename.test.ts ("the renderer, the page and the host share one label name pattern": shared pattern; "label names follow the MyST pattern and the length limit": invalid names; "counts {ref} uses with and without a title, not other roles or names": remaining uses)
 - Method: test/core/protocol/pageToHost.test.ts ("previewLabelRename validates the line and both label names": the validator repeats the name check)
 - Method: the pointer press outside the popover has no named test (untested)
 - Criteria: The icon shows a pointer cursor in edit mode only; no message is posted on a closed field, an invalid name or an unchanged name; page and host both reject invalid names; matching of the answer is by edit id; `{ref}`-only counting and the message texts match.

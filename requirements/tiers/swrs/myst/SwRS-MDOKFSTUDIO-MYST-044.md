@@ -37,9 +37,10 @@ When a rename is for a document revision the host has moved past, the extension 
 
 - GIVEN a message for a stale render revision
 - WHEN it reaches the render gate
-- THEN it is dropped without an answer
+- THEN the host answers with ok false and the stale-line refusal, and nothing changes
 
 ### Verification notes
 
 - Method: Integration suite run() in test/integration/labelRename.test.ts
-- Criteria: The page ends with the timeout text in the second case.
+- Method: test/session/trustReq.requirements.test.ts (a label rename from an older render is answered with the stale-line refusal)
+- Criteria: The page shows the stale-line refusal in the second case.
