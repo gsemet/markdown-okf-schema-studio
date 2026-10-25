@@ -54,9 +54,6 @@ When the extension builds the page of a document, it SHALL have the sanitizer re
 | A script element with no src attribute, also inside an SVG that holds a script element with code | The script is gone with the diagnostic blocked-inline-script |
 | The same page sanitized for a read-only preview (scripts disallowed) | The script is gone with the diagnostic blocked-script instead |
 
-### Known issues
-- Known issue: with a packaged VSIX, VS Code disables the extension in Restricted Mode unless a user setting or the product configuration overrides it (SwRS-MDOKFSTUDIO-TRUST-001); the Restricted Mode case of this requirement is then reached only with that override. Deduced from the VS Code source, not run with a packaged build.
-
 ### Related requirements
 - SwRS-MDOKFSTUDIO-DIAG-089: the JAR is disabled in Restricted Mode
 - SwRS-MDOKFSTUDIO-DIAG-024: the built-in PlantUML engine starts no process

@@ -302,9 +302,28 @@ test("each removal or rewrite is recorded with its code, message and value", () 
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-test("the extension manifest declares no capabilities entry (Known issue: Restricted Mode)", () => {
+test("the manifest declares limited support for untrusted workspaces", () => {
   const manifest = JSON.parse(
     fs.readFileSync(path.join(path.resolve(__dirname, "../../.."), "package.json"), "utf8"),
-  ) as Record<string, unknown>;
-  assert.equal("capabilities" in manifest, false);
+  ) as {
+    main?: string;
+    capabilities?: { untrustedWorkspaces?: { supported?: unknown; description?: string; restrictedConfigurations?: string[] } };
+    contributes: { configuration: Array<{ properties: Record<string, unknown> }> };
+  };
+  // VS Code (extensionManifestPropertiesService) runs an extension with a main entry point in
+  // Restricted Mode only when this declaration says true or "limited"; without it the extension
+  // is disabled there.
+  assert.ok(manifest.main, "the rule below applies to an extension with a main entry point");
+  const untrusted = manifest.capabilities?.untrustedWorkspaces;
+  assert.equal(untrusted?.supported, "limited");
+  assert.match(untrusted?.description ?? "", /read-only/u);
+  const settings = new Set(manifest.contributes.configuration.flatMap((category) => Object.keys(category.properties)));
+  assert.ok((untrusted?.restrictedConfigurations ?? []).length > 0);
+  for (const name of untrusted?.restrictedConfigurations ?? []) {
+    assert.ok(settings.has(name), `${name} is a contributed setting`);
+  }
+  assert.deepEqual(
+    untrusted?.restrictedConfigurations,
+    ["markdownOkfSchemaStudio.plantuml.useJar", "markdownOkfSchemaStudio.plantuml.jarPath"],
+  );
 });
