@@ -17,7 +17,9 @@ test("the Node file system reads, writes, lists, renames and resolves links", as
 
   await files.writeFile(path.join(root, "docs", "a.md"), new TextEncoder().encode("# A"));
   assert.equal(await readTextFile(files, path.join(root, "docs", "a.md")), "# A");
-  assert.deepEqual(await files.stat(path.join(root, "docs", "a.md")), { kind: "file", size: 3 });
+  const { mtimeMs, ...stat } = await files.stat(path.join(root, "docs", "a.md"));
+  assert.deepEqual(stat, { kind: "file", size: 3 });
+  assert.ok(typeof mtimeMs === "number" && Math.abs(Date.now() - mtimeMs) < 60_000, "stat reports the modification time");
   assert.deepEqual(await files.readDirectory(root), [["docs", "directory"], ["link", "directory"]]);
   assert.equal(await files.realpath(path.join(root, "link", "a.md")), path.join(root, "docs", "a.md"));
 

@@ -59,7 +59,7 @@ function createVscodeFileSystem(): FileSystem {
   return {
     async stat(path) {
       const stat = await vscode.workspace.fs.stat(vscode.Uri.file(path));
-      return { kind: kindOf(stat.type), size: stat.size };
+      return { kind: kindOf(stat.type), size: stat.size, mtimeMs: stat.mtime };
     },
     async readFile(path) {
       return vscode.workspace.fs.readFile(vscode.Uri.file(path));

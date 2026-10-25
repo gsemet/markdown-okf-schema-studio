@@ -67,6 +67,35 @@ export async function writeNewFileAtomically(
   }
 }
 
+/** A hidden file this extension writes while saving a pasted image: `.image-2.png.k3j9x0ab.partial`. */
+const STALE_PARTIAL_NAME = /^\.image(?:-\d+)?\.(?:png|jpg|gif|webp)\.[0-9a-z]{1,8}\.partial$/u;
+
+/** A hidden partial file older than this is the leftover of a save that never ended. */
+export const STALE_PARTIAL_AGE_MS = 10 * 60 * 1000;
+
+/**
+ * Deletes the leftovers of an interrupted pasted-image save from a folder: files whose name has
+ * exactly the form of `writeNewFileAtomically`'s hidden file and that were last modified more
+ * than `STALE_PARTIAL_AGE_MS` before `now`. Any other file is left alone, and a failure is ignored.
+ */
+export async function removeStalePartialFiles(
+  files: FileSystem,
+  folderPath: string,
+  entries: Array<[string, string]>,
+  now: number,
+): Promise<void> {
+  for (const [name, kind] of entries) {
+    if (kind !== "file" || !STALE_PARTIAL_NAME.test(name)) continue;
+    const target = path.join(folderPath, name);
+    try {
+      const { mtimeMs } = await files.stat(target);
+      if (mtimeMs !== undefined && now - mtimeMs > STALE_PARTIAL_AGE_MS) await files.delete(target);
+    } catch {
+      // The file vanished or cannot be removed: it is not in the way of the paste.
+    }
+  }
+}
+
 /** How many times a paste chooses a name again when another program took the chosen one. */
 const PASTE_NAME_ATTEMPTS = 5;
 
@@ -280,6 +309,7 @@ export class HostRequestController {
    * up to `PASTE_NAME_ATTEMPTS` times. Resolves the file name, or `undefined` when no name is free.
    */
   private async saveNewImage(files: FileSystem, folderPath: string, extension: string, bytes: Uint8Array): Promise<string | undefined> {
+    await removeStalePartialFiles(files, folderPath, await files.readDirectory(folderPath).then((list) => list, () => []), Date.now());
     for (let attempt = 1; ; attempt += 1) {
       const entries = await files.readDirectory(folderPath);
       const fileName = nextImageName(new Set(entries.map(([name]) => name)), extension);

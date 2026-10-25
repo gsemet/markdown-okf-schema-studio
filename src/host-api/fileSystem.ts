@@ -12,6 +12,8 @@ export interface FileStat {
   kind: FileKind;
   /** Size in bytes. */
   size: number;
+  /** Last modification time, in milliseconds since the epoch, when the host reports it. */
+  mtimeMs?: number;
 }
 
 /** File access by absolute file system path. Every method rejects when the operation fails. */

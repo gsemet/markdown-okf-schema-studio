@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-10-25 (a pasted image removes the leftovers of an interrupted save)
+
+- SwRS-MDOKFSTUDIO-PALETTE-196: the next paste into a folder now deletes hidden `.partial` files of
+  the extension's exact naming that are older than 10 minutes (left by a save cut off before its
+  rename); newer files and every file of another form are kept. Added a scenario.
+
 ## 2026-10-25 (a pasted image that loses a file-name race takes the next name)
 
 - SwRS-MDOKFSTUDIO-PALETTE-196: when another program creates a file under the chosen name

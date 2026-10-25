@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A hidden `.partial` file left in a folder by a pasted image whose save was cut off (crash, closed
+  window) is now removed at the next image paste into that folder once it is older than 10
+  minutes. Only files with the extension's exact naming are touched.
 - For contributors: the source is organised in layers (`src/core`, `src/host-api`, `src/page`,
   `src/node-services`, `src/session`, `src/host-vscode`), and `just check` now enforces their import
   boundaries (dependency-cruiser) and a file-size ratchet (800 lines per file in `src/`, 1 500 in
