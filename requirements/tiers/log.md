@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-25 (empty YAML schema reported as empty)
+
+- SwRS-MDOKFSTUDIO-FMSCHEMA-023: an empty or comment-only YAML schema file no longer makes the
+  analysis throw; the type stays without schema and one informational row reads "schema file '{name}' is empty" (okf-schema wording). The Known issue
+  line is removed (also from the superseded FMSCHEMA-025 and from StRS FMSCHEMA-006 and -008) and
+  a boundary scenario states the behaviour.
+
 ## 2026-10-25 (doc and download roles without a label show their target)
 
 - SwRS-MDOKFSTUDIO-MYST-017: a `{doc}` or `{download}` role written without a label now shows the

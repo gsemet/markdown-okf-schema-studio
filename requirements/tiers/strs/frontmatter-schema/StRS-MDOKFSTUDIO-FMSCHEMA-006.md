@@ -58,7 +58,8 @@ As a writer of Open Knowledge Format documents, I get schema-aware metadata simp
 - Known issue: a standard JSON pointer (#/defs/s) leaves the property that holds the reference without a schema, so the schema does not compile and the table shows the red row "Schema validation failed to run"; a second reference to a file that is already inlined, a reference cycle and a missing target all become a reference to the schema root.
 - Known issue: a reference such as ../../x.yaml is read even when it leaves the schema folder (workspace trust applies).
 - A JSON or JSON5 schema that cannot be read or parsed gives the generic table with the warning row "Schema could not be parsed: {error}".
-- Known issue: a YAML syntax error is not reported (the partly parsed schema is applied silently) and an empty YAML schema file makes the analysis throw.
+- An empty or comment-only YAML schema file has no content yet: the type stays without schema, the table is generic and one informational row reads "schema file '{name}' is empty".
+- Known issue: a YAML syntax error is not reported (the partly parsed schema is applied silently).
 - A schema that cannot be compiled shows a red row "Schema validation failed to run: {diagnostic}" spanning every visible column, counted as one error in the badge; the fields stay listed in schema order with their documentation.
 - Resolved schemas and compiled validators are reused only while the schema file and every inlined or probed reference keep the same content (compared by content, not time); edited, replaced, reverted or deleted files are picked up and at most 64 schemas are cached.
 - Known issue: editing a schema does not refresh open previews by itself; the table is re-validated on the next document change, refresh, re-render or settings change.

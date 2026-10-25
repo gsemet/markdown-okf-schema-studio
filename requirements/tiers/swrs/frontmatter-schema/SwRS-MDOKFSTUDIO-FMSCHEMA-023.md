@@ -76,6 +76,12 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 - WHEN a document of type Note is analysed
 - THEN no "Schema could not be parsed" row appears; the partly parsed content is used and here the validator rejects it with the "Schema validation failed to run" row
 
+### Scenario (boundary): Empty YAML schema
+
+- GIVEN a Note.schema.yaml file that is empty or holds only comments
+- WHEN a document of type Note is analysed
+- THEN the type stays without schema: the table is generic, one informational row reads "schema file 'Note.schema.yaml' is empty" (the wording of okf-schema), the summary is 0 errors, 0 warnings, 1 info and the analysis does not throw
+
 ### Scenario (refusal): Schema that cannot be compiled
 
 - GIVEN a schema declaring a property with `type: nonsense`
@@ -99,12 +105,12 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 - Known issue: a missing target becomes a reference to the schema root, not an unresolved reference.
 - Known issue: a reference with a sibling keyword next to `$ref` is not inlined.
 - Known issue: a YAML syntax error is not reported: the parse errors of the YAML document are never checked, so the partly parsed schema is applied silently.
-- Known issue: an empty YAML schema file parses to null and makes the analysis throw a TypeError instead of showing a row.
 
 ### Verification notes
 
 - Method: test/core/frontmatter/okfFrontmatter.test.ts (JSON5 with comments; extension fallback of a relative reference; the other reference forms were probed against the resolver and have no test; the trailing-comma scenario has no test; the reference cycle scenario has no test).
 - Method: test/core/frontmatter/diagReq.frontmatter.requirements.test.ts, test `a JSON5 schema that cannot be parsed gives the generic table and one warning row; a YAML error is not reported as such` (schema that cannot be parsed, YAML syntax error).
+- Method: test/core/frontmatter/diagReq.frontmatter.requirements.test.ts, test `an empty or comment-only YAML schema is reported as empty: generic table, one info note, no throw` (empty YAML schema).
 - Method: test/core/frontmatter/schemaRegistry.test.ts (schema that cannot be compiled: the same error is reported at every analysis).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario in dark and light, 900 px and 460 px (schema that cannot be compiled, compile failure in a narrow preview).
 - Criteria: Only comment stripping is supported: trailing commas, unquoted keys and single-quote conversions are not. Only a node made of a single `$ref` key is inlined; a missing target leaves a reference to the schema root. The summary is 0 errors, 1 warning, 0 infos for a JSON or JSON5 failure, and the fields are listed in source order without documentation. The standard JSON-pointer scenario has no test (probed against the resolver).
