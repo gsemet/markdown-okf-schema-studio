@@ -499,10 +499,11 @@ export class PreviewManager {
     session.plantUml.includeWatch.clear();
     this.diagnostics.clear(previousDocumentUri);
     session.document = document;
-    session.state = session.states.get(session.documentUri);
     session.panel.title = this.previewTitle(session, documentPath);
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-026
     this.rendering.showPending(session, true, "Following the active Markdown editor.");
+    // After the pending page, which clears the state: the render of the returned-to document reads it.
+    session.state = session.states.get(session.documentUri);
     void this.rendering.refreshPreviewDocument(session, document);
   }
 

@@ -66,10 +66,11 @@ When the page reports its reading state while the reader scrolls, the extension 
 | openDisclosures | only safe integers from 0 to 9999 are kept, at most the first 100 |
 | descriptionsCollapsed not a boolean | the previous Description state is kept |
 
-### Scenario (nominal): Switching to a document starts it fresh
+### Scenario (nominal): Switching back to a document restores its state
 | Input | Outcome |
 | --- | --- |
-| a preview scrolled to line 80 of A, with a focused block and open sections, then switched to B (which reported no scroll anchor) and back to A | A renders again with its scroll line 80 through the stored anchor, and starts without the focused block, the selection, the open sections and the Description state it had |
+| a preview scrolled to line 80 of A, with a focused block and open sections, then switched to B (which reported no scroll anchor) and back to A | A renders again with its scroll line 80 through the stored anchor and with the focused block, the selection, the open sections and the Description state it had |
+| a document never shown in this preview | it starts fresh, with no remembered state |
 | the same sequence, but B's page reported its own scroll anchor | the scroll line of A is not kept; with a following preview the render starts at the editor's first visible line |
 
 ### Scenario (boundary): The 200 most recent documents
@@ -80,10 +81,6 @@ When the page reports its reading state while the reader scrolls, the extension 
 | a state stored again for a remembered document | the entry becomes the most recent and the map does not grow |
 | a capacity that is not valid | rejected; the default capacity is 200 |
 
-### Known issues
-- Known issue: switchDocument reads the remembered state of the document, then the pending page it shows clears it (showPending sets the state to undefined) before the render builds its context, so a document the reader returns to does not get its focused block, selection, open sections or Description state back; the scroll anchor survives only until another document reports its own. Deduced from the code, not run.
-- Known issue: the remembered states of the 200 most recent documents are never used after a switch, see the Known issue above.
-
 ### Related requirements
 - SwRS-MDOKFSTUDIO-LIFE-108: previewScroll and previewReveal, which also report the state
 - SwRS-MDOKFSTUDIO-LIFE-119: the anchor that a new render starts at
@@ -92,6 +89,6 @@ When the page reports its reading state while the reader scrolls, the extension 
 - Method: test/page/pageTimers.test.ts and test/page/pageHost.test.ts (scenarios 1 and 2: "the webview state is written at once, then at most once per 100 ms with the last state", "previewState messages are throttled to one per 100 ms; previewScroll is never held back", "a hidden page writes the held-back state and posts the held-back previewState at once")
 - Method: test/integration/lifecycle.test.ts (scenario 3: sourceLine and scrollTop after previewState)
 - Method: scenario 4 is checked by reading parsePreviewPanelState in src/core/state/previewState.ts and hasValidStateFields in src/core/protocol/pageToHost.ts (untested for the field bounds)
-- Method: test/host/lifeReq.requirements.test.ts (scenario 5: "switching back to a document does not bring back its remembered state (Known issue)", by reading switchDocument and RenderingController.showPending in the A, B, A path; a single integration test, A to line 80, B, back to A, would settle it before the requirement is fixed or superseded)
+- Method: test/host/lifeReq.requirements.test.ts (scenario 5: "switching back to a document brings back its remembered state", the session path A to line 80 with a focused block and an open section, B, back to A)
 - Method: test/core/state/boundedState.test.ts (scenario 6: "evicts the least recently set entry once the cap is exceeded", "reading an entry protects it from eviction, peek does not", "default capacity is 200 and rejects invalid capacities", "overwriting a key refreshes it and never grows the map")
-- Criteria: STATE_THROTTLE_MS is 100 and the last state always reaches the host; preview.state equals the parsed state of the message; session.state is undefined when the render of the returned-to document builds its context, and initialAnchor is the stored anchor when it names that document; size never exceeds 200 and the order is least to most recent.
+- Criteria: STATE_THROTTLE_MS is 100 and the last state always reaches the host; preview.state equals the parsed state of the message; session.state is the remembered state of the returned-to document when its render builds its context, and initialAnchor is the stored anchor when it names that document; size never exceeds 200 and the order is least to most recent.

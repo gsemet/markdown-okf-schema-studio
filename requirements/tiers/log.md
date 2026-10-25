@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-25 (returning to a document restores its reading state)
+
+- SwRS-MDOKFSTUDIO-LIFE-125: switching A, B, back to A restores the focused block, selection, open
+  sections and Description state of A (scenario changed, verification notes updated). Removed the two
+  Known issue lines and the one of StRS-MDOKFSTUDIO-LIFE-014. SwRS-MDOKFSTUDIO-LIFE-026: its Known
+  issue now states only the remaining case (a replaced session starts with an empty map).
+
 ## 2026-10-25 (a refused block open keeps its reason and a way out; a refused key move says why)
 
 - SwRS-MDOKFSTUDIO-BLOCK-216: the status line is in the editor frame from the start ("Loading
