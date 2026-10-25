@@ -33,9 +33,12 @@ plus linear gradients on table elements. Arbitrary inline CSS and `<style>` bloc
 Notebook outputs referenced from MyST, such as `![](#tbl:data-cars)` inside a
 `{table}` directive, require the notebook/project build context. The active-file
 preview displays a warning placeholder for these references; it does not execute
-notebooks or hydrate their outputs. Workspace-local file includes are supported
-only when the workspace is trusted and the included path passes the preview's
-resource policy.
+notebooks or hydrate their outputs. File includes are read only through the preview's
+resource policy, which depends on trust. In a trusted workspace, an include may point to any
+file inside the workspace folder. In Restricted Mode (untrusted workspace) or for a standalone
+file, the preview is read-only and the resource root is the folder of the document: an include
+inside that folder (subfolders included) is read and shown, and an include outside it is
+refused with a warning.
 
 `{code-cell}` input renders with its line-numbering and line-emphasis options, but the active-file
 preview does not execute it. Its output is replaced by a warning placeholder and requires a full
