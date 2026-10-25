@@ -16,7 +16,7 @@ import { reportsReloadedDocument } from "../core/preview/contentPatch";
 import type { MessageRouter } from "../core/protocol/router";
 import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
-import { LABEL_GONE } from "../core/edits/sourceEdits";
+import { LABEL_GONE, STALE_REQUEST } from "../core/edits/sourceEdits";
 import { revisionOfStage } from "./sessionDocuments";
 
 /** What a page message handler returns: the work it started, when a caller may wait for it. */
@@ -121,7 +121,7 @@ export class PageMessageDispatcher {
       }
       case "render":
         if (manager.matchesCurrent(preview, value)) return this.route(preview, value);
-        if (value.type === "previewLabelRename") this.refuseStaleLabelRename(preview, value);
+        this.refuseStaleRequest(preview, value);
         return undefined;
       case "page-state":
         return isPageStateMessage(value) ? this.handlePageState(preview, value) : undefined;
@@ -129,18 +129,46 @@ export class PageMessageDispatcher {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-MYST-038
-  /** A rename sent from an older render is answered with the stale-line refusal, not dropped. */
-  private refuseStaleLabelRename(preview: PreviewSession, value: PageMessageOf<"previewLabelRename">): void {
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-065
+  /**
+   * A request of the render gate sent from an older render is answered with the out-of-date reason
+   * instead of being dropped, so the page clears what it holds pending and shows the reason. The
+   * messages that are no request (history, view preference, palette mode) have no answer type.
+   */
+  private refuseStaleRequest(preview: PreviewSession, value: PageToHostMessage): void {
     if (preview.disposed || !this.manager.has(preview) || value.documentId !== preview.documentUri) return;
-    void preview.postToPage({
-      type: "previewLabelRenameResult",
-      documentId: value.documentId,
-      revision: value.revision,
-      requestId: value.requestId,
-      editId: value.editId,
-      ok: false,
-      reason: LABEL_GONE,
-    });
+    const identity = { documentId: value.documentId, revision: value.revision, requestId: value.requestId };
+    switch (value.type) {
+      case "previewLabelRename":
+        void preview.postToPage({ ...identity, type: "previewLabelRenameResult", editId: value.editId, ok: false, reason: LABEL_GONE });
+        return;
+      case "previewBlockMove":
+        void preview.postToPage({ ...identity, type: "previewBlockMoveResult", ok: false, reason: STALE_REQUEST });
+        return;
+      case "previewBlocksCopy":
+      case "previewBlocksCut":
+      case "previewBlocksPaste":
+        void preview.postToPage({
+          ...identity,
+          type: "previewBlocksResult",
+          op: value.type === "previewBlocksCopy" ? "copy" : value.type === "previewBlocksCut" ? "cut" : "paste",
+          ok: false,
+          reason: STALE_REQUEST,
+        });
+        return;
+      case "previewThreadReply":
+      case "previewThreadDelete":
+      case "previewListTargets":
+      case "previewListCitations":
+      case "previewPickDocument":
+      case "previewPickImage":
+      case "previewPasteImage":
+      case "previewPasteHtml":
+        void preview.postToPage({ ...identity, type: `${value.type}Result`, editId: value.editId, ok: false, reason: STALE_REQUEST });
+        return;
+      default:
+        return;
+    }
   }
 
   /** Runs the handler of a message that passed its gate; the caller may wait for what it started. */
@@ -150,7 +178,7 @@ export class PageMessageDispatcher {
   }
 
   /**
-   * A save or cancel of an editor opened on an older page than the one the host holds is refused
+   * An open, a save or a cancel of an editor opened on an older page than the one the host holds is refused
    * with an explicit error the editor shows, instead of being dropped: the reader keeps the text and
    * knows it was not saved (STAB-06).
    */
@@ -165,6 +193,10 @@ export class PageMessageDispatcher {
         value,
         "The preview changed while this block was being edited. Copy your text, then reopen the block.",
       );
+    } else if (value.type === "previewEditOpen") {
+      manager.edits.postEditSourceError(preview, value, STALE_REQUEST);
+    } else if (value.type === "previewCheckboxToggle") {
+      manager.sourceEdits.postCheckboxResult(preview, value, { error: STALE_REQUEST });
     } else if (value.type === "previewFrontmatterSave") {
       manager.frontmatter.postEditError(preview, value, "The preview changed while this field was being edited. Reopen the field.");
     }
