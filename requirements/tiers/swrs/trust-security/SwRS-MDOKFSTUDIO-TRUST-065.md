@@ -73,9 +73,9 @@ Every page message type has one gate. A message with a registered type and a val
 
 | Gate | Message types | Passes when | Otherwise |
 | --- | --- | --- | --- |
-| render | previewCopyText, previewHistoryGo, previewViewPreferenceChanged, previewPaletteModeChanged, previewLabelRename, previewThreadReply, previewThreadDelete, previewBlockMove, previewBlocksCopy, previewBlocksCut, previewBlocksPaste, previewListTargets, previewListCitations, previewPickDocument, previewPickImage, previewPasteImage, previewPasteHtml | its document, revision and request identifiers equal those of the render the host holds, the preview is alive and has a rendered stage | dropped, with no answer and no change |
+| render | previewHistoryGo, previewViewPreferenceChanged, previewPaletteModeChanged, previewLabelRename, previewThreadReply, previewThreadDelete, previewBlockMove, previewBlocksCopy, previewBlocksCut, previewBlocksPaste, previewListTargets, previewListCitations, previewPickDocument, previewPickImage, previewPasteImage, previewPasteHtml | its document, revision and request identifiers equal those of the render the host holds, the preview is alive and has a rendered stage | dropped, with no answer and no change |
 | comment | previewCommentCreate, previewCommentReply, previewCommentResolve, previewCommentDelete | its document and request identifiers equal those of the render the host holds, whatever its revision (comments live in a sidecar file and the quote is anchored again, so typed text is not lost to a race with typing) | dropped, with no answer and no write |
-| document | previewPlantUmlInclude, previewShowProblems, previewWarningBannerClosed | the preview is alive and its documentId equals that of the document the preview shows, even one render behind; revision and request are not compared | dropped without an answer |
+| document | previewCopyText, previewPlantUmlInclude, previewShowProblems, previewWarningBannerClosed | the preview is alive and its documentId equals that of the document the preview shows, even one render behind; revision and request are not compared | dropped without an answer |
 | own-id | previewEditClosed, previewEditFlushed | the preview is not disposed, whatever document, revision and request the message names (the waiting host matches the answer by the identifier it sent) | dropped (disposed preview) |
 | page-state | previewReady, previewScroll, previewReveal, previewState, previewLink, previewLinkDiscover, previewThemeModeChanged, previewRefresh, previewAnchorModeChanged, previewEditModeChanged, previewEditOpen, previewEditSave, previewEditCancel, previewFrontmatterSave, previewCheckboxToggle | it names the render the host holds, or it is one of the exceptions below | dropped without changing anything |
 
@@ -87,8 +87,8 @@ The page-state exceptions are the ready reports (see SwRS-MDOKFSTUDIO-LIFE-071),
 | --- | --- |
 | previewBlockMove naming revision 3 while the host holds revision 4 | dropped, with no answer and no change |
 | previewBlockMove, previewBlocksCopy, previewBlocksCut or previewBlocksPaste naming an earlier request id | dropped and nothing is answered |
-| previewCopyText of a page whose document version or render request is no longer current | dropped, the clipboard is not written |
-| previewCopyText of a current page | the text is written to the clipboard |
+| previewCopyText of a page whose document version or render request is no longer current | handled: the text is written to the clipboard and the page is answered, because a copy edits nothing |
+| previewCopyText naming another document | dropped, the clipboard is not written |
 | previewLink with another document identity, revision or request than the host render | ignored: nothing opens and nothing is recorded |
 | previewLink after the preview was disposed | ignored: nothing happens |
 | message of a disposed preview, or of a preview without a rendered stage | dropped |
@@ -138,8 +138,7 @@ A message that passes its gate but writes for a document newer than the render i
 
 ### Known issues
 
-- Known issue: a request of the render gate that names an older render than the one the host holds is dropped by the gate without any answer. No reason is shown; an arrow click stays marked pending; a keyboard move, a clipboard request and a selection move are forgotten by the page after five seconds; and an open request (which the host answers only for saves and cancels) leaves its frame empty.
-- Known issue: the copy button still shows Copied although the host dropped the request and the clipboard is unchanged; the version check is stricter than needed for a copy, which edits nothing.
+- Known issue: a request of the render gate that names an older render than the one the host holds is dropped by the gate without any answer. No reason is shown; an arrow click stays marked pending; a keyboard move and a selection move are forgotten by the page after five seconds; and an open request (which the host answers only for saves and cancels) leaves its frame empty.
 - Known issue: the include request (previewPlantUmlInclude) is not an edit: it is allowed in read-only previews and in Restricted Mode.
 
 ### Related requirements
@@ -155,7 +154,7 @@ A message that passes its gate but writes for a document newer than the render i
 - Method: test/integration/commentWrite.test.ts (comment gate: a previewCommentCreate with an old documentVersion is written and answered ok; the same message with a wrong document id is dropped and writes nothing).
 - Method: test/integration/blockMove.test.ts and test/integration/blockClipboard.test.ts (stale version: document and clipboard unchanged, current render plans the move or copy). The message text has no assertion.
 - Method: test/session/blockReq.requirements.test.ts (a save or cancel from an older page of a writable preview is answered with an error; read-only gets none).
-- Method: test/session/renderReq.codeCopy.requirements.test.ts (stale copy request dropped, current one written).
+- Method: test/session/renderReq.codeCopy.requirements.test.ts (stale copy request copied and answered, another document dropped).
 - Method: test/session/diagReq.plantuml.requirements.test.ts (include request handled for the current document even one render behind, dropped otherwise).
 - Method: test/host/fmtableReq.requirements.test.ts (frontmatter save from an older render answered with the reopen hint; another document gets no answer).
 - Method: test/integration/labelRename.test.ts (rename out-of-date answer; stale revision dropped, the page ends with the timeout text).

@@ -258,7 +258,7 @@ test("the page-state validators accept exactly what the frozen validator accepte
 test("a page-state message keeps accepting a document id longer than the registered bound", () => {
   const long = { type: "previewScroll", documentId: "x".repeat(5000), revision: 1, requestId: 1, line: 2 };
   assert.equal(isPageToHostMessage(long), true);
-  assert.equal(isPageToHostMessage({ ...long, type: "previewCopyText", text: "code" }), false);
+  assert.equal(isPageToHostMessage({ ...long, type: "previewCopyText", editId: "e", text: "code" }), false);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-052

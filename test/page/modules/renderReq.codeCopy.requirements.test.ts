@@ -88,6 +88,10 @@ function rect(top: number, left: number, width: number, height: number) {
   return { top, left, right: left + width, bottom: top + height, width, height };
 }
 
+// The host's answer: undefined holds it (the test answers through `held`).
+let reply: { ok: boolean; reason?: string } | undefined = { ok: true };
+const held: Array<(result: { ok?: boolean; reason?: string }) => void> = [];
+
 function harness() {
   const root = new FakeElement("html");
   const body = root.append(new FakeElement("body"));
@@ -124,7 +128,7 @@ function harness() {
     addEventListener: (type: string, handler: Handler) => windowListeners.set(type, [...(windowListeners.get(type) ?? []), handler]),
   };
   provideGlobalElement(FakeElement);
-  const runtime = installCodeCopy(document as never, window as never, (text: string) => posted.push(text));
+  const runtime = installCodeCopy(document as never, window as never, (text: string, done) => { posted.push(text); held.push(done); if (reply) done(reply); });
   return {
     button(): any { return body.querySelector("[data-sphinx-preview-code-copy]") as any; },
     makePre, posted, timers, runtime, window,

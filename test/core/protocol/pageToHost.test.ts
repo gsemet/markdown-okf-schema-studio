@@ -45,14 +45,16 @@ test("the shipped registry rejects an unregistered type", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-CODE-026
-test("previewCopyText accepts text up to 1 MB and rejects anything else", () => {
-  const copy = { type: "previewCopyText", documentId: "doc", revision: 1, requestId: 1, text: "code" };
+test("previewCopyText needs an edit id and a string; the 1 MB limit is the host's to answer", () => {
+  const copy = { type: "previewCopyText", documentId: "doc", revision: 1, requestId: 1, editId: "e", text: "code" };
   assert.equal(isRegisteredPreviewMessage(copy), true);
   assert.equal(isRegisteredPreviewMessage({ ...copy, text: "" }), true);
-  assert.equal(isRegisteredPreviewMessage({ ...copy, text: "x".repeat(1_000_000) }), true);
-  assert.equal(isRegisteredPreviewMessage({ ...copy, text: "x".repeat(1_000_001) }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...copy, text: "x".repeat(1_000_001) }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...copy, text: "x".repeat(20_000_001) }), false);
   assert.equal(isRegisteredPreviewMessage({ ...copy, text: 5 }), false);
   assert.equal(isRegisteredPreviewMessage({ ...copy, text: undefined }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...copy, editId: undefined }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...copy, editId: "" }), false);
 });
 
 test("field helpers respect their boundaries", () => {

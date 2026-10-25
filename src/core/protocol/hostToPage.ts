@@ -124,6 +124,7 @@ export interface PreviewBlocksResultMessage extends RenderMessage<"previewBlocks
 
 /** The page message types that are host round trips answered by `<type>Result`. */
 export type HostRequestType =
+  | "previewCopyText"
   | "previewThreadReply"
   | "previewThreadDelete"
   | "previewListTargets"
@@ -340,6 +341,7 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewBlockMoveResult: render,
     previewBlocksResult: render,
     // Host round trips, matched by edit id by the page's pending requests.
+    previewCopyTextResult: ownId,
     previewThreadReplyResult: ownId,
     previewThreadDeleteResult: ownId,
     previewListTargetsResult: ownId,

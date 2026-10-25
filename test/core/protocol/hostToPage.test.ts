@@ -27,6 +27,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewListTargetsResult: { editId: "h", ok: true, items: [], truncated: false },
   previewListCitationsResult: { editId: "h", ok: true, items: [], truncated: false },
   previewPickDocumentResult: { editId: "h", ok: true, path: "a.md" },
+  previewCopyTextResult: { editId: "h", ok: true },
   previewPickImageResult: { editId: "h", ok: true, cancelled: true },
   previewPasteImageResult: { editId: "h", ok: true, fileName: "a.png" },
   previewPasteHtmlResult: { editId: "h", ok: true, markdown: "**x**" },

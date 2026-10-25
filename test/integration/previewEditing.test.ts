@@ -1410,6 +1410,7 @@ export async function run(): Promise<void> {
     await sendPreviewMessageForTests({
       type: "previewCopyText",
       ...currentContext(document),
+      editId: "copy-1",
       text: copyText,
     });
     assert.equal(await vscode.env.clipboard.readText(), copyText);

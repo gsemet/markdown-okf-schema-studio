@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-10-25 (the copy button says Copied only when the text was copied)
+
+- SwRS-MDOKFSTUDIO-CODE-019, CODE-026: the host now answers every copy request (`previewCopyTextResult`,
+  ok or a reason); the button shows Copied only on success and the reason otherwise. The size
+  limit is answered ("Too large to copy.") instead of dropped. Removed the Known issue line.
+- SwRS-MDOKFSTUDIO-TRUST-065: a copy request moves from the render gate to the document gate, so
+  typing since the render no longer drops it. Removed the Known issue line.
+- SwRS-MDOKFSTUDIO-CODE-020: Copied is shown when the host confirms, not at the click.
+- SwRS-MDOKFSTUDIO-CODE-027 (superseded): removed its Known issue line.
+
 ## 2026-10-25 (the code-block copy button is reachable with the keyboard)
 
 - SwRS-MDOKFSTUDIO-CODE-017: each copyable code block is now a tab stop; focusing it shows the

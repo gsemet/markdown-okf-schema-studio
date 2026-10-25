@@ -21,7 +21,7 @@ import { htmlToMarkdown } from "../../core/paste/htmlToMarkdown";
 import type { FileSystem } from "../../host-api/fileSystem";
 import { scanBibKeys } from "../bibScan";
 import type { HostRequestType } from "../../core/protocol/hostToPage";
-import type { PageMessageOf } from "../../core/protocol/pageToHost";
+import { MAX_COPY_TEXT_LENGTH, type PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
@@ -108,7 +108,7 @@ export class HostRequestController {
     const { host } = this.manager;
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
     // Copies the raw code of a code block. It does not edit anything, so a read-only preview allows it.
-    router.on("previewCopyText", (message) => host.ui.writeClipboard(message.text));
+    router.on("previewCopyText", (message, preview) => this.handleCopyText(preview, message));
     router.on("previewListTargets", (message, preview) => this.handleListTargets(preview, message));
     router.on("previewListCitations", (message, preview) => this.handleListCitations(preview, message));
     router.on("previewPickDocument", (message, preview) => this.handlePickDocument(preview, message));
@@ -140,6 +140,19 @@ export class HostRequestController {
   /** The citation keys of the workspace's `.bib` files next to `documentPath` (bounded scan). */
   public listCitations(documentPath: string | undefined): ReturnType<typeof scanBibKeys> {
     return scanBibKeys(documentPath, this.manager.host);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-CODE-026
+  /** Writes the code to the clipboard, then answers whether it was copied (always answers). */
+  private handleCopyText(preview: PreviewSession, message: PageMessageOf<"previewCopyText">): PromiseLike<void> | undefined {
+    if (message.text.length > MAX_COPY_TEXT_LENGTH) {
+      this.postHostResult(preview, message, { ok: false, reason: "Too large to copy." });
+      return undefined;
+    }
+    return this.manager.host.ui.writeClipboard(message.text).then(
+      () => this.postHostResult(preview, message, { ok: true }),
+      () => this.postHostResult(preview, message, { ok: false, reason: "Could not copy." }),
+    );
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-065
