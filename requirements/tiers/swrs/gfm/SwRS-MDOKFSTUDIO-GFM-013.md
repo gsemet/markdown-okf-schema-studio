@@ -7,16 +7,17 @@ description: When a document uses CRLF line endings, the extension SHALL render
   alerts and fences exactly as for the same LF document.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-GFM-009; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-GFM-009
 ---
 
 ## Alerts render the same in CRLF documents

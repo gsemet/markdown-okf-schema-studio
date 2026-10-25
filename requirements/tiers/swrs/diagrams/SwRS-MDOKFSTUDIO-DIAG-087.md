@@ -3,27 +3,28 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-087
 uuid: 378f3d2e-6912-4334-ae6a-420640065815
 title: jarPath is read as a trimmed string
-description: When the extension reads markdownOkfSchemaStudio.plantuml.jarPath,
-  it SHALL trim the value, and SHALL read a value that is not a string as empty.
+description: "When the extension reads markdownOkfSchemaStudio.plantuml.jarPath, it
+  SHALL trim the value and read a value that is not a string as empty."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-012
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-084; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-084
 ---
 
 ## jarPath is read as a trimmed string
 
 ### Normative behavior
 
-When the extension reads markdownOkfSchemaStudio.plantuml.jarPath, it SHALL trim the value, and SHALL read a value that is not a string as empty.
+When the extension reads markdownOkfSchemaStudio.plantuml.jarPath, it SHALL trim the value and read a value that is not a string as empty.
 
 ### Scenario: Padded value
 

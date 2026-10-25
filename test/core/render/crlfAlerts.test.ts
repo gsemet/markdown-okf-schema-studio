@@ -23,6 +23,7 @@ const FIXTURE = [
   "",
 ].join("\n");
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009
 test("GitHub alerts and fences render identically for LF and CRLF documents", async () => {
   const lf = await renderMyst(FIXTURE);
   const crlf = await renderMyst(FIXTURE.replaceAll("\n", "\r\n"));

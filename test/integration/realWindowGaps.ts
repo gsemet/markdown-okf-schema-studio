@@ -93,6 +93,7 @@ async function waitForGitRepository(uri: vscode.Uri): Promise<void> {
     api.getRepository(uri)?.state.HEAD?.commit !== undefined, 30_000);
 }
 
+// @tests_req StRS-MDOKFSTUDIO-REVIEW-017
 /**
  * review-annotations/r03: a tracked file whose buffer differs from Git HEAD. The buffer is edited,
  * never saved, and reverted at the end, so the working tree does not change.
@@ -236,6 +237,7 @@ export async function scenarioReviewThreads(page: Page, evidence: Evidence): Pro
   }
 }
 
+// @tests_req StRS-MDOKFSTUDIO-PALETTE-018
 /**
  * palette-slash/r09: an image pasted into a block editor. The paste event is dispatched on the
  * editor's textarea with the PNG file in its clipboard data (a test cannot put an image on the
@@ -297,6 +299,8 @@ export async function scenarioImagePaste(page: Page, evidence: Evidence): Promis
   });
 }
 
+// @tests_req StRS-MDOKFSTUDIO-BLOCK-001
+// @tests_req StRS-MDOKFSTUDIO-TRUST-001
 /** trust-security/r01: the side preview of an untrusted workspace (runs in the Restricted Mode window). */
 export async function scenarioUntrustedReadOnly(page: Page, evidence: Evidence): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, false, "this scenario runs in the Restricted Mode window");

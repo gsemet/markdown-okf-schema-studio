@@ -41,6 +41,7 @@ export function globToRegExp(pattern: string): RegExp {
   return new RegExp(`^${source}$`, "u");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-057
 /**
  * Lists the Markdown documents below `baseDirectory` whose path (without extension) matches the
  * glob, as sorted posix requests relative to it, extension included. Bounded in matches,

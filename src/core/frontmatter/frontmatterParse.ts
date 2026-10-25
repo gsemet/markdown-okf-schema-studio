@@ -36,6 +36,8 @@ export interface FrontmatterBlock {
  */
 const FRONTMATTER_FENCE = /^(---[ \t]*\r?\n)(?:([\s\S]*?)\r?\n)?(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/u;
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
 /** Finds the frontmatter block at the start of `source`; undefined when the document has none. */
 export function matchFrontmatterBlock(source: string): FrontmatterBlock | undefined {
   const match = FRONTMATTER_FENCE.exec(source);
@@ -110,6 +112,7 @@ export function parseYamlValue(source: string): ParsedYamlValue {
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
 /**
  * Strips line and block comments outside strings: the JSON5 a schema file may use, read as JSON.
  */

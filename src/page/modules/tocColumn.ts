@@ -5,6 +5,9 @@ export interface TocColumnContext {
   initialViewPreferences?: { toc?: boolean };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-033
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-169
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
  * TOC column: a right-hand column below the toolbar that lists the h1-h4 headings of the content.
  * The column is runtime UI appended to the body (never part of the page shell) and is
@@ -54,6 +57,7 @@ export function installTocColumn(
   let dirty = true;
   let scheduled = false;
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-037
   const layout = (): void => {
     const toolbar = document.querySelector("[data-sphinx-preview-toolbar]");
     const bounds = toolbar?.getBoundingClientRect?.();
@@ -95,6 +99,7 @@ export function installTocColumn(
       : [],
   );
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-040
   const collect = (): Array<{ heading: Element; level: number; text: string; key: string }> => {
     const content = document.getElementById(contentId);
     const found: Array<{ heading: Element; level: number; text: string; key: string }> = [];
@@ -130,6 +135,7 @@ export function installTocColumn(
     else if (box.top < area.top) nav.scrollTop -= area.top - box.top;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-045
   // Marks the entry of the section at the reading line from the cached tops; no layout read.
   const track = (force = false): void => {
     if (!open || entries.length === 0) return;

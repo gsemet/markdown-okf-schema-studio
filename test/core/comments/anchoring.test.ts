@@ -24,6 +24,7 @@ const thread = (
 const filler = (count: number, label = "filler"): string[] =>
   Array.from({ length: count }, (_, index) => `${label} line number ${index} with words`);
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-094
 test("T45: shiftThreadLines follows lines inserted and removed above", () => {
   const threads = [thread("a", { line: 10, endLine: 12, quote: "x" }), thread("b", { line: 3 })];
   const inserted = shiftThreadLines(threads, [{ startLine: 5, endLine: 5, insertedLineCount: 2 }]);
@@ -63,12 +64,14 @@ test("T45: a quote still inside its lines stays anchored", () => {
   assert.deepEqual(result, { state: "anchored", line: 3, endLine: 3 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-100
 test("T45: lines inserted above move the thread to the new line", () => {
   const body = ["# Title", "", ...filler(5), "", "The quick brown fox jumps.", ""].join("\n");
   const result = reanchor(body, thread("a", { line: 3, quote: "quick brown fox" }));
   assert.deepEqual(result, { state: "moved", line: 9, endLine: 9 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-101
 test("T45: a deleted quote orphans the thread and keeps its old line", () => {
   const text = ["# Title", "", "Something else entirely.", "", "More unrelated words."].join("\n");
   const result = reanchor(text, thread("a", { line: 3, endLine: 3, quote: "quick brown fox" }));
@@ -132,6 +135,7 @@ test("T45: text inside code fences and front matter is never a match", () => {
   assert.equal(reanchor(text, thread("a", { line: 9, quote: "the quick brown fox" })).state, "orphaned");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-107
 test("T45: a small edit of the quote is followed by the fuzzy search", () => {
   const quote = "the scheduler retries the failed upload twice";
   const text = [...filler(30), "the scheduler retries the failed uploads twice", ...filler(5)].join("\n");

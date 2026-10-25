@@ -8,6 +8,7 @@ const inside = (selector: string) => ({ closest: (query: string) => (query === s
 const cellControl = inside("[data-sphinx-preview-block-editor]");
 const outside = { closest: () => null };
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
 test("CR 041: Tab, Enter, Escape and the arrow keys an open editor handled are the page's", () => {
   for (const key of ["Tab", "Enter", "Escape", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]) {
     assert.equal(isHandledEditorKey({ key, defaultPrevented: true, target: cellControl }), true, key);

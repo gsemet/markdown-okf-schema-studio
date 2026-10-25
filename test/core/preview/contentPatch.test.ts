@@ -79,6 +79,7 @@ test("T34: extractMainContent returns the inner HTML of the content container of
   assert.equal(extractMainContent("<html><body><p>no container</p></body></html>"), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
 test("T34: two renders of one document type have equal shell keys despite other text, nonces and identifiers", async () => {
   const first = await page("# Title\n\nFirst paragraph.\n", { requestId: 1, version: 1 });
   const second = await page("# Another title\n\nA different paragraph with **bold** text.\n\n- item\n", {
@@ -117,6 +118,8 @@ test("T34: the shell key ignores the status region and the runtime script, and n
   assert.notEqual(shellKey(withoutToolbar), shellKey(html), "a changed toolbar is a changed shell");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-071
 test("T34: shell keys differ when Mermaid appears or disappears, and when math appears", async () => {
   const plain = await page("Text only.\n");
   const diagram = await page("Text only.\n\n" + MERMAID);
@@ -153,6 +156,7 @@ test("T34: canPatch refuses pages without a content container", async () => {
   assert.equal(canPatch(rendered, statusPage), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-105
 test("T34: injecting PlantUML diagrams into a page keeps its shell key, so the diagrams can be patched in", async () => {
   const html = await page("```plantuml\n@startuml\nAlice -> Bob: hello\n@enduml\n```\n");
   assert.match(html, /myst-plantuml-diagram/u);
@@ -177,6 +181,7 @@ test("T34: content that mentions a container inside the content does not change 
   assert.equal(shellKey(nested), shellKey(html));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-022
 test("T34: the runtime context key covers the startup settings and nothing the page follows itself", () => {
   const base = {
     documentId: "file:///a.md",
@@ -239,6 +244,7 @@ test("T34: a ready report with the identifiers of the last assignment is a webvi
     false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022
 test("T34: the record of a patched page carries the nonce of the loaded page and keeps its shell", async () => {
   const loaded = await page("# Loaded\n\nText.\n", { requestId: 1, version: 1 });
   const next = await page("# Next\n\nOther text.\n", { requestId: 2, version: 2 });
@@ -263,6 +269,7 @@ test("T34: reuseNonce swaps every occurrence, in the policy tokens and in the at
   assert.equal(swapped.replaceAll("NEW456", "OLD123"), html);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-THEME-043
 test("T08: two renders with different zoom have the same shell key and the same context key", async () => {
   const first = await page("# Title\n\nText.\n", { requestId: 21, version: 21, zoom: 100 });
   const second = await page("# Title\n\nText.\n", { requestId: 23, version: 23, zoom: 130 });

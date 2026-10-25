@@ -8,16 +8,17 @@ description: When a block editor or the properties editor is open, the extension
   renaming a label and post nothing.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-041; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-BLOCK-041
 ---
 
 ## Rename is blocked while an editor is open in the page
@@ -40,5 +41,5 @@ When a block editor or the properties editor is open, the extension SHALL open t
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "an open block editor blocks the rename" in test/page/modules/labelRename.test.ts
 - Criteria: Frontmatter half is a gap in tests.

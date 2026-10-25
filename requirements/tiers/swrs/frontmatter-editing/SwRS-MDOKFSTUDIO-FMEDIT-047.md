@@ -3,21 +3,22 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-FMEDIT-047
 uuid: 6cec5899-06ed-47f1-9c66-a4d708e01294
 title: A value that does not fit the field type is refused
-description: When a schema is found and the saved value is not of the field's
-  type or not one of its enum values, the extension SHALL refuse the save with
-  "The frontmatter field is stale or its value does not match the schema."
+description: "When a schema is found and the saved value is not of the field's type
+  or not one of its enum values, the extension SHALL refuse the save with \"The frontmatter
+  field is stale or its value does not match the schema.\""
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-009
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-016; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-016
 ---
 
 ## A value that does not fit the field type is refused
@@ -25,8 +26,6 @@ tested_in_files: []
 ### Normative behavior
 
 When a schema is found and the saved value is not of the field's type or not one of its enum values, the extension SHALL refuse the save with "The frontmatter field is stale or its value does not match the schema."
-
-Known issue: the stale-field message is shared by a stale render and a type mismatch; the user cannot tell them apart.
 
 ### Scenario: Nominal
 
@@ -39,6 +38,10 @@ Known issue: the stale-field message is shared by a stale render and a type mism
 - GIVEN a document without a schema
 - WHEN a value of any type is saved
 - THEN no type check applies and the value is written
+
+### Known issues
+
+- Known issue: the stale-field message is shared by a stale render and a type mismatch; the user cannot tell them apart.
 
 ### Verification notes
 

@@ -36,6 +36,8 @@ type KeyEventLike = {
   stopPropagation?: () => void;
 };
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-036
 /**
  * The figure form: Source (with Browse), Alt text, Caption, Legend, Width, Align and Name, shown
  * under the edition palette. It only collects the values; the caller writes the directive.
@@ -268,6 +270,7 @@ export interface FigureEditButton {
   owns(node: unknown): boolean;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-153
 /**
  * Edit mode: the "Edit figure" button over the hovered figure. It lives outside the rendered
  * content (a child of the body, placed through the CSSOM), so content patches never touch it and

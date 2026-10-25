@@ -10,16 +10,17 @@ description: When the preview renders an admonition gallery at any theme and
   overflow.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-006; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-006
 ---
 
 ## Admonition galleries keep one title line per panel without sideways scroll
@@ -42,5 +43,5 @@ When the preview renders an admonition gallery at any theme and pane width, the 
 
 ### Verification notes
 
-- Method: test
+- Method: Visual scenario admonitions-dark-titled in test/visual/scenarioDefinitions1.ts
 - Criteria: The visual gallery scenarios (one family) pass the shared admonition checks.

@@ -44,6 +44,9 @@ const isBlank = (line: SourceLine): boolean => line.text.trim() === "";
 
 const OUT_OF_DATE = "The preview is out of date. Refresh it and try again.";
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-117
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-124
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-156
 /**
  * Plans the swap of two top-level blocks, `first` above `second`. Only the lines from the start of
  * `first` to the end of `second` are rewritten: the blocks swap, the blank separator and the final
@@ -112,6 +115,7 @@ export function planBlockMove(
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-127
 /** True when a line opens an `{include}` directive (a block that is not part of this file). */
 export function opensIncludeDirective(lineText: string): boolean {
   return /^\s*(?::{3,}|`{3,}|~{3,})\s*\{include\}/u.test(lineText);

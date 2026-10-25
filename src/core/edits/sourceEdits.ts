@@ -35,6 +35,7 @@ export const PASTE_NEXT_TO_INCLUDED = "Text cannot be pasted next to a block tha
 /** The one-character edit of a checkbox, or no edit when the marker already has the state. */
 export type CheckboxTogglePlan = EditRefusal | { unchanged: true } | { edit: TextEdit };
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-021
 /**
  * Gives the task-list marker at 1-based `line`, zero-based `column` (its opening bracket) the
  * state `checked`: a one-character edit between the brackets.
@@ -50,6 +51,7 @@ export function planCheckboxToggle(text: string, line: number, column: number, c
   return { edit: { start, end: start + 1, text: toggle.replacement } };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-045
 /**
  * Renames the MyST label on 1-based `line`: only the `(oldName)=` text changes. A line that is not
  * exactly `(oldName)=` is refused, never searched for elsewhere. `remainingRefs` counts the
@@ -138,6 +140,8 @@ export interface BlockMoveRequest {
   direction: "up" | "down";
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-117
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-127
 /**
  * Swaps a block range with its neighbour in one edit. `line` is the new first line of the moved
  * range. Refused: what the block move planner refuses, and a block that opens an `{include}`.
@@ -202,6 +206,7 @@ export function planBlocksPaste(text: string, afterLine: number, clipboard: stri
   return { edit: { start: plan.offset, end: plan.offset, text: plan.text } };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-042
 /**
  * The smallest edit that turns the block text last written to the document (`lastSavedText`,
  * starting at offset `blockStart`) into `editedText`; undefined when they are the same.

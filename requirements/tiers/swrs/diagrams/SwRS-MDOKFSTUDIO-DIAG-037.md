@@ -9,16 +9,17 @@ description: 'When the built-in engine reports an error or throws, the page SHAL
   hint, show no picture, and set data-render-state to error.'
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-006
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-032; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-032
 ---
 
 ## A built-in engine failure shows its reason

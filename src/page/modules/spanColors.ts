@@ -4,6 +4,7 @@
  */
 export { isSafeOkfColor } from "../../core/security/spanColors";
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-034
 /**
  * Applies the validated colours kept by the sanitizer. The value is validated again here with the
  * same grammar (passed in), so a hand-edited attribute can never reach `style`.

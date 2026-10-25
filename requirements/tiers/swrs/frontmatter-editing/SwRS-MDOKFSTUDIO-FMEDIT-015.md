@@ -3,22 +3,22 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-FMEDIT-015
 uuid: d4321aa6-bd82-4975-abf7-02fd5a63ee63
 title: Fields without a schema type are edited as YAML text
-description: When a writer opens the editor of a field without a schema, of
-  unknown type, list-typed with a non-list value or holding an object, the
-  extension SHALL show a YAML text box of 1 to 20 rows holding the value as
-  YAML.
+description: "When a writer opens the editor of a field without a schema, of unknown
+  type, list-typed with a non-list value or holding an object, the extension SHALL
+  show a YAML text box of 1 to 20 rows holding the value as YAML."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-002
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-004; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-004
 ---
 
 ## Fields without a schema type are edited as YAML text
@@ -26,8 +26,6 @@ tested_in_files: []
 ### Normative behavior
 
 When a writer opens the editor of a field without a schema, of unknown type, list-typed with a non-list value or holding an object, the extension SHALL show a YAML text box of 1 to 20 rows holding the value as YAML.
-
-Known issue: objects are edited as de-indented YAML and a YAML parser error is shown as raw, possibly multi-line text.
 
 ### Scenario: Nominal
 
@@ -40,6 +38,10 @@ Known issue: objects are edited as de-indented YAML and a YAML parser error is s
 - GIVEN a field just added, whose value is the empty string
 - WHEN its editor opens
 - THEN the text box starts empty instead of showing the two quote characters
+
+### Known issues
+
+- Known issue: objects are edited as de-indented YAML and a YAML parser error is shown as raw, possibly multi-line text.
 
 ### Verification notes
 

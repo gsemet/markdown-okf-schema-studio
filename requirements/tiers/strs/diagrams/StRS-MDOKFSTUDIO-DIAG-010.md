@@ -7,20 +7,16 @@ description: When the preview content or theme changes, the Studio SHALL redraw
   only the bundled-engine diagrams that need it and reuse the others.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-006; no marker expected."
 derives_from: []
 user_need: As a writer, I keep typing while the diagrams I did not touch stay
   drawn and the preview stays responsive.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-039
-- SwRS-MDOKFSTUDIO-DIAG-040
-- SwRS-MDOKFSTUDIO-DIAG-041
-- SwRS-MDOKFSTUDIO-DIAG-042
-- SwRS-MDOKFSTUDIO-DIAG-043
-- SwRS-MDOKFSTUDIO-DIAG-044
-- SwRS-MDOKFSTUDIO-DIAG-045
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-006
 ---
 
 ## Keep PlantUML pictures in place while typing

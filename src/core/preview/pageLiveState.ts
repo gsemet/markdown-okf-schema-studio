@@ -27,6 +27,7 @@ export interface PageLiveState {
 /** A message that brings a page up to the host's live state. */
 export type PageLiveStateMessage = (PreviewPairingMessage | ThemeChangedMessage) & Record<string, unknown>;
 
+// @implements_req SwRS-MDOKFSTUDIO-THEME-016
 /** The messages that bring the page that reported `ready` up to the host's live state. */
 export function pageLiveStateMessages(ready: PageIdentity, live: PageLiveState): PageLiveStateMessage[] {
   const identity = {

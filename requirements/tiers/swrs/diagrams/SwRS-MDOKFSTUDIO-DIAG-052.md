@@ -8,16 +8,17 @@ description: "When the host handles an include request, it SHALL answer with pre
   or not ok with a reason."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-009
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-090; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TRUST-090
 ---
 
 ## The host answers an include request with the same edit id
@@ -38,11 +39,7 @@ When the host handles an include request, it SHALL answer with previewPlantUmlIn
 - WHEN the host handles it
 - THEN the answer repeats the edit id and carries ok false and a reason
 
-### Known issues
-
-- Known issue: PlantUmlController.handleInclude has no test.
-
 ### Verification notes
 
-- Method: No host-level test; only the resolver and the message shape are tested.
+- Method: Unit test `an include request is answered once with the request's edit id: the file, or a refusal` in `test/session/diagReq.plantuml.requirements.test.ts`.
 - Criteria: Every request gets exactly one answer with its edit id.

@@ -11,6 +11,7 @@ import {
   resolvePlantUmlEngine,
 } from "../../../src/core/configuration/plantUmlConfiguration";
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
 test("reads and trims the configured PlantUML JAR path", () => {
   const configuration = readPlantUmlConfiguration({
     get<T>(section: string, defaultValue: T): T {
@@ -34,6 +35,7 @@ test("uses an empty path for non-string configuration values", () => {
   assert.deepEqual(configuration, DEFAULT_PLANTUML_CONFIGURATION);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
 test("the built-in PlantUML engine is the default and useJar is read as a strict boolean", () => {
   const read = (value: unknown) => readPlantUmlEngineSettings({
     get<T>(section: string, _defaultValue: T): T {

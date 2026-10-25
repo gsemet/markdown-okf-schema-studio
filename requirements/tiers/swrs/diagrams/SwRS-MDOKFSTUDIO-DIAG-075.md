@@ -8,16 +8,17 @@ description: When any markdownOkfSchemaStudio.plantuml setting changes, the
   open document again without reopening the preview.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-024; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-024
 ---
 
 ## Changing a PlantUML setting renders the open document again
@@ -38,11 +39,7 @@ When any markdownOkfSchemaStudio.plantuml setting changes, the extension SHALL r
 - WHEN the setting changes
 - THEN nothing is re-read and nothing is rendered again
 
-### Known issues
-
-- Known issue: Untested: onSettingsChanged has no session test.
-
 ### Verification notes
 
-- Method: No session test for the settings change path.
+- Method: Unit test `a plantuml setting change reads the settings again and renders the open document again` in `test/session/diagReq.settings.requirements.test.ts`.
 - Criteria: Only the three configured sections trigger the work.

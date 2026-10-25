@@ -83,6 +83,7 @@ export function frontmatterLinkIdentity(
   return path.basename(filePath, path.extname(filePath));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
 /**
  * Finds the schema directory for a file: walks ancestors and returns the
  * first directory named `_schema` or `_schemas` (with `_schema` preferred at
@@ -168,6 +169,7 @@ function readSchemaFile(files: SchemaFiles, schemaPath: string): string {
 }
 
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
 function parseSchemaFile(files: SchemaFiles, candidate: SchemaCandidate): Record<string, unknown> {
   const raw = readSchemaFile(files, candidate.path);
   if (candidate.extension === ".json" || candidate.extension === ".json5") {
@@ -306,6 +308,10 @@ export function analyzeFrontmatter(options: FrontmatterOptions): FrontmatterResu
   return { ...result, additionalPropertiesAllowed: result.additionalPropertiesAllowed ?? true };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
 function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult {
   const extraction = extractFrontmatter(options.sourceText);
   if (!extraction.present) {

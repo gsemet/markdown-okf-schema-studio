@@ -7,16 +7,17 @@ description: When one of several JAR diagrams fails, the extension SHALL still
   render the other diagrams.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-012
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-105; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-105
 ---
 
 ## One failing JAR diagram does not affect the others
@@ -37,11 +38,7 @@ When one of several JAR diagrams fails, the extension SHALL still render the oth
 - WHEN the results are injected
 - THEN each shows its own message
 
-### Known issues
-
-- Known issue: Untested.
-
 ### Verification notes
 
-- Method: No test: to be added.
+- Method: Unit test `one failing JAR diagram leaves the pictures of the other diagrams intact` in `test/core/render/diagReq.jar.requirements.test.ts`.
 - Criteria: Document order is preserved and failures are isolated.

@@ -8,29 +8,16 @@ description: When a frontmatter link value is checked, the Studio SHALL resolve
   targets outside the allowed folders.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-014; no marker expected."
 derives_from: []
 user_need: As a writer, I can trust that a link which shows as valid points to
   the intended file.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-050
-- SwRS-MDOKFSTUDIO-FMSCHEMA-051
-- SwRS-MDOKFSTUDIO-FMSCHEMA-052
-- SwRS-MDOKFSTUDIO-FMSCHEMA-053
-- SwRS-MDOKFSTUDIO-FMSCHEMA-054
-- SwRS-MDOKFSTUDIO-FMSCHEMA-055
-- SwRS-MDOKFSTUDIO-FMSCHEMA-056
-- SwRS-MDOKFSTUDIO-FMSCHEMA-057
-- SwRS-MDOKFSTUDIO-FMSCHEMA-058
-- SwRS-MDOKFSTUDIO-FMSCHEMA-059
-- SwRS-MDOKFSTUDIO-FMSCHEMA-060
-- SwRS-MDOKFSTUDIO-FMSCHEMA-061
-- SwRS-MDOKFSTUDIO-FMSCHEMA-062
-- SwRS-MDOKFSTUDIO-FMSCHEMA-079
-- SwRS-MDOKFSTUDIO-FMSCHEMA-080
-- SwRS-MDOKFSTUDIO-FMSCHEMA-081
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-014
 ---
 
 ## Links resolve against the right root

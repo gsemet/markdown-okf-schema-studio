@@ -6,6 +6,7 @@ import { installSelectAllInControls, isTextSelectAll } from "../../../src/page/m
 const textarea = { tagName: "TEXTAREA" };
 const textInput = { tagName: "INPUT", type: "text" };
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
 test("CR 041: Ctrl+A (Cmd+A on macOS) in a text control is the select-all of that control", () => {
   assert.equal(isTextSelectAll({ key: "a", ctrlKey: true, target: textarea }, false), true);
   assert.equal(isTextSelectAll({ key: "A", ctrlKey: true, target: textInput }, false), true, "Caps Lock");

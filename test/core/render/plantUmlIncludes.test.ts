@@ -49,6 +49,7 @@ test("a top-level include resolves next to the document, a nested one next to th
     "without the including file the name resolves next to the document");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-054
 test("a trusted workspace serves the workspace; outside it, absolute paths, URLs and the standard library are refused", () => {
   const { documentPath, scope } = workspace();
   assert.equal(resolvePlantUmlInclude({ path: "../shared/theme.puml", from: null }, scope).ok, true);
@@ -84,6 +85,7 @@ test("Restricted Mode serves only the document's folder and below", () => {
   assert.match(sibling.reason, /Restricted Mode/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-053
 test("a missing file is refused and watched, a too large file and a symlink escape are refused", () => {
   const { root, documentPath, scope } = workspace();
   const docs = path.dirname(documentPath);

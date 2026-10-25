@@ -66,6 +66,7 @@ const EQUIVALENCE_FILES: Record<string, string> = {
   [`${root}/cycle-b.md`]: "Cycle B\n\n```{include} cycle-a.md\n```\n",
 };
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013
 test("include expansion output is unchanged for ordinary documents", async () => {
   const result = await renderMyst(EQUIVALENCE_MAIN, virtualContext(EQUIVALENCE_FILES));
   const snapshot = `${result.html}\n<!--${JSON.stringify({
@@ -132,6 +133,7 @@ test("the included text budget bounds large includes", async () => {
   assert.equal(result.diagnostics.filter((entry) => /include budget/iu.test(entry.message)).length, 1);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-012
 test("a 60-chapter book with 5 snippets each renders fully within the budget", async () => {
   const files: Record<string, string> = {};
   for (let s = 0; s < 5; s += 1) files[`${root}/snip${s}.md`] = `Snippet ${s} text.\n`;

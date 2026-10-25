@@ -33,6 +33,7 @@ function fakeGit(options: { commit?: string; blob?: string | Error; repo?: boole
   return { extension, shows, listeners, state, activations: () => activations };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-203
 test("T16: no Git extension, no repository or a failing show give undefined", async () => {
   assert.equal(await createHeadBaseline<FakeUri>(() => undefined).read(file("/w/a.md"), 10), undefined);
   const noRepo = fakeGit({ commit: "c1", repo: false });

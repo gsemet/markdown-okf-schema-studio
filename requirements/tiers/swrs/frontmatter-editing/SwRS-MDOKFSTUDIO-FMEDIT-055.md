@@ -7,16 +7,17 @@ description: When the host applies a frontmatter save, the extension SHALL apply
   it as one edit of the document so that one Undo reverts it.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-058; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-BLOCK-058
 ---
 
 ## Each frontmatter save is one document edit
@@ -39,5 +40,5 @@ When the host applies a frontmatter save, the extension SHALL apply it as one ed
 
 ### Verification notes
 
-- Method: Inspection of planFrontmatterSave and handleSave; no automated test asserts the undo step.
+- Method: Unit test a value save, an add, a rename and a remove are each one text edit of the document in test/host/fmtableReq.requirements.test.ts. Untested: the Undo step itself needs a real VS Code window.
 - Criteria: applyEdits receives a single-element list.

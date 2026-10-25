@@ -8,16 +8,17 @@ description: When the Label name field is submitted with Enter, the extension
   name is unchanged.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-038; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-038
 ---
 
 ## Enter sends the label rename and an unchanged name sends nothing
@@ -40,5 +41,5 @@ When the Label name field is submitted with Enter, the extension SHALL send one 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "Enter posts one rename with the label line; Escape cancels" in test/page/modules/labelRename.test.ts
 - Criteria: Verified in the page unit suite.

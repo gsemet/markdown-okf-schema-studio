@@ -22,6 +22,7 @@ import {
  * colours, the table cell bar and pasting (modules/figurePanel.ts, pasteImage.ts, pasteHtml.ts).
  */
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("T28: the MyST buttons show in MyST mode only", () => {
   const ids = ["admonition", "deflist", "math", "sub", "sup", "label"];
   for (const mode of ["strict", "gfm"] as const) {
@@ -36,6 +37,8 @@ test("T28: the MyST buttons show in MyST mode only", () => {
   for (const id of ids) assert.ok(paletteButton(myst, id), id);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148
 test("T30: the editor stays open while the host's file dialog has the focus, and the answer is inserted", () => {
   const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   const textarea = openBlockEditorWithSource(harness);
@@ -75,6 +78,7 @@ test("T30: a cancelled file dialog inserts nothing and the blur saves again", ()
 
 const paletteClick = { preventDefault: () => undefined, stopPropagation: () => undefined };
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-109
 test("T31: Image keeps the editor open while the file dialog has the focus, then inserts the reference", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -172,6 +176,7 @@ test("T32: the Figure button with the caret inside a figure opens the form, not 
   assert.equal(figureField(harness, "align").value, "");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
 test("T32: the Figure button outside any figure still picks an image", () => {
   const { harness } = figureHarness("Just a paragraph.\n\n" + figureSource, 3);
   const before = harness.messages.length;
@@ -180,6 +185,7 @@ test("T32: the Figure button outside any figure still picks an image", () => {
   assert.equal(figurePanelOf(harness), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-160
 test("T32: Apply rewrites the directive in one edit and keeps untouched options byte for byte", () => {
   const { harness, textarea, calls } = figureHarness(figureSource, 5);
   paletteButton(harness, "figure").dispatch("click", paletteClick);
@@ -230,6 +236,7 @@ test("T32: an invalid width shows an inline error and keeps the form open withou
   assert.match(textarea.value, /:width: 40%/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-036
 test("T32: focus moves inside the editor frame keep the editor open; leaving it saves", () => {
   const { harness, textarea } = figureHarness(figureSource, 5);
   textarea.value = figureSource + "\nmore";
@@ -244,6 +251,7 @@ test("T32: focus moves inside the editor frame keep the editor open; leaving it 
   assert.equal(saved(), true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031
 test("T32: Escape in the form closes it and gives the focus back to the text box", () => {
   const { harness, textarea, calls } = figureHarness(figureSource, 5);
   paletteButton(harness, "figure").dispatch("click", paletteClick);
@@ -309,6 +317,7 @@ function editFigureButton(harness: RuntimeHarness): RuntimeElement | undefined {
     element.getAttribute("data-sphinx-figure-edit") !== null);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
 test("T32: hovering a figure in edit mode shows Edit figure; outside edit mode it does not", () => {
   const off = createRuntimeHarness();
   hoverFigure(off);
@@ -351,6 +360,7 @@ test("T32: Edit figure opens the block editor and, once the source arrives, the 
   assert.equal(figureField(harness, "source").value, "images/chip.png");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-069
 // T34: the colour picker and the colour-code swatch in the real page script.
 test("T34: the code swatch appears and disappears as the caret moves into and out of a colour code", () => {
   const harness = createRuntimeHarness();
@@ -372,6 +382,8 @@ test("T34: the code swatch appears and disappears as the caret moves into and ou
   assert.equal(swatch.getAttribute("hidden"), null, "typing next to a code shows it");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-039
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-058
 test("T34: the picker edits the text box as one undo step and keeps the editor open", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -437,6 +449,7 @@ function openCellEditorWithPalette(platform?: string) {
   return { harness, ...opened, control, calls };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-085
 test("T35: the cell bar keeps the table operations and adds the inline group after a separator", () => {
   const { harness } = openCellEditorWithPalette();
   const bar = cellBar(harness);
@@ -513,6 +526,7 @@ test("T35: block-only shortcuts do nothing in a cell", () => {
   assert.equal(control.value, "foo", "the TODO comment toggle is a block action");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-091
 test("T35: link text and URL with a pipe are escaped and newlines become spaces in a cell", () => {
   const { harness, control } = openCellEditorWithPalette();
   control.value = "see a|b";
@@ -546,6 +560,7 @@ test("T35: already escaped pipes stay single and a colour span has no pipe to br
   assert.match(control.value, /^<span style="color:#[0-9a-f]+">foo<\/span>$/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-018
 test("T35: a popover opened from the cell bar keeps the editor open, outside focus still commits", () => {
   const { harness, control } = openCellEditorWithPalette();
   control.value = "foo";
@@ -567,6 +582,7 @@ test("T35: a popover opened from the cell bar keeps the editor open, outside foc
   assert.equal(harness.messages.at(-1)?.final, true, "focus left to nowhere: the cell commits");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-089
 test("T35: the link panel opened from the cell keeps the editor open and clicking outside commits", () => {
   const { harness, control } = openCellEditorWithPalette();
   control.value = "foo";
@@ -620,6 +636,7 @@ function imageItem(type = "image/png", size = 8): Record<string, unknown> {
   return { kind: "file", type, getAsFile: () => file };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-203
 test("T38: pasting an image posts it to the host with the selection remembered", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -670,6 +687,7 @@ test("T38: an image over 10 MB is refused in the editor without a message to the
   assert.match(String(status?.textContent), /larger than 10 MB/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
 test("T38: a reply for another edit is ignored and a refusal shows its reason", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -700,6 +718,7 @@ function htmlPasteEvent(html: string, text = "") {
   };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-213
 test("T1: pasting rich text asks the host for Markdown and inserts the answer over the selection", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);

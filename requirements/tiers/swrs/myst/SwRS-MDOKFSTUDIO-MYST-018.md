@@ -8,16 +8,17 @@ description: When a document uses the roles `{sub}`, `{sup}`, `{abbr}` or
   with its expansion as title, or a keyboard key.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-003
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-017; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-017
 ---
 
 ## Inline roles sub, sup, abbr and kbd render
@@ -40,5 +41,5 @@ When a document uses the roles `{sub}`, `{sup}`, `{abbr}` or `{kbd}`, the extens
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "T30: a {kbd} role inserted by the edition palette renders a kbd element" in test/core/render/mystPaletteRendering.test.ts; Unit test "MyST typography renders definitions, abbreviations, scripts, and footnotes" in test/core/render/mystFeatures.test.ts
 - Criteria: Each role maps to its element.

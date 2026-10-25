@@ -15,6 +15,7 @@ const VERSION_ADMONITION_TITLES: Record<string, string> = {
   deprecated: "Deprecated since version",
 };
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-031
 /** Turns the trailing paragraph the MyST writer leaves in a figure into its caption. */
 export function normalizeFigureCaptions(node: MystNode): void {
   if (node.type === "container" && node.kind === "figure" && node.children) {
@@ -63,6 +64,7 @@ function preserveCaptionlessReferences(node: MystNode, targets: ReadonlySet<stri
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-019
 /** A reference to a caption-less figure or table shows its label instead of nothing. */
 export function normalizeCaptionlessReferences(root: MystNode): void {
   const targets = new Set<string>();
@@ -92,6 +94,7 @@ function rawDetailsNode(
   return node;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-029
 /**
  * Renders the raw HTML a Markdown author writes for a collapsible section and a keyboard key.
  * `<details>` (optionally `open`, with a plain `<summary>`) becomes a details element: either a
@@ -211,6 +214,7 @@ export function offsetNodeLines(node: MystNode, offset: number): void {
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-001
 /**
  * Renders `{versionadded}`, `{versionchanged}` and `{deprecated}` as admonitions titled with the
  * version, their body parsed.
@@ -256,6 +260,8 @@ function rawImageNode(value: string): MystNode | undefined {
   return { type: "image", url: src, alt: attr("alt") ?? "", ...(title ? { title } : {}) } as MystNode;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-003
+// @implements_req SwRS-MDOKFSTUDIO-CORE-008
 /**
  * MyST lifts a paragraph that holds only an image to a bare block-level image (as does an `{image}`
  * directive), which would render as an unmapped `<img>`; wrapping it back keeps its source lines for editing and insertion.

@@ -46,6 +46,7 @@ export function readPreviewConfiguration(source: PreviewConfigurationSource): Pr
  */
 export type PreviewBootSettings = Pick<PreviewConfiguration, BootSettingKeys<typeof PREVIEW_SETTINGS>>;
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-156
 /** The boot context entries of the preview settings, in table order (the host writes them). */
 export function previewBootSettings(configuration: PreviewConfiguration): PreviewBootSettings {
   const values: Record<string, unknown> = {};

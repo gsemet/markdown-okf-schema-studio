@@ -8,16 +8,17 @@ description: When a conf.py writes `extensions` or `myst_enable_extensions` as
   quoting, prefix, comment, continuation or line ending.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-066; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-066
 ---
 
 ## The conf.py reader understands list literal forms
@@ -40,5 +41,5 @@ When a conf.py writes `extensions` or `myst_enable_extensions` as list or tuple 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "comments, tuples, single quotes, trailing commas and string joins are understood" in test/core/myst/confParser.test.ts
 - Criteria: Literal forms are parsed; CRLF and prefixes have no dedicated assertion today.

@@ -45,6 +45,7 @@ export interface PalettePopoverContext {
   readonly openMenu: () => HTMLElement | undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-078
 /** The `rows` x `cols` size grid: hover (or the arrow keys) highlight from the top-left cell. */
 export function buildGrid(
   ctx: PalettePopoverContext,
@@ -115,6 +116,8 @@ export function buildGrid(
   popover.gridAction = action;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-072
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
 /** The emoji picker: a filter field and the categories as grids of buttons(). */
 export function buildEmoji(
   ctx: PalettePopoverContext,
@@ -253,6 +256,8 @@ export function buildEmoji(
   popover.emojiField = field;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-140
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-090
 /**
  * A filterable list the host fills: "Loading..." first, then one button per entry. The filter
  * matches the value and the detail; Enter picks the first match, Escape closes (the shared
@@ -388,6 +393,8 @@ export function buildChoices(
   });
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-058
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-036
 /**
  * The colour picker: Text and Background tabs, 16 swatches, a hex field and Remove. A swatch
  * applies at once; the hex field validates as the user types and Enter applies it. For the

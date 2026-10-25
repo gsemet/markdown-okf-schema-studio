@@ -106,6 +106,8 @@ async function ensureCampaignWindowFocused(page: Page, pid: number | undefined):
     + JSON.stringify({ windowPid: pid, frontmostPid: frontmostPid(), titlebar, ...macFocusDiagnostics() }));
 }
 
+// @tests_req StRS-MDOKFSTUDIO-LIFE-014
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 export async function runReloadCampaign(executable: string, extensionRoot: string, workspaceRoot: string): Promise<void> {
   const temporary = fs.mkdtempSync("/tmp/studio-reload-");
   fs.mkdirSync(E2E_REPORT_ROOT, { recursive: true });

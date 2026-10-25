@@ -7,22 +7,16 @@ description: When a writer sets a figure's width or alignment, the Studio SHALL
   show the figure at that width and alignment.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derives_from: []
 user_need: As a writer, I want figure sizing reflected immediately so that I can
   lay out the page.
-derived_by:
-- SwRS-MDOKFSTUDIO-CORE-059
-- SwRS-MDOKFSTUDIO-CORE-063
-- SwRS-MDOKFSTUDIO-MYST-031
-- SwRS-MDOKFSTUDIO-MYST-032
-- SwRS-MDOKFSTUDIO-MYST-033
-- SwRS-MDOKFSTUDIO-MYST-034
-- SwRS-MDOKFSTUDIO-MYST-035
-- SwRS-MDOKFSTUDIO-MYST-091
-- SwRS-MDOKFSTUDIO-MYST-093
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Figure width and alignment show in the preview

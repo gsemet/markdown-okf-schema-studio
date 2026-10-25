@@ -5,6 +5,10 @@ import * as vscode from "vscode";
 
 import { listCitationKeysForTests, listDocumentTargetsForTests } from "./extensionApi";
 
+// @tests_req StRS-MDOKFSTUDIO-PALETTE-013
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-178
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183
 /** The citation and reference lists: bounded workspace scan of `.bib` files, labels of the document. */
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);

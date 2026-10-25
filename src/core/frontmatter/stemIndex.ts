@@ -93,6 +93,7 @@ export class MarkdownStemIndex {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
   private visit(directory: string, realRoot: string): void {
     let entries: fs.Dirent[];
     try {

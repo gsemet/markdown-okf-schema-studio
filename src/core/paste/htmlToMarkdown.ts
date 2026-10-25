@@ -30,6 +30,7 @@ function style(element: Element): string {
   return attr(element, "style").toLowerCase().replace(/\s+/gu, "");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-229
 function hidden(element: Element): boolean {
   return element.attrs.some((entry) => entry.name === "hidden")
     || /display:none|visibility:hidden|mso-hide:all/u.test(style(element));
@@ -267,6 +268,7 @@ function wordListItem(element: Element): { level: number; ordered: boolean; text
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-217
 function convertBlocks(nodes: Node[]): string[] {
   const blocks: string[] = [];
   let run = "";

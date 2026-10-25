@@ -35,6 +35,7 @@ function clip(text: string): string {
   return flat.length > MAX_TITLE_LENGTH ? flat.slice(0, MAX_TITLE_LENGTH - 1) + "…" : flat;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-178
 /** The `(label)=` targets outside code fences, in source order, at most `MAX_TARGETS`. */
 export function documentTargets(text: string): { items: DocumentTarget[]; truncated: boolean } {
   const lines = text.split(/\r?\n/u);
@@ -85,6 +86,7 @@ export function bibKeys(text: string): BibKey[] {
   return found;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-183
 /** Keys of several `.bib` texts: no duplicates, sorted, at most `MAX_BIB_KEYS`. */
 export function collectBibKeys(texts: readonly string[]): { items: BibKey[]; truncated: boolean } {
   const byKey = new Map<string, BibKey>();

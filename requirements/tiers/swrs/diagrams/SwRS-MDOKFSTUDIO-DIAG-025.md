@@ -3,29 +3,29 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-025
 uuid: fd70f647-577f-4e95-ba98-214053648d23
 title: useJar in an untrusted workspace keeps the JAR pipeline
-description: When useJar is true in an untrusted workspace, the extension SHALL
-  still select the JAR pipeline, which refuses to start a process, and SHALL NOT
-  fall back to the built-in engine.
+description: "When useJar is true in an untrusted workspace, the extension SHALL still
+  select the JAR pipeline, which refuses to start a process, and does not fall back
+  to the built-in engine."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-007
-- StRS-MDOKFSTUDIO-DIAG-013
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-024; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-024
 ---
 
 ## useJar in an untrusted workspace keeps the JAR pipeline
 
 ### Normative behavior
 
-When useJar is true in an untrusted workspace, the extension SHALL still select the JAR pipeline, which refuses to start a process, and SHALL NOT fall back to the built-in engine.
+When useJar is true in an untrusted workspace, the extension SHALL still select the JAR pipeline, which refuses to start a process, and does not fall back to the built-in engine.
 
 ### Scenario: Restricted Mode
 

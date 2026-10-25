@@ -8,16 +8,17 @@ description: When an image carries a pixel width written by its author, the
   instead of the intrinsic size, ignoring a gain of 1 px or less.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LAYOUT-007
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-LAYOUT-003
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LAYOUT-023; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-023
 ---
 
 ## Auto uses the author's pixel width for an image breakout
@@ -44,5 +45,5 @@ When an image carries a pixel width written by its author, the extension SHALL c
 
 ### Verification notes
 
-- Method: Inspection of widthMode.ts (declared width replaces the intrinsic size; extra values of 1 or less return); no automated test.
+- Method: Unit test `Auto measures an image from the width its author wrote, and ignores a gain of 1 px or less` in `test/page/diagReq.layout.requirements.test.ts`.
 - Criteria: Breakout 100 px for the declared case, no mark for a gain of 1 px or less.

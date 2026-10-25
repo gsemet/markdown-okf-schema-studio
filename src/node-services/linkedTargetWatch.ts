@@ -24,6 +24,7 @@ function errorText(error: unknown): string {
   return code ?? (error instanceof Error ? error.message : String(error));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 /**
  * Watches one linked target file directly through the operating system (inotify, FSEvents),
  * by watching its folder without recursion and keeping the events that name the file.

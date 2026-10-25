@@ -4,27 +4,28 @@ id: SwRS-MDOKFSTUDIO-CODE-021
 uuid: 679970ae-8f27-446f-80d5-a1a253a71c6a
 title: Keep focus and editors untouched by the copy button
 description: When the reader presses the copy button, the extension SHALL keep
-  the focus of an open block editor and SHALL NOT open or commit an editor or
-  let the click reach the block's own click handling.
+  the focus of an open block editor, without opening or committing an editor or
+  letting the click reach the block's own click handling.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-004
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CODE-019; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CODE-019
 ---
 
 ## Keep focus and editors untouched by the copy button
 
 ### Normative behavior
 
-When the reader presses the copy button, the extension SHALL keep the focus of an open block editor and SHALL NOT open or commit an editor or let the click reach the block's own click handling.
+When the reader presses the copy button, the extension SHALL keep the focus of an open block editor, without opening or committing an editor or letting the click reach the block's own click handling.
 
 ### Scenario: nominal behavior
 

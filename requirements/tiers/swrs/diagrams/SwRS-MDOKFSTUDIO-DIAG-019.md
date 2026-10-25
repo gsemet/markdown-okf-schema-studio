@@ -7,17 +7,18 @@ description: "When a review thread anchor falls inside a Mermaid or PlantUML fig
   the page SHALL NOT wrap text of that figure in a comment quote."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
 - StRS-MDOKFSTUDIO-DIAG-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-REVIEW-017; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-REVIEW-017
 ---
 
 ## Comment quotes are never wrapped inside diagrams

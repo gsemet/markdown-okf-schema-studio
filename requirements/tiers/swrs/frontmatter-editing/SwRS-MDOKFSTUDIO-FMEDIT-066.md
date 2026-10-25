@@ -7,16 +7,17 @@ description: When a writer types in a field or key editor, the extension SHALL
   NOT show the edition palette or the slash menu.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMEDIT-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-001
 ---
 
 ## Field and key editors have no palette or slash menu
@@ -39,5 +40,5 @@ When a writer types in a field or key editor, the extension SHALL NOT show the e
 
 ### Verification notes
 
-- Method: Inspection: the frontmatter editors do not use the palette or slash modules (src/page/features/frontmatter*.ts).
+- Method: Unit test typing in a field or key editor opens neither the slash menu nor the edition palette in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: Only the block editors bind the palette and slash menu.

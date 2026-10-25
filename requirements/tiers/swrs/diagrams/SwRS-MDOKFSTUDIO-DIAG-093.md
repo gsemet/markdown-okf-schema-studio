@@ -9,16 +9,17 @@ description: "When useJar is true and jarPath is set but java cannot be started 
   diagram with state unavailable."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-013
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-089; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-089
 ---
 
 ## A missing Java is reported like a missing command
@@ -42,9 +43,8 @@ When useJar is true and jarPath is set but java cannot be started because it is 
 ### Known issues
 
 - Known issue: The hint tells the user to set jarPath although it is already set; nothing names Java, and a missing Graphviz is neither checked nor reported.
-- Known issue: Untested.
 
 ### Verification notes
 
-- Method: No test: the ENOENT test covers the plantuml command only.
+- Method: Unit test `a missing java is reported like a missing command; other spawn errors keep their text` in `test/core/render/diagReq.jar.requirements.test.ts`.
 - Criteria: Only ENOENT gives the missing-executable wording.

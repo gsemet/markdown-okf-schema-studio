@@ -21,6 +21,7 @@ function optionalNonNegativeNumber(value: unknown): number | undefined {
     : undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-127
 export function parsePreviewPanelState(value: unknown): PreviewPanelState | undefined {
   if (!value || typeof value !== "object") {
     return undefined;

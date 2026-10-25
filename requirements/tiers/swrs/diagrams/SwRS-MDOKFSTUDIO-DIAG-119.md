@@ -7,16 +7,17 @@ description: When a PlantUML picture is shown, the extension SHALL centre it in
   the content column.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-023; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-023
 ---
 
 ## PlantUML pictures are centred
@@ -37,11 +38,7 @@ When a PlantUML picture is shown, the extension SHALL centre it in the content c
 - WHEN the preview is shown
 - THEN it fills the column
 
-### Known issues
-
-- Known issue: Untested: only the Mermaid rules have a stylesheet test.
-
 ### Verification notes
 
-- Method: No stylesheet test for the PlantUML rules.
+- Method: Unit test `a PlantUML picture is a block centred with automatic inline margins` in `test/core/preview/diagReq.styles.requirements.test.ts`.
 - Criteria: margin-inline auto on a block image.

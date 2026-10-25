@@ -8,16 +8,17 @@ description: When a rename succeeds, the extension SHALL show Renamed. N use(s)
   use of the old name remains.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-038; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-038
 ---
 
 ## A successful rename reports the remaining uses
@@ -40,5 +41,5 @@ When a rename succeeds, the extension SHALL show Renamed. N use(s) of old remain
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "the result shows how many {ref} uses of the old name remain" in test/page/modules/labelRename.test.ts; Unit test "counts {ref} uses with and without a title, not other roles or names" in test/core/mapping/labelRename.test.ts
 - Criteria: Message text and `{ref}`-only counting match.

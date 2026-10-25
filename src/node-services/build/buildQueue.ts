@@ -113,6 +113,7 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
     return stage?.dependencies?.some((dependency) => canonicalPath(dependency) === candidate) ?? false;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
   public request(document: TDocument): Promise<BuildQueueOutcome<TResult, TDocument>> {
     const request: BuildRequest<TDocument> = {
       requestId: ++this.requestCounter,

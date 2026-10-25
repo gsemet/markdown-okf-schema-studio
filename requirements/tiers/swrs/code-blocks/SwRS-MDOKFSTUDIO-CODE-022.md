@@ -9,16 +9,17 @@ description: When a code block is being edited, lies inside a block editor,
   content, the extension SHALL NOT show a copy button for it.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-004
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CODE-017; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CODE-017
 ---
 
 ## Offer no copy button for edited blocks, editors, diagram sources and blocks outside the content

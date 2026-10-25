@@ -31,6 +31,7 @@ const INCOMING_CHANGES_DEBOUNCE_MS = 300;
 export class IncomingChangesController {
   public constructor(private readonly manager: PreviewManager) {}
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-195
   /**
    * Tells the page which source lines differ from HEAD (T16). Nothing is posted for a file Git does
    * not know, unless marks or a different "enabled" value must be taken back. Stale ids are dropped by

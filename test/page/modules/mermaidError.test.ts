@@ -33,6 +33,7 @@ test("K3: the error comes first and the diagram source stays below it", () => {
   assert.match(diagram.textContent, /flowchart TD/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-015
 test("K3: the parser message is plain text, never HTML, and the details start closed", () => {
   const doc = new FakeDocument();
   const diagram = diagramWithSource(doc);

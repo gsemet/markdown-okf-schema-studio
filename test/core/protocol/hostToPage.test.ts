@@ -49,6 +49,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
 const message = (type: string, identity: Partial<PageIdentity> | Record<string, unknown>): Record<string, unknown> =>
   ({ type, ...identity, ...WELL_FORMED[type as HostToPageType] });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
 test("every host message type has a rule, and a well-formed message for the page passes it", () => {
   assert.deepEqual(Object.keys(filter.rules).sort(), Object.keys(WELL_FORMED).sort());
   for (const type of Object.keys(WELL_FORMED)) {
@@ -77,6 +78,10 @@ test("each rule matches the identity it names, and only that", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-061
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-062
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-063
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-064
 test("the payload checks refuse what the page used to refuse", () => {
   const refused: Array<[HostToPageType, Record<string, unknown>]> = [
     ["previewPropertiesTable", { markup: 42 }],

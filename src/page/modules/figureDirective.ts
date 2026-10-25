@@ -103,6 +103,7 @@ export function createFigureTools(): FigureTools {
     return -1;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-153
   function validWidth(value: string): boolean {
     return widthPattern.test(value);
   }
@@ -150,6 +151,7 @@ export function createFigureTools(): FigureTools {
     };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-160
   function serializeFigure(model: FigureModel): string {
     const edited = model.caption !== model.originalCaption || model.legend !== model.originalLegend;
     const body = !edited

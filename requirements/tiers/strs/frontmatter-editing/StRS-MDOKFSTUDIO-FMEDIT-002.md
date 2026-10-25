@@ -8,30 +8,16 @@ description: 'When a writer edits a metadata value, the Studio SHALL offer a con
   time inputs, a checkbox, an item list or a YAML text box.'
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-001; no marker expected."
 derives_from: []
 user_need: As a writer, I change a metadata value with a control suited to its
   type so that I enter valid values without knowing YAML.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMEDIT-003
-- SwRS-MDOKFSTUDIO-FMEDIT-004
-- SwRS-MDOKFSTUDIO-FMEDIT-005
-- SwRS-MDOKFSTUDIO-FMEDIT-006
-- SwRS-MDOKFSTUDIO-FMEDIT-007
-- SwRS-MDOKFSTUDIO-FMEDIT-008
-- SwRS-MDOKFSTUDIO-FMEDIT-009
-- SwRS-MDOKFSTUDIO-FMEDIT-015
-- SwRS-MDOKFSTUDIO-FMEDIT-016
-- SwRS-MDOKFSTUDIO-FMEDIT-017
-- SwRS-MDOKFSTUDIO-FMEDIT-018
-- SwRS-MDOKFSTUDIO-FMEDIT-050
-- SwRS-MDOKFSTUDIO-FMEDIT-074
-- SwRS-MDOKFSTUDIO-FMEDIT-075
-- SwRS-MDOKFSTUDIO-FMEDIT-076
-- SwRS-MDOKFSTUDIO-FMEDIT-079
-- SwRS-MDOKFSTUDIO-FMEDIT-081
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMEDIT-001
 ---
 
 ## Edit each kind of metadata value with a fitting control

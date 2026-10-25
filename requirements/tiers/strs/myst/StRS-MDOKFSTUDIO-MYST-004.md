@@ -7,14 +7,16 @@ description: When a writer links to a heading, figure, table, equation or label
   with a reference role, the Studio SHALL show a link whose target is visible.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-009; no marker expected."
 derives_from: []
 user_need: As a writer, I want to see where each cross-reference points so that
   I can spot broken links early.
-derived_by:
-- SwRS-MDOKFSTUDIO-MYST-019
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-MYST-009
 ---
 
 ## Reference roles show where a link goes

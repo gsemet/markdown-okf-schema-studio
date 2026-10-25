@@ -18,6 +18,7 @@ test("overlapping or out-of-range text edits are refused", () => {
   assert.throws(() => applyTextEdits("abc", [{ start: 2, end: 1, text: "" }]), RangeError);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
 test("source lines split on LF, CRLF and CR, and a final line break adds an empty last line", () => {
   const lines = sourceLines("a\r\nbb\ncc\rd\n");
   assert.equal(lines.count, 5);

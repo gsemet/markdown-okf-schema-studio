@@ -7,16 +7,17 @@ description: When the host does not answer a rename within 6 s, the extension
   SHALL enable the field again with The editor did not answer. Try again.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-038; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-038
 ---
 
 ## The rename field times out after 6 seconds
@@ -39,5 +40,5 @@ When the host does not answer a rename within 6 s, the extension SHALL enable th
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "without an answer after 6 s the field is editable again with a message; an answer clears the timer" in test/page/modules/renderReq.labelRename.requirements.test.ts
 - Criteria: The timer is cleared by the answer.

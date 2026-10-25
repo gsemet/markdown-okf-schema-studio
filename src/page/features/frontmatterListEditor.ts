@@ -33,6 +33,7 @@ export interface FrontmatterListEditorParts {
   saveValue(): void;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-010
 /** Builds the list editor into `parts.control`. */
 export function buildFrontmatterListEditor(rt: PageRuntime, parts: FrontmatterListEditorParts): FrontmatterListEditor {
   const { document, context, state } = rt;

@@ -8,16 +8,17 @@ description: When `[[...]]` appears in code, an existing link, an image, math or
   wikilink.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-010; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-010
 ---
 
 ## Leave wikilink syntax untouched where it is not text
@@ -40,5 +41,5 @@ When `[[...]]` appears in code, an existing link, an image, math or raw HTML, or
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "wikilinks render as lazy note targets without changing code or existing links" in test/core/render/mystFeatures.test.ts
 - Criteria: Wikilinks are converted only in plain text.

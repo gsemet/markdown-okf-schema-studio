@@ -41,6 +41,7 @@ export function installMotion(
   const MAX_RANGES = 50;
   const root = document.documentElement;
 
+  // @implements_req SwRS-MDOKFSTUDIO-CORE-050
   const reduced = (): boolean => {
     try {
       return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
@@ -77,6 +78,7 @@ export function installMotion(
   };
 
   return {
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-094
     glow(ranges) {
       if (!Array.isArray(ranges) || ranges.length === 0 || ranges.length > MAX_RANGES || reduced()) return [];
       const valid = ranges.filter((range): range is UpdatedRange => !!range

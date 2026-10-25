@@ -58,6 +58,7 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     return usableTop;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-064
   // Keeps the table toolbar fully visible while its table is edited: when it sits above the usable
   // top of the viewport (under the sticky band or the preview controls, or off-screen), scroll up
   // just enough to show it, but only if the selected cell stays inside the viewport. The scroll is
@@ -79,6 +80,7 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     if (line !== undefined) state.anchor = { line, owner: state.anchor?.owner ?? "preview" };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
   // After a row (the palette, the link panel) was added above the text box, the page scrolls down
   // by the height it added so the text the user is editing stays where it was. Returns the shift
   // applied: none on a page at its very top, and never more than the room under the sticky band.
@@ -148,6 +150,7 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
       || Boolean(edit.element.contains?.(node));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-228
   // Opening the palette adds its height above the frame, in the host. The frame is the scroll
   // anchor, so the text would stay where it is and the content above scrolls up by that height
   // (scroll shift). Not on a page scrolled to its top, and never so far that the bar would end
@@ -200,6 +203,7 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     return shift;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-089
   // The link panel (Cmd/Ctrl+K and the palette's Link button): Text and URL fields under the
   // palette. The text box selection is remembered on open and restored on every way out; the
   // blur commit of the text box ignores the move into the panel.
@@ -254,6 +258,7 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
         rt.textControls.applyTextEdit(control, editActions.linkEdit(selection, text, url), onFallbackInput);
       },
       onCancel: () => closePanel(),
+      // @implements_req SwRS-MDOKFSTUDIO-PALETTE-036
       onLeave: () => {
         if (state.activeBlockEdit === edit) rt.blockEditor.saveBlockEdit();
       },
@@ -272,6 +277,8 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     panel.focusFirst();
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-160
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-150
   // The figure form: the {figure} directive around the caret (the first one when the editor was
   // opened by the Edit figure button), or a Markdown image alone in its paragraph. Apply rewrites
   // that range as one native edit; the text box keeps its caret and the editor stays open.
@@ -370,6 +377,8 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     panel.focusFirst();
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-153
   // The Edit figure button: open the figure's block editor, then its form once the source arrives.
   function openFigureEditor(figure: HTMLElement): void {
     if (!state.editMode || state.activeFrontmatterEdit) return;

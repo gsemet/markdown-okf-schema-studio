@@ -35,6 +35,7 @@ export class PlantUmlController {
     router.on("previewPlantUmlInclude", (message, preview) => this.handleInclude(preview, message));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-024
   /**
    * The engine for this preview's next render: the bundled one unless `useJar` is on. With `useJar`
    * in an untrusted workspace the JAR pipeline is still asked, and it refuses without a process.
@@ -45,6 +46,7 @@ export class PlantUmlController {
       : "jar";
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-105
   /** Starts the work that follows a render: link enrichment, then the host's diagrams. */
   public scheduleDeferredWork(preview: PreviewSession, result: RenderResult): void {
     const { manager } = this;
@@ -66,6 +68,7 @@ export class PlantUmlController {
     }, 0);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-089
   private apply(
     preview: PreviewSession,
     result: RenderResult,
@@ -112,6 +115,8 @@ export class PlantUmlController {
     rendering.setPanelHtml(preview, html, nextDiagnostics);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-090
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-053
   /**
    * A local `!include` file for the built-in PlantUML engine: read under the rules of `{include}`
    * (only the document's folder and below in Restricted Mode) and watched, so a change draws the

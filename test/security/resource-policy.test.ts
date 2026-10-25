@@ -30,6 +30,8 @@ function makeRoots(): { output: string; outside: string } {
   return { output, outside };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-013
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025
 test("canonicalizes local resources and rejects hostile paths", () => {
   const { output } = makeRoots();
   const policy = new ResourcePolicy([{ label: "output", directory: output }]);

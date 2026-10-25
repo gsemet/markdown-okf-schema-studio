@@ -8,16 +8,17 @@ description: 'When a document holds a Quarto callout div such as `::: {.callout-
   as title.'
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Quarto callouts render as simple admonitions
@@ -40,5 +41,5 @@ When a document holds a Quarto callout div such as `::: {.callout-tip}`, the ext
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "Quarto callout classes render as semantic MyST admonitions" in test/core/render/mystFeatures.test.ts
 - Criteria: Kind and title follow the callout class and heading.

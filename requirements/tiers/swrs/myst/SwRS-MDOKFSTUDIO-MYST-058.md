@@ -7,16 +7,17 @@ description: When a toctree has `:caption:` or `:hidden:`, the extension SHALL
   show the caption as a level-2 heading above the list or show nothing.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-012
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-057; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-057
 ---
 
 ## Toctree caption and hidden options
@@ -39,5 +40,5 @@ When a toctree has `:caption:` or `:hidden:`, the extension SHALL show the capti
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a toctree lists links labelled by the target H1, the file name or an explicit title" in test/core/render/gridToctree.test.ts
 - Criteria: Options are independent.

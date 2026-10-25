@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import { isImageFileName, relativeImageReference } from "../../../src/core/mapping/imageReference";
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-192
 test("relativeImageReference gives a POSIX path relative to the document folder", () => {
   assert.equal(relativeImageReference("/w/book/a.md", "/w/book/logo.png"), "logo.png");
   assert.equal(relativeImageReference("/w/book/a.md", "/w/book/img/deep/logo.png"), "img/deep/logo.png");

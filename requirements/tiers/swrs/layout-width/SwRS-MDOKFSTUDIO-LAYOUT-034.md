@@ -7,16 +7,17 @@ description: When a table overflows, the extension SHALL keep a cell holding a
   single word of at most 24 characters on one line.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LAYOUT-002
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-LAYOUT-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LAYOUT-032; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-032
 ---
 
 ## Short identifiers stay on one line in a scrolling table
@@ -44,5 +45,5 @@ When a table overflows, the extension SHALL keep a cell holding a single word of
 
 ### Verification notes
 
-- Method: Unit test markWideTables marks short cells and the overflow of a wide table, never the properties table, and the CSS test for the nowrap rule; Fixes 001 UX-15 D-19 overflow cue.
+- Method: Unit test markWideTables marks short cells and the overflow of a wide table, never the properties table, and the CSS test for the nowrap rule.
 - Criteria: A cell matches only when its trimmed text is one to 24 non-space characters.

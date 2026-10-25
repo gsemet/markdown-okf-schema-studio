@@ -76,6 +76,10 @@ export function frontmatterValueMatchesField(field: FrontmatterField, value: unk
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-016
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-024
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-067
 /**
  * Plans one save of the properties table on `sourceText`, given the frontmatter analysis the table
  * was built from (`frontmatter`, undefined when the document has none).
@@ -173,6 +177,7 @@ export function planFrontmatterSave(
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-029
 /**
  * Checks the frontmatter analysis of a planned save's `candidateSource`: a remove must not make a
  * required field missing that was present before (`before`: the analysis the table was built

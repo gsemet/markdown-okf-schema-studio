@@ -28,6 +28,7 @@ export function installLinkNavigation(
       window.queueMicrotask(flush);
     }
   };
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-079
   const discover = (link: Element): void => {
     const request = link.getAttribute("data-sphinx-preview-navigation");
     if (!request || request.startsWith("#") || request.startsWith("okf-link:")
@@ -58,6 +59,7 @@ export function installLinkNavigation(
     links.forEach(observe);
     window.addEventListener("unload", () => observer.disconnect(), { once: true });
   }
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-077
   const activate = (event: Event): void => {
     if (event.type === "auxclick" && (event as MouseEvent).button !== 1) return;
     const link = event.target instanceof Element ? event.target.closest(selector) : undefined;
@@ -83,6 +85,7 @@ export function installLinkNavigation(
       links = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
       links.forEach(observe);
     },
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-085
     // The host's answer to a discovery (previewLinkTargets, routed by the page once the host
     // message filter has matched it to this render): a hint per link, never a new target.
     applyTargets(message): void {

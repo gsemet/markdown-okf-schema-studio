@@ -130,6 +130,7 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     host.setState?.(nextState);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-037
   // The pending edit is dropped as soon as it cannot be used, or when its editor closes. It is
   // kept across loads that cannot use it yet: a reload of the render that posted the add, or a
   // page without the rendered preview. A later load of the new render opens the editor, and a
@@ -173,6 +174,8 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     return state.activeFrontmatterEdit;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-024
   function openFrontmatterKeyEditor(row: Element, nameCell: Element): void {
     if (state.activeBlockEdit || state.activeFrontmatterEdit || row.getAttribute("data-okf-editable") !== "true") return;
     const name = row.getAttribute("data-okf-field");
@@ -311,6 +314,7 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     openFrontmatterValueEditor(rt, row, options);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
   function receiveFrontmatterResult(message: Parameters<FrontmatterEditor["receiveFrontmatterResult"]>[0]): void {
     const edit = state.activeFrontmatterEdit;
     if (!edit || message.editId !== edit.editId) return;
@@ -338,6 +342,7 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     afterResult?.();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-001
   function setFrontmatterEditCells(enabled: boolean): void {
     document.querySelectorAll?.("[data-okf-edit-cell]").forEach((cell) => {
       if (enabled) {
@@ -348,6 +353,7 @@ export function installFrontmatterEditor(rt: PageRuntime): FrontmatterEditor {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-067
   // Saves the open frontmatter editor as a flush (typed text is kept whatever it holds).
   function flushFrontmatterEditor(): boolean {
     const frontmatterEdit = state.activeFrontmatterEdit;

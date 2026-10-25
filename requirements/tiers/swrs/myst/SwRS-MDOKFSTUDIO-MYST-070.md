@@ -8,16 +8,17 @@ description: When a list in conf.py uses a computed value, f-string, bytes or
   uncertain and show no warnings.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-066; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-066
 ---
 
 ## Uncertain conf.py lists suppress all warnings
@@ -40,5 +41,5 @@ When a list in conf.py uses a computed value, f-string, bytes or other prefixed 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "anything that is not a plain string list is uncertain" in test/core/myst/confParser.test.ts; Unit test "no conf.py, no myst_parser or an uncertain conf.py give no set" in test/core/myst/confLocator.test.ts
 - Criteria: Certainty is all or nothing.

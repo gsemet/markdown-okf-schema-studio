@@ -44,6 +44,7 @@ function writeFile(root: string, relative: string): void {
   fs.writeFileSync(target, "# fixture\n");
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
 test("MarkdownStemIndex excludes generated, dependency, and hidden directories", () => {
   const root = makeRoot();
   try {

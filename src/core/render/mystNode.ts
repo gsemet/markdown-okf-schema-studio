@@ -63,6 +63,7 @@ export function mergeProperties(node: MystNode, properties: Record<string, unkno
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-003
 /** The source line attributes (`data-line`, `data-end-line`) of a block that starts at `line`. */
 export function sourcePositionProperties(node: MystNode, line?: number): Record<string, number | string> {
   if (line === undefined) {

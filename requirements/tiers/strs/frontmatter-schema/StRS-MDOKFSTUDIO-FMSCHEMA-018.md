@@ -8,17 +8,16 @@ description: When a writer activates a resolving frontmatter link, the Studio
   defines one, and refuse unusable links with a reason.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-014; no marker expected."
 derives_from: []
 user_need: As a reviewer, I jump from a metadata reference to the file and line
   it names.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-073
-- SwRS-MDOKFSTUDIO-FMSCHEMA-074
-- SwRS-MDOKFSTUDIO-FMSCHEMA-082
-- SwRS-MDOKFSTUDIO-FMSCHEMA-083
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-014
 ---
 
 ## Frontmatter links can be followed

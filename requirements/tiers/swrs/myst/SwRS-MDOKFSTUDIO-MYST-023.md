@@ -8,16 +8,17 @@ description: When a document holds a notebook output reference such as `#tbl:`
   warning.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-005
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-022; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-022
 ---
 
 ## Notebook output references show a note and a warning
@@ -40,5 +41,5 @@ When a document holds a notebook output reference such as `#tbl:` or an unexecut
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "MyST code-cell directives render numbered input without claiming execution" in test/core/render/mystFeatures.test.ts
 - Criteria: Both cases are warned.

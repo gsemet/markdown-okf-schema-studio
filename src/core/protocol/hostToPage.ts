@@ -295,12 +295,16 @@ export interface HostMessageFilter {
   accepts(value: unknown, page: PageIdentity): value is HostToPageMessage;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-056
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-122
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-059
 /** The page's filter of host messages. */
 export function createHostMessageFilter(): HostMessageFilter {
   // In-place content patch (T34): the limits the host's patch stays within.
   const PATCH_STATUSES = ["pending", "success", "stale", "error", "missing-source", "recovery"];
   const MAX_PATCH_CONTENT_LENGTH = 20 * 1024 * 1024;
   const MAX_PATCH_DIAGNOSTICS = 500;
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-061
   const isValidContentPatch = (message: Readonly<Record<string, unknown>>): boolean => {
     const next = message.next as Record<string, unknown> | undefined;
     if (!next || typeof next !== "object"
@@ -324,6 +328,7 @@ export function createHostMessageFilter(): HostMessageFilter {
   const ownId: HostMessageRule = { addressing: "own-id" };
   const rules: { readonly [T in HostToPageType]: HostMessageRule } = {
     previewPendingOverlay: render,
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-062
     previewPropertiesTable: { addressing: "render", isValid: (message) => typeof message.markup === "string" },
     previewContentPatch: { addressing: "render", isValid: isValidContentPatch },
     previewFrontmatterResult: render,
@@ -331,6 +336,7 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewCheckboxResult: render,
     // Matched by edit id: the rename itself moves the revision before the answer arrives.
     previewLabelRenameResult: ownId,
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-129
     previewBlockMoveResult: render,
     previewBlocksResult: render,
     // Host round trips, matched by edit id by the page's pending requests.
@@ -344,12 +350,14 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewPasteHtmlResult: ownId,
     previewPlantUmlIncludeResult: ownId,
     sourceScroll: render,
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-063
     previewLinkTargets: { addressing: "render", isValid: (message) => Array.isArray(message.targets) },
     previewHistoryState: render,
     previewShowComments: render,
     previewIncomingChanges: render,
     previewComments: render,
     previewCommentResult: render,
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-064
     // The host is about to switch document: the flush id is the match.
     previewFlushEdit: { addressing: "own-id", isValid: (message) => typeof message.flushId === "string" },
     navigateAnchor: render,

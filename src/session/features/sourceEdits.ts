@@ -49,6 +49,7 @@ export class SourceEditController {
     router.on("previewBlocksPaste", (message, preview) => this.handleBlocksPaste(preview, message));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-058
   /** Applies edits a preview asked for, as one undo step in the editor that shows the document. */
   private apply(document: HostDocument, edits: readonly TextEdit[]): PromiseLike<boolean> {
     return this.manager.host.documents.applyEdits(document, edits, { ownUndoStep: true });
@@ -70,6 +71,7 @@ export class SourceEditController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-021
   /** Toggles one `[ ]`/`[x]` marker with a single-character edit (one undo step). */
   private handleCheckboxToggle(preview: PreviewSession, message: PageMessageOf<"previewCheckboxToggle">): PromiseLike<void> | undefined {
     const document = currentPreviewDocument(preview, message);
@@ -99,6 +101,7 @@ export class SourceEditController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-051
   private postLabelRenameResult(
     preview: PreviewSession,
     message: PageMessageOf<"previewLabelRename">,
@@ -114,6 +117,10 @@ export class SourceEditController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-065
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-045
   /**
    * Renames a MyST label from its anchor icon: only the `(oldName)=` line changes, in one undo step.
    * A line that is not exactly `(oldName)=` is refused, never searched for elsewhere.
@@ -156,6 +163,7 @@ export class SourceEditController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-090
   private postThreadResult(
     preview: PreviewSession,
     type: "previewThreadReplyResult" | "previewThreadDeleteResult",
@@ -172,6 +180,7 @@ export class SourceEditController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-186
   /**
    * Reply to or delete an inline comment thread (`<!-- THREAD`). The page only names the source
    * lines: the host re-reads them, refuses anything that is not exactly one thread comment, and
@@ -333,6 +342,8 @@ export class SourceEditController {
       ?? refuse("The preview is out of date. Try again once it has refreshed.");
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-166
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-169
   /**
    * Copy and cut of selected blocks (T40): the exact Markdown of the lines goes to the clipboard; cut
    * then deletes them (with one blank separator) in one edit. The page ranges are not trusted.
@@ -389,6 +400,7 @@ export class SourceEditController {
     }).then(undefined, fail);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-174
   /** Paste of clipboard text as new blocks after a block or at the start of the body (T40). */
   private handleBlocksPaste(
     preview: PreviewSession,

@@ -8,6 +8,7 @@ import {
   markdownMarkerLine,
 } from "../../../src/core/navigation/previewNavigation";
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-102
 test("Markdown fragments select headings and source lines, not fenced examples", () => {
   const source = "```md\n## My Heading\n```\n\n## My Heading\n\nOther Heading\n---\n## Café {#explicit-id}\nParagraph ^block-id\n## Range start\nRange end\n";
   assert.equal(markdownFragmentLine(source, "#my-heading"), 5);
@@ -22,6 +23,7 @@ test("Markdown fragments select headings and source lines, not fenced examples",
   assert.deepEqual(markdownFragmentRange(source, "#L11-L12"), { startLine: 11, endLine: 12 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 test("marker navigation selects exact marker identities", () => {
   const source = [
     "# @implements_req SwRS-1-extra",
@@ -35,6 +37,7 @@ test("marker navigation selects exact marker identities", () => {
   assert.equal(markdownMarkerLine(source, "", "SwRS-1"), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
 test("classifies relative links without touching the filesystem", () => {
   assert.deepEqual(classifyPreviewReference("references/PROPERTIES.md"), { kind: "relative", value: "references/PROPERTIES.md" });
   assert.equal(classifyPreviewReference("wiki:Note").kind, "wiki");

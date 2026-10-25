@@ -2,9 +2,12 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-GFM-008
 uuid: fae00a2f-255b-46fc-b3da-95c9708eb762
-title: Strikethrough renders from double tildes
-description: When prose contains ~~text~~, the extension SHALL render the text
-  struck through, and SHALL leave a single ~x~ pair and tildes in code literal.
+title: Strikethrough, footnotes and pipe tables render as on GitHub
+description: When prose contains ~~text~~, a footnote reference with its
+  definition, or a GFM pipe table, the extension SHALL render the text struck
+  through, the reference with its footnote text, and the table header with the
+  alignment of the delimiter row on every cell of the column, leaving a single
+  ~x~ pair and tildes in code literal.
 project: markdown-okf-schema-studio
 scope: gfm
 lifecycle: draft
@@ -12,32 +15,63 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
+depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files: []
-tested_in_files: []
+implemented_in_files:
+- src/core/render/mystEngine.ts
+- src/core/render/mystRenderer.ts
+- src/core/render/mystTables.ts
+tested_in_files:
+- test/core/render/mystFeatures.test.ts
+- test/core/render/mystPaletteRendering.test.ts
 ---
 
-## Strikethrough renders from double tildes
+## Strikethrough, footnotes and pipe tables render as on GitHub
 
 ### Normative behavior
 
-When prose contains ~~text~~, the extension SHALL render the text struck through, and SHALL leave a single ~x~ pair and tildes in code literal.
+When prose contains ~~text~~, a footnote reference with its definition, or a GFM pipe table, the extension SHALL render the text struck through, the reference with its footnote text, and the table header with the alignment of the delimiter row on every cell of the column, leaving a single ~x~ pair and tildes in code literal.
 
-### Scenario: Struck text in prose and tables
+### Scenario (nominal): Struck text in prose and tables
 
 - GIVEN ~~old~~ in a paragraph, a list item and a table cell
 - WHEN the preview is rendered
 - THEN each is rendered struck through
 
-### Scenario: Single tildes and code
+### Scenario (boundary): Single tildes and code
 
 - GIVEN '~x~' in prose and '~~x~~' in inline code
 - WHEN the preview is rendered
 - THEN both stay literal text
 
+### Scenario (nominal): Footnote renders
+
+- GIVEN a paragraph with [^1] and a definition [^1]: Text
+- WHEN the preview is rendered
+- THEN a reference and the footnote text are present
+
+### Scenario (boundary): Reference without definition
+
+- GIVEN a [^2] reference with no definition
+- WHEN the preview is rendered
+- THEN no footnote text is invented and rendering succeeds
+
+### Scenario (nominal): Aligned column
+
+- GIVEN a pipe table with a '---:' column
+- WHEN the preview is rendered
+- THEN each cell of that column is right-aligned and the header row is a header
+
+### Scenario (boundary): Unaligned columns
+
+- GIVEN a pipe table with plain '---' columns
+- WHEN the preview is rendered
+- THEN no alignment is applied
+
 ### Verification notes
 
-- Method: Unit test on the render pipeline output.
-- Criteria: Strikethrough elements exist only for double-tilde prose pairs.
+- Method: test/core/render/mystFeatures.test.ts (all six scenarios: unit tests on the render pipeline output).
+- Method: test/core/render/mystPaletteRendering.test.ts (footnote and pipe table scenarios: unit tests on the render pipeline output).
+- Criteria: Strikethrough elements exist only for double-tilde prose pairs; footnote reference and definition elements are present for defined notes; alignment appears on all cells of aligned columns only.

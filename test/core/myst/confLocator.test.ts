@@ -15,6 +15,7 @@ function workspace(): { root: string; docs: string; clean: () => void } {
 
 const CONF = "extensions = ['myst_parser']\nmyst_enable_extensions = ['deflist']\n";
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066
 test("the nearest conf.py wins and the enabled set comes from it", (context) => {
   const { root, docs, clean } = workspace();
   context.after(clean);

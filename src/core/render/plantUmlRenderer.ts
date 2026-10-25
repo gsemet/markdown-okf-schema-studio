@@ -146,6 +146,7 @@ function resolvedJarPath(jarPath: string, workspaceRoot: string): string {
   return path.isAbsolute(jarPath) ? jarPath : path.resolve(workspaceRoot, jarPath);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-089
 function validateJarPath(jarPath: string): string | undefined {
   try {
     if (!fs.statSync(jarPath).isFile()) {
@@ -186,6 +187,7 @@ function svgOutput(stdout: string): string {
   return stdout.slice(start, end + "</svg>".length);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-097
 function renderSource(
   source: string,
   command: string,
@@ -296,6 +298,8 @@ function renderSource(
   });
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-084
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-105
 export async function renderPlantUmlDiagrams(
   html: string,
   options: PlantUmlRenderOptions,

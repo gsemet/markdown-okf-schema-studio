@@ -97,6 +97,7 @@ function findContextTagClose(
   return undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-013
 function createContextAdmonition(
   opening: MystNode,
   closing: MystNode,
@@ -147,6 +148,7 @@ function groupContextTagChildren(children: MystNode[]): MystNode[] {
   return grouped;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-012
 function splitGroupedContextTagHtml(
   node: MystNode,
   mystParse: MystEngine["mystParse"],

@@ -7,17 +7,16 @@ description: When a writer uses definition lists, subscript, superscript,
   abbreviations or keys, the Studio SHALL show them typeset.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derives_from: []
 user_need: As a writer, I want these MyST text constructs typeset in the preview
   so that I can check them without building.
-derived_by:
-- SwRS-MDOKFSTUDIO-MYST-017
-- SwRS-MDOKFSTUDIO-MYST-018
-- SwRS-MDOKFSTUDIO-MYST-052
-- SwRS-MDOKFSTUDIO-MYST-095
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Definition lists and inline text roles are typeset

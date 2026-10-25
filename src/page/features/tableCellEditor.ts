@@ -49,6 +49,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     renderTableCellEditor(edit);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
   // Tab / Shift+Tab: next or previous rendered cell, wrapping across rows; Tab on the last cell
   // adds a row and resumes in its first cell after the re-render.
   function tabThroughTableCells(edit: BlockEdit, backwards: boolean): void {
@@ -129,6 +130,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     }, 0);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-064
   // CR 034: the table toolbar stays in view while a tall table scrolls. It keeps its place above the
   // table (the table's text never moves) and is translated down to just under the sticky band or
   // the preview controls, never past the table's bottom. A bar over 40% of the viewport stays put.
@@ -153,6 +155,9 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     menu.style?.setProperty?.("--sphinx-preview-table-menu-shift", shift + "px");
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-091
   function renderTableCellEditor(edit: BlockEdit): void {
     const { blockEditor, textControls } = rt;
     const { hostRequests } = rt.parts;
@@ -171,11 +176,13 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     input.setAttribute("spellcheck", "false");
     input.setAttribute("aria-label", "Markdown table cell");
     input.value = row[edit.tableColumnIndex]!;
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-006
     // The cell grows with its text: the field has no scrollbar and the buttons sit beneath it.
     const resizeInput = (): void => {
       input.style.height = "auto";
       input.style.height = input.scrollHeight + "px";
     };
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-013
     const rememberCellValue = (): void => {
       // Any later change wins over a conversion that was not saved.
       edit.convertedText = undefined;
@@ -190,6 +197,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
 
     const menu = edit.tableMenu || document.createElement("div");
     menu.textContent = "";
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-048
     if (!edit.tableMenu) {
       menu.className = "sphinx-preview-table-menu";
       menu.setAttribute("role", "toolbar");
@@ -267,6 +275,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     // A table captioned by a {table} directive sits in a figure; wrapping a list-table in it is not
     // offered.
     const tableFigure = selectedCell.closest?.("table")?.parentElement?.tagName === "FIGURE";
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-070
     addAction("Convert to list-table", tableActionIcons.listTable, "List table", () => {
       const converted = tableTools.convertTable(tableTools.serialize(edit.tableModel!), "list-table");
       if (converted && converted.ok) {
@@ -285,6 +294,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       blockEditor.autosaveBlockEdit();
     };
     edit.tableInput = input;
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-085
     if (!edit.cellPalette) {
       edit.cellPalette = createEditPalette(document, {
         actions: editActions,
@@ -319,6 +329,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       });
     }
     const cellPalette = edit.cellPalette;
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
     cellPalette.setMode(state.paletteMode);
     if (!edit.cellSlash) {
       edit.cellSlash = createSlashMenu(document, window, {
@@ -377,6 +388,8 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
         edit.cellSlash?.sync();
       });
     }
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-018
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-025
     input.addEventListener("keydown", (event) => {
       if (edit.cellSlash?.handleKey(event)) return;
       if (edit.cellPalette?.handleKey(event)) return;

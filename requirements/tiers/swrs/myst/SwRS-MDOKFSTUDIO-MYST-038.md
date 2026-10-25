@@ -2,43 +2,101 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-MYST-038
 uuid: 0bf9bdd0-2e90-4a37-b7d8-1efb9ea673ea
-title: Clicking an anchor icon in edit mode opens the rename field
-description: When a reader clicks an anchor icon in edit mode, the extension
-  SHALL open a Rename label popover with a prefilled, selected, focused Label
-  name field before block click handling.
+title: "The anchor icon opens a rename field that sends valid names"
+description: "When a reader clicks the anchor icon of a label in edit mode, the extension
+  SHALL open a Rename label popover with a prefilled, selected, focused Label name
+  field before block click handling, send a rename only for a changed valid name and
+  show the answer of the host in the field."
 project: markdown-okf-schema-studio
 scope: myst
 lifecycle: draft
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
+- StRS-MDOKFSTUDIO-MYST-009
+depends_on:
+- SwRS-MDOKFSTUDIO-BLOCK-041
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files: []
-tested_in_files: []
+implemented_in_files:
+- src/core/mapping/labelRename.ts
+- src/page/modules/labelRename.ts
+tested_in_files:
+- test/core/mapping/labelRename.test.ts
+- test/core/protocol/pageToHost.test.ts
+- test/page/modules/labelRename.test.ts
+- test/page/modules/renderReq.labelRename.requirements.test.ts
 ---
 
-## Clicking an anchor icon in edit mode opens the rename field
+## The anchor icon opens a rename field that sends valid names
 
 ### Normative behavior
 
-When a reader clicks an anchor icon in edit mode, the extension SHALL open a Rename label popover with a prefilled, selected, focused Label name field before block click handling.
+When a reader clicks the anchor icon of a label in edit mode, the extension SHALL open a Rename label popover with a prefilled, selected, focused Label name field before block click handling, send a rename only for a changed valid name and show the answer of the host in the field.
 
-### Scenario: Nominal
-
-- GIVEN edit mode on
+### Scenario (nominal): The click opens the rename field
+- GIVEN edit mode on and the label `(draft_1)=` before a paragraph, which shows an anchor icon with a pointer cursor
 - WHEN the anchor icon is clicked
-- THEN a dialog Rename label opens under it with the field prefilled and selected, and no block editor opens
+- THEN a dialog Rename label opens under it with the Label name field prefilled with `draft_1`, selected and focused, and no block editor opens
 
-### Scenario: Boundary or refusal
+### Scenario (refusal): Clicks that open no field
+| Input | Outcome |
+| --- | --- |
+| Anchor icon clicked with edit mode off | Nothing opens and the icon stays a link target |
+| Anchor icon of the label `(_draft)=` clicked in edit mode (label starting with `_`, `.` or `-`) | No rename field, popover or message appears and the click opens no block editor |
 
-- GIVEN edit mode off
-- WHEN the anchor icon is clicked
-- THEN nothing opens and the icon stays a link target
+### Scenario (nominal): Enter sends the rename or closes
+| Input (Enter pressed in the field) | Outcome |
+| --- | --- |
+| A changed valid name | One rename with the label line is posted |
+| The name left unchanged | The field closes and nothing is posted |
+
+### Scenario (refusal): Invalid names are not sent
+| Input (Enter pressed in the field) | Outcome |
+| --- | --- |
+| `-bad` (starts with a non letter or digit) | The message is shown and nothing is posted |
+| An empty name | The same message is shown and nothing is posted |
+| A 101-character name | The same message is shown and nothing is posted |
+| A name with characters other than letters, digits and `_ . : -` | The same message is shown and nothing is posted |
+
+The message reads: Use letters, digits and _ . : - only, starting with a letter or digit (100 characters at most). The host and the message validator repeat the check.
+
+### Scenario (boundary): Escape or an outside press closes the field
+| Input (field open) | Outcome |
+| --- | --- |
+| Escape | The field closes and nothing is sent |
+| Pointer press outside the popover and the icon | The field closes and nothing is sent |
+
+### Scenario (nominal): A successful rename reports the remaining uses
+| Input (rename succeeds) | Outcome |
+| --- | --- |
+| Two `{ref}` uses of the old name | The field shows Renamed. 2 uses of "old" remain in this document. |
+| No `{ref}` use, or `{doc}` and `{numref}` uses only | The field shows Renamed. No use of the old name remains. |
+
+Only `{ref}` forms are counted. The field closes itself 5 s after the success message; a new rename or Escape within the 5 s makes the field follow the new action and no stale close occurs.
+
+### Scenario (boundary): Progress, refusal and silence of the host
+| Input | Outcome |
+| --- | --- |
+| A posted rename the host has not answered | The field is disabled and reads Renaming... |
+| An answer with another edit id | The answer is ignored |
+| A refusal with a reason | The reason is shown and the field is editable again |
+| No host answer within 6 s | The field is editable again with The editor did not answer. Try again. |
+| An answer arriving before 6 s | The answer is matched by edit id, the timer is cleared and no timeout message is shown |
+
+### Known issues
+- Known issue: the anchor icon accepts a leading `_`, `.` or `-` (`ANCHOR_LABEL`), but the rename pattern requires a letter or digit first (`LABEL_NAME`, the page `namePattern`). The click is swallowed before that test, so the writer gets no editor, no popover and no message.
+
+### Related requirements
+- SwRS-MDOKFSTUDIO-BLOCK-041: an open editor blocks a rename; see it for the refusal reason.
+- SwRS-MDOKFSTUDIO-MYST-045: the host side of the rename.
+- SwRS-MDOKFSTUDIO-MYST-051: the message the field posts and the answer it receives.
 
 ### Verification notes
-
-- Method: test
-- Criteria: The icon shows a pointer cursor in edit mode only.
+- Method: test/page/modules/labelRename.test.ts ("a click on the anchor in edit mode opens a prefilled, selected field before the block handlers": click opens and edit mode off; "Enter posts one rename with the label line; Escape cancels": Enter and Escape; "an invalid or unchanged name is not sent": invalid names and unchanged name; "the result shows how many {ref} uses of the old name remain": remaining uses, progress and refusal)
+- Method: test/page/modules/renderReq.labelRename.requirements.test.ts ("without an answer after 6 s the field is editable again with a message; an answer clears the timer": silence of the host; "a successful rename closes the field 5 s later and a new action cancels the stale close": 5 s close; "a label starting with an underscore, dot or hyphen opens no field and swallows the click (Known issue)": symbol label)
+- Method: test/core/mapping/labelRename.test.ts ("label names follow the MyST pattern and the length limit": invalid names; "counts {ref} uses with and without a title, not other roles or names": remaining uses)
+- Method: test/core/protocol/pageToHost.test.ts ("previewLabelRename validates the line and both label names": the validator repeats the name check)
+- Method: the pointer press outside the popover has no named test (untested)
+- Criteria: The icon shows a pointer cursor in edit mode only; no message is posted on a closed field, an invalid name or an unchanged name; page and host both reject invalid names; matching of the answer is by edit id; `{ref}`-only counting and the message texts match.

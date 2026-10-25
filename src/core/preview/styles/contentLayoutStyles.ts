@@ -1,5 +1,14 @@
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-028
+// @implements_req SwRS-MDOKFSTUDIO-CORE-034
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-001
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-007
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
+// @implements_req SwRS-MDOKFSTUDIO-THEME-001
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 /**
  * The toolbar toggle icons, the TOC column, the width modes and the content typography (wrapping,
  * paragraphs, lists, checkboxes).

@@ -4,7 +4,7 @@ id: StRS-MDOKFSTUDIO-MYST-006
 uuid: 57486d1a-28f4-417c-8399-d0375937e762
 title: Maths is typeset offline and bad formulas stay readable
 description: When a document contains inline, display or aligned maths, the
-  Studio SHALL show it typeset without network access, and SHALL keep an invalid
+  Studio SHALL show it typeset without network access, and keep an invalid
   formula readable.
 project: markdown-okf-schema-studio
 scope: myst
@@ -27,7 +27,7 @@ derived_by:
 
 ### Normative behavior
 
-When a document contains inline, display or aligned maths, the Studio SHALL show it typeset without network access, and SHALL keep an invalid formula readable.
+When a document contains inline, display or aligned maths, the Studio SHALL show it typeset without network access, and keep an invalid formula readable.
 
 ### Preserved stakeholder intent
 

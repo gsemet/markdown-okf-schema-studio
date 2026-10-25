@@ -7,6 +7,7 @@ import { isSpace, isWordChar, touchedLines, validSelection } from "./editActionH
 import type { EditActionContext } from "./editActions";
 import type { TextEdit } from "./textEditing";
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-045
 /**
  * Toggles an inline `*` marker pair (`*` italic, `**` bold) around the selection. A run of `n`
  * asterisks around the content holds bold when `n >= 2` and italic when `n` is odd, so
@@ -116,6 +117,7 @@ const TODO_CLOSE = " -->";
 
 const TODO_LINE = /^([ \t]*)<!--[ \t]*TODO:[ \t]?(.*?)[ \t]?-->[ \t]*$/u;
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-160
 /**
  * Toggles `<!-- TODO: … -->` around each non-blank line touched by the selection: when every
  * such line is already wrapped they are unwrapped, otherwise the unwrapped ones are wrapped.
@@ -180,6 +182,7 @@ export function toggleTodo(ctx: EditActionContext): TextEdit | undefined {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-114
 /**
  * Inserts an inline comment thread after the block at the caret, with the first message started
  * by `threadAuthor` (the Git user) and the local date, and the caret on its text line:
@@ -211,6 +214,7 @@ export function insertThread(ctx: EditActionContext, threadAuthor?: string): Tex
   return { start, end, text, selectionStart: caret, selectionEnd: caret };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-048
 /** Toggles a `~~` pair around the selection or the word at the caret. */
 export function toggleStrikethrough(ctx: EditActionContext): TextEdit | undefined {
   const { value, selectionStart, selectionEnd } = ctx;
@@ -276,6 +280,7 @@ export function toggleStrikethrough(ctx: EditActionContext): TextEdit | undefine
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-135
 /** Wraps the selection in a MyST role (`{sub}` or `{sup}`); empty puts the caret between the quotes. */
 export function wrapRole(ctx: EditActionContext, role: string): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -292,6 +297,7 @@ export function wrapRole(ctx: EditActionContext, role: string): TextEdit | undef
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-136
 /** Writes `(label-name)=` above the first line of the text, the name selected; refuses a second one. */
 export function insertLabel(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -310,6 +316,8 @@ export function insertLabel(ctx: EditActionContext): TextEdit | undefined {
 export const roleArgument = (value: string | undefined): value is string =>
   value !== undefined && value.length > 0 && value.length <= 200 && !/[`<>\r\n]/u.test(value);
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-147
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-148
 /**
  * Inserts `{role}` with the chosen target. A selection on one line becomes the link text
  * (`{ref}`text <target>``); without one the target is the text.
@@ -324,6 +332,7 @@ export function insertTargetRole(ctx: EditActionContext, role: string, textAllow
   return { start: ctx.selectionStart, end: ctx.selectionEnd, text, selectionStart: caret, selectionEnd: caret };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-138
 /** Wraps the selection in the `{kbd}` role, or inserts a sample key with the sample selected. */
 export function insertKbdRole(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -338,6 +347,7 @@ export function insertKbdRole(ctx: EditActionContext): TextEdit | undefined {
   return wrapRole(ctx, "kbd");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-126
 /** Wraps the selection in `<kbd>`, removes the tags when it already has them, or inserts a sample. */
 export function toggleKbd(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -373,6 +383,7 @@ export function toggleKbd(ctx: EditActionContext): TextEdit | undefined {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-072
 /** Replaces the selection with the chosen emoji character, caret after it. */
 export function insertEmoji(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;

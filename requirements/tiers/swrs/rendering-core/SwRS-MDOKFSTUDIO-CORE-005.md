@@ -8,16 +8,17 @@ description: When a document starts with a YAML frontmatter block, the extension
   code block.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-003; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-003
 ---
 
 ## Hide leading frontmatter from the body
@@ -40,5 +41,5 @@ When a document starts with a YAML frontmatter block, the extension SHALL leave 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "block source ranges stay absolute when leading frontmatter is stripped" in test/core/render/mystFeatures.test.ts
 - Criteria: No frontmatter code block appears in the body; later `---` lines are unchanged.

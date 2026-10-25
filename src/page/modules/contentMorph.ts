@@ -9,6 +9,7 @@
  * {@link morphKey}, which removes what VS Code added to the first page when it loaded it.
  */
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-069
 /**
  * For each incoming key, the index of the current node to keep in its place, or -1 for the
  * incoming node itself. Equal keys pair in document order; a node is kept at most once.

@@ -8,16 +8,17 @@ description: When the reader closes the banner, the extension SHALL remove it at
   document until VS Code restarts, handing it back on reload.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-014
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-081; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-081
 ---
 
 ## Closing the banner dismisses it for that document
@@ -40,5 +41,5 @@ When the reader closes the banner, the extension SHALL remove it at once without
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "CR 050: closing removes the banner, tells the host the key and keeps it closed until the set changes" in test/page/modules/warningBanner.test.ts
 - Criteria: A second preview of the file shares the dismissal.

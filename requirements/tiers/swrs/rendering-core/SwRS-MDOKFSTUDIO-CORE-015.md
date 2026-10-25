@@ -8,16 +8,17 @@ description: When a block comes from an included file, the extension SHALL map
   as included, also for nested includes.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-002
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-012; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-012
 ---
 
 ## Map included blocks to the include directive
@@ -40,5 +41,5 @@ When a block comes from an included file, the extension SHALL map it to the line
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "included blocks map to the directive lines only" in test/core/render/includeMapping.test.ts
 - Criteria: Included blocks carry the host directive line and the included attribute at any depth.

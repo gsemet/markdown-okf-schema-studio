@@ -23,6 +23,7 @@ export interface LinkPanel {
   destroy(): void;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-089
 /**
  * The link panel: Text and URL fields with Insert and Cancel, shown under the edition palette.
  * It only collects the two values; the caller applies the edit and restores the text box
@@ -35,6 +36,7 @@ export function createLinkPanel(document: Document, deps: LinkPanelDeps): LinkPa
   root.setAttribute("role", "dialog");
   root.setAttribute("aria-label", "Insert link");
   root.setAttribute("data-sphinx-link-panel", "true");
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-036
   // A press on the padding or a button must not blur the field that has the focus (that would
   // read as leaving the editor); a press on a field has to focus it.
   root.addEventListener("mousedown", (event: Event) => {
@@ -84,6 +86,7 @@ export function createLinkPanel(document: Document, deps: LinkPanelDeps): LinkPa
     if (closed) return;
     deps.onSubmit(textInput.value, urlInput.value);
   };
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
   const cancel = (): void => {
     if (closed) return;
     deps.onCancel();

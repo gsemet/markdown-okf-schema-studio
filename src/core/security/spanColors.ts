@@ -1,3 +1,4 @@
+// @implements_req SwRS-MDOKFSTUDIO-GFM-034
 /**
  * Strict colour grammar for `<span style="color: …; background-color: …">`. Inline styles are
  * blocked by the CSP, so the sanitizer keeps an allowed value as `data-okf-color` /

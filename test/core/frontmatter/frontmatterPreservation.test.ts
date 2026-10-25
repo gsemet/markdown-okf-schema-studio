@@ -204,6 +204,7 @@ const valueEdits: ValueEdit[] = [
 
 for (const edit of valueEdits) {
   const label = `value edit ${edit.fixture} ${edit.field}`;
+  // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
   test(`${label} changes only the named field`, () => {
     const source = fixtures[edit.fixture];
     const patch = createFrontmatterFieldPatch(source, edit.field, edit.value);
@@ -219,6 +220,7 @@ for (const edit of valueEdits) {
 
 // ---- Structural edits (contract for T06) ----
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024
 test("structural F2 rename title to heading keeps the trailing comment", () => {
   const patch = createFrontmatterFieldRenamePatch(F2, "title", "heading");
   assert.ok(patch, "patch must be produced");
@@ -234,6 +236,7 @@ test("structural F2 remove links deletes exactly that line", () => {
   assert.equal(applyPatch(F2, patch), replaceBlock(F2, "links: [a.md, b.md]\n", ""));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
 test("structural F2 remove tags deletes exactly the sequence lines", () => {
   const patch = createFrontmatterFieldRemovePatch(F2, "tags");
   assert.ok(patch, "patch must be produced");

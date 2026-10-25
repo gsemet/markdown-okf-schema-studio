@@ -2,7 +2,7 @@
 type: StRS
 id: StRS-MDOKFSTUDIO-CODE-004
 uuid: fa141c5f-0336-4c39-9e9e-8abc65ee3bc1
-title: Copy the exact code of a block
+title: A reader copies the exact code of a block
 description: When a reader points at a code block in any preview, the Studio
   SHALL offer a one-click copy of the exact code and confirm the copy.
 project: markdown-okf-schema-studio
@@ -30,17 +30,17 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CODE-033
 - SwRS-MDOKFSTUDIO-CODE-034
 - SwRS-MDOKFSTUDIO-CODE-035
+- SwRS-MDOKFSTUDIO-TRUST-006
+- SwRS-MDOKFSTUDIO-TRUST-065
 ---
 
-## Copy the exact code of a block
+## A reader copies the exact code of a block
 
 ### Normative behavior
 
 When a reader points at a code block in any preview, the Studio SHALL offer a one-click copy of the exact code and confirm the copy.
 
 ### Preserved stakeholder intent
-
-## User Need
 
 Readers need to reuse code samples without selecting text by hand, even in a read-only preview.
 

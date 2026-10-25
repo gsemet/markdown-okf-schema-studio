@@ -20,6 +20,9 @@ afterEach(() => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-025
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
 test("rewrites local resources and removes active HTML content", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -64,6 +67,7 @@ test("rewrites local resources and removes active HTML content", () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-011
 test("reduced previews remove external scripts while retaining contained media", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -143,6 +147,7 @@ test("CR038: a column width in percent becomes a stylesheet rule; other widths a
   assert.doesNotMatch(result.html, /400px|calc|data-myst-table-style|style="/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022
 test("rewrites sanitized table styles into a nonce-bearing stylesheet", () => {
   const result = rewriteSphinxHtml(
     '<html><head></head><body><table><tr>'
@@ -182,6 +187,7 @@ test("blocks hostile CSS imports, schemes, and URLs while preserving local asset
   assert.doesNotMatch(sanitized, /https:\/\/example|data:image|javascript:/iu);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-012
 test("generates a restrictive nonce-bearing CSP", () => {
   const csp = createContentSecurityPolicy("vscode-webview://unit", "nonce-value");
 
@@ -236,6 +242,7 @@ test("keeps deferred relative navigation inert and host-routable", () => {
   assert.match(result.html, /href="#"[^>]+data-sphinx-preview-navigation="chapter-two\.md"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-031
 test("resolves parent-relative figure images through the workspace root", () => {
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-figure-test-"));
   temporaryDirectories.push(workspace);
@@ -270,6 +277,7 @@ test("resolves parent-relative figure images through the workspace root", () => 
   assert.ok(!rewritten.diagnostics.some((diagnostic) => diagnostic.code === "blocked-resource"));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-008
 test("strips figure images that escape even the workspace root", () => {
   const workspace = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-figure-test-"));
   temporaryDirectories.push(workspace);
@@ -317,6 +325,7 @@ test("data-okf-width keeps a plain length and nothing else", () => {
   assert.doesNotMatch(result.html, /position:fixed|url\(x\)/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034
 test("span style keeps only hex and rgb colour and background-color as data attributes", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);
@@ -352,6 +361,7 @@ test("span style keeps only hex and rgb colour and background-color as data attr
   assert.ok(other.diagnostics.length >= 4);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-041
 test("emits dir=auto on block elements and keeps only ltr, rtl and auto", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
   temporaryDirectories.push(output);

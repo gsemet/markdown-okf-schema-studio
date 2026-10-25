@@ -29,7 +29,7 @@ The CI only runs what a developer can run locally. All logic lives in the task r
    workflow uploads.
 9. **No retries to hide flakiness.** A job that passes on re-run without a change is a bug to fix,
    not a CI setting.
-10. **Every PR uses the template** `.github/PULL_REQUEST_TEMPLATE.md` (Summary, How it works,
+10. **Every PR uses the template** `.github/PULL_REQUEST_TEMPLATE.md` (Summary, Deliverable showcase,
     Changes, Impacts, Blast radius graded 1 to 3, Test plan), written in English. Fill every
     section; write "None" rather than delete one. It is written for a reader outside the team: no
     internal ids in the text (see "PR body for an external reader" in prd-workflow.guidelines.md).

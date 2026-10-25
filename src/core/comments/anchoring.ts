@@ -67,6 +67,7 @@ export function toLineChanges(changes: readonly ContentChangeLike[]): LineChange
   }));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-094
 /**
  * Moves the stored lines of the threads with the edits (all ranges are in the coordinates of the
  * document before the event, so the order of the changes does not matter). Unchanged threads keep
@@ -397,6 +398,7 @@ function bestDistance(pattern: string, text: string, limit: number, budget: { ce
   return best <= limit ? best : Infinity;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-107
 function fuzzyCandidates(index: DocumentIndex, quote: string, budget: { cells: number }): Candidate[] {
   if (index.plain.length > MAX_FUZZY_TEXT || quote.length < MIN_FAR_QUOTE) return [];
   const counts = wordCounts(index);
@@ -454,6 +456,8 @@ function fuzzyCandidates(index: DocumentIndex, quote: string, budget: { cells: n
 /** The `reanchor` input: only the anchor of a thread is read. */
 export type AnchorThread = { anchor: CommentThread["anchor"] };
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-100
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-101
 function reanchorWith(index: DocumentIndex, thread: AnchorThread, budget: { cells: number }): AnchorResult {
   const { line, endLine } = thread.anchor;
   const orphaned: AnchorResult = { state: "orphaned", line, endLine };

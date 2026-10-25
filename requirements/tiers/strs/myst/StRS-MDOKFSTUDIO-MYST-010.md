@@ -7,29 +7,16 @@ description: When a writer renames a label from its anchor icon, the Studio
   SHALL apply it as one undoable edit, or explain why it refuses.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-009; no marker expected."
 derives_from: []
 user_need: As a writer, I want safe label renaming so that references do not
   silently break.
-derived_by:
-- SwRS-MDOKFSTUDIO-MYST-038
-- SwRS-MDOKFSTUDIO-MYST-039
-- SwRS-MDOKFSTUDIO-MYST-040
-- SwRS-MDOKFSTUDIO-MYST-041
-- SwRS-MDOKFSTUDIO-MYST-042
-- SwRS-MDOKFSTUDIO-MYST-043
-- SwRS-MDOKFSTUDIO-MYST-044
-- SwRS-MDOKFSTUDIO-MYST-045
-- SwRS-MDOKFSTUDIO-MYST-046
-- SwRS-MDOKFSTUDIO-MYST-047
-- SwRS-MDOKFSTUDIO-MYST-048
-- SwRS-MDOKFSTUDIO-MYST-049
-- SwRS-MDOKFSTUDIO-MYST-050
-- SwRS-MDOKFSTUDIO-MYST-051
-- SwRS-MDOKFSTUDIO-MYST-090
-- SwRS-MDOKFSTUDIO-MYST-094
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-MYST-009
 ---
 
 ## A label can be renamed safely from its anchor

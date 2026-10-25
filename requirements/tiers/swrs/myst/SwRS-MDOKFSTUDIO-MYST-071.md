@@ -9,13 +9,13 @@ description: When the extension looks up a conf.py, the extension SHALL trust a
   deleted.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: deprecated
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Archived. Not an observable behaviour; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
@@ -41,5 +41,5 @@ When the extension looks up a conf.py, the extension SHALL trust a folder's resu
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "typing does not touch the disk: results are cached until the interval or an invalidation" in test/core/myst/confLocator.test.ts
 - Criteria: Typing never reads the disk.

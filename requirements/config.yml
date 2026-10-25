@@ -16,543 +16,143 @@ scopes:
     id_token: CORE
     folder: rendering-core
     source_dirs:
-      - src/core/render/renderPipeline.ts
-      - src/core/render/mystRenderer.ts
-      - src/core/preview/previewStyles.ts
-      - src/node-services/build/sphinxBuild.ts
-      - src/node-services/build/snapshotWorkspace.ts
-      - src/node-services/build/sourceTransforms.ts
-      - sphinx/conf.py
-      - sphinx/preview_source_mapping.py
-      - src/core/preview/styles/contentBlockStyles.ts
-      - src/core/render/documentGlob.ts
-      - src/core/render/mystBlockTransforms.ts
-      - src/core/render/mystEngine.ts
-      - src/core/render/mystNode.ts
-      - src/core/render/mystNormalize.ts
-      - src/core/render/mystTables.ts
-      - src/core/render/mystTypes.ts
-      - src/page/modules/motion.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/core/render/renderPipeline.test.ts
-      - test/core/render/includeBudget.test.ts
-      - test/core/render/includeMapping.test.ts
-      - test/core/render/sphinxFeatures.contract.ts
-      - test/node-services/build/sphinxBuild.test.ts
-      - test/node-services/build/snapshotWorkspace.test.ts
-      - test/node-services/build/sourceTransforms.test.ts
-      - test/core/preview/inlineCode.test.ts
-      - test/core/preview/previewStyles.test.ts
-      - test/integration/projectFeatures.test.ts
-      - test/visual/scenarios.ts
-      - test/visual/scenarioIds.ts
-      - test/visual/capture.py
-      - test/visual/renderFixtures.ts
-      - test/visual/themes.ts
-      - sphinx/tests/test_sphinx_preview_mapping.py
-      - test/visual/generatedFixtures.ts
-      - test/visual/renderOptions.ts
-      - test/core/render/mystNode.test.ts
-      - test/page/modules/motion.test.ts
-      - test/visual/capture_comment_checks.py
-      - test/visual/capture_edit_checks.py
-      - test/visual/capture_final_checks.py
-      - test/visual/capture_layout_checks.py
-      - test/visual/capture_page_checks.py
-      - test/visual/scenarioAssertions.ts
-      - test/visual/scenarioDefinitions1.ts
-      - test/visual/scenarioDefinitions2.ts
+      - test
+      - sphinx/tests
   code-blocks:
     id_token: CODE
     folder: code-blocks
     source_dirs:
-      - src/core/render/highlight.ts
-      - src/page/modules/codeCopy.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/core/render/highlight.test.ts
-      - test/page/modules/codeCopy.test.ts
+      - test
+      - sphinx/tests
   gfm:
     id_token: GFM
     folder: gfm
     source_dirs:
-      - src/core/render/checkboxMarkers.ts
-      - src/core/security/spanColors.ts
-      - src/page/modules/spanColors.ts
-      - src/core/render/mystGithubAlerts.ts
-      - src/page/features/checkboxes.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/core/render/bareUrlAutolink.test.ts
-      - test/core/render/checkboxMarkers.test.ts
-      - test/core/render/checkboxRendering.test.ts
-      - test/core/render/crlfAlerts.test.ts
-      - test/core/security/spanColors.test.ts
-      - test/page/modules/spanColors.test.ts
-      - test/integration/checkboxToggle.test.ts
+      - test
+      - sphinx/tests
   myst:
     id_token: MYST
     folder: myst
     source_dirs:
-      - src/core/myst/confLocator.ts
-      - src/core/myst/confParser.ts
-      - src/core/render/mystSyntaxDetect.ts
-      - src/core/render/mathRenderer.ts
-      - src/core/mapping/labelRename.ts
-      - src/page/modules/labelRename.ts
-      - src/page/modules/figureSizes.ts
-      - src/core/directives/admonition.ts
-      - src/core/directives/directive.ts
-      - src/core/directives/figure.ts
-      - src/core/directives/registry.ts
-      - src/core/directives/tables.ts
-      - src/core/preview/calloutIcons.ts
-      - src/core/render/mystContextTags.ts
-      - src/core/render/mystGridToctree.ts
-      - src/core/render/mystInlineTransforms.ts
-      - src/page/modules/warningBanner.ts
-      - src/session/features/diagnostics.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/core/render/mystFeatures.test.ts
-      - test/core/render/mathRenderer.test.ts
-      - test/core/render/mystSyntaxDetect.test.ts
-      - test/core/myst/confLocator.test.ts
-      - test/core/myst/confParser.test.ts
-      - test/core/mapping/labelRename.test.ts
-      - test/page/modules/labelRename.test.ts
-      - test/integration/labelRename.test.ts
-      - test/integration/mystDiagnostics.test.ts
-      - test/core/directives/registry.test.ts
-      - test/core/render/gridToctree.test.ts
-      - test/core/render/mystPaletteRendering.test.ts
-      - test/core/render/mystFeaturesSupport.ts
-      - test/page/modules/warningBanner.test.ts
+      - test
+      - sphinx/tests
   diagrams:
     id_token: DIAG
     folder: diagrams
     source_dirs:
-      - src/core/render/plantUmlRenderer.ts
-      - src/page/modules/mermaidPreview.ts
-      - src/core/configuration/plantUmlConfiguration.ts
-      - src/core/render/plantUmlIncludes.ts
-      - src/core/render/plantUmlLimits.ts
-      - src/page/features/rendererBridge.ts
-      - src/page/modules/mermaidCache.ts
-      - src/page/modules/mermaidError.ts
-      - src/page/modules/plantumlCore.d.ts
-      - src/page/modules/plantumlDiagram.ts
-      - src/page/modules/plantumlFileRequests.ts
-      - src/page/modules/plantumlPreview.ts
-      - src/session/features/plantUml.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/core/render/plantUmlRenderer.test.ts
-      - test/core/configuration/plantUmlConfiguration.test.ts
-      - test/core/render/plantUmlEngine.test.ts
-      - test/core/render/plantUmlFile.test.ts
-      - test/core/render/plantUmlIncludes.test.ts
-      - test/page/modules/mermaidCache.test.ts
-      - test/page/modules/mermaidError.test.ts
-      - test/page/modules/plantumlDiagram.test.ts
-      - test/page/modules/plantumlFileRequests.test.ts
-      - test/page/rendererBridge.test.ts
+      - test
+      - sphinx/tests
   frontmatter-schema:
     id_token: FMSCHEMA
     folder: frontmatter-schema
     source_dirs:
-      - src/core/frontmatter/okfFrontmatter.ts
-      - src/core/frontmatter/propertiesTable.ts
-      - src/core/frontmatter/schemaRegistry.ts
-      - src/core/frontmatter/schemaValidator.ts
-      - src/core/frontmatter/fileLinks.ts
-      - src/core/frontmatter/stemIndex.ts
-      - src/core/configuration/frontmatterConfiguration.ts
-      - src/core/frontmatter/frontmatterParse.ts
-      - src/core/frontmatter/frontmatterValidate.ts
-      - src/core/frontmatter/schemaFiles.ts
-      - src/core/preview/styles/propertiesStyles.ts
-      - src/node-services/linkedTargetWatch.ts
-      - src/node-services/schemaFiles.ts
-      - src/page/features/linkTooltip.ts
-      - src/session/features/frontmatter.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/core/frontmatter/okfFrontmatter.test.ts
-      - test/core/frontmatter/propertiesTable.test.ts
-      - test/core/frontmatter/schemaRegistry.test.ts
-      - test/core/frontmatter/schemaValidator.test.ts
-      - test/core/frontmatter/fileLinks.test.ts
-      - test/core/frontmatter/stemIndex.test.ts
-      - test/core/frontmatter/fixtures.ts
-      - test/core/configuration/frontmatterConfiguration.test.ts
-      - test/integration/genericMarkdown.test.ts
-      - test/node-services/linkedTargetWatch.test.ts
+      - test
+      - sphinx/tests
   frontmatter-editing:
     id_token: FMEDIT
     folder: frontmatter-editing
     source_dirs:
-      - src/core/edits/frontmatterEdit.ts
-      - src/core/frontmatter/frontmatterSerialize.ts
-      - src/core/frontmatter/sameData.ts
-      - src/core/preview/styles/frontmatterEditorStyles.ts
-      - src/page/features/frontmatterEditor.ts
-      - src/page/features/frontmatterListEditor.ts
-      - src/page/features/frontmatterMenu.ts
-      - src/page/features/frontmatterValueEditor.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/core/frontmatter/frontmatterPreservation.test.ts
-      - test/core/frontmatter/frontmatterFence.test.ts
-      - test/integration/previewEditing.test.ts
-      - test/core/edits/frontmatterEdit.test.ts
-      - test/core/frontmatter/sameData.test.ts
-      - test/page/runtimeFrontmatterEditor.test.ts
-      - test/page/runtimeFrontmatterFields.test.ts
+      - test
+      - sphinx/tests
   layout-width:
     id_token: LAYOUT
     folder: layout-width
     source_dirs:
-      - src/page/modules/widthMode.ts
-      - src/page/modules/firstClearance.ts
-      - src/core/preview/styles/contentLayoutStyles.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/page/modules/firstClearance.test.ts
-      - test/page/geometryChecks.test.ts
-      - test/shared/geometry-checks.js
+      - test
+      - sphinx/tests
   theme-zoom:
     id_token: THEME
     folder: theme-zoom
     source_dirs:
-      - src/core/state/previewTheme.ts
-      - src/page/modules/viewControls.ts
-      - src/core/preview/themeTokens.ts
-      - src/page/features/themeMode.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/core/state/previewTheme.test.ts
-      - test/core/preview/creamTheme.test.ts
-      - test/core/preview/themeTokens.test.ts
+      - test
+      - sphinx/tests
   toolbar-navigation:
     id_token: TOOLBAR
     folder: toolbar-navigation
     source_dirs:
-      - src/core/preview/previewToolbar.ts
-      - src/page/modules/toolbarCollapse.ts
-      - src/page/modules/tocColumn.ts
-      - src/page/modules/historyControls.ts
-      - src/page/modules/linkNavigation.ts
-      - src/core/state/navigationHistory.ts
-      - src/core/state/previewViewPreferences.ts
-      - src/core/navigation/previewNavigation.ts
-      - src/core/preview/styles/pageChromeStyles.ts
-      - src/page/features/anchorMode.ts
-      - src/page/features/stickyHeadings.ts
-      - src/session/features/history.ts
-      - src/session/features/links.ts
-      - src/session/features/viewState.ts
-      - src/session/previewNavigator.ts
-      - src/session/workspaceChoices.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/page/modules/tocColumn.test.ts
-      - test/page/modules/linkNavigation.test.ts
-      - test/core/state/navigationHistory.test.ts
-      - test/core/state/previewViewPreferences.test.ts
-      - test/core/navigation/previewNavigation.test.ts
-      - test/integration/previewHistory.test.ts
-      - test/page/runtimePageControls.test.ts
-      - test/session/links.test.ts
-      - test/session/previewNavigator.test.ts
+      - test
+      - sphinx/tests
   block-editing:
     id_token: BLOCK
     folder: block-editing
     source_dirs:
-      - src/page/modules/textEditing.ts
-      - src/page/modules/blockSelection.ts
-      - src/core/mapping/blockMove.ts
-      - src/core/mapping/blockRange.ts
-      - src/core/state/blockRange.ts
-      - src/core/mapping/insertion.ts
-      - src/core/mapping/textDiff.ts
-      - src/core/state/editLock.ts
-      - src/core/edits/sourceEdits.ts
-      - src/core/edits/textEdit.ts
-      - src/core/preview/styles/editModeStyles.ts
-      - src/page/features/blockEditor.ts
-      - src/page/features/blockMoves.ts
-      - src/page/features/blockSelectionView.ts
-      - src/page/features/blockSourceEditor.ts
-      - src/page/features/insertPoints.ts
-      - src/page/features/editMode.ts
-      - src/page/features/editorChrome.ts
-      - src/page/features/textControls.ts
-      - src/page/modules/editorKeys.ts
-      - src/page/modules/editorTrace.ts
-      - src/page/modules/selectAllKey.ts
-      - src/session/features/blockEdits.ts
-      - src/session/features/sourceEdits.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/page/modules/textEditing.test.ts
-      - test/page/modules/blockSelection.test.ts
-      - test/core/mapping/blockMove.test.ts
-      - test/core/mapping/blockRange.test.ts
-      - test/core/state/blockRange.test.ts
-      - test/core/mapping/insertion.test.ts
-      - test/core/mapping/textDiff.test.ts
-      - test/core/state/editLock.test.ts
-      - test/integration/blockMove.test.ts
-      - test/integration/blockClipboard.test.ts
-      - test/integration/realInput.test.ts
-      - test/integration/realInput/harness.ts
-      - test/core/edits/sourceEdits.test.ts
-      - test/core/edits/textEdit.test.ts
-      - test/page/modules/editorKeys.test.ts
-      - test/page/modules/editorTrace.test.ts
-      - test/page/modules/selectAllKey.test.ts
-      - test/page/runtimeBlockEditor.test.ts
-      - test/page/runtimeBlockMoves.test.ts
-      - test/page/runtimeBlockSelection.test.ts
-      - test/page/runtimeEditorFlush.test.ts
+      - test
+      - sphinx/tests
   palette-slash:
     id_token: PALETTE
     folder: palette-slash
     source_dirs:
-      - src/page/modules/editActions.ts
-      - src/page/modules/editPalette.ts
-      - src/page/modules/slashMenu.ts
-      - src/page/modules/linkPanel.ts
-      - src/page/modules/figurePanel.ts
-      - src/page/modules/figureDirective.ts
-      - src/page/modules/pasteImage.ts
-      - src/page/modules/hostRequests.ts
-      - src/session/features/hostRequests.ts
-      - src/page/modules/caretRect.ts
-      - src/core/mapping/imageReference.ts
-      - src/core/mapping/pastedImage.ts
-      - src/core/mapping/mystTargets.ts
-      - src/session/bibScan.ts
-      - src/core/configuration/editingConfiguration.ts
-      - src/core/palette/emoji.ts
-      - src/core/palette/paletteActions.ts
-      - src/core/palette/paletteIcons.ts
-      - src/core/paste/htmlToMarkdown.ts
-      - src/core/preview/styles/editPaletteStyles.ts
-      - src/page/modules/blockEditActions.ts
-      - src/page/modules/inlineEditActions.ts
-      - src/page/modules/linkEditActions.ts
-      - src/page/modules/colourEditActions.ts
-      - src/page/modules/editActionHelpers.ts
-      - src/page/modules/editPalettePopovers.ts
-      - src/page/modules/pasteHtml.ts
-      - src/page/modules/stickyBar.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/page/modules/editActions.test.ts
-      - test/page/modules/editPalette.test.ts
-      - test/page/modules/slashMenu.test.ts
-      - test/page/modules/figureDirective.test.ts
-      - test/page/modules/caretReveal.test.ts
-      - test/page/modules/hostRequests.test.ts
-      - test/core/mapping/imageReference.test.ts
-      - test/core/mapping/pastedImage.test.ts
-      - test/core/mapping/mystTargets.test.ts
-      - test/core/configuration/editingConfiguration.test.ts
-      - test/integration/paletteMode.test.ts
-      - test/integration/mystPickers.test.ts
-      - test/integration/imagePicker.test.ts
-      - test/integration/imagePaste.test.ts
-      - test/core/palette/paletteActions.test.ts
-      - test/core/paste/htmlToMarkdown.test.ts
-      - test/page/modules/pasteImage.test.ts
-      - test/session/pasteImageWrite.test.ts
-      - test/page/modules/stickyBar.test.ts
-      - test/page/runtimeEditPalette.test.ts
-      - test/page/runtimePaletteActions.test.ts
+      - test
+      - sphinx/tests
   table-editing:
     id_token: TABLE
     folder: table-editing
     source_dirs:
-      - src/page/modules/markdownTable.ts
-      - src/page/features/tableCellEditor.ts
-      - src/page/modules/tableEditActions.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/page/modules/markdownTable.test.ts
-      - test/page/modules/markdownTablePreservation.test.ts
-      - test/page/modules/listTable.test.ts
-      - test/page/runtimeTableCellEditor.test.ts
+      - test
+      - sphinx/tests
   review-annotations:
     id_token: REVIEW
     folder: review-annotations
     source_dirs:
-      - src/core/comments/anchoring.ts
-      - src/core/comments/author.ts
-      - src/core/comments/commentModel.ts
-      - src/core/comments/commentStore.ts
-      - src/core/render/commentMarkers.ts
-      - src/page/modules/chipToggle.ts
-      - src/page/modules/commentCompose.ts
-      - src/page/modules/commentThreads.ts
-      - src/page/modules/incomingChanges.ts
-      - src/session/features/incomingChanges.ts
-      - src/page/modules/incomingToggle.ts
-      - src/host-vscode/headBaseline.ts
-      - src/core/mapping/lineDiff.ts
-      - src/core/configuration/commentsConfiguration.ts
-      - src/core/comments/inlineThread.ts
-      - src/core/preview/styles/commentStyles.ts
-      - src/page/modules/commentsToggle.ts
-      - src/page/modules/inlineThread.ts
-      - src/session/features/comments.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/core/comments/anchoring.test.ts
-      - test/core/comments/commentEditing.test.ts
-      - test/core/comments/commentModel.test.ts
-      - test/core/render/commentMarkers.test.ts
-      - test/page/modules/chipToggle.test.ts
-      - test/page/modules/commentCompose.test.ts
-      - test/page/modules/commentThreads.test.ts
-      - test/page/modules/incomingChanges.test.ts
-      - test/host-vscode/headBaseline.test.ts
-      - test/host-vscode/headBaselineUserName.test.ts
-      - test/core/mapping/lineDiff.test.ts
-      - test/core/configuration/commentsConfiguration.test.ts
-      - test/integration/incomingChanges.test.ts
-      - test/integration/reviewComments.test.ts
-      - test/integration/commentWrite.test.ts
-      - test/integration/commentAnchors.test.ts
-      - test/core/comments/inlineThread.test.ts
-      - test/integration/inlineThread.test.ts
-      - test/page/modules/inlineThread.test.ts
-      - test/page/modules/commentsToggle.test.ts
+      - test
+      - sphinx/tests
   lifecycle-sync:
     id_token: LIFE
     folder: lifecycle-sync
     source_dirs:
-      - src/extension.ts
-      - src/node-services/build/buildQueue.ts
-      - src/core/preview/contentPatch.ts
-      - src/page/features/contentPatch.ts
-      - src/session/webview.ts
-      - src/session/features/scrollSync.ts
-      - src/core/scroll/anchorPolicy.ts
-      - src/core/mapping/sourceMapping.ts
-      - src/core/state/boundedState.ts
-      - src/core/state/previewState.ts
-      - src/core/configuration/previewConfiguration.ts
-      - src/core/configuration/settingsRegistry.ts
-      - src/core/preview/previewStatus.ts
-      - src/core/preview/pageLiveState.ts
-      - src/core/preview/pageBuildEntry.ts
-      - src/core/preview/flushWait.ts
-      - src/core/preview/updatedRanges.ts
-      - src/core/protocol/bootContext.ts
-      - src/host-api/assetResolver.ts
-      - src/host-api/capabilities.ts
-      - src/host-api/colorTheme.ts
-      - src/host-api/diagnostics.ts
-      - src/host-api/documentStore.ts
-      - src/host-api/events.ts
-      - src/host-api/fileSystem.ts
-      - src/host-api/hostUi.ts
-      - src/host-api/index.ts
-      - src/host-api/keyValueStore.ts
-      - src/host-api/navigation.ts
-      - src/host-api/previewPanel.ts
-      - src/host-api/processRunner.ts
-      - src/host-api/settings.ts
-      - src/host-api/textEditors.ts
-      - src/host-api/vcsInfo.ts
-      - src/host-api/watcher.ts
-      - src/host-api/workspaceInfo.ts
-      - src/host-memory/memoryDocumentStore.ts
-      - src/host-memory/memoryFileSystem.ts
-      - src/host-vscode/activation.ts
-      - src/host-vscode/documents.ts
-      - src/host-vscode/groupFocus.ts
-      - src/host-vscode/groupLock.ts
-      - src/host-vscode/previewPanel.ts
-      - src/host-vscode/testHooks.ts
-      - src/host-vscode/vscodeHost.ts
-      - src/node-services/nodeFileSystem.ts
-      - src/node-services/paths.ts
-      - src/node-services/processRunner.ts
-      - src/page/bootContext.ts
-      - src/page/buildConstants.ts
-      - src/page/hostTransport.ts
-      - src/page/main.ts
-      - src/page/pageBus.ts
-      - src/page/pageDiagnostics.ts
-      - src/page/pageHost.ts
-      - src/page/pageSettings.ts
-      - src/page/runtime.ts
-      - src/page/features/hostHandlers.ts
-      - src/page/features/mappedBlocks.ts
-      - src/page/features/pageInput.ts
-      - src/page/features/pageRuntime.ts
-      - src/page/features/scrollCore.ts
-      - src/page/features/statusRegion.ts
-      - src/page/modules/contentMorph.ts
-      - src/session/features/pageLoadState.ts
-      - src/session/features/rendering.ts
-      - src/session/hostEvents.ts
-      - src/session/pageMessages.ts
-      - src/session/previewManager.ts
-      - src/session/previewSession.ts
-      - src/session/sessionDocuments.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/node-services/build/buildQueue.test.ts
-      - test/core/mapping/sourceMapping.test.ts
-      - test/core/state/boundedState.test.ts
-      - test/core/state/previewState.test.ts
-      - test/core/scroll/anchorPolicy.test.ts
-      - test/core/preview/contentPatch.test.ts
-      - test/core/configuration/previewConfiguration.test.ts
-      - test/shared/lineDelta.ts
-      - test/integration/stockCoexistence.test.ts
-      - test/integration/dirtySnapshots.test.ts
-      - test/integration/sourceMapping.test.ts
-      - test/integration/lifecycle.test.ts
-      - test/integration/serializer.test.ts
-      - test/integration/workspaceDisposal.test.ts
-      - test/integration/scroll-sync-suite.ts
-      - test/integration/reload-suite.ts
-      - test/integration/extensionApi.ts
-      - test/core/configuration/settingsRegistry.test.ts
-      - test/core/preview/flushWait.test.ts
-      - test/core/preview/updatedRanges.test.ts
-      - test/host-memory/memoryHost.test.ts
-      - test/host-vscode/documents.test.ts
-      - test/host-vscode/groupFocus.test.ts
-      - test/host/previewTiming.test.ts
-      - test/integration/updateGlow.test.ts
-      - test/node-services/nodeServices.test.ts
-      - test/page/modules/contentMorph.test.ts
-      - test/session/previewManager.test.ts
-      - test/session/previewRuntimeFile.test.ts
-      - test/page/pageBus.test.ts
-      - test/page/pageHost.test.ts
-      - test/page/pageMessages.test.ts
-      - test/page/pageSettings.test.ts
-      - test/page/pageTimers.test.ts
-      - test/page/runtimeBundle.test.ts
-      - test/page/runtimeContentPatch.test.ts
-      - test/page/runtimeScroll.test.ts
+      - test
+      - sphinx/tests
   trust-security:
     id_token: TRUST
     folder: trust-security
     source_dirs:
-      - src/core/security/csp.ts
-      - src/core/security/html-sanitizer.ts
-      - src/core/security/resource-policy.ts
-      - src/core/protocol/envelope.ts
-      - src/core/protocol/hostToPage.ts
-      - src/core/protocol/pageToHost.ts
-      - src/core/protocol/revision.ts
-      - src/core/protocol/router.ts
-      - src/page/hostMessages.ts
+      - src
+      - sphinx
     test_dirs:
-      - test/security/html-policy.test.ts
-      - test/security/package-contract.test.ts
-      - test/security/resource-policy.test.ts
-      - test/security/userFacingText.test.ts
-      - test/integration/trusted-suite.ts
-      - test/integration/untrusted-suite.ts
-      - test/integration/standalone-suite.ts
-      - test/core/protocol/hostToPage.test.ts
-      - test/core/protocol/pageStateMessages.test.ts
-      - test/core/protocol/pageToHost.test.ts
-      - test/core/protocol/revision.test.ts
-      - test/core/protocol/router.test.ts
-      - test/page/hostMessages.test.ts
+      - test
+      - sphinx/tests

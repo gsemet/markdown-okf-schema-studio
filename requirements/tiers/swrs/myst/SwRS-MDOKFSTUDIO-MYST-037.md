@@ -8,16 +8,17 @@ description: When an anchor icon renders, the extension SHALL leave it out of
   absolute source line of its label.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-009
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-036; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-036
 ---
 
 ## The anchor icon is not a mapped block and carries its source line
@@ -40,5 +41,5 @@ When an anchor icon renders, the extension SHALL leave it out of the mapped bloc
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a label before a paragraph renders an anchor icon span that is the link target" in test/core/render/mystPaletteRendering.test.ts
 - Criteria: The icon has role img and aria-label Anchor: name.

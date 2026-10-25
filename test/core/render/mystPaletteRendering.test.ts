@@ -29,6 +29,7 @@ function paletteInsert(id: string, value: string, at: number, arg?: string): str
   return value.slice(0, edit.start) + edit.text + value.slice(edit.end);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009
 test("an alert inserted by the edition palette renders as an admonition of the chosen type", async () => {
   const written = paletteInsert("alert", "Mind the gap", 4, "WARNING");
   assert.equal(written, "> [!WARNING]\n> Mind the gap");
@@ -96,6 +97,7 @@ async function renderPalette(markdown: string) {
   return { html: parseHtml(result.html), raw: result.html };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-029
 test("a collapsible section inserted by the edition palette renders as details with a summary", async () => {
   const { html } = await renderPalette(paletteInsert("details", "Intro", 5));
   const details = findElement(html, isTag("details"));
@@ -104,6 +106,7 @@ test("a collapsible section inserted by the edition palette renders as details w
   assert.match(textContent(details), /Content/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-008
 test("a footnote inserted by the edition palette renders a reference and a definition", async () => {
   const written = paletteInsert("footnote", "A claim.", 7) + "The source.";
   assert.equal(written, "A claim[^1].\n\n[^1]: The source.");
@@ -114,6 +117,7 @@ test("a footnote inserted by the edition palette renders a reference and a defin
   assert.match(textContent(definition), /The source\./u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-017
 test("a Mermaid fence inserted by the edition palette renders a diagram container", async () => {
   const { html } = await renderPalette(paletteInsert("mermaid", "Intro", 5));
   const diagram = findElement(html, (element) => hasClass(element, "myst-mermaid-diagram"));
@@ -158,6 +162,7 @@ test("an amsmath align environment in a dollar block and in a math directive ren
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-031
 test("a figure keeps its width and alignment as data attributes and classes", async () => {
   const { html } = await renderPalette(":::{figure} img/a.png\n:width: 60%\n:align: center\n:alt: A\n\nCaption\n:::");
   const figure = findElement(html, isTag("figure"))!;
@@ -185,6 +190,8 @@ test("an invalid figure width or alignment is ignored", async () => {
   assert.doesNotMatch(raw, /align-sideways|position:fixed/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019
+// @tests_req SwRS-MDOKFSTUDIO-MYST-036
 test("a label before a paragraph renders an anchor icon span that is the link target", async () => {
   const { html } = await renderPalette("(intro)=\nA paragraph.\n\nSee {ref}`intro` and {ref}`Title <intro>`.");
   const anchors = findElements(html, (element) => hasClass(element, "okf-anchor"));
@@ -294,6 +301,7 @@ test("a definition list from the palette renders a dl with its term and definiti
   assert.equal(textContent(findElement(list, isTag("dd"))!).trim(), "Definition");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-024
 test("inline, display and aligned math from the palette typeset with KaTeX", async () => {
   const inline = paletteWrite("math", "Value x here", [6, 7], "inline");
   const display = paletteWrite("math", "Intro", [5, 5], "display");
@@ -343,6 +351,7 @@ test("T30: a {ref} inserted by the edition palette renders as a link to the labe
   assert.match(textContent(link), /Introduction/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022
 test("T30: a {cite} inserted by the edition palette renders the citation placeholder", async () => {
   const edit = createEditActions([], createMarkdownTableTools()).byId.get("cite")!.apply({
     value: "Claim ", selectionStart: 6, selectionEnd: 6, scope: "block", arg: "smith2024" })!;
@@ -373,6 +382,7 @@ test("T30: a captioned table inserted by the edition palette renders a caption",
   assert.equal(findElements(html, (element) => element.tagName === "th").length, 2);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-017
 test("T30: a {kbd} role inserted by the edition palette renders a kbd element", async () => {
   const edit = createEditActions([], createMarkdownTableTools()).byId.get("roleKbd")!.apply({
     value: "Press ", selectionStart: 6, selectionEnd: 6, scope: "block" })!;
@@ -382,6 +392,7 @@ test("T30: a {kbd} role inserted by the edition palette renders a kbd element", 
   assert.equal(textContent(key), "Ctrl+K");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034
 test("a span with a colour style renders as data attributes, anything else is dropped", async () => {
   const document = inlineDocument(
     "A <span style=\"color: #c00; background-color: rgb(1, 2, 3)\">red **bold**</span> and "

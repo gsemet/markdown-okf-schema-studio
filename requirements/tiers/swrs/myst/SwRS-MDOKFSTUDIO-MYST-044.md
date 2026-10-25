@@ -8,16 +8,17 @@ description: When a rename is for a document revision the host has moved past,
   again once it has refreshed.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-065; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TRUST-065
 ---
 
 ## The host refuses a rename for an out-of-date preview
@@ -40,5 +41,5 @@ When a rename is for a document revision the host has moved past, the extension 
 
 ### Verification notes
 
-- Method: test
+- Method: Integration suite run() in test/integration/labelRename.test.ts
 - Criteria: The page ends with the timeout text in the second case.

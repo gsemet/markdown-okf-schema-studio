@@ -3,28 +3,28 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-044
 uuid: ca1105f6-bbdc-4640-a418-66daeb1eeee4
 title: A content patch draws only new built-in diagrams
-description: When the preview content is patched in place, the page SHALL draw
-  the built-in diagrams that have no render state and SHALL leave the others
-  untouched.
+description: "When the preview content is patched in place, the page SHALL draw the
+  built-in diagrams that have no render state and leave the others untouched."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-006
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-039; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-039
 ---
 
 ## A content patch draws only new built-in diagrams
 
 ### Normative behavior
 
-When the preview content is patched in place, the page SHALL draw the built-in diagrams that have no render state and SHALL leave the others untouched.
+When the preview content is patched in place, the page SHALL draw the built-in diagrams that have no render state and leave the others untouched.
 
 ### Scenario: New diagram
 

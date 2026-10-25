@@ -102,6 +102,7 @@ const indentCases: [string, boolean, string | undefined][] = [
 ];
 
 for (const [input, outdent, expected] of indentCases) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
   test("indentSelection " + (outdent ? "outdent " : "indent ") + JSON.stringify(input), () => {
     assert.equal(indent(input, outdent), expected);
   });
@@ -122,6 +123,7 @@ const caretCases: [string, string, string, string, string | undefined][] = [
 ];
 
 for (const [name, source, before, after, expected] of caretCases) {
+  // @tests_req SwRS-MDOKFSTUDIO-BLOCK-026
   test("mapRenderedCaret " + name, () => {
     const caret = createTextEditingTools().mapRenderedCaret(source, before, after);
     if (expected === undefined) {
@@ -133,6 +135,7 @@ for (const [name, source, before, after, expected] of caretCases) {
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
 test("wrapSelection wraps a non-empty selection with the marker and keeps it selected", () => {
   for (const marker of ["*", "_", "`", "~"]) {
     const edit = tools.wrapSelection("a foo b", 2, 5, marker);

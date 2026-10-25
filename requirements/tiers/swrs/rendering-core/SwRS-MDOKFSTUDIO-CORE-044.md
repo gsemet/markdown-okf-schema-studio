@@ -8,17 +8,18 @@ description: When a document holds a raw HTML block outside the supported subset
   SHALL drop it from the rendered page.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-GFM-004
+- StRS-MDOKFSTUDIO-GFM-002
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-GFM-029; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-GFM-029
 ---
 
 ## Drop unsupported raw HTML
@@ -41,5 +42,5 @@ When a document holds a raw HTML block outside the supported subset (tables, det
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "raw HTML outside the supported subset is dropped and a kbd element is kept" in test/core/render/renderReq.renderingCore.requirements.test.ts
 - Criteria: Only the supported subset survives rendering.

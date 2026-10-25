@@ -267,6 +267,11 @@ async function runBlockNavigation(
   console.log("PASS block keyboard navigation E2E");
 }
 
+// @tests_req StRS-MDOKFSTUDIO-LIFE-010
+// @tests_req StRS-MDOKFSTUDIO-TOOLBAR-013
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the E2E runner must expose a loopback CDP port");
   await pinStoredWorkspaceChoices();

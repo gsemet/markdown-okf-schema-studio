@@ -8,16 +8,17 @@ description: When a context tag pair sits inside a block quote, list item,
   by the parser, the extension SHALL group it as a panel and parse its Markdown.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-002
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-013; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-013
 ---
 
 ## Context tags group inside containers and split raw HTML blocks
@@ -40,5 +41,5 @@ When a context tag pair sits inside a block quote, list item, definition list or
 
 ### Verification notes
 
-- Method: test
+- Method: Visual scenario `context-tags-${theme}-wide` in test/visual/scenarioDefinitions1.ts
 - Criteria: Grouping works in all listed containers.

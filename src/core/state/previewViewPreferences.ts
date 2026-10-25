@@ -25,6 +25,7 @@ export const VIEW_ZOOM_STEP = 10;
 export const VIEW_PREFERENCE_KEYS: readonly ViewPreferenceKey[] = ["zoom", "widthMode", "toc", "incomingChanges", "comments", "toolbarCollapsed"];
 export const VIEW_WIDTH_MODES: readonly ViewWidthMode[] = ["margin", "auto", "full"];
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 export const DEFAULT_VIEW_PREFERENCES: Readonly<ViewPreferences> = Object.freeze({
   zoom: 100,
   widthMode: "margin",
@@ -47,6 +48,7 @@ function normalizeZoom(value: unknown): number {
   return Math.min(MAX_VIEW_ZOOM, Math.max(MIN_VIEW_ZOOM, rounded));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 export function normalizeViewPreferences(value: unknown): ViewPreferences {
   const input = value && typeof value === "object" && !Array.isArray(value)
     ? value as Record<string, unknown>

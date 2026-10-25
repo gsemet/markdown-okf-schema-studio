@@ -8,16 +8,16 @@ description: When a writer collapses the Description column of a properties
   for that document.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-001; no marker expected."
 derives_from: []
 user_need: As a writer, I hide the Description column when I need room and find
   it hidden again next time.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-014
-- SwRS-MDOKFSTUDIO-FMSCHEMA-015
-- SwRS-MDOKFSTUDIO-FMSCHEMA-016
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-001
 ---
 
 ## The Description column can be collapsed

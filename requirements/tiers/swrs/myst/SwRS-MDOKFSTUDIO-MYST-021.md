@@ -9,16 +9,17 @@ description: When a document holds a directive the preview cannot resolve
   outside a full build.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-005
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-022; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-022
 ---
 
 ## Directives needing a build show an inert placeholder with a warning
@@ -41,5 +42,5 @@ When a document holds a directive the preview cannot resolve without a project b
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "project-scoped roles and directives degrade to labelled placeholders" in test/core/render/mystFeatures.test.ts; Unit test "a toctree lists links labelled by the target H1, the file name or an explicit title" in test/core/render/gridToctree.test.ts
 - Criteria: Supported directives (admonitions, figure, image, tables, grid, toctree, math, code family, mermaid, uml, include) show no placeholder.

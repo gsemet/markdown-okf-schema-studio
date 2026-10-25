@@ -7,17 +7,18 @@ description: When several built-in diagrams need drawing, the page SHALL run the
   engine for one diagram at a time in the order requested.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-010
+- StRS-MDOKFSTUDIO-DIAG-006
 - StRS-MDOKFSTUDIO-DIAG-009
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-039; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-039
 ---
 
 ## The built-in engine draws one diagram at a time

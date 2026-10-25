@@ -8,16 +8,17 @@ description: When an admonition has no title argument and its body starts with a
   and keep the rest as body.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Untitled admonitions take their title from a leading bold line or heading
@@ -40,5 +41,5 @@ When an admonition has no title argument and its body starts with a bold line or
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a leading bold paragraph or heading supplies the MyST admonition title" in test/core/render/mystFeatures.test.ts
 - Criteria: Both leading forms become the title; the rest stays body.

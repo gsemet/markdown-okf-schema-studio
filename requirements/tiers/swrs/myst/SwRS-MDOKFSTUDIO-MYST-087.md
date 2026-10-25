@@ -8,16 +8,17 @@ description: When a document holds an admonition directive, the extension SHALL
   name.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Each admonition kind renders under its own directive name
@@ -40,5 +41,5 @@ When a document holds an admonition directive, the extension SHALL render it wit
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "each directive name has one plug-in, found by its exact name" in test/core/directives/registry.test.ts
 - Criteria: Admonition family behaves per name.

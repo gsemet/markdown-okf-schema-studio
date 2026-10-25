@@ -59,6 +59,8 @@ export function installPasteImage(window: any): PasteImage {
   const MAX_BYTES = 10 * 1024 * 1024;
   const ALLOWED = ["image/png", "image/jpeg", "image/gif", "image/webp"];
   return {
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-203
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-090
     handle(event, textarea, hooks) {
       const data = event && event.clipboardData;
       if (!data) return false;

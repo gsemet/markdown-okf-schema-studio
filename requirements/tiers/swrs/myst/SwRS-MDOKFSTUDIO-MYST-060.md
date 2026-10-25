@@ -7,16 +7,17 @@ description: When a toctree has `:reversed:`, the extension SHALL flip the entry
   order.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-012
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-057; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-057
 ---
 
 ## Toctree reversed option flips the order
@@ -39,5 +40,5 @@ When a toctree has `:reversed:`, the extension SHALL flip the entry order.
 
 ### Verification notes
 
-- Method: test
-- Criteria: Untested today.
+- Method: Unit test "a toctree with :reversed: flips the entry order and keeps the written order otherwise" in test/core/render/renderReq.myst.requirements.test.ts
+- Criteria: `:reversed:` flips the order; without it the written order is kept.

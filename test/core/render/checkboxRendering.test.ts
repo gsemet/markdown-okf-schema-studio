@@ -27,6 +27,7 @@ function position(element: HtmlElement): string {
     + `:${attribute(element, "checked") !== undefined ? "x" : " "}`;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-016
 test("task lists, paragraphs and table cells render interactive checkboxes mapped to the source", async () => {
   const source = [
     "---",

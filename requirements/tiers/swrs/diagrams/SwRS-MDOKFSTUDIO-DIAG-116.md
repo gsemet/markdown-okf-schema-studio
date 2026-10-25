@@ -7,16 +7,17 @@ description: When Mermaid fails a drawing after the node was planned for another
   key, the page SHALL NOT show an error for the replaced key.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-003
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-009; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-009
 ---
 
 ## A late Mermaid error for a replaced key is not shown

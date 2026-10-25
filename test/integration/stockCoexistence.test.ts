@@ -71,8 +71,10 @@ function markdownExtensionManifest(): {
   return manifest.contributes;
 }
 
+// @tests_req StRS-MDOKFSTUDIO-LIFE-001
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-059
   for (const status of ["pending", "error"] as const) {
     const html = buildStatusWebviewHtml(status, "vscode-webview://unit", "Sphinx message");
     const nonce = html.match(/<style nonce="([^"]+)"/u)?.[1];
@@ -116,6 +118,7 @@ export async function run(): Promise<void> {
     (editor) => editor.viewType === "vscode.markdown.preview.editor",
   );
   assert.equal(previewEditor?.priority?.diffEditor, "option");
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-001
   assert.equal(stockCommandIds.has(COMMAND_ID), false);
   const settingsBefore = snapshotStockSettings();
   const createdDiffFiles: string[] = [];
@@ -160,6 +163,7 @@ export async function run(): Promise<void> {
     );
     assert.ok(getActivePreviewForTests());
     assert.ok(customEditorTabs("vscode.markdown.preview.editor").length >= 1);
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-149
     assert.equal(snapshotStockSettings(), settingsBefore);
     const sidePreviewPanel = getActivePreviewPanelForTests();
     assert.ok(sidePreviewPanel, "the MyST side preview did not open");
@@ -168,6 +172,7 @@ export async function run(): Promise<void> {
       sidePreviewDisposed = true;
     });
 
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-018
     await vscode.commands.executeCommand("vscode.openWith", document.uri, EDITOR_VIEW_TYPE);
     await waitFor("the optional MyST Open With editor", () =>
       customEditorTabs(EDITOR_VIEW_TYPE).length === 1
@@ -220,6 +225,7 @@ export async function run(): Promise<void> {
     ]);
     assert.equal(getActivePreviewForTests()?.phase === "ready", false);
     assert.equal(getActivePreviewForTests()?.status, "pending");
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-049
     assert.match(getActivePreviewForTests()?.html ?? "", /data-sphinx-preview-status="pending"/u);
     await waitFor("the delayed fixture MyST view", () => {
       const preview = getActivePreviewForTests();

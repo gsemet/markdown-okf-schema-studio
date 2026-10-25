@@ -24,6 +24,7 @@ async function waitFor(
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
+// @tests_req StRS-MDOKFSTUDIO-LIFE-014
 export async function run(): Promise<void> {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   assert.ok(workspaceFolder);
@@ -52,6 +53,7 @@ export async function run(): Promise<void> {
     true,
     "the extension-host workspace folder could not be removed",
   );
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-143
   await waitFor("preview disposal after workspace removal", () => getActivePreviewForTests() === undefined);
   assert.equal(outputDirectory, path.dirname(fixturePath));
   assert.equal(fs.existsSync(outputDirectory), true, "workspace removal deleted the source directory");

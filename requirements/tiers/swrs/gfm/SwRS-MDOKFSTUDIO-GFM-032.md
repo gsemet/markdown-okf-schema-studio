@@ -5,26 +5,27 @@ uuid: 89114af5-eb78-4a39-91ba-6a216f92d72e
 title: Raw table styles keep a sanitized subset
 description: When a raw HTML table element has a style, the extension SHALL keep
   only text and background colours, text-fill, background-clip text and linear
-  gradients, and SHALL remove other declarations with a diagnostic.
+  gradients, removing other declarations with a diagnostic.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-GFM-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-GFM-002
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-GFM-031; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-GFM-031
 ---
 
 ## Raw table styles keep a sanitized subset
 
 ### Normative behavior
 
-When a raw HTML table element has a style, the extension SHALL keep only text and background colours, text-fill, background-clip text and linear gradients, and SHALL remove other declarations with a diagnostic.
+When a raw HTML table element has a style, the extension SHALL keep only text and background colours, text-fill, background-clip text and linear gradients, removing other declarations with a diagnostic.
 
 ### Scenario: Safe colours kept
 

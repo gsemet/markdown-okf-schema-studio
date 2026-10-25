@@ -21,6 +21,8 @@ export function installEditMode(rt: PageRuntime): EditMode {
     rt.parts.figureEditButton.sync(element);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-017
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   // The element whose outline shows what a click at this node would edit, or undefined.
   function editHoverTarget(node: EventTarget | null): Element | undefined {
     if (!state.editMode || !(node instanceof Element)) return undefined;
@@ -37,6 +39,9 @@ export function installEditMode(rt: PageRuntime): EditMode {
     return element.getAttribute("data-sphinx-preview-editing") === "true" ? undefined : element;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-001
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
   function applyEditMode(enabled: boolean): void {
     if (!enabled) {
       rt.selection.clearBlockSelection();
@@ -65,6 +70,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
     rt.insertPoints.refreshInsertPoints();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-026
   function clickCaretContext(target: HTMLElement, eventTarget: Element, x: number, y: number): CaretPoint | undefined {
     try {
       if (!Number.isFinite(x) || !Number.isFinite(y)) return undefined;
@@ -107,6 +113,9 @@ export function installEditMode(rt: PageRuntime): EditMode {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-018
   function openMappedEditor(target: HTMLElement, eventTarget: Element, initialCaretPosition: CaretPosition = "end",
     reveal = false): void {
     if (eventTarget.closest?.("[data-okf-properties]")) return;
@@ -167,6 +176,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
     openMappedEditor,
     clickCaretContext,
     resumePendingBlockNavigation,
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
     bindButton() {
       rt.editModeButton?.addEventListener?.("click", () => {
         const nextEditMode = !state.editMode;

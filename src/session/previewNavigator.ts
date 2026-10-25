@@ -63,6 +63,7 @@ export interface PreviewNavigator {
 export function createPreviewNavigator(files: NavigationFiles): PreviewNavigator {
   const isRegularFile = async (filePath: string): Promise<boolean> => (await files.stat(filePath)).kind === "file";
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-098
   async function resolvePreviewNavigation(
     request: string,
     activeSourceFile: string,
@@ -146,6 +147,7 @@ export function createPreviewNavigator(files: NavigationFiles): PreviewNavigator
     return { kind: "blocked", reason: `The navigation target is outside ${rootLabel}.` };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-094
   async function validatePreviewNavigation(
     request: string,
     activeSourceFile: string,

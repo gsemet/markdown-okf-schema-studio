@@ -8,16 +8,17 @@ description: When a document holds dollar amounts such as `$19 base ... ($200)`,
   dollarmath extension for them.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-072; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-072
 ---
 
 ## Prices are not reported as missing dollarmath
@@ -40,5 +41,5 @@ When a document holds dollar amounts such as `$19 base ... ($200)`, `$5 and $6` 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "prices and ordinary braces are not math or substitutions" in test/core/render/mystSyntaxDetect.test.ts
 - Criteria: Only real spans count; render divergence of currency is an open question.

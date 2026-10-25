@@ -8,16 +8,17 @@ description: When a document has several PlantUML diagrams and useJar is true in
   once.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-012
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-084; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-084
 ---
 
 ## The JAR pipeline starts one process per diagram
@@ -41,9 +42,8 @@ When a document has several PlantUML diagrams and useJar is true in a trusted wo
 ### Known issues
 
 - Known issue: Many diagrams start many JVMs at once.
-- Known issue: Untested.
 
 ### Verification notes
 
-- Method: No test: all unit tests render a single diagram; to be added.
+- Method: Unit test `the JAR pipeline starts one process per diagram before any of them finishes` in `test/core/render/diagReq.jar.requirements.test.ts`.
 - Criteria: Process count equals diagram count.

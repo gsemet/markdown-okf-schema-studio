@@ -78,6 +78,7 @@ export class HostEvents {
   // Files and dependencies
   // ---------------------------------------------------------------------------------------------
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-044
   /** A file below the session's root changed: re-render when the page shows or depends on it. */
   public refreshReferencedPath(session: PreviewSession, filePath: string): void {
     if (session.disposed || isIgnoredWatchPath(filePath)) {
@@ -112,6 +113,7 @@ export class HostEvents {
       // Per-target watchers arm asynchronously; the preview-wide watcher backs them up (debounced).
       this.manager.frontmatter.scheduleLinkEnrichment(session, session.documentUri, session.document.revision);
     }
+    // @implements_req SwRS-MDOKFSTUDIO-DIAG-053
     if (session.plantUml.includeWatch.has(candidate)) {
       // The page draws its built-in PlantUML diagrams itself: tell it to read their files again.
       this.manager.edits.deferWhileEditing(session, "plantuml-includes", () => this.manager.plantUml.notifyIncludesChanged(session));
@@ -122,6 +124,7 @@ export class HostEvents {
     this.manager.edits.deferWhileEditing(session, "render", () => this.manager.rendering.refreshOpenDocument(session, true));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-062
   /** The missing source came back: render it again. */
   public recoverMissingSource(session: PreviewSession): void {
     if (!this.manager.sourceAvailable(session)) {
@@ -134,6 +137,7 @@ export class HostEvents {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-078
   /**
    * A conf.py event refreshes only the previews whose governing conf.py is that file, before or
    * after the event (a created or deleted file can change which one governs). Other previews and
@@ -155,6 +159,7 @@ export class HostEvents {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
   /** Watches the Markdown files of a workspace root for the filename-stem index of links. */
   public watchStemRoot(root: string): void {
     const canonicalRoot = canonicalPath(root);
@@ -192,6 +197,7 @@ export class HostEvents {
   // Host events
   // ---------------------------------------------------------------------------------------------
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
   /** The text of a document changed (any document, any change: the store's own edits included). */
   public onDocumentChanged(event: DocumentChange): void {
     if (event.changes.length === 0) {
@@ -207,6 +213,7 @@ export class HostEvents {
     })));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-094
   /**
    * Records a change made outside the preview (or an undo / redo) on the previews of its document. A
    * change of the active text editor's document is the user typing there: it does not glow.
@@ -297,6 +304,7 @@ export class HostEvents {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-143
   /** Workspace folders were added or removed: stem watchers follow, previews of a removed folder close. */
   public onFoldersChanged(added: readonly WorkspaceFolderInfo[], removed: readonly WorkspaceFolderInfo[]): void {
     for (const folder of added) {
@@ -315,11 +323,15 @@ export class HostEvents {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   /** The user granted trust: the incoming changes can be read now. */
   public onTrustGranted(): void {
     for (const session of this.manager.sessions()) this.manager.incoming.schedule(session, 0);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-024
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
   /** Settings changed: the previews read theirs again and update the page. */
   public onSettingsChanged(event: SettingsChange): void {
     const { host } = this.manager;
@@ -362,6 +374,7 @@ export class HostEvents {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-026
   /** The active editor changed: the side preview follows a Markdown document. */
   public onActiveEditorChanged(editor: PairedEditor | undefined): void {
     const session = this.manager.latest((candidate) => candidate.followsActiveEditor);
@@ -377,6 +390,7 @@ export class HostEvents {
     this.manager.switchAfterFlush(session, document);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-100
   /** The visible editors changed: each page learns whether its document has an editor beside it. */
   public onVisibleEditorsChanged(): void {
     for (const session of this.manager.sessions()) {
@@ -389,6 +403,7 @@ export class HostEvents {
     this.manager.scroll.syncEditorToPreview(editor);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-THEME-016
   /** The color theme changed: each page learns its kind. */
   public onThemeChanged(): void {
     for (const session of this.manager.sessions()) {

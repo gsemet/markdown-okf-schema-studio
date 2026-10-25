@@ -5,6 +5,7 @@ import { createMermaidCache, diagramKey } from "../../../src/page/modules/mermai
 
 const theme = { primaryColor: "#111", fontFamily: "sans" };
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-009
 test("PERF-07: a diagram already drawn with the same source and theme is not drawn again", () => {
   const cache = createMermaidCache(4);
   const key = diagramKey(theme, "graph TD; A-->B");

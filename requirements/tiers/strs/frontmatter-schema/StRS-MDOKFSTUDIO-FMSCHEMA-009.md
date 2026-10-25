@@ -7,16 +7,16 @@ description: When a writer edits a schema file or a file it refers to, the
   Studio SHALL use the new content the next time the document is analysed.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-006; no marker expected."
 derives_from: []
 user_need: As a schema author, I edit a schema and see the new rules applied to
   my documents.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-027
-- SwRS-MDOKFSTUDIO-FMSCHEMA-028
-- SwRS-MDOKFSTUDIO-FMSCHEMA-078
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-006
 ---
 
 ## Schema edits are picked up on the next analysis

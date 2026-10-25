@@ -7,16 +7,17 @@ description: When a diff contains `--- a/file` and `+++ b/file` header lines,
   the extension SHALL colour them as a deletion and an addition respectively.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-CODE-002
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-CODE-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CODE-008; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CODE-008
 ---
 
 ## Colour diff file header lines like ordinary lines

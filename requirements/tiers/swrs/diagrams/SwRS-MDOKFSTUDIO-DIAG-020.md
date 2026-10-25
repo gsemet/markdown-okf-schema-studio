@@ -7,17 +7,18 @@ description: "When the selection of a writer lies inside a Mermaid or PlantUML f
   the page SHALL NOT offer to create a review comment for it."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
 - StRS-MDOKFSTUDIO-DIAG-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-REVIEW-038; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-REVIEW-038
 ---
 
 ## Selecting text inside a diagram offers no comment
@@ -38,11 +39,7 @@ When the selection of a writer lies inside a Mermaid or PlantUML figure, the pag
 - WHEN the selection settles
 - THEN the comment button is offered
 
-### Known issues
-
-- Known issue: No test asserts this; the evidence is the shared skip selector.
-
 ### Verification notes
 
-- Method: Inspection of the skip selector in commentCompose.ts; no test names it.
+- Method: Unit test `a selection inside a Mermaid or PlantUML figure offers no comment; one in a paragraph does` in `test/page/modules/diagReq.diagrams.requirements.test.ts`.
 - Criteria: The compose skip list contains both figure classes.

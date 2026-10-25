@@ -8,16 +8,17 @@ description: When a PlantUML diagram text is longer than 1 MiB, the extension
   with state error, without starting a process.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-014
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-097; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-097
 ---
 
 ## The JAR pipeline refuses a source over 1 MiB
@@ -38,11 +39,7 @@ When a PlantUML diagram text is longer than 1 MiB, the extension SHALL show Plan
 - WHEN the diagram is rendered
 - THEN the process is started
 
-### Known issues
-
-- Known issue: Untested; the same constant as the built-in engine limit.
-
 ### Verification notes
 
-- Method: No test feeds an oversized source; to be added.
+- Method: Unit test `a diagram text over 1 MiB is refused without a process, a text of exactly 1 MiB is rendered` in `test/core/render/diagReq.jar.requirements.test.ts`.
 - Criteria: The limit is strictly greater than 1 MiB.

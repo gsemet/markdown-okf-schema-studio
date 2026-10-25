@@ -57,6 +57,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     rt.blockMoves.updateMoveLabels(blocks);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-148
   // A selection that waits for a save (pendingBlockSelection) survives the patch that clears the
   // old one; every other reason to clear drops it too.
   function clearBlockSelection(keepPending = false): void {
@@ -102,6 +103,8 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     focusSelectionEnd(blocks);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-140
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   function selectBlocksTo(node: Element): void {
     const block = rt.insertPoints.blockOfTarget(node);
     if (!block || block.getAttribute("data-okf-properties") !== null) return;
@@ -177,6 +180,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     selectBlocksNow,
     selectBlocksTo,
     applyPendingBlockSelection,
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-169
     receiveBlocksResult(message) {
       if (blocksFlight) window.clearTimeout(blocksFlight.timer);
       blocksFlight = undefined;
@@ -224,6 +228,9 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         clearBlockSelection();
       });
 
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-166
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-174
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-127
       // With a block selection Cmd/Ctrl+C and +X send its source lines to the host; Cmd/Ctrl+V
       // pastes after the selection or after the block of a focused "+" bar.
       document.addEventListener("keydown", (event) => {

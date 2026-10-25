@@ -62,6 +62,7 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
   ) as NonNullable<Parameters<typeof mermaid.initialize>[0]>;
 
   const renderDiagrams = async (pending: readonly HTMLElement[]): Promise<void> => {
+    // @implements_req SwRS-MDOKFSTUDIO-DIAG-005
     const themeVariables = {
       background: "transparent",
       primaryColor: themeVariable("--studio-textCodeBlock-background", "#f0f0f0"),
@@ -85,6 +86,7 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
       });
     };
 
+    // @implements_req SwRS-MDOKFSTUDIO-DIAG-001
     const showImage = (diagram: HTMLElement, src: string): void => {
       const image = document.createElement("img");
       image.className = "myst-mermaid-image";
@@ -94,6 +96,7 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
       diagram.dataset.renderState = "rendered";
     };
 
+    // @implements_req SwRS-MDOKFSTUDIO-DIAG-009
     await Promise.all(pending.map(async (diagram) => {
       const source = diagramSources.get(diagram) ?? diagram.textContent?.trim() ?? "";
       if (!source) {

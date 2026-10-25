@@ -37,6 +37,7 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
         - Number(right.getAttribute("data-sphinx-source-line")));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-148
   function selectableBlocks(): HTMLElement[] {
     return topLevelMappedBlocks().filter((block) => block.getAttribute("data-okf-properties") === null);
   }
@@ -63,6 +64,7 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
       ?? document.querySelector?.<HTMLElement>("[data-okf-properties]");
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
   function sourceRangeForList(list: Element, reference: Element): { line: number; endLine: number } | undefined {
     const sourceFile = reference.getAttribute("data-sphinx-source-file");
     const documentId = reference.getAttribute("data-sphinx-preview-document");

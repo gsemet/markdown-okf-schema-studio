@@ -10,6 +10,7 @@ function insert(text: string, afterLine: number, raw: string): string | undefine
   return text.slice(0, plan.offset) + insertionText(plan, raw) + text.slice(plan.offset);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-094
 test("inserts between blocks separated by a blank line", () => {
   assert.equal(insert("A\n\nB\n", 1, "NEW"), "A\n\nNEW\n\nB\n");
 });

@@ -180,6 +180,7 @@ export function createEditActions(
     createTableEditActions(tableTools);
   const { colourOk, applyColour, colourCodeAt, applyColourCode } = createColourEditActions(isSafeColor);
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-054
   // Eight hues at two intensities, whatever the theme: they are colours of the document.
   const LANGUAGE_OPTIONS: EditActionOption[] = [
     { value: "text", label: "text" },
@@ -217,6 +218,7 @@ export function createEditActions(
     rule: { apply: insertRule },
     table: { apply: insertTable },
     emoji: { apply: insertEmoji },
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-160
     todo: { apply: toggleTodo },
     thread: { apply: (ctx) => insertThread(ctx, threadAuthor) },
     alert: { apply: insertAlert },
@@ -235,6 +237,7 @@ export function createEditActions(
     label: { apply: insertLabel },
     ref: { apply: (ctx) => insertTargetRole(ctx, "ref", true) },
     doc: { apply: (ctx) => insertTargetRole(ctx, "doc", true) },
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-149
     cite: {
       apply: (ctx) => {
         if (!validSelection(ctx) || !roleArgument(ctx.arg) || /[\s,]/u.test(ctx.arg)) return undefined;
@@ -273,6 +276,7 @@ export function createEditActions(
   const byId = new Map<string, EditAction>();
   for (const action of actions) byId.set(action.id, action);
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-083
   function shortcutFor(event: EditActionKeyEvent, mac?: boolean): EditAction | undefined {
     if (event.isComposing) return undefined;
     // AltGr reports ctrlKey and altKey together: it types characters, it is not a shortcut.

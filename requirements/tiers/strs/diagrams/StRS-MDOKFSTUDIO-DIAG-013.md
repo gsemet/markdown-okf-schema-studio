@@ -8,26 +8,16 @@ description: When a writer previews a PlantUML diagram whose JAR rendering is
   diagram, and never start a process in an untrusted workspace.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-007; no marker expected."
 derives_from: []
 user_need: As a writer, I know whether Restricted Mode, a wrong path, a missing
   command or a PlantUML error stopped my diagram.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-025
-- SwRS-MDOKFSTUDIO-DIAG-057
-- SwRS-MDOKFSTUDIO-DIAG-082
-- SwRS-MDOKFSTUDIO-DIAG-089
-- SwRS-MDOKFSTUDIO-DIAG-090
-- SwRS-MDOKFSTUDIO-DIAG-091
-- SwRS-MDOKFSTUDIO-DIAG-092
-- SwRS-MDOKFSTUDIO-DIAG-093
-- SwRS-MDOKFSTUDIO-DIAG-094
-- SwRS-MDOKFSTUDIO-DIAG-095
-- SwRS-MDOKFSTUDIO-DIAG-096
-- SwRS-MDOKFSTUDIO-DIAG-102
-- SwRS-MDOKFSTUDIO-DIAG-107
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-007
 ---
 
 ## Understand why a JAR-rendered diagram failed or was blocked

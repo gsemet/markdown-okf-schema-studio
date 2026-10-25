@@ -30,6 +30,7 @@ interface FileRequestAsker {
   ): void;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-046
 /**
  * Forwards the bundle's file requests to the host through `requests` (an `installHostRequests`
  * instance of its own, so closing an editor does not cancel them).

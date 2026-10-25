@@ -29,6 +29,7 @@ test("a spoofed mime type is told apart from the bytes", () => {
   assert.notEqual(sniffImage(Buffer.from("<html>")), imageTypeOfMime("image/png"));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
 test("nextImageName takes image.ext, then the first free suffix", () => {
   assert.equal(nextImageName(new Set(), "png"), "image.png");
   assert.equal(nextImageName(new Set(["image.png"]), "png"), "image-1.png");

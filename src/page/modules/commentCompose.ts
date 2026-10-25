@@ -121,6 +121,7 @@ export function installCommentCompose(
     return undefined;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-049
   const readSelection = (): typeof current => {
     const selection = window.getSelection?.();
     if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return undefined;
@@ -167,6 +168,7 @@ export function installCommentCompose(
     button = undefined;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-038
   const showButton = (): void => {
     if (!button) {
       const created = document.createElement("button");
@@ -266,6 +268,7 @@ export function installCommentCompose(
   };
   let pendingAnchor: Record<string, unknown> | undefined;
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-044
   const open = (): boolean => {
     if (box) return true;
     current = readSelection() ?? current;

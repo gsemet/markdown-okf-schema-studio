@@ -7,16 +7,17 @@ description: When a paragraph holds a URL longer than the column, the extension
   SHALL wrap it inside the column without horizontal page overflow.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-CORE-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-CORE-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-034; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-034
 ---
 
 ## Wrap long URLs in the column
@@ -39,5 +40,5 @@ When a paragraph holds a URL longer than the column, the extension SHALL wrap it
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "K1: long words and bare URLs wrap inside text blocks, links and table cells" in test/core/preview/previewStyles.test.ts
 - Criteria: Links are covered by the wrap rule.

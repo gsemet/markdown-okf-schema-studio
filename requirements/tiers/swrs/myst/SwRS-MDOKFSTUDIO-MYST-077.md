@@ -10,16 +10,17 @@ description: "When an extension is missing, the extension SHALL list one warning
   conf.py. Add \"EXTENSION\" to `myst_enable_extensions`. Rendering stays unchanged."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-072; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-072
 ---
 
 ## Extension warnings use the fixed wording and status list
@@ -42,5 +43,5 @@ When an extension is missing, the extension SHALL list one warning in the status
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "CR 050: the status region marks the conf.py warnings with their code" in test/page/modules/warningBanner.test.ts; Unit test "MyST syntax missing from the nearest conf.py warns once per extension, rendering unchanged" in test/core/render/renderPipeline.test.ts
 - Criteria: The wording is fixed.

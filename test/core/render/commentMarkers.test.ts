@@ -16,6 +16,7 @@ async function render(source: string): Promise<{ html: string; doc: ReturnType<t
 
 const chips = (doc: ReturnType<typeof parseHtml>) => findElements(doc, (e) => hasClass(e, "okf-chip"));
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
 test("a block comment renders as a positioned gray chip with a hidden body", async () => {
   const { doc } = await render("Before\n\n<!-- remember this -->\n\nAfter\n");
   const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
@@ -68,6 +69,7 @@ test("a TODO comment is a green expandable chip", async () => {
   assert.equal(attribute(chip, "title"), "TODO: finish the chapter");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-139
 test("the word TODO in prose becomes a green chip and the rest of the sentence is unchanged", async () => {
   const { doc } = await render("We still TODO this part, TODOs and todo stay plain.\n");
   const found = chips(doc);
@@ -221,6 +223,7 @@ test("a list item can hold a comment chip between its items", async () => {
 
 const THREAD = "<!-- THREAD\nAda (2026-10-16 10:47):\n  first line\n  second line\nBob (2026-10-16 10:52):\n  a reply\n-->";
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
 test("a THREAD comment is a green thread chip with one entry per message", async () => {
   const { doc } = await render(`Before\n\n${THREAD}\n\nAfter\n`);
   const block = findElement(doc, (e) => hasClass(e, "okf-comment"));

@@ -19,6 +19,7 @@ import { createVscodePanelGroups, type VscodePanelGroups } from "./groupLock";
 import { createVscodePreviewPanel, type VscodePreviewPanel } from "./previewPanel";
 import { createVscodeHost, type VscodeHost } from "./vscodeHost";
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-001
 /** The command that opens the side preview. */
 export const COMMAND_ID = "markdown-okf-schema-studio.openPreview";
 /** The command that renders the active preview again. */
@@ -65,10 +66,13 @@ export class StudioActivation {
       confWatcher.onDidCreate(onConfFileEvent),
       confWatcher.onDidDelete(onConfFileEvent),
       vscode.workspace.onDidCloseTextDocument((document) => manager.events.onDocumentClosed(document.uri.toString())),
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-003
       vscode.commands.registerCommand(COMMAND_ID, (uri?: unknown) => this.openPreview(uri)),
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-018
       vscode.window.registerCustomEditorProvider(EDITOR_VIEW_TYPE, {
         resolveCustomTextEditor: (document, panel) => this.resolvePreviewEditor(document, panel),
       }, { webviewOptions: { enableFindWidget: true, retainContextWhenHidden: true } }),
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-032
       vscode.commands.registerCommand(REFRESH_COMMAND_ID, async () => {
         const active = vscode.window.activeTextEditor?.document;
         await manager.refreshActive(active ? host.documents.of(active) : undefined);
@@ -102,6 +106,7 @@ export class StudioActivation {
     );
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-143
   /** Disposes the sessions (not their panels) and what the activation holds. */
   public stop(): void {
     const { manager } = this;
@@ -122,6 +127,7 @@ export class StudioActivation {
     return group?.viewColumn ?? vscode.ViewColumn.Beside;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-CORE-043
   /** The open-preview command: the side preview of the active (or given) Markdown file. */
   public async openPreview(uri?: unknown): Promise<void> {
     const { host, manager } = this;
@@ -146,6 +152,7 @@ export class StudioActivation {
     }
     const textDocument = vscode.window.activeTextEditor?.document;
     const document = textDocument ? host.documents.of(textDocument) : undefined;
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-010
     if (!document || document.path === undefined || !isDocumentEligible(document)) {
       void host.ui.showInformation(
         "Open a Markdown file to use Markdown OKF-Schema Studio.",
@@ -164,6 +171,8 @@ export class StudioActivation {
       return;
     }
 
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-149
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-007
     const panel = vscode.window.createWebviewPanel(
       PANEL_VIEW_TYPE,
       "Studio",
@@ -214,6 +223,7 @@ export class StudioActivation {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-127
   /** A side preview restored with the window: it shows the document its saved state names. */
   public async deserializePreviewPanel(webviewPanel: vscode.WebviewPanel, rawState: unknown): Promise<void> {
     const { host, manager } = this;
@@ -248,6 +258,7 @@ export class StudioActivation {
       );
       return;
     }
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-038
     // Earlier restored panels stay open with their live session; only the newest one follows the
     // active editor, so each older one becomes a fixed preview of the document it shows.
     for (const earlier of manager.sessions()) {

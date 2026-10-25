@@ -7,16 +7,17 @@ description: When the reader changes the width mode, the extension SHALL keep
   the line at the reading position of the page.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LAYOUT-006
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-LAYOUT-003
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LAYOUT-020; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-020
 ---
 
 ## A width mode change keeps the reading line
@@ -37,11 +38,7 @@ When the reader changes the width mode, the extension SHALL keep the line at the
 - WHEN the Width button is clicked
 - THEN the anchor is taken from the line at the current scroll position, when that line is known
 
-### Known issues
-
-- Known issue: The reading-line preservation on a mode change has no test.
-
 ### Verification notes
 
-- Method: Inspection of keepReadingLine and the width mode change callback in the page runtime; no automated test.
+- Method: Unit test `a width mode change keeps the line at the reading position, with or without an anchor yet` in `test/page/diagReq.layout.requirements.test.ts`.
 - Criteria: The change callback calls keepReadingLine. The clearance re-measure of the same callback is SwRS-MDOKFSTUDIO-LAYOUT-041.

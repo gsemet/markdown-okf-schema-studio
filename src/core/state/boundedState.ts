@@ -14,6 +14,7 @@ export interface KeyValueStorage {
   keys(): readonly string[];
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-125
 /** A Map that keeps at most `capacity` entries; reading or writing an entry makes it most recent. */
 export class BoundedMap<V> {
   private readonly entriesByKey = new Map<string, V>();
@@ -71,6 +72,7 @@ export class BoundedMap<V> {
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
 /** Reads the persisted map (least to most recent), ignoring anything malformed. */
 export function loadCollapsedMap(
   storage: KeyValueStorage,

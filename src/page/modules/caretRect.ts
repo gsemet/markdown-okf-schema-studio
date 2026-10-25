@@ -63,6 +63,7 @@ export function caretRectOf(
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
 /**
  * How far to scroll (positive: down) so the caret is neither under the stuck edition palette nor
  * below the viewport. 0 when the palette is not stuck (it is still above the frame) or when the

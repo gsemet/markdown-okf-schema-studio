@@ -89,6 +89,7 @@ function selectOf(root: FakeElement): FakeElement {
   return select;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("the palette starts with a labelled select of the three modes", () => {
   const { root } = open("gfm");
   const select = root.children[0];
@@ -124,6 +125,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
   ]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-017
 test("P6: the real registry shows the MyST-specific buttons in MyST mode only, per mode", () => {
   const ids = (mode: EditActionMode): string[] => {
     const textbox = { value: "", selectionStart: 0, selectionEnd: 0, focus: () => undefined };
@@ -149,6 +151,7 @@ test("P6: the real registry shows the MyST-specific buttons in MyST mode only, p
   for (const id of mystOnly) assert.equal(gfm.includes(id), false, id);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
 test("choosing a mode rebuilds the buttons, keeps the select and reports the change once", () => {
   const changes: string[] = [];
   const { root } = open("strict", (mode) => changes.push(mode));
@@ -252,6 +255,7 @@ function lit(menu: FakeElement): number {
 
 const click = { preventDefault: () => undefined, stopPropagation: () => undefined };
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-078
 test("T24: the Table button opens a 9 x 9 grid of 81 cells", () => {
   const { root } = openFull();
   button(root, "table").dispatch("click", click);
@@ -348,6 +352,7 @@ function openEmoji(h: Harness): { menu: FakeElement; field: FakeElement; emojis:
 
 const shown = (emojis: FakeElement[]): FakeElement[] => emojis.filter((e) => e.getAttribute("hidden") === null);
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-072
 test("T24: the emoji picker has about 150 emoji in 6 categories, each with a title", () => {
   const h = openFull();
   const { menu, field, emojis } = openEmoji(h);
@@ -425,6 +430,7 @@ test("T24: Enter in the filter inserts the first match; Escape returns to the te
   assert.equal(h.leaves, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-036
 test("T24: leaving the editor frame from the filter saves once; moving inside does not", () => {
   const h = openFull();
   const { field, emojis } = openEmoji(h);
@@ -520,6 +526,7 @@ test("T25: strict mode has no GitHub buttons; GFM and MyST show Alert, Checkbox 
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
 test("T25: Alert writes the alert first, then lists the five types, none lit", () => {
   const h = openGfm("Mind the gap", 4);
   button(h.root, "alert").dispatch("click", click);
@@ -587,6 +594,7 @@ test("T25: Alert on an existing alert only opens the list", () => {
   assert.equal(h.textbox.value, "> [!CAUTION]\n> body");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031
 test("T25: the list opens at the caret, in the bar's coordinates", () => {
   const h = openGfm("x", 1, { left: 340, top: 120, bottom: 140 });
   button(h.root, "alert").dispatch("click", click);
@@ -671,6 +679,7 @@ test("T26: the GFM mode lists the five proposals, strict mode none of them", () 
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-111
 test("T26: Column alignment lists left, center and right; a choice rewrites the delimiter cell", () => {
   const h = openGfm("| a | b |\n| --- | --- |\n| 1 | 2 |", 2);
   button(h.root, "columnAlign").dispatch("click", click);
@@ -682,6 +691,7 @@ test("T26: Column alignment lists left, center and right; a choice rewrites the 
   assert.equal(popover(h.root), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-126
 test("T26: Details, Footnote, Mermaid and Key are one-click actions", () => {
   const h = openGfm("word", 4);
   button(h.root, "footnote").dispatch("click", click);
@@ -724,6 +734,7 @@ function openHost(options: {
 const choiceButtons = (menu: FakeElement): FakeElement[] =>
   menu.all().filter((e) => e.getAttribute("data-edit-option") !== null);
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-140
 test("T30: Reference opens a filter popover, lists the host's labels and inserts the chosen one", () => {
   let asked = "";
   let answer: ((result: { items: Array<{ value: string; label: string; detail?: string }> }) => void) | undefined;
@@ -769,6 +780,7 @@ test("T30: Enter in the filter picks the first match; Escape closes", () => {
   assert.equal(popover(h.root), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
 test("T30: an empty list or a host error is said in the popover; a late answer after closing is ignored", () => {
   const empty = openHost({ requestList: (_kind, done) => done({ items: [] }) });
   button(empty.root, "ref").dispatch("click", click);
@@ -784,6 +796,7 @@ test("T30: an empty list or a host error is said in the popover; a late answer a
   assert.equal(popover(closed.root), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148
 test("T30: Document asks the host for a file and inserts the path; a cancelled pick inserts nothing", () => {
   let done: ((value: string | undefined) => void) | undefined;
   let asked = "";
@@ -800,6 +813,7 @@ test("T30: Document asks the host for a file and inserts the path; a cancelled p
   assert.ok(h.textbox.focused > before, "the focus goes back to the text box");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-109
 test("T31: Image asks the host for an image file and inserts the reference; a failed pick inserts nothing", () => {
   let done: ((value: string | undefined) => void) | undefined;
   let asked = "";
@@ -825,6 +839,7 @@ function byAttr(menu: FakeElement, name: string): FakeElement[] {
   return menu.all().filter((e) => e.getAttribute(name) !== null);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-058
 test("T34: the Colour button opens a picker with two tabs, 16 swatches, a hex field and Remove", () => {
   const h = openColour("say foo now", 4, 7);
   button(h.root, "color").dispatch("click", click);
@@ -907,6 +922,7 @@ test("T34: Remove unwraps the span of the open tab", () => {
   assert.equal(h.textbox.value, "say foo now");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-069
 test("T34: the code swatch button shows only with the caret in a colour code and opens on that value", () => {
   const h = openColour("a #c00 b rgb(1, 2, 3) c", 0);
   const swatch = button(h.root, "colorCode");
@@ -958,6 +974,8 @@ function openTableConversion(value: string, caret: number) {
   return { palette, root: palette.element as unknown as FakeElement, textbox, notices, edits };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-073
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-074
 test("CR038: List table shows with the caret in a pipe table, Pipe table with it in a list-table", () => {
   const pipe = openTableConversion("| a | b |\n| --- | --- |\n| 1 | 2 |", 3);
   assert.equal(button(pipe.root, "listTable").getAttribute("hidden"), null);
@@ -970,6 +988,7 @@ test("CR038: List table shows with the caret in a pipe table, Pipe table with it
   assert.equal(button(text.root, "pipeTable").getAttribute("hidden"), "true");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-039
 test("CR038: a refused conversion changes nothing and tells why through notify", () => {
   const source = "```{list-table} A title\n:header-rows: 1\n\n* - a\n  - b\n```";
   const h = openTableConversion(source, 5);
@@ -981,6 +1000,8 @@ test("CR038: a refused conversion changes nothing and tells why through notify",
   assert.equal(h.textbox.focused > 0, true, "the focus stays in the text box");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-263
 test("CR038: the slash menu offers the conversion only inside a table of the other form", () => {
   const pipe = openTableConversion("| a |\n| --- |\n| 1 |", 3);
   assert.deepEqual(pipe.palette.menuEntries().map((entry) => entry.id).filter((id) => id.endsWith("Table") && id !== "htmlTable" && id !== "tableCaption"),

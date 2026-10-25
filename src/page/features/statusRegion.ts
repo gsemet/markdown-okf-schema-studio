@@ -26,6 +26,8 @@ export function installStatusRegion(document: Document, router: HostMessageRoute
   // replaces the whole document, which removes it.
   let pendingOverlay: HTMLElement | null = null;
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-049
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-055
   function applyPendingOverlay(message: PendingOverlayState): void {
     if (typeof message.visible !== "boolean"
       || typeof message.label !== "string" || message.label.length > 500
@@ -50,6 +52,7 @@ export function installStatusRegion(document: Document, router: HostMessageRoute
     pendingOverlay.childNodes[1]!.textContent = message.message;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-059
   // The status region of a rendered page: label, optional message, optional diagnostics list. Every
   // field is set with textContent.
   function applyStatusRegion(message: StatusRegionState): void {

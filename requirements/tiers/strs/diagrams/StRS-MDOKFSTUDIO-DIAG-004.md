@@ -8,15 +8,16 @@ description: When a Mermaid diagram has invalid syntax, the Studio SHALL show
   readable.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-001; no marker expected."
 derives_from: []
 user_need: As a writer, I see at once that my Mermaid diagram does not parse and
   why, without losing the source.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-015
-- SwRS-MDOKFSTUDIO-DIAG-016
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-001
 ---
 
 ## Understand why a Mermaid diagram failed

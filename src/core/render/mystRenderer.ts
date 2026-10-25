@@ -47,6 +47,7 @@ export const INCLUDE_BUDGET_MAX_EXPANSIONS = 2000;
 /** Counts UTF-16 code units of included source text (`string.length`), not encoded bytes. */
 export const INCLUDE_BUDGET_MAX_CHARS = 10 * 1024 * 1024;
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
 /**
  * Maps every node of an included tree to the `{include}` directive's own lines in the host
  * document and flags it as included, so the editor never targets unrelated host lines.
@@ -104,6 +105,7 @@ function includeBudgetDiagnostic(line: number | undefined): RenderDiagnostic {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-068
 /**
  * Reads the diagram file of a `{uml}` / `{plantuml}` directive into its body, charged to the
  * include budget and recorded as a dependency (a missing file inside the roots too, so the preview
@@ -160,6 +162,8 @@ function resolvePlantUmlFile(
   node.data = { ...node.data, plantUmlFile: request, plantUmlBase: read.path };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-012
+// @implements_req SwRS-MDOKFSTUDIO-CORE-013
 function expandIncludes(
   node: MystNode,
   sourcePath: string,
@@ -301,6 +305,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   },
   { name: "context tags", run: (state) => repairGroupedContextTagHtml(state.ast, state.mystParse) },
   {
+    // @implements_req SwRS-MDOKFSTUDIO-MYST-072
     name: "MyST extension check",
     run: (state) => {
       if (!state.context?.enabledMystExtensions) return;
@@ -382,6 +387,10 @@ const HTML_PASSES: ReadonlyArray<{ readonly name: string; readonly run: (html: s
   { name: "anchor ids", run: (html, state) => resolveAnchorIds(html, state.anchorLabels) },
 ];
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-001
+// @implements_req SwRS-MDOKFSTUDIO-GFM-029
+// @implements_req SwRS-MDOKFSTUDIO-GFM-008
+// @implements_req SwRS-MDOKFSTUDIO-MYST-017
 /**
  * Renders one Markdown buffer to HTML entirely in-process.
  *
@@ -425,6 +434,8 @@ export async function renderMyst(
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-003
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
 /**
  * Removes a leading YAML frontmatter block; MyST would otherwise emit it as a
  * `language-yaml` code block, duplicating the properties table above the body.

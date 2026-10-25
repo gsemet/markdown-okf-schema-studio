@@ -28,6 +28,7 @@ export function installInsertPoints(rt: PageRuntime): InsertPoints {
     );
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
   function createInsertPoint(afterLine: number, label: string, standalone: boolean, move?: InsertMove): HTMLElement {
     const point = document.createElement("div");
     point.className = "sphinx-preview-insert-point"
@@ -48,6 +49,8 @@ export function installInsertPoints(rt: PageRuntime): InsertPoints {
     return point;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-102
   function refreshInsertPoints(): void {
     removeInsertPoints();
     if (!state.editMode) return;
@@ -104,6 +107,7 @@ export function installInsertPoints(rt: PageRuntime): InsertPoints {
     moves: insertMoves,
     refreshInsertPoints,
     blockOfTarget,
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
     bindKeys() {
       // Enter on an empty document opens the "Start writing" editor, like clicking the button.
       document.addEventListener("keydown", (event) => {

@@ -8,16 +8,17 @@ description: When a copy request comes from a page whose document version or
   writing the clipboard.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-004
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-065; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TRUST-065
 ---
 
 ## Drop a copy request from a stale page
@@ -25,8 +26,6 @@ tested_in_files: []
 ### Normative behavior
 
 When a copy request comes from a page whose document version or render request is no longer current, the extension SHALL drop it without writing the clipboard.
-
-Known issue: the copy button still shows Copied although the host dropped the request and the clipboard is unchanged; the version check is stricter than needed for a copy, which edits nothing.
 
 ### Scenario: nominal behavior
 
@@ -39,6 +38,10 @@ Known issue: the copy button still shows Copied although the host dropped the re
 - GIVEN the page is current
 - WHEN a copy request arrives
 - THEN the text is written to the clipboard
+
+### Known issues
+
+- Known issue: the copy button still shows Copied although the host dropped the request and the clipboard is unchanged; the version check is stricter than needed for a copy, which edits nothing.
 
 ### Verification notes
 

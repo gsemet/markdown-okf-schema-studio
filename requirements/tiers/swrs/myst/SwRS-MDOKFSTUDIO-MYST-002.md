@@ -8,16 +8,17 @@ description: When an admonition panel renders, the extension SHALL colour it and
   colour.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Admonitions take an accent colour and badge by kind
@@ -40,5 +41,5 @@ When an admonition panel renders, the extension SHALL colour it and give it a ba
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "every admonition flavour gets an accent colour" in test/core/preview/previewStyles.test.ts; Visual scenario admonitions-dark-full in test/visual/scenarioDefinitions1.ts
 - Criteria: Every admonition kind has an accent colour and a badge; caution is red with an octagon, not the warning yellow.

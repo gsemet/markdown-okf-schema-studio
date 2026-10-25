@@ -50,6 +50,7 @@ export function isBase64(value: string): boolean {
   return /^[A-Za-z0-9+/]*={0,2}$/u.test(value) && value.length % 4 === 0;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-196
 /**
  * `image.ext`, then `image-1.ext`, `image-2.ext` … the first name not in `existing` (compared
  * case-insensitively, as file systems often are); `undefined` after 1000 suffixes.

@@ -28,6 +28,8 @@ function options(overrides: Partial<RenderOptions> = {}): RenderOptions {
   };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-001
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025
 test("the render pipeline retains buffer identity and attaches source diagnostics", async (context) => {
   context.after(resetRenderHooksForTests);
   let observed = "";
@@ -88,6 +90,7 @@ test("cancellation while rendering rejects a late successful result", async (con
   await assert.rejects(render, RenderCanceledError);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-072
 test("MyST syntax missing from the nearest conf.py warns once per extension, rendering unchanged", async (context) => {
   context.after(resetRenderHooksForTests);
   const fs = await import("node:fs");

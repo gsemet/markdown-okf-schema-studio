@@ -7,17 +7,18 @@ description: When a GitHub alert sits in an included file or a grouped context
   tag, the extension SHALL expand it as in the host document.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-002
+- StRS-MDOKFSTUDIO-MYST-001
 - StRS-MDOKFSTUDIO-GFM-002
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-012; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-012
 ---
 
 ## Expand alerts in included files and context tags
@@ -40,5 +41,5 @@ When a GitHub alert sits in an included file or a grouped context tag, the exten
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a GitHub alert in an included file or in a grouped context tag renders as a note panel" in test/core/render/renderReq.renderingCore.requirements.test.ts
 - Criteria: Alerts render in these two contexts as at top level.

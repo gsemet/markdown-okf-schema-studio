@@ -83,6 +83,10 @@ async function runCaptures(): Promise<void> {
   }
 }
 
+// @tests_req StRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-006
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, false);
   // CDP input needs a window macOS has activated (windowFocus.ts).

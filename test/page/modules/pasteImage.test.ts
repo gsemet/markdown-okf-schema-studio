@@ -10,6 +10,7 @@ function paste(value: string, start: number, end = start, name = "image.png"): {
   return { text, selected: text.slice(edit.selectionStart, edit.selectionEnd) };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-203
 test("CR 050: an image pasted at the end of a text line becomes a paragraph of its own", () => {
   assert.deepEqual(paste("Text before the image.", 22), {
     text: "Text before the image.\n\n![image.png](image.png)", selected: "image.png",

@@ -7,21 +7,16 @@ description: When a JAR-rendered diagram is too large, too slow, too chatty or
   cancelled, the Studio SHALL stop it and report the reason.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-007; no marker expected."
 derives_from: []
 user_need: As a writer, a heavy or broken diagram never freezes the editor or
   leaves processes running.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-097
-- SwRS-MDOKFSTUDIO-DIAG-098
-- SwRS-MDOKFSTUDIO-DIAG-099
-- SwRS-MDOKFSTUDIO-DIAG-100
-- SwRS-MDOKFSTUDIO-DIAG-101
-- SwRS-MDOKFSTUDIO-DIAG-102
-- SwRS-MDOKFSTUDIO-DIAG-103
-- SwRS-MDOKFSTUDIO-DIAG-118
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-007
 ---
 
 ## A runaway PlantUML process cannot hang the preview

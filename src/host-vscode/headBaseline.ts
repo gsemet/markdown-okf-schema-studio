@@ -40,6 +40,7 @@ export interface HeadBaseline<U> {
   watch(uri: U, listener: (commit: string | undefined) => void): { dispose(): void } | undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-203
 export function createHeadBaseline<U extends { scheme: string; fsPath: string }>(
   getExtension: () => GitExtensionLike<U> | undefined,
 ): HeadBaseline<U> {
@@ -79,6 +80,7 @@ export function createHeadBaseline<U extends { scheme: string; fsPath: string }>
         return undefined;
       }
     },
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-065
     async userName(uri) {
       if (uri.scheme !== "file") return undefined;
       try {

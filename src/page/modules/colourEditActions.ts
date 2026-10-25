@@ -99,6 +99,7 @@ export function createColourEditActions(isSafeColor: ((value: string) => boolean
     return best;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-058
   function applyColour(ctx: EditActionContext): TextEdit | undefined {
     if (!validSelection(ctx)) return undefined;
     const match = /^(text|background):([\s\S]*)$/u.exec(ctx.arg ?? "");
@@ -174,6 +175,7 @@ export function createColourEditActions(isSafeColor: ((value: string) => boolean
     };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-069
   /** The `#rgb`, `#rrggbb` or `rgb()` code the selection lies in, or `undefined`. */
   function colourCodeAt(ctx: EditActionContext): { start: number; end: number; text: string } | undefined {
     if (!validSelection(ctx)) return undefined;

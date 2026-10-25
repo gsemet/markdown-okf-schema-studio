@@ -163,6 +163,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
       remove: (threadId) => postCommentMessage("previewCommentDelete", { threadId }),
     }
     : undefined);
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   // The Comment button of a text selection (writable previews only, T43). Not shown while a block
   // editor is open or blocks are selected; it never changes the selection.
   const commentCompose = commentsEnabled ? installCommentCompose(document, window, {
@@ -249,6 +250,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const historyControls = installHistoryControls(document, vscode, context,
     (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate));
   const viewControls = installViewControls(document, vscode, context, keepReadingLine);
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-018
   // The toolbar changes size when rows 2-3 are collapsed: re-measure everything placed around it.
   installToolbarCollapse(document, vscode, context, () => {
     firstClearance.update();
@@ -256,6 +258,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     tocColumn.layout();
     widthMode.update();
   });
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-020
   // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.
   const widthMode = installWidthMode(document, window, vscode, context, () => {
     firstClearance.update();
@@ -271,6 +274,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.editModeButton = document.querySelector?.<HTMLElement>("[data-sphinx-preview-edit-toggle]");
   const savedState = vscode.getState?.();
   const saved = savedState as RuntimeSavedState | undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
   state.descriptionsCollapsed = (saved?.documentId === context.documentId ? saved.descriptionsCollapsed : undefined)
     ?? context.initialState?.descriptionsCollapsed
     ?? (window.innerWidth <= 640);
@@ -283,6 +287,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   });
   // Whether the page and the text editor scroll together (features/anchorMode.ts).
   const anchorMode = installAnchorMode(document, hostMessages, { host: vscode, context, settings, savedState });
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
   state.editMode = rt.editModeButton
     ? (typeof saved?.editMode === "boolean" ? saved.editMode : context.initialEditMode === true)
     : false;

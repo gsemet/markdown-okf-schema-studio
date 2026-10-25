@@ -33,6 +33,7 @@ export function readEditingConfiguration(source: EditingConfigurationSource): Ed
   return readSettings(EDITING_SETTINGS, source);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
  * The palette mode a new panel starts in: the mode stored for the workspace when there is a valid
  * one (the user's choice always wins), otherwise the `defaultPaletteMode` setting.

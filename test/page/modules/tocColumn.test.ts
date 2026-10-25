@@ -128,6 +128,8 @@ function setup(options: { toc?: boolean; saved?: { viewToc?: boolean }; frames?:
   return { toc, window, twisties, content, body, root, button, posted, scrolled, flush, nav, entries, getState: () => state, changes: () => changes, frames };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 test("the TOC is off by default and the page is marked closed", () => {
   const { root, button, nav } = setup();
   assert.equal(root.getAttribute("data-sphinx-preview-toc"), "closed");
@@ -140,6 +142,7 @@ test("the workspace preference opens the TOC and the saved webview state wins", 
   assert.equal(setup({ toc: true, saved: { viewToc: false } }).root.getAttribute("data-sphinx-preview-toc"), "closed");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
 test("the entries list h1 to h4 with their level and without the permalink glyph", () => {
   const { content, toc, flush, entries } = setup({ toc: true });
   const permalink = new FakeElement("a", ["headerlink"]);
@@ -213,6 +216,7 @@ test("clicking an entry scrolls to its heading and does not navigate", () => {
   assert.equal(scrolled[1], first);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
 test("the toggle opens the TOC, posts the preference, remembers it and builds the entries", () => {
   const { content, button, root, posted, flush, entries, getState, changes } = setup();
   content.appendChild(heading("h1", "Title"));
@@ -236,6 +240,7 @@ test("the toggle opens the TOC, posts the preference, remembers it and builds th
   assert.equal(posted[1].value, false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
 test("the column starts 8 px below the toolbar", () => {
   const { nav } = setup({ toc: true });
   assert.equal(nav().styles.get("--sphinx-preview-toc-top"), "92px");
@@ -290,6 +295,7 @@ test("collapsing a middle parent hides only its own subtree", () => {
   assert.deepEqual(entries().map(hiddenOf), [false, false, true, false, false]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 test("the current entry follows the reading line and is marked aria-current", () => {
   const { content, toc, window, flush, entries } = setup({ toc: true });
   outline(content);

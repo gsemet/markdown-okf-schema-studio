@@ -7,6 +7,7 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 from capture_support import Failure, save_step
 
 
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-031
 def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """T21: the edition palette above an open block editor."""
   if not scenario.get("editPalette"):
@@ -302,6 +303,8 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   page.wait_for_timeout(250)
 
 
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-048
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-085
 def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolbar, failures: list[Failure]) -> None:
   """T35: the inline palette group inside the table cell bar."""
   group = toolbar.locator("[data-sphinx-edit-palette='cell']")
@@ -381,6 +384,7 @@ def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolba
   area.focus()
 
 
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-006
 def check_cell_editor_chrome(page: Page, page_name: str, target, original_bounds, failures: list[Failure]) -> None:
     """Done/Cancel live inside the cell, the columns keep their width, the toolbar status is centred."""
     info = page.evaluate("""() => {
@@ -457,6 +461,7 @@ def check_cell_editor_chrome(page: Page, page_name: str, target, original_bounds
         failures.append(Failure(page_name, f"table cell shrank while editing: {original_bounds['height']} -> {info['cellHeight']}"))
 
 
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-035
 def check_cell_end_key(page: Page, page_name: str, cell_input, failures: list[Failure]) -> None:
     """Real End key in a focused table-cell editor: caret to the end, default prevented, no scroll.
 

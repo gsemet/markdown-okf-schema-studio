@@ -7,17 +7,18 @@ description: When an include names a file that does not exist, the extension
   SHALL list a warning naming the request in the status region.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-002
 - StRS-MDOKFSTUDIO-CORE-003
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-013; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-013
 ---
 
 ## Warn about a missing included file
@@ -40,5 +41,5 @@ When an include names a file that does not exist, the extension SHALL list a war
 
 ### Verification notes
 
-- Method: test
+- Method: Integration suite run() in test/integration/projectFeatures.test.ts
 - Criteria: The warning appears while the file is missing and not after.

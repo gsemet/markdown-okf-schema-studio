@@ -9,16 +9,17 @@ description: When the preview shows inline code, the extension SHALL draw a tint
   headings.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-028; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-028
 ---
 
 ## Style inline code as a pill
@@ -41,5 +42,5 @@ When the preview shows inline code, the extension SHALL draw a tint and hairline
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "inline code is a subtle tinted pill derived from the text colour" in test/core/preview/inlineCode.test.ts
 - Criteria: Computed styles and line height match.

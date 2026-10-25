@@ -74,6 +74,7 @@ export class HostRequestController {
   /** Registers the handlers of the host requests. */
   public register(router: PageMessageRouter): void {
     const { host } = this.manager;
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
     // Copies the raw code of a code block. It does not edit anything, so a read-only preview allows it.
     router.on("previewCopyText", (message) => host.ui.writeClipboard(message.text));
     router.on("previewListTargets", (message, preview) => this.handleListTargets(preview, message));
@@ -84,6 +85,7 @@ export class HostRequestController {
     router.on("previewPasteHtml", (message, preview) => this.handlePasteHtml(preview, message));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-090
   /** Answers a host request: `<type>Result` with the request's identity. */
   public postHostResult(
     preview: PreviewSession,
@@ -108,6 +110,7 @@ export class HostRequestController {
     return scanBibKeys(documentPath, this.manager.host);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-065
   private handleListTargets(preview: PreviewSession, message: PageMessageOf<"previewListTargets">): void {
     const document = currentPreviewDocument(preview, message);
     if (!document) {
@@ -117,6 +120,8 @@ export class HostRequestController {
     this.postHostResult(preview, message, targetChoices(document.getText()));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-183
   private handleListCitations(
     preview: PreviewSession,
     message: PageMessageOf<"previewListCitations">,
@@ -141,6 +146,7 @@ export class HostRequestController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-148
   /** Native open dialog for a `{doc}` link: answers with the path relative to the document. */
   private handlePickDocument(
     preview: PreviewSession,
@@ -174,6 +180,7 @@ export class HostRequestController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-192
   /**
    * Native open dialog for the Image and Figure buttons: answers with the picked image as a path
    * relative to the document. Nothing is read or written. A file outside the workspace folders, on
@@ -217,6 +224,7 @@ export class HostRequestController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-196
   /**
    * An image pasted into the open block editor: saved next to the document under a name chosen
    * here (`image.png`, `image-1.png`, …), never a name from the page. Refused in a read-only
@@ -268,6 +276,7 @@ export class HostRequestController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-213
   /** Rich text pasted into the open block editor: the clipboard's HTML as Markdown. No file is touched. */
   private handlePasteHtml(preview: PreviewSession, message: PageMessageOf<"previewPasteHtml">): void {
     try {

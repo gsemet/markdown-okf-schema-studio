@@ -40,6 +40,12 @@ function replaceDocument(document: vscode.TextDocument, text: string): vscode.Wo
   return edit;
 }
 
+// @tests_req StRS-MDOKFSTUDIO-LIFE-001
+// @tests_req StRS-MDOKFSTUDIO-LIFE-003
+// @tests_req StRS-MDOKFSTUDIO-LIFE-007
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const extensionRoot = path.resolve(__dirname, "../../..");
@@ -54,6 +60,7 @@ export async function run(): Promise<void> {
 
   try {
     await vscode.window.showTextDocument(firstDocument, vscode.ViewColumn.One);
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-003
     await vscode.commands.executeCommand(COMMAND_ID);
     await waitFor("the first lifecycle render", () => {
       const preview = getActivePreviewForTests();
@@ -65,6 +72,7 @@ export async function run(): Promise<void> {
     assert.equal(firstPreview.outputDirectory, fixtureDirectory);
     assert.match(firstPreview.html, /Markdown OKF-Schema Studio Fixture/u);
     assert.equal(firstPreview.documentUri, firstDocument.uri.toString());
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-024
     assert.equal(getActivePreviewPanelForTests()?.title, "Studio · preview.md");
 
     sendPreviewMessageForTests({
@@ -110,6 +118,7 @@ export async function run(): Promise<void> {
       scrollTop: 88,
     });
     const persisted = getActivePreviewForTests();
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-125
     assert.equal(persisted?.sourceLine, 4);
     assert.equal(persisted?.scrollTop, 88);
 
@@ -123,6 +132,7 @@ export async function run(): Promise<void> {
     assert.equal(getActivePreviewForTests()?.lastRevealedSourceLine, undefined);
 
     await vscode.window.showTextDocument(secondDocument, vscode.ViewColumn.One);
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-026
     await waitFor("the second lifecycle render", () => {
       const preview = getActivePreviewForTests();
       return preview?.phase === "ready"
@@ -150,6 +160,7 @@ export async function run(): Promise<void> {
       true,
     );
     const requestBeforeRefresh = getActivePreviewForTests()?.requestId ?? 0;
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-032
     await vscode.commands.executeCommand(REFRESH_COMMAND_ID);
     await waitFor("the explicitly refreshed dirty render", () => {
       const preview = getActivePreviewForTests();
@@ -181,6 +192,7 @@ export async function run(): Promise<void> {
       await vscode.workspace.applyEdit(replaceDocument(secondDocument, editedText)),
       true,
     );
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-049
     await waitFor("lifecycle recovery", () => {
       const preview = getActivePreviewForTests();
       return preview?.phase === "ready"
@@ -218,6 +230,7 @@ export async function run(): Promise<void> {
     await vscode.window.showTextDocument(firstDocument, vscode.ViewColumn.One);
     await waitFor("the preview following the first document", () =>
       getActivePreviewForTests()?.documentUri === firstDocument.uri.toString());
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-010
     await vscode.commands.executeCommand(COMMAND_ID, secondDocument.uri);
     await waitFor("the preview showing the Uri passed to the command", () => {
       const preview = getActivePreviewForTests();
@@ -248,6 +261,7 @@ export async function run(): Promise<void> {
     await resetPreviewThemeModeForTests();
   }
 
+  // @tests_req SwRS-MDOKFSTUDIO-LIFE-143
   assert.equal(getActivePreviewForTests(), undefined);
   assert.equal(fs.existsSync(fixtureDirectory), true, "preview disposal removed the source directory");
 }

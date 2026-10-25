@@ -8,19 +8,16 @@ description: When the Sphinx configuration check finds syntax warnings, the
   view, including in Restricted Mode.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-007; no marker expected."
 derives_from: []
 user_need: As a Sphinx author, I want a quiet warning with a path to details so
   that I can act without being interrupted.
-derived_by:
-- SwRS-MDOKFSTUDIO-MYST-081
-- SwRS-MDOKFSTUDIO-MYST-082
-- SwRS-MDOKFSTUDIO-MYST-083
-- SwRS-MDOKFSTUDIO-MYST-084
-- SwRS-MDOKFSTUDIO-MYST-085
-- SwRS-MDOKFSTUDIO-MYST-086
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-MYST-007
 ---
 
 ## A closable banner warns about configuration syntax warnings

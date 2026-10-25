@@ -7,13 +7,13 @@ description: When the page has stored more than 64 built-in results, it SHALL
   drop the least recently used result.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: deprecated
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-006
+annotation_exemption: true
+exemption_reason: "Archived. Not an observable behaviour; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
@@ -37,11 +37,7 @@ When the page has stored more than 64 built-in results, it SHALL drop the least 
 - WHEN the limit is exceeded
 - THEN an unused newer result is dropped before it
 
-### Known issues
-
-- Known issue: The 64-entry eviction has no test of its own.
-
 ### Verification notes
 
-- Method: No test of the eviction (cacheLimit); to be added.
+- Method: Unit test `the built-in result cache keeps 64 results and drops the least recently used` in `test/page/modules/diagReq.diagrams.requirements.test.ts`.
 - Criteria: At most 64 results are kept.

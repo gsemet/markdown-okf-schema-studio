@@ -8,17 +8,16 @@ description: When a writer switches the preview theme, the Studio SHALL draw
   theme colours are unavailable.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-001; no marker expected."
 derives_from: []
 user_need: As a reader, I want Mermaid diagrams to match the dark, white, cream
   or light preview so their labels stay legible.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-005
-- SwRS-MDOKFSTUDIO-DIAG-006
-- SwRS-MDOKFSTUDIO-DIAG-007
-- SwRS-MDOKFSTUDIO-DIAG-008
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-001
 ---
 
 ## Mermaid diagrams follow the preview theme

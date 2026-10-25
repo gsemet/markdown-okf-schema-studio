@@ -105,6 +105,7 @@ function diagnostic(
   diagnostics.push({ code, message, value });
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-031
 export function createPreviewResourcePolicy(
   documentDirectory: string,
   workspaceRoot?: string,
@@ -143,6 +144,8 @@ export class ResourcePolicy {
     return "path" in resolution ? resolution.path : undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-CORE-013
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-025
   /**
    * `resolveResource` with the reason of a refusal (the diagnostic code it records), and for a
    * missing file inside the roots the absolute path it would have, so a caller can watch for it.

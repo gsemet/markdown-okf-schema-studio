@@ -8,16 +8,17 @@ description: When a writer presses the undo or redo keys in a field editor
   the document.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-019; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-019
 ---
 
 ## Undo and redo keys in a field editor act on the field text
@@ -40,5 +41,5 @@ When a writer presses the undo or redo keys in a field editor control, the exten
 
 ### Verification notes
 
-- Method: Inspection of keepUndoInControl (src/page/features/textControls.ts); the table cell editor has a test, the field editors have none.
+- Method: Unit test undo and redo keys in a field editor stop at the control, in the value and the key editor in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: keepUndoInControl calls stopPropagation for Z and Y with Cmd or Ctrl.

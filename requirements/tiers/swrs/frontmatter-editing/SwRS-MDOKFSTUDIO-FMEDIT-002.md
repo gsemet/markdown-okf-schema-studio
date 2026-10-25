@@ -7,17 +7,18 @@ description: "When a field editor or a block editor is open, the extension SHALL
   open another field editor."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-011
+- StRS-MDOKFSTUDIO-FMEDIT-008
 - StRS-MDOKFSTUDIO-FMEDIT-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-041; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-BLOCK-041
 ---
 
 ## A field editor does not open while another editor is open
@@ -25,10 +26,6 @@ tested_in_files: []
 ### Normative behavior
 
 When a field editor or a block editor is open, the extension SHALL NOT open another field editor.
-
-Known issue: an editor left in an error state keeps blocking every other field until it is cancelled with Escape in that editor; clicking elsewhere does not close it.
-
-Known issue: the guard works in one direction only: a block editor can still be opened by clicking a block or a plus insert point while a field editor is open.
 
 ### Scenario: Nominal
 
@@ -42,7 +39,12 @@ Known issue: the guard works in one direction only: a block editor can still be 
 - WHEN the writer clicks the value cell of a field
 - THEN no field editor opens
 
+### Known issues
+
+- Known issue: an editor left in an error state keeps blocking every other field until it is cancelled with Escape in that editor; clicking elsewhere does not close it.
+- Known issue: the guard works in one direction only: a block editor can still be opened by clicking a block or a plus insert point while a field editor is open.
+
 ### Verification notes
 
-- Method: Unit test on the page runtime (test/page/runtimeFrontmatterEditor.test.ts, test/page/runtimeBlockSelection.test.ts).
+- Method: Unit test an open field editor blocks the key editor and a second value editor; a block editor blocks the field editor in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: openFrontmatterValueEditor and openFrontmatterKeyEditor return when activeBlockEdit or activeFrontmatterEdit is set.

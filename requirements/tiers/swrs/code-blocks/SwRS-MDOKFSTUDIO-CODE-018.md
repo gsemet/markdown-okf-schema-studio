@@ -4,27 +4,28 @@ id: SwRS-MDOKFSTUDIO-CODE-018
 uuid: 93f876c5-9143-48f4-8b54-185fd26d1ca5
 title: Hide the copy button below 30 px of visible block
 description: When less than 30 px of the hovered block is visible below the
-  sticky band or the frame top, the extension SHALL hide the copy button, and
-  SHALL show it again once 30 px are visible.
+  sticky band or the frame top, the extension SHALL hide the copy button,
+  showing it again once 30 px are visible.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-004
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CODE-017; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CODE-017
 ---
 
 ## Hide the copy button below 30 px of visible block
 
 ### Normative behavior
 
-When less than 30 px of the hovered block is visible below the sticky band or the frame top, the extension SHALL hide the copy button, and SHALL show it again once 30 px are visible.
+When less than 30 px of the hovered block is visible below the sticky band or the frame top, the extension SHALL hide the copy button, showing it again once 30 px are visible.
 
 ### Scenario: nominal behavior
 

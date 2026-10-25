@@ -44,6 +44,7 @@ function setup(options: {
   return { root, button, toggle, messages, layout, state: () => state };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
 test("comments are shown by default and the button says how to hide them", () => {
   const { root, button, toggle } = setup();
   assert.equal(toggle.shown(), true);
@@ -77,6 +78,7 @@ test("a click hides the comment chips, posts the preference, keeps the state and
   assert.equal(layout.length, 2);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 test("the saved preference and the webview state decide the initial state", () => {
   assert.equal(setup({ preferences: { comments: false } }).toggle.shown(), false);
   const saved = setup({ preferences: { comments: false }, state: { viewComments: true } });

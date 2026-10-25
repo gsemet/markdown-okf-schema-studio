@@ -29,6 +29,7 @@ function applied(text: string, plan: { edit: TextEdit } | { refused: string } | 
 
 const THREAD = ["<!-- THREAD", "Ada (2026-10-16 10:47):", "  hello", "-->"];
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021
 test("a checkbox toggle changes the one character between the brackets", () => {
   const text = "# Tasks\r\n\r\n- [ ] one\r\n- [x] two\r\n";
   const toggle = planCheckboxToggle(text, 3, 2, true);
@@ -45,6 +46,7 @@ test("a checkbox already in the asked state is unchanged, a missing one is refus
   assert.deepEqual(planCheckboxToggle(text, 0, 2, true), { refused: CHECKBOX_GONE });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-045
 test("a label rename changes the label line only and counts the remaining references", () => {
   const text = "(old)=\n# Title\n\nSee {ref}`old` and {ref}`text <old>`.\n";
   const rename = planLabelRename(text, 1, "old", "new");
@@ -54,6 +56,7 @@ test("a label rename changes the label line only and counts the remaining refere
   assert.deepEqual(planLabelRename(text, 2, "old", "new"), { refused: LABEL_GONE });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186
 test("thread lines are read only when they are exactly one thread comment", () => {
   const text = ["Before", "", ...THREAD, ""].join("\r\n");
   assert.deepEqual(readThreadLines(text, 3, 6), { lines: THREAD });
@@ -62,6 +65,7 @@ test("thread lines are read only when they are exactly one thread comment", () =
   assert.deepEqual(readThreadLines(text, 0, 4), { refused: THREAD_GONE });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-192
 test("deleting a thread removes whole lines and one of two surrounding blank lines", () => {
   const text = ["Before", "", ...THREAD, "", "After", ""].join("\n");
   assert.equal(applied(text, planThreadDelete(text, 3, 6)), "Before\n\nAfter\n");
@@ -88,6 +92,7 @@ test("a thread reply replaces the closing line and uses the document's line brea
   assert.deepEqual(planThreadReply(text, 1, 2, { author: "Bob", date: "d", body: "x" }, "\n"), { refused: THREAD_GONE });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117
 test("a block move swaps the blocks in one edit and gives the moved block's new first line", () => {
   const text = "A\n\nB1\nB2\n\nC\n";
   const down = planBlockMoveEdit(text, { line: 1, endLine: 1, neighbourLine: 3, neighbourEndLine: 4, direction: "down" });
@@ -100,6 +105,7 @@ test("a block move swaps the blocks in one edit and gives the moved block's new 
   assert.equal(up.line, 3);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
 test("a block move is refused for an included block, after the planner's own checks", () => {
   const text = "A\n\n```{include} other.md\n```\n";
   assert.deepEqual(
@@ -111,6 +117,7 @@ test("a block move is refused for an included block, after the planner's own che
   assert.notEqual(refused.refused, MOVE_INCLUDED, "the order check comes before the include check");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-166
 test("copy gives the exact Markdown of the blocks, cut also removes them with one separator", () => {
   const text = "A\r\n\r\nB\r\n\r\nC\r\n";
   assert.deepEqual(planBlocksCopyCut(text, 3, 3, "copy"), { copied: "B" });
@@ -141,6 +148,7 @@ test("a paste inserts the clipboard as new blocks, never next to an included blo
   assert.equal(checkBlocksPaste(included, 99), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042
 test("a block text edit is the smallest replacement, offset by the block start", () => {
   assert.deepEqual(planBlockTextEdit(10, "Hello world", "Hello there world"), { start: 16, end: 16, text: "there " });
   assert.equal(planBlockTextEdit(10, "same", "same"), undefined);

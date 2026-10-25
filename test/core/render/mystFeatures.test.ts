@@ -17,6 +17,7 @@ import {
 } from "./dom";
 import { fixtureDirectory, fixtureDocument, inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-010
 test("wikilinks render as lazy note targets without changing code or existing links", async () => {
   const document = inlineDocument(
     "See [[Note]], [[Folder/My Note#Heading|Label]] and [[#Section]].\n\n"
@@ -33,6 +34,7 @@ test("wikilinks render as lazy note targets without changing code or existing li
   assert.match(result.html, /\[\[Fenced\]\]/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-001
 test("the in-process renderer preserves the active-file MyST feature contract", async () => {
   const document = fixtureDocument("feature-contract.md");
   const result = await renderPreviewDocument({
@@ -79,6 +81,7 @@ test("the in-process renderer preserves the active-file MyST feature contract", 
   assert.equal(result.diagnostics.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-019
 test("figure references render figures whose body supplies the caption", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -131,6 +134,8 @@ test("references to captionless figures and tables stay readable", async () => {
   assert.equal(result.diagnostics.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-005
+// @tests_req SwRS-MDOKFSTUDIO-CODE-014
 test("MyST code directives number and emphasize lines relative to their start", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -190,6 +195,7 @@ test("MyST code-cell directives render numbered input without claiming execution
   assert.equal(result.diagnostics[0].severity, "warning");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
 test("Mermaid fences and directives preserve diagram source for webview rendering", async () => {
   const sources = [
     "```mermaid\ngraph LR\n  a --> b\n```",
@@ -213,6 +219,7 @@ test("Mermaid fences and directives preserve diagram source for webview renderin
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-023
 test("PlantUML fences and directives preserve diagram source for external rendering", async () => {
   const sources = [
     "```plantuml\n@startuml\nAlice -> Bob: hello\n@enduml\n```",
@@ -301,6 +308,7 @@ test("custom admonition titles preserve inline Markdown and their class", async 
   assert.match(textContent(admonition), /This is a custom title for a tip admonition\./u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-006
 test("nested backtick and colon delimiters preserve their enclosing Markdown", async () => {
   for (const outerLength of [4, 5]) {
     const outerFence = "`".repeat(outerLength);
@@ -385,6 +393,7 @@ test("GitHub alert syntax preserves an explicit title", async () => {
   assert.match(textContent(admonition), /Keep useful advice concise\./u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-009
 test("GitHub alert syntax defaults the title when none is provided", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument("> [!TIP]\n> Tips remain visible.\n"),
@@ -431,6 +440,7 @@ test("GitHub bold Note, Important, and Warning markers become simple admonitions
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-017
 test("MyST typography renders definitions, abbreviations, scripts, and footnotes", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -464,6 +474,7 @@ test("MyST typography renders definitions, abbreviations, scripts, and footnotes
   assert.match(textContent(footnote), /Heart rate in beats per minute\./u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("all named MyST admonitions receive their documented default title", async () => {
   const titles: Record<string, string> = {
     note: "Note",
@@ -649,6 +660,7 @@ test("MyST GFM and directive tables preserve captions, headers, and alignment", 
   assert.match(textContent(csvTable), /line one\s+line two/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-063
 test("CR038: a list-table renders its title, header rows, widths and alignment as one editable block", async () => {
   const source = [
     "Before",
@@ -734,6 +746,7 @@ test("CR038: list-table widths that do not match the columns or are not numbers 
   assert.equal(findElements(html, isTag("col")).length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-031
 test("raw HTML tables preserve complex cell spans without active content", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -861,6 +874,7 @@ test("Jupyter table output embeds show a project-build placeholder", async () =>
   assert.equal(result.diagnostics[0].line, 4);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-003
 test("block elements carry the source line the editor scrolls against", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument("# One\n\nalpha\n\n## Two\n\nbeta\n\n| A | B |\n|---|---|\n| x | y |\n"),
@@ -913,6 +927,7 @@ test("MyST admonitions retain the directive range through the closing fence", as
   assert.equal(attribute(admonition, "data-end-line"), "5");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013
 test("standalone hyphenated context tags render as mapped Markdown admonitions", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -1114,6 +1129,7 @@ test("block source ranges stay absolute when leading frontmatter is stripped", a
   assert.equal(attribute(paragraph, "data-end-line"), "8");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022
 test("project-scoped roles and directives degrade to labelled placeholders", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument("Text {cite}`smith2024` here.\n\n```{animation} chart.js\n```\n"),
@@ -1147,6 +1163,7 @@ test("an untrusted workspace refuses to render", async () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-031
 test("figures and plain images are mapped blocks with their closing source line", async () => {
   const source = "Intro\n\n:::{figure} a.svg\n:alt: x\n\nCap\n:::\n\n"
     + "```{figure} b.svg\n\nCap2\n```\n\n![alt](c.png)\n";
@@ -1190,6 +1207,7 @@ test("image directives are mapped blocks spanning the directive's source lines",
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-008
 test("tilde pairs render as struck-through text only in prose", async () => {
   const includedPath = path.join(fixtureDirectory, "included-strike.md");
   fs.writeFileSync(includedPath, "Included ~~gone~~ text.\n");

@@ -33,6 +33,8 @@ export function installPasteHtml(): PasteHtml {
         plainNext = false;
       }
     },
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-213
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-090
     handle(event, textarea, hooks) {
       const plainRequested = plainNext;
       plainNext = false;

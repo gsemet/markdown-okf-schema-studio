@@ -84,6 +84,8 @@ export function studioToken(name: ThemeTokenName): string {
   return STUDIO_TOKEN_PREFIX + name;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-THEME-016
+// @implements_req SwRS-MDOKFSTUDIO-THEME-034
 /**
  * The VS Code mapping of the theme tokens: each token takes the value of its `--vscode-*` variable.
  * It is declared on the root element, where VS Code sets its variables, and again on `body`, so a

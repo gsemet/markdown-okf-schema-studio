@@ -18,6 +18,14 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
   const { editorTrace, traceFocus } = rt.diagnostics;
   const { textEditing, editActions, figureTools, tableTools } = rt.tools;
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-029
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-034
   const receiveBlockEditSource: BlockSourceEditor["receiveBlockEditSource"] = (message) => {
     const edit = state.activeBlockEdit;
     if (!edit || message.editId !== edit.editId) return;
@@ -99,6 +107,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
         edit.status.textContent = hint;
       }
     });
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-047
     // Focus moving into the palette or a panel of the same frame is not leaving the editor; only
     // a focus that goes outside the frame (or nowhere) commits.
     textarea.addEventListener("blur", (event) => {
@@ -110,6 +119,8 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     });
     textarea.addEventListener("blur", () => edit.slashMenu?.close());
     textarea.addEventListener("keydown", (event) => pasteHtml.noteKey(event));
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-213
+    // Only this text box takes over a paste; the table cell editor has no paste listener (native paste).
     textarea.addEventListener("paste", (event) => {
       // An image on an otherwise empty clipboard first, then rich text; plain text stays native.
       if (pasteImage.handle(event, textarea, {
@@ -199,6 +210,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       onDone: () => {
         if (state.activeBlockEdit === edit) blockEditor.saveBlockEdit();
       },
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
       onModeChange: (nextMode) => {
         state.paletteMode = nextMode as PaletteMode;
         host.postMessage({
@@ -219,6 +231,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     edit.palette = palette;
     // The slash command menu lists the palette's own entries and runs them through it.
     edit.slashMenu?.destroy();
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-232
     edit.slashMenu = createSlashMenu(document, window, {
       getControl: () => textarea,
       getEntries: () => palette.menuEntries(),
@@ -236,6 +249,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       edit.closeLinkPanel?.(false);
       edit.closeFigurePanel?.(false);
     });
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
     textarea.addEventListener("input", (event) => {
       palette.closePopover();
       edit.closeLinkPanel?.(false);
@@ -252,6 +266,9 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
         edit.slashMenu?.sync();
       });
     }
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-053
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-069
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-017
     textarea.addEventListener("keydown", (event) => {
       if (edit.slashMenu?.handleKey(event)) return;
       if (palette.handleKey(event)) return;

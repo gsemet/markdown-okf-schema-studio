@@ -8,13 +8,14 @@ description: When the workspace is untrusted or the file is standalone, the
   reduced to the document's folder.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: deprecated
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Archived. Another requirement specifies this behaviour, so no marker
+  is expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

@@ -28,6 +28,7 @@ async function fixture(): Promise<{ directory: string; target: string; sibling: 
   return { directory, target, sibling };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 test("a linked target written in place is reported by the direct watch, a sibling is not", async () => {
   const { directory, target, sibling } = await fixture();
   let events = 0;

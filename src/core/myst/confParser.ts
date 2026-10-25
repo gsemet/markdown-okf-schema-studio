@@ -198,6 +198,7 @@ function readExpression(tokens: Token[], index: number): string[] | undefined {
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-066
 export function parseConf(source: string): ParsedConf {
   const lists: Record<string, string[]> = { extensions: [], myst_enable_extensions: [] };
   let certain = true;

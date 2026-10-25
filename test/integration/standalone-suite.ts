@@ -35,6 +35,11 @@ async function waitForDocument(documentUri: string): Promise<void> {
   throw new Error(`Timed out waiting for preview document ${documentUri}.`);
 }
 
+// @tests_req StRS-MDOKFSTUDIO-TRUST-001
+// @tests_req StRS-MDOKFSTUDIO-TRUST-004
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-007
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const directory = fs.mkdtempSync(path.join(os.homedir(), "markdown-okf-schema-standalone-"));

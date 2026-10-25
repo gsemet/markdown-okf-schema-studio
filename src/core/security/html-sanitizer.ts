@@ -76,6 +76,7 @@ const NATURALLY_FOCUSABLE_ELEMENTS = new Set([
   "summary",
 ]);
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-031
 export function sanitizeTableStyle(tagName: string, style: string): string | undefined {
   if (!TABLE_STYLE_ELEMENTS.has(tagName.toLowerCase())) {
     return undefined;
@@ -165,6 +166,14 @@ function walkChildren(
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-008
+// @implements_req SwRS-MDOKFSTUDIO-CORE-041
+// @implements_req SwRS-MDOKFSTUDIO-GFM-016
+// @implements_req SwRS-MDOKFSTUDIO-GFM-034
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-011
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-025
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-036
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-042
 function rewriteNode(
   node: HtmlNode,
   parent: HtmlNode,
@@ -383,6 +392,7 @@ function rewriteNode(
   walkChildren(node, context, diagnostics, tableStyles);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-119
 function injectSourceMappings(
   node: HtmlNode,
   sourceMapping: { sourceFile: string; documentId: string },
@@ -445,6 +455,7 @@ export function rewriteSphinxHtml(html: string, context: HtmlRewriteContext): Ht
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-012
 export function injectContentSecurityPolicy(html: string, contentSecurityPolicy: string): string {
   const document = parse(html) as unknown as HtmlNode;
   const head = findFirst(document, "head");

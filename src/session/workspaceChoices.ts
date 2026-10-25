@@ -88,11 +88,13 @@ export class WorkspaceChoices {
     }, () => undefined);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
   /** The theme mode the reader picked in the page, if any. */
   public get previewThemeMode(): PreviewThemeMode | undefined {
     return this.themeMode;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
   /** Remembers the theme mode for the session and the workspace. */
   public setPreviewThemeMode(mode: PreviewThemeMode): void {
     this.themeMode = mode;
@@ -158,6 +160,7 @@ export class WorkspaceChoices {
     return this.collapsedDescriptions.get(documentUri);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
   /** Remembers `descriptionsCollapsed` of a document for the workspace when it changed. */
   public recordCollapsedDescriptions(documentUri: string, collapsed: boolean): void {
     const storage = this.storage;

@@ -7,16 +7,17 @@ description: When inline text contains a kbd element without attributes, the
   extension SHALL render a keyboard key cap.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-GFM-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-GFM-002
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-GFM-029; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-GFM-029
 ---
 
 ## Raw kbd renders as a key cap

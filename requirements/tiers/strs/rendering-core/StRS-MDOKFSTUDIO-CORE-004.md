@@ -8,18 +8,16 @@ description: When a document contains CJK, right-to-left text or long
   column.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-CORE-001; no marker expected."
 derives_from: []
 user_need: Writers need to read documents in any script and direction without
   horizontal scrolling.
-derived_by:
-- SwRS-MDOKFSTUDIO-CORE-034
-- SwRS-MDOKFSTUDIO-CORE-039
-- SwRS-MDOKFSTUDIO-CORE-040
-- SwRS-MDOKFSTUDIO-CORE-041
-- SwRS-MDOKFSTUDIO-CORE-042
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-CORE-001
 ---
 
 ## Read text in any script and direction

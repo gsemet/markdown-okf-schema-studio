@@ -7,16 +7,17 @@ description: When a document re-renders, its preview closes or its document
   changes, the extension SHALL replace or remove its Problems entries.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-078; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-078
 ---
 
 ## Problems entries are replaced and removed
@@ -39,5 +40,5 @@ When a document re-renders, its preview closes or its document changes, the exte
 
 ### Verification notes
 
-- Method: test
+- Method: Integration suite run() in test/integration/mystDiagnostics.test.ts
 - Criteria: No unit test of the controller.

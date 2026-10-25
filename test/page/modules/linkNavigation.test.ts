@@ -43,6 +43,7 @@ function harness(requests: string[]) {
   };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
 test("link discovery waits for the viewport and deduplicates bounded batches", () => {
   const runtime = harness(["references/PROPERTIES.md", "references/PROPERTIES.md", "wiki:Note", "okf-link:identity", "#heading", "https://example.test"]);
   assert.equal(runtime.messages.length, 0);
@@ -61,6 +62,7 @@ test("link discovery waits for the viewport and deduplicates bounded batches", (
   assert.equal(many.messages.map((message) => message.requests.length).join(","), "64,64,2");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
 test("local and wiki clicks are host-routed even before discovery, including middle click", () => {
   const runtime = harness(["references/PROPERTIES.md", "wiki:Note", "okf-link:identity"]);
   let prevented = 0;
@@ -75,6 +77,7 @@ test("local and wiki clicks are host-routed even before discovery, including mid
   assert.equal(runtime.messages[0].requestId, context.requestId);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
 // The stale-render half of this test moved to test/page/runtimeContentPatch.test.ts ("link target hints of a
 // stale render are ignored"): the page's host message filter now matches previewLinkTargets to the
 // render before the router hands it to applyTargets.

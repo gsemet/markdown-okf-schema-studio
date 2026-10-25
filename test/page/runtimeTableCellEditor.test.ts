@@ -15,6 +15,9 @@ import {
  * The table cell editor and its toolbar (features/tableCellEditor.ts).
  */
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-013
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
 test("table cell editing exposes row and column operations and saves the edited table", () => {
   const harness = createRuntimeHarness();
   const table = new RuntimeElement({
@@ -166,6 +169,7 @@ const convertButton = (harness: ReturnType<typeof createRuntimeHarness>) =>
   harness.createdElements.filter((element) =>
     element.getAttribute("aria-label") === "Convert to list-table").at(-1);
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-070
 test("CR038: the table toolbar converts the pipe table to a list-table in one final save", () => {
   const harness = createRuntimeHarness();
   openPipeTableCellEditor(harness);
@@ -196,6 +200,7 @@ test("CR038: the conversion button is off for a table inside a captioned figure"
   assert.equal(convertButton(harness)?.disabled, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-048
 test("table toolbar sits in the flow above the table with text labels and a position status", () => {
   const harness = createRuntimeHarness();
   const section = new RuntimeElement({}, harness.windowState, 0, 300, "section");
@@ -260,6 +265,7 @@ test("table toolbar sits in the flow above the table with text labels and a posi
   assert.equal(section.childElements.includes(menu), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-064
 test("CR 034: the table toolbar rides down with a tall table and leaves with the table", () => {
   const harness = createRuntimeHarness({ viewportHeight: 600 });
   const section = new RuntimeElement({}, harness.windowState, 0, 3000, "section");
@@ -440,6 +446,7 @@ test("a later layout change that pushes the toolbar above the reading offset is 
   assert.equal(harness.windowState.scrollY, 300 - 45);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-034
 test("table editing switches cells without losing changes and finalizes before leaving the table", () => {
   const harness = createRuntimeHarness();
   const table = new RuntimeElement({
@@ -525,6 +532,7 @@ test("table editing switches cells without losing changes and finalizes before l
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
 test("Tab and Shift+Tab move between table cells, wrapping across rows", () => {
   const harness = createRuntimeHarness();
   const { cells, input } = openTableCellEditorForTab(harness);
@@ -656,6 +664,7 @@ test("a table cell arrow without a matching model cell is not swallowed", () => 
   assert.equal(cellEditorOf(harness).parentElement, cells[1][1]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
 test("the table cell field is re-fitted when the preview is resized", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness);
@@ -826,6 +835,7 @@ test("Escape cancels a table cell even when focus is outside the cell editor", (
   assert.equal(harness.messages.at(-1)?.type, "previewEditCancel");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-025
 test("Escape in a changed table cell cancels and never saves a final table", () => {
   const harness = createRuntimeHarness();
   const input = openTableCellEditor(harness);
@@ -864,6 +874,7 @@ test("Escape in a table cell after an autosave restores the table with previewEd
   assert.equal(harness.messages.some((message) => message.final === true), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-018
 test("Enter in a changed table cell saves the table", () => {
   const harness = createRuntimeHarness();
   const input = openTableCellEditor(harness);

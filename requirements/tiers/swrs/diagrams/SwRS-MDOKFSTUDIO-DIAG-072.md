@@ -9,16 +9,17 @@ description: "When the include budget of a render is exhausted, the extension SH
   warning for the render."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-011
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-068; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-068
 ---
 
 ## An exhausted include budget stops diagram files
@@ -39,11 +40,7 @@ When the include budget of a render is exhausted, the extension SHALL show that 
 - WHEN the preview is rendered
 - THEN both show the message and only one warning exists
 
-### Known issues
-
-- Known issue: No test in this scope triggers this message.
-
 ### Verification notes
 
-- Method: No test in this scope triggers it; the budget itself is covered by the myst scope.
+- Method: Unit test `after the include budget is exhausted every remaining diagram file shows the budget message, with one warning` in `test/core/render/diagReq.pipeline.requirements.test.ts`.
 - Criteria: The budget message replaces the diagram.

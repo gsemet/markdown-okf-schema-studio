@@ -35,6 +35,7 @@ function listTableWidths(value: unknown): number[] | undefined {
   return parts.map((part) => Math.round((part / total) * 10000) / 100);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-063
 /**
  * A list-table's table spans the directive (one editable block) and records its widths and header
  * rows; the `:align:` option goes to the table, or to a raw HTML table beneath the directive.

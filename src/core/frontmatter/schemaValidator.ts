@@ -2,6 +2,7 @@ import Draft202012Validator from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import type { ValidateFunction } from "ajv";
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
 export const sharedSchemaValidator = new Draft202012Validator({
   allErrors: true,
   addUsedSchema: false,

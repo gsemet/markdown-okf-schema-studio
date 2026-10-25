@@ -73,6 +73,7 @@ function setup(initialState: Record<string, unknown> | undefined = undefined, sh
   return { root, content, toggle, fire, layoutChanges, state: () => state };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-143
 test("a click on the chip opens the body and a second click closes it", () => {
   const { content, fire, layoutChanges } = setup();
   const { chip, body } = comment(content, { line: "7" });
@@ -165,6 +166,7 @@ test("the saved state of a reloaded page is read back", () => {
   assert.deepEqual([...toggle.expanded()], ["5:0"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
 test("the show-comments attribute follows the setting, live", () => {
   const { root, toggle, layoutChanges } = setup(undefined, false);
   assert.equal(root.getAttribute("data-okf-show-comments"), "false");

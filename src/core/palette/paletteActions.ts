@@ -154,6 +154,7 @@ const HEADING_OPTIONS: EditActionOption[] = [
   ...[1, 2, 3, 4, 5].map((level) => ({ value: String(level), label: "Heading " + level })),
 ];
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-238
 // `/` menu variants: the options of the popovers that are worth a direct entry.
 const HEADING_SLASH = [
   ...[1, 2, 3, 4, 5].map((level) => ({
@@ -174,11 +175,14 @@ const ADMONITION_SLASH = ADMONITION_OPTIONS.map((option) => ({
   aliases: [option.value === "seealso" ? "see also" : option.value, "callout", "admonition"],
 }));
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-263
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
 /**
  * Every palette action, by id, in display order (palette buttons and `/` menu entries follow this
  * order). Add an action here and its handler in `src/page/modules/editActions.ts`.
  */
 export const PALETTE_ACTIONS = {
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-043
   heading: {
     slash: { variantsOnly: true, variants: HEADING_SLASH },
     label: "Heading",
@@ -268,6 +272,7 @@ export const PALETTE_ACTIONS = {
     scopes: ["block"],
     popover: "language",
   },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-052
   bulletList: {
     slash: { menuOnly: true, aliases: ["bullet", "bullets", "ul", "unordered", "list", "-", "*"] },
     label: "Bulleted list",
@@ -300,6 +305,7 @@ export const PALETTE_ACTIONS = {
     modes: ["strict"],
     scopes: ["block"],
   },
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-106
   table: {
     slash: { aliases: ["grid", "tbl"] },
     label: "Table",
@@ -389,6 +395,7 @@ export const PALETTE_ACTIONS = {
     modes: ["gfm"],
     scopes: ["block"],
   },
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-017
   mermaid: {
     slash: { aliases: ["diagram", "chart", "graph", "flowchart"] },
     label: "Mermaid",
@@ -398,6 +405,7 @@ export const PALETTE_ACTIONS = {
     modes: ["gfm"],
     scopes: ["block"],
   },
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-111
   columnAlign: {
     slash: { aliases: ["align", "left", "center", "right"] },
     label: "Column alignment",
@@ -422,6 +430,7 @@ export const PALETTE_ACTIONS = {
     modes: ["gfm"],
     scopes: ["block", "cell"],
   },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-127
   admonition: {
     slash: { aliases: ["callout"], variants: ADMONITION_SLASH },
     label: "Admonition",
@@ -442,6 +451,7 @@ export const PALETTE_ACTIONS = {
     modes: ["myst"],
     scopes: ["block"],
   },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-133
   math: {
     slash: { aliases: ["equation", "latex", "formula", "katex"] },
     label: "Math",

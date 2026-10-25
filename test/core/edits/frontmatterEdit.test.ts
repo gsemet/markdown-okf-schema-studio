@@ -37,6 +37,7 @@ test("a value change edits the field in place and gives the edited text", () => 
   assert.equal(save.isRemove, false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016
 test("a YAML value is parsed; invalid YAML is refused unless the save is a flush", () => {
   const frontmatter = result([field("count", 3, "number")]);
   const parsed = plan(planFrontmatterSave(SOURCE, frontmatter, { fieldName: "count", fieldValue: "4", fieldValueFormat: "yaml" }));
@@ -52,6 +53,7 @@ test("a YAML value is parsed; invalid YAML is refused unless the save is a flush
   });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-067
 test("a stale field, a bad new key and a value of the wrong type are refused", () => {
   const frontmatter = result([field("title", "Old", "text"), field("count", 3, "number")], { schemaFound: true });
   assert.deepEqual(planFrontmatterSave(SOURCE, frontmatter, { fieldName: "gone", fieldValue: "x" }), { error: FRONTMATTER_STALE });
@@ -71,6 +73,7 @@ test("a stale field, a bad new key and a value of the wrong type are refused", (
   assert.equal(flushed.needsSchemaCheck, false, "a flush writes the value as typed");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024
 test("add, rename and remove plan their edits; a duplicate name is named in the error", () => {
   const frontmatter = result([field("title", "Old", "text"), field("count", 3, "number")]);
   const add = plan(planFrontmatterSave(SOURCE, frontmatter, { fieldName: "tag", frontmatterAction: "add", fieldValue: "x" }));
@@ -107,6 +110,7 @@ test("with a schema the save needs the check of its edited text", () => {
   assert.equal(checkFrontmatterCandidate(save, result([linkOnly], { schemaFound: true }), frontmatter), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
 test("a remove may not leave a required field newly missing", () => {
   const frontmatter = result([field("title", "Old", "text"), field("count", 3, "number")], {
     schemaFound: true, missingRequiredFields: ["author"],

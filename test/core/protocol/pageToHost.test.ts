@@ -26,6 +26,7 @@ test("rejects missing or non-integer ids and oversize documentId", () => {
   assert.equal(check({ ...valid, requestId: 2 ** 53 }), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052
 test("rejects non-objects, unregistered and prototype-key types", () => {
   assert.equal(check(null), false);
   assert.equal(check("sample"), false);
@@ -43,6 +44,7 @@ test("the shipped registry rejects an unregistered type", () => {
   assert.equal(isRegisteredPreviewMessage(valid), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-026
 test("previewCopyText accepts text up to 1 MB and rejects anything else", () => {
   const copy = { type: "previewCopyText", documentId: "doc", revision: 1, requestId: 1, text: "code" };
   assert.equal(isRegisteredPreviewMessage(copy), true);
@@ -66,6 +68,8 @@ test("field helpers respect their boundaries", () => {
   assert.equal(isOneOf(1, ["a", "b"] as const), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-013
 test("previewViewPreferenceChanged validates the value per preference", () => {
   const base = { type: "previewViewPreferenceChanged", documentId: "doc", revision: 1, requestId: 1 };
   const ok = (preference: unknown, value: unknown): boolean =>
@@ -95,6 +99,7 @@ test("previewViewPreferenceChanged validates the value per preference", () => {
   assert.equal(ok("__proto__", true), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-058
 test("previewHistoryGo accepts only back or forward", () => {
   const base = { type: "previewHistoryGo", documentId: "doc", revision: 1, requestId: 1 };
   assert.equal(isRegisteredPreviewMessage({ ...base, direction: "back" }), true);
@@ -114,6 +119,8 @@ test("previewPaletteModeChanged accepts only strict, gfm or myst", () => {
   assert.equal(isRegisteredPreviewMessage({ ...base }), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038
+// @tests_req SwRS-MDOKFSTUDIO-MYST-051
 test("previewLabelRename validates the line and both label names", () => {
   const rename = {
     type: "previewLabelRename", documentId: "doc", revision: 1, requestId: 1, editId: "e",
@@ -130,6 +137,7 @@ test("previewLabelRename validates the line and both label names", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
 test("T30: the list and pick messages carry an edit id and no other payload", () => {
   for (const type of ["previewListTargets", "previewListCitations", "previewPickDocument", "previewPickImage"]) {
     const base = { type, documentId: "doc", revision: 1, requestId: 1, editId: "host-1" };
@@ -141,6 +149,8 @@ test("T30: the list and pick messages carry an edit id and no other payload", ()
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-240
 test("previewBlockMove validates both ranges, the direction and the optional pin", () => {
   const move = {
     type: "previewBlockMove", documentId: "doc", revision: 1, requestId: 1,
@@ -157,6 +167,9 @@ test("previewBlockMove validates both ranges, the direction and the optional pin
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-241
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-242
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-243
 test("T40: the block clipboard messages validate their lines and the optional pin", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1 };
   for (const type of ["previewBlocksCopy", "previewBlocksCut"]) {
@@ -177,6 +190,7 @@ test("T40: the block clipboard messages validate their lines and the optional pi
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
 test("T38: previewPasteImage caps the size and accepts plain base64 of an allowed type only", () => {
   const base = {
     type: "previewPasteImage", documentId: "doc", revision: 1, requestId: 1,
@@ -194,6 +208,7 @@ test("T38: previewPasteImage caps the size and accepts plain base64 of an allowe
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-213
 test("T1: previewPasteHtml accepts a bounded non-empty HTML string with an edit id", () => {
   const base = { type: "previewPasteHtml", documentId: "doc", revision: 1, requestId: 1, editId: "host-1", html: "<b>x</b>" };
   assert.equal(isRegisteredPreviewMessage(base), true);
@@ -202,6 +217,8 @@ test("T1: previewPasteHtml accepts a bounded non-empty HTML string with an edit 
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-069
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-070
 test("T43: previewCommentCreate and previewCommentReply validate anchor, id and body limits", () => {
   const anchor = { line: 2, endLine: 3, quote: "q", prefix: "p", suffix: "s" };
   const create = { type: "previewCommentCreate", documentId: "doc", revision: 1, requestId: 1, anchor, body: "Why?" };
@@ -224,6 +241,7 @@ test("T43: previewCommentCreate and previewCommentReply validate anchor, id and 
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-071
 test("T44: previewCommentResolve and previewCommentDelete validate the thread id and the flag", () => {
   const base = { documentId: "doc", revision: 1, requestId: 1, threadId: "t_0a0b0c0d" };
   const resolve = { type: "previewCommentResolve", ...base, resolved: true };
@@ -240,6 +258,7 @@ test("T44: previewCommentResolve and previewCommentDelete validate the thread id
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-245
 test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
   const flushed = {
     type: "previewEditFlushed", documentId: "doc", revision: 1, requestId: 1, flushId: "flush-1", flushed: true,
@@ -252,6 +271,7 @@ test("CR 025: previewEditFlushed validates the flush id and the flag", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-244
 test("STAB-03: previewEditClosed carries the id of the closed editor", () => {
   const closed = { type: "previewEditClosed", documentId: "doc", revision: 1, requestId: 1, editId: "edit-3" };
   assert.equal(isRegisteredPreviewMessage(closed), true);
@@ -260,6 +280,7 @@ test("STAB-03: previewEditClosed carries the id of the closed editor", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-178
 test("previewThreadReply and previewThreadDelete validate the lines, the edit id and the text", () => {
   const reply = {
     type: "previewThreadReply", documentId: "doc", revision: 1, requestId: 1, editId: "host-1",
@@ -278,6 +299,7 @@ test("previewThreadReply and previewThreadDelete validate the lines, the edit id
   assert.equal(isRegisteredPreviewMessage({ ...remove, line: 8 }), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-050
 test("previewPlantUmlInclude carries a bounded file name, the including file id or null, and an edit id", () => {
   const base = { type: "previewPlantUmlInclude", documentId: "doc", revision: 1, requestId: 1, editId: "plantuml-1", path: "styles/common.puml", from: null };
   assert.equal(isRegisteredPreviewMessage(base), true);
@@ -293,6 +315,7 @@ test("previewPlantUmlInclude carries a bounded file name, the including file id 
   assert.equal(isRegisteredPreviewMessage({ ...base, editId: undefined }), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-086
 test("CR 050: the warning banner messages are registered with a bounded key", () => {
   const envelope = { documentId: "file:///chapter.md", revision: 3, requestId: 7 };
   assert.equal(isRegisteredPreviewMessage({ ...envelope, type: "previewShowProblems" }), true);

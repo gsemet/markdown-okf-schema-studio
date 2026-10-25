@@ -13,8 +13,9 @@ origin: native
 tier: StRS
 derives_from: []
 user_need: As a writer, I see why my frontmatter is rejected and keep reading my
-  document.
+  document; a broken metadata block must never blank the preview.
 derived_by:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-001
 - SwRS-MDOKFSTUDIO-FMSCHEMA-017
 - SwRS-MDOKFSTUDIO-FMSCHEMA-018
 - SwRS-MDOKFSTUDIO-FMSCHEMA-076
@@ -28,9 +29,7 @@ When a document's frontmatter is not valid YAML or is not a mapping, the Studio 
 
 ### Preserved stakeholder intent
 
-A broken metadata block must never blank the preview; the writer needs a visible reason to fix it.
-
-As a writer, I see why my frontmatter is rejected and keep reading my document.
+As a writer, I see why my frontmatter is rejected and keep reading my document; a broken metadata block must never blank the preview.
 
 ### Rationale and constraints
 

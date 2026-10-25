@@ -46,6 +46,8 @@ function diagramHtml(source = "@startuml\nAlice -> Bob: hello\n@enduml"): string
   return `<figure class="myst-plantuml-figure" data-line="7"><div class="myst-plantuml-diagram">${source}</div></figure>`;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-105
 test("renders PlantUML through the configured external JAR and injects an image", async () => {
   const workspace = createWorkspace();
   const child = new FakeChild();
@@ -93,6 +95,7 @@ test("renders PlantUML through the configured external JAR and injects an image"
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
 test("uses the PATH executable when no JAR is configured and reports missing commands", async () => {
   const workspace = createWorkspace();
   let spawnCount = 0;
@@ -284,6 +287,7 @@ test("decodes a multibyte character split across stdout chunks", async () => {
   });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-097
 test("caps stderr at 64 KiB and notes the truncation", async () => {
   const child = new FakeChild();
   await withFake(() => {

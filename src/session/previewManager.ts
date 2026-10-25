@@ -139,6 +139,7 @@ export class PreviewManager {
   // The set of sessions
   // ---------------------------------------------------------------------------------------------
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-032
   /** The session created or switched last that is still live; the target of the refresh command. */
   public get active(): PreviewSession | undefined {
     return this.activeSession;
@@ -159,6 +160,7 @@ export class PreviewManager {
     return [...this.live].reverse().find((session) => !session.disposed && matches(session));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-065
   /** True when a message names the render the session holds (document, revision and request). */
   public matchesCurrent(session: PreviewSession, message: PageMessageIdentity): boolean {
     const stage = session.stage;
@@ -200,6 +202,7 @@ export class PreviewManager {
   /** The path with its symbolic links resolved; the resolved path when the file does not exist. */
   public readonly canonicalPath = canonicalPath;
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-062
   /** True when the session's source is an existing Markdown file inside its root. */
   public sourceAvailable(session: PreviewSession): boolean {
     const sourcePath = this.activePathOf(session);
@@ -208,6 +211,7 @@ export class PreviewManager {
       && sourceExists(sourcePath);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-024
   /** The panel title: the side preview that follows the editor says so. */
   public previewTitle(session: { followsActiveEditor: boolean }, filePath: string): string {
     const name = path.basename(filePath);
@@ -218,6 +222,10 @@ export class PreviewManager {
   // Lifecycle of a session
   // ---------------------------------------------------------------------------------------------
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-049
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-038
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-007
   /**
    * Creates the session of `panel` for `document` (or, for a restored panel whose document could
    * not be opened, for the document `restoredState` names). The session renders nothing until
@@ -282,6 +290,7 @@ export class PreviewManager {
       plantUmlEngineSettings: readPlantUmlEngineSettings(host.settings.section(PLANTUML_CONFIGURATION_SECTION)),
       frontmatterConfiguration: readFrontmatterConfiguration(host.settings.section(FRONTMATTER_CONFIGURATION_SECTION)),
     });
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
     session.queue = new BuildQueue<HostDocument, RenderResult>({
       debounceMs: 40,
       revisionOf: (queued) => queued.revision,
@@ -358,6 +367,7 @@ export class PreviewManager {
     return session;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-151
   /** Locks the group of a new side preview (see {@link PanelGroups.lockNewPanelGroup}). */
   public async lockNewGroup(session: PreviewSession): Promise<void> {
     const locked = await this.groups.lockNewPanelGroup(session.panel);
@@ -449,6 +459,7 @@ export class PreviewManager {
     this.switchChains.set(panel, chain);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-125
   private switchDocument(session: PreviewSession, document: HostDocument): void {
     const { host } = this;
     if (!isDocumentEligible(document) || document.id === session.documentUri) {
@@ -484,15 +495,18 @@ export class PreviewManager {
     session.queue.clearLastGood();
     const previousDocumentUri = session.documentUri;
     session.documentUri = document.id;
+    // @implements_req SwRS-MDOKFSTUDIO-DIAG-053
     session.plantUml.includeWatch.clear();
     this.diagnostics.clear(previousDocumentUri);
     session.document = document;
     session.state = session.states.get(session.documentUri);
     session.panel.title = this.previewTitle(session, documentPath);
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-026
     this.rendering.showPending(session, true, "Following the active Markdown editor.");
     void this.rendering.refreshPreviewDocument(session, document);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-143
   /** Disposes a session (its panel too when `disposePanel`); idempotent. */
   public disposeSession(session: PreviewSession, disposePanel: boolean): void {
     if (session.disposed) {

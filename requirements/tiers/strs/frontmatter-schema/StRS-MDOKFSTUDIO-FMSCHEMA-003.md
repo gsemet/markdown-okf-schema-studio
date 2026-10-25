@@ -8,19 +8,16 @@ description: When a writer reads a properties table, the Studio SHALL show
   the preview width.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-001; no marker expected."
 derives_from: []
 user_need: As a writer, I read property values in the form I typed them and the
   table never pushes the page sideways.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-006
-- SwRS-MDOKFSTUDIO-FMSCHEMA-007
-- SwRS-MDOKFSTUDIO-FMSCHEMA-008
-- SwRS-MDOKFSTUDIO-FMSCHEMA-009
-- SwRS-MDOKFSTUDIO-FMSCHEMA-010
-- SwRS-MDOKFSTUDIO-FMSCHEMA-011
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-001
 ---
 
 ## Property values read like YAML

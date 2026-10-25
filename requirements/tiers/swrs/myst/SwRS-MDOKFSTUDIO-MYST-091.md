@@ -7,16 +7,17 @@ description: When a document holds a `{figure}` directive, the extension SHALL
   render it with the figure styles and offer the figure palette action.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-031; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-031
 ---
 
 ## The figure directive renders with its own styles and actions
@@ -39,5 +40,5 @@ When a document holds a `{figure}` directive, the extension SHALL render it with
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "every plug-in renders, styles the preview and names MyST palette actions that exist" in test/core/directives/registry.test.ts
 - Criteria: Figure family behaves per name.

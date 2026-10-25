@@ -8,16 +8,17 @@ description: When a `{figure}` or `{image}` has `:align:` left, center or right,
   and right beside the text.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-031; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-031
 ---
 
 ## Figure alignment sets align classes and float
@@ -40,5 +41,5 @@ When a `{figure}` or `{image}` has `:align:` left, center or right, the extensio
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a figure keeps its width and alignment as data attributes and classes" in test/core/render/mystPaletteRendering.test.ts
 - Criteria: Centre is centred; left and right float.

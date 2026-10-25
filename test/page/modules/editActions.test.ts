@@ -6,6 +6,50 @@ import { createEditActions } from "../../../src/page/modules/editActions";
 import { createMarkdownTableTools } from "../../../src/page/modules/markdownTable";
 import { isSafeOkfColor } from "../../../src/core/security/spanColors";
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-017
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-039
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-043
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-045
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-048
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-049
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-050
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-052
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-053
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-054
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-058
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-069
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-072
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-083
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-089
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-092
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-109
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-114
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-123
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-124
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-125
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-126
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-127
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-130
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-132
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-133
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-135
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-136
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-137
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-138
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-147
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-148
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-149
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-160
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-073
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-074
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-076
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-106
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-111
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-115
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-117
+
 const registry = createEditActions([], createMarkdownTableTools());
 
 /**

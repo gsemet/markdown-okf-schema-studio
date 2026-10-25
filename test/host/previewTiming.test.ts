@@ -35,6 +35,7 @@ async function typeAndPatch(host: HostSession, text: string): Promise<Record<str
   return host.postedSince(from, "previewContentPatch")[0]!;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
 test("edits inside the 40 ms render debounce reach the page once, as the last text", async (t) => {
   const host = await readyPreview(t);
   const from = host.posted.length;
@@ -60,6 +61,7 @@ test("edits inside the 40 ms render debounce reach the page once, as the last te
   assert.equal(host.assignments.length, assignments, "a ready page is patched, not reloaded");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
 test("a render pending for 1500 ms over a ready page shows the overlay, hidden again before the patch", async (t) => {
   const host = await readyPreview(t);
   const from = host.posted.length;
@@ -89,6 +91,7 @@ test("a render that finishes before 1500 ms never shows the overlay", async (t) 
   assert.deepEqual(host.postedSince(from, "previewPendingOverlay"), []);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-071
 test("a patched page that does not report ready within 2000 ms gets the full document", async (t) => {
   const host = await readyPreview(t);
   const assignments = host.assignments.length;
@@ -153,6 +156,8 @@ test("a page reloaded by the webview after patches gets the current document aga
   assert.match(host.assignments.at(-1)!, /First paragraph patched\./u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
 test("renders wait while the page has an inline editor open, and the newest one arrives on its close", async (t) => {
   const host = await readyPreview(t);
   const loaded = host.loadedIdentity();
@@ -200,6 +205,8 @@ test("a close of another editor id releases nothing", async (t) => {
   assert.deepEqual(host.postedSince(from, "previewContentPatch"), []);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
 test("Refresh Preview brings the render to the page even over an open inline editor", async (t) => {
   const host = await readyPreview(t);
   const loaded = host.loadedIdentity();
@@ -222,6 +229,7 @@ test("Refresh Preview brings the render to the page even over an open inline edi
   assert.deepEqual(host.postedSince(afterRefresh, "previewContentPatch"), []);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143
 test("a preview disposed while its render is debouncing, building or awaiting a patch acknowledgement stays silent", async (t) => {
   for (const moment of ["debouncing", "building", "awaiting acknowledgement"] as const) {
     const host = await openPreview(t.mock.timers, MARKDOWN);

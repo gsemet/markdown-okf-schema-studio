@@ -9,16 +9,17 @@ description: "When the data-sphinx-preview-theme-mode, data-sphinx-preview-theme
   each one whose theme colours differ from those it was drawn with, keeping the labels."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-002
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-005; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-005
 ---
 
 ## Mermaid diagrams are drawn again when the theme changes

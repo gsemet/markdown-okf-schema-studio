@@ -38,6 +38,7 @@ import { attribute, findElements, parseHtml } from "../core/render/dom";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-012
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   await pinStoredWorkspaceChoices();

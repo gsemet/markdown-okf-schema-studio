@@ -8,20 +8,16 @@ description: When a writer references a PlantUML file with the uml or plantuml
   explain why a file cannot be read.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-009; no marker expected."
 derives_from: []
 user_need: As a writer, I keep diagrams in separate puml files, reference them
   from the document, and see them drawn.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-068
-- SwRS-MDOKFSTUDIO-DIAG-069
-- SwRS-MDOKFSTUDIO-DIAG-070
-- SwRS-MDOKFSTUDIO-DIAG-071
-- SwRS-MDOKFSTUDIO-DIAG-072
-- SwRS-MDOKFSTUDIO-DIAG-073
-- SwRS-MDOKFSTUDIO-DIAG-074
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-009
 ---
 
 ## Preview a diagram stored in a PUML file

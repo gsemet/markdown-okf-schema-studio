@@ -63,6 +63,7 @@ export type PlantUmlIncludeAnswer =
 /** A URL or a standard-library name (`<C4/C4_Context>`): never read from the disk. */
 const NOT_LOCAL = /^\s*(?:<|[a-z][a-z\d+.-]*:)/iu;
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-054
 /**
  * Reads the file a PlantUML `!include` asks for. A nested include resolves next to the including
  * file (`from`), a top-level one next to the document. `watch` is the path whose change (or
@@ -103,6 +104,7 @@ export function resolvePlantUmlInclude(
   return { ok: true, id: read.path, text: read.source, watch: read.path };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-053
 /** The files the built-in engine was given (or asked for in vain), to draw again when they change. */
 export class PlantUmlIncludeWatch {
   private readonly paths = new Set<string>();

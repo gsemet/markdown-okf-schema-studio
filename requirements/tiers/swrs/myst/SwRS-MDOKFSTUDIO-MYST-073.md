@@ -7,16 +7,17 @@ description: When more than 10 extension warnings are detected, the extension
   SHALL keep at most 10.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-072; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-072
 ---
 
 ## At most 10 extension warnings are kept
@@ -39,5 +40,5 @@ When more than 10 extension warnings are detected, the extension SHALL keep at m
 
 ### Verification notes
 
-- Method: test
-- Criteria: MAX_EXTENSION_WARNINGS is 10; untested.
+- Method: Unit test "at most 10 extension warnings are kept and 10 or fewer are all kept" in test/core/render/renderReq.myst.requirements.test.ts
+- Criteria: MAX_EXTENSION_WARNINGS is 10; eleven missing extensions keep ten warnings.

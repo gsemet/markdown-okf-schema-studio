@@ -91,6 +91,7 @@ function harness(options: { failWrite?: boolean; beforeWrite?: (files: FileSyste
   };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
 test("a pasted image never shows under its name before all its bytes are written", async () => {
   const { files, seenMidWrite, paste, images } = harness();
   const result = await paste();

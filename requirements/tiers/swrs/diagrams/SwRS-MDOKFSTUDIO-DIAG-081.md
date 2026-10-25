@@ -7,16 +7,17 @@ description: "When a PlantUML picture is wider than the content column, the exte
   SHALL scale it down to the column width keeping its proportions."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-023; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-023
 ---
 
 ## PlantUML pictures are contained in the content width
@@ -37,11 +38,7 @@ When a PlantUML picture is wider than the content column, the extension SHALL sc
 - WHEN the preview is shown
 - THEN it keeps its natural size
 
-### Known issues
-
-- Known issue: Untested: only the Mermaid rules have a stylesheet test.
-
 ### Verification notes
 
-- Method: No stylesheet test for the PlantUML rules; the visual scenarios exercise them indirectly.
+- Method: Unit test `a PlantUML picture is scaled down to the column and never set to a fixed width` in `test/core/preview/diagReq.styles.requirements.test.ts`.
 - Criteria: max-width 100 percent, height auto, centred.

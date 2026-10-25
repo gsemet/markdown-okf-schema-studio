@@ -513,6 +513,7 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
   // (h3 at 460 px renders exactly like h2: the harness rejects identical screenshots.)
   ...FIRST_GAP_CASES.flatMap(([name, fixture, kind]) => [WIDE, NARROW, XLARGE]
     .filter((viewport) => !(name === "h3" && viewport.width === NARROW.width)).map((viewport) => ({
+    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-004
     id: `first-element-gap-${name}-${viewport.width}`,
     fixture,
     theme: (name === "empty" ? "dark" : "light") as "light" | "dark",
@@ -559,6 +560,7 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
     ["expanded", NARROW360, "360"],
     ["collapsed", NARROW360, "360"],
   ] as const).map(([state, viewport, label]) => ({
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-001
     id: `toolbar-rows-${state}-${mode ?? theme}-${label}`,
     fixture: "32-readme-margin-break",
     theme,
@@ -573,6 +575,7 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
   // Collapsed toolbar: the first element clears the shorter toolbar (P3) at 360 px.
   ...FIRST_GAP_CASES.filter(([name]) => ["paragraph", "table"].includes(name))
     .map(([name, fixture, kind]) => ({
+      // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-018
       id: `first-element-gap-${name}-360-collapsed`,
       fixture,
       theme: "light" as const,

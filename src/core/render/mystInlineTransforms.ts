@@ -31,6 +31,8 @@ function anchorProperties(label: string, line: number | undefined): Record<strin
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-019
+// @implements_req SwRS-MDOKFSTUDIO-MYST-036
 /**
  * Adds the anchor icon for each `(name)=` target: the first child of the following paragraph or
  * heading, else a zero-height row of its own before the block (or alone at the end). Returns the
@@ -105,6 +107,7 @@ export function resolveAnchorIds(html: string, labels: ReadonlySet<string>): str
     labels.has(label) && html.includes(` id="${label}"`) ? "" : ` id="${label}"`);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-010
 /**
  * Turns `[[target]]` and `[[target|text]]` in text into links (not in code, math, links or HTML).
  */
@@ -172,6 +175,7 @@ function trimBareUrl(url: string): string {
   return url.slice(0, end);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-001
 /**
  * Links bare `http(s)://` and `www.` URLs in text, except inside links, references, code, math,
  * HTML and roles.
@@ -250,6 +254,7 @@ function markTaskList(node: MystNode): void {
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-016
 /**
  * Turns marker placeholders in prose into checkbox inputs and restores the literal marker
  * everywhere else (code, math, raw HTML, link text, URLs, directive arguments and options).

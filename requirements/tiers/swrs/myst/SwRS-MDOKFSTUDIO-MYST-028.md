@@ -8,16 +8,17 @@ description: When the rendered page holds `\(x^2\)` in a math span or `\[...\]`
   nodes and code alone, and change nothing when typesetting twice.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-024; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-024
 ---
 
 ## Sphinx-style math delimiters are typeset
@@ -40,5 +41,5 @@ When the rendered page holds `\(x^2\)` in a math span or `\[...\]` in a math blo
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "supports Sphinx math delimiters and leaves ordinary text and code alone" in test/core/render/mathRenderer.test.ts
 - Criteria: Typesetting is idempotent.

@@ -34,6 +34,16 @@ function send(preview: PreviewForTests, type: string, fields: Record<string, unk
 const anchorOf = (line: number, quote: string) => ({ line, endLine: line, quote, prefix: "a ", suffix: " b" });
 const readThreads = (file: string): any[] => JSON.parse(fs.readFileSync(file, "utf8")).threads;
 
+// @tests_req StRS-MDOKFSTUDIO-REVIEW-001
+// @tests_req StRS-MDOKFSTUDIO-REVIEW-003
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-069
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-074
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
 /**
  * T43: creating a thread and replying write the sidecar next to the document through the host
  * queue. Two creates sent together both land; the author comes from the setting; an invalid
@@ -201,6 +211,9 @@ export async function run(): Promise<void> {
   }
 }
 
+// @tests_req StRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 /** T43: a read-only preview offers no comments and writes no sidecar. */
 export async function runUntrusted(preview: PreviewForTests, document: vscode.TextDocument): Promise<void> {
   assert.match(preview.html, /"commentsEnabled":false/u, "a read-only preview has no Comment button");

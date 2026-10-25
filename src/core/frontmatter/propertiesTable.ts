@@ -60,6 +60,8 @@ function linkTitle(link: FrontmatterLinkResult): string {
   return `[${link.code ?? "W15"}] ${link.message}`;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 function formatLinkedValue(value: unknown, link: FrontmatterLinkResult | undefined): string {
   const display = escapeHtml(formatScalar(value));
   if (!link) return display;
@@ -160,6 +162,7 @@ const SEVERITY_CLASS: Record<string, string> = {
   info: "okf-info",
 };
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
 function tooltipOf(field: FrontmatterResult["fields"][number]): string {
   const parts: string[] = [];
   if (field.doc?.title) {
@@ -177,6 +180,13 @@ function tooltipOf(field: FrontmatterResult["fields"][number]): string {
   return parts.join("\n");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-001
 /**
  * Builds the Obsidian-style properties table. Two columns (name | value) by
  * default; when an OKF schema matched, a third column shows each field's

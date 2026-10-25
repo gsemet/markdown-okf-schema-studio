@@ -1,3 +1,4 @@
+// @implements_req SwRS-MDOKFSTUDIO-CORE-050
 /**
  * The OKF frontmatter properties table and the motion rules (transitions, reduced motion).
  *

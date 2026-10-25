@@ -12,6 +12,7 @@
  * callback (see `plantumlFileRequests.ts`), and draws again on `studio:plantuml-includes-changed`.
  */
 import { renderToString } from "@plantuml/core";
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-024
 // Bundled `!theme` definitions and OpenIconic sprites: registered as globals, nothing is fetched.
 import "@plantuml/core/themes.js";
 import "@plantuml/core/openiconic.js";
@@ -25,6 +26,7 @@ import {
 } from "./plantumlDiagram";
 import { PLANTUML_FILE_REQUEST_EVENT, PLANTUML_INCLUDES_CHANGED_EVENT, type PlantUmlFileRequestDetail } from "./plantumlFileRequests";
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-032
 const askHost: PlantUmlFileHost = (request) => new Promise<PlantUmlFileAnswer>((resolve) => {
   const detail: PlantUmlFileRequestDetail = { request, accepted: false, respond: resolve };
   document.dispatchEvent(new CustomEvent(PLANTUML_FILE_REQUEST_EVENT, { detail }));
@@ -52,12 +54,14 @@ function renderDiagrams(diagrams: readonly HTMLElement[]): void {
 
 renderDiagrams(Array.from(document.querySelectorAll<HTMLElement>(diagramSelector)));
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-039
 // A content patch replaces the diagrams: draw the new ones (unchanged sources come from the cache).
 document.addEventListener("studio:content-replaced", () => {
   renderDiagrams(Array.from(document.querySelectorAll<HTMLElement>(diagramSelector))
     .filter((diagram) => !diagram.hasAttribute("data-render-state")));
 });
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-053
 // An included file changed on disk: draw again the diagrams that read files (and those still drawing).
 document.addEventListener(PLANTUML_INCLUDES_CHANGED_EVENT, () => {
   renderer.forgetIncludedFiles();
@@ -66,6 +70,7 @@ document.addEventListener(PLANTUML_INCLUDES_CHANGED_EVENT, () => {
       || !diagram.hasAttribute("data-render-state")));
 });
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
 // A theme switch between light and dark draws every diagram again in the other variant.
 const themeObserver = new MutationObserver(() => {
   const dark = previewIsDark();

@@ -7,16 +7,17 @@ description: When the palette mode is Strict, GFM or MyST, the extension SHALL
   render the same HTML for the same Markdown, as the mode changes buttons only.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-001
 ---
 
 ## Render identically in every palette mode
@@ -39,5 +40,5 @@ When the palette mode is Strict, GFM or MyST, the extension SHALL render the sam
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "the rendered HTML is the same whatever the palette mode: the render takes no mode" in test/core/render/renderReq.renderingCore.requirements.test.ts
 - Criteria: Rendered HTML is the same in all three modes.

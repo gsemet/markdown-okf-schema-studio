@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import { createFocusWorkTracker, focusGroupCommand } from "../../src/host-vscode/groupFocus";
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-151
 test("a group position that exists maps to its focus command", () => {
   assert.equal(focusGroupCommand(1, 2), "workbench.action.focusFirstEditorGroup");
   assert.equal(focusGroupCommand(2, 2), "workbench.action.focusSecondEditorGroup");

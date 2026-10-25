@@ -7,15 +7,16 @@ description: When a writer picks Mermaid in the edition palette or the slash
   menu, the Studio SHALL insert a starter flowchart fence that renders at once.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-001; no marker expected."
 derives_from: []
 user_need: As a writer, I add a diagram in one step and start editing a working
   example instead of an empty block.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-017
-- SwRS-MDOKFSTUDIO-DIAG-018
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-001
 ---
 
 ## Insert a Mermaid diagram from the edit tools

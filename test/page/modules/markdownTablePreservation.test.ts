@@ -114,6 +114,7 @@ test("lineDelta: one inserted line is reported as one added line", () => {
 });
 
 for (const entry of corpus) {
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-094
   test(`round trip preserves the source: ${entry.name}`, () => {
     const tools = createMarkdownTableTools();
     const model = tools.parse(entry.source);
@@ -139,6 +140,7 @@ for (const entry of corpus) {
 // Safety net for every corpus table: any single-cell edit (header and body rows, every column,
 // empty, plain and pipe-containing values) must reparse to the edited model and touch one line.
 for (const entry of corpus) {
+  // @tests_req SwRS-MDOKFSTUDIO-TABLE-091
   test(`every single-cell edit reparses and changes at most one line: ${entry.name}`, () => {
     const tools = createMarkdownTableTools();
     const original = tools.parse(entry.source);

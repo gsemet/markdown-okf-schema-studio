@@ -33,6 +33,7 @@ export { resetRenderHooksForTests, setRenderDelayForTests, setRenderOverrideForT
 /** The activation that runs; undefined before `activate` and after `deactivate`. */
 let activation: StudioActivation | undefined;
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-001
 /** Activates the extension: commands, the custom editor, the serializer and the event wiring. */
 export function activate(context: vscode.ExtensionContext): void {
   activation = new StudioActivation(context.extensionUri);

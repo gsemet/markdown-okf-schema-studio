@@ -5,27 +5,28 @@ uuid: a047ca63-6d02-4c34-ae95-841a018a097b
 title: Checkbox markers stay literal where they have another meaning
 description: When [ ] or [x] occurs in code, math, diagrams, link text or URLs,
   images, ATX headings, raw HTML, directive arguments, an escape, wikilink or
-  reference syntax, the extension SHALL keep it as literal text, and SHALL still
-  render [ ] as a checkbox when [x] is a defined reference label.
+  reference syntax, the extension SHALL keep it as literal text, except that [ ]
+  still renders as a checkbox when [x] is a defined reference label.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-003
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-GFM-016; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-GFM-016
 ---
 
 ## Checkbox markers stay literal where they have another meaning
 
 ### Normative behavior
 
-When [ ] or [x] occurs in code, math, diagrams, link text or URLs, images, ATX headings, raw HTML, directive arguments, an escape, wikilink or reference syntax, the extension SHALL keep it as literal text, and SHALL still render [ ] as a checkbox when [x] is a defined reference label.
+When [ ] or [x] occurs in code, math, diagrams, link text or URLs, images, ATX headings, raw HTML, directive arguments, an escape, wikilink or reference syntax, the extension SHALL keep it as literal text, except that [ ] still renders as a checkbox when [x] is a defined reference label.
 
 ### Scenario: Literal in code and links
 

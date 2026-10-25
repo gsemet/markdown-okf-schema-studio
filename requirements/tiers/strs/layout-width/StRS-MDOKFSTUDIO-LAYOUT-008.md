@@ -8,19 +8,17 @@ description: When the width mode is Margin or Full width, the Studio SHALL keep
   small side margins in Full width, centring narrow blocks in every mode.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-003; no marker expected."
 derives_from: []
 user_need: As a reader, I can rely on Margin to keep everything in a readable
   column, on Full width to use the whole pane, and on narrow tables and figures
   being centred in all modes.
-derived_by:
-- SwRS-MDOKFSTUDIO-LAYOUT-022
-- SwRS-MDOKFSTUDIO-LAYOUT-028
-- SwRS-MDOKFSTUDIO-LAYOUT-029
-- SwRS-MDOKFSTUDIO-LAYOUT-030
-- SwRS-MDOKFSTUDIO-LAYOUT-039
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-LAYOUT-003
 ---
 
 ## Margin and Full width modes frame the content predictably

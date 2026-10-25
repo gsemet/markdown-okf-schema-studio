@@ -8,6 +8,7 @@ export interface SelectAllKeyEvent {
   target?: unknown;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-069
 /**
  * True when `event` is the platform's select-all shortcut (Cmd+A on macOS, Ctrl+A elsewhere)
  * typed in a text control of the page: a textarea, a text-like input or an editable element.

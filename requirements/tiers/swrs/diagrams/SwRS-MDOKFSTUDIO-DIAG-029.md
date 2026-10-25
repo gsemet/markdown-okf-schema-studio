@@ -3,28 +3,29 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-029
 uuid: eb817d93-d5f6-40db-9527-e60dd40f0cd1
 title: Built-in PlantUML diagrams are drawn as inert pictures
-description: When the built-in engine draws a diagram, the page SHALL replace
-  the diagram text with one image whose alt text is "PlantUML diagram" and whose
-  source is a data URI of the SVG, and SHALL set data-render-state to rendered.
+description: "When the built-in engine draws a diagram, the page SHALL replace the
+  diagram text with one image whose alt text is \"PlantUML diagram\" and whose source
+  is a data URI of the SVG, and set data-render-state to rendered."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-023; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-023
 ---
 
 ## Built-in PlantUML diagrams are drawn as inert pictures
 
 ### Normative behavior
 
-When the built-in engine draws a diagram, the page SHALL replace the diagram text with one image whose alt text is "PlantUML diagram" and whose source is a data URI of the SVG, and SHALL set data-render-state to rendered.
+When the built-in engine draws a diagram, the page SHALL replace the diagram text with one image whose alt text is "PlantUML diagram" and whose source is a data URI of the SVG, and set data-render-state to rendered.
 
 ### Scenario: Valid diagram
 

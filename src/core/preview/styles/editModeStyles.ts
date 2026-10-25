@@ -1,3 +1,11 @@
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-017
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-029
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-140
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-006
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-048
 /**
  * Edit mode: scroll anchoring, editable blocks, insert points and move buttons, the block and table
  * cell editors and the table menu.

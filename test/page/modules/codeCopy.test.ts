@@ -161,6 +161,7 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
   };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017
 test("hovering a code block shows the copy button inside its top right corner", () => {
   const t = harness();
   const { pre, code } = t.makePre("print('hi')\n", 100);
@@ -185,6 +186,7 @@ test("the button stays while the pointer moves from the block to the button", ()
   assert.equal(t.button().hidden, false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019
 test("a click posts the raw code only, without filename or line numbers, and shows a check mark", () => {
   const t = harness();
   const { code } = t.makePre("line one\nline two\n", 100);

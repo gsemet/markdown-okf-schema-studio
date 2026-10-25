@@ -3,28 +3,29 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-033
 uuid: cb33b4e6-2f1f-4075-ac47-d5b1224efcb9
 title: The library loaders of the built-in engine refuse every request
-description: When the built-in engine asks for a standard-library bundle or an
-  optional script such as emoji, the page SHALL refuse the request with an error
-  and SHALL NOT add a script tag or fetch anything.
+description: "When the built-in engine asks for a standard-library bundle or an optional
+  script such as emoji, the page SHALL refuse the request with an error without adding
+  a script tag or fetching anything."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-006
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-032; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-032
 ---
 
 ## The library loaders of the built-in engine refuse every request
 
 ### Normative behavior
 
-When the built-in engine asks for a standard-library bundle or an optional script such as emoji, the page SHALL refuse the request with an error and SHALL NOT add a script tag or fetch anything.
+When the built-in engine asks for a standard-library bundle or an optional script such as emoji, the page SHALL refuse the request with an error without adding a script tag or fetching anything.
 
 ### Scenario: Library bundle
 

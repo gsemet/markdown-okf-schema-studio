@@ -6,6 +6,7 @@ import { caretRectOf, caretRevealDelta } from "../../../src/page/modules/caretRe
 const stuckBar = { bottom: 190 };
 const frameAbove = { top: -900 };
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
 test("P4: a caret under the stuck palette is scrolled down to just below it", () => {
   // Caret line at y 120 is under the bar (bottom 190): scroll up by 70 (negative) to land flush under it.
   assert.equal(caretRevealDelta({ top: 120, bottom: 140 }, stuckBar, frameAbove, 900), -70);

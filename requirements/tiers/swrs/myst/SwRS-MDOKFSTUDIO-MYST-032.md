@@ -8,16 +8,17 @@ description: When a figure image path points to a sibling folder such as
   landmark in the frame.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-031; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-031
 ---
 
 ## Figure images outside the document folder load
@@ -40,5 +41,5 @@ When a figure image path points to a sibling folder such as `../external-img/dep
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "resolves parent-relative figure images through the workspace root" in test/security/html-policy.test.ts; Visual scenario chapter-figure-dark in test/visual/scenarioDefinitions1.ts
 - Criteria: Loading follows the resource policy.

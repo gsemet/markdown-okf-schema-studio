@@ -60,6 +60,7 @@ function fileErrors(html: ReturnType<typeof parseHtml>): string[] {
     .map((element) => textContent(element).trim());
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-068
 test("{uml} path.puml and a body-less {plantuml} path.puml render the file, name it and depend on it", async () => {
   const { result, html, docs } = await render(
     "# Page\n\n```{uml} diagrams/flow.puml\n```\n\n```{plantuml} diagrams/flow.puml\n:caption: Flow\n```\n\n"

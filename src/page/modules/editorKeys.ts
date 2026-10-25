@@ -6,6 +6,7 @@ export interface EditorKeyEvent {
   target?: unknown;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-069
 /**
  * True when an open editor of the page (block, table cell, frontmatter, or the table bar of a cell)
  * has already handled `event`: the key is one the editors act on (Tab, Enter, Escape, the arrow

@@ -8,16 +8,17 @@ description: When the preview typesets maths, the extension SHALL load the KaTeX
   and need no script or network request.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-024; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-024
 ---
 
 ## Maths typesets offline without inline styles
@@ -40,5 +41,5 @@ When the preview typesets maths, the extension SHALL load the KaTeX stylesheet a
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "typesets inline and display math with local assets and CSP-compatible styles" in test/core/render/mathRenderer.test.ts
 - Criteria: No external request is made.

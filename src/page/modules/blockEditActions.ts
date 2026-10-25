@@ -16,6 +16,7 @@ import { imageDraft } from "./linkEditActions";
 import type { EditActionContext } from "./editActions";
 import type { TextEdit } from "./textEditing";
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-043
 /** Sets (or, with level 0, removes) the `#` prefix on each touched non-blank line. */
 export function setHeading(ctx: EditActionContext): TextEdit | undefined {
   if (ctx.arg === undefined || !/^[0-5]$/u.test(ctx.arg)) return undefined;
@@ -31,6 +32,7 @@ export function setHeading(ctx: EditActionContext): TextEdit | undefined {
   });
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-049
 /**
  * Quotes every touched line with `> ` in front of any list marker, or removes one quote level
  * when every non-blank touched line is already quoted.
@@ -52,6 +54,8 @@ export function toggleQuote(ctx: EditActionContext): TextEdit | undefined {
   });
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-052
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-053
 /**
  * Turns the touched lines into a bulleted (`- `) or numbered (`1. `) list, or removes the marker
  * when every non-blank touched line already has it. A marker of the other kind is replaced; an
@@ -81,6 +85,7 @@ export function toggleList(ctx: EditActionContext, ordered: boolean): TextEdit |
   });
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-054
 /**
  * Wraps the touched lines in a fence, or inserts an empty fence with the caret inside (on a
  * blank line, otherwise below the caret line). The fence outgrows any backtick run inside.
@@ -123,6 +128,7 @@ export function insertCodeFence(ctx: EditActionContext): TextEdit | undefined {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-050
 /** Puts a horizontal rule, set apart by blank lines, after the line the selection ends on. */
 export function insertRule(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -170,6 +176,7 @@ function alertAtCaret(ctx: EditActionContext): { start: number; end: number; typ
   return { start, end: start + head[2].length, type: head[2].toUpperCase() };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-115
 /**
  * Inserts a GitHub alert (`> [!NOTE]` and the touched lines quoted) or, with the caret inside
  * an alert, changes its type to `ctx.arg`. An unknown type is refused.
@@ -213,6 +220,7 @@ const CHECKBOX_LINE = /^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)\[[ xX]\][ \t]?/u;
 
 const LIST_ITEM_LINE = /^(\s*(?:[-*+]|\d{1,9}[.)])[ \t]+)/u;
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-123
 /**
  * Toggles a task-list checkbox on the touched lines: when every non-blank line has one they
  * lose it (the list item stays), otherwise the lines without one gain `[ ]` after their list
@@ -260,6 +268,7 @@ export function toggleCheckbox(ctx: EditActionContext): TextEdit | undefined {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-124
 /**
  * Wraps the touched lines (or a new sample) in `<details><summary>`; the summary text is
  * selected. A blank line after the summary lets the content render as Markdown.
@@ -282,6 +291,7 @@ export function insertDetails(ctx: EditActionContext): TextEdit | undefined {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-125
 /**
  * Adds a footnote: `[^n]` after the selection and an empty `[^n]: ` definition at the end of
  * the text (after the footnote definitions already there), the caret in it. `n` is one more than
@@ -304,6 +314,8 @@ export function insertFootnote(ctx: EditActionContext): TextEdit | undefined {
   return { start: at, end: ctx.value.length, text: text + trailing, selectionStart: caret, selectionEnd: caret };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-127
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-130
 /**
  * Wraps the touched lines in a MyST colon-fence admonition (`:::{type}`), or inserts an empty one;
  * "custom" writes `{admonition} Title` with a `:class:`. The outer fence is one colon longer than
@@ -340,6 +352,7 @@ export function insertAdmonition(ctx: EditActionContext): TextEdit | undefined {
   return insertBlockAt(ctx, text, custom ? titleAt : head.length, custom ? 5 : 0);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-132
 /** Makes the touched lines a definition list term with an `: Definition` line below (or a sample). */
 export function insertDefinitionList(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -356,6 +369,7 @@ export function insertDefinitionList(ctx: EditActionContext): TextEdit | undefin
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-133
 /** Math: `inline` wraps in `$…$`, `display` in a `$$` block and `aligned` in `\begin{align}`. */
 export function insertMath(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -394,6 +408,7 @@ function imageName(imagePath: string): string {
   return stem === "" ? "image" : stem;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-109
 /** A picked path the actions can write: relative text without line breaks or angle brackets. */
 function pickedImagePath(ctx: EditActionContext): string | undefined {
   const picked = ctx.arg;
@@ -417,6 +432,7 @@ export function insertImage(ctx: EditActionContext): TextEdit | undefined {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-150
 /**
  * `:::{figure} path` with `:alt:` and an empty caption line. The touched lines of a selection
  * become the caption; the fence is one colon longer than the longest colon fence inside them.
@@ -442,6 +458,7 @@ export function insertFigure(ctx: EditActionContext): TextEdit | undefined {
   return insertBlockAt(ctx, text, head.length, 0);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-137
 /** A MyST dropdown: a note admonition with `:class: dropdown`; the touched lines become its body. */
 export function insertDropdown(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;
@@ -464,6 +481,7 @@ export function insertDropdown(ctx: EditActionContext): TextEdit | undefined {
   return insertBlockAt(ctx, text, titleAt, 5);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-017
 /** A fenced Mermaid flowchart set apart after the selection, its first node label selected. */
 export function insertMermaid(ctx: EditActionContext): TextEdit | undefined {
   if (!validSelection(ctx)) return undefined;

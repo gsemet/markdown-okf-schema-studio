@@ -8,17 +8,18 @@ description: When a render has expanded 2000 includes or 10 Mi characters of
   remaining includes as placeholders.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-002
 - StRS-MDOKFSTUDIO-CORE-003
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-013; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-013
 ---
 
 ## Limit the include budget per render
@@ -41,5 +42,5 @@ When a render has expanded 2000 includes or 10 Mi characters of included text, t
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "include fan-out stops at the budget with one diagnostic" in test/core/render/includeBudget.test.ts
 - Criteria: One "Include budget exhausted" warning appears at the limit and none below it.

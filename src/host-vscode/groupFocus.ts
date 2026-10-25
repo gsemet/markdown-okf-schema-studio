@@ -10,6 +10,7 @@ export const FOCUS_GROUP_COMMANDS = [
   "workbench.action.focusEighthEditorGroup",
 ];
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-151
 /**
  * The command that focuses the group at `column`, or undefined when no such group exists now.
  * VS Code creates a new empty group when one of these commands names a position past the last

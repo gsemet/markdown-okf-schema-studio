@@ -8,17 +8,17 @@ description: When a table is wider than the pane, the Studio SHALL let it scroll
   identifiers on one line.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-001; no marker expected."
 derives_from: []
 user_need: As a reader, I reach every column of a wide table without the page
   moving, I can tell there is more to scroll to, and short identifiers stay
   readable.
-derived_by:
-- SwRS-MDOKFSTUDIO-LAYOUT-032
-- SwRS-MDOKFSTUDIO-LAYOUT-033
-- SwRS-MDOKFSTUDIO-LAYOUT-034
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-LAYOUT-001
 ---
 
 ## Wide tables scroll inside their own box

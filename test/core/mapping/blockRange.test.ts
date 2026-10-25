@@ -15,6 +15,7 @@ function paste(text: string, afterLine: number, raw: string): string | { refused
   return text.slice(0, plan.offset) + plan.text + text.slice(plan.offset);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-166
 test("spanText returns the exact lines without the final line break", () => {
   assert.equal(spanText("A\n\nB1\nB2\n\nC\n", 3, 4), "B1\nB2");
   assert.equal(spanText("A\n\nB", 3, 3), "B");
@@ -22,6 +23,7 @@ test("spanText returns the exact lines without the final line break", () => {
   assert.equal(spanText("A\n\n  B  \n", 3, 3), "  B  ", "inner whitespace is kept");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
 test("spanText refuses bad ranges and the frontmatter", () => {
   const text = "---\na: 1\n---\n\nB\n";
   assert.deepEqual(Object.keys(spanText(text, 1, 3) as object), ["refused"]);
@@ -32,6 +34,7 @@ test("spanText refuses bad ranges and the frontmatter", () => {
   assert.equal(spanText(text, 5, 5), "B");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-169
 test("cutting a middle block removes it with one separator", () => {
   assert.equal(cut("A\n\nB\n\nC\n", 3, 3), "A\n\nC\n");
   assert.equal(cut("A\n\nB1\nB2\n\n\nC\n", 3, 4), "A\n\nC\n", "all the blank lines after go with it");
@@ -89,6 +92,7 @@ test("cut refuses the frontmatter and bad ranges", () => {
   assert.deepEqual(Object.keys(planCut("A\n\nB\n", 2, 2)), ["refused"], "a blank line is not a block");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
 test("pastedBlockText trims blank lines at both ends and normalises line breaks", () => {
   assert.equal(pastedBlockText("\n\n  \nA\r\nB\n\n"), "A\nB");
   assert.equal(pastedBlockText("  \n\t\n"), "");

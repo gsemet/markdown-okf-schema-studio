@@ -8,27 +8,16 @@ description: When the JAR option is on in a trusted workspace, the Studio SHALL
   show the result in the open preview.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-007; no marker expected."
 derives_from: []
 user_need: As a writer with a PlantUML installation, I use its exact output,
   including features the bundled engine lacks.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-084
-- SwRS-MDOKFSTUDIO-DIAG-085
-- SwRS-MDOKFSTUDIO-DIAG-086
-- SwRS-MDOKFSTUDIO-DIAG-087
-- SwRS-MDOKFSTUDIO-DIAG-088
-- SwRS-MDOKFSTUDIO-DIAG-104
-- SwRS-MDOKFSTUDIO-DIAG-105
-- SwRS-MDOKFSTUDIO-DIAG-106
-- SwRS-MDOKFSTUDIO-DIAG-108
-- SwRS-MDOKFSTUDIO-DIAG-109
-- SwRS-MDOKFSTUDIO-DIAG-110
-- SwRS-MDOKFSTUDIO-DIAG-111
-- SwRS-MDOKFSTUDIO-DIAG-117
-- SwRS-MDOKFSTUDIO-DIAG-120
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-007
 ---
 
 ## Render PlantUML with my own JAR or command

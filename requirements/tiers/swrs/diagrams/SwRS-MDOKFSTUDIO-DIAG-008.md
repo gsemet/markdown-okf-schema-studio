@@ -8,16 +8,17 @@ description: When a Mermaid map with edge labels is drawn in the dark, light or
   a text contrast of at least 4.5:1 against its background.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-002
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-005; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-005
 ---
 
 ## Mermaid edge labels stay readable

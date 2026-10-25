@@ -271,8 +271,8 @@ even in git.
 - The title follows the same rule: a Conventional Commit subject that says what changes.
 - Update the body whenever the scope changes (re-scope, dropped item, follow-up); it describes
   the PR as it is now, not its history.
-- Add a "How it works" section right after Summary, with one or more small visuals, each placed
-  next to the one or two sentences it supports. Use one, sometimes several, rarely every kind.
+- Add a "Deliverable showcase" section right after Summary: what the reader gets, shown with one or
+  more small visuals, each placed next to the one or two sentences it supports. Use one, sometimes several, rarely every kind.
   Keep only the calls, files, props and boundaries the reviewer needs, with real names checked
   against the code:
   - a Mermaid `flowchart` of the modules or layers that change, arrows for the calls or allowed

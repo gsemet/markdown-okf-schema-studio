@@ -8,6 +8,7 @@ export interface InsertionPlan {
   lineEnding: string;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-094
 /** Where and how to insert a new block after `afterLine` (0 = start of the body). */
 export function planInsertion(text: string, afterLine: number): InsertionPlan | undefined {
   if (!Number.isSafeInteger(afterLine) || afterLine < 0) {

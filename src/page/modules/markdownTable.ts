@@ -35,6 +35,7 @@ interface TableGrid {
 type GridResult = { ok: true; grid: TableGrid } | { ok: false; reason: string };
 
 export function createMarkdownTableTools() {
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-102
   function splitRow(line: string): string[] {
     const text = line.trim();
     const start = text.startsWith("|") ? 1 : 0;
@@ -110,6 +111,7 @@ export function createMarkdownTableTools() {
     return segments;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-091
   function escapeCellPipes(value: string): string {
     let result = "";
     let codeTicks = 0;
@@ -165,6 +167,7 @@ export function createMarkdownTableTools() {
     return `${indentation}| ${newCells.map((cell) => escapeCellPipes(cell)).join(" | ")} |`;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
   function parse(source: string): MarkdownTableModel | undefined {
     const lineEnding = /\r\n|\r|\n/u.exec(source)?.[0] ?? "\n";
     const lines = source.split(/\r\n|\r|\n/u);
@@ -190,6 +193,8 @@ export function createMarkdownTableTools() {
     };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-094
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-234
   function serialize(model: MarkdownTableModel): string {
     if (
       !model.sourceLines
@@ -227,6 +232,7 @@ export function createMarkdownTableTools() {
     return lines.join(model.lineEnding) + (model.trailingLineEnding ? model.lineEnding : "");
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
   function insertRowAfter(model: MarkdownTableModel, renderedRowIndex: number): number {
     const rowIndex = renderedRowIndex === 0 ? 2 : renderedRowIndex + 2;
     model.rows.splice(rowIndex, 0, Array(model.rows[0].length).fill(""));
@@ -257,6 +263,7 @@ export function createMarkdownTableTools() {
     return Math.min(deleteAt, model.rows[0].length - 1);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-117
   /**
    * The model as an HTML `<table>`: the first row in `<thead>`, the rows after the delimiter row
    * in `<tbody>`, the delimiter's colons as `align` attributes. Cell text is kept as text: only
@@ -352,6 +359,7 @@ export function createMarkdownTableTools() {
     };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-076
   function listTableGrid(source: string): GridResult {
     const lineEnding = lineEndingOf(source);
     const trailingLineEnding = /(?:\r\n|\r|\n)$/u.test(source);
@@ -537,6 +545,7 @@ export function createMarkdownTableTools() {
     };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-080
   function gridToListTable(grid: TableGrid): TableConversion {
     let ticks = 2;
     for (const row of grid.rows) {

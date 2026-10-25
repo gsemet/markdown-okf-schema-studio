@@ -1,6 +1,17 @@
 import { directiveStyle } from "../../directives/registry";
 import { gridColumnCss } from "../../render/mystGridToctree";
 
+// @implements_req SwRS-MDOKFSTUDIO-CODE-007
+// @implements_req SwRS-MDOKFSTUDIO-CODE-008
+// @implements_req SwRS-MDOKFSTUDIO-CODE-014
+// @implements_req SwRS-MDOKFSTUDIO-CORE-028
+// @implements_req SwRS-MDOKFSTUDIO-CORE-034
+// @implements_req SwRS-MDOKFSTUDIO-CORE-022
+// @implements_req SwRS-MDOKFSTUDIO-CORE-008
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-032
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-032
 /**
  * Rendered blocks: inline images, label anchors, figures, admonitions, code and highlighting,
  * diagrams, tables, project-only placeholders, grids, toctrees and math.

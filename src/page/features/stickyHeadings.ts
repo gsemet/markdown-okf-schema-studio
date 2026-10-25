@@ -25,6 +25,7 @@ export interface StickyHeadings {
   updateStickyHeadings(fromScroll?: boolean): void;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-022
 /** The sticky heading band of a page; `depth` is the number of heading levels it shows. */
 export function installStickyHeadings(
   document: Document,
@@ -48,6 +49,7 @@ export function installStickyHeadings(
     return rectangle && Number.isFinite(rectangle.bottom) ? Math.max(0, rectangle.bottom) : 0;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
   function refreshStickyHeadingPosition(): void {
     if (!stickyHeadings) return;
     const toolbar = document.querySelector?.("[data-sphinx-preview-toolbar]");
@@ -58,6 +60,7 @@ export function installStickyHeadings(
     stickyHeadings.style?.setProperty?.("--sphinx-preview-toolbar-width", toolbarWidth + "px");
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-030
   function refreshReadingOffset(): void {
     if (!stickyHeadings) {
       readingOffsetValue = 0;
@@ -134,6 +137,7 @@ export function installStickyHeadings(
     return headingTops[found]!.index;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-018
   function updateStickyHeadings(fromScroll = false): void {
     if (!stickyHeadings) return;
     refreshStickyHeadingPosition();

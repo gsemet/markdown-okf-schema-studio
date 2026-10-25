@@ -20,6 +20,7 @@ const DEFINITION_PATTERN =
 
 const URL_SELECTION = /^(?:https?:\/\/|mailto:|www\.)\S+$/iu;
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-089
 /**
  * Starting values of the link panel. A selection inside an existing `[text](url)` (or a caret
  * within it) reads that link back and replaces all of it; a selected URL becomes the target
@@ -89,6 +90,7 @@ function referenceDraft(ctx: EditActionContext): LinkDraft | undefined {
   return undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-109
 /** The image around the selection or caret (`![alt](path)`), or `undefined` outside any image. */
 export function imageDraft(ctx: EditActionContext): ImageDraft | undefined {
   const { value, selectionStart, selectionEnd } = ctx;
@@ -108,6 +110,7 @@ export function imageDraft(ctx: EditActionContext): ImageDraft | undefined {
   return undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-092
 /** The edit that writes `[text](url)` over the range of the selection's link draft. */
 export function linkEdit(ctx: EditActionContext, text: string, url: string): TextEdit {
   const draft = linkDraft(ctx);

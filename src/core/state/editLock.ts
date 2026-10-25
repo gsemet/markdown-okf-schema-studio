@@ -43,6 +43,7 @@ export class EditLock {
     this.pageEditorId = editId;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-191
   /**
    * The page closed the editor `editId` (any editor when omitted). Returns the queued work when
    * nothing else holds it any more.
@@ -80,6 +81,7 @@ export class EditLock {
     return { released: true, flush: this.release() };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-193
   /** True while work that replaces the webview document or its content has to wait. */
   public shouldDeferReload(): boolean {
     return this.held || this.pageEditorId !== undefined;
