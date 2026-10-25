@@ -8,7 +8,8 @@ description: When the sanitizer processes a page, it SHALL remove every embed,
   whose http-equiv is refresh, and every attribute whose name starts with on or
   is srcdoc or style (except the style of a span and the table style attribute
   that other rules handle), give an img without an alt attribute an empty alt,
-  and leave every element and attribute it has no rule for unchanged.
+  and remove every element and attribute that is not on its list of supported
+  ones.
 project: markdown-okf-schema-studio
 scope: trust-security
 lifecycle: draft
@@ -31,7 +32,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When the sanitizer processes a page, it SHALL remove every embed, foreignObject, form, iframe, object and style element, every meta element whose http-equiv is refresh, and every attribute whose name starts with on or is srcdoc or style (except the style of a span and the table style attribute that other rules handle), give an img without an alt attribute an empty alt, and leave every element and attribute it has no rule for unchanged.
+When the sanitizer processes a page, it SHALL remove every embed, foreignObject, form, iframe, object and style element, every meta element whose http-equiv is refresh, and every attribute whose name starts with on or is srcdoc or style (except the style of a span and the table style attribute that other rules handle), give an img without an alt attribute an empty alt, and remove every element and attribute that is not on its list of supported ones (an allow-list: the elements and attributes of the supported rendering, the aria-* attributes and the data attributes of the preview).
 
 ### Scenario (nominal): Active elements are removed with their content
 
@@ -78,16 +79,16 @@ The diagnostic blocked-event-attribute is recorded for each removal.
 | an img element with no alt attribute | it carries alt with an empty value |
 | an img element with alt set to image | the alt text is kept |
 
-### Scenario (boundary): Elements and attributes without a rule
+### Scenario (refusal): Elements and attributes outside the allow-list
 
 | Input | Outcome |
 | --- | --- |
-| a page with a base element | the element stays |
-| a paragraph with a data-example attribute | the attribute stays |
+| a page with a base element | removed; the diagnostic blocked-element is recorded |
+| a link element that is not a stylesheet, a template, a dialog, an element of an unknown name | removed with their content; the diagnostic blocked-element is recorded |
+| a paragraph with a data-example attribute, an image with a ping or formaction attribute | the attribute is removed; the diagnostic blocked-attribute is recorded |
+| a paragraph with a class, an aria-label, a data-line or a data-okf-color attribute | the attribute stays |
 
-### Known issues
-
-- Known issue: the sanitizer is a deny-list, not an allow-list. An element outside its list, such as base or a link that is not a stylesheet, passes untouched, and an unknown attribute stays; the content security policy (base-uri, form-action, frame-src, object-src set to none) and the renderer, which drops raw HTML outside a small subset, are the other walls. Read from the code.
+The list holds the elements and attributes the supported rendering needs: the HTML text, list, table, media and form elements, the basic SVG and MathML elements, the aria-* attributes and the data attributes written by the renderer (data-line, data-end-line, data-line-number, data-footnote*, data-plantuml-* and the prefixes data-sphinx-, data-okf- and data-myst-).
 
 ### Related requirements
 
@@ -99,5 +100,5 @@ The diagnostic blocked-event-attribute is recorded for each removal.
 ### Verification notes
 
 - Method: Unit test test/security/html-policy.test.ts (rewrites local resources and removes active HTML content; removes refresh metadata with surrounding whitespace; rewrites sanitized table styles into a nonce-bearing stylesheet; keeps deferred relative navigation inert and host-routable; reduced previews remove external scripts while retaining contained media) covers the iframe and foreignObject with their neighbours, the refresh with spaces, the event handlers, the style of a paragraph, the empty alt and the kept alt. Embed, object and form are untested. The diagnostic assertion of the removal test accepts the codes blocked-inline-script or blocked-svg-content, and blocked-svg-content does not exist in the code, so the code blocked-active-element is not asserted.
-- Method: Unit test test/security/trustReq.requirements.test.ts (the sanitizer removes style elements and records blocked-inline-style; the sanitizer leaves elements and attributes it has no rule for, Known issue: deny-list) covers the style element and the elements and attributes without a rule (a base element and a data-example attribute stay). The table-style branch (data-myst-table-style) is covered by the tests of SwRS-MDOKFSTUDIO-GFM-031.
+- Method: Unit test test/security/trustReq.requirements.test.ts (the sanitizer removes style elements and records blocked-inline-style; the sanitizer keeps only listed elements and attributes; the sanitizer reports a removed element and a removed attribute) covers the style element and the elements and attributes outside the allow-list (a base element, a link, a template, a dialog, an unknown element, a data-example, ping and formaction attribute are removed, class and aria-label stay). The table-style branch (data-myst-table-style) is covered by the tests of SwRS-MDOKFSTUDIO-GFM-031.
 - Criteria: No element of the removed names remains in the sanitized page, no meta refresh remains, and no element keeps an on* attribute, srcdoc or a style attribute, except the data-okf values of SwRS-MDOKFSTUDIO-GFM-034. No style element written by the document remains; the stylesheet the extension appends has the page nonce. Every img of the sanitized page has an alt attribute. The code blocked-event-attribute is also recorded when a plain style attribute is removed and when a colour span style is cleaned, so the code does not tell the cases apart (visible to the test hook only). An element or attribute is removed or rewritten only by a rule of SwRS-MDOKFSTUDIO-TRUST-011, SwRS-MDOKFSTUDIO-TRUST-025 or SwRS-MDOKFSTUDIO-TRUST-042, or by SwRS-MDOKFSTUDIO-GFM-031, SwRS-MDOKFSTUDIO-GFM-034 or SwRS-MDOKFSTUDIO-LAYOUT-023.

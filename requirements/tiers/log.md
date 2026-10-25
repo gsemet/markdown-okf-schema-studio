@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-10-25 (page security hardening: sanitizer allow-list, message sender check, no stylesheet link)
+
+- SwRS-MDOKFSTUDIO-TRUST-036: the sanitizer keeps only the elements and attributes of the supported
+  rendering (allow-list); others are removed with the diagnostics blocked-element and
+  blocked-attribute. Scenario replaced, Known issue line removed.
+- SwRS-MDOKFSTUDIO-TRUST-042: a linked stylesheet is removed from the page (the diagnostic that it is
+  ignored stays); Known issue line removed.
+- SwRS-MDOKFSTUDIO-TRUST-059: the page hands a window message to the host message filter only from
+  its parent frame, its own window or an event without a sender; Known issue line removed. The
+  sender check cannot be proven without a real webview: covered by a unit test; it still needs one real-window run.
+
 ## 2026-10-25 (trust granted: an open Restricted Mode preview becomes writable)
 
 - SwRS-MDOKFSTUDIO-TRUST-001: on a trust grant, an open preview that was read-only only because of

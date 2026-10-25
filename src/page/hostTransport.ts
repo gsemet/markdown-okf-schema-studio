@@ -30,15 +30,49 @@ export interface VsCodeWebviewApi {
   setState?(state: unknown): void;
 }
 
+/** The part of a `message` event the origin check reads. */
+interface MessageSource {
+  source?: unknown;
+  origin?: string;
+}
+
+/** The window members the transport uses. */
+export type TransportWindow = Pick<Window, "addEventListener"> & Partial<Pick<Window, "parent" | "location">>;
+
+/**
+ * Whether a `message` event comes from a sender the page trusts: the frame that hosts the page (in
+ * a VS Code webview the host posts through the parent frame, whose origin varies by VS Code
+ * version, so the sender frame is checked, not the origin), the page's own window with its own
+ * origin, or an event dispatched in the page itself (no sender, empty origin). A message from any
+ * other window, frame or opener is dropped.
+ */
+export function isTrustedMessageSender(event: MessageSource, window: TransportWindow): boolean {
+  const { source, origin } = event;
+  if (source === undefined || source === null) {
+    return origin === undefined || origin === "";
+  }
+  if (source === window.parent) {
+    return true;
+  }
+  return source === window && (origin === undefined || origin === window.location?.origin || origin === "null");
+}
+
 /**
  * The transport of a VS Code webview: messages through the webview API, host messages as `message`
- * events of the page's window.
+ * events of the page's window sent by a trusted sender (see {@link isTrustedMessageSender}).
  */
-export function createVsCodeTransport(api: VsCodeWebviewApi, window: Pick<Window, "addEventListener">): HostTransport {
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-059
+export function createVsCodeTransport(api: VsCodeWebviewApi, window: TransportWindow): HostTransport {
   return {
     postMessage: (message) => api.postMessage(message),
     getState: () => api.getState?.(),
     setState: (state) => api.setState?.(state),
-    onMessage: (listener) => window.addEventListener("message", (event) => listener((event as MessageEvent).data)),
+    onMessage: (listener) =>
+      window.addEventListener("message", (event) => {
+        const message = event as MessageEvent;
+        if (isTrustedMessageSender(message, window)) {
+          listener(message.data);
+        }
+      }),
   };
 }

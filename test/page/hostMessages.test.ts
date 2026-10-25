@@ -62,6 +62,30 @@ test("the VS Code transport passes the webview API through and unwraps window me
   assert.deepEqual(transport.getState(), { b: 2 });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
+test("a window message event reaches the page only from the parent frame or the page itself", () => {
+  const parent = {};
+  const other = {};
+  let onWindowMessage: ((event: Event) => void) | undefined;
+  const fakeWindow = {
+    parent,
+    location: { origin: "https://page.test" },
+    addEventListener: ((type: string, listener: (event: Event) => void) => { if (type === "message") onWindowMessage = listener; }) as Window["addEventListener"],
+  };
+  const transport = createVsCodeTransport({ postMessage: () => undefined }, fakeWindow as unknown as Parameters<typeof createVsCodeTransport>[1]);
+  const received: unknown[] = [];
+  transport.onMessage((data) => received.push(data));
+  const send = (data: unknown, source: unknown, origin: string): void => onWindowMessage?.({ data, source, origin } as unknown as Event);
+  send("parent", parent, "vscode-webview://abc");
+  send("foreign-window", other, "https://evil.test");
+  send("foreign-same-origin-string", other, "https://page.test");
+  send("opener-null", null, "https://evil.test");
+  send("self", fakeWindow, "https://page.test");
+  send("self-foreign-origin", fakeWindow, "https://evil.test");
+  send("dispatched", null, "");
+  assert.deepEqual(received, ["parent", "self", "dispatched"]);
+});
+
 test("the boot context round-trips through its inert JSON element; a page without one reads {}", () => {
   const context = { documentId: "file:///a</script>.md", revision: 1, requestId: 2, activeSourceFile: "/a.md" };
   const text = serializeRuntimeContext(context);

@@ -51,7 +51,8 @@ test("rewrites local resources and removes active HTML content", () => {
     },
   );
 
-  assert.match(result.html, /webview:\/\/theme\.css/);
+  // The linked stylesheet is ignored (the preview supplies its own theme), so its element is gone.
+  assert.doesNotMatch(result.html, /theme\.css|<link/u);
   assert.match(result.html, /webview:\/\/image\.png/);
   assert.match(result.html, /webview:\/\/movie\.mp4/);
   assert.match(result.html, /nonce=\"unit-nonce\"/);

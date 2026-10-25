@@ -6,10 +6,10 @@ title: The sanitizer rewrites links and records each removal
 description: "When the sanitizer finds a link in a page, it SHALL keep an anchor or
   an http, https or mailto address as the href, turn a relative or wiki request into
   the href # that the host routes from data-sphinx-preview-navigation, remove the
-  address of a blocked request, rewrite a linked stylesheet to its webview address
-  or remove it, and record each removal or rewrite as a diagnostic with a code, a
-  message and the value on the record of the page, without showing it in the status
-  area of the preview."
+  address of a blocked request, remove a linked stylesheet (recording the diagnostic
+  that it is ignored when the file is inside the roots), and record each removal or
+  rewrite as a diagnostic with a code, a message and the value on the record of the
+  page, without showing it in the status area of the preview."
 project: markdown-okf-schema-studio
 scope: trust-security
 lifecycle: draft
@@ -35,7 +35,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, https or mailto address as the href, turn a relative or wiki request into the href # that the host routes from data-sphinx-preview-navigation, remove the address of a blocked request, rewrite a linked stylesheet to its webview address or remove it, and record each removal or rewrite as a diagnostic with a code, a message and the value on the record of the page, without showing it in the status area of the preview.
+When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, https or mailto address as the href, turn a relative or wiki request into the href # that the host routes from data-sphinx-preview-navigation, remove the address of a blocked request, remove a linked stylesheet (recording a diagnostic that it is ignored when the file is inside the roots), and record each removal or rewrite as a diagnostic with a code, a message and the value on the record of the page, without showing it in the status area of the preview.
 
 ### Scenario (nominal): Anchor and external addresses
 
@@ -65,7 +65,7 @@ When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, h
 
 | Input | Outcome |
 | --- | --- |
-| a link element for theme.css inside the roots | the link stays with the webview address of the file |
+| a link element for theme.css inside the roots | the element is removed; the page build records the diagnostic blocked-stylesheet (message Ignored a linked stylesheet; the preview supplies its own theme.) |
 | a link element for a file outside the roots | the element is removed with the diagnostic blocked-stylesheet (message Removed a stylesheet outside staged output.) |
 
 ### Scenario (nominal): Removals are recorded on the record of the page
@@ -85,10 +85,6 @@ When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, h
 - GIVEN a document with a missing include
 - WHEN the preview renders
 - THEN the status area lists the render diagnostic
-
-### Known issues
-
-- Known issue: for every stylesheet the policy accepts, the page build records the diagnostic Ignored a linked stylesheet; the preview supplies its own theme., but the link element stays in the page and the policy allows styles from the webview source. A raw HTML link element does not reach this step from a Markdown document, because the renderer drops it (SwRS-MDOKFSTUDIO-GFM-029). Read from src/session/webview.ts and src/core/security/html-sanitizer.ts.
 
 ### Related requirements
 

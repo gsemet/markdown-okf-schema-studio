@@ -46,6 +46,57 @@ export interface HtmlRewriteResult {
   diagnostics: SecurityDiagnostic[];
 }
 
+/**
+ * Elements the preview keeps. Every other element is removed with its content, so a new or exotic
+ * element never reaches the page until it is listed here. `script`, `style`, `meta`, `link` and the
+ * active elements have their own rules in {@link rewriteNode}.
+ */
+const ALLOWED_ELEMENTS = new Set([
+  "html", "head", "body", "title", "meta", "script", "style", "main", "article", "aside", "section", "nav",
+  "header", "footer", "address", "hgroup", "div", "span", "p", "br", "hr", "wbr", "pre", "code",
+  "kbd", "samp", "var", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "q", "cite", "dl", "dt",
+  "dd", "ol", "ul", "li", "menu", "a", "abbr", "acronym", "b", "bdi", "bdo", "big", "center", "dfn",
+  "em", "font", "i", "mark", "s", "small", "strike", "strong", "sub", "sup", "time", "tt", "u",
+  "del", "ins", "details", "summary", "figure", "figcaption", "img", "picture", "source", "video",
+  "audio", "track", "table", "caption", "col", "colgroup", "tbody", "td", "tfoot", "th", "thead",
+  "tr", "button", "input", "label", "select", "option", "optgroup", "textarea", "fieldset",
+  "legend", "progress", "meter", "output", "ruby", "rt", "rp", "map", "area", "canvas",
+  "svg", "g", "path", "circle", "ellipse", "line", "polygon", "polyline", "rect", "text", "tspan",
+  "defs", "desc", "symbol", "use", "marker", "pattern", "clippath", "mask", "lineargradient",
+  "radialgradient", "stop", "image",
+  "math", "mi", "mn", "mo", "ms", "mtext", "mrow", "mfrac", "msqrt", "mroot", "msub", "msup",
+  "msubsup", "munder", "mover", "munderover", "mtable", "mtr", "mtd", "mspace", "mstyle",
+  "semantics", "annotation",
+]);
+const ALLOWED_ATTRIBUTES = new Set([
+  "id", "class", "title", "lang", "dir", "role", "tabindex", "hidden", "translate", "name", "href",
+  "xlink:href", "src", "srcset", "sizes", "poster", "data", "alt", "width", "height", "colspan",
+  "rowspan", "headers", "scope", "span", "align", "valign", "start", "reversed", "type", "value",
+  "open", "disabled", "checked", "readonly", "required", "placeholder", "for", "min", "max",
+  "low", "high", "optimum", "rel", "target", "download", "hreflang", "cite", "datetime",
+  "controls", "loop", "muted", "preload", "autoplay", "loading", "decoding", "media", "usemap",
+  "shape", "coords", "charset", "content", "color", "face", "size", "border", "cellpadding",
+  "cellspacing", "nonce", "async", "defer", "crossorigin", "integrity", "referrerpolicy",
+  "xmlns", "xmlns:xlink", "xml:space", "viewbox", "preserveaspectratio", "version",
+  "d", "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "points", "transform",
+  "fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "stroke-dasharray",
+  "stroke-opacity", "fill-opacity", "opacity", "offset", "stop-color", "stop-opacity", "gradientunits",
+  "gradienttransform", "markerwidth", "markerheight", "refx", "refy", "orient", "markerunits",
+  "text-anchor", "dominant-baseline", "font-size", "font-family", "font-weight", "dx", "dy",
+  "clip-path", "mask", "patternunits", "fill-rule", "clip-rule", "display", "focusable",
+  "mathvariant", "mathsize", "mathcolor", "mathbackground", "displaystyle",
+  "scriptlevel", "linethickness", "columnalign", "rowalign", "encoding", "close",
+  "separators", "fence", "stretchy", "lspace", "rspace", "accent", "accentunder", "movablelimits",
+]);
+const ALLOWED_ATTRIBUTE_PREFIXES = ["aria-", "data-sphinx-", "data-okf-", "data-myst-", "data-plantuml-", "data-footnote"];
+const ALLOWED_DATA_ATTRIBUTES = new Set(["data-line", "data-end-line", "data-line-number", "data-footnotes"]);
+
+function isAllowedAttribute(name: string): boolean {
+  return ALLOWED_ATTRIBUTES.has(name)
+    || ALLOWED_DATA_ATTRIBUTES.has(name)
+    || ALLOWED_ATTRIBUTE_PREFIXES.some((prefix) => name.startsWith(prefix));
+}
+
 const RESOURCE_ATTRIBUTES = new Set(["src", "poster", "data"]);
 const REMOVED_ELEMENTS = new Set(["embed", "foreignobject", "form", "iframe", "object"]);
 const TABLE_STYLE_ELEMENTS = new Set([
@@ -188,6 +239,29 @@ function rewriteNode(
     return;
   }
 
+  if (tagName === "link") {
+    removeNode(parent, node);
+    const isStylesheet = attr(node, "rel")?.value.toLowerCase().split(/\s+/u).includes("stylesheet");
+    const stylesheet = attr(node, "href");
+    if (!isStylesheet || !stylesheet) {
+      addDiagnostic(diagnostics, "blocked-element", "Removed <link> from preview output.");
+      return;
+    }
+    const resolved = context.resolveResource(stylesheet.value, context.outputRoot);
+    if (resolved) {
+      context.processStylesheet?.(resolved.path);
+    } else {
+      addDiagnostic(diagnostics, "blocked-stylesheet", "Removed a stylesheet outside staged output.", stylesheet.value);
+    }
+    return;
+  }
+
+  if (!tagName.startsWith("#") && !ALLOWED_ELEMENTS.has(tagName)) {
+    removeNode(parent, node);
+    addDiagnostic(diagnostics, "blocked-element", `Removed <${tagName}> from preview output.`);
+    return;
+  }
+
   if (tagName === "script") {
     if (context.allowExternalScripts === false) {
       removeNode(parent, node);
@@ -304,6 +378,12 @@ function rewriteNode(
       continue;
     }
 
+    if (!isAllowedAttribute(name)) {
+      removeAttr(node, attribute.name);
+      addDiagnostic(diagnostics, "blocked-attribute", `Removed unsupported ${attribute.name} attribute.`);
+      continue;
+    }
+
     if (name === "srcset") {
       const rewritten = rewriteSrcset(attribute.value, (request) => {
         const resolved = context.resolveResource(request, context.outputRoot);
@@ -329,11 +409,7 @@ function rewriteNode(
       continue;
     }
 
-    const isStylesheetHref =
-      tagName === "link" &&
-      name === "href" &&
-      attr(node, "rel")?.value.toLowerCase().split(/\s+/u).includes("stylesheet");
-    if ((name === "href" || name === "xlink:href") && !isStylesheetHref) {
+    if (name === "href" || name === "xlink:href") {
       const originalRequest = attribute.value;
       const link = context.resolveNavigation(originalRequest, context.outputRoot);
       if ("uri" in link) {
@@ -372,21 +448,6 @@ function rewriteNode(
     && !NATURALLY_FOCUSABLE_ELEMENTS.has(tagName)
   ) {
     setAttr(node, "tabindex", "0");
-  }
-
-  if (tagName === "link" && attr(node, "rel")?.value.toLowerCase().split(/\s+/u).includes("stylesheet")) {
-    const stylesheet = attr(node, "href");
-    if (stylesheet) {
-      const resolved = context.resolveResource(stylesheet.value, context.outputRoot);
-      if (resolved) {
-        stylesheet.value = resolved.uri;
-        context.processStylesheet?.(resolved.path);
-      } else {
-        removeNode(parent, node);
-        addDiagnostic(diagnostics, "blocked-stylesheet", "Removed a stylesheet outside staged output.", stylesheet.value);
-        return;
-      }
-    }
   }
 
   walkChildren(node, context, diagnostics, tableStyles);
