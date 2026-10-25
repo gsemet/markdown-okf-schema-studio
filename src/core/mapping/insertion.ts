@@ -1,3 +1,4 @@
+import { sourceLines } from "../edits/textEdit";
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 
 export interface InsertionPlan {
@@ -14,14 +15,13 @@ export function planInsertion(text: string, afterLine: number): InsertionPlan | 
   if (!Number.isSafeInteger(afterLine) || afterLine < 0) {
     return undefined;
   }
-  const lineEnding = text.includes("\r\n") ? "\r\n" : "\n";
+  const lineEnding = text.includes("\r\n") ? "\r\n" : text.includes("\n") ? "\n" : text.includes("\r") ? "\r" : "\n";
+  const lines = sourceLines(text);
   let anchorLine = afterLine;
   if (afterLine === 0) {
     const frontmatter = matchFrontmatterBlock(text);
     if (!frontmatter) {
-      const firstBreak = text.search(/\r?\n/u);
-      const firstLine = firstBreak === -1 ? text : text.slice(0, firstBreak);
-      const firstLineBlank = text.length > 0 && firstLine.trim() === "";
+      const firstLineBlank = text.length > 0 && lines.text(0).trim() === "";
       return {
         offset: 0,
         prefix: "",
@@ -29,36 +29,19 @@ export function planInsertion(text: string, afterLine: number): InsertionPlan | 
         lineEnding,
       };
     }
-    const closed = text.slice(0, frontmatter.length).replace(/\r?\n$/u, "");
-    anchorLine = closed.split("\n").length;
+    const closed = text.slice(0, frontmatter.length).replace(/(?:\r\n|\n|\r)$/u, "");
+    anchorLine = sourceLines(closed).count;
   }
-  // Locate the end of `anchorLine` (before its line break).
-  let offset = 0;
-  for (let line = 1; line < anchorLine; line += 1) {
-    const next = text.indexOf("\n", offset);
-    if (next === -1) {
-      return undefined;
-    }
-    offset = next + 1;
-  }
-  if (offset >= text.length && !(anchorLine === 1 && text.length === 0)) {
-    // The line after a final line break does not exist.
+  // The line after a final line break does not exist; an empty text has its one empty line.
+  if (anchorLine > lines.count || (lines.start(anchorLine - 1) >= text.length && text.length > 0)) {
     return undefined;
   }
-  const lineBreak = text.indexOf("\n", offset);
-  offset = lineBreak === -1 ? text.length : (lineBreak > offset && text[lineBreak - 1] === "\r" ? lineBreak - 1 : lineBreak);
-  const breakLength = offset < text.length ? (text[offset] === "\r" ? 2 : 1) : 0;
-  const followingStart = offset + breakLength;
-  let followingExists = false;
-  if (followingStart < text.length) {
-    const nextBreak = text.indexOf("\n", followingStart);
-    const following = text.slice(followingStart, nextBreak === -1 ? text.length : nextBreak);
-    followingExists = following.trim() !== "";
-  }
+  const offset = lines.end(anchorLine - 1);
+  const following = anchorLine < lines.count ? lines.text(anchorLine) : "";
   return {
     offset,
     prefix: lineEnding + lineEnding,
-    suffix: followingExists ? lineEnding : "",
+    suffix: following.trim() !== "" ? lineEnding : "",
     lineEnding,
   };
 }
@@ -69,6 +52,6 @@ export function insertionText(plan: InsertionPlan, raw: string): string {
     return "";
   }
   return plan.prefix
-    + raw.replace(/\r?\n/gu, plan.lineEnding).replace(/(\r?\n)+$/u, "")
+    + raw.replace(/\r\n|\n|\r/gu, plan.lineEnding).replace(/(?:\r\n|\n|\r)+$/u, "")
     + plan.suffix;
 }

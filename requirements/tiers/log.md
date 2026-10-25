@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-25 (block edits and insertions keep CRLF and lone-CR line endings)
+
+- SwRS-MDOKFSTUDIO-BLOCK-234: the line breaks inside an edited multi-line block are written with
+  the one line ending the block already uses (the text box returns LF). Added a scenario (a block of one
+  line takes the document's ending), removed the Known issue line.
+- SwRS-MDOKFSTUDIO-BLOCK-094: the insertion planner counts lines by LF, CR LF and CR and inserts
+  with CR in a lone-CR document. Added a scenario, removed the Known issue line.
+
 ## 2026-10-25 (a soft shadow under the sticky heading band)
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-002 (new): the sticky heading band casts a soft theme-coloured shadow

@@ -92,3 +92,17 @@ for (const [name, figure, closingLine] of FIGURE_SHAPES) {
     );
   });
 }
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-094
+test("lone-CR documents keep CR and count lines by CR", () => {
+  assert.equal(insert("A\r\rB\r", 1, "N1\nN2"), "A\r\rN1\rN2\r\rB\r");
+  assert.equal(insert("A\r\rB\r", 3, "NEW"), "A\r\rB\r\rNEW\r");
+  assert.equal(insert("- a\r- b\r- c\r", 2, "NEW"), "- a\r- b\r\rNEW\r\r- c\r");
+  assert.equal(insert("Body\r", 0, "NEW"), "NEW\r\rBody\r");
+  assert.equal(planInsertion("A\r", 2), undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-094
+test("CRLF documents are counted line by line for later lines", () => {
+  assert.equal(insert("A\r\n\r\nB\r\n", 3, "NEW"), "A\r\n\r\nB\r\n\r\nNEW\r\n");
+});

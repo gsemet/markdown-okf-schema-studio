@@ -488,3 +488,45 @@ test("the host stores the edit mode a writable preview reports and ignores the o
   await readOnly.send("previewEditModeChanged", { editMode: false });
   assert.equal(updates.length, 1, "a read-only preview stores nothing");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+test("a block edit keeps the line ending of the document and the next save is not refused", async () => {
+  for (const eol of ["\n", "\r\n", "\r"]) {
+    const name = JSON.stringify(eol);
+    const text = `# Title${eol}${eol}- a${eol}- b${eol}${eol}Last${eol}`;
+    const run = fixture({ text });
+    // The list is source lines 3-4; the text box returns LF.
+    const list = { editId: "e1", line: 3, endLine: 4, originalText: `- a${eol}- b${eol}` };
+    await run.send("previewEditSave", { ...list, editedText: `- a\n- b\n- c${eol}`, final: false });
+    assert.equal(run.document.getText(), `# Title${eol}${eol}- a${eol}- b${eol}- c${eol}${eol}Last${eol}`, name);
+    await run.send("previewEditSave", { ...list, editedText: `- a\n- b\n- c\n- d${eol}`, final: false });
+    assert.deepEqual(run.of("previewEditSource"), [], `${name}: the second save is not refused`);
+    assert.equal(run.document.getText(), `# Title${eol}${eol}- a${eol}- b${eol}- c${eol}- d${eol}${eol}Last${eol}`, name);
+
+    // A one-line paragraph with Enter pressed, and its trailing line ending kept.
+    const single = fixture({ text });
+    await single.send("previewEditSave", {
+      editId: "e1", line: 6, endLine: 6, originalText: `Last${eol}`, editedText: `Last\nmore${eol}`, final: true,
+    });
+    assert.equal(single.document.getText(), `# Title${eol}${eol}- a${eol}- b${eol}${eol}Last${eol}more${eol}`, name);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+test("a block edit in a document with mixed line endings writes the text box content as it is", async () => {
+  const run = fixture({ text: "# Title\r\n\r\n- a\n- b\r\n\r\nLast\n" });
+  await run.send("previewEditSave", {
+    editId: "e1", line: 3, endLine: 4, originalText: "- a\n- b\r\n", editedText: "- a\n- b\n- c\r\n", final: false,
+  });
+  assert.deepEqual(run.of("previewEditSource"), []);
+  assert.equal(run.document.getText(), "# Title\r\n\r\n- a\n- b\n- c\r\n\r\nLast\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
+test("the last block of a CRLF document without a final line break takes CR LF", async () => {
+  const run = fixture({ text: "# Title\r\n\r\nLast" });
+  await run.send("previewEditSave", {
+    editId: "e1", line: 3, endLine: 3, originalText: "Last", editedText: "Last\nmore", final: true,
+  });
+  assert.equal(run.document.getText(), "# Title\r\n\r\nLast\r\nmore");
+});

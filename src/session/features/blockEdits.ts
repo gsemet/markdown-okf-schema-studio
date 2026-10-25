@@ -4,7 +4,7 @@
  * STAB-06), and the flush of the page's open editors before the host switches document (CR 025).
  */
 
-import { planBlockTextEdit } from "../../core/edits/sourceEdits";
+import { planBlockTextEdit, withLineEndingOf } from "../../core/edits/sourceEdits";
 import type { HostDocument } from "../../host-api/documentStore";
 import { sourceRangeForLines } from "../../core/mapping/sourceMapping";
 import { insertionText, planInsertion, type InsertionPlan } from "../../core/mapping/insertion";
@@ -272,7 +272,9 @@ export class BlockEditController {
     if (preview.edits.active !== edit || edit.applying) {
       return;
     }
-    const editedText = edit.pendingText;
+    const editedText = edit.pendingText === undefined
+      ? undefined
+      : withLineEndingOf(edit.pendingText, edit.lastSavedText, preview.document?.getText());
     if (editedText === undefined || editedText === edit.lastSavedText) {
       edit.pendingText = undefined;
       if (edit.finalRequested) {

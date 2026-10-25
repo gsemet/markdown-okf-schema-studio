@@ -206,6 +206,21 @@ export function planBlocksPaste(text: string, afterLine: number, clipboard: stri
   return { edit: { start: plan.offset, end: plan.offset, text: plan.text } };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-234
+/**
+ * `editedText` with every line break turned into the one line ending that `reference` (the block
+ * text) uses throughout; a `reference` with no line break takes the one line ending of
+ * `documentText`. A text box returns LF for every break, the document may use CR LF or CR. Mixed
+ * line endings leave `editedText` as it is.
+ */
+export function withLineEndingOf(editedText: string, reference: string, documentText = ""): string {
+  let endings = new Set(reference.match(/\r\n|\n|\r/gu));
+  if (endings.size === 0) endings = new Set(documentText.match(/\r\n|\n|\r/gu));
+  if (endings.size !== 1) return editedText;
+  const [ending] = endings;
+  return editedText.replace(/\r\n|\n|\r/gu, ending);
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-042
 /**
  * The smallest edit that turns the block text last written to the document (`lastSavedText`,
