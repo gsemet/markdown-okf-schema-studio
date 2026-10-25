@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/modules/incomingChanges.test.ts
 - test/page/modules/reviewReq.requirements.test.ts
 - test/page/runtimePageControls.test.ts
+- test/visual/scenarioDefinitions2.ts
 ---
 
 ## Changed blocks get a thin change bar that moves nothing

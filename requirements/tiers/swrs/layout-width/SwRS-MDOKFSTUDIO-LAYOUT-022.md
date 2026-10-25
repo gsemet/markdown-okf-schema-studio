@@ -69,7 +69,7 @@ When the width mode is Margin or Full width, the extension SHALL keep tables, co
 | Top-level paragraph holding two images and no text | Not marked as a figure |
 
 ### Known issues
-- Known issue: The README says that with the setting at 0 all three modes look the same, but Full width uses a 16 px gutter where Margin and Auto use up to 78 px (not identical, and not tested).
+- Known issue: docs/user/settings.md says that with the setting at 0 all three modes look the same, but Full width uses a 16 px gutter where Margin and Auto use up to 78 px (not identical, and not tested).
 - Known issue: The centring rules are only visual checks; no unit test reads them.
 - Known issue: The negative case of the figure mark and the removal of a stale mark have no test.
 - Known issue: The figure mark requires exactly one child element, while the Auto breakout treats any image of a text-free top-level paragraph as its wrapper, so a paragraph of two images can break out in Auto without being marked as a figure (and so without being centred).

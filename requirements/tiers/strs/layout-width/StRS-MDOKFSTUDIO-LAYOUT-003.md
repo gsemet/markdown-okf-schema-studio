@@ -75,8 +75,8 @@ As a writer or team, I choose how wide the text column is, from a narrow measure
 - Margin keeps tables, code blocks and figures inside the text column; they scroll or wrap instead of leaving it.
 - Full width removes the column limit and gives the page and wide blocks the same 16 px side margins as a table that breaks out in Auto; text, tables, code blocks and figures are centred with at least 15 px gutters.
 - In every mode a table or figure narrower than the column is centred at its own width, a narrow figure and its caption are centred under the picture, a paragraph holding only an image is marked as a figure, and code blocks stay left with their width.
-- Known issue: the README says that with the setting at 0 the three width modes look the same, which is not exact because Full width keeps a 16 px gutter while the other modes keep up to 78 px.
+- Known issue: docs/user/settings.md says that with the setting at 0 the three width modes look the same, which is not exact because Full width keeps a 16 px gutter while the other modes keep up to 78 px.
 - Known issue: the update of an open preview after a setting change has no automated test.
-- Known issue: the code and README put the button on row 3, while the file header of the width mode module and an older bullet of the Unreleased change-log entry say row 2.
+- Known issue: the code and docs/user/toolbar.md put the button on row 3, while the file header of the width mode module and an older bullet of the Unreleased change-log entry say row 2.
 - Known issue: the paths for %/em/rem figures, declared pixel widths, the Mermaid wrapper and the 1 px tolerance are not directly tested, and no visual scenario combines the open table-of-contents column with Auto.
 - Known issue: some visual scenario titles (`v05`, `v06` "full") do not match what they assert.

@@ -255,6 +255,11 @@ export const INCOMING_RANGES_MESSAGE = {
   data: { type: "previewIncomingChanges", enabled: true, ranges: [{ start: 7, end: 13 }, { start: 26, end: 36 }, { start: 48, end: 48 }] },
 };
 
+/** CR 090: the blocks of `54-readme-showcase` reported as changed since the last commit (intro, one card, admonition, figure). */
+export const README_SHOWCASE_CHANGES_MESSAGE = {
+  data: { type: "previewIncomingChanges", enabled: true, ranges: [{ start: 16, end: 17 }, { start: 28, end: 32 }, { start: 41, end: 47 }, { start: 49, end: 55 }] },
+};
+
 export const INCOMING_BARS_ASSERTIONS: ContentAssertion[] = [
   { message: "every block the ranges meet is marked and the blocks before them are not", selector: `${MAIN} [data-sphinx-preview-changed]`, min: 8,
     expr: "(() => { const marked = [...document.querySelectorAll('#sphinx-myst-preview-content [data-sphinx-preview-changed]')]; const first = document.querySelector('#sphinx-myst-preview-content p'); return marked.every(e => e.getBoundingClientRect().top > first.getBoundingClientRect().bottom) && !first.hasAttribute('data-sphinx-preview-changed') && !document.querySelector('#sphinx-myst-preview-content h2').hasAttribute('data-sphinx-preview-changed'); })()" },

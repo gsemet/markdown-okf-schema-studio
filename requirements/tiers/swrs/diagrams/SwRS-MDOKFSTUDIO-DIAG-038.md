@@ -42,7 +42,7 @@ When the text of a built-in diagram is longer than 1 MiB (1,048,576 characters),
 
 ### Known issues
 
-- Known issue: The limit is counted in UTF-16 code units and is the same constant as the JAR pipeline's; README states 1 MiB only for includes.
+- Known issue: The limit is counted in UTF-16 code units and is the same constant as the JAR pipeline's; docs/user/plantuml.md states 1 MiB only for includes.
 
 ### Verification notes
 

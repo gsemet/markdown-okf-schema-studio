@@ -56,6 +56,6 @@ Writers need code samples to read as they would in published documentation, in t
 
 ### Rationale and constraints
 
-- Unsupported languages stay plain monospace text; the shared language list is not documented in the README.
+- Unsupported languages stay plain monospace text; the shared language list is not documented in docs/user/editing.md.
 - A diff is a visualization only: no comparison and no per-line navigation. The literal markers stay in the text.
 - Line numbers, emphasized lines, file names and captions apply to MyST code directives; plain fences are covered by the highlighted code samples.

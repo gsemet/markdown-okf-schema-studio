@@ -40,7 +40,7 @@ When the width mode is Full width, the extension SHALL lift the column limit and
 
 ### Known issues
 
-- Known issue: The README says that with the setting at 0 all three modes look the same, but Full width uses a 16 px gutter where Margin and Auto use up to 78 px (not identical, and not tested).
+- Known issue: docs/user/settings.md says that with the setting at 0 all three modes look the same, but Full width uses a 16 px gutter where Margin and Auto use up to 78 px (not identical, and not tested).
 
 ### Verification notes
 
