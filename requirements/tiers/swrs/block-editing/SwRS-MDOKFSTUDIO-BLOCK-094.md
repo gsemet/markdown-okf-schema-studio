@@ -59,6 +59,7 @@ When the host writes a new block after a line, it SHALL put one blank line befor
 | --- | --- |
 | A document with CR LF line breaks, a block of two lines inserted | Every line break of the inserted text is CR LF |
 | A document with LF line breaks only, a block inserted | Every line break of the inserted text is LF |
+| A document whose lines end with a lone CR, a block of two lines inserted after line 1 or after a later line | The block goes at the end of that line and every line break of the inserted text is CR; a line after the last CR is refused as missing |
 
 ### Scenario (refusal): A whitespace-only new block
 | Input | Outcome |
@@ -79,14 +80,14 @@ When the host writes a new block after a line, it SHALL put one blank line befor
 | A previewEditOpen with insertAfterLine on the last line | The empty source of the new block is sent |
 
 ### Known issues
-- Known issue: the planner finds line ends by LF only. In a document whose lines end with a lone CR, an insertion after line 1 goes to the end of the text and an insertion after any later line is refused as stale.
+- Known issue: a document whose lines end with a lone CR is not recognised as having frontmatter (the fence match accepts LF and CR LF only), so an insertion at the start of such a document goes before the frontmatter.
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-BLOCK-087: the page side of the insertion
 - SwRS-MDOKFSTUDIO-BLOCK-216: a refused open or save keeps the typed text and says why (the save for an insertion after a missing line)
 
 ### Verification notes
-- Method: test/core/mapping/insertion.test.ts (between blocks, glued next block, last line with and without a final line break, frontmatter, empty document, CRLF documents, whitespace-only text, trailing line breaks, out of range lines); the stale message has no assertion
+- Method: test/core/mapping/insertion.test.ts (between blocks, glued next block, last line with and without a final line break, frontmatter, empty document, CRLF documents, lone-CR documents, whitespace-only text, trailing line breaks, out of range lines); the stale message has no assertion
 - Method: test/integration/previewEditing.test.ts (insertion protocol: autosave, final save, cancel, empty text)
 - Method: real-input scenario scenarioInsertAfterFinalFigure and visual scenarios block-editing/v09 and block-editing/v10 (end of document after a figure or an image)
-- Criteria: prefix is two line endings and suffix one line ending only when the next line holds text; the offset equals the end of the closing fence line after frontmatter; offset 0 with an empty prefix for a first block without frontmatter; the plan's lineEnding is CR LF when the text contains a CR LF pair; insertionText returns an empty string for whitespace; a final line break is not counted as a following line; no double separator follows the inserted text; planInsertion returns undefined for an out of range line and the host posts the error
+- Criteria: prefix is two line endings and suffix one line ending only when the next line holds text; the offset equals the end of the closing fence line after frontmatter; offset 0 with an empty prefix for a first block without frontmatter; the plan's lineEnding is CR LF when the text contains a CR LF pair, else LF when it contains an LF, else CR when it contains a CR; insertionText returns an empty string for whitespace; a final line break is not counted as a following line; no double separator follows the inserted text; planInsertion returns undefined for an out of range line and the host posts the error
