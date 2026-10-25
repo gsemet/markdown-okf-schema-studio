@@ -20,6 +20,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/render/mystBlockTransforms.ts
 - src/core/render/mystRenderer.ts
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
@@ -49,7 +50,7 @@ When a document holds a term followed by `: Definition` lines or an inline `{sub
 
 - GIVEN a doc role and a download role, each written with a label and a target in angle brackets, and a doc role written with a bare target
 - WHEN the preview renders
-- THEN each is a plain link whose `href` is the written target, with the label as text; a role written without a label gives an empty link, since the target path itself is not a link text
+- THEN each is a plain link whose `href` is the written target, with the label as text; a role written without a label shows the written target as text (the file name for a download role)
 
 ### Scenario (refusal): Numbered references stay inert placeholders
 
@@ -59,11 +60,11 @@ When a document holds a term followed by `: Definition` lines or an inline `{sub
 
 ### Known issues
 
-- Known issue: the preview adds no resolution of its own. `{doc}` and `{download}` targets are not checked against the workspace, `{numref}` to a heading label is never resolved to a number (it stays an inert placeholder span), and a `{doc}` or `{download}` written without a label renders an empty link.
+- Known issue: the preview adds no resolution of its own. `{doc}` and `{download}` targets are not checked against the workspace and `{numref}` to a heading label is never resolved to a number (it stays an inert placeholder span).
 
 ### Verification notes
 
 - Method: test/core/render/mystFeatures.test.ts (definition lists and sub, sup, abbr, kbd: "MyST typography renders definitions, abbreviations, scripts, and footnotes")
 - Method: test/core/render/mystPaletteRendering.test.ts (palette-written kbd role: "T30: a {kbd} role inserted by the edition palette renders a kbd element")
-- Method: test/core/render/renderReq.myst.requirements.test.ts (doc and download links, numref placeholder: "doc and download roles render as plain links and numref as an inert placeholder (Known issues)")
-- Criteria: Term and definition become dt and dd; each role maps to its element; doc and download are plain links with the written target; the numref placeholder holds the role name and the written key.
+- Method: test/core/render/renderReq.myst.requirements.test.ts (doc and download links, numref placeholder: "doc and download roles render as plain links and numref as an inert placeholder")
+- Criteria: Term and definition become dt and dd; each role maps to its element; doc and download are plain links with the written target; the doc and download text is the label, or the written target (file name for a download) without a label; the numref placeholder holds the role name and the written key.

@@ -72,6 +72,25 @@ export function normalizeCaptionlessReferences(root: MystNode): void {
   preserveCaptionlessReferences(root, targets);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-017
+/**
+ * A `{doc}` or `{download}` role written without a label shows its target as the link text: the
+ * written path for `{doc}`, the file name for `{download}`. A role with a label is unchanged.
+ */
+export function labelLinkRoles(node: MystNode): void {
+  if (node.type === "mystRole" && (node.name === "doc" || node.name === "download")) {
+    for (const link of node.children ?? []) {
+      if (link.type === "link" && link.url && !link.children?.length) {
+        const text = node.name === "download" ? link.url.replace(/^.*[\\/]/u, "") || link.url : link.url;
+        link.children = [{ type: "text", value: text }];
+      }
+    }
+  }
+  for (const child of node.children ?? []) {
+    labelLinkRoles(child);
+  }
+}
+
 const RAW_DETAILS_HEAD = /^<details((?:\s+open(?:=(?:""|"open"))?)?)\s*>\s*(?:<summary>([^<]*)<\/summary>)?\s*$/iu;
 const RAW_DETAILS_WHOLE = /^<details((?:\s+open(?:=(?:""|"open"))?)?)\s*>\s*(?:<summary>([^<]*)<\/summary>)?([\s\S]*?)<\/details>\s*$/iu;
 

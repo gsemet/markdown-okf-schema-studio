@@ -96,10 +96,10 @@ test("an included file is not checked against conf.py while the document's own t
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-017
-test("doc and download roles render as plain links and numref as an inert placeholder (Known issues)", async () => {
+test("doc and download roles render as plain links and numref as an inert placeholder", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
-      "See {doc}`other/page`, {doc}`Label <other/page>` and {download}`manifest <schema/m.json>`.\n\n"
+      "See {doc}`other/page`, {doc}`Label <other/page>`, {download}`manifest <schema/m.json>` and {download}`schema/m.json`.\n\n"
       + "(fig-x)=\n## Figure heading\n\nRef {numref}`fig-x` and {numref}`Figure <fig-x>`.\n",
     ),
     workspaceRoot,
@@ -110,9 +110,10 @@ test("doc and download roles render as plain links and numref as an inert placeh
   const links = findElements(dom, (element) => element.tagName === "a" && attribute(element, "href") !== undefined
     && !hasClass(element, "okf-anchor")).map((link) => [attribute(link, "href"), textContent(link)]);
   assert.deepEqual(links, [
-    ["other/page", ""], // Known issue: a role without a label gives an empty link
+    ["other/page", "other/page"], // no label: the written target is the text
     ["other/page", "Label"],
     ["schema/m.json", "manifest"],
+    ["schema/m.json", "m.json"], // no label: the file name is the text
   ]);
   const placeholders = findElements(dom, (element) => element.tagName === "span"
     && hasClass(element, "reference") && hasClass(element, "role") && hasClass(element, "unhandled"));
