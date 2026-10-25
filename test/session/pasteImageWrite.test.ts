@@ -123,3 +123,22 @@ test("a file created under the chosen name during the write is kept and the past
   assert.deepEqual(Buffer.from(await files.readFile(`${FOLDER}/image-1.png`)), PNG);
   assert.deepEqual(await images(), ["image-1.png", "image.png"], "the hidden file of the paste is removed");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
+test("the next paste removes old hidden partial files of its own naming and nothing else", async () => {
+  const old = Date.now() - 60 * 60 * 1000;
+  const { files, paste, images } = harness();
+  const memory = files as unknown as { addFile(path: string, text: string, mtimeMs?: number): void };
+  const staleOurs = [".image.png.k3j9x0ab.partial", ".image-12.webp.0a.partial"];
+  const keep = [
+    ".image.png.zz9.partial", // ours but recent: another paste may still be writing it
+    ".notes.txt.k3j9x0ab.partial", // not an image name of ours
+    "image.png.k3j9x0ab.partial", // not hidden
+    ".image.png.K3J9X0AB.partial", // wrong alphabet
+    "old.png", // an ordinary old file
+  ];
+  for (const name of [...staleOurs, ...keep]) memory.addFile(`${FOLDER}/${name}`, "x", name === keep[0] ? Date.now() : old);
+  const result = await paste();
+  assert.equal(result?.ok, true, `host answer: ${JSON.stringify(result)}`);
+  assert.deepEqual(await images(), [...keep, "image.png"].sort());
+});

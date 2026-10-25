@@ -27,7 +27,7 @@ export function createNodeFileSystem(): FileSystem {
   return {
     async stat(file): Promise<FileStat> {
       const stat = await fs.stat(file);
-      return { kind: kindOf(stat), size: stat.size };
+      return { kind: kindOf(stat), size: stat.size, mtimeMs: stat.mtimeMs };
     },
     async readFile(file) {
       return new Uint8Array(await fs.readFile(file));

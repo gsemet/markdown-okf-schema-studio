@@ -10,7 +10,7 @@ import type { FileKind, FileStat, FileSystem } from "../host-api/fileSystem";
 /** An in-memory file system with a way to put files in it. */
 export interface MemoryFileSystem extends FileSystem {
   /** Creates or replaces a text file (UTF-8), creating its directories. */
-  addFile(path: string, text: string): void;
+  addFile(path: string, text: string, mtimeMs?: number): void;
   /** Creates an empty directory and its parents. */
   addDirectory(path: string): void;
 }
@@ -40,6 +40,7 @@ function parentOf(path: string): string | undefined {
 export function createMemoryFileSystem(): MemoryFileSystem {
   const files = new Map<string, Uint8Array>();
   const directories = new Set<string>(["/"]);
+  const modified = new Map<string, number>();
 
   const addDirectory = (path: string): void => {
     for (let current: string | undefined = normalizePosixPath(path); current !== undefined; current = parentOf(current)) {
@@ -54,21 +55,24 @@ export function createMemoryFileSystem(): MemoryFileSystem {
     if (parent === undefined || !directories.has(parent)) throw notFound(path);
     if (directories.has(target)) throw Object.assign(new Error(`EISDIR: '${path}'`), { code: "EISDIR" });
     files.set(target, new Uint8Array(data));
+    modified.set(target, Date.now());
   };
 
   return {
-    addFile(path, text) {
+    addFile(path, text, mtimeMs) {
       const target = normalizePosixPath(path);
       const parent = parentOf(target);
       if (parent !== undefined) addDirectory(parent);
       files.set(target, new TextEncoder().encode(text));
+      modified.set(target, mtimeMs ?? Date.now());
     },
     addDirectory,
     async stat(path): Promise<FileStat> {
       const target = normalizePosixPath(path);
       const kind = kindAt(target);
       if (!kind) throw notFound(path);
-      return { kind, size: files.get(target)?.length ?? 0 };
+      const mtimeMs = modified.get(target);
+      return { kind, size: files.get(target)?.length ?? 0, ...(mtimeMs === undefined ? {} : { mtimeMs }) };
     },
     async readFile(path) {
       const data = files.get(normalizePosixPath(path));
@@ -101,9 +105,12 @@ export function createMemoryFileSystem(): MemoryFileSystem {
       }
       write(target, data);
       files.delete(source);
+      modified.delete(source);
     },
     async delete(path) {
-      if (!files.delete(normalizePosixPath(path))) throw notFound(path);
+      const target = normalizePosixPath(path);
+      if (!files.delete(target)) throw notFound(path);
+      modified.delete(target);
     },
     async realpath(path) {
       const target = normalizePosixPath(path);
