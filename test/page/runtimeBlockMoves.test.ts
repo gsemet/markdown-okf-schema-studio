@@ -157,6 +157,9 @@ test("T37: Alt+ArrowDown on a focused block and Alt+ArrowUp on its bar button po
   );
   assert.equal(prevented, 1);
   harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: false, reason: "no" });
+  const refusal = insertPointAfterLine(harness, 52).childElements.find((element) =>
+    element.className.split(" ").includes("sphinx-preview-move-status"));
+  assert.equal(refusal?.textContent, "no", "a refusal after a key press shows its reason");
   const button = insertPointAfterLine(harness, 52).childElements[0];
   harness.dispatchDocument("keydown", altKey("ArrowUp", { target: button }));
   const up = moveMessages(harness, before).at(-1)!;

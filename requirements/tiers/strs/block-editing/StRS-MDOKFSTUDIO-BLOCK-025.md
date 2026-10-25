@@ -85,5 +85,4 @@ As a writer, I trust that every change I make from the preview lands on the line
 - A change is never half-applied.
 - The text a writer typed stays in the editor when a save is refused.
 - Autosaves of one session merge into one undo step in a text editor that shows the file; moves, cuts and pastes use explicit undo stops.
-- Known issue: a refused open leaves an empty frame, without the reason, until the next render or until edit mode is turned off.
 - Known issue (deduced from the code, not run): a multi-line block of a CRLF document may have its second save refused (see SwRS-MDOKFSTUDIO-BLOCK-234).

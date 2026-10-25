@@ -295,12 +295,11 @@ test("the editor frame appears at once, empty, and is filled when the source arr
   const frame = blockEditorOf(harness.mappings[1]);
   assert.ok(frame, "the frame is in the page after the block");
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true", "the block is hidden");
-  assert.equal(frame.childElements.length, 0, "no text box yet");
+  assert.equal(frame.childElements.length, 1, "only the loading line, no text box yet");
   assert.equal(harness.createdElements.some((element) => element.tagName === "TEXTAREA"), false);
-  // Known issue: the "Loading Markdown source…" line is not attached to the frame of a block.
   const status = statusLine(harness);
   assert.equal(status.textContent, "Loading Markdown source…");
-  assert.equal(status.parentElement, undefined);
+  assert.equal(status.parentElement, frame, "the loading line is in the frame from the start");
   const parentOf = (element: RuntimeElement): RuntimeElement | undefined => element.parentElement;
 
   sourceReply(harness, "Second paragraph.\n");
@@ -437,11 +436,50 @@ test("a refused open leaves the frame without a text box and records the error",
   });
   assert.equal(status.textContent, "Another Markdown block is already being edited.");
   const frame = blockEditorOf(harness.mappings[1]);
-  assert.equal(frame.childElements.length, 0, "no text box");
+  assert.equal(frame.childElements.length, 2, "the reason and a Close button, no text box");
+  assert.equal(status.parentElement, frame, "the reason is in the frame");
   assert.equal(harness.createdElements.some((element) => element.tagName === "TEXTAREA"), false);
-  // Known issue: the status line is not in the frame, so the writer does not see the reason.
-  assert.equal(status.parentElement, undefined);
-  assert.equal(harness.refreshButton.disabled, true, "the editor stays registered as the open editor");
+  assert.equal(harness.refreshButton.disabled, false, "Refresh works again");
+  const close = frame.childElements[1]!.childElements[0]!;
+  assert.equal(close.textContent, "Close");
+  const posted = harness.messages.length;
+  close.dispatch("click");
+  assert.equal(frame.removed, true, "Close leaves the refused frame");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), null);
+  assert.deepEqual(postsOf(harness, "previewEditCancel", posted), [], "nothing was held by the host");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+test("Escape and a click on another block leave the frame of a refused open", () => {
+  const refuse = (): ReturnType<typeof createRuntimeHarness> => {
+    const harness = createRuntimeHarness();
+    turnEditModeOn(harness);
+    harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+    harness.dispatchMessage({
+      type: "previewEditSource", ...MOVE_IDENTIFIERS, editId: harness.messages.at(-1)?.editId,
+      error: "The preview is out of date. Try again once it has refreshed.",
+    });
+    return harness;
+  };
+  const escaped = refuse();
+  const frame = blockEditorOf(escaped.mappings[1]);
+  assert.equal(statusLine(escaped).textContent, "The preview is out of date. Try again once it has refreshed.");
+  escaped.dispatchDocument("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(frame.removed, true, "Escape closes the frame");
+  assert.equal(escaped.refreshButton.disabled, false);
+
+  const clicked = refuse();
+  const before = clicked.messages.length;
+  clicked.dispatchDocument("click", { target: clicked.mappings[2], preventDefault: () => undefined });
+  const opens = postsOf(clicked, "previewEditOpen", before);
+  assert.equal(opens.length, 1, "another block opens");
+  assert.equal(opens[0]!.line, Number(clicked.mappings[2].getAttribute("data-sphinx-source-line")));
+  assert.equal(blockEditorOf(clicked.mappings[1])?.removed ?? true, true, "the refused frame is gone");
+
+  const refreshed = refuse();
+  const refreshBefore = refreshed.messages.length;
+  refreshed.refreshButton.dispatch("click");
+  assert.equal(postsOf(refreshed, "previewRefresh", refreshBefore).length, 1, "Refresh runs");
 });
 
 test("a refused save keeps the typed text and lets the next input save again", () => {
@@ -601,7 +639,10 @@ test("a keyboard move that never lands is forgotten after five seconds", () => {
   const timers = answered.pendingTimerCount();
   answered.advanceTimers(1000);
   answered.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: false, reason: "no" });
-  assert.ok(answered.pendingTimerCount() < timers, "the timer is cleared by the answer");
+  // The refusal now also shows its reason for six seconds: that timer replaces the flight timer.
+  assert.ok(answered.pendingTimerCount() <= timers, "the flight timer is cleared by the answer");
+  answered.advanceTimers(6000);
+  assert.equal(answered.pendingTimerCount(), 0, "nothing is left running");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-127

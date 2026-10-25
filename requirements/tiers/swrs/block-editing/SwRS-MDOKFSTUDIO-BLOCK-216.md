@@ -50,14 +50,19 @@ When the host refuses to open a block editor or to save its text, the extension 
 | A first previewEditSave whose originalText differs from the block in the document, for example "Not the current source" | The answer carries "The source block changed while it was being edited." and nothing is written |
 | A first previewEditSave for lines beyond the document, also the save of an insertion after a missing line, or a revision that does not fit | The answer carries "The preview is stale. Reopen the block before saving." and nothing is written |
 | A previewEditSave with another editId, document, range, original text or revision than the held edit | The answer carries "The preview block edit is stale. Reopen the block before saving." and the document is unchanged |
-| A previewEditOpen that names an older render than the host holds | The answer carries "The preview is out of date. Try again once it has refreshed." and no page editor is registered; the reason is not visible yet (see the Known issue below), only the pending state is cleared |
+| A previewEditOpen that names an older render than the host holds | The answer carries "The preview is out of date. Try again once it has refreshed." and no page editor is registered; the frame of the editor shows the reason |
 | A previewEditCancel with another editId, document, range, original text or revision than the held edit | The answer carries "The preview block edit is stale. Reopen the block before cancelling." and nothing changes |
 
 ### Scenario (refusal): A refused open leaves the frame without a text box
-- GIVEN a previewEditSource answer with the error "Another Markdown block is already being edited."
+- GIVEN an editor frame that shows "Loading Markdown source…" and a previewEditSource answer with the error "Another Markdown block is already being edited."
 - WHEN it reaches the open frame
-- THEN the frame has no text box and its status line holds the message
-- The editor stays registered as the open editor
+- THEN the frame has no text box and its status line, which is in the frame from the start, holds the message
+- The frame gets a Close button, the Refresh button is enabled again, and the frame is the open editor only until the writer leaves it
+
+### Scenario (nominal): The writer leaves a refused open
+- GIVEN the frame of a refused open
+- WHEN the writer presses Escape, clicks Close, clicks Refresh or clicks another block
+- THEN the frame closes without posting a cancel, and a click on another block opens that block
 
 ### Scenario (boundary): The answer of another editor
 - GIVEN an answer whose editId is not the open editor's
@@ -74,15 +79,13 @@ When the host refuses to open a block editor or to save its text, the extension 
 - WHEN the writer types again
 - THEN the next autosave is posted and the key hint returns to the status line
 
-### Known issues
-- Known issue: the status line of a block editor is attached to the frame only when the source arrives, so after a refused open the writer sees an empty frame and not the reason (a table cell editor does show it). The frame has no Done and no Cancel button and no Escape handling, the Refresh button stays disabled, and a click on another block opens nothing; the frame closes only when a render patches the page or when edit mode is turned off.
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TRUST-065: the gate of each page message, including the stale write
 - SwRS-MDOKFSTUDIO-BLOCK-058: the outcome of a host source edit, including a failed apply
 
 ### Verification notes
-- Method: test/page/blockReq.requirements.test.ts (refused open leaves the frame without a text box, answer of another editor, refused save keeps the typed text, typing again) with `a refused open leaves the frame without a text box and records the error` and `a refused save keeps the typed text and lets the next input save again`; the branch of the open is receiveBlockEditSource in src/page/features/blockSourceEditor.ts.
+- Method: test/page/blockReq.requirements.test.ts (refused open leaves the frame without a text box, `Escape and a click on another block leave the frame of a refused open`, answer of another editor, refused save keeps the typed text, typing again) with `a refused open leaves the frame without a text box and records the error` and `a refused save keeps the typed text and lets the next input save again`; the branch of the open is receiveBlockEditSource in src/page/features/blockSourceEditor.ts.
 - Method: test/session/blockReq.requirements.test.ts (accepted requests, stale open, stale lines) with `an open for a document that changed since the render is refused and registers no editor` and `a first save for lines or an insertion point that do not exist is refused as stale`.
 - Method: test/integration/previewEditing.test.ts (a mismatched originalText leaves the document unchanged; saves and cancels of mismatching edits); the message texts of these two rows have no assertion.
-- Criteria: the status text equals the host message and the editor stays registered as the open editor; the error is posted by postEditSourceError; currentSourceEdit returns nothing for the stale case; handleEditSave compares originalText with the document slice and every field of the held edit is compared; lastPostedText is cleared so that the next text is posted.
+- Criteria: the status text equals the host message and the frame of a refused open stays the open editor until the writer leaves it; the error is posted by postEditSourceError; currentSourceEdit returns nothing for the stale case; handleEditSave compares originalText with the document slice and every field of the held edit is compared; lastPostedText is cleared so that the next text is posted.

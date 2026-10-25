@@ -490,6 +490,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
       "div[sphinx-preview-block-editor].setAttribute(aria-label,Raw Markdown editor)",
       "p.setAttribute(data-sphinx-preview-edit-status,)",
       "p.setAttribute(role,status)",
+      "div[sphinx-preview-block-editor].appendChild(<p>)",
       "div[sphinx-preview-block-editor].addEventListener(click,fn)",
       "div[50].setAttribute(data-sphinx-preview-editing,true)",
       "div[50].insertAdjacentElement(afterend,<div[sphinx-preview-block-editor]>)",

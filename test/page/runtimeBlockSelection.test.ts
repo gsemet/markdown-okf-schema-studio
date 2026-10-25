@@ -458,6 +458,9 @@ test("T41: a key repeat does not move the span twice; a refusal keeps the select
   assert.equal(moveMessages(harness, before).length, 1);
   harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: false, reason: "Text between." });
   assert.deepEqual(selectedLines(harness), [1, 50], "a refused move leaves the selection as it was");
+  const reason = insertPointAfterLine(harness, 52).childElements.find((element) =>
+    element.className.split(" ").includes("sphinx-preview-move-status"));
+  assert.equal(reason?.textContent, "Text between.", "the reason shows under the last selected block");
   harness.dispatchDocument("keydown", altKey("ArrowDown", { target }));
   assert.equal(moveMessages(harness, before).length, 2);
 });

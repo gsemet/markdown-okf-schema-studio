@@ -213,8 +213,12 @@ test("a host refusal of a cell save shows in the table bar; a refused open repla
   const { request } = openCellWithoutSource(refusedOpen);
   sendError(refusedOpen, request.editId, "Editing requires a trusted workspace.");
   const region = cellEditorRegion(refusedOpen);
-  assert.equal(region.childElements.length, 1);
+  // The region also holds a Close button now, so the writer can leave the refused open.
+  assert.equal(region.childElements.length, 2);
   assert.equal(region.childElements[0]!.textContent, "Editing requires a trusted workspace.");
+  assert.equal(region.childElements[1]!.childElements[0]!.textContent, "Close");
+  region.childElements[1]!.childElements[0]!.dispatch("click");
+  assert.equal(region.removed, true);
   assert.equal(refusedOpen.createdElements.some((element) => element.tagName === "TEXTAREA"), false);
 });
 

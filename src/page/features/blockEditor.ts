@@ -216,6 +216,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-102
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
   const openBlockEditor: BlockEditor["openBlockEditor"] = (target, selectedCell, sourceRange, initialCaretPosition = "end") => {
+    // An editor whose open was refused only shows the reason: a new open replaces it.
+    if (state.activeBlockEdit?.openRefused) closeBlockEdit(false);
     if (state.activeBlockEdit) return;
     const line = sourceRange?.line ?? Number(target.getAttribute("data-sphinx-source-line"));
     const endLine = sourceRange?.endLine
@@ -250,7 +252,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     status.setAttribute("data-sphinx-preview-edit-status", "");
     status.setAttribute("role", "status");
     status.textContent = selectedCell ? "Loading Markdown table source…" : "Loading Markdown source…";
-    if (selectedCell) element.appendChild(status);
+    element.appendChild(status);
     element.addEventListener("click", (event) => event.stopPropagation?.());
     if (selectedCell) {
       selectedCell.setAttribute("data-sphinx-preview-table-cell-selected", "true");

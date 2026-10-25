@@ -38,6 +38,27 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       edit.lastPostedText = undefined;
       edit.status.textContent = message.error;
       edit.hintReplaced = Boolean(edit.textarea);
+      // Nothing was ever opened: the frame keeps the reason and a Close button; Escape and a
+      // click on another block leave it too.
+      if (edit.originalText === undefined && !edit.textarea && !edit.tableInput) {
+        edit.openRefused = true;
+        if (rt.refreshButton) rt.refreshButton.disabled = false;
+        if (!edit.element.querySelector?.("[data-sphinx-preview-open-refused-close]")) {
+          const close = document.createElement("button");
+          close.setAttribute("type", "button");
+          close.setAttribute("data-sphinx-preview-open-refused-close", "");
+          close.setAttribute("title", "Close (Esc)");
+          close.textContent = "Close";
+          close.addEventListener("click", () => {
+            if (state.activeBlockEdit === edit) blockEditor.closeBlockEdit(false);
+          });
+          // The row of the Done and Cancel buttons gives it the same look.
+          const row = document.createElement("div");
+          row.className = "sphinx-preview-block-editor-buttons";
+          row.appendChild(close);
+          edit.element.appendChild(row);
+        }
+      }
       return;
     }
     if (typeof message.originalText !== "string" || edit.textarea || edit.tableInput) return;
