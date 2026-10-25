@@ -57,6 +57,7 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     parts.statusRegion.applyPendingOverlay({ visible: false, label: "", message: "" });
     // Blocks whose HTML did not change stay in place with what the page did to them (PERF-05).
     parts.contentMorph.replace(main, message.contentHtml);
+    parts.codeCopy.refresh();
     context.revision = next.revision;
     context.requestId = next.requestId;
     if (next.initialAnchor !== undefined) context.initialAnchor = next.initialAnchor;

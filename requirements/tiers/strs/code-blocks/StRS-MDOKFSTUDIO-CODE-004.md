@@ -3,8 +3,8 @@ type: StRS
 id: StRS-MDOKFSTUDIO-CODE-004
 uuid: fa141c5f-0336-4c39-9e9e-8abc65ee3bc1
 title: A reader copies the exact code of a block
-description: When a reader points at a code block in any preview, the Studio
-  SHALL offer a one-click copy of the exact code and confirm the copy.
+description: When a reader points at or tabs to a code block in any preview, the
+  Studio SHALL offer a one-click copy of the exact code and confirm the copy.
 project: markdown-okf-schema-studio
 scope: code-blocks
 lifecycle: draft
@@ -38,7 +38,7 @@ derived_by:
 
 ### Normative behavior
 
-When a reader points at a code block in any preview, the Studio SHALL offer a one-click copy of the exact code and confirm the copy.
+When a reader points at or tabs to a code block in any preview, the Studio SHALL offer a one-click copy of the exact code and confirm the copy.
 
 ### Preserved stakeholder intent
 
@@ -46,4 +46,4 @@ Readers need to reuse code samples without selecting text by hand, even in a rea
 
 ### Rationale and constraints
 
-- Not available for blocks being edited or for diagram sources; the button is revealed by pointing only.
+- Not available for blocks being edited or for diagram sources; the button is revealed by pointing or by keyboard focus on the block, and Enter or Space on it copies.

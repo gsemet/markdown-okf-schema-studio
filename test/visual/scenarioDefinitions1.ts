@@ -398,6 +398,19 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Pointing at the first code block shows a 26 px copy button inside its top right corner, clear of "
       + "the floating toolbar; clicking it posts the raw code and turns the icon into a check mark.",
   })),
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-017
+    id: `code-blocks/v${17 + index}-copy-button-keyboard-focus-${theme}-900`,
+    fixture: "04-code-and-tables",
+    theme,
+    ...WIDE,
+    height: 900,
+    scroll: { kind: "top" as const },
+    codeCopyKeyboardChecks: true,
+    description:
+      "Tabbing to the first code block shows its copy button with a focus ring on the block; one more Tab "
+      + "moves the focus ring to the button, and Enter posts the raw code and turns the icon into a check mark.",
+  })),
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",

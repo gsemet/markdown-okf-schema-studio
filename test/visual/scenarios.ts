@@ -219,6 +219,8 @@ export interface Scenario {
   firstElementGapWidth?: "margin" | "auto" | "full";
   /** Hovering the first code block shows the copy button in its top right; a click posts the code. */
   codeCopyChecks?: boolean;
+  /** The copy button is reached with the keyboard: focus on the first code block reveals it, Tab focuses it, Enter copies. */
+  codeCopyKeyboardChecks?: boolean;
   expectStickyGrowth?: boolean;
   /** Geometry checks (test/shared/geometry-checks.js) that fail this scenario when applicable and failing. */
   machineChecks?: string[];

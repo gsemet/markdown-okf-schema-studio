@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-25 (the code-block copy button is reachable with the keyboard)
+
+- SwRS-MDOKFSTUDIO-CODE-017: each copyable code block is now a tab stop; focusing it shows the
+  Copy code button, Tab moves to the button, Enter or Space copies. Removed the Known issue line,
+  added keyboard and not-a-tab-stop scenarios and a light and a dark focus scenario.
+- StRS-MDOKFSTUDIO-CODE-004: said the button also appears on keyboard focus.
+
 ## 2026-10-25 (a table inserted with the caret in a table goes after it)
 
 - SwRS-MDOKFSTUDIO-TABLE-106, TABLE-115, TABLE-117: Table, Table with caption and HTML table now

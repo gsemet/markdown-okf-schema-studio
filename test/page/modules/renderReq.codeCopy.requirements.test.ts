@@ -58,6 +58,15 @@ class FakeElement {
     }
     return null;
   }
+  querySelectorAll(selector: string): FakeElement[] {
+    const found: FakeElement[] = [];
+    for (const child of this.children) {
+      if (child.matches(selector)) found.push(child);
+      found.push(...child.querySelectorAll(selector));
+    }
+    return found;
+  }
+  hasAttribute(name: string) { return this.attrs.has(name); }
   querySelector(selector: string): any {
     for (const child of this.children) {
       if (child.matches(selector)) return child;
@@ -178,7 +187,7 @@ test("an applied content patch hides the copy button once", () => {
     querySelectorAll: () => [],
     documentElement: { setAttribute: () => undefined },
   };
-  const parts = new Proxy({ codeCopy: { hide: () => { hides += 1; } } } as Record<string, unknown>, {
+  const parts = new Proxy({ codeCopy: { hide: () => { hides += 1; }, refresh: () => undefined } } as Record<string, unknown>, {
     get: (target, key) => (typeof key === "string" && key in target ? target[key] : inert),
   });
   const rt: any = new Proxy({

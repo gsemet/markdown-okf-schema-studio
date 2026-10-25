@@ -1,12 +1,13 @@
 // @implements_req SwRS-MDOKFSTUDIO-CODE-017
 /**
- * Copy button over the hovered code block.
+ * Copy button over the hovered or keyboard-focused code block. Each code block of the preview is a
+ * tab stop; focusing it shows the button, Tab moves to the button and Enter or Space copies.
  */
 export function installCodeCopy(
   document: Document,
   window: Window & typeof globalThis,
   post: (text: string) => void,
-): { hide(): void } {
+): { hide(): void; refresh(): void } {
   const contentId = "sphinx-myst-preview-content";
   const size = 26;
   const inset = 6;
@@ -78,6 +79,15 @@ export function installCodeCopy(
     }
     return pre;
   };
+  // @implements_req SwRS-MDOKFSTUDIO-CODE-017
+  // Makes every copyable block a tab stop; run again after the content is replaced.
+  const refresh = (): void => {
+    const content = document.getElementById(contentId);
+    if (!content) return;
+    for (const pre of Array.from(content.querySelectorAll("pre"))) {
+      if (blockOf(pre) && !pre.hasAttribute("tabindex")) pre.setAttribute("tabindex", "0");
+    }
+  };
   const place = (): void => {
     const pre = current;
     if (!pre || !pre.isConnected || pre.getAttribute("data-sphinx-preview-editing") === "true") {
@@ -141,6 +151,29 @@ export function installCodeCopy(
     pointerY = event.clientY;
     pointTo(event.target);
   }, { passive: true });
+  // Keyboard path: focusing a block reveals the button, Tab goes on to it, Shift+Tab comes back.
+  document.addEventListener("focusin", (event) => {
+    if (isButton(event.target)) return;
+    const pre = blockOf(event.target);
+    if (pre && pre === event.target) show(pre);
+  });
+  document.addEventListener("focusout", (event) => {
+    const related = event.relatedTarget;
+    if (isButton(related) || (related instanceof Element && current && current.contains(related))) return;
+    if (current && event.target === button && related === current) return;
+    hide();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (!current || !button || button.hidden) return;
+    if (!event.shiftKey && event.target === current) {
+      event.preventDefault();
+      button.focus();
+    } else if (event.shiftKey && isButton(event.target)) {
+      event.preventDefault();
+      (current as HTMLElement).focus();
+    }
+  });
   window.addEventListener("scroll", () => {
     if (!current) return;
     place();
@@ -149,6 +182,12 @@ export function installCodeCopy(
     settleTimer = window.setTimeout(() => {
       settleTimer = undefined;
       if (!current) return;
+      // Keyboard focus on the block or the button keeps the button, wherever the pointer rests.
+      const active = document.activeElement;
+      if (active && (active === current || isButton(active))) {
+        place();
+        return;
+      }
       const under = document.elementFromPoint(pointerX, pointerY);
       if (isButton(under)) return;
       const pre = blockOf(under);
@@ -168,5 +207,6 @@ export function installCodeCopy(
     }
   });
 
-  return { hide };
+  refresh();
+  return { hide, refresh };
 }
