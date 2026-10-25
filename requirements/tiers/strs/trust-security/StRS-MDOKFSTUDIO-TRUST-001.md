@@ -45,4 +45,3 @@ As a reader, I open a document in Restricted Mode, or a file from outside my wor
 - This record holds the rule that applies to every kind of change. The wording of each refusal is specified with the feature that owns the action (block editing, table editing, frontmatter editing, labels, checkboxes, images, comments).
 - An action that changes no file is never refused because the preview is read-only; the theme mode and the zoom only change how the preview looks, never the document, so no trust is needed.
 - The viewing actions themselves are specified in the theme and zoom, toolbar and navigation, and code block scopes.
-- Known issue: the sentence about a trusted workspace is also shown for a file outside every workspace folder, where trusting a workspace changes nothing.

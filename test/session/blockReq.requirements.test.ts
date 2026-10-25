@@ -14,6 +14,7 @@ import type { PanelGroups } from "../../src/host-api/previewPanel";
 import { createMemoryDocumentStore } from "../../src/host-memory/memoryDocumentStore";
 import { PreviewManager } from "../../src/session/previewManager";
 import { PreviewSession } from "../../src/session/previewSession";
+import { READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
 
 const MARKDOWN = "# Title\n\nFirst paragraph.\n\nSecond paragraph.\n";
 
@@ -118,7 +119,7 @@ function fixture(options: FixtureOptions = {}) {
 const SECOND = { editId: "e1", line: 5, endLine: 5, originalText: "Second paragraph.\n" };
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("a read-only preview answers the open, save and cancel of a block with the trust error", async () => {
+test("a read-only preview answers the open, save and cancel of a block with the read-only reason", async () => {
   const readOnly = fixture({ readOnly: true });
   await readOnly.send("previewEditOpen", { editId: "e1", line: 5, endLine: 5 });
   await readOnly.send("previewEditSave", { ...SECOND, editedText: "Changed.\n" });
@@ -126,7 +127,7 @@ test("a read-only preview answers the open, save and cancel of a block with the 
   const answers = readOnly.of("previewEditSource");
   assert.equal(answers.length, 3);
   for (const answer of answers) {
-    assert.equal(answer.error, "Editing requires a trusted workspace.");
+    assert.equal(answer.error, READ_ONLY_NO_FOLDER);
     assert.equal(answer.originalText, undefined);
   }
   assert.equal(readOnly.document.getText(), MARKDOWN);

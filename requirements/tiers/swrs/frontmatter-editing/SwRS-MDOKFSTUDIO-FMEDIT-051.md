@@ -5,7 +5,7 @@ uuid: b152cca7-c62f-44de-8d70-f5a76c32ba08
 title: A save in an untrusted workspace is refused
 description: When the preview is read-only because the workspace is untrusted or
   the file is outside the workspace, the extension SHALL refuse a frontmatter
-  save with "Editing requires a trusted workspace."
+  save with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005)
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
 lifecycle: superseded
@@ -25,13 +25,13 @@ superseded_by: SwRS-MDOKFSTUDIO-TRUST-005
 
 ### Normative behavior
 
-When the preview is read-only because the workspace is untrusted or the file is outside the workspace, the extension SHALL refuse a frontmatter save with "Editing requires a trusted workspace."
+When the preview is read-only because the workspace is untrusted or the file is outside the workspace, the extension SHALL refuse a frontmatter save with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005)
 
 ### Scenario: Nominal
 
 - GIVEN a read-only preview
 - WHEN a previewFrontmatterSave arrives
-- THEN the page receives the error "Editing requires a trusted workspace." and the document is unchanged
+- THEN the page receives the error the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) and the document is unchanged
 
 ### Scenario: Boundary or refusal
 

@@ -4,7 +4,8 @@ id: SwRS-MDOKFSTUDIO-MYST-042
 uuid: 0c4e9ea5-6836-40c0-b327-3c9f536cdd84
 title: The host refuses a rename in an untrusted or read-only preview
 description: When a rename arrives for an untrusted or read-only preview, the
-  extension SHALL change nothing and answer Renaming needs a trusted workspace.
+  extension SHALL change nothing and answer the read-only reason
+  (SwRS-MDOKFSTUDIO-TRUST-005).
 project: markdown-okf-schema-studio
 scope: myst
 lifecycle: superseded
@@ -24,7 +25,7 @@ superseded_by: SwRS-MDOKFSTUDIO-TRUST-005
 
 ### Normative behavior
 
-When a rename arrives for an untrusted or read-only preview, the extension SHALL change nothing and answer Renaming needs a trusted workspace.
+When a rename arrives for an untrusted or read-only preview, the extension SHALL change nothing and answer the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005).
 
 ### Scenario: Nominal
 
@@ -40,5 +41,5 @@ When a rename arrives for an untrusted or read-only preview, the extension SHALL
 
 ### Verification notes
 
-- Method: Unit test "a rename in an untrusted or read-only preview changes nothing and answers Renaming needs a trusted workspace" in test/session/renderReq.labelRename.requirements.test.ts
+- Method: Unit test "a rename in an untrusted or read-only preview changes nothing and answers with the read-only reason" in test/session/renderReq.labelRename.requirements.test.ts
 - Criteria: Refusal carries the reason.

@@ -26,7 +26,7 @@ import { MAX_COPY_TEXT_LENGTH, type PageMessageOf } from "../../core/protocol/pa
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { currentPaletteDocument, isDocumentEligible, isPathWithin } from "../sessionDocuments";
+import { currentPaletteDocument, isDocumentEligible, isPathWithin, previewReadOnlyReason } from "../sessionDocuments";
 
 /** The answer of a palette list request. */
 export type HostListAnswer =
@@ -173,7 +173,7 @@ export class HostRequestController {
     message: PageMessageOf<"previewListCitations">,
   ): PromiseLike<void> | undefined {
     if (preview.readOnly) {
-      this.postHostResult(preview, message, { ok: false, reason: "Citations are read from the workspace, which needs trust." });
+      this.postHostResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
       return undefined;
     }
     const document = currentPaletteDocument(preview, message);
@@ -199,7 +199,7 @@ export class HostRequestController {
     message: PageMessageOf<"previewPickDocument">,
   ): PromiseLike<void> | undefined {
     if (preview.readOnly) {
-      this.postHostResult(preview, message, { ok: false, reason: "Linking a document needs a trusted workspace." });
+      this.postHostResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
       return undefined;
     }
     const document = currentPaletteDocument(preview, message);
@@ -235,7 +235,7 @@ export class HostRequestController {
   private handlePickImage(preview: PreviewSession, message: PageMessageOf<"previewPickImage">): PromiseLike<void> | undefined {
     const { host } = this.manager;
     if (preview.readOnly) {
-      this.postHostResult(preview, message, { ok: false, reason: "Inserting an image needs a trusted workspace." });
+      this.postHostResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
       return undefined;
     }
     const document = currentPaletteDocument(preview, message);
@@ -286,7 +286,7 @@ export class HostRequestController {
       this.postHostResult(preview, message, { ok: false, reason });
       return undefined;
     };
-    if (preview.readOnly) return refuse("Pasting an image needs a trusted workspace.");
+    if (preview.readOnly) return refuse(previewReadOnlyReason(preview));
     const document = preview.document;
     const documentPath = document?.path;
     if (!document || documentPath === undefined || document.id !== preview.documentUri) {

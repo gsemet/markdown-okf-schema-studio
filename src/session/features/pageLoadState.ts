@@ -80,4 +80,6 @@ export interface ToolbarState {
   initialPaletteMode: PaletteMode;
   /** False in read-only previews: the page offers no Comment button and no reply box. */
   commentsEnabled: boolean;
+  /** Set in read-only previews: why the page offers no editing (the tooltip of a disabled checkbox). */
+  readOnlyReason?: string;
 }

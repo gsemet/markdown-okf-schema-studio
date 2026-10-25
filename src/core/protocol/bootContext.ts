@@ -37,6 +37,8 @@ export interface PreviewRuntimeContext extends ScrollContext, Partial<PreviewBoo
   initialViewPreferences?: ViewPreferences;
   /** True in writable previews: the page offers the Comment button and the reply box (T43). */
   commentsEnabled?: boolean;
+  /** Set in read-only previews: the cause shown wherever the page explains why it cannot edit. */
+  readOnlyReason?: string;
   /** The name a new inline comment thread starts with (comments.authorName, else the Git user). */
   threadAuthor?: string;
   /** The host's color theme kind (VS Code `ColorThemeKind` numbering). */

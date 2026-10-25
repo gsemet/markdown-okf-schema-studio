@@ -77,7 +77,7 @@ For the open editor, the stale render and the read-only preview, see SwRS-MDOKFS
 | a toggle while a Markdown edit is open | refused with 'Save or cancel the open Markdown edit before toggling a checkbox.' |
 | VS Code fails to apply the edit | refused with 'VS Code could not apply the checkbox edit.' or the edit error |
 | a toggle message the validator rejects (see SwRS-MDOKFSTUDIO-GFM-027) | refused with 'The checkbox request was not understood. Refresh the preview.' |
-| a toggle in a preview of a file outside every workspace folder | refused with "Editing needs the file's folder opened as a workspace folder in VS Code." (in an untrusted workspace: 'Editing requires a trusted workspace.') |
+| a toggle in a preview of a file outside every workspace folder | refused with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 
 The reason appears in a status note right after the box and disappears after about six seconds; a second refusal of the same box replaces the note.
 

@@ -40,7 +40,7 @@ import type { PreviewRuntimeContext } from "../../core/protocol/bootContext";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { isDocumentEligible, revisionOfStage } from "../sessionDocuments";
+import { isDocumentEligible, previewReadOnlyReason, revisionOfStage } from "../sessionDocuments";
 import { CONTENT_PATCH_ACK_TIMEOUT_MS, PENDING_OVERLAY_DELAY_MS, type ToolbarState } from "./pageLoadState";
 
 function diagnosticDetails(error: unknown): PreviewDiagnostic[] {
@@ -60,6 +60,15 @@ function runtimeContextSettings(context: PreviewRuntimeContext): RuntimeContextS
 
 function sameResourceRoots(previous: readonly string[], next: readonly string[]): boolean {
   return previous.length === next.length && previous.every((root, index) => root === next[index]);
+}
+
+/** What the boot context says about editing: comments on, or the reason a read-only page gives. */
+export function editingBootState(
+  preview: Pick<PreviewSession, "readOnly" | "workspaceFolder">,
+): { commentsEnabled: boolean; readOnlyReason?: string } {
+  return preview.readOnly
+    ? { commentsEnabled: false, readOnlyReason: previewReadOnlyReason(preview) }
+    : { commentsEnabled: true };
 }
 
 /** Renders, page documents, content patches, status and the pending overlay. */
@@ -395,7 +404,7 @@ export class RenderingController {
         pairedTextEditor: manager.scroll.visibleEditorFor(preview) !== undefined,
         initialEditMode: !preview.readOnly && manager.choices.editMode === true,
         initialPaletteMode: manager.choices.initialPaletteMode(),
-        commentsEnabled: !preview.readOnly,
+        ...editingBootState(preview),
       },
     );
     const localResourceRoots = [preview.workspaceRoot];

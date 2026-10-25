@@ -58,7 +58,7 @@ When previewPickImage reaches the host for a trusted, saved document, the extens
 | a file outside every workspace folder | the reason reads The image must be inside a workspace folder. |
 | a text file, or a file that is not local | the reason reads Pick a png, jpeg, gif, webp or svg image. |
 | a file on another drive, with no relative path, or with a name that holds an angle bracket or a line break | the reason reads That image cannot be referenced from this document (another drive, or an unusual name). |
-| a read-only preview | ok false with the reason Inserting an image needs a trusted workspace. |
+| a read-only preview | ok false with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 | a document that is out of date or is not a file | ok false with the reason The preview is out of date, or the document is not a file. |
 | a failed dialog | ok false with the message of the error (a value that is not an Error as its string) |
 

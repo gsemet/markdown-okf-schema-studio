@@ -64,7 +64,7 @@ When the writer presses Document link, the extension SHALL ask the host through 
 | Input | Outcome |
 | --- | --- |
 | a path on another Windows drive, or a name with a backtick, an angle bracket or a line break | ok false with the reason That file name cannot be written in a {doc} link. |
-| a read-only preview | ok false with the reason Linking a document needs a trusted workspace. |
+| a read-only preview | ok false with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 | a document that is out of date or is not a file | ok false with the reason The preview is out of date, or the document is not a file. |
 | a failed dialog | ok false with the message of the error (a value that is not an Error as its string) |
 | a previewPickDocument message without a non-empty editId of at most 100 characters | ignored by the envelope check |

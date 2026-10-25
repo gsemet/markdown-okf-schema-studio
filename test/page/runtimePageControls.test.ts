@@ -121,9 +121,9 @@ test("a checkbox click is refused while a block editor is open", () => {
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 test("checkboxes are disabled when the preview cannot edit the document", () => {
-  const harness = createRuntimeHarness({ editingEnabled: false });
+  const harness = createRuntimeHarness({ editingEnabled: false, readOnlyReason: "Reason from the host." });
   assert.equal(harness.checkbox.disabled, true);
-  assert.match(harness.checkbox.getAttribute("title") ?? "", /trusted workspace/u);
+  assert.equal(harness.checkbox.getAttribute("title"), "Reason from the host.");
   const messageCount = harness.messages.length;
   const event = clickEvent(harness.checkbox);
   harness.dispatchDocument("click", event);

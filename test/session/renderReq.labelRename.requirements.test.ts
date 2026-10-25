@@ -13,6 +13,7 @@ import { SourceEditController } from "../../src/session/features/sourceEdits";
 import type { PageMessageRouter } from "../../src/session/pageMessages";
 import type { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
+import { READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
 
 function setup(options: { readOnly: boolean; blockEditOpen: boolean }) {
   const applied: unknown[] = [];
@@ -36,13 +37,13 @@ function setup(options: { readOnly: boolean; blockEditOpen: boolean }) {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
-test("a rename in an untrusted or read-only preview changes nothing and answers Renaming needs a trusted workspace", () => {
+test("a rename in an untrusted or read-only preview changes nothing and answers with the read-only reason", () => {
   const t = setup({ readOnly: true, blockEditOpen: false });
   t.run();
   assert.equal(t.posted.length, 1);
   assert.equal(t.posted[0].type, "previewLabelRenameResult");
   assert.equal(t.posted[0].ok, false);
-  assert.equal(t.posted[0].reason, "Renaming needs a trusted workspace.");
+  assert.equal(t.posted[0].reason, READ_ONLY_NO_FOLDER);
   assert.equal(t.posted[0].editId, "label-1");
   assert.deepEqual(t.applied, [], "the document is unchanged");
 });

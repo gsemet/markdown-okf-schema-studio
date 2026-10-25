@@ -7,9 +7,10 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { SourceEditController } from "../../src/session/features/sourceEdits";
+import { READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
 
 const TEXT = ["# Title", "", "<!-- THREAD", "Ada (2026-10-16 10:47):", "  hello", "-->", "", "After.", ""].join("\n");
-const TRUSTED_REFUSAL = "Editing a thread needs a trusted workspace.";
+const TRUSTED_REFUSAL = READ_ONLY_NO_FOLDER;
 
 interface Setup {
   readonly handlers: Map<string, (message: any, preview: any) => PromiseLike<void> | undefined>;

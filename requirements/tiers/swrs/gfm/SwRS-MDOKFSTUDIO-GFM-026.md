@@ -25,7 +25,7 @@ superseded_by: SwRS-MDOKFSTUDIO-TRUST-005
 
 ### Normative behavior
 
-When the preview cannot edit the document, the extension SHALL disable checkboxes with the tooltip 'Editing requires a trusted workspace.' and refuse a toggle message with the same text.
+When the preview cannot edit the document, the extension SHALL disable checkboxes with the tooltip of the shared read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) and refuse a toggle message with the same text.
 
 ### Scenario: Untrusted workspace
 

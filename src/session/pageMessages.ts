@@ -16,8 +16,8 @@ import { reportsReloadedDocument } from "../core/preview/contentPatch";
 import type { MessageRouter } from "../core/protocol/router";
 import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
-import { LABEL_GONE, MALFORMED_TOGGLE, readOnlyReason, STALE_REQUEST } from "../core/edits/sourceEdits";
-import { revisionOfStage } from "./sessionDocuments";
+import { LABEL_GONE, MALFORMED_TOGGLE, STALE_REQUEST } from "../core/edits/sourceEdits";
+import { previewReadOnlyReason, revisionOfStage } from "./sessionDocuments";
 
 /** What a page message handler returns: the work it started, when a caller may wait for it. */
 export type PageMessageResult = PromiseLike<void> | void;
@@ -271,13 +271,13 @@ export class PageMessageDispatcher {
     }
     if (preview.readOnly && EDIT_REQUEST_TYPES.has(value.type)) {
       if (value.type === "previewFrontmatterSave") {
-        manager.frontmatter.postEditError(preview, value, "Editing requires a trusted workspace.");
+        manager.frontmatter.postEditError(preview, value, previewReadOnlyReason(preview));
       } else if (value.type === "previewCheckboxToggle") {
         manager.sourceEdits.postCheckboxResult(preview, value, {
-          error: readOnlyReason(preview.workspaceFolder !== undefined),
+          error: previewReadOnlyReason(preview),
         });
       } else if (value.type === "previewEditOpen" || value.type === "previewEditSave" || value.type === "previewEditCancel") {
-        manager.edits.postEditSourceError(preview, value, "Editing requires a trusted workspace.");
+        manager.edits.postEditSourceError(preview, value, previewReadOnlyReason(preview));
       }
       return undefined;
     }
