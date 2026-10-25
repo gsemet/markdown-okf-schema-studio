@@ -66,7 +66,7 @@ When two instructions conflict, the higher source wins, and the conflict is repo
   [ci.guidelines.md](.agents/guidelines/ci.guidelines.md)
 - When picking up backlog work, change requests or PRs (`.agents/changes/`), including Parallel
   Change Requests Orchestration:
-  [prd-workflow.guidelines.md](.agents/guidelines/prd-workflow.guidelines.md)
+  [change-requests-lifecycle.guidelines.md](.agents/guidelines/change-requests-lifecycle.guidelines.md)
 - Shared vocabulary of UI and code terms: [.agents/glossary/common.md](.agents/glossary/common.md).
   Use these words in code, tests, commits and docs; add new terms there.
 

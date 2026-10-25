@@ -48,7 +48,7 @@ Details: "Architecture" in [CONTRIBUTING.md](../CONTRIBUTING.md).
   Only the maintainer decides a merge.
 - A change is complete only when `just preflight` passes.
 
-Details: [prd-workflow.guidelines.md](guidelines/prd-workflow.guidelines.md),
+Details: [change-requests-lifecycle.guidelines.md](guidelines/change-requests-lifecycle.guidelines.md),
 [ci.guidelines.md](guidelines/ci.guidelines.md).
 
 ## 5. Dependencies

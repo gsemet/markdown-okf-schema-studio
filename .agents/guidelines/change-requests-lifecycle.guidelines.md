@@ -1,4 +1,4 @@
-# PRD workflow: backlog → change request → PR → archive
+# Change Requests Life Cycle: inbox → backlog → change request → PR → archive
 
 How agent sessions turn backlog items into merged pull requests, one CR at a time or several in
 parallel ("Parallel Change Requests Orchestration"). Project specifics (gates, commit format,
@@ -7,15 +7,22 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 
 ## Vocabulary
 
-- **Backlog item**: an idea, bug or request not yet scheduled. One folder
-  `.agents/changes/backlog/<P1|P2|P3>/<slug>/` holding the intent (`01-intent.md`, plus any
-  analysis). P1 = do first, P3 = later. The Backlog table of `requests/ORCHESTRATOR.md` lists them.
+- **Inbox item**: a new idea, bug or request not yet prioritised. One folder
+  `.agents/changes/01-inbox/<slug>/` holding the intent (`01-intent.md`). New items always land
+  here; triage moves them to the backlog with a priority.
+- **Backlog item**: a prioritised item not yet started. One folder
+  `.agents/changes/02-backlog/<P1|P2|P3|P4>/<slug>/` holding the intent (`01-intent.md`, plus any
+  analysis and `02-decisions.md` with user decisions). P1 = do first, P4 = someday. The Backlog
+  table of `03-requests/ORCHESTRATOR.md` lists them.
 - **Change request (CR)**: one unit of delivered work. One CR = one branch = one PR with green CI,
   shipping code, tests (unit + e2e), documentation and screenshots for any visible change.
-- **PRD folder**: the working folder of a CR in progress, `.agents/changes/requests/NNN-<slug>/`.
+- **PRD folder**: the working folder of a CR in progress, `.agents/changes/03-requests/NNN-<slug>/`.
   It is the only source of truth to resume a CR.
-- **Archive**: a landed CR, `.agents/changes/archives/NNN-<slug>/` (PRD folder + `report.md`).
-- **NNN**: next free three-digit number across `archives/` and `requests/`. Never reuse or skip.
+- **Archive**: a landed CR, `.agents/changes/04-archives/NNN-<slug>/` (PRD folder + `report.md`).
+- **Trash**: an abandoned idea, `.agents/changes/05-trash/<slug>/`, kept for reference. Only the
+  user abandons an item; agents never start work from the trash.
+- **NNN**: next free three-digit number across `04-archives/` and `03-requests/`.
+  Never reuse or skip.
 
 `.agents/changes/` is git-ignored local working memory: never commit it, never link to it.
 
@@ -23,17 +30,19 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 
 ```text
 .agents/changes/
-├── backlog/P1|P2|P3/<slug>/      ← items not started
-├── requests/ORCHESTRATOR.md      ← CR tables: Active, Backlog, Landed (parallel mode)
-├── requests/ORCHESTRATOR-STATUS.md ← rebuilt by the orchestrator from the STATE.md headers
-├── requests/NNN-<slug>/          ← PRD folder
+├── 01-inbox/<slug>/              ← new items, not yet prioritised
+├── 02-backlog/P1|P2|P3|P4/<slug>/ ← prioritised items not started
+├── 03-requests/ORCHESTRATOR.md   ← CR tables: Active, Backlog, Landed (parallel mode)
+├── 03-requests/ORCHESTRATOR-STATUS.md ← rebuilt from the STATE.md headers
+├── 03-requests/NNN-<slug>/       ← PRD folder
 │   ├── 00-request.md             ← intent + user decisions
 │   ├── task.md                   ← brief: files, change, tests first, docs, gates
 │   ├── rules.md                  ← hard rules for sub-agents (see below)
 │   ├── STATE.md                  ← header (see below) + steps 1–11 as a checklist
 │   ├── reports/T1-r<n>.md        ← coder report, round n
 │   └── reviews/T1-r<n>.md        ← reviewer verdict, round n
-└── archives/NNN-<slug>/          ← landed CRs
+├── 04-archives/NNN-<slug>/       ← landed CRs
+└── 05-trash/<slug>/              ← abandoned ideas (user decision)
 ```
 
 ## Roles and models
@@ -69,7 +78,7 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 | 8 PR | driver | Rebase on `origin/main`, push, open the PR with the template from [ci.guidelines.md](ci.guidelines.md), written for an external reader (see "PR body for an external reader"), screenshots in Impacts. |
 | 9 CI | driver | Watch the checks (see "Responsiveness"). Product or test failure → step 5 with the log excerpt. Infra failure (setup, network) → re-run once. Never weaken a test. |
 | 10 Notify | driver | CI green: `status: ready` in the header, then return. |
-| 11 Land | orchestrator | After the user merges: write `report.md`, move the PRD folder to `archives/`, update `INDEX.md`, remove the worktree and the CR branch (keep its `-assets` branch). |
+| 11 Land | orchestrator | After the user merges: write `report.md`, move the PRD folder to `04-archives/`, update `INDEX.md`, remove the worktree and the CR branch (keep its `-assets` branch). |
 
 **Round limit**: a round is one coder pass, whether a review or a CI failure triggered it. At most
 3 rounds per CR, all causes together. After round 3 without green CI, the driver sets
@@ -118,24 +127,24 @@ main session ── user interface: grill, decisions, merges; supervises the orc
    ```
 
    **Branch names** follow the CR, never the PR: `NNN` is the three-digit CR number (with its
-   leading zeros) and `<slug>` the CR folder name, so `requests/042-docs-stacked-prs` is worked on
+   leading zeros) and `<slug>` the CR folder name, so `03-requests/042-docs-stacked-prs` is worked on
    branch `changes-requests/042-docs-stacked-prs`. Its screenshot branch is
    `changes-requests/042-docs-stacked-prs-assets` (see "Screenshots in the PR"). The change type
    (`feat`, `fix`, `docs`…) lives in the commit messages and the PR title, not in the branch name.
    Branches created before this rule keep their names.
 
-2. `requests/ORCHESTRATOR.md` holds only the CR tables (template below). Every cell that names a
+2. `03-requests/ORCHESTRATOR.md` holds only the CR tables (template below). Every cell that names a
    file or a PR is a link: the CR number opens its spec (`00-request.md`), the status opens its
-   `STATE.md`, the PR number opens the PR on GitHub. Links are relative to `requests/`. The
+   `STATE.md`, the PR number opens the PR on GitHub. Links are relative to `03-requests/`. The
    situation of each CR lives in its `STATE.md` header; the orchestrator copies the status into
-   the table at each tick. A landed CR moves to "Landed" and links to its archived `report.md`. "Backlog", between the two, lists the items of `backlog/P*/` not yet
-   started (a CR moved out of the backlog leaves it; a finished backlog item moves to `archives/`).
+   the table at each tick. A landed CR moves to "Landed" and links to its archived `report.md`. "Backlog", between the two, lists the items of `02-backlog/P*/` not yet
+   started (a CR moved out of the backlog leaves it; a finished backlog item moves to `04-archives/`).
 
    ```markdown
    # CR table
 
    Repository: [<owner>/<repo>](https://github.com/<owner>/<repo>). Process:
-   [prd-workflow.guidelines.md](../../guidelines/prd-workflow.guidelines.md). Live status:
+   [change-requests-lifecycle.guidelines.md](../../guidelines/change-requests-lifecycle.guidelines.md). Live status:
    [ORCHESTRATOR-STATUS.md](ORCHESTRATOR-STATUS.md). Worktree of CR NNN: `../<repo>-wt-NNN`.
 
    ## Active
@@ -148,13 +157,13 @@ main session ── user interface: grill, decisions, merges; supervises the orc
 
    | Priority | Item | Title | Files |
    | --- | --- | --- | --- |
-   | P3 | [drawio-block](../backlog/P3/drawio-block/01-intent.md) | Draw IO Integration | 1 |
+   | P3 | [drawio-block](../02-backlog/P3/drawio-block/01-intent.md) | Draw IO Integration | 1 |
 
    ## Landed
 
    | CR (spec) | Report | Branch | PR |
    | --- | --- | --- | --- |
-   | [041](../archives/041-<slug>/00-request.md) | [report](../archives/041-<slug>/report.md) | `fix/<slug>` | [#35](https://github.com/<owner>/<repo>/pull/35) merged |
+   | [041](../04-archives/041-<slug>/00-request.md) | [report](../04-archives/041-<slug>/report.md) | `fix/<slug>` | [#35](https://github.com/<owner>/<repo>/pull/35) merged |
    ```
 
    The same rule holds for every status report to the user: a PR, CR, run or file is named with
@@ -213,7 +222,7 @@ No agent blocks: a message from its parent is read within 5 minutes.
 ### Driver prompt (the orchestrator fills the placeholders)
 
 > You are the CR driver for CR `<NNN>`. You alone own worktree `<path>` (branch `<branch>`, PR
-> `<#n or none>`). Read `.agents/guidelines/prd-workflow.guidelines.md` (lifecycle, round limit,
+> `<#n or none>`). Read `.agents/guidelines/change-requests-lifecycle.guidelines.md` (lifecycle, round limit,
 > `STATE.md` header, responsiveness), `.agents/guidelines/ci.guidelines.md`, and the PRD folder
 > `<absolute path>` (`00-request.md`, `task.md`, `rules.md`, `STATE.md`, latest report and review).
 > Resume from the `STATE.md` header and write `driver: <your id>` in it. Run steps 5–10: start a
@@ -271,7 +280,7 @@ even in git.
 - The title follows the same rule: a Conventional Commit subject that says what changes.
 - Update the body whenever the scope changes (re-scope, dropped item, follow-up); it describes
   the PR as it is now, not its history.
-- Add a "Deliverable showcase" section right after Summary: what the reader gets, shown with one or
+- Add a "Deliverables" section right after Summary: what the reader gets, shown with one or
   more small visuals, each placed next to the one or two sentences it supports. Use one, sometimes several, rarely every kind.
   Keep only the calls, files, props and boundaries the reviewer needs, with real names checked
   against the code:
