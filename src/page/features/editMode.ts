@@ -125,6 +125,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
     if (reveal) target.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     const selectedCell = eventTarget.closest?.<HTMLTableCellElement>("td, th");
     const table = selectedCell?.closest?.("table");
+    if (state.activeBlockEdit?.openRefused) rt.blockEditor.closeBlockEdit(false);
     const edit = state.activeBlockEdit;
     if (edit?.selectedCell) {
       if (table === edit.selectedCell.closest("table")) {

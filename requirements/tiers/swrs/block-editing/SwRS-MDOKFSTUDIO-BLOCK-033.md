@@ -78,11 +78,9 @@ The keys before the done key read "Enter: new line · Tab: indent · Esc: cancel
 | Click in the text box, the status line or between the buttons | The document click listeners do not run, so no other editor opens and the block selection is not touched |
 | Click on another block while the editor is open | The document listeners run as usual |
 
-### Known issues
-- Known issue: the text "Loading Markdown source…" is set on the status line of a block editor, but that line is attached to the frame only when the source arrives, so the writer never sees it; only the table cell editor shows its loading text.
 
 ### Verification notes
 - Method: test/page/runtimeBlockEditor.test.ts (`an opened block editor shows its line range, Done and Cancel on one row`: line range, key hints for one platform only, both buttons; `Done posts a final save and both buttons keep the textarea focused on press`: focus on press); visual scenario block-editing/v04 (buttons).
 - Method: test/page/runtimeBlockMoves.test.ts (`T28: an empty source reply opens an empty textarea with a placeholder; Done saves the insertion`: the New block text).
 - Method: test/page/blockReq.requirements.test.ts (`the editor frame appears at once, empty, and is filled when the source arrives`: frame at once and filled; `a click inside the editor frame does not reach the document listeners`: click in the frame).
-- Criteria: The text before the first separator dot is exactly one of the three forms; the hint equals the string built by blockEditHint for the platform; two buttons with the quoted labels, the primary style coming from the first-child rule of the stylesheet; the mousedown event of both buttons is default-prevented; openBlockEditor appends the status line to the frame only for a table cell; the frame has a click listener that stops propagation.
+- Criteria: The text before the first separator dot is exactly one of the three forms; the hint equals the string built by blockEditHint for the platform; two buttons with the quoted labels, the primary style coming from the first-child rule of the stylesheet; the mousedown event of both buttons is default-prevented; openBlockEditor appends the status line to the frame at once, for a block and for a table cell; the frame has a click listener that stops propagation.

@@ -46,6 +46,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-032
   function refreshPreview(): void {
     rt.parts.linkTooltip.close();
+    if (state.activeBlockEdit?.openRefused) rt.blockEditor.closeBlockEdit(false);
     const openEdit = state.activeBlockEdit || state.activeFrontmatterEdit;
     if (openEdit) {
       openEdit.status.textContent = "Save or cancel this edit before refreshing.";

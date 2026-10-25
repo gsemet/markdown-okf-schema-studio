@@ -119,6 +119,8 @@ export interface BlockEdit {
   tableRowIndex?: number;
   tableColumnIndex?: number;
   initialCaretPosition: CaretPosition;
+  /** The host refused to open this editor: the frame holds the reason and a way out. */
+  openRefused?: boolean;
   originalText?: string;
   lastPostedText?: string;
   hasAutosavedChange?: boolean;

@@ -434,11 +434,18 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       document.addEventListener("pointerdown", () => {
         lastPointerDownAt = Date.now();
       }, true);
-      // Escape outside an open cell editor cancels it.
+      // Escape outside an open cell editor cancels it; it also closes the frame of a refused open.
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Escape") return;
         const edit = state.activeBlockEdit;
-        if (!edit || !edit.selectedCell || edit.finishing) return;
+        if (!edit || edit.finishing) return;
+        // The frame of a refused open has no text box: Escape anywhere closes it.
+        if (edit.openRefused) {
+          event.preventDefault?.();
+          rt.blockEditor.closeBlockEdit(false);
+          return;
+        }
+        if (!edit.selectedCell) return;
         const inside = (node: EventTarget | null): boolean => Boolean(node)
           && (edit.element === node || Boolean(edit.element.contains?.(node as Node)));
         if (inside(event.target) || inside(document.activeElement)) return;

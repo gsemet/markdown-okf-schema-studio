@@ -279,9 +279,16 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
       else if (flight) settleBlockMove(rt.blocks.bodyBlockAtLine(flight.line), flight);
       if (message.ok !== false || typeof message.reason !== "string") return;
       const points = rt.insertPoints.points();
-      const point = points.find((candidate) =>
+      let point = points.find((candidate) =>
         candidate.getAttribute("data-sphinx-move-pending") === "true");
       points.forEach((candidate) => candidate.removeAttribute("data-sphinx-move-pending"));
+      // A key press marks no bar: the reason goes to the bar under the block (or selection) moved.
+      if (!point && flight) {
+        const moved = flight.mode === "select"
+          ? (blockSelection.isActive() ? rt.selection.syncSelectionModel()[blockSelection.endIndex!] : undefined)
+          : rt.blocks.bodyBlockAtLine(flight.line);
+        point = points.find((candidate) => rt.insertPoints.moves.get(candidate)?.block === moved);
+      }
       if (!point) return;
       point.querySelector?.(".sphinx-preview-move-status")?.remove?.();
       const status = document.createElement("span");

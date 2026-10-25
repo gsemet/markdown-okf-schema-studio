@@ -1,5 +1,17 @@
 # Update Log
 
+## 2026-10-25 (a refused block open keeps its reason and a way out; a refused key move says why)
+
+- SwRS-MDOKFSTUDIO-BLOCK-216: the status line is in the editor frame from the start ("Loading
+  Markdown source..."), then holds the refusal reason; the frame of a refused open has a Close
+  button and closes on Escape, Close, Refresh or a click on another block. Added a scenario,
+  removed the Known issue line. The stale-open reason (out of date render) is now shown.
+- SwRS-MDOKFSTUDIO-BLOCK-033, TABLE-034, TRUST-065: removed the Known issue lines about the hidden
+  loading text and the stuck cell editor; the table cell region has the same exits.
+- SwRS-MDOKFSTUDIO-BLOCK-130, BLOCK-156: a move refused after a key press shows its reason next to
+  the bar under the moved block or selection. Removed the Known issue lines.
+- StRS-MDOKFSTUDIO-BLOCK-025: removed the Known issue line about the empty frame.
+
 ## 2026-10-25 (a link inside a paragraph is followed and opens no editor)
 
 - SwRS-MDOKFSTUDIO-BLOCK-014: in edit mode a click, Enter or Space on a link inside a paragraph
