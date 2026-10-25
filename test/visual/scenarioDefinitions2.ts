@@ -1194,6 +1194,17 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     contentAssertions: CHIPS_HIDDEN_ASSERTIONS,
     description: "The show-comments setting off: the gray comment chips are in the document but not displayed, and the TODO chips stay visible.",
   },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+    id: "review-annotations/v22-comments-button-hides-thread-light-900",
+    fixture: "46-inline-thread",
+    theme: "light",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    commentButtonThreadChecks: true,
+    description: "A page with a gray comment chip, a green thread chip and a TODO chip: the toolbar Comments button hides the gray "
+      + "and the thread chips at once, the TODO chip stays, and a second press brings them back.",
+  },
   // CR 046: the update glow of a content patch that follows an outside change or an undo.
   ...([
     ["light", undefined, 1],

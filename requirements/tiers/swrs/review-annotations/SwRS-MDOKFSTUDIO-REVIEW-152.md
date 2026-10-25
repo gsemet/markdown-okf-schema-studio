@@ -6,8 +6,8 @@ title: The showComments setting and the Comments button hide and show the chips
 description: When the setting markdownOkfSchemaStudio.preview.showComments is
   read, the extension SHALL treat the value false as off and every other value,
   including no value, as on, hiding the comment chips of the preview while it is
-  off and letting the Comments button hide and show the gray chips while it is
-  on.
+  off and letting the Comments button hide and show the gray and the thread
+  chips while it is on.
 project: markdown-okf-schema-studio
 scope: review-annotations
 lifecycle: draft
@@ -32,6 +32,7 @@ tested_in_files:
 - test/page/modules/chipToggle.test.ts
 - test/page/modules/commentsToggle.test.ts
 - test/session/reviewReqIncoming.requirements.test.ts
+- test/visual/scenarioDefinitions2.ts
 ---
 
 ## The showComments setting and the Comments button hide and show the chips
@@ -70,13 +71,10 @@ When the setting markdownOkfSchemaStudio.preview.showComments is read, the exten
 | Shown | true | Hide comments |
 | Hidden | false | Show comments |
 
-### Scenario (nominal): The Comments button hides the gray chips only
+### Scenario (nominal): The Comments button hides the gray and the thread chips
 - GIVEN gray chips shown, a TODO chip and an inline thread chip on the page, in preview or in edit mode
 - WHEN the reader presses the Comments button
-- THEN the gray chips are hidden at once, the preference false is posted to the host and the state is saved in the webview (the preference is stored for the workspace and decides the start state, see SwRS-MDOKFSTUDIO-LIFE-169 and SwRS-MDOKFSTUDIO-LIFE-170), while the TODO chip and the thread chip stay visible
-
-### Known issues
-- Known issue: pressing the Comments button hides the gray chips only, while turning preview.showComments off hides the gray chips and the thread chips, so the button labelled Hide comments leaves inline threads visible.
+- THEN the gray chips and the thread chip are hidden at once, the preference false is posted to the host and the state is saved in the webview (the preference is stored for the workspace and decides the start state, see SwRS-MDOKFSTUDIO-LIFE-169 and SwRS-MDOKFSTUDIO-LIFE-170), while the TODO chip stays visible
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-REVIEW-156: a show-comments message of another render is ignored.
@@ -84,8 +82,8 @@ When the setting markdownOkfSchemaStudio.preview.showComments is read, the exten
 ### Verification notes
 - Method: test/page/modules/chipToggle.test.ts (`the show-comments attribute follows the setting, live`: default, off, live change).
 - Method: test/core/configuration/settingsRegistry.test.ts (boot flag showComments) and test/security/package-contract.test.ts (setting listed, boolean, default true).
-- Method: test/core/preview/previewStyles.test.ts (`T15: an open comment is an admonition-like box and showComments off hides the gray chips only`; `the Comments toolbar button hides the gray chips at once and goes away with the setting`: button hidden with the setting off, the button hides only the comment kind). The hiding of the thread chips by the setting is deduced from the stylesheet rule, not asserted.
+- Method: test/core/preview/previewStyles.test.ts (`T15: an open comment is an admonition-like box and showComments off hides the gray chips only`; `the Comments toolbar button hides the gray chips at once and goes away with the setting`: button hidden with the setting off, the button hides the comment and the thread kinds, not the TODO kind). The hiding of the thread chips by the setting is deduced from the stylesheet rule, not asserted.
 - Method: test/session/reviewReqIncoming.requirements.test.ts (`the value of preview.showComments is posted to the page when the settings change, without a render`). The page-load trigger is untested at host level.
 - Method: test/page/modules/commentsToggle.test.ts (`comments are shown by default and the button says how to hide them`, `the saved preference and the webview state decide the initial state`, `a click hides the comment chips, posts the preference, keeps the state and re-lays out`).
-- Method: visual scenarios review-annotations/v20-comment-chips-hidden-light-900 and v02-comment-todo-chips-light-900 (setting off, then on), v07-comment-list-chips-visible-light-900 to v10-comment-list-chips-hidden-dark-900 (button, preview and edit mode).
-- Criteria: package.json declares the setting as boolean with default true and the boot flag is on for every value but false; the page attribute data-okf-show-comments is false and the stylesheet hides the two kinds and the button; postShowComments runs in onSettingsChanged and after a page load; the pressed state and the three texts match the state; the page attribute data-sphinx-preview-comments is off after the button, the post carries preference comments with value false, the layout callback runs so that the reading position is kept, and the stylesheet hides only the comment kind.
+- Method: visual scenarios review-annotations/v20-comment-chips-hidden-light-900 and v02-comment-todo-chips-light-900 (setting off, then on), v07-comment-list-chips-visible-light-900 to v10-comment-list-chips-hidden-dark-900 (button, preview and edit mode), v22-comments-button-hides-thread-light-900 (the button hides the thread chip, the TODO chip stays).
+- Criteria: package.json declares the setting as boolean with default true and the boot flag is on for every value but false; the page attribute data-okf-show-comments is false and the stylesheet hides the two kinds and the button; postShowComments runs in onSettingsChanged and after a page load; the pressed state and the three texts match the state; the page attribute data-sphinx-preview-comments is off after the button, the post carries preference comments with value false, the layout callback runs so that the reading position is kept, and the stylesheet hides the comment and the thread kinds only.

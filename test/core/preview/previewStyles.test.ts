@@ -855,9 +855,10 @@ test("T15: an open comment is an admonition-like box and showComments off hides 
   assert.doesNotMatch(css, /data-okf-show-comments="false"\][^{]*kind="todo"/u);
 });
 
-test("the Comments toolbar button hides the gray chips at once and goes away with the setting", () => {
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
+test("the Comments toolbar button hides the gray and thread chips at once and goes away with the setting", () => {
   const css = PREVIEW_THEME_CSS;
-  assert.match(css, /html\[data-sphinx-preview-comments="off"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="comment"\] \{\s*display: none;/u);
+  assert.match(css, /html\[data-sphinx-preview-comments="off"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="comment"\],\s*html\[data-sphinx-preview-comments="off"\] #sphinx-myst-preview-content \.okf-comment\[data-okf-comment-kind="thread"\] \{\s*display: none;/u);
   assert.doesNotMatch(css, /data-sphinx-preview-comments="off"\][^{]*kind="todo"/u);
   assert.match(css, /html\[data-okf-show-comments="false"\] \[data-sphinx-preview-comments-toggle\] \{\s*display: none;/u);
   const toolbar = renderPreviewToolbar(false);

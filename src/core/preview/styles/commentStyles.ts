@@ -521,9 +521,10 @@ html[data-okf-show-comments="false"] #sphinx-myst-preview-content .okf-comment[d
   display: none;
 }
 
-/* Toolbar Comments button off: same hiding as the setting, kept per workspace. The button itself is
-   not offered when the setting is off. */
-html[data-sphinx-preview-comments="off"] #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="comment"] {
+/* Toolbar Comments button off: same hiding as the setting (gray and thread chips, TODO chips stay),
+   kept per workspace. The button itself is not offered when the setting is off. */
+html[data-sphinx-preview-comments="off"] #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="comment"],
+html[data-sphinx-preview-comments="off"] #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="thread"] {
   display: none;
 }
 

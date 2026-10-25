@@ -302,6 +302,30 @@ def check_comment_toggle(page: Page, scenario: dict, failures: list[Failure]) ->
     failures.append(Failure(page_name, f"the final frame must have the gray chips {final}"))
 
 
+def check_comment_button_thread(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The toolbar Comments button hides the thread chip with the gray chips (TODO stays) and brings them back."""
+  if not scenario.get("commentButtonThreadChecks"):
+    return
+  page_name = scenario["page"]
+  button = page.locator("[data-sphinx-preview-comments-toggle]")
+  shown = lambda kind: page.evaluate(
+    f"[...document.querySelectorAll('.okf-comment[data-okf-comment-kind={kind}] > .okf-chip')].filter(e => e.getClientRects().length > 0).length"
+  )
+  if button.count() != 1 or not button.is_visible():
+    failures.append(Failure(page_name, "the Comments button is not visible"))
+    return
+  if (shown("comment"), shown("thread"), shown("todo")) != (1, 1, 1):
+    failures.append(Failure(page_name, "the gray, thread and TODO chips must all start visible"))
+  button.click()
+  page.wait_for_timeout(150)
+  if (shown("comment"), shown("thread"), shown("todo")) != (0, 0, 1):
+    failures.append(Failure(page_name, "the Comments button must hide the gray and the thread chips and keep the TODO chip"))
+  button.click()
+  page.wait_for_timeout(150)
+  if (shown("comment"), shown("thread"), shown("todo")) != (1, 1, 1):
+    failures.append(Failure(page_name, "the Comments button did not bring the gray and thread chips back"))
+
+
 def check_inline_thread(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """An inline comment thread: green chip with a bubble, a titled green box, reply and delete requests, the switch."""
   if not scenario.get("inlineThreadChecks"):

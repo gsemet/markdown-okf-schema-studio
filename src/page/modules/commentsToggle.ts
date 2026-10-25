@@ -9,8 +9,8 @@ export interface CommentsToggleContext {
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
  * Comments button of toolbar row 3, in preview and in edit mode: shows or hides the gray comment
- * chips (TODO chips stay). The choice is the `comments` view preference: it is posted to
- * the host (which keeps it per workspace, on by default) and mirrored on `<html>` as
+ * chips and the thread chips (TODO chips stay). The choice is the `comments` view preference: it is
+ * posted to the host (which keeps it per workspace, on by default) and mirrored on `<html>` as
  * `data-sphinx-preview-comments` ("on" / "off"), so CSS hides the chips at once. The
  * `preview.showComments` setting stays the master switch (`data-okf-show-comments`, which also
  * removes the button). `onLayoutChange` runs after a change so the page keeps its reading line.
