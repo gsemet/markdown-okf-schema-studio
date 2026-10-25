@@ -18,7 +18,10 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     const content = document.createElement("span");
     content.setAttribute("data-sphinx-table-cell-content", "true");
     content.setAttribute("aria-hidden", "true");
-    Array.from(cell.childNodes).forEach((node) => content.appendChild(node));
+    // The row handle stays visible: it is not cell content.
+    Array.from(cell.childNodes).forEach((node) => {
+      if ((node as Element).getAttribute?.("data-okf-row-handle") == null) content.appendChild(node);
+    });
     cell.appendChild(content);
     return content;
   }

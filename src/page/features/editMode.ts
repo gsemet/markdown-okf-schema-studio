@@ -67,6 +67,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
     editModeButton?.setAttribute?.("title", tooltip);
     editModeButton?.setAttribute?.("data-tooltip", tooltip);
     rt.frontmatter.setFrontmatterEditCells(enabled);
+    rt.tableRowMove.refresh();
     rt.insertPoints.refreshInsertPoints();
   }
 

@@ -6,6 +6,16 @@
   neither the parent nor the page's window but has the page's own origin; the page now also accepts a
   same-origin sender other than its opener. Confirmed with a real-window run.
 
+## 2026-10-25 (table row handle reorders the body rows of a table)
+
+- StRS-MDOKFSTUDIO-TABLE-002 and SwRS-MDOKFSTUDIO-TABLE-002 (new): in edit mode each body row of a
+  pipe table or `{list-table}` shows the list editor's handle in a gutter of its first cell;
+  dragging it, or Alt+Up and Alt+Down on it, moves the row as one edit of the table text. A
+  list-table row moves as a whole item and `:header-rows:` stay fixed. Out of scope and stated as
+  refusals: captioned and HTML tables, included tables, the header rows, and any move while an
+  editor is open. Verified by unit tests (table model, list-table source, page runtime) and nine
+  visual scenarios (table-editing v06 to v14); no real VS Code window drag was run.
+
 ## 2026-10-25 (page security hardening: sanitizer allow-list, message sender check, no stylesheet link)
 
 - SwRS-MDOKFSTUDIO-TRUST-036: the sanitizer keeps only the elements and attributes of the supported

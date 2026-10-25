@@ -535,6 +535,14 @@ export interface BlockMoves {
   bindKeys(): void;
 }
 
+/** The row handles of pipe tables and the move of a row (`features/tableRowMove.ts`). */
+export interface TableRowMove {
+  /** Rebuilds the handles: one per body row of a movable pipe table in edit mode, none otherwise. */
+  refresh(): void;
+  /** Takes the table source a move asked for; false when the message is not for a move. */
+  receiveSource(message: PreviewEditSourceMessage): boolean;
+}
+
 /** Edit mode, the edit hover, and opening the editor of a clicked block (`features/editMode.ts`). */
 export interface EditMode {
   applyEditMode(enabled: boolean): void;
@@ -592,6 +600,7 @@ export interface PageRuntime {
   selection: BlockSelectionView;
   insertPoints: InsertPoints;
   blockMoves: BlockMoves;
+  tableRowMove: TableRowMove;
   editMode: EditMode;
   contentPatch: ContentPatch;
   input: PageInput;

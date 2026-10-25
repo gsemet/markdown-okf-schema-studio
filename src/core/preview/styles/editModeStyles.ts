@@ -389,4 +389,37 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   cursor: default;
   opacity: 0.55;
 }
+
+/* Row handles of a pipe table: the mark of the list editor sits in a gutter of the first column,
+   inside the table box (the table scrolls sideways, so a handle outside it would be clipped). The
+   header cell keeps the same gutter so the first column stays aligned. */
+#sphinx-myst-preview-content table[data-okf-row-handles="true"] > :is(thead, tbody) > tr > :first-child {
+  position: relative;
+  padding-inline-start: 2.2em;
+}
+
+/* Whole words: the gutter must not squeeze a column into mid-word breaks. */
+#sphinx-myst-preview-content table[data-okf-row-handles="true"] :where(th, td) {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+#sphinx-myst-preview-content .okf-table-row-handle {
+  position: absolute;
+  inset-block-start: 0.3em;
+  inset-inline-start: 0.3em;
+  margin: 0;
+}
+
+#sphinx-myst-preview-content tr[data-okf-row-dragging="true"] {
+  opacity: 0.45;
+}
+
+#sphinx-myst-preview-content tr[data-okf-row-drop="before"] > :is(td, th) {
+  box-shadow: inset 0 2px 0 var(--studio-focusBorder, Highlight);
+}
+
+#sphinx-myst-preview-content tr[data-okf-row-drop="after"] > :is(td, th) {
+  box-shadow: inset 0 -2px 0 var(--studio-focusBorder, Highlight);
+}
 `;

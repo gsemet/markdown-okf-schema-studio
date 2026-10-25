@@ -108,6 +108,10 @@ export class RuntimeElement {
     return this.childElements.length;
   }
 
+  public get firstChild(): RuntimeElement | null {
+    return this.childElements[0] ?? null;
+  }
+
   public get firstElementChild(): RuntimeElement | null {
     return this.childElements[0] ?? null;
   }
@@ -203,6 +207,7 @@ export class RuntimeElement {
         || (selector === "tr[data-okf-field]" && current.tagName === "TR" && current.getAttribute("data-okf-field") !== null)
         || (selector === "td, th" && ["TD", "TH"].includes(current.tagName))
         || (selector === "table" && current.tagName === "TABLE")
+        || (selector === "[data-okf-row-handle]" && current.getAttribute("data-okf-row-handle") !== null)
         || (selector === "ul, ol" && ["UL", "OL"].includes(current.tagName))
         || (selector === "[data-sphinx-preview-block-editor]"
           && current.getAttribute("data-sphinx-preview-block-editor") !== null)

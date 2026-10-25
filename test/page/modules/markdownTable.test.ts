@@ -279,3 +279,29 @@ test("T25: toHtmlTable keeps a model's unicode and empty cells", () => {
   assert.equal(html.includes('<th align="right"></th>'), true);
   assert.equal(html.includes("<td>\u2705</td>"), true);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+test("moving a body row reorders the source lines and keeps each line as written", () => {
+  const tools = createMarkdownTableTools();
+  const source = "  | Name  | N |\n  | :---- | ---: |\n  | a     | 1 |\n  |b|2|\n  | c     | 3 |\n";
+  const table = tools.parse(source);
+  assert.ok(table);
+  assert.equal(tools.moveRow(table, 1, 3), 3);
+  assert.equal(tools.serialize(table), "  | Name  | N |\n  | :---- | ---: |\n  |b|2|\n  | c     | 3 |\n  | a     | 1 |\n");
+  assert.equal(tools.moveRow(table, 3, 1), 1);
+  assert.equal(tools.serialize(table), source);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+test("the table model refuses a move of the header, past the ends or onto the same place", () => {
+  const tools = createMarkdownTableTools();
+  const source = "| A | B |\r\n| --- | --- |\r\n| x | y |\r\n| p | q |\r\n";
+  const table = tools.parse(source);
+  assert.ok(table);
+  for (const [from, to] of [[0, 1], [1, 0], [2, 3], [1, 1], [1, 2.5], [-1, 1]] as const) {
+    assert.equal(tools.moveRow(table, from, to), undefined);
+  }
+  assert.equal(tools.serialize(table), source);
+  assert.equal(tools.moveRow(table, 1, 2), 2);
+  assert.equal(tools.serialize(table), "| A | B |\r\n| --- | --- |\r\n| p | q |\r\n| x | y |\r\n");
+});

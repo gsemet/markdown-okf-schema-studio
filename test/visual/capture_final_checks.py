@@ -454,6 +454,9 @@ def check_link_details(page: Page, scenario: dict, failures: list[Failure]) -> N
 
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
 def check_tooltip_contrast(page: Page, scenario: dict, failures: list[Failure]) -> None:
+    # A drag held down for the capture keeps the pointer button pressed: no hover (and no tooltip) then.
+    if any(action.get("hold") for action in scenario.get("pageActions") or []):
+        return
     button = page.locator('[data-sphinx-preview-refresh]')
     button.hover()
     page.wait_for_timeout(200)
@@ -557,6 +560,24 @@ def check_forced_dark_theme(page: Page, scenario: dict, failures: list[Failure])
 def check_page_actions(page: Page, scenario: dict, failures: list[Failure]) -> None:
     """The scenario's `pageActions`: real clicks and hovers on the page, in order, before the content assertions."""
     for action in scenario.get("pageActions") or []:
+        if "drag" in action:
+            source = page.locator(action["drag"]).first
+            destination = page.locator(action["over"]).first
+            if source.count() == 0 or destination.count() == 0:
+                failures.append(Failure(scenario["page"], f"page action: drag {action['drag']} over {action['over']} matches nothing"))
+                return
+            source.scroll_into_view_if_needed()
+            from_box = source.bounding_box()
+            to_box = destination.bounding_box()
+            page.mouse.move(from_box["x"] + from_box["width"] / 2, from_box["y"] + from_box["height"] / 2)
+            page.mouse.down()
+            # The pointer ends in the lower quarter of the destination: the drop line goes below it.
+            page.mouse.move(from_box["x"] + 20, from_box["y"] + 20, steps=4)
+            page.mouse.move(to_box["x"] + 40, to_box["y"] + to_box["height"] * 0.8, steps=12)
+            if not action.get("hold"):
+                page.mouse.up()
+            page.wait_for_timeout(action.get("waitMs", 200))
+            continue
         selector = action.get("click") or action.get("hover")
         target = page.locator(selector).first
         if target.count() == 0:

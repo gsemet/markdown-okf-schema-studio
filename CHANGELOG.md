@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- In edit mode, each body row of a Markdown pipe table or a MyST `{list-table}` now shows the grab
+  handle of the frontmatter list editor. Drag it onto another row to move the row, or focus it and
+  press Alt+Up or Alt+Down. A move is one edit (one undo), the header rows stay in place, and the
+  handle sits in a gutter of the first column so it is never clipped, even on a table that fills the
+  column. A list-table row moves as a whole item (its nested cell lines included) and the
+  `:header-rows:` stay fixed. Captioned and HTML tables show no handle.
 - A hidden `.partial` file left in a folder by a pasted image whose save was cut off (crash, closed
   window) is now removed at the next image paste into that folder once it is older than 10
   minutes. Only files with the extension's exact naming are touched.

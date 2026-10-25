@@ -39,6 +39,7 @@ import { installScrollCore } from "./features/scrollCore";
 import { installStatusRegion } from "./features/statusRegion";
 import { installStickyHeadings } from "./features/stickyHeadings";
 import { installTableCellEditor } from "./features/tableCellEditor";
+import { installTableRowMove } from "./features/tableRowMove";
 import { installTextControls } from "./features/textControls";
 import { installThemeMode } from "./features/themeMode";
 import { createPageHostMessages } from "./hostMessages";
@@ -330,6 +331,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.selection = installBlockSelectionView(rt);
   rt.insertPoints = installInsertPoints(rt);
   rt.blockMoves = installBlockMoves(rt);
+  rt.tableRowMove = installTableRowMove(rt);
   rt.editMode = installEditMode(rt);
   rt.contentPatch = installContentPatch(rt);
   rt.input = installPageInput(rt);
