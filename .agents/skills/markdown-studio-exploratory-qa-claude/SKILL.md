@@ -1,11 +1,11 @@
 ---
 name: markdown-studio-exploratory-qa-claude
-description: This skill should be used when asked to run, resume, or re-validate an exploratory QA campaign on the Markdown OKF-Schema Studio VS Code extension in a real VS Code window (real mouse and keyboard through CDP), and to write one bug sheet per finding under .agents/changes/requests/. A coordinator picks charters from a coverage map and delegates each to a sub-agent that drives its own window with scenario files and automatic checks. It ships the driver, scenario engine, no-op sweep, a read-only spy extension, synthetic fixtures, a use-case catalogue, and the harness pitfalls learned in previous campaigns.
+description: This skill should be used when asked to run, resume, or re-validate an exploratory QA campaign on the Markdown OKF-Schema Studio VS Code extension in a real VS Code window (real mouse and keyboard through CDP), and to write one bug sheet per finding under .agents/changes/03-requests/. A coordinator picks charters from a coverage map and delegates each to a sub-agent that drives its own window with scenario files and automatic checks. It ships the driver, scenario engine, no-op sweep, a read-only spy extension, synthetic fixtures, a use-case catalogue, and the harness pitfalls learned in previous campaigns.
 compatibility: macOS with Visual Studio Code installed at /Applications, fnm with Node 24, the extension's node_modules (playwright-core), rsync, git, sips.
 metadata:
   owner: "Gaetan Semet <gaetan.semet@ampere.cars>"
   keywords: [markdown, okf, studio, vscode, exploratory, qa, ux, cdp]
-  previous-campaigns: [".agents/changes/requests/deep-UX-analysis/"]
+  previous-campaigns: [".agents/changes/04-archives/001-deep-UX-analysis/"]
 ---
 
 # Markdown Studio Exploratory QA (Claude)
@@ -110,7 +110,7 @@ it in the coordinator's thread.
 
 ### 6. Report
 
-Under `.agents/changes/requests/<campaign-folder>/` (for a follow-up, a new folder or a `part-N/`
+Under `.agents/changes/03-requests/<campaign-folder>/` (for a follow-up, a new folder or a `part-N/`
 subfolder linked from the previous index):
 
 - `00-index.md`: date, commit, status (`partial`/`completed`), summary, findings table sorted by

@@ -59,7 +59,7 @@ def last_campaign_rev(campaign):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--since")
-    parser.add_argument("--campaign", default=str(REPO / ".agents/changes/requests/deep-UX-analysis"))
+    parser.add_argument("--campaign", default=str(REPO / ".agents/changes/04-archives/001-deep-UX-analysis"))
     args = parser.parse_args()
 
     print("## Automated coverage (do not re-explore; extend instead)")

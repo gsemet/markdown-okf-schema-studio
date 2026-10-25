@@ -6,7 +6,7 @@ last section "Internal references". -->
 
 <!-- Why: the user problem or limitation this solves, in two or three sentences. -->
 
-## Deliverable showcase
+## Deliverables
 
 <!-- Show the deliverable, meaning what the reader gets, with small visuals each next to the
 sentence it supports: a Mermaid flowchart of the modules or calls that change, a sequence diagram
