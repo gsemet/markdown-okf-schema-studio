@@ -24,6 +24,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/render/mystContextTags.ts
+- src/core/render/mystNormalize.ts
 - src/core/render/mystRenderer.ts
 tested_in_files:
 - test/core/render/includeBudget.test.ts
@@ -55,7 +56,7 @@ When a trusted document holds an `{include}` directive for a Markdown file insid
 | --- | --- |
 | an `{include}` with the `:literal:` option | the directive shows as a placeholder, not expanded |
 | an `{include}` with an option other than `:class:` and `:label:` | the directive stays an unresolved placeholder |
-| an `{include}` with an empty argument | see Known issues |
+| an `{include}` with an empty argument | the directive stays a placeholder with a warning on its line, and the rest of the document renders |
 | an `{include}` with only `:class:` | the file is expanded |
 | a plain include or an include with `:label:` | the file is expanded |
 
@@ -84,10 +85,6 @@ When a trusted document holds an `{include}` directive for a Markdown file insid
 | an included file with a `> [!NOTE]` alert | the alert renders as a note panel |
 | an alert in a grouped context tag | the alert renders as a note panel |
 
-### Known issues
-
-- Known issue: an `{include}` with an empty argument does not leave a placeholder; the writer fails on the missing argument text and the whole render is refused with an error. The `:literal:` and other-option forms do leave the placeholder.
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-CORE-013: depth, budget, size and allowed roots that bound an include
@@ -97,6 +94,6 @@ When a trusted document holds an `{include}` directive for a Markdown file insid
 - Method: Unit test "a 60-chapter book with 5 snippets each renders fully within the budget" in test/core/render/includeBudget.test.ts (nominal expand, boundary class option)
 - Method: Unit test "an include repeated many times is read once per render" in test/core/render/includeBudget.test.ts (nominal repeated include)
 - Method: Unit test "included blocks map to the directive lines only" in test/core/render/includeMapping.test.ts (nominal map, boundary nested)
-- Method: Unit test "an include with :literal:, an empty argument or an other option stays a placeholder; :class: expands" in test/core/render/renderReq.renderingCore.requirements.test.ts (refusal unsupported forms)
+- Method: Unit test "an include with :literal:, an empty argument or an other option stays a placeholder; :class: expands" in test/core/render/renderReq.renderingCore.requirements.test.ts (refusal unsupported forms, including the placeholder and warning of an empty argument)
 - Method: Unit test "a GitHub alert in an included file or in a grouped context tag renders as a note panel" in test/core/render/renderReq.renderingCore.requirements.test.ts (nominal alerts)
 - Criteria: The included Markdown is rendered at the directive position with its frontmatter stripped. Only plain, `:class:` and `:label:` includes expand. Included blocks carry the host directive line and the included attribute at any depth. A single read per render and distinct lines per use. Alerts render in these two contexts as at top level.

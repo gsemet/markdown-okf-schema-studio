@@ -40,10 +40,6 @@ When an `{include}` has an empty argument, the `:literal:` option or an option o
 - WHEN it is rendered
 - THEN the file is expanded
 
-### Known issues
-
-- Known issue: an `{include}` with an empty argument does not leave a placeholder; the writer fails on the missing argument text and the whole render is refused with an error. The `:literal:` and other-option forms do leave the placeholder.
-
 ### Verification notes
 
 - Method: Unit test "an include with :literal:, an empty argument or an other option stays a placeholder; :class: expands" in test/core/render/renderReq.renderingCore.requirements.test.ts

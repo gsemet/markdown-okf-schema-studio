@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-25 (an include with no path keeps the document rendering)
+
+- SwRS-MDOKFSTUDIO-CORE-012: an `{include}` with an empty argument now leaves the include
+  placeholder with a warning on its line, and the rest of the document renders, like the other
+  incomplete forms. Changed the refusal table row and removed the Known issue line (also from the
+  superseded SwRS-MDOKFSTUDIO-CORE-014).
+
 ## 2026-10-25 (watcher ignore list read below the root)
 
 - SwRS-MDOKFSTUDIO-LIFE-044: the ignored build and tool folders (tmp, out, dist...) are now matched

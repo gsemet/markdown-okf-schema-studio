@@ -134,12 +134,16 @@ test("an include with :literal:, an empty argument or an other option stays a pl
 
   assert.equal(await expanded("part.md\n:literal:"), false, ":literal:");
   assert.equal(await expanded("part.md\n:start-line: 0"), false, "an option other than :class: and :label:");
-  // Known issue: an empty argument does not leave a placeholder; the writer fails on the missing
-  // argument text and the whole render is refused.
-  await assert.rejects(expanded(""), TypeError);
+  assert.equal(await expanded(""), false, "an empty argument");
   assert.equal(await expanded("part.md\n:class: wide"), true, ":class: only");
   assert.equal(await expanded("part.md\n:label: part-label"), true, ":label: only");
   assert.equal(await expanded("part.md"), true, "a plain include");
+
+  const empty = await renderMyst("Before.\n\n```{include}\n```\n\nAfter.\n", virtualContext(files));
+  assert.match(empty.html, /myst-unresolved/u, "the empty include leaves the placeholder");
+  assert.match(empty.html, /Before\./u);
+  assert.match(empty.html, /After\./u, "the rest of the document renders");
+  assert.ok(empty.diagnostics.some((entry) => entry.severity === "warning" && entry.line === 3), "a warning on the directive line");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-GFM-029
