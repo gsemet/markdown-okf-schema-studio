@@ -16,6 +16,7 @@ user_need: As a maintainer, I install on the pinned Node.js version from the
   official registry, and when I package the Studio the bundles the preview loads
   are in the package.
 derived_by:
+- SwRS-MDOKFSTUDIO-CORE-069
 - SwRS-MDOKFSTUDIO-TRUST-074
 - SwRS-MDOKFSTUDIO-TRUST-075
 ---

@@ -179,8 +179,8 @@ e2e:
 gallery: e2e
     {{ npm }} run gallery:generate
 
-# Build the site after end-to-end tests.
-site: e2e
+# Build the site after end-to-end tests and the requirements report.
+site: e2e requirements-report
     {{ npm }} run site:gallery
     {{ npm }} run site
 
@@ -256,11 +256,11 @@ ci-report STAGES="all":
         exit 1
     fi
 
-# CI job "gallery": generate the gallery and the site from existing end-to-end outputs.
+# CI job "gallery": generate the requirements report, the gallery and the site from existing end-to-end outputs.
 ci-gallery:
     #!/usr/bin/env bash
     set -uo pipefail
-    if {{ npm }} run site:gallery && {{ npm }} run site; then
+    if just requirements-report && {{ npm }} run site:gallery && {{ npm }} run site; then
         echo "ci-gallery: passed"
     else
         echo "ci-gallery: FAILED" >&2

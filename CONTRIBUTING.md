@@ -268,6 +268,13 @@ image on the right; on narrow screens the sidecar appears above the image. Histo
 remain visible with their original metadata and are not certified as part of the latest passing
 campaign.
 
+`just site` and `just ci-gallery` first write the requirements report (`just requirements-report`),
+and the published `out/site/requirements.html` ("Requirements" in the site navigation) is built
+from it: the chain from use case to test as a diagram, one real requirement as an example, and the
+counts of active requirements (per scope, marker coverage, exemptions, known issues; retired ones
+apart). Without the report the site still builds and the page says it was not generated. The page
+follows the reader's light or dark colour scheme, like the rest of the site.
+
 The shared logo source is [images/logo.svg](images/logo.svg).
 After editing it, run `fnm exec -- npm run logo:generate` to regenerate the PNG used by the README
 and VS Code Marketplace, and the Sphinx favicon. Chromium must be installed through `just dev`.

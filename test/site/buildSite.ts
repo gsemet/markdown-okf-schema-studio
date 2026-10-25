@@ -10,6 +10,8 @@ import {
   relativeSitePath,
   rewriteLinkTarget,
 } from "./siteLinks";
+import { REQUIREMENTS_REPORT_PATH, writeRequirementsPage } from "./requirementsPage";
+import { DARK_THEME_CSS } from "./siteTheme";
 
 interface HtmlAttribute {
   name: string;
@@ -61,6 +63,7 @@ export function pageDocument(title: string, currentPage: string, body: string): 
   const rootLink = relativeSitePath(currentPage, "index.html");
   const contributingLink = relativeSitePath(currentPage, "contributing.html");
   const galleryLink = relativeSitePath(currentPage, "gallery.html");
+  const requirementsLink = relativeSitePath(currentPage, "requirements.html");
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -69,7 +72,7 @@ export function pageDocument(title: string, currentPage: string, body: string): 
 <link rel="icon" href="${relativeSitePath(currentPage, "favicon.svg")}" type="image/svg+xml">
 <title>${escapeHtml(title)} | Markdown OKF-Schema Studio</title>
 <style>
-:root { color-scheme: light; --ink: #16242c; --muted: #53636c; --line: #d7e0e3; --paper: #f7faf9; --panel: #ffffff; --accent: #0e6974; --accent-strong: #084b55; --warm: #e8b05d; --success: #1b6b4a; --danger: #a33a3a; }
+:root { color-scheme: light dark; --ink: #16242c; --muted: #53636c; --line: #d7e0e3; --paper: #f7faf9; --panel: #ffffff; --accent: #0e6974; --accent-strong: #084b55; --warm: #e8b05d; --success: #1b6b4a; --danger: #a33a3a; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.65 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 header { border-bottom: 1px solid var(--line); background: var(--panel); }
@@ -136,10 +139,11 @@ img { max-width: 100%; height: auto; }
 @media (max-width: 700px) { .capture-viewer header { align-items: flex-start; } .capture-nav { flex: 1 0 100%; justify-content: space-between; order: 3; } .capture-detail { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(220px, 42%) minmax(0, 1fr); } }
 .status { padding: 1rem; border: 1px dashed var(--line); color: var(--muted); }
 footer { max-width: 920px; margin: 0 auto; padding: 0 1.25rem 3rem; color: var(--muted); font-size: .85rem; }
+${DARK_THEME_CSS}
 </style>
 </head>
 <body>
-<header><nav><a class="site-brand" href="${rootLink}"><img src="${relativeSitePath(currentPage, "images/logo.svg")}" alt="" width="44" height="44"><strong>Markdown OKF-Schema Studio</strong></a><a href="${rootLink}">Home</a><a href="${contributingLink}">Contributing</a><a href="${galleryLink}">Gallery</a></nav></header>
+<header><nav><a class="site-brand" href="${rootLink}"><img src="${relativeSitePath(currentPage, "images/logo.svg")}" alt="" width="44" height="44"><strong>Markdown OKF-Schema Studio</strong></a><a href="${rootLink}">Home</a><a href="${contributingLink}">Contributing</a><a href="${galleryLink}">Gallery</a><a href="${requirementsLink}">Requirements</a></nav></header>
 <main>${body}</main>
 <footer>Generated from the repository README and current local reports.</footer>
 </body>
@@ -338,6 +342,7 @@ async function main(): Promise<void> {
     fs.cpSync(REPORTS_ROOT, path.join(siteRoot, "reports"), { recursive: true, errorOnExist: false, force: true });
   }
   fs.mkdirSync(path.join(siteRoot, "reports"), { recursive: true });
+  writeRequirementsPage(path.join(siteRoot, "requirements.html"), REQUIREMENTS_REPORT_PATH(EXTENSION_ROOT), (body) => pageDocument("requirements", "requirements.html", body));
   fs.writeFileSync(path.join(siteRoot, "gallery.html"), pageDocument("gallery", "gallery.html", buildGallery()));
   fs.writeFileSync(path.join(siteRoot, "reports", "index.html"), pageDocument("reports", "reports/index.html", "<h1>Reports</h1><p><a class=\"report-link\" href=\"e2e/REVIEW.md\">Open the E2E review index</a></p>"));
   fs.writeFileSync(path.join(siteRoot, "site-manifest.json"), JSON.stringify({
