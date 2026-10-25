@@ -122,14 +122,14 @@ main session ── user interface: grill, decisions, merges; supervises the orc
 1. One worktree per CR, dependencies symlinked, never staged:
 
    ```bash
-   git worktree add -b changes-requests/NNN-<slug> ../<repo>-wt-NNN origin/main --no-track
+   git worktree add -b change-requests/NNN-<slug> ../<repo>-wt-NNN origin/main --no-track
    ln -s "$PWD/node_modules" ../<repo>-wt-NNN/node_modules
    ```
 
    **Branch names** follow the CR, never the PR: `NNN` is the three-digit CR number (with its
    leading zeros) and `<slug>` the CR folder name, so `03-requests/042-docs-stacked-prs` is worked on
-   branch `changes-requests/042-docs-stacked-prs`. Its screenshot branch is
-   `changes-requests/042-docs-stacked-prs-assets` (see "Screenshots in the PR"). The change type
+   branch `change-requests/042-docs-stacked-prs`. Its screenshot branch is
+   `change-requests/042-docs-stacked-prs-assets` (see "Screenshots in the PR"). The change type
    (`feat`, `fix`, `docs`…) lives in the commit messages and the PR title, not in the branch name.
    Branches created before this rule keep their names.
 
@@ -329,11 +329,11 @@ tree=$(for f in shots/*.png; do
   printf '100644 blob %s\t%s\n' "$(git hash-object -w --no-filters "$f")" "$(basename "$f")"
 done | git mktree)
 commit=$(git commit-tree "$tree" -m "CR NNN screenshots")
-git push origin "${commit}:refs/heads/changes-requests/NNN-<slug>-assets"  # braces: zsh reads $commit:r as a modifier
+git push origin "${commit}:refs/heads/change-requests/NNN-<slug>-assets"  # braces: zsh reads $commit:r as a modifier
 # URL: https://raw.githubusercontent.com/<owner>/<repo>/${commit}/<name>.png
 ```
 
-Keep `changes-requests/NNN-<slug>-assets` after merge: the PR body points at it. Landing removes
+Keep `change-requests/NNN-<slug>-assets` after merge: the PR body points at it. Landing removes
 the CR branch only. Older PRs use `pr-assets/<n>` branches: keep them, their PR bodies point at
 them.
 
