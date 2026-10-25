@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-25 (dollar amounts stay text, as in Sphinx)
+
+- SwRS-MDOKFSTUDIO-MYST-024: the dollar-amounts scenario now states Sphinx's dollarmath rule (an
+  opening `$` is not followed by whitespace, a closing `$` neither follows whitespace nor precedes
+  a digit): `$5 and $6` stays text and only a real `$x$` span is typeset. The Known issue is
+  replaced by two Known issue lines (a price followed by a real span in the
+  same paragraph loses the maths; `*a $5 and* $6` shows literal asterisks); the two visual scenarios `myst/v35` and `myst/v36` assert the new behaviour.
+
 ## 2026-10-25 (message sender check accepts the webview host frames)
 
 - SwRS-MDOKFSTUDIO-TRUST-059: in a real VS Code webview the host message comes from a frame that is
