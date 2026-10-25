@@ -319,34 +319,30 @@ test("a cell change after a refused conversion drops the prepared list-table and
   assert.equal(saves(plain).at(-1)!.editedText, next.editedText);
 });
 
-test("the List table button does nothing and shows no message when the table text is not recognised", () => {
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-070
+test("the List table button converts the table after a line break was pasted into the cell", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness);
-  // A line break in a cell splits the source row, so the table text no longer parses.
   opened.input().value = "a\nb";
   opened.input().dispatch("input");
-  const statusOf = (): string => tableBar(harness).childElements.find((element) =>
-    element.getAttribute("data-sphinx-preview-edit-status") !== null)!.textContent;
-  const before = statusOf();
-  const finals = saves(harness).filter((message) => message.final === true).length;
   barButton(harness, "Convert to list-table").dispatch("click");
-  assert.equal(statusOf(), before, "no message in the bar status");
-  assert.equal(saves(harness).filter((message) => message.final === true).length, finals, "no final save");
+  const last = saves(harness).at(-1)!;
+  assert.equal(last.final, true);
+  assert.match(String(last.editedText), /^```\{list-table\}/u);
+  assert.match(String(last.editedText), /a b/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-091
-test("a line break pasted into the cell text box is kept and written into the source row", () => {
+test("a line break pasted into the cell text box becomes a space in the source row", () => {
   const harness = createRuntimeHarness();
   const opened = openTableCellEditorForTab(harness);
-  let prevented = false;
-  opened.input().dispatch("paste", { preventDefault: () => { prevented = true; }, clipboardData: undefined });
-  assert.equal(prevented, false, "the cell text box has no paste handler");
-  opened.input().value = "a\nb";
+  opened.input().value = "a\r\nb\nc";
   opened.input().dispatch("input");
+  assert.equal(opened.input().value, "a b c", "the text box holds one line");
   opened.input().dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
   const last = saves(harness).at(-1)!;
   assert.equal(last.final, true);
-  assert.equal(last.editedText, "| A | B |\n| --- | --- |\n| a\nb | y |\n| p | q |\n");
+  assert.equal(last.editedText, "| A | B |\n| --- | --- |\n| a b c | y |\n| p | q |\n");
 });
 
 test("a click outside any editable block saves the open cell once", () => {
