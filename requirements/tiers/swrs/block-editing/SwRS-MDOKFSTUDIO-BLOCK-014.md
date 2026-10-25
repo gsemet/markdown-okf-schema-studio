@@ -80,6 +80,7 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 | click on a comment chip in a paragraph | the chip expands and no editor opens |
 | click on the body of an open comment thread | no editor opens |
 | click on a mapped block that is itself inside a link | no editor opens |
+| click, Enter or Space on a link inside a paragraph, edit mode on | the link is followed and no editor opens; a click on the text of the paragraph outside the link still opens it |
 | click on a cell of the properties table | no block editor opens; the field editor of the cell is specified by SwRS-MDOKFSTUDIO-FMEDIT-001 |
 | click on a paragraph below the properties table | its block editor opens as usual |
 
@@ -107,11 +108,6 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 | previewEditSource with neither an error string nor a string originalText | ignored |
 | previewEditSource that arrives when the text box already exists | ignored |
 
-### Known issues
-
-- Known issue: Enter or Space on a focused link inside a paragraph follows the link and also opens the paragraph editor: the keydown listener excludes only links of the properties table, and the paragraph is the mapped target (deduced from the listener; no test).
-- Known issue: a click on a link inside a paragraph is not excluded: the navigation handler posts previewLink and the document click handler then opens the editor of the paragraph (deduced from the handler order and the mapping of block elements only; no test clicks an inline link in edit mode).
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview offers no editing affordance
@@ -127,6 +123,7 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 ### Verification notes
 
 - Method: test/page/runtimeBlockEditor.test.ts (`edit mode loads raw Markdown and saves changes when the block loses focus`: paragraph click and previewEditSource fills the text box; `fenced Markdown editors sit outside the rendered pre and preserve source when saving`: fenced code row). The reading mode paragraph row is not asserted here.
+- Method: test/page/blockReq.requirements.test.ts (`a click on a link inside a paragraph follows the link and opens no editor`, `Enter or Space on a link inside a paragraph opens no editor`: link inside a paragraph row).
 - Method: test/page/blockReq.requirements.test.ts (`Enter or Space on a focused block opens its editor with the caret at the end`: Enter scenario; `a click on a comment chip, an open thread or a block inside a link opens no editor`: chip, open thread and linked block rows; `a click on a cell of the properties table never opens a block editor`: properties table rows; `a click on Diagram source in edit mode opens the editor of the figure and not the disclosure`: Diagram source row and reading mode row). The insert point part of the Enter and Space row is asserted by `T28: document-level click and keydown on an insertion point never open a block editor` in test/page/runtimeBlockMoves.test.ts.
 - Method: test/integration/realInput.test.ts (scenarioImageEditing, screenshot block-editing/r04, clicks plain, linked and raw img blocks: paragraph or image scenario; scenarioSaveKeepsBlockInPlace: fenced code row). No unit test covers the capture listener or the Cmd and Ctrl click of the linked image scenario.
 - Method: visual scenarios in test/visual/scenarioDefinitions2.ts, block-editing/v04 (paragraph click), block-editing/v05 (admonition title click and fenced block; a click on the admonition body has no test) and block-editing/v12 (edit-list-narrow: list item row). The nested list case, the line range of a list (sourceRangeForList in src/page/features/mappedBlocks.ts) and lists that mix files are untested.

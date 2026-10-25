@@ -149,12 +149,15 @@ test("the hover outline skips the properties table and an open editor, and an el
   assert.deepEqual(outlined(), [], "nothing is outlined while the pointer is over the open editor");
 });
 
-test("Known issue: a link inside a paragraph does not stop the outline of the paragraph", () => {
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
+test("hovering a link inside a paragraph does not outline the paragraph, the text around it does", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
-  const link = new RuntimeElement({}, harness.windowState, 0, 20, "a");
+  const link = new SelectorElement(harness, ["a"], {}, "a");
   harness.mappings[1].appendChild(link);
   harness.dispatchDocument("mouseover", { target: link });
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-edit-hover"), null);
+  harness.dispatchDocument("mouseover", { target: harness.mappings[1] });
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-edit-hover"), "true");
 });
 
@@ -193,14 +196,17 @@ test("a click on a comment chip, an open thread or a block inside a link opens n
   assert.equal(postsOf(harness, "previewEditOpen", before).length, 1, "a plain block still opens its editor");
 });
 
-test("Known issue: a click on a link inside a paragraph opens the editor of the paragraph", () => {
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("a click on a link inside a paragraph follows the link and opens no editor", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
-  const link = new RuntimeElement({}, harness.windowState, 0, 20, "a");
+  const link = new SelectorElement(harness, ["a"], {}, "a");
   harness.mappings[1].appendChild(link);
   const before = harness.messages.length;
   harness.dispatchDocument("click", { target: link, preventDefault: () => undefined });
-  assert.equal(postsOf(harness, "previewEditOpen", before).length, 1);
+  assert.deepEqual(postsOf(harness, "previewEditOpen", before), []);
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  assert.equal(postsOf(harness, "previewEditOpen", before).length, 1, "the text outside the link still edits");
 });
 
 test("Enter or Space on a focused block opens its editor with the caret at the end", () => {
@@ -245,12 +251,15 @@ test("Enter or Space stays with a text box, a button, a chip, a toggle and an in
   assert.equal(postsOf(reading, "previewReveal").length, 1);
 });
 
-test("Known issue: Enter on a link inside a paragraph opens the editor of the paragraph", () => {
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("Enter or Space on a link inside a paragraph opens no editor", () => {
   const harness = createRuntimeHarness();
   turnEditModeOn(harness);
-  const link = new RuntimeElement({}, harness.windowState, 0, 20, "a");
+  const link = new SelectorElement(harness, ["a"], {}, "a");
   harness.mappings[1].appendChild(link);
-  harness.dispatchDocument("keydown", key("Enter", { target: link }).event);
+  for (const name of ["Enter", " "]) harness.dispatchDocument("keydown", key(name, { target: link }).event);
+  assert.deepEqual(postsOf(harness, "previewEditOpen"), []);
+  harness.dispatchDocument("keydown", key("Enter", { target: harness.mappings[1] }).event);
   assert.equal(postsOf(harness, "previewEditOpen").length, 1);
 });
 
