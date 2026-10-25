@@ -22,6 +22,7 @@ import {
   INCOMING_RANGES_MESSAGE,
   INLINE_IMAGE_ASSERTIONS,
   INVALID_YAML_ASSERTIONS,
+  DOLLAR_PRICES_ASSERTIONS,
   LIST_TABLE_ASSERTIONS,
   LONG_WORDS_ASSERTIONS,
   MAIN,
@@ -1246,4 +1247,15 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "each time the reference goes on a paragraph of its own, with a blank line before and after it, and its name is "
       + "selected. The final frame shows the editor after the paste at the end.",
   },
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-024
+    id: `myst/v${35 + index}-dollar-prices-full-${theme}-900`,
+    fixture: "55-dollar-prices",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: DOLLAR_PRICES_ASSERTIONS,
+    description: `Three price sentences (\`$19 ... ($200)\`, \`$5 and $6\`, \`$100–$380\`) and one real \`$x$\` span, ${theme}, 900 px pane: the preview typesets the text between two dollar signs as maths in the three price sentences too, the same as for the real span.`,
+  })),
 ];

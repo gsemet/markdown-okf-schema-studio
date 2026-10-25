@@ -617,3 +617,9 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
     };
   }),
 ];
+
+export const DOLLAR_PRICES_ASSERTIONS: ContentAssertion[] = [
+  { message: "the real $x$ span is typeset as maths", selector: `${MAIN} p:last-of-type .katex`, count: 1 },
+  { message: "each price sentence holds one typeset span: the text between its two dollar signs (as the parser reads prices today)", selector: `${MAIN} .katex`, count: 4 },
+  { message: "no price sentence keeps a dollar sign as text", selector: `${MAIN} p`, count: 4, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p')].slice(0, 3).every((paragraph) => !paragraph.textContent.includes('$'))" },
+];

@@ -26,6 +26,7 @@ tested_in_files:
 - test/core/render/mathRenderer.test.ts
 - test/core/render/mystPaletteRendering.test.ts
 - test/visual/scenarioDefinitions1.ts
+- test/visual/scenarioDefinitions2.ts
 ---
 
 ## Maths is typeset offline by KaTeX and bad formulas stay readable
@@ -93,9 +94,20 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 - WHEN the preview renders and the scroll lands
 - THEN the equation box has overflow-x auto, the page has no horizontal overflow and the equation block stays in the frame
 
+### Scenario (boundary): Dollar amounts in a sentence are read as maths
+
+- GIVEN sentences with `$19 base subscription ... ($200)`, `$5 and $6` and `$100–$380`, and a real `$x$` span
+- WHEN the preview renders
+- THEN each price sentence holds one typeset span made of the text between its two dollar signs, the same as the real span, and no dollar sign of those sentences stays as text
+
+### Known issues
+
+- Known issue: the parser reads the text between two dollar amounts as inline maths (`$5 and $6` typesets `5 and `), where Sphinx's dollarmath leaves it as text; the warning detector already treats such amounts as plain text (see SwRS-MDOKFSTUDIO-MYST-072).
+
 ### Verification notes
 
 - Method: test/core/render/mystPaletteRendering.test.ts (inline and display maths: "inline, display and aligned math from the palette typeset with KaTeX")
 - Method: test/core/render/mathRenderer.test.ts (offline and missing bundle: "typesets inline and display math with local assets and CSP-compatible styles"; unparsable formulas: "invalid LaTeX stays readable without breaking valid equations"; active content: "math cannot inject trusted HTML commands or external links"; Sphinx delimiters: "supports Sphinx math delimiters and leaves ordinary text and code alone")
+- Method: test/visual/scenarioDefinitions2.ts (dollar amounts: visual scenarios myst/v35 and myst/v36, fixture 55-dollar-prices, with a real `$x$` span as control)
 - Method: test/visual/scenarioDefinitions1.ts (long display equations: visual scenario chapter-dark-half)
 - Criteria: Typesetting runs on the host-rendered page and makes no external request; failure is local to the formula; trust is off and the bounds maxExpand 1000 and maxSize 100 are set; typesetting is idempotent; overflow is local.
