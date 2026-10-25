@@ -82,8 +82,11 @@ When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or m
 | Done, leaving the text box or Ctrl+Enter on an editor opened and not changed | The editor closes and no previewEditSave and no previewEditCancel is posted (a close report may follow, see SwRS-MDOKFSTUDIO-BLOCK-191) |
 | Done on an insertion editor left empty | The editor closes and nothing is written |
 
-### Known issues
-- Known issue: pressing Done again, or leaving the text box, while the first final save is in flight posts a second final save: postBlockEditSave only refuses an autosave while the editor is finishing. Done, Ctrl+Enter and the text box blur have no guard; the arrow navigation, the move chord, Cancel, the flush, the paste result and the palette focus-leave do check the finishing state.
+### Scenario (boundary): A second final save is refused while the first is in flight
+
+| Input | Outcome |
+| --- | --- |
+| Done, Ctrl+Enter or leaving the text box while the final save of the same editor is in flight | No second final save is posted; the editor waits for the render of the first |
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-BLOCK-191: the host holds the open block edit and ends it when the block changes.
@@ -91,6 +94,7 @@ When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or m
 ### Verification notes
 - Method: test/page/runtimeBlockEditor.test.ts (`Done posts a final save and both buttons keep the textarea focused on press`: Done with changes; `Cmd+Enter and Ctrl+Enter finish the block editor like Done`: Cmd or Ctrl with Enter; `blur after typing posts one final save and clears the autosave timer`: leaving the text box; `Escape in an unchanged Markdown block editor closes it without a message`: unchanged editor, Escape only).
 - Method: test/page/blockReq.requirements.test.ts (`the status line reads Saving Markdown… from the final save on, and shows an error that refuses it`: status line and refused save).
+- Method: test/page/blockReq.requirements.test.ts (`Done, Ctrl+Enter and the blur post one final save while the first is in flight`: second final save refused).
 - Method: test/page/runtimeBlockMoves.test.ts (`T28: Done on an untouched empty insertion closes without saving`: empty insertion). Done, blur and Ctrl+Enter on an unchanged existing block are untested.
 - Method: test/integration/realInput.markers.ts (scenarioCtrlEnterCommit, screenshot block-editing/r02; scenarioParagraphBlurCommit, screenshot block-editing/r01).
 - Method: test/page/runtimePaletteActions.test.ts (`T30: the editor stays open while the host's file dialog has the focus, and the answer is inserted`: host dialog; `T31: Done saves while the file dialog is still open, so the editor is never stuck`: Done during a pending dialog); the moves into the palette and the panels have no test in this scope.

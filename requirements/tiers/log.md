@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-25 (a click on another block opens it once the save lands; no second final save)
+
+- SwRS-MDOKFSTUDIO-BLOCK-041: a click on another block while the open editor holds changed text saves
+  the first editor and opens the clicked block when that render arrives, without a second click.
+  Removed the Known issue line.
+- SwRS-MDOKFSTUDIO-BLOCK-047: Done, Ctrl+Enter and the blur post no second final save while the first
+  is in flight. Added a scenario, removed the Known issue line.
+
 ## 2026-10-25 (a request of an older render is answered, not dropped)
 
 - SwRS-MDOKFSTUDIO-TRUST-065, TRUST-090, BLOCK-216: the render gate answers a request that names an older

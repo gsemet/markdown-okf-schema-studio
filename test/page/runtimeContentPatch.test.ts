@@ -1139,6 +1139,37 @@ test("T34: pending block navigation resumes after a content patch", () => {
   assert.deepEqual(next.selectionRange, [0, 0], "the caret is at the start");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+test("a click on another block while the first editor holds changes opens it once the save is rendered", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: noop });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "Current block\n",
+  });
+  const textarea = harness.createdElements.filter((element) => element.tagName === "TEXTAREA").at(-1)!;
+  textarea.value = "Current block, changed\n";
+  textarea.dispatch("input");
+  // The pointer press blurs the text box (the save), then the click reaches the other block.
+  textarea.dispatch("blur");
+  const saves = () => harness.messages.filter((message) => message.type === "previewEditSave" && message.final);
+  assert.equal(saves().length, 1);
+  harness.dispatchDocument("click", { target: harness.mappings[2], preventDefault: noop });
+  assert.equal(saves().length, 1, "the save in flight is not posted again");
+  const pending = harness.getWebviewState().pendingBlockNavigation as Record<string, unknown> | undefined;
+  assert.ok(pending, "the click is remembered");
+  const before = harness.messages.length;
+  harness.dispatchMessage(patchMessage());
+  const open = messagesAfter(harness, before).filter((message) => message.type === "previewEditOpen");
+  assert.equal(open.length, 1, "the clicked block opens once, after the render");
+  assert.equal(harness.getWebviewState().pendingBlockNavigation, undefined);
+});
+
 test("T34: patches sent before the page acknowledged the previous one apply in order", () => {
   const harness = createRuntimeHarness();
   const before = harness.messages.length;

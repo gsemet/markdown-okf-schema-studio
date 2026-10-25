@@ -355,6 +355,21 @@ test("the status line reads Saving Markdown… from the final save on, and shows
   assert.equal(status.textContent, "The preview is stale. Reopen the block before saving.");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+test("Done, Ctrl+Enter and the blur post one final save while the first is in flight", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "Second paragraph, changed.";
+  textarea.dispatch("input");
+  findButton(harness, DONE).dispatch("click");
+  const before = harness.messages.length;
+  findButton(harness, DONE).dispatch("click");
+  textarea.dispatch("blur");
+  textarea.dispatch("keydown", { key: "Enter", ctrlKey: true, preventDefault: () => undefined });
+  assert.deepEqual(postsOf(harness, "previewEditSave", before), [], "no second final save");
+  assert.equal(postsOf(harness, "previewEditSave").filter((message) => message.final === true).length, 1);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
 test("Cancel and Escape are ignored while the final save is in flight", () => {
   const harness = createRuntimeHarness();
