@@ -12,6 +12,16 @@ import type { TextEdit } from "./textEditing";
 
 /** The table actions bound to the page's table tools. */
 export function createTableEditActions(tableTools: MarkdownTableTools | undefined) {
+  /**
+   * The context with the insert point moved to the end of the table (pipe, `{list-table}` or HTML)
+   * that holds the caret, so a new block never splits it; unchanged outside a table.
+   */
+  function afterTable(ctx: EditActionContext): EditActionContext {
+    const found = anyTableAtCaret(ctx);
+    if (!found || ctx.selectionEnd > found.end) return ctx;
+    return { ...ctx, selectionStart: found.end, selectionEnd: found.end };
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-106
   /** A table of `rows` x `cols` (the header counts as a row) set apart by blank lines. */
   function insertTable(ctx: EditActionContext): TextEdit | undefined {
@@ -25,8 +35,9 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
     const header = row((column) => "Column " + (column + 1));
     const lines = [header, row(() => "---")];
     for (let index = 1; index < rows; index += 1) lines.push(row(() => ""));
-    // The table goes after the selection, which stays untouched.
-    return insertBlockAfterSelection(ctx, lines.join("\n"), "Column 1");
+    // The table goes after the selection (after the table that holds the caret), which stays
+    // untouched.
+    return insertBlockAfterSelection(afterTable(ctx), lines.join("\n"), "Column 1");
   }
 
   /**
@@ -95,7 +106,7 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
       "    </tr>", "  </thead>", "  <tbody>", "    <tr>", "      <td></td>", "      <td></td>",
       "    </tr>", "  </tbody>", "</table>",
     ].join("\n");
-    return insertBlockAfterSelection(ctx, body, "Column 1");
+    return insertBlockAfterSelection(afterTable(ctx), body, "Column 1");
   }
 
   /**
@@ -239,7 +250,7 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
       };
     }
     const body = head + "| Column 1 | Column 2 |\n| --- | --- |\n|  |  |\n" + ":".repeat(3);
-    return insertBlockAt(ctx, body, head.indexOf("Caption"), 7);
+    return insertBlockAt(afterTable(ctx), body, head.indexOf("Caption"), 7);
   }
 
   return { insertTable, htmlTable, convertTableAtCaret, tableKindAt, alignColumn, tableCaption };

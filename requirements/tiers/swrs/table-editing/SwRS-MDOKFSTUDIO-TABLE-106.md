@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/slashMenu.test.ts
+- test/page/modules/tableInsertAfterTable.test.ts
 ---
 
 ## The Table action inserts a pipe table of the chosen size on its own lines
@@ -52,6 +53,11 @@ When the writer runs the Table action with a size of R x C, 1 to 9 each, in a bl
 - WHEN the action runs
 - THEN the paragraph is split and the table sits on its own lines between its two parts
 
+### Scenario (boundary): Caret inside a table
+- GIVEN the caret in a row of a pipe table, a {list-table} or an HTML table
+- WHEN the action runs
+- THEN the new table goes on its own lines after the last line of that table and the existing table stays whole
+
 ### Scenario (boundary): After a line break, a blank line or a selection
 - GIVEN the caret after a line break, or after a blank line, or with text selected
 - WHEN the action runs
@@ -76,16 +82,13 @@ When the writer runs the Table action with a size of R x C, 1 to 9 each, in a bl
 | GFM mode | Table, HTML table and Column alignment; Table with caption, List table and Pipe table are not offered |
 | MyST mode | all six: Table, HTML table, Column alignment, Table with caption, List table and Pipe table |
 
-### Known issues
-- Known issue: With the caret in a row of an existing table, the action inserts the new table after the caret with blank lines around it, which splits the existing table in two; only the paragraph case is shown by the "In the middle of a paragraph" scenario.
-
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TABLE-111: Column alignment, offered in the same modes.
 - SwRS-MDOKFSTUDIO-TABLE-115: Table with caption, offered in MyST mode.
 - SwRS-MDOKFSTUDIO-TABLE-117: HTML table, offered in GFM and MyST modes.
 
 ### Verification notes
-- Method: test/page/modules/editActions.test.ts (3x4, size limits 1x1 and 9x9, the first header cell selection, middle of a paragraph, after a line break or a blank line, selection kept, refused sizes, and the block-only scope: the table action is for blocks only; emoji is for blocks and cells). The mode rows other than Table with caption are read from the descriptors in src/core/palette/paletteActions.ts and the additive mode rule in src/page/modules/editPalette.ts and have no test (untested); the mode filtering of the palette in general belongs to the palette-slash scope.
+- Method: test/page/modules/tableInsertAfterTable.test.ts (the caret in a pipe table, a list-table or an HTML table: the table goes after it); test/page/modules/editActions.test.ts (3x4, size limits 1x1 and 9x9, the first header cell selection, middle of a paragraph, after a line break or a blank line, selection kept, refused sizes, and the block-only scope: the table action is for blocks only; emoji is for blocks and cells). The mode rows other than Table with caption are read from the descriptors in src/core/palette/paletteActions.ts and the additive mode rule in src/page/modules/editPalette.ts and have no test (untested); the mode filtering of the palette in general belongs to the palette-slash scope.
 - Method: test/page/modules/slashMenu.test.ts (P11: the table cell palette lists only the actions allowed in a cell; cell scope row).
 - Method: test/page/modules/markdownTable.test.ts (T24: the table inserted by the palette parses back with its header and empty rows).
 - Method: test/page/runtimeEditPalette.test.ts (T24: one click on a grid cell inserts the table as one undo step and keeps the editor open).

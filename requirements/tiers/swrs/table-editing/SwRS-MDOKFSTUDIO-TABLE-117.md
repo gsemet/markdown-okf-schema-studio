@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/markdownTable.test.ts
+- test/page/modules/tableInsertAfterTable.test.ts
 ---
 
 ## HTML table converts or inserts an HTML table
@@ -58,18 +59,20 @@ When the writer runs HTML table, the extension SHALL replace the pipe table at t
 - WHEN HTML table is run
 - THEN a table element with a header of Column 1 and Column 2 and one empty body row is inserted on its own lines, with Column 1 selected
 
+### Scenario (boundary): Caret in a list-table or an HTML table
+- GIVEN the caret inside a {list-table} or an HTML table
+- WHEN HTML table is run
+- THEN the new table is inserted on its own lines after the last line of that table, which stays whole
+
 ### Scenario (boundary): No table tools
 - GIVEN the page without table tools
 - WHEN HTML table is run
 - THEN the same new table is inserted
 
-### Known issues
-- Known issue: With the caret inside a {list-table} or inside an existing HTML table, no pipe table is found and the new table is inserted at the caret, which splits that table.
-
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TABLE-106: the palette modes in which HTML table is offered (GFM and MyST modes).
 
 ### Verification notes
-- Method: test/page/modules/editActions.test.ts (T25: htmlTable converts the pipe table under the caret, text escaped, alignment kept; T25: htmlTable finds the table from its header, delimiter or last row, and from a table after text; T25: htmlTable outside a pipe table inserts a new 2 x 2 table set apart by blank lines; the no table tools row is read from htmlTable in src/page/modules/tableEditActions.ts and is untested).
+- Method: test/page/modules/editActions.test.ts (T25: htmlTable converts the pipe table under the caret, text escaped, alignment kept; T25: htmlTable finds the table from its header, delimiter or last row, and from a table after text; T25: htmlTable outside a pipe table inserts a new 2 x 2 table set apart by blank lines; the list-table and HTML table rows are in test/page/modules/tableInsertAfterTable.test.ts; the no table tools row is read from htmlTable in src/page/modules/tableEditActions.ts and is untested).
 - Method: test/page/modules/markdownTable.test.ts (T25: toHtmlTable writes thead and tbody with escaped text and alignment attributes; T25: toHtmlTable omits tbody without rows and alignment attributes without colons; T25: toHtmlTable keeps a model's unicode and empty cells).
 - Criteria: The replaced range, the exact HTML text for each case, and the inserted text with the selection of Column 1. The button itself belongs to the palette-slash scope.
