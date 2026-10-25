@@ -84,25 +84,53 @@ test("a read-only preview stores a theme choice; its edit requests are refused",
   assert.equal(choices.previewThemeMode, "white");
 });
 
-// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
-test("a theme mode that cannot be saved still holds for the session", async (t) => {
-  const log = t.mock.method(console, "error", () => undefined);
+const NOT_SAVED = "The Markdown preview could not save your display choice; it holds until VS Code closes.";
 
-  const failing: KeyValueStore = {
+function failingStore(): KeyValueStore {
+  return {
     get: () => undefined,
     update: () => Promise.reject(new Error("disk full")),
     keys: () => [],
   };
-  const rejected = new WorkspaceChoices({} as HostServices);
-  rejected.load(failing);
+}
+
+function hostWithWarnings(warnings: string[]): HostServices {
+  return { ui: { showWarning: (text: string) => { warnings.push(text); return Promise.resolve(); } } } as unknown as HostServices;
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-021
+test("a view preference that cannot be saved holds for the session and warns the reader once", async (t) => {
+  const log = t.mock.method(console, "error", () => undefined);
+  const warnings: string[] = [];
+  const rejected = new WorkspaceChoices(hostWithWarnings(warnings));
+  rejected.load(failingStore());
+  rejected.setViewPreference("zoom", 130);
+  rejected.setViewPreference("widthMode", "full");
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(rejected.viewPreferences.zoom, 130);
+  assert.equal(rejected.viewPreferences.widthMode, "full");
+  assert.equal(log.mock.calls[0]!.arguments[0], "Failed to persist the Markdown preview view preferences.");
+  assert.deepEqual(warnings, [NOT_SAVED], "one warning for a run of failures");
+  mock.restoreAll();
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
+test("a theme mode that cannot be saved still holds for the session", async (t) => {
+  const log = t.mock.method(console, "error", () => undefined);
+
+  const warnings: string[] = [];
+  const rejected = new WorkspaceChoices(hostWithWarnings(warnings));
+  rejected.load(failingStore());
   rejected.setPreviewThemeMode("dark");
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(rejected.previewThemeMode, "dark");
   assert.equal(log.mock.callCount(), 1);
   assert.equal(log.mock.calls[0]!.arguments[0], "Failed to persist the Markdown preview theme mode.");
+  assert.deepEqual(warnings, [NOT_SAVED]);
 
   const store = memoryStore();
-  const unloaded = new WorkspaceChoices({} as HostServices);
+  const unloaded = new WorkspaceChoices(hostWithWarnings(warnings));
   unloaded.setPreviewThemeMode("white");
   assert.equal(unloaded.previewThemeMode, "white");
   unloaded.load(store);
@@ -112,5 +140,6 @@ test("a theme mode that cannot be saved still holds for the session", async (t) 
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(store.values.size, 0, "nothing is written");
   assert.equal(log.mock.callCount(), 1, "nothing more is logged");
+  assert.deepEqual(warnings, [NOT_SAVED], "nothing more is shown");
   mock.restoreAll();
 });

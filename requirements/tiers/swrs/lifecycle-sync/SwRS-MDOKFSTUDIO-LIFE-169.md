@@ -124,7 +124,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 
 - GIVEN workspace storage whose update fails, or choices whose storage is not loaded or was released at deactivation
 - WHEN the host stores a theme mode or a view preference picked by the reader
-- THEN the value is held for the session, a rejected write logs "Failed to persist the Markdown preview theme mode." or "Failed to persist the Markdown preview view preferences." and the reader sees no message, and with no storage nothing is written and nothing is logged
+- THEN the value is held for the session, a rejected write logs "Failed to persist the Markdown preview theme mode." or "Failed to persist the Markdown preview view preferences." and shows the reader one warning, "The Markdown preview could not save your display choice; it holds until VS Code closes.", repeated only after a write succeeded in between, and with no storage nothing is written and nothing is logged
 
 ### Scenario (boundary): Stored preferences are normalized field by field
 
@@ -136,7 +136,6 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 
 ### Known issues
 
-- Known issue: when the storage write fails the failure is only logged; the reader sees no message and the choice is lost at the next start (for the theme mode and for the view preferences, including the width mode); the failure of the workspace persistence has no test.
 - Known issue: the preference message is accepted by read-only and untrusted previews because it edits no document.
 
 ### Related requirements
@@ -153,8 +152,8 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 - Method: test/page/modules/editPalette.test.ts and test/page/runtimeEditPalette.test.ts (one previewPaletteModeChanged per chosen mode, none after setMode).
 - Method: test/page/modules/tocColumn.test.ts (the toggle posts toc and remembers it).
 - Method: test/integration/paletteMode.test.ts (a reported palette mode is stored and wins over the setting in the next panel; the read-only case is deduced from the code, untested).
-- Method: test/integration/lifecycle.test.ts and test/core/state/previewTheme.test.ts (previewThemeModeChanged dark is stored and carried by the next page; the storage write and the stale-message drop are untested).
+- Method: test/integration/lifecycle.test.ts and test/core/state/previewTheme.test.ts (previewThemeModeChanged dark is stored and carried by the next page; the stale-message drop is untested).
 - Method: test/core/state/previewViewPreferences.test.ts (one key, normalized object, no write without storage) and test/core/protocol/pageToHost.test.ts (validators, width mode wide refused).
-- Method: test/session/diagReq.viewState.requirements.test.ts (a theme mode that cannot be saved still holds for the session).
+- Method: test/session/diagReq.viewState.requirements.test.ts (a theme mode or a view preference that cannot be saved still holds for the session, is logged, and warns the reader once).
 - Method: test/integration/previewEditing.test.ts (previewAnchorModeChanged false then true sets the configuration of the preview; the update of the loaded context is untested).
 - Criteria: after each change the saved state, the posted message and the stored value equal the value shown; an invalid value leaves the stored value unchanged.

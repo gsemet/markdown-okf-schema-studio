@@ -52,4 +52,4 @@ As a reader, I find the preview controls in three clear rows, fold the toolbar d
 - A value that is not valid for its preference is refused; a stored value that is not valid falls back to the default of that preference alone.
 - The meaning of zoom and width is described in the theme-zoom and layout-width scopes.
 - Known issue: the toolbar floats over the page, so text that scrolls under it is covered; only the first element of a document gets room under it (see the first-element gap of the layout-width scope).
-- Known issue: when the workspace storage cannot be written, the choice is kept for the session only and the failure is not shown to the reader.
+- When the workspace storage cannot be written, the choice is kept for the session and the reader gets one short warning that it will not survive a restart.

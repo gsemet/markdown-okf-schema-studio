@@ -51,7 +51,21 @@ export class WorkspaceChoices {
    */
   public readonly dismissedWarningBanners = new Map<string, string>();
 
+  /** True once a failed write was shown to the reader; a successful write re-arms the warning. */
+  private persistWarned = false;
+
   public constructor(private readonly host: HostServices) {}
+
+  /** Tells the reader, once per run of failures, that a choice holds for this session only. */
+  private warnNotSaved(): void {
+    if (this.persistWarned) {
+      return;
+    }
+    this.persistWarned = true;
+    void this.host.ui.showWarning(
+      "The Markdown preview could not save your display choice; it holds until VS Code closes.",
+    );
+  }
 
   /** Reads the stored choices of the workspace; until then, the choices are the defaults. */
   public load(storage: KeyValueStore): void {
@@ -102,9 +116,15 @@ export class WorkspaceChoices {
     if (!storage) {
       return;
     }
-    void writePreviewThemeMode(storage, mode).then(undefined, (error: unknown) => {
-      console.error("Failed to persist the Markdown preview theme mode.", error);
-    });
+    void writePreviewThemeMode(storage, mode).then(
+      () => {
+        this.persistWarned = false;
+      },
+      (error: unknown) => {
+        console.error("Failed to persist the Markdown preview theme mode.", error);
+        this.warnNotSaved();
+      },
+    );
   }
 
   /** Forgets the theme mode (session and workspace). */
@@ -127,9 +147,15 @@ export class WorkspaceChoices {
     if (!storage) {
       return;
     }
-    void writeViewPreferences(storage, this.preferences).then(undefined, (error: unknown) => {
-      console.error("Failed to persist the Markdown preview view preferences.", error);
-    });
+    void writeViewPreferences(storage, this.preferences).then(
+      () => {
+        this.persistWarned = false;
+      },
+      (error: unknown) => {
+        console.error("Failed to persist the Markdown preview view preferences.", error);
+        this.warnNotSaved();
+      },
+    );
   }
 
   /** The stored edit mode, as stored (`true` starts the next preview in edit mode). */
