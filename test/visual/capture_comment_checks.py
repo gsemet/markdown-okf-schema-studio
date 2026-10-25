@@ -652,6 +652,15 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
   finish()
 
 
+def answer_code_copy(page: Page, ok: bool = True) -> None:
+  """Plays the host's answer to the last copy request, as the extension host does."""
+  page.evaluate("""([ok]) => {
+    const request = window.visualMessages.filter(m => m.type === 'previewCopyText').at(-1);
+    window.dispatchEvent(new MessageEvent('message', { data: {
+      type: 'previewCopyTextResult', editId: request.editId, ok, ...(ok ? {} : { reason: 'Too large to copy.' }) } }));
+  }""", [ok])
+
+
 def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The copy button follows the hovered code block and posts its raw code."""
   if scenario.get("codeCopyKeyboardChecks"):
@@ -693,6 +702,9 @@ def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None
     "window.visualMessages.filter(m => m.type === 'previewCopyText').at(-1)")
   if not copied or copied.get("text") != expected:
     failures.append(Failure(page_name, "clicking the copy button did not post the exact code text"))
+  if button.get_attribute("aria-label") == "Copied":
+    failures.append(Failure(page_name, "the copy button said Copied before the host answered"))
+  answer_code_copy(page)
   if button.get_attribute("aria-label") != "Copied":
     failures.append(Failure(page_name, "the copy button did not show the check mark after the click"))
   if page.locator(".sphinx-preview-block-editor").count() != 0:
@@ -737,6 +749,7 @@ def check_code_copy_keyboard(page: Page, scenario: dict, failures: list[Failure]
   copied = page.evaluate("window.visualMessages.filter(m => m.type === 'previewCopyText').at(-1)")
   if not copied or copied.get("text") != expected:
     failures.append(Failure(page_name, "Enter on the focused copy button did not post the exact code text"))
+  answer_code_copy(page)
   if button.get_attribute("aria-label") != "Copied":
     failures.append(Failure(page_name, "the copy button did not show the check mark after Enter"))
 

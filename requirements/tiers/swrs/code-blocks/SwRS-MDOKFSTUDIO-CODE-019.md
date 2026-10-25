@@ -6,7 +6,8 @@ title: The copy button copies the raw code and confirms it
 description: When the reader clicks the copy button, the extension SHALL put the
   block's code only on the clipboard, without file name or line numbers, lines
   joined with newlines and a trailing newline, label the button Copied with a
-  check mark for 1.5 s and keep the focus and the editors untouched.
+  check mark for 1.5 s only after the host confirms the copy, show the host's
+  reason instead when it refuses, and keep the focus and the editors untouched.
 project: markdown-okf-schema-studio
 scope: code-blocks
 lifecycle: draft
@@ -30,7 +31,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When the reader clicks the copy button, the extension SHALL put the block's code only on the clipboard, without file name or line numbers, lines joined with newlines and a trailing newline, label the button Copied with a check mark for 1.5 s and keep the focus and the editors untouched.
+When the reader clicks the copy button, the extension SHALL put the block's code only on the clipboard, without file name or line numbers, lines joined with newlines and a trailing newline, label the button Copied with a check mark for 1.5 s only after the host confirms the copy, show the host's reason instead when it refuses, and keep the focus and the editors untouched.
 
 ### Scenario (nominal): The clipboard holds the code lines only
 
@@ -48,13 +49,19 @@ When the reader clicks the copy button, the extension SHALL put the block's code
 
 - GIVEN the reader has clicked Copy code
 - WHEN 1.5 s pass
-- THEN the button was labelled Copied with a check mark from the click and returns to Copy code without the check mark
+- THEN the button was labelled Copied with a check mark from the host's confirmation and returns to Copy code without the check mark
+
+### Scenario (refusal): The button never claims a copy that did not happen
+
+- GIVEN the host answers a copy request with a refusal and a reason (for example "Too large to copy.")
+- WHEN the answer arrives
+- THEN the button shows a cross and the reason as its label and title for 3 s instead of Copied, then returns to Copy code; before any answer, and for an answer to an older click, it keeps the label Copy code
 
 ### Scenario (boundary): A second click restarts the confirmation
 
 - GIVEN the reader clicks the button twice within 1.5 s
-- WHEN the second click happens
-- THEN the Copied state lasts 1.5 s from the second click
+- WHEN the host confirms the second click
+- THEN the Copied state lasts 1.5 s from that confirmation
 
 ### Scenario (nominal): An open block editor keeps the focus
 
@@ -75,6 +82,6 @@ When the reader clicks the copy button, the extension SHALL put the block's code
 
 ### Verification notes
 
-- Method: test/page/modules/codeCopy.test.ts (posted text, diff markers, Copied label and icon with fake timers, second click, mousedown default-prevented and click not propagated, focus kept)
-- Method: test/session/renderReq.codeCopy.requirements.test.ts (host clipboard write of the posted text)
-- Criteria: clipboard text equals the source code plus one trailing newline; label and icon change at click and reset 1500 ms after the last click; mousedown is default-prevented; click does not propagate
+- Method: test/page/modules/codeCopy.test.ts (posted text, diff markers, Copied label and icon after the host answer, refusal reason, answer of an older click ignored, fake timers, second click, mousedown default-prevented and click not propagated, focus kept)
+- Method: test/session/renderReq.codeCopy.requirements.test.ts (host clipboard write of the posted text and its answer)
+- Criteria: clipboard text equals the source code plus one trailing newline; label and icon change when the host answers (ok: Copied; refused: its reason) and reset 1500 ms (3000 ms for a refusal) later; nothing changes before the answer; mousedown is default-prevented; click does not propagate

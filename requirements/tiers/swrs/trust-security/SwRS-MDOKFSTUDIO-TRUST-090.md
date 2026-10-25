@@ -87,7 +87,7 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 
 | Request | Timeout | End without an answer |
 | --- | --- | --- |
-| previewListTargets, previewListCitations | 6 seconds | ok false and the reason The editor did not answer. Try again., shown in the popover |
+| previewListTargets, previewListCitations, previewCopyText | 6 seconds | ok false and the reason The editor did not answer. Try again., shown in the popover |
 | previewThreadReply, previewThreadDelete | 6 seconds (default) | ok false and the reason The editor did not answer. Try again., shown in the status line of the thread |
 | previewPasteHtml | 10 seconds (set by the block editor) | ok false and the reason The editor did not answer. Try again. |
 | previewPasteImage | 30 seconds (set by the block editor) | ok false and the reason The editor did not answer. Try again. |
@@ -102,6 +102,7 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 
 | Request | Result message | Success payload | Refusals and failures, as the reason text of ok false |
 | --- | --- | --- | --- |
+| previewCopyText | previewCopyTextResult | ok true | Too large to copy. (text over 1 000 000 characters); Could not copy. (the clipboard write failed) |
 | previewListTargets | previewListTargetsResult | ok true, items, truncated | The preview is out of date. Try again once it has refreshed. (no refusal in a read-only preview) |
 | previewListCitations | previewListCitationsResult | ok true, items, truncated | Citations are read from the workspace, which needs trust. (read-only); The preview is out of date. Try again once it has refreshed.; the message of the scan error |
 | previewPickDocument | previewPickDocumentResult | ok true and path relative to the document, or ok true and cancelled true when the dialog is closed | Linking a document needs a trusted workspace. (read-only); The preview is out of date, or the document is not a file.; That file name cannot be written in a {doc} link.; the message of the dialog error |

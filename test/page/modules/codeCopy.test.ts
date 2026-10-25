@@ -110,6 +110,10 @@ function rect(top: number, left: number, width: number, height: number) {
   return { top, left, right: left + width, bottom: top + height, width, height };
 }
 
+// The host's answer: undefined holds it (the test answers through `held`).
+let reply: { ok: boolean; reason?: string } | undefined = { ok: true };
+const held: Array<(result: { ok?: boolean; reason?: string }) => void> = [];
+
 function harness(options: { band?: ReturnType<typeof rect> } = {}) {
   const root = new FakeElement("html");
   const body = root.append(new FakeElement("body"));
@@ -151,7 +155,7 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
     addEventListener: (type: string, handler: Handler) => windowListeners.set(type, [...(windowListeners.get(type) ?? []), handler]),
   };
   provideGlobalElement(FakeElement);
-  const runtime: { hide(): void; refresh(): void } = installCodeCopy(document as never, window as never, (text: string) => posted.push(text));
+  const runtime: { hide(): void; refresh(): void } = installCodeCopy(document as never, window as never, (text: string, done) => { posted.push(text); held.push(done); if (reply) done(reply); });
   return {
     button(): any { return body.querySelector("[data-sphinx-preview-code-copy]") as any; },
     body, content, band, makePre, posted, timers, runtime, window,
@@ -408,4 +412,37 @@ test("keyboard: scrolling stops with the pointer elsewhere, the focused block ke
   t.scroll();
   for (const timer of [...t.timers]) timer.callback();
   assert.equal(t.button().hidden, false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-019
+test("the button says Copied only after the host answers ok, and shows the refusal otherwise", () => {
+  const saved = reply;
+  try {
+    reply = undefined; // hold the answer
+    const t = harness();
+    const { code } = t.makePre("x\n", 100);
+    t.over(code);
+    t.button().fire("click");
+    assert.equal(t.button().getAttribute("aria-label"), "Copy code", "nothing is claimed before the answer");
+
+    held.at(-1)!({ ok: false, reason: "Too large to copy." });
+    assert.equal(t.button().getAttribute("aria-label"), "Too large to copy.");
+    assert.equal(t.button().getAttribute("title"), "Too large to copy.");
+    assert.equal(t.button().innerHTML.includes("M4 4l8 8"), true, "the refusal mark shows");
+    t.timers.at(-1)!.callback();
+    assert.equal(t.button().getAttribute("aria-label"), "Copy code");
+    assert.equal(t.button().getAttribute("title"), null);
+
+    t.button().fire("click");
+    held.at(-1)!({ ok: true });
+    assert.equal(t.button().getAttribute("aria-label"), "Copied");
+
+    // An answer that comes after a newer click is ignored.
+    t.button().fire("click");
+    t.button().fire("click");
+    held.at(-2)!({ ok: false, reason: "old" });
+    assert.equal(t.button().getAttribute("aria-label"), "Copy code");
+  } finally {
+    reply = saved;
+  }
 });

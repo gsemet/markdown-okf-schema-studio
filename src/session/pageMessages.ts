@@ -56,7 +56,7 @@ export const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGa
   previewEditCancel: "page-state",
   previewFrontmatterSave: "page-state",
   previewCheckboxToggle: "page-state",
-  previewCopyText: "render",
+  previewCopyText: "document",
   previewHistoryGo: "render",
   previewViewPreferenceChanged: "render",
   previewPaletteModeChanged: "render",

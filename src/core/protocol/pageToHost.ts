@@ -243,7 +243,7 @@ export interface HostRequestFields {
 }
 
 /** Raw code of a code block, copied to the clipboard by the host. */
-export interface PreviewCopyTextMessage extends PageMessageBase<"previewCopyText"> {
+export interface PreviewCopyTextMessage extends PageMessageBase<"previewCopyText">, HostRequestFields {
   text: string;
 }
 
@@ -436,7 +436,8 @@ const VIEW_PREFERENCE_VALIDATORS: Record<string, (value: unknown) => boolean> = 
   toolbarCollapsed: (value) => typeof value === "boolean",
 };
 
-const MAX_COPY_TEXT_LENGTH = 1_000_000;
+export const MAX_COPY_TEXT_LENGTH = 1_000_000;
+const MAX_COPY_TEXT_TRANSPORT_LENGTH = 20_000_000;
 
 const MAX_EDIT_ID_LENGTH = 100;
 
@@ -577,7 +578,9 @@ export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageV
     && message.line === message.endLine),
   // @implements_req SwRS-MDOKFSTUDIO-CODE-026
   // Raw code of a code block, copied to the clipboard by the host.
-  previewCopyText: (message) => isBoundedString(message.text, MAX_COPY_TEXT_LENGTH),
+  // The size limit is the host's to answer (`previewCopyTextResult`); the shape check only keeps
+  // a message of absurd size out of the host.
+  previewCopyText: (message) => isHostRequest(message) && isBoundedString(message.text, MAX_COPY_TEXT_TRANSPORT_LENGTH),
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-058
   // Back / Next of toolbar row 2: the host walks the panel's navigation history.
   previewHistoryGo: (message) => isOneOf(message.direction, ["back", "forward"] as const),

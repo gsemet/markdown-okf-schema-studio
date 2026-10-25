@@ -176,13 +176,9 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate));
   const firstClearance = installFirstClearance(document, window);
   pageDiagnostics.expose(firstClearance);
-  const codeCopy = installCodeCopy(document, window, (text) => vscode.postMessage({
-    type: "previewCopyText",
-    documentId: context.documentId,
-    revision: context.revision,
-    requestId: context.requestId,
-    text,
-  }));
+  // The button follows the host's answer (`hostRequests` is created below, before any click).
+  const codeCopy = installCodeCopy(document, window, (text, done) =>
+    hostRequests.ask("previewCopyText", { text }, {}, done));
   // Edit mode: the anchor icon of a label renames it. The result is matched by edit id: the edit
   // itself moves the document version before the answer arrives.
   const labelRename = installLabelRename(document, window, {

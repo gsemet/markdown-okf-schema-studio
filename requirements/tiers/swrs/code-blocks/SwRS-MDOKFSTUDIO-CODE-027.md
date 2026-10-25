@@ -39,10 +39,6 @@ When a copy request comes from a page whose document version or render request i
 - WHEN a copy request arrives
 - THEN the text is written to the clipboard
 
-### Known issues
-
-- Known issue: the copy button still shows Copied although the host dropped the request and the clipboard is unchanged; the version check is stricter than needed for a copy, which edits nothing.
-
 ### Verification notes
 
 - Method: Unit test of the message dispatcher.

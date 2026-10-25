@@ -6,7 +6,7 @@
 export function installCodeCopy(
   document: Document,
   window: Window & typeof globalThis,
-  post: (text: string) => void,
+  post: (text: string, done: (result: { ok?: boolean; reason?: string }) => void) => void,
 ): { hide(): void; refresh(): void } {
   const contentId = "sphinx-myst-preview-content";
   const size = 26;
@@ -23,11 +23,17 @@ export function installCodeCopy(
   let pointerX = 0;
   let pointerY = 0;
 
+  const refusedIcon = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  // Counts the clicks: an answer of an older click, or of a block left since, shows nothing.
+  let clickSequence = 0;
+
   const resetCopied = (): void => {
+    clickSequence++;
     if (copiedTimer !== undefined) window.clearTimeout(copiedTimer);
     copiedTimer = undefined;
     if (!button) return;
     button.setAttribute("aria-label", "Copy code");
+    button.removeAttribute("title");
     button.innerHTML = copyIcon;
   };
   const hide = (): void => {
@@ -50,11 +56,19 @@ export function installCodeCopy(
       event.stopPropagation();
       const pre = current;
       if (!pre) return;
-      post(textOf(pre));
       resetCopied();
-      created.setAttribute("aria-label", "Copied");
-      created.innerHTML = checkIcon;
-      copiedTimer = window.setTimeout(resetCopied, 1500);
+      const mine = clickSequence;
+      // "Copied" only when the host says the clipboard was written; otherwise its reason.
+      post(textOf(pre), (result) => {
+        if (mine !== clickSequence) return;
+        const copied = result.ok === true;
+        const label = copied ? "Copied" : (result.reason || "Could not copy.");
+        created.setAttribute("aria-label", label);
+        if (copied) created.removeAttribute("title");
+        else created.setAttribute("title", label);
+        created.innerHTML = copied ? checkIcon : refusedIcon;
+        copiedTimer = window.setTimeout(resetCopied, copied ? 1500 : 3000);
+      });
     });
     return created;
   };
