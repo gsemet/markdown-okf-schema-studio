@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-26 (a failed preference write warns the reader)
+
+- SwRS-MDOKFSTUDIO-LIFE-169: when the workspace storage rejects the write of the theme mode or a view
+  preference, the reader now gets one short warning (the choice still holds for the session); the Known
+  issue line is removed here, in StRS TOOLBAR-001 and in the superseded LAYOUT-021, and the deprecated THEME-055 scenario and note are aligned, and the verification
+  note names the new test.
+
 ## 2026-10-25 (Comments button hides the thread chips too)
 
 - SwRS-MDOKFSTUDIO-REVIEW-152: the toolbar Comments button now hides the inline thread chips together

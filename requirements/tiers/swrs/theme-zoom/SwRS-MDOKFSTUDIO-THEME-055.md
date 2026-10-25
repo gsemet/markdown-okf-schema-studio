@@ -30,7 +30,7 @@ When the workspace storage rejects the write of the view preferences, the extens
 
 - GIVEN workspace storage whose update fails
 - WHEN the host handles a zoom message
-- THEN the next page of the session starts at that zoom, the error "Failed to persist the Markdown preview view preferences." is written to the log and the reader sees no message
+- THEN the next page of the session starts at that zoom, the error "Failed to persist the Markdown preview view preferences." is written to the log and the reader sees one warning, "The Markdown preview could not save your display choice; it holds until VS Code closes."
 
 ### Scenario: No storage
 
@@ -40,5 +40,5 @@ When the workspace storage rejects the write of the view preferences, the extens
 
 ### Verification notes
 
-- Method: Untested: no test makes the storage fail or absent. Read from WorkspaceChoices.setViewPreference in src/session/workspaceChoices.ts, which is shared with the other view preferences of toolbar-navigation.
-- Criteria: By code reading only; a unit test would use a failing KeyValueStore.
+- Method: Superseded by SwRS-MDOKFSTUDIO-LIFE-169, whose test (test/session/diagReq.viewState.requirements.test.ts) makes the storage fail and checks the log and the warning.
+- Criteria: See SwRS-MDOKFSTUDIO-LIFE-169.

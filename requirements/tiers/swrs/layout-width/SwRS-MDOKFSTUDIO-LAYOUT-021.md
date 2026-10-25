@@ -17,7 +17,8 @@ annotation_exemption: true
 exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LIFE-169; no marker expected."
 derived_by: []
 implemented_in_files: []
-tested_in_files: []
+tested_in_files:
+- test/session/diagReq.viewState.requirements.test.ts
 superseded_by: SwRS-MDOKFSTUDIO-LIFE-169
 ---
 
@@ -42,7 +43,6 @@ When the reader changes the width mode, the extension SHALL keep the choice in t
 ### Known issues
 
 - Known issue: The preference message is accepted by read-only and untrusted previews because it edits no document.
-- Known issue: A failure of the workspace persistence is only logged and has no test.
 
 ### Verification notes
 
