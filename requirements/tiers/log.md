@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-10-25 (every label with an anchor icon can be renamed)
+
+- SwRS-MDOKFSTUDIO-MYST-038: one label name pattern for the icon, the field and the host, so a
+  label starting with `_`, `.` or `-` opens the rename field; the invalid-name message no longer
+  asks for a leading letter or digit. Added two scenarios (symbol labels, stale render), removed the
+  Known issue line.
+- SwRS-MDOKFSTUDIO-PALETTE-178: a label starting with a symbol is now listed as a target.
+- SwRS-MDOKFSTUDIO-MYST-041, MYST-051: message text and name rule follow; a stale rename is answered.
+- SwRS-MDOKFSTUDIO-TRUST-065: a rename from a stale render is answered with the stale-line refusal.
+- SwRS-MDOKFSTUDIO-MYST-094 (superseded): removed its Known issue line.
+
 ## 2026-10-25 (block edits and insertions keep CRLF and lone-CR line endings)
 
 - SwRS-MDOKFSTUDIO-BLOCK-234: the line breaks inside an edited multi-line block are written with

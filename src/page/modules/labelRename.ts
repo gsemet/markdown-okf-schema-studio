@@ -2,6 +2,8 @@
  * Edit mode: a click on a label's anchor icon opens a one-field popover to rename the label.
  * The host re-checks everything it is sent.
  */
+import { LABEL_NAME } from "../../core/mapping/labelRename";
+
 export interface LabelRenameOptions {
   isEditMode(): boolean;
   /** Why a rename cannot start now (an open editor), or undefined. */
@@ -16,11 +18,11 @@ export function installLabelRename(
   window: Window & typeof globalThis,
   options: LabelRenameOptions,
 ): { close(): void; receive(message: { type?: string; editId?: string; ok?: boolean; remainingRefs?: number; reason?: string }): boolean } {
-  const namePattern = /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/u;
+  const namePattern = LABEL_NAME;
   const maxLength = 100;
   const answerTimeoutMs = 6000;
   const doneCloseMs = 5000;
-  const invalidText = "Use letters, digits and _ . : - only, starting with a letter or digit (100 characters at most).";
+  const invalidText = "Use letters, digits and _ . : - only (100 characters at most).";
   let popover: HTMLElement | undefined;
   let input: HTMLInputElement | undefined;
   let status: HTMLElement | undefined;

@@ -44,7 +44,7 @@ When the host answers previewListTargets, the extension SHALL list the lines (na
 
 ### Scenario (refusal): Fences and bad names
 
-- GIVEN labels inside a backtick or tilde fence, (bad name)= and (-bad)=
+- GIVEN labels inside a backtick or tilde fence and (bad name)=
 - WHEN the host answers
 - THEN they are not listed
 

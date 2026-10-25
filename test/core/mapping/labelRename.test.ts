@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { countRefUses, isValidLabelName, renameLabelLine } from "../../../src/core/mapping/labelRename";
+import { countRefUses, isValidLabelName, LABEL_NAME, renameLabelLine } from "../../../src/core/mapping/labelRename";
 
 function apply(text: string, line: number, oldName: string, newName: string): string | undefined {
   const edit = renameLabelLine(text, line, oldName, newName);
@@ -10,10 +10,10 @@ function apply(text: string, line: number, oldName: string, newName: string): st
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-038
 test("label names follow the MyST pattern and the length limit", () => {
-  for (const good of ["a", "intro", "A1", "sec_2.x:y-z", "x".repeat(100)]) {
+  for (const good of ["a", "intro", "A1", "_a", ".a", "-a", "sec_2.x:y-z", "x".repeat(100)]) {
     assert.equal(isValidLabelName(good), true, good);
   }
-  for (const bad of ["", "-a", "_a", ".a", "a b", "a)", "a=", "é", "x".repeat(101), "a\n", 5, undefined]) {
+  for (const bad of ["", "a b", "a)", "a=", "é", "x".repeat(101), "a\n", 5, undefined]) {
     assert.equal(isValidLabelName(bad), false, String(bad));
   }
 });
@@ -40,6 +40,7 @@ test("refuses a line that is not exactly the old label, never guessing another l
   assert.equal(renameLabelLine("(old)= trailing\n", 1, "old", "new"), undefined);
   assert.equal(renameLabelLine("(old)=\n", 1, "old", "bad name"), undefined);
   assert.equal(renameLabelLine("(old)=\n", 1, "old", ""), undefined);
+  assert.equal(renameLabelLine("(_old)=\n", 1, "_old", "-new")?.text, "(-new)=");
 });
 
 test("counts {ref} uses with and without a title, not other roles or names", () => {
@@ -53,4 +54,12 @@ test("counts {ref} uses with and without a title, not other roles or names", () 
   assert.equal(countRefUses(text, "missing"), 0);
   assert.equal(countRefUses("{ref}`a.b` {ref}`aXb`", "a.b"), 1);
   assert.equal(countRefUses(text, "bad name"), 0);
+});
+
+test("the renderer, the page and the host share one label name pattern", () => {
+  for (const name of ["_a", ".a", "-a", "a", "A1:b.c_d-e"]) {
+    assert.equal(LABEL_NAME.test(name), true, name);
+    assert.equal(isValidLabelName(name), true, name);
+  }
+  for (const name of ["", "a b", "a/b", "é"]) assert.equal(isValidLabelName(name), false, name);
 });

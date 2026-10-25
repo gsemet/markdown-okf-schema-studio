@@ -39,13 +39,7 @@ When the writer clicks the anchor icon of a label whose name starts with an unde
 - WHEN the writer clicks its anchor icon
 - THEN the rename field opens with the name selected
 
-### Known issues
-
-- Known issue: the anchor icon accepts a leading `_`, `.` or `-` (`ANCHOR_LABEL`), but the rename
-  pattern requires a letter or digit first (`LABEL_NAME`, the page `namePattern`). The click is
-  swallowed before that test, so the writer gets no editor, no popover and no message.
-
 ### Verification notes
 
-- Method: Unit test "a label starting with an underscore, dot or hyphen opens no field and swallows the click (Known issue)" in test/page/modules/renderReq.labelRename.requirements.test.ts.
-- Criteria: A label starting with `_`, `.` or `-` opens no field and the click is swallowed.
+- Method: Superseded; see SwRS-MDOKFSTUDIO-MYST-038 for the test that now covers labels starting with a symbol.
+- Criteria: Superseded; the behaviour is specified by SwRS-MDOKFSTUDIO-MYST-038.

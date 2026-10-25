@@ -44,15 +44,18 @@ When the page posts previewLabelRename, the extension SHALL accept it only with 
 | Field of previewLabelRename | Accepted | Otherwise |
 | --- | --- | --- |
 | line | A source line (a safe integer, 1 or more) | The validator rejects the message |
-| oldName | A valid label name: letters, digits and `_ . : -`, starting with a letter or digit, 100 characters at most | The validator rejects the message |
+| oldName | A valid label name: letters, digits and `_ . : -`, 100 characters at most | The validator rejects the message |
 | newName | The same pattern and bound as oldName | The validator rejects the message |
 | editId | Optional; repeated in the answer, which the page matches by it | Not checked by the validator |
 | render identity | The current render | The gate drops or refuses the message (see SwRS-MDOKFSTUDIO-TRUST-065) |
 
 ### Scenario (refusal): Malformed or stale messages
-- GIVEN a message with an invalid name, no line or a stale render
+- GIVEN a message with an invalid name or no line
 - WHEN the host receives it
-- THEN it is rejected or dropped by the validator and gate and nothing in the document changes
+- THEN it is rejected by the validator and nothing in the document changes
+- GIVEN a message from a stale render
+- WHEN the host receives it
+- THEN the host answers with ok false and the reason The label is no longer on that line. Refresh the preview., and nothing in the document changes
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-MYST-045: what the host does with an accepted rename.

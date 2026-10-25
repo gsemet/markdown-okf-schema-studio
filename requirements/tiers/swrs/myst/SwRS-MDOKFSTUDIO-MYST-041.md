@@ -3,10 +3,9 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-MYST-041
 uuid: 5619e278-3fe6-4963-a331-c815cf96d9fe
 title: Invalid label names are not sent
-description: 'When the new label name is empty, longer than 100 characters, starts
-  with a non letter or digit, or uses characters other than letters, digits and _
-  . : -, the extension SHALL not send it and show Use letters, digits and _ . : -
-  only, starting with a letter or digit (100 characters at most).'
+description: 'When the new label name is empty, longer than 100 characters or uses
+  characters other than letters, digits and _ . : -, the extension SHALL not send
+  it and show Use letters, digits and _ . : - only (100 characters at most).'
 project: markdown-okf-schema-studio
 scope: myst
 lifecycle: superseded
@@ -26,7 +25,7 @@ superseded_by: SwRS-MDOKFSTUDIO-MYST-038
 
 ### Normative behavior
 
-When the new label name is empty, longer than 100 characters, starts with a non letter or digit, or uses characters other than letters, digits and _ . : -, the extension SHALL not send it and show Use letters, digits and _ . : - only, starting with a letter or digit (100 characters at most).
+When the new label name is empty, longer than 100 characters or uses characters other than letters, digits and _ . : -, the extension SHALL not send it and show Use letters, digits and _ . : - only (100 characters at most).
 
 ### Scenario: Nominal
 
