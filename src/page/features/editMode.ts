@@ -30,7 +30,7 @@ export function installEditMode(rt: PageRuntime): EditMode {
       return undefined;
     }
     const mapped = node.closest<HTMLElement>(MAPPINGS_SELECTOR);
-    if (!mapped || mapped.closest("a")) return undefined;
+    if (!mapped || mapped.closest("a") || node.closest("a")) return undefined;
     const cell = node.closest("td, th");
     const editing = rt.blocks.editingElementFor(mapped).element;
     const element = cell && cell.closest("table")

@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-25 (a link inside a paragraph is followed and opens no editor)
+
+- SwRS-MDOKFSTUDIO-BLOCK-014: in edit mode a click, Enter or Space on a link inside a paragraph
+  follows the link only; the text outside the link still opens the editor. Added a row, removed
+  the two Known issue lines.
+- SwRS-MDOKFSTUDIO-BLOCK-017: hovering such a link no longer outlines the paragraph. Added a row,
+  removed the Known issue line.
+
 ## 2026-10-25 (a click on another block opens it once the save lands; no second final save)
 
 - SwRS-MDOKFSTUDIO-BLOCK-041: a click on another block while the open editor holds changed text saves

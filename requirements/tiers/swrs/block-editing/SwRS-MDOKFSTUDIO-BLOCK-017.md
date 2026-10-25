@@ -64,6 +64,7 @@ While edit mode is on, the page SHALL outline with a dashed line the element tha
 | a cell of the properties table | no element receives the outline; the field editors are specified with the frontmatter editing behaviour |
 | an element inside an open block editor, for example its frame | no element receives the outline |
 | a mapped block that is itself inside a link | no element receives the outline |
+| a link inside a paragraph | no element receives the outline; the text of the paragraph around the link outlines the paragraph |
 
 ### Scenario (nominal): The text cursor over mapped blocks
 
@@ -72,14 +73,11 @@ While edit mode is on, the page SHALL outline with a dashed line the element tha
 | edit mode on | yes | text |
 | edit mode off | yes | the default one of the theme, not text |
 
-### Known issues
-
-- Known issue: the rule tests whether the mapped block itself is inside a link. A link inside a paragraph does not qualify, so the paragraph is outlined while the pointer is over the link.
-
 ### Verification notes
 
 - Method: test/page/runtimeBlockEditor.test.ts (`edit mode hover marks the whole list that a click would edit`: hovering a list item and pointer or focus leaves).
 - Method: test/integration/realInput.test.ts (scenarioEditAffordances, screenshot block-editing/r12: hovering a list item and the outlined element per target); visual scenarios block-editing/v06, v07 and v08 share the same assertions.
+- Method: test/page/blockReq.requirements.test.ts (`hovering a link inside a paragraph does not outline the paragraph, the text around it does`: link inside a paragraph row).
 - Method: test/page/blockReq.requirements.test.ts (`the hover outline skips the properties table and an open editor, and an element in a link`: targets that are not outlined).
 - Method: test/core/preview/blockReq.requirements.test.ts (`mapped blocks show the text cursor in edit mode only`: text cursor table).
 - Criteria: At most one element carries the attribute; the outline is a 1 px dashed line in the focus colour; editHoverTarget returns nothing for the targets that are not outlined; the stylesheet holds the text cursor rule and only for edit mode.

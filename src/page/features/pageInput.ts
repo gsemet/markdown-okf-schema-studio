@@ -186,7 +186,8 @@ export function installPageInput(rt: PageRuntime): PageInput {
         const target = event.target instanceof Element
           ? event.target.closest<HTMLElement>(MAPPINGS_SELECTOR)
           : undefined;
-        if (!target || target.closest("a")) {
+        // In edit mode a click on a link inside a block only follows the link.
+        if (!target || target.closest("a") || (state.editMode && event.target instanceof Element && event.target.closest("a"))) {
           if (state.editMode && state.activeBlockEdit?.selectedCell && !state.activeBlockEdit.finishing) {
             rt.blockEditor.postBlockEditSave(true);
           }
@@ -243,6 +244,8 @@ export function installPageInput(rt: PageRuntime): PageInput {
         }
         const target = element ? element.closest<HTMLElement>(MAPPINGS_SELECTOR) : undefined;
         if (!target || target.closest("a")) return;
+        // In edit mode Enter or Space on a link inside a block only follows the link.
+        if (state.editMode && element!.closest("a")) return;
         event.preventDefault?.();
         if (state.editMode) {
           rt.editMode.openMappedEditor(target, element!);
