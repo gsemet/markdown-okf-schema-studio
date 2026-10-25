@@ -389,4 +389,52 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   cursor: default;
   opacity: 0.55;
 }
+
+/* Row handles of a pipe table or a list-table: the mark of the list editor sits just left of the
+   table, outside it and centred on its row. A table scrolls sideways (overflow), so the handles live
+   in a layer of their own at the page origin; the runtime sets each handle's left and top. A table
+   with no room on its left is pushed right by the width of a handle. */
+[data-okf-row-handle-layer] {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 0;
+  height: 0;
+  z-index: 2;
+}
+
+[data-okf-row-handle-layer] .okf-table-row-handle {
+  position: absolute;
+  margin: 0;
+  transform: translate(-100%, -50%);
+}
+
+/* The dots of the mark hang down and right from their centre: lift them so they centre on the row. */
+[data-okf-row-handle-layer] .okf-table-row-handle::before {
+  transform: translate(-2.5px, -5px);
+}
+
+#sphinx-myst-preview-content table[data-okf-row-shift="true"] {
+  width: max-content !important;
+  max-width: calc(100% - 2.2em) !important;
+  margin-inline-start: 2.2em !important;
+  margin-inline-end: 0 !important;
+}
+
+/* Whole words: a narrow column breaks at spaces, the table scrolls sideways instead. */
+#sphinx-myst-preview-content table[data-okf-row-handles="true"] :where(th, td) {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+#sphinx-myst-preview-content tr[data-okf-row-dragging="true"] {
+  opacity: 0.45;
+}
+
+#sphinx-myst-preview-content tr[data-okf-row-drop="before"] > :is(td, th) {
+  box-shadow: inset 0 2px 0 var(--studio-focusBorder, Highlight);
+}
+
+#sphinx-myst-preview-content tr[data-okf-row-drop="after"] > :is(td, th) {
+  box-shadow: inset 0 -2px 0 var(--studio-focusBorder, Highlight);
+}
 `;

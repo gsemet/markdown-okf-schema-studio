@@ -35,6 +35,11 @@ import {
   NARROW,
   NARROW360,
   ORPHAN_LIST_ASSERTIONS,
+  LIST_ROW_HANDLE_ASSERTIONS,
+  NARROW_ROW_HANDLE_ASSERTIONS,
+  WIDE_ROW_HANDLE_ASSERTIONS,
+  ROW_DRAG_ASSERTIONS,
+  ROW_HANDLE_ASSERTIONS,
   ORPHAN_THREADS_MESSAGE,
   PLANTUML_UNSUPPORTED_ASSERTIONS,
   plantUmlBuiltinAssertions,
@@ -1301,5 +1306,110 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     fullPage: true,
     contentAssertions: DOLLAR_PRICES_ASSERTIONS,
     description: `Three price sentences (\`$19 ... ($200)\`, \`$5 and $6\`, \`$100–$380\`) and one real \`$x$\` span, ${theme}, 900 px pane: the preview typesets the text between two dollar signs as maths in the three price sentences too, the same as for the real span.`,
+  })),
+  ...([
+    { name: "light", theme: "light", mode: undefined },
+    { name: "dark", theme: "dark", mode: undefined },
+    { name: "cream", theme: "dark", mode: "cream" },
+  ] as const).flatMap((variant, index) => [
+    {
+      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+      id: `table-editing/v0${6 + index}-row-handles-${variant.name}-900`,
+      fixture: "56-table-row-handles",
+      theme: variant.theme,
+      ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
+      ...WIDE,
+      scroll: { kind: "top" as const },
+      editMode: true,
+      contentAssertions: ROW_HANDLE_ASSERTIONS,
+      description: `Edit mode, ${variant.name} preview, 900 px pane: each body row of two pipe tables shows the list editor's handle just left of the table, centred on its row, the header rows show none, and the table that fills the column keeps its handles in the pane, unclipped.`,
+    },
+    {
+      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+      id: `table-editing/v${String(9 + index).padStart(2, "0")}-row-dragging-${variant.name}-900`,
+      fixture: "56-table-row-handles",
+      theme: variant.theme,
+      ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
+      ...WIDE,
+      scroll: { kind: "top" as const },
+      editMode: true,
+      pageActions: [{
+        drag: `[data-okf-row-handle-layer] .okf-table-row-handle[data-okf-row="1"]`,
+        over: `${MAIN} table:nth-of-type(1) tbody tr:nth-child(3)`,
+        hold: true as const,
+      }],
+      contentAssertions: ROW_DRAG_ASSERTIONS,
+      description: `Edit mode, ${variant.name} preview, 900 px pane, the first handle of the short table dragged over the third row with the button still down: the dragged row is dimmed and a line under the third row shows where it would land.`,
+    },
+  ]),
+  ...([
+    { name: "light", theme: "light", mode: undefined },
+    { name: "dark", theme: "dark", mode: undefined },
+    { name: "cream", theme: "dark", mode: "cream" },
+  ] as const).map((variant, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-TABLE-002
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+    id: `table-editing/v${12 + index}-list-table-row-handles-${variant.name}-900`,
+    fixture: "57-list-table-row-handles",
+    theme: variant.theme,
+    ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    contentAssertions: LIST_ROW_HANDLE_ASSERTIONS,
+    description: `Edit mode, ${variant.name} preview, 900 px pane: each body row of two {list-table} directives (one header row, then two header rows) shows the list editor's handle just left of the table, centred on its row, the header rows show none, and no handle is clipped.`,
+  })),
+  ...([
+    { name: "light", theme: "light", mode: undefined },
+    { name: "dark", theme: "dark", mode: undefined },
+    { name: "cream", theme: "dark", mode: "cream" },
+  ] as const).flatMap((variant, index) => [
+    {
+      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+      id: `table-editing/v${15 + index}-row-handles-narrow-${variant.name}-360`,
+      fixture: "56-table-row-handles",
+      theme: variant.theme,
+      ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
+      width: NARROW360.width,
+      height: 1000,
+      scroll: { kind: "top" as const },
+      editMode: true,
+      contentAssertions: NARROW_ROW_HANDLE_ASSERTIONS,
+      description: `Edit mode, ${variant.name} preview, 360 px pane: the tables leave no room on their left, so they are pushed right by a handle's width; the handles stay in the pane, left of the tables and centred on their rows, even where a table scrolls sideways.`,
+    },
+    {
+      // @tests_req StRS-MDOKFSTUDIO-TABLE-002
+      // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+      id: `table-editing/v${18 + index}-list-table-row-handles-narrow-${variant.name}-360`,
+      fixture: "57-list-table-row-handles",
+      theme: variant.theme,
+      ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
+      width: NARROW360.width,
+      height: 1000,
+      scroll: { kind: "top" as const },
+      editMode: true,
+      contentAssertions: LIST_ROW_HANDLE_ASSERTIONS,
+      description: `Edit mode, ${variant.name} preview, 360 px pane: the two {list-table} directives keep their handles in the pane, left of the tables and centred on their rows.`,
+    },
+  ]),
+  ...([
+    { name: "light", theme: "light", mode: undefined },
+    { name: "dark", theme: "dark", mode: undefined },
+    { name: "cream", theme: "dark", mode: "cream" },
+  ] as const).map((variant, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-TABLE-002
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+    id: `table-editing/v${21 + index}-row-handles-scrolling-table-${variant.name}-900`,
+    fixture: "58-wide-table-row-handles",
+    theme: variant.theme,
+    ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    contentAssertions: WIDE_ROW_HANDLE_ASSERTIONS,
+    description: `Edit mode, ${variant.name} preview, 900 px pane: a pipe table of fourteen columns, wider than the pane and scrolled sideways, keeps the handle of each body row left of the table, outside its scrolling box, visible and centred on its row.`,
   })),
 ];

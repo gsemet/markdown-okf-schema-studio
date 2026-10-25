@@ -636,3 +636,57 @@ export const DOLLAR_PRICES_ASSERTIONS: ContentAssertion[] = [
   { message: "each price sentence holds one typeset span: the text between its two dollar signs (as the parser reads prices today)", selector: `${MAIN} .katex`, count: 4 },
   { message: "no price sentence keeps a dollar sign as text", selector: `${MAIN} p`, count: 4, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p')].slice(0, 3).every((paragraph) => !paragraph.textContent.includes('$'))" },
 ];
+
+const ROW_HANDLES = "[data-okf-row-handle-layer] .okf-table-row-handle";
+
+/** Every handle is left of its table, inside the pane and centred on its row (2 px). */
+const HANDLE_GEOMETRY = "[...document.querySelectorAll('[data-okf-row-handle-layer] .okf-table-row-handle')].every((handle) => { const table = document.querySelector('#sphinx-myst-preview-content table[data-sphinx-source-line=\"' + handle.dataset.okfRowTable + '\"]'); const row = table.rows[Number(handle.dataset.okfRow)]; const box = handle.getBoundingClientRect(); const tableBox = table.getBoundingClientRect(); const rowBox = row.getBoundingClientRect(); return box.width > 0 && box.left >= 0 && box.right <= tableBox.left + 1 && Math.abs((box.top + box.height / 2) - (rowBox.top + rowBox.height / 2)) <= 2; })";
+
+const WHOLE_WORDS = "[...document.querySelectorAll('#sphinx-myst-preview-content table[data-okf-row-handles] :is(th, td)')].every((cell) => getComputedStyle(cell).overflowWrap === 'normal')";
+
+export const ROW_HANDLE_ASSERTIONS: ContentAssertion[] = [
+  { message: "both pipe tables offer row handles", selector: `${MAIN} table[data-okf-row-handles="true"]`, count: 2 },
+  { message: "each of the seven body rows shows a handle", selector: ROW_HANDLES, count: 7, visible: true },
+  { message: "the handle is the mark of the frontmatter list editor", selector: `${ROW_HANDLES}.okf-list-editor-handle`, count: 7 },
+  { message: "the handles are outside the tables", selector: `${MAIN} table .okf-table-row-handle`, count: 0 },
+  { message: "the header rows have no handle", selector: ROW_HANDLES, count: 7, expr: "[...document.querySelectorAll('[data-okf-row-handle-layer] .okf-table-row-handle')].every((handle) => Number(handle.dataset.okfRow) >= 1)" },
+  { message: "the handle is named for assistive technology", selector: ROW_HANDLES, min: 1, attr: { name: "aria-label", value: "Move table row" } },
+  { message: "every handle is left of its table, in the pane and centred on its row, never clipped", selector: ROW_HANDLES, min: 1, expr: HANDLE_GEOMETRY },
+  { message: "the table that fills the column keeps its width and stays in the column", selector: `${MAIN} table[data-okf-row-handles="true"]:nth-of-type(2)`, count: 1, expr: "(() => { const column = document.querySelector('#sphinx-myst-preview-content > p').getBoundingClientRect(); const table = document.querySelectorAll('#sphinx-myst-preview-content table')[1]; const box = table.getBoundingClientRect(); return box.width >= column.width - 1 && box.left >= column.left - 1 && box.right <= column.right + 1 && table.scrollWidth <= table.clientWidth + 1; })()" },
+  { message: "no word of a cell is broken", selector: `${MAIN} table[data-okf-row-handles="true"] td`, min: 1, expr: WHOLE_WORDS },
+  { message: "every table is inside the pane", selector: `${MAIN} table`, insidePane: true },
+];
+
+export const NARROW_ROW_HANDLE_ASSERTIONS: ContentAssertion[] = [
+  { message: "both pipe tables offer row handles", selector: `${MAIN} table[data-okf-row-handles="true"]`, count: 2 },
+  { message: "each of the seven body rows shows a handle", selector: ROW_HANDLES, count: 7, visible: true },
+  { message: "every handle is left of its table, in the pane and centred on its row, never clipped", selector: ROW_HANDLES, min: 1, expr: HANDLE_GEOMETRY },
+  { message: "a table with no room on its left is pushed right by the handle's width", selector: `${MAIN} table[data-okf-row-handles="true"]`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content table[data-okf-row-handles]')].every((table) => table.getBoundingClientRect().left >= 32)" },
+  { message: "no word of a cell is broken", selector: `${MAIN} table[data-okf-row-handles="true"] td`, min: 1, expr: WHOLE_WORDS },
+  { message: "every table is inside the pane", selector: `${MAIN} table`, insidePane: true },
+];
+
+export const ROW_DRAG_ASSERTIONS: ContentAssertion[] = [
+  { message: "exactly one row is being dragged and it is dimmed", selector: `${MAIN} tr[data-okf-row-dragging="true"]`, count: 1, css: { opacity: "0.45" } },
+  { message: "the row under the pointer shows the drop line below it", selector: `${MAIN} tr[data-okf-row-drop]`, count: 1, attr: { name: "data-okf-row-drop", value: "after" }, expr: "getComputedStyle(document.querySelector('#sphinx-myst-preview-content tr[data-okf-row-drop] td')).boxShadow !== 'none'" },
+  { message: "the drag opened no editor", selector: "[data-sphinx-preview-block-editor]", count: 0 },
+];
+
+export const LIST_ROW_HANDLE_ASSERTIONS: ContentAssertion[] = [
+  { message: "both list-tables offer row handles", selector: `${MAIN} figure table[data-okf-row-handles="true"]`, count: 2 },
+  { message: "each of the five body rows shows a handle", selector: ROW_HANDLES, count: 5, visible: true },
+  { message: "the handle is the mark of the frontmatter list editor", selector: `${ROW_HANDLES}.okf-list-editor-handle`, count: 5 },
+  { message: "the header rows, one in the first list-table and two in the second, have no handle", selector: ROW_HANDLES, count: 5, expr: "[...document.querySelectorAll('[data-okf-row-handle-layer] .okf-table-row-handle')].every((handle) => { const table = document.querySelector('#sphinx-myst-preview-content table[data-sphinx-source-line=\"' + handle.dataset.okfRowTable + '\"]'); return Number(handle.dataset.okfRow) >= table.tHead.rows.length; })" },
+  { message: "the second list-table has two header rows", selector: `${MAIN} figure table`, count: 2, expr: "document.querySelectorAll('#sphinx-myst-preview-content figure table')[1].tHead.rows.length === 2" },
+  { message: "every handle is left of its table, in the pane and centred on its row, never clipped", selector: ROW_HANDLES, min: 1, expr: HANDLE_GEOMETRY },
+  { message: "no word of a cell is broken", selector: `${MAIN} figure td`, min: 1, expr: WHOLE_WORDS },
+  { message: "every table is inside the pane", selector: `${MAIN} table`, insidePane: true },
+];
+
+export const WIDE_ROW_HANDLE_ASSERTIONS: ContentAssertion[] = [
+  { message: "the table is wider than the pane and scrolls sideways", selector: `${MAIN} table[data-okf-row-handles="true"]`, count: 1, expr: "(() => { const table = document.querySelector('#sphinx-myst-preview-content table'); table.scrollLeft = 300; return table.scrollWidth > table.clientWidth + 100 && table.scrollLeft > 0; })()" },
+  { message: "each of the three body rows keeps a visible handle after the table scrolled", selector: ROW_HANDLES, count: 3, visible: true },
+  { message: "every handle stays left of the table, in the pane and centred on its row, never clipped", selector: ROW_HANDLES, min: 1, expr: HANDLE_GEOMETRY },
+  { message: "the handles are outside the scrolling box", selector: `${MAIN} table .okf-table-row-handle`, count: 0 },
+  { message: "every table is inside the pane", selector: `${MAIN} table`, insidePane: true },
+];
