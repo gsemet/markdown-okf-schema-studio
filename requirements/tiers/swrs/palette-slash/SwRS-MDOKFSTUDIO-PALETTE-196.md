@@ -63,7 +63,7 @@ The name never comes from the page. The handler answers ok true and the file nam
 - THEN the bytes go to a hidden partial file of the same folder (named dot, the file name, a random suffix and .partial) that is renamed to the chosen name without overwriting, so the chosen name is never seen empty or partial
 - GIVEN a file created under the chosen name during the write
 - WHEN the rename runs
-- THEN that file is kept and not overwritten
+- THEN that file is kept and not overwritten, and the image is saved under the next free name (image-1.png when image.png was taken), chosen again from a fresh listing of the folder, up to 5 attempts in all; the answer is then ok true with that name, or ok false with the error message when the rename keeps failing for another reason than a taken name
 
 ### Scenario (boundary): The numbering stops after 1000 suffixes
 | Folder | Outcome |
@@ -108,7 +108,7 @@ A saved .md document in a folder inside the workspace, reached through a symboli
 ### Verification notes
 - Method: test/core/mapping/pastedImage.test.ts (name table and numbering of the nominal scenario, the 1000-suffix boundary, the sniffing of png, jpeg, gif and webp, the refusal of SVG, text and short input, a spoofed type, the base64 alphabet)
 - Method: test/integration/imagePaste.test.ts (image.png then image-1.png and the files in the folder; a spoofed type and a non-image are refused and the folder is unchanged)
-- Method: test/session/pasteImageWrite.test.ts (a name complete at all times, a file created under the chosen name during the write is kept, a failed write leaves no file and the page gets the reason)
+- Method: test/session/pasteImageWrite.test.ts (a name complete at all times, a file created under the chosen name during the write is kept and the image takes the next name, a failed write leaves no file and the page gets the reason)
 - Method: test/session/paletteReq.requirements.test.ts (refusal rows for an unsaved or other document, a folder outside the workspace with links resolved and inside it accepted, a non-Markdown file and a .md file accepted)
 - Method: test/core/protocol/pageToHost.test.ts (message shape: the size bound, plain base64 of an allowed type)
 - Criteria: The name never comes from the page; a name that differs only by case counts as taken; the partial file has a hidden name of the form dot, the file name, a random suffix and .partial; the validator bounds the base64 text to 14,000,000 characters and the host refuses more than 10 MiB of bytes; both folder paths are compared after resolving symbolic links; eligibility needs a file path ending in .md in any case.
