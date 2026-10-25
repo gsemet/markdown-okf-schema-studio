@@ -393,6 +393,7 @@ const NODE_RULES: readonly NodeRule[] = [
     },
   },
   {
+    // @implements_req SwRS-MDOKFSTUDIO-CORE-012
     // @implements_req SwRS-MDOKFSTUDIO-CORE-022
     /*
      * A directive the parser understands is rewritten into real nodes (admonition,
@@ -401,8 +402,14 @@ const NODE_RULES: readonly NodeRule[] = [
      * directive nobody knows leaves no children. Both become a visible placeholder.
      */
     name: "directive placeholder",
-    kinds: ["mystDirective"],
+    kinds: ["mystDirective", "mystDirectiveError"],
     run: (node, { line, diagnostics }) => {
+      // The parser reports a directive without its required argument as an error node, which the
+      // writer cannot emit. Only `{include}` is shown as a placeholder here: it is what a writer
+      // types while the preview re-renders.
+      if (node.type === "mystDirectiveError" && node.name !== "include") {
+        return false;
+      }
       const children = node.children ?? [];
       const resolvable = children.length > 0
         && !children.every((child) => BUILD_ONLY_TYPES.has(child.type));
@@ -413,7 +420,9 @@ const NODE_RULES: readonly NodeRule[] = [
       // `includeBudgetExhausted` is set in expandIncludes. Includes skipped by the budget are covered by the single budget diagnostic.
       if (!node.data?.includeBudgetExhausted) {
         diagnostics.push({
-          message: `Directive {${name}} is not available outside a full build.`,
+          message: node.type === "mystDirectiveError"
+            ? `Directive {${name}} needs a path.`
+            : `Directive {${name}} is not available outside a full build.`,
           severity: "warning",
           ...(line === undefined ? {} : { line }),
         });
