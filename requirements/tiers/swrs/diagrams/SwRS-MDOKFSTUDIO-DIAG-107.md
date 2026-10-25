@@ -8,16 +8,17 @@ description: "When a JAR diagram fails or is blocked, the extension SHALL report
   message on the diagram."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-013
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-089; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-089
 ---
 
 ## Each JAR failure is also a status-line warning
@@ -38,11 +39,7 @@ When a JAR diagram fails or is blocked, the extension SHALL report a warning wit
 - WHEN the results are applied
 - THEN no PlantUML warning is reported
 
-### Known issues
-
-- Known issue: Untested: PlantUmlController.apply.
-
 ### Verification notes
 
-- Method: No session test of apply and the plantuml-render code.
+- Method: Unit test `each failing JAR diagram is also a plantuml-render warning with the document path` in `test/session/diagReq.plantuml.requirements.test.ts`.
 - Criteria: One warning per failure.

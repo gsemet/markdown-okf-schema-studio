@@ -8,25 +8,16 @@ description: When a document uses collapsible details, keyboard keys, HTML
   HTML and unsafe colours.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-GFM-002; no marker expected."
 derives_from: []
 user_need: As a writer, I use the raw HTML that GitHub documents rely on and
   nothing unsafe is rendered.
-derived_by:
-- SwRS-MDOKFSTUDIO-CORE-044
-- SwRS-MDOKFSTUDIO-CORE-056
-- SwRS-MDOKFSTUDIO-CORE-062
-- SwRS-MDOKFSTUDIO-GFM-029
-- SwRS-MDOKFSTUDIO-GFM-030
-- SwRS-MDOKFSTUDIO-GFM-031
-- SwRS-MDOKFSTUDIO-GFM-032
-- SwRS-MDOKFSTUDIO-GFM-033
-- SwRS-MDOKFSTUDIO-GFM-034
-- SwRS-MDOKFSTUDIO-GFM-035
-- SwRS-MDOKFSTUDIO-GFM-036
-- SwRS-MDOKFSTUDIO-GFM-038
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-GFM-002
 ---
 
 ## Small raw HTML subset renders safely

@@ -8,16 +8,17 @@ description: When a PlantUML process writes more than 8 MiB to its standard
   exceeds the 8 MiB preview limit. on the diagram with state error.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-014
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-097; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-097
 ---
 
 ## The JAR pipeline stops an output over 8 MiB
@@ -38,11 +39,7 @@ When a PlantUML process writes more than 8 MiB to its standard output, the exten
 - WHEN the output is read
 - THEN the output is accepted
 
-### Known issues
-
-- Known issue: Untested.
-
 ### Verification notes
 
-- Method: No test feeds an oversized output; to be added.
+- Method: Unit test `an output over 8 MiB stops the process; an output of exactly 8 MiB is accepted` in `test/core/render/diagReq.jar.requirements.test.ts`.
 - Criteria: Strictly greater than the limit stops the process.

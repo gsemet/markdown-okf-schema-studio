@@ -2,7 +2,7 @@
 type: StRS
 id: StRS-MDOKFSTUDIO-MYST-012
 uuid: 2bca15d5-215d-4915-91e2-f067ec97a862
-title: Toctree shows linked documents and marks missing ones
+title: A toctree shows the linked documents and marks missing ones
 description: When a document contains a table of contents directive, the Studio
   SHALL list the documents it names as links and mark missing ones.
 project: markdown-okf-schema-studio
@@ -24,7 +24,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-062
 ---
 
-## Toctree shows linked documents and marks missing ones
+## A toctree shows the linked documents and marks missing ones
 
 ### Normative behavior
 

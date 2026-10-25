@@ -22,6 +22,7 @@ export const DEFAULT_PLANTUML_CONFIGURATION: PlantUmlConfiguration = {
   jarPath: PLANTUML_SETTINGS.jarPath.schema.default,
 };
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-084
 /** The JAR pipeline settings of `source`, normalized. */
 export function readPlantUmlConfiguration(
   source: PlantUmlConfigurationSource,
@@ -65,6 +66,7 @@ export type PlantUmlEngineChoice = "builtin" | "jar" | "jar-untrusted";
 /** The engine the render pipeline is asked to use (trust is checked again by the JAR renderer). */
 export type PlantUmlEngine = "builtin" | "jar";
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-024
 /** The engine to use for these settings: the built-in one unless `useJar`, which needs trust. */
 export function resolvePlantUmlEngine(
   settings: PlantUmlEngineSettings,

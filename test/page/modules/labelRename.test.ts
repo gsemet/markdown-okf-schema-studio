@@ -86,6 +86,7 @@ function harness(options: { editMode?: boolean; blocked?: string } = {}) {
   };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-038
 test("a click on the anchor in edit mode opens a prefilled, selected field before the block handlers", () => {
   const t = harness();
   const event = t.click(t.anchor);
@@ -138,6 +139,7 @@ test("an invalid or unchanged name is not sent", () => {
   assert.equal(t.popover(), undefined, "an unchanged name just closes");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
 test("an open block editor blocks the rename", () => {
   const t = harness({ blocked: "Save or cancel the open edit before renaming a label." });
   t.click(t.anchor);

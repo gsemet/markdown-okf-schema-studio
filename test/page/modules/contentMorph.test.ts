@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import { morphKey, planKeyedMorph } from "../../../src/page/modules/contentMorph";
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
 test("PERF-05: unchanged blocks are kept in place, changed and new ones come from the patch", () => {
   assert.deepEqual(planKeyedMorph(["<p>a</p>", "<p>b</p>", "<p>c</p>"], ["<p>a</p>", "<p>B</p>", "<p>c</p>"]), [0, -1, 2]);
   assert.deepEqual(planKeyedMorph(["<p>a</p>"], ["<h1>t</h1>", "<p>a</p>"]), [-1, 0], "an insertion before shifts nothing else");

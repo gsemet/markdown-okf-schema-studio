@@ -45,6 +45,7 @@ function countRawTables(node: RawHtmlNode): number {
     + (node.childNodes ?? []).reduce((count, child) => count + countRawTables(child), 0);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-031
 function rawHtmlChildren(node: RawHtmlNode): unknown[] {
   if (node.nodeName === "#text") {
     return [{ type: "text", value: node.value ?? "" }];
@@ -153,6 +154,7 @@ function setHtmlAttribute(node: RawHtmlNode, name: string, value: string): void 
   node.attrs.push({ name, value });
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-063
 /** Removes the source lines of everything inside a list-table: a click anywhere edits the table. */
 function stripSourceLines(table: RawHtmlNode): void {
   for (const child of table.childNodes ?? []) {
@@ -232,6 +234,7 @@ function findRawRow(node: RawHtmlNode): RawHtmlNode | undefined {
   return undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-008
 /** Applies the recorded specs to the tables of the written HTML, in the same order. */
 export function applyTableAlignments(
   html: string,

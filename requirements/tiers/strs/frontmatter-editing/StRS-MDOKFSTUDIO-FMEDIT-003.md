@@ -8,19 +8,16 @@ description: When a writer edits a list field, the Studio SHALL show one input
   file names for filename-stem link lists.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-001; no marker expected."
 derives_from: []
 user_need: As a writer, I maintain list metadata such as related documents item
   by item, with help picking existing files.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMEDIT-010
-- SwRS-MDOKFSTUDIO-FMEDIT-011
-- SwRS-MDOKFSTUDIO-FMEDIT-012
-- SwRS-MDOKFSTUDIO-FMEDIT-014
-- SwRS-MDOKFSTUDIO-FMEDIT-077
-- SwRS-MDOKFSTUDIO-FMEDIT-078
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMEDIT-001
 ---
 
 ## Edit list fields and link lists item by item

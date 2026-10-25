@@ -19,6 +19,9 @@ test("previewReady without a lock releases nothing", () => {
   assert.deepEqual(lock.onPreviewReady(1), { released: false, flush: [] });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-105
+// @tests_req SwRS-MDOKFSTUDIO-THEME-016
 test("reloads are deferred while held and flushed once on release", () => {
   const lock = new EditLock();
   const calls: string[] = [];
@@ -54,6 +57,7 @@ test("time alone never releases the lock", () => {
   assert.equal(lock.isHeld, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
 test("a save of an unchanged open buffer needs no render (PERF-06)", () => {
   assert.equal(isUnchangedSave({ isActiveDocument: true, documentVersion: 7, stageVersion: 7 }), true);
   assert.equal(isUnchangedSave({ isActiveDocument: true, documentVersion: 8, stageVersion: 7 }), false);
@@ -85,6 +89,7 @@ test("a save of the already rendered buffer is skipped (PERF-06), any other stat
   assert.equal(needsRefresh({ ...rendered, shownStatus: "error" }), true, "the shown error is retried");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
 test("an editor the page opened defers page updates and finished renders until it closes (STAB-03)", () => {
   const lock = new EditLock();
   const calls: string[] = [];

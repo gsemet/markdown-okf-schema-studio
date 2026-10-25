@@ -8,17 +8,18 @@ description: When a writer adds a field, the extension SHALL write it as one
   the file.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-006
+- StRS-MDOKFSTUDIO-FMEDIT-005
 - StRS-MDOKFSTUDIO-FMEDIT-008
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-043; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-043
 ---
 
 ## An added field is a single inserted line in the file's line endings

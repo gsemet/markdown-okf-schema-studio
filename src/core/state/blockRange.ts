@@ -13,6 +13,7 @@ export interface BlockRangeChange {
   text: string;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-191
 /**
  * The block's new start offset after `changes`, or `"conflict"` when a change overlaps the block.
  * A change that ends at or before the block's start (an insertion at its start included) shifts

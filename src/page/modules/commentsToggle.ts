@@ -5,6 +5,8 @@ export interface CommentsToggleContext {
   initialViewPreferences?: { comments?: boolean };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
  * Comments button of toolbar row 3, in preview and in edit mode: shows or hides the gray comment
  * chips (TODO chips stay). The choice is the `comments` view preference: it is posted to

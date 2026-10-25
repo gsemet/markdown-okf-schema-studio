@@ -7,16 +7,17 @@ description: When a writer commits a field editor with Enter or by leaving it,
   the extension SHALL post the save without the flush flag.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-067; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-067
 ---
 
 ## A normal frontmatter save carries no flush flag

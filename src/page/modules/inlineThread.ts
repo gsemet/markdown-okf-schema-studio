@@ -30,6 +30,7 @@ export function installInlineThreads(
       : undefined;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-171
   const build = (comment: Element, body: Element): void => {
     const box = document.createElement("div");
     box.className = "okf-thread-actions";
@@ -57,6 +58,7 @@ export function installInlineThreads(
     body.appendChild(box);
 
     let busy = false;
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
     const send = (
       type: "previewThreadReply" | "previewThreadDelete",
       text: string | undefined,

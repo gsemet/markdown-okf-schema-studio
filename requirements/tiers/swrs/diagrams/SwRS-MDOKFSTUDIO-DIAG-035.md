@@ -3,28 +3,29 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-035
 uuid: 6141713c-27d1-4112-9cd9-6a6bca6d9c9e
 title: A theme read from a folder is refused
-description: When the built-in engine asks for a !theme read from a folder or a
-  URL, the page SHALL refuse it even if the pre-scan did not catch the
-  directive, and the diagram SHALL show the include failure message.
+description: "When the built-in engine asks for a !theme read from a folder or a URL,
+  the page SHALL refuse it even if the pre-scan did not catch the directive, and the
+  diagram shows the include failure message."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-006
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-032; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-032
 ---
 
 ## A theme read from a folder is refused
 
 ### Normative behavior
 
-When the built-in engine asks for a !theme read from a folder or a URL, the page SHALL refuse it even if the pre-scan did not catch the directive, and the diagram SHALL show the include failure message.
+When the built-in engine asks for a !theme read from a folder or a URL, the page SHALL refuse it even if the pre-scan did not catch the directive, and the diagram shows the include failure message.
 
 ### Scenario: Theme from a folder
 

@@ -20,6 +20,7 @@ const BODY = [
   "",
 ].join("\n");
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
 test("a thread body is read as messages with author, date and text", () => {
   assert.deepEqual(parseThreadBody(BODY), [
     { author: "User 1", date: "2026-10-16 10:47", text: "this comment is a text\nthat can span across several lines" },
@@ -57,6 +58,7 @@ test("a new thread snippet holds the header and an indented caret line", () => {
 
 const LINES = ["<!-- THREAD", "Ada (2026-10-16 10:47):", "  hello", "-->"];
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186
 test("a reply goes above the closing marker and nothing else changes", () => {
   const edit = threadReplyEdit(LINES, "Bob", "2026-10-17 08:00", "hi\nthere");
   assert.deepEqual(edit, {
@@ -91,6 +93,7 @@ test("an author is written on one line", () => {
   assert.equal(edit?.lines[0], "Ada Lovelace (2026-10-17 08:00):");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-192
 test("deleting takes one surrounding blank line when both neighbours are blank", () => {
   assert.deepEqual(threadDeleteRange(4, "", ""), { fromOffset: 0, count: 5 });
   assert.deepEqual(threadDeleteRange(4, "text", ""), { fromOffset: 0, count: 4 });

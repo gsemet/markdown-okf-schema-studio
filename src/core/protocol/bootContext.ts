@@ -65,6 +65,7 @@ export interface PreviewRuntimeContext extends ScrollContext, Partial<PreviewBoo
  */
 export const RUNTIME_CONTEXT_ATTRIBUTE = "data-sphinx-preview-runtime-context";
 
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-022
 /** JSON of a boot context that is safe inside a `<script>` element (no `</script>`). */
 export function serializeRuntimeContext(context: PreviewRuntimeContext): string {
   return JSON.stringify(context).replace(/</gu, "\\u003c");

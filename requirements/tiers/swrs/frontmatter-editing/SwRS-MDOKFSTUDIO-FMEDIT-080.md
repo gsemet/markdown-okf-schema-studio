@@ -12,9 +12,10 @@ lifecycle: deprecated
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-011
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Archived. Another requirement specifies this behaviour, so no marker
+  is expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []

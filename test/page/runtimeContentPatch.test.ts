@@ -86,6 +86,7 @@ function traceStartup(
   }
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
 test("T33: the startup sequence of effects and messages is stable", () => {
   const scenarios: Array<[string, Parameters<typeof createRuntimeHarness>[0], boolean | undefined]> = [
     ["reading mode", {}, undefined],
@@ -649,6 +650,7 @@ const EXPECTED_STARTUP_TRACE: Record<string, unknown> = {
   },
 };
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
 test("T34: a content patch replaces the content, moves the identifiers and posts previewReady", () => {
   const harness = createRuntimeHarness();
   const before = harness.messages.length;
@@ -839,6 +841,7 @@ test("T34: the patch removes the pending overlay and the link tooltip", () => {
   assert.equal(link.getAttribute("title"), "target", "the link title was restored");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-061
 test("CR 050: a patch keeps the code of each status line and refuses a malformed one", () => {
   const harness = createRuntimeHarness({ previewStatus: "success" });
   harness.dispatchMessage(patchMessage({
@@ -863,6 +866,8 @@ test("CR 050: a patch keeps the code of each status line and refuses a malformed
   assert.equal(harness.previewContent.innerHTML, "<p>fresh</p>", "a code that is not a string refuses the patch");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-059
 test("T34: the patch rebuilds the status region from plain text", () => {
   const harness = createRuntimeHarness({ previewStatus: "success" });
   const old = harness.statusRegion!;
@@ -950,6 +955,7 @@ test("T34: open disclosures of the old content are open again in the new content
   assert.deepEqual(fresh.map(asOpen), [true, false, true]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
 test("T34: a patch with an anchor or a pin positions the page like a loaded page", () => {
   const anchored = createRuntimeHarness({ initialAnchor: 50 });
   assert.ok(anchored.windowState.scrollY > 0, "the reference page scrolls to the anchor");
@@ -988,6 +994,7 @@ test("T34: a patch keeps the scroll position when the host sends no anchor", () 
   assert.equal(harness.windowState.scrollY, 240);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-021
 test("T34: a pending checkbox toggle of the old content cannot revert the new content", () => {
   const harness = createRuntimeHarness();
   harness.checkbox.checked = true;
@@ -1009,6 +1016,7 @@ function linkElement(harness: RuntimeHarness, request: string, attributes: Recor
     harness.windowState, 0, 10, "a");
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
 test("T34: links of the new content keep known target hints and discover new targets", () => {
   const harness = createRuntimeHarness({ intersectionObserver: true });
   const known = linkElement(harness, "Known", {
@@ -1053,6 +1061,7 @@ test("T34: links of the new content keep known target hints and discover new tar
   assert.equal(typed.getAttribute("title"), "/ws/Typed.md");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-063
 // Moved from test/webview/linkNavigation.test.ts ("discovery hints ignore stale renders and never
 // replace the original target"): the page's host message filter matches previewLinkTargets to the
 // render it shows before the router hands it to the link navigation.

@@ -8,16 +8,17 @@ description: When the navigation request of a frontmatter link is malformed, the
   invalid.".
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMSCHEMA-018
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMSCHEMA-014
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TOOLBAR-113; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TOOLBAR-113
 ---
 
 ## A malformed frontmatter link request is refused
@@ -40,6 +41,5 @@ When the navigation request of a frontmatter link is malformed, the extension SH
 
 ### Verification notes
 
-- Method: No test today for the malformed case.
+- Method: Unit test `a malformed frontmatter link request is refused with its own reason` in `test/session/diagReq.links.requirements.test.ts`.
 - Criteria: The reason is shown in the same warning as other refusals.
-- Known issue: the malformed-request message has no test.

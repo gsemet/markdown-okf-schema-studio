@@ -73,6 +73,7 @@ export interface AnchorPolicy {
   editorTopLine(line: number): number;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-119
 export function createAnchorPolicy(): AnchorPolicy {
   function finite(value: number): boolean {
     return typeof value === "number" && Number.isFinite(value);
@@ -188,6 +189,7 @@ export function createAnchorPolicy(): AnchorPolicy {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-100
 /**
  * Host-side echo guard. After the host scrolls the text editor on behalf of
  * the preview, the editor reports visible-range changes; those are echoes and

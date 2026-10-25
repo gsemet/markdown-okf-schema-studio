@@ -33,6 +33,7 @@ function closesFence(line: string, fence: MarkdownFence): boolean {
   return Boolean(marker && marker[0] === fence.marker && marker.length >= fence.length);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-009
 /** Rewrites alert blockquotes, including optional titles, into MyST admonitions. */
 export function expandGithubAlerts(text: string): string {
   const lines = text.split(/\r?\n/u);

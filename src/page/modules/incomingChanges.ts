@@ -67,6 +67,8 @@ export function installIncomingChanges(document: Document): {
     for (let index = used; index < bars.length; index += 1) bars[index].hidden = true;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-207
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-208
   const apply = (): void => {
     marked.forEach((element) => element.removeAttribute(MARK));
     marked = [];

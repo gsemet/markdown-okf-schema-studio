@@ -4,28 +4,29 @@ id: SwRS-MDOKFSTUDIO-DIAG-022
 uuid: 5745c6d3-1480-4d4b-9435-b83a3df2119a
 title: "A diagram under edit is hidden"
 description: "When a block editor is open on a diagram block, the page SHALL hide
-  the rendered block with display none and show the editor after it, and SHALL show
-  the block again when the editor closes."
+  the rendered block with display none and show the editor after it, and show the
+  block again when the editor closes."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
 - StRS-MDOKFSTUDIO-DIAG-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-001
 ---
 
 ## A diagram under edit is hidden
 
 ### Normative behavior
 
-When a block editor is open on a diagram block, the page SHALL hide the rendered block with display none and show the editor after it, and SHALL show the block again when the editor closes.
+When a block editor is open on a diagram block, the page SHALL hide the rendered block with display none and show the editor after it, and show the block again when the editor closes.
 
 ### Scenario: Editor opens
 
@@ -41,10 +42,10 @@ When a block editor is open on a diagram block, the page SHALL hide the rendered
 
 ### Known issues
 
-- Known issue: There is no live preview of the diagram while it is edited (UX-36, not approved, absent from docs/known-limitations.md).
+- Known issue: There is no live preview of the diagram while it is edited (absent from docs/known-limitations.md).
 - Known issue: A theme change still redraws a hidden Mermaid diagram because the theme observer draws every diagram.
 
 ### Verification notes
 
-- Method: No test of the diagram case; the hiding rule is generic.
+- Method: Unit test `a diagram block is hidden while its editor is open and shown again when it closes` in `test/page/diagReq.diagramEdit.requirements.test.ts`.
 - Criteria: The block is hidden only while its editor is open.

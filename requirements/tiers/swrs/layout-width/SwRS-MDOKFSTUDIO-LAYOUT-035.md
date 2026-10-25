@@ -9,16 +9,18 @@ description: When a maintainer runs the geometry checks on a rendered preview,
   exists.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LAYOUT-009
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-LAYOUT-001
+annotation_exemption: true
+exemption_reason: "Test tooling: the geometry checks are test/shared/geometry-checks.js,
+  outside the source folders. No implementation marker is possible."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-001
 ---
 
 ## Machine geometry checks report four layout defects

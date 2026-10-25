@@ -20,6 +20,7 @@ test("latest saved Description visibility wins over an older enrichment snapshot
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
 test("Description column toggles persist and restore both states", () => {
   const harness = createRuntimeHarness({ viewportWidth: 900 });
   assert.equal(harness.descriptionButton.getAttribute("aria-expanded"), "true");
@@ -45,6 +46,7 @@ test("narrow previews default to collapsed descriptions without overriding an ex
   assert.equal(expanded.descriptionButton.getAttribute("aria-expanded"), "true");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
 test("does not shift sticky headings down when the floating toolbar grows", () => {
   const harness = createRuntimeHarness({ toolbarBottom: 50 });
   harness.toolbar.rectProvider = () => ({ top: 12, height: 38, bottom: 50, width: 130 });
@@ -83,6 +85,7 @@ test("anchors source scrolling below a top-aligned sticky band without a toolbar
   assert.equal(harness.mappings[1].getBoundingClientRect().top, 65);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
 test("the top-aligned sticky band grows and shrinks with the active heading hierarchy", () => {
   for (const depth of [1, 2, 3]) {
     const harness = createRuntimeHarness({ stickyHeadingDepth: depth });
@@ -145,6 +148,7 @@ test("the sticky band label leaves out comment chips and their hidden bodies", (
   assert.equal(harness.stickyHeadings.textContent, "# Chapter\n## Section\n### Topic");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030
 test("caps sticky heading convergence at three passes", () => {
   const harness = createRuntimeHarness();
   let layoutPass = 0;
@@ -229,6 +233,7 @@ test("maps the frontmatter table for stable top and mid-table scroll round-trips
   assert.equal(harness.windowState.scrollY, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
 test("preserves preview scroll when layout changes during sticky heading activation", () => {
   const harness = createRuntimeHarness({ viewportHeight: 800 });
   harness.stickyHeadings.height = 50;
@@ -243,6 +248,7 @@ test("preserves preview scroll when layout changes during sticky heading activat
   assert.equal(harness.windowState.scrollY, 50);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-022
 test("uses the configured sticky heading depth", () => {
   const headings = [
     { depth: 1, expected: "### Topic" },
@@ -298,6 +304,7 @@ test("source anchoring does not reserve a row for floating controls", () => {
   assert.equal(harness.mappings[1].getBoundingClientRect().top, 65);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-022
 test("the boot context cannot terminate its containing script element", () => {
   const script = serializeRuntimeContext({
     documentId: "file:///active.md</script><script>alert(1)</script>",
@@ -337,6 +344,9 @@ test("observes preview content instead of the document body", () => {
   assert.notEqual(harness.observedResizeTarget, harness.body);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-THEME-001
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
 test("cycles preview theme modes and restores the saved selection", () => {
   // A workspace that stored the "current" mode (the fresh default is cream).
   const harness = createRuntimeHarness({}, undefined, "current");
@@ -372,6 +382,7 @@ test("cycles preview theme modes and restores the saved selection", () => {
   assert.equal(shared.documentElement.getAttribute("data-sphinx-preview-theme-mode"), "dark");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 test("frontmatter tooltips preserve exact safe text and restore accessible metadata on dismissal", () => {
   for (const dismissal of ["leave", "blur", "scroll", "resize", "outside", "Escape", "refresh", "pagehide", "beforeunload"]) {
     const harness = createRuntimeHarness({ viewportHeight: 600, controlsHeight: 116 });
@@ -407,6 +418,7 @@ test("frontmatter tooltips preserve exact safe text and restore accessible metad
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
 test("an invalid link span shows its full message in a tooltip on keyboard focus", () => {
   const harness = createRuntimeHarness({ viewportHeight: 600, controlsHeight: 116 });
   const title = "[E10] target 'missing.py' does not resolve to a file";
@@ -433,6 +445,7 @@ test("a pending link never opens a tooltip", () => {
   assert.equal(harness.createdElements.length, before);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
 test("the badge click scrolls to and focuses the first issue row and highlights it briefly", () => {
   const harness = createRuntimeHarness({ viewportHeight: 600 });
   harness.frontmatterRow.setAttribute("class", "okf-error okf-known");
@@ -467,6 +480,7 @@ test("switching frontmatter tooltip links removes the old tooltip and absent ARI
   assert.ok(!harness.body.contains(secondTooltip));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
 test("refresh preserves viewport state while reverse synchronization stays disabled", () => {
   const harness = createRuntimeHarness({ scrollEditorWithPreview: false });
   harness.windowState.scrollY = 320;
@@ -519,6 +533,7 @@ test("refresh preserves viewport state while reverse synchronization stays disab
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-108
 test("disabling editor anchoring stops preview-to-editor scrolling", () => {
   const harness = createRuntimeHarness({ scrollEditorWithPreview: true });
 
@@ -617,6 +632,7 @@ test("refreshes source anchor geometry after a block editor changes document flo
   assert.equal(harness.windowState.scrollY, 1_000 + 60 - 65);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
 test("restores saved editor anchoring when the configured preference changed", () => {
   const harness = createRuntimeHarness({ scrollPreviewWithEditor: false }, undefined, undefined, true);
 
@@ -659,6 +675,8 @@ test("activating a centered block editor preserves scroll before and after layou
   assert.equal(blockEditorOf(harness.mappings[1]).getBoundingClientRect().top, blockTop);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-097
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
 test("executes source and preview synchronization across layout changes", () => {
   const harness = createRuntimeHarness({ scrollEditorWithPreview: false });
   harness.stickyHeadings.rectProvider = () => ({
@@ -767,6 +785,7 @@ test("executes source and preview synchronization across layout changes", () => 
   assert.equal(harness.messages.length, messageCount);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
 test("marks editor selection without moving the preview when following is disabled", () => {
   const sourceOnlyHarness = createRuntimeHarness({
     scrollPreviewWithEditor: false,
@@ -812,6 +831,7 @@ test("source scrolling rejects stale identities and invalid line numbers", async
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117
 test("scrolls to host-approved anchors and ignores invalid or stale requests", () => {
   const harness = createRuntimeHarness();
 
@@ -873,6 +893,7 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
   assert.equal(harness.windowState.scrollY, 935);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032
 test("markWideTables marks short cells and the overflow of a wide table, never the properties table", () => {
   const harness = createRuntimeHarness();
   const table = new RuntimeElement({}, harness.windowState, 0, 100, "table");

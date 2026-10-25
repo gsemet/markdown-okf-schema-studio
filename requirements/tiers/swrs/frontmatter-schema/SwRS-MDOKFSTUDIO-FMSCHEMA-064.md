@@ -7,16 +7,17 @@ description: When a frontmatter link does not resolve, the extension SHALL show
   the value text followed by an error or warning mark and a plain label.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMSCHEMA-016
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMSCHEMA-014
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-063; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-063
 ---
 
 ## A link that does not resolve shows its problem

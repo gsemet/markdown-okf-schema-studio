@@ -69,6 +69,7 @@ async function saveGenericYamlField(
   await waitForCurrentPreview(document);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const extensionRoot = path.resolve(__dirname, "../../..");

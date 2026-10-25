@@ -10,6 +10,7 @@ import {
   studioToken,
 } from "../../../src/core/preview/themeTokens";
 
+// @tests_req SwRS-MDOKFSTUDIO-THEME-034
 test("every theme token maps to the VS Code variable of the same name, on the root and on body", () => {
   assert.match(VSCODE_THEME_TOKEN_CSS, /^\s*:root,\s*body\s*\{/u);
   for (const name of THEME_TOKEN_NAMES) {
@@ -31,6 +32,7 @@ test("the page stylesheet reads VS Code variables only through the token map", (
 /** The tokens the Mermaid theme reads from the page (src/page/modules/mermaidPreview.ts). */
 const MERMAID_THEME_TOKENS = ["textCodeBlock-background", "editor-foreground", "textBlockQuote-background", "editor-background"];
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-005
 test("every token the stylesheet or the Mermaid theme reads is in the token map", () => {
   const used = new Set([...`${PREVIEW_ACCESSIBILITY_CSS}${PREVIEW_THEME_CSS}`.matchAll(/--studio-([\w-]+)/gu)].map((match) => match[1]));
   const known = new Set<string>(THEME_TOKEN_NAMES);
@@ -39,6 +41,7 @@ test("every token the stylesheet or the Mermaid theme reads is in the token map"
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-THEME-025
 test("the forced theme modes set the neutral tokens, not the VS Code variables", () => {
   for (const mode of ["dark", "white", "cream"]) {
     const pattern = new RegExp(`html\\[data-sphinx-preview-theme-mode="${mode}"\\]\\s*,\\s*html\\[data-sphinx-preview-theme-mode="${mode}"\\] body\\s*\\{([^}]*)\\}`, "u");

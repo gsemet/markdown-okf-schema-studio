@@ -14,6 +14,7 @@ function pushTransport(): { transport: HostTransport; send(data: unknown): void 
   };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-059
 test("a host message addressed to the page reaches its handler; any other goes to unhandled", () => {
   const messages = createPageHostMessages();
   const { transport, send } = pushTransport();

@@ -33,6 +33,7 @@ export interface AnchorMode {
   start(): void;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
  * The anchor feature. The first mode is the saved state's, else the setting. Handles
  * `previewPairing`.
@@ -56,6 +57,7 @@ export function installAnchorMode(document: Document, router: HostMessageRouter,
     anchorButton?.setAttribute?.("data-tooltip", tooltip);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-120
   function applyPairing(paired: boolean): void {
     if (!anchorButton) return;
     anchorButton.disabled = !paired;
@@ -89,6 +91,7 @@ export function installAnchorMode(document: Document, router: HostMessageRouter,
     anchored: () => anchorToEditor,
     applyAnchorMode,
     applyPairing,
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
     start() {
       anchorButton?.addEventListener?.("click", () => {
         applyAnchorMode(!anchorToEditor);

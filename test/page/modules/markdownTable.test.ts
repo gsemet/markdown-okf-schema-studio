@@ -5,6 +5,7 @@ import { lineDelta } from "../../shared/lineDelta";
 import { createEditActions } from "../../../src/page/modules/editActions";
 import { createMarkdownTableTools } from "../../../src/page/modules/markdownTable";
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-094
 test("pipe tables round-trip escaped cells and CRLF line endings", () => {
   const tools = createMarkdownTableTools();
   const source = "| Name | Detail |\r\n| :--- | ---: |\r\n| Brake | `a|b` and x\\|y |\r\n";
@@ -16,6 +17,7 @@ test("pipe tables round-trip escaped cells and CRLF line endings", () => {
   assert.equal(tools.serialize(table), source);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
 test("inserting and deleting table rows and columns preserves the remaining cells", () => {
   const tools = createMarkdownTableTools();
   const source = "| A | B |\n| --- | :---: |\n| x | y |\n| p | q |\n";
@@ -43,6 +45,7 @@ test("table tools cannot delete the header, final body row, or final column", ()
   assert.equal(tools.serialize(table), source);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
 test("non-table blocks and malformed separator rows cannot be edited as pipe tables", () => {
   const tools = createMarkdownTableTools();
   for (const source of ["", "Ordinary paragraph\n", "| A |\n", "| A |\n| invalid |\n"]) {
@@ -102,6 +105,7 @@ test("inserting a column re-serializes the table with one more column", () => {
   assert.equal(reparsed.rows[2].length, 3);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
 test("a row inserted into a CRLF table keeps CRLF line endings", () => {
   const tools = createMarkdownTableTools();
   const table = tools.parse("| A | B |\r\n|---|---|\r\n| 1 | 2 |\r\n");
@@ -112,6 +116,7 @@ test("a row inserted into a CRLF table keeps CRLF line endings", () => {
   assert.equal(output.replace(/\r\n/gu, "").includes("\n"), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-102
 test("rows without outer pipes stay parseable when an edge cell is emptied", () => {
   const tools = createMarkdownTableTools();
   const source = "a | b\n--- | ---\nc | d";
@@ -238,6 +243,7 @@ test("T24: the table inserted by the palette parses back with its header and emp
   assert.equal(tools.serialize({ ...model, columnsChanged: true }), edit.text);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-117
 test("T25: toHtmlTable writes thead and tbody with escaped text and alignment attributes", () => {
   const tools = createMarkdownTableTools();
   const model = tools.parse("| A & B | <C> |\n| :--- | :---: |\n| 1 \\| 2 | **bold** |")!;

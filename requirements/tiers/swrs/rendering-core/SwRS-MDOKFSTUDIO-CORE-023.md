@@ -8,17 +8,18 @@ description: When a directive is replaced by a placeholder, the extension SHALL
   in the status region while the render stays successful.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-003
 - StRS-MDOKFSTUDIO-MYST-005
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-022; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-022
 ---
 
 ## List a warning for an unavailable directive
@@ -41,5 +42,5 @@ When a directive is replaced by a placeholder, the extension SHALL list "Directi
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "project-scoped roles and directives degrade to labelled placeholders" in test/core/render/mystFeatures.test.ts; Integration suite run() in test/integration/projectFeatures.test.ts
 - Criteria: One warning per placeholder with its line, and a ready status.

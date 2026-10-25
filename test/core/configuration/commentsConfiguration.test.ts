@@ -7,6 +7,7 @@ import {
   readCommentsConfiguration,
 } from "../../../src/core/configuration/commentsConfiguration";
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
 test("T43: reads the author name of the comments section", () => {
   const sections: string[] = [];
   const configuration = readCommentsConfiguration({

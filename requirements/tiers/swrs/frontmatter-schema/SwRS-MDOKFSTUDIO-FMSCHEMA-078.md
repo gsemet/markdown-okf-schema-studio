@@ -7,13 +7,13 @@ description: When more than 64 schemas have been resolved, the extension SHALL
   drop the oldest resolved schema and release its compiled validator.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: deprecated
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMSCHEMA-009
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMSCHEMA-006
+annotation_exemption: true
+exemption_reason: "Archived. Not an observable behaviour; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
@@ -39,6 +39,5 @@ When more than 64 schemas have been resolved, the extension SHALL drop the oldes
 
 ### Verification notes
 
-- Method: No test today (the schema registry unit tests never reach the 64-entry cap).
+- Method: Unit test `the registry keeps 64 resolved schemas and drops the oldest at the 65th` in `test/core/frontmatter/diagReq.frontmatter.requirements.test.ts`.
 - Criteria: MAX_ENTRIES is 64; the oldest entry in insertion order is dropped.
-- Known issue: the 64-entry cap has no test.

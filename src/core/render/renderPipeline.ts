@@ -152,6 +152,10 @@ function createStage(options: RenderOptions, diagnostics: PreviewDiagnostic[]): 
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-001
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-024
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-039
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-007
 /**
  * Renders the active document to HTML in-process.
  *
@@ -191,6 +195,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
       : await renderMyst(options.document.getText(), {
         sourcePath: stage.activeDocumentPath,
         enabledMystExtensions: enabledMystExtensionsFor(stage.activeDocumentPath, options.workspaceRoot),
+        // @implements_req SwRS-MDOKFSTUDIO-CORE-013
         resolveInclude: (request, sourcePath) => {
           const read = readBoundedText(resourcePolicy, request, path.dirname(sourcePath));
           return read.ok ? { path: read.path, source: read.source } : undefined;

@@ -7,16 +7,17 @@ description: When one file is included several times in a render, the extension
   SHALL read and parse it once and keep each use's own include line.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-002
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-012; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-012
 ---
 
 ## Read a repeated include once per render
@@ -39,5 +40,5 @@ When one file is included several times in a render, the extension SHALL read an
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "an include repeated many times is read once per render" in test/core/render/includeBudget.test.ts
 - Criteria: A single read per render and distinct lines per use.

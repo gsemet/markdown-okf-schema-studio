@@ -25,6 +25,7 @@ const thread = (overrides: Record<string, unknown> = {}) => ({
 const file = (threads: unknown[] = [thread()], extra: Record<string, unknown> = {}) =>
   JSON.stringify({ version: 1, document: "notes.md", threads, ...extra });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001
 test("T42: sidecarNameFor puts .comments.json next to the document", () => {
   assert.equal(sidecarNameFor("notes.md"), "notes.comments.json");
   assert.equal(sidecarNameFor("/a/b/notes.md"), "/a/b/notes.comments.json");
@@ -41,6 +42,7 @@ test("T42: a valid file parses into threads", () => {
   assert.equal(parsed.threads[0].comments[0].author, "Ada");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-004
 test("T42: malformed JSON and wrong shapes give errors and no threads", () => {
   for (const text of ["", "{", "[]", "null", "42", JSON.stringify({ version: 2, document: "a", threads: [] }),
     JSON.stringify({ version: 1, threads: [] }), JSON.stringify({ version: 1, document: "a" })]) {

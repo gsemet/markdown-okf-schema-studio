@@ -7,16 +7,17 @@ description: 'When an admonition has `:class: simple` or `:icon: false`, the ext
   SHALL render a plain left-bar callout or hide the badge respectively.'
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Simple and icon-less admonitions drop their decoration
@@ -39,5 +40,5 @@ When an admonition has `:class: simple` or `:icon: false`, the extension SHALL r
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "dropdown admonitions render as openable details with a summary" in test/core/render/mystFeatures.test.ts; Unit test "MyST simple and no-icon admonition modifiers are styled" in test/core/preview/previewStyles.test.ts
 - Criteria: Each option changes only its own decoration.

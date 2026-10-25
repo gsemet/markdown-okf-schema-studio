@@ -9,17 +9,18 @@ description: 'When the preview shows a placeholder for an unresolved directive, 
   a citation.'
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-003
 - StRS-MDOKFSTUDIO-MYST-005
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-022; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-022
 ---
 
 ## Style placeholders as inert
@@ -42,5 +43,5 @@ When the preview shows a placeholder for an unresolved directive, a citation, a 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "MyST table alignment and notebook output placeholders are styled" in test/core/preview/previewStyles.test.ts
 - Criteria: Placeholder classes carry the muted, dashed and dotted styles.

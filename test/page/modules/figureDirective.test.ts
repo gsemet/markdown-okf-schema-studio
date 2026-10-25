@@ -27,6 +27,7 @@ const book = [
   ":::",
 ].join("\n");
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-160
 test("T32: a book-style figure round-trips byte for byte", () => {
   assert.equal(roundTrip(book), book);
   const model = tools.parseFigure(book)!;
@@ -118,6 +119,7 @@ test("T32: a fence inside the legend makes the outer fence longer", () => {
   assert.ok(next.endsWith("\n::::"), next);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
 test("T32: a YAML option block and other directives are not parsed", () => {
   assert.equal(tools.parseFigure(":::{figure} a.png\n---\nwidth: 50%\n---\nCaption\n:::"), undefined);
   assert.equal(tools.parseFigure(":::{note}\nx\n:::"), undefined);

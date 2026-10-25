@@ -7,16 +7,17 @@ description: While useJar is not true, the extension SHALL ignore
   markdownOkfSchemaStudio.plantuml.jarPath and keep its value for later use.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-024; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-024
 ---
 
 ## jarPath is ignored until useJar is on

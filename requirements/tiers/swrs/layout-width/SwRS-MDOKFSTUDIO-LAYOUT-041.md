@@ -7,16 +7,17 @@ description: When the reader changes the width mode, the extension SHALL measure
   the first-element clearance again.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LAYOUT-006
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-LAYOUT-003
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LAYOUT-018; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-018
 ---
 
 ## A width mode change measures the first-element clearance again
@@ -37,11 +38,7 @@ When the reader changes the width mode, the extension SHALL measure the first-el
 - WHEN the Width button is clicked
 - THEN the clearance is still measured again, because the change callback calls the update unconditionally, and the published values stay the same
 
-### Known issues
-
-- Known issue: The re-measure on a mode change has no test of its own.
-
 ### Verification notes
 
-- Method: Inspection of the width mode change callback in the page runtime (`firstClearance.update(); keepReadingLine();`); no automated test.
+- Method: Unit test `a width mode change measures the first-element clearance again, even when nothing moved` in `test/page/diagReq.layout.requirements.test.ts`.
 - Criteria: The change callback calls the first-element clearance update.

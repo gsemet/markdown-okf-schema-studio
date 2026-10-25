@@ -8,16 +8,17 @@ description: 'When a document holds `{versionadded}`, `{versionchanged}` or `{de
   version X: or Deprecated since version X: followed by the body.'
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Version admonitions show their version title
@@ -40,5 +41,5 @@ When a document holds `{versionadded}`, `{versionchanged}` or `{deprecated}`, th
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "Sphinx version admonitions render generated titles and Markdown bodies" in test/core/render/mystFeatures.test.ts
 - Criteria: Three directives, three titles.

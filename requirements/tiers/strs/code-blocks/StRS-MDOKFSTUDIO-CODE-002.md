@@ -8,16 +8,15 @@ description: When a writer previews a diff or patch code block, the Studio SHALL
   literal markers.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-CODE-001; no marker expected."
 derives_from: []
 user_need: Reviewers need to see what a change adds and removes at a glance.
-derived_by:
-- SwRS-MDOKFSTUDIO-CODE-008
-- SwRS-MDOKFSTUDIO-CODE-009
-- SwRS-MDOKFSTUDIO-CODE-010
-- SwRS-MDOKFSTUDIO-CODE-036
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-CODE-001
 ---
 
 ## Read diffs as additions and deletions

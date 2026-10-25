@@ -244,6 +244,7 @@ function fieldEndWithTrailingComments(text: string, pair: Pair, regionEnd: numbe
   return end;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-004
 /**
  * Renders one pair as YAML text with the given style. The pair's own comments are removed while it
  * is rendered and restored afterwards. `suppressValueComment` drops the value's trailing comment,
@@ -307,6 +308,7 @@ function verified(candidate: string, expected: Record<string, unknown>): boolean
     && isSameData(Object.keys(actual), Object.keys(expected));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-043
 /**
  * Builds a patch that covers only the lines of one existing top-level field. The pair has
  * already been modified by the caller. Returns undefined when the minimal patch cannot be built
@@ -376,6 +378,7 @@ function minimalPairPatch(
   return { start: yamlStart + regionStart, end: yamlStart + regionEnd, text: replacement };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-024
 /** Replaces only the key text of one field. Returns undefined when that does not verify. */
 function minimalRenamePatch(
   source: string,
@@ -404,6 +407,7 @@ function minimalRenamePatch(
   return { start: yamlStart + keyRange[0], end: yamlStart + keyRange[1], text: keyText };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-029
 /** Deletes the whole lines of one field. Returns undefined when the minimal patch does not verify. */
 function minimalRemovePatch(
   source: string,
@@ -535,6 +539,7 @@ export function isPlainSafeScalar(text: string): boolean {
     && stringify(text, { version: "1.1", lineWidth: 0 }) === `${text}\n`;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-037
 /**
  * Where a new top-level key goes in the source so that it sits where the properties table shows
  * its row. The table lists the schema fields that are present in schema order, then the other keys

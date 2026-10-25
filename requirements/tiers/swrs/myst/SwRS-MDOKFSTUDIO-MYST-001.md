@@ -2,10 +2,11 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-MYST-001
 uuid: 0974894c-5149-402f-8bec-8a278aa22ac1
-title: Named admonitions render with a default title
-description: When a document holds a named MyST admonition directive, the
-  extension SHALL render a panel with that kind's default title and the Markdown
-  body.
+title: Admonitions render as coloured callouts with a title
+description: When a document holds an admonition directive, the extension SHALL
+  render a panel with the title, accent colour, badge and Markdown body of its
+  kind, and a custom, untitled, simple, icon-less, version or Quarto form keeps
+  its own title and decoration.
 project: markdown-okf-schema-studio
 scope: myst
 lifecycle: draft
@@ -13,32 +14,112 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
+depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files: []
-tested_in_files: []
+implemented_in_files:
+- src/core/directives/admonition.ts
+- src/core/render/mystBlockTransforms.ts
+- src/core/render/mystNormalize.ts
+tested_in_files:
+- test/core/directives/registry.test.ts
+- test/core/preview/previewStyles.test.ts
+- test/core/render/mystFeatures.test.ts
+- test/visual/scenarioDefinitions1.ts
 ---
 
-## Named admonitions render with a default title
+## Admonitions render as coloured callouts with a title
 
 ### Normative behavior
 
-When a document holds a named MyST admonition directive, the extension SHALL render a panel with that kind's default title and the Markdown body.
+When a document holds an admonition directive, the extension SHALL render a panel with the title, accent colour, badge and Markdown body of its kind, and a custom, untitled, simple, icon-less, version or Quarto form keeps its own title and decoration.
 
-### Scenario: Nominal
+### Scenario (nominal): Named kind shows its default title
 
-- GIVEN a document with a `:::{note}` directive and a Markdown body
+- GIVEN a document with a `:::{note}` directive and a Markdown body, and one directive for each other named kind written with colon or backtick fences
 - WHEN the preview renders
-- THEN a panel titled Note holds the rendered body
+- THEN a panel titled Note holds the rendered body, and each kind is titled by its own directive name and has its own palette action, as the table gives
 
-### Scenario: Boundary or refusal
+| Directive | Default title |
+| --- | --- |
+| note | Note |
+| attention | Attention |
+| caution | Caution |
+| danger | Danger |
+| error | Error |
+| hint | Hint |
+| important | Important |
+| seealso | See Also |
+| tip | Tip |
+| warning | Warning |
 
-- GIVEN a document with an admonition kind outside the named list
+### Scenario (boundary): Kind outside the named list
+
+- GIVEN a document with an admonition kind outside the named list, or an admonition name that is not registered
 - WHEN the preview renders
-- THEN the panel is titled Admonition and keeps its body
+- THEN the panel is titled Admonition, uses the generic Admonition rendering and keeps its body
+
+### Scenario (nominal): Accent colour and badge by kind
+
+- GIVEN a note, a tip, an important, a warning, a caution and a danger admonition
+- WHEN the preview renders
+- THEN each panel has the accent of its kind and a badge in that accent, as the table gives
+
+| Kind | Accent |
+| --- | --- |
+| note | blue |
+| tip | green |
+| important | purple |
+| warning | yellow |
+| caution | red with an octagon (not the warning yellow) |
+| danger | red with a cross |
+
+### Scenario (nominal): Version admonitions
+
+- GIVEN `{versionadded} 2.1` with a body, `{versionchanged}` and `{deprecated}` with versions, and a body with emphasis
+- WHEN the preview renders
+- THEN each panel has the title and accent of the table, with the given version for X, and the Markdown body follows parsed (the emphasis is rendered)
+
+| Directive | Title | Accent |
+| --- | --- | --- |
+| `{versionadded}` | Added in version X: (for example Added in version 2.1:) | green |
+| `{versionchanged}` | Changed in version X: | yellow |
+| `{deprecated}` | Deprecated since version X: | red |
+
+### Scenario (nominal): Custom admonition title and class
+
+- GIVEN `{admonition} A *plain* title` with `:class: tip`, and an `{admonition}` without a `:class:` option
+- WHEN the preview renders
+- THEN the title shows its inline Markdown rendered (emphasised text) and the panel has the tip colour, and the panel without a class keeps the neutral accent
+
+### Scenario (boundary): Untitled admonition takes its title from the first body line
+
+- GIVEN an admonition without a title argument whose body starts with a bold line or a heading
+- WHEN the preview renders
+- THEN the first line becomes the panel title, shown as a title and not as a heading, and the remaining lines form the body
+
+| Body starts with | Panel title |
+| --- | --- |
+| `**A bold title**` | A bold title |
+| `### Title` | Title |
+
+### Scenario (boundary): Simple and icon-less admonitions
+
+- GIVEN an admonition with `:class: simple`, and an admonition with `:icon: false`
+- WHEN the preview renders
+- THEN the first is a plain left-bar callout and the second hides the badge, each option changing only its own decoration
+
+### Scenario (boundary): Quarto callouts
+
+- GIVEN a Quarto callout div such as `::: {.callout-tip}`, once with a leading heading and once without
+- WHEN the preview renders
+- THEN a simple admonition of that kind is shown, titled with the leading heading, or with the kind's default title when the div has no heading
 
 ### Verification notes
 
-- Method: test
-- Criteria: The named kinds (note, attention, caution, danger, error, hint, important, seealso, tip, warning) show Note, Attention, Caution, Danger, Error, Hint, Important, See Also, Tip, Warning, with colon or backtick fences.
+- Method: test/core/render/mystFeatures.test.ts (scenarios named kind and kind outside the list: "all named MyST admonitions receive their documented default title"; version admonitions: "Sphinx version admonitions render generated titles and Markdown bodies"; custom title and class: "custom admonition titles preserve inline Markdown and their class"; untitled: "a leading bold paragraph or heading supplies the MyST admonition title"; Quarto callouts: "Quarto callout classes render as semantic MyST admonitions"; simple and icon-less: "dropdown admonitions render as openable details with a summary", which checks the `simple` and `no-icon` classes)
+- Method: test/core/preview/previewStyles.test.ts (accent and badge: "every admonition flavour gets an accent colour"; simple and icon-less: "MyST simple and no-icon admonition modifiers are styled")
+- Method: test/visual/scenarioDefinitions1.ts (accent and badge: visual scenario admonitions-dark-full)
+- Method: test/core/directives/registry.test.ts (named kind and kind outside the list: "each directive name has one plug-in, found by its exact name")
+- Criteria: Every named kind shows its default title and accent; an unregistered name falls back to Admonition; every version, custom, untitled, simple, icon-less and Quarto form changes only its own title or decoration.

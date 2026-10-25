@@ -8,22 +8,16 @@ description: When a writer previews a diagram the bundled engine cannot draw,
   keep the source readable.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-006; no marker expected."
 derives_from: []
 user_need: As a writer, I learn why my diagram has no picture and what to
   change, instead of seeing a blank block.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-032
-- SwRS-MDOKFSTUDIO-DIAG-033
-- SwRS-MDOKFSTUDIO-DIAG-034
-- SwRS-MDOKFSTUDIO-DIAG-035
-- SwRS-MDOKFSTUDIO-DIAG-036
-- SwRS-MDOKFSTUDIO-DIAG-037
-- SwRS-MDOKFSTUDIO-DIAG-038
-- SwRS-MDOKFSTUDIO-DIAG-082
-- SwRS-MDOKFSTUDIO-DIAG-112
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-006
 ---
 
 ## Understand why a bundled PlantUML diagram is not drawn

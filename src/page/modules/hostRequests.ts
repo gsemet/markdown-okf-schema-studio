@@ -53,6 +53,8 @@ export function installHostRequests(window: Window & typeof globalThis, options:
   };
 
   return {
+    // @implements_req SwRS-MDOKFSTUDIO-DIAG-046
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-090
     ask(type, payload, settings, done) {
       const editId = options.nextEditId();
       const dialog = settings.dialog === true;
@@ -69,6 +71,7 @@ export function installHostRequests(window: Window & typeof globalThis, options:
       settle(editId, message);
       return true;
     },
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-047
     isDialogOpen() {
       for (const entry of pending.values()) if (entry.dialog) return true;
       return false;

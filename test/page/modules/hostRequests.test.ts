@@ -21,6 +21,7 @@ function setup() {
   return { requests, posted, timers };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
 test("ask posts the type and payload with a fresh edit id and answers by edit id", () => {
   const { requests, posted } = setup();
   const results: unknown[] = [];
@@ -46,6 +47,7 @@ test("a request without an answer times out with an error result", () => {
   assert.match(String(results[0].reason), /did not answer/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
 test("a dialog request keeps the editor's blur suspended until it is answered, even on a timeout", () => {
   const { requests, timers } = setup();
   assert.equal(requests.isDialogOpen(), false);

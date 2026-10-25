@@ -7,14 +7,16 @@ description: When `frontmatter.strictAdditionalProperties` is on, the Studio
   SHALL warn on each field that the matching schema does not declare.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-010; no marker expected."
 derives_from: []
 user_need: As a team lead, I want misspelled or stray metadata fields to be
   flagged.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-042
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-010
 ---
 
 ## Unknown fields can be flagged

@@ -20,6 +20,9 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
   const initializedImages = new WeakSet<Element>();
   const initializedDetails = new WeakSet<Element>();
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-193
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-021
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-069
   const applyContentPatch: ContentPatch["applyContentPatch"] = (message) => {
     const main = document.getElementById?.("sphinx-myst-preview-content");
     if (!main) return;
@@ -46,6 +49,7 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     rt.blockEditor.closeBlockEdit(false);
     state.applyingContentPatch = false;
     parts.linkTooltip.close();
+    // @implements_req SwRS-MDOKFSTUDIO-CODE-017
     parts.codeCopy.hide();
     rt.editMode.setEditHover(undefined);
     parts.checkboxes.clearPending();

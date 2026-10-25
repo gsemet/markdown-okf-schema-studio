@@ -3,29 +3,30 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-018
 uuid: 9168279f-e1a8-4d0b-80fe-b687bc184c4e
 title: Mermaid is offered in the GFM palette mode only
-description: When the edition palette or the slash menu is in GFM mode, the
-  extension SHALL offer a Mermaid action in the GitHub group with the tooltip
-  "Mermaid diagram" and the slash aliases diagram, chart, graph and flowchart,
-  and SHALL NOT offer it in the other palette modes.
+description: "When the edition palette or the slash menu is in GFM mode, the extension
+  SHALL offer a Mermaid action in the GitHub group with the tooltip \"Mermaid diagram\"\
+  \ and the slash aliases diagram, chart, graph and flowchart, and does not offer
+  it in the other palette modes."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-005
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-017; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-017
 ---
 
 ## Mermaid is offered in the GFM palette mode only
 
 ### Normative behavior
 
-When the edition palette or the slash menu is in GFM mode, the extension SHALL offer a Mermaid action in the GitHub group with the tooltip "Mermaid diagram" and the slash aliases diagram, chart, graph and flowchart, and SHALL NOT offer it in the other palette modes.
+When the edition palette or the slash menu is in GFM mode, the extension SHALL offer a Mermaid action in the GitHub group with the tooltip "Mermaid diagram" and the slash aliases diagram, chart, graph and flowchart, and does not offer it in the other palette modes.
 
 ### Scenario: GFM mode
 

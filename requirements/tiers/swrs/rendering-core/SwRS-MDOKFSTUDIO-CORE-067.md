@@ -7,17 +7,18 @@ description: When an included file is larger than 5 MiB, the extension SHALL
   leave its include directive as an unresolved placeholder.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-002
 - StRS-MDOKFSTUDIO-CORE-003
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-013; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-013
 ---
 
 ## Refuse oversize included files
@@ -40,5 +41,5 @@ When an included file is larger than 5 MiB, the extension SHALL leave its includ
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "an included file over 5 MiB stays a placeholder and a file of exactly 5 MiB is expanded" in test/core/render/renderReq.renderingCore.requirements.test.ts
 - Criteria: The 5 MiB limit is inclusive of the file size; larger files stay placeholders.

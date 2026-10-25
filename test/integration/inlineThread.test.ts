@@ -97,6 +97,11 @@ async function withThreadPreview(
   }
 }
 
+// @tests_req StRS-MDOKFSTUDIO-REVIEW-015
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-186
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-192
 /**
  * Inline comment threads: a reply appends one message above the closing marker with the configured
  * author and the local date, and changes nothing else (CRLF kept); Delete removes the thread and one
@@ -143,6 +148,7 @@ export async function run(): Promise<void> {
   await runUndo();
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-171
 /** One reply and one delete are each one undo step in the source editor (needs a focused window). */
 export async function runUndo(): Promise<void> {
   await withThreadPreview("undo", "\n", async ({ document, original, send }) => {

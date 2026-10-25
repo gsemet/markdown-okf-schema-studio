@@ -21,6 +21,9 @@ export class ViewStateController {
   /** Registers the handlers of the page's view messages. */
   public register(router: PageMessageRouter): void {
     const { manager } = this;
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-214
     // A view preference only changes how the preview looks (workspace state, no document edit), so a
     // read-only or untrusted preview accepts it; the value is validated by the protocol.
     router.on("previewViewPreferenceChanged", (message, preview) => {
@@ -29,6 +32,7 @@ export class ViewStateController {
         manager.incoming.schedule(preview, 0);
       }
     });
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
     // The palette mode is a workspace choice like the edit mode: it changes buttons only, never the
     // rendering, so it is saved from the page and only a document edit needs a writable preview.
     router.on("previewPaletteModeChanged", (message, preview) => {
@@ -36,6 +40,7 @@ export class ViewStateController {
         void manager.choices.setPaletteMode(message.mode);
       }
     });
+    // @implements_req SwRS-MDOKFSTUDIO-MYST-081
     // CR 050: the warning banner. Opening the Problems view and closing the banner edit nothing, so a
     // read-only or untrusted preview allows them.
     router.on("previewShowProblems", () =>
@@ -43,6 +48,7 @@ export class ViewStateController {
     router.on("previewWarningBannerClosed", (message, preview) => {
       manager.choices.dismissedWarningBanners.set(preview.documentUri, message.key);
     });
+    // @implements_req SwRS-MDOKFSTUDIO-THEME-013
     router.on("previewThemeModeChanged", (message) => {
       if (isPreviewThemeMode(message.previewThemeMode)) {
         manager.choices.setPreviewThemeMode(message.previewThemeMode);
@@ -57,6 +63,8 @@ export class ViewStateController {
     router.on("previewState", (message, preview) => {
       this.recordPreviewState(preview, message);
     });
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-032
     router.on("previewRefresh", (value, preview) => {
       this.recordPreviewState(preview, value);
       if (preview.document) {
@@ -66,6 +74,7 @@ export class ViewStateController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-125
   /** Records the scroll and disclosure state a page message reports. */
   public recordPreviewState(preview: PreviewSession, message: PageStateMessageUnion): void {
     const stage = preview.stage;
@@ -92,6 +101,7 @@ export class ViewStateController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
   /** Tells the page whether the gray comment chips show. Stale ids are dropped by the page. */
   public postShowComments(preview: PreviewSession): void {
     const stage = preview.stage;
@@ -105,6 +115,7 @@ export class ViewStateController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-THEME-016
   /** The host's color theme changed: the page re-themes at once, the render follows. */
   public notifyTheme(preview: PreviewSession): void {
     const { manager } = this;

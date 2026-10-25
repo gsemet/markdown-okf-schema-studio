@@ -7,16 +7,18 @@ description: When a document uses the doc or download role, the extension SHALL
   render it as a plain link to the written target.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-003
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Produced by the MyST parser library, with no code of this project.
+  No implementation marker is possible."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-017
 ---
 
 ## Doc and download roles render as plain links
@@ -27,7 +29,7 @@ When a document uses the doc or download role, the extension SHALL render it as 
 
 ### Scenario: Link roles with a written target
 
-- GIVEN the text ``{doc}`other/page` `` and ``{download}`the manifest (schema/m.json)` ``
+- GIVEN a doc role and a download role, each written with a label and a target in angle brackets
 - WHEN the preview renders
 - THEN each is a plain link whose `href` is the written target, with the label as text (the
   target path itself is not a link text: a role without a label gives an empty link)
@@ -47,6 +49,5 @@ When a document uses the doc or download role, the extension SHALL render it as 
 
 ### Verification notes
 
-- Method: inspection of the rendered HTML for these roles (`src/core/render`, fixture
-  `test/visual/fixtures/03-unresolved-constructs.md`).
-- Criteria: Verification pending (no test; P10.5 test gap).
+- Method: Unit test on the rendered HTML for these roles (`test/core/render/renderReq.myst.requirements.test.ts`).
+- Criteria: Plain links with the written target; the `numref` placeholder holds the role name and the written key.

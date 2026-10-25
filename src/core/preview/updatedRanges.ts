@@ -6,6 +6,7 @@ export const MAX_UPDATED_RANGES = 50;
 /** `vscode.TextDocumentChangeReason`: 1 is Undo, 2 is Redo, undefined is any other edit. */
 export type ChangeReason = 1 | 2 | undefined;
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-094
 /**
  * Whether a change of the previewed document makes the updated blocks glow (CR 046): an undo or a
  * redo always does. Any other change glows only when it comes from elsewhere: another extension or

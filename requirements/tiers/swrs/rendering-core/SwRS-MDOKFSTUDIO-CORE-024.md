@@ -7,16 +7,17 @@ description: 'When a render yields diagnostics, the extension SHALL list each in
   status region as a file, a line and a message with a severity.'
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-003
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-025; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-025
 ---
 
 ## List diagnostics with file, line and severity
@@ -39,5 +40,5 @@ When a render yields diagnostics, the extension SHALL list each in the status re
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "T34: the patch rebuilds the status region from plain text" in test/page/runtimeContentPatch.test.ts; Unit test "the render pipeline retains buffer identity and attaches source diagnostics" in test/core/render/renderPipeline.test.ts
 - Criteria: Each listed item shows file, line, message and severity.

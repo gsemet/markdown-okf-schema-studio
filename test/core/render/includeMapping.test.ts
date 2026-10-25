@@ -34,6 +34,8 @@ function mapped(html: string): Array<[string, number, number | undefined, boolea
   return result;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-012
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("included blocks map to the directive lines only", async () => {
   const main = ["# Main", "", "```{include} part.md", "```", "", "Host after."].join("\n");
   const result = await renderMyst(main, context({ [`${root}/part.md`]: twentyLines }));

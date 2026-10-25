@@ -9,16 +9,17 @@ description: When the text of a built-in diagram is longer than 1 MiB (1,048,576
   unavailable.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-006
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-032; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-032
 ---
 
 ## The built-in engine refuses a source over 1 MiB

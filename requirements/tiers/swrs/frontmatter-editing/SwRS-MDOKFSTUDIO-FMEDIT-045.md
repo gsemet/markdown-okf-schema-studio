@@ -8,16 +8,17 @@ description: When a frontmatter edit would leave a block that does not parse or
   with "The frontmatter YAML could not be updated."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMEDIT-008
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-043; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-043
 ---
 
 ## A frontmatter edit that loses or corrupts a key is refused

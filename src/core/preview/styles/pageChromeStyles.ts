@@ -1,6 +1,13 @@
 import { CALLOUT_ICONS } from "../calloutIcons";
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
+// @implements_req SwRS-MDOKFSTUDIO-MYST-081
+// @implements_req SwRS-MDOKFSTUDIO-THEME-025
+// @implements_req SwRS-MDOKFSTUDIO-THEME-031
+// @implements_req SwRS-MDOKFSTUDIO-THEME-043
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
 /**
  * The page chrome: layout variables, the theme modes, the toolbar and its menus, the status banners,
  * the sticky heading band and the tooltips.

@@ -3,30 +3,29 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-102
 uuid: 964e3c0d-f870-4c57-82ce-aae4742d35d1
 title: A process that ignores its input becomes a message
-description: When a PlantUML process exits before reading its input or its
-  standard input reports an error, the extension SHALL report the failure on the
-  diagram as a normal message and SHALL NOT raise an uncaught exception in the
-  extension host.
+description: "When a PlantUML process exits before reading its input or its standard
+  input reports an error, the extension SHALL report the failure on the diagram as
+  a normal message without raising an uncaught exception in the extension host."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-013
-- StRS-MDOKFSTUDIO-DIAG-014
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-097; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-097
 ---
 
 ## A process that ignores its input becomes a message
 
 ### Normative behavior
 
-When a PlantUML process exits before reading its input or its standard input reports an error, the extension SHALL report the failure on the diagram as a normal message and SHALL NOT raise an uncaught exception in the extension host.
+When a PlantUML process exits before reading its input or its standard input reports an error, the extension SHALL report the failure on the diagram as a normal message without raising an uncaught exception in the extension host.
 
 ### Scenario: Broken pipe
 

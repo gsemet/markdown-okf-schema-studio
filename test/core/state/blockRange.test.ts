@@ -6,6 +6,7 @@ import { rebaseBlockRange } from "../../../src/core/state/blockRange";
 // The block is "BLOCK" at offset 10 of the document "0123456789BLOCK-tail".
 const block = { start: 10, length: 5 };
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
 test("STAB-06: a change before the open block shifts it by the inserted or removed length", () => {
   assert.deepEqual(rebaseBlockRange(block, [{ rangeOffset: 2, rangeLength: 0, text: "abc" }]), { start: 13 });
   assert.deepEqual(rebaseBlockRange(block, [{ rangeOffset: 0, rangeLength: 4, text: "" }]), { start: 6 });

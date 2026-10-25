@@ -7,16 +7,17 @@ description: When the properties table is rendered for a document, the extension
   SHALL mark its section as source line 1.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-005; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-005
 ---
 
 ## The properties section maps to source line 1

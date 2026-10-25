@@ -51,6 +51,7 @@ function setup() {
   return { root, main, marks, block, marked };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
 test("T16: the innermost mapped elements that meet a changed range are marked", () => {
   const { main, marks, block, marked } = setup();
   const list = block(main, 1, 6);
@@ -98,6 +99,7 @@ test("T16: elements in or under an open editor are skipped", () => {
   assert.deepEqual(marked(), [plain]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-208
 test("T16: malformed ranges are ignored and enabled is reported", () => {
   const { main, marks, block, marked } = setup();
   block(main, 1);

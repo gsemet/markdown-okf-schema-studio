@@ -217,6 +217,15 @@ function variantsOf(base: Record<string, unknown>): Record<string, unknown>[] {
   return out;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-236
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-237
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-238
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-239
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-054
+// @tests_req SwRS-MDOKFSTUDIO-GFM-027
+// @tests_req SwRS-MDOKFSTUDIO-THEME-013
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-083
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-126
 test("the page-state validators accept exactly what the frozen validator accepted", () => {
   let checked = 0;
   let accepted = 0;
@@ -252,6 +261,7 @@ test("a page-state message keeps accepting a document id longer than the registe
   assert.equal(isPageToHostMessage({ ...long, type: "previewCopyText", text: "code" }), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-052
 test("non-objects and inherited keys are not page messages", () => {
   for (const value of [null, undefined, 0, "previewReady", []]) {
     assert.equal(isPageToHostMessage(value), false, String(value));

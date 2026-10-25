@@ -24,6 +24,7 @@ test("T39: a new selection is empty and has no range", () => {
   assert.equal(model.range(), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-140
 test("T39: extendTo selects from the anchor in both directions", () => {
   const model = selection();
   model.setAnchor(1);
@@ -71,6 +72,7 @@ test("T39: the selection stops at the first and the last block", () => {
   assert.deepEqual([model.startIndex, model.endIndex], [0, 4]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
 test("T39: an included block stops the range before it", () => {
   const list = blocks.map((block, index) => (index === 3 ? { ...block, included: true } : block));
   const model = selection(list);

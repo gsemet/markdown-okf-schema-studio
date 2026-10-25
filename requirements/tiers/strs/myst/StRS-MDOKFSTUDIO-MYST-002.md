@@ -8,18 +8,16 @@ description: When a writer pastes prompt-style context tags, the Studio SHALL
   HTML.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derives_from: []
 user_need: As a writer, I want pasted context tags to stay readable and inert so
   that I never lose text or run active markup.
-derived_by:
-- SwRS-MDOKFSTUDIO-CORE-045
-- SwRS-MDOKFSTUDIO-MYST-013
-- SwRS-MDOKFSTUDIO-MYST-014
-- SwRS-MDOKFSTUDIO-MYST-015
-- SwRS-MDOKFSTUDIO-MYST-016
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Context tags render as readable panels

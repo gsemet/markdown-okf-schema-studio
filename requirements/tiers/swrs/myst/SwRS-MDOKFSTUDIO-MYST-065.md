@@ -8,16 +8,17 @@ description: When a document holds a `{table}` directive, the extension SHALL
   keeping GFM column alignment on every cell.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-013
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-063; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-063
 ---
 
 ## The table directive renders a table with caption, id and alignment
@@ -40,5 +41,5 @@ When a document holds a `{table}` directive, the extension SHALL render a table 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "MyST GFM and directive tables preserve captions, headers, and alignment" in test/core/render/mystFeatures.test.ts
 - Criteria: Caption, id, alignment and GFM column alignment are present; palette-written captioned tables render a caption.

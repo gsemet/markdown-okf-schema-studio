@@ -52,6 +52,7 @@ function setup(options: { busy?: () => boolean } = {}) {
 
 const textOf = (element: FakeElement) => element.childNodes[0] as FakeText;
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-038
 test("T43: a selection inside one block shows the Comment button near the range and builds the anchor", () => {
   const { document, select, button, click, box, posted, compose } = setup();
   const p = document.add("p", { "data-line": "3", "data-end-line": "3" }, document.content, "Please say hello to the world today");
@@ -91,6 +92,7 @@ test("T43: the quote is whitespace-collapsed and capped at 500, prefix and suffi
   assert.equal(anchor.suffix, "z".repeat(32));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-049
 test("T43: a selection across blocks anchors first block line to last block end line", () => {
   const { document, select, button, click, box, posted } = setup();
   const first = document.add("p", { "data-line": "3", "data-end-line": "4" }, document.content, "First block");
@@ -225,6 +227,7 @@ test("T43: the keyboard shortcut opens the box for the current selection", () =>
   assert.ok(box());
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-044
 test("T43: typing in the box is not seen by other key handlers, and the box text is data", () => {
   const { document, select, button, click, box } = setup();
   const p = document.add("p", { "data-line": "2" }, document.content, "<b>x</b> selectable text");

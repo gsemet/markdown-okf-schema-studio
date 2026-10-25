@@ -7,16 +7,17 @@ description: When the pointer enters another code block while the button shows
   Copied, the extension SHALL reset the button to Copy code.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-004
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CODE-017; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CODE-017
 ---
 
 ## Reset the Copied state when another block is hovered

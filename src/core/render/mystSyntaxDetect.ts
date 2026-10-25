@@ -76,6 +76,7 @@ function frontmatterEnd(lines: readonly string[]): number {
   return 0;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-072
 export function detectMystSyntax(root: DetectNode, source: string): MystSyntaxUse[] {
   const lines = source.split(/\r\n|\r|\n/u);
   const first = new Map<string, MystSyntaxUse>();

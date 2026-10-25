@@ -8,20 +8,16 @@ description: When the width mode is Auto, the Studio SHALL let tables, figures,
   width, centred and clear of the pane edges.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-003; no marker expected."
 derives_from: []
 user_need: As a reader, I see wide tables, pictures and diagrams in full when
   the pane has room, without turning the whole page to full width.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-021
-- SwRS-MDOKFSTUDIO-LAYOUT-023
-- SwRS-MDOKFSTUDIO-LAYOUT-024
-- SwRS-MDOKFSTUDIO-LAYOUT-025
-- SwRS-MDOKFSTUDIO-LAYOUT-026
-- SwRS-MDOKFSTUDIO-LAYOUT-027
-- SwRS-MDOKFSTUDIO-LAYOUT-031
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-LAYOUT-003
 ---
 
 ## Auto width lets wide content break out of the column

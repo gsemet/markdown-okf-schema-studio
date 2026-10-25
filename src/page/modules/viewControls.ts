@@ -24,6 +24,7 @@ export function installViewControls(
   const step = 10;
   const zoomOut = document.querySelector("[data-sphinx-preview-zoom-out]");
   const zoomIn = document.querySelector("[data-sphinx-preview-zoom-in]");
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
   const normalize = (value: unknown): number | undefined => (
     typeof value === "number" && Number.isFinite(value)
       ? Math.min(maximum, Math.max(minimum, Math.round(value / step) * step))
@@ -48,6 +49,8 @@ export function installViewControls(
       button.setAttribute("data-tooltip", tooltip);
     }
   };
+  // @implements_req SwRS-MDOKFSTUDIO-THEME-038
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
   const change = (delta: number): void => {
     const next = Math.min(maximum, Math.max(minimum, zoom + delta));
     if (next === zoom) return;

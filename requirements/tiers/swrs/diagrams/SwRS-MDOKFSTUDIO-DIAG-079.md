@@ -7,16 +7,19 @@ description: When the extension is packaged, it SHALL depend on @plantuml/core
   at one exact version without a range.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Declarative: the pinned PlantUML engine version lives in package.json
+  and the lock file (checked by the package contract test). No implementation marker
+  is possible."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TRUST-075
 ---
 
 ## The built-in engine is pinned to an exact version

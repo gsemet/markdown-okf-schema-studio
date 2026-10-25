@@ -7,16 +7,17 @@ description: When a code block's language is unknown or absent, the extension
   SHALL leave the block as plain monospace text without token spans.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CODE-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CODE-001
 ---
 
 ## Leave unknown-language code as plain text

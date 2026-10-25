@@ -8,19 +8,16 @@ description: When a writer navigates away or the preview needs to flush an open
   it, and warn if it is refused.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-008; no marker expected."
 derives_from: []
 user_need: As a writer, I do not lose what I typed in a metadata field when I
   follow a link or go back.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMEDIT-067
-- SwRS-MDOKFSTUDIO-FMEDIT-068
-- SwRS-MDOKFSTUDIO-FMEDIT-069
-- SwRS-MDOKFSTUDIO-FMEDIT-070
-- SwRS-MDOKFSTUDIO-FMEDIT-071
-- SwRS-MDOKFSTUDIO-FMEDIT-085
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMEDIT-008
 ---
 
 ## Keep typed metadata text when leaving the editor

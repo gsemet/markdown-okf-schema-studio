@@ -30,6 +30,7 @@ test("placeholders contain no character Markdown could interpret", () => {
   assert.doesNotMatch(prepared.text.replace(/ /gu, ""), /[\x00-\x7f]/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-016
 test("link syntax, escapes, wikilinks, images and headings are not checkboxes", () => {
   const cases = [
     "[x](https://example.com)",

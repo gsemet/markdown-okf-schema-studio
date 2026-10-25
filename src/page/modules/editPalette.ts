@@ -12,6 +12,22 @@ import {
 import type { CaretRect } from "./caretRect";
 import type { TextEdit } from "./textEditing";
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-017
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-169
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-036
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-039
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-069
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-078
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-083
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-109
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-115
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-148
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-150
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-238
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-242
+
 /** The text box the palette edits (a textarea; only these members are read). */
 export interface EditPaletteControl {
   value: string;

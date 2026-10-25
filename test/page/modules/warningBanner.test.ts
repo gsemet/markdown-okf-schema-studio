@@ -37,11 +37,13 @@ test("CR 050: a closed set stays closed; another set shows the banner again", ()
   assert.equal(warningBannerState("success", [DOLLAR], key).visible, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081
 test("CR 050: the banner text is short and counts the warnings", () => {
   assert.equal(warningBannerText(1), "1 MyST syntax warning from conf.py");
   assert.equal(warningBannerText(3), "3 MyST syntax warnings from conf.py");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-072
 test("CR 050: the status region marks the conf.py warnings with their code", () => {
   assert.deepEqual(formatStatusDiagnostic({ message: "m", file: "a.md", line: 2, severity: "warning", code: "myst-extension" }),
     { severity: "warning", text: "a.md:2: m", code: "myst-extension" });

@@ -70,6 +70,8 @@ test("comment chips are shown by default and can be turned off", () => {
   assert.equal(read(false), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
 test("incremental updates can be turned off and default to on", () => {
   const read = (value?: boolean): boolean => readPreviewConfiguration({
     get<T>(section: string, defaultValue: T): T {
@@ -81,6 +83,7 @@ test("incremental updates can be turned off and default to on", () => {
   assert.equal(read(false), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
 test("normalizes preview content width and reserves zero for unlimited", () => {
   const values = new Map<string, number>([
     ["maxContentWidth", 2500],
@@ -104,6 +107,7 @@ test("normalizes preview content width and reserves zero for unlimited", () => {
   }).maxContentWidth, DEFAULT_PREVIEW_CONFIGURATION.maxContentWidth);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-022
 test("normalizes sticky heading depth to one through six levels", () => {
   const readDepth = (value: number): number => readPreviewConfiguration({
     get<T>(section: string, defaultValue: T): T {

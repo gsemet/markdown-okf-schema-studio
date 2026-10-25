@@ -6,6 +6,9 @@ import type { PreviewRuntimeContext } from "../../src/core/protocol/bootContext"
 
 const BASE: PreviewRuntimeContext = { documentId: "file:///a.md", revision: 1, requestId: 1, activeSourceFile: "/a.md" };
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-097
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-156
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
 test("page settings default to following both ways, without selection marks or double-click reveal", () => {
   assert.deepEqual(pageSettings(BASE), {
     scrollPreviewWithEditor: true,
@@ -27,6 +30,7 @@ test("page settings default to following both ways, without selection marks or d
   });
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-022
 test("the sticky heading depth is rounded and clamped to 1..6, else 3", () => {
   assert.equal(stickyHeadingDepthOf(BASE), 3);
   assert.equal(stickyHeadingDepthOf({ ...BASE, stickyHeadingDepth: 0 }), 1);

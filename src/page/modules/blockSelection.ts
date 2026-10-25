@@ -47,6 +47,7 @@ export function createBlockSelection(): BlockSelection {
     end = undefined;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-127
   const extendTo = (index: number): boolean => {
     if (!valid(index)) return false;
     if (anchor === undefined) anchor = index;

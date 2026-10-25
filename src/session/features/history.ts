@@ -26,6 +26,7 @@ export class HistoryController {
 
   /** Registers the handler of Back / Next. */
   public register(router: PageMessageRouter): void {
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
     // Back / Next walk the navigation history of the panel. Only navigation, no document edit.
     router.on("previewHistoryGo", (message, preview) => this.go(preview, message.direction));
   }
@@ -65,6 +66,7 @@ export class HistoryController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-059
   /** Records the place being left and the target of a followed link. */
   public recordNavigation(preview: PreviewSession, target: NavigationEntry): void {
     const history = this.historyOf(preview);
@@ -73,6 +75,8 @@ export class HistoryController {
     this.postHistoryState(preview);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-054
   private async go(preview: PreviewSession, direction: "back" | "forward"): Promise<void> {
     const { host } = this.manager;
     if (!preview.stage) return;

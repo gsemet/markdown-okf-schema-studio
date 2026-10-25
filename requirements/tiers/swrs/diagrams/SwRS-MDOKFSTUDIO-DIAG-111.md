@@ -7,16 +7,17 @@ description: "When a PlantUML installation works, the extension SHALL draw a dia
   as a loaded picture without an error and keep its expandable source."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-012
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-105; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-105
 ---
 
 ## A working JAR draws a diagram as a loaded picture

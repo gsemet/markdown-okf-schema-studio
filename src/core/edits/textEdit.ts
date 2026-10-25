@@ -58,6 +58,7 @@ export interface SourceLines {
   end(index: number): number;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-234
 /** Splits `text` into {@link SourceLines}. */
 export function sourceLines(text: string): SourceLines {
   const starts = [0];

@@ -8,16 +8,17 @@ description: When a navigation waits for a plain save that the host refuses, the
   before navigating.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-067; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-067
 ---
 
 ## A refused plain save is saved again as a flush before a navigation
@@ -35,7 +36,7 @@ When a navigation waits for a plain save that the host refuses, the extension SH
 ### Scenario: Boundary or refusal
 
 - GIVEN a pending plain save that gets no result
-- WHEN the bounded wait of about one second elapses
+- WHEN the bounded wait of about 1.5 seconds elapses
 - THEN the navigation goes on; a plain save accepted before the flush is not saved twice
 
 ### Verification notes

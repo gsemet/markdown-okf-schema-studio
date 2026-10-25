@@ -120,6 +120,8 @@ export function installLabelRename(
     field.select();
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-038
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   // Capture phase: this runs before the click handlers of the mapped blocks, which would open the
   // block editor. Outside edit mode the icon stays a plain link target.
   document.addEventListener("click", (event) => {

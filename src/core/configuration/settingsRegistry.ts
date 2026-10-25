@@ -119,6 +119,7 @@ export const MAX_STICKY_HEADING_DEPTH = 6;
 /** Default of `preview.stickyHeadingDepth`. */
 export const DEFAULT_STICKY_HEADING_DEPTH = 3;
 
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
 /** The column width of a `preview.maxContentWidth` value: rounded, at most 2400, else the default. */
 export function normalizePreviewContentWidth(value: unknown): number {
   if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
@@ -127,6 +128,7 @@ export function normalizePreviewContentWidth(value: unknown): number {
   return Math.min(MAX_PREVIEW_CONTENT_WIDTH, Math.round(value));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-022
 /** The sticky band depth of a `preview.stickyHeadingDepth` value: rounded, clamped to 1..6, else 3. */
 export function normalizeStickyHeadingDepth(value: unknown): number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -162,6 +164,7 @@ export const PREVIEW_SETTINGS = {
     markdownDescription: "Makes the editor follow the preview: scrolling or clicking in the preview reveals the matching source line in the editor. **On**: the editor follows. **Off**: the editor is never moved by the preview, and `#markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor#` has no effect.",
     order: 31,
   }, asStored, bootFlag(true)),
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-128
   /** The page marks the block of the editor selection. */
   markEditorSelection: startupSetting<boolean>({
     type: "boolean",
@@ -186,6 +189,7 @@ export const PREVIEW_SETTINGS = {
     markdownDescription: "Sets how many heading levels stay pinned at the top of the preview while you scroll. **1**: only the top-level heading. **3** (default): up to three levels. **6**: every level.",
     order: 11,
   }, normalizeStickyHeadingDepth, normalizeStickyHeadingDepth),
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
   /** Show the gray chips of HTML comments; TODO chips always show (T15). */
   showComments: liveSetting<boolean>({
     type: "boolean",
@@ -210,6 +214,7 @@ export const PREVIEW_SETTINGS = {
     markdownDescription: "Controls how the preview refreshes while you type. **On**: the changed parts of the page are updated in place, so scroll position and open sections are kept. **Off**: the whole page reloads on every change; turn this off if the preview shows stale or broken content.",
     order: 20,
   }, asStored),
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-214
   /** Mark blocks changed since the last commit with a green bar (T16). */
   showIncomingChanges: setting<boolean>({
     type: "boolean",
@@ -221,6 +226,7 @@ export const PREVIEW_SETTINGS = {
 
 /** The `markdownOkfSchemaStudio.editing.*` settings. */
 export const EDITING_SETTINGS = {
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
   /** The palette buttons a workspace starts with, until the user picks another mode. */
   defaultPaletteMode: setting<PaletteMode>({
     type: "string",
@@ -243,6 +249,7 @@ function trimmedPath(value: unknown): string {
 
 /** The `markdownOkfSchemaStudio.frontmatter.*` settings. */
 export const FRONTMATTER_SETTINGS = {
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
   /** Show the frontmatter properties table at the top of the preview. */
   propertiesTable: setting<boolean>({
     type: "boolean",
@@ -257,6 +264,7 @@ export const FRONTMATTER_SETTINGS = {
     markdownDescription: "Controls warnings for frontmatter fields that the matching OKF schema does not declare. **On**: such fields are reported as warnings. **Off**: they are accepted silently.",
     order: 61,
   }, asStored),
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-060
   /** The bundle root of `x-okf-link` values (trimmed); empty: found from the schema folder. */
   bundleRoot: setting<string>({
     type: "string",
@@ -293,6 +301,7 @@ export const COMMENTS_SETTINGS = {
 
 /** The `markdownOkfSchemaStudio.plantuml.*` settings. */
 export const PLANTUML_SETTINGS = {
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-024
   /** Use the external `java -jar` / `plantuml` pipeline; only a real `true` starts a process. */
   useJar: setting<boolean>({
     type: "boolean",
@@ -321,6 +330,7 @@ export interface SettingCategory {
   readonly settings: SettingsTable;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-156
 /** Every section of the table, in the order of `contributes.configuration`. */
 export const SETTING_CATEGORIES: readonly SettingCategory[] = [
   { section: "preview", title: "Preview", order: 1, settings: PREVIEW_SETTINGS },

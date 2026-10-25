@@ -8,16 +8,17 @@ description: When a colour span style contains a removed declaration, the
   attribute.'.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-GFM-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-GFM-002
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-GFM-034; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-GFM-034
 ---
 
 ## Removed span styles record a diagnostic
@@ -40,5 +41,5 @@ When a colour span style contains a removed declaration, the extension SHALL rec
 
 ### Verification notes
 
-- Method: Unit test (currently none).
+- Method: Unit test "span style keeps only hex and rgb colour and background-color as data attributes" in test/security/html-policy.test.ts.
 - Criteria: Diagnostic present only when something is removed.

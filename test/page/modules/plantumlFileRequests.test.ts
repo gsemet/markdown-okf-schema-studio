@@ -41,6 +41,7 @@ function page() {
   return { ask, posted, requests, expireTimers };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-090
 test("a file request of the PlantUML bundle becomes a registered host message and the answer comes back", () => {
   const { ask, posted, requests } = page();
   const { detail, answers } = ask({ path: "styles/common.puml", from: null });
@@ -59,6 +60,7 @@ test("a file request of the PlantUML bundle becomes a registered host message an
   assert.deepEqual(answers, [{ ok: true, id: "/docs/styles/common.puml", text: "A -> B" }]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-046
 test("refusals, stale answers and timeouts reach the bundle as reasons, once", () => {
   const { ask, requests, expireTimers } = page();
   const refused = ask({ path: "../secret.puml", from: "/docs/a.puml" });

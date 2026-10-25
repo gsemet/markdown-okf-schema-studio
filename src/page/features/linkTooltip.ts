@@ -13,6 +13,7 @@ export interface LinkTooltip {
   close(): void;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 /** Shows the tooltip on hover and focus; scrolling, resizing, Escape and leaving the page close it. */
 export function installLinkTooltip(document: Document, window: Window & typeof globalThis): LinkTooltip {
   let closeLinkTooltip = (): void => {};

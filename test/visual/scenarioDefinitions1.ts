@@ -13,6 +13,7 @@ import {
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   {
+    // @tests_req StRS-MDOKFSTUDIO-CORE-001
     id: "handbook-dark-top",
     fixture: "01-handbook-overview",
     theme: "dark",
@@ -33,6 +34,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "list, a fenced Python block, and a titled warning admonition.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-028
     id: "handbook-dark-bottom",
     fixture: "01-handbook-overview",
     theme: "dark",
@@ -53,6 +55,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "on a white page would be invisible.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-THEME-002
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-025
     id: "handbook-forced-white",
     fixture: "01-handbook-overview",
     theme: "dark",
@@ -64,6 +68,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "must all use the light palette.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-001
     id: "handbook-forced-cream",
     fixture: "01-handbook-overview",
     theme: "dark",
@@ -76,6 +81,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "the page. Nothing may look dark, yellow or washed out.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-031
     id: "admonitions-forced-cream-full",
     fixture: "02-admonition-gallery",
     theme: "dark",
@@ -146,6 +152,9 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "and that admonition padding does not eat the usable column.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-001
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032
     id: "handbook-narrow-table",
     horizontalOverflow: true,
     fixture: "01-handbook-overview",
@@ -157,6 +166,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "far-right Audit column. The page itself must not widen.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-MYST-001
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-001
     id: "admonitions-dark-full",
     fixture: "02-admonition-gallery",
     theme: "dark",
@@ -179,6 +190,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "for a generic admonition carrying an author-supplied class.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-006
     id: "admonitions-dark-titled",
     fixture: "02-admonition-gallery",
     theme: "dark",
@@ -208,6 +220,9 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The same gallery at panel width, to catch wrapping inside tinted panels.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-CORE-003
+    // @tests_req StRS-MDOKFSTUDIO-MYST-005
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-022
     id: "unresolved-dark-full",
     fixture: "03-unresolved-constructs",
     theme: "dark",
@@ -229,6 +244,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "The same constructs on a light theme, including both rendered Mermaid diagrams.",
   },
   ...["dark", "light"].flatMap((theme) => [{
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-234
     id: `nested-list-typing-${theme}`,
     fixture: "16-nested-list-editing",
     theme,
@@ -253,6 +269,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "word Wrapped shows **Wrapped** in the textarea, and undo and redo restored the text.",
   },
   ...([["dark", 460], ["light", 900]] as const).map(([theme, width], index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-PALETTE-018
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-213
     id: `block-editing/v1${index + 5}-paste-rich-text-${theme}-${width}`,
     fixture: "17-wrapped-editing",
     theme,
@@ -265,6 +283,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   })),
   ...["dark", "light"].flatMap((theme) => [
     {
+      // @tests_req SwRS-MDOKFSTUDIO-MYST-013
       id: `context-tags-${theme}-wide`,
       fixture: "15-context-tags",
       theme,
@@ -288,6 +307,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     },
   ]),
   {
+    // @tests_req StRS-MDOKFSTUDIO-DIAG-001
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-005
     id: "mermaid-map-dark",
     mermaidThemeSwitch: true,
     fixture: "06-mermaid-map",
@@ -298,6 +319,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The OKF knowledge-base map in the dark preview.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-001
     id: "mermaid-map-light",
     fixture: "06-mermaid-map",
     theme: "light",
@@ -316,6 +338,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The OKF knowledge-base map without host color variables.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-DIAG-007
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-105
     id: "plantuml-success-light",
     fixture: "12-plantuml-optional",
     theme: "light",
@@ -348,6 +372,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "Intentionally unconfigured PlantUML shows the JAR-path guidance and expandable source, not a successful diagram.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-089
     id: "plantuml-executable-not-found",
     fixture: "13-plantuml-executable-not-found",
     theme: "light",
@@ -359,6 +384,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "A missing PlantUML executable shows an actionable settings message and preserves the source.",
   },
   ...(["light", "dark", "cream"] as const).map((mode) => ({
+    // @tests_req StRS-MDOKFSTUDIO-CODE-004
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-017
     id: `code-copy-button-${mode}`,
     fixture: "04-code-and-tables",
     theme: mode === "light" ? "light" : "dark",
@@ -438,6 +465,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "The caption has no generated figure number; inspect its separation from body text.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-031
     id: "chapter-figure-dark",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -456,6 +484,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "The important-block landmark and following body-colour paragraph.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-024
     id: "chapter-dark-half",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -490,6 +519,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     description: "Same chapter opening on a light theme, for side-by-side contrast review.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-003
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
     id: "chapter-max-width-dark-full",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -525,6 +556,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "content that escaped the block.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-CODE-001
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-001
     id: "syntax-dark-rust",
     fixture: "06-syntax-highlighting",
     theme: "dark",
@@ -566,6 +599,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "unregistered grammar that must degrade to plain monospace text.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-008
     id: "diff-dark-preview",
     fixture: "06-syntax-highlighting",
     theme: "dark",
@@ -608,6 +642,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "must retain its green and red line treatments.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-CODE-007
     id: "syntax-narrow-python",
     horizontalOverflow: true,
     fixture: "06-syntax-highlighting",
@@ -630,6 +665,10 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "readable link-blue text against the soft white-mode code background.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
+    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-006
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
     id: "okf-schema-table",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -641,6 +680,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "table shows name, value, and the schema description of each field.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
     id: "okf-schema-narrow",
     screenshotOf: "frontmatter-scroll-feedback",
     fixture: "08-okf-schema",
@@ -653,6 +693,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "the name and value columns remain readable without horizontal crowding.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
     id: "frontmatter-links-loading",
     fixture: "14-frontmatter-links",
     theme: "dark",
@@ -664,6 +705,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "keeps its text and shows a small spinner immediately after it.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-014
     id: "frontmatter-links-loaded",
     fixture: "14-frontmatter-links",
     theme: "dark",
@@ -697,6 +739,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Whole-page edit mode preserves source layout while a focused paragraph editor shows its caret.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-029
     id: "edit-paragraph-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -756,6 +799,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Edit mode on, light theme, a paragraph in the middle of the chapter open in its editor: the edition palette (heading, bold, italic, strikethrough, link, code, quote, rule, table, emoji, TODO) sits on top of the edit box, outside its border and attached to it, and the clicked text keeps its screen position. The steps `bar`, `menu`, `grid`, `emoji`, `alert`, `colour` and `colour-code` keep the palette after Bold and undo, the heading list, the table grid, the emoji picker, the alert type list, the colour picker and the colour-code swatch.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
     id: "edit-palette-tall-light",
     fixture: "05-long-chapter",
     theme: "light",
@@ -801,6 +845,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "460 px preview, light theme, a very tall paragraph editor: the palette sits on top of the box with the box top in view, and with the box top scrolled out it sticks to the top of the viewport inside the pane (wrapping onto several rows), keeps the focus in the box and leaves with the box end. The `top` step shows the palette on top of the box, the `end` step the bottom of the box, the final frame the stuck palette mid-box.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-TABLE-008
     id: "palette-slash/v19-table-toolbar-sticky-tall-table-light-900",
     fixture: "46-tall-table",
     theme: "light",
@@ -992,6 +1037,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Edit mode on, light theme. A hovered list is outlined with a dashed line (the `hover` step, which also shows the round + insertion button in the left gutter), then a paragraph editor opens with its frame and Done/Cancel row.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-087
     id: "edit-insert-after-final-figure",
     fixture: "18-figure-at-end",
     theme: "light",
@@ -1021,6 +1067,8 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "the image; the insertion message carried the image's line (5).",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-BLOCK-003
+    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-004
     id: "edit-first-block-top-wide",
     fixture: "17-wrapped-editing",
     theme: "light",
@@ -1060,6 +1108,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "top edge of the preview, not stuck against it.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-BLOCK-011
     id: "edit-empty-document-enter-opens-editor",
     fixture: "20-empty-document",
     theme: "light",

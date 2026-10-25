@@ -5,6 +5,7 @@
 
 import type { MystNode } from "./mystNode";
 
+// @implements_req SwRS-MDOKFSTUDIO-GFM-008
 /** Parser options shared by every `mystParse` call so all parse sites agree. */
 export const MYST_PARSE_OPTIONS = { extensions: { strikethrough: true } };
 

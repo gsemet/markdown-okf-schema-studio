@@ -7,20 +7,16 @@ description: When the preview content changes, the Studio SHALL keep unchanged
   Mermaid diagrams drawn and draw only new or changed ones.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-001; no marker expected."
 derives_from: []
 user_need: As a writer, I type in the document and the diagrams I did not touch
   do not flicker or disappear.
-derived_by:
-- SwRS-MDOKFSTUDIO-DIAG-009
-- SwRS-MDOKFSTUDIO-DIAG-010
-- SwRS-MDOKFSTUDIO-DIAG-011
-- SwRS-MDOKFSTUDIO-DIAG-012
-- SwRS-MDOKFSTUDIO-DIAG-013
-- SwRS-MDOKFSTUDIO-DIAG-014
-- SwRS-MDOKFSTUDIO-DIAG-116
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-DIAG-001
 ---
 
 ## Mermaid diagrams stay in place while typing

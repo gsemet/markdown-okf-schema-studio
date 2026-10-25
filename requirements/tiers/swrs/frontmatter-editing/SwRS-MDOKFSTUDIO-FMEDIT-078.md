@@ -7,16 +7,17 @@ description: When a writer presses Cmd or Ctrl+Enter in a list item input, the
   extension SHALL save the list.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-003
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-010; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-010
 ---
 
 ## Cmd or Ctrl+Enter in a list item saves the list

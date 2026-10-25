@@ -55,6 +55,8 @@ export {
   type PreviewStatusDiagnosticItem,
 } from "../core/preview/previewStatus";
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-059
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-012
 export function buildStatusWebviewHtml(
   status: PreviewStatus,
   cspSource: string,
@@ -67,6 +69,7 @@ export function buildStatusWebviewHtml(
   return injectAccessibilityStyles(html, PREVIEW_ACCESSIBILITY_CSS, nonce);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-007
 /**
  * The runtime as a file (PERF-11): the boot context of this render in an inert JSON element, then
  * the bundled runtime script (src/page/main.ts), which reads it. Only the JSON changes from one
@@ -144,6 +147,10 @@ function injectPropertiesTable(html: string, markup: string): string {
   return html;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-022
 export function buildPreviewWebviewHtml(
   sphinxHtml: string,
   outputDirectory: string,
@@ -173,6 +180,7 @@ export function buildPreviewWebviewHtml(
       uri: `${assets.resourceUri(resourcePath)}${resourceReferenceSuffix(request)}`,
     };
   };
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
   const resolveNavigation = (
     request: string,
     _baseDirectory: string,

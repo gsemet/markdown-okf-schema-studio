@@ -102,6 +102,7 @@ export function installWarningBanner(
     return element;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-081
   const build = (state: WarningBannerState, texts: readonly string[]): any => {
     const element = document.createElement("div");
     element.setAttribute("data-sphinx-preview-warning-banner", "");

@@ -9,16 +9,17 @@ description: When a document holds CommonMark content, the extension SHALL
   matching HTML elements.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-001
 ---
 
 ## Render the CommonMark blocks
@@ -41,5 +42,5 @@ When a document holds CommonMark content, the extension SHALL render headings h1
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "the in-process renderer preserves the active-file MyST feature contract" in test/core/render/mystFeatures.test.ts
 - Criteria: The rendered HTML holds one matching element per CommonMark construct.

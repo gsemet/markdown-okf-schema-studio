@@ -37,6 +37,7 @@ export function newId(prefix: "t_" | "c_"): string {
   return formatId(prefix, randomBytes(4));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-054
 export function createCommentStore(io: CommentFileIo): {
   /** `renameDocument` stores `documentName` in the file even when the file already names another. */
   update(
@@ -48,6 +49,7 @@ export function createCommentStore(io: CommentFileIo): {
 } {
   const queues = new Map<string, Promise<unknown>>();
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-004
   const step = async (
     path: string,
     documentName: string,

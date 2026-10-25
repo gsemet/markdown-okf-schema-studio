@@ -13,6 +13,7 @@ function textContent(node: HtmlNode): string {
   return "childNodes" in node ? node.childNodes.map(textContent).join("") : "";
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-024
 export function renderMathHtml(html: string, stylesheetUri: string, nonce: string): string {
   if (!/class="[^"]*\b(?:math-inline|math-display|math)\b/u.test(html)) return html;
   const document = parse(html);

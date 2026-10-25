@@ -8,16 +8,17 @@ description: When the white or cream theme is forced, the extension SHALL give
   code blocks a soft background and readable text.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CODE-007; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CODE-007
 ---
 
 ## Keep code backgrounds soft and readable in the forced white and cream themes

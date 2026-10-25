@@ -37,10 +37,13 @@ export function bindEditModeCaptureClicks(rt: PageRuntime): void {
   }, true);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-001
 /** The document input of a page. */
 export function installPageInput(rt: PageRuntime): PageInput {
   const { document, window, context, host, state, settings } = rt;
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-032
   function refreshPreview(): void {
     rt.parts.linkTooltip.close();
     const openEdit = state.activeBlockEdit || state.activeFrontmatterEdit;
@@ -64,6 +67,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-108
   function postReveal(target: Element, activation: string): void {
     const line = target.getAttribute("data-sphinx-source-line");
     const sourceFile = target.getAttribute("data-sphinx-source-file");
@@ -80,6 +84,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
   function applyDescriptionVisibility(): void {
     const collapsed = state.descriptionsCollapsed;
     document.documentElement?.setAttribute("data-okf-descriptions-collapsed", String(collapsed));
@@ -101,6 +106,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
   return {
     refreshPreview,
     applyDescriptionVisibility,
+    // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
     bindClicks() {
       // Registered first so a checkbox click never opens a block editor or reveals the source.
       rt.parts.checkboxes.bindClicks();
@@ -143,6 +149,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
           ...snapshot,
         });
       });
+      // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-001
       document.addEventListener("click", (event) => {
         if (event.target instanceof Element
           && event.target.closest('a[data-sphinx-preview-navigation^="okf-link:"]')) return;
@@ -165,6 +172,8 @@ export function installPageInput(rt: PageRuntime): PageInput {
           rt.frontmatter.openFrontmatterEditor(row);
         }
       });
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+      // @implements_req SwRS-MDOKFSTUDIO-TABLE-018
       document.addEventListener("click", (event) => {
         const extendsSelection = state.editMode && event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey;
         if (state.editMode && !extendsSelection) rt.selection.clearBlockSelection();
@@ -201,6 +210,7 @@ export function installPageInput(rt: PageRuntime): PageInput {
         postReveal(target, "click");
       });
       rt.editMode.bindHover();
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-097
       document.addEventListener("dblclick", (event) => {
         if (state.editMode || !settings.doubleClickToSwitchToEditor) return;
         const target = event.target instanceof Element

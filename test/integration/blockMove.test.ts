@@ -33,6 +33,13 @@ async function openPreview(document: vscode.TextDocument): Promise<NonNullable<R
   return preview;
 }
 
+// @tests_req StRS-MDOKFSTUDIO-BLOCK-025
+// @tests_req StRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-156
 /** Moving a block from the insert bar: one swap, one undo, and every unsafe request refused. */
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
@@ -105,6 +112,7 @@ export async function run(): Promise<void> {
   await runBlockClipboardUndo();
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
 /** Moving a selection of blocks (T41): the whole span moves, and one undo restores the order. */
 export async function runUndo(): Promise<void> {
   const extensionRoot = path.resolve(__dirname, "../../..");
@@ -139,6 +147,7 @@ export async function runUndo(): Promise<void> {
   }
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 /** An untrusted (read-only) preview never moves a block. */
 export async function runUntrusted(preview: { documentUri: string; documentVersion?: number; requestId?: number }, document: vscode.TextDocument): Promise<void> {
   const before = document.getText();

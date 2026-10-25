@@ -50,6 +50,7 @@ test("edit mode opens mapped figures and admonition titles at their source range
   assert.equal(admonitionRequest?.endLine, 34);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024
 test("frontmatter name cells open a schema-suggesting key editor and save on blur", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.editModeButton.dispatch("click");
@@ -119,6 +120,7 @@ test("Escape cancels an unsaved frontmatter key edit", () => {
   assert.equal(harness.refreshButton.disabled, false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
 test("edit mode exposes schema enum controls and saves the selected value", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   assert.equal(harness.frontmatterNameCell.getAttribute("tabindex"), null);
@@ -250,6 +252,7 @@ test("clicking a boolean name cell still opens the key editor and reading mode d
   assert.equal(harness.messages.some((message) => message.type === "previewFrontmatterSave"), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
 test("frontmatter list editor supports add, reorder, remove, and direct array saves", () => {
   const harness = createRuntimeHarness();
   harness.frontmatterRow.setAttribute("data-okf-type", "list");
@@ -589,6 +592,7 @@ test("frontmatter validation errors show an explicit error state", () => {
   assert.equal(status.textContent, "Schema validation failed: must NOT have fewer than 1 characters");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
 test("frontmatter field actions render inside the edited row", () => {
   for (const fieldCell of ["name", "value"] as const) {
     const harness = createRuntimeHarness({ mapFrontmatter: true, viewportWidth: 460, viewportHeight: 600 });
@@ -621,6 +625,7 @@ test("frontmatter field actions render inside the edited row", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
 test("frontmatter blur toward the field actions does not save", () => {
   type Harness = ReturnType<typeof createRuntimeHarness>;
   const saves = (harness: Harness) =>
@@ -703,6 +708,7 @@ test("frontmatter text values open a one-row textarea", () => {
   assert.equal(textarea.rows, 1);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
 test("frontmatter field toolbar adds and removes fields", () => {
   const addHarness = createRuntimeHarness({ mapFrontmatter: true });
   addHarness.editModeButton.dispatch("click");
@@ -853,6 +859,7 @@ test("text frontmatter values use a wrapping textarea that grows with its conten
   assert.equal(textarea.style.height, "4000px");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-004
 test("Enter saves a one-line frontmatter text field and Shift+Enter does not", () => {
   const { harness, textarea } = openTextFieldEditor("Alpha");
   assert.equal(textarea.getAttribute("aria-keyshortcuts"), "Enter Shift+Enter");
@@ -962,6 +969,7 @@ test("Escape cancels an unsaved frontmatter value edit", () => {
   assert.equal(harness.refreshButton.disabled, false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001
 test("frontmatter cells open their field editor with the keyboard in edit mode", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   harness.editModeButton.dispatch("click");
@@ -1001,6 +1009,7 @@ test("T41: a new custom key opens a one-line text editor, not the YAML editor", 
   assert.equal(textarea.value, "");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
 test("T41: Enter saves a new custom key as plain text and Shift+Enter adds a line", () => {
   const { harness, textarea } = newCustomKeyHarness();
   textarea.value = "Ann";

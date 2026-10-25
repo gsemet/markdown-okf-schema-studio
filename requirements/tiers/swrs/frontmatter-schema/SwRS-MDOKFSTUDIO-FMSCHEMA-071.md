@@ -8,16 +8,17 @@ description: When a writer hovers or focuses a link value that is not pending,
   when there is no room, never under the toolbar and at most 480 px wide.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMSCHEMA-017
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMSCHEMA-014
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-067; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-067
 ---
 
 ## A link tooltip appears on hover and focus

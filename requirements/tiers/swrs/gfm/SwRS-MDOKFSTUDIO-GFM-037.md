@@ -7,16 +7,17 @@ description: When the lines after an alert marker stop being quoted, the
   extension SHALL end the admonition at the first unquoted line.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-002
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-GFM-009; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-GFM-009
 ---
 
 ## Alerts end at the first unquoted line

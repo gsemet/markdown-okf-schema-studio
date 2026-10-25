@@ -70,6 +70,7 @@ export function createConfLocator(options: ConfLocatorOptions = {}): ConfLocator
     return found.length === 1 ? found[0] : null;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-066
   function findConf(directory: string, root: string): string | null {
     const cached = directories.get(directory);
     if (cached && now() - cached.checkedAt < CONF_RECHECK_MS) {

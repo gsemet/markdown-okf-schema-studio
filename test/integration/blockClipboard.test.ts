@@ -79,6 +79,13 @@ async function withFixture(
   }
 }
 
+// @tests_req StRS-MDOKFSTUDIO-BLOCK-025
+// @tests_req StRS-MDOKFSTUDIO-BLOCK-016
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-166
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-174
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
 /** Copy, cut and paste of blocks as Markdown, and every unsafe request refused. */
 export async function run(): Promise<void> {
   await withFixture("block-clipboard", async (document, send) => {
@@ -130,6 +137,7 @@ export async function run(): Promise<void> {
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
 /** One cut is one undo step, one paste is one undo step. Needs a real keyboard-free undo command. */
 export async function runUndo(): Promise<void> {
   await withFixture("block-clipboard-undo", async (document, send) => {
@@ -150,6 +158,7 @@ export async function runUndo(): Promise<void> {
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 /** An untrusted (read-only) preview neither edits the document nor touches the clipboard. */
 export async function runUntrusted(
   preview: { documentUri: string; documentVersion?: number; requestId?: number },

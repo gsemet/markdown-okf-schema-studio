@@ -9,15 +9,16 @@ description: When a render fails, the Studio SHALL keep the last good page
   page until the newer render is ready.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-CORE-003; no marker expected."
 derives_from: []
 user_need: Writers need the preview to stay trustworthy while they type and when
   something goes wrong.
-derived_by:
-- SwRS-MDOKFSTUDIO-CORE-025
-- SwRS-MDOKFSTUDIO-CORE-026
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-CORE-003
 ---
 
 ## Keep the preview usable when a render fails

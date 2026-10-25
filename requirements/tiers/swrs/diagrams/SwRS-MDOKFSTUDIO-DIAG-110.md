@@ -7,16 +7,17 @@ description: When a block editor is open, the extension SHALL hold the JAR
   results and apply them after the edit ends instead of closing the editor.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-012
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-105; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-105
 ---
 
 ## JAR results wait for an open block edit

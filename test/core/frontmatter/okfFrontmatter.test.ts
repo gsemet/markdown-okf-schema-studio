@@ -25,6 +25,22 @@ import {
 import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
 import { inspectFrontmatterLinks } from "../../../src/core/frontmatter/fileLinks";
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-004
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-043
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-019
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-060
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+
 interface SyntheticFs {
   root: string;
 }

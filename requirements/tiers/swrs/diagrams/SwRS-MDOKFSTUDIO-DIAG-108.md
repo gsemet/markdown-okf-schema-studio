@@ -6,26 +6,27 @@ title: "JAR results reach a ready page in place"
 description: "When incremental updates are on, the page is ready for the render stage,
   the status lines fit a patch and a content patch can be planned, the extension SHALL
   send the JAR results as a content patch without reloading the page, and otherwise
-  SHALL set the full page HTML."
+  sets the full page HTML."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-012
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-105; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-105
 ---
 
 ## JAR results reach a ready page in place
 
 ### Normative behavior
 
-When incremental updates are on, the page is ready for the render stage, the status lines fit a patch and a content patch can be planned, the extension SHALL send the JAR results as a content patch without reloading the page, and otherwise SHALL set the full page HTML.
+When incremental updates are on, the page is ready for the render stage, the status lines fit a patch and a content patch can be planned, the extension SHALL send the JAR results as a content patch without reloading the page, and otherwise sets the full page HTML.
 
 ### Scenario: Ready page
 
@@ -41,7 +42,7 @@ When incremental updates are on, the page is ready for the render stage, the sta
 
 ### Known issues
 
-- Known issue: The apply method has no session test; when the injected page equals the current one and there are no warnings, nothing is done.
+- Known issue: When the injected page equals the current one and there are no warnings, nothing is done.
 
 ### Verification notes
 

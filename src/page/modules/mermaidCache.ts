@@ -23,6 +23,7 @@ export function diagramKey(themeVariables: Readonly<Record<string, string>>, sou
   return JSON.stringify([themeVariables, source]);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-009
 export function createMermaidCache(limit = 64): MermaidCache {
   const images = new Map<string, string>();
   return {

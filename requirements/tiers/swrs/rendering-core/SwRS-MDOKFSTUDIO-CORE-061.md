@@ -9,16 +9,17 @@ description: When a document holds `{versionadded}`, `{versionchanged}` or
   Markdown body parsed.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-001
 ---
 
 ## Render version admonitions
@@ -41,5 +42,5 @@ When a document holds `{versionadded}`, `{versionchanged}` or `{deprecated}`, th
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "Sphinx version admonitions render generated titles and Markdown bodies" in test/core/render/mystFeatures.test.ts
 - Criteria: Title text and parsed body match.

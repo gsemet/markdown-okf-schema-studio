@@ -22,6 +22,7 @@ export interface PreviewStatusDiagnostic {
   code?: string;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-049
 export const PREVIEW_STATUS_LABELS: Record<PreviewStatus, string> = {
   pending: "Preview pending",
   success: "Preview ready",
@@ -47,6 +48,8 @@ export interface PreviewStatusDiagnosticItem {
   code?: string;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-025
+// @implements_req SwRS-MDOKFSTUDIO-MYST-072
 /**
  * The text of one diagnostic as the status region shows it. The page markup and the in-place
  * content patch (T34) both use it, so a patched page shows the same lines as a loaded one.
@@ -62,6 +65,7 @@ export function formatStatusDiagnostic(diagnostic: PreviewStatusDiagnostic): Pre
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-059
 export function statusMarkup(
   status: PreviewStatus,
   message?: string,

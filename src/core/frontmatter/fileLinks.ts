@@ -171,6 +171,7 @@ function valueMatchesSchema(
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
 function iterAnnotations(
   schema: unknown,
   value: unknown,
@@ -346,6 +347,7 @@ function parseAnnotation(annotation: unknown, field: string): ParsedAnnotation |
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 function linkedFileDetails(
   targetPath: string,
   annotation: ParsedAnnotation,
@@ -431,6 +433,7 @@ function gitRoot(filePath: string): string | undefined {
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-060
 function configuredRoot(
   configured: string | undefined,
   filePath: string,
@@ -491,6 +494,7 @@ function rejectAbsolute(target: string): boolean {
   return path.isAbsolute(target) || /^[A-Za-z]:[\\/]/u.test(target) || target.startsWith("\\\\");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
 function resolveExact(
   target: string,
   resolution: FileLinkResolution,
@@ -546,6 +550,7 @@ function resolveExact(
   }
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
 function resolveFilenameStem(
   target: string,
   roots: readonly string[],
@@ -616,6 +621,7 @@ function workspaceRelativePath(
   return (relative || path.basename(filePath)).split(path.sep).join("/");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
 export function inspectFrontmatterLinks(
   frontmatter: Record<string, unknown>,
   schema: Record<string, unknown>,

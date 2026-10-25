@@ -8,16 +8,17 @@ description: When a `{figure}` or `{image}` has `:width:`, the extension SHALL
   other value.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-031; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-031
 ---
 
 ## Figure width values are validated
@@ -40,5 +41,5 @@ When a `{figure}` or `{image}` has `:width:`, the extension SHALL keep a number 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a figure keeps its width and alignment as data attributes and classes" in test/core/render/mystPaletteRendering.test.ts; Unit test "data-okf-width keeps a plain length and nothing else" in test/security/html-policy.test.ts
 - Criteria: A plain number means pixels.

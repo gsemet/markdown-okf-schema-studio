@@ -25,6 +25,7 @@ const cases: Array<[string, string, string, number]> = [
 ];
 
 for (const [name, source, ext, line] of cases) {
+  // @tests_req SwRS-MDOKFSTUDIO-MYST-072
   test(`detects ${name}`, async () => {
     const found = await detect(source);
     assert.deepEqual(found.filter((entry) => entry.ext === ext), [{ ext, line }]);

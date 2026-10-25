@@ -71,6 +71,7 @@ export class RenderingController {
     router.on("previewReady", (value, preview) => this.onReady(preview, value));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
   /** The runtime context of a page that shows `stage` (read by the page at startup). */
   public runtimeContext(
     stage: RenderStage,
@@ -131,6 +132,7 @@ export class RenderingController {
     preview.overlay.visible = false;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-049
   /**
    * The only place that assigns a session's page document; a new document must report ready again
    * and the overlay of the replaced document is gone with it.
@@ -212,6 +214,7 @@ export class RenderingController {
     this.assignWebviewHtml(preview, preview.webview.html);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-022
   /**
    * A patch keeps the nonce of the loaded document, and the record of the page carries it. A new
    * document must not reuse a nonce that an earlier document already had: before the record is loaded
@@ -254,6 +257,7 @@ export class RenderingController {
     );
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-007
   /** Shows the pending status; `clearContent` replaces the page with a status document. */
   public showPending(
     preview: PreviewSession,
@@ -277,6 +281,7 @@ export class RenderingController {
     this.setStatus(preview, "pending", message);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-071
   /**
    * True when the loaded page shows `stage`, or will once it has handled the messages already sent
    * (a chain of content patches whose acknowledgements are still on their way).
@@ -292,6 +297,7 @@ export class RenderingController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-094
   /**
    * Sends the new content of the page to the loaded webview (T34). The message is addressed to the
    * identifiers the page currently has; `next` carries the ones it moves to. The caller has already
@@ -359,6 +365,9 @@ export class RenderingController {
     }, CONTENT_PATCH_ACK_TIMEOUT_MS);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-069
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-011
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
   /** Shows a finished render: a content patch when the loaded page allows it, else a new document. */
   public updatePreview(preview: PreviewSession, result: RenderResult): void {
     const { manager } = this;
@@ -471,6 +480,7 @@ export class RenderingController {
     preview.status = status;
     preview.shownStatus = undefined;
     preview.hadFailure = false;
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-024
     preview.panel.title = manager.previewTitle(preview, result.stage.activeDocumentPath);
     if (contentPatch && previousStage) {
       // The page removes its pending overlay itself when it applies the patch.
@@ -604,6 +614,7 @@ export class RenderingController {
     this.showRenderFailure(preview, state.error);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-CORE-025
   private showRenderFailure(preview: PreviewSession, error: unknown): void {
     if (preview.disposed || !this.manager.has(preview)) {
       return;
@@ -627,6 +638,7 @@ export class RenderingController {
     );
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-062
   /** Replaces the page with the missing-source status and stops rendering. */
   public setMissingSource(
     preview: PreviewSession,

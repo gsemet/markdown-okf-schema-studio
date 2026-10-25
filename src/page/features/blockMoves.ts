@@ -38,6 +38,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
   // (key repeat) would be stale; it is dropped until the result and the render are in.
   let blockMoveInFlight: BlockMoveFlight | undefined;
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   function postBlockMove(block: HTMLElement, neighbour: HTMLElement, direction: "up" | "down",
     span?: { line: number; endLine: number }): boolean {
     if (!state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return false;
@@ -140,6 +141,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-156
   function requestSelectionMove(direction: "up" | "down"): boolean {
     if (blockMoveInFlight) return false;
     const blocks = rt.selection.syncSelectionModel();
@@ -212,6 +214,8 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
       ? direction : undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-127
   function addMoveButtons(point: HTMLElement, move: InsertMove): void {
     rt.insertPoints.moves.set(point, move);
     MOVE_BUTTON_SPECS.forEach((spec) => {
@@ -288,6 +292,7 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
       window.clearTimeout(moveStatusTimer);
       moveStatusTimer = window.setTimeout(() => status.remove(), 6000);
     },
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-130
     bindKeys() {
       // Alt+Up/Down on a focused block or insertion bar moves the block like its arrow buttons.
       document.addEventListener("keydown", (event) => {

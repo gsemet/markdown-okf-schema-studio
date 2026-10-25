@@ -34,6 +34,7 @@ function defaultFrontmatterFieldValue(field: AvailableField): unknown {
   return "";
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-028
 /** Builds the field menu of `edit` and appends it to its editor. */
 export function createFrontmatterMenu(rt: PageRuntime, edit: FrontmatterEdit, anchor: Element,
   properties: Element | null | undefined): void {
@@ -218,6 +219,7 @@ export function createFrontmatterMenu(rt: PageRuntime, edit: FrontmatterEdit, an
       fieldControl.focus?.({ preventScroll: true });
     }
   });
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-029
   removeButton.addEventListener("click", () => {
     postFrontmatterAction(edit, "remove", edit.fieldName, undefined);
   });

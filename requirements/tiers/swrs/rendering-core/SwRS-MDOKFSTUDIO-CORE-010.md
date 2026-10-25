@@ -2,10 +2,12 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-CORE-010
 uuid: ae60e227-e117-4230-8302-2d63c436cacc
-title: Render wikilinks as links
+title: Wikilinks render as links where they are text
 description: When a document holds `[[Note]]`, `[[Folder/Note#Heading|Label]]`
-  or `[[#Section]]`, the extension SHALL render a link, with a `wiki:` URL for a
-  note target and an in-page slug anchor for a heading-only target.
+  or `[[#Section]]` in plain text, the extension SHALL render a link, with a
+  `wiki:` URL for a note target and an in-page slug anchor for a heading-only
+  target, and leave `[[...]]` unconverted where it appears in code, an existing
+  link, an image, math, raw HTML or an `![[...]]` embed.
 project: markdown-okf-schema-studio
 scope: rendering-core
 lifecycle: draft
@@ -13,32 +15,43 @@ origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
+depends_on: []
 annotation_exemption: false
 exemption_reason:
 derived_by: []
-implemented_in_files: []
-tested_in_files: []
+implemented_in_files:
+- src/core/render/mystInlineTransforms.ts
+tested_in_files:
+- test/core/render/mystFeatures.test.ts
 ---
 
-## Render wikilinks as links
+## Wikilinks render as links where they are text
 
 ### Normative behavior
 
-When a document holds `[[Note]]`, `[[Folder/Note#Heading|Label]]` or `[[#Section]]`, the extension SHALL render a link, with a `wiki:` URL for a note target and an in-page slug anchor for a heading-only target.
+When a document holds `[[Note]]`, `[[Folder/Note#Heading|Label]]` or `[[#Section]]` in plain text, the extension SHALL render a link, with a `wiki:` URL for a note target and an in-page slug anchor for a heading-only target, and leave `[[...]]` unconverted where it appears in code, an existing link, an image, math, raw HTML or an `![[...]]` embed.
 
-### Scenario: Nominal render wikilinks as links
+### Scenario (nominal): Render wikilinks as links
 
 - GIVEN a paragraph with `[[Note]]` and `[[#Section]]`
 - WHEN it is rendered
 - THEN the first is a link with a `wiki:` URL and the second an in-page `#section` anchor
 
-### Scenario: Boundary or refusal of render wikilinks as links
+### Scenario (boundary): A label is the link text
 
-- GIVEN a wikilink with a `|Label`
+- GIVEN a wikilink with a `|Label`, as in `[[Folder/Note#Heading|Label]]`
 - WHEN it is rendered
 - THEN the link text is the label
 
+### Scenario (refusal): Leave wikilink syntax untouched where it is not text
+
+| Input | Outcome |
+| --- | --- |
+| `[[Note]]` inside inline code | the text stays literal code |
+| `[[Note]]` inside an existing link, an image, math or raw HTML | it is not converted to a wikilink |
+| an `![[Note]]` embed | it is not converted to a link |
+
 ### Verification notes
 
-- Method: test
-- Criteria: Each wikilink form yields the expected link target and text.
+- Method: Unit test "wikilinks render as lazy note targets without changing code or existing links" in test/core/render/mystFeatures.test.ts (nominal, boundary label, refusal inline code and embed; the existing link, image, math and raw HTML cases are named by the test title only)
+- Criteria: Each wikilink form yields the expected link target and text. Wikilinks are converted only in plain text.

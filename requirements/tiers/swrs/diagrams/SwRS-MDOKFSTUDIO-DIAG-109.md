@@ -7,16 +7,17 @@ description: When JAR results belong to a render stage that is no longer the
   current one, the extension SHALL drop them.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-012
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-105; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-105
 ---
 
 ## Results of an older render stage are dropped
@@ -37,11 +38,7 @@ When JAR results belong to a render stage that is no longer the current one, the
 - WHEN its results arrive
 - THEN they are applied
 
-### Known issues
-
-- Known issue: Untested.
-
 ### Verification notes
 
-- Method: No session test.
+- Method: Unit test `JAR results of a render that is no longer the current one are dropped` in `test/session/diagReq.plantuml.requirements.test.ts`.
 - Criteria: Only the current stage is updated.

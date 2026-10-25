@@ -8,16 +8,17 @@ description: "When a writer saves a field, the extension SHALL send the properti
   screen position after the re-render."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-228; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-BLOCK-228
 ---
 
 ## The properties section keeps its place across the save
@@ -40,5 +41,5 @@ When a writer saves a field, the extension SHALL send the properties section's s
 
 ### Verification notes
 
-- Method: Inspection of frontmatterPinFields (src/page/features/scrollCore.ts); no frontmatter-specific test.
+- Method: Unit test a field save carries the source line and viewport top of the properties section in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: Add and remove actions carry the same fields; a section with an empty rectangle sends no pin fields.

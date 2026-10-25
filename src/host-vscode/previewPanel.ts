@@ -41,6 +41,7 @@ export function createVscodePreviewPanel(
     },
     assets,
     bundleRoot,
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-007
     setResourceRoots(roots) {
       panel.webview.options = {
         enableScripts: true,

@@ -8,16 +8,17 @@ description: When a MyST code-block has a caption, the extension SHALL keep the
   joined to the block's top with the same width and border and a square joint.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-CODE-003
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-CODE-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CODE-014; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CODE-014
 ---
 
 ## Join a code caption to its block as a title bar

@@ -12,6 +12,7 @@ function isLowSurrogate(code: number): boolean {
   return code >= 0xdc00 && code <= 0xdfff;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-042
 /**
  * Smallest single replacement turning `before` into `after`. Offsets are in `before`.
  * The range never splits a CRLF pair or a UTF-16 surrogate pair.

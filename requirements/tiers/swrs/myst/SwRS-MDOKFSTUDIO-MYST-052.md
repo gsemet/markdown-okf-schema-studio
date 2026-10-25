@@ -9,16 +9,18 @@ description: When the MyST gallery document renders in dark and light themes at
   and typeset inline math with no horizontal overflow.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-003
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "The result comes from the whole renderer and stylesheet together,
+  with no single implementation point. No implementation marker is possible."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-006
 ---
 
 ## The MyST gallery renders without sideways scroll
@@ -41,5 +43,5 @@ When the MyST gallery document renders in dark and light themes at 900 px, the e
 
 ### Verification notes
 
-- Method: test
+- Method: Visual scenario `myst/v${20 + index}-myst-gallery-full-${theme}-900` in test/visual/scenarioDefinitions2.ts
 - Criteria: One visual family, two themes.

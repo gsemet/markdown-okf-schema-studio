@@ -4,6 +4,7 @@
  * not import `vscode`.
  */
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
 /** Longest wait for the page to answer a flush request, and for the host to apply its saves. */
 export const FLUSH_WAIT_MS = 1500;
 

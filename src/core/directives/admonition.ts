@@ -8,6 +8,7 @@ import { CALLOUT_ICONS } from "../preview/calloutIcons";
 import { findNode, type MystNode, takeAdmonitionTitle } from "../render/mystNode";
 import type { MystDirectiveDescriptor } from "./directive";
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-001
 /** The default title of each admonition kind (also the kinds of `callout-*` divs). */
 export const ADMONITION_TITLES: Record<string, string> = {
   attention: "Attention",
@@ -22,6 +23,7 @@ export const ADMONITION_TITLES: Record<string, string> = {
   warning: "Warning",
 };
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-006
 /**
  * The admonition directive gives its position to the admonition the parser built beneath it, and
  * an admonition without arguments or title takes its title from a leading heading or bold line.

@@ -7,16 +7,17 @@ description: When a toctree holds more than 500 entries, the extension SHALL
   show at most 500.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-012
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-057; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-057
 ---
 
 ## Toctree shows at most 500 entries
@@ -39,5 +40,5 @@ When a toctree holds more than 500 entries, the extension SHALL show at most 500
 
 ### Verification notes
 
-- Method: test
-- Criteria: Untested today.
+- Method: Unit test "a toctree shows at most 500 entries and all of them when there are 500" in test/core/render/renderReq.myst.requirements.test.ts
+- Criteria: At most 500 entries are shown; 500 are all shown.

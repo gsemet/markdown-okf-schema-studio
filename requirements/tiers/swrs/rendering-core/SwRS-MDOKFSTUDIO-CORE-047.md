@@ -4,27 +4,28 @@ id: SwRS-MDOKFSTUDIO-CORE-047
 uuid: fcc7bbf2-04ac-4bd3-b885-ca1c17341fe3
 title: Show a citation as an unresolved placeholder
 description: When a document holds a `{cite}` role, the extension SHALL render
-  an unresolved citation placeholder and SHALL NOT append a bibliography.
+  an unresolved citation placeholder without appending a bibliography.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-003
 - StRS-MDOKFSTUDIO-MYST-005
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-022; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-022
 ---
 
 ## Show a citation as an unresolved placeholder
 
 ### Normative behavior
 
-When a document holds a `{cite}` role, the extension SHALL render an unresolved citation placeholder and SHALL NOT append a bibliography.
+When a document holds a `{cite}` role, the extension SHALL render an unresolved citation placeholder without appending a bibliography.
 
 ### Scenario: Nominal show a citation as an unresolved placeholder
 
@@ -40,5 +41,5 @@ When a document holds a `{cite}` role, the extension SHALL render an unresolved 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "T30: a {cite} inserted by the edition palette renders the citation placeholder" in test/core/render/mystPaletteRendering.test.ts; Unit test "project-scoped roles and directives degrade to labelled placeholders" in test/core/render/mystFeatures.test.ts
 - Criteria: A citation yields a placeholder and no added section.

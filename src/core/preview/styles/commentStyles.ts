@@ -1,5 +1,9 @@
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-008
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-028
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-143
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
 /**
  * Comments: comment and TODO chips, inline threads, incoming-change marks, review comment popovers,
  * the orphaned comments box and the toolbar and setting toggles that hide them.

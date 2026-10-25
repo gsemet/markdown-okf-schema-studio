@@ -106,6 +106,8 @@ export function extractMainContent(html: string): MainContent | undefined {
   return analyze(html).content;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-071
+// @implements_req SwRS-MDOKFSTUDIO-THEME-043
 /**
  * The page without its content, its status region and the identifiers embedded in the runtime
  * script and in the nonces. Equal keys mean that the loaded page already has the right shell.
@@ -122,6 +124,7 @@ function contentIsPatchable(inner: string): boolean {
     && !/<script/iu.test(inner);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-069
 /**
  * The new content when the loaded page (`previousHtml`) can be updated in place to `nextHtml`:
  * the shells are equal and the content carries no nonce and no script. Undefined otherwise.
@@ -164,6 +167,7 @@ export type RuntimeContextSettings = {
   activeSourceFile: string;
 } & Partial<PreviewStartupSettings>;
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-022
 /** The key of {@link RuntimeContextSettings}: the document, then the startup settings in table order. */
 export function runtimeContextKey(context: RuntimeContextSettings): string {
   return JSON.stringify([
@@ -191,6 +195,7 @@ export function reportsReloadedDocument(
     && report.requestId !== state.stageRequestId;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-022
 /**
  * `html` with the nonce of its render replaced by the nonce of the page that is loaded. A patch
  * does not change the loaded page's nonce, and the host's record of the page must match the page.

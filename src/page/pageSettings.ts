@@ -21,6 +21,7 @@ export interface PageSettings {
 /** Delay between the last keystroke in a block editor and its autosave. */
 export const AUTOSAVE_DELAY_MS = 400;
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-128
 /** The scroll and reveal settings of a boot context, read as the settings registry says. */
 export function pageSettings(context: PreviewRuntimeContext): PageSettings {
   const boot = readPreviewBootSettings(context);
@@ -32,6 +33,7 @@ export function pageSettings(context: PreviewRuntimeContext): PageSettings {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-022
 /** How many heading levels the sticky band shows: the setting rounded and clamped to 1..6, else 3. */
 export function stickyHeadingDepthOf(context: PreviewRuntimeContext): number {
   return readPreviewBootSettings(context).stickyHeadingDepth;

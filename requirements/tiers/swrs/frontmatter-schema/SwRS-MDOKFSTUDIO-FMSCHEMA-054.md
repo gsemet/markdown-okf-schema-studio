@@ -8,16 +8,17 @@ description: When a bundle-relative or project-relative target resolves outside
   E10 error "escapes its {resolution} root".
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMSCHEMA-015
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMSCHEMA-014
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-050; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-050
 ---
 
 ## Bundle and project targets cannot leave their root

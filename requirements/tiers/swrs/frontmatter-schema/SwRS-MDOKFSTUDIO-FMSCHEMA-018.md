@@ -8,16 +8,17 @@ description: 'When the frontmatter block parses to a list, a scalar or nothing, 
   a mapping.".'
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-FMSCHEMA-002
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-001
 ---
 
 ## Frontmatter that is not a mapping gives an error row
@@ -40,8 +41,7 @@ When the frontmatter block parses to a list, a scalar or nothing, the extension 
 
 ### Verification notes
 
-- Method: No dedicated test today: the not-a-mapping branch is not asserted by any unit, integration or visual test.
+- Method: Unit test `frontmatter that is a list or an empty block gives the not-a-mapping error row and one error` in `test/core/frontmatter/diagReq.frontmatter.requirements.test.ts`.
 - Criteria: The extraction returns present = true, no mapping and the message Frontmatter is not a mapping.
-- Known issue: the not-a-mapping branch has no test.
 - Known issue: a YAML alias that expands more than 100 times fails the parse and is reported as invalid YAML, not as a mapping problem.
 - Known issue: an empty block is a valid fence but still gets this error row.

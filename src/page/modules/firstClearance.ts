@@ -51,6 +51,7 @@ export function installFirstClearance(
   type Box = { top: number; left: number; right: number; bottom: number; width: number; height: number };
   const sharesColumn = (a: Box, b: Box): boolean => a.left < b.right && a.right > b.left;
 
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-011
   // The toolbar's bottom edge (viewport coordinates, margin included), the extra room below the
   // 40px gap and the width the toolbar takes from a first-block editor.
   const measure = (): { clearance: number; inset: number; bottom: number } => {
@@ -238,6 +239,7 @@ export function installFirstClearance(
     window.requestAnimationFrame(tick);
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-018
   window.addEventListener("resize", on("window resize"));
   if (typeof ResizeObserver !== "undefined") {
     sectionObserver = new ResizeObserver(on("properties section resize"));

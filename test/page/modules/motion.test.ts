@@ -76,6 +76,7 @@ function setup(options: { reduced?: boolean } = {}) {
   return { root, body, main, motion, glow, block, glowing, press, timers };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
 test("CR 046: an update glows on the innermost blocks whose lines meet a range, and only there", () => {
   const { main, glow, block, glowing } = setup();
   const before = block(main, "P", 1);
@@ -133,6 +134,7 @@ test("CR 046: no ranges, invalid ranges or a change too large to point at blocks
   assert.equal(glow([{ start: 1, end: 40 }]).length, 40);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050
 test("CR 046: with prefers-reduced-motion: reduce nothing is marked to move", () => {
   const { root, main, motion, glow, block, glowing, press, timers } = setup({ reduced: true });
   block(main, "P", 1);

@@ -57,12 +57,15 @@ export function installThemeMode(
 ): ThemeMode {
   const { host, context, savedState } = deps;
   const themeButton = document.querySelector?.("[data-sphinx-preview-theme-toggle]");
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
   let previewThemeMode: PreviewThemeMode = isThemeMode(context.previewThemeMode)
     ? context.previewThemeMode
     : isThemeMode(savedState?.previewThemeMode)
       ? savedState.previewThemeMode
       : DEFAULT_PREVIEW_THEME_MODE;
 
+  // @implements_req SwRS-MDOKFSTUDIO-THEME-016
+  // @implements_req SwRS-MDOKFSTUDIO-CORE-050
   function applyTheme(themeKind: number | undefined): void {
     const target = document.documentElement ?? document.body;
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -82,6 +85,8 @@ export function installThemeMode(
     themeButton?.setAttribute?.("data-tooltip", tooltip);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-THEME-001
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
   function cyclePreviewThemeMode(): void {
     const currentIndex = PREVIEW_THEME_MODES.indexOf(previewThemeMode);
     deps.themeSwitch();

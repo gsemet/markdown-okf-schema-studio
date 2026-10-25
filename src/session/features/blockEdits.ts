@@ -88,6 +88,7 @@ export class BlockEditController {
     router.on("previewEditCancel", (message, preview) => this.handleEditCancel(preview, message));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
   /** Answers a block edit message with an error the page's editor shows. */
   public postEditSourceError(
     preview: PreviewSession,
@@ -122,6 +123,9 @@ export class BlockEditController {
     return offsets ? { document, start: offsets.start, end: offsets.end } : undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-094
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-216
   private handleEditOpen(preview: PreviewSession, message: PageMessageOf<"previewEditOpen">): void {
     if (preview.edits.active) {
       this.postEditSourceError(preview, message, "Another Markdown block is already being edited.");
@@ -262,6 +266,8 @@ export class BlockEditController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-042
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-058
   private drainActiveBlockEdit(preview: PreviewSession, edit: ActiveBlockEdit): void {
     if (preview.edits.active !== edit || edit.applying) {
       return;
@@ -314,6 +320,7 @@ export class BlockEditController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-191
   private handleEditSave(preview: PreviewSession, message: PageMessageOf<"previewEditSave">): void {
     let edit = preview.edits.active;
     if (!edit && message.insertAfterLine !== undefined) {
@@ -399,6 +406,7 @@ export class BlockEditController {
     this.drainActiveBlockEdit(preview, edit);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-053
   private handleEditCancel(preview: PreviewSession, message: PageMessageOf<"previewEditCancel">): void {
     const edit = preview.edits.active;
     if (!edit
@@ -488,6 +496,7 @@ export class BlockEditController {
     await waitForSettled(() => preview.disposed || (!preview.edits.active && preview.edits.pendingSaves.size === 0));
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
   /**
    * Asks the page to save and close what its open editors hold, then waits for the saves to reach the
    * document (CR 025). Used before the host switches document on its own (tab follow, Back / Next):

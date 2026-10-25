@@ -8,17 +8,16 @@ description: When a writer chooses Remove field from a field editor, the Studio
   requires.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-005; no marker expected."
 derives_from: []
 user_need: As a writer, I remove an obsolete metadata field safely, without
   losing other fields or comments.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMEDIT-029
-- SwRS-MDOKFSTUDIO-FMEDIT-030
-- SwRS-MDOKFSTUDIO-FMEDIT-031
-- SwRS-MDOKFSTUDIO-FMEDIT-032
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMEDIT-005
 ---
 
 ## Remove a metadata field

@@ -26,6 +26,7 @@ async function waitFor(description: string, predicate: () => boolean): Promise<v
   throw new Error(`Timed out waiting for ${description}.`);
 }
 
+// @tests_req StRS-MDOKFSTUDIO-LIFE-010
 export async function run(): Promise<void> {
   const extensionRoot = path.resolve(__dirname, "../../..");
   const fixturePath = path.join(extensionRoot, "test", "integration", "fixtures", "preview.md");
@@ -40,6 +41,7 @@ export async function run(): Promise<void> {
     const sourceFile = escapeRegex(path.resolve(fixturePath));
     assert.match(preview.html, new RegExp(`data-sphinx-preview-document="${documentId}"`, "u"));
     assert.match(preview.html, new RegExp(`data-sphinx-source-file="${sourceFile}"`, "u"));
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-119
     assert.match(preview.html, /data-sphinx-source-line="[1-9]\d*"/u);
     assert.match(preview.html, /data-sphinx-preview-block="source-block-\d+"/u);
     assert.match(preview.html, /data-sphinx-preview-scroll-sync/iu);
@@ -75,6 +77,7 @@ export async function run(): Promise<void> {
       "figure directives are keyboard-accessible edit targets",
     );
 
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-100
     syncActiveEditorForTests();
     await waitFor(
       "the initial editor-to-preview source mapping context",
@@ -90,6 +93,7 @@ export async function run(): Promise<void> {
       revision: editorSync.documentVersion,
       requestId: editorSync.requestId,
     };
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-108
     sendPreviewMessageForTests({ type: "previewScroll", ...context, line: 1 });
     assert.equal(getActivePreviewForTests()?.lastRevealedSourceLine, 1);
     sendPreviewMessageForTests({
@@ -99,6 +103,7 @@ export async function run(): Promise<void> {
       sourceFile: path.resolve(fixturePath),
       line: 2,
     });
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-097
     assert.equal(getActivePreviewForTests()?.lastRevealedSourceLine, 2);
     sendPreviewMessageForTests({
       type: "previewReveal",

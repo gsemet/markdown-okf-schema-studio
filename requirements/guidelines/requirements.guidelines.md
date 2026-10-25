@@ -47,17 +47,33 @@ targets use it already.
 
 - **StRS** (`StRS-MDOKFSTUDIO-<TOKEN>-NNN`): a user use case observable in VS Code (what a writer,
   reviewer or maintainer can do and see), with `--user-need`. No implementation detail, no
-  message names, no pixel values.
-- **SwRS** (`SwRS-MDOKFSTUDIO-<TOKEN>-NNN`): one bounded, directly testable behaviour of the
-  extension (host, page or renderer), with `--derives-from` one or more StRS (any scope) and two
-  GIVEN-WHEN-THEN scenarios (nominal and boundary/refusal). Settings, commands, messages,
-  palette actions, slash entries and toolbar buttons each need their SwRS (accepted values,
-  default, refusal of invalid/stale input).
+  message names, no pixel values. A use case is broad enough to have about 3 to 8 SwRS; a scope
+  has about 2 to 8 StRS.
+- **SwRS** (`SwRS-MDOKFSTUDIO-<TOKEN>-NNN`): one observable behaviour of the extension (host,
+  page or renderer), meaning one trigger family and one outcome rule, with `--derives-from` one or
+  more StRS (any scope). The body holds all the scenarios of that behaviour, named by kind:
+  `### Scenario (nominal): …`, `### Scenario (refusal): …` and `### Scenario (boundary): …`. It
+  has at least one nominal and one refusal or boundary scenario and about eight at most; above
+  that, it holds two behaviours and is split. Equivalent cases go in one scenario with a table
+  (input, outcome), not in several scenarios or several SwRS.
+- One SwRS per palette action, and one per page↔host message type of `src/core/protocol/`. A
+  message SwRS states the accepted shape and what happens to a malformed or unexpected message.
+  The feature SwRS that handles a message is its message SwRS when it states that shape. One
+  message SwRS may cover two types that share one shape.
+- Settings, commands, slash entries and toolbar buttons are named scenarios of the feature SwRS
+  they belong to (accepted values, default, refusal of invalid or stale input), not SwRS of
+  their own.
+- A rule that every message, request, button or handler applies (a gate, the read-only refusal,
+  answer correlation, one edit at a time, where a view choice is stored) is written once, as a
+  cross-cutting SwRS with one table row per case. A SwRS that relies on it lists it in
+  `depends_on` and cites it ("see SwRS-…") instead of repeating its scenarios.
+- Known issues are notes in a `### Known issues` section (`- Known issue: …`), written as the
+  code behaves. Only behaviour defects go there; documentation and test gaps go to the backlog.
 - Page-wide properties checked on every visual scenario (no horizontal overflow, toolbar row
   layout per zoom, tooltip contrast, white/cream palette) are ONE SwRS each, in the scope of their
   subject (layout-width, toolbar-navigation, theme-zoom), not one per scenario.
 - Families of equivalent assertions (code-blocks v05–v12, admonition galleries) map to one SwRS;
-  a long scenario lock line is split into atomic SwRS.
+  a long scenario lock line is split into scenarios of that SwRS.
 
 ## Creating
 
@@ -73,6 +89,10 @@ Never write requirement frontmatter by hand and never reuse an ID; retire with
 `okfreq archive <ID> --path . --yes` or `okfreq supersede <OLD> <NEW> --path . --yes`.
 Use the frontmatter `title` verbatim as the first `##` heading (replace the generated
 `## EARS Expression`). Replace every `<placeholder>`.
+
+`okfreq new` takes the lowest free number. Never create a requirement in a change that also
+deletes requirement files, and never create one whose number is listed as retired in
+`requirements/tiers/log.md`.
 
 ## Traceability markers (TypeScript, JavaScript, Python)
 
@@ -112,6 +132,14 @@ def check_no_horizontal_overflow(page): ...
 - A visual scenario's `@tests_req` goes on its own line directly above the scenario entry in
   `test/visual/scenarios.ts`; page-wide checks get theirs above the check function in
   `test/visual/capture.py` or `test/shared/geometry-checks.js`.
+- Companion marker files: a file at its size limit (`scripts/check-file-sizes.mjs`) cannot take
+  marker lines. Its markers live in a sibling `<name>.markers.ts` that holds only comment lines
+  and `export {};`, with a header naming the host file. Move them back into the host file when it
+  is split. Current companion: `test/integration/realInput.markers.ts`.
+  `src/page/modules/plantumlBundle.markers.ts` is
+  different: the behaviour it marks is in `esbuild.mjs`, outside the marker source folders.
+- A declarative behaviour (a `package.json` key, the lock file, an absence of code) cannot carry a
+  marker: set `annotation_exemption: true` with the reason in `exemption_reason`.
 
 ## After editing
 

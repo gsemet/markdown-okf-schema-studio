@@ -7,16 +7,17 @@ description: When a newer render of the same diagram element starts before an
   earlier one finishes, the page SHALL show only the result of the newer render.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-006
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-039; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-039
 ---
 
 ## A superseded built-in render does not overwrite a newer one

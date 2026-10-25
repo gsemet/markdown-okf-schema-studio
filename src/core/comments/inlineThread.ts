@@ -35,6 +35,7 @@ export function isThreadBody(body: string): boolean {
   return BODY_START.test(body.trim());
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-167
 /**
  * The messages of a thread comment body (the text between `<!--` and `-->`), or `undefined` when
  * it is not a thread: no THREAD opener, no valid message header, or text before the first header.
@@ -119,6 +120,7 @@ export function isThreadSource(lines: readonly string[]): boolean {
   return body !== undefined && parseThreadBody(body) !== undefined && THREAD_OPEN.test(lines[0].trim().replace(/\r$/u, ""));
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-186
 /**
  * The edit that appends a reply before the closing `-->`: it replaces the last source line only.
  * `lines` are the lines of the comment, without line ends. `undefined` when they are not a thread
@@ -147,6 +149,7 @@ export function threadReplyEdit(
   return { fromLine: lastIndex, lineCount: 1, lines: [before.replace(/[ \t]+$/u, ""), ...reply, after] };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-192
 /**
  * The lines to remove to delete a thread. `before` and `after` are the neighbouring source lines
  * (undefined at the edges of the file). One surrounding blank line goes too when both neighbours

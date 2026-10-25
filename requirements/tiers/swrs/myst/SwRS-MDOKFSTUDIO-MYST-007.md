@@ -8,16 +8,17 @@ description: When an admonition uses a longer fence than an inner `markdown`
   code in the body.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-006; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-006
 ---
 
 ## A longer outer fence keeps inner fences as literal code
@@ -40,5 +41,5 @@ When an admonition uses a longer fence than an inner `markdown` fence or inner a
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "nested backtick and colon delimiters preserve their enclosing Markdown" in test/core/render/mystFeatures.test.ts
 - Criteria: The fence length decides which fence closes the directive.

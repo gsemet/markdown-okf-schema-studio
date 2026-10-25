@@ -76,6 +76,7 @@ function isLine(value: unknown): value is number {
   return Number.isSafeInteger(value) && (value as number) >= 1;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-001
 /** `notes.md` -> `notes.comments.json`; a name without extension just gets the suffix. */
 export function sidecarNameFor(documentName: string): string {
   const slash = Math.max(documentName.lastIndexOf("/"), documentName.lastIndexOf("\\"));
@@ -136,6 +137,7 @@ function parseThread(value: unknown, where: string, errors: string[]): CommentTh
   return { id, anchor, resolved, createdAt, comments: parsed as CommentEntry[] };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-004
 /** Validates the text of a sidecar file. Never throws. */
 export function parseSidecar(text: string): ParsedSidecar {
   const failure = (message: string, extra: string[] = []): ParsedSidecar =>
@@ -224,6 +226,7 @@ export function normalizeBody(value: unknown): string | undefined {
   return trimmed === "" ? undefined : trimmed;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-054
 /** Adds a thread with its first comment; undefined when the file is full or the id is taken. */
 export function addThread(
   threads: readonly CommentThread[],
@@ -241,6 +244,7 @@ export function addThread(
   }];
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-074
 /** Appends a comment to a thread; undefined when the thread is missing or already full. */
 export function addReply(
   threads: readonly CommentThread[],

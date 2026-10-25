@@ -8,15 +8,16 @@ description: When a schema file cannot be read, parsed or compiled, the Studio
   message that names the problem.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-006; no marker expected."
 derives_from: []
 user_need: As a schema author, I see immediately that my schema is broken and
   why, instead of silently losing validation.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-025
-- SwRS-MDOKFSTUDIO-FMSCHEMA-026
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-006
 ---
 
 ## Schema problems are reported without hiding the metadata

@@ -23,6 +23,7 @@ export interface MarkdownFragmentRange {
   endLine: number;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-102
 /**
  * The source lines the `#fragment` of `suffix` selects in `source`: `#L3` or `#L3-L7` line ranges,
  * `#^block-id` block ids, MyST `(label)=` targets, `{#explicit-id}` heading ids or heading slugs,
@@ -86,6 +87,7 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 /** Finds the first source line containing a marker followed by an exact identity. */
 export function markdownMarkerLine(
   source: string,
@@ -112,6 +114,7 @@ export type PreviewReference =
   | { kind: "wiki"; value: string }
   | { kind: "blocked"; reason: string };
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-090
 /**
  * Classifies a link of the page without touching the file system: a valid anchor, an allowed
  * external URL (http, https, mailto), a relative path, a wikilink (`wiki:`), or a blocked target

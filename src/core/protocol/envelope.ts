@@ -43,6 +43,7 @@ export function isOneOf<T extends string | number>(value: unknown, list: readonl
   return (list as readonly unknown[]).includes(value);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-052
 /**
  * Whether a message carries a page identity: a document id (a string, at most `maxDocumentIdLength`
  * long), and integer revision and request ids.

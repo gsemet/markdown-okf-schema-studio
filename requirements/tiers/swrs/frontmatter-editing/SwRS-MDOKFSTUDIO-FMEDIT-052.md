@@ -8,16 +8,17 @@ description: "When a frontmatter save comes from an editor opened on an older re
   field was being edited. Reopen the field.\""
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-009
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-065; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TRUST-065
 ---
 
 ## A save from an older render is refused with a reopen hint
@@ -40,5 +41,5 @@ When a frontmatter save comes from an editor opened on an older render than the 
 
 ### Verification notes
 
-- Method: Inspection of reportStaleEdit (src/session/pageMessages.ts).
+- Method: Unit test a frontmatter save from an older render is answered with a reopen hint; another document gets no answer in test/host/fmtableReq.requirements.test.ts.
 - Criteria: Read-only and disposed previews also get no stale answer.

@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { renderMathHtml } from "../../../src/core/render/mathRenderer";
 import { attribute, findElements, hasClass, parseHtml, textContent } from "./dom";
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-024
 test("typesets inline and display math with local assets and CSP-compatible styles", () => {
   const result = renderMathHtml('<main><span class="math-inline">b</span>'
     + '<div class="math-display" data-sphinx-source-line="80">H = b \\times s \\times \\frac{m}{60}</div></main>',

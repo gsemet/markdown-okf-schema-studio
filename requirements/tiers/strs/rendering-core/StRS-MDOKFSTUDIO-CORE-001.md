@@ -2,9 +2,10 @@
 type: StRS
 id: StRS-MDOKFSTUDIO-CORE-001
 uuid: 689c328e-435b-4127-b966-0216d0ce52fb
-title: Read a faithful rendering of the document
+title: A reader reads a faithful rendering of any document
 description: When a writer opens or edits a Markdown file, the Studio SHALL show
-  a rendered preview of its content beside the editor that follows each edit.
+  a rendered preview of its content beside the editor that follows each edit and
+  displays text in any script and direction readably inside the preview column.
 project: markdown-okf-schema-studio
 scope: rendering-core
 lifecycle: draft
@@ -12,7 +13,7 @@ origin: native
 tier: StRS
 derives_from: []
 user_need: Writers need to read their Markdown as formatted text, at any length,
-  while they type.
+  in any script and direction, while they type.
 derived_by:
 - SwRS-MDOKFSTUDIO-CORE-001
 - SwRS-MDOKFSTUDIO-CORE-002
@@ -37,6 +38,10 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-035
 - SwRS-MDOKFSTUDIO-CORE-037
 - SwRS-MDOKFSTUDIO-CORE-038
+- SwRS-MDOKFSTUDIO-CORE-039
+- SwRS-MDOKFSTUDIO-CORE-040
+- SwRS-MDOKFSTUDIO-CORE-041
+- SwRS-MDOKFSTUDIO-CORE-042
 - SwRS-MDOKFSTUDIO-CORE-043
 - SwRS-MDOKFSTUDIO-CORE-044
 - SwRS-MDOKFSTUDIO-CORE-046
@@ -49,18 +54,22 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-065
 - SwRS-MDOKFSTUDIO-CORE-066
 - SwRS-MDOKFSTUDIO-CORE-068
+- SwRS-MDOKFSTUDIO-GFM-029
+- SwRS-MDOKFSTUDIO-LIFE-094
+- SwRS-MDOKFSTUDIO-TRUST-052
 ---
 
-## Read a faithful rendering of the document
+## A reader reads a faithful rendering of any document
 
 ### Normative behavior
 
-When a writer opens or edits a Markdown file, the Studio SHALL show a rendered preview of its content beside the editor that follows each edit.
+When a writer opens or edits a Markdown file, the Studio SHALL show a rendered preview of its content beside the editor that follows each edit and displays text in any script and direction readably inside the preview column.
 
 ### Preserved stakeholder intent
 
-Writers need to read their Markdown as formatted text, at any length, while they type.
+Writers need to read their Markdown as formatted text, at any length, while they type, and to read documents in any script and direction without horizontal scrolling.
 
 ### Rationale and constraints
 
 - Covers headings, lists, quotes, inline code, images and long documents. The rendering is the same in every palette mode.
+- Covers Japanese, Chinese, Korean, Hebrew and Arabic text and long unbreakable words such as long URLs, which wrap inside the preview column instead of scrolling sideways.

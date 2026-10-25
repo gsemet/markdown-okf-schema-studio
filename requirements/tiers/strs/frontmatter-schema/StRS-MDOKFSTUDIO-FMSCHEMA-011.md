@@ -8,23 +8,16 @@ description: When a document's frontmatter violates its schema, the Studio SHALL
   required fields.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-010; no marker expected."
 derives_from: []
 user_need: As a writer, I see exactly which metadata is wrong, and can jump to
   it.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-035
-- SwRS-MDOKFSTUDIO-FMSCHEMA-036
-- SwRS-MDOKFSTUDIO-FMSCHEMA-037
-- SwRS-MDOKFSTUDIO-FMSCHEMA-038
-- SwRS-MDOKFSTUDIO-FMSCHEMA-039
-- SwRS-MDOKFSTUDIO-FMSCHEMA-040
-- SwRS-MDOKFSTUDIO-FMSCHEMA-041
-- SwRS-MDOKFSTUDIO-FMSCHEMA-084
-- SwRS-MDOKFSTUDIO-FMSCHEMA-085
-- SwRS-MDOKFSTUDIO-FMSCHEMA-089
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-010
 ---
 
 ## Validation problems show on the field concerned

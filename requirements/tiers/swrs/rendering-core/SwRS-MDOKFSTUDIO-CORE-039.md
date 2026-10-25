@@ -7,16 +7,17 @@ description: When a paragraph holds Japanese, Chinese or Korean text, the
   extension SHALL wrap it inside the pane at 900 px and 460 px.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-CORE-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-CORE-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-034; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-034
 ---
 
 ## Wrap CJK text in the pane
@@ -39,5 +40,5 @@ When a paragraph holds Japanese, Chinese or Korean text, the extension SHALL wra
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "the content stylesheet lets paragraphs, including CJK text, wrap inside the pane" in test/core/render/renderReq.renderingCore.requirements.test.ts
 - Criteria: CJK paragraphs stay within the pane width.

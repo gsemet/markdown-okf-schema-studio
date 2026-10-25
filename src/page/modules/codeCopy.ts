@@ -1,3 +1,4 @@
+// @implements_req SwRS-MDOKFSTUDIO-CODE-017
 /**
  * Copy button over the hovered code block.
  */
@@ -56,6 +57,7 @@ export function installCodeCopy(
     });
     return created;
   };
+  // @implements_req SwRS-MDOKFSTUDIO-CODE-019
   // Raw code. Wrapped blocks (diff, line numbers, emphasized lines) hold one span per line and no
   // newline characters, so their lines are joined again; the trailing newline matches plain blocks.
   const textOf = (pre: Element): string => {

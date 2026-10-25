@@ -8,19 +8,16 @@ description: When a frontmatter link resolves to a Markdown file, the Studio
   keep them current.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-014; no marker expected."
 derives_from: []
 user_need: As a reviewer, I see key facts about a linked file without opening
   it.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-067
-- SwRS-MDOKFSTUDIO-FMSCHEMA-068
-- SwRS-MDOKFSTUDIO-FMSCHEMA-069
-- SwRS-MDOKFSTUDIO-FMSCHEMA-070
-- SwRS-MDOKFSTUDIO-FMSCHEMA-071
-- SwRS-MDOKFSTUDIO-FMSCHEMA-072
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-014
 ---
 
 ## Linked files show their evidence

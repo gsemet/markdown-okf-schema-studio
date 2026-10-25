@@ -77,6 +77,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     return rectangle.height > 0;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-119
   // Document y where each soft-wrapped source line of a paragraph starts. Paragraph text keeps
   // the source line breaks as newline characters, so the line after each newline starts at the
   // first visible character that follows it.
@@ -148,6 +149,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-128
   function markSourceLine(sourceLine: number): void {
     clearMarkedSourceLine();
     if (!settings.markEditorSelection || !Number.isFinite(sourceLine) || !layout.length) return;
@@ -249,6 +251,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     return pinFields(1, properties);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-228
   function blockPinFields(edit: BlockEdit): PinFields {
     const line = edit.insertAfterLine !== undefined
       ? Math.max(1, edit.insertAfterLine + 1)
@@ -268,6 +271,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     return best;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-069
   function restoreState(): void {
     const initial = context.initialState;
     let disclosuresOpened = false;
@@ -316,6 +320,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     rt.parts.stickyBand.refreshReadingOffset();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-108
   function postScroll(): void {
     frame = undefined;
     rt.parts.stickyBand.updateStickyHeadings(true);
@@ -355,6 +360,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     if (frame === undefined) frame = window.requestAnimationFrame(postScroll);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-032
   // Keeps short identifiers whole in a table that scrolls sideways and flags the overflow so the
   // stylesheet can draw edge shadows. Attributes are written only when the value changes, so the
   // ResizeObserver never loops.
@@ -375,6 +381,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
   function stabilizeLayout(): void {
     window.requestAnimationFrame(() => {
       state.activeBlockEdit?.resizeTextarea?.();
@@ -442,6 +449,8 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     markWideTables,
     keepReadingLine,
     revealElement,
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-097
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-100
     followSourceScroll(message) {
       markSourceLine(Number(message.selectionLine ?? message.line));
       if (!settings.scrollPreviewWithEditor) return;
@@ -465,6 +474,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
         applyAnchor();
       });
     },
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-117
     navigateToAnchor(message) {
       const value = typeof message.value === "string" ? message.value : "";
       const decodeFragment = (fragment: string): string | undefined => {

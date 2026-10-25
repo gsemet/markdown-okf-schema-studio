@@ -8,20 +8,16 @@ description: When a writer types a bare http(s) or www URL in prose, the Studio
   schemes as plain text.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-GFM-002; no marker expected."
 derives_from: []
 user_need: As a writer, I paste plain URLs and get working links without
   breaking code or existing links.
-derived_by:
-- SwRS-MDOKFSTUDIO-GFM-001
-- SwRS-MDOKFSTUDIO-GFM-002
-- SwRS-MDOKFSTUDIO-GFM-003
-- SwRS-MDOKFSTUDIO-GFM-004
-- SwRS-MDOKFSTUDIO-GFM-005
-- SwRS-MDOKFSTUDIO-GFM-006
-- SwRS-MDOKFSTUDIO-GFM-007
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-GFM-002
 ---
 
 ## Bare URLs become safe links

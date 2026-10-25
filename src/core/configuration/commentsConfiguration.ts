@@ -24,6 +24,7 @@ export type CommentsConfiguration = SettingValues<typeof COMMENTS_SETTINGS>;
 /** The comments settings when none is set. */
 export const DEFAULT_COMMENTS_CONFIGURATION: CommentsConfiguration = settingDefaults(COMMENTS_SETTINGS);
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-065
 /** The comments settings of `source`, normalized. */
 export function readCommentsConfiguration(source: CommentsConfigurationSource): CommentsConfiguration {
   return readSettings(COMMENTS_SETTINGS, source);

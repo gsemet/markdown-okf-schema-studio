@@ -48,6 +48,7 @@ test("a duplicate of the current entry is ignored", () => {
   assert.equal(history.snapshot().entries.length, 2);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-065
 test("the history keeps at most 50 entries, the newest", () => {
   const history = new NavigationHistory();
   for (let n = 1; n <= NAVIGATION_HISTORY_CAP + 10; n += 1) history.push(place("a", n));
@@ -67,6 +68,7 @@ test("depart updates the line of the same document and pushes another document",
   assert.deepEqual(history.snapshot().entries, [place("a", 9), place("b", 2)]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
 test("depart without a known line keeps the entry's line and pushes a new document at line 1", () => {
   const history = new NavigationHistory();
   history.push(place("a", 7));

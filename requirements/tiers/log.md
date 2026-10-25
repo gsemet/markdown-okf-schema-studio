@@ -1,5 +1,45 @@
 # Update Log
 
+## 2026-10-25 (complete baseline)
+
+- Completed the baseline for all 16 scopes: **76 StRS (one per use case) and 364 SwRS (one per
+  observable behaviour)**, each with named scenarios (`nominal`, `refusal`, `boundary`), a table
+  for equivalent cases, its Known issues as the code behaves, and verification notes that name the
+  test of each scenario. 13 cross-cutting rules are written once and cited with `depends_on`:
+  the page message envelope, gates, read-only refusal, answer correlation, host message
+  acceptance, read-only affordances, edit exclusivity, source edit outcome, palette popovers
+  (two) and the view choice store and start. Each palette action and each page and host
+  message type has its own SwRS. The guideline "Levels" states these rules.
+- Markers: 813 `@implements_req` and 1072 `@tests_req` links (one per requirement per file) in
+  `src/`, `sphinx/` and `test/`; stakeholder-validation markers on 69 StRS; the marker companions
+  of `editPalette.ts`, `editActions.test.ts` and `okfFrontmatter.test.ts` are folded into their
+  hosts. Every SwRS has a test marker and every SwRS that is not declarative has a source marker (3
+  declarative SwRS are exempt).
+- Retired requirements: 508 are `superseded` by the requirement that now holds their behaviour
+  and 8 non-observable ones are `archived`; all are exempt from markers and kept for their ids.
+  The 1138 ids below were allocated while the baseline was being written, never published, and
+  have no file. **They must never be allocated again** (`okfreq new` takes the lowest free number,
+  so create requirements only in a change that deletes none):
+  - StRS-MDOKFSTUDIO-BLOCK: 002, 004–005, 007, 009–010, 012–013, 015, 017–024
+  - StRS-MDOKFSTUDIO-LIFE: 002, 004, 006, 008–009, 011–013, 015–018, 020, 022–023
+  - StRS-MDOKFSTUDIO-PALETTE: 003–004, 006, 008–012, 014, 016–017, 019–027
+  - StRS-MDOKFSTUDIO-REVIEW: 002, 004–007, 009–011, 013–014, 016, 018
+  - StRS-MDOKFSTUDIO-TABLE: 002–005, 007, 009–010, 013–015
+  - StRS-MDOKFSTUDIO-THEME: 001, 003, 005–010, 012–013
+  - StRS-MDOKFSTUDIO-TOOLBAR: 002–003, 005, 007–008, 010, 012, 014
+  - StRS-MDOKFSTUDIO-TRUST: 002–003, 005, 007–008, 010–011, 013, 015
+  - SwRS-MDOKFSTUDIO-BLOCK: 002–011, 013, 015–016, 018–020, 022, 024–025, 027–028, 030–032, 034–040, 043–046, 048–052, 054–057, 059–060, 062–068, 070–076, 078, 080–086, 088–093, 095–101, 103–108, 110–116, 118–123, 125–126, 128, 131–138, 141–147, 149–155, 157–165, 167–168, 170–173, 175–190, 192, 194–204, 206–215, 217–226, 229–231, 246–248, 251, 253
+  - SwRS-MDOKFSTUDIO-LIFE: 002, 004–009, 011–017, 019–023, 025, 027–031, 033–037, 040–043, 045–047, 050–054, 056–058, 060–061, 063–068, 070, 072–073, 075–080, 083–088, 092, 095–096, 098–099, 101–107, 109–111, 113–115, 118, 120–124, 126, 128–135, 138–142, 144–148, 150, 152–155, 157–168
+  - SwRS-MDOKFSTUDIO-PALETTE: 002–009, 011–016, 018–020, 022–030, 032–035, 037–038, 040–042, 044, 046–047, 051, 055–057, 059–068, 070–071, 073–077, 079–082, 084–085, 087–088, 090–091, 093–108, 110–113, 116–122, 128–129, 131, 134, 139, 141–146, 151–152, 154–159, 161–173, 175–177, 179–182, 184–191, 193–195, 197–202, 204–212, 214–216, 218–228, 230–231, 233–237, 239, 241, 243–251, 253–255, 257–262, 264–274
+  - SwRS-MDOKFSTUDIO-REVIEW: 002–003, 005–011, 013–016, 018–020, 022–027, 029–037, 039–043, 045–048, 050–053, 055–064, 066–068, 072, 075–080, 082–085, 087–093, 095–099, 102–106, 108–118, 120–124, 126–132, 134–138, 140–142, 144–151, 153–155, 157–159, 161–166, 168–170, 172–177, 179–185, 187–189, 191, 193–194, 196–199, 201–202, 204–206, 209–213, 215–217
+  - SwRS-MDOKFSTUDIO-TABLE: 002–005, 007–012, 014–017, 019–024, 028–029, 031–033, 036–043, 049–054, 056–063, 065–069, 071–072, 075, 077–079, 081–084, 086–090, 092–093, 095–101, 103–105, 107–110, 112–114, 116, 118–129
+  - SwRS-MDOKFSTUDIO-THEME: 002–012, 014–015, 017, 019–023, 026–030, 032–033, 035–037, 039–042, 044–054, 057–058
+  - SwRS-MDOKFSTUDIO-TOOLBAR: 002–006, 008–012, 014–017, 019–021, 023–024, 026–029, 031–032, 034–036, 038–039, 041–044, 046–053, 055, 057, 060–064, 066–069, 073–076, 078, 080–082, 084, 086–089, 091–093, 095–097, 099–101, 103–112, 114–116, 118–119, 121, 123–125, 127, 129–149
+  - SwRS-MDOKFSTUDIO-TRUST: 002–004, 008–010, 013–021, 023–024, 026–035, 037–041, 043–049, 051, 053–054, 056–058, 060, 066–069, 071, 076–085, 087–089
+- Verification: `okfreq validate --prose --check-links`, `lint --check`, `update-coverage --check`,
+  `okfreq trace` (no missing id, no duplicate), `just check` and `just preflight` pass (440 active
+  requirements).
+
 ## 2026-10-24 (batch 1)
 
 - Added the first requirements: 27 StRS and 237 SwRS for rendering-core (5 / 68), code-blocks

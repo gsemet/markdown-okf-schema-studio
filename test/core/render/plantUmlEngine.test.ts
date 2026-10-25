@@ -75,6 +75,8 @@ for (const trusted of [true, false]) {
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-089
 test("useJar keeps the external pipeline: trusted it spawns, Restricted Mode refuses it without a process", async () => {
   const record = countingSpawner();
   try {

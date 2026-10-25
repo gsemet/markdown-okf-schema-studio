@@ -55,9 +55,11 @@ export class LinkController {
 
   /** Registers the handlers of link requests and link discovery. */
   public register(router: PageMessageRouter): void {
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
     router.on("previewLinkDiscover", (message, preview) => {
       void this.handleDiscovery(preview, message);
     });
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-113
     router.on("previewLink", (message, preview) => {
       this.manager.view.recordPreviewState(preview, message);
       if (message.request) {
@@ -67,6 +69,8 @@ export class LinkController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-007
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-098
   /** Resolves a link request of the page (a URL, a path, a wiki link or an `okf-link:` identity). */
   public async resolve(preview: PreviewSession, request: string) {
     const { manager } = this;
@@ -178,6 +182,7 @@ export class LinkController {
     }, preview.readOnly ? "the standalone document directory" : "the workspace", navigationRoots);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-079
   private async handleDiscovery(preview: PreviewSession, message: PageMessageOf<"previewLinkDiscover">): Promise<void> {
     const { manager } = this;
     try {
@@ -191,6 +196,11 @@ export class LinkController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-073
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-117
   private async handleLink(preview: PreviewSession, request: string): Promise<void> {
     const { manager } = this;
     const { host } = manager;

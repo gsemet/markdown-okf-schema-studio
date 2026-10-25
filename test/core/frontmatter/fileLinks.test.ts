@@ -21,6 +21,7 @@ function inspect(frontmatter: Record<string, unknown>, schema: Record<string, un
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 test("link annotations read target fields and exact marker lines afresh", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-details-"));
   const target = path.join(root, "target.md");
@@ -61,6 +62,7 @@ test("link display options reject invalid metadata", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-046
 test("oneOf annotations are collected only when exactly one branch matches", () => {
   const schema: Record<string, unknown> = {
     type: "object",
@@ -145,6 +147,8 @@ test("conditional, patternProperties, and additionalProperties schemas are trave
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-050
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-060
 test("document-relative links stay inside workspace roots unless explicitly allowed", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "okf-link-containment-"));
   const workspace = path.join(root, "workspace");

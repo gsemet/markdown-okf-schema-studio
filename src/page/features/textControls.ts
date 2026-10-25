@@ -28,6 +28,8 @@ export function installTextControls(rt: PageRuntime): TextControls {
   const { document, window, state } = rt;
   const { textEditing, editActions } = rt.tools;
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-079
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-035
   function boundaryNavigation(control: TextControl, event: KeyboardEvent): ReturnType<TextControls["boundaryNavigation"]> {
     if (event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return undefined;
     if (control.selectionStart !== control.selectionEnd) return undefined;
@@ -149,6 +151,7 @@ export function installTextControls(rt: PageRuntime): TextControls {
     return true;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
   function keepUndoInControl(event: KeyboardEvent): boolean {
     const mod = event.metaKey || event.ctrlKey;
     const code = event.keyCode;
@@ -160,6 +163,7 @@ export function installTextControls(rt: PageRuntime): TextControls {
     return false;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-069
   // Typing *, _, backtick or ~ over a selection wraps it (as one native, undoable edit) and keeps the text
   // selected, so a second press wraps again. No selection, modifiers and IME stay native.
   function wrapSelectionInControl(event: KeyboardEvent, control: TextControl, onFallbackInput: () => void): boolean {
@@ -180,6 +184,7 @@ export function installTextControls(rt: PageRuntime): TextControls {
     return true;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-085
   // Cmd/Ctrl+B, +I and +/ run a registered edit action on the block text box as one native edit.
   // The key is consumed even when the action has nothing to change, so the host editor never
   // sees it (Cmd+B would toggle the side bar).
@@ -203,6 +208,7 @@ export function installTextControls(rt: PageRuntime): TextControls {
     return true;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-039
   // Applies a text edit through the native editing path so the undo stack keeps the step; falls
   // back to a manual splice where execCommand is unavailable.
   function applyTextEdit(control: TextControl, rawEdit: Parameters<TextControls["applyTextEdit"]>[1],
@@ -230,6 +236,7 @@ export function installTextControls(rt: PageRuntime): TextControls {
     control.setSelectionRange(edit.selectionStart, edit.selectionEnd);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-026
   function focusTextControlAtLastContent(element: HTMLElement, caretPosition: CaretPosition = "end"): void {
     element.focus({ preventScroll: true });
     const control = element as TextControl;

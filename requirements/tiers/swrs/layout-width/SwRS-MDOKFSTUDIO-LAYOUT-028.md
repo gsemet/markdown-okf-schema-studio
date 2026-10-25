@@ -7,16 +7,17 @@ description: When the width mode is Full width, the extension SHALL lift the
   column limit and set the page side gutter to 16 px.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LAYOUT-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-LAYOUT-003
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LAYOUT-022; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-022
 ---
 
 ## Full width removes the column limit

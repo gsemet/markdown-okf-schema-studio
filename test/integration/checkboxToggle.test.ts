@@ -98,6 +98,8 @@ async function capture(
   console.log(`PASS checkbox screenshot: ${id}`);
 }
 
+// @tests_req StRS-MDOKFSTUDIO-GFM-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
   const browser: Browser = await chromium.connectOverCDP(`http://127.0.0.1:${process.env.STUDIO_CDP_PORT}`);

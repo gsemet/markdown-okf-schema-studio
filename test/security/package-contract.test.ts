@@ -17,6 +17,7 @@ function contributedSettings(categories: ConfigurationCategory[]): Record<string
   return Object.assign({}, ...categories.map((category) => category.properties)) as Record<string, Record<string, unknown>>;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-074
 test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the shared logo", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as { icon: string };
   assert.equal(manifest.icon, "images/logo.png");
@@ -30,6 +31,12 @@ test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the share
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-003
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-018
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-032
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-001
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-156
 test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     name: string;
@@ -192,6 +199,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(packageJson.contributes.editors, undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-075
 test("pins Node 24 and keeps the lockfile on the official npm registry", () => {
   assert.equal(fs.readFileSync(path.join(extensionRoot, ".nvmrc"), "utf8").trim(), "24");
   const lockfile = fs.readFileSync(path.join(extensionRoot, "package-lock.json"), "utf8");

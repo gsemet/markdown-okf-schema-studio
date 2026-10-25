@@ -4,27 +4,28 @@ id: SwRS-MDOKFSTUDIO-DIAG-011
 uuid: 6687c3d6-6998-46f5-a5f1-8d4a8901c70b
 title: "A content patch draws only Mermaid diagrams not yet drawn"
 description: "When the preview content is patched in place, the page SHALL draw the
-  Mermaid diagrams that have no render state and SHALL leave the diagrams that have
-  one untouched."
+  Mermaid diagrams that have no render state and leave the diagrams that have one
+  untouched."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-003
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-009; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-009
 ---
 
 ## A content patch draws only Mermaid diagrams not yet drawn
 
 ### Normative behavior
 
-When the preview content is patched in place, the page SHALL draw the Mermaid diagrams that have no render state and SHALL leave the diagrams that have one untouched.
+When the preview content is patched in place, the page SHALL draw the Mermaid diagrams that have no render state and leave the diagrams that have one untouched.
 
 ### Scenario: New diagram
 

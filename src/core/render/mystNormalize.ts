@@ -45,6 +45,8 @@ const BUILD_ONLY_TYPES = new Set([
   "bibliography",
 ]);
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-001
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
 function normalizeDiagram(
   node: MystNode,
   line: number | undefined,
@@ -100,6 +102,7 @@ export function isPlantUmlNode(node: MystNode): boolean {
     || (node.type === "code" && node.lang?.toLowerCase() === "plantuml");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-068
 /**
  * `{uml} path.puml` (sphinxcontrib-plantuml) and `{plantuml} path.puml` without a body name the
  * diagram file. Options in the body (`:caption:`) are not rendered.
@@ -187,6 +190,8 @@ const NODE_RULES: readonly NodeRule[] = [
     },
   },
   {
+    // @implements_req SwRS-MDOKFSTUDIO-CODE-005
+    // @implements_req SwRS-MDOKFSTUDIO-CODE-014
     name: "code block options",
     kinds: ["code"],
     run: (node) => {
@@ -296,6 +301,8 @@ const NODE_RULES: readonly NodeRule[] = [
     },
   },
   {
+    // @implements_req SwRS-MDOKFSTUDIO-MYST-001
+    // @implements_req SwRS-MDOKFSTUDIO-MYST-006
     /*
      * The stock admonition handler prints the kind as a title and then also renders an
      * explicit `admonitionTitle` child, so a titled admonition shows two headings. It also
@@ -386,6 +393,7 @@ const NODE_RULES: readonly NodeRule[] = [
     },
   },
   {
+    // @implements_req SwRS-MDOKFSTUDIO-CORE-022
     /*
      * A directive the parser understands is rewritten into real nodes (admonition,
      * container, table...) beneath its `mystDirective` wrapper. One the parser knows but
@@ -444,6 +452,7 @@ const NODE_RULES: readonly NodeRule[] = [
     },
   },
   {
+    // @implements_req SwRS-MDOKFSTUDIO-MYST-031
     name: "figure alignment",
     kinds: ["container"],
     run: (node) => {
@@ -467,6 +476,7 @@ NODE_RULES.forEach((rule, order) => {
   }
 });
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-003
 /**
  * Rewrites nodes the HTML writer cannot resolve without a project-wide build, and gives block
  * nodes their source line. Runs the rules of the node's kind in order; a rule that changes the

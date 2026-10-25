@@ -38,6 +38,13 @@ function historyOf(): NonNullable<ReturnType<typeof getActivePreviewForTests>>["
   return preview.history;
 }
 
+// @tests_req StRS-MDOKFSTUDIO-TOOLBAR-009
+// @tests_req StRS-MDOKFSTUDIO-TOOLBAR-011
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-077
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const extensionRoot = path.resolve(__dirname, "../../..");

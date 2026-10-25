@@ -106,6 +106,7 @@ export function installCommentThreads(
 
   const text = (value: unknown): string => (typeof value === "string" ? value.slice(0, MAX_TEXT) : "");
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-001
   // Keeps only well-formed threads, as fresh objects (the host validated them already).
   const sanitize = (value: unknown): PageCommentThread[] => {
     if (!Array.isArray(value)) return [];
@@ -216,6 +217,7 @@ export function installCommentThreads(
     }
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-086
   const startAction = (kind: "resolve" | "delete", send: (threadId: string) => void): void => {
     const threadId = openId;
     if (threadId === undefined || pendingFor(threadId)) return;
@@ -329,6 +331,7 @@ export function installCommentThreads(
     return found;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-017
   const attach = (thread: PageCommentThread): boolean => {
     const quote = thread.anchor.quote;
     if (quote === "") return false;
@@ -427,6 +430,7 @@ export function installCommentThreads(
     return true;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-028
   // The "Orphaned comments" box: after the content element, outside the HTML a patch replaces. It
   // adds no scroll height of its own where the content ends (see the stylesheet), so the end of
   // the document, the first-element gap and the insert points do not change.
@@ -515,6 +519,8 @@ export function installCommentThreads(
     (popover as HTMLElement).style.setProperty("top", `${top}px`);
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-081
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   const open = (thread: PageCommentThread, target: Element): void => {
     close();
     const root = document.createElement("div");
@@ -580,6 +586,7 @@ export function installCommentThreads(
   const idOf = (holder: Element): string | null =>
     holder.getAttribute(MARK) ?? holder.getAttribute(BADGE) ?? holder.getAttribute(ORPHAN);
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-021
   const toggle = (holder: Element): boolean => {
     const id = idOf(holder);
     const thread = threads.find((candidate) => candidate.id === id);

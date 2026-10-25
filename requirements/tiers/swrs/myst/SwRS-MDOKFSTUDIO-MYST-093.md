@@ -8,15 +8,13 @@ description: When two directive families declare the same directive name, the
   duplicate.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: deprecated
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-001
-- StRS-MDOKFSTUDIO-MYST-008
-- StRS-MDOKFSTUDIO-MYST-013
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Archived. Not an observable behaviour; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
@@ -42,5 +40,5 @@ When two directive families declare the same directive name, the extension SHALL
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a directive name registered twice raises an error naming it; distinct names register" in test/core/directives/renderReq.registry.requirements.test.ts
 - Criteria: Duplicate registration raises an error.

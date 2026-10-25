@@ -8,16 +8,17 @@ description: When VS Code rejects the workspace edit of a frontmatter save, the
   the error text.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-009
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-058; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-BLOCK-058
 ---
 
 ## A save VS Code rejects is reported
@@ -40,5 +41,5 @@ When VS Code rejects the workspace edit of a frontmatter save, the extension SHA
 
 ### Verification notes
 
-- Method: Inspection of FrontmatterController.handleSave (src/session/features/frontmatter.ts).
+- Method: Unit test a frontmatter save that VS Code does not apply is answered with a message; a thrown error gives its text in test/host/fmtableReq.requirements.test.ts.
 - Criteria: Both answers leave the document unchanged and the editor open with the message.

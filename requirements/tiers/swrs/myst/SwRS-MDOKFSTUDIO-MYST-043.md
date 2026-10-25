@@ -3,28 +3,31 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-MYST-043
 uuid: 0744ee93-51aa-474c-9333-77d4840754aa
 title: The host refuses a rename while an edit is open
-description: When a rename arrives while a block or frontmatter edit is open,
-  the extension SHALL change nothing and answer Save or cancel the open Markdown
-  edit before renaming a label.
+description: When a rename arrives while a block edit is open, the extension
+  SHALL change nothing and answer Save or cancel the open Markdown edit before
+  renaming a label.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-041; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-BLOCK-041
 ---
 
 ## The host refuses a rename while an edit is open
 
 ### Normative behavior
 
-When a rename arrives while a block or frontmatter edit is open, the extension SHALL change nothing and answer Save or cancel the open Markdown edit before renaming a label.
+When a rename arrives while a block edit is open, the extension SHALL change nothing and answer Save or cancel the open Markdown edit before renaming a label.
+
+The host holds no state for a frontmatter edit: the page itself refuses to start a rename while a block or frontmatter editor is open (see the rename field requirement on open editors), so no request is sent in that case.
 
 ### Scenario: Nominal
 
@@ -34,11 +37,11 @@ When a rename arrives while a block or frontmatter edit is open, the extension S
 
 ### Scenario: Boundary or refusal
 
-- GIVEN a frontmatter edit open
-- WHEN a rename request arrives
-- THEN the same refusal applies
+- GIVEN a frontmatter edit open in the page
+- WHEN the writer clicks the anchor icon
+- THEN the page opens its field disabled with Save or cancel the open edit before renaming a label, and sends no request
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a rename while a block edit is open changes nothing and answers Save or cancel the open Markdown edit" in test/session/renderReq.labelRename.requirements.test.ts
 - Criteria: The document is unchanged.

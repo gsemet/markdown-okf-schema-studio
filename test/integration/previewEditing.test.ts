@@ -238,6 +238,23 @@ async function captureLinkState(
   });
 }
 
+// @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
+// @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-014
+// @tests_req StRS-MDOKFSTUDIO-BLOCK-003
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-094
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-216
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-016
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-073
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
   const browser: Browser = await chromium.connectOverCDP(`http://127.0.0.1:${process.env.STUDIO_CDP_PORT}`);

@@ -171,6 +171,7 @@ function escapeHtml(value: string): string {
 
 type DiffLineKind = "addition" | "deletion" | undefined;
 
+// @implements_req SwRS-MDOKFSTUDIO-CODE-008
 function classifyDiffLines(source: string): DiffLineKind[] {
   return source.replace(/\n$/u, "").split("\n").map((line) => {
     if (line.startsWith("+")) {
@@ -183,6 +184,7 @@ function classifyDiffLines(source: string): DiffLineKind[] {
   });
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CODE-005
 function wrapCodeLines(
   highlighted: string,
   numbered: boolean,
@@ -231,6 +233,8 @@ function wrapCodeLines(
   return output;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CODE-001
+// @implements_req SwRS-MDOKFSTUDIO-CODE-014
 /**
  * Rewrites every fenced code block in `html` with highlighted markup.
  *

@@ -3,22 +3,22 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-FMEDIT-083
 uuid: 51009a9c-74b0-4839-a8ab-c37a45184dd0
 title: A save for a missing field or revision is refused as stale
-description: When a frontmatter save names a field absent from the current
-  analysis or a document revision that no longer matches, the extension SHALL
-  answer "The frontmatter field is stale or its value does not match the
-  schema."
+description: "When a frontmatter save names a field absent from the current analysis
+  or a document revision that no longer matches, the extension SHALL answer \"The
+  frontmatter field is stale or its value does not match the schema.\""
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-009
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-016; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-016
 ---
 
 ## A save for a missing field or revision is refused as stale
@@ -26,8 +26,6 @@ tested_in_files: []
 ### Normative behavior
 
 When a frontmatter save names a field absent from the current analysis or a document revision that no longer matches, the extension SHALL answer "The frontmatter field is stale or its value does not match the schema."
-
-Known issue: the stale-field message is shared by stale renders and schema mismatches.
 
 ### Scenario: Nominal
 
@@ -40,6 +38,10 @@ Known issue: the stale-field message is shared by stale renders and schema misma
 - GIVEN a save whose revision differs from the document revision
 - WHEN the host receives it
 - THEN the same stale-field message is the answer
+
+### Known issues
+
+- Known issue: the stale-field message is shared by stale renders and schema mismatches.
 
 ### Verification notes
 

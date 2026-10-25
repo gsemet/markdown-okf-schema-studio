@@ -4,27 +4,28 @@ id: SwRS-MDOKFSTUDIO-CODE-013
 uuid: c2b55d26-68ee-4ede-9f74-e293a1184f08
 title: Scroll long code lines inside their block
 description: When a code line is wider than its block outside Auto width mode,
-  the extension SHALL scroll the block horizontally to the line's far end and
-  SHALL NOT widen the page, also at a 460 px panel width.
+  the extension SHALL scroll the block horizontally to the line's far end
+  without widening the page, also at a 460 px panel width.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CODE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CODE-007; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CODE-007
 ---
 
 ## Scroll long code lines inside their block
 
 ### Normative behavior
 
-When a code line is wider than its block outside Auto width mode, the extension SHALL scroll the block horizontally to the line's far end and SHALL NOT widen the page, also at a 460 px panel width.
+When a code line is wider than its block outside Auto width mode, the extension SHALL scroll the block horizontally to the line's far end without widening the page, also at a 460 px panel width.
 
 ### Scenario: nominal behavior
 

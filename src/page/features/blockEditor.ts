@@ -34,6 +34,11 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     edit.renderedCellContent = undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-148
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-228
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-089
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-064
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-085
   // The cancel branch is used by Cancel and Escape when something reached the document;
   // Done, Cmd/Ctrl+Enter and leaving edit mode commit the text instead.
   function closeBlockEdit(cancel = false): void {
@@ -119,6 +124,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     host.setState?.(nextState);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-079
   const rememberPendingBlockNavigation: BlockEditor["rememberPendingBlockNavigation"] = (
     target, caretPosition, selectedCell, explicitIndices, thenMove,
   ) => {
@@ -153,6 +159,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     return undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-130
   // Cmd+Alt (Ctrl+Alt elsewhere) + Up/Down in the block text box: save the edit, move the block,
   // reopen the editor on it with the caret where it was. Plain Option/Alt+arrow stays native.
   // Handled chords are always consumed; a key repeat or a move in flight does nothing.
@@ -203,6 +210,11 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     return true;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-029
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-102
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
   const openBlockEditor: BlockEditor["openBlockEditor"] = (target, selectedCell, sourceRange, initialCaretPosition = "end") => {
     if (state.activeBlockEdit) return;
     const line = sourceRange?.line ?? Number(target.getAttribute("data-sphinx-source-line"));
@@ -280,6 +292,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     });
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-234
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-018
   function postBlockEditSave(final: boolean): boolean | undefined {
     const edit = state.activeBlockEdit;
     if (
@@ -327,6 +341,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     return true;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-042
   function autosaveBlockEdit(): void {
     const edit = state.activeBlockEdit;
     if (!edit) return;
@@ -354,10 +369,12 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     rt.frontmatter.flushFrontmatterEditor();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-047
   function saveBlockEdit(): void {
     postBlockEditSave(true);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-067
   // Before the preview leaves this document (a link to another file, Back / Next, the host
   // following another tab, CR 025): save and close every open editor now, whatever it holds, and
   // do not wait for the autosave timer. The host applies the saves before it switches document.
@@ -408,6 +425,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     timer = window.setTimeout(finish, 1000);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-053
   // Cancel button and Escape: close without saving, and restore the block when an autosave already
   // reached the document.
   function cancelBlockEdit(): void {
@@ -416,6 +434,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     closeBlockEdit(edit.hasAutosavedChange === true);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-033
   function blockEditHint(edit: BlockEdit): string {
     const applePlatform = isApplePlatform();
     const lines = edit.insertAfterLine !== undefined
@@ -427,6 +446,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       + (applePlatform ? "⌘↩" : "Ctrl+Enter") + ": done";
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-006
   // Done and Cancel, shared by the block editor and the table-cell editor. The mousedown default is
   // prevented to keep the focus in the field, so its blur commit does not run before the click.
   function createEditorButtons(edit: BlockEdit): HTMLElement {
@@ -471,6 +491,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     navigateBlockEdit,
     hideTableCellContent,
     restoreTableCellContent,
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
     bindPageHide() {
       window.addEventListener("pagehide", flushHiddenPage);
       document.addEventListener("visibilitychange", () => {

@@ -21,6 +21,7 @@ function document(version: number, text: string): TestDocument {
   };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
 test("lets an in-flight build finish and starts the newest queued edit right after", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout"] });
   const resolvers = new Map<number, (value: string) => void>();
@@ -58,6 +59,8 @@ test("lets an in-flight build finish and starts the newest queued edit right aft
   assert.equal(outcome.request.requestId, 3);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-025
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
 test("retains a successful result as stale after a failed newer build", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout"] });
   const pending = new Map<number, { resolve: (value: string) => void; reject: (error: Error) => void }>();
@@ -119,6 +122,7 @@ test("still renders a build whose buffer already moved on, and cleans up on disp
   assert.equal(aborted, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-044
 test("tracks referenced dependencies for refresh decisions", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout"] });
   const queue = new BuildQueue<TestDocument, { stage: { dependencies: readonly string[] } }>({

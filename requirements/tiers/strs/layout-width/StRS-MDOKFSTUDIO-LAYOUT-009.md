@@ -8,15 +8,17 @@ description: When a maintainer runs the layout checks on a rendered preview, the
   two-line statuses, and pass when the page has no matching content.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-001; no marker expected."
 derives_from: []
 user_need: As a maintainer, I can run machine layout checks on any preview and
   trust that they flag real layout defects and stay quiet on pages where they do
   not apply.
-derived_by:
-- SwRS-MDOKFSTUDIO-LAYOUT-035
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-LAYOUT-001
 ---
 
 ## Layout measurements stay trustworthy for maintainers

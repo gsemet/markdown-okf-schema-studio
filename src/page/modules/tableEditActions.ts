@@ -12,6 +12,7 @@ import type { TextEdit } from "./textEditing";
 
 /** The table actions bound to the page's table tools. */
 export function createTableEditActions(tableTools: MarkdownTableTools | undefined) {
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-106
   /** A table of `rows` x `cols` (the header counts as a row) set apart by blank lines. */
   function insertTable(ctx: EditActionContext): TextEdit | undefined {
     if (!validSelection(ctx)) return undefined;
@@ -71,6 +72,7 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
     return undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-117
   /**
    * With the caret in a pipe table, replaces that table's lines with an HTML `<table>`; anywhere
    * else (or without table tools) inserts a new 2 x 2 HTML table after the selection.
@@ -144,6 +146,8 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
     return pipe ? { start: pipe.start, end: pipe.end, text: value.slice(pipe.start, pipe.end) } : undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-073
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-074
   /** The conversion of the table at the caret to `target`, or the reason it cannot be done. */
   function convertTableAtCaret(
     ctx: EditActionContext, target: "pipe" | "list-table",
@@ -167,6 +171,7 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
     return found ? tableTools.detectTable(found.text) : undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-111
   /**
    * Sets the alignment of the table column the caret is in, rewriting only that cell of the
    * delimiter row (`:---`, `:---:`, `---:`): the cell keeps its padding and, when the colons need
@@ -210,6 +215,7 @@ export function createTableEditActions(tableTools: MarkdownTableTools | undefine
     };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-115
   /**
    * Wraps the pipe table at the caret in `:::{table} Caption` (the caption selected), or inserts a
    * new 2 x 2 captioned table. A table that is already inside a `{table}` directive is left alone.

@@ -8,6 +8,7 @@ export const MAX_LABEL_LENGTH = 100;
 
 const LABEL_NAME = /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/u;
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-038
 export function isValidLabelName(value: unknown): value is string {
   return typeof value === "string" && value.length <= MAX_LABEL_LENGTH && LABEL_NAME.test(value);
 }
@@ -19,6 +20,7 @@ export interface LabelLineEdit {
   text: string;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-045
 /**
  * The edit that renames the label on 1-based `line`, or `undefined` when that line is not exactly
  * `(oldName)=` (surrounding whitespace aside) or a name is invalid. Never guesses another line.

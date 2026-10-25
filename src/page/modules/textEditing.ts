@@ -79,6 +79,7 @@ export function createTextEditingTools() {
     return undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-061
   /**
    * Returns the edit that Tab (or Shift+Tab when `outdent`) should apply to the lines touched by
    * the selection. List lines move by their marker width, other lines by 4 spaces; a collapsed
@@ -165,6 +166,7 @@ export function createTextEditingTools() {
     };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-069
   /**
    * Returns the edit that typing a Markdown emphasis marker (`*`, `_`, backtick or `~`) applies
    * to a non-empty selection: the marker goes on both sides and the text stays selected, so
@@ -190,6 +192,7 @@ export function createTextEditingTools() {
     };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-026
   /**
    * Maps a click in the rendered text to a caret offset in the Markdown `source`. `before` and
    * `after` are the rendered characters on each side of the click. Returns `undefined` when no
@@ -270,6 +273,7 @@ export function createTextEditingTools() {
     return undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-091
   /**
    * Makes an edit safe for a Markdown table cell: an unescaped `|` in the inserted text gets a
    * backslash (one already escaped, or preceded by an escaping backslash in the cell, stays as it

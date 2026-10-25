@@ -25,6 +25,7 @@ export function touchedLines(ctx: EditActionContext) {
   return { firstStart, lastEnd, lines: value.slice(firstStart, lastEnd).split("\n") };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-039
 /** True when the selection lies inside the text, start before end. */
 export function validSelection(ctx: EditActionContext): boolean {
   return (

@@ -27,6 +27,7 @@ export function installIncomingToggle(
     ? saved.viewIncomingChanges
     : context.initialViewPreferences?.incomingChanges !== false;
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-214
   const apply = (): void => {
     document.documentElement.setAttribute("data-sphinx-preview-incoming", shown ? "on" : "off");
     if (!button) return;

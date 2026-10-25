@@ -41,6 +41,7 @@ test("the book's conf.py lists are read in full", () => {
   ]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-066
 test("comments, tuples, single quotes, trailing commas and string joins are understood", () => {
   const conf = parseConf([
     "extensions = ('myst_parser',  # the parser",

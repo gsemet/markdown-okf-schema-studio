@@ -7,19 +7,17 @@ description: When a reader presses the Width button, the Studio SHALL cycle
   between Margin, Auto and Full width and remember the choice for the workspace.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-003; no marker expected."
 derives_from: []
 user_need: As a reader, I switch between a narrow reading column, a column that
   lets wide content out, and the full pane with one button, and the choice is
   still there when I come back.
-derived_by:
-- SwRS-MDOKFSTUDIO-LAYOUT-020
-- SwRS-MDOKFSTUDIO-LAYOUT-021
-- SwRS-MDOKFSTUDIO-LAYOUT-038
-- SwRS-MDOKFSTUDIO-LAYOUT-040
-- SwRS-MDOKFSTUDIO-LAYOUT-041
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-LAYOUT-003
 ---
 
 ## One button switches the width mode

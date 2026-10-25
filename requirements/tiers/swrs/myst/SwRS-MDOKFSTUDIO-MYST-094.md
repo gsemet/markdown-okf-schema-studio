@@ -8,16 +8,17 @@ description: When the writer clicks the anchor icon of a label whose name starts
   no rename field.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-038; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-038
 ---
 
 ## A label starting with underscore, dot or hyphen cannot be renamed
@@ -46,5 +47,5 @@ When the writer clicks the anchor icon of a label whose name starts with an unde
 
 ### Verification notes
 
-- Method: inspection (`src/page/modules/labelRename.ts` click handler, `src/core/mapping/labelRename.ts`).
-- Criteria: No test covers a label starting with `_`, `.` or `-`.
+- Method: Unit test "a label starting with an underscore, dot or hyphen opens no field and swallows the click (Known issue)" in test/page/modules/renderReq.labelRename.requirements.test.ts.
+- Criteria: A label starting with `_`, `.` or `-` opens no field and the click is swallowed.

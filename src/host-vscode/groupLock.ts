@@ -110,6 +110,7 @@ export function createVscodePanelGroups(
   }
 
   return {
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-151
     /**
      * Locks the editor group a new side preview created, so files opened while the preview has focus
      * land in another group. Only a group that holds just this panel is locked. Never blocks the preview.

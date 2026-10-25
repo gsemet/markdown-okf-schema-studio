@@ -96,6 +96,7 @@ function recordFocus<T>(body: (focused: RuntimeElement[]) => T): T {
   }
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-010
 test("T21: Enter in a list item inserts an empty item after it, focuses it, and does not save", () => {
   recordFocus((focused) => {
     const list = openListEditor('["one","two"]');
@@ -250,6 +251,7 @@ test("T24: Remove field is disabled with a tooltip on a required row", () => {
   assert.equal(removeButton.getAttribute("data-tooltip"), tooltip);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-029
 test("T24: Remove field stays enabled on an optional row", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   openFrontmatterValueEditor(harness);
@@ -260,6 +262,7 @@ test("T24: Remove field stays enabled on an optional row", () => {
   assert.equal(removeButton.getAttribute("title"), "Remove frontmatter field");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
 test("T24: choosing a field in the picker adds it right after the open row", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   openFrontmatterValueEditor(harness);
@@ -365,6 +368,7 @@ test("T25: an invalid custom key shows an error and posts nothing", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-037
 test("T25: a pending frontmatter edit opens the editor of the new field and clears the state once it closes", () => {
   const harness = createRuntimeHarness({
     mapFrontmatter: true,
@@ -498,6 +502,8 @@ test("T30: previewPropertiesTable is ignored for another request, version, docum
   assert.equal(harness.htmlInsertions.length, 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-193
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
 test("T30: previewPropertiesTable is deferred while a frontmatter editor is open, then applied on close", () => {
   const harness = createRuntimeHarness({ mapFrontmatter: true });
   openFrontmatterValueEditor(harness);
@@ -520,6 +526,7 @@ test("T30: previewPropertiesTable is deferred while a frontmatter editor is open
   assert.deepEqual(harness.htmlInsertions.map((entry) => entry.position), ["beforebegin"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001
 test("T30: a replaced section gets edit-cell tabindex in edit mode and none outside it", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");

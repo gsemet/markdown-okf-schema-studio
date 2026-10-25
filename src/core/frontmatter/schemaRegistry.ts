@@ -15,6 +15,7 @@ const entries = new Map<string, RegistryEntry>();
 // Entries for schemas that were deleted or renamed are never re-resolved, so cap the registry.
 const MAX_ENTRIES = 64;
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-027
 /**
  * Returns the same resolved schema object while every input it was built from is unchanged, so the
  * compiled-validator caches keyed by that object keep hitting. Inputs are compared by content, not

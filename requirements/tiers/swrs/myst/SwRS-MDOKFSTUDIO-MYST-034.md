@@ -8,13 +8,13 @@ description: When a figure or image has a requested width, the extension SHALL
   content update.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: deprecated
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-008
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Archived. Not an observable behaviour; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
@@ -40,5 +40,5 @@ When a figure or image has a requested width, the extension SHALL apply it from 
 
 ### Verification notes
 
-- Method: test
+- Method: Visual scenario `figure-anchors-${theme}-${mode ?? "theme"}` in test/visual/scenarioDefinitions2.ts
 - Criteria: The value is re-validated with the page's own pattern.

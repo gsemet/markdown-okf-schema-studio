@@ -3,20 +3,21 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-FMEDIT-021
 uuid: 95d8c126-2370-4c3d-bbb3-1f1e09d7cee8
 title: Turning edit mode off closes a field editor without saving
-description: When a writer turns edit mode off while a field editor is open, the
-  extension SHALL close the editor without posting its value.
+description: "When a writer turns edit mode off while a field editor is open, the
+  extension SHALL close the editor without posting its value."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-019; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-019
 ---
 
 ## Turning edit mode off closes a field editor without saving
@@ -24,8 +25,6 @@ tested_in_files: []
 ### Normative behavior
 
 When a writer turns edit mode off while a field editor is open, the extension SHALL close the editor without posting its value.
-
-Known issue: leaving edit mode discards a typed but unsaved field value, while block editors save theirs.
 
 ### Scenario: Nominal
 
@@ -39,7 +38,11 @@ Known issue: leaving edit mode discards a typed but unsaved field value, while b
 - WHEN the writer turns edit mode off
 - THEN the block is saved, which is the difference with a field editor
 
+### Known issues
+
+- Known issue: leaving edit mode discards a typed but unsaved field value, while block editors save theirs.
+
 ### Verification notes
 
-- Method: Inspection of applyEditMode (src/page/features/editMode.ts) and unit test on the page runtime.
+- Method: Unit test turning edit mode off closes a field editor without a save but saves a changed block editor in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: closeFrontmatterEditor is called without a save; the block editor path posts a final save.

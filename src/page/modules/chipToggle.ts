@@ -74,6 +74,7 @@ export function installChipToggle(
     });
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-143
   const toggle = (chip: Element): void => {
     const comment = chip.parentElement;
     if (!comment || !comment.classList.contains("okf-comment") || !partsOf(comment)) return;
@@ -107,6 +108,7 @@ export function installChipToggle(
   });
 
   let shown: boolean | undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
   const setShowComments = (next: boolean): void => {
     const changed = shown !== undefined && shown !== next;
     shown = next;

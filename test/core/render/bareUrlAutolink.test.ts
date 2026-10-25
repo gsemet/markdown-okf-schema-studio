@@ -18,6 +18,7 @@ function summary(html: string): string[] {
   return anchors(html).map((a) => `${textContent(a)} -> ${attribute(a, "href")}`);
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-001
 test("bare http(s) and www URLs render as links with GFM trailing-punctuation rules", async () => {
   const source = [
     "Plain https://example.com/path?q=1#frag and http://example.org/a.",

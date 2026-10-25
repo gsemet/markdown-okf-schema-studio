@@ -9,16 +9,17 @@ description: When any `markdownOkfSchemaStudio.frontmatter.*` setting changes,
   document.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMSCHEMA-005
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMSCHEMA-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-004; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-004
 ---
 
 ## A frontmatter setting change re-analyses the open previews
@@ -41,7 +42,6 @@ When any `markdownOkfSchemaStudio.frontmatter.*` setting changes, the extension 
 
 ### Verification notes
 
-- Method: Not covered by a test today.
+- Method: Unit test `a frontmatter setting change reads the settings again and analyses the table of the active document only` in `test/session/diagReq.settings.requirements.test.ts`.
 - Criteria: The change event is filtered by section; the preview and plantuml sections also trigger the same refresh. Other previews are re-rendered from their last good render with the new settings, not re-analysed.
-- Known issue: no test changes a frontmatter setting while a preview is open.
 - Known issue: a preview whose document is not the active editor's document is not re-analysed by this path; it only re-renders from its last good render.

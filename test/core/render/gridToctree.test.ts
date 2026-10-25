@@ -62,6 +62,7 @@ const GRID = [
   "::::",
 ].join("\n");
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-053
 test("a grid renders its items in a column container with one class per breakpoint", async () => {
   const { dom, diagnostics } = await render(GRID);
   const grid = findElement(dom, (element) => hasClass(element, "myst-grid"));
@@ -146,6 +147,8 @@ const DOCS = {
   [`${root}/chap/b.md`]: "# Chapter B\n",
 };
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022
+// @tests_req SwRS-MDOKFSTUDIO-MYST-057
 test("a toctree lists links labelled by the target H1, the file name or an explicit title", async () => {
   const source = "```{toctree}\n:caption: Contents\n\nintro\nsub/deep\nnotitle\nCustom <intro.md>\n```\n";
   const { dom, html } = await render(source, DOCS);

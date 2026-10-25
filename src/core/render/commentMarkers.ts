@@ -116,6 +116,7 @@ function threadChipLabel(messages: ThreadMessage[]): string {
   return messages.length > 1 ? `${messages[0].author} (${messages.length})` : messages[0].author;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-167
 /** A `<!-- THREAD` comment: a green chip with the first author, a body with one entry per message. */
 function threadNode(
   node: CommentMarkerNode,
@@ -147,6 +148,7 @@ function threadNode(
   node.children = [];
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-133
 function commentNode(
   node: CommentMarkerNode,
   body: string,
@@ -195,6 +197,7 @@ function todoChipNode(): CommentMarkerNode {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-139
 function splitTodo(value: string): CommentMarkerNode[] | undefined {
   const parts: CommentMarkerNode[] = [];
   let offset = 0;

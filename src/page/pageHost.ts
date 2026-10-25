@@ -63,6 +63,7 @@ export function createPageHost(transport: HostTransport, window: PageHostClock):
       transport.setState?.(state);
     }
   }
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-125
   function setStateThrottled(state: PageSavedState): void {
     const now = throttleClock();
     if (pendingStateTimer === undefined && now - lastStateWrite >= STATE_THROTTLE_MS) {

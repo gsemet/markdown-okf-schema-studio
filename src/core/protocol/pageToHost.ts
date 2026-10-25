@@ -426,6 +426,7 @@ export type PageMessageOf<T extends PageToHostType> = Extract<PageToHostMessage,
 // ---------------------------------------------------------------------------------------------
 // Validators
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-013
 const VIEW_PREFERENCE_VALIDATORS: Record<string, (value: unknown) => boolean> = {
   zoom: (value) => Number.isSafeInteger(value) && (value as number) >= 70 && (value as number) <= 200,
   widthMode: (value) => isOneOf(value, ["margin", "auto", "full"] as const),
@@ -445,6 +446,7 @@ const MAX_PLANTUML_INCLUDE_PATH_LENGTH = 4096;
 
 const MAX_WARNING_KEY_LENGTH = 32;
 
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-090
 /** The list and pick requests of the MyST palette carry only the id their answer is matched by. */
 const isHostRequest: MessageValidator = (message) =>
   isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "";
@@ -544,39 +546,53 @@ export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageV
   previewReveal: stateMessage("previewReveal"),
   previewState: stateMessage("previewState"),
   previewLink: stateMessage("previewLink"),
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-083
   previewLinkDiscover: stateMessage("previewLinkDiscover", (message) => Array.isArray(message.requests)
     && message.requests.length <= 64
     && message.requests.every((request) => typeof request === "string" && request.length <= 4096)),
+  // @implements_req SwRS-MDOKFSTUDIO-THEME-013
   previewThemeModeChanged: stateMessage("previewThemeModeChanged",
     (message) => isPreviewThemeMode(message.previewThemeMode)),
   previewRefresh: stateMessage("previewRefresh"),
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-126
   previewAnchorModeChanged: stateMessage("previewAnchorModeChanged",
     (message) => typeof message.anchorToEditor === "boolean"),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-236
   previewEditModeChanged: stateMessage("previewEditModeChanged", (message) => typeof message.editMode === "boolean"),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-237
   // Inline edits: a block editor, a frontmatter field and a task-list checkbox.
   previewEditOpen: stateMessage("previewEditOpen"),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-238
   previewEditSave: stateMessage("previewEditSave",
     (message) => typeof message.originalText === "string" && typeof message.editedText === "string"),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-239
   previewEditCancel: stateMessage("previewEditCancel"),
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-054
   previewFrontmatterSave: stateMessage("previewFrontmatterSave", (message) => message.frontmatterAction === "remove"
     || Object.prototype.hasOwnProperty.call(message, "fieldValue")),
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-027
   previewCheckboxToggle: stateMessage("previewCheckboxToggle", (message) => Number.isSafeInteger(message.column)
     && (message.column as number) >= 0
     && typeof message.checked === "boolean"
     && message.line === message.endLine),
+  // @implements_req SwRS-MDOKFSTUDIO-CODE-026
   // Raw code of a code block, copied to the clipboard by the host.
   previewCopyText: (message) => isBoundedString(message.text, MAX_COPY_TEXT_LENGTH),
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-058
   // Back / Next of toolbar row 2: the host walks the panel's navigation history.
   previewHistoryGo: (message) => isOneOf(message.direction, ["back", "forward"] as const),
   // A view preference of toolbar row 2 (zoom, width mode, TOC, incoming changes, collapsed toolbar).
   previewViewPreferenceChanged: (message) => typeof message.preference === "string"
     && Object.hasOwn(VIEW_PREFERENCE_VALIDATORS, message.preference)
     && VIEW_PREFERENCE_VALIDATORS[message.preference](message.value),
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-010
   // The palette mode select of the edition palette: strict, GFM or MyST buttons (workspace state).
   previewPaletteModeChanged: (message) => isOneOf(message.mode, PALETTE_MODES),
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-051
   // Rename of a MyST label from its anchor icon: the source line of `(oldName)=` and both names.
   previewLabelRename: (message) => isSourceLine(message.line)
     && isValidLabelName(message.oldName) && isValidLabelName(message.newName),
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-178
   // Inline comment threads (`<!-- THREAD`): reply to or delete the thread at these source lines.
   // The host picks the author and the time and re-checks that the lines are still a thread.
   previewThreadReply: (message) => isHostRequest(message) && isSourceLine(message.line)
@@ -584,6 +600,7 @@ export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageV
     && isBoundedString(message.text, MAX_THREAD_REPLY_LENGTH) && message.text.trim() !== "",
   previewThreadDelete: (message) => isHostRequest(message) && isSourceLine(message.line)
     && isSourceLine(message.endLine) && (message.endLine as number) >= (message.line as number),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-240
   // Move of a body block past its neighbour from the "+" bar: both line ranges, the direction and
   // the moved block's viewport top (the host knows the new line). The host re-checks the ranges.
   previewBlockMove: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
@@ -592,30 +609,38 @@ export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageV
     && (message.pinViewportTop === undefined
       || (typeof message.pinViewportTop === "number" && Number.isFinite(message.pinViewportTop)
         && Math.abs(message.pinViewportTop) <= 100000)),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-241
   // Copy, cut and paste of selected blocks as Markdown (T40): the source lines of the selection
   // (or the line to paste after) and the viewport top of the block the screen is held on. The
   // host re-checks every line against the document.
   previewBlocksCopy: (message) => isSourceLine(message.line) && isSourceLine(message.endLine),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-242
   previewBlocksCut: (message) => isSourceLine(message.line) && isSourceLine(message.endLine)
     && isPinViewportTop(message.pinViewportTop),
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-243
   previewBlocksPaste: (message) => Number.isSafeInteger(message.insertAfterLine)
     && (message.insertAfterLine as number) >= 0
     && (message.pinLine === undefined || isSourceLine(message.pinLine))
     && isPinViewportTop(message.pinViewportTop),
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-069
   // Review comments (T43): a new thread on a selection and a reply. The host picks the author, the
   // ids and the time; it refuses read-only previews and writes the sidecar file.
   previewCommentCreate: (message) => isValidAnchor(message.anchor) && isCommentBody(message.body),
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-070
   previewCommentReply: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "" && isCommentBody(message.body),
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-071
   // Resolve, reopen and delete a thread (T44). The host refuses read-only previews and answers.
   previewCommentResolve: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "" && typeof message.resolved === "boolean",
   previewCommentDelete: (message) => isBoundedString(message.threadId, MAX_BODY_LENGTH)
     && message.threadId !== "",
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-245
   // The page's answer to a host flush request (CR 025): it posted the final save of every open
   // editor before this message, so the host can wait for those saves. It edits nothing.
   previewEditFlushed: (message) => isBoundedString(message.flushId, MAX_EDIT_ID_LENGTH)
     && message.flushId !== "" && typeof message.flushed === "boolean",
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-244
   // The page closed an inline editor the host asked about with `previewEditorWatch` (STAB-03): the
   // page updates that waited for it can run. It edits nothing.
   previewEditClosed: (message) => isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "",
@@ -634,6 +659,7 @@ export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageV
     && message.dataBase64.length > 0
     && message.dataBase64.length <= MAX_PASTED_IMAGE_BASE64_LENGTH
     && isBase64(message.dataBase64),
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-050
   // A local file of a PlantUML `!include` for the built-in engine: the name the directive gives and
   // the id (absolute path) the host gave the including file, or null for the document itself. The
   // host reads it under the rules of `{include}`; the answer repeats `editId`.
@@ -643,6 +669,7 @@ export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageV
       || (isBoundedString(message.from, MAX_PLANTUML_INCLUDE_PATH_LENGTH) && message.from !== "")),
   // CR 050: the warning banner's button opens the Problems view; it carries nothing else.
   previewShowProblems: () => true,
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-086
   // CR 050: the warning banner was closed; the key of its warning set (made by the page) is kept
   // for the document until the end of the session.
   previewWarningBannerClosed: (message) => isBoundedString(message.key, MAX_WARNING_KEY_LENGTH)
@@ -652,6 +679,7 @@ export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageV
     && isBoundedString(message.html, MAX_PASTED_HTML_LENGTH) && message.html !== "",
 };
 
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-052
 /**
  * A checker for a table of validators: the value is an object whose `type` is a key of the table
  * (never an inherited one), whose envelope is a page identity, and whose validator accepts it. The

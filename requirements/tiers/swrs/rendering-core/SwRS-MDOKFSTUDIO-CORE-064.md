@@ -9,16 +9,17 @@ description: When a document uses syntax of an extension that the nearest
   unchanged.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-072; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-072
 ---
 
 ## Warn about MyST syntax of a disabled extension
@@ -41,5 +42,5 @@ When a document uses syntax of an extension that the nearest `conf.py` does not 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "only the first use per extension is reported" in test/core/render/mystSyntaxDetect.test.ts; Unit test "MyST syntax missing from the nearest conf.py warns once per extension, rendering unchanged" in test/core/render/renderPipeline.test.ts
 - Criteria: One warning per extension, capped at 10.

@@ -15,6 +15,7 @@ test("frontmatter link tooltips wrap text in a fixed theme-aware pointer-transpa
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028
 test("typography is driven by VS Code markdown preview variables", () => {
   for (const variable of [
     "--studio-markdown-font-family",
@@ -99,6 +100,7 @@ test("sticky headings align with content and emphasize text in a full-width band
   assert.doesNotMatch(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*box-shadow:/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
 test("sticky headings start at the viewport top without filler and leave horizontal room for controls", () => {
   assert.doesNotMatch(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]::before/u);
   assert.match(
@@ -154,6 +156,7 @@ test("narrow properties wrap long paths without hiding expanded descriptions", (
   assert.doesNotMatch(narrowStyles, /display: none|overflow(?:-x)?: hidden/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("every admonition flavour gets an accent colour", () => {
   for (const flavour of [
     "note",
@@ -224,6 +227,7 @@ test("raw Markdown and YAML editors use the editor font, text fields keep the pr
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
 test("the table cell editor shares the block editor textarea rule and grows with its content", () => {
   // One rule carries the font family, size and line-height for both editors (no duplicated values).
   const shared = PREVIEW_THEME_CSS.match(
@@ -242,6 +246,7 @@ test("the table cell editor shares the block editor textarea rule and grows with
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-048
 test("the table toolbar status is not pushed up by the paragraph margin", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -322,6 +327,7 @@ test("MyST simple and no-icon admonition modifiers are styled", () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-022
 test("MyST table alignment and notebook output placeholders are styled", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -337,6 +343,7 @@ test("MyST table alignment and notebook output placeholders are styled", () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-007
 test("MyST numbered and emphasized code lines are styled", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -348,6 +355,7 @@ test("MyST numbered and emphasized code lines are styled", () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-008
 test("diff lines use full-width theme-aware add and delete treatments", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -369,6 +377,7 @@ test("diff lines use full-width theme-aware add and delete treatments", () => {
   assert.match(PREVIEW_THEME_CSS, /@media \(forced-colors: active\)[\s\S]*?\.myst-diff-line-deletion/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
 test("Mermaid diagrams keep SVG images contained and source inspectable", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -388,6 +397,7 @@ test("figure captions are centred and de-emphasised", () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-014
 test("a captioned code block is left-aligned with its caption as a title bar on top", () => {
   const css = PREVIEW_THEME_CSS;
   // The figure around the code no longer inherits the centred text of image figures.
@@ -415,6 +425,7 @@ test("the caption title bar takes its colours from theme variables only", () => 
   assert.doesNotMatch(rule, /#[0-9a-fA-F]{3,8}\b/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-008
 test("images never overflow the preview column", () => {
   assert.match(PREVIEW_THEME_CSS, /#sphinx-myst-preview-content img \{[^}]*max-width: 100%;/u);
 });
@@ -436,6 +447,9 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
   assert.doesNotMatch(PREVIEW_THEME_CSS, /data-sphinx-preview-mode-controls/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
 test("preview toolbar has three rows: actions with the collapse button, navigation, view options", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
@@ -616,6 +630,7 @@ test("active toolbar toggles do not show a redundant focus ring", () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
 test("frontmatter and table editors keep the active cell surface without nested input frames", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -633,6 +648,7 @@ test("frontmatter and table editors keep the active cell surface without nested 
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-table-cell-editor textarea\s*\{[^}]*white-space: pre-wrap;[^}]*overflow-wrap: anywhere;[^}]*resize: none;/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
 test("preview content width is configurable and can be unlimited", () => {
   assert.match(PREVIEW_THEME_CSS, /--sphinx-preview-content-max-width: 960px;/u);
   assert.equal(
@@ -662,6 +678,7 @@ test("table toolbar sits in the document flow above the table with labelled butt
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032
 test("overflowing content tables keep short cells whole and show scroll shadows", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -727,6 +744,7 @@ test("T28: insertion points are zero-height, hover-revealed gutter buttons", () 
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-007
 test("first-element gap: 40px on the first child, clearance only on the first editor and the Start writing button", () => {
   assert.match(
     PREVIEW_THEME_CSS,
@@ -771,6 +789,7 @@ test("status titles and messages are block-level only on status pages and non-pe
     /\[data-sphinx-preview-status-message\][^{]*\{[^}]*margin-block-start: 0\.25em;/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-049
 test("T43: the pending overlay is fixed, pointer-transparent and never in flow", () => {
   const rule = /\[data-sphinx-preview-pending-overlay\]\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS);
   assert.ok(rule, "the pending overlay rule exists");
@@ -781,6 +800,7 @@ test("T43: the pending overlay is fixed, pointer-transparent and never in flow",
     /\[data-sphinx-preview-pending-overlay\] > (strong|span)[^{]*\{[^}]*display: block;/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-THEME-043
 test("T08: zoom scales the content font size and the column width together", () => {
   assert.match(PREVIEW_THEME_CSS, /--sphinx-preview-zoom: 1;/u);
   assert.match(
@@ -796,6 +816,7 @@ test("T08: zoom scales the content font size and the column width together", () 
   assert.match(PREVIEW_THEME_CSS, /html\[data-sphinx-preview-toolbar-state="collapsed"\] \[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 62px;/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022
 test("P7: full width uses the 16 px gutter a broken-out table keeps in auto", () => {
   assert.match(PREVIEW_THEME_CSS,
     /html\[data-sphinx-preview-width="full"\]\s*\{[^}]*--sphinx-preview-content-gutter: 16px;/u);
@@ -813,6 +834,7 @@ test("T10: full width lifts the column limit and auto lets flagged elements brea
     /\[data-sphinx-preview-width-toggle\]\[data-width-mode="auto"\] \[data-width-icon="auto"\]/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
 test("the TOC column is hidden by default, reserves 256px when open and hides on narrow panes", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /nav\[data-sphinx-preview-toc\] \{\s*display: none;/u);
@@ -823,6 +845,8 @@ test("the TOC column is hidden by default, reserves 256px when open and hides on
   assert.match(css, /\[data-sphinx-preview-sticky-headings\] \{[^}]*max-width: calc\(100% - var\(--sphinx-preview-toc-reserve, 0px\)\)/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-143
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
 test("T15: an open comment is an admonition-like box and showComments off hides the gray chips only", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /\.okf-comment > \.okf-comment-body:not\(\[hidden\]\) \{[^}]*border-inline-start: 4px solid/u);
@@ -859,6 +883,7 @@ test("the comment boxes (compose, thread popover, open comment) have square corn
   assert.match(PREVIEW_THEME_CSS, /\[data-okf-comment-compose\] button,[^{]*\{[^}]*border-radius: 3px;/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
 test("T16: the change bars sit in one column of a layer, square, with no layout shift", () => {
   const css = PREVIEW_THEME_CSS;
   // The bar is no longer an inset shadow against the text edge, nor a pseudo-element of the block.
@@ -871,6 +896,7 @@ test("T16: the change bars sit in one column of a layer, square, with no layout 
   assert.match(css, /data-sphinx-preview-incoming="off"\] \[data-sphinx-preview-change-layer\] \{\s*display: none;/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 test("T16b: only the current TOC entry loses its rounded corners", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /li\[data-sphinx-preview-toc-current\] > button:not\(\[data-sphinx-preview-toc-twisty\]\) \{[^}]*border-radius: 0;[^}]*box-shadow: inset 3px 0 0 var\(--studio-focusBorder, Highlight\)/u);
@@ -935,6 +961,7 @@ test("CR 034: the table toolbar rides down with a scrolling table by a transform
   assert.doesNotMatch(rule, /position: (?:fixed|absolute)|inset-block|top:/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028
 test("T44: the Orphaned comments box sits in the content's bottom padding and adds no scroll height", () => {
   const padding = /#sphinx-myst-preview-content \{[^}]*padding: 0 var\(--sphinx-preview-content-gutter\) (min\(80vh[^;]*\));/u
     .exec(PREVIEW_THEME_CSS);
@@ -961,6 +988,8 @@ test("P11: the slash menu floats above the toolbar and the palette popovers and 
   assert.match(live, /clip: rect\(0 0 0 0\);/u, "the live region is visually hidden");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-034
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001
 test("K1: long words and bare URLs wrap inside text blocks, links and table cells", () => {
   const rule = /#sphinx-myst-preview-content :is\(([^)]*)\)\s*\{[^}]*overflow-wrap: anywhere;/u.exec(PREVIEW_THEME_CSS);
   assert.ok(rule, "expected an overflow-wrap: anywhere rule for text blocks");
@@ -970,6 +999,7 @@ test("K1: long words and bare URLs wrap inside text blocks, links and table cell
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
 test("an inline thread is a green chip with a bubble, a green titled box, and goes with the gray chips", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css, /\.okf-chip--thread \{[^}]*border-color: var\(--studio-charts-green/u);
@@ -1002,6 +1032,7 @@ function reducedMotionBlock(css: string): string {
   return "";
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-050
 test("CR 046: prefers-reduced-motion: reduce turns off every animation and transition of the motion layer", () => {
   // The page-wide rule ends every transition at once (a tiny duration would still start one).
   assert.match(reducedMotionBlock(PREVIEW_ACCESSIBILITY_CSS), /transition-duration: 0s !important;/u);

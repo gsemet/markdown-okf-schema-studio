@@ -71,6 +71,7 @@ function setup(options: { enabled?: boolean; blocked?: string } = {}) {
 const part = (body: FakeElement, attribute: string) => body.querySelector(`[${attribute}]`)!;
 const field = (body: FakeElement) => body.descendants().find((element) => element.tagName === "textarea")!;
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-171
 test("an open thread gets a reply box and a Delete button once, and apply is idempotent", () => {
   const { root, threads } = setup();
   const { body } = thread(root);
@@ -137,6 +138,7 @@ test("Cmd or Ctrl+Enter in the box replies, and keys in the box never reach the 
   assert.equal(asked.length, 1);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
 test("an open edit blocks the change with its reason, and a thread without lines is not sent", () => {
   const blocked = setup({ blocked: "Save or cancel the open edit first." });
   const first = thread(blocked.root);

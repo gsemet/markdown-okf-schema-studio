@@ -8,16 +8,17 @@ description: When a valid rename is accepted, the extension SHALL change only
   surrounding whitespace and CRLF endings.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-045; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-045
 ---
 
 ## A valid rename edits only the label text as one undo step
@@ -40,5 +41,5 @@ When a valid rename is accepted, the extension SHALL change only the `(old)=` te
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "renames only the label line and keeps everything else" in test/core/mapping/labelRename.test.ts; Integration suite run() in test/integration/labelRename.test.ts
 - Criteria: Edit is a single editor operation.

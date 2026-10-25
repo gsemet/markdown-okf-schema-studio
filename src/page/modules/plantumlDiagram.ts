@@ -68,6 +68,7 @@ const UNSUPPORTED_DIRECTIVE = new RegExp(
   "iu",
 );
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-032
 export function findUnsupportedPlantUmlFeature(source: string): UnsupportedPlantUmlFeature | undefined {
   const lines = source.split(/\r\n|\r|\n/u);
   for (const [index, line] of lines.entries()) {
@@ -117,6 +118,7 @@ export function installPlantUmlLoaders(target: Record<string, unknown>, fileLoad
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-023
 /** True for an opaque, dark CSS colour (`rgb()`/`rgba()` as `getComputedStyle` reports it). */
 export function isDarkBackground(color: string): boolean {
   const channels = (color.match(/[\d.]+/gu) ?? []).map(Number);
@@ -221,6 +223,8 @@ export function createPlantUmlDiagramRenderer(
     return seen;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-046
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-061
   const loadFile: PlantUmlFileLoader = (path, from, ok, err, request) => {
     const current = session;
     if (!current || !host) {
@@ -330,6 +334,7 @@ export function createPlantUmlDiagramRenderer(
       }
     });
 
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-039
   const outcome = (source: string, dark: boolean, base: string | undefined): Promise<Outcome> => {
     const key = `${dark ? "dark" : "light"}\u0000${base ?? ""}\u0000${source}`;
     const cached = cache.get(key);

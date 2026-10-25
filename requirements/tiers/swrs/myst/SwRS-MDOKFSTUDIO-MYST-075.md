@@ -8,16 +8,17 @@ description: When a warning is reported, the extension SHALL give the line of
   with CRLF or CR breaks.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-007
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-072; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-072
 ---
 
 ## Warnings carry the line of the syntax
@@ -40,5 +41,5 @@ When a warning is reported, the extension SHALL give the line of the syntax itse
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "the line is the line of the syntax inside a long paragraph and counts the frontmatter" in test/core/render/mystSyntaxDetect.test.ts
 - Criteria: Frontmatter lines are counted.

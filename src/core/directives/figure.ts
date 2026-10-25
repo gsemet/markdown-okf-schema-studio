@@ -10,6 +10,7 @@ import type { MystDirectiveDescriptor } from "./directive";
 /** A width the preview applies to a figure or an image (`data-okf-width`): a number and a unit. */
 export const OKF_WIDTH = /^\d+(?:\.\d+)?(?:px|%|em|rem)?$/u;
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-031
 /** The figure container beneath the directive gets the directive's source lines (one block). */
 function renderFigure(node: MystNode, line: number | undefined): void {
   const figure = node.children?.find((child) =>

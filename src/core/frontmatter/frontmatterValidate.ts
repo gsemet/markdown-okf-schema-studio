@@ -309,6 +309,9 @@ export function fieldUsesFilenameStemLinks(property: unknown): boolean {
     || isFilenameStemAnnotation((property as Record<string, unknown>).items);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
 /**
  * The table rows of a frontmatter mapping: schema fields in schema order, then unknown fields in
  * YAML order (warned about when `strict`), each with its link results and their issues.

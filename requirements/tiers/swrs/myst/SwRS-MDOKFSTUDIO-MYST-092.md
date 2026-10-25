@@ -8,16 +8,17 @@ description: When a document holds a `{table}`, `{list-table}` or `{csv-table}`
   table palette action.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-013
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-063; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-063
 ---
 
 ## The table directive family renders with its own styles and actions
@@ -40,5 +41,5 @@ When a document holds a `{table}`, `{list-table}` or `{csv-table}` directive, th
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "every plug-in renders, styles the preview and names MyST palette actions that exist" in test/core/directives/registry.test.ts
 - Criteria: Table family behaves per name.

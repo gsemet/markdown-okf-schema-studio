@@ -7,16 +7,17 @@ description: When a rename arrives for an untrusted or read-only preview, the
   extension SHALL change nothing and answer Renaming needs a trusted workspace.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-005; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TRUST-005
 ---
 
 ## The host refuses a rename in an untrusted or read-only preview
@@ -39,5 +40,5 @@ When a rename arrives for an untrusted or read-only preview, the extension SHALL
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a rename in an untrusted or read-only preview changes nothing and answers Renaming needs a trusted workspace" in test/session/renderReq.labelRename.requirements.test.ts
 - Criteria: Refusal carries the reason.

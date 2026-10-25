@@ -116,6 +116,8 @@ def pin_frontmatter_capture(page: Page, scenario: dict, failures: list[Failure])
     if sticky_headings.count() == 1 and sticky_headings.is_visible() and sticky_headings.inner_text().strip():
       failures.append(Failure(page_name, "sticky heading is visible in the top-of-file screenshot"))
 
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
 def check_sticky_headings(
   page: Page,
   scenario: dict,
@@ -447,6 +449,7 @@ def check_link_details(page: Page, scenario: dict, failures: list[Failure]) -> N
       failures.append(Failure(scenario["page"], f"link marker line label is incorrect: {result['lineLabel']}"))
 
 
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
 def check_tooltip_contrast(page: Page, scenario: dict, failures: list[Failure]) -> None:
     button = page.locator('[data-sphinx-preview-refresh]')
     button.hover()

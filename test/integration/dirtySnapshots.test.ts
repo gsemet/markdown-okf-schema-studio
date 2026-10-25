@@ -64,6 +64,7 @@ function replaceDocument(document: vscode.TextDocument, text: string): vscode.Wo
   return edit;
 }
 
+// @tests_req StRS-MDOKFSTUDIO-LIFE-005
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   const extensionRoot = path.resolve(__dirname, "../../..");
@@ -112,6 +113,7 @@ export async function run(): Promise<void> {
     const editMarker = "Normal edit latency marker";
     const editStartedAt = performance.now();
     assert.equal(await vscode.workspace.applyEdit(replaceDocument(document, `${originalSource}\n\n${editMarker}\n`)), true);
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-039
     await waitFor("the normal edited snapshot", () => {
       const preview = getActivePreviewForTests();
       return preview?.phase === "ready" && preview.html.includes(editMarker);
@@ -126,6 +128,7 @@ export async function run(): Promise<void> {
     });
     const includeRequestId = getActivePreviewForTests()?.requestId;
     fs.writeFileSync(refreshFixturePath, "# Refreshable include\n\nUpdated include marker\n", "utf8");
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-044
     await waitFor("the changed referenced include", () => {
       const preview = getActivePreviewForTests();
       return preview?.phase === "ready"
@@ -170,6 +173,7 @@ export async function run(): Promise<void> {
     await waitFor("the failed snapshot result", () => getActivePreviewForTests()?.phase === "failed");
     const stalePreview = getActivePreviewForTests();
     assert.ok(stalePreview);
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-049
     assert.match(stalePreview.html, /Preview is stale/iu);
     assert.match(stalePreview.html, /Simulated render failure for the dirty-snapshot test/u);
     assert.match(stalePreview.html, new RegExp(newestMarker, "u"));

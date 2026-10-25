@@ -9,6 +9,8 @@ import { createFrontmatterMenu } from "./frontmatterMenu";
 import { buildFrontmatterListEditor, type FrontmatterListEditor } from "./frontmatterListEditor";
 import type { FrontmatterControl, FrontmatterEdit, PageRuntime } from "./pageRuntime";
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+// @implements_req SwRS-MDOKFSTUDIO-FMEDIT-001
 /** Opens the value editor of a properties row (nothing when an editor is open or the row is read-only). */
 export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
   options?: { newField?: boolean; toggleBoolean?: boolean }): void {
@@ -32,6 +34,7 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
   const useListEditor = Array.isArray(value);
   const structuredValue = useListEditor
     || (value !== null && typeof value === "object");
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-037
   // A key that was just added as a custom key holds an empty string: it is edited as one line
   // of text, like a text field, and saved as a plain YAML scalar when that is safe.
   const newCustomKey = Boolean(options && options.newField) && value === ""
@@ -81,6 +84,7 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
       saveValue: () => saveValue(),
     });
   }
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-003
   if (schemaFound && fieldType === "enum") {
     const enumValues = Array.isArray(enums)
       ? enums.filter((enumValue): enumValue is string => typeof enumValue === "string")
@@ -161,6 +165,8 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
     edit.resizeTextarea = resizeTextarea;
   }
   edit.save = () => saveValue();
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-067
   const saveValue = (forcedValue?: unknown): void => {
     if (cancelled || edit.saving || control.disabled) return;
     if (forcedValue === undefined && fieldType === "text" && !useYamlEditor && !useListEditorValue
@@ -227,6 +233,7 @@ export function openFrontmatterValueEditor(rt: PageRuntime, row: Element,
     event.stopPropagation?.();
     saveValue(null);
   });
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-004
   control.addEventListener("keydown", (event) => {
     if (rt.textControls.keepUndoInControl(event)) return;
     if (event.key === "Escape") {

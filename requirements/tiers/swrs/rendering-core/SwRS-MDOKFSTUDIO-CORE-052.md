@@ -7,16 +7,17 @@ description: When a block editor closes, the extension SHALL fade the rendered
   block back in.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-050; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-050
 ---
 
 ## Fade a closed editor back to its block
@@ -39,5 +40,5 @@ When a block editor closes, the extension SHALL fade the rendered block back in.
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "CR 046: editors and menus appear softly only after a pointer or key press, never after a patch" in test/page/modules/motion.test.ts
 - Criteria: The fade class is applied on close.

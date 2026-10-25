@@ -8,16 +8,17 @@ description: When an image points to a local file that does not exist, the
   remove its source.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-003
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-008; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-008
 ---
 
 ## Keep an image whose file is missing
@@ -40,5 +41,5 @@ When an image points to a local file that does not exist, the extension SHALL ke
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "strips figure images that escape even the workspace root" in test/security/html-policy.test.ts; Visual scenario rendering-core/v19-missing-image-dark-900 in test/visual/scenarioDefinitions2.ts
 - Criteria: The missing-file image keeps its alt text without a `src` attribute.

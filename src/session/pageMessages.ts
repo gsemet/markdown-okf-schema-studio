@@ -96,6 +96,7 @@ export class PageMessageDispatcher {
     private readonly router: PageMessageRouter,
   ) {}
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-065
   /**
    * Handles a message of a preview page. The result is the work the handler started (a save, a
    * navigation), or undefined when the message was dropped.
@@ -150,6 +151,8 @@ export class PageMessageDispatcher {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
   /**
    * The gate of the page-state family. Before the render check, a ready report can show that the
    * webview reloaded an older document, or that it works through a chain of content patches. A stale
@@ -160,6 +163,7 @@ export class PageMessageDispatcher {
   private handlePageState(preview: PreviewSession, value: PageStateMessageUnion): PromiseLike<void> | undefined {
     const { manager } = this;
     const { rendering } = manager;
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-071
     if (value.type === "previewReady" && !preview.disposed && reportsReloadedDocument(value, {
       documentId: preview.stage?.activeDocumentIdentity,
       stageRequestId: preview.stage?.requestId,

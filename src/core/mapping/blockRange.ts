@@ -36,6 +36,7 @@ function frontmatterLineCount(text: string): number {
   return frontmatter ? splitLines(text.slice(0, frontmatter.length)).length : 0;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-124
 /** Validates a span against the text: lines in bounds, first and last line not blank. */
 function checkSpan(text: string, span: BlockSpan): BlockRangeRefusal | undefined {
   const { line, endLine } = span;
@@ -52,6 +53,7 @@ function checkSpan(text: string, span: BlockSpan): BlockRangeRefusal | undefined
   return undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-166
 /**
  * The exact source text of the lines `line`..`endLine`, without the final line break, with the
  * document's own line breaks. Refused for a span that is out of bounds or in the frontmatter.
@@ -65,6 +67,7 @@ export function spanText(text: string, line: number, endLine: number): string | 
   return lines.map((entry, index) => entry.text + (index === lines.length - 1 ? "" : entry.eol)).join("");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-169
 /**
  * Plans the deletion of a span of blocks together with one blank separator, so no gap of two blank
  * lines is left and no two blocks are glued. In the middle the span goes with the blank lines that
@@ -122,6 +125,7 @@ export function pastedBlockText(raw: string): string {
   return lines.join("\n");
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-174
 /** Plans the insertion of clipboard text as new blocks after `afterLine` (0 = start of the body). */
 export function planPaste(text: string, afterLine: number, raw: string): PastePlan | BlockRangeRefusal {
   const block = pastedBlockText(raw);

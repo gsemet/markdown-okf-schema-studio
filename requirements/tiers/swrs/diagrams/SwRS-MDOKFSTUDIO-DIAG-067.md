@@ -7,16 +7,17 @@ description: When the preview follows another document, the host SHALL forget
   all remembered include files.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-009
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-053; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-053
 ---
 
 ## The include watch is cleared when the preview follows another document
@@ -37,11 +38,7 @@ When the preview follows another document, the host SHALL forget all remembered 
 - WHEN it changes after the switch
 - THEN the page is not told
 
-### Known issues
-
-- Known issue: The clearing in previewManager has no test.
-
 ### Verification notes
 
-- Method: No test of the clearing on document switch.
+- Method: Unit test `the include watch is emptied when the preview follows another document` in `test/session/diagReq.plantuml.requirements.test.ts`.
 - Criteria: No stale watch survives a switch.

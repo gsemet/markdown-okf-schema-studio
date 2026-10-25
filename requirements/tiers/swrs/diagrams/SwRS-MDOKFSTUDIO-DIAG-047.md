@@ -3,28 +3,29 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-047
 uuid: 79ecfed3-7024-4b26-8c38-4eeb4271c3c2
 title: Include answers are matched by their edit id
-description: When the page receives a previewPlantUmlIncludeResult, it SHALL
-  give the answer to the request that has the same edit id and SHALL ignore an
-  answer whose edit id matches no waiting request or repeats an answered one.
+description: "When the page receives a previewPlantUmlIncludeResult, it SHALL give
+  the answer to the request that has the same edit id and ignore an answer whose edit
+  id matches no waiting request or repeats an answered one."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-009
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-090; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TRUST-090
 ---
 
 ## Include answers are matched by their edit id
 
 ### Normative behavior
 
-When the page receives a previewPlantUmlIncludeResult, it SHALL give the answer to the request that has the same edit id and SHALL ignore an answer whose edit id matches no waiting request or repeats an answered one.
+When the page receives a previewPlantUmlIncludeResult, it SHALL give the answer to the request that has the same edit id and ignore an answer whose edit id matches no waiting request or repeats an answered one.
 
 ### Scenario: Matching answer
 

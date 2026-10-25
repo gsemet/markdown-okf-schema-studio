@@ -3,21 +3,22 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-LAYOUT-017
 uuid: 7e191c11-2ef8-4450-a4ec-b4de7d56214f
 title: The toolbar bottom edge is published for the sticky palette
-description: When the floating toolbar shares horizontal space with the text
-  column, the extension SHALL publish its bottom edge plus 8 px as --sphinx-
-  preview-toolbar-bottom, and 0 otherwise.
+description: "When the floating toolbar shares horizontal space with the text column,
+  the extension SHALL publish its bottom edge plus 8 px as --sphinx-preview-toolbar-bottom,
+  and 0 otherwise."
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LAYOUT-005
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-LAYOUT-004
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LAYOUT-018; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-018
 ---
 
 ## The toolbar bottom edge is published for the sticky palette

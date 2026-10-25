@@ -8,16 +8,17 @@ description: When the preview is read-only because the workspace is untrusted or
   save with "Editing requires a trusted workspace."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-009
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-005; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TRUST-005
 ---
 
 ## A save in an untrusted workspace is refused
@@ -40,5 +41,5 @@ When the preview is read-only because the workspace is untrusted or the file is 
 
 ### Verification notes
 
-- Method: Inspection of handlePageState (src/session/pageMessages.ts).
+- Method: Unit test a frontmatter save in an untrusted workspace is refused with the trust message and changes nothing in test/host/fmtableReq.requirements.test.ts. Untested: the file outside the workspace (standalone) branch.
 - Criteria: Standalone files get the same wording.

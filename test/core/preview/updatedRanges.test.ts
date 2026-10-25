@@ -6,6 +6,7 @@ import { isOutsideChange, MAX_UPDATED_RANGES, updatedRangesForPatch } from "../.
 const BEFORE = "# Title\n\nFirst paragraph.\n\nSecond paragraph.\n";
 const AFTER = "# Title\n\nFirst paragraph, edited.\n\nSecond paragraph.\n";
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-094
 test("CR 046: an undo or a redo always counts as an outside change, the preview's own edit does not", () => {
   assert.equal(isOutsideChange(undefined, false, false), true, "another tool, a file changed on disk");
   assert.equal(isOutsideChange(undefined, true, false), false, "an edit the preview asked for");

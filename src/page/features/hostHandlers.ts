@@ -10,6 +10,7 @@ import type { PageRuntime } from "./pageRuntime";
 export function registerHostHandlers(rt: PageRuntime): void {
   const { hostMessages, host, context, state, bus } = rt;
   const parts = rt.parts;
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-191
   hostMessages.on("previewEditorWatch", (message) => {
     // The host holds page updates back until this editor closes (STAB-03): report the close. The
     // editor id is the match; the document id may already be the next document the host follows.
@@ -19,6 +20,8 @@ export function registerHostHandlers(rt: PageRuntime): void {
   hostMessages.on("previewContentPatch", (message) => {
     rt.contentPatch.applyContentPatch(message);
   });
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-193
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
   hostMessages.on("previewPropertiesTable", (message) => {
     if (state.activeFrontmatterEdit) {
       rt.diagnostics.editorTrace.record("properties table deferred", "seq " + message.seq);
@@ -28,6 +31,7 @@ export function registerHostHandlers(rt: PageRuntime): void {
     }
     rt.frontmatter.applyPropertiesMarkup(message.markup, message.seq);
   });
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-156
   hostMessages.on("previewShowComments", (message) => {
     parts.chipToggle.setShowComments(message.showComments !== false);
   });
@@ -43,6 +47,7 @@ export function registerHostHandlers(rt: PageRuntime): void {
     parts.incomingChanges.setEnabled(message.enabled !== false);
     parts.incomingChanges.setRanges(message.ranges);
   });
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
   hostMessages.on("previewFlushEdit", (message) => {
     // The host is about to switch document: post the final saves, then the answer, in that order.
     const flushId = message.flushId;
@@ -68,6 +73,7 @@ export function registerHostHandlers(rt: PageRuntime): void {
   hostMessages.on("previewLinkTargets", (message) => {
     parts.linkNavigation.applyTargets(message);
   });
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-090
   hostMessages.on("previewPlantUmlIncludeResult", (message) => parts.plantUmlFileRequests.receive(message));
   hostMessages.on("previewPlantUmlIncludesChanged", () => bus.emit("plantUmlIncludesChanged", undefined));
   hostMessages.on("previewBlocksResult", (message) => {

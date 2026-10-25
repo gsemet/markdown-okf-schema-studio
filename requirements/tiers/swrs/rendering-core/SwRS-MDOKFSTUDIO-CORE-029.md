@@ -5,26 +5,27 @@ uuid: 2abc210d-c78d-4c7b-8f8f-cba7bcb151b1
 title: Style headings
 description: When the preview shows headings, the extension SHALL use weight
   600, h1 at 2em and h2 at 1.5em with a bottom rule, h3 at 1.25em and h4 at 1em,
-  and top-level headings SHALL clear floating figures.
+  and let top- level headings clear floating figures.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-028; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-028
 ---
 
 ## Style headings
 
 ### Normative behavior
 
-When the preview shows headings, the extension SHALL use weight 600, h1 at 2em and h2 at 1.5em with a bottom rule, h3 at 1.25em and h4 at 1em, and top-level headings SHALL clear floating figures.
+When the preview shows headings, the extension SHALL use weight 600, h1 at 2em and h2 at 1.5em with a bottom rule, h3 at 1.25em and h4 at 1em, and let top-level headings clear floating figures.
 
 ### Scenario: Nominal style headings
 
@@ -40,5 +41,5 @@ When the preview shows headings, the extension SHALL use weight 600, h1 at 2em a
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "the top heading keeps the stock preview rule underneath it" in test/core/preview/previewStyles.test.ts
 - Criteria: Computed heading sizes, weight and clear match.

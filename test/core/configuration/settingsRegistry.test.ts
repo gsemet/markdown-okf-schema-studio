@@ -32,6 +32,8 @@ test("the generated settings schema is the package.json one, byte for byte", () 
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-156
 test("categories keep their titles and order, and settings are sorted by their order", () => {
   const configuration = contributedConfiguration();
   assert.deepEqual(configuration.map((category) => [category.title, category.order]), [
@@ -56,6 +58,7 @@ test("a setting with nothing stored reads as its schema default", () => {
   assert.equal(settingSection("preview"), "markdownOkfSchemaStudio.preview");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
 test("the page gets the scroll, reveal, sticky band and comment chip settings in its boot context", () => {
   assert.deepEqual(bootSettingKeys(PREVIEW_SETTINGS), [
     "scrollPreviewWithEditor",

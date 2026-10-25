@@ -7,16 +7,17 @@ description: When a table is wider than the content column, the extension SHALL
   scroll it inside its own box without widening the page.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LAYOUT-032; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-032
 ---
 
 ## Scroll wide tables inside their box
@@ -39,5 +40,5 @@ When a table is wider than the content column, the extension SHALL scroll it ins
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "overflowing content tables keep short cells whole and show scroll shadows" in test/core/preview/previewStyles.test.ts
 - Criteria: Page scroll width equals its client width with a wide table.

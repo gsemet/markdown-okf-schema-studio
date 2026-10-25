@@ -8,25 +8,17 @@ description: When the floating toolbar would cover the first element of a
   width or moving it down only as far as needed.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-004; no marker expected."
 derives_from: []
 user_need: As a writer, I can click the first block editor, the Start writing
   button and the properties controls at any pane width without the floating
   toolbar covering them.
-derived_by:
-- SwRS-MDOKFSTUDIO-LAYOUT-011
-- SwRS-MDOKFSTUDIO-LAYOUT-012
-- SwRS-MDOKFSTUDIO-LAYOUT-013
-- SwRS-MDOKFSTUDIO-LAYOUT-014
-- SwRS-MDOKFSTUDIO-LAYOUT-015
-- SwRS-MDOKFSTUDIO-LAYOUT-016
-- SwRS-MDOKFSTUDIO-LAYOUT-017
-- SwRS-MDOKFSTUDIO-LAYOUT-018
-- SwRS-MDOKFSTUDIO-LAYOUT-019
-- SwRS-MDOKFSTUDIO-LAYOUT-037
-- SwRS-MDOKFSTUDIO-LAYOUT-042
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-LAYOUT-004
 ---
 
 ## Nothing clickable hides under the floating toolbar

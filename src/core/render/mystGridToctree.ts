@@ -166,6 +166,7 @@ function parseBody(lines: readonly string[], firstLine: number, parse: GridParse
   return parsed.children ?? [];
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-053
 /** The per-breakpoint column counts of a `{grid}` argument; missing breakpoints inherit. */
 export function gridColumns(args: string | undefined): string[] {
   const given = (args ?? "").trim().split(/\s+/u).filter(Boolean).slice(0, GRID_BREAKPOINTS.length);
@@ -354,6 +355,7 @@ function link(href: string, label: string, extra = ""): unknown {
   return element("a", `myst-toctree-link${extra}`, [text(label)], { href });
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-MYST-057
 function toctreeEntry(name: string, title: string | undefined, context: ToctreeContext): unknown {
   if (EXTERNAL_URL.test(name)) {
     return element("li", "myst-toctree-entry", [link(name, title ?? name, " myst-toctree-external")]);

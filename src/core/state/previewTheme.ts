@@ -2,6 +2,7 @@ export type PreviewThemeMode = "current" | "dark" | "white" | "cream";
 
 export const PREVIEW_THEME_MODE_STORAGE_KEY = "previewThemeMode";
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
  * The theme mode of a workspace that has stored no choice: the warm, low-glare cream palette. A
  * mode stored by the toolbar theme button always wins over it.

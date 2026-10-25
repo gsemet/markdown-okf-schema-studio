@@ -7,16 +7,17 @@ description: When a writer presses ArrowUp at the start of the first body block
   editor, the extension SHALL NOT move the editor onto the properties table.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-011
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-079; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-BLOCK-079
 ---
 
 ## Boundary navigation does not step into the properties table
@@ -39,5 +40,5 @@ When a writer presses ArrowUp at the start of the first body block editor, the e
 
 ### Verification notes
 
-- Method: Inspection of adjacentMappedBlock (src/page/features/blockEditor.ts).
+- Method: Unit test ArrowUp at the start of the first body block does not step onto the properties table in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: The table is skipped when walking mapped blocks.

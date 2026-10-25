@@ -14,6 +14,7 @@ export class NavigationHistory {
   private entries: NavigationEntry[] = [];
   private index = -1;
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-065
   /** Adds a place after the current one; drops forward entries; ignores a duplicate of the current one. */
   push(entry: NavigationEntry): void {
     const current = this.entries[this.index];

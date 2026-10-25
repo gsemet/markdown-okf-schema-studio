@@ -139,6 +139,7 @@ const thread = (overrides: Record<string, unknown> = {}) => ({
 const marks = (document: FakeDocument) => document.querySelectorAll("[data-okf-comment-thread]");
 const badges = (document: FakeDocument) => document.querySelectorAll("[data-okf-comment-badge]");
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-017
 test("T42: the first occurrence of the quote is wrapped in a mark", () => {
   const { document, comments } = setup();
   const paragraph = document.add("p", { "data-line": "1" }, document.content, "a needle and another needle");
@@ -222,6 +223,8 @@ test("T42: blocks inside an open editor are left alone (O10)", () => {
   assert.equal(editing.textContent, "a needle");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-001
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-021
 test("T42: the popover shows author, date and bodies as text, never as HTML", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -346,6 +349,7 @@ const popoverOf = (document: FakeDocument) => document.querySelector("[data-okf-
 const sendButton = (document: FakeDocument) =>
   popoverOf(document).querySelectorAll("button").find((candidate) => candidate.textContent === "Reply")!;
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-081
 test("T43: the popover has a reply box that posts the thread id and the trimmed body", () => {
   const { document, comments, replies } = setupWithReply();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -428,6 +432,7 @@ test("T43: Cmd/Ctrl+Enter sends a reply and keys typed in the reply box stay the
   assert.deepEqual(replies, [["t1", "ok"]]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 test("T43: no reply box without a reply hook (read-only previews)", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -481,6 +486,7 @@ const press = (document: FakeDocument, selector: string) => {
 const orphanBox = (document: FakeDocument) => document.querySelector("[data-okf-orphans]");
 const orphanItems = (document: FakeDocument) => document.querySelectorAll("[data-okf-comment-orphan]");
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-086
 test("T44: Resolve sends the flag, waits for ok, and the mark changes style after the re-post", () => {
   const { document, comments, calls } = setupWithActions();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
@@ -596,6 +602,7 @@ test("T44: without resolve and delete hooks (read-only) the popover has neither 
   assert.equal(popoverOf(reply.document).querySelector("[data-okf-comment-resolve]"), null, "hooks decide, not the reply hook");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-028
 test("T44: a thread with no block at its line and no quote anywhere goes to the Orphaned comments box", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "plain text");

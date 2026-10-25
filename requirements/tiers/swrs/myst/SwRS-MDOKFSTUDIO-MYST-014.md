@@ -8,16 +8,17 @@ description: When context tag pairs are nested, the extension SHALL render each
   source range.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-002
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-013; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-013
 ---
 
 ## Nested context tags render as nested panels
@@ -40,5 +41,5 @@ When context tag pairs are nested, the extension SHALL render each pair as its o
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "nested context tags preserve each wrapper range" in test/core/render/mystFeatures.test.ts
 - Criteria: Each pair maps to its own lines.

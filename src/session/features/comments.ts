@@ -104,6 +104,7 @@ export class CommentsController {
     return open?.path !== undefined && open.isDirty;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-004
   /** Reads the sidecar of a document; undefined when there is none. */
   private async readSidecar(sidecar: string): Promise<string | undefined> {
     const { files } = this.manager.host;
@@ -119,6 +120,7 @@ export class CommentsController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-012
   /**
    * Tells the page the review comment threads stored in `<name>.comments.json` next to the shown
    * document (T42). Without a sidecar nothing is posted, unless threads shown earlier must go. An
@@ -228,6 +230,8 @@ export class CommentsController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-119
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
   /**
    * T45: saves the moved anchors with the document. Runs on save only, through the same per-file queue
    * as every comment write, so it honours its refusals: an invalid sidecar is left untouched, and so
@@ -296,6 +300,7 @@ export class CommentsController {
     void this.manager.host.ui.showWarning(`The review comments were not re-anchored in their file: ${reason}`);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-125
   /**
    * T45: a renamed or moved document takes its comments file along and names itself in it. Nothing
    * is overwritten: when the new comments file exists, or the old one is not valid, belongs to another
@@ -447,6 +452,7 @@ export class CommentsController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-090
   private async answer(
     preview: PreviewSession,
     kind: CommentKind,
@@ -462,6 +468,9 @@ export class CommentsController {
     this.postResult(preview, kind, threadId, outcome);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-054
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-069
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-044
   private handleCreate(preview: PreviewSession, message: PageMessageOf<"previewCommentCreate">): Promise<void> {
     const body = normalizeBody(message.body);
     const anchor = message.anchor;
@@ -473,6 +482,8 @@ export class CommentsController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-070
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-074
   private handleReply(preview: PreviewSession, message: PageMessageOf<"previewCommentReply">): Promise<void> {
     const body = normalizeBody(message.body);
     const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
@@ -484,6 +495,7 @@ export class CommentsController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-071
   private handleResolve(preview: PreviewSession, message: PageMessageOf<"previewCommentResolve">): Promise<void> {
     const threadId = typeof message.threadId === "string" ? message.threadId : undefined;
     const resolved = message.resolved === true;

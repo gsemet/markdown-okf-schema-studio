@@ -151,6 +151,7 @@ export class FrontmatterController {
       .some((target) => this.manager.canonicalPath(target) === canonical);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
   /** Resolves the frontmatter links of `documentUri` at `revision` after a debounce (T30). */
   public scheduleLinkEnrichment(
     preview: PreviewSession,
@@ -202,6 +203,7 @@ export class FrontmatterController {
     }, LINK_ENRICHMENT_DEBOUNCE_MS);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-043
   /**
    * Recomputes the frontmatter payload from the current buffer and re-renders
    * only the properties table, without running the heavier Sphinx build. Falls
@@ -256,6 +258,7 @@ export class FrontmatterController {
     preview.frontmatter.linkedTargetWatchers?.clear();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
   /**
    * Applies a fresh frontmatter result to the properties section (T30). The host's record of the page
    * is always updated; a page that is ready for the current stage is patched in place with the same
@@ -300,6 +303,7 @@ export class FrontmatterController {
     this.manager.rendering.setPanelHtml(preview, html);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-067
   /** Answers a frontmatter save with an error the page shows next to the field. */
   public postEditError(
     preview: PreviewSession,
@@ -338,6 +342,7 @@ export class FrontmatterController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-058
   private handleSave(preview: PreviewSession, message: PageMessageOf<"previewFrontmatterSave">): PromiseLike<void> | undefined {
     const { manager } = this;
     const document = currentPreviewDocument(preview, message);

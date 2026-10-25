@@ -57,6 +57,8 @@ export class ScrollSyncController {
       this.manager.view.recordPreviewState(preview, message);
       this.revealFromPage(preview, message);
     });
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-120
     router.on("previewAnchorModeChanged", (value, preview) => {
       this.manager.view.recordPreviewState(preview, value);
       if (typeof value.anchorToEditor === "boolean") {
@@ -75,6 +77,7 @@ export class ScrollSyncController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-100
   /** The visible text editor that shows the preview's document, if any. */
   public visibleEditorFor(preview: PreviewSession): PairedEditor | undefined {
     const { host } = this.manager;
@@ -84,6 +87,7 @@ export class ScrollSyncController {
     return host.editors.visible().find((candidate) => candidate.document.id === preview.documentUri);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-108
   private revealEditorLine(
     preview: PreviewSession,
     line: number,
@@ -113,6 +117,8 @@ export class ScrollSyncController {
     editor.revealLine(zeroBasedLine, position);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-097
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-128
   /** The editor's first visible line moves the pages of its document (all visible editors when undefined). */
   public syncEditorToPreview(editor: PairedEditor | undefined): void {
     const sourceEditors = editor ? [editor] : this.manager.host.editors.visible();
@@ -155,6 +161,7 @@ export class ScrollSyncController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-228
   /** Remembers the pin of an accepted final save for the render that shows the saved text (R7). */
   public storePendingPin(
     preview: PreviewSession,
@@ -203,6 +210,7 @@ export class ScrollSyncController {
     return { line: pin.line, viewportTop: pin.viewportTop };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-119
   /** Source line the next render shows at the preview reading line (anchoring rule R6). */
   public initialAnchorLine(preview: PreviewSession): number | undefined {
     if (preview.scroll.anchor?.documentId === preview.documentUri) {
@@ -256,6 +264,7 @@ export class ScrollSyncController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-026
   /** A hidden panel shown again catches up with an editor that moved meanwhile. */
   public restorePreviewState(preview: PreviewSession): void {
     preview.probe.restoreCalls += 1;
@@ -284,6 +293,7 @@ export class ScrollSyncController {
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-THEME-016
   /**
    * Answers a page's ready report with the live state it read from its render's context: a change
    * announced while the page was still loading may have reached it before it listened.

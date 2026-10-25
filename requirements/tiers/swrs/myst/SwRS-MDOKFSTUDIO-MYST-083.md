@@ -8,16 +8,17 @@ description: When the reader activates Open Problems on the banner, the
   untrusted previews.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-014
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-081; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-081
 ---
 
 ## Open Problems opens the Problems view
@@ -40,5 +41,5 @@ When the reader activates Open Problems on the banner, the extension SHALL open 
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "CR 050: Open Problems asks the host to open the Problems view" in test/page/modules/warningBanner.test.ts
 - Criteria: The message carries only the envelope and passes the document gate.

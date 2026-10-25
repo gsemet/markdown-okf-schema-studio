@@ -7,16 +7,17 @@ description: 'When a document uses `{cite}`, the extension SHALL show each key a
   muted `[key]` with the tooltip Unresolved citation: key and list no warning.'
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-005
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-022; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-022
 ---
 
 ## Unresolved citations show as muted keys
@@ -39,5 +40,5 @@ When a document uses `{cite}`, the extension SHALL show each key as muted `[key]
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "project-scoped roles and directives degrade to labelled placeholders" in test/core/render/mystFeatures.test.ts
 - Criteria: The live preview has no bibliography, so every citation is unresolved.

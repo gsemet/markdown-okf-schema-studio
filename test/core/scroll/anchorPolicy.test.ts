@@ -33,6 +33,7 @@ test("falls back to block bounds when paragraph lines cannot be measured", () =>
   assert.equal(policy.yAtLine(map, 5), 350);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
 test("converts lines to scroll positions and back through the reading offset", () => {
   const map = policy.buildAnchorMap([
     { top: 100, height: 40, line: 2, endLine: 2 },
@@ -67,6 +68,7 @@ test("reports the editor top line as the floor of the anchor", () => {
   assert.equal(policy.editorTopLine(Number.NaN), 1);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-100
 test("ignores editor echoes across re-renders, then yields to the user", () => {
   const guard = new EditorEchoGuard(500);
   guard.expect("file:///active.md", 10, 42, 100);

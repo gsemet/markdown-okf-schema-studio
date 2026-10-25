@@ -6,12 +6,12 @@ last section "Internal references". -->
 
 <!-- Why: the user problem or limitation this solves, in two or three sentences. -->
 
-## How it works
+## Deliverable showcase
 
-<!-- One or more small visuals, each next to the sentence it supports: a Mermaid flowchart of
-the modules or calls that change, a sequence diagram of one real flow, a before/after tree or
-table, or a 5-15 line code sketch of the new interface. Only the calls, files, props and
-boundaries the reviewer needs. A one-line fix may write "None". -->
+<!-- Show the deliverable, meaning what the reader gets, with small visuals each next to the
+sentence it supports: a Mermaid flowchart of the modules or calls that change, a sequence diagram
+of one real flow, a before/after tree or table, or a 5-15 line code sketch of the new interface.
+Only the calls, files, props and boundaries the reviewer needs. A one-line fix may write "None". -->
 
 ## Changes
 

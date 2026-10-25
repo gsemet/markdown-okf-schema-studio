@@ -8,15 +8,16 @@ description: When a writer edits the frontmatter, the Studio SHALL refresh the
   preview.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-001; no marker expected."
 derives_from: []
 user_need: As a writer, I see validation results update while I type, without
   the preview jumping.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-043
-- SwRS-MDOKFSTUDIO-FMSCHEMA-044
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-001
 ---
 
 ## The table follows edits to the document

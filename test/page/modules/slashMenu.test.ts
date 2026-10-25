@@ -137,6 +137,7 @@ const buttonIds = (root: FakeElement): string[] =>
 // ---------------------------------------------------------------------------------------------
 // Trigger rules
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-232
 test("P11: a slash at a line start or after whitespace may open the menu, other slashes may not", () => {
   const { slash } = setup("gfm");
   assert.equal(slash.canOpenAt("/", 0), true);
@@ -218,6 +219,7 @@ test("P11: a slash typed while text is selected does not open the menu", () => {
 
 const CARET_DEPENDENT = ["colorCode", "listTable", "pipeTable"];
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-238
 test("P11: the menu lists exactly the actions of the palette for each mode", () => {
   const expected: Record<string, string[]> = {};
   for (const mode of ["strict", "gfm", "myst"] as const) {
@@ -241,6 +243,8 @@ test("P11: the menu lists exactly the actions of the palette for each mode", () 
   assert.equal(expected.myst.includes("figure"), true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-085
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-106
 test("P11: the table cell palette lists only the actions allowed in a cell", () => {
   const h = setup("myst", "", "cell");
   const entries = h.palette.menuEntries();
@@ -279,6 +283,7 @@ test("P11: the colour-code button is listed only with the caret inside a colour 
 // ---------------------------------------------------------------------------------------------
 // Ranking
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-240
 test("P11: ranking puts a prefix before a word start before a subsequence", () => {
   const { slash } = setup("gfm");
   const entry = (label: string, aliases: string[] = []): EditPaletteMenuEntry =>
@@ -297,6 +302,8 @@ test("P11: ranking puts a prefix before a word start before a subsequence", () =
     "one letter: prefix, word start, then contained");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-017
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-263
 test("P11: the registry's aliases find the expected command first", () => {
   const first = (mode: EditActionMode, query: string): string | undefined => {
     const h = setup(mode);
@@ -332,6 +339,7 @@ test("P11: the registry's aliases find the expected command first", () => {
 // ---------------------------------------------------------------------------------------------
 // Keyboard, mouse, accessibility
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-242
 test("P11: the arrows move through the list and wrap; typing filters and resets the highlight", () => {
   const h = setup("gfm");
   h.type("/");
@@ -582,6 +590,7 @@ test("P11: moving the caret out of the /query closes the menu", () => {
   assert.equal(i.ids()[0], "todo", "and filters by the text up to the caret: /t");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-252
 test("P11: ARIA: listbox, options, activedescendant on the text box and a polite live count", () => {
   const h = setup("gfm");
   h.type("/");
@@ -620,6 +629,7 @@ test("P11: entry text is set as text, never as markup", () => {
 // ---------------------------------------------------------------------------------------------
 // Placement
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-256
 test("P11: the menu opens under the caret inside the viewport and flips above near the bottom", () => {
   const h = setup("gfm");
   const body = h.doc.body as unknown as { appendChild(node: FakeElement): FakeElement };
@@ -688,6 +698,8 @@ test("P11 r2: /bullet /ul /- find the Bulleted list, /num /ol /numbered the Numb
   assert.ok(first("myst", "list").indexOf("deflist") > 1);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-052
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-053
 test("P11 r2: choosing the list entries writes the list prefix as one edit", () => {
   const h = setup("strict", "Intro\n");
   h.type("/bullet");

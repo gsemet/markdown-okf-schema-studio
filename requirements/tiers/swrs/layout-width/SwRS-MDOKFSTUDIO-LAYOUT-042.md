@@ -10,16 +10,17 @@ description: When the floating toolbar overlaps an open first-block editor, the
   otherwise.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-LAYOUT-005
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-LAYOUT-004
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-LAYOUT-011; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-011
 ---
 
 ## A first-block editor's palette keeps its place unless the frame is under the toolbar

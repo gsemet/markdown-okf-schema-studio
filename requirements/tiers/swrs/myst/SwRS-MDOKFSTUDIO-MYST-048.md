@@ -8,16 +8,17 @@ description: When the host works on a rename, the extension SHALL disable the
   after a refusal showing its reason.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-010
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-009
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-038; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-038
 ---
 
 ## The rename field shows progress and refusals
@@ -40,5 +41,5 @@ When the host works on a rename, the extension SHALL disable the field with Rena
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "the result shows how many {ref} uses of the old name remain" in test/page/modules/labelRename.test.ts
 - Criteria: Matching is by edit id.

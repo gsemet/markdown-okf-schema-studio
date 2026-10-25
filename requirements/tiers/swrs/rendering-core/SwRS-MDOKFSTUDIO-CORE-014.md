@@ -8,17 +8,18 @@ description: When an `{include}` has an empty argument, the `:literal:` option
   as an unresolved placeholder.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-CORE-002
 - StRS-MDOKFSTUDIO-CORE-003
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-CORE-012; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-CORE-012
 ---
 
 ## Keep unsupported include forms as placeholders
@@ -39,7 +40,11 @@ When an `{include}` has an empty argument, the `:literal:` option or an option o
 - WHEN it is rendered
 - THEN the file is expanded
 
+### Known issues
+
+- Known issue: an `{include}` with an empty argument does not leave a placeholder; the writer fails on the missing argument text and the whole render is refused with an error. The `:literal:` and other-option forms do leave the placeholder.
+
 ### Verification notes
 
-- Method: test
+- Method: Unit test "an include with :literal:, an empty argument or an other option stays a placeholder; :class: expands" in test/core/render/renderReq.renderingCore.requirements.test.ts
 - Criteria: Only plain, `:class:` and `:label:` includes expand.

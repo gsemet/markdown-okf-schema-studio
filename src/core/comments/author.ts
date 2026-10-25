@@ -19,6 +19,7 @@ function clean(value: unknown): string {
   return value.replace(/[\u0000-\u001f\u007f]/gu, " ").trim().slice(0, MAX_AUTHOR_LENGTH).trim();
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-065
 export async function resolveAuthor(sources: AuthorSources): Promise<string> {
   const fromSetting = clean(sources.setting);
   if (fromSetting !== "") return fromSetting;

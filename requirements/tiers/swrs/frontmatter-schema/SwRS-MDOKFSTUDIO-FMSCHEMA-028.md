@@ -8,16 +8,18 @@ description: When a schema file is edited while a preview is open, the extension
   re-render or settings change.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMSCHEMA-009
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMSCHEMA-006
+annotation_exemption: true
+exemption_reason: "Absence of code: no watcher observes schema folders. No implementation
+  marker is possible."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-027
 ---
 
 ## Editing a schema does not refresh open previews by itself
@@ -40,6 +42,6 @@ When a schema file is edited while a preview is open, the extension SHALL leave 
 
 ### Verification notes
 
-- Method: Not covered by a test today (follows from the absence of a watcher on schema folders).
+- Method: Unit test `editing a schema file refreshes nothing by itself; the next document change re-analyses the table` in `test/session/diagReq.settings.requirements.test.ts`.
 - Criteria: No watcher observes `_schema` folders; only linked targets and Markdown stems are watched.
 - Known issue: a schema author must touch the document or refresh the preview to see the effect of a schema edit.

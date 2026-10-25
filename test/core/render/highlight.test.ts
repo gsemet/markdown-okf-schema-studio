@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import { highlightCodeBlocks } from "../../../src/core/render/highlight";
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-001
 test("colours tokens for a registered grammar", () => {
   const html = highlightCodeBlocks(
     '<pre><code class="language-rust">fn main() { let x = 1; }\n</code></pre>',
@@ -16,6 +17,7 @@ test("resolves the fence label through aliases", () => {
   assert.match(html, /hljs-string/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-008
 test("renders diff and patch fences with signed-line treatments", () => {
   const source = "--- a/settings.ini\n+++ b/settings.ini\n@@ -1 +1 @@\n value=true\n-old=true\n+old=false\n\n";
   const renderedText = (html: string): string => html.replace(/<[^>]*>/gu, "");
@@ -36,6 +38,7 @@ test("renders diff and patch fences with signed-line treatments", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CODE-005
 test("wraps numbered lines without breaking multiline highlighted spans", () => {
   const html = highlightCodeBlocks(
     '<pre><code class="language-python" data-myst-line-numbers="true"'

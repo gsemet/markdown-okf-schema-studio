@@ -8,24 +8,16 @@ description: While a field editor is open, the Studio SHALL block refresh,
   table out of block selection, movement and navigation.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-008; no marker expected."
 derives_from: []
 user_need: As a writer, I am not surprised by other edits or refreshes
   interfering with a metadata edit in progress.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMEDIT-002
-- SwRS-MDOKFSTUDIO-FMEDIT-058
-- SwRS-MDOKFSTUDIO-FMEDIT-059
-- SwRS-MDOKFSTUDIO-FMEDIT-060
-- SwRS-MDOKFSTUDIO-FMEDIT-061
-- SwRS-MDOKFSTUDIO-FMEDIT-062
-- SwRS-MDOKFSTUDIO-FMEDIT-063
-- SwRS-MDOKFSTUDIO-FMEDIT-064
-- SwRS-MDOKFSTUDIO-FMEDIT-072
-- SwRS-MDOKFSTUDIO-FMEDIT-073
-- SwRS-MDOKFSTUDIO-FMEDIT-080
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMEDIT-008
 ---
 
 ## Keep metadata editing separate from other editing

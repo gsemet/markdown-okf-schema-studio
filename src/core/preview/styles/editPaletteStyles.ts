@@ -1,3 +1,4 @@
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-252
 /**
  * The edition palette: the pill bar, its popovers and pickers (table grid, emoji, references,
  * colours), the table cell bar, the `/` menu and the link and figure panels.

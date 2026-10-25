@@ -8,16 +8,17 @@ description: When a `{grid-item-card}` is rendered, the extension SHALL show its
   the title one link when `:link:` is given.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-MYST-011
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-MYST-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-053; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-053
 ---
 
 ## Grid item cards show title, header, body, footer and link
@@ -40,5 +41,5 @@ When a `{grid-item-card}` is rendered, the extension SHALL show its title, an op
 
 ### Verification notes
 
-- Method: test
+- Method: Unit test "a grid-item-card renders header, body, footer and a stretched link" in test/core/render/gridToctree.test.ts
 - Criteria: `:link-alt:` is the tooltip.

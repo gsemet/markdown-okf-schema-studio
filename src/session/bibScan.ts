@@ -29,6 +29,7 @@ export interface BibScanServices {
   workspace: Pick<WorkspaceInfo, "folderOf" | "findFiles">;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-183
 /**
  * Scans the `.bib` files near a document: its own folder first, then the rest of its workspace
  * folder. `documentPath` is the document's file system path (undefined for a document that is not

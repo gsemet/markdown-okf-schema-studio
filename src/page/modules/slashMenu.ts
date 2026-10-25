@@ -186,6 +186,7 @@ export function createSlashMenu(
     return 0;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-240
   /** Scores of the matching entries, best first (ties keep the registry order). */
   function rank(
     text: string,
@@ -244,6 +245,7 @@ export function createSlashMenu(
       : shown.length + (shown.length === 1 ? " command" : " commands") + " available";
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-238
   function render(): void {
     if (!list) return;
     list.textContent = "";
@@ -324,6 +326,7 @@ export function createSlashMenu(
     announce();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-256
   /** Puts the menu under the caret, or above it when there is no room below; keeps it on screen. */
   function place(): void {
     if (!root) return;
@@ -363,6 +366,7 @@ export function createSlashMenu(
     if (root) place();
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-252
   function open(at: number): void {
     const entries = deps.getEntries();
     if (entries.length === 0) return;
@@ -463,6 +467,7 @@ export function createSlashMenu(
   }
 
   return {
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-232
     handleInput(event) {
       if (applying) return;
       if (event.isComposing) {
@@ -480,6 +485,7 @@ export function createSlashMenu(
       const caret = Number(control.selectionEnd);
       if (canOpenAt(String(control.value ?? ""), caret - 1)) open(caret - 1);
     },
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-242
     handleKey(event) {
       if (!root || event.isComposing) return false;
       const key = String(event.key);

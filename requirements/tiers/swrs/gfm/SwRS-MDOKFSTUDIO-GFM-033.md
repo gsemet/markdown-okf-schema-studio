@@ -7,16 +7,17 @@ description: When a document contains raw HTML outside the supported subset, the
   extension SHALL omit it from the rendering.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-GFM-004
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-GFM-002
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-GFM-029; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-GFM-029
 ---
 
 ## Unsupported raw HTML is dropped
@@ -39,5 +40,5 @@ When a document contains raw HTML outside the supported subset, the extension SH
 
 ### Verification notes
 
-- Method: Unit test (currently none).
+- Method: Unit test "a div block and an inline marquee element are absent from the HTML, while kbd stays" in test/core/render/renderReq.gfm.requirements.test.ts.
 - Criteria: Unsupported tags are absent.

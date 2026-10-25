@@ -3,28 +3,29 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-090
 uuid: e7f5acba-e658-4331-bbc3-131d6716f4ca
 title: A jarPath that is a directory is reported
-description: When the resolved JAR path exists but is not a file, the extension
-  SHALL show The PlantUML JAR path is not a file followed by the path on every
-  PlantUML diagram with state error, and SHALL start no process.
+description: "When the resolved JAR path exists but is not a file, the extension SHALL
+  show The PlantUML JAR path is not a file followed by the path on every PlantUML
+  diagram with state error, without starting a process."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-DIAG-013
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-DIAG-007
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-089; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-089
 ---
 
 ## A jarPath that is a directory is reported
 
 ### Normative behavior
 
-When the resolved JAR path exists but is not a file, the extension SHALL show The PlantUML JAR path is not a file followed by the path on every PlantUML diagram with state error, and SHALL start no process.
+When the resolved JAR path exists but is not a file, the extension SHALL show The PlantUML JAR path is not a file followed by the path on every PlantUML diagram with state error, without starting a process.
 
 ### Scenario: Directory
 
@@ -38,11 +39,7 @@ When the resolved JAR path exists but is not a file, the extension SHALL show Th
 - WHEN the preview is rendered
 - THEN the JAR is run
 
-### Known issues
-
-- Known issue: Untested branch of validateJarPath.
-
 ### Verification notes
 
-- Method: No test of the not-a-file branch; to be added.
+- Method: Unit test `a jarPath naming a directory is refused on every diagram before any process starts` in `test/core/render/diagReq.jar.requirements.test.ts`.
 - Criteria: Directory paths are refused before spawning.

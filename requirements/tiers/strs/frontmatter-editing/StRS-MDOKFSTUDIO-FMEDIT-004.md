@@ -8,24 +8,16 @@ description: When a writer commits or cancels a metadata edit, the Studio SHALL
   keep the properties table in place, and leave the document undoable.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-001; no marker expected."
 derives_from: []
 user_need: As a writer, I know whether my metadata edit was saved, refused or
   cancelled, and I can undo it like any other edit.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMEDIT-019
-- SwRS-MDOKFSTUDIO-FMEDIT-020
-- SwRS-MDOKFSTUDIO-FMEDIT-021
-- SwRS-MDOKFSTUDIO-FMEDIT-022
-- SwRS-MDOKFSTUDIO-FMEDIT-023
-- SwRS-MDOKFSTUDIO-FMEDIT-055
-- SwRS-MDOKFSTUDIO-FMEDIT-056
-- SwRS-MDOKFSTUDIO-FMEDIT-057
-- SwRS-MDOKFSTUDIO-FMEDIT-065
-- SwRS-MDOKFSTUDIO-FMEDIT-082
-- SwRS-MDOKFSTUDIO-FMEDIT-087
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMEDIT-001
 ---
 
 ## Save, cancel and follow metadata edits

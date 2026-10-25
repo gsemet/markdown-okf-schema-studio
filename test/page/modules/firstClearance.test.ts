@@ -49,6 +49,7 @@ function setup(
   return { clearance, published };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-011
 test("nothing is pushed when the toolbar is beside the column", () => {
   const { clearance, published } = setup(rect(0, 100, 600, 2000), rect(12, 800, 150, 72), { kind: "frame" });
   assert.equal(clearance.value(), 0);
@@ -229,6 +230,7 @@ test("the leading properties table is observed itself, also after it is replaced
   assert.deepEqual(sectionObserver.targets, [page.currentSection()]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-018
 test("a late load or font settlement measures again", (context) => {
   const page = dynamicPage();
   context.after(page.restore);

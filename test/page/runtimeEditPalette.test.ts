@@ -27,6 +27,8 @@ import {
  * picker (features/editorChrome.ts; modules/editPalette.ts, linkPanel.ts).
  */
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("T21: the palette sits in a host above the block editor frame, not inside it", () => {
   const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   const textarea = openBlockEditorWithSource(harness);
@@ -85,6 +87,7 @@ test("T21: the palette buttons show the real shortcut in their tooltip", () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-036
 test("T21: every palette control keeps the focus in the text box on mousedown", () => {
   const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   openBlockEditorWithSource(harness);
@@ -98,6 +101,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-039
 test("T21: clicking Bold edits the text in one native step and keeps the editor open", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -119,6 +123,7 @@ test("T21: clicking Bold edits the text in one native step and keeps the editor 
   assert.equal(harness.messages.at(-1)?.final, false, "autosave, not a final save");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-043
 test("T21: the heading list opens as a menu and choosing a level replaces the prefix", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -144,6 +149,7 @@ test("T21: the heading list opens as a menu and choosing a level replaces the pr
   assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-editing"), "true");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-031
 test("T21: Escape closes an open popover first and only then cancels the editor", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -173,6 +179,7 @@ test("T21: opening one popover closes the other and a second click closes it", (
   assert.equal(paletteMenu(harness), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-054
 test("T21: the code language list is text plus the highlighter languages and aliases", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -390,6 +397,7 @@ test("T22: Ctrl+K opens the link panel under the palette with the selection as t
   assert.equal(focus.last(), linkField(harness, "url"), "focus goes to the first empty field");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-083
 test("T22: Cmd+K on macOS opens the panel and Ctrl+K there does not", () => {
   const mac = linkHarness("MacIntel");
   assert.equal(openLinkPanel(mac.harness, mac.textarea, [4, 7]).prevented, true);
@@ -416,6 +424,7 @@ test("T22: with no selection both fields are empty and the text takes the focus"
   assert.equal(focus.last(), linkField(harness, "text"));
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-089
 test("T22: the Link button opens the same panel and keeps the focus rule", () => {
   const { harness, textarea } = linkHarness();
   textarea.value = "say foo now";
@@ -444,6 +453,7 @@ test("T22: the panel has labelled fields, Insert and Cancel in the tab order", (
     ["text", "url", "insert", "cancel"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-092
 test("T22: Enter in the URL field inserts [text](url) as one undo step and returns to the text box", () => {
   const { harness, textarea, calls, focus } = linkHarness();
   openLinkPanel(harness, textarea, [4, 7]);
@@ -736,6 +746,7 @@ function choosePaletteMode(harness: RuntimeHarness, mode: string): void {
   select.dispatch("change");
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 test("T23: the palette mode starts as GFM without a stored value or saved state", () => {
   const harness = createRuntimeHarness();
   openBlockEditorWithSource(harness);
@@ -761,6 +772,7 @@ test("T23: the stored workspace mode is used, and the saved webview state wins o
   assert.equal(paletteOf(invalid)!.getAttribute("data-palette-mode"), "gfm");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-169
 test("T23: choosing a mode posts previewPaletteModeChanged once and keeps the editor open", () => {
   const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
   const textarea = openBlockEditorWithSource(harness);
@@ -796,6 +808,7 @@ test("T23: a mode change does not save the block, and the next editor opens in t
   assert.equal(palettes.at(-1)?.getAttribute("data-palette-mode"), "strict");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 test("T23: a read-only preview has no palette and never posts the message", () => {
   const harness = createRuntimeHarness({ editingEnabled: false, initialPaletteMode: "strict" });
   harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
@@ -863,6 +876,7 @@ test("T23: Escape on the select returns to the text box, Cmd/Ctrl+Enter finishes
   assert.equal(finalSaves(harness), 1);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-017
 test("T23: Ctrl+Shift+M focuses the select, Cmd+Shift+M on macOS, and the tooltip shows it", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -894,6 +908,7 @@ function litCells(menu: RuntimeElement): number {
   return allDescendants(menu).filter((e) => e.getAttribute("data-grid-on") === "true").length;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-078
 test("T24: the Table button opens the grid; hovering lights rows x columns and shows the size", () => {
   const harness = createRuntimeHarness();
   openBlockEditorWithSource(harness);
@@ -1049,6 +1064,7 @@ test("T24: a mouse press in the text box closes the picker and the editor stays 
   assert.ok(paletteMenu(harness), "the picker opens again");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-072
 test("T24: an emoji chosen after the text changed is inserted at the live caret, never a stale one", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -1120,6 +1136,7 @@ test("T25: Alert writes the head, opens the type list near the caret and picking
   assert.equal(textarea.selectionStart, "> [!WARNING]\n> Mind".length, "the caret stayed on its text");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-115
 test("T25: dismissing the type list leaves NOTE, the focus in the text box and the editor open", () => {
   const harness = createRuntimeHarness({ initialPaletteMode: "gfm" });
   const focus = trackFocus(harness);

@@ -7,16 +7,17 @@ description: When a checkbox toggle is applied, the extension SHALL apply it as
   a single undo step of the source document.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-GFM-003
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-058; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-BLOCK-058
 ---
 
 ## A checkbox toggle is one undo step
@@ -39,5 +40,5 @@ When a checkbox toggle is applied, the extension SHALL apply it as a single undo
 
 ### Verification notes
 
-- Method: Integration test in a real window; no-editor path untested.
+- Method: Integration suite run() in test/integration/checkboxToggle.test.ts (real window). Untested: the no-editor path.
 - Criteria: One undo restores the source in both cases.

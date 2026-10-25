@@ -1,3 +1,4 @@
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-015
 /** Shows the one error of a diagram that Mermaid could not render, replacing any earlier one. */
 export function showMermaidError(diagram: HTMLElement, reason: string): void {
   diagram.querySelector(".myst-mermaid-error")?.remove();

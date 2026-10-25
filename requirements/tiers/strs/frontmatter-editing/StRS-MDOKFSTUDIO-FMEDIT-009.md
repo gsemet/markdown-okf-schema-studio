@@ -8,24 +8,16 @@ description: When a metadata edit does not match the schema, targets a stale
   reason and leave the document unchanged.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-008; no marker expected."
 derives_from: []
 user_need: As a writer, I am protected from saving metadata that the schema
   rejects or that no longer matches the document.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMEDIT-018
-- SwRS-MDOKFSTUDIO-FMEDIT-032
-- SwRS-MDOKFSTUDIO-FMEDIT-047
-- SwRS-MDOKFSTUDIO-FMEDIT-048
-- SwRS-MDOKFSTUDIO-FMEDIT-049
-- SwRS-MDOKFSTUDIO-FMEDIT-051
-- SwRS-MDOKFSTUDIO-FMEDIT-052
-- SwRS-MDOKFSTUDIO-FMEDIT-053
-- SwRS-MDOKFSTUDIO-FMEDIT-054
-- SwRS-MDOKFSTUDIO-FMEDIT-079
-- SwRS-MDOKFSTUDIO-FMEDIT-083
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMEDIT-008
 ---
 
 ## Refuse metadata edits that break the schema or the document state

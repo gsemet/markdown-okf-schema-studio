@@ -13,6 +13,7 @@ test("identical input yields an empty replacement", () => {
   assert.equal(result.text, "");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042
 test("insertion, deletion and replacement in the middle", () => {
   assert.deepEqual(minimalReplacement("abcdef", "abXXcdef"), { start: 2, end: 2, text: "XX" });
   assert.deepEqual(minimalReplacement("abXXcdef", "abcdef"), { start: 2, end: 4, text: "" });

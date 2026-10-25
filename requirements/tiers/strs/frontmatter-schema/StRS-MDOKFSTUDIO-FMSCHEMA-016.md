@@ -7,18 +7,15 @@ description: When a frontmatter link value is displayed, the Studio SHALL show
   whether it resolves and, if not, why, without blocking the first paint.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-014; no marker expected."
 derives_from: []
 user_need: As a writer, I see at a glance which references are broken and why.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMSCHEMA-063
-- SwRS-MDOKFSTUDIO-FMSCHEMA-064
-- SwRS-MDOKFSTUDIO-FMSCHEMA-065
-- SwRS-MDOKFSTUDIO-FMSCHEMA-066
-- SwRS-MDOKFSTUDIO-FMSCHEMA-086
-- SwRS-MDOKFSTUDIO-FMSCHEMA-087
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-014
 ---
 
 ## Link status is visible on each value

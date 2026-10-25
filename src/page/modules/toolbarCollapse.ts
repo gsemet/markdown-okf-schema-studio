@@ -5,6 +5,9 @@ export interface ToolbarCollapseContext {
   initialViewPreferences?: { toolbarCollapsed?: boolean };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-007
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-169
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
  * Collapse button of toolbar row 1: hides or shows rows 2 and 3 (the `hidden` attribute also
  * takes them out of the Tab order). The choice is the `toolbarCollapsed` view preference:

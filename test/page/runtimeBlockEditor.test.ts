@@ -23,6 +23,7 @@ import {
  * top spacing of the first block (features/blockEditor.ts, textControls.ts).
  */
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-029
 test("fenced Markdown editors sit outside the rendered pre and preserve source when saving", () => {
   const harness = createRuntimeHarness();
   const code = harness.mappings[1];
@@ -74,6 +75,7 @@ test("fenced Markdown editors sit outside the rendered pre and preserve source w
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-026
 test("without caretRangeFromPoint a click opens the editor with the caret at the end of the block", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -159,6 +161,7 @@ test("Enter in a list item continues the list, and Shift+Enter stays native", ()
   assert.equal(save?.editedText, "- a\n- \n");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
 test("Tab and Shift+Tab indent the block editor without closing it", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -252,6 +255,7 @@ test("block textareas resize on input and preview layout changes", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
 test("edit mode loads raw Markdown and saves changes when the block loses focus", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");
@@ -296,6 +300,8 @@ test("edit mode loads raw Markdown and saves changes when the block loses focus"
   assert.equal(save?.endLine, 52);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-017
 test("edit mode hover marks the whole list that a click would edit", () => {
   for (const editMode of [true, false]) {
     const harness = createRuntimeHarness();
@@ -330,6 +336,7 @@ test("edit mode hover marks the whole list that a click would edit", () => {
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-033
 test("an opened block editor shows its line range, Done and Cancel on one row", () => {
   const harness = createRuntimeHarness();
   const textarea = openRawEditor(harness);
@@ -367,6 +374,7 @@ test("the status line shares one row with the Done and Cancel buttons", () => {
   assert.equal(row.childElements.indexOf(status) < row.childElements.indexOf(buttons), true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-053
 test("Cancel cancels only what reached the document", () => {
   const withAutosave = createRuntimeHarness();
   let textarea = openRawEditor(withAutosave);
@@ -392,6 +400,7 @@ test("Cancel cancels only what reached the document", () => {
   assert.equal(withoutAutosave.pendingTimerCount(), 0);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
 test("Done posts a final save and both buttons keep the textarea focused on press", () => {
   const harness = createRuntimeHarness();
   const textarea = openRawEditor(harness);
@@ -449,6 +458,7 @@ test("raw Markdown block edits autosave on input without disabling the textarea"
   assert.equal(save?.editedText, "Continued typing\n");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-079
 test("arrow boundaries transfer block editing in every direction", () => {
   const cases = [
     { key: "ArrowLeft", position: 0, line: 1, source: "Previous block\n", caret: "end" },
@@ -596,6 +606,7 @@ test("Escape in an unchanged Markdown block editor closes it without a message",
   assert.equal(harness.mappings[1].contains(textarea.parentElement as RuntimeElement), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-191
 test("STAB-03: an editor the host watches reports its close; without a watch the close stays silent", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -619,6 +630,7 @@ test("STAB-03: a watch for an editor that is already closed is answered at once"
     [["previewEditClosed", "gone"]]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-064
 test("STAB-03: a watch sent while the host already follows another document is still answered", () => {
   // The host switched to the next document while this page still shows the previous one: the
   // watch carries the new document id, and the page must answer it by editor id, or the host
@@ -636,6 +648,7 @@ test("STAB-03: a watch sent while the host already follows another document is s
     [["previewEditClosed", "gone"]], "a closed editor is reported at once");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-042
 test("typing is saved once after the autosave delay, carrying the last text", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -652,6 +665,7 @@ test("typing is saved once after the autosave delay, carrying the last text", ()
   assert.equal(saves[0].editedText, "Second\n");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-205
 test("pagehide flushes a pending autosave without waiting for the timer", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
@@ -751,6 +765,7 @@ test("ArrowUp/ArrowDown leave the block only on the first/last visual line", () 
   assert.equal(harness.messages.at(-1)?.type, "previewEditSave", "the unchanged block moves on");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-035
 test("a table cell arrow inside a wrapped cell does not move to another cell", () => {
   const harness = createRuntimeHarness();
   const { cells, input } = openTableCellEditorForTab(harness);
@@ -766,6 +781,7 @@ test("a table cell arrow inside a wrapped cell does not move to another cell", (
   assert.equal(cellEditorOf(harness).parentElement, cells[2][0]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
 test("typing * or _ on a selection wraps it, keeps it selected and wraps again on a second press", () => {
   for (const marker of ["*", "_", "`", "~"]) {
     const harness = createRuntimeHarness();
@@ -958,6 +974,7 @@ function openEmptyDocumentEditor(harness: RuntimeHarness): void {
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-102
 test("top spacing: the editor of the first block of the document carries the first-block class", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   harness.dispatchDocument("click", { target: harness.mappings[0], preventDefault: () => undefined });

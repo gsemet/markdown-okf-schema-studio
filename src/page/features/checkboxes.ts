@@ -45,6 +45,7 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
   const checkboxEditingEnabled = deps.editingEnabled;
   const pendingCheckboxToggles = new Map<string, { checkbox: HTMLInputElement; checked: boolean }>();
 
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
   function initializeCheckboxes(): void {
     document.querySelectorAll?.<HTMLInputElement>(CHECKBOX_SELECTOR).forEach((checkbox) => {
       if (checkboxEditingEnabled) return;
@@ -53,6 +54,8 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
     });
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-021
   function toggleCheckbox(checkbox: HTMLInputElement, event: Event): void {
     const line = Number(checkbox.getAttribute("data-myst-checkbox-line"));
     const column = Number(checkbox.getAttribute("data-myst-checkbox-column"));

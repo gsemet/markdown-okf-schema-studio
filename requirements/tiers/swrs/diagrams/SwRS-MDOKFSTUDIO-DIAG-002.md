@@ -3,29 +3,29 @@ type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-002
 uuid: 20cd8979-d677-493a-a123-278be04b053d
 title: The Mermaid renderer loads only when a Mermaid figure exists
-description: When the rendered content contains a Mermaid figure, the extension
-  SHALL add the Mermaid renderer script from its bundle to the page with the
-  page's script nonce, and SHALL add no Mermaid script when the content has
-  none.
+description: "When the rendered content contains a Mermaid figure, the extension SHALL
+  add the Mermaid renderer script from its bundle to the page with the page's script
+  nonce, and adds no Mermaid script when the content has none."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-001
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-DIAG-001; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-DIAG-001
 ---
 
 ## The Mermaid renderer loads only when a Mermaid figure exists
 
 ### Normative behavior
 
-When the rendered content contains a Mermaid figure, the extension SHALL add the Mermaid renderer script from its bundle to the page with the page's script nonce, and SHALL add no Mermaid script when the content has none.
+When the rendered content contains a Mermaid figure, the extension SHALL add the Mermaid renderer script from its bundle to the page with the page's script nonce, and adds no Mermaid script when the content has none.
 
 ### Scenario: Figure present
 

@@ -21,6 +21,7 @@ import { PROPERTIES_CSS } from "./styles/propertiesStyles";
  * under `styles/`, one module per part, joined here in cascade order.
  */
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-128
 /**
  * The accessibility sheet: the theme token mapping, base colours, focus rings, status banners,
  * forced colours and reduced motion.
@@ -111,6 +112,7 @@ export const PREVIEW_THEME_CSS =
   + CONTENT_BLOCK_CSS
   + PROPERTIES_CSS;
 
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
 /** The per-render rule that sets the content column width (0 lifts the limit). */
 export function previewContentWidthCss(maxContentWidth = DEFAULT_PREVIEW_CONTENT_WIDTH): string {
   const width = normalizePreviewContentWidth(maxContentWidth);

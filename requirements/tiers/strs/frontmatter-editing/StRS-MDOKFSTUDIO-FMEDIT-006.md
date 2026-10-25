@@ -8,26 +8,16 @@ description: When a writer chooses Add field from a field editor, the Studio
   its editor.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: StRS
+annotation_exemption: true
+exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-005; no marker expected."
 derives_from: []
 user_need: As a writer, I add the metadata fields my schema expects, or a custom
   one, and fill them in at once.
-derived_by:
-- SwRS-MDOKFSTUDIO-FMEDIT-028
-- SwRS-MDOKFSTUDIO-FMEDIT-033
-- SwRS-MDOKFSTUDIO-FMEDIT-034
-- SwRS-MDOKFSTUDIO-FMEDIT-035
-- SwRS-MDOKFSTUDIO-FMEDIT-036
-- SwRS-MDOKFSTUDIO-FMEDIT-037
-- SwRS-MDOKFSTUDIO-FMEDIT-038
-- SwRS-MDOKFSTUDIO-FMEDIT-039
-- SwRS-MDOKFSTUDIO-FMEDIT-040
-- SwRS-MDOKFSTUDIO-FMEDIT-041
-- SwRS-MDOKFSTUDIO-FMEDIT-042
-- SwRS-MDOKFSTUDIO-FMEDIT-084
-- SwRS-MDOKFSTUDIO-FMEDIT-086
+derived_by: []
+superseded_by: StRS-MDOKFSTUDIO-FMEDIT-005
 ---
 
 ## Add a metadata field

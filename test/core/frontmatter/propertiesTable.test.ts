@@ -39,11 +39,13 @@ function fieldWith(overrides: Partial<FieldEntry>): FieldEntry {
   };
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
 test("no markup when frontmatter is absent or the table is disabled", () => {
   assert.equal(renderPropertiesTable(resultWith({ present: false }), true), "");
   assert.equal(renderPropertiesTable(resultWith(), false), "");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
 test("renders a two-column Obsidian-like table with escaped values", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [
@@ -70,6 +72,7 @@ test("renders a two-column Obsidian-like table with escaped values", () => {
   assert.doesNotMatch(markup, /status/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
 test("description controls live in column headers with an adjacent collapsed restore slot", () => {
   const markup = renderPropertiesTable(resultWith({ schemaFound: true }), true);
   assert.match(markup, /<div class="okf-properties-title">Frontmatter properties<\/div>/u);
@@ -90,6 +93,7 @@ test("read-only tables expose values without edit targets", () => {
   assert.doesNotMatch(markup, /data-okf-edit-cell|data-okf-value-cell/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-063
 test("annotated scalar and list values render independent navigation and status markup", () => {
   const valid: FrontmatterLinkResult = {
     value: "docs/a.md",
@@ -141,6 +145,7 @@ test("annotated scalar and list values render independent navigation and status 
   assert.match(markup, /docs\/missing\.md/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
 test("valid link tooltips expose workspace-relative paths", () => {
   const valid: FrontmatterLinkResult = {
     value: "../docs/a.md",
@@ -370,6 +375,8 @@ test("maps the injected properties section to the frontmatter source", () => {
   assert.match(markup, /data-sphinx-preview-document="file:\/\/\/active\.md"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-029
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
 test("error rows carry the red underline class and hover tooltip", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [
@@ -643,6 +650,7 @@ test("plain yaml tables stay two-column even when docs are absent", () => {
   assert.doesNotMatch(markup, /okf-doc/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
 test("nested object values render as escaped YAML while keeping edit metadata", () => {
   const markup = renderPropertiesTable(resultWith({
     fields: [
@@ -825,6 +833,7 @@ test("unavailable links use the warning icon", () => {
   assert.match(markup, /<span aria-hidden="true">⚠<\/span> Link root unavailable/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
 test("the header badge is a button that goes to the first issue", () => {
   const markup = renderPropertiesTable(resultWith({
     summary: { errors: 2, warnings: 1, infos: 0 },

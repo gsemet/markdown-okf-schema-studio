@@ -7,17 +7,18 @@ description: 'When a schema conditional rule forbids null for the edited field, 
   extension SHALL refuse a null save with "Schema validation failed: {message}".'
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-009
-- StRS-MDOKFSTUDIO-FMEDIT-002
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+- StRS-MDOKFSTUDIO-FMEDIT-001
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMEDIT-016; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-016
 ---
 
 ## A null value is refused when a conditional rule forbids it

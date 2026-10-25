@@ -7,16 +7,17 @@ description: When a display equation is wider than the pane, the extension SHALL
   scroll it sideways inside its own box and not widen the page.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-MYST-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-024; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-MYST-024
 ---
 
 ## Long display equations scroll inside their box
@@ -39,5 +40,5 @@ When a display equation is wider than the pane, the extension SHALL scroll it si
 
 ### Verification notes
 
-- Method: test
+- Method: Visual scenario chapter-dark-half in test/visual/scenarioDefinitions1.ts
 - Criteria: Overflow is local.

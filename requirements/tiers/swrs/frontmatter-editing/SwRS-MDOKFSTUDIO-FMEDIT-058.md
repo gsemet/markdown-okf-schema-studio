@@ -8,16 +8,17 @@ description: While a field editor is open, the extension SHALL disable the
   before refreshing." in the editor.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
-- StRS-MDOKFSTUDIO-FMEDIT-011
-annotation_exemption: false
-exemption_reason:
+- StRS-MDOKFSTUDIO-FMEDIT-008
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-BLOCK-041; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-BLOCK-041
 ---
 
 ## Refresh is blocked while a field editor is open
@@ -40,5 +41,5 @@ While a field editor is open, the extension SHALL disable the toolbar Refresh bu
 
 ### Verification notes
 
-- Method: Inspection of refreshPreview (src/page/features/pageInput.ts); the refusal text has no test.
+- Method: Unit test Refresh is refused with a message while a field editor is open and works once it is closed in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: The button is disabled on open and re-enabled on close.

@@ -5,6 +5,8 @@ export interface WidthModeContext {
   initialViewPreferences?: { widthMode?: string };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-020
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 /**
  * Width button of toolbar row 2: Margin (the configured column), Auto (the column stays, but
  * tables, figures, images and code blocks wider than it break out, up to the available width and
@@ -36,6 +38,7 @@ export function installWidthMode(
   const pick = (value: unknown): string | undefined => (
     typeof value === "string" && modes.includes(value) ? value : undefined
   );
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
   let mode = pick(saved?.viewWidthMode) ?? pick(context.initialViewPreferences?.widthMode) ?? "margin";
   const marked = new Set<Element>();
   const figures = new Set<Element>();
@@ -60,6 +63,8 @@ export function installWidthMode(
     return undefined;
   };
 
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
+  // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
   const update = (): void => {
     clear();
     const content = document.getElementById(contentId);

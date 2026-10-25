@@ -68,6 +68,7 @@ function insertedIndexes(base: string[], current: string[]): number[] | undefine
   return inserted.reverse();
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-200
 /**
  * Line ranges of `current` that differ from `base` (added or modified lines; lines that only
  * disappeared have no range). Line endings are ignored. Large or very different texts report the

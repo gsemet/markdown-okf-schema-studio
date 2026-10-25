@@ -8,16 +8,17 @@ description: When the extension is built, it SHALL produce
   copy the engine's LICENSE to out/bundle/plantuml/LICENSE.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: superseded
 origin: native
 tier: SwRS
 derives_from:
 - StRS-MDOKFSTUDIO-DIAG-006
-annotation_exemption: false
-exemption_reason:
+annotation_exemption: true
+exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-074; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+superseded_by: SwRS-MDOKFSTUDIO-TRUST-074
 ---
 
 ## The built-in engine bundle and licence are packaged

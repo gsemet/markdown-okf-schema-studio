@@ -46,6 +46,7 @@ test("searches every workspace root and blocks cross-root wikilink ambiguity", a
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-098
 test("discovers bare wikilinks before accepting an active-root sibling", async () => {
   const firstRoot = fs.mkdtempSync(path.join(os.tmpdir(), "studio-bare-wiki-a-"));
   const secondRoot = fs.mkdtempSync(path.join(os.tmpdir(), "studio-bare-wiki-b-"));
@@ -155,6 +156,8 @@ test("classifies anchors, external links, and workspace-local files", async () =
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-094
 test("blocks unsafe anchors, schemes, and paths", async () => {
   const workspaceRoot = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-navigation-test-"));
   try {

@@ -55,6 +55,7 @@ import {
 
 export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
     id: "edit-list-narrow",
     fixture: "11-list-editing",
     theme: "dark",
@@ -113,6 +114,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
         : (viewport.width === 900 || theme === "light" ? " (the `open` step keeps the opened editor)." : ".")),
   }))),
   {
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-024
     id: "edit-frontmatter-key-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -126,6 +128,9 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "The expanded key suggestions show an unused property from the matching JSON Schema.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-003
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-019
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-028
     id: "edit-frontmatter-value-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -179,6 +184,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "The checkbox starts checked, is clicked once, and is captured unchecked after posting a false save to the mock host.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
     id: "preview-edit-activation-scroll-wide",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -229,6 +235,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the original $$ Markdown editor after activation without a scroll jump.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-022
     id: "preview-sticky-headings-1",
     fixture: "05-long-chapter",
     theme: "dark",
@@ -274,6 +282,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "Depth three remains legible in a narrow preview at the normal text size.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-025
     id: "preview-sticky-headings-natural-growth",
     fixture: "10-sticky-heading-wrap",
     theme: "dark",
@@ -288,6 +297,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "Long, wrapped heading ancestry grows the sticky band to its rendered content height.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-010
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-006
     id: "okf-schema-dark",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -299,6 +310,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "title badge with readable contrast.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
     id: "okf-schema-missing-required-dark",
     fixture: "09-okf-schema-missing-required",
     theme: "dark",
@@ -319,6 +331,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "summary below the last property row.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-006
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-023
     id: "schema-validation-error-dark",
     fixture: "10-schema-validation-error",
     theme: "dark",
@@ -349,6 +363,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "The full-width schema diagnostic wraps on a narrow viewport without overflowing its cell.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
     id: "frontmatter-scroll-feedback",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -359,6 +374,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "Three scroll cycles reach both ends; the final frame returns to the top of the tall frontmatter table.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-FMEDIT-001
     id: "frontmatter-scroll-feedback-edit",
     fixture: "08-okf-schema",
     theme: "dark",
@@ -370,6 +386,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       "Edit mode remains on after three scroll cycles; the field editor is closed and the final frame is at the top.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
     id: "frontmatter-dark",
     fixture: "07-frontmatter",
     theme: "dark",
@@ -510,6 +527,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   ] as const).flatMap(([theme, viewport]) => (viewport.width >= 760
     ? (["margin", "auto", "full"] as const)
     : (["margin"] as const)).map((mode) => ({
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-006
     id: `toc-column-${theme}-${viewport.width}${mode === "margin" ? "" : `-${mode}`}`,
     fixture: "30-toc",
     theme,
@@ -548,6 +566,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["light", "hidden", 9],
     ["dark", "hidden", 10],
   ] as const).map(([theme, state, number]) => ({
+    // @tests_req StRS-MDOKFSTUDIO-REVIEW-012
     id: `review-annotations/v${String(number).padStart(2, "0")}-comment-list-chips-${state}-${theme}-900`,
     fixture: "46-comment-list",
     theme,
@@ -598,6 +617,9 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["dark", undefined],
     ["dark", "cream"],
   ] as const).map(([theme, mode]) => ({
+    // @tests_req StRS-MDOKFSTUDIO-MYST-001
+    // @tests_req StRS-MDOKFSTUDIO-MYST-009
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-036
     id: `figure-anchors-${theme}-${mode ?? "theme"}`,
     fixture: "33-figures-anchors",
     theme,
@@ -612,6 +634,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "to a label scrolls to it.",
   })),
   ...["white", "dark"].flatMap((mode) => [WIDE, NARROW].map((viewport) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-067
     id: `frontmatter-link-details-${mode}-${viewport.width}`,
     fixture: "14-frontmatter-links",
     theme: "dark",
@@ -624,6 +647,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   }))),
   // P9 B4: content and error states (gap fill). Ids are final; see scenarioIds.ts for their locks.
   ...([WIDE, NARROW] as const).map((viewport) => ({
+    // @tests_req StRS-MDOKFSTUDIO-CORE-001
     id: `rendering-core/v${viewport === WIDE ? "17" : "18"}-cjk-rtl-light-${viewport.width}`,
     fixture: "35-cjk-rtl",
     theme: "light",
@@ -647,6 +671,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     { n: "15", theme: "dark" },
     { n: "16", theme: "cream" },
   ] as const).map(({ n, theme }) => ({
+    // @tests_req StRS-MDOKFSTUDIO-CODE-001
     id: `code-blocks/v${n}-code-block-caption-${theme}-900`,
     fixture: "46-code-block-caption",
     theme: theme === "cream" ? "dark" : theme,
@@ -658,6 +683,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the code is left-aligned like the plain fence and the caption is a left-aligned monospace title bar joined to the top of the block.",
   })),
   {
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-008
     id: "rendering-core/v19-missing-image-dark-900",
     fixture: "36-missing-image",
     theme: "dark",
@@ -668,6 +694,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "and the broken pictures do not push the content outside the column.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-CORE-001
     id: "rendering-core/v20-huge-document-bottom-dark-900",
     fixture: "gen-huge-document",
     theme: "dark",
@@ -678,6 +705,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the last paragraph is reachable inside the frame with its bottom padding.",
   },
   ...([["dark", 900], ["light", 900], ["light", 460]] as const).map(([theme, width], index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-GFM-002
     id: `gfm/v0${index + 2}-gfm-gallery-full-${theme}-${width}`,
     fixture: "37-gfm-gallery",
     theme,
@@ -688,6 +716,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Every GFM construct on one page (five alerts, strikethrough, footnotes, task list, aligned table, raw HTML table and details, colour span, autolink), ${theme}, ${width} px pane.`,
   })),
   ...(["dark", "light"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-006
     id: `myst/v${20 + index}-myst-gallery-full-${theme}-900`,
     fixture: "38-myst-gallery",
     theme,
@@ -698,6 +727,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Every MyST construct on one page (label and references, dropdown, definition list, sub and sup, kbd and abbr roles, footnote, math, glossary), ${theme}, 900 px pane.`,
   })),
   ...([["light", 900, 2], ["dark", 900, 2], ["light", 460, 1]] as const).map(([theme, width, columns], index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-053
     id: `myst/v${22 + index}-grid-cards-full-${theme}-${width}`,
     fixture: "46-grid-cards",
     theme,
@@ -708,6 +738,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `A {grid} of items and cards with header, body, footer, link and a nested grid, ${theme}, ${width} px pane (${columns} column${columns === 1 ? "" : "s"}).`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-MYST-012
     id: `myst/v${25 + index}-toctree-caption-full-${theme}-900`,
     fixture: "47-toctree",
     theme,
@@ -718,6 +749,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `Three {toctree} lists: with caption and a missing target, a glob and a hidden one, ${theme}, 900 px pane.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-063
     id: `myst/v${27 + index}-list-table-full-${theme}-900`,
     fixture: "46-list-table",
     theme,
@@ -728,6 +760,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `A pipe table and two {list-table} directives (a titled one with :widths: and a centred table, one with two header rows), ${theme}, 900 px pane: the list-tables use the pipe table's cell, header and border styles.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-DIAG-001
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-015
     id: `diagrams/v0${8 + index}-mermaid-syntax-error-${theme}-900`,
     fixture: "40-mermaid-error",
     theme,
@@ -739,6 +773,10 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `An invalid Mermaid diagram in the ${theme} theme: the error message replaces the picture, the source stays available and the text after it continues.`,
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-DIAG-006
+    // @tests_req StRS-MDOKFSTUDIO-DIAG-007
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-023
     id: `diagrams/v${10 + index}-plantuml-builtin-${theme}-900`,
     fixture: "48-plantuml-builtin",
     theme,
@@ -751,6 +789,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "(no Java, no plantuml command, no network): two pictures in the theme colours and the sources below them.",
   })),
   {
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-032
     id: "diagrams/v12-plantuml-builtin-unsupported-light-900",
     fixture: "49-plantuml-unsupported",
     theme: "light",
@@ -764,6 +803,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "for a file and the source stays available.",
   },
   ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-068
     id: `diagrams/v${13 + index}-plantuml-file-${theme}-900`,
     fixture: "50-plantuml-file",
     theme,
@@ -776,6 +816,9 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "reads the files like {include} and the built-in engine draws both, with the file text as the source below them.",
   })),
   ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-DIAG-009
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-039
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-046
     id: `diagrams/v${15 + index}-plantuml-include-${theme}-900`,
     fixture: "51-plantuml-include",
     theme,
@@ -788,6 +831,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the host for both files (the nested one next to the including file) and the built-in engine draws the result.",
   })),
   {
+    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-002
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
     id: "frontmatter-schema/v20-invalid-yaml-dark-900",
     fixture: "41-invalid-yaml",
     theme: "dark",
@@ -797,6 +842,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "Frontmatter with broken YAML: the preview reports the parse problem and still renders the Markdown body.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-084
     id: "frontmatter-schema/v21-unknown-field-strict-light-900",
     fixture: "42-strict-unknown-field",
     theme: "light",
@@ -807,6 +853,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "A schema-typed document with a field the schema does not declare, with the strict setting on: the field gets a warning and the badge counts it.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-004
     id: "frontmatter-schema/v22-properties-hidden-light-900",
     fixture: "43-properties-hidden",
     theme: "light",
@@ -818,6 +865,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   // P9 B5 (a): theme, zoom, trust, layout, toolbar, block and palette states of the extension.
   {
+    // @tests_req StRS-MDOKFSTUDIO-THEME-002
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-025
     id: "theme-zoom/v08-forced-dark-handbook-light-900",
     fixture: "01-handbook-overview",
     theme: "light",
@@ -829,6 +878,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the page, text, note panels and headings all use the dark palette.",
   },
   ...([[70, WIDE, "900"], [200, WIDE, "900"], [150, NARROW, "460"]] as const).map(([zoom, viewport, width], index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-THEME-011
+    // @tests_req SwRS-MDOKFSTUDIO-THEME-043
     id: `theme-zoom/v${String(9 + index).padStart(2, "0")}-zoom-${zoom}-light-${width}`,
     fixture: "01-handbook-overview",
     theme: "light",
@@ -842,6 +893,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   // CR 047: a workspace that stored no choice opens with the built-in defaults, on a light and on a
   // dark host (the cream page hides the host theme, so the dark one uses a narrow pane to differ).
   ...([["light", 12, WIDE, "900"], ["dark", 13, NARROW, "460"]] as const).map(([theme, number, viewport, width]) => ({
+    // @tests_req StRS-MDOKFSTUDIO-THEME-004
     id: `theme-zoom/v${number}-fresh-workspace-${theme}-${width}`,
     fixture: "01-handbook-overview",
     theme,
@@ -855,6 +907,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the preview opens in the cream theme and the floating toolbar shows only its first row, without any click.",
   })),
   ...([["dark", WIDE, "900", 1], ["light", NARROW, "460", 2]] as const).map(([theme, viewport, width, number]) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
     id: `trust-security/v0${number}-read-only-page-${theme}-${width}`,
     fixture: "08-okf-schema",
     theme,
@@ -877,6 +930,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: "A read-only preview with the pointer resting on a paragraph and a click on it: no dashed edit outline, no editor, no Edit button.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117
     id: "toolbar-navigation/v30-back-enabled-after-anchor-light-900",
     fixture: "01-handbook-overview",
     theme: "light",
@@ -897,6 +952,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "and the target heading sits at the top of the pane.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-013
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
     id: "toolbar-navigation/v31-mark-editor-selection-light-900",
     fixture: "01-handbook-overview",
     theme: "light",
@@ -911,6 +968,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "(the dispatch path sentence) in the preview, and only that block.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-BLOCK-016
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-140
     id: "block-editing/v17-block-selection-light-900",
     fixture: "01-handbook-overview",
     theme: "light",
@@ -926,6 +985,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "the selection is announced and no editor is open.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-PALETTE-015
     id: "palette-slash/v21-slash-gfm-light-360",
     fixture: "05-long-chapter",
     theme: "light",
@@ -939,6 +999,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "is not covered by anything and flips above the caret near the bottom; the final frame shows it with /tab typed.",
   },
   {
+    // @tests_req StRS-MDOKFSTUDIO-LAYOUT-003
+    // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-002
     id: "layout-width/v85-max-width-setting-light-2000",
     fixture: "05-long-chapter",
     theme: "light",
@@ -952,6 +1014,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   // P9 B5 (b): review annotations (incoming changes, review threads, orphans, comment chips).
   ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-REVIEW-017
     id: `review-annotations/v${14 + index}-incoming-bars-${theme}-900`,
     fixture: "44-change-bar",
     theme,
@@ -1023,6 +1086,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["dark", undefined, 2],
     ["dark", "cream", 3],
   ] as const).map(([theme, mode, number]) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-LIFE-094
     id: `lifecycle-sync/v0${number}-update-glow-${mode ?? theme}-900`,
     fixture: "44-change-bar",
     theme,
@@ -1042,6 +1106,8 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     ["dark", undefined, 30],
     ["light", "cream", 31],
   ] as const).map(([theme, mode, number]) => ({
+    // @tests_req StRS-MDOKFSTUDIO-MYST-007
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-081
     id: `myst/v${number}-conf-warning-banner-${mode ?? theme}-900`,
     fixture: "53-conf-warnings",
     theme,
@@ -1104,6 +1170,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   },
   // CR 050: an image pasted into a paragraph editor becomes a paragraph of its own.
   {
+    // @tests_req StRS-MDOKFSTUDIO-PALETTE-018
     id: "palette-slash/v22-pasted-image-paragraph-light-900",
     fixture: "52-inline-image",
     theme: "light",

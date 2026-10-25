@@ -28,6 +28,8 @@ export class DiagnosticsController {
     this.sink = undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-078
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-081
   /** Shows a document's MyST extension warnings in the Problems panel; trusted workspaces only. */
   public publish(preview: PreviewSession, result: RenderResult): void {
     const sink = this.sink;
@@ -54,6 +56,7 @@ export class DiagnosticsController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-143
   /** Drops the entries of a document that no live preview shows any more. */
   public clear(documentUri: string): void {
     if (!this.sink) {

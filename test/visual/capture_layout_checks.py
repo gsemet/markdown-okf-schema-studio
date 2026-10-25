@@ -77,6 +77,7 @@ def toolbar_probe(page: Page) -> dict:
     )
 
 
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-007
 def check_toolbar_collapse(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
     """P8: the collapse button hides rows 2-3 (not focusable), shrinks the toolbar and restores it."""
     button = toolbar.locator('[data-sphinx-preview-toolbar-collapse]')
@@ -158,6 +159,7 @@ FRESH_WORKSPACE_STATE_JS = """() => {
 }"""
 
 
+# @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 def check_fresh_workspace(page: Page, scenario: dict, failures: list[Failure]) -> None:
     """A workspace that stored nothing opens in the cream theme mode with rows 2-3 of the toolbar hidden, before any click."""
     if not (scenario.get("render") or {}).get("freshWorkspace"):
@@ -192,6 +194,8 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
             page.wait_for_timeout(200)
 
 
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+# @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failure]) -> None:
     page_name = scenario["page"]
     toolbar = page.locator('[data-sphinx-preview-toolbar][role="toolbar"]')
@@ -674,6 +678,7 @@ def check_top_spacing(page: Page, scenario: dict, failures: list[Failure]) -> No
     failures.append(Failure(page_name, f"{selector} overlaps the floating toolbar"))
 
 
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-020
 def check_width_modes(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The Width button cycles margin, auto and full; only Auto lets wide blocks leave the column."""
   if not scenario.get("widthModeChecks"):
@@ -828,6 +833,9 @@ def apply_width_shot(page: Page, scenario: dict, failures: list[Failure]) -> Non
 WIDTH_BREAK_REPORT_DIR = VISUAL_REPORT_DIR / "width-margins"
 
 
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-001
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022
+# @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
 def check_width_mode_break(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """P2/P7: side margins of text, table, code block and figure in one width mode.
 
@@ -914,6 +922,10 @@ def check_width_mode_break(page: Page, scenario: dict, failures: list[Failure]) 
       failures.append(Failure(page_name, f"full: the text margins are {text['left']}/{text['right']}px, expected 16 px like a broken-out table in Auto"))
 
 
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-033
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-045
 def check_toc_column(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The TOC button opens a right column below the toolbar; wide panes only."""
   if not scenario.get("tocChecks"):
@@ -1299,6 +1311,7 @@ def check_change_bar(page: Page, scenario: dict, failures: list[Failure]) -> Non
   page.evaluate("window.scrollTo(0, 0)")
 
 
+# @tests_req SwRS-MDOKFSTUDIO-LIFE-094
 def check_update_glow(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """CR 046: a content patch that carries updated ranges makes exactly those blocks glow, readable and
   without moving anything; with prefers-reduced-motion: reduce nothing glows. The glow is paused at its
