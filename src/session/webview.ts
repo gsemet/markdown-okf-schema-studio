@@ -266,7 +266,7 @@ export function buildPreviewWebviewHtml(
   const withFrontmatter = injectPropertiesTable(
     html,
     frontmatter
-      ? renderPropertiesTable(frontmatter.result, frontmatter.tableEnabled, scrollContext)
+      ? renderPropertiesTable(frontmatter.result, frontmatter.tableEnabled, scrollContext, editingEnabled)
       : "",
   );
   return {

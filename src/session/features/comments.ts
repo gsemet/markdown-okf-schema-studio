@@ -31,7 +31,7 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { RenamedFile } from "../hostEvents";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { revisionOfStage } from "../sessionDocuments";
+import { previewReadOnlyReason, revisionOfStage } from "../sessionDocuments";
 
 /** Comment threads of one page (owned by the comments controller). */
 export interface CommentsState {
@@ -403,7 +403,7 @@ export class CommentsController {
       void host.ui.showWarning(`The comment was not saved: ${reason}`);
       return { ok: false, reason };
     };
-    if (preview.readOnly) return refuse("comments need a trusted workspace.");
+    if (preview.readOnly) return refuse(previewReadOnlyReason(preview));
     const stage = preview.stage;
     if (preview.disposed || !stage || !preview.documentUri.startsWith("file:")) {
       return refuse("save the document first.");

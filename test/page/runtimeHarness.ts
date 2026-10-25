@@ -446,6 +446,8 @@ export function createRuntimeHarness(configuration: Partial<{
   initialPaletteMode: "strict" | "gfm" | "myst";
   initialViewPreferences: ViewPreferences;
   commentsEnabled: boolean;
+  /** The reason a read-only page gives for its disabled checkboxes. */
+  readOnlyReason: string;
   intersectionObserver: boolean;
   /** `navigator.platform` of the page (absent: no navigator, like a non-Apple platform). */
   platform: string;

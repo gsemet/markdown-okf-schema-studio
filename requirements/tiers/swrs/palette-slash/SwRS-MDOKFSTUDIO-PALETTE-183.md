@@ -85,7 +85,7 @@ The skipped folders are node_modules, .git, _build, .venv, venv, out and dist; t
 | a scan that throws an Error | previewListCitationsResult holds ok false and the reason is the message of the error |
 | a scan that throws a value that is not an Error | ok false and the reason is that value as a string |
 | one unreadable file among readable ones | the scan does not fail and the other keys are answered |
-| a read-only preview | ok false with the reason Citations are read from the workspace, which needs trust. |
+| a read-only preview | ok false with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 | a document that is no longer the one of the render | ok false with the reason The preview is out of date. Try again once it has refreshed. |
 | a previewListCitations message without a non-empty editId of at most 100 characters | ignored by the envelope check |
 

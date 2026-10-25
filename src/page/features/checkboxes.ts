@@ -71,7 +71,7 @@ export function installCheckboxes(document: Document, router: HostMessageRouter,
     document.querySelectorAll?.<HTMLInputElement>(CHECKBOX_SELECTOR).forEach((checkbox) => {
       if (checkboxEditingEnabled) return;
       checkbox.disabled = true;
-      checkbox.setAttribute("title", "Editing requires a trusted workspace.");
+      checkbox.setAttribute("title", context.readOnlyReason ?? "Editing is not available in this preview.");
     });
   }
 

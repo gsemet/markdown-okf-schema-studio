@@ -14,6 +14,7 @@ import { MAX_BIB_BYTES, scanBibKeys, SCAN_TIMEOUT_MS } from "../../src/session/b
 import type { PageMessageRouter } from "../../src/session/pageMessages";
 import type { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
+import { READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
 
 const DOC = "/ws/docs/chapter.md";
 const STALE = "The preview is out of date. Try again once it has refreshed.";
@@ -219,7 +220,7 @@ test("the citation list is refused in a read-only preview and no file is read", 
   const readOnly = setup({ readOnly: true });
   const answer = await readOnly.ask("previewListCitations");
   assert.equal(answer.ok, false);
-  assert.equal(answer.reason, "Citations are read from the workspace, which needs trust.");
+  assert.equal(answer.reason, READ_ONLY_NO_FOLDER);
   assert.deepEqual(readOnly.scans, []);
   const writable = await setup().ask("previewListCitations");
   assert.equal(writable.ok, true);
@@ -245,7 +246,7 @@ test("the document picker is refused in a read-only preview and opens no dialog;
   const readOnly = setup({ readOnly: true });
   const answer = await readOnly.ask("previewPickDocument");
   assert.equal(answer.ok, false);
-  assert.equal(answer.reason, "Linking a document needs a trusted workspace.");
+  assert.equal(answer.reason, READ_ONLY_NO_FOLDER);
   assert.equal(readOnly.dialogs, 0);
   const writable = setup();
   assert.deepEqual(

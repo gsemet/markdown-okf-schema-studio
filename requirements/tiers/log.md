@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-10-26 (one read-only reason names the real cause)
+
+- SwRS-MDOKFSTUDIO-TRUST-005: every refusal of a read-only preview (edits, comments, threads, block
+  moves and clipboard, rename, palette requests) and the tooltip of a disabled checkbox now give the
+  one read-only reason: the trust text for an untrusted workspace, the missing-folder text for a file
+  outside every workspace folder. The three Known issue lines are removed; the boot context carries the
+  reason for the tooltip. Aligned in TRUST-006, -065, -090, FMEDIT-051, MYST-042, PALETTE-148, -183,
+  -192, -196, GFM-021 and -026. StRS TRUST-001: the Known issue line about the trust sentence is removed.
+- SwRS-MDOKFSTUDIO-TRUST-001: the first load of a read-only page builds its properties table without
+  edit cells; the Known issue line is removed and the verification note names the test.
+
 ## 2026-10-26 (a refused checkbox toggle is visible and always answered)
 
 - SwRS-MDOKFSTUDIO-GFM-021: the reason of a refused toggle now also shows in a short status note next to

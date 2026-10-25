@@ -9,6 +9,7 @@ import { test } from "node:test";
 
 import { serializeSidecar, type CommentThread } from "../../src/core/comments/commentModel";
 import { CommentsController, createCommentsState } from "../../src/session/features/comments";
+import { READ_ONLY_NO_FOLDER, READ_ONLY_UNTRUSTED } from "../../src/core/edits/sourceEdits";
 
 const DOCUMENT = "/w/a.md";
 const SIDECAR = "/w/a.comments.json";
@@ -298,5 +299,22 @@ test("a save that cannot write the moved lines warns once for each reason", asyn
   ]);
   await s.controller.persistAnchors(document);
   assert.equal(s.warnings.length, 1, "the same reason again is not shown again");
+  assert.deepEqual(s.writes, []);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+test("a comment from a read-only preview is refused with the real cause", async () => {
+  const s = setup();
+  const router = new Map<string, (message: any, preview: any) => Promise<void>>();
+  s.controller.register({ on: (type: string, handler: any) => { router.set(type, handler); } } as never);
+  const message = { anchor: { line: 1, endLine: 1, quote: "x", prefix: "", suffix: "" }, body: "Hello" };
+
+  await router.get("previewCommentCreate")!(message, s.preview({ readOnly: true }));
+  await router.get("previewCommentCreate")!(message, s.preview({ readOnly: true, workspaceFolder: { path: "/ws" } }));
+  assert.deepEqual(s.posted.map((value) => value.reason), [READ_ONLY_NO_FOLDER, READ_ONLY_UNTRUSTED]);
+  assert.deepEqual(s.warnings, [
+    `The comment was not saved: ${READ_ONLY_NO_FOLDER}`,
+    `The comment was not saved: ${READ_ONLY_UNTRUSTED}`,
+  ]);
   assert.deepEqual(s.writes, []);
 });

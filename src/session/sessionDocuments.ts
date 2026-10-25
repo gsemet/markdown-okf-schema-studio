@@ -7,6 +7,7 @@
 import * as path from "node:path";
 
 import type { HostDocument } from "../host-api/documentStore";
+import { readOnlyReason } from "../core/edits/sourceEdits";
 import type { PageIdentity } from "../core/protocol/envelope";
 import type { Revision } from "../core/protocol/revision";
 import type { RenderStage } from "../core/render/renderPipeline";
@@ -87,4 +88,9 @@ export function currentPaletteDocument(
     return document;
   }
   return currentPreviewDocument(preview, message);
+}
+
+/** Why a read-only preview refuses to edit: the missing workspace folder, else the missing trust. */
+export function previewReadOnlyReason(preview: Pick<PreviewSession, "workspaceFolder">): string {
+  return readOnlyReason(preview.workspaceFolder !== undefined);
 }

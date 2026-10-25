@@ -146,7 +146,7 @@ A message that passes its gate but writes for a document newer than the render i
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TRUST-052: a message needs a registered type and a valid envelope before any gate
-- SwRS-MDOKFSTUDIO-TRUST-005: an edit request of a read-only preview is refused after the gate, with "Editing requires a trusted workspace."
+- SwRS-MDOKFSTUDIO-TRUST-005: an edit request of a read-only preview is refused after the gate, with the read-only reason
 - SwRS-MDOKFSTUDIO-LIFE-071: the ready reports that the page-state gate lets through
 - SwRS-MDOKFSTUDIO-BLOCK-058: the outcome of a host source edit that passes the gate
 

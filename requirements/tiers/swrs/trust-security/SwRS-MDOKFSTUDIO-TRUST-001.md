@@ -49,6 +49,7 @@ tested_in_files:
 - test/page/runtimeEditPalette.test.ts
 - test/page/runtimePageControls.test.ts
 - test/security/trustReq.requirements.test.ts
+- test/session/readOnlyFirstLoad.test.ts
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions2.ts
 ---
@@ -135,10 +136,6 @@ The refusal of write requests is that of SwRS-MDOKFSTUDIO-TRUST-005.
 | capabilities.untrustedWorkspaces.restrictedConfigurations | The PlantUML engine settings plantuml.useJar and plantuml.jarPath: a value from the workspace is ignored in Restricted Mode |
 | A manifest without the declaration, or with another value | The check fails (VS Code then disables a packaged extension in Restricted Mode) |
 
-### Known issues
-
-- Known issue: the first load of a read-only page is built in src/session/webview.ts without the read-only flag, so its properties table carries edit cells and rows that say data-okf-editable true; the host replaces the table with a non-editable one after the frontmatter links are resolved, shortly after the render. No editor can open in between, because every frontmatter editor needs edit mode, which a page without an Edit button never switches on. Deduced from the code, not run.
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TRUST-005: the host refuses every write request of a read-only preview with a reason
@@ -156,7 +153,7 @@ The refusal of write requests is that of SwRS-MDOKFSTUDIO-TRUST-005.
 - Method: Unit test `T23: a read-only preview has no palette and never posts the message` in test/page/runtimeEditPalette.test.ts (palette and palette mode message rows); the host side refusal of the previewPaletteModeChanged scenario is deduced from the code (the handler checks preview.readOnly), not tested.
 - Method: The integration test test/integration/commentWrite.test.ts (a read-only preview page carries commentsEnabled false); the unit tests of the compose module install it only when comments are enabled. The absence of the button in a real page is deduced from the code (commentCompose is created only when commentsEnabled), not run.
 - Method: Unit tests `T43: no reply box without a reply hook (read-only previews)` and `T44: without resolve and delete hooks (read-only) the popover has neither button` in test/page/modules/commentThreads.test.ts (thread popover rows).
-- Method: Visual scenarios trust-security/v01-read-only-page-dark-900 and trust-security/v02-read-only-page-light-460 in test/visual/scenarioDefinitions2.ts (READ_ONLY_ASSERTIONS: no edit cell, every row not editable), and trust-security/v03-read-only-no-hover-outline-light-900 (READ_ONLY_NO_HOVER_ASSERTIONS: no edit-target mark, no outline, cursor not a pointer; no block editor after the paragraph click). These scenarios build the page in test/visual/renderFixtures.ts with the read-only flag, not through the host page build, so no test covers the properties table Known issue. The table cell click and the frontmatter click rows are untested; they are deduced from the code: the click handlers of src/page/features/pageInput.ts open editors only when edit mode is on, which a page without an Edit button never is.
+- Method: Visual scenarios trust-security/v01-read-only-page-dark-900 and trust-security/v02-read-only-page-light-460 in test/visual/scenarioDefinitions2.ts (READ_ONLY_ASSERTIONS: no edit cell, every row not editable), and trust-security/v03-read-only-no-hover-outline-light-900 (READ_ONLY_NO_HOVER_ASSERTIONS: no edit-target mark, no outline, cursor not a pointer; no block editor after the paragraph click). These scenarios build the page in test/visual/renderFixtures.ts with the read-only flag; the host page build (first load) is covered by the unit test "the first load of a read-only page has no edit cells in the properties table" in test/session/readOnlyFirstLoad.test.ts. The table cell click and the frontmatter click rows are untested; they are deduced from the code: the click handlers of src/page/features/pageInput.ts open editors only when edit mode is on, which a page without an Edit button never is.
 - Method: Unit test "granting trust turns an open Restricted Mode preview into a writable one" in test/host/lifeReq.requirements.test.ts (trust granted scenario: same panel, readOnly false, workspace roots, one render).
 - Method: Unit test "the manifest declares limited support for untrusted workspaces" in test/security/trustReq.requirements.test.ts, which asserts the declaration, its description and the restricted settings in package.json, the inputs VS Code reads to decide (extensionManifestPropertiesService, VS Code 1.143.1 bundle: an extension with a main entry point and no declaration is disabled in Restricted Mode). The Restricted Mode integration suite test/integration/untrusted-suite.ts loads the extension from the development path, which is not disabled either way, so it asserts the declaration through the installed extension manifest instead; a packaged VSIX is not run in a Restricted Mode window.
 - Criteria: The readOnly flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; a read-only page has no Edit button, no palette, no Comment button, no reply, Resolve or Delete control, no edit cell, no edit-target mark and no editor element after the clicks; after onTrustGranted an open preview of a workspace file is a new trusted session on the same panel (readOnly false, the workspace folders as roots) and the active preview stays the active one; package.json declares capabilities.untrustedWorkspaces.supported as limited.

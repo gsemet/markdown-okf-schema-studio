@@ -28,7 +28,7 @@ import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { currentPreviewDocument } from "../sessionDocuments";
+import { currentPreviewDocument, previewReadOnlyReason } from "../sessionDocuments";
 
 type BlocksOp = "copy" | "cut" | "paste";
 
@@ -128,7 +128,7 @@ export class SourceEditController {
    */
   private handleLabelRename(preview: PreviewSession, message: PageMessageOf<"previewLabelRename">): PromiseLike<void> | undefined {
     if (preview.readOnly) {
-      this.postLabelRenameResult(preview, message, { ok: false, reason: "Renaming needs a trusted workspace." });
+      this.postLabelRenameResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
       return undefined;
     }
     if (preview.edits.active) {
@@ -198,7 +198,7 @@ export class SourceEditController {
       this.postThreadResult(preview, type, message, { ok: false, reason });
       return undefined;
     };
-    if (preview.readOnly) return fail("Editing a thread needs a trusted workspace.");
+    if (preview.readOnly) return fail(previewReadOnlyReason(preview));
     if (preview.edits.active) return fail("Save or cancel the open Markdown edit before changing a thread.");
     const document = currentPreviewDocument(preview, message);
     if (!document) return fail(STALE_REQUEST);
@@ -263,7 +263,7 @@ export class SourceEditController {
    */
   private handleBlockMove(preview: PreviewSession, message: PageMessageOf<"previewBlockMove">): PromiseLike<void> | undefined {
     if (preview.readOnly) {
-      this.postBlockMoveResult(preview, message, { ok: false, reason: "Moving a block needs a trusted workspace." });
+      this.postBlockMoveResult(preview, message, { ok: false, reason: previewReadOnlyReason(preview) });
       return undefined;
     }
     if (preview.edits.active) {
@@ -334,7 +334,7 @@ export class SourceEditController {
       return undefined;
     };
     if (preview.readOnly) {
-      return refuse("Copying, cutting and pasting blocks needs a trusted workspace.");
+      return refuse(previewReadOnlyReason(preview));
     }
     if (preview.edits.active) {
       return refuse("Save or cancel the open Markdown edit first.");

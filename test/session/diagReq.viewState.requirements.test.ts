@@ -15,6 +15,7 @@ import { PageMessageDispatcher, type PageMessageRouter } from "../../src/session
 import { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
 import { WorkspaceChoices } from "../../src/session/workspaceChoices";
+import { READ_ONLY_NO_FOLDER } from "../../src/core/edits/sourceEdits";
 
 const DOCUMENT = "file:///notes/doc.md";
 
@@ -80,7 +81,7 @@ test("a read-only preview stores a theme choice; its edit requests are refused",
   assert.deepEqual(errors, []);
 
   send({ type: "previewEditOpen", line: 3, endLine: 4, editId: "e1" });
-  assert.deepEqual(errors, ["Editing requires a trusted workspace."]);
+  assert.deepEqual(errors, [READ_ONLY_NO_FOLDER]);
   assert.equal(choices.previewThemeMode, "white");
 });
 

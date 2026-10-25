@@ -81,7 +81,7 @@ A preview is read-only because the workspace is untrusted or the file is standal
 | previewPaletteModeChanged from a read-only preview | nothing is stored |
 | previewPickImage or previewPasteImage from a read-only preview | no dialog and no file written |
 | previewThemeModeChanged or a zoom change with the old revision after a newer render | dropped by the render gate, as for a writable preview |
-| previewEditOpen from the same read-only preview | refused with "Editing requires a trusted workspace."; the theme message is not an edit request and stays accepted |
+| previewEditOpen from the same read-only preview | refused with the read-only reason; the theme message is not an edit request and stays accepted |
 
 ### Related requirements
 

@@ -91,7 +91,7 @@ test("T33: the startup sequence of effects and messages is stable", () => {
   const scenarios: Array<[string, Parameters<typeof createRuntimeHarness>[0], boolean | undefined]> = [
     ["reading mode", {}, undefined],
     ["edit mode", { savedState: { editMode: true }, mapFrontmatter: true, frontmatterHeight: 30 }, undefined],
-    ["untrusted workspace", { editingEnabled: false }, undefined],
+    ["untrusted workspace", { editingEnabled: false, readOnlyReason: "Editing requires a trusted workspace." }, undefined],
     ["saved anchor mode differs from the setting", {}, false],
     ["pinned position", { initialPin: { line: 50, viewportTop: 120 } }, undefined],
     ["pending block navigation", {

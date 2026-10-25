@@ -82,7 +82,7 @@ Each refusal answers ok false with the reason below and writes nothing; the fold
 
 | Case | Reason |
 | --- | --- |
-| read-only preview | Pasting an image needs a trusted workspace. |
+| read-only preview | the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005) |
 | document with no file path, or whose id differs from the previewed document | Save the document before pasting an image. |
 | saved document whose file is not a .md file (any case of the extension) | Pasting an image needs a Markdown file. |
 | document folder outside every workspace folder, both paths compared with symbolic links resolved | The image must be saved inside a workspace folder. |
