@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-25 (watcher ignore list read below the root)
+
+- SwRS-MDOKFSTUDIO-LIFE-044: the ignored build and tool folders (tmp, out, dist...) are now matched
+  against the path below the preview's root, so a workspace stored under such a folder refreshes on
+  included-file, image, sibling-file and conf.py changes. Changed the refusal table and removed the
+  Known issue line.
+
 ## 2026-10-25 (palette requests keep working while the block editor is open)
 
 - SwRS-MDOKFSTUDIO-TRUST-065: Reference, Citation, Document link, Image and the Browse of the

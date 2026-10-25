@@ -643,7 +643,7 @@ test("a notice whose render ended before the page is ready is not posted", async
   assert.equal(second.panel.posted.slice(secondFrom).filter((message) => message.type === "previewPendingOverlay").length, 0);
 });
 
-test("file events below build and tool folders do not trigger a render (Known issue: the whole path is read)", async (t) => {
+test("file events below build and tool folders do not trigger a render (only the segments below the root count)", async (t) => {
   const studio = start(t);
   await studio.openSide(writeFile("# Ignore\n"));
   const session = studio.manager.active!;
@@ -658,9 +658,14 @@ test("file events below build and tool folders do not trigger a render (Known is
   assert.deepEqual(checked, [], "every ignored segment is skipped");
   studio.manager.events.refreshReferencedPath(session, at("docs"));
   assert.deepEqual(checked, [at("docs")], "an ordinary folder is examined");
-  const underTmp = path.join(path.sep, "home", "me", "tmp", "book", "include.md");
+  const root = path.join(path.sep, "home", "me", "tmp", "book");
+  (session as unknown as { workspaceRoot: string }).workspaceRoot = root;
+  const underTmp = path.join(root, "include.md");
   studio.manager.events.refreshReferencedPath(session, underTmp);
-  assert.deepEqual(checked, [at("docs")], "a workspace stored below a tmp folder is ignored as a whole");
+  assert.deepEqual(checked, [at("docs"), underTmp], "a workspace stored below a tmp folder still refreshes");
+  const below = path.join(root, "out", "include.md");
+  studio.manager.events.refreshReferencedPath(session, below);
+  assert.deepEqual(checked, [at("docs"), underTmp], "a tmp-like folder below the root is still ignored");
 });
 
 test("deactivating the extension disposes the sessions and leaves the panels to VS Code", async (t) => {

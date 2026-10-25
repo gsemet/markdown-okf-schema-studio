@@ -54,8 +54,15 @@ const IGNORED_WATCH_SEGMENTS = new Set([
   "tmp",
 ]);
 
-function isIgnoredWatchPath(filePath: string): boolean {
-  return filePath.split(path.sep).some((segment) => IGNORED_WATCH_SEGMENTS.has(segment));
+/**
+ * Whether a file event sits below a build or tool folder of the watched root. Only the segments
+ * below the root count, so a root stored under such a folder still refreshes; a path outside the
+ * root is read whole.
+ */
+function isIgnoredWatchPath(filePath: string, root: string): boolean {
+  const relative = path.relative(root, filePath);
+  const inside = relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
+  return (inside ? relative : filePath).split(path.sep).some((segment) => IGNORED_WATCH_SEGMENTS.has(segment));
 }
 
 function sameFile(a: string | undefined, b: string): boolean {
@@ -81,7 +88,7 @@ export class HostEvents {
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-044
   /** A file below the session's root changed: re-render when the page shows or depends on it. */
   public refreshReferencedPath(session: PreviewSession, filePath: string): void {
-    if (session.disposed || isIgnoredWatchPath(filePath)) {
+    if (session.disposed || isIgnoredWatchPath(filePath, session.workspaceRoot)) {
       return;
     }
     const candidate = canonicalPath(filePath);
@@ -144,10 +151,11 @@ export class HostEvents {
    * unrelated conf.py files are left alone; an open block edit defers the refresh.
    */
   public onConfFileEvent(filePath: string): void {
-    if (isIgnoredWatchPath(filePath)) {
+    const candidates = [...this.manager.sessions()].filter(
+      (session) => session.document && !session.disposed && !isIgnoredWatchPath(filePath, session.workspaceRoot));
+    if (candidates.length === 0) {
       return;
     }
-    const candidates = [...this.manager.sessions()].filter((session) => session.document && !session.disposed);
     const locate = (session: PreviewSession): string | undefined =>
       locateConfFor(this.manager.pathOf(session.document!), session.workspaceRoot);
     const before = new Map(candidates.map((session) => [session, locate(session)]));

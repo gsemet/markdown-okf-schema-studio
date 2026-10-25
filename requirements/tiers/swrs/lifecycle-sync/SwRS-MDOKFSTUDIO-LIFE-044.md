@@ -7,7 +7,7 @@ description: When a file that the shown render depends on is changed, created,
   deleted or renamed below the preview's root, or a markdownOkfSchemaStudio
   preview, plantuml or frontmatter setting changes, the extension SHALL render
   the shown document again or bring the page up to date, ignoring file events
-  below build and tool folders.
+  below build and tool folders of that root.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 lifecycle: draft
@@ -32,7 +32,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When a file that the shown render depends on is changed, created, deleted or renamed below the preview's root, or a markdownOkfSchemaStudio preview, plantuml or frontmatter setting changes, the extension SHALL render the shown document again or bring the page up to date, ignoring file events below build and tool folders.
+When a file that the shown render depends on is changed, created, deleted or renamed below the preview's root, or a markdownOkfSchemaStudio preview, plantuml or frontmatter setting changes, the extension SHALL render the shown document again or bring the page up to date, ignoring file events below build and tool folders of that root.
 
 ### Scenario (nominal): Changed include
 
@@ -52,9 +52,10 @@ When a file that the shown render depends on is changed, created, deleted or ren
 
 | Input | Outcome |
 | --- | --- |
-| an absolute path with one of the segments .git, .venv, .vscode-test, _build, dist, htmlcov, node_modules, out, output, public or tmp, from a file event or from a change of a document other than the shown one | ignored for the preview, no render starts |
+| a path whose part below the preview's root has one of the segments .git, .venv, .vscode-test, _build, dist, htmlcov, node_modules, out, output, public or tmp, from a file event or from a change of a document other than the shown one | ignored for the preview, no render starts |
 | an include under project/node_modules/x.md that the render depends on changes | no render starts |
-| a workspace at /home/me/tmp/book whose files are all below a tmp segment, an included file changes on disk | no render starts for an included file of the workspace; the shown document itself still renders when it is edited |
+| a workspace at /home/me/tmp/book, an included file changes on disk | the preview renders again: only the segments below the root are checked |
+| a file at /home/me/tmp/book/out/x.md changes | ignored: the out segment is below the root |
 
 ### Scenario (nominal): Preview setting
 
@@ -68,10 +69,6 @@ When a file that the shown render depends on is changed, created, deleted or ren
 - WHEN the settings event arrives
 - THEN the event is ignored by the preview lifecycle
 
-### Known issues
-
-- Known issue: the check splits the whole absolute path, not the path relative to the root, so a workspace stored below a folder named tmp, out, output, public or dist never refreshes on an included-file, image or sibling-file change, and Markdown inside those folders is never a trigger; the same check, at the top of the file-event handler, also skips the link-target enrichment and the PlantUML include notification, and conf.py events (see SwRS-MDOKFSTUDIO-MYST-078) are skipped the same way. Typing in the shown document, its deletion and its creation do not pass through this check.
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-193: the render is deferred while an inline editor is open.
@@ -81,6 +78,6 @@ When a file that the shown render depends on is changed, created, deleted or ren
 
 - Method: test/integration/dirtySnapshots.test.ts (changed include: the initial referenced include, the changed referenced include).
 - Method: test/node-services/build/buildQueue.test.ts "tracks referenced dependencies for refresh decisions".
-- Method: test/host/lifeReq.requirements.test.ts "renaming a file the render depends on renders the document again, an unrelated rename does not" (rename rows; checked by reading onFilesRenamed in src/session/hostEvents.ts) and "file events below build and tool folders do not trigger a render (Known issue: the whole path is read)" (folders the preview ignores; checked by reading IGNORED_WATCH_SEGMENTS and isIgnoredWatchPath in src/session/hostEvents.ts).
+- Method: test/host/lifeReq.requirements.test.ts "renaming a file the render depends on renders the document again, an unrelated rename does not" (rename rows; checked by reading onFilesRenamed in src/session/hostEvents.ts) and "file events below build and tool folders do not trigger a render (only the segments below the root count)" (folders the preview ignores; checked by reading IGNORED_WATCH_SEGMENTS and isIgnoredWatchPath in src/session/hostEvents.ts).
 - Method: test/core/configuration/previewConfiguration.test.ts "incremental updates can be turned off and default to on" covers the reading of the preview setting; the settings scenarios are untested at the integration level and checked by reading onSettingsChanged.
-- Criteria: requestId grows and the HTML holds the updated marker; refreshPreviewDocument runs only when queue.dependsOn names the old or new path; refreshReferencedPath returns before any dependency, enrichment or include handling when any segment of the path is in the list; session.configuration equals readPreviewConfiguration after the event.
+- Criteria: requestId grows and the HTML holds the updated marker; refreshPreviewDocument runs only when queue.dependsOn names the old or new path; refreshReferencedPath returns before any dependency, enrichment or include handling when any segment of the path below the session's root is in the list; session.configuration equals readPreviewConfiguration after the event.

@@ -142,6 +142,7 @@ test("editing a schema file refreshes nothing by itself; the next document chang
   };
   const events = new HostEvents(manager as unknown as PreviewManager);
   (session.plantUml as unknown) = { includeWatch: { has: () => false } };
+  (session as { workspaceRoot?: string }).workspaceRoot = "/notes";
 
   events.refreshReferencedPath(session as unknown as PreviewSession, "/notes/_schema/Note.schema.yaml");
   assert.deepEqual(calls, [], "a schema file is watched by nobody: the table keeps its result");
