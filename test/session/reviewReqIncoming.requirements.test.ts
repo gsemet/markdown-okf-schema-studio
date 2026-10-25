@@ -73,6 +73,7 @@ function fixture(t: TestContext, uri = "file:///w/a.md"): Fixture {
   manager.view = new ViewStateController(manager);
   manager.events = new HostEvents(manager);
   manager.sessions = () => new Set([preview]);
+  manager.refreshTrust = () => undefined;
   t.after(() => controller.clear(preview));
   return { posted, preview, manager, controller, watchers, state, headReads: () => reads };
 }

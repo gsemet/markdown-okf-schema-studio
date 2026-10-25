@@ -332,8 +332,9 @@ export class HostEvents {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
-  /** The user granted trust: the incoming changes can be read now. */
+  /** The user granted trust: open previews become writable and the incoming changes can be read. */
   public onTrustGranted(): void {
+    this.manager.refreshTrust();
     for (const session of this.manager.sessions()) this.manager.incoming.schedule(session, 0);
   }
 

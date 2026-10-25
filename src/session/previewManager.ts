@@ -459,6 +459,49 @@ export class PreviewManager {
     this.switchChains.set(panel, chain);
   }
 
+  /**
+   * Replaces the session by a new one on the same panel, which then renders `document`: the root
+   * or the trust state the session was created with no longer fits. `restoredState` is the page
+   * state the new page starts from.
+   */
+  private replaceSession(
+    session: PreviewSession,
+    document: HostDocument,
+    workspaceFolder: WorkspaceFolderInfo | undefined,
+    restoredState?: PreviewPanelState,
+  ): PreviewSession {
+    const panel = session.panel;
+    const followsActiveEditor = session.followsActiveEditor;
+    const lockedColumn = session.lockedColumn;
+    this.disposeSession(session, false);
+    const replacement = this.createSession(panel, document, workspaceFolder, restoredState, followsActiveEditor);
+    // The panel, and so the locked group, lives on with the replacement.
+    replacement.lockedColumn = lockedColumn;
+    this.startRender(replacement, document);
+    return replacement;
+  }
+
+  /**
+   * The user granted trust: a preview that was read-only only because the workspace was untrusted
+   * moves to a trusted session (editing, palette, workspace resource and navigation roots) and
+   * renders once, keeping its reading state. Previews that stay read-only are left alone.
+   */
+  public refreshTrust(): void {
+    const { host } = this;
+    const active = this.activeSession;
+    let activeAfter = active;
+    for (const session of [...this.live]) {
+      const document = session.document;
+      if (session.disposed || !session.readOnly || !document || !isDocumentEligible(document)) continue;
+      const workspaceFolder = host.workspace.folderOf(this.pathOf(document));
+      if (workspaceFolder === undefined || !host.workspace.trusted) continue;
+      const replacement = this.replaceSession(session, document, workspaceFolder, session.state);
+      if (session === active) activeAfter = replacement;
+    }
+    // Replacing a preview makes it the active one: the reader's active preview stays the same.
+    if (activeAfter && this.live.has(activeAfter)) this.activeSession = activeAfter;
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-125
   private switchDocument(session: PreviewSession, document: HostDocument): void {
     const { host } = this;
@@ -472,14 +515,7 @@ export class PreviewManager {
       ? path.dirname(path.resolve(documentPath))
       : workspaceFolder.path;
     if (resourceRoot !== session.workspaceRoot || readOnly !== session.readOnly) {
-      const panel = session.panel;
-      const followsActiveEditor = session.followsActiveEditor;
-      const lockedColumn = session.lockedColumn;
-      this.disposeSession(session, false);
-      const replacement = this.createSession(panel, document, workspaceFolder, undefined, followsActiveEditor);
-      // The panel, and so the locked group, lives on with the replacement.
-      replacement.lockedColumn = lockedColumn;
-      this.startRender(replacement, document);
+      this.replaceSession(session, document, workspaceFolder);
       return;
     }
     // The flush before the switch saved and closed the page's editors; an editor closed unchanged

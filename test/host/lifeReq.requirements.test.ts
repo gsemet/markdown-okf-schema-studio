@@ -387,15 +387,49 @@ test("the recorded column of a locked preview follows its group", async (t) => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
-test("granting trust does not make an open read-only preview writable (Known issue)", async (t) => {
+test("granting trust turns an open Restricted Mode preview into a writable one", async (t) => {
   const untrusted = start(t, { trusted: false });
-  await untrusted.openSide(writeFile("# Restricted\n"));
+  const file = writeFile("# Restricted\n\n- [ ] task\n");
+  const { panel } = await untrusted.openSide(file);
   const restricted = untrusted.manager.active!;
   assert.equal(restricted.readOnly, true);
+  assert.deepEqual(restricted.sessionRoots, []);
+  assert.deepEqual(restricted.navigationRoots, [path.dirname(file)]);
+  assert.equal(restricted.workspaceRoot, path.dirname(file));
+  const readOnlyHtml = lastRendered(panel);
+  const assignmentsBefore = panel.htmlAssignments.length;
   (fake.vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
   fake.controls.events.grantTrust.fire();
-  await untrusted.advance(100);
-  assert.equal(restricted.readOnly, true, "the preview stays read-only after the grant");
+  await untrusted.advance(300);
+  await untrusted.renderDone(panel);
+  const trusted = untrusted.manager.active!;
+  assert.equal(untrusted.manager.sessions().size, 1, "the preview is not duplicated");
+  assert.equal(trusted.panel, restricted.panel, "the same panel is kept: nothing is reopened");
+  assert.equal(trusted.readOnly, false, "the preview is writable after the grant");
+  assert.equal(trusted.workspaceRoot, workspaceRoot);
+  assert.ok(trusted.navigationRoots.includes(workspaceRoot));
+  assert.ok(trusted.sessionRoots.includes(workspaceRoot));
+  assert.notEqual(lastRendered(panel), readOnlyHtml, "the page is rebuilt with the editing controls");
+  const rendersAfter = panel.htmlAssignments.filter((html) => identityOfDocument(html) !== undefined).length;
+  assert.ok(panel.htmlAssignments.length > assignmentsBefore);
+  assert.equal(trusted.probe.renderedStages, 1, "the trusted session renders once");
+  assert.ok(rendersAfter >= 2);
+});
+
+test("granting trust keeps the active preview active when several previews are open", async (t) => {
+  const studio = start(t, { trusted: false });
+  const first = writeFile("# First\n");
+  const second = writeFile("# Second\n");
+  await studio.openSide(first);
+  await openWith(studio, second);
+  const activeId = studio.manager.active!.documentUri;
+  assert.equal(activeId, Uri.file(second).toString());
+  (fake.vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
+  fake.controls.events.grantTrust.fire();
+  await studio.advance(300);
+  assert.equal(studio.manager.sessions().size, 2);
+  assert.ok(sessionsOf(studio).every((session) => !session.readOnly));
+  assert.equal(studio.manager.active!.documentUri, activeId, "the active preview is still the same one");
 });
 
 test("a preview created in a trusted workspace stays writable when trust is granted again", async (t) => {
