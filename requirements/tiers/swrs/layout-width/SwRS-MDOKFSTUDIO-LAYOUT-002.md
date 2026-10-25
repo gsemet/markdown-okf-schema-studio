@@ -91,7 +91,7 @@ When a preview page is built or the setting markdownOkfSchemaStudio.preview.maxC
 - Known issue: The titles of visual scenarios v05 and v06 say full width but they assert only the 960 px column.
 - Known issue: The decimal rounding has no unit test.
 - Known issue: The negative value has no unit test.
-- Known issue: The README says that with the setting at 0 the three width modes look the same, which is not exact: Full width keeps a 16 px side gutter where Margin and Auto keep a gutter of 16 to 78 px.
+- Known issue: docs/user/settings.md says that with the setting at 0 the three width modes look the same, which is not exact: Full width keeps a 16 px side gutter where Margin and Auto keep a gutter of 16 to 78 px.
 - Known issue: The unit test asserts the rule text for 0 and 1200 only; the rendered column at 0 has no automated check.
 - Known issue: The full-page test PERF-11 matches only the number 720 in the inline style, not the whole text of the rule; the whole rule text is asserted on the builder alone.
 - Known issue: No automated test changes the setting on an open preview.

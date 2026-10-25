@@ -17,6 +17,7 @@ import {
   HUGE_DOCUMENT_ASSERTIONS,
   INCOMING_BARS_ASSERTIONS,
   INCOMING_CHANGES_MESSAGE,
+  README_SHOWCASE_CHANGES_MESSAGE,
   INCOMING_DIFF_OFF_ASSERTIONS,
   INCOMING_RANGES_MESSAGE,
   INLINE_IMAGE_ASSERTIONS,
@@ -518,6 +519,69 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     widthModeShot: "auto" as const,
     description: "README capture, cream theme, Auto width: the reading column stays narrow while the wide "
       + "table and the wide figure break out of it, centred on the pane.",
+  },
+  // CR 090: README showcase captures of one polished demo document, Cream theme.
+  {
+    // @tests_req StRS-MDOKFSTUDIO-CORE-001
+    id: "rendering-core/v25-readme-showcase-hero-cream-1200",
+    fixture: "54-readme-showcase",
+    theme: "light",
+    previewThemeMode: "cream",
+    width: 1200,
+    height: 1000,
+    scroll: { kind: "selector" as const, value: "main h1", offset: -100 },
+    description: "README hero capture, cream theme, 1200 px: the properties table, the title, the card grid, the nested admonition and the figure of the demo handbook.",
+  },
+  {
+    // @tests_req StRS-MDOKFSTUDIO-MYST-001
+    id: "myst/v34-readme-showcase-edit-cream-1000",
+    fixture: "54-readme-showcase",
+    theme: "light",
+    previewThemeMode: "cream",
+    width: 1000,
+    height: 900,
+    scroll: { kind: "selector" as const, value: "main .myst-grid", offset: 24 },
+    editMode: true,
+    toolbarState: "collapsed" as const,
+    pageActions: [{ click: "main .admonition-title" }],
+    description: "README capture, cream theme, edit mode: the card grid and the figure of the demo handbook stay rendered while the clicked admonition is open in its Markdown editor.",
+  },
+  {
+    // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-001
+    id: "frontmatter-schema/v23-readme-showcase-schema-cream-1000",
+    fixture: "54-readme-showcase",
+    theme: "light",
+    previewThemeMode: "cream",
+    width: 1000,
+    height: 760,
+    scroll: { kind: "top" as const },
+    description: "README capture, cream theme: the OKF properties table of the demo handbook, resolved from its handbook schema, with type icons and field descriptions.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-207
+    id: "review-annotations/v21-readme-showcase-diff-cream-1000",
+    fixture: "54-readme-showcase",
+    theme: "light",
+    previewThemeMode: "cream",
+    toolbarState: "collapsed" as const,
+    width: 1000,
+    height: 900,
+    scroll: { kind: "selector" as const, value: "main .myst-grid", offset: 24 },
+    render: { hostMessages: [README_SHOWCASE_CHANGES_MESSAGE] },
+    description: "README capture, cream theme: the blocks changed since the last commit (intro paragraph, one card, the admonition and the figure) carry the green bar at the left margin.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+    id: "diagrams/v17-readme-showcase-diagrams-cream-1000",
+    fixture: "54-readme-showcase",
+    theme: "light",
+    previewThemeMode: "cream",
+    toolbarState: "collapsed" as const,
+    width: 1000,
+    height: 1000,
+    scroll: { kind: "selector" as const, value: ".myst-mermaid-diagram", offset: 60 },
+    plantumlExpectation: "builtin" as const,
+    description: "README capture, cream theme: a Mermaid flowchart and a PlantUML sequence diagram, both rendered inline without Java, under the Escalation paths heading.",
   },
   ...([
     ["light", WIDE],

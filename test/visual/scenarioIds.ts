@@ -584,6 +584,11 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "rendering-core/v23-inline-image-in-text-light-900": "In the light theme an image written between two pieces of text of a paragraph is an inline element drawn on the text line between them with the line running through its middle, while a standalone image keeps its centred figure paragraph, and both images load.",
   "rendering-core/v24-inline-image-in-text-edit-dark-900": "In edit mode in the dark theme an image written between two pieces of text of a paragraph is an inline element drawn on the text line between them with the line running through its middle, while a standalone image keeps its centred figure paragraph, and both images load.",
   "palette-slash/v22-pasted-image-paragraph-light-900": "An image pasted into a paragraph editor, at the end after a typed space or in the middle of the text, is inserted as a paragraph of its own with a blank line before and after it (trailing spaces dropped) and its file name selected.",
+  "rendering-core/v25-readme-showcase-hero-cream-1200": "On the cream page at 1200 px, the demo handbook shows its properties table, its title, a three-card grid, a nested admonition and a captioned figure.",
+  "myst/v34-readme-showcase-edit-cream-1000": "In edit mode on the cream page at 1000 px, the card grid and the captioned figure of the demo handbook stay rendered and the clicked admonition opens in its Markdown editor.",
+  "frontmatter-schema/v23-readme-showcase-schema-cream-1000": "On the cream page at 1000 px, the demo handbook frontmatter renders a properties table for type handbook in schema order with its field descriptions.",
+  "review-annotations/v21-readme-showcase-diff-cream-1000": "On the cream page at 1000 px, the blocks the host reports as changed since the last commit in the demo handbook carry the green bar at the left margin.",
+  "diagrams/v17-readme-showcase-diagrams-cream-1000": "On the cream page at 1000 px, the demo handbook shows a Mermaid flowchart and a PlantUML sequence diagram, both drawn inline.",
 };
 
 /**
@@ -757,6 +762,11 @@ export const README_BY_ID: Readonly<Record<string, { file: string; crop: [number
   "theme-zoom/v01-forced-white-handbook-white-900": { file: "theme-white.png", crop: [0, 20, 1800, 930], width: 720 },
   "theme-zoom/v02-forced-cream-handbook-cream-900": { file: "theme-cream.png", crop: [0, 20, 1800, 930], width: 720 },
   "layout-width/v84-break-auto-readme-cream-1200": { file: "margin-break-cream.png", crop: [0, 0, 2400, 1800], width: 1200 },
+  "rendering-core/v25-readme-showcase-hero-cream-1200": { file: "showcase-hero.png", crop: [0, 0, 2400, 1580], width: 1200 },
+  "myst/v34-readme-showcase-edit-cream-1000": { file: "showcase-myst-edit.png", crop: [0, 118, 2000, 1800], width: 1000 },
+  "frontmatter-schema/v23-readme-showcase-schema-cream-1000": { file: "showcase-schema-cream.png", crop: [0, 0, 2000, 1110], width: 1000 },
+  "review-annotations/v21-readme-showcase-diff-cream-1000": { file: "showcase-diff-cream.png", crop: [0, 118, 2000, 1800], width: 1000 },
+  "diagrams/v17-readme-showcase-diagrams-cream-1000": { file: "showcase-diagrams-cream.png", crop: [0, 165, 2000, 1500], width: 1000 },
   "toolbar-navigation/v18-toolbar-expanded-cream-900": { file: "toolbar-expanded.png", crop: [1440, 0, 1800, 260], width: 360 },
   "toolbar-navigation/v19-toolbar-collapsed-cream-900": { file: "toolbar-collapsed.png", crop: [1440, 0, 1800, 260], width: 360 },
   "palette-slash/v12-slash-gfm-light-900": { file: "slash-menu.png", crop: [140, 780, 1660, 1800], width: 760 },

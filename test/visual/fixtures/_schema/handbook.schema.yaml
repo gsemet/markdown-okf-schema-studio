@@ -1,0 +1,40 @@
+type: object
+title: Operations handbook
+additionalProperties: true
+required:
+  - type
+  - title
+  - status
+  - owner
+properties:
+  type:
+    const: handbook
+    description: Document type of the OKF entry.
+  title:
+    type: string
+    minLength: 1
+    description: Title of the handbook page.
+  status:
+    enum:
+      - published
+      - draft
+      - archived
+    description: Publication state of the page.
+  owner:
+    type: string
+    description: Team accountable for the page.
+  audience:
+    type: array
+    items:
+      type: string
+    description: Roles the page is written for.
+  review_cycle_days:
+    type: integer
+    description: Days between two reviews of the page.
+  reviewed_on:
+    type: string
+    format: date
+    description: Date of the last review.
+  description:
+    type: string
+    description: One-sentence summary of the page.

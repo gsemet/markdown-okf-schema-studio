@@ -55,7 +55,7 @@ When a document holds wide content, long words or long URLs, the extension SHALL
 | Identifier-split check on list items on separate lines | Passes |
 
 ### Known issues
-- Known issue: No documentation states this promise (the README speaks only of a comfortable narrow column); it is locked by visual checks and the wrapping unit test only.
+- Known issue: No documentation states this promise (docs/user/wide-tables.md speaks only of a comfortable narrow column); it is locked by visual checks and the wrapping unit test only.
 - Known issue: The GFM gallery check is a composite; its atomic parts belong to the gfm requirements (autolinks, strikethrough, alerts, footnotes, tables, task lists, raw HTML).
 - Known issue: The machine geometry checks are test tooling with no user-visible effect, and they are undocumented outside their unit test; the overlay checks serve other scopes' visual scenarios.
 

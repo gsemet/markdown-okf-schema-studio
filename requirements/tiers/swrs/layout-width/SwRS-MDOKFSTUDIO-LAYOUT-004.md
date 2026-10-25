@@ -41,7 +41,7 @@ When the setting maxContentWidth is 0, the extension SHALL write the width rule 
 
 ### Known issues
 
-- Known issue: The README says that with the setting at 0 the three width modes look the same, which is not exact: Full width keeps a 16 px side gutter where Margin and Auto keep a gutter of 16 to 78 px.
+- Known issue: docs/user/settings.md says that with the setting at 0 the three width modes look the same, which is not exact: Full width keeps a 16 px side gutter where Margin and Auto keep a gutter of 16 to 78 px.
 - Known issue: The unit test asserts the rule text for 0 and 1200 only; the rendered column at 0 has no automated check.
 
 ### Verification notes

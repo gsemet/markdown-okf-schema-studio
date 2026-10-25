@@ -32,6 +32,7 @@ tested_in_files:
 - test/integration/projectFeatures.test.ts
 - test/page/diagReq.diagramEdit.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
+- test/visual/scenarioDefinitions2.ts
 ---
 
 ## Mermaid fences become inert diagram pictures

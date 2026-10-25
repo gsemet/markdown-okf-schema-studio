@@ -94,7 +94,7 @@ When a built-in diagram needs a URL, a library, a theme read from a folder or mo
 - Known issue: The no-connection branch of askHost in plantumlPreview.ts is untested.
 - Known issue: No diagnostic reaches the status line; only the picture area shows the message.
 - Known issue: A plain engine error without a refused include is kept by the result cache and shown again from memory (see SwRS-MDOKFSTUDIO-DIAG-039).
-- Known issue: The limit is counted in UTF-16 code units and is the same constant as the JAR pipeline's; README states 1 MiB only for includes.
+- Known issue: The limit is counted in UTF-16 code units and is the same constant as the JAR pipeline's; docs/user/plantuml.md states 1 MiB only for includes.
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-DIAG-046: local includes are asked of the host and refusals reach the diagram
