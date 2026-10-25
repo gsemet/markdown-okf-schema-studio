@@ -248,12 +248,49 @@ test("the sanitizer removes style elements and records blocked-inline-style", ()
   assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-inline-style"));
 });
 
-test("the sanitizer leaves elements and attributes it has no rule for (Known issue: deny-list)", () => {
+test("the sanitizer keeps only listed elements and attributes", () => {
   const html = sanitize(
-    '<html><head><base href="https://example.test/"></head><body><p data-example="1">Text</p></body></html>',
+    '<html><head><base href="https://example.test/"><link rel="icon" href="x.ico"></head><body>'
+    + '<p data-example="1" class="kept" data-okf-color="red" aria-label="a">Text</p>'
+    + '<template><p>t</p></template><dialog open>d</dialog><custom-tag>c</custom-tag>'
+    + '<img src="a.png" ping="https://example.test/p" formaction="x"></body></html>',
   );
-  assert.match(html, /<base[ >]/u);
-  assert.match(html, /<p[^>]*data-example="1"[^>]*>Text<\/p>/u);
+  assert.doesNotMatch(html, /<base|<link|<template|<dialog|<custom-tag|data-example|ping=|formaction/u);
+  assert.match(html, /<p[^>]*class="kept"[^>]*>Text<\/p>/u);
+  assert.match(html, /<p[^>]*aria-label="a"/u);
+});
+
+test("the sanitizer reports a removed element and a removed attribute", () => {
+  const result = rewriteSphinxHtml(
+    '<html><head><base href="https://example.test/"></head><body><p data-example="1">Text</p></body></html>',
+    {
+      outputRoot: "/workspace",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+  assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-element"));
+  assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-attribute"));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
+test("an ignored linked stylesheet is reported and its link element is removed", () => {
+  const ignored: string[] = [];
+  const result = rewriteSphinxHtml(
+    '<html><head><link rel="stylesheet" href="theme.css"></head><body><p>Text</p></body></html>',
+    {
+      outputRoot: "/workspace",
+      policy: new ResourcePolicy([]),
+      nonce: "unit-nonce",
+      resolveResource: (request) => ({ path: `/workspace/${request}`, uri: `webview:/${request}` }),
+      resolveNavigation: () => ({ kind: "blocked" }),
+      processStylesheet: (stylesheetPath) => ignored.push(stylesheetPath),
+    },
+  );
+  assert.deepEqual(ignored, ["/workspace/theme.css"]);
+  assert.doesNotMatch(result.html, /<link|theme\.css/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-042
