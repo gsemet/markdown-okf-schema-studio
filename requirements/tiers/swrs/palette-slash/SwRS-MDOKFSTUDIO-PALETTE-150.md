@@ -81,10 +81,6 @@ When the host answers a path for the Figure button outside a figure, the extensi
 - WHEN the answer arrives
 - THEN the Source field is unchanged and the reason is shown in the status line; an answer that arrives after the form closed is ignored
 
-### Known issues
-
-- Known issue: see SwRS-MDOKFSTUDIO-TRUST-065 (the refusal that the out-of-date reason produces after the editor has saved a change; it also refuses the Browse of the figure form).
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-PALETTE-192: the host image picker that answers the path.

@@ -75,10 +75,6 @@ The words are split on blanks; the label text of an entry that is not its value 
 
 The note is appended after the entries only when result.truncated is true.
 
-### Known issues
-
-- Known issue: see SwRS-MDOKFSTUDIO-TRUST-065 (the refusal that the out-of-date reason produces after the editor has saved a change).
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-PALETTE-147: a chosen label is written as a ref role.

@@ -78,10 +78,6 @@ See SwRS-MDOKFSTUDIO-TRUST-052, SwRS-MDOKFSTUDIO-TRUST-005, SwRS-MDOKFSTUDIO-TRU
 | a one-line selection | the role is written with the selected text and the path in angle brackets |
 | a picked path with a backtick or an angle bracket | no edit |
 
-### Known issues
-
-- Known issue: see SwRS-MDOKFSTUDIO-TRUST-065 (the refusal that the out-of-date reason produces after the editor has saved a change).
-
 ### Verification notes
 
 - Method: test/page/modules/editPalette.test.ts (T30: Document asks the host for a file and inserts the path; a cancelled pick inserts nothing; checks the picked and cancelled scenarios)

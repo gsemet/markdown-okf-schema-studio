@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-25 (palette requests keep working while the block editor is open)
+
+- SwRS-MDOKFSTUDIO-TRUST-065: Reference, Citation, Document link, Image and the Browse of the
+  figure form are now answered while the block editor is open on the shown render, although its
+  own saves moved the document revision; without an open editor the out-of-date answer stays.
+  Added a row to the "older revision accepted" table and removed the Known issue line. Removed
+  the matching Known issue lines from SwRS-MDOKFSTUDIO-PALETTE-109, -140, -148 and -150.
+
 ## 2026-10-25 (Restricted Mode support declared)
 
 - SwRS-MDOKFSTUDIO-TRUST-001: the manifest now declares `capabilities.untrustedWorkspaces`

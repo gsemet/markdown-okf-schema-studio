@@ -58,3 +58,33 @@ export function currentPreviewDocument(
   }
   return document;
 }
+
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-065
+/**
+ * The document of a palette request (labels, citations, document and image pickers). Like
+ * {@link currentPreviewDocument}, but while the page's block editor is open on the render the
+ * request names, the document revision the editor's own saves produced is accepted: the preview
+ * only refreshes when the editor closes, so insisting on the render revision would refuse every
+ * request after the first autosave.
+ */
+export function currentPaletteDocument(
+  preview: PreviewSession,
+  message: Pick<PageIdentity, "revision">,
+): HostDocument | undefined {
+  const document = preview.document;
+  const stage = preview.stage;
+  const edit = preview.edits.active;
+  if (
+    edit
+    && document
+    && stage
+    && edit.documentId === preview.documentUri
+    && edit.revision === message.revision
+    && stage.activeDocumentRevision === message.revision
+    && document.id === preview.documentUri
+    && isDocumentEligible(document)
+  ) {
+    return document;
+  }
+  return currentPreviewDocument(preview, message);
+}

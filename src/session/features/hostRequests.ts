@@ -25,7 +25,7 @@ import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { currentPreviewDocument, isDocumentEligible, isPathWithin } from "../sessionDocuments";
+import { currentPaletteDocument, isDocumentEligible, isPathWithin } from "../sessionDocuments";
 
 /** The answer of a palette list request. */
 export type HostListAnswer =
@@ -112,7 +112,7 @@ export class HostRequestController {
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-065
   private handleListTargets(preview: PreviewSession, message: PageMessageOf<"previewListTargets">): void {
-    const document = currentPreviewDocument(preview, message);
+    const document = currentPaletteDocument(preview, message);
     if (!document) {
       this.postHostResult(preview, message, { ok: false, reason: "The preview is out of date. Try again once it has refreshed." });
       return;
@@ -130,7 +130,7 @@ export class HostRequestController {
       this.postHostResult(preview, message, { ok: false, reason: "Citations are read from the workspace, which needs trust." });
       return undefined;
     }
-    const document = currentPreviewDocument(preview, message);
+    const document = currentPaletteDocument(preview, message);
     if (!document) {
       this.postHostResult(preview, message, { ok: false, reason: "The preview is out of date. Try again once it has refreshed." });
       return undefined;
@@ -156,7 +156,7 @@ export class HostRequestController {
       this.postHostResult(preview, message, { ok: false, reason: "Linking a document needs a trusted workspace." });
       return undefined;
     }
-    const document = currentPreviewDocument(preview, message);
+    const document = currentPaletteDocument(preview, message);
     const documentPath = document?.path;
     if (!document || documentPath === undefined) {
       this.postHostResult(preview, message, { ok: false, reason: "The preview is out of date, or the document is not a file." });
@@ -192,7 +192,7 @@ export class HostRequestController {
       this.postHostResult(preview, message, { ok: false, reason: "Inserting an image needs a trusted workspace." });
       return undefined;
     }
-    const document = currentPreviewDocument(preview, message);
+    const document = currentPaletteDocument(preview, message);
     const documentPath = document?.path;
     if (!document || documentPath === undefined) {
       this.postHostResult(preview, message, { ok: false, reason: "The preview is out of date, or the document is not a file." });
