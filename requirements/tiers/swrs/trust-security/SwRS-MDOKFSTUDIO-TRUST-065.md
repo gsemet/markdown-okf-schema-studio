@@ -39,6 +39,7 @@ implemented_in_files:
 - src/session/features/sourceEdits.ts
 - src/session/pageMessages.ts
 - src/session/previewManager.ts
+- src/session/sessionDocuments.ts
 tested_in_files:
 - test/host/fmtableReq.requirements.test.ts
 - test/integration/blockClipboard.test.ts
@@ -107,6 +108,7 @@ The page-state exceptions are the ready reports (see SwRS-MDOKFSTUDIO-LIFE-071),
 | previewPlantUmlInclude addressed to the current document from a page one render behind | the include is answered |
 | previewEditFlushed or previewEditClosed naming an older render, on a live preview | the handler runs and the waiting host continues |
 | previewEditSave of the block editor opened on revision 3 after the document moved to revision 4, same editId | accepted |
+| previewListTargets, previewListCitations, previewPickDocument or previewPickImage naming render 3 while the block editor the host holds is open on render 3 and its own saves moved the document to revision 4 | the request is answered as for a current preview (the preview refreshes only when the editor closes) |
 
 ### Scenario (refusal): Stale write answered out of date or with a reopen hint
 
@@ -117,10 +119,10 @@ A message that passes its gate but writes for a document newer than the render i
 | previewBlockMove | the document was edited after the last render | ok false, "The preview is out of date. Try again once it has refreshed."; a render of the current text plans the move |
 | previewBlocksCopy, previewBlocksCut, previewBlocksPaste | the document changed since the render | ok false, "The preview is out of date. Try again once it has refreshed."; a render of the current text plans the copy |
 | previewLabelRename | the document was edited after rendering | "The preview is out of date. Try again once it has refreshed." and nothing changes |
-| previewListTargets | the document is no longer the one of the render | ok false, "The preview is out of date. Try again once it has refreshed."; an unedited document answers the labels |
-| previewListCitations | the document is no longer the one of the render | ok false, "The preview is out of date. Try again once it has refreshed." and no file is read; an unedited document answers the keys |
-| previewPickImage | the preview is out of date, or the document is an untitled document that is not a saved Markdown file | "The preview is out of date, or the document is not a file." and the dialog is not opened |
-| previewPickDocument | the preview is out of date, or the document is not a saved Markdown file | "The preview is out of date, or the document is not a file." and the dialog is not opened |
+| previewListTargets | the document is no longer the one of the render, or was edited after it with no block editor open on that render | ok false, "The preview is out of date. Try again once it has refreshed."; an unedited document answers the labels |
+| previewListCitations | the document is no longer the one of the render, or was edited after it with no block editor open on that render | ok false, "The preview is out of date. Try again once it has refreshed." and no file is read; an unedited document answers the keys |
+| previewPickImage | the preview is out of date (no block editor open on that render), or the document is an untitled document that is not a saved Markdown file | "The preview is out of date, or the document is not a file." and the dialog is not opened |
+| previewPickDocument | the preview is out of date (no block editor open on that render), or the document is not a saved Markdown file | "The preview is out of date, or the document is not a file." and the dialog is not opened |
 | previewThreadReply, previewThreadDelete | the request names another revision of the document than the host holds | "The preview is out of date. Try again once it has refreshed." and nothing changes; a request naming the current revision is handled |
 | previewEditSave, previewEditCancel (block editor) | the editor was opened on an older page than the host holds, in a writable preview | "The preview changed while this block was being edited. Copy your text, then reopen the block." |
 | previewFrontmatterSave | the editor was opened on an older render (render 1 while the host shows render 2 of the same document) | "The preview changed while this field was being edited. Reopen the field." and the document is unchanged |
@@ -138,7 +140,6 @@ A message that passes its gate but writes for a document newer than the render i
 
 - Known issue: a request of the render gate that names an older render than the one the host holds is dropped by the gate without any answer. No reason is shown; an arrow click stays marked pending; a keyboard move, a clipboard request and a selection move are forgotten by the page after five seconds; and an open request (which the host answers only for saves and cancels) leaves its frame empty.
 - Known issue: the copy button still shows Copied although the host dropped the request and the clipboard is unchanged; the version check is stricter than needed for a copy, which edits nothing.
-- Known issue: after the editor has saved any change, whether by the autosave after typing or by a palette button, Reference, Citation, Document link, Image and the Browse of the figure form answer the out-of-date reason until the editor is closed; the paste of an image or of rich text is not affected (SwRS-MDOKFSTUDIO-TRUST-005, SwRS-MDOKFSTUDIO-PALETTE-213). Cause (sessionDocuments.ts:currentPreviewDocument): the check needs the document revision to equal the render revision that the request carries, the autosave moves the document revision and the preview only refreshes when the editor closes, so the advice to try again once it has refreshed cannot come true. The label, citation, image picker and document picker requests share this cause.
 - Known issue: the include request (previewPlantUmlInclude) is not an edit: it is allowed in read-only previews and in Restricted Mode.
 
 ### Related requirements
@@ -158,7 +159,7 @@ A message that passes its gate but writes for a document newer than the render i
 - Method: test/session/diagReq.plantuml.requirements.test.ts (include request handled for the current document even one render behind, dropped otherwise).
 - Method: test/host/fmtableReq.requirements.test.ts (frontmatter save from an older render answered with the reopen hint; another document gets no answer).
 - Method: test/integration/labelRename.test.ts (rename out-of-date answer; stale revision dropped, the page ends with the timeout text).
-- Method: test/session/paletteReq.requirements.test.ts (label, citation, image picker and document picker requests answered with the out-of-date reason; current requests answered; no file read and no dialog opened for a refused request).
+- Method: test/session/paletteReq.requirements.test.ts (label, citation, image picker and document picker requests answered with the out-of-date reason; current requests answered, and answered while a block editor is open on the render after its autosave moved the document, but not when no editor is open or it is open on another render; no file read and no dialog opened for a refused request).
 - Method: test/session/reviewReqThreads.requirements.test.ts (thread request that names another revision gets the out-of-date answer).
 - Method: test/session/toolbarReq.requirements.test.ts (link request of a stale page or a disposed preview is ignored).
 - Criteria: the reason texts equal those of the tables (the move and clipboard messages have no assertion on the text). currentPreviewDocument returns nothing when the revision differs, the stage differs, or the document is not a .md file (eligibility needs a file path ending in .md in any case). The ready reports and the stale-save cases beyond the open-editor save are covered by the tests of SwRS-MDOKFSTUDIO-LIFE-071.

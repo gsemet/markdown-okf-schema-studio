@@ -72,10 +72,6 @@ When the writer presses Image, the extension SHALL ask the host for a native ima
 | A path with a line break | No edit is produced |
 | A path with a > character, or an angle bracket | No edit is produced; the Figure action shares the check |
 
-### Known issues
-
-- Known issue: after the editor has saved a change, the answer of the dialog is refused with the out-of-date reason (see SwRS-MDOKFSTUDIO-TRUST-065).
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TRUST-065: the gate that answers a stale pick with the out-of-date reason.

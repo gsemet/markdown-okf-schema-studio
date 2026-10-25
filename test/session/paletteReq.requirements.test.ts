@@ -98,7 +98,7 @@ test("a scan still running after 5 seconds stops reading and marks the list trun
 
 interface Setup {
   answers: Array<Record<string, unknown>>;
-  preview: { readOnly: boolean; document: unknown; stage: unknown; documentUri: string };
+  preview: { readOnly: boolean; document: unknown; stage: unknown; documentUri: string; edits: { active?: unknown } };
   dialogs: number;
   writes: number;
   scans: string[];
@@ -116,6 +116,8 @@ interface SetupOptions {
   canonical?: (value: string) => string;
   text?: string;
   bibFailure?: Error;
+  /** The block editor the host holds open, on this render revision (the default message revision). */
+  editorOpenOn?: number;
 }
 
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
@@ -166,6 +168,11 @@ function setup(options: SetupOptions = {}): Setup {
     readOnly: options.readOnly ?? false,
     document,
     stage: { activeDocumentRevision: options.stageRevision ?? revision },
+    edits: {
+      active: options.editorOpenOn === undefined
+        ? undefined
+        : { documentId: "file:///ws/docs/chapter.md", revision: options.editorOpenOn },
+    },
     documentUri: "file:///ws/docs/chapter.md",
     postToPage: (message: Record<string, unknown>) => { answers.push(message); return Promise.resolve(true); },
   };
@@ -265,6 +272,22 @@ test("the image picker does not open for a stale preview or an unsaved document"
   const untitled = setup({ documentPath: undefined });
   assert.equal((await untitled.ask("previewPickImage")).reason, NOT_A_FILE);
   assert.equal(untitled.dialogs, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-065
+test("while the block editor is open, palette requests are answered after its autosave moved the document", async () => {
+  // The editor opened on render 3 and saved: the document is at revision 4, the preview still shows render 3.
+  const open = () => setup({ revision: 4, stageRevision: 3, editorOpenOn: 3, picked: { path: "/ws/docs/a.md", local: true } as PickedFile });
+  assert.equal((await open().ask("previewListTargets")).ok, true);
+  assert.equal((await open().ask("previewListCitations")).ok, true);
+  assert.equal((await open().ask("previewPickDocument")).ok, true);
+  const image = setup({ revision: 4, stageRevision: 3, editorOpenOn: 3, picked: { path: "/ws/docs/pic.png", local: true } as PickedFile });
+  assert.equal((await image.ask("previewPickImage")).ok, true);
+  assert.equal(image.dialogs, 1);
+  // Without an open editor the same state is still refused.
+  assert.equal((await setup({ revision: 4, stageRevision: 3 }).ask("previewListTargets")).reason, STALE);
+  // An editor opened on another render does not unlock the request.
+  assert.equal((await setup({ revision: 4, stageRevision: 3, editorOpenOn: 2 }).ask("previewListTargets")).reason, STALE);
 });
 
 const paste = { mime: "image/png", dataBase64: PNG.toString("base64") };
