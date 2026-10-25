@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-10-25 (message sender check accepts the webview host frames)
+
+- SwRS-MDOKFSTUDIO-TRUST-059: in a real VS Code webview the host message comes from a frame that is
+  neither the parent nor the page's window but has the page's own origin; the page now also accepts a
+  same-origin sender other than its opener. Confirmed with a real-window run.
+
 ## 2026-10-25 (page security hardening: sanitizer allow-list, message sender check, no stylesheet link)
 
 - SwRS-MDOKFSTUDIO-TRUST-036: the sanitizer keeps only the elements and attributes of the supported

@@ -33,7 +33,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When the page receives a window message event, it SHALL hand its value to the host message filter only if the event comes from the frame that hosts the page, from the page's own window with its own origin, or is dispatched inside the page without a sender; a message posted by any other window or frame SHALL be dropped. When the page receives a value from the host, it SHALL treat it as a host message only if it is an object whose type is an own key of the table of host message rules and it is addressed to the page by that rule, which names the document, revision and request of the render the page shows, or the document alone, or no render identity but an identifier of its own.
+When the page receives a window message event, it SHALL hand its value to the host message filter only if the event comes from the frame that hosts the page, from another frame with the page's own origin that is not the window that opened it, from the page's own window with its own origin, or is dispatched inside the page without a sender; a message posted by any other window or frame SHALL be dropped. When the page receives a value from the host, it SHALL treat it as a host message only if it is an object whose type is an own key of the table of host message rules and it is addressed to the page by that rule, which names the document, revision and request of the render the page shows, or the document alone, or no render identity but an identifier of its own.
 
 ### Scenario (nominal): Registered type, current render
 
@@ -43,9 +43,9 @@ When the page receives a window message event, it SHALL hand its value to the ho
 
 ### Scenario (refusal): A message from another window or frame
 
-- GIVEN a page in a webview whose parent frame hosts it, a message event sent by the parent frame, one sent by another window, and one sent by a window with a foreign origin
+- GIVEN a page in a webview whose parent frame hosts it, a message event sent by the parent frame, one sent by another frame of the webview host with the page's origin, one sent by another window, one sent by a window with a foreign origin, and one sent by the opener
 - WHEN each event arrives
-- THEN only the one from the parent frame (and one dispatched in the page without a sender) reaches the host message filter; the others are dropped
+- THEN only the ones from the parent frame and from the same-origin host frame (and one dispatched in the page without a sender) reach the host message filter; the others are dropped
 
 ### Scenario (refusal): Values that are not host messages
 
@@ -79,6 +79,6 @@ The bounds of the payload of each type are in the SwRS of that type (see SwRS-MD
 ### Verification notes
 
 - Method: test/core/protocol/hostToPage.test.ts (every host message type has a rule, and a well-formed message for the page passes it; values that are not host messages are refused; each rule matches the identity it names, and only that: all scenarios and the addressing table).
-- Method: test/page/hostMessages.test.ts (a window message event reaches the listener only from the parent frame, the page itself or an event without a sender; a host message addressed to the page reaches its handler, any other goes to unhandled; the page is read at each message, so a moved render identity applies at once: nominal and render scenarios).
+- Method: test/page/hostMessages.test.ts (a window message event reaches the listener only from the parent frame, a same-origin host frame, the page itself or an event without a sender; a host message addressed to the page reaches its handler, any other goes to unhandled; the page is read at each message, so a moved render identity applies at once: nominal and render scenarios).
 - Method: test/page/runtimeBlockMoves.test.ts (`T36: a refused move says why next to the bar; a result of another context is ignored`: previewBlockMoveResult row of the render addressing).
 - Criteria: A value the filter refuses is not given to the handler of any type. The page identity is read at every message. Answers of host round trips are matched by their own edit identifier and are not checked against the render.
