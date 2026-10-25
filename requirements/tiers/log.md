@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-25 (trust granted: an open Restricted Mode preview becomes writable)
+
+- SwRS-MDOKFSTUDIO-TRUST-001: on a trust grant, an open preview that was read-only only because of
+  Restricted Mode moves to a trusted session on the same panel (editing, checkboxes, palette,
+  workspace resource and navigation roots), renders once and keeps its reading state. Scenario and
+  verification note changed; removed the Known issue line about the preview staying read-only
+  (it also covers the former SwRS-MDOKFSTUDIO-LIFE-155). Host-level test only; no real-window run.
+
 ## 2026-10-25 (returning to a document restores its reading state)
 
 - SwRS-MDOKFSTUDIO-LIFE-125: switching A, B, back to A restores the focused block, selection, open
