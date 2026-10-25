@@ -390,6 +390,12 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
   background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.25));
 }
 
+[data-sphinx-preview-code-copy]:focus-visible,
+#sphinx-myst-preview-content pre[tabindex]:focus-visible {
+  outline: 2px solid var(--studio-focusBorder, #007fd4);
+  outline-offset: 1px;
+}
+
 [data-sphinx-preview-code-copy] > svg {
   width: 14px;
   height: 14px;

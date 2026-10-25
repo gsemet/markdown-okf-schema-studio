@@ -654,6 +654,9 @@ def check_first_element_gap(page: Page, scenario: dict, failures: list[Failure])
 
 def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """The copy button follows the hovered code block and posts its raw code."""
+  if scenario.get("codeCopyKeyboardChecks"):
+    check_code_copy_keyboard(page, scenario, failures)
+    return
   if not scenario.get("codeCopyChecks"):
     return
   page_name = scenario["page"]
@@ -694,6 +697,48 @@ def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None
     failures.append(Failure(page_name, "the copy button did not show the check mark after the click"))
   if page.locator(".sphinx-preview-block-editor").count() != 0:
     failures.append(Failure(page_name, "clicking the copy button opened a block editor"))
+
+
+def check_code_copy_keyboard(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """The copy button is reached with the keyboard: Tab focuses the block, Tab again the button, Enter copies."""
+  page_name = scenario["page"]
+  button = page.locator("[data-sphinx-preview-code-copy]")
+  if button.count() != 0:
+    failures.append(Failure(page_name, "a copy button exists before any block is focused"))
+  # Tab from the top of the page until the first code block holds the focus, like a keyboard reader.
+  page.evaluate("() => { document.activeElement?.blur(); }")
+  for _ in range(40):
+    page.keyboard.press("Tab")
+    if page.evaluate("document.activeElement === document.querySelector('#sphinx-myst-preview-content pre')"):
+      break
+  page.wait_for_timeout(120)
+  if button.count() != 1 or not button.is_visible():
+    failures.append(Failure(page_name, "focusing a code block did not show the copy button"))
+    return
+  ring = page.evaluate("""() => {
+    const pre = document.querySelector('#sphinx-myst-preview-content pre');
+    const style = getComputedStyle(pre);
+    return { focused: document.activeElement === pre, width: style.outlineWidth, style: style.outlineStyle };
+  }""")
+  if not ring["focused"] or ring["style"] == "none" or ring["width"] == "0px":
+    failures.append(Failure(page_name, f"the focused code block shows no focus ring: {ring}"))
+  page.keyboard.press("Tab")
+  focused = page.evaluate("document.activeElement && document.activeElement.hasAttribute('data-sphinx-preview-code-copy')")
+  if not focused or not button.is_visible():
+    failures.append(Failure(page_name, "Tab from the code block did not focus the visible copy button"))
+    return
+  outline = button.evaluate("element => getComputedStyle(element).outlineStyle")
+  if outline == "none":
+    failures.append(Failure(page_name, "the focused copy button shows no focus ring"))
+  if button.get_attribute("aria-label") != "Copy code":
+    failures.append(Failure(page_name, "the copy button has no Copy code label"))
+  expected = page.locator("#sphinx-myst-preview-content pre").first.locator("code").evaluate("element => element.textContent")
+  page.keyboard.press("Enter")
+  copied = page.evaluate("window.visualMessages.filter(m => m.type === 'previewCopyText').at(-1)")
+  if not copied or copied.get("text") != expected:
+    failures.append(Failure(page_name, "Enter on the focused copy button did not post the exact code text"))
+  if button.get_attribute("aria-label") != "Copied":
+    failures.append(Failure(page_name, "the copy button did not show the check mark after Enter"))
 
 
 def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) -> None:

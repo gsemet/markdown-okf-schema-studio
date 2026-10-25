@@ -30,6 +30,17 @@ class FakeElement {
   setAttribute(name: string, value: string) { this.attrs.set(name, value); }
   getAttribute(name: string) { return this.attrs.get(name) ?? null; }
   removeAttribute(name: string) { this.attrs.delete(name); }
+  hasAttribute(name: string) { return this.attrs.has(name); }
+  focused = 0;
+  focus() { this.focused++; }
+  querySelectorAll(selector: string): FakeElement[] {
+    const found: FakeElement[] = [];
+    for (const child of this.children) {
+      if (child.matches(selector)) found.push(child);
+      found.push(...child.querySelectorAll(selector));
+    }
+    return found;
+  }
   addEventListener(type: string, handler: Handler) {
     this.listeners.set(type, [...(this.listeners.get(type) ?? []), handler]);
   }
@@ -127,9 +138,11 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
     getElementById: (id: string) => id === "sphinx-myst-preview-content" ? content : null,
     querySelector: (selector: string) => body.querySelector(selector),
     elementFromPoint: () => hovered,
+    get activeElement() { return active; },
     addEventListener: (type: string, handler: Handler) => documentListeners.set(type, [...(documentListeners.get(type) ?? []), handler]),
   };
   let hovered: FakeElement | null = null;
+  let active: FakeElement | null = null;
   const window = {
     innerWidth: 900,
     innerHeight: 800,
@@ -138,7 +151,7 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
     addEventListener: (type: string, handler: Handler) => windowListeners.set(type, [...(windowListeners.get(type) ?? []), handler]),
   };
   provideGlobalElement(FakeElement);
-  const runtime: { hide(): void } = installCodeCopy(document as never, window as never, (text: string) => posted.push(text));
+  const runtime: { hide(): void; refresh(): void } = installCodeCopy(document as never, window as never, (text: string) => posted.push(text));
   return {
     button(): any { return body.querySelector("[data-sphinx-preview-code-copy]") as any; },
     body, content, band, makePre, posted, timers, runtime, window,
@@ -154,10 +167,17 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
       const calls = target.fire("click");
       if (calls.stopped === 0) for (const handler of documentListeners.get("click") ?? []) handler({ target });
     },
+    fireDocument(type: string, event: Record<string, any>) {
+      const calls = { prevented: 0 };
+      const full = { preventDefault: () => calls.prevented++, ...event };
+      for (const handler of documentListeners.get(type) ?? []) handler(full);
+      return calls;
+    },
     click(target: FakeElement) { for (const handler of documentListeners.get("click") ?? []) handler({ target }); },
     move(target: FakeElement) { hovered = target; for (const handler of documentListeners.get("mousemove") ?? []) handler({ target, clientX: 0, clientY: 0 }); },
     scroll() { for (const handler of windowListeners.get("scroll") ?? []) handler({}); },
     pointFrom(target: FakeElement | null) { hovered = target; },
+    setActive(target: FakeElement | null) { active = target; },
   };
 }
 
@@ -339,4 +359,53 @@ test("in edit mode the button click copies and neither opens nor commits an edit
   assert.equal(opened.length, 0, "the click never reaches the document handlers");
   t.clickWithBubbling(code);
   assert.equal(opened.length, 1, "a click on the block itself still reaches them");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+test("keyboard: a code block is a tab stop, focusing it shows the button, Tab and Shift+Tab move between them", () => {
+  const t = harness();
+  const { pre } = t.makePre("print('hi')\n", 100);
+  const other = t.makePre("x\n", 300);
+  other.pre.setAttribute("data-sphinx-preview-editing", "true");
+  t.runtime.refresh();
+  assert.equal(pre.getAttribute("tabindex"), "0", "a copyable block is focusable");
+  assert.equal(other.pre.getAttribute("tabindex"), null, "a block being edited is not");
+  assert.equal(t.button(), null, "tab stops add no element before the first reveal");
+  t.fireDocument("focusin", { target: pre });
+  assert.equal(t.button().hidden, false, "focus reveals the button");
+  assert.equal(t.button().getAttribute("aria-label"), "Copy code");
+  const forward = t.fireDocument("keydown", { key: "Tab", target: pre });
+  assert.equal(forward.prevented, 1);
+  assert.equal(t.button().focused, 1, "Tab moves focus to the button");
+  t.fireDocument("focusin", { target: t.button() });
+  t.fireDocument("focusout", { target: pre, relatedTarget: t.button() });
+  assert.equal(t.button().hidden, false, "the button stays while it holds focus");
+  const back = t.fireDocument("keydown", { key: "Tab", shiftKey: true, target: t.button() });
+  assert.equal(back.prevented, 1);
+  assert.equal(pre.focused, 1, "Shift+Tab returns to the block");
+  t.fireDocument("focusout", { target: pre, relatedTarget: null });
+  assert.equal(t.button().hidden, true, "focus leaving hides the button");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+test("keyboard: activating the focused button copies the code", () => {
+  const t = harness();
+  const { pre } = t.makePre("print('hi')\n", 100);
+  t.fireDocument("focusin", { target: pre });
+  // Enter and Space on a button fire its click event.
+  t.button().fire("click");
+  assert.deepEqual(t.posted, ["print('hi')\n"]);
+  assert.equal(t.button().getAttribute("aria-label"), "Copied");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+test("keyboard: scrolling stops with the pointer elsewhere, the focused block keeps its button", () => {
+  const t = harness();
+  const { pre } = t.makePre("a\n", 100);
+  t.fireDocument("focusin", { target: pre });
+  t.setActive(pre);
+  t.pointFrom(null);
+  t.scroll();
+  for (const timer of [...t.timers]) timer.callback();
+  assert.equal(t.button().hidden, false);
 });

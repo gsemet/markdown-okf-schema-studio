@@ -2,12 +2,12 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-CODE-017
 uuid: 840b982c-ce45-4694-8991-d5240d6004c3
-title: A Copy code button appears on a hovered code block
-description: When the pointer is over a code block of the preview content, the
-  extension SHALL show a 26 px Copy code button 6 px inside the block's
-  top-right corner, below the sticky heading band and the floating toolbar when
-  they cover that corner, and hide it whenever the pointer, a click, scrolling,
-  a resize or a content patch makes it unusable.
+title: A Copy code button appears on a hovered or focused code block
+description: When the pointer is over a code block of the preview content, or
+  the block holds keyboard focus, the extension SHALL show a 26 px Copy code
+  button 6 px inside the block's top-right corner, below the sticky heading band
+  and the floating toolbar when they cover that corner, and hide it whenever the
+  pointer, a click, scrolling, a resize or a content patch makes it unusable.
 project: markdown-okf-schema-studio
 scope: code-blocks
 lifecycle: draft
@@ -29,11 +29,11 @@ tested_in_files:
 - test/visual/scenarioDefinitions1.ts
 ---
 
-## A Copy code button appears on a hovered code block
+## A Copy code button appears on a hovered or focused code block
 
 ### Normative behavior
 
-When the pointer is over a code block of the preview content, the extension SHALL show a 26 px Copy code button 6 px inside the block's top-right corner, below the sticky heading band and the floating toolbar when they cover that corner, and hide it whenever the pointer, a click, scrolling, a resize or a content patch makes it unusable.
+When the pointer is over a code block of the preview content, or the block holds keyboard focus, the extension SHALL show a 26 px Copy code button 6 px inside the block's top-right corner, below the sticky heading band and the floating toolbar when they cover that corner, and hide it whenever the pointer, a click, scrolling, a resize or a content patch makes it unusable.
 
 ### Scenario (nominal): The button appears on hover
 
@@ -90,9 +90,21 @@ When the pointer is over a code block of the preview content, the extension SHAL
 | the button shows Copied on block A and the pointer enters block B | the button on block B reads Copy code with no check mark |
 | the button shows Copied and the pointer stays in the same block | the Copied state is kept until the 1.5 s end |
 
-### Known issues
+### Scenario (nominal): The keyboard reaches the button
 
-- Known issue: the button is revealed by the pointer only (mouseover and mousemove), there is no keyboard path to show or focus it.
+| Step | Outcome |
+| --- | --- |
+| Tab moves focus to a code block | the block shows a focus ring and the Copy code button appears at the same place as on hover |
+| Tab is pressed again | focus moves to the button, which shows a focus ring |
+| Enter or Space is pressed on the button | the raw code is copied and the button shows Copied |
+| Shift+Tab is pressed on the button | focus returns to the block and the button stays shown |
+| focus leaves the block and the button | the button is hidden |
+
+### Scenario (refusal): Blocks that are not tab stops
+
+- GIVEN a block being edited, a code block inside a block editor, or the source of a Mermaid or PlantUML diagram
+- WHEN the reader tabs through the page
+- THEN the block is not a tab stop and no copy button appears for it
 
 ### Related requirements
 
@@ -103,5 +115,6 @@ When the pointer is over a code block of the preview content, the extension SHAL
 
 - Method: test/page/modules/codeCopy.test.ts (hover button geometry, created only on first hover, excluded block kinds, 30 px threshold, click hiding, pointer leaving and moving onto the button, 120 ms scroll settle, placement below the band and toolbar)
 - Method: test/page/modules/renderReq.codeCopy.requirements.test.ts (resize moves the button to the new top-right corner and hides it when too little shows, Copied reset on another block, hide on content patch)
-- Method: test/visual/scenarioDefinitions1.ts (copy-button visual scenarios: geometry and placement)
+- Method: test/page/modules/codeCopy.test.ts (keyboard: tab stop on copyable blocks only, focus reveals the button, Tab and Shift+Tab between block and button, Enter on the button copies)
+- Method: test/visual/scenarioDefinitions1.ts (copy-button visual scenarios: geometry and placement; keyboard focus scenarios in light and dark with the focus rings)
 - Criteria: button geometry matches the statement; the button is created only on first hover; no button for the excluded block kinds or for blocks outside the content element; visibility toggles at the 30 px threshold; hide is called once per applied patch; button position follows the block rect after resize; state reset only when the hovered block changes; button top is not above the bottom of the band or toolbar
