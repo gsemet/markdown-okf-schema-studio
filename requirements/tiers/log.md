@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-10-25 (a line break pasted into a table cell becomes a space)
+
+- SwRS-MDOKFSTUDIO-TABLE-091: a line break pasted into the cell text box is now replaced by a
+  space, so the source row stays one line. Removed the Known issue line.
+- SwRS-MDOKFSTUDIO-TABLE-070: removed the refusal and nothing-recognised scenarios (both
+  unreachable now; the dead refusal branch is gone from the button) and the two Known issue lines;
+  added a scenario for a pasted line break.
+- StRS-MDOKFSTUDIO-TABLE-012: removed the Known issue about a pasted line break and said that
+  pasted text cannot split the row.
+
 ## 2026-10-25 (dollar amounts in the preview are specified as they render)
 
 - SwRS-MDOKFSTUDIO-MYST-024: added a boundary scenario and a Known issue line: the preview typesets

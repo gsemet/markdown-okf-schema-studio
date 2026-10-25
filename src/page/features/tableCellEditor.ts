@@ -190,6 +190,14 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       edit.tableModel!.rows[selectedRow]![edit.tableColumnIndex!] = input.value;
     };
     input.addEventListener("input", () => {
+      // A pasted or dropped line break would split the source row: it becomes a space.
+      if (/[\r\n]/u.test(input.value)) {
+        const flat = (text: string): string => text.replace(/\r\n|[\r\n]/gu, " ");
+        const caret = input.selectionStart;
+        const flatCaret = typeof caret === "number" ? flat(input.value.slice(0, caret)).length : undefined;
+        input.value = flat(input.value);
+        if (flatCaret !== undefined) input.setSelectionRange?.(flatCaret, flatCaret);
+      }
       resizeInput();
       rememberCellValue();
       blockEditor.autosaveBlockEdit();
@@ -281,8 +289,6 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       if (converted && converted.ok) {
         edit.convertedText = converted.text;
         blockEditor.saveBlockEdit();
-      } else if (converted) {
-        edit.status.textContent = converted.reason;
       }
     }, tableFigure, "table");
 
