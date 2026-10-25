@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-10-25 (doc and download roles without a label show their target)
+
+- SwRS-MDOKFSTUDIO-MYST-017: a `{doc}` or `{download}` role written without a label now shows the
+  written target as link text (the file name for a download) instead of an empty link; the Known
+  issue line about the empty link is removed and the boundary scenario states the new behaviour.
+
 ## 2026-10-25 (dollar amounts stay text, as in Sphinx)
 
 - SwRS-MDOKFSTUDIO-MYST-024: the dollar-amounts scenario now states Sphinx's dollarmath rule (an

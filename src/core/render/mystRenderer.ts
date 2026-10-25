@@ -13,6 +13,7 @@ import { convertCommentMarkers } from "./commentMarkers";
 import { highlightCodeBlocks } from "./highlight";
 import {
   expandVersionAdmonitions,
+  labelLinkRoles,
   normalizeCaptionlessReferences,
   normalizeFigureCaptions,
   normalizeRawDetailsAndKbd,
@@ -355,6 +356,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   },
   { name: "figure captions", run: (state) => normalizeFigureCaptions(state.ast) },
   { name: "caption-less references", run: (state) => normalizeCaptionlessReferences(state.ast) },
+  { name: "doc and download labels", run: (state) => labelLinkRoles(state.ast) },
   { name: "version admonitions", run: (state) => expandVersionAdmonitions(state.ast, state.mystParse) },
   { name: "dollar amounts", run: (state) => restoreDollarAmounts(state.ast) },
   { name: "wiki links", run: (state) => expandWikiLinks(state.ast) },
