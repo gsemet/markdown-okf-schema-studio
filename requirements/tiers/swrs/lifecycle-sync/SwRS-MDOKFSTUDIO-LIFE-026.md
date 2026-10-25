@@ -89,7 +89,7 @@ When another saved Markdown file becomes the active editor, the extension SHALL 
 
 ### Known issues
 
-- Known issue: the replaced session starts with an empty remembered-state map; see SwRS-MDOKFSTUDIO-LIFE-125.
+- Known issue: a session replaced because the next document needs another resource root or trust state starts with an empty remembered-state map, so the reading state of earlier documents is not brought back after such a switch.
 
 ### Related requirements
 

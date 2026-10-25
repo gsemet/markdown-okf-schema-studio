@@ -48,5 +48,4 @@ As a reader, I reload the window and my previews come back on the same documents
 - A panel whose saved identity or source is unusable explains why instead of showing a preview.
 - Only the newest restored side preview keeps following the active editor.
 - Deactivating the extension leaves the panels to VS Code, which restores them later.
-- Known issue: switching between documents inside one preview does not bring back the focused block, the selection, the open sections or the Description state; see SwRS-MDOKFSTUDIO-LIFE-125. A window reload does restore them.
 - The remembered state is bounded so that it never grows without limit.

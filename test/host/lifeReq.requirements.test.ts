@@ -700,7 +700,7 @@ test("the Description column choice of a document is stored for the workspace an
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-125
-test("switching back to a document does not bring back its remembered state (Known issue)", async (t) => {
+test("switching back to a document brings back its remembered state", async (t) => {
   const studio = start(t);
   const fileA = writeFile("# A\n\nFirst.\n");
   const fileB = writeFile("# B\n\nSecond.\n");
@@ -719,5 +719,7 @@ test("switching back to a document does not bring back its remembered state (Kno
   fake.controls.events.changeActiveEditor.fire(fake.vscode.window.activeTextEditor);
   await studio.advance(2_000);
   assert.equal(session.documentUri, idA);
-  assert.equal(session.state, undefined, "the pending page clears the remembered state");
+  assert.equal(session.state?.focusedBlockId, "block-3", "the focused block of A is back");
+  assert.deepEqual(session.state?.openDisclosures, [1], "the open sections of A are back");
+  assert.equal(session.state?.sourceLine, 80, "the scroll line of A is back");
 });
