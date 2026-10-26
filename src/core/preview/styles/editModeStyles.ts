@@ -239,6 +239,16 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   z-index: 2;
 }
 
+/* In edit mode every table cell keeps a usable width (an empty new column stays clickable) and the
+   cell being edited is wide enough to type in. The rendered (read) view is unchanged. */
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :where(th, td) {
+  min-width: 8em;
+}
+
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :where(th, td)[data-sphinx-preview-table-cell-selected="true"] {
+  min-width: 300px;
+}
+
 /* The rendered cell content keeps its width (so columns do not move) but no height: the editor
    below is in the flow and the cell grows with the field and its buttons. */
 [data-sphinx-table-cell-content="true"] {

@@ -12,6 +12,14 @@
 - Added `SwRS-MDOKFSTUDIO-PALETTE-002` (every edit bar button carries the slide-in tooltip; the rule button
   is drawn as three dashes) and `SwRS-MDOKFSTUDIO-BLOCK-002` (a horizontal rule has a 25 px hit area), CR 112.
 
+## 2026-10-26 (table cells keep a usable width in edit mode)
+
+- SwRS-MDOKFSTUDIO-TABLE-006: in edit mode every table cell is at least 8em wide (an empty new
+  column stays clickable) and the cell being edited at least 300 px wide; the reading view is
+  unchanged. A style unit test and the visual cell-editor check cover it. Round 2: a real-window
+  test (cream preview on a dark VS Code theme) adds a column with the toolbar, saves it, opens its
+  empty header and measures the empty column (8em) and the edited cell (300 px, editor inside).
+
 ## 2026-10-26 (bold dollar prices preserve emphasis)
 
 - SwRS-MDOKFSTUDIO-MYST-024: permissive MyST dollarmath no longer consumes the `**` markers
