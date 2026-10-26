@@ -283,6 +283,144 @@ export function convertCheckboxPlaceholders(
   markTaskList(node);
 }
 
+const DOLLAR_PLACEHOLDER = "\uE002";
+const DOLLAR_WHITESPACE = /\s/u;
+
+function isEscapedDollar(source: string, index: number): boolean {
+  let backslashes = 0;
+  for (let cursor = index - 1; cursor >= 0 && source[cursor] === "\\"; cursor -= 1) {
+    backslashes += 1;
+  }
+  return backslashes % 2 === 1;
+}
+
+function isDollarDigit(value: string | undefined): boolean {
+  return value !== undefined && value.trim() !== "" && !Number.isNaN(Number(value));
+}
+
+function nextDollar(source: string, start: number): number {
+  for (let index = start; index < source.length; index += 1) {
+    if (source[index] === "$" && !isEscapedDollar(source, index)) return index;
+  }
+  return -1;
+}
+
+function nextDoubleDollar(source: string, start: number): number {
+  for (let index = start; index < source.length - 1; index += 1) {
+    if (source[index] === "$" && source[index + 1] === "$" && !isEscapedDollar(source, index)) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+function closingFence(source: string, index: number): number | undefined {
+  const lineStart = source.lastIndexOf("\n", index - 1) + 1;
+  if (!/^ {0,3}$/u.test(source.slice(lineStart, index))) return undefined;
+  const marker = source[index];
+  if (marker !== "`" && marker !== "~") return undefined;
+  let markerEnd = index;
+  while (source[markerEnd] === marker) markerEnd += 1;
+  const markerLength = markerEnd - index;
+  if (markerLength < 3) return undefined;
+  const openingLineEnd = source.indexOf("\n", markerEnd);
+  if (openingLineEnd < 0) return source.length;
+  for (let lineStart = openingLineEnd + 1; lineStart < source.length; ) {
+    const lineEnd = source.indexOf("\n", lineStart);
+    const end = lineEnd < 0 ? source.length : lineEnd;
+    const line = source.slice(lineStart, end).replace(/\r$/u, "");
+    const match = /^( {0,3})([`~]+)/u.exec(line);
+    if (match && match[2][0] === marker && match[2].length >= markerLength
+      && /^[ \t]*$/u.test(line.slice(match[0].length))) {
+      return lineEnd < 0 ? end : lineEnd + 1;
+    }
+    if (lineEnd < 0) break;
+    lineStart = lineEnd + 1;
+  }
+  return source.length;
+}
+
+function protectedRegionEnd(source: string, index: number): number | undefined {
+  if (source[index] === "`" && !isEscapedDollar(source, index)) {
+    const fenceEnd = closingFence(source, index);
+    if (fenceEnd !== undefined) return fenceEnd;
+    let markerEnd = index;
+    while (source[markerEnd] === "`") markerEnd += 1;
+    const marker = source.slice(index, markerEnd);
+    const end = source.indexOf(marker, markerEnd);
+    if (end >= 0) return end + marker.length;
+  }
+  if (source.startsWith("<!--", index)) {
+    const end = source.indexOf("-->", index + 4);
+    return end < 0 ? source.length : end + 3;
+  }
+  if (source[index] === "<" && /[A-Za-z/!?]/u.test(source[index + 1] ?? "")) {
+    const end = source.indexOf(">", index + 1);
+    if (end >= 0) return end + 1;
+  }
+  return undefined;
+}
+
+/** Masks only dollar delimiters that the MyST dollarmath rules reject. */
+// @implements_req SwRS-MDOKFSTUDIO-MYST-024
+export function prepareDollarAmounts(source: string): string {
+  if (!source.includes("$")) return source;
+  let prepared = "";
+  for (let index = 0; index < source.length; ) {
+    const protectedEnd = protectedRegionEnd(source, index);
+    if (protectedEnd !== undefined) {
+      prepared += source.slice(index, protectedEnd);
+      index = protectedEnd;
+      continue;
+    }
+    if (source[index] !== "$" || isEscapedDollar(source, index)) {
+      prepared += source[index];
+      index += 1;
+      continue;
+    }
+    const doubleEnd = source[index + 1] === "$" ? nextDoubleDollar(source, index + 2) : -1;
+    if (doubleEnd >= 0) {
+      prepared += source.slice(index, doubleEnd + 2);
+      index = doubleEnd + 2;
+      continue;
+    }
+    const end = nextDollar(source, index + 1);
+    const openingAllowed = !DOLLAR_WHITESPACE.test(source[index + 1] ?? "")
+      && !isDollarDigit(source[index - 1]);
+    const closingAllowed = end > index + 1
+      && !DOLLAR_WHITESPACE.test(source[end - 1] ?? "")
+      && !isDollarDigit(source[end + 1]);
+    if (openingAllowed && closingAllowed) {
+      prepared += source.slice(index, end + 1);
+      index = end + 1;
+    } else {
+      prepared += DOLLAR_PLACEHOLDER;
+      index += 1;
+    }
+  }
+  return prepared;
+}
+
+function restoreDollarValue(value: unknown): unknown {
+  if (typeof value === "string") return value.replaceAll(DOLLAR_PLACEHOLDER, "$");
+  if (Array.isArray(value)) return value.map(restoreDollarValue);
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    for (const key of Object.keys(record)) record[key] = restoreDollarValue(record[key]);
+  }
+  return value;
+}
+
+/** Restores the dollar placeholders in every parsed node value before HTML writing. */
+// @implements_req SwRS-MDOKFSTUDIO-MYST-024
+export function restoreDollarPlaceholders(node: MystNode): void {
+  const record = node as unknown as Record<string, unknown>;
+  for (const key of Object.keys(record)) {
+    if (key !== "children") record[key] = restoreDollarValue(record[key]);
+  }
+  node.children?.forEach(restoreDollarPlaceholders);
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-MYST-024
 /**
  * Gives dollar amounts back to the text, as markdown-it dollarmath does: the parser reads the text

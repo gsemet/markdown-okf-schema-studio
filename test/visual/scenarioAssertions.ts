@@ -670,9 +670,11 @@ export const LINK_WARNING_ASSERTIONS: ContentAssertion[] = [
 ];
 
 export const DOLLAR_PRICES_ASSERTIONS: ContentAssertion[] = [
-  { message: "the real $x$ span is typeset as maths", selector: `${MAIN} p:last-of-type .katex`, count: 1 },
-  { message: "only the real span is typeset, the price sentences hold no maths", selector: `${MAIN} .katex`, count: 1 },
-  { message: "every price sentence keeps its dollar signs as text", selector: `${MAIN} p`, count: 4, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p')].slice(0, 3).every((paragraph) => paragraph.textContent.includes('$') && !paragraph.querySelector('.katex'))" },
+  { message: "the three real dollar spans are typeset as maths", selector: `${MAIN} p:nth-of-type(4) .katex`, count: 3 },
+  { message: "only real spans are typeset, the price sentences hold no maths", selector: `${MAIN} .katex`, count: 3 },
+  { message: "every price sentence keeps its dollar signs as text", selector: `${MAIN} p`, count: 5, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p')].slice(0, 3).every((paragraph) => paragraph.textContent.includes('$') && !paragraph.querySelector('.katex'))" },
+  { message: "bold prices render as four strong text spans", selector: `${MAIN} p:last-of-type strong`, count: 4, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p:last-of-type strong')].every((strong, index) => strong.textContent === ['$671', '$402', '$85', '$216'][index])" },
+  { message: "bold prices contain no literal emphasis markers", selector: `${MAIN} p:last-of-type`, count: 1, expr: "!document.querySelector('#sphinx-myst-preview-content p:last-of-type').textContent.includes('**')" },
 ];
 
 const ROW_HANDLES = "[data-okf-row-handle-layer] .okf-table-row-handle";

@@ -28,8 +28,10 @@ import {
   autolinkBareUrls,
   convertCheckboxPlaceholders,
   expandWikiLinks,
+  prepareDollarAmounts,
   normalizeAnchors,
   resolveAnchorIds,
+  restoreDollarPlaceholders,
   restoreDollarAmounts,
 } from "./mystInlineTransforms";
 import { findNode, type MystNode, sourcePositionProperties } from "./mystNode";
@@ -229,7 +231,11 @@ function expandIncludes(
       dependencies.add(included.path);
       let parsedAst = budget.parsed.get(included.path);
       if (!parsedAst) {
-        parsedAst = mystParse(expandGithubAlerts(stripFrontmatter(included.source)), MYST_PARSE_OPTIONS);
+        parsedAst = mystParse(
+          prepareDollarAmounts(expandGithubAlerts(stripFrontmatter(included.source))),
+          MYST_PARSE_OPTIONS,
+        );
+        restoreDollarPlaceholders(parsedAst);
         budget.parsed.set(included.path, parsedAst);
       }
       // The expansion below mutates the tree, so every use works on its own copy.
@@ -358,6 +364,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   { name: "caption-less references", run: (state) => normalizeCaptionlessReferences(state.ast) },
   { name: "doc and download labels", run: (state) => labelLinkRoles(state.ast) },
   { name: "version admonitions", run: (state) => expandVersionAdmonitions(state.ast, state.mystParse) },
+  { name: "dollar placeholders", run: (state) => restoreDollarPlaceholders(state.ast) },
   { name: "dollar amounts", run: (state) => restoreDollarAmounts(state.ast) },
   { name: "wiki links", run: (state) => expandWikiLinks(state.ast) },
   {
@@ -410,7 +417,7 @@ export async function renderMyst(
   const removedPrefix = source.slice(0, source.length - markdown.length);
   const lineOffset = removedPrefix.match(/\r\n|\r|\n/gu)?.length ?? 0;
   const checkboxes = prepareCheckboxMarkers(markdown, lineOffset + 1);
-  const parsedText = expandGithubAlerts(checkboxes.text);
+  const parsedText = prepareDollarAmounts(expandGithubAlerts(checkboxes.text));
   const state: RenderState = {
     source,
     context,

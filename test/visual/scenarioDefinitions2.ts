@@ -1371,7 +1371,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     fullPage: true,
     contentAssertions: DOLLAR_PRICES_ASSERTIONS,
-    description: `Three price sentences (\`$19 ... ($200)\`, \`$5 and $6\`, \`$100–$380\`) and one real \`$x$\` span, ${theme}, 900 px pane: the preview keeps the three price sentences as text, dollar signs included, and typesets only the real span.`,
+    description: `Three price sentences (\`$19 ... ($200)\`, \`$5 and $6\`, \`$100–$380\`), three real math spans and four bold prices, ${theme}, 900 px pane: the preview keeps prices as text and typesets only valid math.`,
   })),
   ...([
     { name: "light", theme: "light", mode: undefined },

@@ -7,7 +7,8 @@ description: When a document holds `$...$`, `$$...$$`, the `{math}` role or
   directive, or an align-style environment inside `$$` or `{math}`, the
   extension SHALL typeset it as maths with KaTeX from the extension bundle
   without network or inline styles, keep a formula that cannot be parsed
-  readable, refuse active content, and scroll a long display equation inside its
+  readable, refuse active content, preserve dollar prices as text without
+  breaking surrounding emphasis, and scroll a long display equation inside its
   own box.
 project: markdown-okf-schema-studio
 scope: myst
@@ -38,9 +39,9 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 
 ### Scenario (nominal): Inline maths is typeset in the text line
 
-- GIVEN `$x^2$` in a sentence
+- GIVEN `$x^2$` and `$a + b$` in a sentence
 - WHEN the preview renders
-- THEN inline math sits in the text line
+- THEN both inline math spans sit in the text line
 
 ### Scenario (boundary): Display maths is typeset in its own block
 
@@ -101,16 +102,17 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 - WHEN the preview renders
 - THEN each price sentence stays text with its dollar signs and holds no typeset span, and only the real span is typeset as maths, following the Sphinx rule that an opening `$` is not followed by whitespace and a closing `$` neither follows whitespace nor precedes a digit
 
-### Known issues
+### Scenario (boundary): Bold dollar prices preserve emphasis
 
-- Known issue: a dollar amount followed by a real span in the same paragraph loses the maths (`price $5, $x$ ok` and `$5 and $x$` render all as text), where Sphinx typesets `5, $x`.
-- Known issue: an emphasis that contains a dollar amount followed by a closing marker outside it (`*a $5 and* $6`) shows literal asterisks, where Sphinx emphasises the text.
+- GIVEN `**$671** cache reads + **$402** 5-min cache writes + **$85** 1-h cache writes + **$216** output`
+- WHEN the preview renders
+- THEN the four prices are text inside four strong spans, the dollar signs are retained, and no literal `**` markers appear
 
 ### Verification notes
 
 - Method: test/core/render/mystPaletteRendering.test.ts (inline and display maths: "inline, display and aligned math from the palette typeset with KaTeX")
 - Method: test/core/render/mathRenderer.test.ts (offline and missing bundle: "typesets inline and display math with local assets and CSP-compatible styles"; unparsable formulas: "invalid LaTeX stays readable without breaking valid equations"; active content: "math cannot inject trusted HTML commands or external links"; Sphinx delimiters: "supports Sphinx math delimiters and leaves ordinary text and code alone")
-- Method: test/core/render/mathRenderer.test.ts (dollar amounts: "dollar amounts stay text while a real dollar span is maths")
-- Method: test/visual/scenarioDefinitions2.ts (dollar amounts: visual scenarios myst/v35 and myst/v36, fixture 55-dollar-prices, with a real `$x$` span as control)
+- Method: test/core/render/mathRenderer.test.ts (dollar amounts: "dollar amounts stay text while a real dollar span is maths"; emphasis: "bold dollar prices do not consume the surrounding emphasis markers")
+- Method: test/visual/scenarioDefinitions2.ts (dollar amounts: visual scenarios myst/v35 and myst/v36, fixture 55-dollar-prices, with three real math spans and four bold prices)
 - Method: test/visual/scenarioDefinitions1.ts (long display equations: visual scenario chapter-dark-half)
 - Criteria: Typesetting runs on the host-rendered page and makes no external request; failure is local to the formula; trust is off and the bounds maxExpand 1000 and maxSize 100 are set; typesetting is idempotent; overflow is local.
