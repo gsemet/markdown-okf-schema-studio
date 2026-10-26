@@ -41,8 +41,7 @@ When a field editor or a block editor is open, the extension SHALL NOT open anot
 
 ### Known issues
 
-- Known issue: an editor left in an error state keeps blocking every other field until it is cancelled with Escape in that editor; clicking elsewhere does not close it.
-- Known issue: the guard works in one direction only: a block editor can still be opened by clicking a block or a plus insert point while a field editor is open.
+- Known issue: an editor left in an error state keeps blocking every other field until it is cancelled with Escape in that editor; clicking another field or the page background does not close it (clicking a block or a plus insert point does).
 
 ### Verification notes
 

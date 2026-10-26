@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-26 (a refused field value no longer stays open next to a block editor)
+
+- SwRS-MDOKFSTUDIO-BLOCK-041: a click on a block or a plus insert point while a field editor holds a
+  value now waits for the answer to the field's save; a saved value opens the block editor, a refused one
+  is cancelled (the field shows its saved value) and the block editor opens. A new table row and a
+  boundary scenario state it; the second Known issue line is removed here and from the superseded
+  FMEDIT-002 and FMEDIT-073, and the first one is narrowed to clicks on another field or the background.
+
 ## 2026-10-26 (one read-only reason names the real cause)
 
 - SwRS-MDOKFSTUDIO-TRUST-005: every refusal of a read-only preview (edits, comments, threads, block

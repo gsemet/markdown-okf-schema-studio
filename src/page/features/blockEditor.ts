@@ -219,6 +219,24 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     // An editor whose open was refused only shows the reason: a new open replaces it.
     if (state.activeBlockEdit?.openRefused) closeBlockEdit(false);
     if (state.activeBlockEdit) return;
+    // A field editor is open (a click on a block or a "+" blurred it and posted a plain save):
+    // wait for the answer. A refused value is discarded and the field shows its saved value; a
+    // saved value opens the editor as before.
+    const field = state.activeFrontmatterEdit;
+    if (field) {
+      if (field.plainSavePending) {
+        const previous = field.afterResult;
+        field.afterResult = () => {
+          previous?.();
+          if (state.activeFrontmatterEdit === field && !field.saving) {
+            rt.frontmatter.closeFrontmatterEditor("refused save, block editor opened");
+          }
+          openBlockEditor(target, selectedCell, sourceRange, initialCaretPosition);
+        };
+        return;
+      }
+      if (!field.saving) rt.frontmatter.closeFrontmatterEditor("block editor opened");
+    }
     const line = sourceRange?.line ?? Number(target.getAttribute("data-sphinx-source-line"));
     const endLine = sourceRange?.endLine
       ?? Number(target.getAttribute("data-sphinx-source-end-line") || line);
