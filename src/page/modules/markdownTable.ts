@@ -8,8 +8,11 @@ export interface MarkdownTableModel {
   sourceRows?: string[][];
   /** For each current row, the index of its source row; undefined for new rows. */
   rowOrigins?: (number | undefined)[];
-  /** Set by column operations; those rewrite every line in the canonical style. */
-  columnsChanged?: boolean;
+  /**
+   * For each current column, the index of its source column; undefined for a new column. Column
+   * operations edit this list so every line keeps its own padding, indentation and outer pipes.
+   */
+  columnOrigins?: (number | undefined)[];
 }
 
 export type MarkdownTableTools = ReturnType<typeof createMarkdownTableTools>;
@@ -36,6 +39,8 @@ type GridResult = { ok: true; grid: TableGrid } | { ok: false; reason: string };
 
 export function createMarkdownTableTools() {
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-102
+  // A backslash keeps the next character in the cell. A code span does not shelter a pipe: the
+  // preview follows the GFM table rule, so an unescaped pipe splits the row inside backticks too.
   function splitRow(line: string): string[] {
     const text = line.trim();
     const start = text.startsWith("|") ? 1 : 0;
@@ -49,20 +54,12 @@ export function createMarkdownTableTools() {
     }
     const cells: string[] = [];
     let cell = "";
-    let codeTicks = 0;
     for (let index = start; index < end; index += 1) {
       const character = text[index];
       if (character === "\\" && index + 1 < end) {
         cell += character + text[index + 1];
         index += 1;
-      } else if (character === "`") {
-        let runLength = 1;
-        while (text[index + runLength] === "`") runLength += 1;
-        cell += "`".repeat(runLength);
-        if (codeTicks === 0) codeTicks = runLength;
-        else if (codeTicks === runLength) codeTicks = 0;
-        index += runLength - 1;
-      } else if (character === "|" && codeTicks === 0) {
+      } else if (character === "|") {
         cells.push(cell.trim());
         cell = "";
       } else {
@@ -91,18 +88,11 @@ export function createMarkdownTableTools() {
     }
     const segments: { start: number; end: number }[] = [];
     let segmentStart = start;
-    let codeTicks = 0;
     for (let index = start; index < end; index += 1) {
       const character = text[index];
       if (character === "\\" && index + 1 < end) {
         index += 1;
-      } else if (character === "`") {
-        let runLength = 1;
-        while (text[index + runLength] === "`") runLength += 1;
-        if (codeTicks === 0) codeTicks = runLength;
-        else if (codeTicks === runLength) codeTicks = 0;
-        index += runLength - 1;
-      } else if (character === "|" && codeTicks === 0) {
+      } else if (character === "|") {
         segments.push({ start: segmentStart + offset, end: index + offset });
         segmentStart = index + 1;
       }
@@ -112,26 +102,85 @@ export function createMarkdownTableTools() {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-091
+  /** Every pipe not already escaped becomes `\\|`, also inside a code span (the preview unescapes it). */
   function escapeCellPipes(value: string): string {
     let result = "";
-    let codeTicks = 0;
     for (let index = 0; index < value.length; index += 1) {
       const character = value[index];
       if (character === "\\" && index + 1 < value.length) {
         result += character + value[index + 1];
         index += 1;
-      } else if (character === "`") {
-        let runLength = 1;
-        while (value[index + runLength] === "`") runLength += 1;
-        result += "`".repeat(runLength);
-        if (codeTicks === 0) codeTicks = runLength;
-        else if (codeTicks === runLength) codeTicks = 0;
-        index += runLength - 1;
       } else {
-        result += character === "|" && codeTicks === 0 ? "\\|" : character;
+        result += character === "|" ? "\\|" : character;
       }
     }
     return result;
+  }
+
+  /** The text between two pipes with a new value: it keeps the leading whitespace and the width. */
+  function rewriteSegment(text: string, newCell: string): string {
+    // A whitespace-only segment keeps one leading space, so the value is not right-aligned.
+    const leading = text.trim() === ""
+      ? (text.length > 0 ? " " : "")
+      : (/^\s*/u.exec(text)?.[0] ?? "");
+    const value = escapeCellPipes(newCell);
+    const trailing = /\s$/u.test(text)
+      ? " ".repeat(Math.max(1, text.length - leading.length - value.length))
+      : "";
+    return leading + value + trailing;
+  }
+
+  /**
+   * A new cell written in the style of `reference`, a neighbouring segment of the same line (for a
+   * delimiter row, of the header line, whose widths the dashes follow). In a padded table the new
+   * cell takes the width of that neighbour; otherwise it is one space wider than its text.
+   */
+  function newSegment(reference: string, value: string, delimiter: boolean, padded: boolean): string {
+    const leading = /^\s/u.test(reference) ? " " : "";
+    const trailing = /\s$/u.test(reference) ? " " : "";
+    const body = delimiter ? "---" : escapeCellPipes(value);
+    const fill = padded ? Math.max(0, reference.length - leading.length - trailing.length - body.length) : 0;
+    return delimiter
+      ? leading + body + "-".repeat(fill) + trailing
+      : leading + body + " ".repeat(fill) + trailing;
+  }
+
+  /**
+   * The line of a source row after column operations: the segment of a kept column stays verbatim
+   * (rewritten only if its value changed), a new column is written in the style of its left
+   * neighbour, and the indentation and the outer pipes stay as they were.
+   */
+  function columnsRow(line: string, oldCells: string[], newCells: string[],
+    origins: (number | undefined)[], delimiter: boolean, headerLine: string, padded: boolean): string {
+    const segments = cellSegments(line);
+    const raw = (column: number | undefined): string | undefined => (
+      column === undefined || !segments[column] ? undefined : line.slice(segments[column].start, segments[column].end));
+    const headerSegments = cellSegments(headerLine);
+    const layout = (column: number | undefined): string | undefined => (delimiter
+      ? (column === undefined || !headerSegments[column]
+        ? undefined : headerLine.slice(headerSegments[column].start, headerSegments[column].end))
+      : raw(column));
+    const parts = newCells.map((cell, index) => {
+      const kept = raw(origins[index]);
+      if (kept !== undefined) return cell === oldCells[origins[index]!] ? kept : rewriteSegment(kept, cell);
+      let reference: string | undefined;
+      for (let step = index - 1; step >= 0 && reference === undefined; step -= 1) reference = layout(origins[step]);
+      for (let step = index + 1; step < origins.length && reference === undefined; step += 1) {
+        reference = layout(origins[step]);
+      }
+      return newSegment(reference ?? " x ", cell, delimiter, padded);
+    });
+    const result = line.slice(0, segments[0]!.start) + parts.join("|") + line.slice(segments.at(-1)!.end);
+    const expected = newCells.map((cell) => escapeCellPipes(cell).trim());
+    const actual = splitRow(result);
+    // The dashes of a new delimiter cell fill the column width: only the cell count is compared there.
+    if (actual.length === expected.length
+      && actual.every((cell, index) => (delimiter && origins[index] === undefined) || cell === expected[index])
+      && (newCells.length > 1 || result.includes("|"))) {
+      return result;
+    }
+    const indentation = line.slice(0, line.length - line.trimStart().length);
+    return `${indentation}| ${newCells.map((cell) => escapeCellPipes(cell)).join(" | ")} |`;
   }
 
   /**
@@ -145,16 +194,9 @@ export function createMarkdownTableTools() {
     for (let index = Math.min(segments.length, newCells.length) - 1; index >= 0; index -= 1) {
       if (newCells[index] === oldCells[index]) continue;
       const segment = segments[index];
-      const text = line.slice(segment.start, segment.end);
-      // A whitespace-only segment keeps one leading space, so the value is not right-aligned.
-      const leading = text.trim() === ""
-        ? (text.length > 0 ? " " : "")
-        : (/^\s*/u.exec(text)?.[0] ?? "");
-      const value = escapeCellPipes(newCells[index]);
-      const trailing = /\s$/u.test(text)
-        ? " ".repeat(Math.max(1, text.length - leading.length - value.length))
-        : "";
-      result = result.slice(0, segment.start) + leading + value + trailing + result.slice(segment.end);
+      result = result.slice(0, segment.start)
+        + rewriteSegment(line.slice(segment.start, segment.end), newCells[index])
+        + result.slice(segment.end);
     }
     // Rows without outer pipes can lose a delimiter when an edge cell is emptied. When the spliced
     // row no longer splits into the new cells, rewrite it canonically and keep its indentation.
@@ -190,6 +232,7 @@ export function createMarkdownTableTools() {
       sourceLines: [...lines],
       sourceRows: rows.map((row) => [...row]),
       rowOrigins: rows.map((_, index) => index),
+      columnOrigins: rows[0].map((_, index) => index),
     };
   }
 
@@ -200,7 +243,6 @@ export function createMarkdownTableTools() {
       !model.sourceLines
       || !model.sourceRows
       || !model.rowOrigins
-      || model.columnsChanged === true
     ) {
       const lines = model.rows.map((row) => `| ${row.map(escapeCellPipes).join(" | ")} |`);
       return lines.join(model.lineEnding) + (model.trailingLineEnding ? model.lineEnding : "");
@@ -217,8 +259,20 @@ export function createMarkdownTableTools() {
       }
       return 0;
     };
+    const origins = model.columnOrigins;
+    const sameColumns = !origins
+      || (origins.length === sourceRows[0]!.length && origins.every((column, index) => column === index));
+    // A padded table has a cell wider than its text and a space on each side.
+    const padded = !sameColumns && sourceLines.some((line) => cellSegments(line).some((segment) => {
+      const text = line.slice(segment.start, segment.end);
+      return text.length > text.trim().length + 2;
+    }));
     const lines = model.rows.map((row, rowIndex) => {
       const origin = rowOrigins[rowIndex];
+      if (!sameColumns) {
+        const template = origin ?? templateRowOrigin(rowIndex);
+        return columnsRow(sourceLines[template]!, sourceRows[template]!, row, origins!, rowIndex === 1, sourceLines[0]!, padded);
+      }
       if (origin !== undefined) {
         const sourceRow = sourceRows[origin];
         if (row.length === sourceRow.length && row.every((cell, index) => cell === sourceRow[index])) {
@@ -271,7 +325,7 @@ export function createMarkdownTableTools() {
   function insertColumnAfter(model: MarkdownTableModel, columnIndex: number): number {
     const insertAt = Math.max(0, Math.min(columnIndex + 1, model.rows[0].length));
     model.rows.forEach((row, rowIndex) => row.splice(insertAt, 0, rowIndex === 1 ? "---" : ""));
-    model.columnsChanged = true;
+    model.columnOrigins?.splice(insertAt, 0, undefined);
     return insertAt;
   }
 
@@ -279,7 +333,7 @@ export function createMarkdownTableTools() {
     if (model.rows[0].length <= 1) return undefined;
     const deleteAt = Math.max(0, Math.min(columnIndex, model.rows[0].length - 1));
     model.rows.forEach((row) => row.splice(deleteAt, 1));
-    model.columnsChanged = true;
+    model.columnOrigins?.splice(deleteAt, 1);
     return Math.min(deleteAt, model.rows[0].length - 1);
   }
 

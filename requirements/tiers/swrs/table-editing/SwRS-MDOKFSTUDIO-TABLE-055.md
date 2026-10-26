@@ -8,7 +8,9 @@ description: When the writer presses a row or column button of the table bar,
   delete the selected body row or column, store the text typed in the current
   cell, select the new or nearest remaining row or column and keep the editor
   open at the new position, with Row − and Col − disabled where the table model
-  refuses the deletion.
+  refuses the deletion, change only the lines the operation concerns (a column
+  operation keeps the padding, the indentation and the outer pipes of every
+  line), and close the popover, link panel and slash menu of the cell it leaves.
 project: markdown-okf-schema-studio
 scope: table-editing
 lifecycle: draft
@@ -33,7 +35,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When the writer presses a row or column button of the table bar, the extension SHALL insert an empty row or column after the selected one or delete the selected body row or column, store the text typed in the current cell, select the new or nearest remaining row or column and keep the editor open at the new position, with Row − and Col − disabled where the table model refuses the deletion.
+When the writer presses a row or column button of the table bar, the extension SHALL insert an empty row or column after the selected one or delete the selected body row or column, store the text typed in the current cell, select the new or nearest remaining row or column and keep the editor open at the new position, with Row − and Col − disabled where the table model refuses the deletion, change only the lines the operation concerns (a column operation keeps the padding, the indentation and the outer pipes of every line), and close the popover, link panel and slash menu of the cell it leaves.
 
 ### Scenario (nominal): Row + inserts an empty row
 
@@ -79,25 +81,24 @@ When the writer presses a row or column button of the table bar, the extension S
 - WHEN the autosave timer is not pending
 - THEN no previewEditSave is posted until the next autosave, cell switch or commit, and Escape then drops the added row
 
-### Scenario (boundary): A column button rewrites the table in the canonical style
+### Scenario (boundary): A column button keeps the style of every line
 
 | Input | Outcome |
 | --- | --- |
-| A table written with padded columns and an indent, whose delimiter row has alignment colons, Col + pressed, the table saved | Every line is rewritten as "\| a \| b \|" with single spaces and outer pipes, the padding and the indentation are gone and the colons of the other columns' delimiter cells are kept |
+| An indented table with padded columns and alignment colons, Col + pressed, the table saved | Every line keeps its indentation, its padding and its outer pipes; the new cell is as wide as the cell on its left, its delimiter cell is dashes of that width, and the other cells are kept verbatim |
+| A compact table "\|A\|B\|", Col − pressed on the first column | Every line loses its first cell and keeps its outer pipes and its absence of spaces |
+| A table without outer pipes, Col − pressed on the last column | The pipe before the removed cell goes with it; the lines stay parseable |
+| A row that cannot be edited in place (the result would not split into the expected cells) | That line alone is written in the canonical form "\| a \| b \|", keeping its indentation |
+| Col + then Col − on the same position | The table is back to its original text |
 | The same table with only Row + pressed, the table saved | The other lines are kept verbatim |
 
-### Scenario (boundary): Rendering the cell editor closes the open panels
+### Scenario (boundary): The open panels belong to the cell they were opened in
 
 | Input | Outcome |
 | --- | --- |
 | Emoji picker open from the cell bar, Col + pressed | The picker is closed |
 | Link panel open from the cell bar, Tab pressed | The panel is closed and the editor is in the next cell |
-| The cell editor is rendered again after a row or column button or a move to another cell | The open popover or panel of the cell formatting group and the slash menu are closed |
-
-### Known issues
-
-- Known issue: A column operation breaks the one-line-diff guarantee of the other edits: the table's own padding, indentation and outer-pipe style are lost, and nothing in the bar tells the writer.
-- Known issue: renderTableCellEditor closes the popover, the link panel and the slash menu every time the editor is rendered: after a row or column button and after every move to another cell, so the writer has to open them again.
+| The cell editor is rendered for another cell after a row or column button or a move | The open popover or panel of the cell formatting group and the slash menu are closed, because they act on the text selected in the cell that was left |
 
 ### Related requirements
 
@@ -105,7 +106,7 @@ When the writer presses a row or column button of the table bar, the extension S
 
 ### Verification notes
 
-- Method: test/page/runtimeTableCellEditor.test.ts (table cell editing exposes row and column operations and saves the edited table, typed text carried through Row + and Col +; table header cannot be deleted from the cell toolbar; table toolbar cannot delete the last body row; scenarios Row +, Row −, columns, disabled buttons, typed text kept). The scenario "Not saved by the button itself" is read from the click handler of addAction and is not asserted.
-- Method: test/page/modules/markdownTable.test.ts (inserting and deleting table rows and columns preserves the remaining cells; deleting the first body row of a compact table removes exactly one line; inserting a column re-serializes the table with one more column; table tools cannot delete the header, final body row, or final column; scenarios Row +, Row −, columns, model refusals, canonical style). The disabled state of Col − is read from tableCellEditor.ts and has no test.
+- Method: test/page/runtimeTableCellEditor.test.ts (Col + on a padded, indented table keeps the style of every line; table cell editing exposes row and column operations and saves the edited table, typed text carried through Row + and Col +; table header cannot be deleted from the cell toolbar; table toolbar cannot delete the last body row; scenarios Row +, Row −, columns, disabled buttons, typed text kept). The scenario "Not saved by the button itself" is read from the click handler of addAction and is not asserted.
+- Method: test/page/modules/markdownTable.test.ts (a column operation keeps the padding, indentation and outer pipes of every line; inserting and deleting table rows and columns preserves the remaining cells; deleting the first body row of a compact table removes exactly one line; inserting a column re-serializes the table with one more column; table tools cannot delete the header, final body row, or final column; scenarios Row +, Row −, columns, model refusals, canonical style). The disabled state of Col − is read from tableCellEditor.ts and has no test.
 - Method: test/page/fmtableReqTable.requirements.test.ts (rendering the cell editor again closes the emoji picker, the link panel and the slash menu; scenario open panels closed).
-- Criteria: The row count and the selected row index after the press, the cell counts per row and the selected column index, the remaining rows and the selected index returned by deleteRow and deleteColumn; the disabled attribute of the button and an unchanged model; the saved table contains the typed text and the new row or column; all lines of the saved text are in the canonical form after a column operation (serialize in src/page/modules/markdownTable.ts, columnsChanged); no popover, panel or slash menu is open after the render.
+- Criteria: The row count and the selected row index after the press, the cell counts per row and the selected column index, the remaining rows and the selected index returned by deleteRow and deleteColumn; the disabled attribute of the button and an unchanged model; the saved table contains the typed text and the new row or column; the lines of the saved text keep their padding, indentation and outer pipes after a column operation (serialize in src/page/modules/markdownTable.ts, columnOrigins); no popover, panel or slash menu is open after the render.

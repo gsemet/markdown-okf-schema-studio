@@ -124,7 +124,7 @@ test("table cell editing exposes row and column operations and saves the edited 
     "| A | B |  |",
     "| --- | :---: | --- |",
     "| x | new |  |",
-    "|  | new row | new column |",
+    "|   | new row | new column |",
     "| p | q |  |",
     "",
   ].join("\n"));
@@ -133,6 +133,40 @@ test("table cell editing exposes row and column operations and saves the edited 
   assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
   assert.equal(harness.messages.at(-1)?.final, true);
   assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
+test("Col + on a padded, indented table keeps the style of every line", () => {
+  const harness = createRuntimeHarness();
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+  row.rowIndex = 1;
+  const cell = new RuntimeElement({}, harness.windowState, 100, 30, "td");
+  cell.cellIndex = 0;
+  table.appendChild(row);
+  row.appendChild(cell);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: cell, preventDefault: () => undefined, stopPropagation: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "  | Name  | Qty |\n  | ----- | --- |\n  | brake | 1   |\n",
+  });
+  harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Insert column after selected column").at(-1)?.dispatch("click");
+  const input = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+  assert.ok(input);
+  input.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  assert.equal(harness.messages.at(-1)?.editedText,
+    "  | Name  |       | Qty |\n  | ----- | ----- | --- |\n  | brake |       | 1   |\n");
 });
 
 function openPipeTableCellEditor(harness: ReturnType<typeof createRuntimeHarness>, parent?: RuntimeElement) {

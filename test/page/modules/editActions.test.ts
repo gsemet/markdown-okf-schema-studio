@@ -746,7 +746,7 @@ test("T25: checkbox is its own inverse on a list item", () => {
   assert.equal(twice.value, "- item");
 });
 
-const HTML_TABLE_SOURCE = "| Name | Qty | Note |\n| :--- | ---: | :---: |\n| a&b | <3 | x\\|y |\n| `c|d` |  | z |";
+const HTML_TABLE_SOURCE = "| Name | Qty | Note |\n| :--- | ---: | :---: |\n| a&b | <3 | x\\|y |\n| `c\\|d` |  | z |";
 
 test("T25: htmlTable converts the pipe table under the caret, text escaped, alignment kept", () => {
   const value = "Intro\n\n" + HTML_TABLE_SOURCE + "\n\nAfter";

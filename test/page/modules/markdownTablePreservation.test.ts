@@ -69,7 +69,7 @@ const corpus: CorpusEntry[] = [
   },
   {
     name: "escaped-and-code",
-    source: "| Key | Value | Code |\n|---|---|---|\n| a \\| b | x | `y|z` |\n| k | v | z |",
+    source: "| Key | Value | Code |\n|---|---|---|\n| a \\| b | x | `y\\|z` |\n| k | v | z |",
     row: 3,
     column: 1,
     value: "w",

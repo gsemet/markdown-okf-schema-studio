@@ -358,12 +358,16 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   stroke-width: 1.7;
 }
 
-.sphinx-preview-table-menu :is([data-sphinx-table-group="column"], [data-sphinx-table-group="table"]) {
+/* One rule per group: before the first button of the column group and before the table group, never
+   between two buttons of the same group (Col + and Col −). */
+.sphinx-preview-table-menu :is([data-sphinx-table-group="row"] + [data-sphinx-table-group="column"],
+  [data-sphinx-table-group="column"] + [data-sphinx-table-group="table"]) {
   position: relative;
   margin-inline-start: 4px;
 }
 
-.sphinx-preview-table-menu :is([data-sphinx-table-group="column"], [data-sphinx-table-group="table"])::before {
+.sphinx-preview-table-menu :is([data-sphinx-table-group="row"] + [data-sphinx-table-group="column"],
+  [data-sphinx-table-group="column"] + [data-sphinx-table-group="table"])::before {
   position: absolute;
   inset-block: 6px;
   inset-inline-start: -4px;

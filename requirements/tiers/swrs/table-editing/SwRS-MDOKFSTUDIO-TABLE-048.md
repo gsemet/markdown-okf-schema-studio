@@ -29,6 +29,7 @@ tested_in_files:
 - test/integration/realInput.markers.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/visual/capture_edit_checks.py
+- test/visual/scenarioDefinitions2.ts
 ---
 
 ## A labelled table bar above the table tells the position and holds the buttons
@@ -71,8 +72,9 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 | Input | Outcome |
 | --- | --- |
 | The group attributes of the five buttons are read | The buttons carry the groups row, row, column, column and table |
-| The styles are read | The rule style applies to the buttons of the column and table groups: a thin rule before each of Col +, Col − and List table |
-| The styles are read for Row + and Row − | No rule is drawn before them |
+| The styles are read | The rule style applies to the first button of the column group and of the table group: a thin rule before Col + and before List table |
+| The styles are read for Row +, Row − and Col − | No rule is drawn before them |
+| The cell formatting group wraps onto a second line of the bar | Its rule is the first element of the group, so it starts the second line instead of ending the first |
 
 ### Scenario (nominal): Status of the selected cell
 
@@ -99,11 +101,6 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 | Cell editor open in a 460 px pane | The bar and its cell formatting group wrap onto several lines: no button of the cell group lies outside the bar and the bar is not wider than the viewport |
 | Cell editor open in a 360 px pane | The bar and its group wrap inside the pane without overlap, which follows from the wrapping style and is not covered by any scenario |
 
-### Known issues
-
-- Known issue: The rule is drawn by the style of each button of the column and table groups, because the group is an attribute of each button and there is no group element, so a rule also separates Col + from Col −.
-- Known issue: The separator before the cell formatting group is a flex item of its own that does not shrink or stretch sideways, so when the group wraps onto a second line the separator stays at the end of the first line.
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-TABLE-055: the row and column buttons of the bar.
@@ -112,7 +109,7 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 ### Verification notes
 
 - Method: test/page/runtimeTableCellEditor.test.ts (table toolbar sits in the flow above the table with text labels and a position status; table editing switches cells without losing changes and finalizes before leaving the table; table cell editing exposes row and column operations and saves the edited table; scenarios bar above the table, placement and lifetime, five buttons, groups (group attributes), status).
-- Method: test/integration/realInput.markers.ts and real-window scenario scenarioTableToolbar (id table-editing/r06-cell-bar-in-flow) in test/integration/realInput.test.ts (bar above the table); visual scenarios table-editing/v02 to v05 (a bar directly above the table that covers no cell).
+- Method: test/integration/realInput.markers.ts and real-window scenario scenarioTableToolbar (id table-editing/r06-cell-bar-in-flow) in test/integration/realInput.test.ts (bar above the table); visual scenarios table-editing/v02 to v05 (a bar directly above the table that covers no cell) and table-editing/v24 and v25 (360 px: one rule per group, the rule of the cell group level with the group's first line).
 - Method: test/visual/capture_edit_checks.py: check_cell_bar_formatting (five operations; narrow pane at 460 px on table-editing/v03 and v05) and check_cell_editor_chrome (status centring, on table-editing/v01 to v05).
 - Method: test/core/preview/previewStyles.test.ts (status centring style) and test/core/preview/fmtableReq.requirements.test.ts (the table bar status takes no room when it is empty).
-- Criteria: The toolbar role and name, its position before the table, and in the visual check a bottom edge not below the table top; five elements with data-sphinx-table-operation, each with an icon and a title; the exact status strings, T being the number of body rows of the model; a centre difference of at most 2 px, or a status below the button row; no cell group button outside the bar and no horizontal overflow at 460 px. The tooltip display and position are not asserted for this bar. The rule style is a style rule in src/core/preview/styles/editModeStyles.ts selecting every button of the column and table groups and has no assertion. No table-editing scenario is narrower than 460 px, so the branch of the check that expects wrapping at 400 px or less is never reached. The descriptions of visual scenarios table-editing/v02 to v05 in test/visual/scenarioIds.ts still say "four-action row and column bar", which is stale: the bar has five operations and the check asserts five.
+- Criteria: The toolbar role and name, its position before the table, and in the visual check a bottom edge not below the table top; five elements with data-sphinx-table-operation, each with an icon and a title; the exact status strings, T being the number of body rows of the model; a centre difference of at most 2 px, or a status below the button row; no cell group button outside the bar and no horizontal overflow at 460 px. The tooltip display and position are not asserted for this bar. The rule style is a style rule in src/core/preview/styles/editModeStyles.ts selecting the first button of the column group and of the table group (adjacent-sibling selectors); the style test in previewStyles.test.ts reads that selector and the flex rule of the wrapper that holds the cell group's separator (editPaletteStyles.ts); the wrapping itself is shown by the visual scenarios. Scenarios table-editing/v24 and v25 (360 px) reach the branch of the check that expects wrapping at 400 px or less; the check also reads the computed rule of each operation button and the position of the cell group's separator against its first button. The descriptions of visual scenarios table-editing/v02 to v05 in test/visual/scenarioIds.ts still say "four-action row and column bar", which is stale: the bar has five operations and the check asserts five.

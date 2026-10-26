@@ -350,8 +350,12 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     separator.setAttribute("role", "separator");
     separator.setAttribute("aria-orientation", "vertical");
     separator.className = "sphinx-preview-table-menu-separator";
-    menu.appendChild(separator);
-    menu.appendChild(cellPalette.element);
+    // The rule and the group are one flex item: when the group wraps, the rule goes with it.
+    const cellGroup = document.createElement("div");
+    cellGroup.className = "sphinx-preview-table-menu-cell-group";
+    cellGroup.appendChild(separator);
+    cellGroup.appendChild(cellPalette.element);
+    menu.appendChild(cellGroup);
 
     const columnCount = edit.tableModel!.rows[0]!.length;
     const columnText = "column " + (edit.tableColumnIndex + 1) + " of " + columnCount;

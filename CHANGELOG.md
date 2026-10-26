@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Table editing in edit mode: Col + and Col − keep the padding, the indentation and the outer pipes
+  of every line instead of rewriting the table; an unescaped pipe inside a code span now splits a cell
+  in the editor as it does in the preview (write `\|` to keep it in the cell, which is what the editor
+  writes when you type one); the table bar draws one rule per button group and its rule before the cell
+  formatting group wraps together with the group.
 - In edit mode, each body row of a Markdown pipe table or a MyST `{list-table}` now shows the grab
   handle of the frontmatter list editor. Drag it onto another row to move the row, or focus it and
   press Alt+Up or Alt+Down. A move is one edit (one undo), the header rows stay in place, and the

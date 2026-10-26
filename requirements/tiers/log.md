@@ -1,5 +1,20 @@
 # Update Log
 
+## 2026-10-26 (table editor polish)
+
+- SwRS-MDOKFSTUDIO-TABLE-055: a column button now edits only the lines it concerns (padding,
+  indentation and outer pipes of every line are kept; a new cell takes the style of its neighbour); a
+  panel, popover or slash menu belongs to the cell it was opened in and closes when the editor moves to
+  another cell or a row or column button is pressed. Two scenarios state both; both Known issue lines
+  are removed.
+- SwRS-MDOKFSTUDIO-TABLE-102: an unescaped pipe inside a code span splits a cell, as the preview does
+  (GFM); a row that then has too many cells is not a pipe table of the editor. The title, the
+  description and the code-span scenarios change; the Known issue line is removed here and from
+  StRS-MDOKFSTUDIO-TABLE-011.
+- SwRS-MDOKFSTUDIO-TABLE-091: a pipe typed inside a code span is written escaped like any other.
+- SwRS-MDOKFSTUDIO-TABLE-048: one rule per group (none between Col + and Col −) and the rule of the
+  cell formatting group wraps with the group; both Known issue lines are removed.
+
 ## 2026-10-26 (one colour grammar for tables and colour spans)
 
 - SwRS-MDOKFSTUDIO-GFM-034: colour spans and raw HTML table styles share one grammar (a closed list

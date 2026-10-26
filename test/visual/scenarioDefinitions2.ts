@@ -1445,4 +1445,17 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     contentAssertions: WIDE_ROW_HANDLE_ASSERTIONS,
     description: `Edit mode, ${variant.name} preview, 900 px pane: a pipe table of fourteen columns, wider than the pane and scrolled sideways, keeps the handle of each body row left of the table, outside its scrolling box, visible and centred on its row.`,
   })),
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-TABLE-048
+    id: `table-editing/v${24 + index}-table-bar-groups-${theme}-360`,
+    fixture: "60-table-bar-groups",
+    theme,
+    width: NARROW360.width,
+    height: 800,
+    scroll: { kind: "selector" as const, value: "main table:not(.okf-properties) tbody td:nth-child(3)", offset: 72 },
+    editMode: true,
+    editTarget: "table-cell" as const,
+    machineChecks: ["overlay-covers-text", "overlay-clipped"],
+    description: `The table bar of a cell editor, ${theme}, 360 px pane: a rule before Col + and before List table but none between Col + and Col \u2212, and the rule of the cell formatting group goes with the group onto its own line.`,
+  })),
 ];
