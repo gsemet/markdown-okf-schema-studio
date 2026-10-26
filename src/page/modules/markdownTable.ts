@@ -1,3 +1,5 @@
+import { createTableStructureTools } from "./tableStructure";
+
 export interface MarkdownTableModel {
   rows: string[][];
   lineEnding: string;
@@ -13,6 +15,11 @@ export interface MarkdownTableModel {
    * operations edit this list so every line keeps its own padding, indentation and outer pipes.
    */
   columnOrigins?: (number | undefined)[];
+  /**
+   * Set on the model of a `{list-table}` (see `tableStructure.ts`): `write` turns the pipe text of
+   * the grid into the text to save, the list-table again.
+   */
+  listTable?: { write: (pipeText: string) => string };
 }
 
 export type MarkdownTableTools = ReturnType<typeof createMarkdownTableTools>;
@@ -239,6 +246,11 @@ export function createMarkdownTableTools() {
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-094
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-234
   function serialize(model: MarkdownTableModel): string {
+    const pipe = serializePipe(model);
+    return model.listTable ? model.listTable.write(pipe) : pipe;
+  }
+
+  function serializePipe(model: MarkdownTableModel): string {
     if (
       !model.sourceLines
       || !model.sourceRows
@@ -739,6 +751,7 @@ export function createMarkdownTableTools() {
   }
 
   return {
+    ...createTableStructureTools({ parse, convertTable, serializePipe }),
     parse,
     serialize,
     toHtmlTable,

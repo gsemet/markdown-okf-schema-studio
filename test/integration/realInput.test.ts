@@ -11,8 +11,7 @@ import {
   getActivePreviewForTests,
   getActivePreviewPanelForTests,
   PANEL_VIEW_TYPE,
-  previewGroupFocusMovesForTests,
-  previewGroupUnlocksSettledForTests,
+  previewGroupFocusMovesForTests, previewGroupUnlocksSettledForTests,
   resetRenderHooksForTests,
   setRenderDelayForTests,
   setRenderOverrideForTests,
@@ -38,14 +37,14 @@ import {
   press,
   setEditMode,
   typeText,
-  waitFor,
-  waitForEditor,
+  waitFor, waitForEditor,
   waitForRender,
   withCurrentFrame,
   writeSchema,
   type Evidence,
 } from "./realInput/harness";
 import { scenarioImagePaste, scenarioIncomingChanges, scenarioReviewThreads } from "./realWindowGaps";
+import { scenarioTableStructure } from "./tableStructureReal";
 import { scenarioPerformanceProbe } from "./performanceProbe";
 import { traceDocumentChanges, windowFocusReport } from "./windowFocus";
 
@@ -2060,7 +2059,7 @@ async function scenarioTableToolbar(page: Page, evidence: Evidence): Promise<voi
       const status = await frame.locator("[data-sphinx-table-menu] [data-sphinx-preview-edit-status]").textContent();
       assert.equal(status, "Row 1 of 2 \u00b7 column 2 of 2");
       const labels = await frame.locator(".sphinx-preview-table-menu-label").allTextContents();
-      assert.deepEqual(labels, ["Row +", "Row \u2212", "Col +", "Col \u2212", "List table"]);
+      assert.deepEqual(labels, ["Row above", "Row below", "Row \u2212", "Col left", "Col right", "Col \u2212", "List table"]);
       const position = await frame.locator("[data-sphinx-table-menu]").evaluate((element) => getComputedStyle(element).position);
       assert.equal(position, "static");
     });
@@ -4536,6 +4535,7 @@ export async function run(): Promise<void> {
     await scenarioEditModeNoReflow(page, evidence);
     await scenarioTableTab(page, evidence);
     await scenarioTableToolbar(page, evidence);
+    await scenarioTableStructure(page);
     await scenarioBooleanOneClick(page, evidence);
     await scenarioListEditorClickAndKeys(page, evidence);
     await scenarioListLinkCompletion(page, evidence);

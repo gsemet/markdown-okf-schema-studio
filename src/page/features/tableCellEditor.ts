@@ -238,6 +238,8 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     const tableActionIcons = {
       addRow: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 3.5h16v13H4z"></path><path d="M4 8h16M9.5 3.5v13M14.5 3.5v13M12 19v4M9.5 21.5h5"></path></svg>',
       deleteRow: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 3.5h16v13H4z"></path><path d="M4 8h16M9.5 3.5v13M14.5 3.5v13M9.5 21.5h5"></path></svg>',
+      addRowAbove: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7.5h16v13H4z"></path><path d="M4 16h16M9.5 7.5v13M14.5 7.5v13M12 1v4M9.5 2.5h5"></path></svg>',
+      addColumnBefore: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.5 4h13v16h-13z"></path><path d="M16 4v16M11.5 4v16M7 9H1M4 6v6"></path></svg>',
       addColumn: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 4h13v16h-13z"></path><path d="M8 4v16M12.5 4v16M17 9h6M20 6v6"></path></svg>',
       deleteColumn: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 4h13v16h-13z"></path><path d="M8 4v16M12.5 4v16M17 9h6"></path></svg>',
       listTable: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16v14H4z"></path><path d="M4 10h16M9 5v14M6 7.5h.01M6 14.5h.01M12 14.5h6"></path></svg>',
@@ -265,20 +267,40 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       menu.appendChild(button);
       actionButtons.push(button);
     };
-    addAction("Insert row after selected row", tableActionIcons.addRow, "Row +", () => {
+    // A structural button changes the table, so the table is saved and rendered again, and the
+    // editor reopens in the cell the press selects (the DOM of the open editor has no such cell).
+    const structural = (change: () => void): void => {
+      edit.closeLinkPanel?.(false);
+      edit.cellPalette?.closePopover();
+      edit.cellSlash?.close();
+      change();
+      blockEditor.rememberPendingBlockNavigation(edit.target, "end", undefined, {
+        tableRowIndex: edit.tableRowIndex!,
+        tableColumnIndex: edit.tableColumnIndex!,
+      });
+      if (!blockEditor.postBlockEditSave(true)) blockEditor.clearPendingBlockNavigation();
+    };
+    addAction("Insert row before selected row", tableActionIcons.addRowAbove, "Row above", () => structural(() => {
+      const row = tableTools.insertRowBefore(edit.tableModel!, edit.tableRowIndex!);
+      if (row !== undefined) edit.tableRowIndex = row;
+    }), edit.tableRowIndex === 0, "row");
+    addAction("Insert row after selected row", tableActionIcons.addRow, "Row below", () => structural(() => {
       edit.tableRowIndex = tableTools.insertRowAfter(edit.tableModel!, edit.tableRowIndex!);
-    }, false, "row");
-    addAction("Delete selected row", tableActionIcons.deleteRow, "Row −", () => {
+    }), false, "row");
+    addAction("Delete selected row", tableActionIcons.deleteRow, "Row −", () => structural(() => {
       const nextRow = tableTools.deleteRow(edit.tableModel!, edit.tableRowIndex!);
       if (nextRow !== undefined) edit.tableRowIndex = nextRow;
-    }, edit.tableRowIndex === 0 || edit.tableModel!.rows.length <= 3, "row");
-    addAction("Insert column after selected column", tableActionIcons.addColumn, "Col +", () => {
+    }), edit.tableRowIndex === 0 || edit.tableModel!.rows.length <= 3, "row");
+    addAction("Insert column before selected column", tableActionIcons.addColumnBefore, "Col left", () => structural(() => {
+      edit.tableColumnIndex = tableTools.insertColumnBefore(edit.tableModel!, edit.tableColumnIndex!);
+    }), false, "column");
+    addAction("Insert column after selected column", tableActionIcons.addColumn, "Col right", () => structural(() => {
       edit.tableColumnIndex = tableTools.insertColumnAfter(edit.tableModel!, edit.tableColumnIndex!);
-    }, false, "column");
-    addAction("Delete selected column", tableActionIcons.deleteColumn, "Col −", () => {
+    }), false, "column");
+    addAction("Delete selected column", tableActionIcons.deleteColumn, "Col −", () => structural(() => {
       const nextColumn = tableTools.deleteColumn(edit.tableModel!, edit.tableColumnIndex!);
       if (nextColumn !== undefined) edit.tableColumnIndex = nextColumn;
-    }, edit.tableModel!.rows[0]!.length <= 1, "column");
+    }), edit.tableModel!.rows[0]!.length <= 1, "column");
     // Table level: the pipe table becomes a {list-table}, written back as one edit (one undo step).
     // A table captioned by a {table} directive sits in a figure; wrapping a list-table in it is not
     // offered.
@@ -290,7 +312,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
         edit.convertedText = converted.text;
         blockEditor.saveBlockEdit();
       }
-    }, tableFigure, "table");
+    }, tableFigure || Boolean(edit.tableModel!.listTable), "table");
 
     // The inline buttons allowed in a cell join the bar after a separator; the same group object
     // is kept for the whole edit and only moved into each rebuilt bar.

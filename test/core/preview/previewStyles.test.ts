@@ -728,7 +728,7 @@ test("the table bar draws one rule per group and the cell group carries its own 
   assert.match(
     PREVIEW_THEME_CSS,
     /\.sphinx-preview-table-menu :is\(\[data-sphinx-table-group="row"\] \+ \[data-sphinx-table-group="column"\],\s*\[data-sphinx-table-group="column"\] \+ \[data-sphinx-table-group="table"\]\)::before\s*\{/u,
-    "a rule before Col + and before List table, none before Col −",
+    "a rule before Col left and before List table, none before Col −",
   );
   assert.doesNotMatch(PREVIEW_THEME_CSS, /\.sphinx-preview-table-menu :is\(\[data-sphinx-table-group="column"\], \[data-sphinx-table-group="table"\]\)/u);
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-table-menu-cell-group\s*\{[^}]*display: flex;[^}]*flex: 0 1 auto;/u);

@@ -1490,6 +1490,6 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     editMode: true,
     editTarget: "table-cell" as const,
     machineChecks: ["overlay-covers-text", "overlay-clipped"],
-    description: `The table bar of a cell editor, ${theme}, 360 px pane: a rule before Col + and before List table but none between Col + and Col \u2212, and the rule of the cell formatting group goes with the group onto its own line.`,
+    description: `The table bar of a cell editor, ${theme}, 360 px pane: a rule before Col left and before List table but none between Col left and Col right and Col \u2212, and the rule of the cell formatting group goes with the group onto its own line.`,
   })),
 ];
