@@ -14,6 +14,10 @@
 - Edit bar: every button shows the same sliding tooltip as the floating toolbar (name and shortcut),
   the Horizontal rule button is drawn as three dashes (`---`) instead of the centred-text icon, and a
   horizontal rule can be clicked up to 12 px above or below its line to open its editor.
+- Table editing: the table bar has Row above, Row below, Col left and Col right (insert before or
+  after the selected cell) and Row − / Col − (delete). A press saves the table and reopens the editor
+  in the new cell, so Col + no longer wipes the title of the selected column and Row − / Col − work.
+  A plain `{list-table}` (one header row, one-line cells) has the same buttons.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when

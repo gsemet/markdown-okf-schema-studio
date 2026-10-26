@@ -11,8 +11,7 @@ import {
   getActivePreviewForTests,
   getActivePreviewPanelForTests,
   PANEL_VIEW_TYPE,
-  previewGroupFocusMovesForTests,
-  previewGroupUnlocksSettledForTests,
+  previewGroupFocusMovesForTests, previewGroupUnlocksSettledForTests,
   resetRenderHooksForTests,
   setRenderDelayForTests,
   setRenderOverrideForTests,
@@ -38,14 +37,14 @@ import {
   press,
   setEditMode,
   typeText,
-  waitFor,
-  waitForEditor,
+  waitFor, waitForEditor,
   waitForRender,
   withCurrentFrame,
   writeSchema,
   type Evidence,
 } from "./realInput/harness";
 import { scenarioImagePaste, scenarioIncomingChanges, scenarioReviewThreads } from "./realWindowGaps";
+import { scenarioTableStructure } from "./tableStructureReal";
 import { scenarioPerformanceProbe } from "./performanceProbe";
 import { traceDocumentChanges, windowFocusReport } from "./windowFocus";
 
@@ -4536,6 +4535,7 @@ export async function run(): Promise<void> {
     await scenarioEditModeNoReflow(page, evidence);
     await scenarioTableTab(page, evidence);
     await scenarioTableToolbar(page, evidence);
+    await scenarioTableStructure(page);
     await scenarioBooleanOneClick(page, evidence);
     await scenarioListEditorClickAndKeys(page, evidence);
     await scenarioListLinkCompletion(page, evidence);

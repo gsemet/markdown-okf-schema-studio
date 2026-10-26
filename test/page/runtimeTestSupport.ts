@@ -70,6 +70,7 @@ export function findButton(harness: RuntimeHarness, label: string): RuntimeEleme
 export function openTableCellEditorForTab(
   harness: ReturnType<typeof createRuntimeHarness>,
   options: { mapped?: boolean } = {},
+  originalText = "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
 ) {
   const table = new RuntimeElement({
     "data-sphinx-preview-document": "file:///active.md",
@@ -105,7 +106,7 @@ export function openTableCellEditorForTab(
     revision: 7,
     requestId: 11,
     editId: harness.messages.at(-1)?.editId,
-    originalText: "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n",
+    originalText,
   });
   const input = (): RuntimeElement => {
     const control = harness.createdElements.filter((element) =>

@@ -17,7 +17,7 @@ import {
  */
 
 const PIPE = "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n";
-const LIST_TABLE = "```{list-table}\n:header-rows: 1\n\n* - A\n  - B\n* - x\n  - y\n```\n";
+const LIST_TABLE = "```{list-table}\n:header-rows: 1\n:widths: 1 1\n\n* - A\n  - B\n* - x\n  - y\n```\n";
 
 /** A table of three rows and two columns in the page; the bottom-right cell has index `columns - 1`. */
 function buildTable(harness: RuntimeHarness, columns = 2): { table: RuntimeElement; cells: RuntimeElement[][] } {

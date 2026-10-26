@@ -339,7 +339,7 @@ def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolba
   for block_only in ("heading", "quote", "table", "image", "codeFence"):
     if block_only in geometry["ids"]:
       failures.append(Failure(page_name, f"the cell bar shows the block action {block_only}"))
-  if geometry["operations"] != 5 or not geometry["hasSeparator"] or geometry["mode"]:
+  if geometry["operations"] != 7 or not geometry["hasSeparator"] or geometry["mode"]:
     failures.append(Failure(page_name, f"the cell bar structure is wrong: {geometry}"))
   rules = toolbar.evaluate("""bar => {
     const has = (name) => {
@@ -349,8 +349,10 @@ def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolba
     const separator = bar.querySelector('.sphinx-preview-table-menu-cell-group > [role=separator]').getBoundingClientRect();
     const first = bar.querySelector("[data-sphinx-edit-palette='cell'] > button:not([hidden])").getBoundingClientRect();
     return {
-      rowPlus: has('Insert row after selected row'), rowMinus: has('Delete selected row'),
-      colPlus: has('Insert column after selected column'), colMinus: has('Delete selected column'),
+      rowPlus: has('Insert row before selected row') || has('Insert row after selected row'),
+      rowMinus: has('Delete selected row'),
+      colPlus: has('Insert column before selected column'),
+      colMinus: has('Insert column after selected column') || has('Delete selected column'),
       table: has('Convert to list-table'),
       separatorTop: separator.top, separatorBottom: separator.bottom, firstTop: first.top, firstBottom: first.bottom,
     };
@@ -976,15 +978,15 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       ):
         failures.append(Failure(page_name, f"table action bar is outside the screenshot viewport: {toolbar_bounds}"))
       operations = toolbar.locator("[data-sphinx-table-operation]")
-      if operations.count() != 5:
-        failures.append(Failure(page_name, f"table action bar has {operations.count()} row/column/table actions, expected 5"))
+      if operations.count() != 7:
+        failures.append(Failure(page_name, f"table action bar has {operations.count()} row/column/table actions, expected 7"))
       elif not operations.first.is_visible():
         failures.append(Failure(page_name, "table row/column actions are hidden while the cell editor has focus"))
       if toolbar.locator("[data-sphinx-preview-table-save], [data-sphinx-preview-table-cancel]").count() != 0:
         failures.append(Failure(page_name, "table action bar still contains Save or Cancel controls"))
-      # The four row and column buttons and the table conversion are the bar's own children; the inline group is checked apart (T35).
+      # The six row and column buttons and the table conversion are the bar's own children; the inline group is checked apart (T35).
       buttons = toolbar.locator(":scope > button")
-      if buttons.count() != 5 or not buttons.evaluate_all("""items => items.every(button =>
+      if buttons.count() != 7 or not buttons.evaluate_all("""items => items.every(button =>
         button.getAttribute("aria-label")
         && button.title
         && button.querySelector("svg")
@@ -1010,7 +1012,7 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       ):
         failures.append(Failure(page_name, f"selected table cell has no visible focus outline: {selected_cell_state}"))
       label_texts = toolbar.locator(".sphinx-preview-table-menu-label").all_text_contents()
-      if label_texts != ["Row +", "Row \u2212", "Col +", "Col \u2212", "List table"]:
+      if label_texts != ["Row above", "Row below", "Row \u2212", "Col left", "Col right", "Col \u2212", "List table"]:
         failures.append(Failure(page_name, f"table action bar labels are wrong: {label_texts}"))
       check_cell_bar_formatting(page, page_name, scenario, toolbar, failures)
       cell_input = editor.locator("textarea[aria-label='Markdown table cell']")

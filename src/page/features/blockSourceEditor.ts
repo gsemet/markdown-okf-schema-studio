@@ -77,7 +77,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
           ? String.fromCharCode(13)
           : "";
     if (edit.selectedCell) {
-      const model = tableTools.parse(originalText);
+      const model = tableTools.parse(originalText) ?? tableTools.parseListTable(originalText);
       if (
         model
         && edit.tableRowIndex! < model.rows.length - 1

@@ -70,7 +70,7 @@ When a cell editor is open, the extension SHALL add to the table bar, after a se
 ### Scenario (boundary): Rebuilt bar keeps the group
 | Input | Outcome |
 | --- | --- |
-| A cell editor open and Row + pressed, the editor rendered again | The bar element is the same and holds the same group element |
+| The editor moved to another cell by a click, rendered again | The bar element is the same and holds the same group element |
 | The editor moved to the next cell by Tab, rendered again | The same bar and the same group are in place |
 
 ### Scenario (boundary): The group leaves with the editor

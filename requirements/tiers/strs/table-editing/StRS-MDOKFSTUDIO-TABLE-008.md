@@ -21,6 +21,9 @@ user_need: As a writer, I see the table actions with text labels above the table
   reach.
 derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-001
+- SwRS-MDOKFSTUDIO-TABLE-003
+- SwRS-MDOKFSTUDIO-TABLE-004
+- SwRS-MDOKFSTUDIO-TABLE-005
 - SwRS-MDOKFSTUDIO-TABLE-048
 - SwRS-MDOKFSTUDIO-TABLE-055
 - SwRS-MDOKFSTUDIO-TABLE-064
