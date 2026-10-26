@@ -46,7 +46,7 @@ import {
   toggleTodo,
   wrapRole,
 } from "./inlineEditActions";
-import { imageDraft, linkDraft, linkEdit } from "./linkEditActions";
+import { imageAltExit, imageDraft, linkDraft, linkEdit } from "./linkEditActions";
 import type { MarkdownTableTools } from "./markdownTable";
 import { createTableEditActions } from "./tableEditActions";
 import type { TextEdit } from "./textEditing";
@@ -147,6 +147,8 @@ export interface EditActionRegistry {
   byId: Map<string, EditAction>;
   /** The image around the selection or caret, or `undefined` outside any image. */
   imageDraft(ctx: EditActionContext): ImageDraft | undefined;
+  /** The caret position after the image whose alt text holds the selection, or `undefined`. */
+  imageAltExit(ctx: EditActionContext): number | undefined;
   /** The link panel's initial values for the selection (an existing link is read back). */
   linkDraft(ctx: EditActionContext): LinkDraft;
   /** The edit that writes `[text](url)` over the draft's range; see `linkDraft`. */
@@ -307,5 +309,5 @@ export function createEditActions(
     return (mac === true ? "Cmd" : "Ctrl") + "+" + key.toUpperCase();
   }
 
-  return { actions, byId, imageDraft, linkDraft, linkEdit, shortcutFor, shortcutLabel };
+  return { actions, byId, imageAltExit, imageDraft, linkDraft, linkEdit, shortcutFor, shortcutLabel };
 }

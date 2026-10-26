@@ -42,6 +42,13 @@
   inside the hidden table and the table seemed to vanish. The webview regression and the
   real-window round trip fail with the old code.
 
+## 2026-10-26 (Enter in the image alt text validates it)
+
+- SwRS-MDOKFSTUDIO-BLOCK-069: Enter in the alt text of a Markdown image (selected after a paste or
+  a pick, or typed in) keeps the alt text and moves the caret just after the image instead of
+  replacing the selection by a line break. Runtime and unit tests, and the visual scenarios
+  palette-slash/v22 to v24 (cream and dark), fail on the previous code.
+
 ## 2026-10-26 (bold dollar prices preserve emphasis)
 
 - SwRS-MDOKFSTUDIO-MYST-024: permissive MyST dollarmath no longer consumes the `**` markers

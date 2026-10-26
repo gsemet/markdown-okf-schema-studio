@@ -161,6 +161,41 @@ test("Enter in a list item continues the list, and Shift+Enter stays native", ()
   assert.equal(save?.editedText, "- a\n- \n");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+test("Enter in the selected alt text of an image validates it and moves the caret after the image", () => {
+  const harness = createRuntimeHarness();
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    editId: harness.messages.at(-1)?.editId,
+    originalText: "![image.png](image.png) tail\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  let prevented = 0;
+  // The alt text selected, as after a paste or a pick: Enter keeps it and leaves after the image.
+  textarea.setSelectionRange(2, 11);
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 1);
+  assert.equal(textarea.value, "![image.png](image.png) tail");
+  assert.equal(textarea.selectionStart, 23);
+  assert.equal(textarea.selectionEnd, 23);
+  // A caret inside the alt text (after typing) validates the same way.
+  textarea.setSelectionRange(5, 5);
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 2);
+  assert.equal(textarea.selectionStart, 23);
+  // Outside the alt text Enter stays native.
+  textarea.setSelectionRange(25, 25);
+  textarea.dispatch("keydown", { key: "Enter", preventDefault: () => { prevented += 1; } });
+  assert.equal(prevented, 2);
+  assert.equal(textarea.value, "![image.png](image.png) tail");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-061
 test("Tab and Shift+Tab indent the block editor without closing it", () => {
   const harness = createRuntimeHarness();
