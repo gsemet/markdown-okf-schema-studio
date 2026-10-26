@@ -1117,3 +1117,60 @@ test("CR 046: the motion layer is short and never animates layout or the table b
   }
   assert.ok(cssRules(starting).length >= 3);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028
+test("a block quote is tinted with the theme block quote background", () => {
+  const rule = /#sphinx-myst-preview-content blockquote\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  assert.match(rule, /background: var\(--studio-textBlockQuote-background, /u);
+  assert.match(rule, /border-inline-start: 4px solid/u);
+  for (const mode of ["dark", "white", "cream"]) {
+    const block = new RegExp(`html\\[data-sphinx-preview-theme-mode="${mode}"\\] body\\s*\\{([^}]*)\\}`, "u").exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+    assert.match(block, /--studio-textBlockQuote-background: #[0-9a-f]{6};/iu, `${mode} sets the block quote tint`);
+  }
+});
+
+/**
+ * The stylesheet VS Code injects at the top of every webview carries this rule, inside
+ * `@layer vscode-default`. It paints the block quote with the dark host colour whatever the preview
+ * theme is. It is the CR 107 evidence: a real VS Code window with the Dark Modern theme and the
+ * Cream preview theme showed a near-black block quote while the preview set no background of its
+ * own. An unlayered preview rule beats a layered default, and the specificity check below keeps the
+ * preview rule winning even if the host ever drops the layer.
+ */
+const VSCODE_WEBVIEW_BLOCKQUOTE_RULE = "blockquote { background: var(--vscode-textBlockQuote-background); "
+  + "border-color: var(--vscode-textBlockQuote-border); }";
+
+/** Specificity of one selector as [ids, classes/attributes/pseudo-classes, types]; `:where` counts 0. */
+function specificity(selector: string): [number, number, number] {
+  const flat = selector.replace(/:where\([^)]*\)/gu, "").replace(/:(?:is|not|has)\(([^)]*)\)/gu, " $1 ");
+  const ids = (flat.match(/#[\w-]+/gu) ?? []).length;
+  const classes = (flat.match(/\.[\w-]+|\[[^\]]*\]|:(?!:)[\w-]+/gu) ?? []).length;
+  const types = (flat.replace(/\[[^\]]*\]|[#.:][\w-]+/gu, " ").match(/(?:^|[\s>+~])[a-z][\w-]*/gu) ?? []).length;
+  return [ids, classes, types];
+}
+
+function outranks(left: [number, number, number], right: [number, number, number]): boolean {
+  for (let index = 0; index < 3; index += 1) {
+    if (left[index] !== right[index]) return left[index] > right[index];
+  }
+  return false;
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-028
+test("CR 107: the preview block quote background outranks the VS Code webview default rule", () => {
+  const defaults = /^(\S[^{]*)\{([^}]*)\}/u.exec(VSCODE_WEBVIEW_BLOCKQUOTE_RULE);
+  assert.ok(defaults);
+  const defaultSpecificity = specificity(defaults[1].trim());
+  assert.deepEqual(defaultSpecificity, [0, 0, 1]);
+  const previewBackgrounds: Array<[number, number, number]> = [];
+  const css = PREVIEW_THEME_CSS.replace(/\/\*[\s\S]*?\*\//gu, "");
+  for (const match of css.matchAll(/([^{}@]+)\{([^{}]*)\}/gu)) {
+    if (!/(?:^|;|\s)background(?:-color)?\s*:/u.test(match[2])) continue;
+    for (const selector of match[1].split(",")) {
+      if (/(?:^|[\s>+~])blockquote\s*$/u.test(selector.trim())) previewBackgrounds.push(specificity(selector.trim()));
+    }
+  }
+  assert.ok(previewBackgrounds.length > 0, "the preview sets a background on block quotes");
+  assert.ok(previewBackgrounds.every((candidate) => outranks(candidate, defaultSpecificity)),
+    "every preview block quote background beats the host default, so the host colour theme cannot show through");
+});

@@ -166,8 +166,10 @@ ${directiveStyle("figure")}
 ${directiveStyle("admonition")}
 #sphinx-myst-preview-content blockquote {
   margin: 1em 0;
-  padding: 0 1em;
+  padding: 0.25em 1em;
   border-inline-start: 4px solid var(--sphinx-preview-border);
+  border-radius: 0 4px 4px 0;
+  background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.08));
   color: var(--studio-descriptionForeground, inherit);
 }
 
