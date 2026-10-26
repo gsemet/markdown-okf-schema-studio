@@ -32,7 +32,6 @@ implemented_in_files:
 - src/page/features/blockMoves.ts
 - src/page/features/blockSelectionView.ts
 - src/page/features/checkboxes.ts
-- src/page/features/editMode.ts
 - src/page/features/editorChrome.ts
 - src/page/features/frontmatterEditor.ts
 - src/page/features/frontmatterValueEditor.ts
@@ -51,7 +50,6 @@ tested_in_files:
 - test/page/modules/inlineThread.test.ts
 - test/page/modules/labelRename.test.ts
 - test/page/runtimeBlockSelection.test.ts
-- test/page/runtimeContentPatch.test.ts
 - test/page/runtimePageControls.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/renderReq.labelRename.requirements.test.ts
@@ -110,10 +108,11 @@ The page refuses with the open editor's status line unless the row says otherwis
 
 - GIVEN a block editor that holds changed text
 - WHEN the writer clicks another block
-- THEN the first editor is saved through its blur and stays open until the render of its save arrives, and the second block opens once, when that render arrives, without a second click; the save in flight is not posted again; an editor with unchanged text closes at the blur and the same click opens the second editor
+- THEN the first editor is saved through its blur, no second editor opens at that click, and the first editor stays open until the render of its save arrives; an editor with unchanged text closes at the blur and the same click opens the second editor
 
 ### Known issues
 
+- Known issue: a click on another block while the first editor holds changed text saves the first editor through its blur, but opens no second editor at that click, because the first editor stays open until the render of its save arrives; the writer clicks again after the render. An editor with unchanged text closes at the blur, and the same click opens the second editor.
 - Known issue: an editor left in an error state keeps blocking every other field until it is cancelled with Escape in that editor; clicking elsewhere does not close it.
 - Known issue: the guard against a second editor works in one direction only: a block editor can still be opened by clicking a block or a plus insert point while a field editor is open.
 
@@ -124,7 +123,6 @@ The page refuses with the open editor's status line unless the row says otherwis
 
 ### Verification notes
 
-- Method: test/page/runtimeContentPatch.test.ts (`a click on another block while the first editor holds changes opens it once the save is rendered`: click while changed text is held).
 - Method: test/integration/realInput.markers.ts (scenario scenarioParagraphBlurCommit: click on another block while changed text is held, asserts only that the first editor closed) and test/page/runtimeBlockEditor.test.ts and test/page/runtimeBlockMoves.test.ts (second block editor request ignored, editors of the empty document and of an insertion open one at a time; nominal and no-editor scenarios).
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (field editor blocks the key editor and a second value editor, a block editor blocks the field editor; refresh refused with a message while a field editor is open and works once it is closed; checkbox click refused while a field editor is open; Edit figure and the Start writing Enter shortcut ignore input; rows: field editor, refresh, checkbox).
 - Method: test/page/runtimeBlockSelection.test.ts and test/page/runtimeBlockMoves.test.ts (selection and move input ignored while a field editor is open).

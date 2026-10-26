@@ -294,7 +294,6 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     });
   };
 
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-047
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-234
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-018
   function postBlockEditSave(final: boolean): boolean | undefined {
@@ -303,7 +302,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       !edit
       || typeof edit.originalText !== "string"
       || (!edit.textarea && !edit.tableInput)
-      || edit.finishing
+      || (edit.finishing && !final)
     ) return false;
     if (edit.autosaveTimer !== undefined) {
       window.clearTimeout(edit.autosaveTimer);

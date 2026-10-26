@@ -114,7 +114,6 @@ export function installEditMode(rt: PageRuntime): EditMode {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
-  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-018
   function openMappedEditor(target: HTMLElement, eventTarget: Element, initialCaretPosition: CaretPosition = "end",
@@ -137,18 +136,6 @@ export function installEditMode(rt: PageRuntime): EditMode {
       if (!rt.blockEditor.postBlockEditSave(true)) {
         rt.blockEditor.clearPendingBlockNavigation();
         openMappedEditor(target, eventTarget, initialCaretPosition, reveal);
-      }
-      return;
-    }
-    if (edit) {
-      if (target === edit.target) return;
-      // A block editor is open: its text is saved first and this block opens once the save is
-      // rendered. A save already in flight is not posted again. An editor that cannot save
-      // (its source has not arrived) keeps the click from doing anything, as before.
-      rt.blockEditor.rememberPendingBlockNavigation(target, initialCaretPosition, selectedCell ?? undefined);
-      if (!edit.finishing && !rt.blockEditor.postBlockEditSave(true)) {
-        rt.blockEditor.clearPendingBlockNavigation();
-        if (!state.activeBlockEdit) openMappedEditor(target, eventTarget, initialCaretPosition, reveal);
       }
       return;
     }
