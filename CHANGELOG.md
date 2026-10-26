@@ -4,6 +4,10 @@
 
 - Dropdown admonitions show their state: a chevron at the right of the title points right while the
   dropdown is closed and down while it is open, in every admonition kind and theme.
+- Review comment threads are readable in every theme: the popover text no longer takes a pale host
+  colour on the Cream or White theme, dates, quotes and placeholders are no longer faded, and every
+  comment text colour reaches a 4.5:1 contrast in the Dark, White and Cream modes. The setting
+  `markdownOkfSchemaStudio.comments.authorName` can now be overridden per workspace or folder.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when

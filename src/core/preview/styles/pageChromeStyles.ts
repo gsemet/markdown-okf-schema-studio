@@ -2,6 +2,7 @@ import { CALLOUT_ICONS } from "../calloutIcons";
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
 // @implements_req SwRS-MDOKFSTUDIO-THEME-025
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-002
 /** The Dark, White and Cream palettes: each forced mode sets the whole `--studio-*` palette itself. */
 const FORCED_THEME_MODES_CSS = `html[data-sphinx-preview-theme-mode="dark"],
 html[data-sphinx-preview-theme-mode="dark"] body {
@@ -13,6 +14,7 @@ html[data-sphinx-preview-theme-mode="dark"] body {
   --studio-editor-foreground: #d4d4d4;
   --studio-foreground: #d4d4d4;
   --studio-editorWidget-background: #252526;
+  --studio-editorWidget-foreground: #d4d4d4;
   --studio-editorWidget-border: #454545;
   --studio-dropdown-background: var(--studio-editorWidget-background);
   --studio-dropdown-foreground: var(--studio-editor-foreground);
@@ -25,7 +27,7 @@ html[data-sphinx-preview-theme-mode="dark"] body {
   --studio-button-background: #0e639c;
   --studio-button-foreground: #ffffff;
   --studio-errorForeground: #f48771;
-  --studio-descriptionForeground: #9d9d9d;
+  --studio-descriptionForeground: #a8a8a8;
   --studio-textLink-foreground: #3794ff;
   --studio-focusBorder: #007fd4;
   --studio-editor-findMatchHighlightBackground: #ea5c0055;
@@ -57,6 +59,7 @@ html[data-sphinx-preview-theme-mode="white"] body {
   --studio-editor-foreground: #1f1f1f;
   --studio-foreground: #1f1f1f;
   --studio-editorWidget-background: #f3f3f3;
+  --studio-editorWidget-foreground: #1f1f1f;
   --studio-editorWidget-border: #c8c8c8;
   --studio-dropdown-background: var(--studio-editorWidget-background);
   --studio-dropdown-foreground: var(--studio-editor-foreground);
@@ -107,6 +110,7 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   --studio-list-hoverBackground: rgba(43, 42, 39, 0.07);
   --studio-widget-border: #d6cdbd;
   --studio-editorWidget-background: #fbf8f1;
+  --studio-editorWidget-foreground: #2b2a27;
   --studio-editorWidget-border: #d6cdbd;
   --studio-dropdown-background: var(--studio-editorWidget-background);
   --studio-dropdown-foreground: var(--studio-editor-foreground);

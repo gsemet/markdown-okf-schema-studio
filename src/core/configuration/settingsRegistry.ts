@@ -21,6 +21,11 @@ export interface SettingSchema<T> {
   enum?: readonly string[];
   /** One line per `enum` value, shown by the settings editor. */
   enumDescriptions?: readonly string[];
+  /**
+   * Where the setting can be set: `resource` also allows a workspace folder (or `.vscode/settings.json`)
+   * to override the user value. Omitted: VS Code's default (window).
+   */
+  scope?: "resource";
   /** The value used when the user has not set one. */
   default: T;
   /** Smallest value of a number setting (settings editor validation). */
@@ -286,8 +291,9 @@ export const COMMENTS_SETTINGS = {
   /** Author of new review comments; empty means Git user.name, then the OS user name (T43). */
   authorName: setting<string>({
     type: "string",
+    scope: "resource",
     default: "",
-    markdownDescription: "The name stored with the review comments you write in the preview. **Empty** (default): your Git `user.name` is used, and when Git has none, your operating system user name. **A name**: that name is used as it is, up to 100 characters.",
+    markdownDescription: "The name stored with the review comments you write in the preview. **Empty** (default): your Git `user.name` is used, and when Git has none, your operating system user name. **A name**: that name is used as it is, up to 100 characters. Set it in your user settings, or override it for one workspace or folder (`.vscode/settings.json`), for example to sign with a project alias.",
     order: 50,
   }, (value) => typeof value === "string" ? value : ""),
 };

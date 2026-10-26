@@ -4,6 +4,7 @@ import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfig
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-028
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-143
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-152
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-002
 /**
  * Comments: comment and TODO chips, inline threads, incoming-change marks, review comment popovers,
  * the orphaned comments box and the toolbar and setting toggles that hide them.
@@ -285,10 +286,6 @@ export const COMMENT_CSS = `
   font-size: 0.9em;
 }
 
-[data-okf-comment-popover][data-okf-comment-resolved="true"] {
-  opacity: 0.75;
-}
-
 [data-okf-comment-popover] [data-okf-comment-state] {
   margin-bottom: 6px;
   font-style: italic;
@@ -306,8 +303,10 @@ export const COMMENT_CSS = `
   justify-content: space-between;
 }
 
+/* The date is smaller, not faded: fading takes the text under the 4.5:1 contrast. */
 [data-okf-comment-popover] [data-okf-comment-head] span {
-  opacity: 0.7;
+  color: var(--studio-descriptionForeground, inherit);
+  font-size: 0.9em;
 }
 
 [data-okf-comment-popover] [data-okf-comment-body] {
@@ -352,7 +351,7 @@ button[data-okf-comment-create]:hover {
   max-height: 4.5em;
   margin-bottom: 6px;
   overflow: hidden;
-  opacity: 0.7;
+  color: var(--studio-descriptionForeground, inherit);
   font-style: italic;
   overflow-wrap: anywhere;
 }
@@ -369,6 +368,13 @@ button[data-okf-comment-create]:hover {
   background: var(--studio-input-background);
   color: var(--studio-input-foreground);
   font: inherit;
+}
+
+[data-okf-comment-compose] textarea::placeholder,
+[data-okf-comment-popover] textarea::placeholder,
+#sphinx-myst-preview-content .okf-thread-actions textarea::placeholder {
+  color: var(--studio-descriptionForeground, inherit);
+  opacity: 1;
 }
 
 [data-okf-comment-compose] textarea:focus,
@@ -469,7 +475,6 @@ button[data-okf-comment-create]:hover {
   padding-top: 8px;
   border-top: 1px solid var(--studio-editorWidget-border, rgba(128, 128, 128, 0.4));
   font-weight: 600;
-  opacity: 0.8;
 }
 
 [data-okf-orphans] button[data-okf-comment-orphan] {
@@ -488,10 +493,6 @@ button[data-okf-comment-create]:hover {
   pointer-events: auto;
 }
 
-[data-okf-orphans] button[data-okf-comment-orphan][data-okf-comment-resolved="true"] {
-  opacity: 0.6;
-}
-
 [data-okf-orphans] [data-okf-orphan-quote] {
   display: block;
   font-style: italic;
@@ -500,7 +501,7 @@ button[data-okf-comment-create]:hover {
 
 [data-okf-orphans] [data-okf-orphan-meta] {
   display: block;
-  opacity: 0.7;
+  color: var(--studio-descriptionForeground, inherit);
   font-size: 0.9em;
   overflow-wrap: anywhere;
 }

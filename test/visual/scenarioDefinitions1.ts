@@ -9,8 +9,10 @@ import {
   FRONTMATTER_SKILL_ASSERTIONS,
   MARK_CONTAINING_BLOCK_ASSERTIONS,
   NARROW,
+  REVIEW_THREAD_CONTRAST_ASSERTIONS,
   STICKY_RUNNING_TEXT_ASSERTIONS,
   type ScenarioDefinition,
+  THREADS_MESSAGE,
   WIDE,
   XLARGE,
 } from "./scenarioAssertions";
@@ -1196,5 +1198,11 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     contentAssertions: FRONTMATTER_SKILL_ASSERTIONS(keys),
     description: `Front matter with a long description and a long value next to short keys (${name}): `
       + "the key column fits its keys, no key and not the Names label breaks inside a word, and the values take the rest of the width.",
+  })),
+  ...([["v23", "cream"], ["v24", undefined], ["v25", "white"]] as const).map(([number, mode]) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-REVIEW-002
+    id: `review-annotations/${number}-review-thread-contrast-${mode ?? "dark"}-900`, fixture: "45-review-threads",
+    theme: "dark" as const, ...(mode ? { previewThemeMode: mode } : {}), ...WIDE, scroll: { kind: "top" as const }, render: { hostMessages: [THREADS_MESSAGE] }, pageActions: [{ click: 'mark[data-okf-comment-thread="thread-open"]' }],
+    contentAssertions: REVIEW_THREAD_CONTRAST_ASSERTIONS, description: `An open review thread popover on the ${mode ?? "dark"} theme with a dark VS Code host: its text reaches 4.5:1 and none is faded.`,
   })),
 ];

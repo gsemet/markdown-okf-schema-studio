@@ -44,6 +44,19 @@ export const THEMES: PreviewTheme[] = [
       "--vscode-editor-findMatchHighlightBackground": "#9e6a03",
       "--vscode-badge-background": "#4d4d4d",
       "--vscode-badge-foreground": "#cccccc",
+      // Widget, input and button tokens as the real Dark Modern theme sets them (read from a real
+      // window, CR 110 round 2): without them the page fell back to its own defaults and no test
+      // saw the host-coloured text that was grey on a forced Cream or White page.
+      "--vscode-editorWidget-background": "#202020",
+      "--vscode-editorWidget-foreground": "#cccccc",
+      "--vscode-input-background": "#313131",
+      "--vscode-input-foreground": "#cccccc",
+      "--vscode-input-border": "#3c3c3c",
+      "--vscode-button-background": "#0078d4",
+      "--vscode-button-foreground": "#ffffff",
+      "--vscode-button-border": "#ffffff1a",
+      "--vscode-button-secondaryBackground": "#00000000",
+      "--vscode-button-secondaryForeground": "#cccccc",
     },
   },
   {
@@ -69,6 +82,19 @@ export const THEMES: PreviewTheme[] = [
       "--vscode-editor-findMatchHighlightBackground": "#f8e3a1",
       "--vscode-badge-background": "#c4c4c4",
       "--vscode-badge-foreground": "#3b3b3b",
+      // Widget, input and button tokens as the real Dark Modern theme sets them (read from a real
+      // window, CR 110 round 2): without them the page fell back to its own defaults and no test
+      // saw the host-coloured text that was grey on a forced Cream or White page.
+      "--vscode-editorWidget-background": "#f8f8f8",
+      "--vscode-editorWidget-foreground": "#3b3b3b",
+      "--vscode-input-background": "#ffffff",
+      "--vscode-input-foreground": "#3b3b3b",
+      "--vscode-input-border": "#cecece",
+      "--vscode-button-background": "#005fb8",
+      "--vscode-button-foreground": "#ffffff",
+      "--vscode-button-border": "#0000001a",
+      "--vscode-button-secondaryBackground": "#e5e5e5",
+      "--vscode-button-secondaryForeground": "#3b3b3b",
     },
   },
   {

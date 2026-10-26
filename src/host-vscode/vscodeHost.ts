@@ -119,7 +119,7 @@ function createVscodeWorkspaceInfo(): WorkspaceInfo {
 
 function createVscodeSettings(): Settings {
   return {
-    section: (name) => vscode.workspace.getConfiguration(name),
+    section: (name, resource) => vscode.workspace.getConfiguration(name, resource === undefined ? undefined : vscode.Uri.parse(resource)),
     onDidChange: (listener) => vscode.workspace.onDidChangeConfiguration((event) => listener({
       affects: (section) => event.affectsConfiguration(section),
     })),

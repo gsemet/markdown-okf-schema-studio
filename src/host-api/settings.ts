@@ -20,8 +20,11 @@ export interface SettingsChange {
 
 /** Read access to the settings, and their changes. */
 export interface Settings {
-  /** The settings of one section, read when a value is asked for. */
-  section(name: string): SettingsSection;
+  /**
+   * The settings of one section, read when a value is asked for. `resource` (a document or folder
+   * id) lets a host apply the values a folder overrides, for the settings declared per resource.
+   */
+  section(name: string, resource?: string): SettingsSection;
   /** Fires after the user changed settings. */
   readonly onDidChange: HostEvent<SettingsChange>;
 }

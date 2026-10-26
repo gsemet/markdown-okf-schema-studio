@@ -197,6 +197,13 @@ export async function run(): Promise<void> {
     assert.equal(result?.ok, false, "the page is told, so it keeps the typed text");
     assert.match(result?.reason ?? "", /not valid/u);
 
+    // A workspace value overrides the user value (the setting is declared per resource).
+    fs.rmSync(sidecarPath);
+    await settings.update("authorName", "Workspace Alias", vscode.ConfigurationTarget.Workspace);
+    await send(preview, "previewCommentCreate", { anchor: anchorOf(3, "x"), body: "Workspace author" });
+    assert.equal(readThreads(sidecarPath)[0].comments[0].author, "Workspace Alias");
+    await settings.update("authorName", undefined, vscode.ConfigurationTarget.Workspace);
+
     // Without the setting, the Git user name or the OS user name is stored (never empty).
     await settings.update("authorName", undefined, vscode.ConfigurationTarget.Global);
     fs.rmSync(sidecarPath);
@@ -204,6 +211,7 @@ export async function run(): Promise<void> {
     assert.ok(readThreads(sidecarPath)[0].comments[0].author.length > 0);
     assert.equal(getActivePreviewForTests()?.comments.result?.ok, true);
   } finally {
+    await settings.update("authorName", undefined, vscode.ConfigurationTarget.Workspace).then(undefined, () => undefined);
     await settings.update("authorName", originalAuthor, vscode.ConfigurationTarget.Global);
     disposeActivePreviewForTests();
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");

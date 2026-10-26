@@ -28,6 +28,8 @@ tested_in_files:
 - test/core/configuration/commentsConfiguration.test.ts
 - test/host-vscode/headBaselineUserName.test.ts
 - test/integration/commentWrite.test.ts
+- test/security/package-contract.test.ts
+- test/session/commentAuthorResource.test.ts
 ---
 
 ## A comment carries the configured, Git or system author name
@@ -76,7 +78,8 @@ When the host stores a comment or a reply, the extension SHALL use as author the
 | --- | --- |
 | The setting is set to Ada Reviewer | The author name is Ada Reviewer |
 | The setting is set to a number | The author name is the empty default |
-| The setting as declared by the extension | It is in the Comments category with type string and default empty |
+| The setting as declared by the extension | It is in the Comments category with type string, default empty and resource scope |
+| The setting is set in a workspace folder | The folder value is read for the documents of that folder, over the user value |
 
 ### Related requirements
 
@@ -89,4 +92,4 @@ When the host stores a comment or a reply, the extension SHALL use as author the
 - Method: test/integration/commentWrite.test.ts (author Ada Reviewer from the setting; the Git or system name is never empty), covering Setting wins and Order of the sources.
 - Method: test/host-vscode/headBaselineUserName.test.ts, unit tests `T43: userName reads user.name through the Git API and trims it` (The Git user name is read through the built-in Git extension), `T43: userName is undefined without Git, a repository, getConfig or a value` (No Git user name).
 - Method: test/core/configuration/commentsConfiguration.test.ts, unit tests `T43: reads the author name of the comments section` and `T43: a non-string author name falls back to the empty default` (The comments.authorName setting), and test/security/package-contract.test.ts (the setting is listed).
-- Criteria: The author follows the four-step order. The stored name has no control character and at most 100 characters. userName returns the trimmed value or undefined. The setting exists in the Comments category with type string and default empty.
+- Criteria: The author follows the four-step order. The stored name has no control character and at most 100 characters. userName returns the trimmed value or undefined. The setting exists in the Comments category with type string, default empty and resource scope; the host reads it for the resource of the document.

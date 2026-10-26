@@ -155,8 +155,10 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.match(showComments.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
   const authorName = properties[
     "markdownOkfSchemaStudio.comments.authorName"
-  ] as { type: string; default: string; order: number; markdownDescription: string; description?: string };
+  ] as { type: string; default: string; order: number; markdownDescription: string; description?: string; scope?: string };
   assert.equal(authorName.type, "string");
+  // @tests_req SwRS-MDOKFSTUDIO-REVIEW-065
+  assert.equal(authorName.scope, "resource", "a workspace or folder can override the author name");
   assert.equal(authorName.default, "");
   assert.equal(authorName.order, 50);
   assert.match(authorName.markdownDescription, /Git/u);

@@ -223,7 +223,7 @@ export class SourceEditController {
     }
 
     return resolveAuthor({
-      setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION)).authorName,
+      setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION, document.id)).authorName,
       gitName: () => host.vcs.userName(document.id),
       osUserName,
     }).then((author) => {
