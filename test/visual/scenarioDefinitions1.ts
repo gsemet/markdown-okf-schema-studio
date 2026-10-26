@@ -8,14 +8,15 @@ import {
   EDIT_BAR_TOOLTIP_ASSERTIONS,
   FRONTMATTER_LONG_KEYS_ASSERTIONS,
   FRONTMATTER_SKILL_ASSERTIONS,
+  KEYBOARD_SELECTION_ASSERTIONS,
   MAIN,
   MARK_CONTAINING_BLOCK_ASSERTIONS,
   NARROW,
   REVIEW_THREAD_CONTRAST_ASSERTIONS,
   STICKY_RUNNING_TEXT_ASSERTIONS,
-  UNCLOSED_DIRECTIVE_ASSERTIONS,
   type ScenarioDefinition,
   THREADS_MESSAGE,
+  UNCLOSED_DIRECTIVE_ASSERTIONS,
   WIDE,
   XLARGE,
 } from "./scenarioAssertions";
@@ -1254,5 +1255,27 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     ],
     contentAssertions: EDIT_BAR_TOOLTIP_ASSERTIONS,
     description: `Edit bar of a paragraph editor (${mode}): hovering the rule button slides in its tooltip like the floating toolbar, the rule button shows a dashed line, and a click near a rule hits it.`,
+  })),
+  ...([
+    ["cream", "light", "cream", 18],
+    ["dark", "dark", undefined, 19],
+  ] as const).map(([name, theme, mode, number]) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+    id: `block-editing/v${number}-keyboard-selection-${name}-900`,
+    fixture: "01-handbook-overview",
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    pageActions: [
+      { click: "[data-sphinx-preview-edit-toggle]" },
+      { press: "ArrowDown" },
+      { press: "ArrowDown" },
+      { press: "Enter" },
+      { press: "Escape" },
+    ],
+    contentAssertions: KEYBOARD_SELECTION_ASSERTIONS,
+    description: `Edit mode on, ${name} theme: Down, Down, Enter and Escape from the keyboard open the second block and close it again; `
+      + "the block is left outlined as selected and announced, with no editor open.",
   })),
 ];

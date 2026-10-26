@@ -567,3 +567,114 @@ test("T41 r2: the last selected block's arrows are labelled for the selection; a
   assert.equal(moveButton(harness, 100, "down").getAttribute("aria-label"), "Move the block above down");
   assert.equal(moveButton(harness, 100, "down").getAttribute("title"), null);
 });
+
+// CR 120: keyboard-only block editing. Up / Down select, Enter opens, Esc and Cmd/Ctrl+Enter close
+// the editor and leave its block selected.
+function plainKey(key: string, extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return { key, preventDefault: () => undefined, stopPropagation: () => undefined, ...extra };
+}
+
+function editorsOpen(harness: RuntimeHarness): boolean {
+  return harness.documentElement.getAttribute("data-sphinx-preview-block-editing") === "true";
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 120: plain Up and Down select a block, starting at the block nearest the viewport top", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  let prevented = 0;
+  harness.dispatchDocument("keydown", plainKey("ArrowDown", { preventDefault: () => { prevented += 1; } }));
+  assert.deepEqual(selectedLines(harness), [1], "the first press selects the top block");
+  assert.equal(prevented, 1, "the page does not scroll under the key");
+  harness.dispatchDocument("keydown", plainKey("ArrowDown"));
+  assert.deepEqual(selectedLines(harness), [50]);
+  harness.dispatchDocument("keydown", plainKey("ArrowDown"));
+  harness.dispatchDocument("keydown", plainKey("ArrowDown"));
+  assert.deepEqual(selectedLines(harness), [100], "the selection stops at the last block");
+  harness.dispatchDocument("keydown", plainKey("ArrowUp"));
+  assert.deepEqual(selectedLines(harness), [50]);
+  assert.equal(selectionAnnouncement(harness), "1 block selected");
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditOpen"), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 120: plain Up collapses a block run onto the neighbour of its free end", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  shiftClick(harness, harness.mappings[0]);
+  shiftClick(harness, harness.mappings[2]);
+  harness.dispatchDocument("keydown", plainKey("ArrowUp"));
+  assert.deepEqual(selectedLines(harness), [50]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 120: plain Up and Down do nothing outside edit mode, in a text box or with a modifier", () => {
+  const reading = createRuntimeHarness();
+  reading.dispatchDocument("keydown", plainKey("ArrowDown"));
+  assert.deepEqual(selectedLines(reading), []);
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  harness.dispatchDocument("keydown", plainKey("ArrowDown", { target: textarea }));
+  assert.deepEqual(selectedLines(harness), [], "an open editor keeps its arrow keys");
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(editorsOpen(harness), false);
+  harness.dispatchDocument("keydown", plainKey("ArrowDown", { metaKey: true }));
+  harness.dispatchDocument("keydown", plainKey("ArrowDown", { ctrlKey: true }));
+  harness.dispatchDocument("keydown", plainKey("ArrowDown", { altKey: true }));
+  assert.deepEqual(selectedLines(harness), [50], "only the Escape selection is left; no chord selected anything");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 120: Enter opens the editor of the selected block", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  harness.dispatchDocument("keydown", plainKey("ArrowDown"));
+  harness.dispatchDocument("keydown", plainKey("ArrowDown"));
+  const before = harness.messages.length;
+  harness.dispatchDocument("keydown", plainKey("Enter"));
+  const opened = harness.messages.slice(before).filter((message) => message.type === "previewEditOpen");
+  assert.equal(opened.length, 1);
+  assert.equal(opened[0].line, 50);
+  assert.equal(editorsOpen(harness), true);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 120: Enter with no selection opens nothing", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  harness.dispatchDocument("keydown", plainKey("Enter"));
+  assert.equal(harness.messages.slice(before).some((message) => message.type === "previewEditOpen"), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 120: Escape closes the editor and leaves its block selected for the arrow keys", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+  assert.equal(editorsOpen(harness), false);
+  assert.deepEqual(selectedLines(harness), [50]);
+  harness.dispatchDocument("keydown", plainKey("ArrowDown"));
+  assert.deepEqual(selectedLines(harness), [100]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 120: Cmd/Ctrl+Enter without changes closes the editor and selects its block", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.dispatch("keydown", { key: "Enter", ctrlKey: true, preventDefault: () => undefined });
+  assert.equal(editorsOpen(harness), false);
+  assert.deepEqual(selectedLines(harness), [50]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 120: Cmd/Ctrl+Enter with changes saves, and the block is selected once the patch is in", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.value = "Current block, changed\n";
+  textarea.dispatch("input");
+  const before = harness.messages.length;
+  textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
+  const saves = harness.messages.slice(before).filter((message) => message.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.deepEqual(selectedLines(harness), [], "nothing is selected before the save result");
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), [50]);
+});

@@ -378,10 +378,10 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       }
       if (event.key === "Escape" && !event.isComposing) {
         event.preventDefault?.();
-        blockEditor.cancelBlockEdit();
+        rt.selection.finishEditorWithSelection("cancel", () => blockEditor.cancelBlockEdit());
       } else if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault?.();
-        blockEditor.saveBlockEdit();
+        rt.selection.finishEditorWithSelection("save", () => blockEditor.saveBlockEdit());
       }
     });
     textControls.focusTextControlAtLastContent(textarea, edit.initialCaretPosition);
