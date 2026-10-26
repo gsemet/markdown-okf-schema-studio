@@ -282,7 +282,7 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
   // The figure form: the {figure} directive around the caret (the first one when the editor was
   // opened by the Edit figure button), or a Markdown image alone in its paragraph. Apply rewrites
   // that range as one native edit; the text box keeps its caret and the editor stays open.
-  const openFigurePanel: EditorChrome["openFigurePanel"] = (control, onFallbackInput, first = false) => {
+  const openFigurePanel: EditorChrome["openFigurePanel"] = (control, onFallbackInput, first = false, focus) => {
     const edit = state.activeBlockEdit;
     if (!edit || edit.finishing || edit.textarea !== control || !edit.palette) return;
     if (edit.figurePanel) {
@@ -374,7 +374,8 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
     edit.figurePanelShift = shift;
     if (shift > 0) edit.paletteShift = (edit.paletteShift ?? 0) + shift;
     rt.scroll.applyAnchor();
-    panel.focusFirst();
+    if (focus === "caption") panel.focusCaption();
+    else panel.focusFirst();
   };
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041

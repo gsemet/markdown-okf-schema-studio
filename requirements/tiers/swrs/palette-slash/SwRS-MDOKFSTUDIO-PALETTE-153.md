@@ -27,6 +27,7 @@ implemented_in_files:
 - src/page/modules/figurePanel.ts
 tested_in_files:
 - test/integration/realInput.markers.ts
+- test/integration/realWindowGaps.ts
 - test/page/modules/figureDirective.test.ts
 - test/page/paletteReq.requirements.test.ts
 - test/page/runtimePaletteActions.test.ts
@@ -60,6 +61,12 @@ The button is a child of the body placed with the CSSOM, so a content patch neve
 - GIVEN the caret in a figure
 - WHEN the form opens
 - THEN the dialog is named Edit figure, the fields Source with a Browse... button, Alt text, Caption, Legend, Width with the placeholder 60% or 300px, Align with None, Left, Center and Right, and Name are filled from the directive, and the Source field has the focus with its text selected; the fields carry the accessible names Source, Alt text, Caption, Legend, Width, Align and Name
+
+### Scenario (nominal): Form after inserting a figure
+
+- GIVEN the Figure button pressed outside a figure and an image picked
+- WHEN the directive is written
+- THEN the form opens on it without another click, and the Caption field has the focus with its text selected
 
 ### Scenario (nominal): Lone Markdown image
 

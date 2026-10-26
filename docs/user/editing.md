@@ -77,7 +77,8 @@ select at its start
   `{ref}` and `{doc}` references, `{cite}` citations from the workspace `.bib` files, dropdowns,
   tables with a caption, figures and `{kbd}` keys. In edit mode, hovering a figure shows Edit figure
   (or press Figure with the caret in a `{figure}`): a form edits the source (with Browse), alt text,
-  caption, legend, width, alignment and name, and leaves every other option as it was.
+  caption, legend, width, alignment and name, and leaves every other option as it was. Figure on a plain paragraph picks an image, writes the
+  `{figure}` and opens the same form at once on the caption; Escape keeps the figure as inserted.
   Editing a table cell adds the inline buttons (bold, italic, link, colour, emoji and so on) to the
   row and column bar.
   MyST `{list-table}` directives render with their title, `:header-rows:`, `:widths:` and

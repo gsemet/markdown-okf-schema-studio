@@ -455,7 +455,7 @@ export interface EditorChrome {
   frameContains(edit: BlockEdit, node: Node | null | undefined): boolean;
   keepTextInPlaceBelowPalette(edit: BlockEdit, textTopBefore: number | undefined): number;
   openLinkPanel(control: TextControl, onFallbackInput: () => void): void;
-  openFigurePanel(control: HTMLTextAreaElement, onFallbackInput: () => void, first?: boolean): void;
+  openFigurePanel(control: HTMLTextAreaElement, onFallbackInput: () => void, first?: boolean, focus?: "caption"): void;
   openFigureEditor(figure: HTMLElement): void;
   /** Keeps the palette sticky state right on resize and scroll. */
   bindPaletteSticky(): void;

@@ -44,7 +44,7 @@ import {
   writeSchema,
   type Evidence,
 } from "./realInput/harness";
-import { scenarioImagePaste, scenarioIncomingChanges, scenarioReviewThreads } from "./realWindowGaps";
+import { scenarioFigureInsert, scenarioImagePaste, scenarioIncomingChanges, scenarioReviewThreads } from "./realWindowGaps";
 import { scenarioTableStructure } from "./tableStructureReal";
 import { scenarioPerformanceProbe } from "./performanceProbe";
 import { traceDocumentChanges, windowFocusReport } from "./windowFocus";
@@ -4566,7 +4566,7 @@ export async function run(): Promise<void> {
     // CR 043 (P9 T2): real-window gap fill, also in the stress plan.
     await scenarioIncomingChanges(page, evidence);
     await scenarioReviewThreads(page, evidence);
-    await scenarioImagePaste(page, evidence);
+    for (const gap of [scenarioImagePaste, scenarioFigureInsert]) await gap(page, evidence);
     passed = true;
     complete = true;
   } finally {

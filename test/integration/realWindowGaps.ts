@@ -299,6 +299,57 @@ export async function scenarioImagePaste(page: Page, evidence: Evidence): Promis
   });
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+/**
+ * CR 117: Figure with a picked image inserts the directive and opens the figure form right away,
+ * on the caption field. The native image dialog is stubbed in the host (a test cannot drive it);
+ * the page, the host request and the form are the product's own. Escape keeps the inserted figure.
+ */
+export async function scenarioFigureInsert(page: Page, evidence: Evidence): Promise<void> {
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60"><rect width="120" height="60" fill="#789"/></svg>\n';
+  const windowApi = vscode.window as unknown as { showOpenDialog: typeof vscode.window.showOpenDialog };
+  const originalDialog = windowApi.showOpenDialog;
+  await withFixtureDocument("realinput-figure-insert", { "chapter.md": "# Chapter\n\nText.\n", "images/chip.svg": svg }, "chapter.md",
+    async (document, directory) => {
+      windowApi.showOpenDialog = () => Promise.resolve([vscode.Uri.file(path.join(directory, "images", "chip.svg"))]);
+      await openSidePreview(document);
+      await waitForPreviewReady(document);
+      try {
+        await setEditMode(page, true);
+        await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Text." }).first().click());
+        await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+        // The native select popup cannot be driven through CDP: selectOption is the allowed exception.
+        await withCurrentFrame(page, (frame) => frame.locator(".sphinx-preview-edit-palette select").selectOption("myst"));
+        await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='figure']").click());
+        await waitFor("the figure form after the image pick", () => withCurrentFrame(page, async (frame) =>
+          await frame.locator("[role='dialog'][aria-label='Edit figure']").count() === 1));
+        await withCurrentFrame(page, async (frame) => {
+          assert.equal(await frame.locator("[data-figure-field='source']").inputValue(), "images/chip.svg");
+          assert.equal(await frame.locator("[data-figure-field='alt']").inputValue(), "chip");
+          assert.equal(await frame.locator("[data-figure-field='caption']").evaluate((field) => field === window.document.activeElement),
+            true, "the caption field has the focus");
+        });
+        await typeText(page, "The chip.");
+        await withCurrentFrame(page, (frame) => frame.locator("[data-figure-action='apply']").click());
+        const editorText = (): Promise<string> => withCurrentFrame(page, (frame) =>
+          frame.locator("[data-sphinx-preview-block-editor] textarea").inputValue());
+        try {
+          await waitFor("the caption in the editor", async () => /:::\{figure\} images\/chip\.svg\n:alt: chip\n\n+The chip\.\n:::/u.test(await editorText()));
+        } catch (error) {
+          throw new Error(`${String(error)} Editor text: ${JSON.stringify(await editorText().catch(() => undefined))}`);
+        }
+        await press(page, `${MOD}+Enter`);
+        await waitFor("the saved figure", () => /:::\{figure\} images\/chip\.svg\n:alt: chip\n\n+The chip\.\n:::/u.test(bufferText(document)));
+        await waitFor("the block editor to close", () => withCurrentFrame(page, async (frame) =>
+          await frame.locator("[data-sphinx-preview-block-editor]").count() === 0));
+      } finally {
+        windowApi.showOpenDialog = originalDialog;
+        await leaveEditMode(page);
+      }
+    });
+}
+
 // @tests_req StRS-MDOKFSTUDIO-BLOCK-001
 // @tests_req StRS-MDOKFSTUDIO-TRUST-001
 /** trust-security/r01: the side preview of an untrusted workspace (runs in the Restricted Mode window). */

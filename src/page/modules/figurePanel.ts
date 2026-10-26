@@ -20,6 +20,8 @@ export interface FigurePanelDeps {
 export interface FigurePanel {
   element: HTMLElement;
   focusFirst(): void;
+  /** Focuses the caption field with its text selected (a figure that was just inserted). */
+  focusCaption(): void;
   /** Removes the panel without calling back; later blur events are ignored. */
   destroy(): void;
 }
@@ -248,6 +250,10 @@ export function createFigurePanel(document: Document, deps: FigurePanelDeps): Fi
       const target = deps.mode === "image" ? apply : source;
       target.focus({ preventScroll: true });
       if (target === source && typeof source.select === "function") source.select();
+    },
+    focusCaption() {
+      caption.focus({ preventScroll: true });
+      if (typeof caption.select === "function") caption.select();
     },
     destroy() {
       closed = true;
