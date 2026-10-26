@@ -861,3 +861,13 @@ test("T30: replacing with precomputed markup is identical to replacing from the 
   // Unchanged markup leaves the string untouched, which is how the host detects "nothing changed".
   assert.equal(replacePropertiesTableHtml(html, oldMarkup), html);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+test("a long key carries its full name as tooltip, a short key keeps the row tooltip", () => {
+  const longName = "a_deliberately_very_long_property_name";
+  const markup = renderPropertiesTable(resultWith({
+    fields: [fieldWith({ name: longName, value: "x" }), fieldWith({ name: "name", value: "y" })],
+  }), true);
+  assert.match(markup, new RegExp(`<span class="okf-name-text" title="${longName}">${longName}</span>`, "u"));
+  assert.match(markup, /<span class="okf-name-text">name<\/span>/u);
+});
