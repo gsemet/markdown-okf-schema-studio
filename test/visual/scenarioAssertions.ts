@@ -734,6 +734,14 @@ export const DOLLAR_PRICES_ASSERTIONS: ContentAssertion[] = [
   { message: "bold prices contain no literal emphasis markers", selector: `${MAIN} p:last-of-type`, count: 1, expr: "!document.querySelector('#sphinx-myst-preview-content p:last-of-type').textContent.includes('**')" },
 ];
 
+export const UNCLOSED_DIRECTIVE_ASSERTIONS: ContentAssertion[] = [
+  { message: "the heading before the broken blocks renders", selector: `${MAIN} h1`, count: 1, text: "Unclosed directives" },
+  { message: "the open label, its target and the closing text stay paragraphs", selector: `${MAIN} p`, count: 4, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p')].map((p) => p.textContent.trim()).filter((t) => t === '(label-name' || t === ')=' || t.startsWith('The text after')).length === 3" },
+  { message: "the table directive without a body is a code block of its own lines", selector: `${MAIN} pre`, count: 2, expr: "document.querySelectorAll('#sphinx-myst-preview-content pre')[0].textContent.trim() === ':::{table} Caption\\n\\n:::'" },
+  { message: "the unclosed list-table at the end is a code block of its line", selector: `${MAIN} pre`, count: 2, expr: "document.querySelectorAll('#sphinx-myst-preview-content pre')[1].textContent.trim() === '```{list-table}'" },
+  { message: "the code blocks are visible and inside the pane", selector: `${MAIN} pre`, count: 2, visible: true, insidePane: true },
+];
+
 const ROW_HANDLES = "[data-okf-row-handle-layer] .okf-table-row-handle";
 
 /** Every handle is left of its table, inside the pane and centred on its row (2 px). */

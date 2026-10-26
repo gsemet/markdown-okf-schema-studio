@@ -24,6 +24,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-021
 - SwRS-MDOKFSTUDIO-MYST-022
 - SwRS-MDOKFSTUDIO-MYST-023
+- SwRS-MDOKFSTUDIO-MYST-096
 ---
 
 ## Build-dependent constructs appear as labelled placeholders

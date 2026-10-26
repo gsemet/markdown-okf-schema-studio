@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-26 (unclosed directives render as raw text)
+
+- SwRS-MDOKFSTUDIO-MYST-096 (new): a directive or fence the parser cannot build (an unclosed or
+  empty `{list-table}` or `:::{table}`) shows its own lines as a code block and the rest of the
+  document renders, instead of the render failing. Unit tests and the cream and dark visual
+  scenarios cover it.
+
 ## 2026-10-26 (bold dollar prices preserve emphasis)
 
 - SwRS-MDOKFSTUDIO-MYST-024: permissive MyST dollarmath no longer consumes the `**` markers

@@ -8,6 +8,9 @@
   colour on the Cream or White theme, dates, quotes and placeholders are no longer faded, and every
   comment text colour reaches a 4.5:1 contrast in the Dark, White and Cream modes. The setting
   `markdownOkfSchemaStudio.comments.authorName` can now be overridden per workspace or folder.
+- A directive the parser cannot build, such as an unclosed ```` ```{list-table} ```` or a
+  `:::{table}` with no body, no longer fails the preview: its own lines show as a code block and
+  the rest of the document renders.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when

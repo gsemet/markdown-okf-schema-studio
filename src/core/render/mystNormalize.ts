@@ -404,9 +404,10 @@ const NODE_RULES: readonly NodeRule[] = [
     name: "directive placeholder",
     kinds: ["mystDirective", "mystDirectiveError"],
     run: (node, { line, diagnostics }) => {
-      // The parser reports a directive without its required argument as an error node, which the
-      // writer cannot emit. Only `{include}` is shown as a placeholder here: it is what a writer
-      // types while the preview re-renders.
+      // The parser reports a directive without its required argument or body as an error node,
+      // which the writer cannot emit; `neutralizeDirectiveErrors` has turned those into raw code
+      // blocks. Only `{include}` is shown as a placeholder here: it is what a writer types while
+      // the preview re-renders.
       if (node.type === "mystDirectiveError" && node.name !== "include") {
         return false;
       }

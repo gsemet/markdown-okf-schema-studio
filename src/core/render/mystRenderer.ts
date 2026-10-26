@@ -22,6 +22,7 @@ import {
 } from "./mystBlockTransforms";
 import { normalizeContextTagContainers, repairGroupedContextTagHtml } from "./mystContextTags";
 import { loadEngine, MYST_PARSE_OPTIONS, type MystEngine } from "./mystEngine";
+import { neutralizeDirectiveErrors } from "./mystDirectiveErrors";
 import { expandGithubAlerts } from "./mystGithubAlerts";
 import { expandGrids, expandToctrees } from "./mystGridToctree";
 import {
@@ -387,6 +388,10 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   { name: "context tag containers", run: (state) => normalizeContextTagContainers(state.ast) },
   { name: "bare block images", run: (state) => wrapBareBlockImages(state.ast) },
   { name: "anchors", run: (state) => { state.anchorLabels = normalizeAnchors(state.ast); } },
+  {
+    name: "directive errors",
+    run: (state) => neutralizeDirectiveErrors(state.ast, state.source.split(/\r\n|\r|\n/u)),
+  },
   { name: "normalize nodes", run: (state) => walk(state.ast, state.diagnostics) },
   { name: "table alignments", run: (state) => collectTableAlignments(state.ast, state.tableAlignments) },
 ];
