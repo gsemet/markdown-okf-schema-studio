@@ -89,11 +89,11 @@ test("table cell editing exposes row and column operations and saves the edited 
   cell.top = 100;
   assert.equal(
     tableMenu.childElements.filter((element) => element.tagName === "BUTTON").length,
-    5,
+    7,
   );
   const operationButtons = harness.createdElements.filter((element) =>
     element.getAttribute("data-sphinx-table-operation") !== null);
-  assert.equal(operationButtons.length, 5);
+  assert.equal(operationButtons.length, 7);
   assert.ok(operationButtons.every((button) =>
     button.innerHTML.includes("<svg") && button.getAttribute("title") !== null));
   assert.equal(harness.createdElements.filter((element) =>
@@ -103,36 +103,128 @@ test("table cell editing exposes row and column operations and saves the edited 
   input.dispatch("input");
   harness.createdElements.filter((element) =>
     element.getAttribute("aria-label") === "Insert row after selected row").at(-1)?.dispatch("click");
-  input = harness.createdElements.filter((element) =>
-    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
-  assert.ok(input);
-  input.value = "new row";
-  input.dispatch("input");
-  harness.createdElements.filter((element) =>
-    element.getAttribute("aria-label") === "Insert column after selected column").at(-1)?.dispatch("click");
-  input = harness.createdElements.filter((element) =>
-    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
-  assert.ok(input);
-  input.value = "new column";
-  input.dispatch("input");
-  input.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
-
+  // The press saves the table and has the page render it again: the editor reopens in the new row
+  // (a row the open editor's DOM does not have), with the typed text kept in the original cell.
   const save = harness.messages.at(-1);
   assert.equal(save?.type, "previewEditSave");
+  assert.equal(save?.final, true);
   assert.equal(save?.originalText, "| A | B |\n| --- | :---: |\n| x | y |\n| p | q |\n");
   assert.equal(save?.editedText, [
-    "| A | B |  |",
-    "| --- | :---: | --- |",
-    "| x | new |  |",
-    "|   | new row | new column |",
-    "| p | q |  |",
+    "| A | B |",
+    "| --- | :---: |",
+    "| x | new |",
+    "|   |   |",
+    "| p | q |",
     "",
   ].join("\n"));
-  input.dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
-  // Escape commits like blur and never cancels; the re-render closes the finished edit.
-  assert.equal(harness.messages.at(-1)?.type, "previewEditSave");
-  assert.equal(harness.messages.at(-1)?.final, true);
-  assert.equal(harness.messages.some((message) => message.type === "previewEditCancel"), false);
+  const pending = harness.getWebviewState().pendingBlockNavigation as Record<string, unknown> | undefined;
+  assert.equal(pending?.tableRowIndex, 2);
+  assert.equal(pending?.tableColumnIndex, 1);
+  assert.equal(pending?.sourceLine, 20);
+});
+
+/** A press of `label` on the cell (row 1, column `column`) of the two-column table of the tab helper. */
+function pressTableButton(label: string, options: { row?: number; column?: number; typed?: string } = {}) {
+  const harness = createRuntimeHarness();
+  const { cells, click, input } = openTableCellEditorForTab(harness);
+  click(cells[options.row ?? 1][options.column ?? 0]);
+  if (options.typed !== undefined) {
+    input().value = options.typed;
+    input().dispatch("input");
+  }
+  const button = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === label).at(-1);
+  assert.ok(button, label);
+  const disabled = button.disabled;
+  const before = harness.messages.length;
+  button.dispatch("click");
+  const save = harness.messages.slice(before).find((message) => message.type === "previewEditSave");
+  const pending = harness.getWebviewState().pendingBlockNavigation as Record<string, unknown> | undefined;
+  return { harness, disabled, save, pending };
+}
+
+const COMPACT = "| A | B |\n| --- | --- |\n| x | y |\n| p | q |\n";
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-003
+test("Row above inserts an empty row above the selected one and keeps its text", () => {
+  const { save, pending } = pressTableButton("Insert row before selected row", { row: 2, column: 1, typed: "qq" });
+  assert.equal(save?.originalText, COMPACT);
+  assert.match(String(save?.editedText), /^\| A \| B \|\n\| --- \| --- \|\n\| x \| y \|\n\|\s*\|\s*\|\n\| p \| qq \|\n$/u);
+  assert.equal(pending?.tableRowIndex, 2);
+  assert.equal(pending?.tableColumnIndex, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-003
+test("Row above is off in the header row", () => {
+  const { disabled, save } = pressTableButton("Insert row before selected row", { row: 0 });
+  assert.equal(disabled, true);
+  assert.equal(save, undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
+test("Row below on the header row inserts the first body row", () => {
+  const { save, pending } = pressTableButton("Insert row after selected row", { row: 0, column: 1 });
+  assert.match(String(save?.editedText), /^\| A \| B \|\n\| --- \| --- \|\n\|\s*\|\s*\|\n\| x \| y \|\n\| p \| q \|\n$/u);
+  assert.equal(pending?.tableRowIndex, 1);
+  assert.equal(pending?.tableColumnIndex, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
+test("Row - removes the selected body row and keeps the editor on the row that took its place", () => {
+  const { save, pending } = pressTableButton("Delete selected row", { row: 1, column: 1 });
+  assert.equal(save?.editedText, "| A | B |\n| --- | --- |\n| p | q |\n");
+  assert.equal(pending?.tableRowIndex, 1);
+  assert.equal(pending?.tableColumnIndex, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-004
+test("Col left inserts an empty column to the left and leaves the title of the selected column", () => {
+  const { save, pending } = pressTableButton("Insert column before selected column", { row: 0, column: 1, typed: "B" });
+  assert.equal(save?.originalText, COMPACT);
+  const lines = String(save?.editedText).split("\n");
+  assert.equal(lines[0].replace(/\s+/gu, ""), "|A||B|", "the header keeps both titles and gains an empty cell");
+  assert.equal(lines[1].replace(/\s+/gu, ""), "|---|---|---|");
+  assert.equal(lines[2].replace(/\s+/gu, ""), "|x||y|");
+  assert.equal(lines[3].replace(/\s+/gu, ""), "|p||q|");
+  assert.equal(pending?.tableRowIndex, 0);
+  assert.equal(pending?.tableColumnIndex, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
+test("Col right inserts an empty column to the right and leaves the title of the selected column", () => {
+  const { save, pending } = pressTableButton("Insert column after selected column", { row: 0, column: 0 });
+  const lines = String(save?.editedText).split("\n");
+  assert.equal(lines[0].replace(/\s+/gu, ""), "|A||B|");
+  assert.equal(lines[2].replace(/\s+/gu, ""), "|x||y|");
+  assert.equal(pending?.tableRowIndex, 0);
+  assert.equal(pending?.tableColumnIndex, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
+test("Col - removes the selected column from every row", () => {
+  const { save, pending } = pressTableButton("Delete selected column", { row: 1, column: 0 });
+  assert.equal(save?.editedText, "| B |\n| --- |\n| y |\n| q |\n");
+  assert.equal(pending?.tableRowIndex, 1);
+  assert.equal(pending?.tableColumnIndex, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-005
+test("a plain {list-table} opens the cell editor and its buttons write a list-table", () => {
+  const source = "```{list-table}\n:header-rows: 1\n\n* - A\n  - B\n* - x\n  - y\n```\n";
+  const harness = createRuntimeHarness();
+  const { cells, click, input } = openTableCellEditorForTab(harness, {}, source);
+  click(cells[1][0]);
+  assert.equal(input().value, "x");
+  const press = (label: string): Record<string, unknown> | undefined => {
+    const before = harness.messages.length;
+    harness.createdElements.filter((element) => element.getAttribute("aria-label") === label).at(-1)?.dispatch("click");
+    return harness.messages.slice(before).find((message) => message.type === "previewEditSave");
+  };
+  const save = press("Insert column before selected column");
+  assert.equal(save?.editedText, "```{list-table}\n:header-rows: 1\n\n* -\n  - A\n  - B\n* -\n  - x\n  - y\n```\n");
+  const converted = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Convert to list-table").at(-1);
+  assert.equal(converted?.disabled, true);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-055
@@ -161,10 +253,7 @@ test("Col + on a padded, indented table keeps the style of every line", () => {
   });
   harness.createdElements.filter((element) =>
     element.getAttribute("aria-label") === "Insert column after selected column").at(-1)?.dispatch("click");
-  const input = harness.createdElements.filter((element) =>
-    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
-  assert.ok(input);
-  input.dispatch("keydown", { key: "Enter", preventDefault: () => undefined });
+  // The press itself saves the table.
   assert.equal(harness.messages.at(-1)?.editedText,
     "  | Name  |       | Qty |\n  | ----- | ----- | --- |\n  | brake |       | 1   |\n");
 });
@@ -282,7 +371,7 @@ test("table toolbar sits in the flow above the table with text labels and a posi
   const labels = menu.childElements.filter((element) => element.tagName === "BUTTON")
     .map((button) => button.childElements.find((child) =>
       child.className === "sphinx-preview-table-menu-label")?.textContent);
-  assert.deepEqual(labels, ["Row +", "Row \u2212", "Col +", "Col \u2212", "List table"]);
+  assert.deepEqual(labels, ["Row above", "Row below", "Row \u2212", "Col left", "Col right", "Col \u2212", "List table"]);
   assert.equal(menu.childElements.find((element) =>
     element.getAttribute("data-sphinx-preview-edit-status") !== null)?.textContent,
   "Row 1 of 2 \u00b7 column 2 of 2");

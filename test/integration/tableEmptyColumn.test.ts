@@ -75,7 +75,7 @@ const SOURCE = [
 ].join("\n");
 
 /**
- * CR 113: in a real window, with the cream preview theme on a dark VS Code theme, the toolbar "Col +"
+ * CR 113: in a real window, with the cream preview theme on a dark VS Code theme, the toolbar "Col right"
  * adds a column with an empty header; in edit mode that column and the selected cell stay usable
  * (empty column at least 8em, the edited cell at least 300 px, the editor not clipped).
  */
@@ -123,7 +123,7 @@ export async function run(): Promise<void> {
     }, 30_000);
     frame = await liveFrame(page);
 
-    // Open the "Model" header cell, then add a column after it with the toolbar "Col +".
+    // Open the "Model" header cell, then add a column after it with the toolbar "Col right".
     await frame.locator("table thead th:nth-child(3)").click();
     await waitFor("the table toolbar", async () =>
       await (await liveFrame(page)).locator("[data-sphinx-table-menu]").count() === 1);

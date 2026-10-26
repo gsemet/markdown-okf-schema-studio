@@ -465,7 +465,8 @@ test("T35: the cell bar keeps the table operations and adds the inline group aft
   assert.deepEqual(
     bar.childElements.filter((child) => child.tagName === "BUTTON")
       .map((button) => button.getAttribute("data-sphinx-table-operation")),
-    ["Insert row after selected row", "Delete selected row", "Insert column after selected column",
+    ["Insert row before selected row", "Insert row after selected row", "Delete selected row",
+      "Insert column before selected column", "Insert column after selected column",
       "Delete selected column", "Convert to list-table"],
   );
   const group = cellGroup(harness);

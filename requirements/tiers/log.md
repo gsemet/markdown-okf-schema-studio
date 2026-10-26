@@ -20,6 +20,15 @@
   test (cream preview on a dark VS Code theme) adds a column with the toolbar, saves it, opens its
   empty header and measures the empty column (8em) and the edited cell (300 px, editor inside).
 
+## 2026-10-26 (table bar inserts before and after, and works on a list-table)
+
+- SwRS-MDOKFSTUDIO-TABLE-003, -004 and -005 (new): Row above, Col left, and the row and column
+  buttons on a plain `{list-table}`. SwRS-MDOKFSTUDIO-TABLE-055: a row or column button now saves
+  the table and has the page render it again before the editor reopens in the new position; it no
+  longer leaves the editor over a cell that shows another cell's text (Col + wiped the title of the
+  selected column). SwRS-MDOKFSTUDIO-TABLE-048 lists seven buttons; SwRS-MDOKFSTUDIO-TABLE-001
+  keeps the raw editor for a list-table that is not plain.
+
 ## 2026-10-26 (bold dollar prices preserve emphasis)
 
 - SwRS-MDOKFSTUDIO-MYST-024: permissive MyST dollarmath no longer consumes the `**` markers
