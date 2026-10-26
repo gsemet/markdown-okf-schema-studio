@@ -46,6 +46,7 @@ import {
   PLANTUML_UNSUPPORTED_ASSERTIONS,
   plantUmlBuiltinAssertions,
   plantUmlFileAssertions,
+  PLANTUML_THEME_SPRITE_ASSERTIONS,
   plantUmlIncludeAssertions,
   PROPERTIES_HIDDEN_ASSERTIONS,
   READ_ONLY_ASSERTIONS,
@@ -903,6 +904,19 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     description: `A diagram with a local !include whose file includes another one, in the ${theme} preview: the page asks `
       + "the host for both files (the nested one next to the including file) and the built-in engine draws the result.",
   })),
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-DIAG-024
+    id: "diagrams/v18-plantuml-theme-sprite-light-900",
+    fixture: "63-plantuml-theme-sprite",
+    theme: "light",
+    plantumlExpectation: "builtin" as const,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: PLANTUML_THEME_SPRITE_ASSERTIONS,
+    description: "A class diagram that selects a bundled !theme and uses an OpenIconic icon, in the light preview: the built-in "
+      + "engine draws it with the Smetana layout, the theme colours and the icon, without a request.",
+  },
   {
     // @tests_req StRS-MDOKFSTUDIO-FMSCHEMA-002
     // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-001

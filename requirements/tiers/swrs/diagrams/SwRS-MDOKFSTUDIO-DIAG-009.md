@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/realInput.markers.ts
 - test/page/modules/mermaidCache.test.ts
+- test/page/modules/mermaidPreviewEntry.test.ts
 - test/page/rendererBridge.test.ts
 ---
 

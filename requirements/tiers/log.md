@@ -1,5 +1,17 @@
 # Update Log
 
+## 2026-10-26 (test and marker quality)
+
+- No requirement text changes. SwRS-MDOKFSTUDIO-DIAG-009 gains page tests of the Mermaid entry point
+  (element ids never repeat, passes run one at a time, a late drawing never replaces the current
+  one, a failed drawing shows one error); SwRS-MDOKFSTUDIO-DIAG-024 gains a visual scenario for a
+  bundled theme and an OpenIconic sprite. The superseded SwRS DIAG-012, 013, 014, 031 and 116 keep
+  no marker (their behaviour is these two requirements).
+- Markers narrowed from the whole style module to the CSS section that implements them:
+  SwRS-MDOKFSTUDIO-LAYOUT-007 and SwRS-MDOKFSTUDIO-THEME-025.
+- Companion marker files (`*.markers.ts`) name their host file and are checked by
+  `just check-markers`.
+
 ## 2026-10-26 (toolbar and sticky band fixes)
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-018: the sticky band follows the headings of the running text only; a

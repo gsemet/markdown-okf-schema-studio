@@ -254,6 +254,7 @@
     "check-types": "tsc --noEmit -p .",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "check:limits": "node scripts/check-file-sizes.mjs",
+    "check:markers": "node scripts/check-marker-companions.mjs",
     "check:settings": "node scripts/generate-settings.mjs --check",
     "generate:settings": "node scripts/generate-settings.mjs",
     "watch": "tsc -watch -p .",
