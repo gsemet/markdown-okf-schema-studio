@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import {
   classifyPreviewReference,
+  decodePath,
   markdownFragmentLine,
   markdownFragmentRange,
   markdownMarkerLine,
@@ -44,6 +45,18 @@ test("classifies relative links without touching the filesystem", () => {
   for (const request of ["wiki:javascript:alert(1)", "wiki:%2Fetc/passwd", "%00.md", "%5Csecret", "//example.test"]) {
     assert.equal(classifyPreviewReference(request).kind, "blocked", request);
   }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+test("a link path is decoded once: a literal percent is reachable, an escaped percent is not decoded again", () => {
+  assert.equal(decodePath("100%25.md"), "100%.md");
+  assert.equal(decodePath("a%2541.md"), "a%41.md");
+  assert.equal(decodePath("docs%2520file.md"), "docs%20file.md");
+  assert.equal(decodePath("a%zz.md"), undefined);
+  assert.equal(classifyPreviewReference("100%25.md").kind, "relative");
+  assert.equal(classifyPreviewReference("a%2541.md").kind, "relative");
+  assert.equal(classifyPreviewReference("%255Csecret").kind, "relative", "a literal %5C is only text");
+  assert.equal(classifyPreviewReference("%5Csecret").kind, "blocked");
 });
 
 test("a MyST (label)= line is the target of its fragment, but not inside a fence", () => {

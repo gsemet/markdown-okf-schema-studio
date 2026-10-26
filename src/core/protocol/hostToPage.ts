@@ -162,6 +162,8 @@ export interface HostRequestResultMessage extends RenderMessage<`${HostRequestTy
 export interface SourceScrollMessage extends RenderMessage<"sourceScroll"> {
   line?: number;
   selectionLine?: number;
+  /** Scroll to `line` even when the preview does not follow the editor (a Back or Next move). */
+  reveal?: boolean;
 }
 
 /** The targets of the links the page discovered (answer to `previewLinkDiscover`). */

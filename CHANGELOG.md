@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Links and history in the preview: a link to a missing or blocked file keeps its text and colour and
+  is followed by a small warning icon whose tooltip names the problem (for example "File not found:
+  docs/guid.md"); link tooltips are refreshed when the preview regains focus; Back and Next within the
+  same document scroll even when the preview does not follow the editor, and a Back or Next whose
+  document cannot be opened no longer moves the history position; a file name with a literal `%` is
+  reachable (`100%25.md`) and an escaped percent is no longer decoded twice.
 - Open Preview to Side now works from a Studio Open With tab: it previews that tab's file instead of
   asking for a Markdown file.
 - A failed load of the render engine at start-up is no longer remembered: the first render tries the

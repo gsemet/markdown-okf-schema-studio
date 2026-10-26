@@ -67,6 +67,12 @@ export class NavigationHistory {
     return this.index >= 0 && this.index < this.entries.length - 1;
   }
 
+  /** Puts the list and the position back as a {@link snapshot} captured earlier (a failed move). */
+  restore(snapshot: { entries: NavigationEntry[]; index: number }): void {
+    this.entries = snapshot.entries.map((entry) => ({ ...entry }));
+    this.index = snapshot.index;
+  }
+
   snapshot(): { entries: NavigationEntry[]; index: number } {
     return { entries: this.entries.map((entry) => ({ ...entry })), index: this.index };
   }

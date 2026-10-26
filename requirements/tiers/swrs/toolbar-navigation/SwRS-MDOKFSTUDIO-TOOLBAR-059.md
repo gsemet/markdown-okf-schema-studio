@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/state/navigationHistory.test.ts
 - test/integration/previewHistory.test.ts
+- test/page/runtimeScroll.test.ts
 - test/session/toolbarReq.requirements.test.ts
 ---
 
@@ -77,22 +78,20 @@ When the reader follows a link to another Markdown document in a preview that fo
 ### Scenario (boundary): Anchor mode off
 - GIVEN a panel whose Anchor mode is off and a history of two places of the same document
 - WHEN Back is pressed
-- THEN the history moves and the buttons update, but the preview does not scroll
+- THEN the history moves, the buttons update and the preview scrolls to the stored line, because the sourceScroll of a history move carries reveal true, which the page honours when it does not follow the editor
 
 ### Scenario (nominal): One history per panel
 - GIVEN two preview panels
 - WHEN links are followed in the first
 - THEN the second panel's Back and Next stay disabled; a document switch that recreates the session of a panel keeps the same history object, which lives as long as the panel
 
-### Known issues
-- Known issue: when the Anchor mode is off, Back or Next within the same document moves the history and stores the line, but the page ignores the sourceScroll message (the scroll is skipped when the preview does not follow the editor), so the preview does not scroll.
-
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TOOLBAR-054: Back and Next, their state and their warnings.
 - SwRS-MDOKFSTUDIO-TOOLBAR-065: the list that holds the places, its size and its duplicates.
 
 ### Verification notes
-- Method: test/integration/previewHistory.test.ts (Link to another Markdown document: link to second.md#target, entries and posted state; In-page anchor jump: #target and #note-label; Back or Next to another document: Back to line 3, Next to the second document with its line restored; Back or Next within the same document: lastSourceScrollLine 1 and the history entry of the same document). The clamp of Line past the end, the no-source-line anchor, the stale anchor replacement (by code only) and Anchor mode off are not tested there.
+- Method: test/integration/previewHistory.test.ts (Link to another Markdown document: link to second.md#target, entries and posted state; In-page anchor jump: #target and #note-label; Back or Next to another document: Back to line 3, Next to the second document with its line restored; Back or Next within the same document: lastSourceScrollLine 1 and the history entry of the same document). The clamp of Line past the end, the no-source-line anchor and the stale anchor replacement (by code only) are not tested there.
+- Method: test/page/runtimeScroll.test.ts (Anchor mode off: a sourceScroll with reveal true scrolls the page, one without it is ignored).
 - Method: test/core/state/navigationHistory.test.ts (Unknown line: depart without a known line).
 - Method: test/session/toolbarReq.requirements.test.ts (Moves that are not recorded: a locked preview records anchor jumps only, a link to a file that is not Markdown opens without a history entry; One history per panel: each preview panel has its own history that outlives a session).
 - Criteria: entries = [place left, target] and the current index is the target; preview.scroll.lastSourceScrollLine and the anchor equal the stored line; recordNavigation is not called for a file link when followsActiveEditor is false and requires path.extname(...).toLowerCase() === .md; historyOf returns one NavigationHistory per panel.

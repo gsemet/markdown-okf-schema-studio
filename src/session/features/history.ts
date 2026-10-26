@@ -90,14 +90,15 @@ export class HistoryController {
       this.postHistoryState(preview);
       return;
     }
+    const before = history.snapshot();
     history.depart(this.currentPlace(preview));
     const target = direction === "back" ? history.back() : history.forward();
     if (!target) {
       this.postHistoryState(preview);
       return;
     }
-    this.postHistoryState(preview);
     if (target.uri === preview.documentUri) {
+      this.postHistoryState(preview);
       preview.scroll.lastSourceScrollLine = target.line;
       // The stored line is now the reader's place: a stale anchor must not overwrite it on the next jump.
       preview.scroll.anchor = { line: target.line, owner: "editor", documentId: preview.documentUri };
@@ -107,14 +108,20 @@ export class HistoryController {
         revision: revisionOfStage(stage),
         requestId: stage.requestId,
         line: target.line,
+        // A history move scrolls even when the preview does not follow the editor.
+        reveal: true,
       });
       return;
     }
     try {
       const document = await host.documents.open(target.uri);
+      this.postHistoryState(preview);
       const lineIndex = Math.min(Math.max(0, target.line - 1), Math.max(0, document.lineCount - 1));
       await host.navigation.showDocument(target.uri, lineSelection(document, lineIndex, lineIndex));
     } catch (error) {
+      // The document did not change, so the position does not move either.
+      history.restore(before);
+      this.postHistoryState(preview);
       void host.ui.showWarning(
         `Markdown OKF-Schema Studio could not go ${direction}: ${error instanceof Error ? error.message : String(error)}`,
       );

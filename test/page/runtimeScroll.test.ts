@@ -814,6 +814,25 @@ test("marks editor selection without moving the preview when following is disabl
 
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
+test("a history move scrolls the preview even when following the editor is disabled", () => {
+  const send = (extra: Record<string, unknown>) => {
+    const harness = createRuntimeHarness({ scrollPreviewWithEditor: false });
+    harness.dispatchMessage({
+      type: "sourceScroll",
+      documentId: "file:///active.md",
+      revision: 7,
+      requestId: 11,
+      line: 50,
+      ...extra,
+    });
+    harness.flushFrames();
+    return harness.windowState.scrollY;
+  };
+  assert.equal(send({}), 0, "an ordinary editor scroll is ignored");
+  assert.ok(send({ reveal: true }) > 0, "a Back or Next move scrolls");
+});
+
 test("source scrolling rejects stale identities and invalid line numbers", async (context) => {
   for (const [name, override] of Object.entries({
     "other document": { documentId: "file:///other.md" },
@@ -900,6 +919,20 @@ test("scrolls to host-approved anchors and ignores invalid or stale requests", (
     value: "#section",
   });
   assert.equal(harness.windowState.scrollY, 935);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-117
+test("an escape left after four decoding rounds is refused, whatever its digits", () => {
+  const harness = createRuntimeHarness();
+  // Five rounds of encoding: after four rounds the text is still the escape %41 (an element has that id).
+  harness.dispatchMessage({
+    type: "navigateAnchor",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    value: "#%2525252541",
+  });
+  assert.equal(harness.windowState.scrollY, 0);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032

@@ -379,6 +379,19 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   font-size: 0.85em;
 }
 
+/* A link to a missing or blocked target keeps its look; this small icon follows it. */
+#sphinx-myst-preview-content .sphinx-preview-link-warning {
+  margin-inline-start: 0.25em;
+  color: var(--studio-editorWarning-foreground, var(--studio-charts-yellow, #b89500));
+  font-size: 0.85em;
+  cursor: help;
+  user-select: none;
+}
+
+#sphinx-myst-preview-content .sphinx-preview-link-warning::before {
+  content: "\\26A0";
+}
+
 /* Task list items show the checkbox in the bullet gutter, as GitHub does. */
 #sphinx-myst-preview-content li.task-list-item {
   list-style: none;

@@ -70,9 +70,7 @@ When the page starts, the page receives a history state for its render or the re
 | --- | --- |
 | Back to a place whose file was deleted | The warning "Markdown OKF-Schema Studio could not go back: {reason}" is shown with the reason of the error |
 | Next to a place whose file cannot be opened | The warning "Markdown OKF-Schema Studio could not go forward: {reason}" is shown |
-
-### Known issues
-- Known issue: the history position has already moved when the open fails, so Back and Next enable on the new position although the document did not change.
+| Either move that fails | The history position and the list stay as they were, and the state posted afterwards enables Back and Next as before the press |
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TOOLBAR-059: the places that Back and Next move between are recorded there.

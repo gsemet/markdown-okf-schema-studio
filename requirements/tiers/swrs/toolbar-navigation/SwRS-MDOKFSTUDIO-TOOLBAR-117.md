@@ -61,11 +61,8 @@ When the reader follows an anchor, the extension SHALL post navigateAnchor with 
 | --- | --- |
 | an unknown id | the page does not scroll |
 | a malformed escape | the page does not scroll |
+| an escape still left after four decoding rounds, such as %41 | the page does not scroll, whatever its digits |
 | a stale request id (another render) | the page does not scroll |
-
-### Known issues
-
-- Known issue: the check for an escape left after four decoding rounds uses the case-insensitive pattern /%[da-f]{2}/ (the host-side check uses [0-9a-f]); a leftover such as %41 is not recognised, and the partly decoded text is looked up as an id. The result matches the undecodable case (no element, no scroll) unless an element id literally contains that text.
 
 ### Related requirements
 
@@ -75,6 +72,6 @@ When the reader follows an anchor, the extension SHALL post navigateAnchor with 
 ### Verification notes
 
 - Method: test/integration/previewHistory.test.ts (heading anchor #target and #note-label recorded, navigateAnchor carries the lines).
-- Method: test/page/runtimeScroll.test.ts (page scrolls to host-approved anchors; ignores invalid, unknown and stale requests; id fallback; source line wins).
+- Method: test/page/runtimeScroll.test.ts (page scrolls to host-approved anchors; ignores invalid, unknown and stale requests, including an escape left after four rounds such as %41; id fallback; source line wins).
 - Method: visual scenario in test/visual/scenarioDefinitions2.ts, toolbar-navigation/v30-back-enabled-after-anchor-light-900 (the target heading is near the top of the pane).
 - Criteria: the lines are those of markdownFragmentRange; the scroll position is the target top minus the reading offset, within the scroll limits; no scroll without a target element.

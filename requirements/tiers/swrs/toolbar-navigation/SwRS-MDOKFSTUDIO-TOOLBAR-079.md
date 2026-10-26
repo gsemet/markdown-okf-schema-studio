@@ -86,9 +86,15 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 | a request whose resolution raises an error | the warning "Preview link discovery failed: {error}" is shown and nothing is answered for the batch |
 | a preview closed meanwhile, when the error is raised | no warning is shown |
 
+### Scenario (nominal): Links are asked again when the reader returns
+
+| Given | When | Then |
+| --- | --- | --- |
+| a link already looked up and a file created or deleted since | the preview window regains focus or the preview becomes visible again | the requests of the links in view are sent again and the tooltip and the warning icon follow the answer |
+
 ### Known issues
 
-- Known issue: a request is asked once per page (the page never forgets it), so a target file created or deleted later keeps its old tooltip until the page is replaced.
+- Known issue: while the preview stays focused and visible, a file created or deleted meanwhile is not noticed; the links are asked again only when the focus or the visibility comes back, or when the page is replaced.
 
 ### Related requirements
 
@@ -100,4 +106,4 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 - Method: test/page/modules/linkNavigation.test.ts (link discovery waits for the viewport and deduplicates bounded batches; anchor and external requests are not asked; same request twice; 130 links in batches of 64).
 - Method: test/page/modules/toolbarReq.requirements.test.ts (without an intersection observer no link is looked up and clicks still reach the host).
 - Method: test/session/toolbarReq.requirements.test.ts (the host answers a discovery with one target per request, in order; a discovery of another render gets no answer; a failed discovery shows a warning and sends no answer).
-- Criteria: each request string is sent at most once per page; each message holds at most 64 requests; the skip pattern is the start of the request; one target per request in the order of the request; no previewLinkTargets after the render changed; showWarning is called once per failed batch.
+- Criteria: each request string is sent at most once per page until the window regains focus or the preview becomes visible, which forgets what was asked; each message holds at most 64 requests; the skip pattern is the start of the request; one target per request in the order of the request; no previewLinkTargets after the render changed; showWarning is called once per failed batch.

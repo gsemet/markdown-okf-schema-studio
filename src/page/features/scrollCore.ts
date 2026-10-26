@@ -453,7 +453,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-100
     followSourceScroll(message) {
       markSourceLine(Number(message.selectionLine ?? message.line));
-      if (!settings.scrollPreviewWithEditor) return;
+      if (!settings.scrollPreviewWithEditor && message.reveal !== true) return;
       const line = Number(message.line);
       if (!Number.isFinite(line) || line < 1) return;
       lastPostedLine = anchorPolicy.editorTopLine(line);
@@ -488,9 +488,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
         } catch {
           return undefined;
         }
-        // `[da-f]`, not `[\da-f]`: the shipped page has always checked this class (the regex came
-        // from a template string, where `\d` became `d`). Kept as is: changing it changes behaviour.
-        return /%[da-f]{2}/iu.test(decoded) ? undefined : decoded;
+        return /%[\da-f]{2}/iu.test(decoded) ? undefined : decoded;
       };
       const fragmentSourceLine = Number(message.sourceLine ?? (message as { line?: unknown }).line);
       const mappedEntry = Number.isInteger(fragmentSourceLine) && fragmentSourceLine > 0

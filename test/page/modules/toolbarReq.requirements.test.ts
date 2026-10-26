@@ -21,8 +21,13 @@ function linkHarness(requests: string[], withObserver: boolean) {
     constructor(request: string) { this.attributes.set("data-sphinx-preview-navigation", request); }
     getAttribute(name: string) { return this.attributes.get(name); }
     setAttribute(name: string, value: string) { this.attributes.set(name, value); }
+    removeAttribute(name: string) { this.attributes.delete(name); }
+    nextSibling = null;
+    parentNode = { insertBefore: (node: unknown) => { inserted.push(node as FakeIcon); } };
     closest() { return this; }
   }
+  interface FakeIcon { attributes: Map<string, string>; getAttribute(name: string): string | undefined; setAttribute(name: string, value: string): void }
+  const inserted: FakeIcon[] = [];
   const links = requests.map((request) => new Link(request));
   const messages: Array<Record<string, any>> = [];
   const microtasks: Array<() => void> = [];
@@ -36,7 +41,14 @@ function linkHarness(requests: string[], withObserver: boolean) {
   }
   provideGlobalElement(Link);
   const installed = installLinkNavigation(
-    { querySelectorAll: () => links, addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback) } as never,
+    {
+      querySelectorAll: () => links,
+      addEventListener: (type: string, callback: (event: any) => void) => listeners.set(type, callback),
+      createElement: () => {
+        const attributes = new Map<string, string>();
+        return { attributes, getAttribute: (name: string) => attributes.get(name), setAttribute: (name: string, value: string) => attributes.set(name, value) };
+      },
+    } as never,
     {
       ...(withObserver ? { IntersectionObserver: Observer } : {}),
       queueMicrotask: (callback: () => void) => microtasks.push(callback),
@@ -45,7 +57,7 @@ function linkHarness(requests: string[], withObserver: boolean) {
     { postMessage: (message: Record<string, any>) => messages.push(message) } as never,
     context as never,
   );
-  return { installed, links, messages, listeners,
+  return { installed, links, messages, listeners, inserted,
     intersect: (entries: Array<{ target: Link; isIntersecting: boolean }>) => intersect(entries),
     flush: () => { while (microtasks.length) microtasks.shift()!(); },
   };
@@ -89,20 +101,25 @@ function filesBelow(directory: string): string[] {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
-test("a missing or blocked target is shown only in the tooltip", () => {
+test("a missing or blocked target keeps the link and adds a warning icon", () => {
   const runtime = linkHarness(["gone.md", "here.md"], true);
   runtime.installed.applyTargets({ targets: [
-    { request: "gone.md", kind: "blocked", reason: "The navigation target is unavailable." },
+    { request: "gone.md", kind: "blocked", reason: "File not found: gone.md" },
     { request: "here.md", kind: "local", path: "/w/here.md" },
   ] } as never);
   const [blocked, local] = runtime.links;
   assert.equal(blocked.getAttribute("data-sphinx-preview-link-state"), "blocked");
-  assert.equal(blocked.getAttribute("title"), "The navigation target is unavailable.");
+  assert.equal(blocked.getAttribute("title"), "File not found: gone.md");
+  // The link itself only gains the description that names the problem; the valid link is unchanged.
   assert.deepEqual([...blocked.attributes.keys()].sort(), [
+    "aria-describedby", "data-sphinx-preview-link-state", "data-sphinx-preview-navigation", "title",
+  ]);
+  assert.deepEqual([...local.attributes.keys()].sort(), [
     "data-sphinx-preview-link-state", "data-sphinx-preview-navigation", "title",
   ]);
-  assert.deepEqual([...local.attributes.keys()].sort(), [...blocked.attributes.keys()].sort());
-  // No rule of the extension selects the state attribute: the two look alike.
+  assert.equal(runtime.inserted.length, 1, "only the blocked link gets an icon");
+  assert.equal(runtime.inserted[0].getAttribute("title"), "File not found: gone.md");
+  // No rule of the extension selects the state attribute: the link keeps its look; the icon has a class.
   const selectors = filesBelow(path.join(process.cwd(), "src")).filter((file) =>
     fs.readFileSync(file, "utf8").includes("[data-sphinx-preview-link-state"));
   assert.deepEqual(selectors, []);

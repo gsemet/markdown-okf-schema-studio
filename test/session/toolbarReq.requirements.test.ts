@@ -417,9 +417,19 @@ test("a Back or Next that cannot open its document shows a warning", async () =>
     showOther(f.preview, b);
     await f.send("previewHistoryGo", { direction: "back" });
     assert.deepEqual(f.warnings, ["Markdown OKF-Schema Studio could not go back: deleted"]);
+    // The document did not change, so the history position did not move either.
+    assert.equal(history.snapshot().index, 1);
+    assert.equal(history.canBack(), true);
+    assert.equal(history.canForward(), false);
+    const afterBack = f.posted.filter((message) => message.type === "previewHistoryState").at(-1)!;
+    assert.equal(afterBack.canBack, true);
+    assert.equal(afterBack.canForward, false);
+    history.back();
     showOther(f.preview, a);
     await f.send("previewHistoryGo", { direction: "forward" });
     assert.equal(f.warnings[1], "Markdown OKF-Schema Studio could not go forward: deleted");
+    assert.equal(history.snapshot().index, 0);
+    assert.equal(history.canForward(), true);
   } finally {
     f.cleanup();
   }
@@ -468,7 +478,7 @@ test("the host answers a discovery with one target per request, in order", async
     assert.deepEqual(targets.map((target) => target.request), requests);
     assert.deepEqual(targets.map((target) => target.kind), ["blocked", "local", "blocked"]);
     assert.equal(targets[1].path, path.join(f.root, "here.md"));
-    assert.equal(targets[0].reason, "The navigation target is unavailable.");
+    assert.equal(targets[0].reason, "File not found: gone.md");
     assert.equal(targets[2].reason, "The navigation scheme is not allowed in the preview.");
   } finally {
     f.cleanup();
