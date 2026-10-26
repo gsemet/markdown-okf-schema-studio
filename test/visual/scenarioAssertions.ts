@@ -422,6 +422,22 @@ export const MARK_EDITOR_SELECTION_ASSERTIONS: ContentAssertion[] = [
   { message: "the marker is an outline in the find-match colour", selector: "[data-sphinx-preview-current=\"true\"]", css: { outlineStyle: "solid", outlineWidth: "2px" } },
 ];
 
+export const MARK_CONTAINING_BLOCK_ASSERTIONS: ContentAssertion[] = [
+  { message: "exactly one block carries the editor-selection marker", selector: "[data-sphinx-preview-current=\"true\"]", count: 1, visible: true },
+  { message: "the marked block is the long log that contains the selection line, not the paragraph that starts closer",
+    selector: "[data-sphinx-preview-current=\"true\"]", text: "line 12 of the dispatch log",
+    attr: { name: "aria-current", value: "location" } },
+  { message: "the paragraph after the log is not marked", selector: `${MAIN} p`, text: "The paragraph right after the long log.",
+    expr: "!document.evaluate(\"//p[contains(., 'right after the long log')]\", document, null, 9, null).singleNodeValue.hasAttribute('data-sphinx-preview-current')" },
+];
+
+export const STICKY_RUNNING_TEXT_ASSERTIONS: ContentAssertion[] = [
+  { message: "the note's own heading exists in the page", selector: `${MAIN} .admonition h3`, count: 1 },
+  { message: "the band shows the headings of the running text and not the heading inside the note",
+    selector: "[data-sphinx-preview-sticky-headings]", count: 1, visible: true,
+    expr: "document.querySelector('[data-sphinx-preview-sticky-headings]').textContent === '# Fleet handbook\\n## Overview'" },
+];
+
 export const STICKY_SHADOW_ASSERTIONS: ContentAssertion[] = [
   { message: "the band is marked as having content scrolled under it", selector: "[data-sphinx-preview-sticky-headings]", count: 1, visible: true,
     attr: { name: "data-scrolled-under", value: "" } },

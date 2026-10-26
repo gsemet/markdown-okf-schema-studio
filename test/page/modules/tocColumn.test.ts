@@ -267,6 +267,21 @@ test("only parent entries get a twisty with aria-expanded", () => {
   assert.deepEqual(twisties().map((twisty) => twisty.getAttribute("aria-expanded")), ["true", "true"]);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-040
+test("the twisty name says Fold when open and Unfold when folded", () => {
+  const { content, toc, flush, twisties } = setup({ toc: true });
+  outline(content);
+  toc.refresh();
+  flush();
+  const first = twisties()[0];
+  const open = first.getAttribute("aria-label")!;
+  assert.match(open, /^Fold /u);
+  first.fire("click");
+  assert.equal(twisties()[0].getAttribute("aria-label"), open.replace(/^Fold /u, "Unfold "));
+  twisties()[0].fire("click");
+  assert.equal(twisties()[0].getAttribute("aria-label"), open);
+});
+
 test("collapsing a parent hides its descendants, and a rebuild keeps it collapsed", () => {
   const { content, toc, flush, twisties, entries, getState } = setup({ toc: true });
   outline(content);

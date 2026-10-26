@@ -426,6 +426,8 @@ export function createRuntimeHarness(configuration: Partial<{
   viewportHeight: number;
   viewportWidth: number;
   firstMappedSourceLine: number;
+  /** Last source line of the second mapped block (it starts at line 50). */
+  secondBlockEndLine: number;
   firstMappedTop: number;
   frontmatterHeight: number;
   mapFrontmatter: boolean;
@@ -463,6 +465,7 @@ export function createRuntimeHarness(configuration: Partial<{
 }> = {}, savedThemeMode?: string, sharedThemeMode?: "current" | "dark" | "white", savedAnchorMode?: boolean): RuntimeHarness {
   const {
     firstMappedSourceLine = 1,
+    secondBlockEndLine = 52,
     firstMappedTop = 0,
     frontmatterHeight = 0,
     mapFrontmatter = false,
@@ -509,7 +512,7 @@ export function createRuntimeHarness(configuration: Partial<{
     new RuntimeElement(
       {
         "data-sphinx-preview-document": "file:///active.md",
-        "data-sphinx-source-end-line": "52",
+        "data-sphinx-source-end-line": String(secondBlockEndLine),
         "data-sphinx-source-file": "/workspace/active.md",
         "data-sphinx-source-line": "50",
       },

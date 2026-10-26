@@ -153,11 +153,16 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
   function markSourceLine(sourceLine: number): void {
     clearMarkedSourceLine();
     if (!settings.markEditorSelection || !Number.isFinite(sourceLine) || !layout.length) return;
+    // The block that contains the line (the innermost one when blocks nest); a line between two
+    // blocks takes the block with the nearest edge.
+    const distance = (entry: LayoutEntry): number =>
+      sourceLine < entry.sourceLine
+        ? entry.sourceLine - sourceLine
+        : Math.max(0, sourceLine - entry.endLine);
     const nearest = layout.reduce<LayoutEntry | undefined>((best, candidate) => {
       if (!best) return candidate;
-      return Math.abs(candidate.sourceLine - sourceLine) < Math.abs(best.sourceLine - sourceLine)
-        ? candidate
-        : best;
+      const gap = distance(candidate) - distance(best);
+      return gap < 0 || (gap === 0 && candidate.sourceLine > best.sourceLine) ? candidate : best;
     }, undefined);
     nearest?.element?.setAttribute?.("data-sphinx-preview-current", "true");
     nearest?.element?.setAttribute?.("aria-current", "location");

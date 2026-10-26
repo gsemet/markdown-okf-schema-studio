@@ -1,5 +1,21 @@
 # Update Log
 
+## 2026-10-26 (toolbar and sticky band fixes)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-018: the sticky band follows the headings of the running text only; a
+  heading without height is no longer a parent line, and headings inside an admonition or the
+  properties table (which the table of contents leaves out) never enter the band. The scenario
+  "Every heading level" uses a normal section; two scenarios are added or reworded; the Known issue
+  line is removed. StRS-MDOKFSTUDIO-TOOLBAR-004 and -006 lose their Known issue line about the
+  mismatch with the table of contents.
+- SwRS-MDOKFSTUDIO-TOOLBAR-040: the accessible name of a twisty is Fold followed by the heading while
+  the subtree is shown and Unfold while it is folded; both Known issue lines are removed.
+- SwRS-MDOKFSTUDIO-TOOLBAR-128 (and StRS-MDOKFSTUDIO-TOOLBAR-013): the editor-selection mark goes to
+  the block that contains the cursor line (innermost when blocks nest, nearest edge between blocks);
+  the Known issue line is removed.
+- The toolbar over the scrolled text (StRS-MDOKFSTUDIO-TOOLBAR-001): unchanged; its Known issue line
+  stays.
+
 ## 2026-10-26 (link navigation and history fixes)
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-059: Back or Next within the same document scrolls the preview to the stored

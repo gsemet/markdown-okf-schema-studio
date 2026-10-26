@@ -43,5 +43,5 @@ As a reader, I choose per preview panel whether scrolling the text editor scroll
 - The first scroll mode comes from the setting `markdownOkfSchemaStudio.preview.scrollPreviewWithEditor`; the button overrides it for the panel.
 - The button is disabled and never looks pressed while no text editor shows the file.
 - The cursor mark is controlled by the setting `markdownOkfSchemaStudio.preview.markEditorSelection`, off by default.
+- The mark goes to the block that contains the cursor line.
 - The mark is refreshed when the editor scrolls or the preview is rendered again, not on every cursor move.
-- Known issue: the page marks the block whose first source line is nearest to the cursor line, not always the block that contains the line.

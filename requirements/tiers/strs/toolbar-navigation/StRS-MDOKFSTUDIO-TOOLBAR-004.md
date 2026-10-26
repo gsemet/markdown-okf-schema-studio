@@ -37,7 +37,6 @@ As a reader, I always know which section I am in while I scroll a long document,
 ### Rationale and constraints
 
 - The pinned headings show the heading at the reading line with its parents, written with their `#` markers.
-- The band follows every heading level from h1 to h6, wraps in a narrow pane and leaves room for the toolbar.
+- The band follows every heading level from h1 to h6 of the running text (not the headings inside admonitions and the properties table), wraps in a narrow pane and leaves room for the toolbar.
 - The depth is set by the setting `markdownOkfSchemaStudio.preview.stickyHeadingDepth`; its default is three levels.
 - A depth outside one to six is brought back into range, and a value that is not a number means the default.
-- Known issue: the table of contents lists h1 to h4 only and leaves out headings inside admonitions and the properties table, which the pinned headings do follow.
