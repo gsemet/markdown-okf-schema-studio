@@ -45,6 +45,20 @@ the live preview. A toolbar button toggles the marks.
 
 ![Blocks changed since the last commit marked with a green bar](images/readme/showcase-diff-cream.png)
 
+### Review with comment threads
+
+Select a passage of the document and start a comment thread on it. The thread is anchored to that
+passage, follows it when the text moves, and is stored in a `.comments.json` file next to the
+document, so it is versioned with the Markdown in Git and needs no server. Readers can reply,
+resolve and delete threads from the popover that opens on the highlighted text.
+
+![An open comment thread on a passage, with a comment, a reply, and the Resolve, Delete and Reply controls](images/readme/showcase-comment-thread.png)
+
+Comments are signed with the `markdownOkfSchemaStudio.comments.authorName` setting. Left empty, it
+falls back to your Git `user.name`, then to your operating system user name, and you can override
+it per user, workspace or folder. Comment threads are the groundwork for future interactive
+multi-user capabilities, a direction we are exploring with no date attached.
+
 ### Mermaid and PlantUML, no Java
 
 Mermaid and PlantUML diagrams are drawn by built-in engines. PlantUML needs no Java, no server and
@@ -63,7 +77,6 @@ are one button away.
 
 ### And more
 
-- Review comment threads stored next to the document, with resolve and reply.
 - A Notion-style slash menu and an edition palette (Strict, GFM or MyST buttons).
 - Block selection, multi-block copy, cut, paste and move.
 - Rich paste from Google Docs, Word or a web page, converted to Markdown.
