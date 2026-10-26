@@ -9,24 +9,21 @@ const BASE: PreviewRuntimeContext = { documentId: "file:///a.md", revision: 1, r
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-097
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-156
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
-test("page settings default to following both ways, without selection marks or double-click reveal", () => {
+test("page settings default to following both ways and without selection marks", () => {
   assert.deepEqual(pageSettings(BASE), {
     scrollPreviewWithEditor: true,
     scrollEditorWithPreview: true,
     markEditorSelection: false,
-    doubleClickToSwitchToEditor: false,
   });
   assert.deepEqual(pageSettings({
     ...BASE,
     scrollPreviewWithEditor: false,
     scrollEditorWithPreview: false,
     markEditorSelection: true,
-    doubleClickToSwitchToEditor: true,
   }), {
     scrollPreviewWithEditor: false,
     scrollEditorWithPreview: false,
     markEditorSelection: true,
-    doubleClickToSwitchToEditor: true,
   });
 });
 

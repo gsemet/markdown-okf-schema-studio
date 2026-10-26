@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Open Preview to Side now works from a Studio Open With tab: it previews that tab's file instead of
+  asking for a Markdown file.
+- A failed load of the render engine at start-up is no longer remembered: the first render tries the
+  load again.
+- Removed the setting `markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor`: it had no
+  visible effect, because a single click in the preview already reveals the matching source line (and
+  still does). If it is set in your `settings.json`, VS Code shows an unknown-setting hint; delete
+  the line.
 - Table editing in edit mode: Col + and Col − keep the padding, the indentation and the outer pipes
   of every line instead of rewriting the table; an unescaped pipe inside a code span now splits a cell
   in the editor as it does in the preview (write `\|` to keep it in the cell, which is what the editor

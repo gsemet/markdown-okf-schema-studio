@@ -1,5 +1,20 @@
 # Update Log
 
+## 2026-10-26 (small preview lifecycle fixes)
+
+- SwRS-MDOKFSTUDIO-LIFE-010: Open Preview to Side from a Studio Open With tab previews that tab's
+  file; a custom editor of another type is still refused. The Known issue line is removed.
+- SwRS-MDOKFSTUDIO-CORE-001 (and the archived CORE-027): a failed engine load is not cached, so the
+  first render after a failed warm-up loads the engine again; the Known issue line is removed.
+- SwRS-MDOKFSTUDIO-LIFE-097: the setting doubleClickToSwitchToEditor is removed, a click keeps
+  revealing the source line and a double click has no behaviour of its own. Title, description,
+  scenarios and verification change (two settings instead of three); the Known issue line is
+  removed. SwRS-MDOKFSTUDIO-LIFE-048, -071, -108, -156 and StRS-MDOKFSTUDIO-LIFE-010 drop the
+  setting. SwRS-MDOKFSTUDIO-LIFE-112 (archived) described the removed behaviour and stays as is.
+- SwRS-MDOKFSTUDIO-LIFE-094: unchanged. Its Known issue stays: VS Code does not say where a change
+  of the active document comes from, and the host knows only the cursor line, so an edit of another
+  tool cannot be told from typing without glowing while the writer types.
+
 ## 2026-10-26 (table editor polish)
 
 - SwRS-MDOKFSTUDIO-TABLE-055: a column button now edits only the lines it concerns (padding,

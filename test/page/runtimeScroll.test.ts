@@ -771,12 +771,9 @@ test("executes source and preview synchronization across layout changes", () => 
   harness.dispatchDocument("click", { target: harness.mappings[1] });
   assert.equal(harness.messages.at(-1)?.type, "previewReveal");
   assert.equal(harness.messages.at(-1)?.line, 50);
+  const posted = harness.messages.length;
   harness.dispatchDocument("dblclick", { target: harness.mappings[1] });
-  assert.equal(harness.messages.at(-1)?.activation, "click");
-
-  const enabledHarness = createRuntimeHarness({ doubleClickToSwitchToEditor: true });
-  enabledHarness.dispatchDocument("dblclick", { target: enabledHarness.mappings[1] });
-  assert.equal(enabledHarness.messages.at(-1)?.activation, "double-click");
+  assert.equal(harness.messages.length, posted, "a double click posts nothing more than its clicks");
 
   harness.dispatchDocument("keydown", {
     key: "Enter",

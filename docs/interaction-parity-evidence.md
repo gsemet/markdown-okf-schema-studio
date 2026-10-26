@@ -57,9 +57,9 @@ Commands were run from the standalone repository root unless noted.
 Focused assertions include:
 
 - all four settings are under `sphinxMystLiveview.preview`; no `markdown.*` setting is added;
-- scroll directions are independently disabled, source marking is opt-in, and double-click reveal
-  is disabled by default and enabled only by its MyST setting;
-- click, keyboard, and opt-in double-click mapping messages carry document/version/request identity;
+- scroll directions are independently disabled and source marking is opt-in (the double-click
+  reveal setting was removed; a single click reveals the source);
+- click and keyboard mapping messages carry document/version/request identity;
 - hidden or zero-geometry blocks do not enter interpolation; image load, decode, resize, and rapid
   source-scroll stabilization remain active;
 - deferred relative links are inert (`href="#"`) and host-routed, while staged Sphinx HTML links

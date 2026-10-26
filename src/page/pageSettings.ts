@@ -14,8 +14,6 @@ export interface PageSettings {
   scrollEditorWithPreview: boolean;
   /** The page marks the block of the editor selection (default off). */
   markEditorSelection: boolean;
-  /** A double click outside edit mode reveals the source line (default off). */
-  doubleClickToSwitchToEditor: boolean;
 }
 
 /** Delay between the last keystroke in a block editor and its autosave. */
@@ -29,7 +27,6 @@ export function pageSettings(context: PreviewRuntimeContext): PageSettings {
     scrollPreviewWithEditor: boot.scrollPreviewWithEditor,
     scrollEditorWithPreview: boot.scrollEditorWithPreview,
     markEditorSelection: boot.markEditorSelection,
-    doubleClickToSwitchToEditor: boot.doubleClickToSwitchToEditor,
   };
 }
 

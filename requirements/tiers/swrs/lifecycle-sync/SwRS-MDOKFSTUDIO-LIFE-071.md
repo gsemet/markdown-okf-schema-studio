@@ -63,7 +63,7 @@ When a render changes the page shell, for example a diagram engine or math appea
 
 | Input | Outcome |
 | --- | --- |
-| A change of scrollPreviewWithEditor, scrollEditorWithPreview, markEditorSelection, doubleClickToSwitchToEditor or stickyHeadingDepth, then the next render is shown | The runtime context key differs, so the page document is assigned again and the new value reaches the page in its boot context |
+| A change of scrollPreviewWithEditor, scrollEditorWithPreview, markEditorSelection or stickyHeadingDepth, then the next render is shown | The runtime context key differs, so the page document is assigned again and the new value reaches the page in its boot context |
 | The new render shows another document or source file | A new document is loaded the same way |
 | The new render uses other resource folders | A new document is loaded the same way |
 | A change of showComments, which the page follows through a message | The context key is not affected and a patch stays possible |

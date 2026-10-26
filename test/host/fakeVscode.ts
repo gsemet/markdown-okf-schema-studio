@@ -367,6 +367,9 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     edit: (): Promise<boolean> => Promise.resolve(true),
   }, "TextEditor");
 
+  /** The active tab when it is a custom editor (set by a test); undefined otherwise. */
+  let activeCustomTab: { uri: Uri; viewType: string } | undefined;
+
   const window = {
     activeTextEditor: undefined as ReturnType<typeof editorFor> | undefined,
     visibleTextEditors: [] as Array<ReturnType<typeof editorFor>>,
@@ -383,7 +386,13 @@ export function createFakeVscode(options: FakeVscodeOptions) {
         }));
       },
       get activeTabGroup() {
-        return this.all[0];
+        const group = this.all[0]!;
+        return {
+          ...group,
+          activeTab: activeCustomTab
+            ? { label: "Studio", input: new TabInputCustom(activeCustomTab.uri, activeCustomTab.viewType), isActive: true }
+            : undefined,
+        };
       },
       onDidChangeTabGroups: events.changeTabGroups.event,
       onDidChangeTabs: events.changeTabs.event,
@@ -475,6 +484,10 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     public constructor(public readonly viewType: string) {}
   }
 
+  class TabInputCustom {
+    public constructor(public readonly uri: Uri, public readonly viewType: string) {}
+  }
+
   class TabInputText {
     public constructor(public readonly uri: Uri) {}
   }
@@ -492,6 +505,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
     WorkspaceEdit,
     TabInputWebview,
     TabInputText,
+    TabInputCustom,
     Diagnostic: class {
       public source?: string;
       public code?: unknown;
@@ -555,6 +569,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
   /** Opens `filePath` in the (only) text editor, as the active and visible editor. */
   const showDocument = async (filePath: string): Promise<FakeTextDocument> => {
     const document = await workspace.openTextDocument(Uri.file(filePath));
+    activeCustomTab = undefined;
     await window.showTextDocument(document);
     return document;
   };
@@ -575,6 +590,11 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       shownMessages,
       events,
       showDocument,
+      /** Makes a custom editor tab of `filePath` the active tab (no text editor is active then). */
+      activateCustomEditorTab: (filePath: string | undefined, viewType = "markdown-okf-schema-studio.editor"): void => {
+        activeCustomTab = filePath === undefined ? undefined : { uri: Uri.file(filePath), viewType };
+        if (filePath !== undefined) window.activeTextEditor = undefined;
+      },
       /** Changes the document text as typing would, and tells the extension. */
       changeDocument: (document: FakeTextDocument, text: string): void => {
         events.changeTextDocument.fire(document.replaceText(text));

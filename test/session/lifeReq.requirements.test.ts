@@ -39,7 +39,7 @@ function setup(options: { pairing?: boolean; lineCount?: number } = {}) {
   const manager = new PreviewManager(host, groups);
   const preview = {
     documentUri: DOCUMENT_ID,
-    configuration: { scrollEditorWithPreview: true, scrollPreviewWithEditor: true, doubleClickToSwitchToEditor: true },
+    configuration: { scrollEditorWithPreview: true, scrollPreviewWithEditor: true },
     stage: { activeDocumentPath: SOURCE },
     scroll: { echoGuard: new EditorEchoGuard() },
   };

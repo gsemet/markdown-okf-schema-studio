@@ -119,6 +119,7 @@ export function writeFile(text: string, directory = workspaceRoot, name?: string
 export function startStudio(timers: MockTimers, options: { trusted?: boolean } = {}) {
   timers.enable({ apis: ["setTimeout"] });
   windowApi.activeTextEditor = undefined;
+  fake.controls.activateCustomEditorTab(undefined);
   windowApi.visibleTextEditors = [];
   (fake.vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = options.trusted ?? true;
   captured.panelOptions.length = 0;

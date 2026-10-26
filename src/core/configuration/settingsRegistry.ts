@@ -172,13 +172,6 @@ export const PREVIEW_SETTINGS = {
     markdownDescription: "Marks, in the preview, the block that holds the editor cursor line. The mark is refreshed when the editor scrolls or the preview re-renders, not on every cursor move. **On**: the matching block is marked. **Off**: no mark. Works even when `#markdownOkfSchemaStudio.preview.scrollPreviewWithEditor#` is off.",
     order: 32,
   }, asStored, bootFlag(false)),
-  /** A double click outside edit mode reveals the source line. */
-  doubleClickToSwitchToEditor: startupSetting<boolean>({
-    type: "boolean",
-    default: false,
-    markdownDescription: "Lets you double-click rendered content in the preview to jump to its source line in the editor. **On**: double-click reveals the source line. **Off**: double-click does nothing special. Requires `#markdownOkfSchemaStudio.preview.scrollEditorWithPreview#` to be on, and is ignored while a block is being edited in the preview.",
-    order: 33,
-  }, asStored, bootFlag(false)),
   /** How many heading levels the sticky band shows (1..6). */
   stickyHeadingDepth: startupSetting<number>({
     type: "number",

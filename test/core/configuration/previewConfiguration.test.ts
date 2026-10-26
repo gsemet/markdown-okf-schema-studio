@@ -12,7 +12,6 @@ test("reads independent studio preview settings without stock configuration keys
     ["scrollPreviewWithEditor", false],
     ["scrollEditorWithPreview", true],
     ["markEditorSelection", true],
-    ["doubleClickToSwitchToEditor", true],
     ["maxContentWidth", 1120],
     ["stickyHeadingDepth", 2],
     ["showComments", false],
@@ -30,7 +29,6 @@ test("reads independent studio preview settings without stock configuration keys
     scrollPreviewWithEditor: false,
     scrollEditorWithPreview: true,
     markEditorSelection: true,
-    doubleClickToSwitchToEditor: true,
     maxContentWidth: 1120,
     stickyHeadingDepth: 2,
     incrementalUpdates: true,
@@ -41,7 +39,6 @@ test("reads independent studio preview settings without stock configuration keys
     "scrollPreviewWithEditor",
     "scrollEditorWithPreview",
     "markEditorSelection",
-    "doubleClickToSwitchToEditor",
     "maxContentWidth",
     "stickyHeadingDepth",
     "incrementalUpdates",
@@ -52,7 +49,6 @@ test("reads independent studio preview settings without stock configuration keys
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.scrollPreviewWithEditor, true);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.scrollEditorWithPreview, true);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.markEditorSelection, false);
-  assert.equal(DEFAULT_PREVIEW_CONFIGURATION.doubleClickToSwitchToEditor, false);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.maxContentWidth, 960);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.stickyHeadingDepth, 3);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.incrementalUpdates, true);

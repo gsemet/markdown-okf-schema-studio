@@ -1,7 +1,7 @@
 /**
  * The document clicks and keys of the page: a click or Enter on a mapped block reveals its source
  * line, or edits it in edit mode; a click on a properties cell edits the field; the issue badge,
- * the Description column toggle, the Refresh button, and a double click that reveals the source.
+ * the Description column toggle, the Refresh button.
  * The order in which these listeners are bound matters (see `../runtime.ts`).
  */
 
@@ -214,15 +214,6 @@ export function installPageInput(rt: PageRuntime): PageInput {
         postReveal(target, "click");
       });
       rt.editMode.bindHover();
-      // @implements_req SwRS-MDOKFSTUDIO-LIFE-097
-      document.addEventListener("dblclick", (event) => {
-        if (state.editMode || !settings.doubleClickToSwitchToEditor) return;
-        const target = event.target instanceof Element
-          ? event.target.closest(MAPPINGS_SELECTOR)
-          : undefined;
-        if (!target || target.closest("a")) return;
-        postReveal(target, "double-click");
-      });
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
         const element = elementOf(event);

@@ -38,10 +38,6 @@ When the extension activates, the extension SHALL load the MyST engine once so t
 - WHEN the activation runs
 - THEN the failure is swallowed and the activation shows no error
 
-### Known issues
-
-- Known issue: the engine promise is cached once, including a failed one, so the first render does not retry the load after a failed warm-up and fails with the same error.
-
 ### Verification notes
 
 - Method: Unit test "the warm-up loads the engine once, shares it with the render and a warm-up call never throws" in test/core/render/renderReq.renderingCore.requirements.test.ts

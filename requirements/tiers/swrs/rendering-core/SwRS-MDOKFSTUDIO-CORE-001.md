@@ -19,6 +19,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/render/mystEngine.ts
 - src/core/render/mystRenderer.ts
 - src/core/render/renderPipeline.ts
 tested_in_files:
@@ -93,11 +94,7 @@ When the active Markdown buffer changes, the extension SHALL render the buffer t
 
 - GIVEN the extension just activated and the MyST engine was loaded once at activation
 - WHEN the first render runs
-- THEN the engine is already loaded; if the warm-up import failed, the failure is swallowed and the activation shows no error
-
-### Known issues
-
-- Known issue: the engine promise is cached once, including a failed one, so the first render does not retry the load after a failed warm-up and fails with the same error.
+- THEN the engine is already loaded; if the warm-up import failed, the failure is swallowed and the activation shows no error, and the first render loads the engine again instead of failing with the cached error
 
 ### Verification notes
 
@@ -106,6 +103,6 @@ When the active Markdown buffer changes, the extension SHALL render the buffer t
 - Method: Unit test "cancellation while rendering rejects a late successful result" in test/core/render/renderPipeline.test.ts (refusal cancel, boundary late result)
 - Method: Unit test "the in-process renderer preserves the active-file MyST feature contract" in test/core/render/mystFeatures.test.ts (nominal CommonMark constructs)
 - Method: Unit test "the rendered HTML is the same whatever the palette mode: the render takes no mode" in test/core/render/renderReq.renderingCore.requirements.test.ts (nominal palette modes)
-- Method: Unit test "the warm-up loads the engine once, shares it with the render and a warm-up call never throws" in test/core/render/renderReq.renderingCore.requirements.test.ts (boundary warm-up)
+- Method: Unit test "the warm-up loads the engine once, shares it with the render and a warm-up call never throws" in test/core/render/renderReq.renderingCore.requirements.test.ts (boundary warm-up) and "a failed engine load is not cached: the next render retries it"
 - Method: Visual scenario rendering-core/v20-huge-document-bottom-dark-900 in test/visual/scenarioDefinitions2.ts (boundary very long document)
 - Criteria: A render of a dirty buffer returns HTML for the buffer text and spawns no subprocess. The rendered HTML holds one matching element per CommonMark construct. Rendered HTML is the same in all three modes. All headings and the last paragraph are present. The pipeline throws the trust message only without the reduced-mode allowance (production always passes `allowUntrusted: true`, so this refusal is a guard tested at pipeline level). A late result of a superseded render is never applied. One engine load is shared; a warm-up failure is swallowed.
