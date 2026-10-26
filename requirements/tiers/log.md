@@ -56,6 +56,12 @@
   context, so a rebinding applies. SwRS-MDOKFSTUDIO-BLOCK-069: its undo, redo and select-all rows now
   distinguish the block and cell text boxes from the frontmatter fields.
 
+## 2026-10-26 (keyboard-only block editing)
+
+- SwRS-MDOKFSTUDIO-BLOCK-004 (new): in edit mode, plain Up and Down select and move a one-block
+  selection, Enter opens the selected block, and Escape or Cmd/Ctrl+Enter leave the edited block
+  selected. Unit tests and the cream and dark visual scenarios cover it.
+
 ## 2026-10-26 (bold dollar prices preserve emphasis)
 
 - SwRS-MDOKFSTUDIO-MYST-024: permissive MyST dollarmath no longer consumes the `**` markers

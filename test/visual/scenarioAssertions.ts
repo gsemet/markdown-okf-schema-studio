@@ -531,6 +531,14 @@ export const BLOCK_SELECTION_ASSERTIONS: ContentAssertion[] = [
   { message: "no editor is open", selector: ".sphinx-preview-block-editor", count: 0 },
 ];
 
+/** CR 120: after Down, Down, Enter, Escape the second block is selected by keyboard alone. */
+export const KEYBOARD_SELECTION_ASSERTIONS: ContentAssertion[] = [
+  { message: "one block is selected", selector: "[data-sphinx-preview-block-selected=\"true\"]", count: 1, visible: true },
+  { message: "the selected block is outlined in the focus colour", selector: "[data-sphinx-preview-block-selected=\"true\"]", css: { outlineStyle: "solid", outlineWidth: "2px" } },
+  { message: "the selection is announced", selector: ".sphinx-preview-selection-status", count: 1, text: "1 block selected" },
+  { message: "no editor is open", selector: ".sphinx-preview-block-editor", count: 0 },
+];
+
 export const MAX_WIDTH_ASSERTIONS: ContentAssertion[] = [
   { message: "the content column is 1400 px wide, the configured maximum", selector: MAIN,
     expr: "Math.abs(document.querySelector('#sphinx-myst-preview-content').getBoundingClientRect().width - 1400) <= 1" },

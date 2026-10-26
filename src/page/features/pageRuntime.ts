@@ -238,6 +238,8 @@ export interface PendingBlockSelection {
   anchor: SelectionAnchor | undefined;
   targetIndex: number;
   count: number;
+  /** Select without scrolling the page (the block of an editor that closed by keyboard). */
+  quiet?: boolean;
 }
 
 /** What the runtime reads from the saved state of the page at startup. */
@@ -499,9 +501,14 @@ export interface BlockSelectionView {
   renderBlockSelection(blocks: HTMLElement[]): void;
   clearBlockSelection(keepPending?: boolean): void;
   rememberSelectionAnchor(block: Element | undefined): void;
-  selectBlocksNow(anchor: SelectionAnchor | undefined, targetIndex: number): void;
+  selectBlocksNow(anchor: SelectionAnchor | undefined, targetIndex: number, scroll?: boolean): void;
   selectBlocksTo(node: Element): void;
   applyPendingBlockSelection(): void;
+  /**
+   * Runs `action` (cancel or save of the open block editor) and leaves the edited block selected,
+   * so the arrow keys carry on from it (keyboard-only editing).
+   */
+  finishEditorWithSelection(kind: "cancel" | "save", action: () => void): void;
   receiveBlocksResult(message: PreviewBlocksResultMessage): void;
   bindKeys(): void;
 }

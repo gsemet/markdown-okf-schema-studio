@@ -76,18 +76,20 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
 
   // The block the free end of the selection sits on: gets the focus so the keyboard (and a screen
   // reader) follows it.
-  function focusSelectionEnd(blocks: HTMLElement[]): void {
+  function focusSelectionEnd(blocks: HTMLElement[], scroll = true): void {
     const anchorIndex = blockSelection.anchorIndex;
     const free = blockSelection.startIndex === anchorIndex ? blockSelection.endIndex : blockSelection.startIndex;
     const block = blocks[free!];
     if (!block) return;
     block.setAttribute("tabindex", "-1");
-    block.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+    if (scroll) block.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     block.focus?.({ preventScroll: true });
   }
 
   // Shift+click without an open editor: select from the anchor to the clicked block.
-  function selectBlocksNow(anchor: SelectionAnchor | undefined, targetIndex: number): void {
+  // `scroll` false keeps the page where it is: a block left selected by a closing editor is already
+  // where the reader saw it.
+  function selectBlocksNow(anchor: SelectionAnchor | undefined, targetIndex: number, scroll = true): void {
     const blocks = syncSelectionModel();
     if (!(targetIndex >= 0 && targetIndex < blocks.length)) return;
     if (!blockSelection.isActive()) {
@@ -100,7 +102,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     }
     renderBlockSelection(blocks);
     window.getSelection?.()?.removeAllRanges?.();
-    focusSelectionEnd(blocks);
+    focusSelectionEnd(blocks, scroll);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-140
@@ -132,7 +134,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     state.pendingBlockSelection = undefined;
     if (!pending || !state.editMode || state.activeBlockEdit) return;
     if (rt.blocks.selectableBlocks().length !== pending.count) return;
-    selectBlocksNow(pending.anchor, pending.targetIndex);
+    selectBlocksNow(pending.anchor, pending.targetIndex, pending.quiet !== true);
   }
 
   function showSelectionNotice(text: string): void {
@@ -164,6 +166,44 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     blocksFlight = { timer: window.setTimeout(() => { blocksFlight = undefined; }, 5000) };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
+  // The block that gets the selection on the first Up or Down: the first one that reaches into the
+  // viewport, that is the block nearest its top. Included blocks never join a selection.
+  function topVisibleIndex(blocks: HTMLElement[]): number {
+    const usable = blocks.map((block, index) => ({ block, index }))
+      .filter(({ block }) => !rt.blocks.isIncludedBlock(block));
+    const visible = usable.find(({ block }) => {
+      const rect = block.getBoundingClientRect();
+      return (rect.bottom ?? rect.top + rect.height) > 0;
+    });
+    return (visible ?? usable[0])?.index ?? -1;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
+  // Plain Up / Down: without a selection the block nearest the top of the viewport is selected; with
+  // one, the selection collapses onto the neighbour of its free end (skipping included blocks).
+  function stepSelection(delta: number): void {
+    const blocks = syncSelectionModel();
+    if (blocks.length === 0) return;
+    let target: number;
+    if (blockSelection.isActive()) {
+      const free = blockSelection.startIndex === blockSelection.anchorIndex ? blockSelection.endIndex! : blockSelection.startIndex!;
+      target = free;
+      for (let next = free + delta; next >= 0 && next < blocks.length; next += delta) {
+        if (!rt.blocks.isIncludedBlock(blocks[next])) {
+          target = next;
+          break;
+        }
+      }
+    } else {
+      target = topVisibleIndex(blocks);
+    }
+    if (target < 0) return;
+    blockSelection.clear();
+    selectBlocksNow(undefined, target);
+    rememberSelectionAnchor(blocks[target]);
+  }
+
   /** True for a key target that keeps its own keys (a text box, a field, an editor, the properties). */
   function ownsKeys(target: EventTarget | null, selector: string, contentEditable: boolean): boolean {
     return target instanceof Element
@@ -180,6 +220,20 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     selectBlocksNow,
     selectBlocksTo,
     applyPendingBlockSelection,
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
+    finishEditorWithSelection(kind, action) {
+      const edit = state.activeBlockEdit;
+      const blocks = rt.blocks.selectableBlocks();
+      const element = edit && !edit.selectedCell && edit.insertAfterLine === undefined
+        ? rt.insertPoints.blockOfTarget(edit.renderedTarget || edit.target) : undefined;
+      const index = element ? blocks.indexOf(element) : -1;
+      action();
+      if (!edit || index < 0) return;
+      const waiting = state.activeBlockEdit === edit
+        || (kind === "cancel" && edit.hasAutosavedChange === true);
+      if (state.activeBlockEdit !== edit) selectBlocksNow(undefined, index, false);
+      if (waiting) state.pendingBlockSelection = { anchor: undefined, targetIndex: index, count: blocks.length, quiet: true };
+    },
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-169
     receiveBlocksResult(message) {
       if (blocksFlight) window.clearTimeout(blocksFlight.timer);
@@ -219,6 +273,37 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
           rememberSelectionAnchor(blocks[blockSelection.anchorIndex!]);
           focusSelectionEnd(blocks);
         }
+      });
+
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
+      // Keyboard-only editing: plain Up / Down move the block selection, Enter opens the selected
+      // block (the Enter of a focused block is the page input's; this one covers a page that lost
+      // the focus to the body). The edit-mode toggle may hold the focus right after it was pressed.
+      document.addEventListener("keydown", (event) => {
+        if (!state.editMode || event.isComposing || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+        const arrow = event.key === "ArrowUp" || event.key === "ArrowDown";
+        if (!arrow && event.key !== "Enter") return;
+        if (state.activeBlockEdit || state.activeFrontmatterEdit || event.defaultPrevented) return;
+        const target = event.target;
+        const toggle = target instanceof Element && target === rt.editModeButton;
+        if (!toggle && ownsKeys(target, "[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]", true)) return;
+        const focused = target instanceof Element ? rt.insertPoints.blockOfTarget(target) : undefined;
+        if (!toggle && !focused && target instanceof Element
+          && target !== document.body && target !== document.documentElement) return;
+        if (arrow) {
+          event.preventDefault?.();
+          event.stopPropagation?.();
+          stepSelection(event.key === "ArrowUp" ? -1 : 1);
+          return;
+        }
+        if (focused || !blockSelection.isActive()) return;
+        const blocks = syncSelectionModel();
+        const free = blockSelection.startIndex === blockSelection.anchorIndex ? blockSelection.endIndex : blockSelection.startIndex;
+        const block = blocks[free!];
+        if (!block) return;
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        rt.editMode.openMappedEditor(block, block);
       });
 
       document.addEventListener("keydown", (event) => {

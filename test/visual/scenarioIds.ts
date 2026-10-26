@@ -596,6 +596,8 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "toolbar-navigation/v39-sticky-running-text-light-900": "In the light preview scrolled to a heading inside a note, the sticky band shows the headings of the running text only and never the heading inside the note.",
   "toolbar-navigation/v40-sticky-running-text-dark-900": "In the dark preview scrolled to a heading inside a note, the sticky band shows the headings of the running text only and never the heading inside the note.",
   "block-editing/v17-block-selection-light-900": "In edit mode a Shift+click on two blocks outlines both as selected, announces two selected blocks and opens no editor.",
+  "block-editing/v18-keyboard-selection-cream-900": "In the cream preview, Down, Down, Enter and Escape from the keyboard open and close the second block and leave it outlined as selected, with no editor open.",
+  "block-editing/v19-keyboard-selection-dark-900": "In the dark preview, Down, Down, Enter and Escape from the keyboard open and close the second block and leave it outlined as selected, with no editor open.",
   "palette-slash/v21-slash-gfm-light-360": "In a 360 px light pane the gfm slash menu opens inside the pane, uncovered and clear of the toolbar, and flips above the caret near the bottom.",
   "layout-width/v85-max-width-setting-light-2000": "A 1400 px maximum content width is honoured in a 2000 px pane: the column is exactly 1400 px wide and centred.",
   "review-annotations/v14-incoming-bars-light-900": "Incoming line ranges sent by the host draw one 3 px green square-ended bar per block they meet, all in one column at the left margin and as tall as their blocks.",
