@@ -185,3 +185,35 @@ test("T35: cellSafeEdit keeps a selection inside the inserted text on the same c
   assert.equal(edit.selectionStart, 2);
   assert.equal(edit.selectionEnd, 6);
 });
+
+/** Applies the delete-line edit to `value` with the selection `[start, end]`; the text with `|` at the caret. */
+function deleteLine(value: string, start: number, end = start): string | undefined {
+  const edit = tools.deleteLine(value, start, end);
+  if (!edit) return undefined;
+  const text = value.slice(0, edit.start) + edit.text + value.slice(edit.end);
+  return text.slice(0, edit.selectionStart) + "|" + text.slice(edit.selectionStart);
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+test("CR 119: deleteLine removes the caret line with its break and keeps the column on the next line", () => {
+  assert.equal(deleteLine("one\ntwo\nthree", 5), "one\nt|hree");
+  assert.equal(deleteLine("one\ntwo\nthree", 1), "t|wo\nthree");
+  assert.equal(deleteLine("abcdef\nxy\nz", 4), "xy|\nz", "the column is cut to the next line's length");
+  assert.equal(deleteLine("a\n\nb", 2), "a\n|b", "an empty line goes too");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+test("CR 119: deleteLine on the last line takes the break before it and moves the caret up", () => {
+  assert.equal(deleteLine("one\ntwo\nthree", 10), "one\ntw|o");
+  assert.equal(deleteLine("one\ntwo\n", 8), "one\n|two", "the empty line after the final break goes");
+  assert.equal(deleteLine("only", 2), "|", "the only line leaves an empty text");
+  assert.equal(deleteLine("", 0), undefined, "no text, no edit");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+test("CR 119: deleteLine removes every line a selection touches, not the line it ends at the start of", () => {
+  assert.equal(deleteLine("a\nb\nc\nd", 2, 5), "a\n|d", "a selection over b and c");
+  assert.equal(deleteLine("a\nb\nc\nd", 1, 4), "c|\nd", "from the end of a to the start of c: a and b");
+  assert.equal(deleteLine("a\nb\nc\nd", 2, 4), "a\n|c\nd", "ending at the start of c leaves c alone");
+  assert.equal(deleteLine("a\nb\nc", 5, 0), "|", "a backward selection over everything");
+});

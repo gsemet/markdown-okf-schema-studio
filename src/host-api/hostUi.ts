@@ -33,6 +33,11 @@ export interface HostUi {
   pickFile(options: PickFileOptions): PromiseLike<PickedFile | undefined>;
   /** Shows the host's list of problems (diagnostics). */
   showProblems(): PromiseLike<void>;
+  /**
+   * Tells the host whether a preview text box is being edited in the focused preview, so its key
+   * bindings for undo, redo, select all and delete line apply (VS Code: a `when` context).
+   */
+  setPreviewEditing(editing: boolean): void;
   /** The text on the clipboard. */
   readClipboard(): PromiseLike<string>;
   /** Puts `text` on the clipboard. */

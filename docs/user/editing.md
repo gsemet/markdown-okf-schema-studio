@@ -35,6 +35,13 @@ environments),
   Alt+Up/Down moves the focused block; Cmd/Ctrl+Alt+Up/Down does it from the block text box.
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
+  In a block or table-cell text box the VS Code keys apply: Cmd/Ctrl+Z undoes and
+  Cmd+Shift+Z (Ctrl+Shift+Z or Ctrl+Y) redoes the last change, as many times as you need;
+  Cmd/Ctrl+A selects the whole text of the text box; Cmd/Ctrl+Shift+K deletes the current line or
+  the selected lines. They are the commands "Undo in the Edited Text Box", "Redo in the Edited Text
+  Box", "Select All in the Edited Text Box" and "Delete Line in the Edited Text Box" (key
+  bindings only, none in the Command Palette) while a text box is open in the focused preview, so
+  rebinding them in Keyboard Shortcuts changes the keys.
   The Thread button (or `/thread`) inserts an inline comment thread after the block: a
   `<!-- THREAD` comment holding `Author (YYYY-MM-DD HH:MM):` headers, each followed by the indented
   text of the message. In the preview it is a green chip with a speech bubble; click it to read the

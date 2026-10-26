@@ -64,6 +64,7 @@ export const INTEGRATION_TESTS: readonly IntegrationTestRow[] = [
   { file: "test/integration/stockCoexistence.test.ts", group: "lifecycle-sync", locks: "Coexists with the built-in Markdown preview; status-page layout scoped by a body marker" },
   { file: "test/integration/previewEditing.test.ts", group: "frontmatter-editing", locks: "Frontmatter saves (values, lists, nullable, afterField), block edit protocol, insertion, edit lock after reload, copy-code message (+ frontmatter-e2e captures)" },
   { file: "test/integration/previewHistory.test.ts", group: "toolbar-navigation", locks: "Back/Next across documents and in-page anchors and (label)= targets; refused while a block editor is open; external links not recorded" },
+  { file: "test/integration/editKeys.test.ts", group: "block-editing", locks: "Real keys in the block text box through VS Code key bindings: several undo and redo steps, select all of the box, delete line in one undoable step" },
   { file: "test/integration/paletteMode.test.ts", group: "palette-slash", locks: "Palette mode: setting gives the start, page choice stored per workspace and wins, invalid mode not stored" },
   { file: "test/integration/labelRename.test.ts", group: "myst", locks: "Label rename from the anchor icon: one edit, one undo, stale line refused" },
   { file: "test/integration/blockMove.test.ts", group: "block-editing", locks: "Block move from the insert bar: one swap, one undo; stale/overlapping/frontmatter/include moves refused" },

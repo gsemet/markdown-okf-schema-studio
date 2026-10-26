@@ -44,6 +44,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewEditorWatch: { editId: "e" },
   previewPlantUmlIncludesChanged: {},
   previewPairing: { pairedTextEditor: true },
+  previewEditCommand: { command: "undo" },
   themeChanged: { themeKind: 2 },
 };
 
@@ -83,11 +84,14 @@ test("each rule matches the identity it names, and only that", () => {
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-062
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-063
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-064
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
 test("the payload checks refuse what the page used to refuse", () => {
   const refused: Array<[HostToPageType, Record<string, unknown>]> = [
     ["previewPropertiesTable", { markup: 42 }],
     ["previewLinkTargets", { targets: "none" }],
     ["previewFlushEdit", { flushId: 42 }],
+    ["previewEditCommand", { command: "format" }],
+    ["previewEditCommand", { command: undefined }],
     ["previewEditorWatch", { editId: undefined }],
     ["previewContentPatch", { next: undefined }],
     ["previewContentPatch", { next: { revision: "8", requestId: 12 } }],

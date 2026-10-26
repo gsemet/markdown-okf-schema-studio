@@ -239,6 +239,17 @@ export interface ThemeChangedMessage extends RenderMessage<"themeChanged"> {
   themeKind: number;
 }
 
+/** The editing commands VS Code's own key bindings run on the text box that has the caret. */
+export const PREVIEW_EDIT_COMMANDS = ["undo", "redo", "selectAll", "deleteLine"] as const;
+
+/** One of {@link PREVIEW_EDIT_COMMANDS}. */
+export type PreviewEditCommandName = (typeof PREVIEW_EDIT_COMMANDS)[number];
+
+/** A key binding of the host ran an editing command: the page applies it to the focused text box. */
+export interface PreviewEditCommandMessage extends RenderMessage<"previewEditCommand"> {
+  command: PreviewEditCommandName;
+}
+
 /** Every message a host sends to a preview page. */
 export type HostToPageMessage =
   | PreviewPendingOverlayMessage
@@ -263,6 +274,7 @@ export type HostToPageMessage =
   | PreviewEditorWatchMessage
   | PreviewPlantUmlIncludesChangedMessage
   | PreviewPairingMessage
+  | PreviewEditCommandMessage
   | ThemeChangedMessage;
 
 /** The type names of {@link HostToPageMessage}. */
@@ -369,6 +381,11 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewEditorWatch: { addressing: "own-id", isValid: (message) => typeof message.editId === "string" },
     previewPlantUmlIncludesChanged: { addressing: "document" },
     previewPairing: render,
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
+    previewEditCommand: {
+      addressing: "render",
+      isValid: (message) => (PREVIEW_EDIT_COMMANDS as readonly unknown[]).includes(message.command),
+    },
     themeChanged: render,
   };
   return {

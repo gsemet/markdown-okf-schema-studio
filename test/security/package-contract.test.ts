@@ -55,7 +55,8 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(packageJson.name, "markdown-okf-schema-studio");
   assert.equal(packageJson.displayName, "Markdown OKF-Schema Studio");
   assert.match(packageJson.scripts["test:integration"], /npm run bundle/u);
-  assert.deepEqual(packageJson.contributes.commands, [
+  // CR 119 appended the four edit-mode commands (asserted below); the first two are unchanged.
+  assert.deepEqual(packageJson.contributes.commands.slice(0, 2), [
     {
       command: "markdown-okf-schema-studio.openPreview",
       title: "Open Preview to Side",
@@ -77,7 +78,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
     selector: [{ filenamePattern: "*.md" }],
     priority: "option",
   }]);
-  assert.deepEqual(packageJson.contributes.menus.commandPalette, [
+  assert.deepEqual((packageJson.contributes.menus.commandPalette as unknown[]).slice(0, 2), [
     {
       command: "markdown-okf-schema-studio.openPreview",
       when: "resourceExtname == .md",
@@ -101,7 +102,7 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       group: "navigation",
     },
   ]);
-  assert.deepEqual(packageJson.contributes.keybindings, [
+  assert.deepEqual((packageJson.contributes.keybindings as unknown[]).slice(0, 1), [
     {
       command: "markdown-okf-schema-studio.openPreview",
       key: "ctrl+k shift+v",
@@ -266,4 +267,29 @@ test("the built-in PlantUML engine ships pinned and the JAR is an explicit opt-i
   assert.match(esbuild, /out\/bundle\/plantumlPreview\.js/u);
   const ignore = fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8").split(/\r?\n/u);
   assert.ok(!ignore.some((line) => /^out\/bundle|^out\/\*\*/u.test(line.trim())), "the webview bundles must ship in the VSIX");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+test("CR 119: undo, redo, select all and delete line are VS Code key bindings on the preview edit context", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
+    contributes: {
+      commands: Array<{ command: string; title: string; category?: string }>;
+      menus: { commandPalette: Array<{ command: string; when: string }> };
+      keybindings: Array<{ command: string; key: string; mac?: string; when: string }>;
+    };
+  };
+  const prefix = "markdown-okf-schema-studio.";
+  const ids = ["editUndo", "editRedo", "editSelectAll", "editDeleteLine"].map((name) => prefix + name);
+  assert.deepEqual(packageJson.contributes.commands.slice(2).map((entry) => entry.command), ids);
+  assert.ok(packageJson.contributes.commands.slice(2).every((entry) => entry.category === "Markdown OKF-Schema Studio"));
+  assert.deepEqual(packageJson.contributes.menus.commandPalette.slice(2), ids.map((command) => ({ command, when: "false" })),
+    "the commands are for key bindings, not for the palette");
+  const when = "markdownOkfSchemaStudio.previewEditing";
+  assert.deepEqual(packageJson.contributes.keybindings.slice(1), [
+    { command: ids[0], key: "ctrl+z", mac: "cmd+z", when },
+    { command: ids[1], key: "ctrl+y", mac: "cmd+shift+z", when },
+    { command: ids[1], key: "ctrl+shift+z", when },
+    { command: ids[2], key: "ctrl+a", mac: "cmd+a", when },
+    { command: ids[3], key: "ctrl+shift+k", mac: "cmd+shift+k", when },
+  ]);
 });

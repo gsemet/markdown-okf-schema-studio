@@ -4,6 +4,8 @@
  * in emphasis marks, the palette shortcuts, and text edits that keep the browser's undo stack.
  */
 
+import type { PreviewEditCommandName } from "../../core/protocol/hostToPage";
+import { editCommandOfKey } from "../modules/editCommandKey";
 import { isApplePlatform } from "../pageSettings";
 import type { CaretPosition, PageRuntime, TextControl, TextControls } from "./pageRuntime";
 
@@ -151,6 +153,40 @@ export function installTextControls(rt: PageRuntime): TextControls {
     return true;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
+  // Undo, redo, select all and delete line in a block or cell text box are VS Code key bindings:
+  // the page cancels the native action and lets the key reach VS Code, whose `previewEditCommand`
+  // answer (see runEditCommand) applies the command, so a rebound key works.
+  function hostEditKey(event: KeyboardEvent): boolean {
+    if (!editCommandOfKey(event, isApplePlatform())) return false;
+    event.preventDefault?.();
+    return true;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
+  // Applies an editing command to the text box that has the focus; false when none has it.
+  function runEditCommand(command: PreviewEditCommandName): boolean {
+    const control = document.activeElement as TextControl | null;
+    const tagName = String(control?.tagName || "").toUpperCase();
+    if (!control || (tagName !== "TEXTAREA" && tagName !== "INPUT")) return false;
+    if (command === "selectAll") {
+      control.setSelectionRange(0, String(control.value ?? "").length);
+      return true;
+    }
+    if (command === "deleteLine") {
+      const edit = textEditing.deleteLine(
+        String(control.value ?? ""),
+        Number(control.selectionStart),
+        Number(control.selectionEnd),
+      );
+      if (edit) applyTextEdit(control, edit, () => control.dispatchEvent?.(new Event("input", { bubbles: true })));
+      return true;
+    }
+    control.focus({ preventScroll: true });
+    document.execCommand?.(command);
+    return true;
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-FMEDIT-019
   function keepUndoInControl(event: KeyboardEvent): boolean {
     const mod = event.metaKey || event.ctrlKey;
@@ -263,6 +299,8 @@ export function installTextControls(rt: PageRuntime): TextControls {
     boundaryNavigation,
     homeEndInControl,
     keepUndoInControl,
+    hostEditKey,
+    runEditCommand,
     wrapSelectionInControl,
     paletteShortcut,
     applyTextEdit,

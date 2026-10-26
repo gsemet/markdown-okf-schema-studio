@@ -317,5 +317,33 @@ export function createTextEditingTools() {
     };
   }
 
-  return { continueOnEnter, indentSelection, wrapSelection, mapRenderedCaret, cellSafeEdit };
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
+  /**
+   * The edit of VS Code's "Delete Line": removes every line the selection touches, with one line
+   * break, and puts the caret on the same column of the line that follows (of the previous line
+   * when the last line goes). A selection that ends at the start of a line leaves that line alone.
+   * `undefined` when there is no text.
+   */
+  function deleteLine(value: string, selectionStart: number, selectionEnd: number): TextEdit | undefined {
+    if (value === "") return undefined;
+    const start = Math.max(0, Math.min(selectionStart, selectionEnd, value.length));
+    const end = Math.max(start, Math.min(Math.max(selectionStart, selectionEnd), value.length));
+    const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+    const lastTouched = end > start && value[end - 1] === "\n" ? end - 1 : end;
+    const breakAfter = value.indexOf("\n", lastTouched);
+    const column = start - lineStart;
+    if (breakAfter !== -1) {
+      const nextStart = breakAfter + 1;
+      const nextEnd = value.indexOf("\n", nextStart);
+      const nextLength = (nextEnd === -1 ? value.length : nextEnd) - nextStart;
+      const caret = lineStart + Math.min(column, nextLength);
+      return { start: lineStart, end: nextStart, text: "", selectionStart: caret, selectionEnd: caret };
+    }
+    if (lineStart === 0) return { start: 0, end: value.length, text: "", selectionStart: 0, selectionEnd: 0 };
+    const previousStart = value.lastIndexOf("\n", lineStart - 2) + 1;
+    const caret = previousStart + Math.min(column, lineStart - 1 - previousStart);
+    return { start: lineStart - 1, end: value.length, text: "", selectionStart: caret, selectionEnd: caret };
+  }
+
+  return { continueOnEnter, indentSelection, wrapSelection, mapRenderedCaret, cellSafeEdit, deleteLine };
 }

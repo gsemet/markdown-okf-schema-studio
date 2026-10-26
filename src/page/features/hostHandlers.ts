@@ -31,6 +31,8 @@ export function registerHostHandlers(rt: PageRuntime): void {
     }
     rt.frontmatter.applyPropertiesMarkup(message.markup, message.seq);
   });
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
+  hostMessages.on("previewEditCommand", (message) => rt.textControls.runEditCommand(message.command));
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-156
   hostMessages.on("previewShowComments", (message) => {
     parts.chipToggle.setShowComments(message.showComments !== false);
