@@ -70,6 +70,13 @@ When the host moves a block past its neighbour, it SHALL replace only the lines 
 | Three blank-separated blocks, the first moved down and moved up again | The text equals the original |
 | Blocks without a blank line, the same two moves | The added blank line stays, so the text differs (see the scenario above) |
 
+### Scenario (boundary): A list mapped up to its trailing blank line
+
+| Input | Outcome |
+| --- | --- |
+| A list followed by a blank line, sent with the range the renderer maps for it (the list's lines and that blank line), moved down or up past a heading | The blank lines at the end of the range are dropped first; the move is done and no "The preview is out of date" refusal is shown |
+| A range that is only blank lines | Refused as a range that does not match the document |
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-124: the host refuses ranges that do not match the document, blocks in the frontmatter and text between the blocks.
@@ -80,5 +87,6 @@ When the host moves a block past its neighbour, it SHALL replace only the lines 
 
 - Method: test/core/mapping/blockMove.test.ts: `swaps two blocks and keeps the separator and the final line break`, `only the lines from the first block to the second block change` and `reports the new first line of each block` (scenario 1), `several blank lines between the blocks are kept as they are` (scenario 2), `keeps CRLF line breaks, inside the blocks and between them` (scenario 3), `glued blocks get a blank line instead of merging into one paragraph` and `a block glued to its neighbours stays apart after the move` (scenario 4), `move down then up restores the document` (scenario 5).
 - Method: test/core/edits/sourceEdits.test.ts: `a block move swaps the blocks in one edit and gives the moved block's new first line` (scenario 1).
-- Method: test/integration/blockMove.test.ts: the move in the real host (scenarios 1 and 5, down then up).
+- Method: test/core/edits/sourceEdits.test.ts: `a list mapped up to its trailing blank line moves like any block` (scenario 6).
+- Method: test/integration/blockMove.test.ts: the move in the real host (scenarios 1 and 5, down then up), and `runMappedRanges`, a document with a frontmatter, headings and a list moved with the ranges the renderer maps (scenario 6).
 - Criteria: Applying the edit gives the expected text and the reported new first line. No two blocks that were separate become one paragraph. Identity for blank-separated blocks.

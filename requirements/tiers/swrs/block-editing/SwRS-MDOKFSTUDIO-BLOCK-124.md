@@ -47,7 +47,7 @@ When the ranges of a block move, the range of a copy or a cut, or the line of a 
 | Two ranges that overlap | The move is refused with "The preview is out of date. Refresh it and try again." |
 | Unordered ranges | Refused with the same reason |
 | A range outside the text | Refused with the same reason |
-| A range whose first or last line is blank | Refused with the same reason |
+| A range whose first line is blank, or a range of blank lines only | Refused with the same reason (blank lines at the end of a range are dropped before the check, see SwRS-MDOKFSTUDIO-BLOCK-117) |
 
 ### Scenario (refusal): Copy, cut and paste ranges that do not match the document
 
