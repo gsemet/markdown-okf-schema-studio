@@ -814,6 +814,61 @@ test("marks editor selection without moving the preview when following is disabl
 
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+test("marks the block that contains the cursor line, not the one that starts nearest", () => {
+  const harness = createRuntimeHarness({
+    scrollPreviewWithEditor: false,
+    markEditorSelection: true,
+    secondBlockEndLine: 90,
+  });
+  harness.dispatchMessage({
+    type: "sourceScroll",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    line: 80,
+    selectionLine: 80,
+  });
+  harness.flushFrames();
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-current"), "true");
+  assert.equal(harness.mappings[2].getAttribute("data-sphinx-preview-current"), null);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+test("a selection line between two blocks marks the block with the nearest edge", () => {
+  const mark = (selectionLine: number) => {
+    const harness = createRuntimeHarness({
+      scrollPreviewWithEditor: false,
+      markEditorSelection: true,
+      secondBlockEndLine: 90,
+    });
+    harness.dispatchMessage({
+      type: "sourceScroll", documentId: "file:///active.md", revision: 7, requestId: 11,
+      line: selectionLine, selectionLine,
+    });
+    harness.flushFrames();
+    return harness.mappings.map((element) => element.getAttribute("data-sphinx-preview-current"));
+  };
+  assert.deepEqual(mark(94), [null, "true", null], "the end of block 50-90 is nearer than line 100");
+  assert.deepEqual(mark(97), [null, null, "true"], "line 100 is nearer than the end of block 50-90");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+test("a selection line inside two nested blocks marks the innermost one", () => {
+  const harness = createRuntimeHarness({
+    scrollPreviewWithEditor: false,
+    markEditorSelection: true,
+    secondBlockEndLine: 120,
+  });
+  harness.dispatchMessage({
+    type: "sourceScroll", documentId: "file:///active.md", revision: 7, requestId: 11,
+    line: 100, selectionLine: 100,
+  });
+  harness.flushFrames();
+  assert.equal(harness.mappings[2].getAttribute("data-sphinx-preview-current"), "true");
+  assert.equal(harness.mappings[1].getAttribute("data-sphinx-preview-current"), null);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-059
 test("a history move scrolls the preview even when following the editor is disabled", () => {
   const send = (extra: Record<string, unknown>) => {

@@ -43,9 +43,8 @@ As a reader, I open a table of contents next to a long document when I want an o
 
 - The column is off by default; a stored workspace choice opens it; the state of a restored panel wins.
 - On a narrow pane the column is hidden while the button stays pressed, and the text keeps its width.
-- Entries are indented by heading level; the column lists h1 to h4 and says "No headings" for an empty document.
+- Entries are indented by heading level; the column lists h1 to h4 and says "No headings" for an empty document; headings inside admonitions and the properties table are not listed.
 - The folded sections are remembered for the panel; the current section stays visible in the column.
 - The text stays clear of the column in Margin, Auto and Full width mode and at the highest zoom, with no sideways scrolling of the page.
 - The column starts below the toolbar and stays inside the pane.
 - The pane width at which the column appears is specified in the software requirements.
-- Known issue: headings inside admonitions, the properties table and the sticky band are never listed.

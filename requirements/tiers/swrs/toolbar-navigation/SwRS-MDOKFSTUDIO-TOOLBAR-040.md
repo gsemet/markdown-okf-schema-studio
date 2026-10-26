@@ -61,12 +61,12 @@ When the column is built, the extension SHALL list the headings h1 to h4 of the 
 ### Scenario (nominal): Fold
 - GIVEN a parent entry with two children
 - WHEN its twisty is pressed
-- THEN the children are hidden, aria-expanded is false, and sibling entries stay shown; pressed again, they show
+- THEN the children are hidden, aria-expanded is false, the accessible name becomes Unfold followed by the heading, and sibling entries stay shown; pressed again, they show and the name is Fold again
 
 ### Scenario (boundary): Twisty by entry
 | Input | Outcome |
 | --- | --- |
-| An entry with deeper entries below it | It has a twisty button that hides or shows exactly its own subtree, down to the next entry of the same or a shallower level, and sets aria-expanded |
+| An entry with deeper entries below it | It has a twisty button that hides or shows exactly its own subtree, down to the next entry of the same or a shallower level, and sets aria-expanded; its accessible name is Fold followed by the heading while the subtree is shown and Unfold followed by the heading while it is folded |
 | An entry with no deeper entry below it | It has no twisty |
 
 ### Scenario (nominal): Folded sections are remembered
@@ -79,12 +79,8 @@ When the column is built, the extension SHALL list the headings h1 to h4 of the 
 - WHEN the first is folded
 - THEN only the first is folded, because the key holds the occurrence number
 
-### Known issues
-- Known issue: the sticky band follows every h1 to h6 heading, including those inside admonitions and the properties table, so a heading can appear in the band and never in the column.
-- Known issue: the accessible name of the twisty is Fold followed by the heading in both states; only aria-expanded changes, and no test uses the keyboard on it (the native button handles Enter and Space).
-
 ### Verification notes
-- Method: test/page/modules/tocColumn.test.ts (Four levels and Indent, text and excluded headings: the entries list h1 to h4 with their level and without the permalink glyph, headings in properties, admonitions, block editors and the sticky band are left out, a comment chip and its hidden body stay out of the entry label and a TODO word chip stays in; No headings: an empty document shows No headings; Landmark: the TOC is off by default and the page is marked closed, asserting the aria-label; Fold and Twisty by entry: only parent entries get a twisty with aria-expanded, collapsing a parent hides its descendants, collapsing a middle parent hides only its own subtree; Folded sections are remembered and Same text twice: a rebuild keeps it collapsed and a repeated heading text is told apart by its occurrence). The shallowest-level indent, the empty-text skip and the case of only excluded headings are untested.
+- Method: test/page/modules/tocColumn.test.ts (Four levels and Indent, text and excluded headings: the entries list h1 to h4 with their level and without the permalink glyph, headings in properties, admonitions, block editors and the sticky band are left out, a comment chip and its hidden body stay out of the entry label and a TODO word chip stays in; No headings: an empty document shows No headings; Landmark: the TOC is off by default and the page is marked closed, asserting the aria-label; Fold and Twisty by entry: only parent entries get a twisty with aria-expanded, collapsing a parent hides its descendants, collapsing a middle parent hides only its own subtree; the twisty name switches between Fold and Unfold; Folded sections are remembered and Same text twice: a rebuild keeps it collapsed and a repeated heading text is told apart by its occurrence). The shallowest-level indent, the empty-text skip and the case of only excluded headings are untested.
 - Method: test/page/runtimePageControls.test.ts (Folded sections are remembered: T13, a state snapshot keeps the TOC visibility and the folded sections).
 - Method: test/visual/capture_layout_checks.py (check_toc_column: levels 1 to 4 and no h5; a twisty hides and shows sub-entries).
 - Criteria: levels listed are 1..4; entries equal the headings that match no excluded selector; the empty paragraph carries the text No headings; nav[data-sphinx-preview-toc] has aria-label Table of contents; hidden entries are those below a folded parent; tocCollapsed in the webview state lists the keys.

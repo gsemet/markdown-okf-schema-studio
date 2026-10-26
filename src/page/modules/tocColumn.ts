@@ -170,7 +170,9 @@ export function installTocColumn(
         : index;
       if (hidden[index]) entry.item.setAttribute("hidden", "");
       else entry.item.removeAttribute("hidden");
-      entry.twisty?.setAttribute("aria-expanded", collapsedKeys.has(entry.key) ? "false" : "true");
+      const folded = collapsedKeys.has(entry.key);
+      entry.twisty?.setAttribute("aria-expanded", folded ? "false" : "true");
+      entry.twisty?.setAttribute("aria-label", (folded ? "Unfold " : "Fold ") + entry.text);
     });
     track(true);
   };

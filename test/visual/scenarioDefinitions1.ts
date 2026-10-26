@@ -5,7 +5,9 @@
 
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/core/configuration/previewConfiguration";
 import {
+  MARK_CONTAINING_BLOCK_ASSERTIONS,
   NARROW,
+  STICKY_RUNNING_TEXT_ASSERTIONS,
   type ScenarioDefinition,
   WIDE,
   XLARGE,
@@ -1133,4 +1135,34 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Edit mode on with an empty file after pressing Enter in the preview: the new-block editor is "
       + "open with its caret in it, replacing the Start writing button, with at least 20 px above its frame.",
   },
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+    id: `toolbar-navigation/v${39 + index}-sticky-running-text-${theme}-900`,
+    fixture: "62-cursor-block",
+    theme,
+    stickyHeadingDepth: 2,
+    ...WIDE,
+    scroll: { kind: "stickyHeading" as const, value: ".admonition h3" },
+    expectedStickyHeadings: "# Fleet handbook\n## Overview",
+    contentAssertions: STICKY_RUNNING_TEXT_ASSERTIONS,
+    description: `${theme} preview scrolled to a heading inside a note: the sticky band shows the headings of the running text only, `
+      + "so the note's own heading never appears in the band.",
+  })),
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-013
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-128
+    id: `toolbar-navigation/v${37 + index}-mark-containing-block-${theme}-900`,
+    fixture: "62-cursor-block",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: {
+      markEditorSelection: true as const,
+      hostMessages: [{ delayMs: 50, data: { type: "sourceScroll", line: 20, selectionLine: 32 } }],
+    },
+    contentAssertions: MARK_CONTAINING_BLOCK_ASSERTIONS,
+    description: `With the mark-editor-selection setting on (${theme}), a selection line inside a long code block outlines that block, `
+      + "not the paragraph below it that starts closer to the line.",
+  })),
 ];

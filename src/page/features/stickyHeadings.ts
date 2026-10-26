@@ -105,14 +105,22 @@ export function installStickyHeadings(
   let headingList: Element[] = [];
   let headingTops: Array<{ index: number; top: number }> = [];
 
+  // The band follows the headings of the running text: the ones inside an admonition or the
+  // properties table are left out (the table of contents leaves them out too), and so is a heading
+  // without height, which is neither the current heading nor a parent.
+  const BAND_EXCLUDED = "[data-okf-properties], .admonition, div[class*=\"admonition-\"]";
+
   function measureHeadings(): void {
-    headingList = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"));
     const scrollY = window.scrollY;
+    headingList = [];
     headingTops = [];
-    headingList.forEach((heading, index) => {
+    for (const heading of Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"))) {
+      if (heading.closest?.(BAND_EXCLUDED)) continue;
       const bounds = heading.getBoundingClientRect();
-      if (bounds.height > 0) headingTops.push({ index, top: bounds.top + scrollY });
-    });
+      if (!(bounds.height > 0)) continue;
+      headingTops.push({ index: headingList.length, top: bounds.top + scrollY });
+      headingList.push(heading);
+    }
     headingTops.sort((left, right) => left.top - right.top || left.index - right.index);
   }
 

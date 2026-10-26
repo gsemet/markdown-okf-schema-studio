@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Sticky headings and table of contents: the pinned heading band no longer lists a collapsed
+  (zero-height) heading as a parent, nor headings inside admonitions and the properties table, which
+  the table of contents leaves out too; the fold button of a table-of-contents entry is named "Unfold"
+  while its section is folded; the editor-selection outline goes to the block that contains the cursor
+  line instead of the block whose first line is nearest.
 - Links and history in the preview: a link to a missing or blocked file keeps its text and colour and
   is followed by a small warning icon whose tooltip names the problem (for example "File not found:
   docs/guid.md"); link tooltips are refreshed when the preview regains focus; Back and Next within the

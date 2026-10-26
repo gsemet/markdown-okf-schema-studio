@@ -128,7 +128,7 @@ test("a missing or blocked target keeps the link and adds a warning icon", () =>
 interface BandOptions {
   width: number;
   bandHeight: number;
-  headings: Array<{ tag: string; text: string; top: number; height: number }>;
+  headings: Array<{ tag: string; text: string; top: number; height: number; excluded?: boolean }>;
   scrollY: number;
   policyOffset: number;
 }
@@ -145,6 +145,7 @@ function bandHarness(options: BandOptions) {
     tagName: heading.tag.toUpperCase(),
     textContent: heading.text,
     getBoundingClientRect: () => ({ top: heading.top - options.scrollY, height: heading.height }),
+    closest: (selector: string) => (heading.excluded && selector.includes(".admonition") ? {} : null),
   }));
   const doc = {
     querySelector: (selector: string) => (selector.includes("sticky-headings") ? band : null),
@@ -163,20 +164,49 @@ function bandHarness(options: BandOptions) {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
-test("the sticky band follows every heading from h1 to h6 and ignores a heading without height", () => {
+test("the sticky band follows every heading from h1 to h6 of the running text", () => {
   const { band, sticky, selectors } = bandHarness({
     width: 800, bandHeight: 60, scrollY: 250, policyOffset: 30,
     headings: [
       { tag: "h1", text: "Title", top: 0, height: 30 },
       { tag: "h2", text: "Section", top: 100, height: 24 },
-      { tag: "h5", text: "Deep in an admonition", top: 200, height: 18 },
+      { tag: "h5", text: "Deep", top: 200, height: 18 },
       { tag: "h3", text: "Hidden", top: 240, height: 0 },
     ],
   });
   sticky.updateStickyHeadings();
   assert.equal(selectors[0], "h1, h2, h3, h4, h5, h6");
-  assert.equal(band.textContent, "# Title\n## Section\n##### Deep in an admonition");
+  assert.equal(band.textContent, "# Title\n## Section\n##### Deep");
   assert.equal(band.hidden, false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+test("a heading without height is not a parent line of the band", () => {
+  const { band, sticky } = bandHarness({
+    width: 800, bandHeight: 60, scrollY: 250, policyOffset: 30,
+    headings: [
+      { tag: "h1", text: "Title", top: 0, height: 30 },
+      { tag: "h2", text: "Collapsed", top: 100, height: 0 },
+      { tag: "h3", text: "Part", top: 200, height: 18 },
+    ],
+  });
+  sticky.updateStickyHeadings();
+  assert.equal(band.textContent, "# Title\n### Part");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
+test("a heading inside an admonition or the properties table never enters the band", () => {
+  const { band, sticky } = bandHarness({
+    width: 800, bandHeight: 60, scrollY: 250, policyOffset: 30,
+    headings: [
+      { tag: "h1", text: "Title", top: 0, height: 30 },
+      { tag: "h2", text: "In a note", top: 100, height: 24, excluded: true },
+      { tag: "h3", text: "Part", top: 200, height: 18 },
+      { tag: "h4", text: "In a note too", top: 230, height: 18, excluded: true },
+    ],
+  });
+  sticky.updateStickyHeadings();
+  assert.equal(band.textContent, "# Title\n### Part");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-030
