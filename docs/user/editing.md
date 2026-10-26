@@ -58,7 +58,7 @@ environments),
   colour code), code blocks with a language,
   blockquotes, horizontal rules and images picked from a file dialog (or pasted: a screenshot on the
   clipboard is saved next to the document as `image.png`, `image-1.png`, … and inserted as a
-  paragraph of its own, with a blank line before and after it, and its alt text selected). An image
+  paragraph of its own, with a blank line before and after it, and its alt text selected; Enter keeps it and moves the caret just after the image). An image
   written inside a paragraph is drawn in its line of text; an image alone in its paragraph is a
   centred figure. Pasting rich text (from Google Docs, Word, a web page or VS Code) into a
   block editor inserts it as Markdown (headings, bold, italic, strikethrough, links, lists, code,

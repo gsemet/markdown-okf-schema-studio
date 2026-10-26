@@ -277,6 +277,20 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "line moved the caret to the first line without leaving the editor; typing * twice on the selected "
       + "word Wrapped shows **Wrapped** in the textarea, and undo and redo restored the text.",
   },
+  // CR 118: Enter on the selected alt text of a pasted image validates it and moves the caret after the image.
+  ...(["cream", "dark"] as const).map((mode, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+    id: `palette-slash/v${25 + index}-pasted-image-alt-enter-${mode}-900`,
+    fixture: "52-inline-image",
+    theme: "dark" as const,
+    ...(mode === "cream" ? { previewThemeMode: "cream" as const } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    pasteImageChecks: true,
+    description: `In the ${mode} theme an image pasted into a paragraph editor has its file name selected as alt text; `
+      + "Enter keeps the alt text and moves the caret just after the image instead of replacing the name by a line break.",
+  })),
   ...([["dark", 460], ["light", 900]] as const).map(([theme, width], index) => ({
     // @tests_req StRS-MDOKFSTUDIO-PALETTE-018
     // @tests_req SwRS-MDOKFSTUDIO-PALETTE-213

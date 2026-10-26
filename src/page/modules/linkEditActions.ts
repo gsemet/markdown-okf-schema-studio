@@ -110,6 +110,23 @@ export function imageDraft(ctx: EditActionContext): ImageDraft | undefined {
   return undefined;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-069
+/**
+ * Where the caret goes when Enter validates the alt text of an image: just after its closing
+ * parenthesis. `undefined` when the selection is not inside the alt text (brackets included
+ * on the inside only), so Enter keeps its normal behaviour there.
+ */
+export function imageAltExit(ctx: EditActionContext): number | undefined {
+  const { value, selectionStart, selectionEnd } = ctx;
+  for (const match of value.matchAll(IMAGE_PATTERN)) {
+    const start = match.index ?? 0;
+    const altStart = start + 2;
+    const altEnd = altStart + match[1].length;
+    if (selectionStart >= altStart && selectionEnd <= altEnd) return start + match[0].length;
+  }
+  return undefined;
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-092
 /** The edit that writes `[text](url)` over the range of the selection's link draft. */
 export function linkEdit(ctx: EditActionContext, text: string, url: string): TextEdit {
