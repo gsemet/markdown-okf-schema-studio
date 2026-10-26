@@ -33,6 +33,10 @@
   cell text boxes: Cmd/Ctrl+Z, Cmd+Shift+Z (Ctrl+Shift+Z or Ctrl+Y), Cmd/Ctrl+A and Cmd/Ctrl+Shift+K
   are VS Code key bindings on the open text box, so rebinding them in Keyboard Shortcuts applies.
   Delete line is one undoable step.
+- Keyboard-only block editing: in edit mode, with no editor open, Up and Down select a block
+  (starting at the block nearest the top of the pane) and move the selection, Enter opens the selected
+  block, and Escape or Cmd/Ctrl+Enter closes the editor and leaves its block selected, so a document
+  can be edited without the mouse.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when

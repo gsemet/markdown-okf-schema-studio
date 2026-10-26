@@ -19,6 +19,7 @@ user_need: "As a writer, I select a run of blocks with Shift+click or Shift+Arro
   while the document stays tidy: no double blank lines, no glued blocks."
 derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-001
+- SwRS-MDOKFSTUDIO-BLOCK-004
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-058
 - SwRS-MDOKFSTUDIO-BLOCK-124
