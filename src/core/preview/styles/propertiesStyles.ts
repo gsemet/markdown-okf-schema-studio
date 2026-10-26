@@ -1,4 +1,5 @@
 // @implements_req SwRS-MDOKFSTUDIO-CORE-050
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
 /**
  * The OKF frontmatter properties table and the motion rules (transitions, reduced motion).
  *
@@ -104,6 +105,38 @@ export const PROPERTIES_CSS = `
   padding: 0.25em 0.5em;
   border: none;
   background: none;
+}
+
+/* The key column fits its keys (CR 109): a key never breaks inside a word, the column takes the
+   width of the longest key up to 40% of the table, a longer key ends with an ellipsis (a key of
+   more than 24 characters carries its full name as tooltip), the header label "Names" stays whole and the value column wraps in the
+   rest. The preview-wide overflow-wrap: anywhere would otherwise shrink the column to one letter.
+   The section is the size container that 40cqw measures (a table box cannot be one). */
+[data-okf-properties] {
+  container-type: inline-size;
+}
+
+[data-okf-properties] .okf-properties tbody th[scope="row"]:not([colspan]) {
+  width: 1%;
+}
+
+#sphinx-myst-preview-content [data-okf-properties] .okf-properties tbody th:not([colspan]) .okf-name-cell {
+  max-width: calc(40cqw - 2em);
+}
+
+#sphinx-myst-preview-content [data-okf-properties] .okf-properties .okf-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+/* The key column is as wide as its longest key, which can be shorter than the "Names" label of the
+   header: the label never breaks inside the word either. */
+#sphinx-myst-preview-content [data-okf-properties] .okf-properties thead th:first-child {
+  white-space: nowrap;
+  overflow-wrap: normal;
 }
 
 [data-okf-properties] .okf-properties-docs th,

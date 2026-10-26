@@ -469,3 +469,12 @@
   group `requirements`) and runs through `uv run`. No requirement exists yet.
   Verification: `okfreq validate`, `okfreq lint --check` and `okfreq update-coverage --check` pass
   on the empty bundle (see the pull request for the run).
+
+## 2026-10-26
+
+- SwRS-MDOKFSTUDIO-FMSCHEMA-005: the key column of the frontmatter properties table keeps each key
+  on one line, takes the width of the longest key up to 40% of the table and cuts a longer key with
+  an ellipsis (CR 109). Verification: `just requirements-lint`.
+- SwRS-MDOKFSTUDIO-FMSCHEMA-005 (CR 109, round 2): the key column also keeps its width next to a long
+  description and a code block in the values, and the Names label never breaks inside the word.
+  Verification: `just requirements-lint`.

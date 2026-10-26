@@ -5,6 +5,8 @@
 
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/core/configuration/previewConfiguration";
 import {
+  FRONTMATTER_LONG_KEYS_ASSERTIONS,
+  FRONTMATTER_SKILL_ASSERTIONS,
   MARK_CONTAINING_BLOCK_ASSERTIONS,
   NARROW,
   STICKY_RUNNING_TEXT_ASSERTIONS,
@@ -1164,5 +1166,35 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     contentAssertions: MARK_CONTAINING_BLOCK_ASSERTIONS,
     description: `With the mark-editor-selection setting on (${theme}), a selection line inside a long code block outlines that block, `
       + "not the paragraph below it that starts closer to the line.",
+  })),
+  ...([
+    { n: "24", theme: "light", mode: "cream" },
+    { n: "25", theme: "dark", mode: undefined },
+  ] as const).map(({ n, theme, mode }) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+    id: `frontmatter-schema/v${n}-frontmatter-long-keys-${mode ?? theme}-900`,
+    fixture: "64-frontmatter-long-keys",
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    contentAssertions: FRONTMATTER_LONG_KEYS_ASSERTIONS,
+    description: `Plain frontmatter table with the keys name, description, metadata and a very long key, ${mode ?? theme} theme: `
+      + "the key column is as wide as its keys, never breaks a key inside a word, cuts the longest key with an ellipsis and a tooltip, and leaves the rest of the width to the values.",
+  })),
+  ...([
+    { n: "26", fixture: "65-frontmatter-skill-metadata", name: "skill-metadata-cream", theme: "light", mode: "cream", keys: 3 },
+    { n: "27", fixture: "66-frontmatter-short-keys", name: "short-keys-dark", theme: "dark", mode: undefined, keys: 3 },
+  ] as const).map(({ n, fixture, name, theme, mode, keys }) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+    id: `frontmatter-schema/v${n}-frontmatter-${name}-900`,
+    fixture,
+    theme,
+    ...(mode ? { previewThemeMode: mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    contentAssertions: FRONTMATTER_SKILL_ASSERTIONS(keys),
+    description: `Front matter with a long description and a long value next to short keys (${name}): `
+      + "the key column fits its keys, no key and not the Names label breaks inside a word, and the values take the rest of the width.",
   })),
 ];

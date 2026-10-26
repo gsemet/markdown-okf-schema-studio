@@ -145,6 +145,26 @@ test("properties tables fill the preview content column", () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+test("the key column of the properties table fits its keys and never breaks one inside a word", () => {
+  const rule = (selector: RegExp) => PREVIEW_THEME_CSS.match(new RegExp(`${selector.source}\\s*\\{([^}]*)\\}`, "u"))?.[1] ?? "";
+  const name = rule(/\.okf-properties \.okf-name-text/u);
+  assert.match(name, /white-space: nowrap;/u);
+  assert.match(name, /overflow-wrap: normal;/u);
+  assert.match(name, /text-overflow: ellipsis;/u);
+  assert.match(name, /overflow: hidden;/u);
+  assert.match(rule(/\.okf-properties tbody th\[scope="row"\]:not\(\[colspan\]\)/u), /width: 1%;/u);
+  assert.match(rule(/\.okf-properties tbody th:not\(\[colspan\]\) \.okf-name-cell/u), /max-width: calc\(40cqw - 2em\);/u);
+  assert.match(PREVIEW_THEME_CSS, /\n\[data-okf-properties\]\s*\{\s*container-type: inline-size;/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+test("the Names header label never breaks inside the word, even when every key is shorter", () => {
+  const header = PREVIEW_THEME_CSS.match(/\.okf-properties thead th:first-child\s*\{([^}]*)\}/u)?.[1] ?? "";
+  assert.match(header, /white-space: nowrap;/u);
+  assert.match(header, /overflow-wrap: normal;/u);
+});
+
 test("narrow properties wrap long paths without hiding expanded descriptions", () => {
   const narrowStyles = PREVIEW_THEME_CSS.split("@media (max-width: 640px) {")[1]?.split("\n[data-okf-properties] .okf-properties th {")[0];
   assert.ok(narrowStyles);

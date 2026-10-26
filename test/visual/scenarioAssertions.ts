@@ -51,6 +51,31 @@ export const LONG_WORDS_ASSERTIONS: ContentAssertion[] = [
   { message: "the text after them continues", selector: `${MAIN} > p`, text: "continues normally" },
 ];
 
+const KEYS = `${MAIN} [data-okf-properties] tbody th .okf-name-text`;
+
+export const FRONTMATTER_LONG_KEYS_ASSERTIONS: ContentAssertion[] = [
+  { message: "the four keys are rendered", selector: KEYS, count: 4 },
+  { message: "every key sits on one line", selector: KEYS, expr: `[...document.querySelectorAll('${KEYS}')].every(e => e.getClientRects().length === 1 && e.getBoundingClientRect().height < parseFloat(getComputedStyle(e).fontSize) * 2)` },
+  { message: "the short keys are shown whole", selector: KEYS, expr: `[...document.querySelectorAll('${KEYS}')].slice(0, 3).every(e => e.scrollWidth <= e.clientWidth)` },
+  { message: "the key column is at most 40% of the table", selector: `${MAIN} [data-okf-properties] table`, expr: "(() => { const table = document.querySelector('#sphinx-myst-preview-content [data-okf-properties] table'); const th = table.querySelector('tbody th'); return th.getBoundingClientRect().width <= table.getBoundingClientRect().width * 0.4 + 1; })()" },
+  { message: "the value column takes the rest and wraps", selector: `${MAIN} [data-okf-properties] tbody td`, expr: "(() => { const table = document.querySelector('#sphinx-myst-preview-content [data-okf-properties] table'); const td = table.querySelector('tbody td'); return td.getBoundingClientRect().width > table.getBoundingClientRect().width * 0.5; })()" },
+  { message: "the longest key is cut with an ellipsis and keeps its full name as tooltip", selector: KEYS, expr: `(() => { const e = [...document.querySelectorAll('${KEYS}')].pop(); return getComputedStyle(e).textOverflow === 'ellipsis' && e.scrollWidth > e.clientWidth && e.title === e.textContent; })()` },
+];
+
+const KEY_TABLE = `'#sphinx-myst-preview-content [data-okf-properties] table'`;
+/** Width of the text of `e` on one line, whatever the box around it does. */
+const TEXT_WIDTH = "(e) => { const r = document.createRange(); r.selectNodeContents(e); return r.getBoundingClientRect().width; }";
+
+/** Long values (a long description, a nested block of code) must not starve the key column (CR 109, round 2). */
+export const FRONTMATTER_SKILL_ASSERTIONS = (keys: number): ContentAssertion[] => [
+  { message: `the ${keys} keys are rendered`, selector: KEYS, count: keys },
+  { message: "every key cell is as wide as its key text and holds it on one line", selector: KEYS, expr: `(() => { const width = ${TEXT_WIDTH}; return [...document.querySelectorAll('${KEYS}')].every(e => { const th = e.closest('th'); const pad = parseFloat(getComputedStyle(th).paddingLeft) + parseFloat(getComputedStyle(th).paddingRight); return th.getBoundingClientRect().width >= width(e) + pad - 1 && e.getClientRects().length === 1 && e.getBoundingClientRect().height < parseFloat(getComputedStyle(e).fontSize) * 2; }); })()` },
+  { message: "the header label Names stays on one line", selector: `${MAIN} [data-okf-properties] thead th:first-child`, expr: `(() => { const th = document.querySelector('#sphinx-myst-preview-content [data-okf-properties] thead th'); return th.getBoundingClientRect().height < parseFloat(getComputedStyle(th).fontSize) * 3 && th.scrollWidth <= th.clientWidth + 1; })()` },
+  { message: "the key column is at most 40% of the table", selector: `${MAIN} [data-okf-properties] table`, expr: `(() => { const t = document.querySelector(${KEY_TABLE}); return t.querySelector('tbody th').getBoundingClientRect().width <= t.getBoundingClientRect().width * 0.4 + 1; })()` },
+  { message: "the value column takes the rest of the table", selector: `${MAIN} [data-okf-properties] tbody td`, expr: `(() => { const t = document.querySelector(${KEY_TABLE}); return t.querySelector('tbody td').getBoundingClientRect().width > t.getBoundingClientRect().width * 0.6; })()` },
+  { message: "the table stays inside the pane", selector: `${MAIN} [data-okf-properties] table`, insidePane: true },
+];
+
 export const CODE_BLOCK_CAPTION_ASSERTIONS: ContentAssertion[] = [
   { message: "the two captioned code blocks and the plain fence are rendered", selector: `${MAIN} pre`, count: 3 },
   { message: "each caption is a title bar of its own code figure", selector: `${MAIN} figure > figcaption`, count: 2 },
