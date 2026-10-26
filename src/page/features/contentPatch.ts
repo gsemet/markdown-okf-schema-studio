@@ -8,6 +8,7 @@
  */
 
 import { applyFigureSizes } from "../modules/figureSizes";
+import { applyLinkHint } from "../modules/linkNavigation";
 import { applySpanColors, isSafeOkfColor } from "../modules/spanColors";
 import type { ContentPatch, PageRuntime } from "./pageRuntime";
 
@@ -76,8 +77,7 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
       Array.from(document.querySelectorAll("a[data-sphinx-preview-navigation]")).forEach((link) => {
         const hint = linkHints.get(link.getAttribute("data-sphinx-preview-navigation") as string);
         if (!hint) return;
-        link.setAttribute("data-sphinx-preview-link-state", hint.state);
-        if (hint.title !== null) link.setAttribute("title", hint.title);
+        applyLinkHint(document, link, hint.state, hint.title ?? "");
       });
     }
     state.pinApplied = false;

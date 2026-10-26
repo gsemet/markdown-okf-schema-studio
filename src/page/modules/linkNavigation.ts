@@ -6,6 +6,42 @@ export interface LinkRuntimeContext {
   requestId: number;
 }
 
+const WARNING_CLASS = "sphinx-preview-link-warning";
+let warningCounter = 0;
+
+/**
+ * Marks a link with what the host found at its target: the kind and the tooltip. A blocked target
+ * (missing, outside the workspace, refused) also gets a small warning icon right after the link,
+ * with the reason as its tooltip and as the description of the link; the link itself keeps its
+ * text and colour. Safe to call again for the same link.
+ */
+export function applyLinkHint(document: Document, link: Element, kind: string, title: string): void {
+  link.setAttribute("data-sphinx-preview-link-state", kind);
+  link.setAttribute("title", title);
+  const following = link.nextSibling as Element | null;
+  const existing = following && typeof following.getAttribute === "function"
+    && (following.getAttribute("class") ?? "").split(/\s+/u).includes(WARNING_CLASS)
+    ? following
+    : undefined;
+  if (kind !== "blocked") {
+    existing?.remove();
+    if (existing) link.removeAttribute("aria-describedby");
+    return;
+  }
+  const icon = existing ?? document.createElement("span");
+  if (!existing) {
+    warningCounter += 1;
+    icon.setAttribute("class", WARNING_CLASS);
+    icon.setAttribute("id", `${WARNING_CLASS}-${warningCounter}`);
+    // Decorative for screen readers: the reason is the description of the link.
+    icon.setAttribute("aria-hidden", "true");
+    link.parentNode?.insertBefore(icon, link.nextSibling);
+  }
+  icon.setAttribute("title", title);
+  icon.setAttribute("aria-label", title);
+  link.setAttribute("aria-describedby", icon.getAttribute("id") as string);
+}
+
 export function installLinkNavigation(
   document: Document,
   window: Window & typeof globalThis,
@@ -58,6 +94,21 @@ export function installLinkNavigation(
     };
     links.forEach(observe);
     window.addEventListener("unload", () => observer.disconnect(), { once: true });
+    // Files may have been created or deleted while the reader was elsewhere: when the preview
+    // comes back, the links forget their target and the ones in view are asked again.
+    const refresh = (): void => {
+      discovered.clear();
+      links = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
+      for (const link of links) {
+        observer.unobserve(link);
+        observed.delete(link);
+        observe(link);
+      }
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") refresh();
+    });
   }
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-077
   const activate = (event: Event): void => {
@@ -92,8 +143,7 @@ export function installLinkNavigation(
       for (const target of message.targets) {
         for (const link of links) {
           if (link.getAttribute("data-sphinx-preview-navigation") !== target.request) continue;
-          link.setAttribute("data-sphinx-preview-link-state", target.kind as string);
-          link.setAttribute("title", target.path ?? target.reason ?? target.request);
+          applyLinkHint(document, link, target.kind as string, target.path ?? target.reason ?? target.request);
         }
       }
     },

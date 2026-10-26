@@ -152,21 +152,14 @@ function schemeOf(value: string): string | undefined {
 }
 
 /**
- * Decodes a percent-encoded link path (at most four rounds, for double-encoded links). Undefined
- * when the text is malformed or still holds an escape after the last round.
+ * Decodes a percent-encoded link path once, as a URL path is decoded. Undefined when an escape is
+ * malformed. An escaped percent sign (`%25`) stays a literal `%` in the file name; it is not
+ * decoded a second time.
  */
 export function decodePath(value: string): string | undefined {
-  let decoded = value;
   try {
-    for (let attempt = 0; attempt < 4; attempt += 1) {
-      const next = decodeURIComponent(decoded);
-      if (next === decoded) {
-        return decoded;
-      }
-      decoded = next;
-    }
+    return decodeURIComponent(value);
   } catch {
     return undefined;
   }
-  return /%[\da-f]{2}/iu.test(decoded) ? undefined : decoded;
 }

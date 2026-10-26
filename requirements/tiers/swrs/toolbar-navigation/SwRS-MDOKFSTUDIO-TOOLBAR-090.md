@@ -57,17 +57,15 @@ When a link request is followed or looked up, the extension SHALL classify it be
 
 A blocked request causes no file access.
 
-### Scenario (boundary): Decoding at most four times
+### Scenario (boundary): Decoding once
 
 | Request | Outcome |
 | --- | --- |
-| docs%2520file.md | relative with the path docs file.md |
-| a path encoded five times | blocked as not decodable safely |
-| 100%25.md | blocked as not decodable safely, because the second round fails on the lone percent sign |
-
-### Known issues
-
-- Known issue: a path that decodes to a lone percent sign is refused as undecodable, so a file whose name holds a literal % cannot be reached by a link; a doubly encoded percent (a%2541.md) is decoded twice to aA.md.
+| docs%20file.md | relative with the path docs file.md |
+| docs%2520file.md | relative with the path docs%20file.md (the escaped percent is a literal percent in the file name, it is not decoded again) |
+| 100%25.md | relative with the path 100%.md |
+| a%2541.md | relative with the path a%41.md |
+| %255Csecret | relative with the path %5Csecret (only a backslash decoded from the link itself is refused) |
 
 ### Related requirements
 
@@ -76,7 +74,7 @@ A blocked request causes no file access.
 
 ### Verification notes
 
-- Method: test/session/previewNavigator.test.ts (classifies anchors, external links, relative links without touching the filesystem and workspace-local files; blocks unsafe anchors, schemes and paths including the space anchor, /tmp/secret, //example.test, %00.md and %5Csecret); the # and #a#b anchors, the case-insensitive scheme, the wiki prefix, the five-round and literal percent cases are untested here.
-- Method: test/core/navigation/previewNavigation.test.ts (blocked schemes and absolute paths; double-encoded path; unsafe characters); the exact scheme and absolute reason texts are not asserted, and the five-round, literal percent and malformed escape cases are untested.
+- Method: test/session/previewNavigator.test.ts (classifies anchors, external links, relative links without touching the filesystem and workspace-local files; blocks unsafe anchors, schemes and paths including the space anchor, /tmp/secret, //example.test, %00.md and %5Csecret); the # and #a#b anchors, the case-insensitive scheme, the wiki prefix, the percent cases are in previewNavigation.test.ts.
+- Method: test/core/navigation/previewNavigation.test.ts (blocked schemes and absolute paths; double-encoded path; unsafe characters); the exact scheme and absolute reason texts are not asserted, and the malformed escape case is untested.
 - Method: test/core/preview/toolbarReq.requirements.test.ts (a query-only link is blocked and a file with a query is relative).
-- Criteria: ANCHOR_PATTERN is ^#[^\s#?]+$; schemes are compared in lower case against http:, https:, mailto:; no file access for a blocked request; decoded paths starting with / are blocked; a request starting with ? and an empty path part is blocked; decodePath returns undefined after four rounds that still change the text, or a leftover escape, and a decoded NUL or backslash blocks the request.
+- Criteria: ANCHOR_PATTERN is ^#[^\s#?]+$; schemes are compared in lower case against http:, https:, mailto:; no file access for a blocked request; decoded paths starting with / are blocked; a request starting with ? and an empty path part is blocked; decodePath decodes once and returns undefined for a malformed escape, and a decoded NUL or backslash blocks the request.

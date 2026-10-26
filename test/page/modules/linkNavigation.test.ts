@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { installLinkNavigation } from "../../../src/page/modules/linkNavigation";
+import { applyLinkHint, installLinkNavigation } from "../../../src/page/modules/linkNavigation";
 import { provideGlobalElement } from "./fakeDom";
 
 const context = { documentId: "file:///active.md", revision: 1, requestId: 2 };
@@ -175,4 +175,80 @@ test("T33: a context mutated after install is honoured by posts and by the hint 
   runtime.installed.rescan();
   runtime.installed.applyTargets({ targets: [{ request: "wiki:Note", kind: "local", path: "/p.md" }] });
   assert.equal(link.getAttribute("title"), "/p.md");
+});
+
+class Node2 {
+  attributes = new Map<string, string>();
+  parentNode: Container | null = null;
+  constructor(public tag: string) {}
+  getAttribute(name: string) { return this.attributes.get(name) ?? null; }
+  setAttribute(name: string, value: string) { this.attributes.set(name, value); }
+  removeAttribute(name: string) { this.attributes.delete(name); }
+  get nextSibling() { const list = this.parentNode?.children ?? []; return list[list.indexOf(this) + 1] ?? null; }
+  remove() { this.parentNode?.children.splice(this.parentNode.children.indexOf(this), 1); this.parentNode = null; }
+}
+class Container extends Node2 {
+  children: Node2[] = [];
+  insertBefore(node: Node2, reference: Node2 | null) {
+    node.remove();
+    node.parentNode = this;
+    this.children.splice(reference ? this.children.indexOf(reference) : this.children.length, 0, node);
+  }
+}
+
+function iconHarness() {
+  const parent = new Container("p");
+  const link = new Node2("a");
+  link.setAttribute("data-sphinx-preview-navigation", "docs/guid.md");
+  link.setAttribute("title", "original");
+  parent.insertBefore(link, null);
+  const document = { createElement: (tag: string) => new Node2(tag) } as unknown as Document;
+  return { parent, link, document };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
+test("a blocked target keeps the link and adds a warning icon described by the reason", () => {
+  const { parent, link, document } = iconHarness();
+  applyLinkHint(document, link as never, "blocked", "File not found: docs/guid.md");
+  assert.equal(parent.children.length, 2);
+  const icon = parent.children[1];
+  assert.equal(icon.getAttribute("class"), "sphinx-preview-link-warning");
+  assert.equal(icon.getAttribute("title"), "File not found: docs/guid.md");
+  assert.equal(icon.getAttribute("aria-hidden"), "true");
+  assert.equal(icon.getAttribute("aria-label"), "File not found: docs/guid.md");
+  assert.equal(link.getAttribute("aria-describedby"), icon.getAttribute("id"));
+  assert.equal(link.getAttribute("data-sphinx-preview-navigation"), "docs/guid.md");
+  // A second answer updates the icon instead of adding another one.
+  applyLinkHint(document, link as never, "blocked", "The navigation target is outside the workspace.");
+  assert.equal(parent.children.length, 2);
+  assert.equal(parent.children[1].getAttribute("title"), "The navigation target is outside the workspace.");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
+test("a target that becomes valid loses the warning icon and the description", () => {
+  const { parent, link, document } = iconHarness();
+  applyLinkHint(document, link as never, "blocked", "File not found: docs/guid.md");
+  applyLinkHint(document, link as never, "local", "/workspace/docs/guid.md");
+  assert.equal(parent.children.length, 1);
+  assert.equal(link.getAttribute("aria-describedby"), null);
+  assert.equal(link.getAttribute("title"), "/workspace/docs/guid.md");
+  const valid = iconHarness();
+  applyLinkHint(valid.document, valid.link as never, "local", "/workspace/a.md");
+  assert.equal(valid.parent.children.length, 1, "a valid link gets no icon");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+test("links are asked again when the preview regains focus or becomes visible", () => {
+  const runtime = harness(["a.md"]);
+  runtime.intersect([{ target: runtime.links[0], isIntersecting: true }]);
+  runtime.flush();
+  assert.equal(runtime.messages.length, 1);
+  runtime.intersect([{ target: runtime.links[0], isIntersecting: true }]);
+  runtime.flush();
+  assert.equal(runtime.messages.length, 1, "asked once while the page stays as it is");
+  runtime.listeners.get("focus")!({});
+  runtime.intersect([{ target: runtime.links[0], isIntersecting: true }]);
+  runtime.flush();
+  assert.equal(runtime.messages.length, 2, "asked again after the focus came back");
+  assert.equal(runtime.messages[1].requests[0], "a.md");
 });

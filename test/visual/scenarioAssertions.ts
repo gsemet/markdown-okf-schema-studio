@@ -636,6 +636,13 @@ export const RAW_TABLE_COLOUR_SPANS_ASSERTIONS: ContentAssertion[] = [
   { message: "an unsafe var() or url() value leaves the text uncoloured", selector: `${MAIN} table td span`, count: 4, expr: "(() => { const span = [...document.querySelectorAll('#sphinx-myst-preview-content td span')].find((s) => s.textContent.trim() === 'Plain'); return !span.hasAttribute('data-okf-color') && !span.hasAttribute('data-okf-background') && !span.getAttribute('style'); })()" },
 ];
 
+export const LINK_WARNING_ASSERTIONS: ContentAssertion[] = [
+  { message: "the two links to a missing or blocked file are followed by a warning icon", selector: `${MAIN} a[data-sphinx-preview-link-state="blocked"] + .sphinx-preview-link-warning`, count: 2, visible: true },
+  { message: "the valid link has no icon", selector: `${MAIN} a[data-sphinx-preview-link-state="local"] + .sphinx-preview-link-warning`, count: 0 },
+  { message: "the icon tooltip names the problem and the link is described by it", selector: `${MAIN} a[data-sphinx-preview-link-state="blocked"]`, count: 2, expr: "(() => { const link = document.querySelector('#sphinx-myst-preview-content a[data-sphinx-preview-link-state=\"blocked\"]'); const icon = link.nextElementSibling; return icon.title === 'File not found: docs/guid.md' && link.getAttribute('aria-describedby') === icon.id && icon.getAttribute('aria-hidden') === 'true'; })()" },
+  { message: "a blocked link keeps the colour and the underline of the valid link", selector: `${MAIN} a[data-sphinx-preview-navigation]`, count: 3, expr: "(() => { const [valid, ...blocked] = [...document.querySelectorAll('#sphinx-myst-preview-content a[data-sphinx-preview-navigation]')].map((a) => { const s = getComputedStyle(a); return s.color + '|' + s.textDecorationLine; }); return blocked.every((value) => value === valid); })()" },
+];
+
 export const DOLLAR_PRICES_ASSERTIONS: ContentAssertion[] = [
   { message: "the real $x$ span is typeset as maths", selector: `${MAIN} p:last-of-type .katex`, count: 1 },
   { message: "only the real span is typeset, the price sentences hold no maths", selector: `${MAIN} .katex`, count: 1 },

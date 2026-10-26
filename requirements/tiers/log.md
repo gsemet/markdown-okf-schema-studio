@@ -1,5 +1,25 @@
 # Update Log
 
+## 2026-10-26 (link navigation and history fixes)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-059: Back or Next within the same document scrolls the preview to the stored
+  line even when the preview does not follow the editor (the sourceScroll of a history move carries
+  reveal). The Known issue line is removed.
+- SwRS-MDOKFSTUDIO-TOOLBAR-054: a Back or Next whose document cannot be opened leaves the history
+  position and the list as they were. The Known issue line is removed.
+- SwRS-MDOKFSTUDIO-TOOLBAR-085 (and StRS-MDOKFSTUDIO-TOOLBAR-011): a link to a missing or blocked target
+  keeps its text and colour and is followed by a warning icon with the reason as its tooltip and as the
+  description of the link; a missing file reads "File not found: {path}". The Known issue line is
+  removed from both. The scenario "shown only in the tooltip" is replaced by the icon scenario.
+- SwRS-MDOKFSTUDIO-TOOLBAR-079: the links in view are asked again when the preview regains focus or
+  becomes visible, so a file created or deleted meanwhile is reflected. The Known issue line is
+  narrowed to the preview that stays focused.
+- SwRS-MDOKFSTUDIO-TOOLBAR-090: a link path is decoded once; a file name with a literal percent
+  (100%25.md) is reachable and an escaped percent is not decoded twice. The scenario "Decoding at most
+  four times" becomes "Decoding once"; the Known issue line is removed.
+- SwRS-MDOKFSTUDIO-TOOLBAR-117: the page refuses an escape left after four rounds whatever its digits
+  (same class as the host). The Known issue line is removed.
+
 ## 2026-10-26 (small preview lifecycle fixes)
 
 - SwRS-MDOKFSTUDIO-LIFE-010: Open Preview to Side from a Studio Open With tab previews that tab's

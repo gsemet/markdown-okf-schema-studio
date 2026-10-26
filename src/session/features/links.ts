@@ -13,8 +13,9 @@ import {
   type FrontmatterResult,
 } from "../../core/frontmatter/okfFrontmatter";
 import { resolveFrontmatterLinkRoots } from "../../core/frontmatter/fileLinks";
+import { resourcePathPart } from "../../core/security/resource-policy";
 import type { TextRange } from "../../host-api/documentStore";
-import { markdownFragmentRange, markdownMarkerLine } from "../../core/navigation/previewNavigation";
+import { decodePath, markdownFragmentRange, markdownMarkerLine } from "../../core/navigation/previewNavigation";
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
@@ -186,9 +187,13 @@ export class LinkController {
   private async handleDiscovery(preview: PreviewSession, message: PageMessageOf<"previewLinkDiscover">): Promise<void> {
     const { manager } = this;
     try {
-      const targets = await Promise.all((message.requests ?? []).map(async (request) => ({
-        request, ...await this.resolve(preview, request),
-      })));
+      const targets = await Promise.all((message.requests ?? []).map(async (request) => {
+        const navigation = await this.resolve(preview, request);
+        // The page shows the reason as a tooltip: a missing file names the path of the link.
+        return navigation.kind === "blocked" && navigation.reason === "The navigation target is unavailable."
+          ? { request, ...navigation, reason: `File not found: ${decodePath(resourcePathPart(request)) ?? request}` }
+          : { request, ...navigation };
+      }));
       if (!manager.matchesCurrent(preview, message)) return;
       await preview.postToPage({ type: "previewLinkTargets", ...manager.rendering.runtimeContext(preview.stage!), targets });
     } catch (error) {

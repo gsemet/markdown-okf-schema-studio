@@ -45,7 +45,7 @@ When a reader clicks a link in the preview, the Studio SHALL open its target, or
 
 ### Preserved stakeholder intent
 
-As a reader, I click a link and land on the right document, line, heading or web page; when a link cannot be followed I am told why, I rest the pointer on a link and read where it goes or why it is broken before I click, and a link cannot take me to a file outside my workspace unless I turned on the setting that allows outside links for frontmatter links.
+As a reader, I click a link and land on the right document, line, heading or web page; when a link cannot be followed I am told why, I rest the pointer on a link and read where it goes before I click, and a small warning icon next to a link tells me before I click that its target is missing or blocked, and a link cannot take me to a file outside my workspace unless I turned on the setting that allows outside links for frontmatter links.
 
 ### Rationale and constraints
 
@@ -55,4 +55,4 @@ As a reader, I click a link and land on the right document, line, heading or web
 - Only links that scroll into view are checked, so a long document is not resolved all at once.
 - The hint never changes where the link goes.
 - Hints already known survive an in-place update of the content.
-- Known issue: a link to a missing or blocked target looks like any other link; only its tooltip tells.
+- A link to a missing or blocked target keeps its text and colour; a small warning icon follows it and its tooltip names the problem.

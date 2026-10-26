@@ -774,7 +774,7 @@ export function createRuntimeHarness(configuration: Partial<{
     body,
     documentElement,
     getElementById: (id: string): RuntimeElement | null => (
-      id === "section" ? anchor
+      id === "section" || id === "%41" ? anchor
         : id === "sphinx-myst-preview-content" ? previewContent
           : null
     ),

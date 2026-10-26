@@ -24,6 +24,7 @@ import {
   INVALID_YAML_ASSERTIONS,
   DOLLAR_PRICES_ASSERTIONS,
   RAW_TABLE_COLOUR_SPANS_ASSERTIONS,
+  LINK_WARNING_ASSERTIONS,
   LIST_TABLE_ASSERTIONS,
   LONG_WORDS_ASSERTIONS,
   MAIN,
@@ -1318,6 +1319,24 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "each time the reference goes on a paragraph of its own, with a blank line before and after it, and its name is "
       + "selected. The final frame shows the editor after the paste at the end.",
   },
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-085
+    id: `toolbar-navigation/v${35 + index}-link-warning-${theme}-900`,
+    fixture: "61-link-warnings",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    render: {
+      hostMessages: [{ delayMs: 50, data: { type: "previewLinkTargets", targets: [
+        { request: "guide.md", kind: "local", path: "/workspace/guide.md" },
+        { request: "docs/guid.md", kind: "blocked", reason: "File not found: docs/guid.md" },
+        { request: "../private/notes.md", kind: "blocked", reason: "The navigation target is outside the workspace." },
+      ] } }],
+    },
+    contentAssertions: LINK_WARNING_ASSERTIONS,
+    description: `Three links, one valid and two to a missing or blocked file, ${theme}, 900 px pane: the links keep their text and colour and `
+      + "a small warning icon follows each of the two that cannot be opened.",
+  })),
   ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-GFM-034
     id: `gfm/v0${7 + index}-raw-table-colour-spans-${theme}-900`,
