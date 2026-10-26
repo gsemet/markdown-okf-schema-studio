@@ -310,6 +310,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
         palette.focusModeSelect();
         return;
       }
+      if (textControls.hostEditKey(event)) return;
       if (textControls.keepUndoInControl(event)) return;
       if (blockEditor.moveBlockFromEditor(event, textarea)) return;
       if (textControls.paletteShortcut(event, textarea, () => {

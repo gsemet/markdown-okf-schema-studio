@@ -29,6 +29,10 @@
 - Inserting a figure with the Figure button now opens the figure form right after the image is
   chosen, on the caption field, instead of leaving a bare directive; Escape keeps the inserted
   figure with its default values.
+- Edit mode follows VS Code's undo, redo, select-all and delete-line keys in the block and table
+  cell text boxes: Cmd/Ctrl+Z, Cmd+Shift+Z (Ctrl+Shift+Z or Ctrl+Y), Cmd/Ctrl+A and Cmd/Ctrl+Shift+K
+  are VS Code key bindings on the open text box, so rebinding them in Keyboard Shortcuts applies.
+  Delete line is one undoable step.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when

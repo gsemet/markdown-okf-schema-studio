@@ -7,6 +7,7 @@
  * calls another one while it is being installed.
  */
 
+import type { PreviewEditCommandName } from "../../core/protocol/hostToPage";
 import type { PreviewRuntimeContext } from "../../core/protocol/bootContext";
 import type {
   NavigateAnchorMessage,
@@ -408,6 +409,10 @@ export interface TextControls {
   homeEndInControl(event: KeyboardEvent, control: TextControl): boolean;
   /** Keeps Cmd/Ctrl+Z and +Y in the text box (the host editor never sees them). */
   keepUndoInControl(event: KeyboardEvent): boolean;
+  /** Cancels the native action of the VS Code undo, redo, select-all and delete-line keys; they reach VS Code. */
+  hostEditKey(event: KeyboardEvent): boolean;
+  /** Applies a command VS Code's key binding ran to the focused text box; false when none has the focus. */
+  runEditCommand(command: PreviewEditCommandName): boolean;
   wrapSelectionInControl(event: KeyboardEvent, control: TextControl, onFallbackInput: () => void): boolean;
   paletteShortcut(event: KeyboardEvent, control: TextControl, onFallbackInput: () => void): boolean;
   applyTextEdit(control: TextControl, rawEdit: ControlTextEdit, onFallbackInput: () => void): void;

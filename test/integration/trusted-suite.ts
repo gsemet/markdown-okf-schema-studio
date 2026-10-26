@@ -28,6 +28,7 @@ import { run as runLabelRename } from "./labelRename.test";
 import { run as runMystPickers } from "./mystPickers.test";
 import { run as runPaletteMode } from "./paletteMode.test";
 import { run as runPreviewHistory } from "./previewHistory.test";
+import { run as runEditKeys } from "./editKeys.test";
 import { run as runRealInput } from "./realInput.test";
 import { run as runLifecycle } from "./lifecycle.test";
 import { run as runMystDiagnostics } from "./mystDiagnostics.test";
@@ -128,6 +129,7 @@ export async function run(): Promise<void> {
     console.error("Preview editing integration failed:", error);
     throw error;
   }
+  await runEditKeys();
   await runPreviewHistory();
   await runPaletteMode();
   await runLabelRename();

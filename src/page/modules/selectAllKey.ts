@@ -47,7 +47,8 @@ export function installSelectAllInControls(
   onKept?: (target: EventTarget | null) => void,
 ): void {
   document.addEventListener("keydown", (event) => {
-    if (!isSelectAll(event, mac)) return;
+    // A text box that cancelled the native select-all leaves it to VS Code's key binding (CR 119).
+    if (event.defaultPrevented || !isSelectAll(event, mac)) return;
     event.stopPropagation();
     onKept?.(event.target);
   });

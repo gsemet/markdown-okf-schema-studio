@@ -59,6 +59,26 @@
         "title": "Refresh Preview",
         "category": "Markdown OKF-Schema Studio",
         "enablement": "resourceExtname == .md"
+      },
+      {
+        "command": "markdown-okf-schema-studio.editUndo",
+        "title": "Undo in the Edited Text Box",
+        "category": "Markdown OKF-Schema Studio"
+      },
+      {
+        "command": "markdown-okf-schema-studio.editRedo",
+        "title": "Redo in the Edited Text Box",
+        "category": "Markdown OKF-Schema Studio"
+      },
+      {
+        "command": "markdown-okf-schema-studio.editSelectAll",
+        "title": "Select All in the Edited Text Box",
+        "category": "Markdown OKF-Schema Studio"
+      },
+      {
+        "command": "markdown-okf-schema-studio.editDeleteLine",
+        "title": "Delete Line in the Edited Text Box",
+        "category": "Markdown OKF-Schema Studio"
       }
     ],
     "menus": {
@@ -70,6 +90,22 @@
         {
           "command": "markdown-okf-schema-studio.refreshPreview",
           "when": "resourceExtname == .md"
+        },
+        {
+          "command": "markdown-okf-schema-studio.editUndo",
+          "when": "false"
+        },
+        {
+          "command": "markdown-okf-schema-studio.editRedo",
+          "when": "false"
+        },
+        {
+          "command": "markdown-okf-schema-studio.editSelectAll",
+          "when": "false"
+        },
+        {
+          "command": "markdown-okf-schema-studio.editDeleteLine",
+          "when": "false"
         }
       ],
       "editor/title": [
@@ -93,6 +129,35 @@
         "key": "ctrl+k shift+v",
         "mac": "cmd+k shift+v",
         "when": "editorTextFocus && resourceExtname == .md"
+      },
+      {
+        "command": "markdown-okf-schema-studio.editUndo",
+        "key": "ctrl+z",
+        "mac": "cmd+z",
+        "when": "markdownOkfSchemaStudio.previewEditing"
+      },
+      {
+        "command": "markdown-okf-schema-studio.editRedo",
+        "key": "ctrl+y",
+        "mac": "cmd+shift+z",
+        "when": "markdownOkfSchemaStudio.previewEditing"
+      },
+      {
+        "command": "markdown-okf-schema-studio.editRedo",
+        "key": "ctrl+shift+z",
+        "when": "markdownOkfSchemaStudio.previewEditing"
+      },
+      {
+        "command": "markdown-okf-schema-studio.editSelectAll",
+        "key": "ctrl+a",
+        "mac": "cmd+a",
+        "when": "markdownOkfSchemaStudio.previewEditing"
+      },
+      {
+        "command": "markdown-okf-schema-studio.editDeleteLine",
+        "key": "ctrl+shift+k",
+        "mac": "cmd+shift+k",
+        "when": "markdownOkfSchemaStudio.previewEditing"
       }
     ],
     "configuration": [

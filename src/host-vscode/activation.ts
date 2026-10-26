@@ -9,6 +9,7 @@ import * as path from "node:path";
 
 import * as vscode from "vscode";
 
+import { PREVIEW_EDIT_COMMANDS, type PreviewEditCommandName } from "../core/protocol/hostToPage";
 import { preloadMystEngine } from "../core/render/mystRenderer";
 import { buildStatusWebviewHtml } from "../session/webview";
 import { PreviewManager } from "../session/previewManager";
@@ -24,6 +25,13 @@ import { createVscodeHost, type VscodeHost } from "./vscodeHost";
 export const COMMAND_ID = "markdown-okf-schema-studio.openPreview";
 /** The command that renders the active preview again. */
 export const REFRESH_COMMAND_ID = "markdown-okf-schema-studio.refreshPreview";
+/** The commands VS Code's key bindings run on the text box being edited (CR 119). */
+export const EDIT_COMMAND_IDS: Readonly<Record<PreviewEditCommandName, string>> = {
+  undo: "markdown-okf-schema-studio.editUndo",
+  redo: "markdown-okf-schema-studio.editRedo",
+  selectAll: "markdown-okf-schema-studio.editSelectAll",
+  deleteLine: "markdown-okf-schema-studio.editDeleteLine",
+};
 /** The view type of the side preview panels (and of their serializer). */
 export const PANEL_VIEW_TYPE = "markdown-okf-schema-studio.preview";
 /** The view type of the custom editor (a fixed preview of one document). */
@@ -77,6 +85,9 @@ export class StudioActivation {
         const active = vscode.window.activeTextEditor?.document;
         await manager.refreshActive(active ? host.documents.of(active) : undefined);
       }),
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
+      ...PREVIEW_EDIT_COMMANDS.map((command) =>
+        vscode.commands.registerCommand(EDIT_COMMAND_IDS[command], () => manager.runEditCommand(command))),
       vscode.window.registerWebviewPanelSerializer(PANEL_VIEW_TYPE, {
         deserializeWebviewPanel: (panel, state) => this.deserializePreviewPanel(panel, state),
       }),

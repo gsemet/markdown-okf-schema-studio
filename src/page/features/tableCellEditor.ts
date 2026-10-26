@@ -435,6 +435,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     input.addEventListener("keydown", (event) => {
       if (edit.cellSlash?.handleKey(event)) return;
       if (edit.cellPalette?.handleKey(event)) return;
+      if (textControls.hostEditKey(event)) return;
       if (textControls.keepUndoInControl(event)) return;
       if (textControls.paletteShortcut(event, input, rememberAndAutosave)) return;
       if (textControls.wrapSelectionInControl(event, input, () => {
