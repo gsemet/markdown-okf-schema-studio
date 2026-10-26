@@ -447,6 +447,14 @@ export const EDIT_PALETTE_CSS = `
   background: var(--sphinx-preview-border);
 }
 
+/* The rule and the cell formatting group form one flex item, so they wrap together. */
+.sphinx-preview-table-menu-cell-group {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  min-width: 0;
+}
+
 .sphinx-preview-edit-palette.sphinx-preview-edit-palette-in-bar {
   flex: 0 1 auto;
   margin: 0;

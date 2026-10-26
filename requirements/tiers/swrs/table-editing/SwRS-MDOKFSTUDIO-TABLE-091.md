@@ -43,7 +43,7 @@ When the writer types text into a table cell or inserts text into a cell from th
 ### Scenario (boundary): Pipe in a code span typed in a cell
 - GIVEN the value `a|b` typed
 - WHEN the table is saved
-- THEN the pipe is left as typed (see the code-span rule of the cell splitting in SwRS-MDOKFSTUDIO-TABLE-102)
+- THEN the source holds `a\|b` and the preview shows a|b in the code span, because a pipe inside a code span splits a cell like any other (see the cell splitting in SwRS-MDOKFSTUDIO-TABLE-102)
 
 ### Scenario (nominal): Link text and URL inserted from the bar
 - GIVEN a link text and a URL that contain a pipe, inserted from the Link panel, a text with a pipe inside a code span, and a link text containing a line break
@@ -66,7 +66,7 @@ When the writer types text into a table cell or inserts text into a cell from th
 - THEN the text box holds "a b", the caret keeps its place after the pasted text and the source row stays one line with the same cell count
 
 ### Related requirements
-- SwRS-MDOKFSTUDIO-TABLE-102: the cell splitting that leaves a pipe in a code span or after a backslash inside its cell.
+- SwRS-MDOKFSTUDIO-TABLE-102: the cell splitting that leaves only a pipe after a backslash inside its cell.
 - SwRS-MDOKFSTUDIO-TABLE-070: the List table button, which converts the table after a pasted line break.
 
 ### Verification notes

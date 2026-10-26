@@ -8,11 +8,11 @@ import { createMarkdownTableTools } from "../../../src/page/modules/markdownTabl
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-094
 test("pipe tables round-trip escaped cells and CRLF line endings", () => {
   const tools = createMarkdownTableTools();
-  const source = "| Name | Detail |\r\n| :--- | ---: |\r\n| Brake | `a|b` and x\\|y |\r\n";
+  const source = "| Name | Detail |\r\n| :--- | ---: |\r\n| Brake | `a\\|b` and x\\|y |\r\n";
   const table = tools.parse(source);
   assert.ok(table);
   assert.deepEqual(table.rows, [
-    ["Name", "Detail"], [":---", "---:"], ["Brake", "`a|b` and x\\|y"],
+    ["Name", "Detail"], [":---", "---:"], ["Brake", "`a\\|b` and x\\|y"],
   ]);
   assert.equal(tools.serialize(table), source);
 });
@@ -28,7 +28,7 @@ test("inserting and deleting table rows and columns preserves the remaining cell
   table.rows[insertedRow + 1][0] = "new";
   const insertedColumn = tools.insertColumnAfter(table, 0);
   table.rows[insertedRow + 1][insertedColumn] = "cell";
-  assert.match(tools.serialize(table), /\| new \| cell \|  \|/u);
+  assert.match(tools.serialize(table), /\| new \| cell \| +\|/u);
   tools.deleteRow(table, insertedRow);
   tools.deleteColumn(table, insertedColumn);
   assert.equal(tools.serialize(table), source);
@@ -58,8 +58,8 @@ test("cellSegments returns the text between the delimiting pipes, offsets in the
   assert.deepEqual(tools.cellSegments("| a | b |"), [{ start: 1, end: 4 }, { start: 5, end: 8 }]);
   assert.deepEqual(tools.cellSegments("|a|b|"), [{ start: 1, end: 2 }, { start: 3, end: 4 }]);
   assert.deepEqual(tools.cellSegments("a | b"), [{ start: 0, end: 2 }, { start: 3, end: 5 }]);
-  const escaped = "  | a \\| b | `x|y` |";
-  assert.deepEqual(tools.cellSegments(escaped), [{ start: 3, end: 11 }, { start: 12, end: 19 }]);
+  const escaped = "  | a \\| b | `x\\|y` |";
+  assert.deepEqual(tools.cellSegments(escaped), [{ start: 3, end: 11 }, { start: 12, end: 20 }]);
   assert.equal(tools.cellSegments(escaped).length, 2);
 });
 
@@ -240,7 +240,7 @@ test("T24: the table inserted by the palette parses back with its header and emp
   assert.equal(model.rows.length, 4, "header, separator and two rows");
   assert.deepEqual(model.rows[2], ["", "", "", ""]);
   // The canonical serializer writes the same text back, so cell edits keep the layout.
-  assert.equal(tools.serialize({ ...model, columnsChanged: true }), edit.text);
+  assert.equal(tools.serialize({ rows: model.rows, lineEnding: model.lineEnding, trailingLineEnding: model.trailingLineEnding }), edit.text);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-117
@@ -304,4 +304,48 @@ test("the table model refuses a move of the header, past the ends or onto the sa
   assert.equal(tools.serialize(table), source);
   assert.equal(tools.moveRow(table, 1, 2), 2);
   assert.equal(tools.serialize(table), "| A | B |\r\n| --- | --- |\r\n| p | q |\r\n| x | y |\r\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-055
+test("a column operation keeps the padding, indentation and outer pipes of every line", () => {
+  const tools = createMarkdownTableTools();
+  const source = "  | Name   | Qty  |\n  | :----- | ---: |\n  | brake  | 1    |\n  | pedal  | 22   |\n";
+  const table = tools.parse(source);
+  assert.ok(table);
+  const added = tools.insertColumnAfter(table, 0);
+  assert.equal(added, 1);
+  assert.equal(tools.serialize(table), [
+    "  | Name   |        | Qty  |",
+    "  | :----- | ------ | ---: |",
+    "  | brake  |        | 1    |",
+    "  | pedal  |        | 22   |",
+    "",
+  ].join("\n"));
+  table.rows[2]![1] = "x";
+  assert.equal(tools.serialize(table).split("\n")[2], "  | brake  | x      | 1    |");
+  tools.deleteColumn(table, 2);
+  assert.deepEqual(tools.serialize(table).split("\n").slice(0, 2), ["  | Name   |        |", "  | :----- | ------ |"]);
+  const compact = tools.parse("|A|B|\n|---|---|\n|1|2|");
+  assert.ok(compact);
+  tools.deleteColumn(compact, 0);
+  assert.equal(tools.serialize(compact), "|B|\n|---|\n|2|");
+  const bare = tools.parse("a | b | c\n--- | --- | ---\nd | e | f");
+  assert.ok(bare);
+  tools.deleteColumn(bare, 2);
+  assert.equal(tools.serialize(bare), "a | b \n--- | --- \nd | e ");
+  tools.insertColumnAfter(bare, 0);
+  assert.equal(tools.parse(tools.serialize(bare))?.rows[0]?.length, 3);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-102
+test("an unescaped pipe inside a code span splits the cell as the preview does", () => {
+  const tools = createMarkdownTableTools();
+  assert.deepEqual(tools.parse("| a | b |\n| --- | --- |\n| x | `y` |")?.rows[2], ["x", "`y`"]);
+  // The renderer reads three cells in the body row: the editor refuses it instead of disagreeing.
+  assert.equal(tools.parse("| a | b |\n| --- | --- |\n| `x|y` | z |"), undefined);
+  const model = tools.parse("| a | b |\n| --- | --- |\n| `x\\|y` | z |");
+  assert.deepEqual(model?.rows[2], ["`x\\|y`", "z"]);
+  model!.rows[2]![1] = "`p|q`";
+  assert.equal(tools.serialize(model!), "| a | b |\n| --- | --- |\n| `x\\|y` | `p\\|q` |");
+  assert.equal(tools.cellSegments("| `a|b` |").length, 2);
 });

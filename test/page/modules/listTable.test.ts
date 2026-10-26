@@ -40,7 +40,7 @@ test("pipe -> list-table -> pipe is lossless for simple tables", () => {
     "| A |\n| --- |\n| x |",
     "| A | B |\n| --- | --- |",
     "| A | B |\n| --- | --- |\n|  | y |\n| z |  |",
-    "| `a|b` | x\\|y |\n| --- | --- |\n| **bold** and [link](https://e.org) | été ✅ |",
+    "| `a\\|b` | x\\|y |\n| --- | --- |\n| **bold** and [link](https://e.org) | été ✅ |",
     PIPE + "\n",
     PIPE.replace(/\n/gu, "\r\n"),
   ];

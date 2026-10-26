@@ -435,8 +435,17 @@ function cellBar(harness: RuntimeHarness): RuntimeElement {
   return bar;
 }
 
+/** The wrapper that holds the rule and the inline group: they wrap together. */
+function cellGroupWrapper(harness: RuntimeHarness): RuntimeElement | undefined {
+  // The fake DOM keeps the wrappers of earlier renders in the bar: the one that holds the group is
+  // the current one.
+  return cellBar(harness).childElements.filter((child) =>
+    child.className === "sphinx-preview-table-menu-cell-group")
+    .find((wrapper) => wrapper.childElements.some((child) => child.getAttribute("data-sphinx-edit-palette") === "cell"));
+}
+
 function cellGroup(harness: RuntimeHarness): RuntimeElement | undefined {
-  return cellBar(harness).childElements.find((child) =>
+  return cellGroupWrapper(harness)?.childElements.find((child) =>
     child.getAttribute("data-sphinx-edit-palette") === "cell");
 }
 
@@ -461,9 +470,11 @@ test("T35: the cell bar keeps the table operations and adds the inline group aft
   );
   const group = cellGroup(harness);
   assert.ok(group, "the inline group is inside the table bar");
-  const separator = bar.childElements.find((child) => child.getAttribute("role") === "separator");
-  assert.ok(separator, "a separator");
-  assert.equal(bar.childElements.indexOf(separator) + 1, bar.childElements.indexOf(group));
+  const wrapper = cellGroupWrapper(harness)!;
+  const separator = wrapper.childElements.find((child) => child.getAttribute("role") === "separator");
+  assert.ok(separator, "a separator inside the wrapper of the group, so it wraps with the group");
+  assert.equal(wrapper.childElements.indexOf(separator) + 1, wrapper.childElements.indexOf(group));
+  assert.equal(bar.childElements.some((child) => child.getAttribute("role") === "separator"), false);
   assert.equal(group.childElements.some((child) => child.tagName === "SELECT"), false, "no mode select");
   const ids = group.childElements.map((child) => child.getAttribute("data-edit-action"));
   for (const id of ["bold", "italic", "strikethrough", "link", "emoji", "color", "kbd", "sub", "sup"]) {
@@ -569,7 +580,7 @@ test("T35: a popover opened from the cell bar keeps the editor open, outside foc
   paletteButton(harness, "emoji").dispatch("click", { preventDefault: () => undefined });
   const menu = paletteMenu(harness)!;
   assert.ok(menu, "the emoji picker opens");
-  assert.equal(cellBar(harness).childElements.includes(cellGroup(harness)!), true);
+  assert.equal(cellBar(harness).childElements.includes(cellGroupWrapper(harness)!), true);
   const filter = allDescendants(menu).find((e) => e.tagName === "INPUT")!;
   const doc = harness.document as unknown as { activeElement?: unknown };
   doc.activeElement = filter;
@@ -609,7 +620,7 @@ test("T35: table operations keep the inline group in the rebuilt bar", () => {
     element.getAttribute("aria-label") === "Insert row after selected row").at(-1)?.dispatch("click");
   // The fake DOM does not empty a parent on `textContent = ""`, so check identity, not counts.
   assert.equal(cellGroup(harness), group, "the same group is moved into the rebuilt bar");
-  assert.equal(group.parentElement, cellBar(harness));
+  assert.equal(group.parentElement?.parentElement, cellBar(harness));
   assert.equal(group.removed, false);
 });
 

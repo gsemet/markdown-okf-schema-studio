@@ -47,5 +47,4 @@ As a writer, I convert a table between a Markdown pipe table, a MyST list-table 
 - A conversion that would lose content is refused with a reason ending "Nothing was changed."; presentation (column alignment colons, `:widths:`) is dropped going to a list-table by design.
 - The HTML table writer of the HTML table button belongs here as the third form.
 - Saving an unchanged table gives back the original text byte for byte for compact, padded, no-spaces, aligned, no-outer-pipes, escaped, indented, CRLF and wider-than-padding tables.
-- Known issue: the column buttons of the bar are the exception and rewrite the whole table in one fixed style.
-- Known issue: a pipe inside a code span is one cell for the editor but a cell boundary for the preview.
+- A column button keeps the padding, the indentation and the outer pipes of every line, and a pipe inside a code span splits a cell in the editor as it does in the preview.

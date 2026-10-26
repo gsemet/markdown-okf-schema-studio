@@ -319,7 +319,7 @@ def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolba
     const cell = document.querySelector('[data-sphinx-preview-table-cell-selected="true"]');
     const cellRect = cell.getBoundingClientRect();
     const table = cell.closest('table').getBoundingClientRect();
-    const separator = bar.querySelector(':scope > [role=separator]');
+    const separator = bar.querySelector(':scope > .sphinx-preview-table-menu-cell-group > [role=separator]');
     return {
       ids: buttons.map((button) => button.dataset.editAction),
       operations: bar.querySelectorAll(':scope > [data-sphinx-table-operation]').length,
@@ -341,6 +341,24 @@ def check_cell_bar_formatting(page: Page, page_name: str, scenario: dict, toolba
       failures.append(Failure(page_name, f"the cell bar shows the block action {block_only}"))
   if geometry["operations"] != 5 or not geometry["hasSeparator"] or geometry["mode"]:
     failures.append(Failure(page_name, f"the cell bar structure is wrong: {geometry}"))
+  rules = toolbar.evaluate("""bar => {
+    const has = (name) => {
+      const button = bar.querySelector(`:scope > [data-sphinx-table-operation="${name}"]`);
+      return getComputedStyle(button, '::before').content === '""';
+    };
+    const separator = bar.querySelector('.sphinx-preview-table-menu-cell-group > [role=separator]').getBoundingClientRect();
+    const first = bar.querySelector("[data-sphinx-edit-palette='cell'] > button:not([hidden])").getBoundingClientRect();
+    return {
+      rowPlus: has('Insert row after selected row'), rowMinus: has('Delete selected row'),
+      colPlus: has('Insert column after selected column'), colMinus: has('Delete selected column'),
+      table: has('Convert to list-table'),
+      separatorTop: separator.top, separatorBottom: separator.bottom, firstTop: first.top, firstBottom: first.bottom,
+    };
+  }""")
+  if rules["rowPlus"] or rules["rowMinus"] or not rules["colPlus"] or rules["colMinus"] or not rules["table"]:
+    failures.append(Failure(page_name, f"the rules of the table bar are not one per group: {rules}"))
+  if rules["separatorTop"] > rules["firstBottom"] or rules["separatorBottom"] < rules["firstTop"]:
+    failures.append(Failure(page_name, f"the rule of the cell group is not level with the group's first line: {rules}"))
   if geometry["outside"] or geometry["scrollWidth"] > geometry["clientWidth"] + 1 or geometry["barRight"] > geometry["viewport"] + 0.5:
     failures.append(Failure(page_name, f"the cell bar buttons overflow the bar: {geometry}"))
   if geometry["barBottom"] > geometry["tableTop"] + 0.5:

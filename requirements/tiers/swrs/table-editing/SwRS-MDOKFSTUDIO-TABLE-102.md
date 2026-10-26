@@ -2,11 +2,11 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-TABLE-102
 uuid: 24211349-a556-47b9-8dde-6fe33b637cf7
-title: Edge pipes are optional and escaped or code pipes do not split a cell
+title: Edge pipes are optional and only an escaped pipe stays in its cell
 description: When a table row is split into cells for editing, the extension
-  SHALL accept rows with or without leading and trailing pipes and keep a pipe
-  that is escaped with a backslash or that sits inside a code span within its
-  cell.
+  SHALL accept rows with or without leading and trailing pipes, keep a pipe that
+  is escaped with a backslash within its cell, and split a cell at every other
+  pipe, also one inside a code span, as the preview does.
 project: markdown-okf-schema-studio
 scope: table-editing
 lifecycle: draft
@@ -24,11 +24,11 @@ tested_in_files:
 - test/page/modules/markdownTable.test.ts
 ---
 
-## Edge pipes are optional and escaped or code pipes do not split a cell
+## Edge pipes are optional and only an escaped pipe stays in its cell
 
 ### Normative behavior
 
-When a table row is split into cells for editing, the extension SHALL accept rows with or without leading and trailing pipes and keep a pipe that is escaped with a backslash or that sits inside a code span within its cell.
+When a table row is split into cells for editing, the extension SHALL accept rows with or without leading and trailing pipes, keep a pipe that is escaped with a backslash within its cell, and split a cell at every other pipe, also one inside a code span, as the preview does.
 
 ### Scenario (nominal): Rows without outer pipes
 - GIVEN the rows "a | b", "| a | b" and "a | b |"
@@ -45,20 +45,17 @@ When a table row is split into cells for editing, the extension SHALL accept row
 - WHEN it is parsed, and then written back unchanged
 - THEN the cells are Brake and x\|y (the cell text holds the backslash) and the serialised row text is unchanged
 
-### Scenario (nominal): Pipe in backticks
-- GIVEN the row "| Brake | `a|b` and x |"
+### Scenario (nominal): Escaped pipe in backticks
+- GIVEN the row "| Brake | `a\|b` and x |"
 - WHEN it is parsed for editing
-- THEN the cells are Brake and `a|b` and x
+- THEN the cells are Brake and `a\|b` and x (the preview shows a|b in the code span)
 
-### Scenario (boundary): Pipe after the code span
-- GIVEN the row "| `a` | b |" and the row "| ``a`|b | c |"
-- WHEN they are parsed for editing
-- THEN the first gives the cells `a` and b, because the code span is closed by a run of the same length; in the second the opening run of two backticks is never closed by the single one, so the rest of the row stays in one cell
-
-### Known issues
-- Known issue: The preview renderer follows the GFM table rule, which splits a row at a pipe inside a code span, while the editor keeps that pipe in one cell. For the row `| a | b |` over a body row `| `x|y` | z |`, the preview shows the cells `x and y` (the extra cell z is dropped) while the editor model holds the two cells `x|y` and z, so a click on the second rendered cell opens the editor of z.
+### Scenario (boundary): Unescaped pipe in backticks
+- GIVEN the row "| `x|y` | z |" under a two-column table
+- WHEN it is parsed for editing
+- THEN the pipe splits the cell, as it does in the preview (GFM): the row has three cells, so the table is not a pipe table of the editor and no cell editor opens on it, instead of the editor and the preview holding different cells
 
 ### Verification notes
-- Method: test/page/modules/markdownTable.test.ts (rows without outer pipes: rows without outer pipes stay parseable when an edge cell is emptied and rows with only one outer pipe stay parseable; escaped pipe and its round trip: pipe tables round-trip escaped cells and CRLF line endings; pipe in backticks: cellSegments returns the text between the delimiting pipes, offsets in the untrimmed line). The odd-backslash boundary and the "Pipe after the code span" scenario are read from splitRow and have no dedicated test (untested). The renderer difference of the Known issue was checked with markdown-it 14.3.3 and the project's myst-parser and has no test.
+- Method: test/page/modules/markdownTable.test.ts (rows without outer pipes: rows without outer pipes stay parseable when an edge cell is emptied and rows with only one outer pipe stay parseable; escaped pipe and its round trip: pipe tables round-trip escaped cells and CRLF line endings; pipe in backticks: cellSegments returns the text between the delimiting pipes, offsets in the untrimmed line; an unescaped pipe inside a code span splits the cell as the preview does). The odd-backslash boundary is read from splitRow and has no dedicated test (untested). The preview rule was checked with markdown-it 14.3.3 and the project's myst-parser.
 - Method: test/page/modules/markdownTablePreservation.test.ts (escaped pipe round trip: corpus entry escaped-and-code).
 - Criteria: The cells produced by parse for each row form, and string equality after serialising.
