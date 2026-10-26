@@ -493,6 +493,19 @@ test("preview toolbar has three rows: actions with the collapse button, navigati
   );
 });
 
+test("toolbar tooltips stay opaque and anchored even on disabled controls", () => {
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar\] button:disabled\s*\{[^}]*opacity:/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar\] button:disabled > svg\s*\{[^}]*opacity: 0\.5;/u);
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /button\[data-tooltip\]:focus-visible::after\s*\{[^}]*transform: translate/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-THEME-025
+test("forced preview themes supply dropdown colors independently of the host", () => {
+  for (const mode of ["dark", "white", "cream"]) {
+    assert.match(PREVIEW_THEME_CSS, new RegExp(`html\\[data-sphinx-preview-theme-mode="${mode}"\\][^{}]*\\{[^}]*--studio-dropdown-background: var\\(--studio-editorWidget-background\\);[^}]*--studio-dropdown-foreground: var\\(--studio-editor-foreground\\);`, "u"));
+  }
+});
+
 test("control tooltips retain their offset while sticky headings remain at the top", () => {
   assert.match(PREVIEW_THEME_CSS, /--sphinx-preview-controls-height: 116px;/u);
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-sticky-headings\]\s*\{[^}]*position: fixed;[^}]*inset-block-start: 0;/u);
@@ -843,6 +856,14 @@ test("T10: full width lifts the column limit and auto lets flagged elements brea
   assert.match(rule[1]!, /max-width: none;/u);
   assert.match(PREVIEW_THEME_CSS,
     /\[data-sphinx-preview-width-toggle\]\[data-width-mode="auto"\] \[data-width-icon="auto"\]/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10: the auto measure lifts every cap, the row-handle one included", () => {
+  // The row-handle cap is !important: a weaker uncap would measure the capped table, flip the
+  // breakout at every resize and pull the scroll back on every frame.
+  assert.match(PREVIEW_THEME_CSS,
+    /\[data-sphinx-preview-measuring\]\s*\{\s*max-width: none !important;/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-037

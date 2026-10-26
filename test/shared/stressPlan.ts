@@ -65,6 +65,8 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "linked-target-save",
     // CR 048: the slash menu once did not open after a line break in a full local run.
     "slash-menu",
+    "save-position",
+    "alert-dropdown",
   ],
   untrusted: ["untrusted-read-only"],
 };

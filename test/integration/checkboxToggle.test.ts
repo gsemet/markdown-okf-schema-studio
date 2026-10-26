@@ -51,6 +51,11 @@ async function currentPreviewFrame(page: Page): Promise<Frame> {
       }
     }
     return false;
+  }).catch(async (error: unknown) => {
+    const preview = getActivePreviewForTests();
+    throw new Error(`${String(error)} Expected preview: ${JSON.stringify({
+      documentUri: preview?.documentUri, version: preview?.documentVersion, requestId: preview?.requestId,
+    })}; ${await windowFocusReport(page)}`);
   });
   assert.ok(result);
   return result;

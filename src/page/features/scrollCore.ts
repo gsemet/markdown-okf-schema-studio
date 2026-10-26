@@ -218,6 +218,9 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
       return;
     }
     if (!state.anchor) return;
+    // Past the last mapped block every scroll reads as the last line: keep the reader's scroll.
+    const current = lineAtScroll(window.scrollY);
+    if (current !== undefined && Math.abs(current - state.anchor.line) < 1e-3) return;
     const target = scrollAtLine(state.anchor.line);
     if (target !== undefined) programmaticScroll(target);
   }
@@ -362,7 +365,8 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
   }
 
   function scheduleScroll(): void {
-    if (frame === undefined) frame = window.requestAnimationFrame(postScroll);
+    // A layout pass may handle the scroll first (stabilizeLayout); the frame then has nothing to do.
+    if (frame === undefined) frame = window.requestAnimationFrame(() => { if (frame !== undefined) postScroll(); });
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-032
@@ -389,6 +393,15 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
   function stabilizeLayout(): void {
     window.requestAnimationFrame(() => {
+      if (frame !== undefined) {
+        const changed = layout.some((entry) => {
+          const rectangle = entry.element.getBoundingClientRect();
+          return Math.abs(rectangle.top + window.scrollY - entry.top) > 0.5
+            || Math.abs(rectangle.height - entry.height) > 0.5;
+        });
+        if (changed) frame = undefined;
+        else postScroll();
+      }
       state.activeBlockEdit?.resizeTextarea?.();
       state.activeFrontmatterEdit?.resizeTextarea?.();
       markWideTables();

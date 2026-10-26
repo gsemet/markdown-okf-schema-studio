@@ -338,6 +338,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
     }
     if (!final && editedText === edit.lastPostedText) return;
     if (editedText !== edit.originalText) edit.hasAutosavedChange = true;
+    const pin = final ? rt.scroll.blockPinFields(edit) : {};
     if (final) {
       edit.finishing = true;
       edit.status.textContent = "Saving Markdown…";
@@ -355,7 +356,7 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       editedText,
       final,
       ...(edit.insertAfterLine !== undefined ? { insertAfterLine: edit.insertAfterLine } : {}),
-      ...(final ? rt.scroll.blockPinFields(edit) : {}),
+      ...pin,
       ...(state.flushingEditors ? { flush: true } : {}),
       ...rt.scroll.anchorField(),
     });

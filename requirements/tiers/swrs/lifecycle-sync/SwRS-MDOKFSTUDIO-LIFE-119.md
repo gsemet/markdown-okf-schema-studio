@@ -66,6 +66,8 @@ When a preview is scrolled, rebuilt, re-laid out or edited, the extension SHALL 
 | an image loads, the pane is resized, the content changes size, the sticky band changes or the zoom changes | the page scrolls again to the stored anchor line instead of re-reading it from the scroll position |
 | a preview scrolled to the middle of a long document, and the reader cycles the width mode through auto, full and margin | the same heading stays within 40 px of where it was |
 | a sticky band that appears while the page is scrolled | the content does not move |
+| a scroll whose layout pass runs before the scroll is handled (a viewport resize reported with each scroll, as in a webview next to an editor) | the scroll sets the anchor first; the page stays where the reader scrolled |
+| a pending scroll while blocks change position or height, such as a comment above the reading line closing | the stored anchor survives; the layout-induced scroll does not become a new reading position |
 
 ### Scenario (boundary): Lines added or removed above the anchor
 | Input | Outcome |
@@ -101,6 +103,7 @@ When a preview is scrolled, rebuilt, re-laid out or edited, the extension SHALL 
 - SwRS-MDOKFSTUDIO-LIFE-108: the scroll from the preview to the text editor
 
 ### Verification notes
+- Method: test/page/runtimeScroll.test.ts, `a pending layout-induced scroll does not replace the reading anchor` distinguishes changed block geometry from the unchanged geometry in `a viewport resize fired before the scroll it accompanies does not pull the page back`.
 - Method: test/core/scroll/anchorPolicy.test.ts (scenarios 1, 2, 5: "converts lines to scroll positions and back through the reading offset", "reports the editor top line as the floor of the anchor", "ramps the reading line so the top of the page is line 1", "anchors long paragraphs at the start of each source line", "falls back to block bounds when paragraph lines cannot be measured", "shifts the anchor when lines change above it only")
 - Method: test/page/runtimeContentPatch.test.ts (scenario 3, page half: a boot context with initialAnchor 50); the host rule (stored anchor, then the editor's first visible line, then none) is untested
 - Method: test/integration/scroll-sync-suite.ts (scenarios 4 and 6: width-cycle-reading-line; block editor stays open through scrolling)

@@ -687,6 +687,47 @@ test("activating a centered block editor preserves scroll before and after layou
   assert.equal(blockEditorOf(harness.mappings[1]).getBoundingClientRect().top, blockTop);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+test("a pending layout-induced scroll does not replace the reading anchor", () => {
+  const harness = createRuntimeHarness();
+  harness.stickyHeadings.height = 65;
+  harness.stickyHeadings.rectProvider = () => ({ top: 0, height: 65, bottom: 65 });
+  harness.triggerResizeObserver();
+  harness.flushFrames();
+  harness.windowState.scrollY = 435;
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  const before = harness.mappings[1].getBoundingClientRect().top;
+  harness.mappings[1].top -= 60;
+  harness.mappings[2].top -= 60;
+  harness.windowState.scrollY -= 10;
+  harness.triggerResizeObserver();
+  harness.dispatchWindow("scroll");
+  harness.flushFrames();
+  assert.equal(harness.mappings[1].getBoundingClientRect().top, before);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-119
+test("a viewport resize fired before the scroll it accompanies does not pull the page back", () => {
+  // The same scroll and layout pass, handled in the usual order (scroll first) and in the order
+  // of webviews that report a visual viewport resize, with no size change, ahead of each scroll.
+  const scrollThenLayout = (resizeFirst: boolean): number => {
+    const harness = createRuntimeHarness();
+    harness.windowState.scrollY = 250;
+    harness.dispatchWindow("scroll");
+    harness.flushFrames();
+    harness.windowState.scrollY = 400;
+    if (resizeFirst) harness.dispatchVisualViewportResize();
+    harness.dispatchWindow("scroll");
+    if (!resizeFirst) harness.dispatchVisualViewportResize();
+    harness.flushFrames();
+    return harness.windowState.scrollY;
+  };
+  const expected = scrollThenLayout(false);
+  assert.ok(expected > 300, `the scroll is kept (${expected})`);
+  assert.equal(scrollThenLayout(true), expected);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-097
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-100
 test("executes source and preview synchronization across layout changes", () => {
@@ -1049,6 +1090,7 @@ test("markWideTables sets the overflow attribute only past a one pixel tolerance
   assert.equal(table.getAttribute("data-sphinx-table-overflow"), null, "the cue goes away when the table fits");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-228
 test("a final block save carries the edited element's pin; an autosave does not", () => {
   const harness = createRuntimeHarness();
   harness.windowState.scrollY = 200;
@@ -1075,6 +1117,13 @@ test("a final block save carries the edited element's pin; an autosave does not"
   assert.equal("pinLine" in (autosave ?? {}), false);
   assert.equal("pinViewportTop" in (autosave ?? {}), false);
 
+  const status = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-edit-status") !== null);
+  assert.ok(status);
+  harness.mappings[1].rectProvider = () => {
+    const top = status.textContent.startsWith("Saving") ? 284 : 300;
+    return { top, height: 40, bottom: top + 40 };
+  };
   const editorTop = blockEditorOf(harness.mappings[1]).getBoundingClientRect().top;
   textarea.dispatch("keydown", { key: "Enter", metaKey: true, preventDefault: () => undefined });
   const save = harness.messages.at(-1);
