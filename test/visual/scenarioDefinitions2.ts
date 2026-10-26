@@ -791,6 +791,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
   })),
   ...(["dark", "light"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-MYST-006
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-001
     id: `myst/v${20 + index}-myst-gallery-full-${theme}-900`,
     fixture: "38-myst-gallery",
     theme,

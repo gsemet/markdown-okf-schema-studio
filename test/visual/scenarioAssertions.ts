@@ -137,6 +137,7 @@ export const LIST_TABLE_ASSERTIONS: ContentAssertion[] = [
 export const MYST_GALLERY_ASSERTIONS: ContentAssertion[] = [
   { message: "a reference links to its label", selector: `${MAIN} a[data-sphinx-preview-navigation='#gallery-target']`, count: 1, text: "Labels and references" },
   { message: "the dropdown is a closed details block with its summary", selector: `${MAIN} details`, count: 1, text: "Read more", expr: "document.querySelector('#sphinx-myst-preview-content details').open === false" },
+  { message: "the closed dropdown shows a state chevron at the right of its title", selector: `${MAIN} details > summary`, count: 1, expr: "(() => { const s = document.querySelector('#sphinx-myst-preview-content details > summary'); const after = getComputedStyle(s, '::after'); const chevron = s.getBoundingClientRect(); return s.parentElement.open === false && after.content !== 'none' && after.content !== 'normal' && after.transform !== 'none' && getComputedStyle(s).listStyleType === 'none' && parseFloat(after.marginLeft) > 0 && chevron.width > 0; })()" },
   { message: "the definition list has two terms", selector: `${MAIN} dl dt`, count: 2 },
   { message: "subscript and superscript", selector: `${MAIN} sub, ${MAIN} sup:not(.footnote-ref):not([data-footnote-ref])`, min: 2 },
   { message: "the kbd role", selector: `${MAIN} kbd`, count: 1, text: "Ctrl+S" },

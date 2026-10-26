@@ -316,6 +316,18 @@ test("caution callouts are red with the octagon icon, not the warning amber", ()
   assert.doesNotMatch(PREVIEW_THEME_CSS, /:where\(\.warning[^)]*\.caution[^)]*\)/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001
+test("dropdown admonitions show their open or closed state with a chevron", () => {
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /#sphinx-myst-preview-content details\.admonition > summary\.admonition-title::after\s*\{[^}]*content: "";[^}]*transform: rotate\(-45deg\);/u,
+  );
+  assert.match(
+    PREVIEW_THEME_CSS,
+    /#sphinx-myst-preview-content details\.admonition\[open\] > summary\.admonition-title::after\s*\{[^}]*transform: rotate\(45deg\);/u,
+  );
+});
+
 test("MyST simple and no-icon admonition modifiers are styled", () => {
   assert.match(
     PREVIEW_THEME_CSS,

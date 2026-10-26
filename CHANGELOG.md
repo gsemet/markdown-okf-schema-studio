@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Dropdown admonitions show their state: a chevron at the right of the title points right while the
+  dropdown is closed and down while it is open, in every admonition kind and theme.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when
