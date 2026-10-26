@@ -204,6 +204,8 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
 
   function moveChordDirection(event: KeyboardEvent, inEditor: boolean): "up" | "down" | undefined {
     if (event.isComposing || event.shiftKey || !event.altKey) return undefined;
+    // AltGr reports ctrlKey and altKey together on Windows and Linux layouts: it is no chord.
+    if (event.getModifierState?.("AltGraph") === true) return undefined;
     const key = event.key === "ArrowUp" || event.key === "ArrowDown" ? event.key
       : (!event.key || event.key === "Unidentified" ? event.code : undefined);
     const direction = key === "ArrowUp" ? "up" : key === "ArrowDown" ? "down" : undefined;
