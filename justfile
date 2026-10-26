@@ -116,6 +116,10 @@ check-boundaries:
 check-limits:
     {{ npm }} run check:limits
 
+# Check the companion marker files (*.markers.ts): host file exists, markers name existing requirements.
+check-markers:
+    {{ npm }} run check:markers
+
 # Check that the package.json settings schema matches the settings registry (src/core/configuration/settingsRegistry.ts).
 check-settings:
     {{ npm }} run check:settings
@@ -124,8 +128,8 @@ check-settings:
 generate-settings:
     {{ npm }} run generate:settings
 
-# Format the justfile and run TypeScript, boundary, size, settings schema, unit, contract, security and requirements checks.
-check: format compile check-boundaries check-limits check-settings unit contracts security release-tests requirements-lint
+# Format the justfile and run TypeScript, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks.
+check: format compile check-boundaries check-limits check-markers check-settings unit contracts security release-tests requirements-lint
 
 # Validate the okfreq requirements bundle: schemas, links, navigation and generated coverage.
 requirements-lint:
@@ -184,7 +188,7 @@ site: e2e requirements-report
     {{ npm }} run site:gallery
     {{ npm }} run site
 
-# CI job "static": justfile format check, TypeScript, boundary, size, settings schema, unit, contract, security and requirements checks, Sphinx contract, requirements report.
+# CI job "static": justfile format check, TypeScript, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks, Sphinx contract, requirements report.
 ci-static:
     #!/usr/bin/env bash
     set -uo pipefail

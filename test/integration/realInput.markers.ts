@@ -1,3 +1,4 @@
+// Companion of: test/integration/realInput.test.ts
 // Requirement markers for realInput.test.ts.
 // That file is at its size limit (see scripts/check-file-sizes.mjs), so the markers live here
 // until the file is split. Each marker names a requirement the tests of realInput.test.ts check.

@@ -100,6 +100,8 @@ Tests mirror this tree under `test/` (`test/core/render/` tests `src/core/render
   in `test/`. The files that were larger are listed in `scripts/file-size-baseline.json` and may
   only shrink; when one shrinks, lower its entry with `node scripts/check-file-sizes.mjs --update`
   (the check says so). The same target fails on any `@ts-nocheck` or `@ts-ignore` in `src/`.
+- `just check-markers` checks the companion marker files (`*.markers.ts`): each names an existing
+  host file (`// Companion of: <path>`) and marks only existing requirements.
 - `just check-settings` fails when the `contributes.configuration` of `package.json` differs from
   what the settings registry generates (see "Add a setting").
 

@@ -170,6 +170,16 @@ export function plantUmlBuiltinAssertions(dark: boolean): ContentAssertion[] {
   ];
 }
 
+export const PLANTUML_THEME_SPRITE_ASSERTIONS: ContentAssertion[] = [
+  { message: "the diagram is rendered by the built-in engine", selector: '.myst-plantuml-diagram[data-plantuml-engine="builtin"][data-render-state="rendered"]', count: 1 },
+  { message: "no error message", selector: ".myst-plantuml-error", count: 0 },
+  { message: "the class diagram is drawn with the Smetana layout", selector: "img.myst-plantuml-image", expr: `${FIRST_PLANTUML_SVG}.includes('>ThemedOrder<') && ${FIRST_PLANTUML_SVG}.includes('>ThemedItem<')` },
+  { message: "the bundled theme colours the picture", selector: "img.myst-plantuml-image", expr: `${FIRST_PLANTUML_SVG}.includes('fill="#2FA4E7"')` },
+  { message: "the OpenIconic sprite is drawn as a path before its label", selector: "img.myst-plantuml-image", expr: `/<path d="M[^"]+"[^>]*\\/><text[^>]*> favourite</.test(${FIRST_PLANTUML_SVG})` },
+  { message: "nothing is fetched from the network", selector: MAIN, expr: "performance.getEntriesByType('resource').every((entry) => entry.name.startsWith('file:'))" },
+  { message: "the text after the diagram continues", selector: `${MAIN} > p`, text: "continues normally" },
+];
+
 export const PLANTUML_UNSUPPORTED_ASSERTIONS: ContentAssertion[] = [
   { message: "the diagram is refused by the built-in engine, not drawn", selector: '.myst-plantuml-diagram[data-plantuml-engine="builtin"][data-render-state="unavailable"]', count: 1 },
   { message: "one visible message names the standard-library include and its line", selector: ".myst-plantuml-error", count: 1, visible: true, text: "!include <C4/C4_Context> (line 2)" },

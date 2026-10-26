@@ -1,9 +1,43 @@
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-007
+/** The first element of the page starts 40px below the top (read and edit mode). */
+const FIRST_ELEMENT_GAP_CSS = `/*
+ * The first-element gap: whatever opens the page starts 40px below the top. This is a margin on
+ * the first child, not padding on the column, so the column's own top never moves. It follows
+ * every rule above that sets a top margin (headings, the properties table, blocks).
+ */
+#sphinx-myst-preview-content > :first-child {
+  margin-top: 40px;
+}`;
+
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-007
+/** The first-block editor, the Start writing button and a leading properties table keep the 40px under the toolbar. */
+const FIRST_ELEMENT_CLEARANCE_CSS = `/*
+ * Every first element starts 40px below the top. Only an interactive first element that sits under
+ * the floating toolbar moves: an open first-block editor gives up the width the toolbar covers
+ * (--sphinx-preview-first-inset, its inline-end margin) and keeps the 40px; the Start writing
+ * button, a leading properties table, and a first-block editor in a pane too narrow to be narrowed
+ * add the runtime's clearance, which is 0 whenever nothing overlaps.
+ */
+#sphinx-myst-preview-content > [data-okf-properties]:first-child,
+#sphinx-myst-preview-content .sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content .sphinx-preview-insert-point--first {
+  margin-top: calc(40px + var(--sphinx-preview-first-clearance, 0px));
+}
+
+#sphinx-myst-preview-content > [data-okf-properties]:first-child,
+#sphinx-myst-preview-content .sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor--first,
+#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first {
+  margin-inline-end: var(--sphinx-preview-first-inset, 0px);
+}`;
+
 // @implements_req SwRS-MDOKFSTUDIO-CORE-028
 // @implements_req SwRS-MDOKFSTUDIO-CORE-034
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-001
-// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-007
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
 // @implements_req SwRS-MDOKFSTUDIO-THEME-001
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
@@ -283,14 +317,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 #sphinx-myst-preview-content h3 { font-size: 1.25em; }
 #sphinx-myst-preview-content h4 { font-size: 1em; }
 
-/*
- * The first-element gap: whatever opens the page starts 40px below the top. This is a margin on
- * the first child, not padding on the column, so the column's own top never moves. It follows
- * every rule above that sets a top margin (headings, the properties table, blocks).
- */
-#sphinx-myst-preview-content > :first-child {
-  margin-top: 40px;
-}
+${FIRST_ELEMENT_GAP_CSS}
 
 #sphinx-myst-preview-content p,
 #sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor {
@@ -306,27 +333,7 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   margin: 0;
 }
 
-/*
- * Every first element starts 40px below the top. Only an interactive first element that sits under
- * the floating toolbar moves: an open first-block editor gives up the width the toolbar covers
- * (--sphinx-preview-first-inset, its inline-end margin) and keeps the 40px; the Start writing
- * button, a leading properties table, and a first-block editor in a pane too narrow to be narrowed
- * add the runtime's clearance, which is 0 whenever nothing overlaps.
- */
-#sphinx-myst-preview-content > [data-okf-properties]:first-child,
-#sphinx-myst-preview-content .sphinx-preview-block-editor--first,
-#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor--first,
-#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first,
-#sphinx-myst-preview-content .sphinx-preview-insert-point--first {
-  margin-top: calc(40px + var(--sphinx-preview-first-clearance, 0px));
-}
-
-#sphinx-myst-preview-content > [data-okf-properties]:first-child,
-#sphinx-myst-preview-content .sphinx-preview-block-editor--first,
-#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor--first,
-#sphinx-myst-preview-content p[data-sphinx-preview-editing="true"] + .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first {
-  margin-inline-end: var(--sphinx-preview-first-inset, 0px);
-}
+${FIRST_ELEMENT_CLEARANCE_CSS}
 
 #sphinx-myst-preview-content :where(ul, ol) {
   padding-inline-start: 2em;

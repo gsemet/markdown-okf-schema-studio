@@ -134,10 +134,12 @@ def check_no_horizontal_overflow(page): ...
   `test/visual/capture.py` or `test/shared/geometry-checks.js`.
 - Companion marker files: a file at its size limit (`scripts/check-file-sizes.mjs`) cannot take
   marker lines. Its markers live in a sibling `<name>.markers.ts` that holds only comment lines
-  and `export {};`, with a header naming the host file. Move them back into the host file when it
-  is split. Current companion: `test/integration/realInput.markers.ts`.
-  `src/page/modules/plantumlBundle.markers.ts` is
-  different: the behaviour it marks is in `esbuild.mjs`, outside the marker source folders.
+  and `export {};`, with a `// Companion of: <path>` header naming the host file. Move them back
+  into the host file when it is split and delete the companion. `just check-markers` (part of
+  `just check`) fails when the host file is gone or a marker names no requirement. Current
+  companions: `test/integration/realInput.markers.ts`; `src/page/modules/plantumlBundle.markers.ts`
+  and `src/core/render/requirementsPage.markers.ts` are different: the behaviour they mark is in
+  `esbuild.mjs` or in site tooling, outside the marker source folders.
 - A declarative behaviour (a `package.json` key, the lock file, an absence of code) cannot carry a
   marker: set `annotation_exemption: true` with the reason in `exemption_reason`.
 

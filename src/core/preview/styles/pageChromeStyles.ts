@@ -1,65 +1,9 @@
 import { CALLOUT_ICONS } from "../calloutIcons";
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
-// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
-// @implements_req SwRS-MDOKFSTUDIO-MYST-081
 // @implements_req SwRS-MDOKFSTUDIO-THEME-025
-// @implements_req SwRS-MDOKFSTUDIO-THEME-031
-// @implements_req SwRS-MDOKFSTUDIO-THEME-043
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-001
-// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
-/**
- * The page chrome: layout variables, the theme modes, the toolbar and its menus, the status banners,
- * the sticky heading band and the tooltips.
- *
- * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
- * the parts in cascade order: moving a rule to another part changes the cascade.
- */
-export const PAGE_CHROME_CSS = `
-:root {
-  --sphinx-preview-font: var(--studio-markdown-font-family, var(--studio-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, sans-serif));
-  --sphinx-preview-font-size: var(--studio-markdown-font-size, 14px);
-  --sphinx-preview-line-height: var(--studio-markdown-line-height, 1.6);
-  --sphinx-preview-content-max-width: ${DEFAULT_PREVIEW_CONTENT_WIDTH}px;
-  /* Set by the runtime (toolbar Zoom - / +); text and column scale together. */
-  --sphinx-preview-zoom: 1;
-  --sphinx-preview-zoomed-font-size: calc(var(--sphinx-preview-font-size) * var(--sphinx-preview-zoom, 1));
-  --sphinx-preview-column-width: calc(var(--sphinx-preview-content-max-width) * var(--sphinx-preview-zoom, 1));
-  --sphinx-preview-controls-height: 116px;
-  --sphinx-preview-content-gutter: clamp(16px, 8vw, 78px);
-  --sphinx-preview-diff-addition: var(--studio-charts-green, #2da44e);
-  --sphinx-preview-diff-deletion: var(--studio-charts-red, #cf222e);
-  --sphinx-preview-scrollbar-thumb: var(--studio-scrollbarSlider-background, rgba(128, 128, 128, 0.4));
-  --sphinx-preview-scrollbar-hover: var(--studio-scrollbarSlider-hoverBackground, rgba(128, 128, 128, 0.7));
-}
-
-body {
-  --sphinx-preview-border: var(--studio-widget-border, var(--studio-panel-border, rgba(128, 128, 128, 0.35)));
-}
-
-* {
-  scrollbar-color: var(--sphinx-preview-scrollbar-thumb) var(--studio-editor-background, Canvas);
-}
-
-::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-::-webkit-scrollbar-track,
-::-webkit-scrollbar-corner {
-  background: var(--studio-editor-background, Canvas);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--sphinx-preview-scrollbar-thumb);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--sphinx-preview-scrollbar-hover);
-}
-
-html[data-sphinx-preview-theme-mode="dark"],
+/** The Dark, White and Cream palettes: each forced mode sets the whole `--studio-*` palette itself. */
+const FORCED_THEME_MODES_CSS = `html[data-sphinx-preview-theme-mode="dark"],
 html[data-sphinx-preview-theme-mode="dark"] body {
   color-scheme: dark;
   --sphinx-preview-band-shadow: rgba(0, 0, 0, 0.6);
@@ -180,7 +124,66 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   --studio-charts-yellow: #7d5500;
   --studio-charts-red: #ae3a2a;
   --studio-charts-orange: #94500c;
+}`;
+
+// @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
+// @implements_req SwRS-MDOKFSTUDIO-MYST-081
+// @implements_req SwRS-MDOKFSTUDIO-THEME-031
+// @implements_req SwRS-MDOKFSTUDIO-THEME-043
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
+/**
+ * The page chrome: layout variables, the theme modes, the toolbar and its menus, the status banners,
+ * the sticky heading band and the tooltips.
+ *
+ * Part of the preview theme stylesheet (`PREVIEW_THEME_CSS`, `../previewStyles.ts`), which joins
+ * the parts in cascade order: moving a rule to another part changes the cascade.
+ */
+export const PAGE_CHROME_CSS = `
+:root {
+  --sphinx-preview-font: var(--studio-markdown-font-family, var(--studio-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, sans-serif));
+  --sphinx-preview-font-size: var(--studio-markdown-font-size, 14px);
+  --sphinx-preview-line-height: var(--studio-markdown-line-height, 1.6);
+  --sphinx-preview-content-max-width: ${DEFAULT_PREVIEW_CONTENT_WIDTH}px;
+  /* Set by the runtime (toolbar Zoom - / +); text and column scale together. */
+  --sphinx-preview-zoom: 1;
+  --sphinx-preview-zoomed-font-size: calc(var(--sphinx-preview-font-size) * var(--sphinx-preview-zoom, 1));
+  --sphinx-preview-column-width: calc(var(--sphinx-preview-content-max-width) * var(--sphinx-preview-zoom, 1));
+  --sphinx-preview-controls-height: 116px;
+  --sphinx-preview-content-gutter: clamp(16px, 8vw, 78px);
+  --sphinx-preview-diff-addition: var(--studio-charts-green, #2da44e);
+  --sphinx-preview-diff-deletion: var(--studio-charts-red, #cf222e);
+  --sphinx-preview-scrollbar-thumb: var(--studio-scrollbarSlider-background, rgba(128, 128, 128, 0.4));
+  --sphinx-preview-scrollbar-hover: var(--studio-scrollbarSlider-hoverBackground, rgba(128, 128, 128, 0.7));
 }
+
+body {
+  --sphinx-preview-border: var(--studio-widget-border, var(--studio-panel-border, rgba(128, 128, 128, 0.35)));
+}
+
+* {
+  scrollbar-color: var(--sphinx-preview-scrollbar-thumb) var(--studio-editor-background, Canvas);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: var(--studio-editor-background, Canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sphinx-preview-scrollbar-thumb);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sphinx-preview-scrollbar-hover);
+}
+
+${FORCED_THEME_MODES_CSS}
 
 [data-sphinx-preview-toolbar] {
   position: fixed;
