@@ -229,6 +229,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
       ...(options.incomingChanges === undefined ? {} : { incomingChanges: options.incomingChanges }),
     },
     ...(options.markEditorSelection === true ? { markEditorSelection: true } : {}),
+    ...(options.commentsEnabled === true ? { commentsEnabled: true } : {}),
     ...(options.trusted === false ? { warningsInProblems: false } : {}),
   };
   const serializedSource = JSON.stringify(source).replace(/</gu, "\\u003c");
