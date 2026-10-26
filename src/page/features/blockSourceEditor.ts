@@ -201,13 +201,13 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
         resizeTextarea();
         blockEditor.autosaveBlockEdit();
       }),
-      openPanel: (action, panelName) => {
+      openPanel: (action, panelName, focus) => {
         const onFallbackInput = (): void => {
           resizeTextarea();
           blockEditor.autosaveBlockEdit();
         };
         if ((panelName ?? action.panel) === "link") editorChrome.openLinkPanel(textarea, onFallbackInput);
-        else if (panelName === "figure") editorChrome.openFigurePanel(textarea, onFallbackInput);
+        else if (panelName === "figure") editorChrome.openFigurePanel(textarea, onFallbackInput, false, focus);
       },
       caretInside: (kind) => kind === "figure"
         && figureTools.locateFigure(String(textarea.value ?? ""), Number(textarea.selectionStart)) !== undefined,

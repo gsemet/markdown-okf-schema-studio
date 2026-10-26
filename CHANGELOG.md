@@ -26,6 +26,9 @@
   list: a list is mapped up to the blank line after it, and the host now drops blank lines at the end of a
   moved range. A move refused because the host still held an older render is sent once more after the
   next render before any message is shown.
+- Inserting a figure with the Figure button now opens the figure form right after the image is
+  chosen, on the caption field, instead of leaving a bare directive; Escape keeps the inserted
+  figure with its default values.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when

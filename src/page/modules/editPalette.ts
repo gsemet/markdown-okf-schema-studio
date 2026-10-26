@@ -66,7 +66,7 @@ export interface EditPaletteDeps {
    */
   pickHost?(kind: "document" | "image", done: (value: string | undefined) => void): void;
   /** Opens the small panel of an action that has one (the Link button), or the named one. */
-  openPanel?(action: EditAction, panel?: string): void;
+  openPanel?(action: EditAction, panel?: string, focus?: "caption"): void;
   /** True when the caret is inside existing syntax of this kind (see `panelWhenInside`). */
   caretInside?(kind: "figure"): boolean;
   mode: EditActionMode;
@@ -541,7 +541,13 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       if (!deps.pickHost) return;
       deps.pickHost(kind, (value) => {
         if (value === undefined) deps.getControl().focus({ preventScroll: true });
-        else run(action, value);
+        else {
+          run(action, value);
+          // A figure just inserted: its form opens at once, on the caption (the caret is in it).
+          if (action.panelWhenInside && deps.caretInside?.(action.panelWhenInside)) {
+            deps.openPanel?.(action, action.panelWhenInside, "caption");
+          }
+        }
       });
       return;
     }
