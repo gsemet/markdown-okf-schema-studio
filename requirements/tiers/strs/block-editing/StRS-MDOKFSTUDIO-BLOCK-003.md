@@ -20,6 +20,7 @@ user_need: As a writer, I click a paragraph, heading, list, admonition, code
   never change an included file by accident.
 derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-001
+- SwRS-MDOKFSTUDIO-BLOCK-002
 - SwRS-MDOKFSTUDIO-BLOCK-014
 - SwRS-MDOKFSTUDIO-BLOCK-017
 - SwRS-MDOKFSTUDIO-BLOCK-021

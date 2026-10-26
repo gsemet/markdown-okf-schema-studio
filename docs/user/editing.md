@@ -48,6 +48,9 @@ environments),
   focused "+" bar (one undo step).
   Alt+Up/Down (or the arrows of the selection's last block) moves the whole selection (one undo
   step), and the selection follows.
+  Every palette button shows a tooltip with its name and shortcut when you hover or focus it, sliding
+  in like the floating toolbar's. A horizontal rule is easy to hit: a click up to 12 px above or below
+  its line opens its editor.
   An edition palette above the text box adds headings, bold, italic, strikethrough, inline code,
   links (Cmd/Ctrl+K opens a link panel with text and target, pre-filled when the caret is in a
   link), tables from a size grid, emoji from a picker, text and background colours

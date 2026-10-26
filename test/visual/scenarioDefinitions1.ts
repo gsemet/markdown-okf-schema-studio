@@ -5,8 +5,10 @@
 
 import { DEFAULT_PREVIEW_CONFIGURATION } from "../../src/core/configuration/previewConfiguration";
 import {
+  EDIT_BAR_TOOLTIP_ASSERTIONS,
   FRONTMATTER_LONG_KEYS_ASSERTIONS,
   FRONTMATTER_SKILL_ASSERTIONS,
+  MAIN,
   MARK_CONTAINING_BLOCK_ASSERTIONS,
   NARROW,
   REVIEW_THREAD_CONTRAST_ASSERTIONS,
@@ -1221,5 +1223,22 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     contentAssertions: UNCLOSED_DIRECTIVE_ASSERTIONS,
     description: `A label opened and never closed around a table directive with no body, then an unclosed list-table, ${variant.name} preview, 900 px pane: `
       + "the preview does not fail, each broken construct shows its own lines as a code block and the text around them renders.",
+  })),
+  ...(["cream", "dark"] as const).map((mode, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-002
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-002
+    id: `palette-slash/v${23 + index}-edit-bar-tooltip-rule-${mode}-900`,
+    fixture: "64-rule-edit",
+    theme: mode === "dark" ? "dark" as const : "light" as const,
+    ...(mode === "cream" ? { previewThemeMode: "cream" as const } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    pageActions: [
+      { click: `${MAIN} > p` },
+      { hover: '.sphinx-preview-edit-palette > button[data-edit-action="rule"]', waitMs: 400 },
+    ],
+    contentAssertions: EDIT_BAR_TOOLTIP_ASSERTIONS,
+    description: `Edit bar of a paragraph editor (${mode}): hovering the rule button slides in its tooltip like the floating toolbar, the rule button shows a dashed line, and a click near a rule hits it.`,
   })),
 ];

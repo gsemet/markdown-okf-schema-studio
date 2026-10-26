@@ -7,6 +7,11 @@
   document renders, instead of the render failing. Unit tests and the cream and dark visual
   scenarios cover it.
 
+## 2026-10-26 (edit bar tooltips and rule hit area)
+
+- Added `SwRS-MDOKFSTUDIO-PALETTE-002` (every edit bar button carries the slide-in tooltip; the rule button
+  is drawn as three dashes) and `SwRS-MDOKFSTUDIO-BLOCK-002` (a horizontal rule has a 25 px hit area), CR 112.
+
 ## 2026-10-26 (bold dollar prices preserve emphasis)
 
 - SwRS-MDOKFSTUDIO-MYST-024: permissive MyST dollarmath no longer consumes the `**` markers
