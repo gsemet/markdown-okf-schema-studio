@@ -47,14 +47,16 @@ install restrictions) come from `AGENTS.md`. CI and PR body rules come from
 
 ## Roles and models
 
-| Role | Count | Model | Does | Never |
+Unless specified by user through your context otherwise, here are the default roles and models to use
+
+| Role | Count | Model (Claude Code) | Alternative (GitHub Copilot coding agent) | Never |
 | --- | --- | --- | --- | --- |
-| User | 1 | — | answers grill questions, grants extra rounds, merges PRs | — |
-| Main session | 1 | Opus | talks to the user, steps 1–4, starts and supervises the orchestrator | starts drivers, lands CRs, edits a CR worktree |
-| Orchestrator | 1 | Sonnet | starts and supervises drivers, watches merges, step 11, rebase requests | runs long commands, codes, reviews, commits, merges PRs |
-| CR driver | 1 per CR | Sonnet | steps 5–10 for its CR, starts coder and reviewer, watches its CI | codes, reviews, touches another CR |
-| Coder | 1 per round | Sonnet | changes the worktree, runs local gates, writes the report | commits, pushes, lives past its round |
-| Reviewer | 1 per round | Sonnet | verifies the diff (read-only), writes the verdict | edits files, lives past its round |
+| User | 1 | — | —  | — |
+| Main session | 1 | Opus 5.5 | Opus 5.5 (copilot) | starts drivers, lands CRs, edits a CR worktree |
+| Orchestrator | 1 | Sonnet 5.5 | Sonnet 5.5 (copilot) | runs long commands, codes, reviews, commits, merges PRs |
+| CR driver | 1 per CR | Sonnet | Sonnet 5.5 (copilot)  | codes, reviews, touches another CR |
+| Coder | 1 per round | Sonnet | GPT 5.6 Luna (copilot) | commits, pushes, lives past its round |
+| Reviewer | 1 per round | Sonnet | GPT 6.1 Sol (copilot) | edits files, lives past its round |
 
 - **Escalation to Opus**: the driver uses Opus for the coder after the second FIX-REQUIRED, or
   after two CI failures with the same cause. The reviewer uses Opus when the CR's blast radius is
@@ -289,6 +291,7 @@ even in git.
   - a Mermaid `sequenceDiagram` of one real flow (an edit, a message, a write), before and after
     when the order is the fix;
   - a before/after tree or table (files moved or split, sizes, settings);
+  - screenshots before/after for UI changes
   - a short code sketch (5 to 15 lines) of the new interface, message or registration that a
     contributor will reuse, with `...` for the rest.
   A one-line fix may skip the section; a structural change never does.
