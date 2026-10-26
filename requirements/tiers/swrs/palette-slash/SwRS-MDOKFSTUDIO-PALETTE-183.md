@@ -59,7 +59,8 @@ The skipped folders are node_modules, .git, _build, .venv, venv, out and dist; t
 
 | Input | Outcome |
 | --- | --- |
-| more bibliography files than 20 | at most 20 files are taken and the list is marked truncated when that cap is reached |
+| exactly 20 bibliography files | all 20 are taken and the list is not marked truncated |
+| more bibliography files than 20 | at most 20 files are taken and the list is marked truncated |
 | bibliography files of 3 MiB together | files are read only while their total size stays within 2 MiB; the files that do not fit are skipped and the list is marked truncated |
 | a file that cannot be read | the file is skipped and the other files still count; the scan does not fail |
 | a search that takes longer than 5 seconds | the search is cancelled, no more file is read, and the list holds the keys read so far with truncated true |
@@ -91,10 +92,6 @@ The skipped folders are node_modules, .git, _build, .venv, venv, out and dist; t
 
 Each answer repeats the editId and holds ok true with the items (value and label are the key, the detail is the title) and the truncated flag; see SwRS-MDOKFSTUDIO-TRUST-052, SwRS-MDOKFSTUDIO-TRUST-005, SwRS-MDOKFSTUDIO-TRUST-065 and SwRS-MDOKFSTUDIO-TRUST-090.
 
-### Known issues
-
-- Known issue: the truncated flag is also set when exactly 20 bibliography files exist, although nothing was cut, so the note More entries exist is shown for a complete list (bibScan.ts:search sets it when the number of files found reaches the cap; deduced from the code, not run).
-
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-PALETTE-149: the cite role written for a chosen key.
@@ -102,6 +99,6 @@ Each answer repeats the editId and holds ok true with the items (value and label
 ### Verification notes
 
 - Method: test/integration/mystPickers.test.ts (the keys smith2024 and zed are listed, hiddenkey in node_modules is excluded, the title Smith title is listed with smith2024; checks nearest first, excluded folder, entries of the list)
-- Method: test/session/paletteReq.requirements.test.ts (the scan skips files that do not fit in 2 MiB, marks the list truncated and skips an unreadable file; a scan still running after 5 seconds stops reading and marks the list truncated; a fast scan clears the timer; a citation scan that throws is answered with ok false and the message of the error; checks the bounds and failed scan scenarios)
+- Method: test/session/paletteReq.requirements.test.ts (the scan skips files that do not fit in 2 MiB, marks the list truncated and skips an unreadable file; a scan still running after 5 seconds stops reading and marks the list truncated; a fast scan clears the timer; a citation scan that throws is answered with ok false and the message of the error; exactly 20 bibliography files are a complete list, a 21st marks it truncated; checks the bounds and failed scan scenarios)
 - Method: test/core/mapping/mystTargets.test.ts (bibKeys reads entry keys and titles, and skips comment, string and preamble entries; collectBibKeys merges files, removes duplicates, sorts and caps; checks the entries and duplicates scenarios)
-- Criteria: The 20 file cap is not asserted by a test (untested); MAX_BIB_BYTES is 2 MiB and the text of each file is decoded as UTF-8; SCAN_TIMEOUT_MS is 5000; the read-only and out-of-date answers are deduced from the code (handleListCitations), not tested.
+- Criteria: MAX_BIB_BYTES is 2 MiB and the text of each file is decoded as UTF-8; SCAN_TIMEOUT_MS is 5000; the read-only and out-of-date answers are deduced from the code (handleListCitations), not tested.

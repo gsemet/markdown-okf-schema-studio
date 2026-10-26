@@ -68,6 +68,28 @@ test("the scan skips files that do not fit in 2 MiB, marks the list truncated an
   assert.equal(fits.truncated, false, "files within the cap do not truncate");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-183
+test("exactly 20 bibliography files are a complete list, a 21st marks it truncated", async () => {
+  const names = Array.from({ length: 21 }, (_, index) => `/ws/docs/f${index}.bib`);
+  const entries = Object.fromEntries(names.map((name, index) => [name, { size: 5, text: `@book{k${index},\n}\n` }]));
+  const { files } = bibFiles(entries);
+  const requested: number[] = [];
+  const workspace = (list: string[]): never => ({
+    folderOf: () => ({ id: "ws", path: "/ws", name: "ws" }),
+    findFiles: (query: { maxResults: number }) => {
+      requested.push(query.maxResults);
+      return Promise.resolve(list.slice(0, query.maxResults));
+    },
+  }) as never;
+  const exact = await scanBibKeys(DOC, { files, workspace: workspace(names.slice(0, 20)) });
+  assert.equal(exact.files, 20);
+  assert.equal(exact.truncated, false, "nothing was cut");
+  const more = await scanBibKeys(DOC, { files, workspace: workspace(names) });
+  assert.equal(more.files, 20);
+  assert.equal(more.truncated, true);
+  assert.ok(requested.every((count) => count === 21), "the search asks for one file more than it keeps");
+});
+
 test("a scan still running after 5 seconds stops reading and marks the list truncated; a fast scan clears the timer", async () => {
   mock.timers.enable({ apis: ["setTimeout"] });
   try {

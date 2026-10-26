@@ -146,6 +146,12 @@ test("a paste inserts the clipboard as new blocks, never next to an included blo
   const included = "```{include} other.md\n```\n\nB\n";
   assert.deepEqual(checkBlocksPaste(included, 1), { refused: PASTE_NEXT_TO_INCLUDED });
   assert.equal(checkBlocksPaste(included, 0), undefined);
+  assert.deepEqual(checkBlocksPaste(included, 2), { refused: PASTE_NEXT_TO_INCLUDED }, "after the closing fence line");
+  assert.equal(checkBlocksPaste(included, 3), undefined, "the blank line after the directive");
+  assert.equal(checkBlocksPaste(included, 4), undefined);
+  const colon = "A\n\n:::{include} other.md\n:::\n\nB\n";
+  assert.deepEqual(checkBlocksPaste(colon, 4), { refused: PASTE_NEXT_TO_INCLUDED });
+  assert.equal(checkBlocksPaste(colon, 2), undefined);
   assert.equal(checkBlocksPaste(included, 99), undefined);
 });
 

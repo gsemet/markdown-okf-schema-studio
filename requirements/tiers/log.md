@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-10-26 (small block editing and palette fixes)
+
+- SwRS-MDOKFSTUDIO-BLOCK-130: AltGr with an up or down arrow in the text box is no move chord; a
+  boundary row states it and the Known issue line is removed.
+- SwRS-MDOKFSTUDIO-BLOCK-127: the host also refuses a paste after the closing fence line of an
+  include directive (a new refusal scenario), so the refusal no longer depends on the page; the Known
+  issue line is removed.
+- SwRS-MDOKFSTUDIO-PALETTE-183: exactly 20 bibliography files are a complete list and are not marked
+  truncated; a boundary row states it and the Known issue line is removed.
+
 ## 2026-10-26 (a refused field value no longer stays open next to a block editor)
 
 - SwRS-MDOKFSTUDIO-BLOCK-041: a click on a block or a plus insert point while a field editor holds a

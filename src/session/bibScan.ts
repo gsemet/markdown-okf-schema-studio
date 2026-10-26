@@ -47,7 +47,7 @@ export async function scanBibKeys(documentPath: string | undefined, services: Bi
         base,
         pattern: "**/*.bib",
         exclude: BIB_EXCLUDE,
-        maxResults: MAX_BIB_FILES,
+        maxResults: MAX_BIB_FILES + 1,
         signal: cancellation.signal,
       });
       for (const file of files) {
@@ -57,7 +57,7 @@ export async function scanBibKeys(documentPath: string | undefined, services: Bi
         }
         found.add(file);
       }
-      if (files.length >= MAX_BIB_FILES) truncated = true;
+      if (files.length > MAX_BIB_FILES) truncated = true;
     };
     // Nearest first: the document's own folder, then the rest of its workspace folder.
     if (documentPath !== undefined) await search(path.dirname(documentPath));

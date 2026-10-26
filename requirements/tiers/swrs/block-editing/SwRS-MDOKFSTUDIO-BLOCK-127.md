@@ -97,9 +97,11 @@ When a move, a copy, a cut, a block selection or a paste would involve a block t
 - WHEN the host handles it
 - THEN the answer is ok false with "Text cannot be pasted next to a block that comes from an included file." and the document and the clipboard are untouched
 
-### Known issues
+### Scenario (refusal): The host refuses a paste after the closing fence of an include directive
 
-- Known issue: the host looks at the single line it is asked to paste after. The insert point of an included block sits after the last line of the directive, which is the closing fence and does not open an include, so a request for that line passes this check; only the page refuses it.
+- GIVEN a document whose first block is a fenced {include} directive of two lines and a paste after line 2, the closing fence, which is where the insert point of the included block sits
+- WHEN the host handles it
+- THEN the answer is ok false with "Text cannot be pasted next to a block that comes from an included file." and the document and the clipboard are untouched; a paste after the blank line that follows the directive is accepted
 
 ### Related requirements
 

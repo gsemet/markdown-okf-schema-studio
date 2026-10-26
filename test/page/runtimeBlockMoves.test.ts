@@ -275,6 +275,18 @@ test("T37: on macOS the chord is Cmd+Alt, and Ctrl+Alt does nothing special", ()
   assert.equal(harness.messages.slice(before).find((message) => message.type === "previewEditSave")?.final, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-130
+test("T37: AltGr with an arrow in the text box is no move chord", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const textarea = openMoveTextarea(harness, "Current block\n");
+  textarea.setSelectionRange(3, 3);
+  const before = harness.messages.length;
+  textarea.dispatch("keydown", altKey("ArrowUp", { ctrlKey: true, getModifierState: (name: string) => name === "AltGraph" }));
+  assert.deepEqual(harness.messages.slice(before), [], "AltGr leaves the key native");
+  textarea.dispatch("keydown", altKey("ArrowUp", { ctrlKey: true, getModifierState: () => false }));
+  assert.deepEqual(harness.messages.slice(before).map((message) => message.type), ["previewEditCancel", "previewBlockMove"]);
+});
+
 test("T37: with nothing to save the chord closes the editor and moves at once", () => {
   const harness = createRuntimeHarness({ savedState: { editMode: true } });
   const textarea = openMoveTextarea(harness, "Current block\n");

@@ -206,10 +206,32 @@ export function planBlocksCopyCut(
   return { copied, cut: { edit: { start: plan.start, end: plan.end, text: "" }, followingLine: plan.followingLine } };
 }
 
-/** Refuses a paste after `afterLine` (0: start of the body) when that line opens an `{include}`. */
+/**
+ * True when `afterLine` lies in an `{include}` directive: on its opening line, inside it or on its
+ * closing fence line (the insert point of an included block sits after that closing fence).
+ */
+function insideIncludeDirective(lines: SourceLines, afterLine: number): boolean {
+  for (let open = 1; open <= Math.min(afterLine, lines.count); open += 1) {
+    const opening = lines.text(open - 1);
+    if (!opensIncludeDirective(opening)) continue;
+    const fence = /^\s*(:{3,}|`{3,}|~{3,})/u.exec(opening)![1];
+    let close = open;
+    while (close < lines.count) {
+      close += 1;
+      const candidate = lines.text(close - 1).trim();
+      if (candidate.length >= fence.length && candidate === fence[0].repeat(candidate.length)
+        && candidate[0] === fence[0]) break;
+    }
+    if (afterLine <= close) return true;
+    open = close;
+  }
+  return false;
+}
+
+/** Refuses a paste after `afterLine` (0: start of the body) in or at the end of an `{include}`. */
 export function checkBlocksPaste(text: string, afterLine: number): EditRefusal | undefined {
   const lines = sourceLines(text);
-  return afterLine > 0 && afterLine <= lines.count && linesOpenInclude(lines, afterLine, afterLine)
+  return afterLine > 0 && afterLine <= lines.count && insideIncludeDirective(lines, afterLine)
     ? { refused: PASTE_NEXT_TO_INCLUDED }
     : undefined;
 }
