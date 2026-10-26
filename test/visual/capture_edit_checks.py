@@ -470,12 +470,18 @@ def check_cell_editor_chrome(page: Page, page_name: str, target, original_bounds
         failures.append(Failure(page_name, f"table cell font differs from the block editor: {info['font']}"))
     if info["statusDelta"] is None or info["statusDelta"] > 2:
         failures.append(Failure(page_name, f"toolbar status is not vertically centred with the buttons: {info['statusDelta']}"))
-    if original_bounds and abs(info["cellWidth"] - original_bounds["width"]) > 1:
+    if info["cellWidth"] < 299:
+        failures.append(Failure(page_name, f"edited table cell is narrower than 300 px: {info['cellWidth']}"))
+    if original_bounds and original_bounds["width"] < 299:
+        pass  # the edited cell grew to its 300 px minimum
+    elif original_bounds and abs(info["cellWidth"] - original_bounds["width"]) > 1:
         failures.append(Failure(
             page_name,
             f"table column width changed while editing: {original_bounds['width']} -> {info['cellWidth']}",
         ))
-    if original_bounds and info["cellHeight"] < original_bounds["height"] - 1:
+    # A cell that grew to 300 px wraps its text on fewer lines, so it may be shorter.
+    grew = original_bounds and info["cellWidth"] > original_bounds["width"] + 1
+    if original_bounds and not grew and info["cellHeight"] < original_bounds["height"] - 1:
         failures.append(Failure(page_name, f"table cell shrank while editing: {original_bounds['height']} -> {info['cellHeight']}"))
 
 

@@ -1223,3 +1223,15 @@ test("CR 112: a horizontal rule is 12px taller above and below than its line, wi
   assert.match(rule, /background-clip: content-box;/u);
   assert.match(rule, /margin: calc\(2em - 12px\) 0;/u);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-006
+test("in edit mode table cells keep a minimum width and the edited cell is wider", () => {
+  const edit = 'html\\[data-sphinx-preview-edit-mode="on"\\] #sphinx-myst-preview-content table';
+  assert.match(PREVIEW_THEME_CSS, new RegExp(`${edit} :where\\(th, td\\) \\{[^}]*min-width: 8em;`, "u"));
+  assert.match(
+    PREVIEW_THEME_CSS,
+    new RegExp(`${edit} :where\\(th, td\\)\\[data-sphinx-preview-table-cell-selected="true"\\] \\{[^}]*min-width: 300px;`, "u"),
+  );
+  // The rendered (read) view has no such rule.
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /(?:^|\n)#sphinx-myst-preview-content table :where\(th, td\) \{[^}]*min-width/u);
+});

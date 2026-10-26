@@ -863,8 +863,15 @@ def check_edit_affordances(page: Page, scenario: dict, failures: list[Failure]) 
   if editor.count() != 1 or not editor.is_visible():
     failures.append(Failure(page_name, "clicking a paragraph did not open its framed editor"))
     return
-  if page.locator('main [data-sphinx-preview-edit-hover="true"]').count() != 0:
-    failures.append(Failure(page_name, "hover outline stayed on while an editor opened"))
+  # The editor replaces the paragraph and the page may reflow under the stationary pointer; the
+  # browser then reports the pointer over whatever block lies there, and that block is rightly
+  # outlined. The check is that no outline stays on the block being edited or inside its editor.
+  stale = page.evaluate("""() => [...document.querySelectorAll('main [data-sphinx-preview-edit-hover="true"]')]
+    .filter(element => element.closest('.sphinx-preview-block-editor')
+      || element.getAttribute('data-sphinx-preview-editing') === 'true')
+    .map(element => element.tagName)""")
+  if stale:
+    failures.append(Failure(page_name, f"hover outline stayed on while an editor opened: {stale}"))
   frame = editor.evaluate("""element => {
     const style = getComputedStyle(element);
     const area = getComputedStyle(element.querySelector('textarea'));
