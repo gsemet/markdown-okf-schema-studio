@@ -1,3 +1,4 @@
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-002
 import { CALLOUT_ICONS } from "../calloutIcons";
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
@@ -434,12 +435,14 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
 }
 
 [data-sphinx-preview-toolbar] button[data-tooltip],
-.sphinx-preview-table-menu button[data-tooltip] {
+.sphinx-preview-table-menu button[data-tooltip],
+.sphinx-preview-edit-palette > button[data-tooltip] {
   position: relative;
 }
 
 [data-sphinx-preview-toolbar] button[data-tooltip]::after,
-.sphinx-preview-table-menu button[data-tooltip]::after {
+.sphinx-preview-table-menu button[data-tooltip]::after,
+.sphinx-preview-edit-palette > button[data-tooltip]::after {
   position: absolute;
   inset-block-start: calc(100% + 8px);
   inset-inline-start: 50%;
@@ -487,9 +490,44 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
 [data-sphinx-preview-toolbar] button[data-tooltip]:hover::after,
 [data-sphinx-preview-toolbar] button[data-tooltip]:focus-visible::after,
 .sphinx-preview-table-menu button[data-tooltip]:hover::after,
-.sphinx-preview-table-menu button[data-tooltip]:focus-visible::after {
+.sphinx-preview-table-menu button[data-tooltip]:focus-visible::after,
+.sphinx-preview-edit-palette > button[data-tooltip]:hover::after,
+.sphinx-preview-edit-palette > button[data-tooltip]:focus-visible::after {
   visibility: visible;
   opacity: 1;
+}
+
+/* Tooltip bubble (shared rules in pageChromeStyles): centred under the button and sliding in like the
+   floating toolbar's. It is not rendered until the button is hovered or focused (a hidden bubble would
+   still widen the page near the bar's right edge); the first buttons align to the bar's start edge so
+   the bubble stays inside. */
+.sphinx-preview-edit-palette > button[data-tooltip] {
+  --sphinx-preview-edit-tooltip-x: -50%;
+}
+
+.sphinx-preview-edit-palette > button[data-tooltip]:nth-child(-n+4) {
+  --sphinx-preview-edit-tooltip-x: 0px;
+}
+
+.sphinx-preview-edit-palette > button[data-tooltip]::after {
+  display: none;
+  transform: translate(var(--sphinx-preview-edit-tooltip-x), 0);
+  transition: none;
+}
+
+.sphinx-preview-edit-palette > button[data-tooltip]:nth-child(-n+4)::after {
+  inset-inline-start: 0;
+}
+
+.sphinx-preview-edit-palette > button[data-tooltip]:hover::after,
+.sphinx-preview-edit-palette > button[data-tooltip]:focus-visible::after {
+  display: block;
+  animation: sphinx-preview-edit-tooltip-in 100ms ease;
+}
+
+@keyframes sphinx-preview-edit-tooltip-in {
+  from { opacity: 0; transform: translate(var(--sphinx-preview-edit-tooltip-x), -3px); }
+  to { opacity: 1; transform: translate(var(--sphinx-preview-edit-tooltip-x), 0); }
 }
 
 /* Fixed, out of flow: showing or resizing the band never moves the content (scroll anchoring R8). */

@@ -68,6 +68,30 @@ test("T21: no palette before the source arrives and none after the editor closes
   assert.equal(palette.removed, true, "the palette leaves with the editor");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-002
+test("T21b: every palette button carries the slide-in tooltip of its title", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  const buttons = harness.createdElements.filter((element) => element.getAttribute("data-edit-action") !== null);
+  assert.ok(buttons.length > 10, "the palette has its buttons");
+  for (const button of buttons) {
+    const tooltip = button.getAttribute("data-tooltip");
+    assert.ok(tooltip, button.getAttribute("data-edit-action") + " has a data-tooltip");
+    assert.equal(tooltip, button.getAttribute("title"), String(button.getAttribute("data-edit-action")));
+  }
+  assert.equal(paletteButton(harness, "bold").getAttribute("data-tooltip"), "Bold (Ctrl+B)");
+  assert.equal(paletteButton(harness, "rule").getAttribute("data-tooltip"), "Horizontal rule");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-002
+test("T21c: the rule button is three dashes, not the lines of centred text", () => {
+  const harness = createRuntimeHarness();
+  openBlockEditorWithSource(harness);
+  const markup = paletteButton(harness, "rule").innerHTML;
+  assert.match(markup, /d="M3 12h4M10 12h4M17 12h4"/u);
+  assert.doesNotMatch(markup, /M8 7h8/u);
+});
+
 test("T21: the palette buttons show the real shortcut in their tooltip", () => {
   const harness = createRuntimeHarness();
   openBlockEditorWithSource(harness);

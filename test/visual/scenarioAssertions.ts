@@ -795,3 +795,13 @@ export const WIDE_ROW_HANDLE_ASSERTIONS: ContentAssertion[] = [
   { message: "the handles are outside the scrolling box", selector: `${MAIN} table .okf-table-row-handle`, count: 0 },
   { message: "every table is inside the pane", selector: `${MAIN} table`, insidePane: true },
 ];
+
+/** CR 112: the edit bar's buttons carry the slide-in tooltip, and a horizontal rule is easy to hit. */
+export const EDIT_BAR_TOOLTIP_ASSERTIONS: ContentAssertion[] = [
+  { message: "every button of the open edit bar carries a data-tooltip (the floating toolbar's slide-in tooltip)", selector: ".sphinx-preview-edit-palette > button", min: 5,
+    expr: "[...document.querySelectorAll('.sphinx-preview-edit-palette > button')].every((button) => (button.getAttribute('data-tooltip') ?? '').length > 0)" },
+  { message: "the hovered rule button shows its tooltip bubble, fully opaque, with its name", selector: ".sphinx-preview-edit-palette > button[data-edit-action=\"rule\"]", count: 1,
+    expr: "(() => { const button = document.querySelector('.sphinx-preview-edit-palette > button[data-edit-action=\"rule\"]'); const bubble = getComputedStyle(button, '::after'); return bubble.opacity === '1' && bubble.visibility === 'visible' && bubble.content.includes('Horizontal rule'); })()" },
+  { message: "a click 10 px above or below the line of a horizontal rule still lands on it", selector: `${MAIN} hr`, count: 1,
+    expr: "[...document.querySelectorAll('#sphinx-myst-preview-content hr')].every((rule) => { const box = rule.getBoundingClientRect(); const x = box.left + box.width / 2; const y = box.top + box.height / 2; return box.height >= 24 && document.elementFromPoint(x, y - 10) === rule && document.elementFromPoint(x, y + 10) === rule; })" },
+];

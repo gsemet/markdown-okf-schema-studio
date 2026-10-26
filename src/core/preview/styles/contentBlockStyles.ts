@@ -1,6 +1,7 @@
 import { directiveStyle } from "../../directives/registry";
 import { gridColumnCss } from "../../render/mystGridToctree";
 
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-002
 // @implements_req SwRS-MDOKFSTUDIO-CODE-007
 // @implements_req SwRS-MDOKFSTUDIO-CODE-008
 // @implements_req SwRS-MDOKFSTUDIO-CODE-014
@@ -502,11 +503,16 @@ html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > 
 }
 
 ${directiveStyle("tables")}
+/* The line is 1px, but the box is 25px tall (12px of padding on each side, painted transparent), so a
+   click near the line lands on the rule and opens its editor. The margin gives the padding back. */
 #sphinx-myst-preview-content hr {
+  box-sizing: content-box;
   height: 1px;
-  margin: 2em 0;
+  margin: calc(2em - 12px) 0;
+  padding: 12px 0;
   border: 0;
   background: var(--sphinx-preview-border);
+  background-clip: content-box;
 }
 
 #sphinx-myst-preview-content dt {

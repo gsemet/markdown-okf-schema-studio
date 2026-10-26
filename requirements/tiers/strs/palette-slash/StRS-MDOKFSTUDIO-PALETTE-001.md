@@ -21,6 +21,7 @@ user_need: As a writer, I format and insert Markdown from buttons or keyboard
   half-written markup.
 derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-001
+- SwRS-MDOKFSTUDIO-PALETTE-002
 - SwRS-MDOKFSTUDIO-PALETTE-021
 - SwRS-MDOKFSTUDIO-PALETTE-039
 - SwRS-MDOKFSTUDIO-PALETTE-043

@@ -11,6 +11,9 @@
 - A directive the parser cannot build, such as an unclosed ```` ```{list-table} ```` or a
   `:::{table}` with no body, no longer fails the preview: its own lines show as a code block and
   the rest of the document renders.
+- Edit bar: every button shows the same sliding tooltip as the floating toolbar (name and shortcut),
+  the Horizontal rule button is drawn as three dashes (`---`) instead of the centred-text icon, and a
+  horizontal rule can be clicked up to 12 px above or below its line to open its editor.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when

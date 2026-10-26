@@ -1206,3 +1206,20 @@ test("CR 107: the preview block quote background outranks the VS Code webview de
   assert.ok(previewBackgrounds.every((candidate) => outranks(candidate, defaultSpecificity)),
     "every preview block quote background beats the host default, so the host colour theme cannot show through");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-002
+test("CR 112: the edit bar buttons share the floating toolbar's tooltip bubble and slide it in on hover", () => {
+  assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-edit-palette > button\[data-tooltip\]::after[^{]*\{[^}]*content: attr\(data-tooltip\);/u);
+  assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-edit-palette > button\[data-tooltip\]:hover::after[^{]*\{[^}]*visibility: visible;[^}]*opacity: 1;/u);
+  assert.match(PREVIEW_THEME_CSS, /@keyframes sphinx-preview-edit-tooltip-in/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-002
+test("CR 112: a horizontal rule is 12px taller above and below than its line, with the spacing unchanged", () => {
+  const rule = /#sphinx-myst-preview-content hr \{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  assert.match(rule, /height: 1px;/u);
+  assert.match(rule, /padding: 12px 0;/u);
+  assert.match(rule, /box-sizing: content-box;/u);
+  assert.match(rule, /background-clip: content-box;/u);
+  assert.match(rule, /margin: calc\(2em - 12px\) 0;/u);
+});

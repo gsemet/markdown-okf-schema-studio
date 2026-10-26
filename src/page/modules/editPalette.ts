@@ -13,6 +13,7 @@ import type { CaretRect } from "./caretRect";
 import type { TextEdit } from "./textEditing";
 
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-001
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-002
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-017
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
@@ -648,6 +649,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
       button.setAttribute("aria-label", action.label);
       const text = tooltip(action);
       button.setAttribute("title", text);
+      button.setAttribute("data-tooltip", text);
       button.setAttribute("data-edit-action", action.id);
       button.setAttribute("data-edit-group", action.group);
       if (previousGroup && previousGroup !== action.group) {
