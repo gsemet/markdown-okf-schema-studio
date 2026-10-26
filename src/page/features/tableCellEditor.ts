@@ -313,6 +313,16 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
         blockEditor.saveBlockEdit();
       }
     }, tableFigure || Boolean(edit.tableModel!.listTable), "table");
+    // A list-table opened in the cell editor goes back to a pipe table from the same bar.
+    if (edit.tableModel!.listTable) {
+      addAction("Convert to pipe table", tableActionIcons.listTable, "Pipe table", () => {
+        const converted = tableTools.convertTable(tableTools.serialize(edit.tableModel!), "pipe");
+        if (converted && converted.ok) {
+          edit.convertedText = converted.text;
+          blockEditor.saveBlockEdit();
+        }
+      }, false, "table");
+    }
 
     // The inline buttons allowed in a cell join the bar after a separator; the same group object
     // is kept for the whole edit and only moved into each rebuilt bar.

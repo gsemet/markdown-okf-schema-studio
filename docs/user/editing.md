@@ -87,7 +87,15 @@ select at its start
   menu) convert it to the other form in one undo step. A conversion that would lose content (a
   list-table cell with several lines or block content, a title, a label or several header rows to a
   pipe table) shows a message and changes nothing; column alignment colons and `:widths:` are
-  dropped. Conversion never writes HTML.
+  dropped. Conversion never writes HTML. A click on a cell of a `{list-table}` opens the whole
+  directive in the raw Markdown editor, in place of the table.
+  In edit mode a pipe table or a `{list-table}` shows a handle left of each body row and a handle
+  above each column (outside the cells, the same mark as the list editor of the properties). Drag
+  a handle onto another row or column, or focus it and press Alt+Up and Alt+Down (Alt+Left and
+  Alt+Right for a column), to move it: the header rows stay in place, the move is one edit and one
+  undo, and it works while a cell of the table is open too (the text typed in the cell moves with
+  its row or column). In a list-table the cells and the `:widths:` numbers of a moved column move
+  together and the `* -` and `  -` markers keep their places.
   Typing `/` at a line start opens a Notion-style command menu with completion
   (see [Slash Menu](slash-menu.md)).
 - **Linked evidence:**

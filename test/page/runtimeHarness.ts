@@ -208,6 +208,7 @@ export class RuntimeElement {
         || (selector === "td, th" && ["TD", "TH"].includes(current.tagName))
         || (selector === "table" && current.tagName === "TABLE")
         || (selector === "[data-okf-row-handle]" && current.getAttribute("data-okf-row-handle") !== null)
+        || (selector === "[data-okf-col-handle]" && current.getAttribute("data-okf-col-handle") !== null)
         || (selector === "ul, ol" && ["UL", "OL"].includes(current.tagName))
         || (selector === "[data-sphinx-preview-block-editor]"
           && current.getAttribute("data-sphinx-preview-block-editor") !== null)

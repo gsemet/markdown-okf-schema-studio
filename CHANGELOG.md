@@ -18,6 +18,10 @@
   after the selected cell) and Row − / Col − (delete). A press saves the table and reopens the editor
   in the new cell, so Col + no longer wipes the title of the selected column and Row − / Col − work.
   A plain `{list-table}` (one header row, one-line cells) has the same buttons.
+- Table editing: a column handle above each column of a pipe table or a `{list-table}` moves the
+  column (drag, or Alt+Left and Alt+Right), as the row handle moves a row; a row or column handle
+  now works while a cell of the table is being edited, instead of doing nothing; a click on a
+  cell of a `{list-table}` opens its raw editor in view instead of making the table vanish.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when

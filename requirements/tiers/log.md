@@ -29,6 +29,19 @@
   selected column). SwRS-MDOKFSTUDIO-TABLE-048 lists seven buttons; SwRS-MDOKFSTUDIO-TABLE-001
   keeps the raw editor for a list-table that is not plain.
 
+## 2026-10-26 (table column handles, row moves with a cell editor open)
+
+- SwRS-MDOKFSTUDIO-TABLE-007 (new, derived from StRS-MDOKFSTUDIO-TABLE-002, which now covers
+  columns): a handle above each column of a pipe table or a `{list-table}` moves the column in
+  every row, by drag or Alt+Left and Alt+Right.
+- SwRS-MDOKFSTUDIO-TABLE-002: a row handle now moves its row while a cell editor of the same table
+  is open (the known issue "a move needs every editor closed" is removed); the real-window suite
+  drags with the mouse.
+- SwRS-MDOKFSTUDIO-TABLE-001: a click on a cell of a table the cell editor cannot read (a
+  `{list-table}`) opens the raw editor after the hidden table, in view. Before, the frame stayed
+  inside the hidden table and the table seemed to vanish. The webview regression and the
+  real-window round trip fail with the old code.
+
 ## 2026-10-26 (bold dollar prices preserve emphasis)
 
 - SwRS-MDOKFSTUDIO-MYST-024: permissive MyST dollarmath no longer consumes the `**` markers

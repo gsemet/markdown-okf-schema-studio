@@ -19,8 +19,10 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/page/features/tableRowMove.ts
+- src/page/modules/listTableMove.ts
 - src/page/modules/markdownTable.ts
 tested_in_files:
+- test/integration/tableMoves.ts
 - test/page/modules/listTableRowMove.test.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/runtimeTableRowMove.test.ts
@@ -80,9 +82,16 @@ The chord is not also read as the move of the whole table block.
 | --- | --- |
 | A table inside a figure that is not a `{list-table}` (a `{table}` with a caption), an HTML table, a table of an included file, and the properties table | No handle is shown |
 | A pipe table with one body row | No handle is shown (nothing to reorder) |
-| A drag or an Alt+Up or Alt+Down while a block editor, a cell editor or a frontmatter editor is open, or while a move waits for its render | The drag is cancelled or the key is ignored and nothing is requested |
+| A drag or an Alt+Up or Alt+Down while a block editor, a frontmatter editor or a cell editor of another table is open, while the source of an open cell editor has not arrived, or while a move waits for its render | The drag is cancelled or the key is ignored and nothing is requested |
 | Edit mode off | No handle exists, so neither a drag nor a key moves a row |
 | A drop on the header row, or a drag that ends outside the body rows | Nothing is requested from the host and the document is not edited |
+
+### Scenario (nominal): A cell editor of the table is open
+
+| Input | Outcome |
+| --- | --- |
+| A cell editor of the pipe table is open (its source has arrived) and the handle of a body row is dragged, or Alt+Up or Alt+Down is pressed on it | The text of the open cell is part of the table that moves; the row is moved in the editor's table model and the editor is saved and closed as one edit, with no request for the table source |
+| The same drag on the handle of a row of a table the open editor does not belong to | The drag is cancelled |
 
 ### Scenario (refusal): The source of the table is refused or is not a pipe table or list-table
 
@@ -100,7 +109,6 @@ The chord is not also read as the move of the whole table block.
 ### Known issues
 
 - Known issue: A row handle only appears for a pipe table or a `{list-table}` written directly in the document. Rows of a captioned `{table}` and of an HTML table cannot be reordered with a handle.
-- Known issue: A move needs every editor closed. A writer who holds a cell editor open has to leave it first, then drag; the drag is cancelled without a message.
 - Known issue: A table that is pushed right in a narrow pane is a handle's width narrower in edit mode, so it may wrap its text earlier than in reading mode. The handles are placed for a left-to-right page.
 
 ### Related requirements
@@ -112,6 +120,7 @@ The chord is not also read as the move of the whole table block.
 
 - Method: test/page/modules/markdownTable.test.ts (moving a body row reorders the source lines and keeps each line as written; the table model refuses a move of the header, past the ends or onto the same place) for the row move on the source.
 - Method: test/page/modules/listTableRowMove.test.ts (list-table items move whole with continuation lines, nested content and inner blank lines; `:header-rows:` 0, 1, 2 and 3; indented, colon-fenced, CRLF and unclosed directives; unreadable sources refused).
-- Method: test/page/runtimeTableRowMove.test.ts (list-table handles under two header rows and a drag that saves the moved item; handles on body rows only; no handle on list-tables, captioned tables and one-row tables; drag with one save and no cell editor; drop in place requests nothing; drop on the header refused; Alt+Up and Alt+Down; refused or non-pipe source; click on a handle and drag while a cell editor is open).
+- Method: test/page/runtimeTableRowMove.test.ts (list-table handles under two header rows and a drag that saves the moved item; handles on body rows only; no handle on list-tables, captioned tables and one-row tables; drag with one save and no cell editor; drop in place requests nothing; drop on the header refused; Alt+Up and Alt+Down; refused or non-pipe source; click on a handle; a drag refused while the source of a cell editor has not arrived; a drag and a key that move a row while a cell editor of the table is open, saving the typed text with it).
+- Method: test/integration/tableMoves.ts (real VS Code window: a real mouse drag and Alt+Up of a body row of a pipe table and of a list-table, and a drag while a cell editor is open).
 - Method: visual scenarios table-editing/v06 to v08 (handles outside the tables, centred on their rows, and full-width table geometry in light, dark and cream), v15 to v20 (360 px pane: pushed tables) and v21 to v23 (a fourteen-column table scrolled sideways keeps its handles outside the scrolling box), v12 to v14 (list-table handles) and v09 to v11 (a real mouse drag held down: dimmed row, drop line, no editor).
-- Criteria: the saved text equals the source with the lines reordered; the number of `previewEditSave` messages is one; the handle rectangle lies left of its table, inside the pane and centred on its row within 2 px; no cell breaks a word. A real VS Code window drag and the drop in the browser harness are not exercised (the visual harness has no host that answers a save).
+- Criteria: the saved text equals the source with the lines reordered; the number of `previewEditSave` messages is one; the handle rectangle lies left of its table, inside the pane and centred on its row within 2 px; no cell breaks a word. The drop in the browser harness is not exercised (the visual harness has no host that answers a save); the real window suite drags with the mouse.
