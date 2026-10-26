@@ -824,6 +824,36 @@ test("raw HTML table cell styles are preserved as safe preview metadata", async 
   assert.doesNotMatch(rewritten.html, /data-myst-table-style/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-034
+test("a colour span inside a raw HTML table keeps named, hex, rgb and hsl colours", async () => {
+  const result = await renderPreviewDocument({
+    document: inlineDocument(
+      '<table><tr><td><span style="color: red">Urgent</span> <span style="color: hsl(120, 100%, 25%); '
+      + 'background-color: #ffeeaa">Ok</span> <span style="color: var(--x)">No</span></td></tr></table>\n',
+    ),
+    workspaceRoot,
+    requestId: 18,
+    isWorkspaceTrusted: () => true,
+  });
+  const rewritten = rewriteSphinxHtml(result.html, {
+    outputRoot: workspaceRoot,
+    policy: new ResourcePolicy([]),
+    nonce: "unit-nonce",
+    resolveResource: () => undefined,
+    resolveNavigation: () => ({ kind: "blocked" }),
+  });
+  const html = parseHtml(rewritten.html);
+  const urgent = findElement(html, (element) => element.tagName === "span" && textContent(element) === "Urgent");
+  const ok = findElement(html, (element) => element.tagName === "span" && textContent(element) === "Ok");
+  const no = findElement(html, (element) => element.tagName === "span" && textContent(element) === "No");
+  assert.equal(attribute(urgent!, "data-okf-color"), "red");
+  assert.equal(attribute(ok!, "data-okf-color"), "hsl(120, 100%, 25%)");
+  assert.equal(attribute(ok!, "data-okf-background"), "#ffeeaa");
+  assert.equal(attribute(no!, "data-okf-color"), undefined);
+  assert.deepEqual(rewritten.diagnostics.map((entry) => entry.code), ["removed-unsafe-style"]);
+  assert.doesNotMatch(rewritten.html, /style="|var\(/u);
+});
+
 test("table directives render trusted workspace-local HTML includes", async () => {
   const document = inlineDocument(
     "::::{table} Included table\n:label: tbl:included\n:align: center\n\n"

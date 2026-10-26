@@ -84,13 +84,15 @@ def check_figure_anchors(page: Page, scenario: dict, failures: list[Failure]) ->
     const style = getComputedStyle(span);
     return {text: span.textContent, color: style.color, background: style.backgroundColor, color_attr: span.getAttribute('data-okf-color'), background_attr: span.getAttribute('data-okf-background')};
   })""")
-  if [entry["text"] for entry in colours] != ["red", "highlighted"]:
+  if [entry["text"] for entry in colours] != ["red", "highlighted", "named colours apply"]:
     failures.append(Failure(page_name, f"coloured spans are {colours}"))
   else:
     if colours[0]["color"] != "rgb(204, 0, 0)":
       failures.append(Failure(page_name, f"the span colour is {colours[0]['color']}, expected rgb(204, 0, 0)"))
     if colours[1]["background"] != "rgba(255, 220, 0, 0.45)":
       failures.append(Failure(page_name, f"the span background is {colours[1]['background']}"))
+    if colours[2]["color"] != "rgb(255, 0, 0)":
+      failures.append(Failure(page_name, f"the named span colour is {colours[2]['color']}, expected rgb(255, 0, 0)"))
   intro = anchors["intro"]
   if intro and abs(intro["hostLeft"] - content["left"]) > 1:
     failures.append(Failure(page_name, "the anchor moved the labelled paragraph"))

@@ -84,6 +84,9 @@ function rawHtmlChildren(node: RawHtmlNode): unknown[] {
       }
     } else if (name === "title") {
       properties.title = attribute.value;
+    } else if (name === "style" && tagName === "span") {
+      // A colour span is validated by the sanitizer, with the same grammar as outside a table.
+      properties.style = attribute.value;
     } else if (name === "style") {
       const safeStyle = sanitizeTableStyle(tagName, attribute.value);
       if (safeStyle) {

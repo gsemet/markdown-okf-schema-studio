@@ -879,7 +879,7 @@ test("T34: the hex field validates live, refuses invalid values on Enter and app
   const menu = popover(h.root)!;
   const field = byAttr(menu, "data-color-hex")[0]!;
   const enter = { key: "Enter", ...click };
-  field.value = "red";
+  field.value = "redd";
   field.dispatch("input");
   assert.equal(field.getAttribute("aria-invalid"), "true");
   field.dispatch("keydown", enter);

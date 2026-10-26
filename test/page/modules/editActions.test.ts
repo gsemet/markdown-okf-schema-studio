@@ -1221,7 +1221,7 @@ test("T34: color Remove drops one property and unwraps the span when none is lef
 });
 
 test("T34: color refuses an invalid value and never writes markup the sanitizer would strip", () => {
-  for (const bad of ["text:red", "text:#12", "text:#ggg", "text:url(x)", "text:#c00;position:fixed",
+  for (const bad of ["text:redd", "text:#12", "text:#ggg", "text:url(x)", "text:#c00;position:fixed",
     'text:#c00"><script>', "text:rgb(1,2,3", "text:var(--x)", "text:#c00 !important", "sky:#c00", "#c00", ""]) {
     assert.equal(colour("color", "say [foo] now", bad), undefined, bad);
   }
@@ -1271,7 +1271,7 @@ test("T34: colorCode is available only with the caret in a colour code", () => {
 test("T34: colorCode replaces the code under the caret in place, validated", () => {
   assert.equal(colour("colorCode", "a #c0|0 b", "#00f"), "a #00f| b");
   assert.equal(colour("colorCode", "a rgb(1, 2, 3)| b", "#ff8800"), "a #ff8800| b");
-  assert.equal(colour("colorCode", "a #c0|0 b", "red"), undefined);
+  assert.equal(colour("colorCode", "a #c0|0 b", "redd"), undefined);
   assert.equal(colour("colorCode", "a #c0|0 b", 'rgb(1,2,3);"'), undefined);
   assert.equal(colour("colorCode", "a plain| b", "#00f"), undefined, "no code at the caret");
   assert.equal(colour("colorCode", "a #c0|0 b"), undefined);

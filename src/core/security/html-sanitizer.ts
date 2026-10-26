@@ -1,6 +1,6 @@
 import { parse, serialize, type DefaultTreeAdapterTypes } from "parse5";
 import { directiveAttributeRule } from "../directives/registry";
-import { isSafeOkfColor } from "./spanColors";
+import { isSafeOkfColor, SAFE_COLOR_NAME_PATTERN } from "./spanColors";
 
 import {
   relativeResourcePath,
@@ -102,14 +102,12 @@ const REMOVED_ELEMENTS = new Set(["embed", "foreignobject", "form", "iframe", "o
 const TABLE_STYLE_ELEMENTS = new Set([
   "caption", "col", "colgroup", "table", "tbody", "td", "tfoot", "th", "thead", "tr",
 ]);
-const SAFE_GRADIENT_COLOR = String.raw`(?:#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})|[a-z]{1,32})`;
+const SAFE_GRADIENT_COLOR = String.raw`(?:#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})|${SAFE_COLOR_NAME_PATTERN})`;
 const SAFE_GRADIENT_STOP = `${SAFE_GRADIENT_COLOR}(?:\\s+(?:\\d+(?:\\.\\d+)?|\\.\\d+)%?)?`;
 const SAFE_LINEAR_GRADIENT = new RegExp(
   `^(?:-webkit-)?linear-gradient\\(\\s*(?:(?:-?\\d+(?:\\.\\d+)?(?:deg|grad|rad|turn)|to (?:top|bottom|left|right)(?: (?:top|bottom|left|right))?)\\s*,\\s*)?${SAFE_GRADIENT_STOP}(?:\\s*,\\s*${SAFE_GRADIENT_STOP})+\\s*\\)$`,
   "iu",
 );
-const SAFE_HEX_COLOR = /^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/iu;
-const SAFE_FUNCTIONAL_COLOR = /^(?:rgb|rgba|hsl|hsla)\(\s*[\d.%\s,/-]+\)$/iu;
 
 /** Block elements that get `dir="auto"` so right-to-left text aligns to the right like GitHub. */
 const AUTO_DIRECTION_ELEMENTS = new Set([
@@ -164,7 +162,7 @@ function safeTableStyleValue(property: string, value: string): string | undefine
   }
   if (
     ["background-color", "color", "-webkit-text-fill-color"].includes(property)
-    && (SAFE_HEX_COLOR.test(value) || SAFE_FUNCTIONAL_COLOR.test(value) || /^[a-z]{1,32}$/u.test(value))
+    && isSafeOkfColor(value)
   ) {
     return value;
   }
@@ -346,7 +344,7 @@ function rewriteNode(
     if (name === "data-okf-color" || name === "data-okf-background") {
       if (tagName !== "span" || !isSafeOkfColor(attribute.value)) {
         removeAttr(node, attribute.name);
-        addDiagnostic(diagnostics, "blocked-inline-style", "Removed inline style from preview output.");
+        addDiagnostic(diagnostics, "removed-unsafe-style", "Removed unsafe style attribute.");
       }
       continue;
     }
@@ -368,7 +366,7 @@ function rewriteNode(
       if (kept.has("color")) setAttr(node, "data-okf-color", kept.get("color") ?? "");
       if (kept.has("background-color")) setAttr(node, "data-okf-background", kept.get("background-color") ?? "");
       if (dropped || kept.size === 0) {
-        addDiagnostic(diagnostics, "blocked-event-attribute", `Removed unsafe ${attribute.name} attribute.`);
+        addDiagnostic(diagnostics, "removed-unsafe-style", "Removed unsafe style attribute.");
       }
       continue;
     }

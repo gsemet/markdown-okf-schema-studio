@@ -25,6 +25,7 @@ implemented_in_files:
 - src/core/security/html-sanitizer.ts
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
+- test/security/html-policy.test.ts
 ---
 
 ## Raw HTML tables are rebuilt from an allow-list
@@ -47,9 +48,9 @@ When a document contains a raw HTML table, the extension SHALL rebuild it from a
 
 ### Scenario (nominal): Safe colours kept
 
-- GIVEN a cell style 'color: red; background-color: #fff'
+- GIVEN a cell style 'color: red; background-color: #fff' or 'color: hsl(0,0%,0%)'
 - WHEN the preview is rendered
-- THEN both declarations are kept (the style keeps only text and background colours, text-fill, background-clip text and linear gradients)
+- THEN both declarations are kept (the style keeps only text and background colours, text-fill, background-clip text and linear gradients; every colour follows the colour grammar of SwRS-MDOKFSTUDIO-GFM-034, so var(), url(), !important, comments, escapes and names outside the closed list and the keywords currentcolor, inherit, initial and unset are removed; the space form rgb(0 0 0 / 50%) is kept)
 
 ### Scenario (refusal): Unsafe style removed
 

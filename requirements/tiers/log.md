@@ -1,5 +1,14 @@
 # Update Log
 
+## 2026-10-26 (one colour grammar for tables and colour spans)
+
+- SwRS-MDOKFSTUDIO-GFM-034: colour spans and raw HTML table styles share one grammar (a closed list
+  of colour names, the keywords currentcolor, inherit, initial and unset, hex, rgb/rgba and hsl/hsla in
+  comma or space form); a colour span inside a raw table keeps its colour; a
+  removed span style records removed-unsafe-style. The behaviour of GFM-031 and TRUST-036 is aligned.
+  Gradient stops in table styles narrow from any lowercase word ([a-z]{1,32}) to the closed list plus
+  the keywords. No Known issue line described this difference.
+
 ## 2026-10-26 (small block editing and palette fixes)
 
 - SwRS-MDOKFSTUDIO-BLOCK-130: AltGr with an up or down arrow in the text box is no move chord; a

@@ -71,7 +71,7 @@ The action receives the argument text:{colour} or background:{colour} and the pi
 - WHEN the writer presses Enter
 - THEN the field is marked aria-invalid, nothing is written and the picker stays open
 
-The field is validated as the writer types too: a non-empty invalid value sets aria-invalid, an empty or valid value removes it; the valid values are the colour grammar of the sanitizer (see SwRS-MDOKFSTUDIO-GFM-034).
+The field is validated as the writer types too: a non-empty invalid value sets aria-invalid, an empty or valid value removes it; the valid values are the colour grammar of the sanitizer, named colours and hsl() included (see SwRS-MDOKFSTUDIO-GFM-034).
 
 ### Scenario (nominal): The span written and updated
 
@@ -147,7 +147,7 @@ The action receives text: or background: with an empty colour; when no property 
 
 | Input | Outcome |
 | --- | --- |
-| argument `text:red`, `text:#12`, `text:#ggg`, `text:url(x)`, `text:#c00;position:fixed`, text:#c00"&gt;&lt;script&gt;, `text:rgb(1,2,3`, `text:var(--x)`, `text:#c00 !important`, `sky:#c00`, `#c00`, empty, or no argument | no edit (the colour is invalid or holds a control character) |
+| argument `text:redd`, `text:#12`, `text:#ggg`, `text:url(x)`, `text:#c00;position:fixed`, text:#c00"&gt;&lt;script&gt;, `text:rgb(1,2,3`, `text:var(--x)`, `text:#c00 !important`, `sky:#c00`, `#c00`, empty, or no argument | no edit (the colour is invalid or holds a control character) |
 | ab&lt;span style="color:#c00"&gt;c[d&lt;/span&gt;e]f | no edit (selection straddles a span boundary) |
 | a[b&lt;span style="color:#c00"&gt;c]d&lt;/span&gt;ef | no edit (selection straddles a span boundary, the other direction) |
 | ab&lt;span style="co[lor:#c00"&gt;cd&lt;/span&gt;e]f | no edit (a boundary lies inside the text of a tag) |
