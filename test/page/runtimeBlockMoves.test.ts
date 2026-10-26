@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { STALE_REQUEST } from "../../src/core/protocol/staleRequest";
 import { createRuntimeHarness, RuntimeElement } from "./runtimeHarness";
 import {
   altKey,
@@ -140,6 +141,29 @@ test("T36: a refused move says why next to the bar; a result of another context 
   harness.dispatchMessage(result);
   assert.equal(statusOf()?.textContent, result.reason);
   assert.equal(statusOf()?.getAttribute("role"), "status");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-129
+test("T36: a move refused as stale is sent once more after the next render, before any message", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const before = harness.messages.length;
+  const statusOf = () => insertPointAfterLine(harness, 52).childElements.find((element) =>
+    element.className.split(" ").includes("sphinx-preview-move-status"));
+  moveButton(harness, 52, "down").dispatch("click", plainClick());
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...MOVE_IDENTIFIERS, ok: false, reason: STALE_REQUEST });
+  assert.equal(statusOf(), undefined, "no message while the render is awaited");
+  assert.equal(moveMessages(harness, before).length, 1);
+  harness.dispatchMessage(patchMessage());
+  const moves = moveMessages(harness, before);
+  assert.equal(moves.length, 2, "the move is sent again from the new render");
+  assert.deepEqual(
+    [moves[1].line, moves[1].endLine, moves[1].neighbourLine, moves[1].direction, moves[1].revision],
+    [50, 52, 100, "down", 8],
+  );
+  harness.dispatchMessage({ type: "previewBlockMoveResult", ...NEXT_IDENTIFIERS, ok: false, reason: STALE_REQUEST });
+  assert.equal(statusOf()?.textContent, STALE_REQUEST, "a second stale refusal is shown, not retried again");
+  harness.dispatchMessage(patchMessage({ revision: 8, requestId: 12, next: { revision: 9, requestId: 13 } }));
+  assert.equal(moveMessages(harness, before).length, 2);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-130

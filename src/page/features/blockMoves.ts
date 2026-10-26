@@ -6,6 +6,7 @@
  * their new place.
  */
 
+import { STALE_REQUEST } from "../../core/protocol/staleRequest";
 import { isApplePlatform } from "../pageSettings";
 import type { BlockMoves, InsertMove, PageRuntime, PendingMoveSelection } from "./pageRuntime";
 
@@ -28,6 +29,20 @@ interface BlockMoveFlight {
   newLine?: number;
 }
 
+/** The last single-block move sent, to send it once more when the host held an older render. */
+interface SentMove {
+  line: number;
+  direction: "up" | "down";
+  revision: number;
+  retried: boolean;
+}
+
+/** A refused-as-stale move waiting for the next render. */
+interface StaleRetry {
+  move: SentMove;
+  timer: number;
+}
+
 /** The block moves of a page. */
 export function installBlockMoves(rt: PageRuntime): BlockMoves {
   const { document, window, context, host, state } = rt;
@@ -37,6 +52,11 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
   // the old block ranges until the render of the move arrives, so a second request in between
   // (key repeat) would be stale; it is dropped until the result and the render are in.
   let blockMoveInFlight: BlockMoveFlight | undefined;
+  // A move the host refused as stale is sent once more after the next render, before any message.
+  let lastMove: SentMove | undefined;
+  let staleRetry: StaleRetry | undefined;
+
+  let retrying = false;
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
   function postBlockMove(block: HTMLElement, neighbour: HTMLElement, direction: "up" | "down",
@@ -45,6 +65,11 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
     const own = span || rt.blocks.blockRange(block);
     const other = rt.blocks.blockRange(neighbour);
     const top = (block.closest?.("pre") || block).getBoundingClientRect?.().top;
+    if (!span) {
+      lastMove = { line: own.line, direction, revision: context.revision, retried: retrying };
+    } else {
+      lastMove = undefined;
+    }
     host.postMessage({
       type: "previewBlockMove",
       documentId: context.documentId,
@@ -58,6 +83,51 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
       ...(top !== undefined && Number.isFinite(top) && Math.abs(top) <= 100000 ? { pinViewportTop: top } : {}),
     });
     return true;
+  }
+
+  function dropStaleRetry(): void {
+    if (!staleRetry) return;
+    window.clearTimeout(staleRetry.timer);
+    staleRetry = undefined;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-129
+  // The host held an older render than the one the move was made on. Send the move again, once,
+  // from the blocks of the render that is in (now, or when it arrives).
+  function scheduleStaleRetry(): boolean {
+    if (!lastMove || lastMove.retried) return false;
+    dropStaleRetry();
+    const move = lastMove;
+    staleRetry = {
+      move,
+      timer: window.setTimeout(() => {
+        staleRetry = undefined;
+        finishMoveRefusal(STALE_REQUEST);
+      }, 5000),
+    };
+    if (context.revision !== move.revision) runStaleRetry();
+    return true;
+  }
+
+  function runStaleRetry(): void {
+    const pending = staleRetry;
+    if (!pending) return;
+    dropStaleRetry();
+    const block = rt.blocks.bodyBlockAtLine(pending.move.line);
+    const neighbour = block && bodyBlockNeighbour(block, pending.move.direction);
+    retrying = true;
+    let sent = false;
+    try {
+      sent = Boolean(block && neighbour && postBlockMove(block, neighbour, pending.move.direction));
+    } finally {
+      retrying = false;
+    }
+    if (sent) {
+      if (lastMove) lastMove.retried = true;
+      if (blockMoveInFlight) blockMoveInFlight.version = context.revision;
+      return;
+    }
+    finishMoveRefusal(STALE_REQUEST);
   }
 
   function clearBlockMoveInFlight(): BlockMoveFlight | undefined {
@@ -195,11 +265,41 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
 
   // The move is done and its render is in: focus or edit the block at its new place.
   function resumeBlockMove(): void {
+    if (staleRetry && context.revision !== staleRetry.move.revision) runStaleRetry();
     const flight = blockMoveInFlight;
     if (!flight || flight.newLine === undefined || context.revision === flight.version) return;
     if (!state.editMode) return;
     clearBlockMoveInFlight();
     settleBlockMove(rt.blocks.bodyBlockAtLine(flight.newLine), flight);
+  }
+
+  // A refused move says why next to the bar it came from.
+  function finishMoveRefusal(reason: string | undefined): void {
+    const flight = clearBlockMoveInFlight();
+    if (flight?.mode === "select") setPendingMoveSelection(undefined);
+    else if (flight) settleBlockMove(rt.blocks.bodyBlockAtLine(flight.line), flight);
+    if (reason === undefined) return;
+    const points = rt.insertPoints.points();
+    let point = points.find((candidate) =>
+      candidate.getAttribute("data-sphinx-move-pending") === "true");
+    points.forEach((candidate) => candidate.removeAttribute("data-sphinx-move-pending"));
+    // A key press marks no bar: the reason goes to the bar under the block (or selection) moved.
+    const line = flight?.line ?? lastMove?.line;
+    if (!point && (flight || line !== undefined)) {
+      const moved = flight?.mode === "select"
+        ? (blockSelection.isActive() ? rt.selection.syncSelectionModel()[blockSelection.endIndex!] : undefined)
+        : (line === undefined ? undefined : rt.blocks.bodyBlockAtLine(line));
+      point = points.find((candidate) => rt.insertPoints.moves.get(candidate)?.block === moved);
+    }
+    if (!point) return;
+    point.querySelector?.(".sphinx-preview-move-status")?.remove?.();
+    const status = document.createElement("span");
+    status.className = "sphinx-preview-move-status";
+    status.setAttribute("role", "status");
+    status.textContent = reason;
+    point.appendChild(status);
+    window.clearTimeout(moveStatusTimer);
+    moveStatusTimer = window.setTimeout(() => status.remove(), 6000);
   }
 
   function moveChordDirection(event: KeyboardEvent, inEditor: boolean): "up" | "down" | undefined {
@@ -276,30 +376,9 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
         }
         return;
       }
-      const flight = clearBlockMoveInFlight();
-      if (flight?.mode === "select") setPendingMoveSelection(undefined);
-      else if (flight) settleBlockMove(rt.blocks.bodyBlockAtLine(flight.line), flight);
-      if (message.ok !== false || typeof message.reason !== "string") return;
-      const points = rt.insertPoints.points();
-      let point = points.find((candidate) =>
-        candidate.getAttribute("data-sphinx-move-pending") === "true");
-      points.forEach((candidate) => candidate.removeAttribute("data-sphinx-move-pending"));
-      // A key press marks no bar: the reason goes to the bar under the block (or selection) moved.
-      if (!point && flight) {
-        const moved = flight.mode === "select"
-          ? (blockSelection.isActive() ? rt.selection.syncSelectionModel()[blockSelection.endIndex!] : undefined)
-          : rt.blocks.bodyBlockAtLine(flight.line);
-        point = points.find((candidate) => rt.insertPoints.moves.get(candidate)?.block === moved);
-      }
-      if (!point) return;
-      point.querySelector?.(".sphinx-preview-move-status")?.remove?.();
-      const status = document.createElement("span");
-      status.className = "sphinx-preview-move-status";
-      status.setAttribute("role", "status");
-      status.textContent = message.reason;
-      point.appendChild(status);
-      window.clearTimeout(moveStatusTimer);
-      moveStatusTimer = window.setTimeout(() => status.remove(), 6000);
+      if (message.ok === false && message.reason === STALE_REQUEST && scheduleStaleRetry()) return;
+      dropStaleRetry();
+      finishMoveRefusal(message.ok === false && typeof message.reason === "string" ? message.reason : undefined);
     },
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-130
     bindKeys() {
