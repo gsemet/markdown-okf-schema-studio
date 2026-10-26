@@ -415,7 +415,7 @@ export class CommentsController {
     }
     const documentId = host.documents.idOf(documentPath);
     const author = await resolveAuthor({
-      setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION)).authorName,
+      setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION, documentId)).authorName,
       gitName: () => host.vcs.userName(documentId),
       osUserName,
     });

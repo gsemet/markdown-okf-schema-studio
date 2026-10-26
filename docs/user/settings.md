@@ -55,7 +55,8 @@ chips in open
 **Comments**
 
 - `comments.authorName` (default empty): the name stored with the review comments you write in the
-  preview. Empty uses your Git `user.name`, then your operating system user name.
+  preview. Empty uses your Git `user.name`, then your operating system user name. It can be
+  overridden per workspace or per folder (`.vscode/settings.json`).
 
 **PlantUML**
 

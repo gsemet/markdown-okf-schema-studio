@@ -381,6 +381,37 @@ export const REVIEW_THREAD_OPEN_ASSERTIONS: ContentAssertion[] = [
   { message: "the thread popover stays inside the pane", selector: POPOVER, insidePane: true },
   { message: "no orphan box is shown while every thread is anchored", selector: "[data-okf-orphans]", count: 0 },
 ];
+// The text of an open thread popover (author, date, comment, reply placeholder, button labels) reaches WCAG AA
+// 4.5:1 on the popover background in every theme mode, so a pale host colour never shows on a cream page.
+const POPOVER_CONTRAST_EXPR = `(() => {
+  const rgb = (c) => c.match(/[\\d.]+/g).slice(0, 3).map(Number);
+  const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const lum = (c) => { const [r, g, b] = rgb(c).map(lin); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+  const pop = document.querySelector('[data-okf-comment-popover]');
+  const back = getComputedStyle(pop).backgroundColor;
+  const rows = [
+    ['strong', pop.querySelector('[data-okf-comment-head] strong'), back],
+    ['date', pop.querySelector('[data-okf-comment-head] span'), back],
+    ['body', pop.querySelector('[data-okf-comment-body]'), back],
+  ];
+  const input = pop.querySelector('textarea');
+  if (input) {
+    rows.push(['reply', input, getComputedStyle(input).backgroundColor]);
+    rows.push(['placeholder', null, getComputedStyle(input).backgroundColor, getComputedStyle(input, '::placeholder').color]);
+  }
+  for (const button of pop.querySelectorAll('button')) rows.push(['button ' + button.textContent, button, getComputedStyle(button).backgroundColor]);
+  const bad = rows.map(([name, el, bg, fg]) => [name, ratio(fg || getComputedStyle(el).color, bg)]).filter(([, r]) => r < 4.5);
+  window.__popoverContrastFailures = bad.map(([n, r]) => n + ' ' + r.toFixed(2)).join(', ');
+  return bad.length === 0;
+})()`;
+export const REVIEW_THREAD_CONTRAST_ASSERTIONS: ContentAssertion[] = [
+  { message: "the thread popover is shown", selector: POPOVER, count: 1, visible: true },
+  { message: "author, date, comment, placeholder and button text reach 4.5:1 on their background", selector: POPOVER, expr: POPOVER_CONTRAST_EXPR },
+  { message: "no text of the popover is faded with opacity", selector: POPOVER,
+    expr: "[...document.querySelectorAll('[data-okf-comment-popover] [data-okf-comment-head] span, [data-okf-comment-popover] [data-okf-comment-body]')].every(e => getComputedStyle(e).opacity === '1')" },
+  { message: "the thread popover stays inside the pane", selector: POPOVER, insidePane: true },
+];
 export const REVIEW_THREAD_RESOLVED_ASSERTIONS: ContentAssertion[] = [
   { message: "the two anchored quotes are highlighted in the text", selector: `${MAIN} mark[data-okf-comment-thread]`, count: 2 },
   { message: "clicking the resolved quote shows its thread, visible", selector: POPOVER, count: 1, visible: true, text: "Say how long the warm-up takes." },

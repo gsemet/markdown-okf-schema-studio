@@ -22,6 +22,7 @@ user_need: As a reviewer, I attach a comment to the exact words I am talking
   same moment.
 derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-001
+- SwRS-MDOKFSTUDIO-REVIEW-002
 - SwRS-MDOKFSTUDIO-REVIEW-004
 - SwRS-MDOKFSTUDIO-REVIEW-012
 - SwRS-MDOKFSTUDIO-REVIEW-021

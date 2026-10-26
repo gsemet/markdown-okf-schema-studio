@@ -16,6 +16,8 @@ block to the end of the last one. To answer, open a thread and use its reply box
 shown while a block editor is open, over code or the properties table, or in a read-only preview
 (untrusted workspace), where adding comments is refused. The name stored with a comment is the
 `comments.authorName` setting, else your Git `user.name`, else your operating system user name.
+The setting can be set per user, per workspace or per folder (`.vscode/settings.json`), for example
+to sign the comments of one project with an alias.
 
 A thread popover also has **Resolve** (then **Reopen**) and **Delete**; Delete asks "Delete
 thread?" with Yes and No in the popover, and deleting the last thread keeps the file with an empty

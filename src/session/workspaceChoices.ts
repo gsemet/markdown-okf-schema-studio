@@ -94,7 +94,7 @@ export class WorkspaceChoices {
    */
   public refreshThreadAuthor(documentId: string | undefined): void {
     void resolveAuthor({
-      setting: readCommentsConfiguration(this.host.settings.section(COMMENTS_CONFIGURATION_SECTION)).authorName,
+      setting: readCommentsConfiguration(this.host.settings.section(COMMENTS_CONFIGURATION_SECTION, documentId)).authorName,
       gitName: documentId ? () => this.host.vcs.userName(documentId) : undefined,
       osUserName,
     }).then((author) => {
