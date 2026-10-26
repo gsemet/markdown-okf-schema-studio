@@ -30,6 +30,7 @@ implemented_in_files:
 - src/page/modules/markdownTable.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
+- test/integration/tableMoves.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/runtimeTableCellEditor.test.ts
@@ -104,7 +105,7 @@ A table is editable when it has a header row, a delimiter row whose cells are at
 ### Scenario (refusal): A block that is no editable pipe table opens in the raw Markdown editor
 | Input | Outcome |
 | --- | --- |
-| a cell of a rendered MyST list-table that is not plain (see SwRS-MDOKFSTUDIO-TABLE-005), a raw HTML table or a table inside a {table} directive, in edit mode, after the host sends the block source | the cell shows its rendered content again, the region is renamed "Raw Markdown editor" and a text box labelled "Raw Markdown block" holds the whole block source |
+| a cell of a rendered MyST list-table that is not plain (see SwRS-MDOKFSTUDIO-TABLE-005), a raw HTML table or a table inside a {table} directive, in edit mode, after the host sends the block source | the cell shows its rendered content again, the region is renamed "Raw Markdown editor" and a text box labelled "Raw Markdown block" holds the whole block source and the region leaves the cell and sits after the table, which is hidden while its source is edited, so the editor stays in view |
 | a pipe table whose rendered row has more cells than the parsed header, a cell beyond the parsed width clicked | the same fallback applies |
 
 ### Related requirements

@@ -20,6 +20,7 @@ import { captureByLegacy } from "../shared/captureRegistry";
 import { lineDelta } from "../shared/lineDelta";
 import { hostStressPlan, STRESS_SCENARIOS_BY_HOST } from "../shared/stressPlan";
 import { scenarioLinkedTargetSave } from "./linkedTargetSave";
+import { scenarioTableMoves } from "./tableMoves";
 import {
   bufferText,
   caretToEnd,
@@ -4483,24 +4484,18 @@ export async function run(): Promise<void> {
     await page.setViewportSize({ width: 1400, height: 900 });
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
-    if (process.env.STUDIO_REAL_INPUT_SCENARIO === "toolbar") {
-      await scenarioToolbarState(page, evidence);
-      passed = true; // a single scenario: the registry completeness check is skipped
-      return;
-    }
-    if (process.env.STUDIO_REAL_INPUT_SCENARIO === "stress") {
-      await runStress(page);
-      passed = true; // the stress rounds keep their own evidence; the registry check is skipped
-      return;
-    }
-    if (process.env.STUDIO_REAL_INPUT_SCENARIO === "probe") {
-      // The performance probe measures and reports; it is not part of the integration job.
-      await scenarioPerformanceProbe(page);
-      passed = true;
-      return;
-    }
-    if (process.env.STUDIO_REAL_INPUT_SCENARIO === "link-prefill") {
-      await scenarioLinkPanelPrefill(page, evidence);
+    // A single scenario: the registry completeness check is skipped. The stress rounds keep their own
+    // evidence, and the performance probe measures and reports (it is not part of the integration job).
+    const single: Record<string, () => Promise<void>> = {
+      toolbar: () => scenarioToolbarState(page, evidence),
+      stress: () => runStress(page),
+      probe: () => scenarioPerformanceProbe(page),
+      "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
+      "table-moves": () => scenarioTableMoves(page),
+    };
+    const only = single[process.env.STUDIO_REAL_INPUT_SCENARIO ?? ""];
+    if (only) {
+      await only();
       passed = true;
       return;
     }
@@ -4536,6 +4531,7 @@ export async function run(): Promise<void> {
     await scenarioTableTab(page, evidence);
     await scenarioTableToolbar(page, evidence);
     await scenarioTableStructure(page);
+    await scenarioTableMoves(page);
     await scenarioBooleanOneClick(page, evidence);
     await scenarioListEditorClickAndKeys(page, evidence);
     await scenarioListLinkCompletion(page, evidence);

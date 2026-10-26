@@ -1,4 +1,5 @@
 import { createTableStructureTools } from "./tableStructure";
+import { moveListTableColumn, moveListTableRow } from "./listTableMove";
 
 export interface MarkdownTableModel {
   rows: string[][];
@@ -334,6 +335,27 @@ export function createMarkdownTableTools() {
     return to;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-007
+  /**
+   * Moves the column at index `from` to index `to` in every row, the delimiter row included, so
+   * the alignment colons travel with their column. Each cell keeps its own padding in the
+   * serialized table. Returns the new index of the column, or undefined when the model refuses.
+   */
+  function moveColumn(model: MarkdownTableModel, from: number, to: number): number | undefined {
+    const columns = model.rows[0]?.length ?? 0;
+    if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to < 0
+      || from >= columns || to >= columns || from === to) return undefined;
+    for (const row of model.rows) {
+      const [cell] = row.splice(from, 1);
+      row.splice(to, 0, cell!);
+    }
+    if (model.columnOrigins) {
+      const [origin] = model.columnOrigins.splice(from, 1);
+      model.columnOrigins.splice(to, 0, origin);
+    }
+    return to;
+  }
+
   function insertColumnAfter(model: MarkdownTableModel, columnIndex: number): number {
     const insertAt = Math.max(0, Math.min(columnIndex + 1, model.rows[0].length));
     model.rows.forEach((row, rowIndex) => row.splice(insertAt, 0, rowIndex === 1 ? "---" : ""));
@@ -413,79 +435,6 @@ export function createMarkdownTableTools() {
       }
     }
     return out;
-  }
-
-  // @implements_req SwRS-MDOKFSTUDIO-TABLE-002
-  /**
-   * `source` (one whole `{list-table}` directive) with the row at `from` moved to index `to`. Rows are
-   * the top-level list items after the options, counted from 0 with the header rows first; rows
-   * under `:header-rows:` never move and nothing moves into them. An item travels with all its lines
-   * (cell lines, continuation lines, blank lines inside it); the directive line, the options, the
-   * indentation, the blank lines between items and the closing fence stay where they are.
-   * Returns undefined when the directive cannot be read as rows or the move is refused.
-   */
-  function moveListTableRow(source: string, from: number, to: number): string | undefined {
-    const lines = source.match(/[^\r\n]*(?:\r\n|\r|\n)|[^\r\n]+$/gu) ?? [];
-    const text = (line: string): string => line.replace(/[\r\n]+$/u, "");
-    const opener = lines.findIndex((line) => text(line).trim() !== "");
-    const open = opener < 0 ? null : LIST_TABLE_OPEN.exec(text(lines[opener]!));
-    if (!open) return undefined;
-    const fence = open[2]!;
-    let end = lines.length;
-    while (end > opener + 1 && text(lines[end - 1]!).trim() === "") end -= 1;
-    const closing = text(lines[end - 1]!).trim();
-    if (end - 1 > opener && closing.length >= fence.length && closing === fence[0]!.repeat(closing.length)) end -= 1;
-    let index = opener + 1;
-    if (index < end && text(lines[index]!).trim() === "---") {
-      index += 1;
-      while (index < end && text(lines[index]!).trim() !== "---") index += 1;
-      index += 1;
-    }
-    let headerRows = 0;
-    for (; index < end; index += 1) {
-      const line = text(lines[index]!);
-      if (line.trim() === "") continue;
-      const option = /^\s*:([\w-]+):(?:[ \t]+(.*))?$/u.exec(line);
-      if (!option) break;
-      if (option[1] === "header-rows") {
-        headerRows = Number((option[2] ?? "").trim());
-        if (!Number.isInteger(headerRows) || headerRows < 0) return undefined;
-      }
-    }
-    // The blank lines between the options and the first item stay with the options.
-    while (index < end && text(lines[index]!).trim() === "") index += 1;
-    const itemStart = /^([ \t]*)([*+-])[ \t]+/u;
-    const first = index < end ? itemStart.exec(text(lines[index]!)) : null;
-    if (!first) return undefined;
-    const itemIndent = first[1]!.length;
-    const bodyStart = index;
-    const items: string[][] = [];
-    const gaps: string[][] = [];
-    for (; index < end; index += 1) {
-      const line = text(lines[index]!);
-      const start = itemStart.exec(line);
-      if (start && start[1]!.length === itemIndent) {
-        items.push([lines[index]!]);
-        gaps.push([]);
-      } else if (line.trim() === "") {
-        gaps[gaps.length - 1]!.push(lines[index]!);
-      } else if (line.length - line.trimStart().length > itemIndent) {
-        // A line of the item: the blank lines before it belong to the item too.
-        items[items.length - 1]!.push(...gaps[gaps.length - 1]!, lines[index]!);
-        gaps[gaps.length - 1] = [];
-      } else {
-        return undefined;
-      }
-    }
-    if (!Number.isInteger(from) || !Number.isInteger(to) || from === to
-      || from < headerRows || to < headerRows || from >= items.length || to >= items.length) return undefined;
-    const [moved] = items.splice(from, 1);
-    items.splice(to, 0, moved!);
-    const ending = lineEndingOf(source);
-    const withEnding = (line: string): string => (/[\r\n]$/u.test(line) ? line : line + ending);
-    const body = items.flatMap((item, position) => [...item.map(withEnding), ...gaps[position]!]);
-    const result = [...lines.slice(0, bodyStart), ...body, ...lines.slice(end)].join("");
-    return /[\r\n]$/u.test(lines[lines.length - 1]!) ? result : result.replace(/(?:\r\n|\r|\n)$/u, "");
   }
 
   /** The form of the table `source` holds: a list-table directive, an HTML table or a pipe table. */
@@ -761,6 +710,8 @@ export function createMarkdownTableTools() {
     deleteRow,
     moveRow,
     moveListTableRow,
+    moveListTableColumn,
+    moveColumn,
     insertColumnAfter,
     deleteColumn,
     cellSegments,

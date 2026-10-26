@@ -535,9 +535,12 @@ export interface BlockMoves {
   bindKeys(): void;
 }
 
-/** The row handles of pipe tables and the move of a row (`features/tableRowMove.ts`). */
+/** The row and column handles of pipe tables and list-tables and their moves (`features/tableRowMove.ts`). */
 export interface TableRowMove {
-  /** Rebuilds the handles: one per body row of a movable pipe table in edit mode, none otherwise. */
+  /**
+   * Rebuilds the handles: one per body row and one per column of a movable table in edit mode,
+   * none otherwise.
+   */
   refresh(): void;
   /** Takes the table source a move asked for; false when the message is not for a move. */
   receiveSource(message: PreviewEditSourceMessage): boolean;
