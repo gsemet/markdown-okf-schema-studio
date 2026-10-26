@@ -67,6 +67,12 @@ When the preview shows paragraphs, list items, table cells, quotes, captions, he
 - THEN it has a tint and a hairline derived from the text colour, a 4 px radius and a size of 0.875em, scaled inside headings
 - AND inline code that wraps over two lines is padded on each line and the line height is unchanged
 
+### Scenario (nominal): Block quote tint
+- GIVEN a block quote in the Cream theme, in another forced theme or in the host theme
+- WHEN it is shown
+- THEN it keeps its left rule and takes the block quote background token of that theme as its background
+- AND in the Cream theme that background is a step darker than the page
+
 ### Scenario (boundary): Inline code in links and tables
 | Input | Outcome |
 | --- | --- |
@@ -92,6 +98,7 @@ When the preview shows paragraphs, list items, table cells, quotes, captions, he
 
 ### Verification notes
 - Method: test/core/preview/previewStyles.test.ts, tests "typography is driven by VS Code markdown preview variables" (body text), "the top heading keeps the stock preview rule underneath it" (headings), "overflowing content tables keep short cells whole and show scroll shadows" (inline code in tables) and the stylesheet rule of the YAML language (link colour in white and cream only)
+- Method: test/core/preview/previewStyles.test.ts, test "a block quote is tinted with the theme block quote background" (block quote tint)
 - Method: test/core/render/renderReq.renderingCore.requirements.test.ts, test "the content stylesheet tightens list paragraphs and indents every list level by 2em" (list spacing)
 - Method: test/core/preview/inlineCode.test.ts, tests "inline code is a subtle tinted pill derived from the text colour" (inline code pill), "inline code text keeps 4.5:1 on the tinted background in every forced mode" (links), "inline code stays compact in table cells" (tables)
 - Method: test/core/preview/creamTheme.test.ts, test "cream mirrors the white-mode code colouring" (link colour in the forced themes, YAML block)
