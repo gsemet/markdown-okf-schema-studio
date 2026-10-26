@@ -9,6 +9,7 @@ import {
   injectContentSecurityPolicy,
   rewriteSphinxHtml,
   sanitizeCss,
+  sanitizeTableStyle,
 } from "../../src/core/security/html-sanitizer";
 import { ResourcePolicy } from "../../src/core/security/resource-policy";
 
@@ -326,6 +327,30 @@ test("data-okf-width keeps a plain length and nothing else", () => {
   assert.doesNotMatch(result.html, /position:fixed|url\(x\)/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-GFM-031
+test("table styles share the colour grammar and refuse every injection shape", () => {
+  assert.equal(
+    sanitizeTableStyle("td", "color: Red; background-color: hsl(10, 20%, 30%); -webkit-text-fill-color: rgba(1,2,3,.5)"),
+    "color: red; background-color: hsl(10, 20%, 30%); -webkit-text-fill-color: rgba(1,2,3,.5)",
+  );
+  assert.equal(sanitizeTableStyle("td", "color: rgb(0 0 0 / 50%)"), "color: rgb(0 0 0 / 50%)");
+  assert.equal(sanitizeTableStyle("td", "color: Inherit"), "color: inherit");
+  assert.equal(sanitizeTableStyle("td", "color: rgb(0, 0 0)"), undefined);
+  for (const value of [
+    "var(--x)", "url(x)", "expression(1)", "red !important", "red /* x */", "red\\", "r\\65 d", "revert",
+    "notacolour", "red} body{color:blue", "rgb(var(--a),0,0)", "hsl(0,0%,0%) url(x)", "red\u0000",
+  ]) {
+    assert.equal(sanitizeTableStyle("td", `color: ${value}`), undefined, value);
+    assert.equal(sanitizeTableStyle("td", `background-color: ${value}`), undefined, value);
+    assert.equal(sanitizeTableStyle("td", `background: linear-gradient(red, ${value})`), undefined, value);
+  }
+  assert.equal(sanitizeTableStyle("td", "background: linear-gradient(to right, red, hsl(0,0%,0%))"), undefined);
+  assert.equal(
+    sanitizeTableStyle("td", "background: linear-gradient(to right, red 10%, blue)"),
+    "background: linear-gradient(to right, red 10%, blue)",
+  );
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-GFM-034
 test("span style keeps only hex and rgb colour and background-color as data attributes", () => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
@@ -344,20 +369,34 @@ test("span style keeps only hex and rgb colour and background-color as data attr
   assert.equal(kept.diagnostics.length, 0);
 
   for (const style of [
-    "color: red", "color: url(x)", "color: expression(1)", "color: var(--x)", "color: #c00 !important",
+    "color: url(x)", "color: expression(1)", "color: var(--x)", "color: #c00 !important",
     "color: #c00 /* x */", "color: rgb(300,0,0)", "color: rgba(0,0,0,2)", "position: fixed",
     "background: #c00", "color: #c00; position: fixed",
   ]) {
     const result = run(`<span style="${style}">a</span>`);
     assert.doesNotMatch(result.html, /style=|url\(|expression|var\(|!important|\/\*|position/u, style);
     assert.ok(result.diagnostics.length > 0, `diagnostic for ${style}`);
+    assert.ok(result.diagnostics.every((entry) => entry.code === "removed-unsafe-style"), style);
     const colours = [...result.html.matchAll(/data-okf-(?:color|background)="([^"]*)"/gu)].map((match) => match[1]);
     assert.deepEqual(colours, style === "color: #c00; position: fixed" ? ["#c00"] : [], style);
   }
 
+  const named = run("<span style=\"color: Red; background-color: hsla(0, 0%, 0%, 0.5)\">a</span>");
+  assert.match(named.html, /<span data-okf-color="Red" data-okf-background="hsla\(0, 0%, 0%, 0\.5\)">a<\/span>/u);
+  assert.equal(named.diagnostics.length, 0);
+
+  for (const style of [
+    "color: red; background-color: var(--x)", "color: red} body{color:blue", "color: r\\65 d", "color: red /* x */",
+    "color: red !important", "color: revert", "color: hsl(0 0 0)", "color: url(x)",
+  ]) {
+    const result = run(`<span style="${style.replace(/"/gu, "&quot;")}">a</span>`);
+    assert.doesNotMatch(result.html, /style=|var\(|url\(|!important|\/\*|\}|\\/u, style);
+    assert.deepEqual(result.diagnostics.map((entry) => entry.code), ["removed-unsafe-style"], style);
+  }
+
   const other = run("<p style=\"color: #c00\">a</p><b style=\"color: #c00\">b</b><b data-okf-color=\"#c00\">c</b>"
-    + "<span data-okf-color=\"red\">d</span><span data-okf-background=\"#fff\">e</span>");
-  assert.doesNotMatch(other.html, /style=|data-okf-color="(?:#c00|red)"/u);
+    + "<span data-okf-color=\"url(x)\">d</span><span data-okf-background=\"#fff\">e</span>");
+  assert.doesNotMatch(other.html, /style=|data-okf-color="(?:#c00|url\(x\))"/u);
   assert.match(other.html, /data-okf-background="#fff"/u);
   assert.ok(other.diagnostics.length >= 4);
 });

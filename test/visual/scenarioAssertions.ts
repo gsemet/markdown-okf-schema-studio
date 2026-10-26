@@ -631,6 +631,11 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
   }),
 ];
 
+export const RAW_TABLE_COLOUR_SPANS_ASSERTIONS: ContentAssertion[] = [
+  { message: "the named, hsl, hex and rgba colours reach the spans of the raw table", selector: `${MAIN} table td span[data-okf-color]`, count: 3, expr: "(() => { const c = (t) => { const span = [...document.querySelectorAll('#sphinx-myst-preview-content td span')].find((s) => s.textContent.trim() === t); return getComputedStyle(span); }; return c('Urgent').color === 'rgb(255, 0, 0)' && c('Done').color === 'rgb(0, 153, 0)' && c('Queued').color === 'rgb(0, 85, 204)' && c('Queued').backgroundColor === 'rgba(255, 200, 0, 0.35)'; })()" },
+  { message: "an unsafe var() or url() value leaves the text uncoloured", selector: `${MAIN} table td span`, count: 4, expr: "(() => { const span = [...document.querySelectorAll('#sphinx-myst-preview-content td span')].find((s) => s.textContent.trim() === 'Plain'); return !span.hasAttribute('data-okf-color') && !span.hasAttribute('data-okf-background') && !span.getAttribute('style'); })()" },
+];
+
 export const DOLLAR_PRICES_ASSERTIONS: ContentAssertion[] = [
   { message: "the real $x$ span is typeset as maths", selector: `${MAIN} p:last-of-type .katex`, count: 1 },
   { message: "only the real span is typeset, the price sentences hold no maths", selector: `${MAIN} .katex`, count: 1 },

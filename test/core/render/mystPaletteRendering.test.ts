@@ -410,7 +410,7 @@ test("a span with a colour style renders as data attributes, anything else is dr
   });
   const spans = findElements(parseHtml(rewritten.html), isTag("span"));
   assert.deepEqual(spans.map((span) => [attribute(span, "data-okf-color"), attribute(span, "data-okf-background")]),
-    [["#c00", "rgb(1, 2, 3)"], [undefined, undefined], [undefined, undefined]]);
+    [["#c00", "rgb(1, 2, 3)"], ["red", undefined], [undefined, undefined]]);
   assert.doesNotMatch(rewritten.html, /\sstyle="color|position|url\(x\)/u);
   assert.match(textContent(spans[0]!), /red bold/u);
 });

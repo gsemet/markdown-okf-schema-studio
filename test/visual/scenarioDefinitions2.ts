@@ -23,6 +23,7 @@ import {
   INLINE_IMAGE_ASSERTIONS,
   INVALID_YAML_ASSERTIONS,
   DOLLAR_PRICES_ASSERTIONS,
+  RAW_TABLE_COLOUR_SPANS_ASSERTIONS,
   LIST_TABLE_ASSERTIONS,
   LONG_WORDS_ASSERTIONS,
   MAIN,
@@ -1317,6 +1318,17 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
       + "each time the reference goes on a paragraph of its own, with a blank line before and after it, and its name is "
       + "selected. The final frame shows the editor after the paste at the end.",
   },
+  ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-GFM-034
+    id: `gfm/v0${7 + index}-raw-table-colour-spans-${theme}-900`,
+    fixture: "59-raw-table-colour-spans",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: RAW_TABLE_COLOUR_SPANS_ASSERTIONS,
+    description: `Coloured spans in a raw HTML table (a named colour, hsl(), a hex colour on an rgba() background, and a var()/url() value that is dropped), ${theme}, 900 px pane.`,
+  })),
   ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-MYST-024
     id: `myst/v${35 + index}-dollar-prices-full-${theme}-900`,
