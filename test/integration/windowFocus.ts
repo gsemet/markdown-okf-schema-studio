@@ -65,6 +65,20 @@ function hostFocusReport(): string {
  * Failure messages of undo and typing waits carry it (CI guidelines rule 12).
  */
 export async function windowFocusReport(page: Page): Promise<string> {
+  const frames = await Promise.all(page.frames().map(async (frame) => {
+    try {
+      return { url: frame.url(), state: await frame.evaluate(() => ({
+        content: document.querySelector("#sphinx-myst-preview-content") !== null,
+        documentId: document.documentElement.getAttribute("data-sphinx-preview-document-id"),
+        version: document.documentElement.getAttribute("data-sphinx-preview-document-version"),
+        requestId: document.documentElement.getAttribute("data-sphinx-preview-request-id"),
+        visibility: document.visibilityState,
+        editorTrace: (window as unknown as { __studioDiagnostics?: { trace(): unknown } }).__studioDiagnostics?.trace(),
+      })) };
+    } catch (error) {
+      return { url: frame.url(), error: String(error) };
+    }
+  }));
   let pageState: unknown;
   try {
     pageState = await page.evaluate(() => {
@@ -85,7 +99,7 @@ export async function windowFocusReport(page: Page): Promise<string> {
   } catch (error) {
     pageState = `unavailable: ${String(error)}`;
   }
-  return `${hostFocusReport().slice(0, -1)},"page":${JSON.stringify(pageState)}}`;
+  return `${hostFocusReport().slice(0, -1)},"page":${JSON.stringify(pageState)},"frames":${JSON.stringify(frames)}}`;
 }
 
 /** One content change seen by a document trace, as `onDidChangeTextDocument` reported it. */

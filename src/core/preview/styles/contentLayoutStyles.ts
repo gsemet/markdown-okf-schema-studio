@@ -210,9 +210,10 @@ html[data-sphinx-preview-width="auto"] #sphinx-myst-preview-content > [data-sphi
   margin-inline-end: 0;
 }
 
-/* The runtime lifts the column cap for a moment to read the natural width of a wide table. */
+/* The runtime lifts the column cap for a moment to read the natural width of a wide table; it also
+   lifts the row-handle cap (edit mode), else the measure would depend on its own result. */
 html[data-sphinx-preview-width="auto"] #sphinx-myst-preview-content > :where(table, .table-wrapper)[data-sphinx-preview-measuring] {
-  max-width: none;
+  max-width: none !important;
 }
 
 /* Tables and figures narrower than the column are centred in every width mode, at their own

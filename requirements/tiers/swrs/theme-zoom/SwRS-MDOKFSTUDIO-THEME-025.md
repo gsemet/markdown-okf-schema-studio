@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/creamTheme.test.ts
 - test/core/preview/diagReq.styles.requirements.test.ts
+- test/core/preview/previewStyles.test.ts
 - test/core/preview/themeTokens.test.ts
 - test/integration/realInput.markers.ts
 - test/visual/capture_page_checks.py
@@ -55,6 +56,11 @@ When a forced theme mode (Dark, White or Cream) is shown, the extension SHALL pa
 - GIVEN the handbook forced to Cream on a dark VS Code theme in a 900 px pane (visual scenarios theme-zoom/v02 to v06, also with the admonition gallery, code and tables, the properties fixture and an open paragraph editor)
 - WHEN the preview is rendered
 - THEN the body background is rgb(245, 241, 232), the page and note text rgb(43, 42, 39), the links and inline code rgb(161, 78, 50), the fenced block background rgb(237, 230, 218) and the colour scheme is light
+
+The edition palette's mode selector uses the forced palette's widget background, page foreground
+and widget border rather than the host dropdown colours. In Cream these are rgb(251, 248, 241),
+rgb(43, 42, 39) and rgb(214, 205, 189), even when the host dropdown is dark. Dark and White apply
+the same rule with their own palette; Current mode continues to follow the host.
 
 ### Scenario (boundary): Warm paper rule
 
@@ -108,6 +114,7 @@ When a forced theme mode (Dark, White or Cream) is shown, the extension SHALL pa
 
 ### Verification notes
 
+- Method: test/core/preview/previewStyles.test.ts, `forced preview themes supply dropdown colors independently of the host` checks the dropdown background and foreground overrides in all three forced palettes.
 - Method: test/visual/scenarioDefinitions1.ts and test/visual/capture_page_checks.py, visual scenarios theme-zoom/v01 and v07 (check_forced_white_theme: White on a dark host and with a properties table), theme-zoom/v02 to v06 (check_forced_cream_theme: Cream on a dark host). The fields of the properties table belong to frontmatter-schema. The White colour scheme is not asserted. Scenario v06 also shows the paragraph editor of block-editing; only the Cream colours of that page are claimed here.
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario theme-zoom/v08 (FORCED_DARK_ASSERTIONS in test/visual/scenarioAssertions.ts: Dark on a light host).
 - Method: test/core/preview/themeTokens.test.ts, unit test `the forced theme modes set the neutral tokens, not the VS Code variables` (Dark and White neutral tokens, literal hex, no VS Code variable; the host independence follows from it and is not run with another host).

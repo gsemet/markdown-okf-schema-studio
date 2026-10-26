@@ -33,6 +33,9 @@ export function installWidthMode(
   const shiftProperty = "--sphinx-preview-breakout-shift";
   const figureAttribute = "data-sphinx-preview-figure";
   const gutter = 16;
+  // A table with row handles (edit mode) keeps their room on its left, so it never needs the
+  // row-shift that would cap it and make the measure flip-flop.
+  const handleGutter = 34;
   const button = document.querySelector("[data-sphinx-preview-width-toggle]");
   const saved = vscode.getState?.() as { viewWidthMode?: unknown } | undefined;
   const pick = (value: unknown): string | undefined => (
@@ -113,6 +116,8 @@ export function installWidthMode(
       window.getComputedStyle?.(document.documentElement)?.getPropertyValue?.("--sphinx-preview-toc-reserve") ?? "",
     ) || 0;
     const available = pane - reserved - gutter * 2;
+    const hasRowHandles = (wrapper: Element): boolean => wrapper.getAttribute("data-okf-row-handles") === "true"
+      || Boolean(wrapper.querySelector?.('[data-okf-row-handles="true"]'));
     // A wide element is centred on the available area (the pane without the TOC column), which is
     // normally also the centre of the column; the shift covers the case where it is not.
     const box = content.getBoundingClientRect?.();
@@ -135,7 +140,8 @@ export function installWidthMode(
     });
     for (const wrapper of wrappers) wrapper.removeAttribute(measuring);
     wrappers.forEach((wrapper, index) => {
-      const extra = widths[index] <= available ? Math.ceil(widths[index] - column) : Math.floor(available - column);
+      const room = hasRowHandles(wrapper) ? pane - reserved - handleGutter * 2 : available;
+      const extra = widths[index] <= room ? Math.ceil(widths[index] - column) : Math.floor(room - column);
       if (extra <= 1) return;
       wrapper.setAttribute(wideAttribute, "");
       (wrapper as HTMLElement).style.setProperty(breakoutProperty, extra + "px");

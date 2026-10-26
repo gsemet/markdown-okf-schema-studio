@@ -1,5 +1,49 @@
 # Update Log
 
+## 2026-10-26 (save pins precede status layout changes)
+
+- SwRS-MDOKFSTUDIO-BLOCK-228: final block and table saves capture the viewport pin before
+  changing the saving status. The strengthened runtime regression fails with the old ordering
+  and passes with the new ordering. Save-position and alert-dropdown scenarios are registered
+  for real-window stress validation without changing their assertions or timeouts.
+
+## 2026-10-26 (shared requirements guidance)
+
+- Replaced the project-specific requirements guide with the generic guide shipped by
+  okf-schema, and synchronized the retained baseline copy. Project paths, scopes, commands
+  and coverage policy are resolved from configuration and governing project instructions.
+  Repeated IDs are allowed beside distinct tests in one file; restored the LIFE-119 marker
+  beside the pending layout-induced scroll regression test. The installed-guide regression
+  test and byte-for-byte comparison with both Studio copies pass.
+
+## 2026-10-26 (layout-induced scrolling preserves the reading anchor)
+
+- SwRS-MDOKFSTUDIO-LIFE-119: a pending scroll updates the reading anchor only when block
+  geometry is unchanged. Closing a comment above the reader no longer treats the browser's
+  layout-induced scroll as a new reading position. Both scroll-order unit tests and all six
+  comment reading-position visual scenarios pass.
+
+## 2026-10-26 (palette selector and toolbar tooltips)
+
+- SwRS-MDOKFSTUDIO-THEME-025: forced palettes now override dropdown colours, including the
+  edition palette's mode selector on a dark host.
+- SwRS-MDOKFSTUDIO-TOOLBAR-001: disabled controls dim only their icons, keeping tooltips opaque;
+  hover and keyboard focus keep long labels aligned with their button. Focused style tests pass.
+
+## 2026-10-27 (preview next to an editor no longer stuck at the top)
+
+- SwRS-MDOKFSTUDIO-LIFE-119: new row in "Layout changes re-apply the stored anchor". A layout
+  pass handles a pending user scroll before it re-applies the anchor. A webview placed next to a
+  text editor reports a visual viewport resize ahead of each scroll; the layout pass then ran
+  first and scrolled back to the old anchor, so the preview could not leave the top.
+
+## 2026-10-26 (Auto width no longer pulls the scroll back on tables with row handles)
+
+- SwRS-MDOKFSTUDIO-LAYOUT-023: new scenario "Table with row handles in edit mode". A wide table
+  with row handles is capped at the pane minus two 34 px handle gutters, and the measurement lifts
+  the !important row-handle cap. Before, the table flipped between broken out and shifted at every
+  frame for some pane widths, and each re-measure pulled the scroll back to the anchor.
+
 ## 2026-10-26 (real-window typing scenario follows the block-open behaviour)
 
 - SwRS-MDOKFSTUDIO-BLOCK-041: the verification note names the real-window scenario

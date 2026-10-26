@@ -1458,7 +1458,7 @@ async function scenarioAlertDropdown(page: Page, evidence: Evidence): Promise<vo
       try {
         await waitFor(description, async () => (await readEditor()).value === expected);
       } catch (error) {
-        throw new Error(String(error) + " Editor state: " + JSON.stringify(await readEditor()));
+        throw new Error(String(error) + " Editor state: " + JSON.stringify(await readEditor()) + " " + await windowFocusReport(page));
       }
     };
     const count = async (selector: string): Promise<number> => {
@@ -4436,10 +4436,10 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   "incoming-changes": scenarioIncomingChanges,
   "review-threads": scenarioReviewThreads,
   "image-paste": scenarioImagePaste,
-  // CR 044: the watcher event of a linked target's save (CI run 39848594435).
   "linked-target-save": scenarioLinkedTargetSave,
-  // CR 048: the menu once did not open after a line break in a full local run.
   "slash-menu": scenarioSlashMenu,
+  "save-position": scenarioSaveKeepsBlockInPlace,
+  "alert-dropdown": scenarioAlertDropdown,
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */

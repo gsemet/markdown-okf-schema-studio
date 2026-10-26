@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- A final editor save captures the block or table position before showing its saving status,
+  so a status-induced layout change cannot replace the position visible when Save was requested.
+- Opening or closing comments above the reading line keeps the text in place, including when
+  the browser emits a scroll event before the layout adjustment finishes.
+- The edition palette's mode selector follows the forced preview theme instead of the VS Code
+  dropdown colours. Toolbar tooltips stay opaque on disabled Back, Next and zoom controls, and
+  long theme labels stay next to their button rather than shifting left on hover.
 - Sticky headings and table of contents: the pinned heading band no longer lists a collapsed
   (zero-height) heading as a parent, nor headings inside admonitions and the properties table, which
   the table of contents leaves out too; the fold button of a table-of-contents entry is named "Unfold"

@@ -61,6 +61,11 @@ When a preview page is built, the extension SHALL render the toolbar, named Prev
 - WHEN the same button is reached with Tab and has the focus ring
 - THEN the same tooltip appears with the same colours
 
+The tooltip stays right-aligned with its button, 8 px below it, without translating horizontally
+on hover or focus. Disabled Back, Next and zoom controls dim only their icons: their tooltip
+background and text remain fully opaque, like enabled controls. Long theme labels keep the same
+anchor rather than moving left by half the label width.
+
 ### Scenario (boundary): Rows stay inside the pane
 | Input | Outcome |
 | --- | --- |
@@ -83,6 +88,7 @@ When a preview page is built, the extension SHALL render the toolbar, named Prev
 - Known issue: no code avoids the text that scrolls under the toolbar, and no code moves the toolbar when the find widget of VS Code opens; the layout-width scope handles only the first element of the document.
 
 ### Verification notes
+- Method: test/core/preview/previewStyles.test.ts, `toolbar tooltips stay opaque and anchored even on disabled controls` checks that disabled-button opacity applies only to the SVG and that the shared tooltip visibility rule adds no translation.
 - Method: test/core/preview/previewStyles.test.ts (Writable preview: the preview toolbar has three rows; Every button has a tooltip: it counts 13 data-tooltip attributes and compares the title and tooltip pair of the Refresh, Anchor and Edit buttons and the start of the Theme button, equality for all 13 buttons is not asserted; Tooltip: the tooltip rule takes its content from data-tooltip, hidden by default and visible on hover and focus-visible; Scrolling: position fixed and z-index 1100 of the toolbar; the 12 px and 14 px offsets and the covering of scrolled text are untested).
 - Method: test/visual/capture_layout_checks.py (Visual order on toolbar-navigation/v06 to v21: row names, button counts, Tab order; Rows stay inside the pane through check_preview_toolbar_rows: rows, overlap, left edge, zoom 70 and 200; the 16 scenarios differ only in theme, width and collapse state; the 460 px width is covered by the sticky band scenarios only).
 - Method: test/visual/capture_final_checks.py (Every button has a tooltip: label per control; Tooltip on hover through check_tooltip_contrast, run on every visual scenario, which hovers the Refresh button; the keyboard case follows from the shared CSS rule and is not measured).

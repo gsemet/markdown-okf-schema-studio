@@ -453,6 +453,16 @@ test("T10b: a wide table gets its fractional max-content width rounded up, so no
   assert.equal(wide.style.getPropertyValue("--sphinx-preview-breakout"), "201px");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("T10b: a table with row handles keeps their room left of it when it breaks out", () => {
+  const { harness, wide } = widthModeFixture();
+  wide.scrollWidth = 1600;
+  wide.setAttribute("data-okf-row-handles", "true");
+  harness.widthButton.dispatch("click");
+  // available = 1000 - 2 * 34 = 932 -> breakout 232, so the table starts 34 px from the pane edge.
+  assert.equal(wide.style.getPropertyValue("--sphinx-preview-breakout"), "232px");
+});
+
 test("T10: the saved width mode applies at startup and an edited element keeps the column", () => {
   const { harness, wide } = widthModeFixture("auto");
   harness.dispatchMessage({ type: "noop" });

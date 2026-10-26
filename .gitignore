@@ -16,3 +16,4 @@ npm-debug.log*
 .playwright-*/
 /test/integration/fixtures/frontmatter-edit-*/
 /.cache/
+/output/

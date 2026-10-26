@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-15T16:28:12.588Z",
-  "sourceDirectory": "out/reports/e2e/screenshots/real-input-oFWqTn",
+  "generatedAt": "2026-10-26T10:43:06.078Z",
+  "sourceDirectory": "out/reports/e2e/screenshots/real-input-gIyI9Q",
   "captures": [
     {
       "image": "images/01-paragraph-blur-commit.png",
-      "source": "out/reports/e2e/screenshots/real-input-oFWqTn/01-paragraph-blur-commit.png",
-      "capturedAt": "2026-10-15T16:25:33.753Z",
-      "bytes": 78948,
+      "source": "out/reports/e2e/screenshots/real-input-gIyI9Q/block-editing/r01-paragraph-blur-commit.png",
+      "capturedAt": "2026-10-26T10:37:26.936Z",
+      "bytes": 88374,
       "mediaType": "image",
       "mimeType": "image/png",
       "title": "Commit an edited paragraph",
@@ -14,9 +14,9 @@
     },
     {
       "image": "images/21-edit-hover.png",
-      "source": "out/reports/e2e/screenshots/real-input-oFWqTn/21-edit-hover.png",
-      "capturedAt": "2026-10-15T16:26:00.994Z",
-      "bytes": 58997,
+      "source": "out/reports/e2e/screenshots/real-input-gIyI9Q/block-editing/r12-edit-hover.png",
+      "capturedAt": "2026-10-26T10:38:35.778Z",
+      "bytes": 59450,
       "mediaType": "image",
       "mimeType": "image/png",
       "title": "Reveal the edit affordance",
@@ -24,9 +24,9 @@
     },
     {
       "image": "images/38-edit-mode-remembered.png",
-      "source": "out/reports/e2e/screenshots/real-input-oFWqTn/38-edit-mode-remembered.png",
-      "capturedAt": "2026-10-15T16:26:40.806Z",
-      "bytes": 155495,
+      "source": "out/reports/e2e/screenshots/real-input-gIyI9Q/lifecycle-sync/r08-edit-mode-remembered.png",
+      "capturedAt": "2026-10-26T10:40:07.537Z",
+      "bytes": 153829,
       "mediaType": "image",
       "mimeType": "image/png",
       "title": "MyST and diagrams on white",

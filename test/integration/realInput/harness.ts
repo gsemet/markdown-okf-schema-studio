@@ -180,6 +180,18 @@ export async function currentPreviewFrame(page: Page): Promise<Frame> {
   await waitFor("the rendered Studio webview", async () => {
     result = await findCurrentFrame(page);
     return result !== undefined;
+  }).catch(async (error: unknown) => {
+    const preview = getActivePreviewForTests();
+    const frames = await Promise.all(page.frames().map(async (frame) => ({
+      url: frame.url(), root: await frame.locator("html").evaluate((element) => ({
+        version: element.getAttribute("data-sphinx-preview-document-version"),
+        requestId: element.getAttribute("data-sphinx-preview-request-id"),
+        documentId: element.getAttribute("data-sphinx-preview-document-id"),
+      })).catch(() => undefined),
+    })));
+    throw new Error(`${String(error)} Expected preview: ${JSON.stringify({
+      documentUri: preview?.documentUri, version: preview?.documentVersion, requestId: preview?.requestId,
+    })}; frames: ${JSON.stringify(frames)}`);
   });
   assert.ok(result);
   return result;

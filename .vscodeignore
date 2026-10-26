@@ -31,3 +31,11 @@ tsconfig.json
 uv.lock
 .gitignore
 .dependency-cruiser.cjs
+output/**
+.github/**
+AGENTS.md
+justfile
+guidelines.yml
+guidelines.lock.json
+.guidelines-operation.lock
+images/logo-proposals/**

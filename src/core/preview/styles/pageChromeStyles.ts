@@ -14,6 +14,9 @@ html[data-sphinx-preview-theme-mode="dark"] body {
   --studio-foreground: #d4d4d4;
   --studio-editorWidget-background: #252526;
   --studio-editorWidget-border: #454545;
+  --studio-dropdown-background: var(--studio-editorWidget-background);
+  --studio-dropdown-foreground: var(--studio-editor-foreground);
+  --studio-dropdown-border: var(--studio-editorWidget-border);
   --studio-icon-foreground: #d4d4d4;
   --studio-toolbar-hoverBackground: rgba(255, 255, 255, 0.1);
   --studio-input-background: #3c3c3c;
@@ -55,6 +58,9 @@ html[data-sphinx-preview-theme-mode="white"] body {
   --studio-foreground: #1f1f1f;
   --studio-editorWidget-background: #f3f3f3;
   --studio-editorWidget-border: #c8c8c8;
+  --studio-dropdown-background: var(--studio-editorWidget-background);
+  --studio-dropdown-foreground: var(--studio-editor-foreground);
+  --studio-dropdown-border: var(--studio-editorWidget-border);
   --studio-icon-foreground: #333333;
   --studio-toolbar-hoverBackground: rgba(0, 0, 0, 0.08);
   --studio-input-background: #ffffff;
@@ -102,6 +108,9 @@ html[data-sphinx-preview-theme-mode="cream"] body {
   --studio-widget-border: #d6cdbd;
   --studio-editorWidget-background: #fbf8f1;
   --studio-editorWidget-border: #d6cdbd;
+  --studio-dropdown-background: var(--studio-editorWidget-background);
+  --studio-dropdown-foreground: var(--studio-editor-foreground);
+  --studio-dropdown-border: var(--studio-editorWidget-border);
   --studio-editorHoverWidget-background: #ede6da;
   --studio-editorHoverWidget-foreground: #2b2a27;
   --studio-editorHoverWidget-border: #d6cdbd;
@@ -414,6 +423,9 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
 
 [data-sphinx-preview-toolbar] button:disabled {
   cursor: not-allowed;
+}
+
+[data-sphinx-preview-toolbar] button:disabled > svg {
   opacity: 0.5;
 }
 
@@ -474,7 +486,6 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning
 .sphinx-preview-table-menu button[data-tooltip]:focus-visible::after {
   visibility: visible;
   opacity: 1;
-  transform: translate(-50%, 0);
 }
 
 /* Fixed, out of flow: showing or resizing the band never moves the content (scroll anchoring R8). */
