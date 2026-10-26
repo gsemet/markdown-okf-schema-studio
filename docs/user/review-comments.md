@@ -1,5 +1,7 @@
 # Review Comments
 
+[![An open comment thread on a passage, with a comment, a reply, and the Resolve, Delete and Reply controls](../../images/readme/showcase-comment-thread.png)](../../images/readme/showcase-comment-thread.png)
+
 A file named like the document with `.comments.json` instead of its extension, for example
 `notes.comments.json` next to `notes.md`, holds review comment threads. The preview highlights the
 quoted text of every thread, in preview and in edit mode; when the quote cannot be found in the
@@ -15,9 +17,9 @@ created when it does not exist. A selection that spans several blocks is anchore
 block to the end of the last one. To answer, open a thread and use its reply box. The button is not
 shown while a block editor is open, over code or the properties table, or in a read-only preview
 (untrusted workspace), where adding comments is refused. The name stored with a comment is the
-`comments.authorName` setting, else your Git `user.name`, else your operating system user name.
-The setting can be set per user, per workspace or per folder (`.vscode/settings.json`), for example
-to sign the comments of one project with an alias.
+`markdownOkfSchemaStudio.comments.authorName` setting, else your Git `user.name`, else your
+operating system user name. The setting can be set per user, per workspace or per folder
+(`.vscode/settings.json`), for example to sign the comments of one project with an alias.
 
 A thread popover also has **Resolve** (then **Reopen**) and **Delete**; Delete asks "Delete
 thread?" with Yes and No in the popover, and deleting the last thread keeps the file with an empty

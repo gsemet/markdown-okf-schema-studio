@@ -369,6 +369,22 @@ export const THREAD_ENTRY_ORPHAN_RESOLVED = {
 export const THREADS_MESSAGE = { data: { type: "previewComments", threads: [THREAD_ENTRY_OPEN, THREAD_ENTRY_RESOLVED] } };
 export const ORPHAN_THREADS_MESSAGE = { data: { type: "previewComments", threads: [THREAD_ENTRY_OPEN, THREAD_ENTRY_ORPHAN_OPEN, THREAD_ENTRY_ORPHAN_RESOLVED] } };
 
+/** CR 124: one open thread (a root comment and a reply) on the intro paragraph of `54-readme-showcase`. */
+export const README_SHOWCASE_THREAD_MESSAGE = {
+  data: {
+    type: "previewComments",
+    threads: [{
+      id: "thread-readme",
+      anchor: { line: 16, endLine: 16, quote: "plan the day, dispatch, observe and correct", prefix: "same loop: ", suffix: ". This page" },
+      resolved: false,
+      createdAt: "yesterday",
+      comments: [
+        { id: "c1", author: "Marie Dubois", createdAt: "yesterday", body: "Add a line on who owns the loop at night." },
+        { id: "c2", author: "Tom Becker", createdAt: "this morning", body: "Good point; the control room does. I will add it to the Observe card." },
+      ],
+    }],
+  },
+};
 export const POPOVER = "[data-okf-comment-popover]";
 export const REVIEW_THREAD_OPEN_ASSERTIONS: ContentAssertion[] = [
   { message: "the two anchored quotes are highlighted in the text", selector: `${MAIN} mark[data-okf-comment-thread]`, count: 2 },
@@ -812,4 +828,14 @@ export const EDIT_BAR_TOOLTIP_ASSERTIONS: ContentAssertion[] = [
     expr: "(() => { const button = document.querySelector('.sphinx-preview-edit-palette > button[data-edit-action=\"rule\"]'); const bubble = getComputedStyle(button, '::after'); return bubble.opacity === '1' && bubble.visibility === 'visible' && bubble.content.includes('Horizontal rule'); })()" },
   { message: "a click 10 px above or below the line of a horizontal rule still lands on it", selector: `${MAIN} hr`, count: 1,
     expr: "[...document.querySelectorAll('#sphinx-myst-preview-content hr')].every((rule) => { const box = rule.getBoundingClientRect(); const x = box.left + box.width / 2; const y = box.top + box.height / 2; return box.height >= 24 && document.elementFromPoint(x, y - 10) === rule && document.elementFromPoint(x, y + 10) === rule; })" },
+];
+
+export const README_SHOWCASE_THREAD_ASSERTIONS: ContentAssertion[] = [
+  { message: "the anchored passage of the intro paragraph is highlighted", selector: `${MAIN} mark[data-okf-comment-thread]`, count: 1, text: "plan the day, dispatch, observe and correct" },
+  { message: "the open thread popover is shown, with its root comment and its reply in order", selector: POPOVER, count: 1, visible: true, text: "Marie Dubois" },
+  { message: "the reply follows the root comment", selector: `${POPOVER} [data-okf-comment-body]`, count: 2,
+    expr: "[...document.querySelectorAll('[data-okf-comment-popover] [data-okf-comment-body]')].map(e => e.textContent.slice(0, 5)).join('|') === 'Add a|Good '" },
+  { message: "Resolve and Delete are visible", selector: `${POPOVER} [data-okf-comment-resolve], ${POPOVER} [data-okf-comment-delete]`, count: 2, visible: true },
+  { message: "the reply box and its Reply button are visible", selector: `${POPOVER} [data-okf-comment-reply-input], ${POPOVER} [data-okf-comment-reply-send]`, count: 2, visible: true },
+  { message: "the popover stays inside the pane", selector: POPOVER, insidePane: true },
 ];
