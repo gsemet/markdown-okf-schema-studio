@@ -72,6 +72,7 @@ The page refuses with the open editor's status line unless the row says otherwis
 | --- | --- | --- | --- |
 | Open a second block editor (click, insert point or key) | block editor | page | The request is ignored and the first editor stays open; no message |
 | Open a second block editor | block edit held by the host | host (`previewEditOpen`) | `previewEditSource` carries the error "Another Markdown block is already being edited." |
+| Click on a block or a plus insert point | field editor | page | The field editor's plain save is posted first and the block editor waits for its answer. Saved: the block editor opens. Refused (invalid YAML, a value the schema refuses): the field editor is cancelled, the field shows its saved value again, the refused text is discarded and the block editor opens |
 | Open a field editor, a key editor or a second value editor | field editor or block editor | page | No second field editor opens and the first stays open; no message |
 | Edit figure button | field editor | page | No figure editor opens; no message |
 | Enter shortcut of the empty-document Start writing insert point | field editor | page | No block editor opens; no message |
@@ -94,6 +95,14 @@ The page refuses with the open editor's status line unless the row says otherwis
 - WHEN a click, an insert point or a key requests an editor, or `previewEditOpen` arrives, or `previewBlockMove` or `previewBlocksCopy` arrives, or a rename, a thread change or a checkbox click is requested, or a refresh is requested
 - THEN the editor opens (the source of the block is sent), the move or the copy is planned, the request is sent (rename, thread change, `previewCheckboxToggle`, `previewRefresh`), the Refresh button is enabled and a delete of an inline thread is applied
 
+### Scenario (boundary): A click on a block while a field editor holds a value
+
+- GIVEN a field editor that holds a changed value and the writer clicks a block or a plus insert point
+- WHEN the host saves the value
+- THEN the field is saved and the block editor opens once the answer arrives
+- WHEN the host refuses the value instead
+- THEN the field editor closes without a second save, the field shows its saved value and the block editor opens
+
 ### Scenario (boundary): Refresh Preview command over an open editor
 
 - GIVEN an open editor and the Refresh Preview command of the writer
@@ -114,8 +123,7 @@ The page refuses with the open editor's status line unless the row says otherwis
 
 ### Known issues
 
-- Known issue: an editor left in an error state keeps blocking every other field until it is cancelled with Escape in that editor; clicking elsewhere does not close it.
-- Known issue: the guard against a second editor works in one direction only: a block editor can still be opened by clicking a block or a plus insert point while a field editor is open.
+- Known issue: an editor left in an error state keeps blocking every other field until it is cancelled with Escape in that editor; clicking another field or the page background does not close it (clicking a block or a plus insert point does).
 
 ### Related requirements
 
@@ -128,6 +136,7 @@ The page refuses with the open editor's status line unless the row says otherwis
 - Method: test/integration/realInput.markers.ts (scenario scenarioParagraphBlurCommit: click on another block while changed text is held, asserts only that the first editor closed) and test/page/runtimeBlockEditor.test.ts and test/page/runtimeBlockMoves.test.ts (second block editor request ignored, editors of the empty document and of an insertion open one at a time; nominal and no-editor scenarios).
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (field editor blocks the key editor and a second value editor, a block editor blocks the field editor; refresh refused with a message while a field editor is open and works once it is closed; checkbox click refused while a field editor is open; Edit figure and the Start writing Enter shortcut ignore input; rows: field editor, refresh, checkbox).
 - Method: test/page/runtimeBlockSelection.test.ts and test/page/runtimeBlockMoves.test.ts (selection and move input ignored while a field editor is open).
+- Method: test/page/fmtableReqFrontmatter.requirements.test.ts (a click on a block or a plus insert point after a blur save: the block waits for the answer, opens after a saved value, and opens after cancelling a refused one).
 - Method: test/page/blockReq.requirements.test.ts (the Refresh button is disabled while a block editor is open and enabled again; a refresh asked from the page over an open block editor shows a message and posts no refresh).
 - Method: test/session/blockReq.requirements.test.ts (a block move is refused while a block edit is held and planned otherwise; copy, cut and paste of blocks are refused while a block edit is held; a second open while the host holds an edit is refused).
 - Method: test/host/previewTiming.test.ts (Refresh Preview brings the render to the page even over an open inline editor; the later edit waits; the message sent by the page toolbar button is not tested).

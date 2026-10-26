@@ -387,3 +387,61 @@ test("the Edit figure button and the Start writing Enter shortcut ignore input w
   assert.equal(pressEnter(false), true, "without a field editor Enter opens the Start writing editor");
   assert.equal(pressEnter(true), false, "with a field editor open nothing opens");
 });
+
+const FIELD_IDS = { documentId: "file:///active.md", revision: 7, requestId: 11 };
+
+/** Opens the YAML editor of an object field, types `typed` and blurs it (the click's plain save). */
+function blurredYamlField(typed: string) {
+  const harness = createRuntimeHarness({ mapFrontmatter: true });
+  harness.frontmatterRow.setAttribute("data-okf-type", "object");
+  harness.frontmatterRow.setAttribute("data-okf-value", JSON.stringify({ a: 1 }));
+  harness.frontmatterRow.setAttribute("data-okf-value-yaml", "a: 1\n");
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", click(harness.frontmatterValueCell));
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  textarea.value = typed;
+  textarea.dispatch("blur");
+  const save = frontmatterSaves(harness).at(-1);
+  assert.ok(save);
+  return { harness, editId: save.editId };
+}
+
+const blockEditorOpens = (harness: ReturnType<typeof createRuntimeHarness>): number =>
+  harness.messages.filter((message) => message.type === "previewEditOpen").length;
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+test("a refused field value is cancelled and the clicked block opens its editor", () => {
+  const { harness, editId } = blurredYamlField("[review");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  assert.equal(blockEditorOpens(harness), 0, "the block waits for the answer to the save");
+  harness.dispatchMessage({
+    type: "previewFrontmatterResult", ...FIELD_IDS, editId, error: "Invalid YAML value: unexpected end",
+  });
+  assert.equal(harness.frontmatterValueCell.getAttribute("data-okf-editing"), null);
+  assert.equal(blockEditorOpens(harness), 1, "the block editor opens");
+  assert.equal(frontmatterSaves(harness).length, 1, "the refused text is not saved again");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+test("a refused field value is cancelled and a plus insert point opens its editor", () => {
+  const { harness, editId } = blurredYamlField("[review");
+  const point = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-insert-after-line") !== null && !element.removed);
+  assert.ok(point, "an insertion point");
+  point.childElements[0].dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined });
+  assert.equal(blockEditorOpens(harness), 0);
+  harness.dispatchMessage({ type: "previewFrontmatterResult", ...FIELD_IDS, editId, error: "Invalid YAML value" });
+  assert.equal(harness.frontmatterValueCell.getAttribute("data-okf-editing"), null);
+  assert.equal(blockEditorOpens(harness), 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-041
+test("a valid field value is saved and the clicked block opens its editor", () => {
+  const { harness, editId } = blurredYamlField("a: 2");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  assert.equal(blockEditorOpens(harness), 0, "the block waits for the answer to the save");
+  harness.dispatchMessage({ type: "previewFrontmatterResult", ...FIELD_IDS, editId, saved: true });
+  assert.equal(blockEditorOpens(harness), 1, "the block editor opens once the value is saved");
+  assert.equal(frontmatterSaves(harness).length, 1);
+});

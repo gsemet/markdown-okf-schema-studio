@@ -40,10 +40,6 @@ While a field editor is open, the extension SHALL ignore the Edit figure button 
 - WHEN the writer presses Enter
 - THEN no block editor opens from the Start writing insert point
 
-### Known issues
-
-- Known issue: clicking a plus insert point still opens a block editor while a field editor is open (see SwRS-MDOKFSTUDIO-FMEDIT-002).
-
 ### Verification notes
 
 - Method: Unit test the Edit figure button and the Start writing Enter shortcut ignore input while a field editor is open in test/page/fmtableReqFrontmatter.requirements.test.ts.
