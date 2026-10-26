@@ -106,6 +106,21 @@ test("a block move swaps the blocks in one edit and gives the moved block's new 
   assert.equal(up.line, 3);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117
+test("a list mapped up to its trailing blank line moves like any block", () => {
+  // The renderer maps a list followed by a blank line to that blank line (lines 9-11 here).
+  const text = "---\ntitle: T\n---\n\n# Title\n\n## Scenario\n\n- GIVEN a\n- WHEN b\n\n## Next\n\nTail\n";
+  const up = planBlockMoveEdit(text, { line: 12, endLine: 12, neighbourLine: 9, neighbourEndLine: 11, direction: "up" });
+  assert.ok("edit" in up, JSON.stringify(up));
+  assert.equal(applyTextEdits(text, [up.edit]),
+    "---\ntitle: T\n---\n\n# Title\n\n## Scenario\n\n## Next\n\n- GIVEN a\n- WHEN b\n\nTail\n");
+  const down = planBlockMoveEdit(text, { line: 9, endLine: 11, neighbourLine: 12, neighbourEndLine: 12, direction: "down" });
+  assert.ok("edit" in down, JSON.stringify(down));
+  assert.equal(applyTextEdits(text, [down.edit]), applyTextEdits(text, [up.edit]));
+  assert.equal(down.line, 11);
+  assert.equal(up.line, 9);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-127
 test("a block move is refused for an included block, after the planner's own checks", () => {
   const text = "A\n\n```{include} other.md\n```\n";

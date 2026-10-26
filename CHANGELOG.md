@@ -22,6 +22,10 @@
   column (drag, or Alt+Left and Alt+Right), as the row handle moves a row; a row or column handle
   now works while a cell of the table is being edited, instead of doing nothing; a click on a
   cell of a `{list-table}` opens its raw editor in view instead of making the table vanish.
+- Moving a block up or down no longer answers "The preview is out of date" when the block is next to a
+  list: a list is mapped up to the blank line after it, and the host now drops blank lines at the end of a
+  moved range. A move refused because the host still held an older render is sent once more after the
+  next render before any message is shown.
 - A final editor save captures the block or table position before showing its saving status,
   so a status-induced layout change cannot replace the position visible when Save was requested.
 - Opening or closing comments above the reading line keeps the text in place, including when

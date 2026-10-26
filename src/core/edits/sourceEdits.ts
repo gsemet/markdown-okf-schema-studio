@@ -12,6 +12,7 @@
 import { isThreadSource, threadDeleteRange, threadReplyEdit } from "../comments/inlineThread";
 import { opensIncludeDirective, planBlockMove, type BlockLines } from "../mapping/blockMove";
 import { planCut, planPaste, spanText } from "../mapping/blockRange";
+import { STALE_REQUEST } from "../protocol/staleRequest";
 import { countRefUses, renameLabelLine } from "../mapping/labelRename";
 import { minimalReplacement } from "../mapping/textDiff";
 import { checkboxToggleEdit } from "../render/checkboxMarkers";
@@ -34,8 +35,7 @@ export function readOnlyReason(hasWorkspaceFolder: boolean): string {
   return hasWorkspaceFolder ? READ_ONLY_UNTRUSTED : READ_ONLY_NO_FOLDER;
 }
 
-/** The reason of a request that names an older render than the one the host holds. */
-export const STALE_REQUEST = "The preview is out of date. Try again once it has refreshed.";
+export { STALE_REQUEST };
 /** Refusal of a thread change whose `<!-- THREAD` comment is gone. */
 export const THREAD_GONE = "The thread is no longer in the source. Refresh the preview.";
 /** Refusal of a reply that cannot be added (empty, too long, or no closing `-->`). */
@@ -156,14 +156,28 @@ export interface BlockMoveRequest {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-117
+/**
+ * The range without the blank lines at its end. The renderer maps a list that is followed by a
+ * blank line up to that blank line, so the page sends such a range as it is mapped; the block
+ * itself ends on its last non-blank line. A range that is out of bounds is left to the planner.
+ */
+function withoutTrailingBlankLines(text: string, block: BlockLines): BlockLines {
+  const lines = sourceLines(text);
+  let endLine = block.endLine;
+  if (!Number.isSafeInteger(endLine) || !Number.isSafeInteger(block.line) || endLine > lines.count) return block;
+  while (endLine > block.line && lines.text(endLine - 1).trim() === "") endLine -= 1;
+  return { line: block.line, endLine };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-117
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-127
 /**
  * Swaps a block range with its neighbour in one edit. `line` is the new first line of the moved
  * range. Refused: what the block move planner refuses, and a block that opens an `{include}`.
  */
 export function planBlockMoveEdit(text: string, request: BlockMoveRequest): EditRefusal | { edit: TextEdit; line: number } {
-  const moving: BlockLines = { line: request.line, endLine: request.endLine };
-  const neighbour: BlockLines = { line: request.neighbourLine, endLine: request.neighbourEndLine };
+  const moving = withoutTrailingBlankLines(text, { line: request.line, endLine: request.endLine });
+  const neighbour = withoutTrailingBlankLines(text, { line: request.neighbourLine, endLine: request.neighbourEndLine });
   const movesDown = request.direction === "down";
   const first = movesDown ? moving : neighbour;
   const second = movesDown ? neighbour : moving;

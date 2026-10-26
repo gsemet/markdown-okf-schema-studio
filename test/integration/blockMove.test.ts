@@ -10,6 +10,7 @@ import {
   sendPreviewMessageForTests,
 } from "./extensionApi";
 import { runUndo as runBlockClipboardUndo } from "./blockClipboard.test";
+import { renderMyst } from "../../src/core/render/mystRenderer";
 
 async function waitFor(description: string, predicate: () => boolean, timeoutMs = 20_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -110,6 +111,69 @@ export async function run(): Promise<void> {
   // The undo checks live here: the locked-screen gate skips this whole suite.
   await runUndo();
   await runBlockClipboardUndo();
+  await runMappedRanges();
+}
+
+/** The line range of every top-level heading and list the renderer maps, as the page sends it. */
+async function renderedRanges(text: string): Promise<Array<{ tag: string; line: number; endLine: number }>> {
+  const { html } = await renderMyst(text);
+  return [...html.matchAll(/^<(h[1-6]|ul|ol) data-line="(\d+)" data-end-line="(\d+)"/gmu)]
+    .map((match) => ({ tag: match[1], line: Number(match[2]), endLine: Number(match[3]) }));
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-117
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-124
+/**
+ * The ranges the page sends are the ones the renderer maps: a list followed by a blank line is
+ * mapped up to that blank line. A document with a frontmatter, headings and a list moves up and
+ * down with those ranges and is never answered "the preview is out of date".
+ */
+export async function runMappedRanges(): Promise<void> {
+  const extensionRoot = path.resolve(__dirname, "../../..");
+  const directory = fs.mkdtempSync(path.join(extensionRoot, "test", "integration", "fixtures", "block-move-mapped-"));
+  const sourcePath = path.join(directory, "mapped.md");
+  const original = [
+    "---", "title: Mapped", "---", "", "# Title", "", "## Scenario (nominal)", "",
+    "- GIVEN a document", "- WHEN the preview renders", "", "## Next", "", "Tail.", "",
+  ].join("\n");
+  fs.writeFileSync(sourcePath, original);
+  try {
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(sourcePath));
+    const preview = await openPreview(document);
+    const [, scenario, list, next] = await renderedRanges(original);
+    assert.equal(list.tag, "ul");
+    assert.ok(list.endLine > list.line + 1, "the list is mapped past its last item, up to the blank line");
+    const moveUntilApplied = async (
+      block: { line: number; endLine: number }, neighbour: { line: number; endLine: number }, direction: "up" | "down",
+    ): Promise<void> => {
+      const before = document.getText();
+      for (let attempt = 0; attempt < 20 && document.getText() === before; attempt += 1) {
+        await sendPreviewMessageForTests({
+          type: "previewBlockMove",
+          documentId: preview.documentUri,
+          revision: document.version,
+          requestId: getActivePreviewForTests()?.requestId ?? preview.requestId,
+          line: block.line, endLine: block.endLine,
+          neighbourLine: neighbour.line, neighbourEndLine: neighbour.endLine, direction, pinViewportTop: 200,
+        });
+        if (document.getText() === before) await new Promise<void>((resolve) => setTimeout(resolve, 250));
+      }
+    };
+    // The heading below the list moves up past it; the list then moves up past the heading again.
+    await moveUntilApplied(next, list, "up");
+    const moved = original.replace("- GIVEN a document\n- WHEN the preview renders\n\n## Next\n",
+      "## Next\n\n- GIVEN a document\n- WHEN the preview renders\n");
+    assert.notEqual(moved, original);
+    assert.equal(document.getText(), moved, "the heading moves one block up past the list");
+    const after = await renderedRanges(moved);
+    await moveUntilApplied(after[3], after[2], "up");
+    assert.equal(document.getText(), original, "moving the list back up restores the document");
+    assert.ok(scenario.line < list.line);
+  } finally {
+    disposeActivePreviewForTests();
+    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
