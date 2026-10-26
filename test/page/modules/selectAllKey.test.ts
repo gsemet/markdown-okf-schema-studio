@@ -48,3 +48,15 @@ test("CR 041: the shortcut stops at the document, so VS Code's window listener n
   assert.equal(dispatch({ key: "a", ctrlKey: true, target: { tagName: "BODY" } }), false, "outside a control VS Code still selects the page");
   assert.equal(dispatch({ key: "z", ctrlKey: true, target: textarea }), false, "undo still reaches VS Code");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+test("CR 119: a select-all a text box already cancelled is left to VS Code's key binding", () => {
+  const documentListeners: Array<(event: unknown) => void> = [];
+  const document = { addEventListener: (_type: string, listener: (event: unknown) => void) => documentListeners.push(listener) };
+  installSelectAllInControls(document as never, isTextSelectAll, false);
+  let stopped = false;
+  for (const listener of documentListeners) {
+    listener({ key: "a", ctrlKey: true, target: textarea, defaultPrevented: true, stopPropagation: () => { stopped = true; } });
+  }
+  assert.equal(stopped, false);
+});

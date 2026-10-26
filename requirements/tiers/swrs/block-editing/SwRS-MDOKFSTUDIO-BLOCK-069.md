@@ -83,8 +83,8 @@ When a writer presses a key in the text box of an open editor, the page SHALL gi
 ### Scenario (nominal): Undo and redo stay in the text box
 | Input | Outcome |
 | --- | --- |
-| An editor with typed text, the writer presses Cmd+Z or Ctrl+Z | The typing is undone in the text box only, the editor stays open and focused and no window listener receives the key |
-| The same keys with Shift+Z or Y | The key stops before the VS Code document or workbench and the undo is left to the text box |
+| An editor with typed text, the writer presses Cmd+Z or Ctrl+Z | The typing is undone in the text box only and the editor stays open and focused; in a block or table-cell text box the undo runs through VS Code's key binding (SwRS-MDOKFSTUDIO-BLOCK-003), in a frontmatter field the key stops at the page and the text box undoes natively |
+| The same keys with Shift+Z or Y | The same for redo: through the key binding in a block or table-cell text box, natively in a frontmatter field |
 | The preview opened through Open With, and then side by side, the same keys | The result is the same in both |
 
 ### Scenario (boundary): Repeated spaces and Enter are typed as they are
@@ -97,7 +97,8 @@ When a writer presses a key in the text box of an open editor, the page SHALL gi
 | Input | Outcome |
 | --- | --- |
 | A keydown of Enter in an editor whose listener prevented the default (Tab, Escape and the arrow keys likewise) | It stops at the document and the default stays prevented, so VS Code runs no shortcut for it |
-| Cmd+A on macOS or Ctrl+A elsewhere in a block text box | The propagation stops, the default is not prevented and the control selects its own text |
+| Cmd+A on macOS or Ctrl+A elsewhere in a frontmatter field | The propagation stops, the default is not prevented and the control selects its own text |
+| Cmd+A on macOS or Ctrl+A elsewhere in a block or table-cell text box | The page cancels the native action, the document does not stop the key and VS Code's key binding selects the text of the text box (SwRS-MDOKFSTUDIO-BLOCK-003) |
 
 ### Scenario (nominal): Enter in the alt text of an image validates it
 | Input | Outcome |
@@ -118,6 +119,7 @@ When a writer presses a key in the text box of an open editor, the page SHALL gi
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-BLOCK-079: arrow keys at the edges of the text box leave the editor
+- SwRS-MDOKFSTUDIO-BLOCK-003: undo, redo, select all and delete line in a block or table-cell text box run through VS Code key bindings
 
 ### Verification notes
 - Method: test/page/modules/textEditing.test.ts (wrap of a selection, nominal; caret and invalid ranges, refusal)

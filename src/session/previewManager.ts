@@ -26,6 +26,7 @@ import { canonicalPath, sourceExists } from "../node-services/paths";
 import { LatestRequest } from "../core/preview/flushWait";
 import { buildStatusWebviewHtml, type PreviewStatus } from "./webview";
 import { createMessageRouter } from "../core/protocol/router";
+import type { PreviewEditCommandName } from "../core/protocol/hostToPage";
 import type { PageToHostMessage } from "../core/protocol/pageToHost";
 import type { Revision } from "../core/protocol/revision";
 import { renderPreviewDocument, type PreviewDocument, type RenderResult } from "../core/render/renderPipeline";
@@ -47,7 +48,7 @@ import { ViewStateController } from "./features/viewState";
 import { PageMessageDispatcher, type PageMessageResult, type PageMessageRouter } from "./pageMessages";
 import { HostEvents } from "./hostEvents";
 import { PreviewSession } from "./previewSession";
-import { isDocumentEligible, isPathWithin } from "./sessionDocuments";
+import { isDocumentEligible, isPathWithin, revisionOfStage } from "./sessionDocuments";
 import { WorkspaceChoices } from "./workspaceChoices";
 
 /** The identity a page message names, as the render gate compares it. */
@@ -97,6 +98,7 @@ export class PreviewManager {
   /** The live sessions, oldest first. */
   private readonly live = new Set<PreviewSession>();
   private activeSession: PreviewSession | undefined;
+  private lastEditingContext = false;
   /** Document switches of a panel queue behind each other; only the latest request is applied. */
   private readonly switchChains = new WeakMap<PreviewPanel, Promise<void>>();
   private readonly latestSwitches = new WeakMap<PreviewPanel, LatestRequest<HostDocument>>();
@@ -182,7 +184,43 @@ export class PreviewManager {
 
   /** Every message of a session's page arrives here (see {@link PageMessageDispatcher}). */
   public handlePageMessage(session: PreviewSession, value: unknown): PromiseLike<void> | undefined {
-    return this.dispatcher.handle(session, value);
+    const result = this.dispatcher.handle(session, value);
+    this.syncEditingContext();
+    return result;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
+  /**
+   * Tells the host whether a focused preview has an editor open, so the key bindings for undo,
+   * redo, select all and delete line apply to it and to no other editor. Cheap: the host hears
+   * only a change.
+   */
+  public syncEditingContext(): void {
+    const editing = [...this.live].some((candidate) =>
+      !candidate.disposed && candidate.panel.active && candidate.edits.lock.pageEditorOpen);
+    if (editing === this.lastEditingContext) return;
+    this.lastEditingContext = editing;
+    this.host.ui.setPreviewEditing(editing);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
+  /**
+   * A key binding ran an editing command: the focused preview with an open editor gets it. False
+   * when no preview qualifies (the context lagged behind a focus change).
+   */
+  public runEditCommand(command: PreviewEditCommandName): boolean {
+    const session = [...this.live].find((candidate) =>
+      !candidate.disposed && candidate.panel.active && candidate.edits.lock.pageEditorOpen);
+    const stage = session?.stage;
+    if (!session || !stage) return false;
+    void session.postToPage({
+      type: "previewEditCommand",
+      command,
+      documentId: stage.activeDocumentIdentity,
+      revision: revisionOfStage(stage),
+      requestId: stage.requestId,
+    });
+    return true;
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -344,6 +382,7 @@ export class PreviewManager {
           // The column shifts when a group on the left closes, but the locked group is the same.
           session.lockedColumn = panel.column;
         }
+        this.syncEditingContext();
         const becameVisible = panel.visible && !wasVisible;
         wasVisible = panel.visible;
         if (becameVisible) {
@@ -582,6 +621,7 @@ export class PreviewManager {
     if (disposePanel) {
       session.panel.dispose();
     }
+    this.syncEditingContext();
   }
 
   /** Disposes every session (their panels too when `disposePanels`). */

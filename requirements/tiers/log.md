@@ -49,6 +49,13 @@
   replacing the selection by a line break. Runtime and unit tests, and the visual scenarios
   palette-slash/v22 to v24 (cream and dark), fail on the previous code.
 
+## 2026-10-26 (edit mode follows VS Code undo, redo, select-all and delete-line keys)
+
+- SwRS-MDOKFSTUDIO-BLOCK-003 (new): in a block or table-cell text box, undo, redo, select all and
+  delete line are contributed VS Code key bindings on the `markdownOkfSchemaStudio.previewEditing`
+  context, so a rebinding applies. SwRS-MDOKFSTUDIO-BLOCK-069: its undo, redo and select-all rows now
+  distinguish the block and cell text boxes from the frontmatter fields.
+
 ## 2026-10-26 (bold dollar prices preserve emphasis)
 
 - SwRS-MDOKFSTUDIO-MYST-024: permissive MyST dollarmath no longer consumes the `**` markers

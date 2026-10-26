@@ -143,6 +143,10 @@ function createVscodeUi(): HostUi {
       return file ? { path: file.fsPath, local: file.scheme === "file" } : undefined;
     }),
     showProblems: () => vscode.commands.executeCommand<void>("workbench.actions.view.problems"),
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
+    setPreviewEditing: (editing) => {
+      void vscode.commands.executeCommand("setContext", "markdownOkfSchemaStudio.previewEditing", editing);
+    },
     readClipboard: () => vscode.env.clipboard.readText(),
     writeClipboard: (text) => vscode.env.clipboard.writeText(text),
   };

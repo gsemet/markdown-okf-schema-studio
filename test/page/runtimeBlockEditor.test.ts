@@ -602,33 +602,81 @@ test("Cmd+Enter and Ctrl+Enter finish the block editor like Done", () => {
   }
 });
 
-test("undo and redo shortcuts stop at the block textarea and keep the native undo", () => {
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// CR 119: the undo, redo, select-all and delete-line keys of the block textarea are VS Code key
+// bindings. The page cancels the native action (so the command never runs twice) and lets the key
+// reach VS Code (no stopPropagation), whose `previewEditCommand` answer applies the command.
+test("CR 119: the VS Code editing keys cancel the native action in the block textarea and reach VS Code", () => {
+  for (const [platform, primary] of [[undefined, "ctrlKey"], ["MacIntel", "metaKey"]] as const) {
+    const harness = createRuntimeHarness(platform === undefined ? {} : { platform });
+    const textarea = openBlockEditorWithSource(harness);
+    const messageCount = harness.messages.length;
+    const cases: Array<[Record<string, unknown>, boolean]> = [
+      [{ key: "z", keyCode: 90, [primary]: true }, true],
+      [{ key: "Z", keyCode: 90, [primary]: true, shiftKey: true }, true],
+      [{ key: "a", [primary]: true }, true],
+      [{ key: "K", [primary]: true, shiftKey: true }, true],
+      [{ key: "z", keyCode: 90 }, false],
+      [{ key: "a" }, false],
+      [{ key: "w", [primary]: true }, false],
+      [{ key: "s", keyCode: 83, [primary]: true }, false],
+      [{ key: "z", keyCode: 90, [primary]: true, altKey: true }, false],
+    ];
+    if (platform === undefined) cases.push([{ key: "y", keyCode: 89, ctrlKey: true }, true]);
+    for (const [init, handled] of cases) {
+      let stopped = 0;
+      let prevented = 0;
+      textarea.dispatch("keydown", {
+        target: textarea,
+        ...init,
+        stopPropagation: () => { stopped += 1; },
+        preventDefault: () => { prevented += 1; },
+      });
+      assert.equal(prevented, handled ? 1 : 0, `${platform ?? "Linux"} ${JSON.stringify(init)}`);
+      assert.equal(stopped, 0, `${platform ?? "Linux"} ${JSON.stringify(init)}`);
+    }
+    assert.equal(harness.messages.length, messageCount);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+test("CR 119: a previewEditCommand from VS Code undoes, redoes, selects all and deletes a line in the focused text box", () => {
   const harness = createRuntimeHarness();
   const textarea = openBlockEditorWithSource(harness);
-  const messageCount = harness.messages.length;
-  const cases: Array<[Record<string, unknown>, boolean]> = [
-    [{ key: "z", keyCode: 90, metaKey: true }, true],
-    [{ key: "z", keyCode: 90, ctrlKey: true }, true],
-    [{ key: "Z", keyCode: 90, metaKey: true, shiftKey: true }, true],
-    [{ key: "y", keyCode: 89, ctrlKey: true }, true],
-    [{ key: "z", keyCode: 90 }, false],
-    [{ key: "y", keyCode: 89 }, false],
-    [{ key: "s", keyCode: 83, metaKey: true }, false],
-    [{ key: "z", keyCode: 90, metaKey: true, altKey: true }, false],
-  ];
-  for (const [init, intercepted] of cases) {
-    let stopped = 0;
-    let prevented = 0;
-    textarea.dispatch("keydown", {
-      target: textarea,
-      ...init,
-      stopPropagation: () => { stopped += 1; },
-      preventDefault: () => { prevented += 1; },
-    });
-    assert.equal(stopped, intercepted ? 1 : 0, JSON.stringify(init));
-    assert.equal(prevented, 0, JSON.stringify(init));
-  }
-  assert.equal(harness.messages.length, messageCount);
+  const calls = stubExecCommand(harness, textarea);
+  const doc = harness.document as unknown as { activeElement?: unknown };
+  doc.activeElement = textarea;
+  const send = (command: string): void => harness.dispatchMessage({
+    type: "previewEditCommand", documentId: "file:///active.md", revision: 7, requestId: 11, command,
+  });
+  textarea.value = "one\ntwo\nthree";
+  textarea.setSelectionRange(5, 5);
+
+  send("selectAll");
+  assert.deepEqual(textarea.selectionRange, [0, 13]);
+
+  textarea.setSelectionRange(5, 5);
+  const count = harness.messages.length;
+  send("deleteLine");
+  assert.equal(textarea.value, "one\nthree");
+  assert.deepEqual(textarea.selectionRange, [5, 5]);
+  assert.deepEqual(calls.map((call) => call.command), ["delete"], "one native, undoable step");
+  harness.flushTimers();
+  assert.ok(harness.messages.length > count, "the deletion is autosaved");
+
+  const nativeCalls: string[] = [];
+  harness.document.execCommand = (command: string): boolean => { nativeCalls.push(command); return true; };
+  send("undo");
+  send("redo");
+  assert.deepEqual(nativeCalls, ["undo", "redo"]);
+
+  doc.activeElement = undefined;
+  send("deleteLine");
+  assert.equal(textarea.value, "one\nthree", "no text box has the focus: nothing happens");
+  harness.dispatchMessage({
+    type: "previewEditCommand", documentId: "file:///active.md", revision: 7, requestId: 11, command: "format",
+  });
+  assert.deepEqual(nativeCalls, ["undo", "redo"], "an unknown command is refused");
 });
 
 test("Escape in an unchanged Markdown block editor closes it without a message", () => {
@@ -954,13 +1002,13 @@ test("Enter continuation and Tab indentation use the undo-preserving execCommand
   assert.ok(calls.every((call) => call.command === "insertText"));
 });
 
-test("undo and redo keys stop at the table cell editor and reach no window listener", () => {
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-003
+// CR 119: as in the block textarea, the keys reach VS Code with the native action cancelled.
+test("CR 119: undo and redo keys of the table cell editor cancel the native action and reach VS Code", () => {
   const harness = createRuntimeHarness();
   const { input } = openTableCellEditorForTab(harness);
-  let windowSaw = 0;
-  (harness.window.addEventListener as (type: string, listener: () => void) => void)("keydown", () => { windowSaw += 1; });
   for (const init of [
-    { key: "z", keyCode: 90, metaKey: true },
+    { key: "z", keyCode: 90, ctrlKey: true },
     { key: "Z", keyCode: 90, ctrlKey: true, shiftKey: true },
     { key: "y", ctrlKey: true },
   ]) {
@@ -971,10 +1019,9 @@ test("undo and redo keys stop at the table cell editor and reach no window liste
       stopPropagation: () => { stopped += 1; },
       preventDefault: () => { prevented += 1; },
     });
-    assert.equal(stopped, 1, JSON.stringify(init));
-    assert.equal(prevented, 0, JSON.stringify(init));
+    assert.equal(stopped, 0, JSON.stringify(init));
+    assert.equal(prevented, 1, JSON.stringify(init));
   }
-  assert.equal(windowSaw, 0);
 });
 
 test("AltGr (ctrlKey and altKey with AltGraph) still wraps the selection, plain Ctrl+Alt does not", () => {

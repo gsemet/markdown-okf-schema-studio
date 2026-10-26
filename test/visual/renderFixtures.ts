@@ -242,6 +242,25 @@ const visualSource = ${serializedSource};
 const visualPlantUmlFiles = ${serializedPlantUmlFiles};
 const sourceRangeForLines = (${sourceRangeForLines.toString()});
 window.visualMessages = [];
+// VS Code binds undo, redo, select all and delete line; the page cancels those keys in a text box
+// and applies the command the host answers with (CR 119). This stands in for that host.
+document.addEventListener("keydown", (event) => {
+  if (!event.defaultPrevented || !(event.metaKey || event.ctrlKey) || event.altKey) return;
+  const key = String(event.key).toLowerCase();
+  const command = key === "z" ? (event.shiftKey ? "redo" : "undo")
+    : key === "y" && !event.shiftKey ? "redo"
+    : key === "a" && !event.shiftKey ? "selectAll"
+    : key === "k" && event.shiftKey ? "deleteLine" : undefined;
+  if (!command) return;
+  const root = document.documentElement;
+  // Synchronous: the checks press undo twice in a row without waiting for a host answer.
+  window.dispatchEvent(new MessageEvent("message", { data: {
+    type: "previewEditCommand", command,
+    documentId: root.getAttribute("data-sphinx-preview-document-id"),
+    revision: Number(root.getAttribute("data-sphinx-preview-document-version")),
+    requestId: Number(root.getAttribute("data-sphinx-preview-request-id")),
+  } }));
+});
 window.acquireVsCodeApi = () => ({
   getState: () => ({}),
   setState: () => {},

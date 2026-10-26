@@ -20,6 +20,7 @@ user_need: As a writer, I trust that every change I make from the preview lands
   told why when an edit, move or paste cannot be done, and my document and
   clipboard are left untouched.
 derived_by:
+- SwRS-MDOKFSTUDIO-BLOCK-003
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-042
 - SwRS-MDOKFSTUDIO-BLOCK-053

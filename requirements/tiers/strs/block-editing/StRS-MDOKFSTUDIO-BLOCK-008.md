@@ -19,6 +19,7 @@ user_need: "As a writer, I type Markdown in the block editor and the keys do wha
   jump, undo stays in the editor, and I keep writing in the next or previous block
   by pressing an arrow key at the edge of the text, without the mouse."
 derived_by:
+- SwRS-MDOKFSTUDIO-BLOCK-003
 - SwRS-MDOKFSTUDIO-BLOCK-061
 - SwRS-MDOKFSTUDIO-BLOCK-069
 - SwRS-MDOKFSTUDIO-BLOCK-077
