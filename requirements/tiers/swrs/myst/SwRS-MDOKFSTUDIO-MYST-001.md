@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/core/render/mystFeatures.test.ts
 - test/visual/scenarioDefinitions1.ts
+- test/visual/scenarioDefinitions2.ts
 ---
 
 ## Admonitions render as coloured callouts with a title
@@ -110,6 +111,12 @@ When a document holds an admonition directive, the extension SHALL render a pane
 - WHEN the preview renders
 - THEN the first is a plain left-bar callout and the second hides the badge, each option changing only its own decoration
 
+### Scenario (boundary): Dropdown admonitions show their state
+
+- GIVEN an admonition with `:class: dropdown`, once closed and once with `:open: true`
+- WHEN the preview renders and the reader toggles the title
+- THEN a chevron at the right of the title points right while the dropdown is closed and down while it is open, whatever the admonition kind and theme
+
 ### Scenario (boundary): Quarto callouts
 
 - GIVEN a Quarto callout div such as `::: {.callout-tip}`, once with a leading heading and once without
@@ -119,6 +126,7 @@ When a document holds an admonition directive, the extension SHALL render a pane
 ### Verification notes
 
 - Method: test/core/render/mystFeatures.test.ts (scenarios named kind and kind outside the list: "all named MyST admonitions receive their documented default title"; version admonitions: "Sphinx version admonitions render generated titles and Markdown bodies"; custom title and class: "custom admonition titles preserve inline Markdown and their class"; untitled: "a leading bold paragraph or heading supplies the MyST admonition title"; Quarto callouts: "Quarto callout classes render as semantic MyST admonitions"; simple and icon-less: "dropdown admonitions render as openable details with a summary", which checks the `simple` and `no-icon` classes)
+- Method: test/core/preview/previewStyles.test.ts (dropdown state: "dropdown admonitions show their open or closed state with a chevron"); test/visual/scenarioAssertions.ts (dropdown state: visual scenarios myst-gallery-full, assertion "the closed dropdown shows a state chevron at the right of its title")
 - Method: test/core/preview/previewStyles.test.ts (accent and badge: "every admonition flavour gets an accent colour"; simple and icon-less: "MyST simple and no-icon admonition modifiers are styled")
 - Method: test/visual/scenarioDefinitions1.ts (accent and badge: visual scenario admonitions-dark-full)
 - Method: test/core/directives/registry.test.ts (named kind and kind outside the list: "each directive name has one plug-in, found by its exact name")

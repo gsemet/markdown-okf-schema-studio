@@ -112,6 +112,33 @@ export const ADMONITION_DIRECTIVE: MystDirectiveDescriptor = {
   display: none;
 }
 
+/* A dropdown shows its state at the right of the title: a chevron pointing right when closed, down when open. */
+#sphinx-myst-preview-content details.admonition > summary.admonition-title {
+  cursor: pointer;
+  list-style: none;
+}
+
+#sphinx-myst-preview-content details.admonition > summary.admonition-title::-webkit-details-marker {
+  display: none;
+}
+
+#sphinx-myst-preview-content details.admonition > summary.admonition-title::after {
+  content: "";
+  flex: none;
+  box-sizing: border-box;
+  width: 0.5em;
+  height: 0.5em;
+  margin-inline: auto 0.3em;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+#sphinx-myst-preview-content details.admonition[open] > summary.admonition-title::after {
+  transform: rotate(45deg);
+}
+
 #sphinx-myst-preview-content .note {
   --sphinx-preview-accent: var(--studio-charts-blue, #3794ff);
 }
