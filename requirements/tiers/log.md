@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-10-26 (bold dollar prices preserve emphasis)
+
+- SwRS-MDOKFSTUDIO-MYST-024: permissive MyST dollarmath no longer consumes the `**` markers
+  around dollar prices; the exact four bold prices remain text inside strong spans, while valid
+  `$x^2$` and `$a + b$` spans still typeset. Unit and light/dark visual contracts cover the fix.
+
 ## 2026-10-26 (save pins precede status layout changes)
 
 - SwRS-MDOKFSTUDIO-BLOCK-228: final block and table saves capture the viewport pin before
