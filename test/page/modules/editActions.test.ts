@@ -1352,6 +1352,16 @@ test("CR035: imageDraft reads alt, path and title of the image around the caret"
   assert.equal(registry.imageDraft(ctxOf("see |here")), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-069
+test("imageAltExit gives the position after the image when the selection is in its alt text", () => {
+  assert.equal(registry.imageAltExit(ctxOf("a ![al|t](p.png) b")), 15);
+  assert.equal(registry.imageAltExit({ value: "a ![alt](p.png) b", selectionStart: 4, selectionEnd: 7, scope: "block" }), 15);
+  assert.equal(registry.imageAltExit(ctxOf("![|](p.png)")), 10);
+  assert.equal(registry.imageAltExit(ctxOf("a ![alt](p.|png) b")), undefined);
+  assert.equal(registry.imageAltExit(ctxOf("a |![alt](p.png) b")), undefined);
+  assert.equal(registry.imageAltExit(ctxOf("a [la|bel](u) b")), undefined);
+});
+
 test("CR035: the image action replaces the image around the caret and keeps alt and title", () => {
   const out = applyTo("image", 'a ![al|t](p/x.png "T") b'.replace("|", ""), [5, 5], "img/new.png")!;
   assert.equal(out.value, 'a ![alt](img/new.png "T") b');

@@ -327,6 +327,19 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
         && !event.shiftKey && !event.altKey && !event.metaKey && !event.ctrlKey
         && !event.isComposing
       ) {
+        // Enter in the alt text of an image (selected after a paste or a pick) validates it and
+        // moves the caret just after the image; the alt text is one line, a newline is never wanted.
+        const afterImage = editActions.imageAltExit({
+          value: textarea.value,
+          selectionStart: textarea.selectionStart,
+          selectionEnd: textarea.selectionEnd,
+          scope: "block",
+        });
+        if (afterImage !== undefined) {
+          event.preventDefault?.();
+          textarea.setSelectionRange(afterImage, afterImage);
+          return;
+        }
         const continuation = textEditing.continueOnEnter(
           textarea.value,
           textarea.selectionStart,

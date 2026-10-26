@@ -520,7 +520,10 @@ def check_paste_rich_text(page: Page, scenario: dict, failures: list[Failure]) -
 
 
 def check_paste_image(page: Page, scenario: dict, failures: list[Failure]) -> None:
-  """CR 050: an image pasted in a paragraph editor goes on a paragraph of its own (mid-line, then at the end)."""
+  """CR 050: an image pasted in a paragraph editor goes on a paragraph of its own (mid-line, then at the end).
+
+  CR 118: Enter on the selected alt text keeps it and moves the caret after the image.
+  """
   if not scenario.get("pasteImageChecks"):
     return
   page_name = scenario["page"]
@@ -585,6 +588,14 @@ def check_paste_image(page: Page, scenario: dict, failures: list[Failure]) -> No
     failures.append(Failure(page_name, f"a paste at the end of the line is not a paragraph of its own: {editor.input_value()!r}"))
   if selected() != "image-1.png":
     failures.append(Failure(page_name, f"the pasted file name is not selected: {selected()!r}"))
+  # CR 118: Enter on the selected alt text validates it and puts the caret just after the image.
+  text_before_enter = editor.input_value()
+  page.keyboard.press("Enter")
+  if editor.input_value() != text_before_enter:
+    failures.append(Failure(page_name, f"Enter on the selected alt text changed the text: {editor.input_value()!r}"))
+  caret = editor.evaluate("element => [element.selectionStart, element.selectionEnd]")
+  if caret != [len(text_before_enter), len(text_before_enter)]:
+    failures.append(Failure(page_name, f"Enter on the alt text did not move the caret after the image: {caret!r}"))
 
 
 def check_insert_after_figure(page: Page, scenario: dict, failures: list[Failure]) -> None:
