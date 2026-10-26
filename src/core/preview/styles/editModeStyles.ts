@@ -404,7 +404,7 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
   opacity: 0.55;
 }
 
-/* Row handles of a pipe table or a list-table: the mark of the list editor sits just left of the
+/* Row handles of a pipe table or a list-table (the column handles follow below): the mark of the list editor sits just left of the
    table, outside it and centred on its row. A table scrolls sideways (overflow), so the handles live
    in a layer of their own at the page origin; the runtime sets each handle's left and top. A table
    with no room on its left is pushed right by the width of a handle. */
@@ -425,6 +425,28 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
 /* The dots of the mark hang down and right from their centre: lift them so they centre on the row. */
 [data-okf-row-handle-layer] .okf-table-row-handle::before {
   transform: translate(-2.5px, -5px);
+}
+
+/* Column handles: the same mark, turned, just above the table and centred on its column. The runtime
+   sets each handle's left (the middle of the header cell) and top (the top of the table). */
+[data-okf-row-handle-layer] .okf-table-col-handle {
+  position: absolute;
+  width: 1.5em;
+  height: 1em;
+  margin: 0;
+  transform: translate(-50%, -100%);
+}
+
+/* Two rows of three dots hang down and right from their centre: lift them to centre on the handle. */
+[data-okf-row-handle-layer] .okf-table-col-handle::before {
+  box-shadow: 5px 0 currentColor, 10px 0 currentColor, 0 5px currentColor, 5px 5px currentColor,
+    10px 5px currentColor;
+  transform: translate(-5px, -2.5px);
+}
+
+/* The bar of a cell editor sits right above its table: leave the handles room between them. */
+html[data-sphinx-preview-edit-mode="on"] .sphinx-preview-table-menu:has(+ [data-okf-col-handles], + * [data-okf-col-handles]) {
+  margin-bottom: 22px;
 }
 
 #sphinx-myst-preview-content table[data-okf-row-shift="true"] {
@@ -450,5 +472,17 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
 
 #sphinx-myst-preview-content tr[data-okf-row-drop="after"] > :is(td, th) {
   box-shadow: inset 0 -2px 0 var(--studio-focusBorder, Highlight);
+}
+
+#sphinx-myst-preview-content :is(td, th)[data-okf-col-dragging="true"] {
+  opacity: 0.45;
+}
+
+#sphinx-myst-preview-content :is(td, th)[data-okf-col-drop="before"] {
+  box-shadow: inset 2px 0 0 var(--studio-focusBorder, Highlight);
+}
+
+#sphinx-myst-preview-content :is(td, th)[data-okf-col-drop="after"] {
+  box-shadow: inset -2px 0 0 var(--studio-focusBorder, Highlight);
 }
 `;

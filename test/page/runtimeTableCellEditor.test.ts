@@ -227,6 +227,19 @@ test("a plain {list-table} opens the cell editor and its buttons write a list-ta
   assert.equal(converted?.disabled, true);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-005
+test("the cell editor of a plain {list-table} converts it back to a pipe table", () => {
+  const source = "```{list-table}\n:header-rows: 1\n\n* - A\n  - B\n* - x\n  - y\n```\n";
+  const harness = createRuntimeHarness();
+  const { cells, click } = openTableCellEditorForTab(harness, {}, source);
+  click(cells[1][0]);
+  const before = harness.messages.length;
+  harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Convert to pipe table").at(-1)?.dispatch("click");
+  const save = harness.messages.slice(before).find((message) => message.type === "previewEditSave");
+  assert.equal(save?.editedText, "| A | B |\n| --- | --- |\n| x | y |\n");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-055
 test("Col + on a padded, indented table keeps the style of every line", () => {
   const harness = createRuntimeHarness();
@@ -1152,4 +1165,57 @@ test("switching table cells posts the pending change immediately", () => {
   assert.equal(saves[0].final, false);
   assert.match(String(saves[0].editedText), /\| edited x \| y \|/u);
   assert.equal(harness.pendingTimerCount(), 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-001
+test("a click on a cell of a table the cell editor cannot read opens the raw editor outside the hidden table", () => {
+  const harness = createRuntimeHarness();
+  const figure = new RuntimeElement({}, harness.windowState, 90, 120, "figure");
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "29",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+  row.rowIndex = 1;
+  const cell = new RuntimeElement({}, harness.windowState, 100, 30, "td");
+  cell.cellIndex = 1;
+  const content = new RuntimeElement({}, harness.windowState, 100, 30, "p");
+  content.textContent = "y";
+  cell.appendChild(content);
+  figure.appendChild(table);
+  table.appendChild(row);
+  row.appendChild(cell);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: cell, preventDefault: () => undefined, stopPropagation: () => undefined,
+  });
+  const request = harness.messages.at(-1);
+  assert.equal(request?.type, "previewEditOpen");
+  // The frame is first put in the clicked cell, as for a pipe table.
+  const frame = harness.createdElements.find((element) =>
+    element.getAttribute("data-sphinx-preview-block-editor") === "true");
+  assert.ok(frame);
+  assert.equal(frame.parentElement, cell);
+
+  // The source is a {list-table}: the table is hidden (edited as raw Markdown) ...
+  const listTable = "```{list-table}\n* - x\n  - y\n```\n";
+  harness.dispatchMessage({
+    type: "previewEditSource",
+    documentId: "file:///active.md",
+    revision: 7,
+    requestId: 11,
+    editId: request?.editId,
+    originalText: listTable,
+  });
+  assert.equal(table.getAttribute("data-sphinx-preview-editing"), "true");
+  // ... so the frame must not stay inside it, or the writer would see nothing to edit.
+  assert.notEqual(frame.parentElement, cell, "the frame left the hidden cell");
+  assert.ok(table.insertedElements.includes(frame), "the frame sits after the table, like any block editor");
+  assert.equal(frame.getAttribute("aria-label"), "Raw Markdown editor");
+  const textarea = harness.createdElements.find((element) =>
+    element.getAttribute("aria-label") === "Raw Markdown block");
+  assert.equal(textarea?.value, "```{list-table}\n* - x\n  - y\n```");
+  assert.equal(cell.childElements.some((child) => child.getAttribute("data-sphinx-table-cell-content") === "true"),
+    false, "the cell has its rendered content back");
 });

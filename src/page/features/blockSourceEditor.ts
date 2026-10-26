@@ -91,6 +91,11 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       edit.selectedCell.removeAttribute("data-sphinx-preview-table-cell-selected");
       edit.selectedCell = undefined;
       edit.target.setAttribute("data-sphinx-preview-editing", "true");
+      // The frame opened inside the clicked cell, and the table is hidden while it is edited as raw
+      // Markdown (a {list-table}, a table the cell editor cannot read): the frame goes after the
+      // table, where the editor of any other block sits, or it would vanish with the table.
+      edit.target.insertAdjacentElement?.("afterend", edit.element);
+      rt.scroll.beginEditAnchor(edit.element);
       edit.element.className = "sphinx-preview-block-editor";
       edit.element.removeAttribute("data-sphinx-preview-table-cell-editor");
       edit.element.setAttribute("aria-label", "Raw Markdown editor");

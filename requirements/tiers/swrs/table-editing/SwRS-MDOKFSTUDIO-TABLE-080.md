@@ -21,6 +21,7 @@ derived_by: []
 implemented_in_files:
 - src/page/modules/markdownTable.ts
 tested_in_files:
+- test/integration/tableMoves.ts
 - test/page/modules/listTable.test.ts
 ---
 

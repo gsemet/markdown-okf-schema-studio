@@ -21,6 +21,7 @@ derived_by: []
 implemented_in_files:
 - src/page/features/tableCellEditor.ts
 tested_in_files:
+- test/integration/tableMoves.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 ---
