@@ -185,6 +185,41 @@ test("T32: the Figure button outside any figure still picks an image", () => {
   assert.equal(figurePanelOf(harness), undefined);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-150
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+test("CR117: inserting a figure from a picked image opens the figure form on its caption", () => {
+  const { harness, textarea } = figureHarness("Just a paragraph.", 17);
+  const proto = Object.getPrototypeOf(textarea) as { focus: (options?: FocusOptions) => void };
+  const originalFocus = proto.focus;
+  const focused: RuntimeElement[] = [];
+  proto.focus = function focus(this: RuntimeElement, options?: FocusOptions): void {
+    focused.push(this);
+    originalFocus.call(this, options);
+  };
+  try {
+    paletteButton(harness, "figure").dispatch("click", paletteClick);
+    const request = harness.messages.at(-1)!;
+    assert.equal(request.type, "previewPickImage");
+    assert.equal(figurePanelOf(harness), undefined, "no form before the image is chosen");
+    harness.dispatchMessage({
+      type: "previewPickImageResult", editId: request.editId, ok: true, path: "images/chip.png",
+      revision: 99, requestId: 99,
+    });
+    assert.match(textarea.value, /:::\{figure\} images\/chip\.png\n:alt: chip\n\n\n:::/u);
+    assert.ok(figurePanelOf(harness), "the form opens right after the pick");
+    assert.equal(figureField(harness, "source").value, "images/chip.png");
+    assert.equal(figureField(harness, "alt").value, "chip");
+    assert.equal(focused.at(-1), figureField(harness, "caption"), "the caption field has the focus");
+    // Cancel keeps the inserted figure with its default values.
+    const inserted = textarea.value;
+    figureField(harness, "caption").dispatch("keydown", { key: "Escape", preventDefault: () => undefined });
+    assert.equal(figurePanelOf(harness), undefined);
+    assert.equal(textarea.value, inserted);
+  } finally {
+    proto.focus = originalFocus;
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-160
 test("T32: Apply rewrites the directive in one edit and keeps untouched options byte for byte", () => {
   const { harness, textarea, calls } = figureHarness(figureSource, 5);

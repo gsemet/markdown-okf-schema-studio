@@ -25,6 +25,7 @@ implemented_in_files:
 - src/page/modules/blockEditActions.ts
 - src/page/modules/editPalette.ts
 tested_in_files:
+- test/integration/realWindowGaps.ts
 - test/page/modules/editActions.test.ts
 - test/page/runtimePaletteActions.test.ts
 ---
@@ -69,6 +70,12 @@ When the host answers a path for the Figure button outside a figure, the extensi
 | the caret inside a figure directive, or in a Markdown image alone in its paragraph | the figure form opens and no dialog is requested (see SwRS-MDOKFSTUDIO-PALETTE-153) |
 | the caret in nested figures | the deepest directive that holds the caret wins |
 
+### Scenario (nominal): Form opens after the pick
+
+- GIVEN the caret in a plain paragraph and the Figure button pressed
+- WHEN the host answers a path and the directive is written
+- THEN the figure form opens at once on the new directive, with the Source and Alt text filled and the focus on the Caption field; Escape closes the form and keeps the inserted directive with its default values
+
 ### Scenario (nominal): Browse in the figure form
 
 - GIVEN the figure form open
@@ -90,4 +97,6 @@ When the host answers a path for the Figure button outside a figure, the extensi
 
 - Method: test/page/modules/editActions.test.ts, with its markers in test/page/modules/editActions.test.ts (T31: figure inserts the directive with alt text and an empty caption line; figure keeps the touched lines as the caption and uses one more colon than the fences inside; checks the picked image, selection, fence and missing path scenarios)
 - Method: test/page/runtimePaletteActions.test.ts (T32: the Figure button with the caret inside a figure opens the form, not the file dialog; the Figure button outside any figure still picks an image; Browse asks the host for an image, keeps the editor open, and fills Source; checks the where-Figure-opens and Browse scenarios)
+- Method: test/page/runtimePaletteActions.test.ts (CR117: inserting a figure from a picked image opens the figure form on its caption; Escape keeps the inserted figure; checks the form-opens-after-the-pick scenario)
+- Method: test/integration/realWindowGaps.ts (real window, image dialog stubbed: the form opens on the caption after the pick, a caption typed and applied is saved)
 - Criteria: The path is written as picked, with no angle brackets; the outer fence is never shorter than three colons.
