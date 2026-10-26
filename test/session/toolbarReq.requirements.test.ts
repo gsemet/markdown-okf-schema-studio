@@ -116,7 +116,6 @@ function fixture(options: { readOnly?: boolean; followsActiveEditor?: boolean; a
       scrollPreviewWithEditor: false,
       scrollEditorWithPreview: false,
       markEditorSelection: false,
-      doubleClickToSwitchToEditor: false,
     } as never,
     plantUmlConfiguration: {} as never,
     plantUmlEngineSettings: {} as never,

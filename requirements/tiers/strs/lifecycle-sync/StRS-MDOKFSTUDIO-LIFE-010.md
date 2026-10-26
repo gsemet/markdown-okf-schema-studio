@@ -50,6 +50,6 @@ As a writer, I scroll the source and the preview shows the same passage; as a re
 - Showing the source line for the preview happens without any editor being opened for it; nothing happens when no text editor shows the file.
 - Scrolling in either pane never edits the document.
 - While a block or field editor is open its screen position is the anchor.
-- The reader chooses in the settings whether the preview follows the editor, whether the editor follows the preview and whether a double click jumps to the source.
+- The reader chooses in the settings whether the preview follows the editor and whether the editor follows the preview.
 - The Anchor button of the toolbar overrides the first choice for one panel.
 - A change of these settings reloads the preview page.

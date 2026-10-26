@@ -136,7 +136,6 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties",
       "markdownOkfSchemaStudio.plantuml.jarPath",
       "markdownOkfSchemaStudio.plantuml.useJar",
-      "markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor",
       "markdownOkfSchemaStudio.preview.incrementalUpdates",
       "markdownOkfSchemaStudio.preview.markEditorSelection",
       "markdownOkfSchemaStudio.preview.maxContentWidth",
@@ -236,9 +235,8 @@ test("every contributed setting is explained with a markdownDescription and a un
   const jarText = properties["markdownOkfSchemaStudio.plantuml.jarPath"].markdownDescription as string;
   assert.ok(!jarText.includes("Absolute"), "jarPath text must not claim the path is absolute");
   assert.ok(jarText.includes("PATH"), "jarPath text must mention PATH");
-  const doubleClick = properties["markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor"]
-    .markdownDescription as string;
-  assert.ok(doubleClick.includes("scrollEditorWithPreview"));
+  assert.equal(properties["markdownOkfSchemaStudio.preview.doubleClickToSwitchToEditor"], undefined,
+    "the removed double-click reveal setting is not contributed");
 });
 
 test("the built-in PlantUML engine ships pinned and the JAR is an explicit opt-in setting", () => {

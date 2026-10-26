@@ -83,12 +83,12 @@ The extension SHALL contribute exactly the settings of its settings registry, wi
 
 | Boot context | Outcome |
 | --- | --- |
-| Missing entries, and a string where a boolean is expected | Each setting gets its page default: scroll and reveal on, selection mark and double click off |
+| Missing entries, and a string where a boolean is expected | Each setting gets its page default: scroll and reveal on, selection mark off |
 | A default-on flag with a value other than false | It reads as on |
 
 ### Verification notes
 
 - Method: test/core/configuration/settingsRegistry.test.ts "categories keep their titles and order, and settings are sorted by their order" (group order, sorting), "the generated settings schema is the package.json one, byte for byte" (generated schema; the hand-edit row follows from the same comparison, and the scripts are just generate-settings and just check-settings), "a setting with nothing stored reads as its schema default" (setting read), "the host writes the boot settings as configured, in table order" and "the page gets the scroll, reveal, sticky band and comment chip settings in its boot context" (boot context written), "the page reads missing or odd boot entries with the page defaults" (boot context read).
 - Method: test/security/package-contract.test.ts "contributes only opt-in Markdown OKF-Schema Studio commands" (key prefix) and "every contributed setting is explained with a markdownDescription and a unique order" (descriptions and order, description limit).
-- Method: test/page/pageSettings.test.ts "page settings default to following both ways, without selection marks or double-click reveal" (boot context read).
+- Method: test/page/pageSettings.test.ts "page settings default to following both ways, and without selection marks" (boot context read).
 - Criteria: the configuration array equals the registry's categories; no two orders are equal and each group is ascending; each markdownDescription has at most 700 characters; the two JSON texts are equal; readSetting returns the schema default for an unset key; previewBootSettings returns only the settings that have a boot entry; readPreviewBootSettings applies the flag rule of each setting.

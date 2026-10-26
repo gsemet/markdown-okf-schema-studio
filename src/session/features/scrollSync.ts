@@ -247,9 +247,6 @@ export class ScrollSyncController {
     if (!preview.configuration.scrollEditorWithPreview) {
       return;
     }
-    if (value.activation === "double-click" && !preview.configuration.doubleClickToSwitchToEditor) {
-      return;
-    }
     const position = value.type === "previewScroll" ? "top" : "center-if-outside";
     if (value.line !== undefined && value.sourceFile === undefined) {
       this.revealEditorLine(preview, value.line, position);

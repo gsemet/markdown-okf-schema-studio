@@ -12,7 +12,7 @@ import * as path from "node:path";
 import { test } from "node:test";
 
 import { PREVIEW_THEME_CSS } from "../../../src/core/preview/previewStyles";
-import { loadEngine, preloadMystEngine } from "../../../src/core/render/mystEngine";
+import { createEngineLoader, loadEngine, preloadMystEngine } from "../../../src/core/render/mystEngine";
 import { renderMyst, type MystRenderContext } from "../../../src/core/render/mystRenderer";
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { MAX_INCLUDED_FILE_BYTES } from "../../../src/core/security/resource-policy";
@@ -68,6 +68,21 @@ test("the warm-up loads the engine once, shares it with the render and a warm-up
   const engine = await first;
   assert.equal(typeof engine.mystParse, "function");
   assert.equal(typeof engine.mystToHtml, "function");
+});
+
+test("a failed engine load is not cached: the next render retries it", async () => {
+  // @tests_req SwRS-MDOKFSTUDIO-CORE-001
+  const engine = { mystParse: () => ({}), mystToHtml: () => "" } as unknown as Awaited<ReturnType<typeof loadEngine>>;
+  let calls = 0;
+  const load = createEngineLoader(async () => {
+    calls += 1;
+    if (calls === 1) throw new Error("warm-up failed");
+    return engine;
+  });
+  await assert.rejects(load(), /warm-up failed/u);
+  assert.equal(await load(), engine, "the call after a failed warm-up loads the engine again");
+  assert.equal(await load(), engine);
+  assert.equal(calls, 2, "a loaded engine is shared, not imported again");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-CORE-013

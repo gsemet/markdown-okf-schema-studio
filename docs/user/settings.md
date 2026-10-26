@@ -33,8 +33,6 @@ chips in open
   anchor button overrides it per panel.
 - `preview.scrollEditorWithPreview` (default on): preview scrolling and clicks reveal the source.
 - `preview.markEditorSelection` (default off): mark the cursor's source line in the preview.
-- `preview.doubleClickToSwitchToEditor` (default off): double-click rendered content to reveal its
-  source; needs `scrollEditorWithPreview`.
 
 **Editing**
 

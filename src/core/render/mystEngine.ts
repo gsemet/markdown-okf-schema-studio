@@ -15,23 +15,35 @@ export interface MystEngine {
   mystToHtml: (ast: MystNode) => string;
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-001
+/**
+ * A loader that starts the import on its first call and shares it with later calls. A failed
+ * import is forgotten, so the next call tries again instead of failing with the same error.
+ */
+export function createEngineLoader(importEngine: () => Promise<MystEngine>): () => Promise<MystEngine> {
+  let pending: Promise<MystEngine> | undefined;
+  return () => {
+    if (!pending) {
+      const attempt = importEngine();
+      pending = attempt;
+      attempt.catch(() => {
+        if (pending === attempt) pending = undefined;
+      });
+    }
+    return pending;
+  };
+}
+
 // myst-parser and myst-to-html are ESM-only, so they are pulled in through a cached
 // dynamic import rather than a top-level require.
-let enginePromise: Promise<MystEngine> | undefined;
-
 /** The engine, imported once (the first call starts the import, later calls share it). */
-export async function loadEngine(): Promise<MystEngine> {
-  if (!enginePromise) {
-    enginePromise = (async () => {
-      const [parser, writer] = await Promise.all([
-        import("myst-parser"),
-        import("myst-to-html"),
-      ]);
-      return { mystParse: parser.mystParse, mystToHtml: writer.mystToHtml } as MystEngine;
-    })();
-  }
-  return enginePromise;
-}
+export const loadEngine = createEngineLoader(async () => {
+  const [parser, writer] = await Promise.all([
+    import("myst-parser"),
+    import("myst-to-html"),
+  ]);
+  return { mystParse: parser.mystParse, mystToHtml: writer.mystToHtml } as MystEngine;
+});
 
 /** Parses source with the same options the renderer uses; for tests of tree-based checks. */
 export async function parseMystSource(source: string): Promise<MystNode> {

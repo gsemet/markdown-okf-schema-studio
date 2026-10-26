@@ -80,7 +80,7 @@ export interface PageStateFields {
   /** Not checked by the validator: reported page state, normalized by the host. */
   descriptionsCollapsed?: boolean;
   /** Not checked by the validator: how a reveal was started. */
-  activation?: "click" | "double-click" | "keyboard";
+  activation?: "click" | "keyboard";
 }
 
 /** A page-state message: the envelope plus the optional {@link PageStateFields}. */
@@ -94,7 +94,7 @@ export interface PreviewReadyMessage extends PageStateMessage<"previewReady"> {
 
 /** The reader scrolled the page: the host may move the text editor. */
 export type PreviewScrollMessage = PageStateMessage<"previewScroll">;
-/** The reader asked to reveal a block in the text editor (click, double-click or keyboard). */
+/** The reader asked to reveal a block in the text editor (click or keyboard). */
 export type PreviewRevealMessage = PageStateMessage<"previewReveal">;
 /** The page's scroll and disclosure state, kept by the host for the next render. */
 export type PreviewStateMessage = PageStateMessage<"previewState">;

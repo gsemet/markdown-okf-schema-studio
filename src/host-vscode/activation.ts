@@ -127,6 +127,17 @@ export class StudioActivation {
     return group?.viewColumn ?? vscode.ViewColumn.Beside;
   }
 
+  /** The document of the active tab when that tab is a Studio Open With editor (no text editor is active then). */
+  private async openStudioTabDocument(): Promise<vscode.TextDocument | undefined> {
+    const input = vscode.window.tabGroups.activeTabGroup?.activeTab?.input;
+    if (!(input instanceof vscode.TabInputCustom) || input.viewType !== EDITOR_VIEW_TYPE) return undefined;
+    try {
+      return await vscode.workspace.openTextDocument(input.uri);
+    } catch {
+      return undefined;
+    }
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-CORE-043
   /** The open-preview command: the side preview of the active (or given) Markdown file. */
   public async openPreview(uri?: unknown): Promise<void> {
@@ -150,7 +161,7 @@ export class StudioActivation {
         return;
       }
     }
-    const textDocument = vscode.window.activeTextEditor?.document;
+    const textDocument = vscode.window.activeTextEditor?.document ?? (await this.openStudioTabDocument());
     const document = textDocument ? host.documents.of(textDocument) : undefined;
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-010
     if (!document || document.path === undefined || !isDocumentEligible(document)) {

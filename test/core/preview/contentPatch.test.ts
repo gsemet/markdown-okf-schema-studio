@@ -189,7 +189,6 @@ test("T34: the runtime context key covers the startup settings and nothing the p
     scrollPreviewWithEditor: true,
     scrollEditorWithPreview: true,
     markEditorSelection: false,
-    doubleClickToSwitchToEditor: false,
     stickyHeadingDepth: 3,
   };
   const key = runtimeContextKey(base);
@@ -197,14 +196,13 @@ test("T34: the runtime context key covers the startup settings and nothing the p
   // Undefined and absent settings are the same setting.
   assert.equal(runtimeContextKey({ documentId: base.documentId, activeSourceFile: base.activeSourceFile }),
     runtimeContextKey({ ...base, scrollPreviewWithEditor: undefined, scrollEditorWithPreview: undefined,
-      markEditorSelection: undefined, doubleClickToSwitchToEditor: undefined, stickyHeadingDepth: undefined }));
+      markEditorSelection: undefined, stickyHeadingDepth: undefined }));
   for (const change of [
     { documentId: "file:///b.md" },
     { activeSourceFile: "/b.md" },
     { scrollPreviewWithEditor: false },
     { scrollEditorWithPreview: false },
     { markEditorSelection: true },
-    { doubleClickToSwitchToEditor: true },
     { stickyHeadingDepth: 2 },
   ]) {
     assert.notEqual(runtimeContextKey({ ...base, ...change }), key, JSON.stringify(change));

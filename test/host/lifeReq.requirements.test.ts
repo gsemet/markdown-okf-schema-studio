@@ -271,6 +271,24 @@ test("Open Preview to Side refuses a file that is not a saved Markdown file", as
   assert.equal(fake.controls.panels.length, panels);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-010
+test("Open Preview to Side from a Studio Open With tab previews that tab's file", async (t) => {
+  const studio = start(t);
+  const file = writeFile("# From the Open With tab\n");
+  fake.controls.activateCustomEditorTab(file);
+  assert.equal(fake.vscode.window.activeTextEditor, undefined, "no text editor is active");
+  const panels = fake.controls.panels.length;
+  const messages = fake.controls.shownMessages.length;
+  await runAndSettle(studio, COMMAND_ID);
+  assert.equal(fake.controls.shownMessages.length, messages, "no refusal message");
+  assert.equal(fake.controls.panels.length, panels + 1, "a side preview opens");
+  assert.equal(sessionsOf(studio).at(-1)!.documentUri.endsWith(path.basename(file)), true);
+  fake.controls.activateCustomEditorTab(file, "some.other.editor");
+  const refused = fake.controls.shownMessages.length;
+  await runAndSettle(studio, COMMAND_ID);
+  assert.equal(fake.controls.shownMessages.length, refused + 1, "a custom editor of another type is still refused");
+});
+
 test("Open Preview to Side reports a file it cannot open", async (t) => {
   const studio = start(t);
   const missing = path.join(workspaceRoot, `deleted-${process.pid}.md`);

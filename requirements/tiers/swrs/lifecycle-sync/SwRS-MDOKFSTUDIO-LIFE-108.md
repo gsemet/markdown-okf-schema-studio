@@ -94,7 +94,7 @@ When the reader scrolls the preview to another source line or activates a render
 | --- | --- |
 | line, endLine, sourceLine or selectionLine a safe integer of at least 1 | accepted |
 | anchorLine a finite number of at least 1 and scrollTop a finite number of at least 0 | accepted |
-| activation click, double-click or keyboard, and a sourceFile string | accepted; the validator does not check them, the host compares the sourceFile path with the active document (see SwRS-MDOKFSTUDIO-LIFE-097 for the double-click setting) |
+| activation click or keyboard, and a sourceFile string | accepted; the validator does not check them, the host compares the sourceFile path with the active document (see SwRS-MDOKFSTUDIO-LIFE-097 for the settings) |
 | line 0, line 1.5, anchorLine below 1 or a negative scrollTop | malformed: dropped by the envelope check without a visible change, the editor is not moved (see SwRS-MDOKFSTUDIO-TRUST-052) |
 | a well-formed previewScroll while scrollPreviewWithEditor is off | the reading state is recorded, the editor is not moved |
 

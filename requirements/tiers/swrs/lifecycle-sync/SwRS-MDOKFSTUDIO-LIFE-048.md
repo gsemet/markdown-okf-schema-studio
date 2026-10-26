@@ -5,9 +5,8 @@ uuid: c2f6b557-7126-4b31-8855-9cc2eecd2084
 title: A changed setting that the page reads only at startup loads a new page
   document
 description: When scrollPreviewWithEditor, scrollEditorWithPreview,
-  markEditorSelection, doubleClickToSwitchToEditor or stickyHeadingDepth
-  changes, the extension SHALL load a new page document instead of patching the
-  loaded one.
+  markEditorSelection or stickyHeadingDepth changes, the extension SHALL load a
+  new page document instead of patching the loaded one.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 lifecycle: deprecated
@@ -28,7 +27,7 @@ tested_in_files: []
 
 ### Normative behavior
 
-When scrollPreviewWithEditor, scrollEditorWithPreview, markEditorSelection, doubleClickToSwitchToEditor or stickyHeadingDepth changes, the extension SHALL load a new page document instead of patching the loaded one.
+When scrollPreviewWithEditor, scrollEditorWithPreview, markEditorSelection or stickyHeadingDepth changes, the extension SHALL load a new page document instead of patching the loaded one.
 
 ### Scenario: Changed startup setting
 

@@ -419,7 +419,6 @@ export function createRuntimeHarness(configuration: Partial<{
   scrollPreviewWithEditor: boolean;
   scrollEditorWithPreview: boolean;
   markEditorSelection: boolean;
-  doubleClickToSwitchToEditor: boolean;
   stickyHeadingDepth: number;
   toolbarBottom: number;
   controlsHeight: number;

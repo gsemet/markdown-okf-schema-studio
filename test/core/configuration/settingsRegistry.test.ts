@@ -64,7 +64,6 @@ test("the page gets the scroll, reveal, sticky band and comment chip settings in
     "scrollPreviewWithEditor",
     "scrollEditorWithPreview",
     "markEditorSelection",
-    "doubleClickToSwitchToEditor",
     "stickyHeadingDepth",
     "showComments",
   ]);
@@ -72,7 +71,6 @@ test("the page gets the scroll, reveal, sticky band and comment chip settings in
     "scrollPreviewWithEditor",
     "scrollEditorWithPreview",
     "markEditorSelection",
-    "doubleClickToSwitchToEditor",
     "stickyHeadingDepth",
   ]);
   assert.deepEqual(bootSettingKeys(PREVIEW_SETTINGS, "live"), ["showComments"]);
@@ -87,7 +85,6 @@ test("the host writes the boot settings as configured, in table order", () => {
     scrollPreviewWithEditor: true,
     scrollEditorWithPreview: true,
     markEditorSelection: false,
-    doubleClickToSwitchToEditor: false,
     stickyHeadingDepth: 6,
     showComments: true,
   }));
@@ -98,7 +95,6 @@ test("the page reads missing or odd boot entries with the page defaults", () => 
     scrollPreviewWithEditor: true,
     scrollEditorWithPreview: true,
     markEditorSelection: false,
-    doubleClickToSwitchToEditor: false,
     stickyHeadingDepth: 3,
     showComments: true,
   });
@@ -106,14 +102,12 @@ test("the page reads missing or odd boot entries with the page defaults", () => 
     scrollPreviewWithEditor: "no",
     scrollEditorWithPreview: false,
     markEditorSelection: "yes",
-    doubleClickToSwitchToEditor: true,
     stickyHeadingDepth: "4",
     showComments: false,
   }), {
     scrollPreviewWithEditor: true,
     scrollEditorWithPreview: false,
     markEditorSelection: false,
-    doubleClickToSwitchToEditor: true,
     stickyHeadingDepth: 3,
     showComments: false,
   });

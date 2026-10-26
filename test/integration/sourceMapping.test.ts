@@ -106,14 +106,6 @@ export async function run(): Promise<void> {
     // @tests_req SwRS-MDOKFSTUDIO-LIFE-097
     assert.equal(getActivePreviewForTests()?.lastRevealedSourceLine, 2);
     sendPreviewMessageForTests({
-      type: "previewReveal",
-      activation: "double-click",
-      ...context,
-      sourceFile: path.resolve(fixturePath),
-      line: 3,
-    });
-    assert.equal(getActivePreviewForTests()?.lastRevealedSourceLine, 2);
-    sendPreviewMessageForTests({
       type: "previewScroll",
       ...context,
       requestId: context.requestId - 1,
