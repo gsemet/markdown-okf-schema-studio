@@ -85,6 +85,12 @@ async function waitForNoBlockEditor(page: Page, description: string): Promise<vo
   });
 }
 
+/** Presses Escape and waits until no raw-Markdown editor is open. */
+async function escapeBlockEditor(page: Page, description: string): Promise<void> {
+  await press(page, "Escape");
+  await waitForNoBlockEditor(page, description);
+}
+
 const TABLE_DOCUMENT = [
   "# Table document",
   "",
@@ -803,8 +809,7 @@ async function scenarioEscapeCancels(page: Page, evidence: Evidence): Promise<vo
     await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
     await press(page, "End");
     await typeText(page, " DROP ME.");
-    await press(page, "Escape");
-    await waitForNoBlockEditor(page, "the block editor to close after Escape");
+    await escapeBlockEditor(page, "the block editor to close after Escape");
     await new Promise((resolve) => setTimeout(resolve, 800));
     assert.equal(bufferText(document), SMOKE, "Escape cancels the block edit");
 
@@ -904,7 +909,11 @@ async function scenarioTypingUndoGrouping(page: Page, evidence: Evidence): Promi
         assert.ok(change.rangeLength + change.textLength <= 40,
           "every change is minimal: " + JSON.stringify(changes));
       }
-      await waitForNoBlockEditor(page, "the block editor to close before the undo");
+      // The click on the heading saved the paragraph and then opened the heading's own editor
+      // (the clicked block opens after the save): close it unchanged before the undo.
+      await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+      await escapeBlockEditor(page, "the block editor to close before the undo");
+      assert.equal(bufferText(document), expected, "closing the heading editor changes nothing");
       const undoTrace = traceDocumentChanges(document);
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
       await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
@@ -1037,8 +1046,7 @@ async function scenarioShortcuts(page: Page, evidence: Evidence): Promise<void> 
       + "in a TODO comment; the image shows the wrapped line before its single Cmd/Ctrl+Z, with the focus in the text box.");
     await press(page, MOD + "+z");
     await expectValue("one undo to restore the line", original);
-    await press(page, "Escape");
-    await waitForNoBlockEditor(page, "the block editor to close after Escape");
+    await escapeBlockEditor(page, "the block editor to close after Escape");
   });
 }
 
@@ -1151,8 +1159,7 @@ async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise<void> 
     assert.equal(await count("[data-sphinx-preview-block-editor]"), 1, "the editor is still open");
     const kept = await readEditor();
     assert.match(String(kept.value), /\/zz$/u, "the typed text is kept: " + JSON.stringify(kept));
-    await press(page, "Escape");
-    await waitForNoBlockEditor(page, "the block editor to close after the second Escape");
+    await escapeBlockEditor(page, "the block editor to close after the second Escape");
   });
 }
 
@@ -1216,8 +1223,7 @@ async function scenarioPalette(page: Page, evidence: Evidence): Promise<void> {
     await press(page, "Escape");
     await waitFor("Escape to close the list", async () => await count(".sphinx-preview-edit-palette-menu") === 0);
     assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
-    await press(page, "Escape");
-    await waitForNoBlockEditor(page, "the block editor to close after the second Escape");
+    await escapeBlockEditor(page, "the block editor to close after the second Escape");
   });
 }
 
@@ -1290,8 +1296,7 @@ async function scenarioLinkPanel(page: Page, evidence: Evidence): Promise<void> 
     assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
     await press(page, MOD + "+z");
     await expectValue("one undo to remove the link", original);
-    await press(page, "Escape");
-    await waitForNoBlockEditor(page, "the block editor to close after Escape");
+    await escapeBlockEditor(page, "the block editor to close after Escape");
   });
 }
 
@@ -1332,8 +1337,7 @@ async function scenarioLinkPanelPrefill(page: Page, evidence: Evidence): Promise
       await readValue() === 'See [the docs](https://example.org/new "Docs")' + " now.");
     await press(page, MOD + "+z");
     await waitFor("one undo to restore the link", async () => await readValue() === original);
-    await press(page, "Escape");
-    await waitForNoBlockEditor(page, "the block editor to close after Escape");
+    await escapeBlockEditor(page, "the block editor to close after Escape");
   });
 }
 
@@ -1406,8 +1410,7 @@ async function scenarioFigureEditor(page: Page, evidence: Evidence): Promise<voi
       await waitFor("one undo to restore the directive", async () => (await readText()) === original);
 
       // Close the editor, open it again through the button, apply and save with Cmd/Ctrl+Enter.
-      await press(page, "Escape");
-      await waitForNoBlockEditor(page, "the block editor to close after Escape");
+      await escapeBlockEditor(page, "the block editor to close after Escape");
       await waitFor("the document to be unchanged", () => bufferText(document) === FIGURE_DOCUMENT);
       await withCurrentFrame(page, (frame) => frame.locator("figure").first().hover());
       await withCurrentFrame(page, (frame) => frame.locator("[data-sphinx-figure-edit]").click());
@@ -1500,8 +1503,7 @@ async function scenarioAlertDropdown(page: Page, evidence: Evidence): Promise<vo
     await captureAfter(evidence, page, "palette-slash/r06-alert-dropdown",
       "Edit mode on; the Alert button wrote > [!NOTE], its type list chose Warning, two Cmd/Ctrl+Z "
       + "removed the alert again, and Escape on a second list kept NOTE with the focus in the text box.");
-    await press(page, "Escape");
-    await waitForNoBlockEditor(page, "the block editor to close after the second Escape");
+    await escapeBlockEditor(page, "the block editor to close after the second Escape");
   });
 }
 
@@ -1745,8 +1747,7 @@ async function scenarioTabIndents(page: Page, evidence: Evidence): Promise<void>
     await captureAfter(evidence, page, "block-editing/r10-tab-indents",
       "Edit mode on; Tab indented `Refrigerated goods` by 2 spaces and Shift+Tab restored it, "
       + "with the focus staying in the editor.");
-    await press(page, "Escape");
-    await waitForNoBlockEditor(page, "the block editor to close after Escape");
+    await escapeBlockEditor(page, "the block editor to close after Escape");
     await press(page, "Tab");
     const afterTab = await readFocus();
     assert.notEqual(afterTab.tag, "TEXTAREA", "after Escape, Tab moves the focus out of a textarea");
@@ -3323,8 +3324,7 @@ async function scenarioImageEditing(page: Page, evidence: Evidence): Promise<voi
     for (const [selector, source_] of images) {
       await withCurrentFrame(page, (frame) => frame.locator(selector).first().click({ force: true }));
       await waitFor("the editor for " + source_, async () => (await editorValue())?.trim() === source_);
-      await press(page, "Escape");
-      await waitForNoBlockEditor(page, "the editor to close after Escape");
+      await escapeBlockEditor(page, "the editor to close after Escape");
       await withCurrentFrame(page, async (frame) => {
         const following = frame.locator(selector).first()
           .locator("xpath=ancestor-or-self::*[@data-sphinx-source-line][1]/following-sibling::*[1]");

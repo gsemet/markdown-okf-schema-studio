@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-10-26 (real-window typing scenario follows the block-open behaviour)
+
+- SwRS-MDOKFSTUDIO-BLOCK-041: the verification note names the real-window scenario
+  scenarioTypingUndoGrouping, which now expects the clicked heading's editor to open after the
+  paragraph save and closes it with Escape before the undo. No behaviour change.
+
 ## 2026-10-26 (test and marker quality)
 
 - No requirement text changes. SwRS-MDOKFSTUDIO-DIAG-009 gains page tests of the Mermaid entry point
