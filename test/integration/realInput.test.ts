@@ -904,7 +904,13 @@ async function scenarioTypingUndoGrouping(page: Page, evidence: Evidence): Promi
         assert.ok(change.rangeLength + change.textLength <= 40,
           "every change is minimal: " + JSON.stringify(changes));
       }
+      // The click on the heading saved the paragraph and opened the heading's own editor once the
+      // render arrived (the clicked block opens after the save): close it without a change so the
+      // undo below runs on the document editor with the paragraph edit as the last step.
+      await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
+      await press(page, "Escape");
       await waitForNoBlockEditor(page, "the block editor to close before the undo");
+      assert.equal(bufferText(document), expected, "closing the heading editor changes nothing");
       const undoTrace = traceDocumentChanges(document);
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
       await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
