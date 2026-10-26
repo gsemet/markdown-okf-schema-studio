@@ -11,6 +11,7 @@ import {
   NARROW,
   REVIEW_THREAD_CONTRAST_ASSERTIONS,
   STICKY_RUNNING_TEXT_ASSERTIONS,
+  UNCLOSED_DIRECTIVE_ASSERTIONS,
   type ScenarioDefinition,
   THREADS_MESSAGE,
   WIDE,
@@ -1204,5 +1205,21 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     id: `review-annotations/${number}-review-thread-contrast-${mode ?? "dark"}-900`, fixture: "45-review-threads",
     theme: "dark" as const, ...(mode ? { previewThemeMode: mode } : {}), ...WIDE, scroll: { kind: "top" as const }, render: { hostMessages: [THREADS_MESSAGE] }, pageActions: [{ click: 'mark[data-okf-comment-thread="thread-open"]' }],
     contentAssertions: REVIEW_THREAD_CONTRAST_ASSERTIONS, description: `An open review thread popover on the ${mode ?? "dark"} theme with a dark VS Code host: its text reaches 4.5:1 and none is faded.`,
+  })),
+  ...([
+    { name: "cream", theme: "dark", mode: "cream" },
+    { name: "dark", theme: "dark", mode: undefined },
+  ] as const).map((variant, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-096
+    id: `myst/v${37 + index}-unclosed-directives-${variant.name}-900`,
+    fixture: "64-unclosed-directives",
+    theme: variant.theme,
+    ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: UNCLOSED_DIRECTIVE_ASSERTIONS,
+    description: `A label opened and never closed around a table directive with no body, then an unclosed list-table, ${variant.name} preview, 900 px pane: `
+      + "the preview does not fail, each broken construct shows its own lines as a code block and the text around them renders.",
   })),
 ];

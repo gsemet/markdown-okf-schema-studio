@@ -98,5 +98,6 @@
 - [SwRS-MDOKFSTUDIO-MYST-093 — A directive name registered twice is refused](SwRS-MDOKFSTUDIO-MYST-093.md) — When two directive families declare the same directive name, the extension SHALL refuse the second registration with an error naming the duplicate.
 - [SwRS-MDOKFSTUDIO-MYST-094 — A label starting with underscore, dot or hyphen cannot be renamed](SwRS-MDOKFSTUDIO-MYST-094.md) — When the writer clicks the anchor icon of a label whose name starts with an underscore, a dot or a hyphen in edit mode, the extension SHALL open no rename field.
 - [SwRS-MDOKFSTUDIO-MYST-095 — Doc and download roles render as plain links](SwRS-MDOKFSTUDIO-MYST-095.md) — When a document uses the doc or download role, the extension SHALL render it as a plain link to the written target.
+- [SwRS-MDOKFSTUDIO-MYST-096 — A directive the parser cannot build shows its source and the render continues](SwRS-MDOKFSTUDIO-MYST-096.md) — When a document holds a directive or fence the parser cannot build (an unclosed or empty backtick or colon fence such as a list-table or table without its body, also nested in another directive), the extension SHALL render the raw source lines of that construct as a code block and render the rest of the document, instead of failing the render.
 
 <!-- okfreq:index:end -->
