@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-27 (one line split per parse of directives)
+
+- SwRS-MDOKFSTUDIO-CORE-070 (new, CR 135): the postinstall patch of markdown-it-myst splits the
+  source into lines once per parse instead of once per directive fence; the tightness of each
+  directive is unchanged and the parse of a 55k-line document is about 5 times faster.
+  Verification: test/build/mystTightnessPatch.test.ts, `just requirements-lint`.
+
 ## 2026-10-27 (the Edit button is greyed with the reason in a read-only preview)
 
 - SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview (untrusted workspace, or a file outside every
