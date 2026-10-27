@@ -646,6 +646,8 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "myst/v36-dollar-prices-full-dark-900": "In the dark theme a paragraph with a price such as $19 ... ($200), $5 and $6 or $100–$380 shows the text between the two dollar signs typeset as maths (no dollar sign left as text), the same as a real $x$ span.",
   "myst/v37-unclosed-directives-cream-900": "In the cream preview at 900 px, a table directive with no body and an unclosed list-table each render their own lines as a code block, an open label and its target stay paragraphs and the text around them renders.",
   "myst/v38-unclosed-directives-dark-900": "In the dark preview at 900 px, a table directive with no body and an unclosed list-table each render their own lines as a code block, an open label and its target stay paragraphs and the text around them renders.",
+  "myst/v39-unclosed-fence-mid-document-cream-900": "In the cream preview at 900 px, a list-table fence and a table fence left open between sections each show their opening line as a code block, and the headings and paragraphs after them render.",
+  "myst/v40-unclosed-fence-mid-document-dark-900": "In the dark preview at 900 px, a list-table fence and a table fence left open between sections each show their opening line as a code block, and the headings and paragraphs after them render.",
 };
 
 /**
