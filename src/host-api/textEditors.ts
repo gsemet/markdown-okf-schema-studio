@@ -36,4 +36,14 @@ export interface TextEditors {
   active(): PairedEditor | undefined;
   /** The editors shown now. */
   visible(): PairedEditor[];
+  /**
+   * When the writer last pressed a key in a text editor (milliseconds since the epoch); undefined
+   * when none was seen. A host that cannot tell leaves it out, so no change counts as typing.
+   */
+  lastKeystrokeAt?(): number | undefined;
+  /**
+   * The cursors and selections, by zero-based lines, of every editor that shows the document. Empty when
+   * none shows it; a host without text editors leaves it out.
+   */
+  selectionsOf?(documentId: string): readonly { startLine: number; endLine: number }[];
 }

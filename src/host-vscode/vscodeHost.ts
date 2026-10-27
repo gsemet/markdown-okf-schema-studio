@@ -31,6 +31,7 @@ import { createNodeFileSystem } from "../node-services/nodeFileSystem";
 import { createNodeProcessRunner } from "../node-services/processRunner";
 import { createWorkerRenderer } from "../node-services/renderWorker";
 import { nodeSchemaFiles } from "../node-services/schemaFiles";
+import { lastKeystrokeAt } from "./keystrokes";
 import { createVscodeDocumentStore, type VscodeDocumentStore } from "./documents";
 
 /** The VS Code host's ports, with the VS Code-only parts of its document store and its assets. */
@@ -289,6 +290,13 @@ function createVscodeEditors(documents: VscodeDocumentStore): TextEditors {
       return editor ? pairedEditor(editor, documents) : undefined;
     },
     visible: () => vscode.window.visibleTextEditors.map((editor) => pairedEditor(editor, documents)),
+    lastKeystrokeAt,
+    selectionsOf: (documentId) => vscode.window.visibleTextEditors
+      .filter((editor) => editor.document.uri.toString() === documentId)
+      .flatMap((editor) => editor.selections.map((selection) => ({
+        startLine: selection.start.line,
+        endLine: selection.end.line,
+      }))),
   };
 }
 

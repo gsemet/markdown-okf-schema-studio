@@ -28,6 +28,7 @@ export {
   storeWorkspaceChoicesForTests,
   syncActiveEditorForTests,
 } from "./host-vscode/testHooks";
+export { noteKeystrokeForTests } from "./host-vscode/keystrokes";
 export { resetRenderHooksForTests, setRenderDelayForTests, setRenderOverrideForTests } from "./core/render/renderPipeline";
 
 /** The activation that runs; undefined before `activate` and after `deactivate`. */

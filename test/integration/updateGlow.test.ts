@@ -7,6 +7,7 @@ import {
   COMMAND_ID,
   disposeActivePreviewForTests,
   getActivePreviewForTests,
+  noteKeystrokeForTests,
   sendPreviewMessageForTests,
 } from "./extensionApi";
 
@@ -109,12 +110,25 @@ export async function run(): Promise<void> {
     assert.ok(covers(externalEdit, 5), `the outside edit glows on line 5: ${JSON.stringify(externalEdit.ranges)}`);
     console.log("PASS update glow: an outside edit glows");
 
-    // 3. Typing in the active text editor: no glow.
+    // 2b. CR 139: another tool edits the document while it is the active editor, the cursor being
+    // on another line and no key pressed: it glows.
     const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
     assert.equal(vscode.window.activeTextEditor?.document.uri.toString(), uri.toString());
+    editor.selection = new vscode.Selection(new vscode.Position(0, 0), new vscode.Position(0, 0));
+    await new Promise<void>((resolve) => setTimeout(resolve, 700));
+    const foreignActive = new vscode.WorkspaceEdit();
+    foreignActive.replace(uri, document.lineAt(4).range, "A paragraph another tool rewrote again.");
+    assert.equal(await vscode.workspace.applyEdit(foreignActive), true);
+    const foreignInActive = await patchShowing(document, "an outside edit of the active document");
+    assert.ok(covers(foreignInActive, 5), `the outside edit of the active document glows on line 5: ${JSON.stringify(foreignInActive.ranges)}`);
+    console.log("PASS update glow: an outside edit of the active document glows");
+
+    // 3. Typing in the active text editor: no glow.
     const end = document.lineAt(6).range.end;
     editor.selection = new vscode.Selection(end, end);
     await vscode.commands.executeCommand("type", { text: " Typed." });
+    // VS Code reports the key after the change it caused; the command above reports none.
+    noteKeystrokeForTests();
     assert.equal(document.lineAt(6).text, "A paragraph the user types in. Typed.");
     const typing = await patchShowing(document, "typing in the active editor");
     assert.deepEqual(typing.ranges, [], "typing in the active text editor glows nowhere");

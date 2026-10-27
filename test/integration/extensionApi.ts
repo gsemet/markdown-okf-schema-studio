@@ -13,6 +13,7 @@ export const {
   getLivePreviewRolesForTests,
   listCitationKeysForTests,
   listDocumentTargetsForTests,
+  noteKeystrokeForTests,
   PANEL_VIEW_TYPE,
   previewGroupFocusMovesForTests,
   previewGroupUnlocksSettledForTests,

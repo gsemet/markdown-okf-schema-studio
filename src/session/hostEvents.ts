@@ -17,7 +17,7 @@ import {
 import { PREVIEW_CONFIGURATION_SECTION, readPreviewConfiguration } from "../core/configuration/previewConfiguration";
 import { invalidateStemIndex } from "../core/frontmatter/fileLinks";
 import { invalidateConfCache, locateConfFor } from "../core/myst/confLocator";
-import { isOutsideChange } from "../core/preview/updatedRanges";
+import { isOutsideChange, isTypingChange, touchesSelection } from "../core/preview/updatedRanges";
 import type { BlockRangeChange } from "../core/state/blockRange";
 import { isUnchangedSave } from "../core/state/editLock";
 import type { DocumentChange, HostDocument } from "../host-api/documentStore";
@@ -257,17 +257,28 @@ export class HostEvents {
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-094
   /**
-   * Records a change made outside the preview (or an undo / redo) on the previews of its document. A
-   * change of the active text editor's document is the user typing there: it does not glow.
+   * Records a change made outside the preview (or an undo / redo) on the previews of its document.
+   * The writer typing does not glow; every other change does (see `isTypingChange`). VS Code
+   * reports the keystroke after the change it caused, so a change that touches a cursor with no
+   * keystroke yet stays pending until the patch that shows it.
    */
   private noteOutsideChange(event: DocumentChange): void {
     const key = event.document.id;
-    const activeDocument = this.manager.host.editors.active()?.document;
-    const inActiveEditor = activeDocument !== undefined && activeDocument.id === key;
     const reason = event.reason === "undo" ? 1 : event.reason === "redo" ? 2 : undefined;
-    if (!isOutsideChange(reason as 1 | 2, this.manager.host.documents.isApplying(key), inActiveEditor)) return;
+    const editors = this.manager.host.editors;
+    const spans = event.changes.map((change) => ({ startLine: change.startLine, endLine: change.endLine, text: change.text }));
+    const selections = editors.selectionsOf?.(key) ?? [];
+    const lastKeystroke = editors.lastKeystrokeAt?.();
+    const now = Date.now();
+    const typing = isTypingChange(spans, selections, lastKeystroke === undefined ? undefined : now - lastKeystroke);
+    const undecided = reason === undefined && !typing && !this.manager.host.documents.isApplying(key)
+      && touchesSelection(spans, selections);
+    const outside = isOutsideChange(reason as 1 | 2, this.manager.host.documents.isApplying(key), typing);
+    if (!outside) return;
     for (const session of this.manager.sessions()) {
-      if (session.documentUri === key) session.page.outsideChangeVersion = event.document.revision;
+      if (session.documentUri !== key) continue;
+      if (undecided) session.page.pendingOutsideChange = { version: event.document.revision, at: now };
+      else session.page.outsideChangeVersion = event.document.revision;
     }
   }
 
