@@ -41,6 +41,8 @@ interface Setup {
   readonly open: Map<string, { path: string; isDirty: boolean; getText(): string }>;
   readonly previews: any[];
   readonly controller: CommentsController;
+  /** Live sidecar watchers and live listener subscriptions the stub host handed out. */
+  readonly watching: { watchers: number; subscriptions: number };
   readonly hooks: { readFile?: (path: string) => Promise<Uint8Array> | undefined };
   preview(extra?: Record<string, unknown>): any;
 }
@@ -56,6 +58,12 @@ function setup(): Setup {
   const open = new Map<string, { path: string; isDirty: boolean; getText(): string }>();
   const previews: any[] = [];
   const hooks: Setup["hooks"] = {};
+  const watching = { watchers: 0, subscriptions: 0 };
+  const subscribe = (): { dispose(): void } => {
+    watching.subscriptions += 1;
+    let live = true;
+    return { dispose: () => { if (live) { live = false; watching.subscriptions -= 1; } } };
+  };
   const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
   const host = {
     files: {
@@ -94,7 +102,14 @@ function setup(): Setup {
     settings: { section: () => ({ get: (_key: string, fallback: unknown) => fallback }) },
     vcs: { userName: async () => "Ada" },
     watcher: {
-      watch: () => ({ onDidCreate: () => undefined, onDidChange: () => undefined, onDidDelete: () => undefined, dispose: () => undefined }),
+      watch: () => {
+        watching.watchers += 1;
+        let live = true;
+        return {
+          onDidCreate: subscribe, onDidChange: subscribe, onDidDelete: subscribe,
+          dispose: () => { if (live) { live = false; watching.watchers -= 1; } },
+        };
+      },
     },
   };
   const manager: any = { host, sessions: () => new Set(previews) };
@@ -121,7 +136,7 @@ function setup(): Setup {
     previews.push(value);
     return value;
   };
-  return { files, sizes, directories, warnings, renames, writes, posted, open, previews, controller, hooks, preview };
+  return { files, sizes, directories, warnings, renames, writes, posted, open, previews, controller, hooks, watching, preview };
 }
 
 const threadsOf = (message: Record<string, any>): Array<Record<string, any>> => message.threads;
@@ -321,4 +336,30 @@ test("a comment from a read-only preview is refused with the real cause", async 
     `The comment was not saved: ${READ_ONLY_UNTRUSTED}`,
   ]);
   assert.deepEqual(s.writes, []);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+test("switching the sidecar and clearing a preview release the watcher and its three subscriptions", async () => {
+  const s = setup();
+  s.files.set(DOCUMENT, "a needle here\n");
+  s.files.set("/w/b.md", "b needle here\n");
+  const preview = s.preview();
+  const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
+  await post(preview);
+  assert.deepEqual(s.watching, { watchers: 1, subscriptions: 3 });
+
+  // The same sidecar again keeps the watch; another document replaces it without growth.
+  await post(preview);
+  assert.deepEqual(s.watching, { watchers: 1, subscriptions: 3 });
+  for (let round = 0; round < 5; round += 1) {
+    const document = round % 2 === 0 ? "/w/b.md" : DOCUMENT;
+    preview.stage = { ...preview.stage, activeDocumentPath: document, activeDocumentIdentity: `file://${document}` };
+    await post(preview);
+    assert.deepEqual(s.watching, { watchers: 1, subscriptions: 3 }, `after switch ${round}`);
+  }
+
+  s.controller.clear(preview);
+  assert.deepEqual(s.watching, { watchers: 0, subscriptions: 0 });
+  s.controller.clear(preview);
+  assert.deepEqual(s.watching, { watchers: 0, subscriptions: 0 }, "clearing twice is harmless");
 });

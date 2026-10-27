@@ -14,11 +14,20 @@ export interface PasteHtmlHooks {
   isCurrent(): boolean;
 }
 
+/** The slice of a `KeyboardEvent` the key note reads. */
+export type PasteKeyEvent = Pick<KeyboardEvent, "key"> & Partial<Pick<KeyboardEvent, "shiftKey" | "metaKey" | "ctrlKey">>;
+
+/** The slice of a `ClipboardEvent` the HTML paste reads. */
+export interface PasteHtmlEvent {
+  clipboardData?: { getData?(format: string): string } | null;
+  preventDefault?(): void;
+}
+
 export interface PasteHtml {
   /** Notes a key press of the text box: Cmd/Ctrl+Shift+V marks the next paste as plain text. */
-  noteKey(event: any): void;
+  noteKey(event: PasteKeyEvent | null | undefined): void;
   /** True when the paste was taken over (the default insertion is prevented). */
-  handle(event: any, textarea: { selectionStart: number; selectionEnd: number }, hooks: PasteHtmlHooks): boolean;
+  handle(event: PasteHtmlEvent | null | undefined, textarea: { selectionStart: number; selectionEnd: number }, hooks: PasteHtmlHooks): boolean;
 }
 
 export function installPasteHtml(): PasteHtml {

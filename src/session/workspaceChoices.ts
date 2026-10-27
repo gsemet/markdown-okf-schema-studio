@@ -46,11 +46,13 @@ export class WorkspaceChoices {
   /** Bounded per-document `descriptionsCollapsed` memory, persisted under one workspace key. */
   private collapsedDescriptions = new BoundedMap<boolean>();
   private author = "";
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-081
   /**
    * CR 050: the warning banner closed per document for this session, by the key of the warning set it
-   * showed. A new set (another key) shows the banner again.
+   * showed. A new set (another key) shows the banner again. Bounded like the other per-document memory: the
+   * most recent documents are kept.
    */
-  public readonly dismissedWarningBanners = new Map<string, string>();
+  public readonly dismissedWarningBanners = new BoundedMap<string>();
 
   /** True once a failed write was shown to the reader; a successful write re-arms the warning. */
   private persistWarned = false;

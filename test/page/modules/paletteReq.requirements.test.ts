@@ -11,7 +11,7 @@ import { createEditActions } from "../../../src/page/modules/editActions";
 import type { EditActionMode, EditActionRegistry } from "../../../src/page/modules/editActions";
 import { createEditPalette } from "../../../src/page/modules/editPalette";
 import { installPasteHtml } from "../../../src/page/modules/pasteHtml";
-import { installPasteImage } from "../../../src/page/modules/pasteImage";
+import { installPasteImage, type PasteImageWindow } from "../../../src/page/modules/pasteImage";
 import { createMarkdownTableTools } from "../../../src/page/modules/markdownTable";
 import { isSafeOkfColor } from "../../../src/core/security/spanColors";
 
@@ -190,14 +190,14 @@ test("a truncated Reference list ends with the note that more entries exist; a c
 
 interface PasteEnvironment { reader: { onload?: () => void; onerror?: () => void; result?: string } }
 
-function pasteWindow(): { window: unknown; env: PasteEnvironment } {
+function pasteWindow(): { window: PasteImageWindow; env: PasteEnvironment } {
   const env: PasteEnvironment = { reader: {} };
   class FakeReader {
     public result: string | undefined;
     public onload: (() => void) | undefined;
     public onerror: (() => void) | undefined;
     public constructor() { env.reader = this; }
-    public readAsDataURL(): void { /* the test fires onload or onerror itself */ }
+    public readAsDataURL(_file: Blob): void { /* the test fires onload or onerror itself */ }
   }
   return { window: { FileReader: FakeReader }, env };
 }

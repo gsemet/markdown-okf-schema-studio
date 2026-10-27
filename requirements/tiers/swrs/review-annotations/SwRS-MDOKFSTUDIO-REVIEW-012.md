@@ -77,6 +77,12 @@ When a document is shown or its review comments file is created, changed, delete
 | Two changes of the comments file in quick succession, the first read ends after the second started | Only the result of the second read is posted |
 | One change of the file, the read ends | Its result is posted |
 
+### Scenario (boundary): The watch of the comments file is released
+| Input | Outcome |
+| --- | --- |
+| The preview shows another document, so another comments file | The watcher of the previous file and its three change, create and delete subscriptions are all disposed; the live count stays at one watcher and three subscriptions |
+| The preview closes | The watcher and its three subscriptions are disposed; disposing twice is harmless |
+
 ### Scenario (nominal): After a write by the host
 | Input | Outcome |
 | --- | --- |
@@ -104,5 +110,6 @@ The page accepts the message only when it is addressed to its render, see SwRS-M
 - Method: test/integration/commentAnchors.test.ts (orphan verdict: orphaned flags posted).
 - Method: test/integration/commentWrite.test.ts (the echo of our own write is skipped; the last posted threads have two entries after two creates and zero after the last delete). The unchanged-threads render and the refusal case of a write are untested.
 - Method: test/session/reviewReqComments.requirements.test.ts: a read of the comments file that a newer read overtook posts nothing (read overtaken by a newer read).
+- Method: test/session/reviewReqComments.requirements.test.ts: switching the sidecar and clearing a preview release the watcher and its three subscriptions (the watch of the comments file is released).
 - Method: test/page/modules/commentThreads.test.ts: `T42: hostile ids and malformed threads are tolerated` (shape of the threads message the page accepts).
 - Criteria: The last posted threads equal the file content, plus an orphaned flag for each thread; the post count stays 0 without a file and the last post is an empty list after a deletion; the threads shown by the page equal the file after each create, change and delete; the post count does not grow after an echo (comparison by the hash of the text and by the serialized threads); a read whose sequence number is no longer the latest returns before posting; post() returns before reading when the document uri does not start with file:.

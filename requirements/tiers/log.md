@@ -1,5 +1,14 @@
 # Update Log
 
+## 2026-10-27 (lifecycle and typing nits)
+
+- SwRS-MDOKFSTUDIO-REVIEW-012: the watch of the comments file disposes its three subscriptions with
+  the watcher when the preview shows another document or closes. SwRS-MDOKFSTUDIO-TOOLBAR-079: a
+  rescan unobserves the links the replaced content detached. SwRS-MDOKFSTUDIO-MYST-081: the memory
+  of closed warning banners keeps at most 200 documents. SwRS-MDOKFSTUDIO-LIFE-156: a boot element
+  that is not a JSON object reads as an empty boot context (CR 135). Clipboard events of the paste
+  modules are typed. Verification: unit tests named in the four requirements, `just requirements-lint`.
+
 ## 2026-10-27 (one line split per parse of directives)
 
 - SwRS-MDOKFSTUDIO-CORE-070 (new, CR 135): the postinstall patch of markdown-it-myst splits the

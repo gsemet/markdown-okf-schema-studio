@@ -39,7 +39,7 @@ export interface CommentsState {
   /** Debounce timer of the threads (T42). */
   timer?: NodeJS.Timeout;
   /** Watch on the sidecar file `<name>.comments.json` of the shown document, and its path. */
-  watch?: { path: string; watcher: { dispose(): void } };
+  watch?: { path: string; watcher: { dispose(): void }; subscriptions: Array<{ dispose(): void }> };
   /** The page may show threads (some were posted and not cleared since the page loaded). */
   shown: boolean;
   /** JSON of the threads last posted to the loaded page; reset when the page reports ready. */
@@ -351,17 +351,25 @@ export class CommentsController {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-012
+  /** Releases the three subscriptions, then the watcher, of the sidecar watch (if any). */
+  private unwatchSidecar(state: CommentsState): void {
+    const watch = state.watch;
+    state.watch = undefined;
+    if (!watch) return;
+    watch.subscriptions.forEach((subscription) => subscription.dispose());
+    watch.watcher.dispose();
+  }
+
   /** Posts again when the sidecar is created, changed or deleted. */
   private watchSidecar(preview: PreviewSession, sidecar: string): void {
     const state = preview.comments;
     if (state.watch?.path === sidecar) return;
-    state.watch?.watcher.dispose();
+    this.unwatchSidecar(state);
     const watcher = this.manager.host.watcher.watch(path.dirname(sidecar), path.basename(sidecar));
     const refresh = (): void => this.schedule(preview, COMMENTS_DEBOUNCE_MS);
-    watcher.onDidCreate(refresh);
-    watcher.onDidChange(refresh);
-    watcher.onDidDelete(refresh);
-    state.watch = { path: sidecar, watcher };
+    const subscriptions = [watcher.onDidCreate(refresh), watcher.onDidChange(refresh), watcher.onDidDelete(refresh)];
+    state.watch = { path: sidecar, watcher, subscriptions };
   }
 
   /** Posts the threads after `delay` (debounced). */
@@ -523,7 +531,6 @@ export class CommentsController {
     const state = preview.comments;
     if (state.timer) clearTimeout(state.timer);
     state.timer = undefined;
-    state.watch?.watcher.dispose();
-    state.watch = undefined;
+    this.unwatchSidecar(state);
   }
 }

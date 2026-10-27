@@ -50,12 +50,34 @@ export function imageParagraphEdit(value: string, start: number, end: number, na
   };
 }
 
-export interface PasteImage {
-  /** True when the paste was taken over (the default insertion is prevented). */
-  handle(event: any, textarea: { selectionStart: number; selectionEnd: number }, hooks: PasteImageHooks): boolean;
+/** A clipboard file as the paste reads it: the MIME type and the size are all it looks at. */
+export interface PasteImageFile { type?: string; size?: number }
+
+/** The slice of a `ClipboardEvent` the image paste reads. */
+export interface PasteImageEvent {
+  clipboardData?: {
+    getData?(format: string): string;
+    items?: ArrayLike<{ kind: string; type: string; getAsFile?(): PasteImageFile | null }>;
+  } | null;
+  preventDefault?(): void;
 }
 
-export function installPasteImage(window: any): PasteImage {
+/** The slice of the page's `window` the image paste uses: a `FileReader` constructor. */
+export interface PasteImageWindow {
+  FileReader: new () => {
+    result: unknown;
+    onload: ((...args: never[]) => unknown) | null | undefined;
+    onerror: ((...args: never[]) => unknown) | null | undefined;
+    readAsDataURL(file: Blob): void;
+  };
+}
+
+export interface PasteImage {
+  /** True when the paste was taken over (the default insertion is prevented). */
+  handle(event: PasteImageEvent | null | undefined, textarea: { selectionStart: number; selectionEnd: number }, hooks: PasteImageHooks): boolean;
+}
+
+export function installPasteImage(window: PasteImageWindow): PasteImage {
   const MAX_BYTES = 10 * 1024 * 1024;
   const ALLOWED = ["image/png", "image/jpeg", "image/gif", "image/webp"];
   return {
@@ -66,9 +88,9 @@ export function installPasteImage(window: any): PasteImage {
       if (!data) return false;
       const text = typeof data.getData === "function" ? data.getData("text/plain") : "";
       if (typeof text === "string" && text !== "") return false;
-      let file;
+      let file: PasteImageFile | null | undefined;
       const items = data.items ? Array.from(data.items) : [];
-      for (const item of items as any[]) {
+      for (const item of items) {
         if (item && item.kind === "file" && ALLOWED.includes(item.type)) {
           file = typeof item.getAsFile === "function" ? item.getAsFile() : undefined;
           if (file) break;
@@ -106,7 +128,7 @@ export function installPasteImage(window: any): PasteImage {
           }
         });
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file as Blob);
       return true;
     },
   };

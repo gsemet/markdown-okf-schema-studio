@@ -75,6 +75,13 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 | a target hidden by the files.exclude setting | found |
 | a name matching more than 50 files under one root | the search stops at 50 files; the answer may differ from the full set |
 
+### Scenario (boundary): Content replaced
+
+| Input | Outcome |
+| --- | --- |
+| The page content is replaced and the rescan finds new links | The new links are observed; a link still in the content is not observed twice |
+| Links of the old content are gone from the page | The observer releases them, so they are not kept alive |
+
 ### Scenario (nominal): The host answers each request
 
 - GIVEN requests for an existing file, a missing file and a javascript: link
@@ -114,6 +121,7 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 ### Verification notes
 
 - Method: test/page/modules/linkNavigation.test.ts (link discovery waits for the viewport and deduplicates bounded batches; anchor and external requests are not asked; same request twice; 130 links in batches of 64).
+- Method: test/page/modules/linkNavigation.test.ts ("T22: rescan unobserves the links that the replaced content detached" and "T22: rescan keeps observing the links that are still in the content": content replaced).
 - Method: test/page/modules/toolbarReq.requirements.test.ts (without an intersection observer no link is looked up and clicks still reach the host).
 - Method: test/session/toolbarReq.requirements.test.ts (the host answers a discovery with one target per request, in order; a discovery of another render gets no answer; a failed discovery shows a warning and sends no answer).
 - Method: test/session/eventFanOut.test.ts (the search for a link target skips node_modules, .git, _build, .venv and venv and returns at most 50 files).

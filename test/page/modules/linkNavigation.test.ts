@@ -102,11 +102,12 @@ function rescanHarness(initial: string[]) {
   const microtasks: Array<() => void> = [];
   const listeners = new Map<string, (event: any) => void>();
   const observed: Link[] = [];
+  const unobserved: Link[] = [];
   let intersect: (entries: Array<{ target: Link; isIntersecting: boolean }>) => void = () => undefined;
   class Observer {
     constructor(callback: typeof intersect) { intersect = callback; }
     observe(link: Link) { observed.push(link); }
-    unobserve() {}
+    unobserve(link: Link) { unobserved.push(link); }
     disconnect() {}
   }
   const live = { documentId: "file:///active.md", revision: 1, requestId: 2 };
@@ -122,7 +123,7 @@ function rescanHarness(initial: string[]) {
     live as never,
   );
   return {
-    installed, messages, listeners, observed, live,
+    installed, messages, listeners, observed, unobserved, live,
     replaceLinks: (requests: string[]) => { current = requests.map((request) => new Link(request)); return current; },
     keepLinksAndAdd: (requests: string[]) => { current = [...current, ...requests.map((request) => new Link(request))]; return current; },
     intersect: (entries: Array<{ target: Link; isIntersecting: boolean }>) => intersect(entries),
@@ -251,4 +252,23 @@ test("links are asked again when the preview regains focus or becomes visible", 
   runtime.flush();
   assert.equal(runtime.messages.length, 2, "asked again after the focus came back");
   assert.equal(runtime.messages[1].requests[0], "a.md");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+test("T22: rescan unobserves the links that the replaced content detached", () => {
+  const runtime = rescanHarness(["a.md", "b.md"]);
+  const [a, b] = runtime.observed;
+  runtime.replaceLinks(["c.md"]);
+  runtime.installed.rescan();
+  assert.deepEqual(runtime.unobserved, [a, b], "the detached links are released by the observer");
+  assert.equal(runtime.observed.length, 3, "the new link is observed");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+test("T22: rescan keeps observing the links that are still in the content", () => {
+  const runtime = rescanHarness(["a.md", "b.md"]);
+  runtime.keepLinksAndAdd(["c.md"]);
+  runtime.installed.rescan();
+  assert.equal(runtime.unobserved.length, 0);
+  assert.equal(runtime.observed.length, 3);
 });
