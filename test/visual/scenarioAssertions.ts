@@ -766,6 +766,13 @@ export const UNCLOSED_DIRECTIVE_ASSERTIONS: ContentAssertion[] = [
   { message: "the code blocks are visible and inside the pane", selector: `${MAIN} pre`, count: 2, visible: true, insidePane: true },
 ];
 
+export const UNCLOSED_FENCE_MID_DOCUMENT_ASSERTIONS: ContentAssertion[] = [
+  { message: "the headings before and after the unclosed fence all render", selector: `${MAIN} h2`, count: 4, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content h2')].map((h) => h.textContent.trim()).join('|') === '3. Unclosed directive|4. Table|5. Colon fence|6. Last section'" },
+  { message: "each unclosed fence is a code block of its opening line", selector: `${MAIN} pre`, count: 2, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content pre')].map((pre) => pre.textContent.trim()).join('|') === '```{list-table}|:::{table} Caption'" },
+  { message: "the paragraphs after the fences render", selector: `${MAIN} p`, count: 4, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content p')].map((p) => p.textContent.trim()).join('|') === 'This paragraph should still render.|The fourth section renders too.|The fifth section is still here.|The last section renders too.'" },
+  { message: "the code blocks are visible and inside the pane", selector: `${MAIN} pre`, count: 2, visible: true, insidePane: true },
+];
+
 const ROW_HANDLES = "[data-okf-row-handle-layer] .okf-table-row-handle";
 
 /** Every handle is left of its table, inside the pane and centred on its row (2 px). */

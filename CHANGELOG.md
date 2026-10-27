@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- A fence left open in the middle of a document no longer hides the rest of it: a backtick or colon
+  fence (such as ```` ```{list-table} ````) with no closing fence and a heading after it shows its
+  opening line as a code block, with an "unclosed fence" warning on that line, and the sections after
+  it render normally. The source is not changed.
 - Dropdown admonitions show their state: a chevron at the right of the title points right while the
   dropdown is closed and down while it is open, in every admonition kind and theme.
 - Review comment threads are readable in every theme: the popover text no longer takes a pale host

@@ -23,6 +23,7 @@ import {
 import { normalizeContextTagContainers, repairGroupedContextTagHtml } from "./mystContextTags";
 import { loadEngine, MYST_PARSE_OPTIONS, type MystEngine } from "./mystEngine";
 import { neutralizeDirectiveErrors } from "./mystDirectiveErrors";
+import { splitUnclosedFences } from "./mystUnclosedFences";
 import { expandGithubAlerts } from "./mystGithubAlerts";
 import { expandGrids, expandToctrees } from "./mystGridToctree";
 import {
@@ -304,6 +305,16 @@ interface RenderPass<Input> {
 /** The tree passes, in order, from the parsed tree to the tree the HTML writer reads. */
 const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   { name: "shift source lines", run: (state) => shiftSourcePositions(state.ast, state.lineOffset) },
+  {
+    name: "unclosed fences",
+    run: (state) => splitUnclosedFences(state.ast, {
+      sourceLines: state.source.split(/\r\n|\r|\n/u),
+      parsedLines: state.parsedText.split(/\r\n|\r|\n/u),
+      lineOffset: state.lineOffset,
+      parse: (fragment) => state.mystParse(fragment, MYST_PARSE_OPTIONS),
+      diagnostics: state.diagnostics,
+    }),
+  },
   {
     name: "grids",
     run: (state) => expandGrids(

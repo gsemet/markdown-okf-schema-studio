@@ -19,6 +19,7 @@ import {
   README_SHOWCASE_THREAD_ASSERTIONS,
   README_SHOWCASE_THREAD_MESSAGE,
   UNCLOSED_DIRECTIVE_ASSERTIONS,
+  UNCLOSED_FENCE_MID_DOCUMENT_ASSERTIONS,
   WIDE,
   XLARGE,
 } from "./scenarioAssertions";
@@ -1285,6 +1286,22 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     contentAssertions: UNCLOSED_DIRECTIVE_ASSERTIONS,
     description: `A label opened and never closed around a table directive with no body, then an unclosed list-table, ${variant.name} preview, 900 px pane: `
       + "the preview does not fail, each broken construct shows its own lines as a code block and the text around them renders.",
+  })),
+  ...([
+    { name: "cream", theme: "dark", mode: "cream" },
+    { name: "dark", theme: "dark", mode: undefined },
+  ] as const).map((variant, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-096
+    id: `myst/v${39 + index}-unclosed-fence-mid-document-${variant.name}-900`,
+    fixture: "65-unclosed-fence-mid-document",
+    theme: variant.theme,
+    ...(variant.mode ? { previewThemeMode: variant.mode } : {}),
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    fullPage: true,
+    contentAssertions: UNCLOSED_FENCE_MID_DOCUMENT_ASSERTIONS,
+    description: `A list-table fence and a note fence left open between sections, ${variant.name} preview, 900 px pane: `
+      + "each shows its opening line as a code block and every section after it renders.",
   })),
   ...(["cream", "dark"] as const).map((mode, index) => ({
     // @tests_req SwRS-MDOKFSTUDIO-PALETTE-002
