@@ -678,3 +678,67 @@ test("CR 120: Cmd/Ctrl+Enter with changes saves, and the block is selected once 
   harness.dispatchMessage(patchMessage());
   assert.deepEqual(selectedLines(harness), [50]);
 });
+
+// CR 129: the content root (`<main tabindex="-1">`) takes the focus when the margin is clicked or the
+// window comes back; it is the page itself, never a control that keeps its arrow keys.
+function previewRoot(harness: RuntimeHarness): RuntimeElement {
+  return harness.previewContent;
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 129: plain Up and Down on the focused content root move the block selection", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const root = previewRoot(harness);
+  let prevented = 0;
+  harness.dispatchDocument("keydown", plainKey("ArrowDown", { target: root, preventDefault: () => { prevented += 1; } }));
+  assert.deepEqual(selectedLines(harness), [1], "the first press selects the top block");
+  assert.equal(prevented, 1, "the page does not scroll under the key");
+  harness.dispatchDocument("keydown", plainKey("ArrowDown", { target: root }));
+  assert.deepEqual(selectedLines(harness), [50]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 129: Shift+Down on the focused content root extends a selection", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  harness.dispatchDocument("keydown", plainKey("ArrowDown"));
+  harness.dispatchDocument("keydown", plainKey("ArrowDown", { target: previewRoot(harness), shiftKey: true }));
+  assert.deepEqual(selectedLines(harness), [1, 50]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 129: the window coming back selects the block nearest the top when nothing was selected", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  assert.deepEqual(selectedLines(harness), []);
+  harness.dispatchWindow("focus");
+  assert.deepEqual(selectedLines(harness), [1]);
+  harness.dispatchDocument("keydown", plainKey("ArrowDown", { target: previewRoot(harness) }));
+  assert.deepEqual(selectedLines(harness), [50]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 129: the window coming back restores the last block the keyboard selected", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  harness.dispatchDocument("keydown", plainKey("ArrowDown"));
+  harness.dispatchDocument("keydown", plainKey("ArrowDown"));
+  assert.deepEqual(selectedLines(harness), [50]);
+  harness.dispatchMessage(patchMessage());
+  assert.deepEqual(selectedLines(harness), [], "a patch while the window was away dropped the outline");
+  harness.dispatchWindow("focus");
+  assert.deepEqual(selectedLines(harness), [50], "the same block is selected again");
+  assert.equal(selectionAnnouncement(harness), "1 block selected");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-004
+test("CR 129: the window coming back selects nothing outside edit mode, in an editor or on another control", () => {
+  const reading = createRuntimeHarness();
+  reading.dispatchWindow("focus");
+  assert.deepEqual(selectedLines(reading), []);
+  const editing = createRuntimeHarness({ savedState: { editMode: true } });
+  openMoveTextarea(editing, "Current block\n");
+  editing.dispatchWindow("focus");
+  assert.deepEqual(selectedLines(editing), [], "an open editor keeps the focus");
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  harness.document.activeElement = harness.mappings[1];
+  harness.dispatchWindow("focus");
+  assert.deepEqual(selectedLines(harness), [], "a focused block or control is left alone");
+});

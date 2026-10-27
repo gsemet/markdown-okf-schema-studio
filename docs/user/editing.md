@@ -51,7 +51,9 @@ environments),
   Keyboard only: with edit mode on and no editor open, Up and Down select a block (the first press
   takes the block nearest the top of the pane) and move the selection, Enter opens the selected
   block, Escape cancels the editor and Cmd/Ctrl+Enter saves it; either way the block stays selected,
-  so Up, Down and Enter carry on from it.
+  so Up, Down and Enter carry on from it. After you leave the window or the tab and come back, the
+  selection is restored (the same block, else the one nearest the top), and a click on the margin
+  of the page keeps Up and Down working; the page itself never shows a focus ring.
   Block selection: Shift+click selects the blocks between the last clicked block and the one you
   click, Shift+Up/Down extends or shrinks the selection, Escape or a click clears it.
   With a selection, Cmd/Ctrl+C copies its exact Markdown, Cmd/Ctrl+X cuts it (one undo step), and

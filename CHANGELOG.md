@@ -13,6 +13,10 @@
   handles are a drop zone. The marker shows on the nearest gap (left or right half of a column, upper
   or lower half of a row), follows the pointer, and goes when the pointer leaves the table, where a
   release cancels the move. Before, it showed only with the pointer exactly on a cell.
+- Keyboard block navigation survives leaving the window: when the page itself held the focus (a click
+  on its margin, a window or tab that comes back), Up and Down only scrolled the page under an orange
+  ring around the whole preview. They now move the block selection again, the selection is restored
+  when the window or tab comes back, and the page never shows a focus ring.
 - Dropdown admonitions show their state: a chevron at the right of the title points right while the
   dropdown is closed and down while it is open, in every admonition kind and theme.
 - Review comment threads are readable in every theme: the popover text no longer takes a pale host

@@ -567,3 +567,9 @@
   scroll-up for it; the caret at the end of a large paste is brought into view whether the bar is
   stuck or not. Verification: real-window test test/integration/tallBlockScroll.test.ts, visual
   scenario palette-slash/v27-palette-clears-content-cream-1100, `just requirements-lint`.
+
+## 2026-10-27
+
+- SwRS-MDOKFSTUDIO-BLOCK-004 (CR 129): the keyboard block navigation also works while the page itself
+  (body or content root) holds the focus, the page shows no focus ring, and a window or tab that
+  comes back restores the block selection. Verification: `just requirements-lint`.

@@ -255,6 +255,13 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
   padding: 0 var(--sphinx-preview-content-gutter) min(80vh, max(24px, calc(100vh - var(--sphinx-preview-reading-offset, 0px) - 40px)));
 }
 
+/* The content root takes the focus (tabindex -1) when the margin is clicked or the window comes back;
+   the page as a whole never shows a focus ring, the selected block does. */
+#sphinx-myst-preview-content:focus,
+#sphinx-myst-preview-content:focus-visible {
+  outline: none;
+}
+
 /* Long words and bare URLs wrap instead of widening the page; code blocks keep their own scroll. */
 #sphinx-myst-preview-content :is(p, li, dd, dt, td, th, blockquote, h1, h2, h3, h4, h5, h6, figcaption, summary, a) {
   overflow-wrap: anywhere;
