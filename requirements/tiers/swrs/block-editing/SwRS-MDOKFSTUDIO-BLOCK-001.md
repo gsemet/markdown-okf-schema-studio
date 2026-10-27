@@ -93,7 +93,7 @@ When a writer clicks the Edit button of a writable preview, the page SHALL switc
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview shows no Edit button
+- SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview shows the Edit button greyed, with the reason
 - SwRS-MDOKFSTUDIO-LIFE-169: the edit mode choice is stored for the workspace
 - SwRS-MDOKFSTUDIO-BLOCK-236: the accepted shape of previewEditModeChanged
 - SwRS-MDOKFSTUDIO-FMEDIT-019: closing of a frontmatter field editor

@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-27 (the Edit button is greyed with the reason in a read-only preview)
+
+- SwRS-MDOKFSTUDIO-TRUST-001: a read-only preview (untrusted workspace, or a file outside every
+  workspace folder) keeps the Edit button, greyed (`aria-disabled`), with the reason as tooltip,
+  instead of hiding it; the toolbar always holds 13 buttons. CR 126. StRS-MDOKFSTUDIO-TOOLBAR-001,
+  SwRS-MDOKFSTUDIO-BLOCK-001 and SwRS-MDOKFSTUDIO-LIFE-170 reworded. Unit, integration and visual
+  checks changed with it.
+
 ## 2026-10-26 (unclosed directives render as raw text)
 
 - SwRS-MDOKFSTUDIO-MYST-096 (new): a directive or fence the parser cannot build (an unclosed or

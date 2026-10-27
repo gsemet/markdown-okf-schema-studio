@@ -554,7 +554,8 @@ export function createRuntimeHarness(configuration: Partial<{
   const backButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const nextButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const anchorButton = new RuntimeElement({}, windowState, 0, 30);
-  const editModeButton = new RuntimeElement({}, windowState, 0, 30);
+  // A read-only page keeps the Edit button, greyed with aria-disabled (core/preview/previewToolbar.ts).
+  const editModeButton = new RuntimeElement(editingEnabled ? {} : { "aria-disabled": "true", title: "Editing is unavailable: this file is not in a trusted workspace", "data-tooltip": "Editing is unavailable: this file is not in a trusted workspace" }, windowState, 0, 30);
   const toolbar = new RuntimeElement({}, windowState, 12, Math.max(0, toolbarBottom - 12));
   toolbar.rectProvider = () => ({
     top: 12,
@@ -794,7 +795,7 @@ export function createRuntimeHarness(configuration: Partial<{
       if (selector === "[data-sphinx-preview-back]") return backButton;
       if (selector === "[data-sphinx-preview-next]") return nextButton;
       if (selector === "[data-sphinx-preview-anchor]") return anchorButton;
-      if (selector === "[data-sphinx-preview-edit-toggle]") return editingEnabled ? editModeButton : null;
+      if (selector === "[data-sphinx-preview-edit-toggle]") return editModeButton;
       if (selector === "[data-sphinx-preview-toolbar]") return toolbar;
       if (selector === "[data-sphinx-preview-sticky-headings]") return stickyHeadings;
       if (selector === "[data-sphinx-preview-status]") {

@@ -498,10 +498,12 @@ test("preview toolbar has three rows: actions with the collapse button, navigati
   assert.equal((optionsRow.match(/<button\b/gu) ?? []).length, 5);
   assert.match(optionsRow, /data-sphinx-preview-theme-toggle[\s\S]*data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
   assert.match(optionsRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><button[^>]*data-sphinx-preview-comments-toggle aria-pressed="true"[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
-  // Read-only previews: no Edit button, same rows, row 1 one button shorter.
+  // Read-only previews: the Edit button stays, greyed (aria-disabled) with the reason as tooltip.
   const readOnly = renderPreviewToolbar(false);
-  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 12);
-  assert.doesNotMatch(readOnly, /data-sphinx-preview-edit-toggle/u);
+  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 13);
+  assert.match(readOnly, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"[^>]*title="Editing is unavailable: this file is not in a trusted workspace"[^>]*data-tooltip="Editing is unavailable: this file is not in a trusted workspace"/u);
+  assert.doesNotMatch(toolbar, /aria-disabled/u);
+  assert.match(PREVIEW_THEME_CSS, /button\[aria-disabled="true"\]\s*\{[^}]*cursor: not-allowed;/u);
   assert.match(readOnly, /data-sphinx-preview-toolbar-row="main"[\s\S]*data-sphinx-preview-toolbar-collapse/u);
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar-more\]\[hidden\]\s*\{[^}]*display: none;/u);
   assert.doesNotMatch(toolbar, /style=/u);

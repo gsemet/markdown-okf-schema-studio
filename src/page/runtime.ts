@@ -15,6 +15,10 @@
  */
 
 import { DEFAULT_EDITING_CONFIGURATION, PALETTE_MODES } from "../core/configuration/editingConfiguration";
+import {
+  EDIT_UNAVAILABLE_NO_FOLDER,
+  READ_ONLY_NO_FOLDER,
+} from "../core/edits/readOnlyReasons";
 import type { PreviewRuntimeContext } from "../core/protocol/bootContext";
 import { createAnchorPolicy } from "../core/scroll/anchorPolicy";
 import { HIGHLIGHT_LANGUAGES } from "./buildConstants";
@@ -269,7 +273,17 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     keepReadingLine();
   }, () => stickyBand.readingOffset());
   rt.refreshButton = document.querySelector?.<HTMLButtonElement>("[data-sphinx-preview-refresh]");
-  rt.editModeButton = document.querySelector?.<HTMLElement>("[data-sphinx-preview-edit-toggle]");
+  const editButton = document.querySelector?.<HTMLElement>("[data-sphinx-preview-edit-toggle]");
+  // A read-only preview greys the Edit button with the reason; it is no edit toggle then.
+  if (editButton?.getAttribute?.("aria-disabled") === "true") {
+    if (context.readOnlyReason === READ_ONLY_NO_FOLDER) {
+      editButton.setAttribute?.("title", EDIT_UNAVAILABLE_NO_FOLDER);
+      editButton.setAttribute?.("data-tooltip", EDIT_UNAVAILABLE_NO_FOLDER);
+    }
+    rt.editModeButton = undefined;
+  } else {
+    rt.editModeButton = editButton;
+  }
   const savedState = vscode.getState?.();
   const saved = savedState as RuntimeSavedState | undefined;
   // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014

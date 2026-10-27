@@ -72,7 +72,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 
 | View choice | Panel state (first) | Stored value (second) | Default (last) | Accepted values and normalisation |
 | --- | --- | --- | --- | --- |
-| Edit mode | saved editMode, a boolean | the host passes initialEditMode true only when the preview is writable and the stored edit mode is true | off (reading mode); also off when the page has no Edit button | a saved non-boolean is ignored; a stored value that is false, absent or not a boolean gives off; a read-only preview gives off |
+| Edit mode | saved editMode, a boolean | the host passes initialEditMode true only when the preview is writable and the stored edit mode is true | off (reading mode); also off when the Edit button is greyed | a saved non-boolean is ignored; a stored value that is false, absent or not a boolean gives off; a read-only preview gives off |
 | Palette mode | saved paletteMode | the host gives the valid mode stored for the workspace, else the value of the setting markdownOkfSchemaStudio.editing.defaultPaletteMode | gfm | only strict, gfm and myst |
 | Width mode | saved viewWidthMode | stored widthMode | margin | only margin, auto and full |
 | Zoom | saved viewZoom | stored zoom | 100 | rounded to a multiple of 10 and clamped to 70 to 200; a value that is not a finite number is ignored |
