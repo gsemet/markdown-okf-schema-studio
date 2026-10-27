@@ -9,6 +9,7 @@ import { CONTENT_BLOCK_CSS } from "./styles/contentBlockStyles";
 import { CONTENT_LAYOUT_CSS } from "./styles/contentLayoutStyles";
 import { EDIT_MODE_CSS } from "./styles/editModeStyles";
 import { EDIT_PALETTE_CSS } from "./styles/editPaletteStyles";
+import { HTML_BLOCK_CSS } from "./styles/htmlBlockStyles";
 import { FRONTMATTER_EDITOR_CSS } from "./styles/frontmatterEditorStyles";
 import { PAGE_CHROME_CSS } from "./styles/pageChromeStyles";
 import { PROPERTIES_CSS } from "./styles/propertiesStyles";
@@ -110,6 +111,7 @@ export const PREVIEW_THEME_CSS =
   + FRONTMATTER_EDITOR_CSS
   + CONTENT_LAYOUT_CSS
   + COMMENT_CSS
+  + HTML_BLOCK_CSS
   + CONTENT_BLOCK_CSS
   + CODE_BLOCK_CSS
   + PROPERTIES_CSS;

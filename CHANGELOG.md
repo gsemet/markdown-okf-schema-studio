@@ -19,6 +19,13 @@
   preview too, when you pressed no key in the last half second or the edit is away from your cursor.
   Typing at your cursor still does not glow. Backspace, Delete and a paste glow when they are the
   first key after a pause.
+- README-style HTML renders like on GitHub: `<div align="center">` and `<p align>`, `<br>`, `<img>`
+  with its width, height and alt, logos and badges inside `<a>`, `<picture>` with
+  `prefers-color-scheme` sources (the image follows the preview theme), `<details>`, `<kbd>`,
+  `<sub>` and `<sup>`; Markdown after a blank line inside an HTML block is rendered. In edit mode
+  each HTML block is an admonition-like frame titled with its literal opening tag
+  (`<div align="center">`); a click edits the raw source of that block only. No script, event
+  handler, `style` or `class` is kept.
 - Edit mode titles an opened comment with its literal tag, in code font: `<!-- -->` for a comment and
   `<!-- TODO -->` for a TODO comment, instead of the words Comment and TODO (read mode keeps the
   words). A comment starting with `todo` in lower case (`<!-- todo cite -->`) is now a TODO comment

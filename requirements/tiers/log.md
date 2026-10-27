@@ -642,6 +642,13 @@
   test/core/render/commentMarkers.test.ts, test/core/render/blockTagTitle.test.ts, real-window
   scenario test/integration/commentTitleWindow.ts.
 
+- SwRS-MDOKFSTUDIO-CORE-071 (CR 141, new): README-style HTML (`div` and `p` with `align`, `br`, `img`
+  with size, `a` around `img`, `picture` with colour-scheme sources that follow the preview theme,
+  `details`, `kbd`, `sub`, `sup`) renders like on GitHub, Markdown after a blank line inside an HTML
+  block is rendered, and in edit mode each HTML block is titled with its literal opening tag; no
+  new sanitizer attribute. Verification: test/core/render/mystRawHtml.test.ts,
+  test/core/preview/previewStyles.test.ts, real-window scenario test/integration/readmeHtmlWindow.ts.
+
 ## 2026-10-28
 
 - SwRS-MDOKFSTUDIO-LIFE-039, SwRS-MDOKFSTUDIO-LIFE-062, SwRS-MDOKFSTUDIO-FMSCHEMA-067 (CR 135 T24,

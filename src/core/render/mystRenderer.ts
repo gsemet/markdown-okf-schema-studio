@@ -20,6 +20,7 @@ import {
   wrapBareBlockImages,
 } from "./mystBlockTransforms";
 import { normalizeContextTagContainers, repairGroupedContextTagHtml } from "./mystContextTags";
+import { expandRawHtmlElements } from "./mystRawHtml";
 import { loadEngine, MYST_PARSE_OPTIONS, type MystEngine } from "./mystEngine";
 import { neutralizeDirectiveErrors } from "./mystDirectiveErrors";
 import { splitUnclosedFences } from "./mystUnclosedFences";
@@ -413,6 +414,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
     ),
   },
   { name: "raw details and kbd", run: (state) => normalizeRawDetailsAndKbd(state.ast, state.mystParse) },
+  { name: "raw html elements", run: (state) => expandRawHtmlElements(state.ast) },
   { name: "context tag containers", run: (state) => normalizeContextTagContainers(state.ast) },
   { name: "bare block images", run: (state) => wrapBareBlockImages(state.ast) },
   { name: "anchors", run: (state) => { state.anchorLabels = normalizeAnchors(state.ast); } },
