@@ -636,6 +636,11 @@
   primitive (`src/core/syntax/markdownSyntax.ts`): a fence opens at up to three spaces of indent and
   closes only with a matching fence followed by white space; front matter is a first-line `---`
   closed by `---` or `...`. Verification: test/core/syntax/markdownSyntax.test.ts.
+- SwRS-MDOKFSTUDIO-REVIEW-003 (CR 140, new): in edit mode an opened comment is titled with its
+  literal tag in code font, `<!-- -->` or `<!-- TODO -->`; SwRS-MDOKFSTUDIO-REVIEW-139 widened: a
+  comment starting with `todo` in any case is a TODO comment. Verification:
+  test/core/render/commentMarkers.test.ts, test/core/render/blockTagTitle.test.ts, real-window
+  scenario test/integration/commentTitleWindow.ts.
 
 ## 2026-10-28
 

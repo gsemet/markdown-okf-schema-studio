@@ -10,6 +10,7 @@
  */
 
 import { parseThreadBody, type ThreadMessage } from "../comments/inlineThread";
+import { commentTagTitle } from "./blockTagTitle";
 
 export interface CommentMarkerNode {
   type: string;
@@ -35,7 +36,8 @@ interface HastElement {
 
 const COMMENT = /^<!--([\s\S]*?)-->$/u;
 const TOOL_COMMENT = /^(?:markdownlint-|prettier-ignore|toc(?![\p{L}\p{N}_])|\/toc(?![\p{L}\p{N}_])|cspell:|vale\s)/iu;
-const TODO_COMMENT = /^TODO(?![\p{L}\p{N}_])/u;
+// A TODO comment: the text starts with TODO in any case, the colon and what follows are optional.
+const TODO_COMMENT = /^TODO(?![\p{L}\p{N}_])/iu;
 const TODO_WORD = /(?<![\p{L}\p{N}_])TODO(?![\p{L}\p{N}_])/gu;
 
 // Nodes whose text is literal or already carries its own meaning.
@@ -149,6 +151,7 @@ function threadNode(
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-133
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-003
 function commentNode(
   node: CommentMarkerNode,
   body: string,
@@ -172,7 +175,12 @@ function commentNode(
     },
     [
       chip(kind === "todo" ? "TODO" : "comment", kind, body),
-      element(wrapper, { className: ["okf-comment-body"], hidden: true }, [text(body)]),
+      element(wrapper, {
+        className: ["okf-comment-body"],
+        hidden: true,
+        // The title edit mode shows above the opened body (stylesheet), as data and never as HTML.
+        "data-okf-tag": commentTagTitle(kind === "todo"),
+      }, [text(body)]),
     ],
   );
   node.type = "okfComment";

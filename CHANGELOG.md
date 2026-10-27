@@ -19,6 +19,10 @@
   preview too, when you pressed no key in the last half second or the edit is away from your cursor.
   Typing at your cursor still does not glow. Backspace, Delete and a paste glow when they are the
   first key after a pause.
+- Edit mode titles an opened comment with its literal tag, in code font: `<!-- -->` for a comment and
+  `<!-- TODO -->` for a TODO comment, instead of the words Comment and TODO (read mode keeps the
+  words). A comment starting with `todo` in lower case (`<!-- todo cite -->`) is now a TODO comment
+  (green chip), like `TODO` and `Todo`.
 - PlantUML through Java (`plantuml.useJar`) now runs with the PlantUML `ALLOWLIST` security profile
   (the workspace folder as allowlist path) and an explicit image size limit of 4096. Includes of files
   inside the workspace still work; URL includes are refused. `JAVA_HOME` is used when it is an

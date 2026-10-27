@@ -70,6 +70,46 @@ test("a TODO comment is a green expandable chip", async () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-139
+test("a TODO comment is detected in any case, with or without a colon, on one or several lines", async () => {
+  const sources = [
+    "<!-- TODO -->", "<!-- todo cite the slop zone -->", "<!-- Todo: cite -->", "<!--TODO:cite-->",
+    "<!--\nTODO: cite\nsecond line\n-->", "<!--\n  todo cite\n-->",
+  ];
+  for (const source of sources) {
+    const { doc } = await render(`${source}\n`);
+    const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
+    assert.equal(attribute(block!, "data-okf-comment-kind"), "todo", source);
+    assert.ok(hasClass(chips(doc)[0], "okf-chip--todo"), source);
+    assert.equal(textContent(chips(doc)[0]), "TODO", source);
+  }
+  for (const source of ["<!-- TODOS later -->", "<!-- TODO_x -->", "<!-- a TODO later -->", "<!-- note -->"]) {
+    const { doc } = await render(`${source}\n`);
+    const block = findElement(doc, (e) => hasClass(e, "okf-comment"));
+    assert.equal(attribute(block!, "data-okf-comment-kind"), "comment", source);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
+test("a comment body carries its literal edit-mode tag as data", async () => {
+  const tagOf = async (source: string): Promise<string | undefined> => {
+    const { doc } = await render(`${source}\n`);
+    return attribute(findElement(doc, (e) => hasClass(e, "okf-comment-body"))!, "data-okf-tag");
+  };
+  assert.equal(await tagOf("<!-- a plain note -->"), "<!-- -->");
+  assert.equal(await tagOf("<!-- TODO: cite the slop zone -->"), "<!-- TODO -->");
+  assert.equal(await tagOf("<!-- todo lower -->"), "<!-- TODO -->");
+  assert.equal(await tagOf("<!--\nTODO: a\nb\n-->"), "<!-- TODO -->");
+  // The tag is a constant: the comment text never reaches the attribute.
+  assert.equal(await tagOf('<!-- <img src=x onerror="alert(1)"> -->'), "<!-- -->");
+  const inline = await render("a <!-- TODO inline --> b\n");
+  assert.equal(attribute(findElement(inline.doc, (e) => hasClass(e, "okf-comment-body"))!, "data-okf-tag"), "<!-- TODO -->");
+  const thread = await render("<!-- THREAD\nAda (2026-10-16 10:47):\n  first line\n-->\n");
+  const body = findElement(thread.doc, (e) => hasClass(e, "okf-comment-body"));
+  assert.ok(body);
+  assert.equal(attribute(body, "data-okf-tag"), undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-139
 test("the word TODO in prose becomes a green chip and the rest of the sentence is unchanged", async () => {
   const { doc } = await render("We still TODO this part, TODOs and todo stay plain.\n");
   const found = chips(doc);
