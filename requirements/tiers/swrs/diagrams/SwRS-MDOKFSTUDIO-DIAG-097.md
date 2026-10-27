@@ -2,13 +2,19 @@
 type: SwRS
 id: SwRS-MDOKFSTUDIO-DIAG-097
 uuid: bf193063-df1c-402e-99f8-b437900dcd45
-title: A JAR render is bounded in input, output, time and process lifetime
+title: A JAR render is bounded in input, output, time, process lifetime and
+  concurrency
 description: When a JAR render meets a bound on the diagram text, the output,
   the error text or the run time, or is cancelled, the extension SHALL end it
   with a message on the diagram, kill the whole PlantUML process group where it
   started one, keep at most the first 64 KiB of error text followed by the note
   [stderr truncated at 64 KiB], and settle the render exactly once without
-  raising an uncaught exception in the extension host.
+  raising an uncaught exception in the extension host. The extension SHALL run
+  at most 2 PlantUML processes at once, queueing the others, and SHALL reuse the
+  SVG of an earlier successful render of the same diagram text under the same
+  command, arguments, workspace root, security profile and JAR size and
+  modification time, without starting a process; diagram text that reads files
+  or the environment is never reused.
 project: markdown-okf-schema-studio
 scope: diagrams
 lifecycle: draft
@@ -24,6 +30,7 @@ implemented_in_files:
 - src/core/render/plantUmlRenderer.ts
 tested_in_files:
 - test/core/render/diagReq.jar.requirements.test.ts
+- test/core/render/plantUmlCache.test.ts
 - test/core/render/plantUmlRenderer.test.ts
 ---
 
@@ -32,6 +39,19 @@ tested_in_files:
 ### Normative behavior
 
 When a JAR render meets a bound on the diagram text, the output, the error text or the run time, or is cancelled, the extension SHALL end it with a message on the diagram, kill the whole PlantUML process group where it started one, keep at most the first 64 KiB of error text followed by the note [stderr truncated at 64 KiB], and settle the render exactly once without raising an uncaught exception in the extension host.
+
+The extension SHALL run at most 2 PlantUML processes at once and queue the others. It SHALL reuse the SVG of an earlier successful render of the same diagram text under the same command, arguments, workspace root, security profile and JAR size and modification time, without starting a process. Diagram text with an include, import, theme, pragma or environment-reading directive is never reused, and a failed render is never kept.
+
+### Scenario (nominal): An unchanged diagram is not rendered twice
+| Input | Outcome |
+| --- | --- |
+| the same diagram text rendered twice under one JAR | one process starts; the second render returns the same SVG |
+| another diagram text, a replaced JAR, an include directive or an earlier failure | a process starts |
+
+### Scenario (boundary): At most 2 processes run at once
+| Input | Outcome |
+| --- | --- |
+| 5 diagrams in one page | never more than 2 processes run together and all 5 are rendered |
 
 ### Scenario (boundary): Error text is capped at 64 KiB
 | Input | Outcome |
@@ -81,6 +101,7 @@ When a JAR render meets a bound on the diagram text, the output, the error text 
 
 ### Known issues
 - Known issue: The test of the time limit uses a shortened timeout; the 30 s constant itself is asserted separately.
+- Known issue: The cache holds up to 64 diagrams in memory and is not cleared when a file read by an include directive changes, so such diagrams are simply never cached.
 - Known issue: Windows, which has no process group, is untested.
 
 ### Related requirements
@@ -90,4 +111,5 @@ When a JAR render meets a bound on the diagram text, the output, the error text 
 ### Verification notes
 - Method: test/core/render/plantUmlRenderer.test.ts (caps stderr at 64 KiB and notes the truncation; kills a hung child at the timeout with a clear diagnostic with a shortened timeout; cancels an active PlantUML process; spawns detached and kills the process group on POSIX; abort falls back to child.kill; does not group-kill a child that already exited; a child that exits before reading stdin does not raise an uncaught exception; a stdin error settles the render with a diagnostic; settles exactly once when close, error and timeout race; the already cancelled render).
 - Method: test/core/render/diagReq.jar.requirements.test.ts `a diagram text over 1 MiB is refused without a process, a text of exactly 1 MiB is rendered` and `an output over 8 MiB stops the process; an output of exactly 8 MiB is accepted` (1 MiB and 8 MiB boundaries).
+- Method: test/core/render/plantUmlCache.test.ts `a second render of the same source starts no process` and `at most two PlantUML processes run at once`.
 - Criteria: The limits are strictly greater than 1 MiB and 8 MiB, the timeout constant is 30000 ms, the group is killed with a fallback, exited children are untouched, and a render has one result.
