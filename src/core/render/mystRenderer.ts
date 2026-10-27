@@ -10,7 +10,6 @@ import * as path from "node:path";
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { type CheckboxMarker, prepareCheckboxMarkers } from "./checkboxMarkers";
 import { convertCommentMarkers } from "./commentMarkers";
-import { highlightCodeBlocks } from "./highlight";
 import {
   expandVersionAdmonitions,
   labelLinkRoles,
@@ -49,6 +48,18 @@ import {
 import type { BoundedTextRead } from "../security/resource-policy";
 import type { MystIncludeSource, MystRenderContext, MystRenderResult, RenderDiagnostic } from "./mystTypes";
 import { describePlantUmlFileRefusal } from "./plantUmlIncludes";
+
+// @implements_req SwRS-MDOKFSTUDIO-CODE-001
+/**
+ * Shiki and its grammars are about 2.3 MB of the bundle and only a document with a code block needs
+ * them. The extension bundle (esbuild.mjs) points this `require` at `lazy/highlight.js`, which loads
+ * on the first highlighted document; in the unit tests it is the module itself.
+ */
+function highlightCodeBlocks(html: string): string {
+  if (!html.includes("<code")) return html;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return (require("./highlight") as typeof import("./highlight")).highlightCodeBlocks(html);
+}
 
 export { parseMystSource, preloadMystEngine } from "./mystEngine";
 export type { MystIncludeSource, MystRenderContext, MystRenderResult, RenderDiagnostic } from "./mystTypes";

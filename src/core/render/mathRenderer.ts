@@ -1,4 +1,3 @@
-import katex from "katex";
 import { parse, parseFragment, serialize, type DefaultTreeAdapterTypes } from "parse5";
 
 import { BoundedCache } from "./boundedCache";
@@ -45,12 +44,23 @@ export function clearMathCache(): void {
   typesetCache.clear();
 }
 
+/**
+ * KaTeX is about 260 KB of the extension bundle and only a document with an equation needs it. The
+ * bundle (esbuild.mjs) points this `require` at `lazy/katex.js`, which loads on the first equation.
+ */
+function loadKatex(): typeof import("katex").default {
+  type Katex = typeof import("katex").default;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const loaded = require("katex") as Katex & { default?: Katex };
+  return loaded.default ?? loaded;
+}
+
 function typeset(source: string, displayMode: boolean): string {
   const key = `${displayMode ? "d" : "i"}\0${source}`;
   let html = typesetCache.get(key);
   if (html === undefined) {
     try {
-      html = katex.renderToString(source, {
+      html = loadKatex().renderToString(source, {
         displayMode,
         trust: false,
         throwOnError: true,

@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/modules/mermaidPreview.ts
 - src/session/webview.ts
 tested_in_files:
+- test/build/bundleSplit.test.ts
 - test/core/preview/contentPatch.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/core/render/mystFeatures.test.ts
@@ -97,6 +98,12 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - Known issue: There is no live preview of the diagram while it is edited (absent from docs/known-limitations.md).
 - Known issue: A theme change still redraws a hidden Mermaid diagram because the theme observer draws every diagram.
 
+### Scenario (nominal): The renderer loads the diagram types it needs
+- GIVEN a document with a Mermaid figure
+- WHEN the page loads the renderer
+- THEN the script tag is `type="module"` and its entry file is small
+- AND each diagram type and the layout engine are chunks fetched when a diagram needs them
+
 ### Verification notes
 
 - Method: test/core/render/mystFeatures.test.ts (fence and directive, empty diagram: rendered HTML structure)
@@ -107,3 +114,4 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - Method: test/page/diagReq.diagramEdit.requirements.test.ts (a diagram block is hidden while its editor is open and shown again when it closes)
 - Method: line-break tags and the drawn picture have no unit test of the browser entry point mermaidPreview.ts (untested apart from the visual scenarios)
 - Criteria: Both syntaxes give the same figure structure; an empty fence gives an empty diagram element; the script tag appears only with a Mermaid figure; a loaded image replaces the text and carries the rendered state; the stylesheet contains the containment rules and the picture is never larger than its natural size; the block is hidden only while its editor is open.
+- Method: test/build/bundleSplit.test.ts (the renderer entry is small and the rest is split into chunks)
