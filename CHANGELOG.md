@@ -12,6 +12,9 @@
   background thread, a render that a newer edit made useless is stopped once it has run more than 1 s
   and twice the last render time, and the preview waits a little longer after the last keystroke when
   the document is slow to render (twice the last render time, at most 1 s).
+- A table column in the preview never narrows below 5em of text, so a table with many columns no
+  longer wraps words letter by letter ("docu / ment"); a table that no longer fits scrolls sideways
+  or breaks out in Auto width. Edit mode keeps its larger 8em cell minimum.
 - PlantUML through Java (`plantuml.useJar`) now runs with the PlantUML `ALLOWLIST` security profile
   (the workspace folder as allowlist path) and an explicit image size limit of 4096. Includes of files
   inside the workspace still work; URL includes are refused. `JAVA_HOME` is used when it is an

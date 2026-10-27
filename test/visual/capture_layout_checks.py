@@ -827,7 +827,10 @@ def apply_width_shot(page: Page, scenario: dict, failures: list[Failure]) -> Non
     return { column, pane: document.documentElement.clientWidth,
       table: rect(content.querySelector(':scope > table')), figure: rect(content.querySelector(':scope > figure')) };
   }""")
+  # Only single-word cells must stay whole: the 5em column floor (SwRS-MDOKFSTUDIO-LAYOUT-032) can push a
+  # many-column table past the pane, and a multi-word header then wraps between words.
   wrapped = page.evaluate("""() => [...document.querySelectorAll('#sphinx-myst-preview-content > table :where(th, td)')].filter(cell => {
+    if (/\\s/u.test((cell.textContent || '').trim())) return false;
     const range = document.createRange();
     range.selectNodeContents(cell);
     const style = getComputedStyle(cell);

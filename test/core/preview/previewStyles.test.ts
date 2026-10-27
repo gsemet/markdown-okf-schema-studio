@@ -746,6 +746,14 @@ test("overflowing content tables keep short cells whole and show scroll shadows"
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032
+test("content table cells keep a 5em minimum width in the rendered view, the properties table keeps its own", () => {
+  const rule = PREVIEW_THEME_CSS.match(/#sphinx-myst-preview-content table:not\(\.okf-properties\) :where\(th, td\) \{([^}]*)\}/u)?.[1] ?? "";
+  assert.match(rule, /min-width: 5em;/u);
+  // Edit mode keeps its larger cell minimum (it outranks the rendered-view rule by specificity).
+  assert.match(PREVIEW_THEME_CSS, /html\[data-sphinx-preview-edit-mode="on"\] #sphinx-myst-preview-content table :where\(th, td\) \{[^}]*min-width: 8em;/u);
+});
+
 test("frontmatter field actions sit in the editing row with labels and no pseudo-tooltips", () => {
   assert.match(
     PREVIEW_THEME_CSS,

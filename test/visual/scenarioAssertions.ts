@@ -122,6 +122,13 @@ export const GFM_GALLERY_ASSERTIONS: ContentAssertion[] = [
   { message: "two footnote references and their texts", selector: `${MAIN} a[data-footnote-ref]`, count: 2, expr: "document.querySelector('#sphinx-myst-preview-content section.footnotes').textContent.includes('Second footnote text.')" },
   { message: "three task list checkboxes, one checked", selector: `${MAIN} input.myst-checkbox`, count: 3, expr: "document.querySelectorAll('#sphinx-myst-preview-content input.myst-checkbox:checked').length === 1" },
   { message: "the table honours column alignment", selector: `${MAIN} table:not(.myst-raw-html-table table) th:nth-child(3)`, css: { textAlign: "right" } },
+  // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-032
+  {
+    message: "every cell of the table keeps a computed minimum width of 5em",
+    selector: `${MAIN} table:not(.myst-raw-html-table table) :where(th, td)`,
+    min: 1,
+    expr: "[...document.querySelectorAll('#sphinx-myst-preview-content table:not(.myst-raw-html-table table) :where(th, td)')].every((cell) => { const style = getComputedStyle(cell); return Math.abs(parseFloat(style.minWidth) - 5 * parseFloat(style.fontSize)) < 0.5; })",
+  },
   { message: "the raw HTML table is rendered", selector: `${MAIN} .myst-raw-html-table`, count: 1, text: "cell two" },
   { message: "the raw details block is rendered", selector: `${MAIN} details`, count: 1, text: "Raw details" },
   { message: "the autolink is a link", selector: `${MAIN} a[data-sphinx-preview-navigation='https://example.com/gfm']`, count: 1 },
