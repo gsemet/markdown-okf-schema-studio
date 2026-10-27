@@ -39,6 +39,7 @@ const FIRST_ELEMENT_CLEARANCE_CSS = `/*
 // @implements_req SwRS-MDOKFSTUDIO-CORE-034
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-001
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
 // @implements_req SwRS-MDOKFSTUDIO-THEME-001
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-025
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-037
@@ -332,6 +333,12 @@ ${FIRST_ELEMENT_GAP_CSS}
 /* The host carries the spacing (and the first-element clearance) of the frame it wraps. */
 #sphinx-myst-preview-content .sphinx-preview-block-editor-host > .sphinx-preview-block-editor {
   margin: 0;
+}
+
+/* The frame reserves the distance the sticky palette rides down (a block near the top of the page):
+   its top margin collapses with the bar's 3px, so the first lines start below the bar. */
+#sphinx-myst-preview-content .sphinx-preview-block-editor-host > .sphinx-preview-block-editor {
+  margin-top: var(--sphinx-preview-palette-reserve, 0px);
 }
 
 ${FIRST_ELEMENT_CLEARANCE_CSS}

@@ -151,6 +151,10 @@ export interface BlockEdit {
   figurePanelShift?: number;
   /** How far opening the palette and panels scrolled the page down (a close scrolls it back). */
   paletteShift?: number;
+  /** The distance the frame reserves under the sticky palette riding down over it (px; 0 when none). */
+  paletteReserve?: number;
+  /** The pane, bar and tall state the tall frame's sticking line was measured for ("" when not tall). */
+  paletteTopKey?: string;
   /** The element that holds the palette above the frame. */
   host?: HTMLElement;
   hintReplaced?: boolean;
@@ -458,6 +462,7 @@ export interface EditorChrome {
   revealTableToolbar(menu: HTMLElement, cell: Element): void;
   placePaletteAboveFrame(edit: BlockEdit, paletteElement: HTMLElement): void;
   syncPaletteSticky(edit: BlockEdit): void;
+  reservePaletteClearance(edit: BlockEdit): void;
   revealCaretBelowPalette(edit: BlockEdit, textarea: HTMLTextAreaElement): void;
   frameContains(edit: BlockEdit, node: Node | null | undefined): boolean;
   keepTextInPlaceBelowPalette(edit: BlockEdit, textTopBefore: number | undefined): number;

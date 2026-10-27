@@ -540,3 +540,15 @@
 - SwRS-MDOKFSTUDIO-FMSCHEMA-005 (CR 109, round 2): the key column also keeps its width next to a long
   description and a code block in the values, and the Names label never breaks inside the word.
   Verification: `just requirements-lint`.
+- SwRS-MDOKFSTUDIO-PALETTE-021 (CR 123): the block edit toolbar never covers the first lines of the
+  editor or the panels in it: the frame reserves the distance the sticky palette rides down in a
+  narrow pane, the page scroll that keeps the text in place stops at the host's top, and a tall block
+  opened in its middle scrolls the first line seen under the sticky band below the stuck bar.
+  Verification: visual scenarios palette-slash/v27-palette-clears-content-cream-1100 and
+  palette-slash/v28-palette-clears-text-rule-cream-900, `just requirements-lint`.
+- SwRS-MDOKFSTUDIO-PALETTE-021 (CR 123, rework): a block taller than the viewport keeps the clicked
+  text in place and its bar sticks at the top of the pane (under the sticky band when the floating
+  toolbar overlaps only the bar's empty end), covering the first lines; no reserve and no opening
+  scroll-up for it; the caret at the end of a large paste is brought into view whether the bar is
+  stuck or not. Verification: real-window test test/integration/tallBlockScroll.test.ts, visual
+  scenario palette-slash/v27-palette-clears-content-cream-1100, `just requirements-lint`.

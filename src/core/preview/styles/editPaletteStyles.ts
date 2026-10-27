@@ -1,4 +1,5 @@
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-252
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
 /**
  * The edition palette: the pill bar, its popovers and pickers (table grid, emoji, references,
  * colours), the table cell bar, the `/` menu and the link and figure panels.
@@ -50,6 +51,15 @@ export const EDIT_PALETTE_CSS = `
    the width under the toolbar (the variable is 0 then). */
 .sphinx-preview-block-editor-host.sphinx-preview-block-editor--first > .sphinx-preview-edit-palette {
   inset-block-start: calc(var(--sphinx-preview-first-bar-bottom, var(--sphinx-preview-toolbar-bottom, 0px)) + 4px);
+}
+
+/* A frame taller than the pane (CR 123): its bar sticks at the top of the reading area, under the
+   sticky band as it shows (the runtime sets its bottom, following the band), when none of its buttons
+   shares columns with the floating toolbar; the text scrolls under it. Not in short panes, where the bar stays in the flow. */
+@media (min-height: 521px) {
+  .sphinx-preview-block-editor-host[data-sphinx-palette-top="true"]:not([data-sphinx-palette-static="true"]) > .sphinx-preview-edit-palette {
+    inset-block-start: calc(var(--sphinx-preview-palette-top, 0px) + 4px);
+  }
 }
 
 /* Short panes, and a palette that would take over 40% of the viewport (set by the runtime), keep

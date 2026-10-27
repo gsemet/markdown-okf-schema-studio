@@ -266,6 +266,8 @@ export interface FigureEditButtonOptions {
   isEditMode(): boolean;
   /** Opens the block editor on the figure with the form. */
   open(figure: Element): void;
+  /** Top of the strip the button can be pressed in at this column span (below the sticky chrome). */
+  usableTop?(box: { top: number; left: number; right: number; width: number }): number;
 }
 
 export interface FigureEditButton {
@@ -316,7 +318,28 @@ export function installFigureEditButton(
     control = created;
     return created;
   };
-  window.addEventListener("scroll", hide, true);
+  // Places the button over `element` from its box now (a scroll moves the figure under a still pointer).
+  const place = (element: Element): void => {
+    const button = ensure();
+    current = element;
+    const bounds = element.getBoundingClientRect();
+    const left = Math.round(Math.max(8, (bounds.right ?? bounds.left + bounds.width) - 96));
+    // A figure scrolled under the sticky preview controls: the button stays below them, inside the figure.
+    let top = Math.round(bounds.top + 6);
+    const usable = options.usableTop?.({ top, left, right: left + 96, width: 96 });
+    if (usable !== undefined && Number.isFinite(usable) && usable > top) {
+      const lowest = Number.isFinite(bounds.bottom) ? bounds.bottom - 34 : top;
+      top = Math.round(Math.max(top, Math.min(usable + 2, lowest)));
+    }
+    button.style.setProperty("top", top + "px");
+    button.style.setProperty("left", left + "px");
+    button.removeAttribute("hidden");
+  };
+  // A scroll does not raise a mouseover, so the hover never syncs again: follow the figure instead of
+  // hiding the button for good (hiding left it hidden while the figure was still hovered).
+  window.addEventListener("scroll", () => {
+    if (current) place(current);
+  }, true);
 
   return {
     sync(element) {
@@ -324,14 +347,8 @@ export function installFigureEditButton(
         hide();
         return;
       }
-      if (element === current) return;
-      const button = ensure();
-      current = element;
-      const bounds = element.getBoundingClientRect();
-      button.style.setProperty("top", Math.round(bounds.top + 6) + "px");
-      button.style.setProperty(
-        "left", Math.round(Math.max(8, (bounds.right ?? bounds.left + bounds.width) - 96)) + "px");
-      button.removeAttribute("hidden");
+      if (element === current && !control?.hasAttribute("hidden")) return;
+      place(element);
     },
     hide,
     owns(node) {
