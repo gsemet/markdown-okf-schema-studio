@@ -39,7 +39,13 @@ import {
 import { findNode, type MystNode, sourcePositionProperties } from "./mystNode";
 import { isPlantUmlNode, plantUmlFileRequest, walk } from "./mystNormalize";
 import { detectMystSyntax, MAX_EXTENSION_WARNINGS, mystExtensionWarning } from "./mystSyntaxDetect";
-import { applyTableAlignments, collectTableAlignments, type TableAlignmentSpec } from "./mystTables";
+import {
+  applyTableAlignments,
+  applyTableAlignmentsToTree,
+  collectTableAlignments,
+  needsHtmlTablePass,
+  type TableAlignmentSpec,
+} from "./mystTables";
 import type { BoundedTextRead } from "../security/resource-policy";
 import type { MystIncludeSource, MystRenderContext, MystRenderResult, RenderDiagnostic } from "./mystTypes";
 import { describePlantUmlFileRefusal } from "./plantUmlIncludes";
@@ -404,7 +410,17 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
     run: (state) => neutralizeDirectiveErrors(state.ast, state.source.split(/\r\n|\r|\n/u)),
   },
   { name: "normalize nodes", run: (state) => walk(state.ast, state.diagnostics) },
-  { name: "table alignments", run: (state) => collectTableAlignments(state.ast, state.tableAlignments) },
+  {
+    name: "table alignments",
+    run: (state) => {
+      collectTableAlignments(state.ast, state.tableAlignments);
+      if (!needsHtmlTablePass(state.tableAlignments)) {
+        // Pipe tables only: the writer emits the attributes, and the HTML needs no second parse.
+        applyTableAlignmentsToTree(state.ast);
+        state.tableAlignments.length = 0;
+      }
+    },
+  },
 ];
 
 /** The HTML passes, in order, on the writer's output. */

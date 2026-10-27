@@ -6,6 +6,7 @@ import {
   canPatch,
   diagnosticsFitPatch,
   extractMainContent,
+  parsedPageCount,
   planContentPatch,
   reportsReloadedDocument,
   reuseNonce,
@@ -296,4 +297,24 @@ test("the page script is injected verbatim even when it contains replacement pat
   );
   assert.ok(built.html.includes(JSON.stringify(tricky)), "the source path reaches the page script unchanged");
   assert.equal(built.html.split("</body>").length, 2, "the closing tag is not duplicated by a replacement pattern");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+test("P-03: a plan parses the new page only, because the loaded page was analyzed as the previous new page", async () => {
+  const first = await page("# Title\n\nFirst.\n", { requestId: 1001 });
+  const second = await page("# Title\n\nSecond.\n", { requestId: 1003 });
+  const third = await page("# Title\n\nThird.\n", { requestId: 1005 });
+  const nonce = /nonce="([^"]+)"/u.exec(second)?.[1] ?? "";
+  const loadedNonce = /nonce="([^"]+)"/u.exec(first)?.[1] ?? "";
+  assert.notEqual(nonce, "");
+
+  assert.ok(planContentPatch(first, second));
+  // The host records the patched page with the nonce of the page that is loaded.
+  const recorded = reuseNonce(second, nonce, loadedNonce);
+  const before = parsedPageCount();
+  const plan = planContentPatch(recorded, third);
+
+  assert.ok(plan);
+  assert.match(plan.contentHtml, /Third\./u);
+  assert.equal(parsedPageCount() - before, 1);
 });

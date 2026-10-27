@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
+- test/core/render/mystTablesTree.test.ts
 ---
 
 ## Strikethrough, footnotes and pipe tables render as on GitHub
@@ -70,8 +71,15 @@ When prose contains ~~text~~, a footnote reference with its definition, or a GFM
 - WHEN the preview is rendered
 - THEN no alignment is applied
 
+### Scenario (boundary): Source lines of a table without a second parse
+
+- GIVEN a pipe table with plain '---' columns, next to a paragraph with the text 'a --> b'
+- WHEN the preview is rendered
+- THEN the table carries its data-line and data-end-line from the syntax tree and the paragraph text reaches the page as the writer wrote it; only aligned columns, list-tables and raw HTML tables are completed on the written HTML
+
 ### Verification notes
 
 - Method: test/core/render/mystFeatures.test.ts (all six scenarios: unit tests on the render pipeline output).
 - Method: test/core/render/mystPaletteRendering.test.ts (footnote and pipe table scenarios: unit tests on the render pipeline output).
+- Method: test/core/render/mystTablesTree.test.ts (Source lines of a table without a second parse): "a pipe table gets its source lines from the syntax tree, with no second parse of the HTML", "aligned columns and list-tables still go through the HTML pass", "only list-tables, raw HTML tables and aligned columns need the HTML pass".
 - Criteria: Strikethrough elements exist only for double-tilde prose pairs; footnote reference and definition elements are present for defined notes; alignment appears on all cells of aligned columns only.

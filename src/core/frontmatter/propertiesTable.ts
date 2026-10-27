@@ -7,7 +7,13 @@
 
 import type { FieldEntry, FrontmatterResult } from "./okfFrontmatter";
 import type { FrontmatterLinkResult } from "./fileLinks";
-import { annotateSourceMappings, type SourceMappingOptions } from "../mapping/sourceMapping";
+import {
+  PREVIEW_BLOCK_ATTRIBUTE,
+  PREVIEW_DOCUMENT_ATTRIBUTE,
+  SOURCE_FILE_ATTRIBUTE,
+  SOURCE_LINE_ATTRIBUTE,
+  type SourceMappingOptions,
+} from "../mapping/sourceMapping";
 import { stringify } from "yaml";
 import { parse, type DefaultTreeAdapterTypes } from "parse5";
 
@@ -282,9 +288,12 @@ export function renderPropertiesTable(
   const missingRequired = result.missingRequiredFields.length > 0
     ? `<p class="okf-missing-required" data-okf-missing-required role="alert">Missing required fields: ${escapeHtml(result.missingRequiredFields.join(", "))}</p>`
     : "";
-  const sourceLineAttribute = sourceMapping ? ' data-line="1"' : "";
-  const markup = `<section${sourceLineAttribute} data-okf-properties data-okf-available-keys="${availableKeys}" data-okf-available-fields="${availableFields}" data-okf-order="${result.orderMode}" data-okf-schema-found="${result.schemaFound}"${result.additionalPropertiesAllowed === false ? ' data-okf-additional-properties="false"' : ""}><div class="okf-properties-title">Frontmatter properties${badge}</div><table class="okf-properties${withDocs ? " okf-properties-docs" : ""}">${header}<tbody>${rows}${infoRows}</tbody></table>${missingRequired}</section>`;
-  return sourceMapping ? annotateSourceMappings(markup, sourceMapping) : markup;
+  // The table is the first source block: it carries the mapping attributes the sanitizer adds to
+  // the rest of the page.
+  const sourceLineAttribute = sourceMapping
+    ? ` data-line="1" ${SOURCE_FILE_ATTRIBUTE}="${escapeHtml(sourceMapping.activeSourceFile)}" ${SOURCE_LINE_ATTRIBUTE}="1" ${PREVIEW_DOCUMENT_ATTRIBUTE}="${escapeHtml(sourceMapping.documentId)}" ${PREVIEW_BLOCK_ATTRIBUTE}="source-block-1"`
+    : "";
+  return `<section${sourceLineAttribute} data-okf-properties data-okf-available-keys="${availableKeys}" data-okf-available-fields="${availableFields}" data-okf-order="${result.orderMode}" data-okf-schema-found="${result.schemaFound}"${result.additionalPropertiesAllowed === false ? ' data-okf-additional-properties="false"' : ""}><div class="okf-properties-title">Frontmatter properties${badge}</div><table class="okf-properties${withDocs ? " okf-properties-docs" : ""}">${header}<tbody>${rows}${infoRows}</tbody></table>${missingRequired}</section>`;
 }
 
 /**

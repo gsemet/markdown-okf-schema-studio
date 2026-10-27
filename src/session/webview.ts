@@ -3,7 +3,6 @@ import * as path from "node:path";
 import type { AssetResolver } from "../host-api/assetResolver";
 import { type FrontmatterResult } from "../core/frontmatter/okfFrontmatter";
 import { renderPropertiesTable } from "../core/frontmatter/propertiesTable";
-import { annotateSourceMappings } from "../core/mapping/sourceMapping";
 import { createContentSecurityPolicy, createNonce } from "../core/security/csp";
 import {
   PREVIEW_ACCESSIBILITY_CSS,
@@ -210,13 +209,8 @@ export function buildPreviewWebviewHtml(
       value: stylesheetPath,
     });
   };
-  const mappedHtml = scrollContext
-    ? annotateSourceMappings(sphinxHtml, {
-      documentId: scrollContext.documentId,
-      activeSourceFile: scrollContext.activeSourceFile,
-    })
-    : sphinxHtml;
-  const rewritten = rewriteSphinxHtml(mappedHtml, {
+  // The sanitizer's one parse also numbers the source blocks (`sourceMapping`).
+  const rewritten = rewriteSphinxHtml(sphinxHtml, {
     outputRoot: outputDirectory,
     policy,
     nonce,

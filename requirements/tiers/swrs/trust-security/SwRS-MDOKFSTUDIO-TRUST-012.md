@@ -28,6 +28,7 @@ implemented_in_files:
 - src/session/webview.ts
 tested_in_files:
 - test/integration/trusted-suite.ts
+- test/security/cspInjection.test.ts
 - test/security/html-policy.test.ts
 - test/security/trustReq.requirements.test.ts
 - test/session/previewRuntimeFile.test.ts
@@ -83,6 +84,7 @@ When the extension builds the policy of a page, it SHALL set its default source 
 
 ### Verification notes
 - Method: test/security/html-policy.test.ts (generates a restrictive nonce-bearing CSP; adds the CSP as a head meta without retaining a weaker policy) checks the starting directive, the script, image and no-wildcard rows and the replacement of the policy of the head; the policy in the body is not asserted.
+- Method: test/security/cspInjection.test.ts (the policy is spliced into the head and the rest of the page is left as written; a weaker policy meta in the head is dropped, in any case and quoting, while the one in the body stays; a document without a head element still gets the policy) checks the scenario The policy of the document is replaced (head meta replaced, body meta kept); a head-like text in an attribute of the root element falls back to the tree. The splice is a string operation on the head of the page the sanitizer wrote, with the tree only for a document without a head.
 - Method: test/session/previewRuntimeFile.test.ts (PERF-11: the static stylesheet is a bundle file; the page keeps only the per-render rule inline) checks the policy read back from the rendered page: the style-src nonce and the absence of unsafe-inline.
 - Method: test/integration/trusted-suite.ts (the page carries a Content-Security-Policy without unsafe-inline or a wildcard default) checks the rendered page; only the script-src, img-src, no-wildcard and no-unsafe parts are asserted.
 - Method: test/security/trustReq.requirements.test.ts (fonts and media load only from the webview source; the page may open no connection, frame, object or worker; the page may not change its base address or submit a form; a status page carries the policy and its own nonce and no script) checks the font-src, media-src, connect-src, frame-src, object-src, worker-src, base-uri and form-action rows one by one and the Status page scenario, built with buildStatusWebviewHtml in src/session/webview.ts. The browser effects of the table (a blocked script, style attribute, remote image, remote font, fetch call, base element) are deduced from the policy, not run in a browser.

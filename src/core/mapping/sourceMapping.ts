@@ -1,5 +1,3 @@
-import { parseFragment, serialize, type DefaultTreeAdapterTypes } from "parse5";
-
 export const SOURCE_FILE_ATTRIBUTE = "data-sphinx-source-file";
 export const SOURCE_LINE_ATTRIBUTE = "data-sphinx-source-line";
 export const PREVIEW_DOCUMENT_ATTRIBUTE = "data-sphinx-preview-document";
@@ -58,52 +56,6 @@ export function sourceRangeForLines(
 
 export function normalizeSourceFileIdentity(value: string): string {
   return value.replace(/\\/gu, "/");
-}
-
-function childNodes(node: DefaultTreeAdapterTypes.Node): DefaultTreeAdapterTypes.Node[] {
-  return "childNodes" in node ? node.childNodes : [];
-}
-
-function attributeValue(element: DefaultTreeAdapterTypes.Element, name: string): string | undefined {
-  return element.attrs.find((attribute) => attribute.name === name)?.value;
-}
-
-function setAttributeValue(element: DefaultTreeAdapterTypes.Element, name: string, value: string): void {
-  const existing = element.attrs.find((attribute) => attribute.name === name);
-  if (existing) {
-    existing.value = value;
-  } else {
-    element.attrs.push({ name, value });
-  }
-}
-
-export function annotateSourceMappings(html: string, options: SourceMappingOptions): string {
-  const fragment = parseFragment(html);
-  let blockNumber = 0;
-
-  const visit = (node: DefaultTreeAdapterTypes.Node): void => {
-    if ("tagName" in node && "attrs" in node) {
-      const sourceLine = attributeValue(node, SOURCE_LINE_ATTRIBUTE)
-        ?? attributeValue(node, "data-line");
-      const parsedLine = Number(sourceLine);
-      if (sourceLine && /^[1-9]\d*$/u.test(sourceLine) && Number.isSafeInteger(parsedLine)) {
-        setAttributeValue(
-          node,
-          SOURCE_FILE_ATTRIBUTE,
-          attributeValue(node, SOURCE_FILE_ATTRIBUTE) || options.activeSourceFile,
-        );
-        setAttributeValue(node, SOURCE_LINE_ATTRIBUTE, sourceLine);
-        setAttributeValue(node, PREVIEW_DOCUMENT_ATTRIBUTE, options.documentId);
-        setAttributeValue(node, PREVIEW_BLOCK_ATTRIBUTE, `source-block-${++blockNumber}`);
-      }
-    }
-    for (const child of childNodes(node)) {
-      visit(child);
-    }
-  };
-
-  visit(fragment);
-  return serialize(fragment);
 }
 
 export function parseSourceMappings(

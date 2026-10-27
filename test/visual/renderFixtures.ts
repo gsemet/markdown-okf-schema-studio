@@ -25,7 +25,7 @@ import {
 import { analyzeFrontmatter } from "../../src/core/frontmatter/okfFrontmatter";
 import { nodeSchemaFiles } from "../../src/node-services/schemaFiles";
 import { renderPropertiesTable } from "../../src/core/frontmatter/propertiesTable";
-import { annotateSourceMappings, sourceRangeForLines } from "../../src/core/mapping/sourceMapping";
+import { sourceRangeForLines } from "../../src/core/mapping/sourceMapping";
 import { rewriteSphinxHtml, ResolvedResource } from "../../src/core/security/html-sanitizer";
 import { RUNTIME_CONTEXT_ATTRIBUTE, serializeRuntimeContext } from "../../src/core/protocol/bootContext";
 import {
@@ -134,11 +134,7 @@ async function renderPage(identity: PageIdentity): Promise<string[]> {
       uri: `${pathToFileURL(resourcePath).toString()}${resourceReferenceSuffix(request)}`,
     };
   };
-  const mappedHtml = annotateSourceMappings(html, {
-    documentId: pathToFileURL(sourcePath).toString(),
-    activeSourceFile: sourcePath,
-  });
-  const rewritten = rewriteSphinxHtml(wrap(mappedHtml, ""), {
+  const rewritten = rewriteSphinxHtml(wrap(html, ""), {
     outputRoot: documentDirectory,
     policy,
     nonce: "visual-test",
