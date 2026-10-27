@@ -12,6 +12,7 @@ import { RenderingController } from "../../src/session/features/rendering";
 import { PageMessageDispatcher } from "../../src/session/pageMessages";
 import { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
+import { createMemoryLogger } from "../../src/host-memory/memoryLogger";
 
 const DOCUMENT = "file:///notes/doc.md";
 
@@ -50,6 +51,7 @@ function harness(options: { stage?: boolean; activeEdit?: { editId: string; revi
     live: new Set<unknown>([session]),
     matchesCurrent: PreviewManager.prototype.matchesCurrent,
     has: () => true,
+    host: { logger: createMemoryLogger() },
     edits: { postEditSourceError: (_preview: unknown, _message: unknown, text: string) => errors.push(text) },
     sourceEdits: { postCheckboxResult: (_preview: unknown, _message: unknown, result: { error?: string }) => errors.push(String(result.error)) },
     frontmatter: { postEditError: (_preview: unknown, _message: unknown, text: string) => errors.push(text) },

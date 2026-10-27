@@ -11,6 +11,7 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { revisionOfStage } from "../sessionDocuments";
+import { fireAndForget } from "../../host-api/logger";
 
 /** The whole lines `first` to `last` (zero-based) of a document, as an editor selection. */
 export function lineSelection(document: HostDocument, first: number, last: number): TextRange {
@@ -57,13 +58,13 @@ export class HistoryController {
     const history = this.historyOf(preview);
     const state = { canBack: history.canBack(), canForward: history.canForward() };
     preview.probe.lastHistoryState = state;
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewHistoryState",
       ...state,
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
-    });
+    }), "postToPage");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-059
@@ -102,7 +103,7 @@ export class HistoryController {
       preview.scroll.lastSourceScrollLine = target.line;
       // The stored line is now the reader's place: a stale anchor must not overwrite it on the next jump.
       preview.scroll.anchor = { line: target.line, owner: "editor", documentId: preview.documentUri };
-      void preview.postToPage({
+      fireAndForget(this.manager.host.logger, preview.postToPage({
         type: "sourceScroll",
         documentId: stage.activeDocumentIdentity,
         revision: revisionOfStage(stage),
@@ -110,7 +111,7 @@ export class HistoryController {
         line: target.line,
         // A history move scrolls even when the preview does not follow the editor.
         reveal: true,
-      });
+      }), "postToPage");
       return;
     }
     try {
@@ -122,9 +123,9 @@ export class HistoryController {
       // The document did not change, so the position does not move either.
       history.restore(before);
       this.postHistoryState(preview);
-      void host.ui.showWarning(
+      fireAndForget(host.logger, host.ui.showWarning(
         `Markdown OKF-Schema Studio could not go ${direction}: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      ), "showWarning");
     }
   }
 }

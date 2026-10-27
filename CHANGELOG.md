@@ -5,6 +5,9 @@
 - Link-target search by name (wiki-style links) skips `node_modules`, `.git`, `_build`, `.venv` and
   `venv`, no longer applies VS Code's `files.exclude` (files hidden by it can now be found) and stops
   at 50 matches per root, so a name matching more files may resolve from the first 50 only.
+- Failures of work the extension runs in the background (saving a display choice, refreshing the
+  preview, moving the comments of a renamed file) are now written to the "Markdown OKF-Schema Studio"
+  output channel (View > Output) instead of the developer console.
 - PlantUML through Java (`plantuml.useJar`) now runs with the PlantUML `ALLOWLIST` security profile
   (the workspace folder as allowlist path) and an explicit image size limit of 4096. Includes of files
   inside the workspace still work; URL includes are refused. `JAVA_HOME` is used when it is an

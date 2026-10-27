@@ -19,6 +19,7 @@ import { resetRenderHooksForTests } from "../core/render/renderPipeline";
 import { createVscodePanelGroups, type VscodePanelGroups } from "./groupLock";
 import { createVscodePreviewPanel, type VscodePreviewPanel } from "./previewPanel";
 import { createVscodeHost, type VscodeHost } from "./vscodeHost";
+import { fireAndForget } from "../host-api/logger";
 
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-001
 /** The command that opens the side preview. */
@@ -166,9 +167,9 @@ export class StudioActivation {
           ? { preview: false, viewColumn: this.columnOutsideSidePreview(sidePreviewForOpen.panel.column) }
           : { preview: false });
       } catch (error) {
-        void host.ui.showError(
+        fireAndForget(host.logger, host.ui.showError(
           "Cannot open " + uri.fsPath + ": " + (error instanceof Error ? error.message : String(error)),
-        );
+        ), "showError");
         return;
       }
     }
@@ -176,9 +177,9 @@ export class StudioActivation {
     const document = textDocument ? host.documents.of(textDocument) : undefined;
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-010
     if (!document || document.path === undefined || !isDocumentEligible(document)) {
-      void host.ui.showInformation(
+      fireAndForget(host.logger, host.ui.showInformation(
         "Open a Markdown file to use Markdown OKF-Schema Studio.",
-      );
+      ), "showInformation");
       return;
     }
     const workspaceFolder = host.workspace.folderOf(document.path);

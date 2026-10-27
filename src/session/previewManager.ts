@@ -52,6 +52,7 @@ import { isDocumentEligible, isPathWithin, revisionOfStage } from "./sessionDocu
 import { SharedRenders } from "./sharedRenders";
 import { SharedLinkedTargetWatches, SharedWatchers } from "./sharedWatchers";
 import { WorkspaceChoices } from "./workspaceChoices";
+import { fireAndForget } from "../host-api/logger";
 
 /** The identity a page message names, as the render gate compares it. */
 export interface PageMessageIdentity {
@@ -223,13 +224,13 @@ export class PreviewManager {
       !candidate.disposed && candidate.panel.active && candidate.edits.lock.pageEditorOpen);
     const stage = session?.stage;
     if (!session || !stage) return false;
-    void session.postToPage({
+    fireAndForget(this.host.logger, session.postToPage({
       type: "previewEditCommand",
       command,
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
-    });
+    }), "postToPage");
     return true;
   }
 
@@ -477,11 +478,11 @@ export class PreviewManager {
 
   /** Renders `document` in the session; a failure shows the error status. */
   public startRender(session: PreviewSession, document: HostDocument): void {
-    void this.requestDocument(session, document).catch((error: unknown) => {
+    fireAndForget(this.host.logger, this.requestDocument(session, document).catch((error: unknown) => {
       if (this.live.has(session) && !session.disposed) {
         this.rendering.setStatus(session, "error", error instanceof Error ? error.message : String(error));
       }
-    });
+    }), "requestDocument");
   }
 
   /**
@@ -506,7 +507,7 @@ export class PreviewManager {
     const queue = latest;
     const chain = (this.switchChains.get(panel) ?? Promise.resolve())
       .then(() => this.edits.flushPageEdits(session))
-      .catch((error: unknown) => console.error("Failed to flush the open editor before the switch.", error))
+      .catch((error: unknown) => this.host.logger.error("Failed to flush the open editor before the switch.", error))
       .then(() => {
         const target = queue.settle();
         if (session.disposed || !this.live.has(session)) {
@@ -607,7 +608,7 @@ export class PreviewManager {
     this.rendering.showPending(session, true, "Following the active Markdown editor.");
     // After the pending page, which clears the state: the render of the returned-to document reads it.
     session.state = session.states.get(session.documentUri);
-    void this.rendering.refreshPreviewDocument(session, document);
+    fireAndForget(this.host.logger, this.rendering.refreshPreviewDocument(session, document), "refreshPreviewDocument");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-143

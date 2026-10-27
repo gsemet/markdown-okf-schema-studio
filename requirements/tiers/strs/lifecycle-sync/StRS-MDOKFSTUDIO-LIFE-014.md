@@ -22,6 +22,7 @@ user_need: As a reader, I reload the window and my previews come back on the
   of that preview lingers.
 derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-014
+- SwRS-MDOKFSTUDIO-LIFE-002
 - SwRS-MDOKFSTUDIO-LIFE-038
 - SwRS-MDOKFSTUDIO-LIFE-071
 - SwRS-MDOKFSTUDIO-LIFE-125

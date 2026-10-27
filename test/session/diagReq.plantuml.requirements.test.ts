@@ -17,6 +17,7 @@ import { HostRequestController } from "../../src/session/features/hostRequests";
 import { RenderingController } from "../../src/session/features/rendering";
 import { PreviewManager } from "../../src/session/previewManager";
 import type { PreviewSession } from "../../src/session/previewSession";
+import { createMemoryLogger } from "../../src/host-memory/memoryLogger";
 
 const DOCUMENT = "file:///notes/doc.md";
 
@@ -75,9 +76,11 @@ test("an include request is answered once with the request's edit id: the file, 
         return Promise.resolve(true);
       },
     } as unknown as PreviewSession;
-    const requests = Object.create(HostRequestController.prototype) as HostRequestController;
+    const requests = Object.assign(Object.create(HostRequestController.prototype) as HostRequestController, {
+      manager: { host: { logger: createMemoryLogger() } },
+    });
     const manager = {
-      host: { workspace: { trusted: true } },
+      host: { logger: createMemoryLogger(), workspace: { trusted: true } },
       activePathOf: () => documentPath,
       canonicalPath: (value: string) => value,
       requests,
@@ -242,9 +245,11 @@ test("an include request is refused for the Java engine and for a file id the ho
       plantUmlEngineSettings: { useJar: true },
       postToPage: (message: Record<string, unknown>) => { posted.push(message); return Promise.resolve(true); },
     } as unknown as PreviewSession;
-    const requests = Object.create(HostRequestController.prototype) as HostRequestController;
+    const requests = Object.assign(Object.create(HostRequestController.prototype) as HostRequestController, {
+      manager: { host: { logger: createMemoryLogger() } },
+    });
     const manager = {
-      host: { workspace: { trusted: true } },
+      host: { logger: createMemoryLogger(), workspace: { trusted: true } },
       activePathOf: () => documentPath,
       canonicalPath: (value: string) => value,
       requests,

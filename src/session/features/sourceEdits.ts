@@ -29,6 +29,7 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { currentPreviewDocument, previewReadOnlyReason } from "../sessionDocuments";
+import { fireAndForget } from "../../host-api/logger";
 
 type BlocksOp = "copy" | "cut" | "paste";
 
@@ -62,14 +63,14 @@ export class SourceEditController {
     message: PageMessageOf<"previewCheckboxToggle">,
     result: { saved: true } | { error: string },
   ): void {
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewCheckboxResult",
       documentId: message.documentId,
       revision: message.revision,
       requestId: message.requestId,
       editId: message.editId,
       ...result,
-    });
+    }), "postToPage");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-GFM-021
@@ -108,14 +109,14 @@ export class SourceEditController {
     message: PageMessageOf<"previewLabelRename">,
     result: { ok: true; remainingRefs: number } | { ok: false; reason: string },
   ): void {
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewLabelRenameResult",
       documentId: message.documentId,
       revision: message.revision,
       requestId: message.requestId,
       editId: message.editId,
       ...result,
-    });
+    }), "postToPage");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-005
@@ -171,14 +172,14 @@ export class SourceEditController {
     message: PageMessageOf<"previewThreadReply" | "previewThreadDelete">,
     result: { ok: true } | { ok: false; reason: string },
   ): void {
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type,
       documentId: message.documentId,
       revision: message.revision,
       requestId: message.requestId,
       editId: message.editId,
       ...result,
-    });
+    }), "postToPage");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-186
@@ -246,13 +247,13 @@ export class SourceEditController {
     message: PageMessageOf<"previewBlockMove">,
     result: { ok: true; line: number } | { ok: false; reason: string },
   ): void {
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewBlockMoveResult",
       documentId: message.documentId,
       revision: message.revision,
       requestId: message.requestId,
       ...result,
-    });
+    }), "postToPage");
   }
 
   /**
@@ -313,14 +314,14 @@ export class SourceEditController {
     op: BlocksOp,
     result: { ok: true } | { ok: false; reason: string },
   ): void {
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewBlocksResult",
       documentId: message.documentId,
       revision: message.revision,
       requestId: message.requestId,
       op,
       ...result,
-    });
+    }), "postToPage");
   }
 
   /** Read-only, open-editor and stale-version refusals shared by copy, cut and paste of blocks. */

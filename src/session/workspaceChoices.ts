@@ -31,6 +31,7 @@ import {
   type ViewPreferenceKey,
   type ViewPreferences,
 } from "../core/state/previewViewPreferences";
+import { fireAndForget } from "../host-api/logger";
 
 /** Storage key of the edit mode the next preview starts in. */
 export const EDIT_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.editMode";
@@ -62,18 +63,20 @@ export class WorkspaceChoices {
       return;
     }
     this.persistWarned = true;
-    void this.host.ui.showWarning(
+    fireAndForget(this.host.logger, this.host.ui.showWarning(
       "The Markdown preview could not save your display choice; it holds until VS Code closes.",
-    );
+    ), "showWarning");
   }
 
   /** Reads the stored choices of the workspace; until then, the choices are the defaults. */
   public load(storage: KeyValueStore): void {
     this.storage = storage;
     this.collapsedDescriptions = loadCollapsedMap(storage);
-    void migrateLegacyCollapsedKeys(storage, this.collapsedDescriptions).catch((error: unknown) => {
-      console.error("Failed to migrate the per-document description state.", error);
-    });
+    fireAndForget(
+      this.host.logger,
+      migrateLegacyCollapsedKeys(storage, this.collapsedDescriptions),
+      "Migrating the per-document description state",
+    );
     this.themeMode = readPreviewThemeMode(storage);
     this.preferences = readViewPreferences(storage);
   }
@@ -93,13 +96,13 @@ export class WorkspaceChoices {
    * user is the one of the repository of `documentId` (a document or folder URI).
    */
   public refreshThreadAuthor(documentId: string | undefined): void {
-    void resolveAuthor({
+    fireAndForget(this.host.logger, resolveAuthor({
       setting: readCommentsConfiguration(this.host.settings.section(COMMENTS_CONFIGURATION_SECTION, documentId)).authorName,
       gitName: documentId ? () => this.host.vcs.userName(documentId) : undefined,
       osUserName,
     }).then((author) => {
       this.author = author;
-    }, () => undefined);
+    }, () => undefined), "resolveAuthor");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
@@ -116,15 +119,15 @@ export class WorkspaceChoices {
     if (!storage) {
       return;
     }
-    void writePreviewThemeMode(storage, mode).then(
+    fireAndForget(this.host.logger, writePreviewThemeMode(storage, mode).then(
       () => {
         this.persistWarned = false;
       },
       (error: unknown) => {
-        console.error("Failed to persist the Markdown preview theme mode.", error);
+        this.host.logger.error("Failed to persist the Markdown preview theme mode.", error);
         this.warnNotSaved();
       },
-    );
+    ), "writePreviewThemeMode");
   }
 
   /** Forgets the theme mode (session and workspace). */
@@ -147,15 +150,15 @@ export class WorkspaceChoices {
     if (!storage) {
       return;
     }
-    void writeViewPreferences(storage, this.preferences).then(
+    fireAndForget(this.host.logger, writeViewPreferences(storage, this.preferences).then(
       () => {
         this.persistWarned = false;
       },
       (error: unknown) => {
-        console.error("Failed to persist the Markdown preview view preferences.", error);
+        this.host.logger.error("Failed to persist the Markdown preview view preferences.", error);
         this.warnNotSaved();
       },
-    );
+    ), "writeViewPreferences");
   }
 
   /** The stored edit mode, as stored (`true` starts the next preview in edit mode). */
@@ -165,7 +168,7 @@ export class WorkspaceChoices {
 
   /** Stores the edit mode the next preview starts in. */
   public setEditMode(editMode: boolean): void {
-    void this.storage?.update(EDIT_MODE_STORAGE_KEY, editMode);
+    fireAndForget(this.host.logger, this.storage?.update(EDIT_MODE_STORAGE_KEY, editMode), "Storing the edit mode");
   }
 
   /** The palette mode the next page starts in: the stored one, else the setting. */
@@ -195,7 +198,7 @@ export class WorkspaceChoices {
     }
     if (this.collapsedDescriptions.peek(documentUri) !== collapsed) {
       this.collapsedDescriptions.set(documentUri, collapsed);
-      void saveCollapsedMap(storage, this.collapsedDescriptions);
+      fireAndForget(this.host.logger, saveCollapsedMap(storage, this.collapsedDescriptions), "saveCollapsedMap");
     }
   }
 

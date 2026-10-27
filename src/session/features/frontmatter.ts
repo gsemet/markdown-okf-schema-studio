@@ -18,6 +18,7 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { currentPreviewDocument, revisionOfStage } from "../sessionDocuments";
+import { fireAndForget } from "../../host-api/logger";
 
 /** The watchers of one linked target: the host's one and the direct operating-system one. */
 export interface LinkedTargetWatcher {
@@ -280,14 +281,14 @@ export class FrontmatterController {
       preview.webview = { ...preview.webview, html };
       preview.page.propertiesTableSeq += 1;
       preview.page.propertiesTableAwaited = preview.page.propertiesTableSeq;
-      void preview.postToPage({
+      fireAndForget(this.manager.host.logger, preview.postToPage({
         type: "previewPropertiesTable",
         documentId: stage.activeDocumentIdentity,
         revision: revisionOfStage(stage),
         requestId: stage.requestId,
         seq: preview.page.propertiesTableSeq,
         markup,
-      });
+      }), "postToPage");
       return;
     }
     this.manager.rendering.setPanelHtml(preview, html);
@@ -303,33 +304,33 @@ export class FrontmatterController {
     if (message.flush === true) {
       // The page is about to be replaced: only a host warning tells the reader the text was dropped.
       const field = message.newFieldName ?? message.fieldName;
-      void this.manager.host.ui.showWarning(flushRefusalMessage(
+      fireAndForget(this.manager.host.logger, this.manager.host.ui.showWarning(flushRefusalMessage(
         field ? `the frontmatter field "${field}"` : "a frontmatter field",
         error,
-      ));
+      )), "showWarning");
     }
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewFrontmatterResult",
       documentId: message.documentId,
       revision: message.revision,
       requestId: message.requestId,
       editId: message.editId,
       error,
-    });
+    }), "postToPage");
   }
 
   private postEditSaved(
     preview: PreviewSession,
     message: PageMessageOf<"previewFrontmatterSave">,
   ): void {
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewFrontmatterResult",
       documentId: message.documentId,
       revision: message.revision,
       requestId: message.requestId,
       editId: message.editId,
       saved: true,
-    });
+    }), "postToPage");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-058

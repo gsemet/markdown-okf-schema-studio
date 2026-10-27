@@ -13,6 +13,7 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { isDocumentEligible, revisionOfStage } from "../sessionDocuments";
+import { fireAndForget } from "../../host-api/logger";
 
 /** The page's view state and the reader's choices. */
 export class ViewStateController {
@@ -37,7 +38,7 @@ export class ViewStateController {
     // rendering, so it is saved from the page and only a document edit needs a writable preview.
     router.on("previewPaletteModeChanged", (message, preview) => {
       if (!preview.readOnly && isPaletteMode(message.mode)) {
-        void manager.choices.setPaletteMode(message.mode);
+        fireAndForget(manager.host.logger, manager.choices.setPaletteMode(message.mode), "setPaletteMode");
       }
     });
     // @implements_req SwRS-MDOKFSTUDIO-MYST-081
@@ -69,7 +70,7 @@ export class ViewStateController {
       this.recordPreviewState(preview, value);
       if (preview.document) {
         manager.prepareRefresh(preview);
-        void manager.rendering.refreshPreviewDocument(preview, preview.document);
+        fireAndForget(manager.host.logger, manager.rendering.refreshPreviewDocument(preview, preview.document), "refreshPreviewDocument");
       }
     });
   }
@@ -106,13 +107,13 @@ export class ViewStateController {
   public postShowComments(preview: PreviewSession): void {
     const stage = preview.stage;
     if (preview.disposed || !stage) return;
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewShowComments",
       showComments: preview.configuration.showComments,
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
-    });
+    }), "postToPage");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-THEME-016
@@ -121,19 +122,19 @@ export class ViewStateController {
     const { manager } = this;
     const stage = preview.stage;
     if (stage) {
-      void preview.postToPage({
+      fireAndForget(this.manager.host.logger, preview.postToPage({
         type: "themeChanged",
         themeKind: manager.host.theme.kind,
         documentId: stage.activeDocumentIdentity,
         revision: revisionOfStage(stage),
         requestId: stage.requestId,
-      });
+      }), "postToPage");
     }
     if (preview.document && isDocumentEligible(preview.document)) {
       // The page re-themes itself at once; the render with the new theme waits for an open editor.
       const document = preview.document;
       manager.edits.deferWhileEditing(preview, "theme-render", () => {
-        if (!preview.disposed) void manager.rendering.refreshPreviewDocument(preview, document);
+        if (!preview.disposed) fireAndForget(manager.host.logger, manager.rendering.refreshPreviewDocument(preview, document), "refreshPreviewDocument");
       });
     }
   }

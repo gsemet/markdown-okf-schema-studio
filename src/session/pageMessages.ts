@@ -18,6 +18,7 @@ import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
 import { LABEL_GONE, MALFORMED_TOGGLE, STALE_REQUEST } from "../core/edits/sourceEdits";
 import { previewReadOnlyReason, revisionOfStage } from "./sessionDocuments";
+import { fireAndForget } from "../host-api/logger";
 
 /** What a page message handler returns: the work it started, when a caller may wait for it. */
 export type PageMessageResult = PromiseLike<void> | void;
@@ -162,21 +163,21 @@ export class PageMessageDispatcher {
     const identity = { documentId: value.documentId, revision: value.revision, requestId: value.requestId };
     switch (value.type) {
       case "previewLabelRename":
-        void preview.postToPage({ ...identity, type: "previewLabelRenameResult", editId: value.editId, ok: false, reason: LABEL_GONE });
+        fireAndForget(this.manager.host.logger, preview.postToPage({ ...identity, type: "previewLabelRenameResult", editId: value.editId, ok: false, reason: LABEL_GONE }), "postToPage");
         return;
       case "previewBlockMove":
-        void preview.postToPage({ ...identity, type: "previewBlockMoveResult", ok: false, reason: STALE_REQUEST });
+        fireAndForget(this.manager.host.logger, preview.postToPage({ ...identity, type: "previewBlockMoveResult", ok: false, reason: STALE_REQUEST }), "postToPage");
         return;
       case "previewBlocksCopy":
       case "previewBlocksCut":
       case "previewBlocksPaste":
-        void preview.postToPage({
+        fireAndForget(this.manager.host.logger, preview.postToPage({
           ...identity,
           type: "previewBlocksResult",
           op: value.type === "previewBlocksCopy" ? "copy" : value.type === "previewBlocksCut" ? "cut" : "paste",
           ok: false,
           reason: STALE_REQUEST,
-        });
+        }), "postToPage");
         return;
       case "previewThreadReply":
       case "previewThreadDelete":
@@ -186,7 +187,7 @@ export class PageMessageDispatcher {
       case "previewPickImage":
       case "previewPasteImage":
       case "previewPasteHtml":
-        void preview.postToPage({ ...identity, type: `${value.type}Result`, editId: value.editId, ok: false, reason: STALE_REQUEST });
+        fireAndForget(this.manager.host.logger, preview.postToPage({ ...identity, type: `${value.type}Result`, editId: value.editId, ok: false, reason: STALE_REQUEST }), "postToPage");
         return;
       default:
         return;

@@ -18,6 +18,7 @@ import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { currentPreviewDocument, isDocumentEligible, revisionOfStage } from "../sessionDocuments";
 import { OWN_EDIT_ECHO_MS } from "./scrollSync";
+import { fireAndForget } from "../../host-api/logger";
 
 /** The block edit the host holds for the page's open inline editor. */
 export interface ActiveBlockEdit {
@@ -100,16 +101,16 @@ export class BlockEditController {
       const where = message.line !== undefined && message.endLine !== undefined
         ? `the block at lines ${message.line}-${message.endLine}`
         : "a block";
-      void this.manager.host.ui.showWarning(flushRefusalMessage(where, error));
+      fireAndForget(this.manager.host.logger, this.manager.host.ui.showWarning(flushRefusalMessage(where, error)), "showWarning");
     }
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewEditSource",
       documentId: message.documentId,
       revision: message.revision,
       requestId: message.requestId,
       editId: message.editId,
       error,
-    });
+    }), "postToPage");
   }
 
   private currentSourceEdit(
@@ -142,7 +143,7 @@ export class BlockEditController {
         return;
       }
       this.openPageEditor(preview, message);
-      void preview.postToPage({
+      fireAndForget(this.manager.host.logger, preview.postToPage({
         type: "previewEditSource",
         documentId: message.documentId,
         revision: message.revision,
@@ -152,7 +153,7 @@ export class BlockEditController {
         endLine: message.endLine,
         originalText: "",
         insertAfterLine: message.insertAfterLine,
-      });
+      }), "postToPage");
       return;
     }
     const source = this.currentSourceEdit(preview, message);
@@ -162,7 +163,7 @@ export class BlockEditController {
     }
     const originalText = source.document.getText().slice(source.start, source.end);
     this.openPageEditor(preview, message);
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewEditSource",
       documentId: message.documentId,
       revision: message.revision,
@@ -171,7 +172,7 @@ export class BlockEditController {
       line: message.line,
       endLine: message.endLine,
       originalText,
-    });
+    }), "postToPage");
   }
 
   /** The page shows an inline editor from now on: page updates wait for it to close (STAB-03). */
@@ -263,7 +264,7 @@ export class BlockEditController {
     }
     this.releaseActiveBlockEdit(preview, refreshes);
     if (refreshes && preview.document) {
-      void this.manager.rendering.refreshPreviewDocument(preview, preview.document);
+      fireAndForget(this.manager.host.logger, this.manager.rendering.refreshPreviewDocument(preview, preview.document), "refreshPreviewDocument");
     }
   }
 
@@ -299,7 +300,7 @@ export class BlockEditController {
     // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
     // CR 134: the text editor scrolls to the edit; the page must not follow that echo.
     preview.scroll.ownEditUntil = Infinity;
-    void this.manager.host.documents.applyEdits(source.document, [textEdit]).then((applied) => {
+    fireAndForget(this.manager.host.logger, this.manager.host.documents.applyEdits(source.document, [textEdit]).then((applied) => {
       preview.scroll.ownEditUntil = Date.now() + OWN_EDIT_ECHO_MS;
       if (preview.edits.active !== edit) {
         return;
@@ -325,7 +326,7 @@ export class BlockEditController {
         edit.lastMessage,
         error instanceof Error ? error.message : String(error),
       );
-    });
+    }), "applyEdits");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-191
@@ -484,11 +485,11 @@ export class BlockEditController {
       return;
     }
     preview.edits.watchedPageEditorId = editId;
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewEditorWatch",
       documentId: preview.documentUri,
       editId,
-    });
+    }), "postToPage");
   }
 
   /** Remembers a save until its edit is applied, so a navigation can wait for it (CR 025). */
