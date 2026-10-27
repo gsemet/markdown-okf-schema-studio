@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A read-only preview (Restricted Mode, or a file outside every workspace folder) no longer exposes
+  your home folder: when the document sits in the home folder, a folder above it or a file-system
+  root, `{include}` and local images are refused with a warning and the preview may load no local
+  file from it. In any folder, a read-only preview also refuses paths inside dot-directories such as
+  `.ssh`, `.aws` or `.config`. Trusted workspaces are unchanged.
 - A fence left open in the middle of a document no longer hides the rest of it: a backtick or colon
   fence (such as ```` ```{list-table} ````) with no closing fence and a heading after it shows its
   opening line as a code block, with an "unclosed fence" warning on that line, and the sections after

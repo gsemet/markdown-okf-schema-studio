@@ -18,6 +18,7 @@ user_need: As a reader, I preview a Markdown file from anywhere on my disk and
   disk, whether the path uses parent paths, encoding or links.
 derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-062
+- SwRS-MDOKFSTUDIO-TRUST-002
 - SwRS-MDOKFSTUDIO-TRUST-007
 - SwRS-MDOKFSTUDIO-TRUST-025
 ---

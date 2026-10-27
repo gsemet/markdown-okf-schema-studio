@@ -17,7 +17,9 @@ export type ResourceRefusalCode =
   | "blocked-resource-scheme"
   | "resource-outside-root"
   | "missing-resource"
-  | "symlink-escape";
+  | "symlink-escape"
+  | "restricted-root"
+  | "hidden-path";
 
 export type ResourceResolution =
   | { path: string }
@@ -105,15 +107,68 @@ function diagnostic(
   diagnostics.push({ code, message, value });
 }
 
+function realOrResolved(directory: string): string {
+  try {
+    return fs.realpathSync(path.resolve(directory));
+  } catch {
+    return path.resolve(directory);
+  }
+}
+
+/**
+ * The home folder the way `os.homedir()` finds it (the core layer does not import `node:os`):
+ * USERPROFILE first on Windows (HOME can differ under Git Bash), HOME first elsewhere.
+ */
+function homeFolder(): string | undefined {
+  const { HOME, USERPROFILE, HOMEDRIVE, HOMEPATH } = process.env;
+  const drivePath = HOMEDRIVE && HOMEPATH ? `${HOMEDRIVE}${HOMEPATH}` : undefined;
+  return process.platform === "win32"
+    ? USERPROFILE || HOME || drivePath
+    : HOME || USERPROFILE || drivePath;
+}
+
+/** Windows and macOS file systems are case-insensitive by default; `realpath` keeps the input case. */
+function foldCase(value: string): string {
+  return process.platform === "win32" || process.platform === "darwin" ? value.toLowerCase() : value;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-002
+/**
+ * True when `directory` is too broad to serve as the resource root of a read-only preview: the
+ * user's home folder, a folder that contains it (`/Users`, `C:\Users`), a file-system root or a
+ * drive root. Symbolic links are resolved first.
+ */
+export function isBroadReadOnlyRoot(directory: string): boolean {
+  const real = realOrResolved(directory);
+  if (path.parse(real).root === real) {
+    return true;
+  }
+  const home = homeFolder();
+  return home !== undefined && isWithin(foldCase(real), foldCase(realOrResolved(home)));
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-MYST-031
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-002
+/**
+ * The policy of one preview. `readOnly` (no workspace folder, or Restricted Mode) narrows it: a
+ * broad document folder (see {@link isBroadReadOnlyRoot}) serves no resource at all, and a path
+ * with a dot-segment below the root (`.ssh`, `.aws`, `.config`) is refused.
+ */
 export function createPreviewResourcePolicy(
   documentDirectory: string,
   workspaceRoot?: string,
+  readOnly = false,
 ): ResourcePolicy {
-  return new ResourcePolicy([
+  const roots: ResourceRoot[] = [
     { label: "preview document directory", directory: documentDirectory },
     ...(workspaceRoot ? [{ label: "workspace root", directory: workspaceRoot }] : []),
-  ]);
+  ];
+  return new ResourcePolicy(roots, readOnly ? { readOnly: true } : {});
+}
+
+export interface ResourcePolicyOptions {
+  /** Read-only preview: broad roots serve nothing and dot-segments are refused. */
+  readOnly?: boolean;
 }
 
 export class ResourcePolicy {
@@ -121,7 +176,10 @@ export class ResourcePolicy {
 
   private readonly roots: CanonicalRoot[];
 
-  public constructor(roots: readonly ResourceRoot[]) {
+  private readonly readOnly: boolean;
+
+  public constructor(roots: readonly ResourceRoot[], options: ResourcePolicyOptions = {}) {
+    this.readOnly = options.readOnly === true;
     this.roots = roots.flatMap((root) => {
       try {
         const directory = path.resolve(root.directory);
@@ -188,6 +246,30 @@ export class ResourcePolicy {
       return { refusal: "resource-outside-root" };
     }
 
+    if (this.readOnly) {
+      if (isBroadReadOnlyRoot(root.directory)) {
+        diagnostic(
+          this.diagnostics,
+          "restricted-root",
+          "This read-only preview is in your home folder or a file-system root, so it reads no "
+          + "include or resource; open a folder in the workspace to include files.",
+          request,
+        );
+        return { refusal: "restricted-root" };
+      }
+      const hidden = path.relative(root.directory, candidate).split(path.sep)
+        .some((segment) => segment.startsWith("."));
+      if (hidden) {
+        diagnostic(
+          this.diagnostics,
+          "hidden-path",
+          "A read-only preview does not read paths inside dot-directories such as .ssh or .config.",
+          request,
+        );
+        return { refusal: "hidden-path" };
+      }
+    }
+
     let realCandidate: string;
     try {
       if (!fs.statSync(candidate).isFile()) {
@@ -202,6 +284,20 @@ export class ResourcePolicy {
         request,
       );
       return { refusal: "missing-resource", candidate };
+    }
+
+    if (
+      this.readOnly
+      && path.relative(root.realDirectory, realCandidate).split(path.sep)
+        .some((segment) => segment.startsWith("."))
+    ) {
+      diagnostic(
+        this.diagnostics,
+        "hidden-path",
+        "A read-only preview does not read paths inside dot-directories such as .ssh or .config.",
+        request,
+      );
+      return { refusal: "hidden-path" };
     }
 
     if (!isWithin(root.realDirectory, realCandidate)) {
