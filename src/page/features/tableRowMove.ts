@@ -2,8 +2,9 @@
  * Moves the body rows and the columns of a pipe table or a MyST list-table in edit mode. Each body
  * row shows the handle of the frontmatter list editor just left of the table, outside it and
  * centred on its row; each column shows the same mark, turned, just above the table, outside its
- * cells and centred on its column. Dragging a handle onto another row or column, or Alt+Up and
- * Alt+Down (Alt+Left and Alt+Right for a column) on the focused handle, moves it. The handles live
+ * cells and centred on its column. Dragging a handle onto another row or column (anywhere over the
+ * table or its handle strip: the marker shows on the nearest gap and follows the pointer), or Alt+Up
+ * and Alt+Down (Alt+Left and Alt+Right for a column) on the focused handle, moves it. The handles live
  * in a layer of their own over the page (a table scrolls sideways and would clip a handle placed
  * inside it), placed from the rectangles of the rows and header cells; a table that leaves no room
  * on its left is pushed right. The page asks the host for the table source, moves the row or the
@@ -47,6 +48,7 @@ export function installTableRowMove(rt: PageRuntime): TableRowMove {
   let layer: HTMLElement | undefined;
   let positionFrame = false;
   let observing = false;
+  let zoneBound = false;
   let pending: PendingMove | undefined;
   let dragged: { axis: Axis; index: number; table: HTMLTableElement } | undefined;
   let dropTarget: { axis: Axis; index: number; table: HTMLTableElement } | undefined;
@@ -271,37 +273,112 @@ export function installTableRowMove(rt: PageRuntime): TableRowMove {
     return true;
   }
 
+  // Shows the line before or after the row or column `index`: where the dragged one would land.
+  function showDrop(table: HTMLTableElement, axis: Axis, index: number, before: boolean): void {
+    clearDropIndicator();
+    if (!dragged || index === dragged.index || (axis === "row" && index < headerCount(table))) return;
+    if (dragElements(axis, table, index).length === 0) return;
+    dropBefore = before;
+    dropTarget = { axis, index, table };
+    dragElements(axis, table, index).forEach((element) =>
+      element.setAttribute(dropAttribute(axis), before ? "before" : "after"));
+  }
+
   // Marks where the dragged row or column would land: a line before or after the target.
   function updateDropIndicator(event: DragEvent, table: HTMLTableElement, axis: Axis, index: number): void {
     if (!dragged || dragged.axis !== axis || dragged.table !== table) return;
     event.preventDefault?.();
     event.stopPropagation?.();
     if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
-    clearDropIndicator();
-    if (index === dragged.index || (axis === "row" && index < headerCount(table))) return;
     const target = dragElements(axis, table, index)[0];
-    if (!target) return;
+    if (!target) {
+      clearDropIndicator();
+      return;
+    }
     const rectangle = target.getBoundingClientRect();
+    let before: boolean;
     if (axis === "row") {
-      dropBefore = typeof event.clientY === "number"
+      before = typeof event.clientY === "number"
         ? event.clientY < rectangle.top + rectangle.height / 2
         : dragged.index > index;
     } else {
-      dropBefore = typeof event.clientX === "number"
+      before = typeof event.clientX === "number"
         ? event.clientX < (rectangle.left ?? 0) + (rectangle.width ?? 0) / 2
         : dragged.index > index;
     }
-    dropTarget = { axis, index, table };
-    dragElements(axis, table, index).forEach((element) =>
-      element.setAttribute(dropAttribute(axis), dropBefore ? "before" : "after"));
+    showDrop(table, axis, index, before);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-002
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-007
+  // The row or column of the dragged table that the pointer is nearest, anywhere over the table or
+  // its handle strip (left of the table for a row, above it for a column): the drop zone of a
+  // handle. A row is read on the vertical axis, a column on the horizontal one; the half of the
+  // row or column decides before or after. Undefined outside the zone, over the header rows (a row
+  // never lands in them) or when the event carries no pointer position.
+  function zoneTarget(event: DragEvent): { index: number; before: boolean } | undefined {
+    if (!dragged || typeof event.clientX !== "number" || typeof event.clientY !== "number") return undefined;
+    const { axis, table } = dragged;
+    const box = table.getBoundingClientRect();
+    const x = event.clientX;
+    const y = event.clientY;
+    const within = axis === "row"
+      ? x >= box.left - HANDLE_SPACE && x <= box.left + (box.width ?? 0) && y >= box.top && y <= box.top + (box.height ?? 0)
+      : x >= box.left && x <= box.left + (box.width ?? 0) && y >= box.top - HANDLE_SPACE && y <= box.top + (box.height ?? 0);
+    if (!within) return undefined;
+    const elements = axis === "row" ? bodyRows(table) : Array.from(table.rows[0]?.cells ?? []);
+    const start = (rectangle: DOMRect): number => (axis === "row" ? rectangle.top : rectangle.left);
+    const size = (rectangle: DOMRect): number => (axis === "row" ? rectangle.height : rectangle.width) ?? 0;
+    const position = axis === "row" ? y : x;
+    // The last row or cell that starts at or before the pointer; the first one when it is before all.
+    let found = -1;
+    elements.forEach((element, order) => {
+      if (start(element.getBoundingClientRect()) <= position) found = order;
+    });
+    if (found < 0) {
+      if (axis === "row") return undefined;
+      found = 0;
+    }
+    const element = elements[found]!;
+    const rectangle = element.getBoundingClientRect();
+    const index = axis === "row" ? (element as HTMLTableRowElement).rowIndex : (element as HTMLTableCellElement).cellIndex;
+    return { index, before: position < start(rectangle) + size(rectangle) / 2 };
+  }
+
+  // The drag over the page outside the rows and cells that handle it themselves: the marker follows
+  // the pointer over the handle strip and the gaps of the table, and goes when the pointer leaves.
+  function dragOverZone(event: DragEvent): void {
+    if (!dragged) return;
+    const target = zoneTarget(event);
+    if (!target) {
+      clearDropIndicator();
+      return;
+    }
+    event.preventDefault?.();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+    showDrop(dragged.table, dragged.axis, target.index, target.before);
+  }
+
+  function dropInZone(event: DragEvent): void {
+    if (!dragged) return;
+    const target = zoneTarget(event);
+    if (!target) return;
+    event.preventDefault?.();
+    commitDrop(dragged.table, dragged.axis, target.index, target.before);
   }
 
   function drop(event: DragEvent, table: HTMLTableElement, axis: Axis, index: number): void {
     if (!dragged || dragged.axis !== axis || dragged.table !== table) return;
     updateDropIndicator(event, table, axis, index);
+    commitDrop(table, axis, index, dropBefore);
+  }
+
+  // Ends the drag and, when a marker shows, moves the dragged row or column to it.
+  function commitDrop(table: HTMLTableElement, axis: Axis, index: number, before: boolean): void {
+    if (!dragged) return;
+    showDrop(table, axis, index, before);
     const moved = dragged;
     const target = dropTarget;
-    const before = dropBefore;
     finishDrag();
     if (!target) return;
     // The index the row or column has once it left its place and sits before or after the target.
@@ -370,8 +447,15 @@ export function installTableRowMove(rt: PageRuntime): TableRowMove {
     entries.push({ handle, axis, index, element, table });
   }
 
-  // The drop targets: every row for a row move, every cell for a column move. Bound once.
+  // The drop targets: every row for a row move, every cell for a column move, bound once; and the
+  // page, for the pointer over the handle strip or a gap of the table.
   function bindDropTargets(table: HTMLTableElement): void {
+    // The drop zone of a handle: the whole table and its handle strip, not only its rows and cells.
+    if (!zoneBound) {
+      zoneBound = true;
+      document.addEventListener("dragover", dragOverZone);
+      document.addEventListener("drop", dropInZone);
+    }
     for (const row of Array.from(table.rows)) {
       if (!bound.has(row)) {
         bound.add(row);

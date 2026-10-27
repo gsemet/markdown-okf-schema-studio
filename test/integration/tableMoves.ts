@@ -1,4 +1,6 @@
 import * as assert from "node:assert/strict";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import * as vscode from "vscode";
 import type { Page } from "playwright-core";
 
@@ -335,8 +337,178 @@ async function scenarioColumnMoves(page: Page, syntax: "pipe" | "list-table"): P
   });
 }
 
+/** Where the drop marker of the running drag shows: the column or row and the side of its gap. */
+interface DropMarker { index: number; side: string }
+
+/** The marker of the drag of `axis` on the page, or undefined when none shows. */
+async function dropMarker(page: Page, axis: "row" | "column"): Promise<DropMarker | undefined> {
+  const attribute = axis === "row" ? "data-okf-row-drop" : "data-okf-col-drop";
+  return withCurrentFrame(page, (frame) => frame.locator(`${TABLE} [${attribute}], ${TABLE} tr[${attribute}]`).evaluateAll(
+    (elements, name) => {
+      const first = elements[0] as (HTMLTableCellElement | HTMLTableRowElement | undefined);
+      if (first === undefined) return undefined;
+      const index = first.tagName === "TR" ? (first as HTMLTableRowElement).rowIndex : (first as HTMLTableCellElement).cellIndex;
+      return { index, side: first.getAttribute(name) ?? "" };
+    }, attribute));
+}
+
+/** Presses the mouse on `handle` and starts the drag; the pointer stays down. */
+async function startHandleDrag(page: Page, handle: string): Promise<void> {
+  const box = await withCurrentFrame(page, (frame) => frame.locator(handle).first().boundingBox());
+  assert.ok(box, `the handle ${handle} has a box`);
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 4, y + 8, { steps: 3 });
+}
+
+/**
+ * Moves the held pointer to `point` and lets the page react. A drag reports its `dragover` a little
+ * behind the pointer: a last small move makes the page see the point itself, not the way to it.
+ */
+async function holdAt(page: Page, point: { x: number; y: number }): Promise<void> {
+  await page.mouse.move(point.x, point.y, { steps: 12 });
+  await wait(100);
+  await page.mouse.move(point.x + 1, point.y);
+  await page.mouse.move(point.x, point.y);
+  await wait(150);
+}
+
+/** The point at the given fractions of the box of `selector`. */
+async function pointIn(page: Page, selector: string, at: { x: number; y: number }): Promise<{ x: number; y: number }> {
+  const box = await withCurrentFrame(page, (frame) => frame.locator(selector).first().boundingBox());
+  assert.ok(box, `${selector} has a box`);
+  return { x: box.x + box.width * at.x, y: box.y + box.height * at.y };
+}
+
+/** Saves a screenshot of the drag for the PR when STUDIO_T128_SHOTS names a folder. */
+async function dropShot(page: Page, name: string): Promise<void> {
+  const folder = process.env.STUDIO_T128_SHOTS;
+  if (folder === undefined || folder === "") return;
+  fs.mkdirSync(folder, { recursive: true });
+  const phase = process.env.STUDIO_T128_PHASE ?? "after";
+  await page.screenshot({ path: path.join(folder, `${phase}-${name}.png`) });
+}
+
+/** Switches the preview theme (the toolbar toggle cycles host, dark, white, cream) to `mode`. */
+async function setPreviewTheme(page: Page, mode: "dark" | "cream"): Promise<void> {
+  await withCurrentFrame(page, async (frame) => {
+    const toggle = frame.locator("[data-sphinx-preview-theme-toggle]");
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      if (await toggle.getAttribute("data-theme-mode") === mode) break;
+      await toggle.click();
+    }
+  });
+  await page.mouse.move(10, 10);
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+/**
+ * CR 128: while a column handle is held, the strip of the handles above the table and every cell
+ * of a column are a drop zone (the marker shows on the nearest gap and follows the pointer); a
+ * release outside the table cancels, a release in the strip moves.
+ */
+async function scenarioColumnDropZone(page: Page, syntax: "pipe" | "list-table"): Promise<void> {
+  const source = syntax === "pipe" ? PIPE : LIST;
+  await withTable(page, `tablemoves-colzone-${syntax}`, source, async (document) => {
+    const theme = process.env.STUDIO_T128_THEME === "dark" ? "dark" : "cream";
+    if (process.env.STUDIO_T128_SHOTS !== undefined) await setPreviewTheme(page, theme);
+    await startHandleDrag(page, COLUMN_HANDLE(0));
+    // Over the handle strip above the third column, on its right half.
+    const handleBox = await withCurrentFrame(page, (frame) => frame.locator(COLUMN_HANDLE(2)).first().boundingBox());
+    const header = await pointIn(page, `${TABLE} th:nth-child(3)`, { x: 0.8, y: 0.5 });
+    assert.ok(handleBox, "the handle of the third column has a box");
+    await holdAt(page, { x: header.x, y: handleBox.y + handleBox.height / 2 });
+    await dropShot(page, `${syntax}-${theme}-column-strip`);
+    assert.deepEqual(await dropMarker(page, "column"), { index: 2, side: "after" },
+      "the marker shows after the third column while the pointer is in the handle strip");
+    // Over a body cell in the middle of the second column, on its right half.
+    await holdAt(page, await pointIn(page, `${TABLE} tbody tr:nth-child(2) td:nth-child(2)`, { x: 0.75, y: 0.5 }));
+    await dropShot(page, `${syntax}-${theme}-column-middle`);
+    assert.deepEqual(await dropMarker(page, "column"), { index: 1, side: "after" },
+      "the marker follows the pointer to the second column");
+    // Moved far below the table and released: the drag is cancelled and no marker is left.
+    const below = await withCurrentFrame(page, (frame) => frame.locator(TABLE).first().boundingBox());
+    assert.ok(below, "the table has a box");
+    await holdAt(page, { x: below.x + below.width / 2, y: Math.min(below.y + below.height + 120, 880) });
+    assert.equal(await dropMarker(page, "column"), undefined, "no marker outside the table");
+    await page.mouse.up();
+    await wait(400);
+    assert.equal(bufferText(document), source, "a release outside the table leaves the document as it was");
+    assert.equal(await dropMarker(page, "column"), undefined, "no marker after the drag ended");
+    // Released in the strip above the last column: the column moves there.
+    await dragToPoint(page, COLUMN_HANDLE(0), async () => {
+      const box = await withCurrentFrame(page, (frame) => frame.locator(COLUMN_HANDLE(2)).first().boundingBox());
+      const cell = await pointIn(page, `${TABLE} th:nth-child(3)`, { x: 0.8, y: 0.5 });
+      assert.ok(box, "the handle of the third column has a box");
+      return { x: cell.x, y: box.y + box.height / 2 };
+    });
+    await expectBuffer(page, document, COLUMN_TO_END[syntax], "the column dropped in the handle strip moved to the end");
+  });
+}
+
+/** A drag from `handle` to the point `where` returns, released there. */
+async function dragToPoint(page: Page, handle: string, where: () => Promise<{ x: number; y: number }>): Promise<void> {
+  await startHandleDrag(page, handle);
+  await holdAt(page, await where());
+  await page.mouse.up();
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+/**
+ * CR 128: while a row handle is held, the strip of the handles left of the table and every cell
+ * of a row are a drop zone (the marker shows on the nearest gap and follows the pointer); a
+ * release outside the table cancels, a release in the strip moves.
+ */
+async function scenarioRowDropZone(page: Page, syntax: "pipe" | "list-table"): Promise<void> {
+  const source = syntax === "pipe" ? PIPE : LIST;
+  await withTable(page, `tablemoves-rowzone-${syntax}`, source, async (document) => {
+    const theme = process.env.STUDIO_T128_THEME === "dark" ? "dark" : "cream";
+    if (process.env.STUDIO_T128_SHOTS !== undefined) await setPreviewTheme(page, theme);
+    const order = (): string => bodyRows(bufferText(document), syntax).join();
+    const stripPoint = async (row: number, fraction: number): Promise<{ x: number; y: number }> => {
+      const handle = await withCurrentFrame(page, (frame) => frame.locator(ROW_HANDLE(row)).first().boundingBox());
+      const body = await pointIn(page, `${TABLE} tbody tr:nth-child(${row})`, { x: 0, y: fraction });
+      assert.ok(handle, `the handle of row ${row} has a box`);
+      return { x: handle.x + handle.width / 2, y: body.y };
+    };
+    await startHandleDrag(page, ROW_HANDLE(1));
+    // Over the handle strip left of the last row, on its lower half.
+    await holdAt(page, await stripPoint(3, 0.8));
+    await dropShot(page, `${syntax}-${theme}-row-strip`);
+    assert.deepEqual(await dropMarker(page, "row"), { index: 3, side: "after" },
+      "the marker shows after the last row while the pointer is in the handle strip");
+    // Over the middle of the second body row, on its lower half.
+    await holdAt(page, await pointIn(page, `${TABLE} tbody tr:nth-child(2) td:nth-child(2)`, { x: 0.5, y: 0.8 }));
+    await dropShot(page, `${syntax}-${theme}-row-middle`);
+    assert.deepEqual(await dropMarker(page, "row"), { index: 2, side: "after" },
+      "the marker follows the pointer to the second body row");
+    // Released far to the right of the table: the drag is cancelled and no marker is left.
+    const box = await withCurrentFrame(page, (frame) => frame.locator(TABLE).first().boundingBox());
+    assert.ok(box, "the table has a box");
+    await holdAt(page, { x: Math.min(box.x + box.width + 150, 1380), y: box.y + box.height + 120 });
+    assert.equal(await dropMarker(page, "row"), undefined, "no marker outside the table");
+    await page.mouse.up();
+    await wait(400);
+    assert.equal(bufferText(document), source, "a release outside the table leaves the document as it was");
+    assert.equal(await dropMarker(page, "row"), undefined, "no marker after the drag ended");
+    // Released in the strip left of the last row: the row moves there.
+    await dragToPoint(page, ROW_HANDLE(1), () => stripPoint(3, 0.8));
+    await waitFor("the first row moved to the end by a drop in the handle strip", () => order() === "b1,c1,a1");
+  });
+}
+
 /** The table scenarios of CR 115, in one window. */
 export async function scenarioTableMoves(page: Page): Promise<void> {
+  // STUDIO_T128_ZONE=column|row runs only that drop zone scenario (for the screenshots of CR 128).
+  const zone = process.env.STUDIO_T128_ZONE;
+  if (zone === "column" || zone === "row") {
+    for (const syntax of ["pipe", "list-table"] as const) {
+      await (zone === "column" ? scenarioColumnDropZone : scenarioRowDropZone)(page, syntax);
+    }
+    return;
+  }
   await scenarioConversionRoundTrip(page);
   console.log("PASS table moves: conversion round trip and the click on a list-table cell");
   await scenarioRawListTable(page);
@@ -346,5 +518,9 @@ export async function scenarioTableMoves(page: Page): Promise<void> {
     console.log(`PASS table moves: rows of a ${syntax} (mouse, key, cell editor open)`);
     await scenarioColumnMoves(page, syntax);
     console.log(`PASS table moves: columns of a ${syntax} (mouse, key, cell editor open)`);
+    await scenarioColumnDropZone(page, syntax);
+    console.log(`PASS table moves: column drop zone of a ${syntax} (handle strip, mid-column, outside)`);
+    await scenarioRowDropZone(page, syntax);
+    console.log(`PASS table moves: row drop zone of a ${syntax} (handle strip, mid-row, outside)`);
   }
 }

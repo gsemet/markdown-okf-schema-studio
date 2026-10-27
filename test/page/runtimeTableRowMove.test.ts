@@ -551,3 +551,74 @@ test("a drag is still refused while the source of a cell editor has not arrived"
   columnHandle(0)!.dispatch("dragstart", { preventDefault: () => { prevented = true; }, dataTransfer: {} });
   assert.equal(prevented, true);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+test("a column handle drags over the handle strip: the marker is on the nearest gap, a drop moves", () => {
+  const harness = createRuntimeHarness();
+  const { rows } = pipeTable(harness);
+  // Two header cells side by side (the fake cells share one box by default).
+  rows[0]!.cells.forEach((cell, index) => {
+    cell.rectProvider = () => ({ top: 100, height: 30, left: 100 * index, width: 100, bottom: 130 });
+  });
+  harness.editModeButton.dispatch("click");
+  const transfer: Record<string, unknown> = { effectAllowed: "", dropEffect: "", setData: () => undefined };
+  columnHandle(0)!.dispatch("dragstart", { dataTransfer: transfer });
+  const markerOf = (): string | null => rows[0]!.cells[1]!.getAttribute("data-okf-col-drop");
+  // Above the table, in the strip of the handles, on the left half then the right half of column 1.
+  harness.dispatchDocument("dragover", { ...dragEvent(90, transfer), clientX: 120 });
+  assert.equal(markerOf(), "before");
+  assert.equal(rows[2]!.cells[1]!.getAttribute("data-okf-col-drop"), "before", "the whole column shows the line");
+  harness.dispatchDocument("dragover", { ...dragEvent(90, transfer), clientX: 180 });
+  assert.equal(markerOf(), "after");
+  assert.equal(transfer.dropEffect, "move");
+  // Beyond the strip, or right of the table: the marker goes.
+  harness.dispatchDocument("dragover", { ...dragEvent(40, transfer), clientX: 180 });
+  assert.equal(markerOf(), null);
+  harness.dispatchDocument("dragover", { ...dragEvent(90, transfer), clientX: 180 });
+  harness.dispatchDocument("dragover", { ...dragEvent(150, transfer), clientX: 260 });
+  assert.equal(markerOf(), null);
+  // A drop outside the zone requests nothing; one in the strip moves the column.
+  harness.dispatchDocument("drop", { ...dragEvent(150, transfer), clientX: 260 });
+  assert.equal(messagesOf(harness, "previewEditOpen").length, 0);
+  columnHandle(0)!.dispatch("dragstart", { dataTransfer: transfer });
+  harness.dispatchDocument("dragover", { ...dragEvent(90, transfer), clientX: 180 });
+  harness.dispatchDocument("drop", { ...dragEvent(90, transfer), clientX: 180 });
+  columnHandle(0)!.dispatch("dragend");
+  sourceReply(harness, SOURCE);
+  const [save] = messagesOf(harness, "previewEditSave");
+  assert.ok(save);
+  assert.equal(save.editedText, "| H2 | H1 |\n| --- | --- |\n| 1 | a |\n| 2 | b |\n| 3 | c |\n");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-002
+test("a row handle drags over the handle strip: the marker is on the nearest gap, a drop moves", () => {
+  const harness = createRuntimeHarness();
+  const { rows, cells } = pipeTable(harness);
+  harness.editModeButton.dispatch("click");
+  const transfer: Record<string, unknown> = { effectAllowed: "", dropEffect: "", setData: () => undefined };
+  const handle = handleOf(cells[1]!)!;
+  handle.dispatch("dragstart", { dataTransfer: transfer });
+  // Left of the table, in the strip of the handles, level with the lower half of the last row.
+  harness.dispatchDocument("dragover", { ...dragEvent(rows[3]!.top + 25, transfer), clientX: -12 });
+  assert.equal(rows[3]!.getAttribute("data-okf-row-drop"), "after");
+  harness.dispatchDocument("dragover", { ...dragEvent(rows[3]!.top + 5, transfer), clientX: -12 });
+  assert.equal(rows[3]!.getAttribute("data-okf-row-drop"), "before");
+  // Over the header rows, past the strip or below the table: no marker.
+  harness.dispatchDocument("dragover", { ...dragEvent(rows[0]!.top + 5, transfer), clientX: -12 });
+  assert.equal(rows[3]!.getAttribute("data-okf-row-drop"), null);
+  harness.dispatchDocument("dragover", { ...dragEvent(rows[2]!.top + 5, transfer), clientX: -60 });
+  assert.equal(rows[2]!.getAttribute("data-okf-row-drop"), null);
+  harness.dispatchDocument("dragover", { ...dragEvent(rows[3]!.top + 25, transfer), clientX: -12 });
+  harness.dispatchDocument("dragover", { ...dragEvent(rows[3]!.top + 90, transfer), clientX: 50 });
+  assert.equal(rows[3]!.getAttribute("data-okf-row-drop"), null);
+  harness.dispatchDocument("drop", { ...dragEvent(rows[3]!.top + 90, transfer), clientX: 50 });
+  assert.equal(messagesOf(harness, "previewEditOpen").length, 0);
+  // A drop in the strip moves the row.
+  harness.dispatchDocument("dragover", { ...dragEvent(rows[3]!.top + 25, transfer), clientX: -12 });
+  harness.dispatchDocument("drop", { ...dragEvent(rows[3]!.top + 25, transfer), clientX: -12 });
+  handle.dispatch("dragend");
+  sourceReply(harness, SOURCE);
+  const [save] = messagesOf(harness, "previewEditSave");
+  assert.ok(save);
+  assert.equal(save.editedText, "| H1 | H2 |\n| --- | --- |\n| b | 2 |\n| c | 3 |\n| a | 1 |\n");
+});

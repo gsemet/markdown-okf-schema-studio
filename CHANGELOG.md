@@ -9,6 +9,10 @@
 - The Edit (pencil) button is no longer hidden in a read-only preview (Restricted Mode, or a file
   outside every workspace folder): it stays in the toolbar, greyed out, and its tooltip says why
   editing is unavailable.
+- Table editing: while a row or column handle is dragged, the whole table and the strip of the
+  handles are a drop zone. The marker shows on the nearest gap (left or right half of a column, upper
+  or lower half of a row), follows the pointer, and goes when the pointer leaves the table, where a
+  release cancels the move. Before, it showed only with the pointer exactly on a cell.
 - Dropdown admonitions show their state: a chevron at the right of the title points right while the
   dropdown is closed and down while it is open, in every admonition kind and theme.
 - Review comment threads are readable in every theme: the popover text no longer takes a pale host

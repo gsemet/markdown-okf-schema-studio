@@ -8,6 +8,13 @@
   SwRS-MDOKFSTUDIO-BLOCK-001 and SwRS-MDOKFSTUDIO-LIFE-170 reworded. Unit, integration and visual
   checks changed with it.
 
+## 2026-10-27 (table handle drop zone)
+
+- SwRS-MDOKFSTUDIO-TABLE-002 and SwRS-MDOKFSTUDIO-TABLE-007: while a row or column handle is held, the
+  whole table and the strip of the handles are a drop zone; the marker shows on the nearest gap, follows
+  the pointer and goes when it leaves the zone (CR 128). Unit tests and the real-window suite
+  `test/integration/tableMoves.ts` cover it. Verification: `just requirements-lint`.
+
 ## 2026-10-26 (unclosed directives render as raw text)
 
 - SwRS-MDOKFSTUDIO-MYST-096 (new): a directive or fence the parser cannot build (an unclosed or
