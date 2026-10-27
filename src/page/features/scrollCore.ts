@@ -393,9 +393,15 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     });
   }
 
+  // One pending frame serves every call made before it runs: an image load, a resize and the
+  // content observer in the same tick measure once, not once each.
+  let layoutPending = false;
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-023
   function stabilizeLayout(): void {
+    if (layoutPending) return;
+    layoutPending = true;
     window.requestAnimationFrame(() => {
+      layoutPending = false;
       if (frame !== undefined) {
         const changed = layout.some((entry) => {
           const rectangle = entry.element.getBoundingClientRect();

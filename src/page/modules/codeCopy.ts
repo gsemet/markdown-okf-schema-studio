@@ -192,9 +192,19 @@ export function installCodeCopy(
       (current as HTMLElement).focus();
     }
   });
+  // Scroll events can arrive several times per frame; the three rect reads and the style writes of
+  // `place` run once per frame, for the position the block has then.
+  let placeFrame: number | undefined;
+  const placeOnFrame = (): void => {
+    if (placeFrame !== undefined) return;
+    placeFrame = window.requestAnimationFrame(() => {
+      placeFrame = undefined;
+      if (current) place();
+    });
+  };
   window.addEventListener("scroll", () => {
     if (!current) return;
-    place();
+    placeOnFrame();
     if (settleTimer !== undefined) window.clearTimeout(settleTimer);
     // When scrolling stops, the button stays only if the pointer is still over its block.
     settleTimer = window.setTimeout(() => {

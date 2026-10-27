@@ -1166,3 +1166,19 @@ test("previewReady reports the pinned anchor only when the load restored a pin",
   assert.ok(plainReady);
   assert.equal("anchorLine" in plainReady, false, "a load without a pin sends no anchorLine");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LAYOUT-023
+test("P-08: layout triggers within one frame measure the page once", () => {
+  const harness = createRuntimeHarness();
+  const reads = (): number => harness.mappings.reduce((count, mapping) => count + mapping.rectReadCount, 0);
+  harness.flushFrames();
+  let before = reads();
+  harness.dispatchWindow("resize");
+  harness.flushFrames();
+  const single = reads() - before;
+  assert.ok(single > 0, "a resize measures the blocks");
+  before = reads();
+  for (let call = 0; call < 5; call += 1) harness.dispatchWindow("resize");
+  harness.flushFrames();
+  assert.equal(reads() - before, single, "five triggers before the frame cost one measurement");
+});

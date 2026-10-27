@@ -1104,6 +1104,25 @@ test("T34: edit mode rebuilds the insertion points for the new content", () => {
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "on", "edit mode stays on");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-069
+test("P-07: edit mode keeps the insertion point of a block that did not change and moves its line", () => {
+  const harness = createRuntimeHarness();
+  harness.mappings.forEach((mapping) => { mapping.siblingsFollowInsertions = true; });
+  harness.editModeButton.dispatch("click");
+  const inserted = (): number => harness.mappings.reduce((count, mapping) => count + mapping.insertedElements.length, 0);
+  const before = inserted();
+  assert.ok(before > 0, "edit mode has insertion points");
+  const block = harness.mappings.find((mapping) => mapping.insertedElements.length > 0)!;
+  const bar = block.insertedElements[0]!;
+  const line = Number(block.getAttribute("data-sphinx-source-end-line") || block.getAttribute("data-sphinx-source-line"));
+  // A line was inserted above: the block keeps its place and its neighbours, its end line moves.
+  block.setAttribute("data-sphinx-source-end-line", String(line + 5));
+  harness.dispatchMessage(patchMessage());
+  assert.equal(inserted(), before, "no insertion point is created again for unchanged neighbours");
+  assert.equal(block.insertedElements[0], bar, "the bar of the block is the same element");
+  assert.equal(bar.getAttribute("data-sphinx-insert-after-line"), String(line + 5), "its line moved with the block");
+});
+
 test("T34: pending block navigation resumes after a content patch", () => {
   const harness = createRuntimeHarness();
   harness.editModeButton.dispatch("click");

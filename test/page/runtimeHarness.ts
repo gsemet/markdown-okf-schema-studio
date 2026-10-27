@@ -308,6 +308,13 @@ export class RuntimeElement {
     if (siblings && index >= 0) siblings.splice(index, 0, node);
   }
 
+  /** Opt-in: `nextElementSibling` answers with the last element inserted after this one. */
+  public siblingsFollowInsertions = false;
+
+  public get nextElementSibling(): RuntimeElement | null {
+    return this.siblingsFollowInsertions ? (this.insertedElements.at(-1) ?? null) : null;
+  }
+
   public insertAdjacentElement(_position: string, element: RuntimeElement): RuntimeElement {
     element.parentElement = this.parentElement;
     element.top = this.top;
