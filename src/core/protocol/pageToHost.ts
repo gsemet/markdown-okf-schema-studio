@@ -61,6 +61,10 @@ const MAX_COPY_TEXT_TRANSPORT_LENGTH = 20_000_000;
 
 const MAX_EDIT_ID_LENGTH = 100;
 
+/** Most replacements one find-and-replace request carries, and the longest text of one. */
+const MAX_FIND_REPLACE_ITEMS = 5000;
+const MAX_FIND_REPLACE_TEXT_LENGTH = 2000;
+
 const MAX_PASTED_HTML_LENGTH = 1_000_000;
 
 const MAX_PLANTUML_INCLUDE_PATH_LENGTH = 4096;
@@ -71,6 +75,16 @@ const MAX_WARNING_KEY_LENGTH = 32;
 /** The list and pick requests of the MyST palette carry only the id their answer is matched by. */
 const isHostRequest: MessageValidator = (message) =>
   isBoundedString(message.editId, MAX_EDIT_ID_LENGTH) && message.editId !== "";
+
+const isFindReplaceItem = (item: unknown): boolean => {
+  if (typeof item !== "object" || item === null) return false;
+  const value = item as Record<string, unknown>;
+  return isSourceLine(value.line) && isSourceLine(value.endLine) && (value.endLine as number) >= (value.line as number)
+    && typeof value.find === "string" && value.find !== "" && value.find.length <= MAX_FIND_REPLACE_TEXT_LENGTH
+    && typeof value.replacement === "string" && value.replacement.length <= MAX_FIND_REPLACE_TEXT_LENGTH
+    && Number.isSafeInteger(value.occurrence) && (value.occurrence as number) >= 0
+    && Number.isSafeInteger(value.occurrences) && (value.occurrences as number) > (value.occurrence as number);
+};
 
 const isPinViewportTop = (value: unknown): boolean => value === undefined
   || (typeof value === "number" && Number.isFinite(value) && Math.abs(value) <= 100000);
@@ -224,6 +238,11 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
     && isBoundedString(message.text, MAX_THREAD_REPLY_LENGTH) && message.text.trim() !== "",
   previewThreadDelete: (message) => isHostRequest(message) && isSourceLine(message.line)
     && isSourceLine(message.endLine) && (message.endLine as number) >= (message.line as number),
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+  // Find and replace: matches of the find bar as (source lines, matched text, occurrence, replacement).
+  previewFindReplace: (message) => isHostRequest(message) && Array.isArray(message.items)
+    && message.items.length >= 1 && message.items.length <= MAX_FIND_REPLACE_ITEMS
+    && message.items.every(isFindReplaceItem),
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-240
   // Move of a body block past its neighbour from the "+" bar: both line ranges, the direction and
   // the moved block's viewport top (the host knows the new line). The host re-checks the ranges.

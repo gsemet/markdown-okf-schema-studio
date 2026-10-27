@@ -9,6 +9,7 @@ import { CONTENT_BLOCK_CSS } from "./styles/contentBlockStyles";
 import { CONTENT_LAYOUT_CSS } from "./styles/contentLayoutStyles";
 import { EDIT_MODE_CSS } from "./styles/editModeStyles";
 import { EDIT_PALETTE_CSS } from "./styles/editPaletteStyles";
+import { FIND_CSS } from "./styles/findStyles";
 import { HTML_BLOCK_CSS } from "./styles/htmlBlockStyles";
 import { TOC_CSS } from "./styles/tocStyles";
 import { FRONTMATTER_EDITOR_CSS } from "./styles/frontmatterEditorStyles";
@@ -116,7 +117,8 @@ export const PREVIEW_THEME_CSS =
   + TOC_CSS
   + CONTENT_BLOCK_CSS
   + CODE_BLOCK_CSS
-  + PROPERTIES_CSS;
+  + PROPERTIES_CSS
+  + FIND_CSS;
 
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
 /** The per-render rule that sets the content column width (0 lifts the limit). */

@@ -42,3 +42,4 @@ When the preview panel is created, the extension SHALL enable the find widget so
 ### Verification notes
 - Method: test/integration/projectFeatures.test.ts, suite run() (preview panel: the panel options set the find widget on); the custom editor case is not asserted by a named test (untested)
 - Criteria: The panel options set the find widget on.
+- Note: with the focus in the page, Cmd/Ctrl+F is taken by the extension's own find bar (SwRS-MDOKFSTUDIO-TOOLBAR-009); the widget option stays on for the entry points that do not go through the page.

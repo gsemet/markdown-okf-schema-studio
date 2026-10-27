@@ -304,6 +304,24 @@ test("previewThreadReply and previewThreadDelete validate the lines, the edit id
   assert.equal(isRegisteredPreviewMessage({ ...remove, line: 8 }), false);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+test("previewFindReplace validates the edit id and every item of the replacement", () => {
+  const item = { line: 3, endLine: 4, find: "studio", occurrence: 1, occurrences: 2, replacement: "atelier" };
+  const base = { type: "previewFindReplace", documentId: "doc", revision: 1, requestId: 1, editId: "find-1", items: [item] };
+  assert.equal(isRegisteredPreviewMessage(base), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, items: [{ ...item, replacement: "" }] }), true, "an empty replacement deletes");
+  for (const patch of [
+    { editId: "" }, { editId: undefined }, { items: [] }, { items: undefined }, { items: "x" },
+    { items: new Array(5001).fill(item) },
+    { items: [{ ...item, find: "" }] }, { items: [{ ...item, find: "x".repeat(2001) }] },
+    { items: [{ ...item, replacement: "x".repeat(2001) }] }, { items: [{ ...item, replacement: 4 }] },
+    { items: [{ ...item, line: 0 }] }, { items: [{ ...item, endLine: 2 }] },
+    { items: [{ ...item, occurrence: 2 }] }, { items: [{ ...item, occurrence: -1 }] }, { items: [null] },
+  ]) {
+    assert.equal(isRegisteredPreviewMessage({ ...base, ...patch }), false, JSON.stringify(patch).slice(0, 80));
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-050
 test("previewPlantUmlInclude carries a bounded file name, the including file id or null, and an edit id", () => {
   const base = { type: "previewPlantUmlInclude", documentId: "doc", revision: 1, requestId: 1, editId: "plantuml-1", path: "styles/common.puml", from: null };

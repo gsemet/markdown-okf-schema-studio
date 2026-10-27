@@ -242,6 +242,25 @@ export class PreviewManager {
     return true;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+  /**
+   * The key binding of Cmd/Ctrl+F opens the find bar of the preview that has the focus. The page
+   * also listens to the key itself; opening twice is harmless. False when no preview is focused.
+   */
+  public runFindCommand(): boolean {
+    const session = [...this.live].find((candidate) => !candidate.disposed && candidate.panel.active);
+    const stage = session?.stage;
+    if (!session || !stage) return false;
+    fireAndForget(this.host.logger, session.postToPage({
+      type: "previewFindCommand",
+      command: "open",
+      documentId: stage.activeDocumentIdentity,
+      revision: revisionOfStage(stage),
+      requestId: stage.requestId,
+    }), "postToPage");
+    return true;
+  }
+
   // ---------------------------------------------------------------------------------------------
   // Paths
   // ---------------------------------------------------------------------------------------------

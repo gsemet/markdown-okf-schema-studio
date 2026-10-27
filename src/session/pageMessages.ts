@@ -66,6 +66,7 @@ export const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGa
   previewLabelRename: "render",
   previewThreadReply: "render",
   previewThreadDelete: "render",
+  previewFindReplace: "render",
   previewBlockMove: "render",
   previewBlocksCopy: "render",
   previewBlocksCut: "render",
@@ -181,6 +182,7 @@ export class PageMessageDispatcher {
         return;
       case "previewThreadReply":
       case "previewThreadDelete":
+      case "previewFindReplace":
       case "previewListTargets":
       case "previewListCitations":
       case "previewPickDocument":

@@ -1286,3 +1286,12 @@ test("CR 143: the toolbar has a Fold button, off until a section is folded", () 
   assert.match(renderPreviewToolbar(),
     /<button type="button" data-sphinx-preview-fold-toggle aria-pressed="false" aria-label="Fold all sections"/u);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010
+test("the find bar and the match paint read the theme tokens, in forced colours as well", () => {
+  assert.match(PREVIEW_THEME_CSS, /::highlight\(studio-find\)\s*\{[^}]*--studio-editor-findMatchHighlightBackground/u);
+  assert.match(PREVIEW_THEME_CSS, /::highlight\(studio-find-current\)\s*\{[^}]*background-color/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-find\]\s*\{[^}]*position: fixed;[^}]*--studio-editorWidget-background/u);
+  assert.match(PREVIEW_THEME_CSS, /@media \(forced-colors: active\)\s*\{\s*::highlight\(studio-find\)/u);
+  assert.doesNotMatch(renderPreviewToolbar(), /data-sphinx-preview-find/u, "the bar is created by the page, not by the toolbar");
+});

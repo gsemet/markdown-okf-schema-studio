@@ -62,6 +62,8 @@ import { installFigureEditButton } from "./modules/figurePanel";
 import { installFirstClearance } from "./modules/firstClearance";
 import { installHistoryControls } from "./modules/historyControls";
 import { installHostRequests, type HostResult } from "./modules/hostRequests";
+import { installFindBar, type FindSourceBlock } from "./modules/findBar";
+import { matchRange, paintMatches } from "./modules/findDom";
 import { installHeadingFold } from "./modules/headingFold";
 import { installIncomingChanges } from "./modules/incomingChanges";
 import { installIncomingToggle } from "./modules/incomingToggle";
@@ -285,6 +287,34 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     onLayoutChange: keepReadingLine,
     busy: () => state.activeBlockEdit !== undefined || state.activeFrontmatterEdit !== undefined,
   });
+  // Find and replace in the rendered text (modules/findBar.ts). The mapped blocks tell which source
+  // lines a match belongs to; a match outside one (the front matter, an included file, a formula) is
+  // found but not replaced from the preview.
+  let findBlocks = new Set<Element>();
+  const findBar = installFindBar(document, window, {
+    content: () => document.getElementById?.("sphinx-myst-preview-content") ?? null,
+    prepare: () => { findBlocks = new Set(rt.blocks.topLevelMappedBlocks()); },
+    sourceBlockOf: (element): FindSourceBlock | undefined => {
+      if (element.closest?.(".math, .katex, svg, [data-okf-properties], [data-sphinx-preview-included]")) return undefined;
+      for (let block: Element | null = element; block; block = block.parentElement) {
+        if (findBlocks.has(block)) {
+          if (block.getAttribute("data-okf-properties") !== null || rt.blocks.isIncludedBlock(block)) return undefined;
+          return { ...rt.blocks.blockRange(block), element: block };
+        }
+      }
+      return undefined;
+    },
+    replaceBlockedReason: () => {
+      if (!rt.editModeButton) return context.readOnlyReason ?? "Editing is not available in this preview.";
+      return state.activeBlockEdit || state.activeFrontmatterEdit ? "Save or cancel the open edit before replacing." : undefined;
+    },
+    reveal: (target) => headingFold.reveal(target),
+    ask: (type, payload, done) => hostRequests.ask(type, payload, {}, done),
+    onLayoutChange: keepReadingLine,
+    paint: (ranges, current) => paintMatches(window, ranges, current),
+    createRange: (match) => matchRange(document, match),
+    selectedText: () => window.getSelection?.()?.toString() ?? "",
+  });
   rt.refreshButton = document.querySelector?.<HTMLButtonElement>("[data-sphinx-preview-refresh]");
   const editButton = document.querySelector?.<HTMLElement>("[data-sphinx-preview-edit-toggle]");
   // A read-only preview greys the Edit button with the reason; it is no edit toggle then.
@@ -376,7 +406,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     contentMorph, stickyBand, statusRegion, commentThreads, commentCompose, linkNavigation, firstClearance,
     codeCopy, labelRename, hostRequests, plantUmlFileRequests, pasteImage, pasteHtml, pasteUrl, warningBanner,
     figureEditButton, chipToggle, tabs, incomingChanges, motion, historyControls, viewControls, widthMode,
-    tocColumn, headingFold, themeMode, anchorMode, checkboxes, inlineThreads, linkTooltip,
+    tocColumn, headingFold, find: findBar, themeMode, anchorMode, checkboxes, inlineThreads, linkTooltip,
   };
   rt.editorChrome.bindPaletteSticky();
 

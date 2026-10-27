@@ -30,7 +30,7 @@ heading that has content below it can fold that content in the preview.
   text is untouched.
 - **Remembered:** the folded sections are kept per document in the preview panel, so they survive a
   reload and a content update. A heading whose text changes is no longer folded.
-- **Find and links:** the browser find (`Cmd+F` / `Ctrl+F`) still reaches text inside a folded
+- **Find and links:** the [find bar](find.md) (`Cmd+F` / `Ctrl+F`) still reaches text inside a folded
   section and unfolds it; a link, a table-of-contents entry or an editor jump to a heading or block
   inside a folded section unfolds the sections around it.
 - **Edit mode:** folding works in edit mode too. A block inside a folded section cannot be selected

@@ -15,6 +15,7 @@ import {
   planBlocksCopyCut,
   planBlocksPaste,
   planCheckboxToggle,
+  planFindReplace,
   planLabelRename,
   planThreadDelete,
   planThreadReply,
@@ -44,6 +45,7 @@ export class SourceEditController {
     router.on("previewLabelRename", (message, preview) => this.handleLabelRename(preview, message));
     router.on("previewThreadReply", (message, preview) => this.handleThreadChange(preview, message, "reply"));
     router.on("previewThreadDelete", (message, preview) => this.handleThreadChange(preview, message, "delete"));
+    router.on("previewFindReplace", (message, preview) => this.handleFindReplace(preview, message));
     router.on("previewBlockMove", (message, preview) => this.handleBlockMove(preview, message));
     router.on("previewBlocksCopy", (message, preview) => this.handleBlocksCopyCut(preview, message));
     router.on("previewBlocksCut", (message, preview) => this.handleBlocksCopyCut(preview, message));
@@ -238,6 +240,48 @@ export class SourceEditController {
       }, document.eol);
       if ("refused" in reply) return fail(reply.refused);
       return finish(this.apply(document, [reply.edit]));
+    });
+  }
+
+  private postFindReplaceResult(
+    preview: PreviewSession,
+    message: PageMessageOf<"previewFindReplace">,
+    result: { ok: true; replaced: number; skipped: number } | { ok: false; reason: string },
+  ): void {
+    void preview.postToPage({
+      type: "previewFindReplaceResult",
+      documentId: message.documentId,
+      revision: message.revision,
+      requestId: message.requestId,
+      editId: message.editId,
+      ...result,
+    });
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+  /**
+   * Replaces the matches of the find bar. The page names the source lines, the matched text and the
+   * occurrence; the planner edits those spans only (all of them in one undo step) and skips what
+   * does not map one-to-one to the source.
+   */
+  private handleFindReplace(preview: PreviewSession, message: PageMessageOf<"previewFindReplace">): PromiseLike<void> | undefined {
+    const fail = (reason: string): undefined => {
+      this.postFindReplaceResult(preview, message, { ok: false, reason });
+      return undefined;
+    };
+    if (preview.readOnly) return fail(previewReadOnlyReason(preview));
+    if (preview.edits.active) return fail("Save or cancel the open Markdown edit before replacing.");
+    const document = currentPreviewDocument(preview, message);
+    if (!document) return fail(STALE_REQUEST);
+    const plan = planFindReplace(document.getText(), message.items);
+    if ("refused" in plan) return fail(plan.refused);
+    const { replaced, skipped } = plan;
+    return this.apply(document, plan.edits).then((applied) => {
+      this.postFindReplaceResult(preview, message, applied
+        ? { ok: true, replaced, skipped }
+        : { ok: false, reason: "VS Code could not apply the replacement." });
+    }, (error: unknown) => {
+      this.postFindReplaceResult(preview, message, { ok: false, reason: error instanceof Error ? error.message : String(error) });
     });
   }
 

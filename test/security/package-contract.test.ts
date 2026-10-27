@@ -317,7 +317,7 @@ test("CR 119: undo, redo, select all and delete line are VS Code key bindings on
   assert.deepEqual(packageJson.contributes.menus.commandPalette.slice(2, 6), ids.map((command) => ({ command, when: "false" })),
     "the commands are for key bindings, not for the palette");
   const when = "markdownOkfSchemaStudio.previewEditing";
-  assert.deepEqual(packageJson.contributes.keybindings.slice(1), [
+  assert.deepEqual(packageJson.contributes.keybindings.slice(1, 6), [
     { command: ids[0], key: "ctrl+z", mac: "cmd+z", when },
     { command: ids[1], key: "ctrl+y", mac: "cmd+shift+z", when },
     { command: ids[1], key: "ctrl+shift+z", when },
@@ -345,6 +345,24 @@ test("CR 143: Fold All and Unfold All are command palette entries offered to the
     { command: prefix + "foldAll", when },
     { command: prefix + "unfoldAll", when },
   ]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+test("CR 144: Cmd/Ctrl+F runs the find command on the focused preview only", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
+    contributes: {
+      commands: Array<{ command: string; title: string }>;
+      keybindings: Array<{ command: string; key: string; mac?: string; when: string }>;
+    };
+  };
+  const id = "markdown-okf-schema-studio.find";
+  assert.ok(packageJson.contributes.commands.some((entry) => entry.command === id && entry.title === "Find in Preview"));
+  const bindings = packageJson.contributes.keybindings.filter((entry) => entry.command === id);
+  assert.equal(bindings.length, 1);
+  assert.equal(bindings[0].key, "ctrl+f");
+  assert.equal(bindings[0].mac, "cmd+f");
+  assert.match(bindings[0].when, /activeWebviewPanelId == 'markdown-okf-schema-studio\.preview'/u);
+  assert.match(bindings[0].when, /!editorTextFocus/u, "the text editor keeps its own find");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-074

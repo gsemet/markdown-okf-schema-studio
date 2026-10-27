@@ -13,6 +13,7 @@ import { run as runDirtySnapshots } from "./dirtySnapshots.test";
 import { run as runGenericMarkdown } from "./genericMarkdown.test";
 import { run as runTableEmptyColumn } from "./tableEmptyColumn.test";
 import { run as runEditToolbarCover } from "./editToolbarCover.test";
+import { run as runFindInPreview } from "./findInPreview.test";
 import { run as runTallBlockScroll } from "./tallBlockScroll.test";
 import { run as runBlockActions } from "./blockActionsFollowSelection.test";
 import { run as runPreviewEditing } from "./previewEditing.test";
@@ -130,6 +131,10 @@ export async function run(): Promise<void> {
     await runTallBlockScroll();
     return;
   }
+  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "find-in-preview") {
+    await runFindInPreview();
+    return;
+  }
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "tall-block-scroll") {
     await runTallBlockScroll();
     return;
@@ -149,6 +154,7 @@ export async function run(): Promise<void> {
   if (!onlyRealInput) await runEditToolbarCover();
   if (!onlyRealInput) await runTallBlockScroll();
   if (!onlyRealInput) await runBlockActions();
+  if (!onlyRealInput) await runFindInPreview();
   try {
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "comment-contrast") await runCommentContrast();
     else if (process.env.STUDIO_REAL_INPUT_SCENARIO === "comment-title") await runCommentTitle();
