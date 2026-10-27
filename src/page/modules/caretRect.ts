@@ -66,8 +66,8 @@ export function caretRectOf(
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
 /**
  * How far to scroll (positive: down) so the caret is neither under the stuck edition palette nor
- * below the viewport. 0 when the palette is not stuck (it is still above the frame) or when the
- * caret is already clear.
+ * below the viewport. A palette that is not stuck (still above the frame) hides nothing, so only a
+ * caret below the viewport moves the page then; 0 when the caret is already clear.
  */
 export function caretRevealDelta(
   caret: { top: number; bottom: number },

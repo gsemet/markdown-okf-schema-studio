@@ -147,14 +147,15 @@ export async function run(): Promise<void> {
   const shotDirectory = path.join(E2E_REPORT_ROOT, "tall-block-scroll");
   fs.mkdirSync(shotDirectory, { recursive: true });
   const directory = fs.mkdtempSync(path.join(extensionRoot, "test", "integration", "fixtures", "tall-block-scroll-e2e-"));
-  const tallPath = path.join(directory, "tall.md");
-  const emptyPath = path.join(directory, "empty.md");
-  fs.writeFileSync(tallPath, SOURCE);
-  fs.writeFileSync(emptyPath, "");
+  const tallPath = (name: string): string => path.join(directory, `${name}.md`);
+  const emptyPath = (mode: string): string => path.join(directory, `empty-${mode}.md`);
+  for (const name of ["tall", "tall-paste-cream", "tall-paste-dark"]) fs.writeFileSync(tallPath(name), SOURCE);
+  for (const mode of ["cream", "dark"]) fs.writeFileSync(emptyPath(mode), "");
   const workbench = vscode.workspace.getConfiguration("workbench");
   const originalTheme = workbench.inspect<string>("colorTheme")?.workspaceValue;
   const failures: string[] = [];
   const opened: vscode.TextDocument[] = [];
+  let themeMode: "cream" | "dark" = "cream";
 
   const openPreview = async (filePath: string): Promise<void> => {
     const document = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
@@ -166,7 +167,7 @@ export async function run(): Promise<void> {
       const preview = getActivePreviewForTests();
       if (preview?.documentUri !== document.uri.toString() || preview.phase !== "ready") return false;
       const frame = await liveFrame(page).catch(() => undefined);
-      return frame !== undefined && await frame.locator("html").getAttribute("data-sphinx-preview-theme-mode") === "cream";
+      return frame !== undefined && await frame.locator("html").getAttribute("data-sphinx-preview-theme-mode") === themeMode;
     }, 30_000);
     await waitFor("edit mode", async () => {
       const live = await liveFrame(page);
@@ -203,7 +204,7 @@ export async function run(): Promise<void> {
   };
 
   // Wheel down over the text box, one notch at a time: the page only goes down, the toolbar stays at
-  // the top. A re-render that closes the editor (the host rendering the pasted text) ends the steps.
+  // the top. An editor that closes (a re-render) fails the case (CR 134).
   const wheelDown = async (name: string, steps: number): Promise<void> => {
     const live = await liveFrame(page);
     const viewport = await (await live.frameElement()).boundingBox();
@@ -219,7 +220,8 @@ export async function run(): Promise<void> {
       await pause(250);
       const now = await sample();
       if (!now) {
-        console.log(`tall-block-scroll ${name}: the editor closed at wheel step ${step} (re-render)`);
+        // CR 134: a re-render that closes the editor is the bug, not a way to end the steps.
+        failures.push(`${name}: the editor closed at wheel step ${step} (a re-render closed it)`);
         return;
       }
       console.log(`tall-block-scroll ${name} step ${step}: ${JSON.stringify({ ...now, caret: undefined })}`);
@@ -235,14 +237,9 @@ export async function run(): Promise<void> {
     }
   };
 
-  try {
-    await workbench.update("colorTheme", "Default Dark Modern", vscode.ConfigurationTarget.Workspace);
-    await page.setViewportSize({ width, height: 800 });
-    await vscode.commands.executeCommand("workbench.action.closeSidebar");
-    await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
-
-    // (a) The tall block, opened while its top is 150 px above the pane, on the first line seen.
-    await openPreview(tallPath);
+  /** Opens the tall page and the tall block's editor with the page scrolled into it (CR 123). */
+  const openTallBlockEditor = async (name: string) => {
+    await openPreview(tallPath(name));
     const live = await liveFrame(page);
     const tall = live.locator("#sphinx-myst-preview-content pre", { hasText: "Tall line 01" }).first();
     await tall.evaluate((element) => globalThis.scrollBy(0, element.getBoundingClientRect().top + 150));
@@ -274,6 +271,94 @@ export async function run(): Promise<void> {
     assert.ok(openedAt, "the tall block's editor is open");
     console.log(`tall-block-scroll opened: ${JSON.stringify({ ...openedAt, caret: undefined })}`);
     checkAtTop("tall block opened", openedAt);
+    return { live, frameBox, firstSeen };
+  };
+
+  /**
+   * CR 134: a paste into the open editor of a tall block. The host renders the pasted text after the
+   * autosave; the editor stays open with the caret where the paste ended and the page does not move.
+   */
+  const pasteIntoTallBlockCase = async (mode: string): Promise<void> => {
+    await openTallBlockEditor(`tall-paste-${mode}`);
+    const before = await sample();
+    assert.ok(before, `${mode} tall paste: an open editor before the paste`);
+    await vscode.env.clipboard.writeText(tallLines(40).map((line) => `Pasted ${line}`).join("\n"));
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+V" : "Control+V");
+    await pause(300);
+    const pasted = await sample();
+    assert.ok(pasted, `${mode} tall paste: the editor is open right after the paste`);
+    await pause(2_000);
+    const settled = await sample();
+    if (!settled) {
+      failures.push(`${mode} tall paste: the editor closed after the paste (the page re-rendered), `
+        + `scrollY was ${pasted.scrollY}`);
+      await shoot(`window-tall-closed-after-paste-${mode}`);
+    } else {
+      if (Math.abs(settled.scrollY - pasted.scrollY) > 2) {
+        failures.push(`${mode} tall paste: the page moved from ${pasted.scrollY} to ${settled.scrollY} after the render`);
+      }
+      if (!settled.caret || settled.caret.bottom > settled.viewportHeight || settled.caret.top < settled.paletteBottom - 0.5) {
+        failures.push(`${mode} tall paste: the caret is out of view after the render (${JSON.stringify(settled.caret)})`);
+      }
+      await shoot(`window-tall-pasted-${mode}`);
+      await closeEditor();
+    }
+    disposeActivePreviewForTests();
+  };
+
+  const pastedTextCase = async (mode: string): Promise<void> => {
+    await openPreview(emptyPath(mode));
+    const emptyFrame = await liveFrame(page);
+    await emptyFrame.getByRole("button", { name: "Start writing" }).click();
+    await waitFor("the Start writing text box", async () => (await (await liveFrame(page)).locator("[data-sphinx-preview-block-editor] textarea").count()) === 1);
+    await (await liveFrame(page)).locator("[data-sphinx-preview-block-editor] textarea").focus();
+    await vscode.env.clipboard.writeText(tallLines(90).join("\n\n"));
+    await page.keyboard.press(process.platform === "darwin" ? "Meta+V" : "Control+V");
+    await pause(300);
+    const pasted = await sample();
+    assert.ok(pasted, "the Start writing editor is open after the paste");
+    console.log(`tall-block-scroll after paste: ${JSON.stringify(pasted)}`);
+    // The page follows the caret to the end of the paste; left at the top, a re-render of the pasted
+    // text (its pin taken there) brings a reader who scrolled down back to the top.
+    if (!pasted.caret || pasted.caret.bottom > pasted.viewportHeight || pasted.caret.top < pasted.paletteBottom - 0.5) {
+      failures.push(`pasted text: the caret at the end of the paste is out of view (caret ${JSON.stringify(pasted.caret)}, `
+        + `palette bottom ${pasted.paletteBottom}, viewport ${pasted.viewportHeight}, scrollY ${pasted.scrollY})`);
+    }
+    // CR 134: the host renders the pasted text after the autosave; the editor stays open with the
+    // caret where the paste ended and the page does not move.
+    await pause(2_000);
+    const settled = await sample();
+    if (!settled) {
+      failures.push(`${mode} paste: the editor closed after the paste (the page re-rendered)`);
+      await shoot(`window-closed-after-paste-${mode}`);
+    } else {
+      if (Math.abs(settled.scrollY - pasted.scrollY) > 2) {
+        failures.push(`${mode} paste: the page moved from ${pasted.scrollY} to ${settled.scrollY} after the render`);
+      }
+      await shoot(`window-pasted-${mode}`);
+    }
+    // Back to the top of the page with the wheel, then down again step by step.
+    const box = await (await (await liveFrame(page)).frameElement()).boundingBox();
+    assert.ok(box);
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.6);
+    for (let step = 0; step < 60 && ((await sample())?.scrollY ?? 0) > 0; step += 1) {
+      await page.mouse.wheel(0, -1200);
+      await pause(60);
+    }
+    await pause(400);
+    if (await sample()) await wheelDown("pasted text", 16);
+    if (await (await liveFrame(page)).locator("[data-sphinx-preview-block-editor]").count() > 0) await closeEditor();
+    disposeActivePreviewForTests();
+  };
+
+  try {
+    await workbench.update("colorTheme", "Default Dark Modern", vscode.ConfigurationTarget.Workspace);
+    await page.setViewportSize({ width, height: 800 });
+    await vscode.commands.executeCommand("workbench.action.closeSidebar");
+    await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
+
+    // (a) The tall block, opened while its top is 150 px above the pane, on the first line seen.
+    const { frameBox, firstSeen } = await openTallBlockEditor("tall");
     // The user's layout: a pane wide enough for the preview controls to overlap only the empty end of
     // the bar (none of its buttons). The bar wraps with the width, so look for such a width.
     let layoutWidth: number | undefined;
@@ -297,36 +382,14 @@ export async function run(): Promise<void> {
     disposeActivePreviewForTests();
     await page.setViewportSize({ width, height: 800 });
 
-    // (b) An empty document, Start writing, a very large text pasted in the text box.
-    await openPreview(emptyPath);
-    const emptyFrame = await liveFrame(page);
-    await emptyFrame.getByRole("button", { name: "Start writing" }).click();
-    await waitFor("the Start writing text box", async () => (await (await liveFrame(page)).locator("[data-sphinx-preview-block-editor] textarea").count()) === 1);
-    await (await liveFrame(page)).locator("[data-sphinx-preview-block-editor] textarea").focus();
-    await vscode.env.clipboard.writeText(tallLines(90).join("\n\n"));
-    await page.keyboard.press(process.platform === "darwin" ? "Meta+V" : "Control+V");
-    await pause(300);
-    const pasted = await sample();
-    assert.ok(pasted, "the Start writing editor is open after the paste");
-    console.log(`tall-block-scroll after paste: ${JSON.stringify(pasted)}`);
-    // The page follows the caret to the end of the paste; left at the top, a re-render of the pasted
-    // text (its pin taken there) brings a reader who scrolled down back to the top.
-    if (!pasted.caret || pasted.caret.bottom > pasted.viewportHeight || pasted.caret.top < pasted.paletteBottom - 0.5) {
-      failures.push(`pasted text: the caret at the end of the paste is out of view (caret ${JSON.stringify(pasted.caret)}, `
-        + `palette bottom ${pasted.paletteBottom}, viewport ${pasted.viewportHeight}, scrollY ${pasted.scrollY})`);
+    // (b) An empty document, Start writing, a very large text pasted in the text box; then the same
+    // in the dark preview theme (CR 134: the editor stays open and the page does not move).
+    for (const mode of ["cream", "dark"] as const) {
+      themeMode = mode;
+      await storeWorkspaceChoicesForTests({ previewThemeMode: mode, toolbarCollapsed: false, paletteMode: "myst" });
+      await pastedTextCase(mode);
+      await pasteIntoTallBlockCase(mode);
     }
-    await shoot("window-pasted-cream");
-    // Back to the top of the page with the wheel, then down again step by step.
-    const box = await (await (await liveFrame(page)).frameElement()).boundingBox();
-    assert.ok(box);
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.6);
-    for (let step = 0; step < 60 && ((await sample())?.scrollY ?? 0) > 0; step += 1) {
-      await page.mouse.wheel(0, -1200);
-      await pause(60);
-    }
-    await pause(400);
-    if (await sample()) await wheelDown("pasted text", 16);
-    if (await (await liveFrame(page)).locator("[data-sphinx-preview-block-editor]").count() > 0) await closeEditor();
 
     assert.deepEqual(failures, [], failures.join("\n"));
   } finally {

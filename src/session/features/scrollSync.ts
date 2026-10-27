@@ -36,7 +36,16 @@ export interface ScrollState {
   };
   lastSourceScrollLine?: number;
   lastRevealedSourceLine?: number;
+  /**
+   * Until when the text editor's scroll is the echo of an edit the preview itself applied (CR 134):
+   * VS Code reveals the end of a large paste in the editor, and the page must not follow that move
+   * while the writer is still in the block editor. `Infinity` while the edit is being applied.
+   */
+  ownEditUntil?: number;
 }
+
+/** How long after an own edit settled the editor's scroll still counts as its echo. */
+export const OWN_EDIT_ECHO_MS = 750;
 
 /** A fresh {@link ScrollState}. */
 export function createScrollState(): ScrollState {
@@ -131,6 +140,11 @@ export class ScrollSyncController {
       for (const preview of this.manager.sessions()) {
         const stage = preview.stage;
         if (preview.disposed || !stage || preview.documentUri !== documentIdentity) {
+          continue;
+        }
+        // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
+        // The editor scrolled to show the edit the preview just applied: the page is where the writer is.
+        if (preview.scroll.ownEditUntil !== undefined && Date.now() < preview.scroll.ownEditUntil) {
           continue;
         }
         const sourceLine = firstVisibleLine + 1;

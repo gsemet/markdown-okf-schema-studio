@@ -594,3 +594,8 @@
 - SwRS-MDOKFSTUDIO-BLOCK-004 (CR 129): the keyboard block navigation also works while the page itself
   (body or content root) holds the focus, the page shows no focus ring, and a window or tab that
   comes back restores the block selection. Verification: `just requirements-lint`.
+- SwRS-MDOKFSTUDIO-PALETTE-021 (CR 134): a paste into an open block editor keeps the page where the
+  writer is: the scroll of the text editor to the edit the autosave applied does not move the page
+  (until 750 ms after the edit settled); wording of the sticking line under the band corrected.
+  Verification: test/session/toolbarReq.requirements.test.ts, real-window test
+  test/integration/tallBlockScroll.test.ts, `just requirements-lint`.
