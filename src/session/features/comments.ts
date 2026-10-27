@@ -85,6 +85,9 @@ export class CommentsController {
     write: async (file, text) => {
       await this.manager.host.files.writeFile(file, new TextEncoder().encode(text));
     },
+    isSymbolicLink: (file) => this.manager.host.files.isSymbolicLink(file),
+    rename: (from, to) => this.manager.host.files.rename(from, to, { overwrite: true }),
+    remove: (file) => this.manager.host.files.delete(file),
   });
 
   public constructor(private readonly manager: PreviewManager) {}

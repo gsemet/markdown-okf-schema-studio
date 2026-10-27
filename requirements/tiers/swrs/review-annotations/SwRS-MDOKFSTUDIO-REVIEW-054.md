@@ -9,7 +9,8 @@ description: When the host receives a create message from a writable preview of
   chosen by the host, in the review comments file next to the document, running
   the changes of one file one after another on its latest content and refusing
   with a reason and a warning, and writing nothing, a change that the file state
-  or its limits do not allow.
+  or its limits do not allow, and writing through a temporary file renamed onto
+  the comments file and never into a comments file that is a symbolic link.
 project: markdown-okf-schema-studio
 scope: review-annotations
 lifecycle: draft
@@ -32,6 +33,7 @@ tested_in_files:
 - test/core/comments/commentEditing.test.ts
 - test/core/comments/reviewReq.requirements.test.ts
 - test/integration/commentWrite.test.ts
+- test/node-services/nodeServices.test.ts
 - test/session/reviewReqComments.requirements.test.ts
 ---
 
@@ -39,7 +41,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When the host receives a create message from a writable preview of a saved document, the extension SHALL append a thread with the anchor as sent, resolved false and one comment, with thread and comment ids and the time chosen by the host, in the review comments file next to the document, running the changes of one file one after another on its latest content and refusing with a reason and a warning, and writing nothing, a change that the file state or its limits do not allow.
+When the host receives a create message from a writable preview of a saved document, the extension SHALL append a thread with the anchor as sent, resolved false and one comment, with thread and comment ids and the time chosen by the host, in the review comments file next to the document, running the changes of one file one after another on its latest content and refusing with a reason and a warning, and writing nothing, a change that the file state or its limits do not allow, and writing through a temporary file renamed onto the comments file and never into a comments file that is a symbolic link.
 
 ### Scenario (nominal): First comment on a text
 
@@ -83,6 +85,14 @@ When the host refuses a comment change, it answers the page ok false with the re
 | The file already holds 1000 threads | "the comments file is full." |
 | A new thread repeats the id of another thread | the change is refused (the same reason, "the comments file is full.") |
 | The existing comments file is not valid | "the comments file is not valid ({first problem}) and is left untouched." |
+| The comments file path is itself a symbolic link (a dangling one included) | "the comments file is a symbolic link and is left untouched" |
+
+### Scenario (nominal): A write replaces the file in one step
+
+- GIVEN a valid change to a comments file that is not a symbolic link
+- WHEN the host writes it
+- THEN the text is written to a temporary file in the same folder and renamed onto the comments file
+- AND a failed write or rename removes the temporary file and leaves the comments file as it was
 
 ### Scenario (refusal): A refusal also shows a warning
 
@@ -112,5 +122,7 @@ When the host refuses a comment change, it answers the page ok false with the re
 - Method: test/integration/commentWrite.test.ts (First comment on a text with ids, author and anchor; the file does not exist before the first create, version 1, document notes.md; two quick creates must both be saved; dirty sidecar, the result reason matches unsaved changes and the file on disk is untouched; the refusal reasons sent to the page). The warning text is not asserted, and the write after the editor is reverted is not asserted.
 - Method: test/core/comments/reviewReq.requirements.test.ts, unit test a change that makes the serialized file larger than 2 MiB is refused before the write (Refusal reasons, the 2 MiB row).
 - Method: test/session/reviewReqComments.requirements.test.ts, unit test a comment for a document that is not a file is refused with 'save the document first.' (Refusal reasons, the not-a-file row).
+- Method: test/core/comments/commentEditing.test.ts, unit tests `S-04: a comments file that is a symbolic link is refused and its target is never written` (the symbolic link row) and `S-04: a write goes to a temporary file and is renamed onto the comments file; a failed rename leaves no temporary file` (A write replaces the file in one step).
+- Method: test/node-services/nodeServices.test.ts, unit test `the Node file system reports a link itself, a dangling one included, and not a missing path` (the link check of the Node file system).
 - Method: real window review-annotations/r04-thread-created (First comment on a text).
 - Criteria: The written file matches the pattern for ids and dates and holds the anchor as sent, and parses with version 1. After concurrent changes the file holds every change, and the second change is written after the first was refused. The refusal comes before the write when the UTF-8 length exceeds MAX_SIDECAR_BYTES, writeComment refuses when the document uri does not start with file:, and for an unsaved comments file the reason names the file and the disk content is identical. showWarning is called with the prefix and the reason on every refusal in writeComment; the refusals of an empty or too long body, an unknown thread id and an unexpected error are answered to the page without a warning.

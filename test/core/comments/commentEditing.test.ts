@@ -114,6 +114,9 @@ function memoryIo(initial?: string, delayMs = 5) {
     writes: [] as string[],
     async read(path: string) { await sleep(); return files.get(path); },
     async write(path: string, text: string) { await sleep(); files.set(path, text); this.writes.push(text); },
+    async isSymbolicLink() { return false; },
+    async rename(from: string, to: string) { const text = files.get(from)!; files.delete(from); files.set(to, text); },
+    async remove(path: string) { files.delete(path); },
   };
 }
 
@@ -155,7 +158,13 @@ test("T43: an invalid existing file is never overwritten, and a refusal does not
   assert.equal(io.files.get("/d/notes.comments.json"), "{ not json");
   const gone = await store.update("/d/other.comments.json", "other.md", () => "nothing to do");
   assert.deepEqual(gone, { ok: false, reason: "nothing to do" });
-  const failing = createCommentStore({ read: async () => undefined, write: async () => { throw new Error("disk full"); } });
+  const failing = createCommentStore({
+    read: async () => undefined,
+    write: async () => { throw new Error("disk full"); },
+    isSymbolicLink: async () => false,
+    rename: async () => undefined,
+    remove: async () => undefined,
+  });
   const failed = await failing.update("/d/x.comments.json", "x.md", (threads) =>
     addThread(threads, { threadId: "t", commentId: "c", anchor, author: "A", body: "x", now: NOW })!);
   assert.equal(failed.ok, false);
@@ -206,6 +215,9 @@ test("T44: resolve and delete go through the same per-file queue as create", asy
   const io = {
     read: async (path: string) => { await new Promise((r) => setTimeout(r, 5)); return files.get(path); },
     write: async (path: string, text: string) => { await new Promise((r) => setTimeout(r, 5)); files.set(path, text); },
+    isSymbolicLink: async () => false,
+    rename: async (from: string, to: string) => { files.set(to, files.get(from)!); files.delete(from); },
+    remove: async (path: string) => { files.delete(path); },
   };
   const store = createCommentStore(io);
   const create = (id: string) => store.update("/a.comments.json", "a.md", (threads) =>
@@ -218,4 +230,53 @@ test("T44: resolve and delete go through the same per-file queue as create", asy
   ]);
   const parsed = parseSidecar(files.get("/a.comments.json")!);
   assert.deepEqual(parsed.threads.map((thread) => [thread.id, thread.resolved]), [["t1", true], ["t3", false]]);
+});
+
+/** A memory file system where the paths in `links` are symbolic links: a write to one reaches its target. */
+function linkedIo(links: Map<string, string | undefined>, files: Map<string, string>) {
+  const targetOf = (path: string): string => links.get(path) ?? path;
+  return {
+    read: async (path: string) => files.get(targetOf(path)),
+    write: async (path: string, text: string) => { files.set(targetOf(path), text); },
+    isSymbolicLink: async (path: string) => links.has(path),
+    // A rename replaces the entry at the path itself, so a link there is replaced, not followed.
+    rename: async (from: string, to: string) => { links.delete(to); files.set(to, files.get(from)!); files.delete(from); },
+    remove: async (path: string) => { files.delete(path); },
+  };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+test("S-04: a comments file that is a symbolic link is refused and its target is never written", async () => {
+  const files = new Map<string, string>();
+  const links = new Map<string, string | undefined>([["/d/notes.comments.json", "/outside/target.txt"]]);
+  const store = createCommentStore(linkedIo(links, files));
+  const result = await store.update("/d/notes.comments.json", "notes.md", (threads) =>
+    addThread(threads, { threadId: "t1", commentId: "c1", anchor, author: "A", body: "x", now: NOW }) ?? "full");
+  assert.equal(result.ok, false);
+  assert.match((result as { reason: string }).reason, /symbolic link/);
+  assert.equal(files.has("/outside/target.txt"), false);
+  assert.equal(links.has("/d/notes.comments.json"), true);
+  assert.deepEqual([...files.keys()], []);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+test("S-04: a write goes to a temporary file and is renamed onto the comments file; a failed rename leaves no temporary file", async () => {
+  const files = new Map<string, string>();
+  const calls: string[] = [];
+  const io = linkedIo(new Map(), files);
+  const store = createCommentStore({
+    ...io,
+    write: async (path, text) => { calls.push(`write ${path.endsWith(".tmp") ? "tmp" : path}`); await io.write(path, text); },
+    rename: async (from, to) => { calls.push(`rename ${to}`); await io.rename(from, to); },
+  });
+  const change = (threads: CommentThread[]) =>
+    addThread(threads, { threadId: "t1", commentId: "c1", anchor, author: "A", body: "x", now: NOW }) ?? "full";
+  assert.equal((await store.update("/d/notes.comments.json", "notes.md", change)).ok, true);
+  assert.deepEqual(calls, ["write tmp", "rename /d/notes.comments.json"]);
+  assert.deepEqual([...files.keys()], ["/d/notes.comments.json"]);
+
+  const broken = createCommentStore({ ...io, rename: async () => { throw new Error("rename failed"); } });
+  const failed = await broken.update("/d/other.comments.json", "other.md", change);
+  assert.equal(failed.ok, false);
+  assert.deepEqual([...files.keys()], ["/d/notes.comments.json"]);
 });

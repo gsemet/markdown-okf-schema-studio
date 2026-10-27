@@ -112,6 +112,9 @@ export function createMemoryFileSystem(): MemoryFileSystem {
       if (!files.delete(target)) throw notFound(path);
       modified.delete(target);
     },
+    async isSymbolicLink() {
+      return false;
+    },
     async realpath(path) {
       const target = normalizePosixPath(path);
       if (!kindAt(target)) throw notFound(path);

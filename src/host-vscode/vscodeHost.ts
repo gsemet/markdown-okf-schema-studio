@@ -77,6 +77,7 @@ function createVscodeFileSystem(): FileSystem {
     async delete(path) {
       await vscode.workspace.fs.delete(vscode.Uri.file(path), { recursive: false, useTrash: false });
     },
+    isSymbolicLink: (path) => node.isSymbolicLink(path),
     realpath: (path) => node.realpath(path),
   };
 }
