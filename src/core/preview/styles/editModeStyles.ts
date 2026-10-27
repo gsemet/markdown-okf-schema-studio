@@ -42,6 +42,11 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-block-selected="tr
   outline-offset: 3px;
 }
 
+/* Whichever moved last owns the block actions: after a pointer move the selection ring goes away. */
+html[data-sphinx-preview-edit-mode="on"][data-sphinx-preview-actions-owner="pointer"] [data-sphinx-preview-block-selected="true"] {
+  outline: none;
+}
+
 .sphinx-preview-selection-status {
   position: absolute;
   width: 1px;
@@ -92,6 +97,21 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
 .sphinx-preview-insert-point button:hover,
 .sphinx-preview-insert-point button:focus-visible {
   opacity: 1;
+}
+
+/* The block actions follow what moved last: while the keyboard selection owns them, the hovered
+   block does not show them and the bar of the selection does. */
+html[data-sphinx-preview-actions-owner="keyboard"] [data-sphinx-source-line]:hover
+  + .sphinx-preview-insert-point:not([data-sphinx-actions-shown="true"]) button:not(:hover):not(:focus-visible) {
+  opacity: 0;
+}
+
+html[data-sphinx-preview-actions-owner="keyboard"] .sphinx-preview-insert-point[data-sphinx-actions-shown="true"] button {
+  opacity: 1;
+}
+
+html[data-sphinx-preview-actions-owner="keyboard"] .sphinx-preview-insert-point[data-sphinx-actions-shown="true"] button.sphinx-preview-move:disabled {
+  opacity: 0.5;
 }
 
 /* The move buttons sit right of the "+", touching it so the pointer never loses the bar. */

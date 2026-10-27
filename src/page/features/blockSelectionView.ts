@@ -54,6 +54,11 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
       .map((block) => block.closest?.("pre") || block);
     selectionElements.forEach((element) => element.setAttribute("data-sphinx-preview-block-selected", "true"));
     announceSelection(selectionElements.length);
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
+    // A selection that just moved owns the block actions; none left gives them back to the pointer.
+    const root = document.documentElement;
+    if (selectionElements.length > 0) root?.setAttribute?.("data-sphinx-preview-actions-owner", "keyboard");
+    else root?.removeAttribute?.("data-sphinx-preview-actions-owner");
     rt.blockMoves.updateMoveLabels(blocks);
   }
 

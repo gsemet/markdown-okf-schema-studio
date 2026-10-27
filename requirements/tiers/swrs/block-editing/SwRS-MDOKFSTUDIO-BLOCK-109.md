@@ -26,10 +26,13 @@ derived_by: []
 implemented_in_files:
 - src/core/preview/styles/editModeStyles.ts
 - src/page/features/blockMoves.ts
+- src/page/features/blockSelectionView.ts
+- src/page/features/editMode.ts
 - src/page/features/insertPoints.ts
 tested_in_files:
 - test/core/preview/blockReq.requirements.test.ts
 - test/core/protocol/pageToHost.test.ts
+- test/integration/blockActionsFollowSelection.test.ts
 - test/page/runtimeBlockMoves.test.ts
 ---
 
@@ -90,6 +93,15 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 | The host answers ok false with a reason to a move requested from a bar | A status element with role status and the reason appears next to that bar and disappears after 6 s; the pending mark is cleared |
 | The host answers ok true | No status is shown; the page is re-rendered |
 
+### Scenario (nominal): The actions show on one block, the one that moved last
+
+- GIVEN edit mode, the pointer resting on a block and a keyboard block selection on another
+- WHEN the keyboard moves the selection (the page marks the root `data-sphinx-preview-actions-owner="keyboard"` and the bar under the last selected block `data-sphinx-actions-shown`)
+- THEN the arrows and the plus of that bar are shown, those of the hovered block are not, and a click on an arrow acts on the block of the bar it is on
+- WHEN the pointer then really moves (a move event at the same coordinates, such as the one a browser sends after a scroll, does not count)
+- THEN the owner is "pointer", the hovered block shows its actions again, the bar of the selection hides and the selection outline is removed
+- AND a selection that is cleared leaves the owner unset, so the hover alone shows the actions
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-240: the accepted shape of previewBlockMove.
@@ -104,4 +116,6 @@ While edit mode is on, the page SHALL give the insert point of every body block 
 - Method: test/page/runtimeBlockMoves.test.ts: `T36: every body insertion point has up and down buttons, disabled at the ends` (scenarios 1 and 2), `T36: the properties point and the Start writing point have no move buttons` (scenario 3), `T36: a click posts the ranges of the block above the bar and of its neighbour` (scenario 5), `T36: a disabled button posts nothing, and the buttons stand down while an editor is open` (scenario 6), `T36: a refused move says why next to the bar; a result of another context is ignored` (scenario 7). The labels of a selection (scenario 1, second part) are checked by the tests of SwRS-MDOKFSTUDIO-BLOCK-156.
 - Method: test/core/preview/blockReq.requirements.test.ts: `the move arrows are hidden only while a block editor is open` (scenario 4).
 - Method: test/core/protocol/pageToHost.test.ts: `previewBlockMove validates both ranges, the direction and the optional pin` (scenario 5).
+- Method: test/page/runtimeBlockMoves.test.ts: `the block actions follow whichever moved last: the keyboard selection or the pointer` (owner attribute and shown bar, scenario 8), and test/core/preview/blockReq.requirements.test.ts: `the block actions of a hovered block yield to the keyboard selection, which shows its own bar` (the style rules).
+- Method: test/integration/blockActionsFollowSelection.test.ts (real window, cream and dark preview themes): the computed opacity of the bars and the outline after a keyboard move and after a pointer move.
 - Criteria: Two buttons with data-sphinx-move up and down per body bar. The disabled attribute is set when the neighbour is missing. addMoveButtons is called only for body bars. The stylesheet hides the buttons under the open-editor attribute. postBlockMove returns false when an editor is open. The status lives 6000 ms.

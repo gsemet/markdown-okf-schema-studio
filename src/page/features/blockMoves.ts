@@ -197,6 +197,10 @@ export function installBlockMoves(rt: PageRuntime): BlockMoves {
   function updateMoveLabels(blocks: HTMLElement[]): void {
     rt.insertPoints.moves.forEach((move, point) => {
       const owns = blockSelection.isActive() && blocks[blockSelection.endIndex!] === move.block;
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
+      // The bar of the keyboard selection shows its actions (the style gates it on the owner).
+      if (owns) point.setAttribute("data-sphinx-actions-shown", "true");
+      else point.removeAttribute("data-sphinx-actions-shown");
       Array.from((point.childNodes ?? (point as { childElements?: HTMLCollection }).childElements ?? []) as ArrayLike<Node>)
         .forEach((node) => {
           const button = node as Element;

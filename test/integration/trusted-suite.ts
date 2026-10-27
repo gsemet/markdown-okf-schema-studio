@@ -14,6 +14,7 @@ import { run as runGenericMarkdown } from "./genericMarkdown.test";
 import { run as runTableEmptyColumn } from "./tableEmptyColumn.test";
 import { run as runEditToolbarCover } from "./editToolbarCover.test";
 import { run as runTallBlockScroll } from "./tallBlockScroll.test";
+import { run as runBlockActions } from "./blockActionsFollowSelection.test";
 import { run as runPreviewEditing } from "./previewEditing.test";
 import { run as runImagePicker } from "./imagePicker.test";
 import { run as runImagePaste } from "./imagePaste.test";
@@ -50,6 +51,11 @@ export async function run(): Promise<void> {
   await pinStoredWorkspaceChoices();
   // CDP input and the undo steps need a window macOS has activated (windowFocus.ts).
   await ensureTestWindowFocused();
+  // The block actions scenario needs no fixture document: it runs before the shared preview.md checks.
+  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "block-actions") {
+    await runBlockActions();
+    return;
+  }
   const extensionRoot = path.resolve(__dirname, "../../..");
   const workspaceRoot = extensionRoot;
   const fixturePath = path.join(extensionRoot, "test", "integration", "fixtures", "preview.md");
@@ -133,6 +139,7 @@ export async function run(): Promise<void> {
   if (!onlyRealInput) await runTableEmptyColumn();
   if (!onlyRealInput) await runEditToolbarCover();
   if (!onlyRealInput) await runTallBlockScroll();
+  if (!onlyRealInput) await runBlockActions();
   try {
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "comment-contrast") await runCommentContrast();
     else await runRealInput();
