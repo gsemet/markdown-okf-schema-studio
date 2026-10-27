@@ -63,6 +63,12 @@
   `<!-- TODO -->` for a TODO comment, instead of the words Comment and TODO (read mode keeps the
   words). A comment starting with `todo` in lower case (`<!-- todo cite -->`) is now a TODO comment
   (green chip), like `TODO` and `Todo`.
+- Fold and unfold sections in the preview: a chevron next to each heading (on hover and focus)
+  hides the blocks up to the next heading of the same or a higher level, `Cmd+Alt+[` / `Ctrl+Alt+[`
+  toggles the current section, and the Fold button of the toolbar and the commands "Fold All
+  Sections in Preview" / "Unfold All Sections in Preview" fold or unfold every section. The folds are
+  a view state kept per document across reloads and never written to the file; the browser find and
+  links to a folded block unfold it, and a block in a folded section cannot be edited.
 - PlantUML through Java (`plantuml.useJar`) now runs with the PlantUML `ALLOWLIST` security profile
   (the workspace folder as allowlist path) and an explicit image size limit of 4096. Includes of files
   inside the workspace still work; URL includes are refused. `JAVA_HOME` is used when it is an

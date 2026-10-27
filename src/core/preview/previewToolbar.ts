@@ -23,6 +23,8 @@ const WIDTH_BUTTON = `<button type="button" data-sphinx-preview-width-toggle dat
 
 const TOC_BUTTON = `<button type="button" data-sphinx-preview-toc-toggle aria-pressed="false" aria-label="Show table of contents" title="Show table of contents" data-tooltip="Show table of contents"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6h2M10 6h10M4 12h2M10 12h10M4 18h2M10 18h10"></path></svg></button>`;
 
+const FOLD_BUTTON = `<button type="button" data-sphinx-preview-fold-toggle aria-pressed="false" aria-label="Fold all sections" title="Fold all sections" data-tooltip="Fold all sections"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 4 5 5 5-5M7 20l5-5 5 5"></path></svg></button>`;
+
 const DIFF_BUTTON = `<button type="button" data-sphinx-preview-diff-toggle aria-pressed="true" aria-label="Hide changes since last commit" title="Hide changes since last commit" data-tooltip="Hide changes since last commit"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 4v12M8 16a2.5 2.5 0 1 0 0 .01M16 20V8M16 8a2.5 2.5 0 1 0 0-.01M13.5 5.5 16 8l2.5-2.5"></path></svg></button>`;
 
 const COMMENTS_BUTTON = `<button type="button" data-sphinx-preview-comments-toggle aria-pressed="true" aria-label="Hide comments" title="Hide comments" data-tooltip="Hide comments"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16v11H9l-5 4Z"></path><path d="M8 9.5h8M8 12.5h5"></path></svg></button>`;
@@ -30,17 +32,18 @@ const COMMENTS_BUTTON = `<button type="button" data-sphinx-preview-comments-togg
 const COLLAPSE_BUTTON = `<button type="button" data-sphinx-preview-toolbar-collapse aria-expanded="true" aria-controls="sphinx-preview-toolbar-more" aria-label="Hide view controls" title="Hide view controls" data-tooltip="Hide view controls"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-collapse-icon="hide"><path d="m6 15 6-6 6 6"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-collapse-icon="show"><path d="m6 9 6 6 6-6"></path></svg></button>`;
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
 /**
  * Three rows. Row 1 (actions): Refresh, Anchor, Edit (greyed with the reason in read-only previews) and the collapse
  * button. Row 2 (navigation): Back, Next, Zoom out, Zoom in. Row 3 (view options): Theme, Width,
- * TOC, Diff, Comments. Rows 2 and 3 sit in one group that the collapse button hides; the Tab order follows
+ * TOC, Fold, Diff, Comments. Rows 2 and 3 sit in one group that the collapse button hides; the Tab order follows
  * the rows.
  */
 export function renderPreviewToolbar(editingEnabled = true): string {
   const mainRow = `<div data-sphinx-preview-toolbar-row="main">${REFRESH_BUTTON}${ANCHOR_BUTTON}${editingEnabled ? EDIT_BUTTON : EDIT_BUTTON_UNAVAILABLE}${COLLAPSE_BUTTON}</div>`;
   const viewRow = `<div data-sphinx-preview-toolbar-row="view">${BACK_BUTTON}${NEXT_BUTTON}${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}</div>`;
-  const optionsRow = `<div data-sphinx-preview-toolbar-row="options">${THEME_BUTTON}${WIDTH_BUTTON}${TOC_BUTTON}${DIFF_BUTTON}${COMMENTS_BUTTON}</div>`;
+  const optionsRow = `<div data-sphinx-preview-toolbar-row="options">${THEME_BUTTON}${WIDTH_BUTTON}${TOC_BUTTON}${FOLD_BUTTON}${DIFF_BUTTON}${COMMENTS_BUTTON}</div>`;
   const moreRows = `<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">${viewRow}${optionsRow}</div>`;
   return `<div data-sphinx-preview-toolbar role="toolbar" aria-label="Preview controls">${mainRow}${moreRows}</div>`;
 }

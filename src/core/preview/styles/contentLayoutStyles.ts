@@ -37,6 +37,7 @@ const FIRST_ELEMENT_CLEARANCE_CSS = `/*
 
 // @implements_req SwRS-MDOKFSTUDIO-CORE-028
 // @implements_req SwRS-MDOKFSTUDIO-CORE-034
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-003
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-001
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-022
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
@@ -325,6 +326,75 @@ body :where(.sy-page, .sy-container, .sy-main, .sy-body, article) {
 
 #sphinx-myst-preview-content h3 { font-size: 1.25em; }
 #sphinx-myst-preview-content h4 { font-size: 1em; }
+
+/* CR 143: folding. The chevron hangs in the left margin of a heading that has a section; it shows
+   on hover, on focus and while the section is folded. The blocks of a folded section are
+   hidden="until-found" (the browser find still reaches their text and opens the section), so
+   their own spacing is dropped: only the heading and the next heading are left. */
+#sphinx-myst-preview-content > :is(h1, h2, h3, h4, h5, h6)[data-okf-fold] {
+  position: relative;
+}
+
+#sphinx-myst-preview-content [data-okf-fold-toggle] {
+  position: absolute;
+  top: 0.04em;
+  left: -1.5em;
+  box-sizing: border-box;
+  width: 1.2em;
+  height: 1.2em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--studio-descriptionForeground, #717171);
+  font-size: 1em;
+  line-height: 1;
+  opacity: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+#sphinx-myst-preview-content [data-okf-fold-toggle]::before {
+  content: "";
+  display: block;
+  box-sizing: border-box;
+  width: 0.4em;
+  height: 0.4em;
+  margin: 0 auto 0.15em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+#sphinx-myst-preview-content [data-okf-fold="closed"] > [data-okf-fold-toggle]::before {
+  margin: 0 auto 0 0.3em;
+  transform: rotate(-45deg);
+}
+
+#sphinx-myst-preview-content :is(h1, h2, h3, h4, h5, h6):hover > [data-okf-fold-toggle],
+#sphinx-myst-preview-content :is(h1, h2, h3, h4, h5, h6):focus-within > [data-okf-fold-toggle],
+#sphinx-myst-preview-content [data-okf-fold="closed"] > [data-okf-fold-toggle] {
+  opacity: 1;
+}
+
+#sphinx-myst-preview-content [data-okf-fold-toggle]:hover {
+  background: var(--studio-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+  color: var(--studio-editor-foreground, CanvasText);
+}
+
+/* A heading that carries an anchor icon in the margin: the chevron sits left of it. */
+#sphinx-myst-preview-content :is(h1, h2, h3, h4, h5, h6):has(.okf-anchor) > [data-okf-fold-toggle] {
+  left: -2.9em;
+}
+
+#sphinx-myst-preview-content > [data-okf-folded] {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+}
 
 ${FIRST_ELEMENT_GAP_CSS}
 

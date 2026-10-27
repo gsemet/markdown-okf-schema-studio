@@ -702,7 +702,7 @@ export const FIRST_GAP_SCENARIOS: ScenarioDefinition[] = [
     scroll: { kind: "top" as const },
     ...(state === "collapsed" ? { toolbarState: "collapsed" as const } : {}),
     description: `Floating toolbar, ${state}, ${mode ?? theme} theme, ${viewport.width} px pane: row 1 Refresh, `
-      + "Anchor, Edit and the collapse button; row 2 Back, Next, Zoom -, Zoom +; row 3 Theme, Width, TOC, Diff. "
+      + "Anchor, Edit and the collapse button; row 2 Back, Next, Zoom -, Zoom +; row 3 Theme, Width, TOC, Fold, Diff. "
       + (state === "collapsed" ? "Rows 2 and 3 are hidden." : "No row overlaps the text or another row."),
   })))),
   // Collapsed toolbar: the first element clears the shorter toolbar (P3) at 360 px.

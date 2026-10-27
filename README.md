@@ -135,8 +135,8 @@ source and preview, select the book icon in the editor title bar.
 
 - [User guide](docs/user/README.md): the index of all pages below, including
   [install and open Studio](docs/user/open-studio.md) with screenshots.
-- [Features and inline editing](docs/user/editing.md), [toolbar](docs/user/toolbar.md) and
-  [slash menu](docs/user/slash-menu.md)
+- [Features and inline editing](docs/user/editing.md), [toolbar](docs/user/toolbar.md),
+  [folding sections](docs/user/folding.md) and [slash menu](docs/user/slash-menu.md)
 - [Themes and motion](docs/user/themes-and-motion.md) and
   [wide tables](docs/user/wide-tables.md)
 - [PlantUML](docs/user/plantuml.md), [charts](docs/user/charts.md) and [review comments](docs/user/review-comments.md)

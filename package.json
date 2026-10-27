@@ -82,6 +82,16 @@
         "command": "markdown-okf-schema-studio.editDeleteLine",
         "title": "Delete Line in the Edited Text Box",
         "category": "Markdown OKF-Schema Studio"
+      },
+      {
+        "command": "markdown-okf-schema-studio.foldAll",
+        "title": "Fold All Sections in Preview",
+        "category": "Markdown OKF-Schema Studio"
+      },
+      {
+        "command": "markdown-okf-schema-studio.unfoldAll",
+        "title": "Unfold All Sections in Preview",
+        "category": "Markdown OKF-Schema Studio"
       }
     ],
     "menus": {
@@ -109,6 +119,14 @@
         {
           "command": "markdown-okf-schema-studio.editDeleteLine",
           "when": "false"
+        },
+        {
+          "command": "markdown-okf-schema-studio.foldAll",
+          "when": "activeWebviewPanelId == 'markdown-okf-schema-studio.preview' || activeCustomEditorId == 'markdown-okf-schema-studio.editor'"
+        },
+        {
+          "command": "markdown-okf-schema-studio.unfoldAll",
+          "when": "activeWebviewPanelId == 'markdown-okf-schema-studio.preview' || activeCustomEditorId == 'markdown-okf-schema-studio.editor'"
         }
       ],
       "editor/title": [

@@ -111,6 +111,8 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     rt.scroll.markWideTables();
     parts.widthMode.update();
     parts.firstClearance.update();
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-004
+    parts.headingFold.apply();
     parts.tocColumn.refresh();
     parts.chipToggle.apply();
     parts.tabs.apply();

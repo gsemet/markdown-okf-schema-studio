@@ -291,7 +291,8 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending
   font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
-  --sphinx-preview-warning-banner-reserve: 196px;
+  /* Widest toolbar row (6 buttons of 30px, 2px gaps, 3px padding, 1px border) + 14px margin + 4px clearance + 4px slack. */
+  --sphinx-preview-warning-banner-reserve: calc(6 * 30px + 5 * 2px + 8px + 14px + 8px);
   --sphinx-preview-warning-accent: color-mix(in srgb, var(--studio-charts-yellow, #bf8803) 75%, var(--studio-editor-foreground, CanvasText));
 }
 

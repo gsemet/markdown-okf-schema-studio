@@ -312,9 +312,9 @@ test("CR 119: undo, redo, select all and delete line are VS Code key bindings on
   };
   const prefix = "markdown-okf-schema-studio.";
   const ids = ["editUndo", "editRedo", "editSelectAll", "editDeleteLine"].map((name) => prefix + name);
-  assert.deepEqual(packageJson.contributes.commands.slice(2).map((entry) => entry.command), ids);
-  assert.ok(packageJson.contributes.commands.slice(2).every((entry) => entry.category === "Markdown OKF-Schema Studio"));
-  assert.deepEqual(packageJson.contributes.menus.commandPalette.slice(2), ids.map((command) => ({ command, when: "false" })),
+  assert.deepEqual(packageJson.contributes.commands.slice(2, 6).map((entry) => entry.command), ids);
+  assert.ok(packageJson.contributes.commands.slice(2, 6).every((entry) => entry.category === "Markdown OKF-Schema Studio"));
+  assert.deepEqual(packageJson.contributes.menus.commandPalette.slice(2, 6), ids.map((command) => ({ command, when: "false" })),
     "the commands are for key bindings, not for the palette");
   const when = "markdownOkfSchemaStudio.previewEditing";
   assert.deepEqual(packageJson.contributes.keybindings.slice(1), [
@@ -323,6 +323,27 @@ test("CR 119: undo, redo, select all and delete line are VS Code key bindings on
     { command: ids[1], key: "ctrl+shift+z", when },
     { command: ids[2], key: "ctrl+a", mac: "cmd+a", when },
     { command: ids[3], key: "ctrl+shift+k", mac: "cmd+shift+k", when },
+  ]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+test("CR 143: Fold All and Unfold All are command palette entries offered to the preview only", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
+    contributes: {
+      commands: Array<{ command: string; title: string; category?: string }>;
+      menus: { commandPalette: Array<{ command: string; when: string }> };
+    };
+  };
+  const prefix = "markdown-okf-schema-studio.";
+  const commands = packageJson.contributes.commands.filter((entry) => /fold/iu.test(entry.command));
+  assert.deepEqual(commands.map((entry) => [entry.command, entry.title, entry.category]), [
+    [prefix + "foldAll", "Fold All Sections in Preview", "Markdown OKF-Schema Studio"],
+    [prefix + "unfoldAll", "Unfold All Sections in Preview", "Markdown OKF-Schema Studio"],
+  ]);
+  const when = "activeWebviewPanelId == 'markdown-okf-schema-studio.preview' || activeCustomEditorId == 'markdown-okf-schema-studio.editor'";
+  assert.deepEqual(packageJson.contributes.menus.commandPalette.filter((entry) => /fold/iu.test(entry.command)), [
+    { command: prefix + "foldAll", when },
+    { command: prefix + "unfoldAll", when },
   ]);
 });
 

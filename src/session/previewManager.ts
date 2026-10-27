@@ -16,7 +16,7 @@ import type { WorkspaceFolderInfo } from "../host-api/workspaceInfo";
 import { createPreviewNavigator, type PreviewNavigator } from "./previewNavigator";
 import { LatestRequest } from "../core/preview/flushWait";
 import { createMessageRouter } from "../core/protocol/router";
-import type { PreviewEditCommandName } from "../core/protocol/hostToPage";
+import type { PreviewEditCommandName, PreviewFoldCommandName } from "../core/protocol/hostToPage";
 import type { PageToHostMessage } from "../core/protocol/pageToHost";
 import type { Revision } from "../core/protocol/revision";
 import type { PreviewPanelState } from "../core/state/previewState";
@@ -220,6 +220,25 @@ export class PreviewManager {
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
     }), "postToPage");
+    return true;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+  /**
+   * A command of the palette folds or unfolds every section of the preview that has the focus.
+   * False when no preview is focused.
+   */
+  public runFoldCommand(command: PreviewFoldCommandName): boolean {
+    const session = [...this.live].find((candidate) => !candidate.disposed && candidate.panel.active);
+    const stage = session?.stage;
+    if (!session || !stage) return false;
+    void session.postToPage({
+      type: "previewFoldCommand",
+      command,
+      documentId: stage.activeDocumentIdentity,
+      revision: revisionOfStage(stage),
+      requestId: stage.requestId,
+    });
     return true;
   }
 

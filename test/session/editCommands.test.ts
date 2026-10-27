@@ -106,3 +106,18 @@ test("CR 119: an editing command goes to the focused preview with an open editor
   f.panel.active = false;
   assert.equal(f.manager.runEditCommand("undo"), false, "the preview is not focused");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+test("CR 143: a fold command goes to the focused preview, whether an editor is open or not", async () => {
+  const f = fixture();
+  f.posted.length = 0;
+  assert.equal(f.manager.runFoldCommand("foldAll"), true);
+  assert.equal(f.manager.runFoldCommand("unfoldAll"), true);
+  assert.deepEqual(f.posted.map((message) => [message.type, message.command, message.requestId]), [
+    ["previewFoldCommand", "foldAll", 1],
+    ["previewFoldCommand", "unfoldAll", 1],
+  ]);
+  f.panel.active = false;
+  assert.equal(f.manager.runFoldCommand("foldAll"), false, "no preview has the focus");
+  assert.equal(f.posted.length, 2);
+});

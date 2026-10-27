@@ -62,6 +62,7 @@ import { installFigureEditButton } from "./modules/figurePanel";
 import { installFirstClearance } from "./modules/firstClearance";
 import { installHistoryControls } from "./modules/historyControls";
 import { installHostRequests, type HostResult } from "./modules/hostRequests";
+import { installHeadingFold } from "./modules/headingFold";
 import { installIncomingChanges } from "./modules/incomingChanges";
 import { installIncomingToggle } from "./modules/incomingToggle";
 import { installInlineThreads } from "./modules/inlineThread";
@@ -278,6 +279,12 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     widthMode.update();
     keepReadingLine();
   }, () => stickyBand.readingOffset());
+  // Folding of the sections under the headings (modules/headingFold.ts).
+  const headingFold = installHeadingFold(document, window, vscode, context, {
+    readingLine: () => stickyBand.readingOffset(),
+    onLayoutChange: keepReadingLine,
+    busy: () => state.activeBlockEdit !== undefined || state.activeFrontmatterEdit !== undefined,
+  });
   rt.refreshButton = document.querySelector?.<HTMLButtonElement>("[data-sphinx-preview-refresh]");
   const editButton = document.querySelector?.<HTMLElement>("[data-sphinx-preview-edit-toggle]");
   // A read-only preview greys the Edit button with the reason; it is no edit toggle then.
@@ -369,7 +376,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     contentMorph, stickyBand, statusRegion, commentThreads, commentCompose, linkNavigation, firstClearance,
     codeCopy, labelRename, hostRequests, plantUmlFileRequests, pasteImage, pasteHtml, pasteUrl, warningBanner,
     figureEditButton, chipToggle, tabs, incomingChanges, motion, historyControls, viewControls, widthMode,
-    tocColumn, themeMode, anchorMode, checkboxes, inlineThreads, linkTooltip,
+    tocColumn, headingFold, themeMode, anchorMode, checkboxes, inlineThreads, linkTooltip,
   };
   rt.editorChrome.bindPaletteSticky();
 

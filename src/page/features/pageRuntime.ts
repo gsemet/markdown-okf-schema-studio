@@ -32,6 +32,7 @@ import type { EditPalette } from "../modules/editPalette";
 import type { FigureTools } from "../modules/figureDirective";
 import type { FigureEditButton, FigurePanel } from "../modules/figurePanel";
 import type { installFirstClearance } from "../modules/firstClearance";
+import type { HeadingFold } from "../modules/headingFold";
 import type { installHistoryControls } from "../modules/historyControls";
 import type { HostRequests } from "../modules/hostRequests";
 import type { installIncomingChanges } from "../modules/incomingChanges";
@@ -331,6 +332,7 @@ export interface PageParts {
   viewControls: ReturnType<typeof installViewControls>;
   widthMode: ReturnType<typeof installWidthMode>;
   tocColumn: ReturnType<typeof installTocColumn>;
+  headingFold: HeadingFold;
   themeMode: ThemeMode;
   anchorMode: AnchorMode;
   checkboxes: Checkboxes;

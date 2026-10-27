@@ -38,8 +38,10 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-148
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-008
   function selectableBlocks(): HTMLElement[] {
-    return topLevelMappedBlocks().filter((block) => block.getAttribute("data-okf-properties") === null);
+    return topLevelMappedBlocks().filter((block) => block.getAttribute("data-okf-properties") === null
+      && block.getAttribute("data-okf-folded") === null);
   }
 
   function blockRange(block: Element): { line: number; endLine: number } {
@@ -56,6 +58,7 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
   function bodyBlockAtLine(line: number): HTMLElement | undefined {
     return topLevelMappedBlocks().find((block) =>
       block.getAttribute("data-okf-properties") === null
+      && block.getAttribute("data-okf-folded") === null
       && Number(block.getAttribute("data-sphinx-source-line")) === line);
   }
 
