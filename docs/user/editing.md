@@ -40,6 +40,15 @@ environments),
   In edit mode an opened comment chip is titled with the syntax that produced it, in code font:
   `<!-- -->` for a comment and `<!-- TODO -->` for a comment whose text starts with TODO, in any case,
   with or without a colon, on one line or several. Read mode keeps the words Comment and TODO.
+  README-style HTML renders like on GitHub: `<div align>` and `<p align>` (left, center, right,
+  justify), `<br>`, `<img>` with `src`, `alt`, `width` and `height`, a logo or badge inside
+  `<a>`, `<picture>` with `<source media="(prefers-color-scheme: dark)" srcset>`, `<details>` and
+  `<summary>`, `<kbd>`, `<sub>` and `<sup>`. Markdown after a blank line inside an HTML block is
+  rendered as Markdown. A picture follows the preview theme (light image on the cream and white
+  pages, dark image on the dark page), not your operating system. Scripts, event handlers, `style`
+  and `class` attributes and script links are never kept. In edit mode each such block (`div`,
+  `p`, `picture`) is framed like an admonition and titled with its literal opening tag, for example
+  `<div align="center">`; a click edits the raw source of that block and nothing outside it.
   In a block or table-cell text box the VS Code keys apply: Cmd/Ctrl+Z undoes and
   Cmd+Shift+Z (Ctrl+Shift+Z or Ctrl+Y) redoes the last change, as many times as you need;
   Cmd/Ctrl+A selects the whole text of the text box; Cmd/Ctrl+Shift+K deletes the current line or

@@ -935,6 +935,21 @@ test("edit mode titles an open comment with its literal tag in code font", () =>
   assert.match(css, /\.okf-comment > \.okf-comment-body:not\(\[hidden\]\)::before \{\s*content: "Comment";/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-CORE-071
+test("README HTML: align, per-theme picture images and the edit-mode frame titled with the tag", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /\[align="center"\], #sphinx-myst-preview-content center \{ text-align: center; \}/u);
+  // The theme, not the system, picks the image of a picture.
+  assert.doesNotMatch(css, /prefers-color-scheme[^{]*img\.okf-theme/u);
+  assert.match(css, /img\.okf-theme-dark \{ display: none; \}/u);
+  assert.match(css, /data-sphinx-preview-theme-mode="current"\] body:is\(\.vscode-dark, \.vscode-high-contrast\) #sphinx-myst-preview-content img\.okf-theme-dark \{ display: inline; \}/u);
+  assert.match(css, /html\[data-sphinx-preview-edit-mode="on"\] #sphinx-myst-preview-content \.okf-html-block\[data-okf-tag\]::before \{\s*content: attr\(data-okf-tag\);/u);
+  // Read mode paints no frame: every okf-html-block rule is scoped to edit mode.
+  for (const rule of css.split("}").filter((part) => part.includes(".okf-html-block"))) {
+    assert.match(rule, /data-sphinx-preview-edit-mode="on"/u);
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
 test("the Comments toolbar button hides the gray and thread chips at once and goes away with the setting", () => {
   const css = PREVIEW_THEME_CSS;

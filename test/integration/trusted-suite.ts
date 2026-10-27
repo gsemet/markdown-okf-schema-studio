@@ -23,6 +23,7 @@ import { run as runUpdateGlow } from "./updateGlow.test";
 import { run as runCommentAnchors } from "./commentAnchors.test";
 import { run as runCommentContrast } from "./commentContrastWindow";
 import { run as runCommentTitle } from "./commentTitleWindow";
+import { run as runReadmeHtml } from "./readmeHtmlWindow";
 import { run as runCommentWrite } from "./commentWrite.test";
 import { run as runReviewComments } from "./reviewComments.test";
 import { run as runBlockMove } from "./blockMove.test";
@@ -144,6 +145,7 @@ export async function run(): Promise<void> {
   try {
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "comment-contrast") await runCommentContrast();
     else if (process.env.STUDIO_REAL_INPUT_SCENARIO === "comment-title") await runCommentTitle();
+    else if (process.env.STUDIO_REAL_INPUT_SCENARIO === "readme-html") await runReadmeHtml();
     else await runRealInput();
   } catch (error) {
     console.error("Real-input integration failed:", error);
@@ -173,6 +175,7 @@ export async function run(): Promise<void> {
   await runCommentWrite();
   await runCommentContrast();
   await runCommentTitle();
+  await runReadmeHtml();
   await runCommentAnchors();
   await runGenericMarkdown();
   await runDirtySnapshots();
