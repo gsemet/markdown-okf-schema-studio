@@ -24,6 +24,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/diagReq.layout.requirements.test.ts
 - test/page/runtimePageControls.test.ts
+- test/page/runtimeScroll.test.ts
 - test/visual/capture_layout_checks.py
 ---
 
@@ -82,6 +83,13 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 | Auto mode with a wide table and the window is resized | The table is measured again and is marked wide with its breakout |
 | A content patch, an image load, a toolbar collapse, a table-of-contents toggle or a change of the edited element | The wide elements are measured again |
 
+### Scenario (boundary): Several triggers in one frame
+
+| Input | Outcome |
+| --- | --- |
+| Five resizes, image loads or content-size changes before the next animation frame | The layout work (wide tables, width mode, measure, anchor, sticky headings) runs once in that frame |
+| A trigger after the frame ran | A new frame is asked for |
+
 ### Known issues
 - Known issue: Only top-level blocks, or the paragraph holding only an image, break out.
 - Known issue: No visual scenario combines the open table-of-contents column with Auto; the TOC case is a unit test only, and the TOC column itself belongs to the toolbar requirements.
@@ -92,6 +100,7 @@ When the width mode is Auto, the extension SHALL widen a table, figure, image, c
 
 ### Verification notes
 - Method: test/page/runtimePageControls.test.ts (wide table and oversized block, column off the centre, table-of-contents column, uncapped table, elements kept in the column, resize): unit tests T10 only elements wider than the column are flagged; T10b a wide element is centred on the available area; T10b a narrow element is not flagged; T10b with the TOC open the available area, its centre and the cap exclude the TOC column (the reserve is published by the CSS for panes of 760 px and more); T10b a wide table gets its fractional max-content width rounded up, so no cell wraps; T10b a table with row handles keeps their room left of it when it breaks out; T10 the saved width mode applies at startup and an edited element keeps the column. The relative-size path is verified by inspection of widthMode.ts; the stabilizeLayout, content patch and toolbar callbacks are verified by inspection.
+- Method: test/page/runtimeScroll.test.ts (Several triggers in one frame): unit test `P-08: layout triggers within one frame measure the page once`.
 - Method: test/page/diagReq.layout.requirements.test.ts (author pixel width and a gain of 1 px): unit test `Auto measures an image from the width its author wrote, and ignores a gain of 1 px or less`.
 - Method: test/core/preview/previewStyles.test.ts (table with row handles): unit test `T10: the auto measure lifts every cap, the row-handle one included`.
 - Method: test/visual/capture_layout_checks.py (wide table and oversized block): visual checks with a minimum margin of 15 px from the pane edge, and visual scenario v84 (table uncapped and rounded up).

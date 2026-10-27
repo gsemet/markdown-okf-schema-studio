@@ -71,7 +71,8 @@ class FakeElement {
     }
     return null;
   }
-  getBoundingClientRect() { return this.rect; }
+  rectReads = 0;
+  getBoundingClientRect() { this.rectReads += 1; return this.rect; }
   fire(type: string, event: Record<string, any> = {}) {
     const calls = { prevented: 0, stopped: 0 };
     const full = { target: this, preventDefault: () => calls.prevented++, stopPropagation: () => calls.stopped++, ...event };
@@ -135,6 +136,7 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
   const windowListeners = new Map<string, Handler[]>();
   const timers: Array<{ id: number; callback: () => void; delay: number }> = [];
   let nextTimer = 1;
+  const frames: Array<() => void> = [];
   const posted: string[] = [];
   const gestures: boolean[] = [];
   const document = {
@@ -154,6 +156,7 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
     setTimeout: (callback: () => void, delay: number) => { const id = nextTimer++; timers.push({ id, callback, delay }); return id; },
     clearTimeout: (id: number) => { const index = timers.findIndex((timer) => timer.id === id); if (index >= 0) timers.splice(index, 1); },
     addEventListener: (type: string, handler: Handler) => windowListeners.set(type, [...(windowListeners.get(type) ?? []), handler]),
+    requestAnimationFrame: (callback: () => void) => frames.push(callback),
   };
   provideGlobalElement(FakeElement);
   const runtime: { hide(): void; refresh(): void } = installCodeCopy(document as never, window as never, (text: string, done, userGesture: boolean) => { posted.push(text); gestures.push(userGesture); held.push(done); if (reply) done(reply); });
@@ -180,7 +183,11 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
     },
     click(target: FakeElement) { for (const handler of documentListeners.get("click") ?? []) handler({ target }); },
     move(target: FakeElement) { hovered = target; for (const handler of documentListeners.get("mousemove") ?? []) handler({ target, clientX: 0, clientY: 0 }); },
-    scroll() { for (const handler of windowListeners.get("scroll") ?? []) handler({}); },
+    // A scroll event and the frame that follows it (what the browser does between two events).
+    scroll() { this.scrollEvent(); this.flushFrames(); },
+    scrollEvent() { for (const handler of windowListeners.get("scroll") ?? []) handler({}); },
+    flushFrames() { for (const callback of frames.splice(0)) callback(); },
+    pendingFrames() { return frames.length; },
     pointFrom(target: FakeElement | null) { hovered = target; },
     setActive(target: FakeElement | null) { active = target; },
   };
@@ -459,4 +466,23 @@ test("a click the user made carries the gesture flag, a dispatched click does no
   t.button().fire("click", { isTrusted: true });
   t.button().fire("click", { isTrusted: false });
   assert.deepEqual(t.gestures, [true, false]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-017
+test("P-08: scroll events within one frame place the button once, for the position of that frame", () => {
+  const t = harness();
+  const { pre, code } = t.makePre("a\n", 100);
+  t.over(code);
+  const reads = pre.rectReads;
+  pre.rect = rect(300, 20, 500, 120);
+  t.scrollEvent();
+  t.scrollEvent();
+  t.scrollEvent();
+  assert.equal(pre.rectReads, reads, "no layout read in the scroll events themselves");
+  assert.equal(t.pendingFrames(), 1, "one frame is asked for, however many events come");
+  t.flushFrames();
+  assert.equal(pre.rectReads, reads + 1, "one placement for the frame");
+  assert.equal(t.button().styles.get("top"), "306px");
+  t.scrollEvent();
+  assert.equal(t.pendingFrames(), 1, "the next scroll asks for a new frame");
 });

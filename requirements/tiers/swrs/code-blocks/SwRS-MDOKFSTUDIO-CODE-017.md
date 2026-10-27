@@ -70,6 +70,7 @@ When the pointer is over a code block of the preview content, or the block holds
 | the block scrolls back to exactly 30 px visible with the pointer over it | the button is shown again |
 | the window is resized and the button is shown | the button moves to 6 px inside the resized block's top-right corner |
 | the resize leaves less than 30 px of the block visible | the button is hidden |
+| several scroll events arrive before the next animation frame | the button is placed once, in that frame, for the block's position then |
 
 ### Scenario (boundary): Events that hide the button
 
@@ -113,6 +114,7 @@ When the pointer is over a code block of the preview content, or the block holds
 
 ### Verification notes
 
+- Method: test/page/modules/codeCopy.test.ts (the button follows the visible part of the block, scroll events within one frame): unit test `P-08: scroll events within one frame place the button once, for the position of that frame`.
 - Method: test/page/modules/codeCopy.test.ts (hover button geometry, created only on first hover, excluded block kinds, 30 px threshold, click hiding, pointer leaving and moving onto the button, 120 ms scroll settle, placement below the band and toolbar)
 - Method: test/page/modules/renderReq.codeCopy.requirements.test.ts (resize moves the button to the new top-right corner and hides it when too little shows, Copied reset on another block, hide on content patch)
 - Method: test/page/modules/codeCopy.test.ts (keyboard: tab stop on copyable blocks only, focus reveals the button, Tab and Shift+Tab between block and button, Enter on the button copies)
