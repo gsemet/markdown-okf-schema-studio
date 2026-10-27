@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- PlantUML through Java (`plantuml.useJar`) now runs with the PlantUML `ALLOWLIST` security profile
+  (the workspace folder as allowlist path) and an explicit image size limit of 4096. Includes of files
+  inside the workspace still work; URL includes are refused. `JAVA_HOME` is used when it is an
+  absolute path holding a java binary.
 - A read-only preview (Restricted Mode, or a file outside every workspace folder) no longer exposes
   your home folder: when the document sits in the home folder, a folder above it or a file-system
   root, `{include}` and local images are refused with a warning and the preview may load no local
