@@ -5,7 +5,7 @@
  * `vscode`; the caller passes the extension (a fake in tests).
  */
 
-export const MAX_BASELINE_BYTES = 1024 * 1024;
+ const MAX_BASELINE_BYTES = 1024 * 1024;
 const MAX_CACHE_ENTRIES = 64;
 
 export interface GitRepositoryLike {

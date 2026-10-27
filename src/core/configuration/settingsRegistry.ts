@@ -8,7 +8,7 @@
  */
 
 /** The prefix of every setting name (`markdownOkfSchemaStudio.preview.maxContentWidth`). */
-export const SETTINGS_NAMESPACE = "markdownOkfSchemaStudio";
+ const SETTINGS_NAMESPACE = "markdownOkfSchemaStudio";
 
 /**
  * The fields of one setting as `package.json` declares them, written as they are, in this order.

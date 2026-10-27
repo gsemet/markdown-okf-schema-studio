@@ -31,7 +31,7 @@ const BODY_START = /^THREAD[ \t]*(?:\r?\n|$)/u;
 const INDENT = /^(?: {1,2}|\t)/u;
 
 /** True when the text of a comment (without `<!--` and `-->`) opens with the word THREAD. */
-export function isThreadBody(body: string): boolean {
+ function isThreadBody(body: string): boolean {
   return BODY_START.test(body.trim());
 }
 
@@ -75,14 +75,14 @@ export function formatThreadDate(date: Date): string {
 }
 
 /** The author as it can be written in a header: one line, no control characters. */
-export function cleanThreadAuthor(author: string): string {
+ function cleanThreadAuthor(author: string): string {
   // eslint-disable-next-line no-control-regex
   const cleaned = author.replace(/[\u0000-\u001f\u007f]/gu, " ").replace(/\s+/gu, " ").trim();
   return cleaned === "" ? "Anonymous" : cleaned;
 }
 
 /** The message lines written for a reply; `-->` inside the text would end the comment. */
-export function threadMessageLines(author: string, date: string, text: string): string[] {
+ function threadMessageLines(author: string, date: string, text: string): string[] {
   const body = text.replace(/\r\n?/gu, "\n").replace(/-->/gu, "-- >").trim();
   const lines = [`${cleanThreadAuthor(author)} (${date}):`];
   for (const line of body.split("\n")) {

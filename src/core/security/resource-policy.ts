@@ -377,7 +377,7 @@ export class ResourcePolicy {
   }
 }
 
-export function relativeResourcePath(fromDirectory: string, resourcePath: string): string {
+ function relativeResourcePath(fromDirectory: string, resourcePath: string): string {
   const relative = path.relative(fromDirectory, resourcePath);
   return relative.split(path.sep).join("/");
 }

@@ -120,6 +120,10 @@ check-limits:
 check-markers:
     {{ npm }} run check:markers
 
+# Check that every runtime export of src/ is used by another module of src/, test/ or scripts/ (allow-list: scripts/unused-exports-allowlist.json).
+check-exports:
+    {{ npm }} run check:exports
+
 # Check that the package.json settings schema matches the settings registry (src/core/configuration/settingsRegistry.ts).
 check-settings:
     {{ npm }} run check:settings
@@ -128,8 +132,8 @@ check-settings:
 generate-settings:
     {{ npm }} run generate:settings
 
-# Format the justfile and run TypeScript, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks.
-check: format compile check-boundaries check-limits check-markers check-settings unit contracts security release-tests requirements-lint
+# Format the justfile and run TypeScript, boundary, size, unused-export, marker companion, settings schema, unit, contract, security and requirements checks.
+check: format compile check-boundaries check-limits check-exports check-markers check-settings unit contracts security release-tests requirements-lint
 
 # Audit the production npm dependencies against the registry advisories (online): fails on high or critical.
 audit:

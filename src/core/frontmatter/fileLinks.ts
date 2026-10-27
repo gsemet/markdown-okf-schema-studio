@@ -12,7 +12,7 @@ import {
 
 export { invalidateStemIndex } from "./stemIndex";
 
-export const FILE_LINK_RESOLUTIONS = [
+ const FILE_LINK_RESOLUTIONS = [
   "document-relative",
   "bundle-relative",
   "bundle-relative-stem",
@@ -20,7 +20,7 @@ export const FILE_LINK_RESOLUTIONS = [
   "filename-stem",
 ] as const;
 
-export const FILE_LINK_SYNTAXES = ["plain", "wikilink"] as const;
+ const FILE_LINK_SYNTAXES = ["plain", "wikilink"] as const;
 
 export type FileLinkResolution = typeof FILE_LINK_RESOLUTIONS[number];
 export type FileLinkSyntax = typeof FILE_LINK_SYNTAXES[number];

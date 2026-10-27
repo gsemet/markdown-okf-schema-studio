@@ -66,9 +66,9 @@ export {
 export type { SchemaFiles } from "./schemaFiles";
 
 /** The names of a bundle's schema directory, in order of preference at each level. */
-export const SCHEMA_DIRECTORIES = ["_schema", "_schemas"] as const;
+ const SCHEMA_DIRECTORIES = ["_schema", "_schemas"] as const;
 /** The extensions of schema files (`<type>.schema<extension>`). */
-export const SCHEMA_FILE_EXTENSIONS = [".json", ".json5", ".yaml", ".yml"] as const;
+ const SCHEMA_FILE_EXTENSIONS = [".json", ".json5", ".yaml", ".yml"] as const;
 
 /** Returns the identity used by an x-okf-link marker hint. */
 export function frontmatterLinkIdentity(

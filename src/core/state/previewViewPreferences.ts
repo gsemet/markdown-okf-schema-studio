@@ -19,11 +19,10 @@ export interface ViewPreferences {
 export type ViewPreferenceKey = keyof ViewPreferences;
 
 export const VIEW_PREFERENCES_STORAGE_KEY = "markdownOkfSchemaStudio.viewPreferences";
-export const MIN_VIEW_ZOOM = 70;
-export const MAX_VIEW_ZOOM = 200;
-export const VIEW_ZOOM_STEP = 10;
-export const VIEW_PREFERENCE_KEYS: readonly ViewPreferenceKey[] = ["zoom", "widthMode", "toc", "incomingChanges", "comments", "toolbarCollapsed"];
-export const VIEW_WIDTH_MODES: readonly ViewWidthMode[] = ["margin", "auto", "full"];
+ const MIN_VIEW_ZOOM = 70;
+ const MAX_VIEW_ZOOM = 200;
+ const VIEW_ZOOM_STEP = 10;
+ const VIEW_WIDTH_MODES: readonly ViewWidthMode[] = ["margin", "auto", "full"];
 
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 export const DEFAULT_VIEW_PREFERENCES: Readonly<ViewPreferences> = Object.freeze({

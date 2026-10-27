@@ -1,5 +1,5 @@
 /** Commands that focus the editor group at a given position (the first group is column 1). */
-export const FOCUS_GROUP_COMMANDS = [
+ const FOCUS_GROUP_COMMANDS = [
   "workbench.action.focusFirstEditorGroup",
   "workbench.action.focusSecondEditorGroup",
   "workbench.action.focusThirdEditorGroup",

@@ -43,7 +43,7 @@ export interface VscodeHost extends HostServices {
 }
 
 /** A VS Code range from a host-neutral one. */
-export function toVscodeRange(range: TextRange): vscode.Range {
+ function toVscodeRange(range: TextRange): vscode.Range {
   return new vscode.Range(range.start.line, range.start.character, range.end.line, range.end.character);
 }
 

@@ -11,10 +11,10 @@ import type { FileSystem } from "../host-api/fileSystem";
 import type { WorkspaceInfo } from "../host-api/workspaceInfo";
 import { collectBibKeys, type BibKey } from "../core/mapping/mystTargets";
 
-export const MAX_BIB_FILES = 20;
+ const MAX_BIB_FILES = 20;
 export const MAX_BIB_BYTES = 2 * 1024 * 1024;
 export const SCAN_TIMEOUT_MS = 5000;
-export const BIB_EXCLUDE = "{**/node_modules/**,**/.git/**,**/_build/**,**/.venv/**,**/venv/**,**/out/**,**/dist/**}";
+ const BIB_EXCLUDE = "{**/node_modules/**,**/.git/**,**/_build/**,**/.venv/**,**/venv/**,**/out/**,**/dist/**}";
 
 export interface BibScanResult {
   items: BibKey[];

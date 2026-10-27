@@ -63,8 +63,8 @@ const BIBLIOGRAPHY_DIRECTIVE = /```\{bibliography\}/u;
 /**
  * Appends a `{bibliography}` directive so staged-build citations resolve.
  *
- * NOTE: this transform belongs to the legacy staged-Sphinx path (snapshotWorkspace →
- * sphinxBuild), which is not wired into the live preview. The live path renders
+ * NOTE: this transform belongs to the legacy staged-Sphinx path (snapshotWorkspace),
+ * which is not wired into the live preview. The live path renders
  * in-process (renderPipeline → renderMyst) and deliberately degrades `{cite}` to an
  * unresolved placeholder — see mystRenderer's BUILD_ONLY_TYPES. This function exists so
  * the committed snapshotWorkspace.ts compiles and stays correct if the staged path is

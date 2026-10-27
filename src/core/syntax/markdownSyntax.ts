@@ -5,7 +5,7 @@
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-097
 /** An opening (or closing) code fence: up to three spaces of indent, then three or more of one mark. */
-export const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})/u;
+ const FENCE_OPEN = /^ {0,3}(`{3,}|~{3,})/u;
 
 /** {@link FENCE_OPEN} that also takes the `:::` fences of MyST directives. */
 const FENCE_OPEN_OR_COLONS = /^ {0,3}(`{3,}|~{3,}|:{3,})/u;

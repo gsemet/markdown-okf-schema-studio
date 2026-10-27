@@ -41,7 +41,7 @@ export function planKeyedMorph(
  * The attributes that say where a block sits in the source. They change for every block below an
  * edit, so they are not part of the key; the page copies them onto the kept node instead.
  */
-export const SOURCE_POSITION_ATTRIBUTES = [
+ const SOURCE_POSITION_ATTRIBUTES = [
   "data-line",
   "data-sphinx-source-line",
   "data-sphinx-source-end-line",

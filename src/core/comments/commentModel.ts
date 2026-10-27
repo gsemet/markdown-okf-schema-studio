@@ -7,7 +7,7 @@
  * at all, so the page never shows half of a broken file. Bodies are plain text.
  */
 
-export const SIDECAR_VERSION = 1;
+ const SIDECAR_VERSION = 1;
 export const MAX_SIDECAR_BYTES = 2 * 1024 * 1024;
 export const MAX_THREADS = 1000;
 export const MAX_COMMENTS_PER_THREAD = 200;
@@ -55,7 +55,7 @@ export interface ParsedSidecar {
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:\d{2})$/u;
 
 /** True for an ISO 8601 date-time with a time zone that names a real instant. */
-export function isIsoDate(value: unknown): value is string {
+ function isIsoDate(value: unknown): value is string {
   return typeof value === "string" && value.length <= 40 && ISO_DATE.test(value)
     && !Number.isNaN(Date.parse(value));
 }
@@ -202,8 +202,8 @@ export function serializeSidecar(model: { document: string; threads: readonly Co
   return `${JSON.stringify(ordered, null, 2)}\n`;
 }
 
-export const MAX_QUOTE_LENGTH = 500;
-export const MAX_CONTEXT_LENGTH = 32;
+ const MAX_QUOTE_LENGTH = 500;
+ const MAX_CONTEXT_LENGTH = 32;
 export const MAX_BODY_LENGTH = 10_000;
 
 /**

@@ -5,7 +5,7 @@ export const MAX_DOCUMENT_STATES = 200;
 export const DESCRIPTIONS_COLLAPSED_KEY = "descriptionsCollapsedByDocument";
 
 /** Prefix of the legacy one-key-per-document entries that migration folds into the map. */
-export const LEGACY_DESCRIPTIONS_PREFIX = "descriptionsCollapsed:";
+ const LEGACY_DESCRIPTIONS_PREFIX = "descriptionsCollapsed:";
 
 /** The slice of `vscode.Memento` the persistence helpers need. */
 export interface KeyValueStorage {

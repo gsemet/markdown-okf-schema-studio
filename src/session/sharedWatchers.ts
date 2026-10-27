@@ -24,7 +24,7 @@ interface SharedEntry {
 }
 
 /** At most this many distinct linked targets are watched at once, however many previews link them. */
-export const MAX_LINKED_TARGET_WATCHES = 256;
+ const MAX_LINKED_TARGET_WATCHES = 256;
 
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-143
 /** One host watcher per (base, pattern), shared by every listener, disposed with the last one. */

@@ -54,7 +54,7 @@ export function sourceRangeForLines(
   };
 }
 
-export function normalizeSourceFileIdentity(value: string): string {
+ function normalizeSourceFileIdentity(value: string): string {
   return value.replace(/\\/gu, "/");
 }
 

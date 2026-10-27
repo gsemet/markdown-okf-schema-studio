@@ -34,9 +34,9 @@ import {
 import { fireAndForget } from "../host-api/logger";
 
 /** Storage key of the edit mode the next preview starts in. */
-export const EDIT_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.editMode";
+ const EDIT_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.editMode";
 /** Storage key of the palette mode the next preview starts in. */
-export const PALETTE_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.paletteMode";
+ const PALETTE_MODE_STORAGE_KEY = "markdownOkfSchemaStudio.paletteMode";
 
 /** The reader's workspace choices and session memory. */
 export class WorkspaceChoices {

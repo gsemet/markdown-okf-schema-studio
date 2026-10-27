@@ -222,7 +222,7 @@ export type PageStateMessageUnion =
   | PreviewEditModeChangedMessage;
 
 /** The type names of the page-state family, which accept a document id of any length. */
-export const PAGE_STATE_MESSAGE_TYPES: ReadonlySet<PageStateMessageUnion["type"]> = new Set([
+ const PAGE_STATE_MESSAGE_TYPES: ReadonlySet<PageStateMessageUnion["type"]> = new Set([
   "previewReady", "previewScroll", "previewReveal", "previewState", "previewLink", "previewLinkDiscover",
   "previewThemeModeChanged", "previewRefresh", "previewAnchorModeChanged", "previewEditOpen",
   "previewEditSave", "previewEditCancel", "previewFrontmatterSave", "previewCheckboxToggle",
@@ -542,7 +542,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
  * One validator per page message type, keyed by the type. A validator checks the payload only; the
  * envelope is checked by {@link isPageToHostMessage} before it runs.
  */
-export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageValidator } = {
+ const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageValidator } = {
   // Page state: readiness, scrolling, reveal, the scroll state, links and the toolbar toggles.
   previewReady: stateMessage("previewReady"),
   previewScroll: stateMessage("previewScroll"),

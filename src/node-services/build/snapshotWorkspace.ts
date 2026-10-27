@@ -445,10 +445,3 @@ export function stageSnapshot(options: SnapshotOptions): StagedPreview {
     throw error;
   }
 }
-
-export function stageActiveDocument(
-  document: PreviewDocument,
-  workspaceRoot: string,
-): StagedPreview {
-  return stageSnapshot({ document, workspaceRoot, requestId: 0 });
-}
