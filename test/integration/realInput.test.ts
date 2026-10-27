@@ -3955,7 +3955,7 @@ async function scenarioPreviewGroupLock(page: Page, evidence: Evidence): Promise
       await closeAllEditors();
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
       const restoredPanel = vscode.window.createWebviewPanel(PANEL_VIEW_TYPE, "Restored preview",
-        vscode.ViewColumn.Beside, { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] });
+        vscode.ViewColumn.Beside, { enableScripts: true, localResourceRoots: [] });
       await vscode.commands.executeCommand("workbench.action.lockEditorGroup");
       await deserializePreviewPanelForTests(restoredPanel, {
         documentId: document.uri.toString(),

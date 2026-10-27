@@ -79,7 +79,7 @@ export class StudioActivation {
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-018
       vscode.window.registerCustomEditorProvider(EDITOR_VIEW_TYPE, {
         resolveCustomTextEditor: (document, panel) => this.resolvePreviewEditor(document, panel),
-      }, { webviewOptions: { enableFindWidget: true, retainContextWhenHidden: true } }),
+      }, { webviewOptions: { enableFindWidget: true } }),
       // @implements_req SwRS-MDOKFSTUDIO-LIFE-032
       vscode.commands.registerCommand(REFRESH_COMMAND_ID, async () => {
         const active = vscode.window.activeTextEditor?.document;
@@ -202,7 +202,6 @@ export class StudioActivation {
       {
         enableScripts: true,
         enableFindWidget: true,
-        retainContextWhenHidden: true,
         localResourceRoots: [],
       },
     );

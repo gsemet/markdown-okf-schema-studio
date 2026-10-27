@@ -36,7 +36,7 @@ export async function run(): Promise<void> {
     PANEL_VIEW_TYPE,
     "Restored preview",
     vscode.ViewColumn.Beside,
-    { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] },
+    { enableScripts: true, localResourceRoots: [] },
   );
 
   try {
@@ -70,7 +70,7 @@ export async function run(): Promise<void> {
     PANEL_VIEW_TYPE,
     "Missing restored preview",
     vscode.ViewColumn.Beside,
-    { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] },
+    { enableScripts: true, localResourceRoots: [] },
   );
   try {
     await deserializePreviewPanelForTests(missingPanel, {
@@ -92,13 +92,13 @@ export async function run(): Promise<void> {
     PANEL_VIEW_TYPE,
     "Restored one",
     vscode.ViewColumn.Beside,
-    { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] },
+    { enableScripts: true, localResourceRoots: [] },
   );
   const secondPanel = vscode.window.createWebviewPanel(
     PANEL_VIEW_TYPE,
     "Restored two",
     vscode.ViewColumn.Beside,
-    { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [] },
+    { enableScripts: true, localResourceRoots: [] },
   );
   try {
     await deserializePreviewPanelForTests(firstPanel, {

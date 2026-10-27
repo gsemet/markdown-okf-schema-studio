@@ -334,11 +334,11 @@ test("Open Preview to Side ignores previews that do not follow the active editor
   assert.equal(fixed.disposed, false, "the Open With tab stays");
 });
 
-test("the side preview and the Open With editor retain their page while hidden", async (t) => {
+test("the side preview and the Open With editor do not retain their page while hidden", async (t) => {
   const studio = start(t);
   await studio.openSide(writeFile("# Side\n"));
-  assert.equal(captured.panelOptions.at(-1)!.retainContextWhenHidden, true);
-  assert.equal(captured.editorOptions!.webviewOptions!.retainContextWhenHidden, true);
+  assert.notEqual(captured.panelOptions.at(-1)!.retainContextWhenHidden, true);
+  assert.notEqual(captured.editorOptions!.webviewOptions!.retainContextWhenHidden, true);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-143
