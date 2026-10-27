@@ -6,8 +6,9 @@ title: Built-in pictures are kept by source and drawn one at a time
 description: When the page needs built-in diagrams, it SHALL show the kept
   result without running the engine when the source, include base and light or
   dark variant equal those of an earlier result, and otherwise run the engine
-  for one diagram at a time in the order requested and show only the newest
-  render of each diagram element.
+  for one diagram at a time in the order requested, skip a queued run whose
+  renders were all superseded, and show only the newest render of each diagram
+  element.
 project: markdown-okf-schema-studio
 scope: diagrams
 lifecycle: draft
@@ -33,7 +34,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When the page needs built-in diagrams, it SHALL show the kept result without running the engine when the source, include base and light or dark variant equal those of an earlier result, and otherwise run the engine for one diagram at a time in the order requested and show only the newest render of each diagram element.
+When the page needs built-in diagrams, it SHALL show the kept result without running the engine when the source, include base and light or dark variant equal those of an earlier result, and otherwise run the engine for one diagram at a time in the order requested, skip a queued run whose renders were all superseded, and show only the newest render of each diagram element.
 
 ### Scenario (nominal): Patch and switch back
 - GIVEN a drawn diagram, a content patch that keeps its source, and a theme switch to dark and back
@@ -65,6 +66,12 @@ When the page needs built-in diagrams, it SHALL show the kept result without run
 - THEN the engine runs for one diagram at a time in the order requested, and the second starts after the first finished
 - AND each include request belongs to the diagram that is drawing, and the second diagram does not read the first one's includes
 
+### Scenario (boundary): Queued runs of a superseded render are dropped
+| Input | Outcome |
+| --- | --- |
+| ten renders of one diagram element requested in a row, each with a different include base | the engine runs at most twice; runs still waiting in the queue whose only renders were superseded (or whose element left the page) are not started |
+| a queued run that a second, current element also waits for (same key) | the run still starts |
+
 ### Scenario (refusal): A superseded render does not overwrite a newer one
 | Input | Outcome |
 | --- | --- |
@@ -84,4 +91,4 @@ When the page needs built-in diagrams, it SHALL show the kept result without run
 - Method: test/page/modules/plantumlDiagram.test.ts (patch and switch back, different base, which results are kept, one diagram at a time, superseded render)
 - Method: test/page/rendererBridge.test.ts (a content patch draws only new diagrams: page events reach the diagram renderers)
 - Method: test/visual/scenarioDefinitions2.ts, visual scenarios diagrams v15 and v16 (a content patch draws only new diagrams)
-- Criteria: A repeated key causes no engine run; the same source in the same theme renders once and a theme change renders again from the kept source; include failures are not cached and plain engine errors are; engine runs never overlap; the element holds the newest render only; only diagrams without a render state are drawn.
+- Criteria: Ten rapid renders of one element run the engine at most twice; A repeated key causes no engine run; the same source in the same theme renders once and a theme change renders again from the kept source; include failures are not cached and plain engine errors are; engine runs never overlap; the element holds the newest render only; only diagrams without a render state are drawn.

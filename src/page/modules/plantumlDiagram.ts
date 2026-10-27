@@ -135,6 +135,7 @@ export function isDarkBackground(color: string): boolean {
 type Outcome = { usesFiles: boolean; cacheable: boolean } & (
   | { kind: "svg"; svg: string }
   | { kind: "error" | "unavailable"; text: string }
+  | { kind: "skipped" }
 );
 
 function clearChildren(element: HTMLElement): void {
@@ -211,7 +212,13 @@ export function createPlantUmlDiagramRenderer(
   const host = options.host;
   const sources = new WeakMap<HTMLElement, string>();
   const tokens = new WeakMap<HTMLElement, number>();
-  const cache = new Map<string, { outcome: Promise<Outcome>; settled: boolean; usesFiles: boolean }>();
+  const cache = new Map<string, {
+    outcome: Promise<Outcome>;
+    settled: boolean;
+    usesFiles: boolean;
+    /** One check per render that waits for the entry: true once that render is superseded. */
+    waiters: Array<() => boolean>;
+  }>();
   let queue: Promise<unknown> = Promise.resolve();
   let session: IncludeSession | undefined;
 
@@ -335,18 +342,34 @@ export function createPlantUmlDiagramRenderer(
     });
 
   // @implements_req SwRS-MDOKFSTUDIO-DIAG-039
-  const outcome = (source: string, dark: boolean, base: string | undefined): Promise<Outcome> => {
+  const outcome = (
+    source: string,
+    dark: boolean,
+    base: string | undefined,
+    superseded: () => boolean,
+  ): Promise<Outcome> => {
     const key = `${dark ? "dark" : "light"}\u0000${base ?? ""}\u0000${source}`;
     const cached = cache.get(key);
     if (cached) {
       cache.delete(key);
       cache.set(key, cached);
+      cached.waiters.push(superseded);
       return cached.outcome;
     }
-    // One engine run at a time: the file loader knows which diagram is asking.
-    const pending = queue.then(() => run(source, dark, base));
+    // One engine run at a time: the file loader knows which diagram is asking. A queued run whose
+    // every waiting render was superseded meanwhile is dropped: the newest render wins.
+    const waiters = [superseded];
+    const pending: Promise<Outcome> = queue.then(() => {
+      if (waiters.every((isSuperseded) => isSuperseded())) {
+        if (cache.get(key) === entry) {
+          cache.delete(key);
+        }
+        return { kind: "skipped", usesFiles: false, cacheable: false } as Outcome;
+      }
+      return run(source, dark, base);
+    });
     queue = pending;
-    const entry = { outcome: pending, settled: false, usesFiles: false };
+    const entry = { outcome: pending, settled: false, usesFiles: false, waiters };
     cache.set(key, entry);
     void pending.then((result) => {
       entry.settled = true;
@@ -390,9 +413,11 @@ export function createPlantUmlDiagramRenderer(
         return;
       }
       const base = diagram.getAttribute("data-plantuml-base") ?? undefined;
-      const result = await outcome(source, dark, base);
+      const isSuperseded = (): boolean =>
+        tokens.get(diagram) !== token || (diagram as { isConnected?: boolean }).isConnected === false;
+      const result = await outcome(source, dark, base, isSuperseded);
       // A newer render (theme switch, changed include) of this element supersedes this one.
-      if (tokens.get(diagram) !== token) {
+      if (result.kind === "skipped" || tokens.get(diagram) !== token) {
         return;
       }
       if (result.usesFiles) {
