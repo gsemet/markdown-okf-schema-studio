@@ -212,6 +212,19 @@ export function installEditMode(rt: PageRuntime): EditMode {
       });
     },
     bindHover() {
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
+      // A real pointer move (not the synthetic one after a scroll, which keeps its coordinates)
+      // gives the block actions back to the hovered block; the selection ring goes away.
+      let pointerAt = "";
+      document.addEventListener("mousemove", (event) => {
+        const at = event.clientX + "," + event.clientY;
+        if (at === pointerAt) return;
+        pointerAt = at;
+        const root = document.documentElement;
+        if (root?.getAttribute?.("data-sphinx-preview-actions-owner") === "keyboard") {
+          root.setAttribute("data-sphinx-preview-actions-owner", "pointer");
+        }
+      });
       document.addEventListener("mouseover", (event) => {
         if (rt.parts.figureEditButton.owns(event.target)) return;
         setEditHover(editHoverTarget(event.target));

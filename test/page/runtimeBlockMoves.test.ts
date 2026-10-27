@@ -511,3 +511,25 @@ test("T28: ordinary block edits never carry insertAfterLine", () => {
   harness.flushTimers();
   assert.equal("insertAfterLine" in (harness.messages.at(-1) as object), false);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+test("the block actions follow whichever moved last: the keyboard selection or the pointer", () => {
+  const harness = createRuntimeHarness({ savedState: { editMode: true } });
+  const owner = () => harness.documentElement.getAttribute("data-sphinx-preview-actions-owner");
+  const shown = (line: number) => insertPointAfterLine(harness, line).getAttribute("data-sphinx-actions-shown");
+  assert.equal(owner(), null, "nothing owns the actions before any selection");
+  // The keyboard moves the selection to the block at line 100: its bar owns the actions.
+  harness.dispatchDocument("keydown", shiftKey("ArrowDown", { target: harness.mappings[1] }));
+  assert.equal(owner(), "keyboard");
+  assert.deepEqual([shown(1), shown(52), shown(100)], [null, null, "true"]);
+  // The first pointer move after the keyboard hands the actions to the hovered block.
+  harness.dispatchDocument("mousemove", { clientX: 5, clientY: 5 });
+  assert.equal(owner(), "pointer");
+  harness.dispatchDocument("keydown", shiftKey("ArrowUp", { target: harness.mappings[2] }));
+  assert.equal(owner(), "keyboard", "a selection move takes the actions back");
+  assert.deepEqual([shown(1), shown(52), shown(100)], [null, "true", null]);
+  harness.dispatchDocument("mousemove", { clientX: 5, clientY: 5 });
+  assert.equal(owner(), "keyboard", "a move event at the same coordinates is not a pointer move");
+  harness.dispatchDocument("mousemove", { clientX: 9, clientY: 5 });
+  assert.equal(owner(), "pointer");
+});

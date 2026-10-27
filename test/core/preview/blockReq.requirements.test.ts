@@ -73,3 +73,18 @@ test("mapped blocks show the text cursor in edit mode only", () => {
     && rule.selectors.some((selector) => selector.includes("data-sphinx-source-line")));
   assert.deepEqual(textCursors, edit, "no rule gives a mapped block the text cursor outside edit mode");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-109
+test("the block actions of a hovered block yield to the keyboard selection, which shows its own bar", () => {
+  const keyboard = 'html[data-sphinx-preview-actions-owner="keyboard"]';
+  const yielding = rules().filter((rule) => rule.selectors.some((selector) =>
+    selector.startsWith(keyboard + " [data-sphinx-source-line]:hover")));
+  assert.equal(yielding.length, 1);
+  assert.equal(yielding[0]!.declarations.get("opacity"), "0");
+  const shown = rulesFor(keyboard + ' .sphinx-preview-insert-point[data-sphinx-actions-shown="true"] button');
+  assert.equal(shown.length, 1);
+  assert.equal(shown[0]!.declarations.get("opacity"), "1");
+  const ring = rulesFor('html[data-sphinx-preview-edit-mode="on"][data-sphinx-preview-actions-owner="pointer"] [data-sphinx-preview-block-selected="true"]');
+  assert.equal(ring.length, 1);
+  assert.equal(ring[0]!.declarations.get("outline"), "none");
+});

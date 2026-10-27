@@ -15,6 +15,13 @@
   the pointer and goes when it leaves the zone (CR 128). Unit tests and the real-window suite
   `test/integration/tableMoves.ts` cover it. Verification: `just requirements-lint`.
 
+## 2026-10-27 (block actions follow the keyboard selection)
+
+- SwRS-MDOKFSTUDIO-BLOCK-109: the plus and the up and down arrows show on one block, the one that
+  moved last (the keyboard selection or the hovered block); a pointer move takes them back and
+  removes the selection outline. A page unit test, a style test and a real-window test (cream and
+  dark) cover it, CR 130.
+
 ## 2026-10-26 (unclosed directives render as raw text)
 
 - SwRS-MDOKFSTUDIO-MYST-096 (new): a directive or fence the parser cannot build (an unclosed or
