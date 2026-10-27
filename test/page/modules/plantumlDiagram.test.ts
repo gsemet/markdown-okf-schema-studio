@@ -121,6 +121,24 @@ test("the same source in the same theme renders once; a theme change renders aga
   assert.equal(first.getAttribute("data-plantuml-dark"), "true");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-039
+test("ten patches of one block run the engine at most twice: queued runs are superseded, the latest wins", async () => {
+  const doc = new FakeDocument();
+  const element = diagram(doc, SEQUENCE);
+  const { engine, calls } = fakeEngine(() => ({ svg: "<svg/>" }));
+  const renderer = createPlantUmlDiagramRenderer(engine);
+
+  const renders: Array<Promise<void>> = [];
+  for (let patch = 0; patch < 10; patch += 1) {
+    element.setAttribute("data-plantuml-base", `/docs/v${patch}.md`);
+    renders.push(renderer.render(element as unknown as HTMLElement, false));
+  }
+  await Promise.all(renders);
+
+  assert.ok(calls.length <= 2, `the engine ran ${calls.length} times for 10 patches`);
+  assert.equal(element.getAttribute("data-render-state"), "rendered", "the latest render is shown");
+});
+
 test("an engine failure shows its reason as plain text with the useJar hint", async () => {
   const doc = new FakeDocument();
   const element = diagram(doc, "@startuml\nAlice -> Bob: <:smile:>\n@enduml");
