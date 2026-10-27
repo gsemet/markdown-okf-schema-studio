@@ -307,3 +307,13 @@ test("CR 119: undo, redo, select all and delete line are VS Code key bindings on
     { command: ids[3], key: "ctrl+shift+k", mac: "cmd+shift+k", when },
   ]);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-074
+test("CR 135: the VSIX leaves out source maps, internal docs, agent files and the Python project file", () => {
+  const ignore = fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8")
+    .split(/\r?\n/u).map((line) => line.trim());
+  for (const pattern of ["**/*.map", ".claude/**", "pyproject.toml", "docs/*.md"]) {
+    assert.ok(ignore.includes(pattern), `.vscodeignore must exclude ${pattern}`);
+  }
+  assert.ok(!ignore.some((line) => /^docs\/(\*\*)?$/u.test(line)), "docs/user pages linked from the README must ship");
+});
