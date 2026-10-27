@@ -594,6 +594,7 @@ export class PreviewManager {
     session.documentUri = document.id;
     // @implements_req SwRS-MDOKFSTUDIO-DIAG-053
     session.plantUml.includeWatch.clear();
+    session.plantUml.issuedIds.clear();
     this.diagnostics.clear(previousDocumentUri);
     session.document = document;
     session.panel.title = this.previewTitle(session, documentPath);

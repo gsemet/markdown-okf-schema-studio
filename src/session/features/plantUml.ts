@@ -19,11 +19,13 @@ import type { PreviewSession } from "../previewSession";
 export interface PlantUmlState {
   /** Files the built-in engine was served for `!include` (canonical paths): a change draws again. */
   includeWatch: PlantUmlIncludeWatch;
+  /** The ids the host gave to included files (canonical paths): the only valid `from` values. */
+  issuedIds: PlantUmlIncludeWatch;
 }
 
 /** A fresh {@link PlantUmlState}. */
 export function createPlantUmlState(): PlantUmlState {
-  return { includeWatch: new PlantUmlIncludeWatch() };
+  return { includeWatch: new PlantUmlIncludeWatch(), issuedIds: new PlantUmlIncludeWatch() };
 }
 
 /** PlantUML diagrams of the page. */
@@ -124,12 +126,25 @@ export class PlantUmlController {
    */
   private handleInclude(preview: PreviewSession, message: PageMessageOf<"previewPlantUmlInclude">): void {
     const { manager } = this;
+    // Only the built-in engine reads includes through the host, and only next to the document or
+    // to a file the host itself named in an earlier answer.
+    if (this.engineFor(preview) !== "builtin") {
+      manager.requests.postHostResult(preview, message, { ok: false, reason: "The built-in PlantUML engine is not in use." });
+      return;
+    }
+    if (message.from !== null && !preview.plantUml.issuedIds.has(message.from)) {
+      manager.requests.postHostResult(preview, message, { ok: false, reason: `PlantUML file ${message.path} could not be read.` });
+      return;
+    }
     const answer = resolvePlantUmlInclude(
       { path: message.path, from: message.from },
       { documentPath: manager.activePathOf(preview), workspaceRoot: preview.workspaceRoot, trusted: manager.host.workspace.trusted, readOnly: preview.readOnly },
     );
     if (answer.watch) {
       preview.plantUml.includeWatch.remember(manager.canonicalPath(answer.watch));
+    }
+    if (answer.ok) {
+      preview.plantUml.issuedIds.remember(answer.id);
     }
     manager.requests.postHostResult(preview, message, answer.ok
       ? { ok: true, id: answer.id, text: answer.text }

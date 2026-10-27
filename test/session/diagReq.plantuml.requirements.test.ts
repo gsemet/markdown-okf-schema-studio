@@ -68,7 +68,8 @@ test("an include request is answered once with the request's edit id: the file, 
     const posted: Array<Record<string, unknown>> = [];
     const preview = {
       workspaceRoot: root,
-      plantUml: { includeWatch: new PlantUmlIncludeWatch() },
+      plantUml: { includeWatch: new PlantUmlIncludeWatch(), issuedIds: new PlantUmlIncludeWatch() },
+      plantUmlEngineSettings: { useJar: false },
       postToPage: (message: Record<string, unknown>) => {
         posted.push(message);
         return Promise.resolve(true);
@@ -118,7 +119,7 @@ test("the include watch is emptied when the preview follows another document", (
     documentUri: "file:///notes/one.md",
     readOnly: false,
     workspaceRoot: "/notes",
-    plantUml: { includeWatch },
+    plantUml: { includeWatch, issuedIds: new PlantUmlIncludeWatch() },
     edits: { lock: { forgetPage: () => undefined }, watchedPageEditorId: "x" },
     queue: { cancel: () => undefined, clearLastGood: () => undefined },
     states: new Map(),
@@ -225,4 +226,47 @@ test("JAR results of a render that is no longer the current one are dropped", ()
   applyOf(current.controller).call(current.controller, current.preview, current.result, 1, plantUml);
   assert.equal(current.set.length, 1);
   assert.match(current.set[0]!.html, /myst-plantuml-image/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-053
+test("an include request is refused for the Java engine and for a file id the host never issued", () => {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "diag-req-include-gate-")));
+  try {
+    const documentPath = path.join(root, "doc.md");
+    fs.writeFileSync(path.join(root, "part.puml"), "@startuml\nA -> B\n@enduml\n");
+    fs.writeFileSync(path.join(root, "next.puml"), "@startuml\nB -> C\n@enduml\n");
+    const posted: Array<Record<string, unknown>> = [];
+    const preview = {
+      workspaceRoot: root,
+      plantUml: { includeWatch: new PlantUmlIncludeWatch(), issuedIds: new PlantUmlIncludeWatch() },
+      plantUmlEngineSettings: { useJar: true },
+      postToPage: (message: Record<string, unknown>) => { posted.push(message); return Promise.resolve(true); },
+    } as unknown as PreviewSession;
+    const requests = Object.create(HostRequestController.prototype) as HostRequestController;
+    const manager = {
+      host: { workspace: { trusted: true } },
+      activePathOf: () => documentPath,
+      canonicalPath: (value: string) => value,
+      requests,
+    };
+    let handler: ((message: unknown, preview: PreviewSession) => void) | undefined;
+    new PlantUmlController(manager as never).register({ on: (_type: string, callback: typeof handler) => { handler = callback; } } as never);
+    const ask = (name: string, from: string | null, editId: string): Record<string, unknown> => ({
+      type: "previewPlantUmlInclude", documentId: DOCUMENT, revision: 4, requestId: 9, path: name, from, editId,
+    });
+
+    handler!(ask("part.puml", null, "e1"), preview);
+    assert.equal(posted[0]!.ok, false, "the Java engine reads includes itself: the host serves none");
+
+    (preview as unknown as { plantUmlEngineSettings: { useJar: boolean } }).plantUmlEngineSettings = { useJar: false };
+    handler!(ask("next.puml", path.join(root, "part.puml"), "e2"), preview);
+    assert.equal(posted[1]!.ok, false, "a from the host never issued is refused");
+
+    handler!(ask("part.puml", null, "e3"), preview);
+    assert.equal(posted[2]!.ok, true);
+    handler!(ask("next.puml", posted[2]!.id as string, "e4"), preview);
+    assert.equal(posted[3]!.ok, true, `a from the host issued is served: ${String(posted[3]!.reason)}`);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });

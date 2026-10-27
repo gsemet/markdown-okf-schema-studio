@@ -245,6 +245,8 @@ export interface HostRequestFields {
 /** Raw code of a code block, copied to the clipboard by the host. */
 export interface PreviewCopyTextMessage extends PageMessageBase<"previewCopyText">, HostRequestFields {
   text: string;
+  /** True when the request follows a click the user made on the copy button (the host refuses without it). */
+  userGesture: boolean;
 }
 
 /** Back / Next of toolbar row 2: the host walks the panel's navigation history. */
@@ -580,7 +582,8 @@ export const PAGE_TO_HOST_VALIDATORS: { readonly [T in PageToHostType]: MessageV
   // Raw code of a code block, copied to the clipboard by the host.
   // The size limit is the host's to answer (`previewCopyTextResult`); the shape check only keeps
   // a message of absurd size out of the host.
-  previewCopyText: (message) => isHostRequest(message) && isBoundedString(message.text, MAX_COPY_TEXT_TRANSPORT_LENGTH),
+  previewCopyText: (message) => isHostRequest(message) && isBoundedString(message.text, MAX_COPY_TEXT_TRANSPORT_LENGTH)
+    && typeof message.userGesture === "boolean",
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-058
   // Back / Next of toolbar row 2: the host walks the panel's navigation history.
   previewHistoryGo: (message) => isOneOf(message.direction, ["back", "forward"] as const),

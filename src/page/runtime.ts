@@ -182,8 +182,8 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const firstClearance = installFirstClearance(document, window);
   pageDiagnostics.expose(firstClearance);
   // The button follows the host's answer (`hostRequests` is created below, before any click).
-  const codeCopy = installCodeCopy(document, window, (text, done) =>
-    hostRequests.ask("previewCopyText", { text }, {}, done));
+  const codeCopy = installCodeCopy(document, window, (text, done, userGesture) =>
+    hostRequests.ask("previewCopyText", { text, userGesture }, {}, done));
   // Edit mode: the anchor icon of a label renames it. The result is matched by edit id: the edit
   // itself moves the document version before the answer arrives.
   const labelRename = installLabelRename(document, window, {

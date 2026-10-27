@@ -41,7 +41,7 @@ function setup(options: { readOnly: boolean }) {
     postToPage: (message: Record<string, unknown>) => { posted.push(message); return Promise.resolve(true); } } as unknown as PreviewSession;
   const dispatcher = new PageMessageDispatcher(manager, router);
   const copy = (identity: Partial<typeof current> = {}): PageToHostMessage => ({
-    type: "previewCopyText", ...current, ...identity, editId: "copy-1", text: "print('x')\n",
+    type: "previewCopyText", ...current, ...identity, editId: "copy-1", text: "print('x')\n", userGesture: true,
   } as PageToHostMessage);
   return { clipboard, edits, posted, preview, dispatcher, copy, failWrite: (value: boolean) => { failWrite = value; } };
 }
@@ -81,4 +81,12 @@ test("a read-only preview still writes the requested code to the clipboard and e
   await t.dispatcher.handle(t.preview, t.copy());
   assert.deepEqual(t.clipboard, ["print('x')\n"]);
   assert.deepEqual(t.edits, [], "no edit request was processed");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-026
+test("a copy request without a user gesture is refused and writes nothing", async () => {
+  const t = setup({ readOnly: false });
+  await t.dispatcher.handle(t.preview, { ...t.copy(), userGesture: false } as PageToHostMessage);
+  assert.deepEqual(t.clipboard, []);
+  assert.deepEqual([t.posted[0]?.ok, t.posted[0]?.reason], [false, "Copy needs a click on the copy button."]);
 });

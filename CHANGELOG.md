@@ -6,6 +6,10 @@
   (the workspace folder as allowlist path) and an explicit image size limit of 4096. Includes of files
   inside the workspace still work; URL includes are refused. `JAVA_HOME` is used when it is an
   absolute path holding a java binary.
+- In Restricted Mode the frontmatter path settings (`frontmatter.bundleRoot`, `frontmatter.projectRoot`
+  and `frontmatter.allowOutsideWorkspaceLinks`) are ignored, like the PlantUML engine settings. The
+  code-block copy button and the PlantUML `!include` reads of the built-in engine now answer only
+  to a real click and to files the extension itself named; nothing changes in normal use.
 - A read-only preview (Restricted Mode, or a file outside every workspace folder) no longer exposes
   your home folder: when the document sits in the home folder, a folder above it or a file-system
   root, `{include}` and local images are refused with a warning and the preview may load no local
