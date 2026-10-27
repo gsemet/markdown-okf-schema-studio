@@ -25,7 +25,7 @@ implemented_in_files:
 - src/page/features/editMode.ts
 tested_in_files:
 - test/core/preview/blockReq.requirements.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
 ---
@@ -76,7 +76,7 @@ While edit mode is on, the page SHALL outline with a dashed line the element tha
 ### Verification notes
 
 - Method: test/page/runtimeBlockEditor.test.ts (`edit mode hover marks the whole list that a click would edit`: hovering a list item and pointer or focus leaves).
-- Method: test/integration/realInput.test.ts (scenarioEditAffordances, screenshot block-editing/r12: hovering a list item and the outlined element per target); visual scenarios block-editing/v06, v07 and v08 share the same assertions.
+- Method: test/integration/realInput/editorWidgets.ts (scenarioEditAffordances, screenshot block-editing/r12: hovering a list item and the outlined element per target); visual scenarios block-editing/v06, v07 and v08 share the same assertions.
 - Method: test/page/blockReq.requirements.test.ts (`hovering a link inside a paragraph does not outline the paragraph, the text around it does`: link inside a paragraph row).
 - Method: test/page/blockReq.requirements.test.ts (`the hover outline skips the properties table and an open editor, and an element in a link`: targets that are not outlined).
 - Method: test/core/preview/blockReq.requirements.test.ts (`mapped blocks show the text cursor in edit mode only`: text cursor table).

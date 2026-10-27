@@ -22,7 +22,7 @@ derived_by: []
 implemented_in_files:
 - src/page/features/tableCellEditor.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/runtimeTableCellEditor.test.ts
 ---
 
@@ -67,6 +67,6 @@ When the writer presses Escape in a cell editor outside an IME composition and n
 
 ### Verification notes
 - Method: test/page/runtimeTableCellEditor.test.ts ("Escape in a changed table cell cancels and never saves a final table" for Escape after typing and the blur after it; "Escape cancels a table cell even when focus is outside the cell editor" for the focus outside and the key inside, with the document-level handler in bindKeys of src/page/features/tableCellEditor.ts; "Escape during IME composition neither cancels nor saves a table cell" for the composition scenarios).
-- Method: test/integration/realInput.test.ts, markers in test/integration/realInput.markers.ts (real-window scenario scenarioEscapeCancels, id table-editing/r04-escape-cancels-cell: Escape after typing).
+- Method: test/integration/realInput/textEditing.ts, markers in test/integration/realInput/markers.ts (real-window scenario scenarioEscapeCancels, id table-editing/r04-escape-cancels-cell: Escape after typing).
 - Method: visual scenarios table-editing/v02 to v05 (Escape cancelling).
 - Criteria: No message with final true after Escape and an unchanged source in the real-window scenario. Exactly one cancel per key press in the two focus scenarios. No message and an open editor in the composition scenario.

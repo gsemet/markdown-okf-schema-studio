@@ -45,5 +45,5 @@ When the preview content is patched in place, the page SHALL draw the Mermaid di
 
 ### Verification notes
 
-- Method: Unit tests that page events reach the diagram renderers; real VS Code scenario RI-T34 in test/integration/realInput.test.ts (a Mermaid diagram is drawn again in the same frame).
+- Method: Unit tests that page events reach the diagram renderers; real VS Code scenario RI-T34 in test/integration/realInput/renderPatching.ts (a Mermaid diagram is drawn again in the same frame).
 - Criteria: Only diagrams without a render state are drawn after a patch.

@@ -26,7 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/fmtableReq.requirements.test.ts
 - test/core/preview/previewStyles.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/visual/capture_edit_checks.py
 - test/visual/scenarioDefinitions2.ts
@@ -111,7 +111,7 @@ When a cell editor opens in a table, the extension SHALL create once a toolbar n
 ### Verification notes
 
 - Method: test/page/runtimeTableCellEditor.test.ts (table toolbar sits in the flow above the table with text labels and a position status; table editing switches cells without losing changes and finalizes before leaving the table; table cell editing exposes row and column operations and saves the edited table; scenarios bar above the table, placement and lifetime, seven buttons, groups (group attributes), status).
-- Method: test/integration/realInput.markers.ts and real-window scenario scenarioTableToolbar (id table-editing/r06-cell-bar-in-flow) in test/integration/realInput.test.ts (bar above the table); visual scenarios table-editing/v02 to v05 (a bar directly above the table that covers no cell) and table-editing/v24 and v25 (360 px: one rule per group, the rule of the cell group level with the group's first line).
+- Method: test/integration/realInput/markers.ts and real-window scenario scenarioTableToolbar (id table-editing/r06-cell-bar-in-flow) in test/integration/realInput/editorWidgets.ts (bar above the table); visual scenarios table-editing/v02 to v05 (a bar directly above the table that covers no cell) and table-editing/v24 and v25 (360 px: one rule per group, the rule of the cell group level with the group's first line).
 - Method: test/visual/capture_edit_checks.py: check_cell_bar_formatting (seven operations; narrow pane at 460 px on table-editing/v03 and v05) and check_cell_editor_chrome (status centring, on table-editing/v01 to v05).
 - Method: test/core/preview/previewStyles.test.ts (status centring style) and test/core/preview/fmtableReq.requirements.test.ts (the table bar status takes no room when it is empty).
 - Criteria: The toolbar role and name, its position before the table, and in the visual check a bottom edge not below the table top; seven elements with data-sphinx-table-operation, each with an icon and a title; the exact status strings, T being the number of body rows of the model; a centre difference of at most 2 px, or a status below the button row; no cell group button outside the bar and no horizontal overflow at 460 px. The tooltip display and position are not asserted for this bar. The rule style is a style rule in src/core/preview/styles/editModeStyles.ts selecting the first button of the column group and of the table group (adjacent-sibling selectors); the style test in previewStyles.test.ts reads that selector and the flex rule of the wrapper that holds the cell group's separator (editPaletteStyles.ts); the wrapping itself is shown by the visual scenarios. Scenarios table-editing/v24 and v25 (360 px) reach the branch of the check that expects wrapping at 400 px or less; the check also reads the computed rule of each operation button and the position of the cell group's separator against its first button. The descriptions of visual scenarios table-editing/v02 to v05 in test/visual/scenarioIds.ts still say "four-action row and column bar", which is stale: the bar has seven operations and the check asserts seven.

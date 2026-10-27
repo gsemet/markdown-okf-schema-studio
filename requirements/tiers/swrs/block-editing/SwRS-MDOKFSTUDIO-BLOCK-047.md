@@ -28,7 +28,7 @@ implemented_in_files:
 - src/page/features/blockSourceEditor.ts
 - src/page/modules/hostRequests.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/modules/hostRequests.test.ts
 - test/page/runtimeBlockEditor.test.ts
@@ -96,7 +96,7 @@ When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or m
 - Method: test/page/blockReq.requirements.test.ts (`the status line reads Saving Markdown… from the final save on, and shows an error that refuses it`: status line and refused save).
 - Method: test/page/blockReq.requirements.test.ts (`Done, Ctrl+Enter and the blur post one final save while the first is in flight`: second final save refused).
 - Method: test/page/runtimeBlockMoves.test.ts (`T28: Done on an untouched empty insertion closes without saving`: empty insertion). Done, blur and Ctrl+Enter on an unchanged existing block are untested.
-- Method: test/integration/realInput.markers.ts (scenarioCtrlEnterCommit, screenshot block-editing/r02; scenarioParagraphBlurCommit, screenshot block-editing/r01).
+- Method: test/integration/realInput/markers.ts (scenarioCtrlEnterCommit, screenshot block-editing/r02; scenarioParagraphBlurCommit, screenshot block-editing/r01).
 - Method: test/page/runtimePaletteActions.test.ts (`T30: the editor stays open while the host's file dialog has the focus, and the answer is inserted`: host dialog; `T31: Done saves while the file dialog is still open, so the editor is never stuck`: Done during a pending dialog); the moves into the palette and the panels have no test in this scope.
 - Method: test/page/modules/hostRequests.test.ts (a dialog request keeps the editor's blur suspended until it is answered, even on a timeout; a list request never suspends the blur: dialog state).
 - Criteria: Done calls postBlockEditSave(true); both modifiers finish the editor and a plain Enter does not; exactly one final save per blur; frameContains(edit, relatedTarget) or an open dialog stops the commit; isDialogOpen is true while at least one pending request carries the dialog mark; edit.status.textContent is set before the message is posted; no previewEditSave and no previewEditCancel is posted for an unchanged editor.

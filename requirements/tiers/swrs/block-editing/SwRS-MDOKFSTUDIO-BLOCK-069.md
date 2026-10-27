@@ -30,7 +30,7 @@ implemented_in_files:
 - src/page/modules/selectAllKey.ts
 - src/page/modules/textEditing.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/modules/editActions.test.ts
 - test/page/modules/editorKeys.test.ts
@@ -126,7 +126,7 @@ When a writer presses a key in the text box of an open editor, the page SHALL gi
 - Method: test/page/runtimeBlockEditor.test.ts (wrap and wrap again, refusal of native marker keys and AltGr, undo stack, no editing command, undo and redo shortcuts, repeated spaces and Enter); visual scenario block-editing/v03 (wraps, undo and redo) and visual scenarios block-editing/v01 and v02 (one assertion family, repeated spaces and Enter)
 - Method: test/page/runtimeBlockEditor.test.ts (CR 118: Enter in the selected alt text of an image keeps the text and moves the caret after the image, and Enter outside the alt text stays native); test/page/modules/editActions.test.ts (imageAltExit); visual scenarios palette-slash/v22, v23 (cream) and v24 (dark) press Enter on the alt text selected after an image paste
 - Method: test/page/blockReq.requirements.test.ts (Home and End, Shift with Home or End)
-- Method: test/integration/realInput.markers.ts (real-input scenario scenarioUndoStaysInEditor, screenshots block-editing/r07 in Open With and r08 side by side; scenarioEnterContinuesList); Chromium undoes by word, so a trailing space may remain after one undo
+- Method: test/integration/realInput/markers.ts (real-input scenario scenarioUndoStaysInEditor, screenshots block-editing/r07 in Open With and r08 side by side; scenarioEnterContinuesList); Chromium undoes by word, so a trailing space may remain after one undo
 - Method: test/page/modules/editorKeys.test.ts (handled keys stop at the document, keys no editor handled keep reaching VS Code); the same containment serves the table cell and the field editors
 - Method: test/page/modules/selectAllKey.test.ts (select-all in a text control stops at the document, other shortcuts do not); the same rule serves the table cell editor and the field editors
 - Criteria: wrapSelection returns no edit for a caret, other keys and invalid ranges; applyTextEdit calls the native insertText or delete command first; the selection range is set to 0 or to the length without trailing line breaks; setSelectionRange is called with the anchor kept and the direction set; stopPropagation is called for the undo and redo keys and no default is prevented; the autosave text equals the typed text plus the trailing newline; isHandledEditorKey is true only for Tab, Enter, Escape and the arrow keys inside an editor frame with defaultPrevented true; isTextSelectAll is true for textarea, text-like input and editable elements only

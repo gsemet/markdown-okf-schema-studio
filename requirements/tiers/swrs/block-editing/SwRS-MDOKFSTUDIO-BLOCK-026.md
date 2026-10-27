@@ -23,7 +23,7 @@ implemented_in_files:
 - src/page/features/textControls.ts
 - src/page/modules/textEditing.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/modules/textEditing.test.ts
 - test/page/runtimeBlockEditor.test.ts
 ---
@@ -62,5 +62,5 @@ When a writer clicks rendered text in edit mode, the page SHALL place the caret 
 
 - Method: test/page/modules/textEditing.test.ts (`mapRenderedCaret ` cases: emphasis and link markup, link label; `mapRenderedCaret ambiguous`, `mapRenderedCaret no match` and `mapRenderedCaret empty context`: ambiguous text).
 - Method: test/page/runtimeBlockEditor.test.ts (`without caretRangeFromPoint a click opens the editor with the caret at the end of the block`: no caret API).
-- Method: test/integration/realInput.test.ts (scenarioCaretAtClick, screenshot block-editing/r11: emphasis and link markup); visual scenarios block-editing/v04 and block-editing/v05. A click in a table cell carries no caret context.
+- Method: test/integration/realInput/editorWidgets.ts (scenarioCaretAtClick, screenshot block-editing/r11: emphasis and link markup); visual scenarios block-editing/v04 and block-editing/v05. A click in a table cell carries no caret context.
 - Criteria: The mapped offset equals the offset expected by the table of cases; mapRenderedCaret returns undefined when no unique place is found and focusTextControlAtLastContent uses the trimmed length.

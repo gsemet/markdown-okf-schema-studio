@@ -1,7 +1,6 @@
-// Companion of: test/integration/realInput.test.ts
-// Requirement markers for realInput.test.ts.
-// That file is at its size limit (see scripts/check-file-sizes.mjs), so the markers live here
-// until the file is split. Each marker names a requirement the tests of realInput.test.ts check.
+// Companion of: test/integration/realInput/run.ts
+// Requirement markers for the real-input scenarios in this folder (run.ts and its scenario files).
+// Each marker names a requirement the real-window scenarios check.
 // @tests_req StRS-MDOKFSTUDIO-BLOCK-003
 // @tests_req StRS-MDOKFSTUDIO-BLOCK-006
 // @tests_req StRS-MDOKFSTUDIO-BLOCK-008

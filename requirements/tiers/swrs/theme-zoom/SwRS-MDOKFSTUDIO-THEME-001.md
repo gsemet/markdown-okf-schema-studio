@@ -26,7 +26,7 @@ implemented_in_files:
 - src/page/features/themeMode.ts
 tested_in_files:
 - test/core/preview/creamTheme.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/diagReq.themeZoom.requirements.test.ts
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeScroll.test.ts
@@ -100,7 +100,7 @@ When the reader presses the Theme button, the extension SHALL switch the preview
 
 - Method: test/page/runtimeScroll.test.ts, unit test `cycles preview theme modes and restores the saved selection` (four clicks, wrap-around from Cream, the Current, Dark and White labels, the Cream tooltip).
 - Method: test/page/runtimePageControls.test.ts, unit test `fresh workspace: the toolbar starts collapsed and the preview theme starts in cream` (the Cream label and tooltip).
-- Method: test/integration/realInput.markers.ts, real-input captures theme-zoom/r01 to r08 click the real button through the cycle (four clicks, wrap-around).
+- Method: test/integration/realInput/markers.ts, real-input captures theme-zoom/r01 to r08 click the real button through the cycle (four clicks, wrap-around).
 - Method: test/core/preview/creamTheme.test.ts, unit tests `cream is an accepted preview theme mode with its own coffee toolbar icon` and `toolbar theme icons are well-formed sibling svgs, one per mode` (icon set well formed); test/visual/scenarioDefinitions1.ts, visual scenarios theme-zoom/v02 and v08 (one icon per mode, visible icon asserted); the Current and White icons are not asserted by a visual scenario.
 - Method: test/page/diagReq.themeZoom.requirements.test.ts, unit test `an unknown theme mode is ignored: the saved mode comes next, Cream last` (the three rows of the unknown mode table).
 - Criteria: The mode attribute and the button attribute equal the next mode of the fixed order after each click, and the fifth state equals the first. The three attributes carry exactly the listed texts for each mode. The list of visible icons equals the active mode and the four icons appear once each in the fixed order. An unknown mode never shows.

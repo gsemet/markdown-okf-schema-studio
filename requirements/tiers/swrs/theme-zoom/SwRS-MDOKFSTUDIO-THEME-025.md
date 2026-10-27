@@ -27,7 +27,7 @@ tested_in_files:
 - test/core/preview/diagReq.styles.requirements.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/core/preview/themeTokens.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/visual/capture_page_checks.py
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
@@ -119,6 +119,6 @@ the same rule with their own palette; Current mode continues to follow the host.
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario theme-zoom/v08 (FORCED_DARK_ASSERTIONS in test/visual/scenarioAssertions.ts: Dark on a light host).
 - Method: test/core/preview/themeTokens.test.ts, unit test `the forced theme modes set the neutral tokens, not the VS Code variables` (Dark and White neutral tokens, literal hex, no VS Code variable; the host independence follows from it and is not run with another host).
 - Method: test/core/preview/creamTheme.test.ts, unit tests `cream defines a light warm palette for every variable white mode overrides` (Cream palette, warm paper rule, Cream complete) and `explicit themes override the same host colors, including the floating toolbar` (same names in the three blocks, toolbar variables included).
-- Method: test/integration/realInput.markers.ts, real-input check `38-toolbar-{host}-{mode}` of test/integration/realInput.test.ts (captures theme-zoom/r01 to r08): runs the four modes on both hosts and compares the toolbar, text and pressed button colours and the borders with a fixed map for Dark, White and Cream; capture r03 is asserted but not captured.
+- Method: test/integration/realInput/markers.ts, real-input check `38-toolbar-{host}-{mode}` of test/integration/realInput/previewWindow.ts (captures theme-zoom/r01 to r08): runs the four modes on both hosts and compares the toolbar, text and pressed button colours and the borders with a fixed map for Dark, White and Cream; capture r03 is asserted but not captured.
 - Method: test/core/preview/diagReq.styles.requirements.test.ts, unit test `the sticky heading band takes the page colours of the forced mode` (the two band rows).
 - Criteria: Computed page colours equal the listed values and the note panel is light. Computed body colours, colour scheme, admonition panel and heading brightness equal the listed values. The toolbar computed colours equal the palette of the mode. Every border colour equals the map value of the mode. The page and toolbar colours of each forced mode are identical on the two hosts. The sorted variable lists of the three blocks are equal and each block holds the background token as a hex value and no VS Code variable.

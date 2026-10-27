@@ -63,9 +63,10 @@ def main():
     args = parser.parse_args()
 
     print("## Automated coverage (do not re-explore; extend instead)")
-    real = EXT / "test/integration/realInput.test.ts"
+    real = EXT / "test/integration/realInput"
     if real.exists():
-        names = re.findall(r"^async function scenario(\w+)", real.read_text(encoding="utf-8"), re.M)
+        names = re.findall(r"^(?:export )?async function scenario(\w+)",
+                           "".join(f.read_text(encoding="utf-8") for f in sorted(real.glob("*.ts"))), re.M)
         print(f"real-input E2E ({len(names)}): " + "; ".join(words(n) for n in names))
     visual = sorted((EXT / "test/visual").glob("scenario*.ts"))
     if visual:
@@ -79,8 +80,6 @@ def main():
         checks = re.findall(r"^def check_(\w+)", text, re.M)
         print(f"screenshot machine checks ({len(checks)}): " + ", ".join(checks))
     for suite in sorted((EXT / "test/integration").glob("*.test.ts")):
-        if suite.name == real.name:
-            continue
         titles = re.findall(r"\b(?:test|it)\(\s*[\"'`](.+?)[\"'`]", suite.read_text(encoding="utf-8"))
         if titles:
             shown = "; ".join(t[:60] for t in titles[:8]) + ("; …" if len(titles) > 8 else "")

@@ -41,5 +41,5 @@ When a cell editor holds typed text and the writer follows a link to another fil
 
 ### Verification notes
 
-- Method: Unit tests CR 025: following a link right after typing posts the final save before the link and CR 025: Back right after typing posts the final save before previewHistoryGo in test/page/runtimeEditorFlush.test.ts (the tests drive a block editor; the cell path is the same function, flushOpenEditors, and CR 025: a host flush request saves the typed text of an open table cell covers the cell branch); real-window scenario scenarioFlushCellAndFrontmatter in test/integration/realInput.test.ts.
+- Method: Unit tests CR 025: following a link right after typing posts the final save before the link and CR 025: Back right after typing posts the final save before previewHistoryGo in test/page/runtimeEditorFlush.test.ts (the tests drive a block editor; the cell path is the same function, flushOpenEditors, and CR 025: a host flush request saves the typed text of an open table cell covers the cell branch); real-window scenario scenarioFlushCellAndFrontmatter in test/integration/realInput/flushBeforeNavigate.ts.
 - Criteria: The flushed save precedes the navigation message. The anchor-in-page boundary is tested for a block editor only.

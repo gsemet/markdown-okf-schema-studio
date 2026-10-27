@@ -38,7 +38,7 @@ tested_in_files:
 - test/integration/checkboxToggle.test.ts
 - test/integration/inlineThread.test.ts
 - test/integration/previewEditing.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/session/blockReq.requirements.test.ts
 ---
 
@@ -110,7 +110,7 @@ When the host writes an edit of the source document for the preview, it SHALL ma
 - SwRS-MDOKFSTUDIO-TRUST-065: a stale write request is answered before any edit is written
 
 ### Verification notes
-- Method: test/integration/realInput.test.ts, scenario scenarioTypingUndoGrouping (screenshot block-editing/r06; checks the typed session row, one undo restored), run with the document shown in a text editor next to the preview; the single step relies on VS Code merging the successive plain edits, and no test covers a document with no visible text editor, such as the Open With editor
+- Method: test/integration/realInput/textEditing.ts, scenario scenarioTypingUndoGrouping (screenshot block-editing/r06; checks the typed session row, one undo restored), run with the document shown in a text editor next to the preview; the single step relies on VS Code merging the successive plain edits, and no test covers a document with no visible text editor, such as the Open With editor
 - Method: test/integration/previewEditing.test.ts (a save during an edit does not render until the edit ends; checks the autosaved-then-Done render once; the "Nothing applied" boundary is not asserted)
 - Method: test/integration/blockMove.test.ts (move row: one swap, down then up, one undo) and test/integration/blockClipboard.test.ts (cut and paste rows: runUndo, one cut and one paste are one step each); both need an unlocked screen
 - Method: test/integration/checkboxToggle.test.ts (checkbox row, one undo restores the source, real window; the no-editor path is untested)

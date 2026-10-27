@@ -29,7 +29,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/propertiesTable.test.ts
 - test/integration/previewEditing.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions1.ts
 ---
@@ -106,5 +106,5 @@ When a properties table with annotated link values is rendered, the extension SH
 
 ### Verification notes
 
-- Method: test/core/frontmatter/propertiesTable.test.ts (valid link, list of links, not found, root unavailable, labels, first paint), test/integration/previewEditing.test.ts (valid link, problem tooltip), test/integration/realInput.markers.ts (keyboard focus and tooltip of a problem), test/page/runtimeScroll.test.ts (tooltip of a problem), test/visual/scenarioDefinitions1.ts (first paint, pending link, resolved after render, document changed meanwhile; the timer is also covered by a unit test of the frontmatter controller).
+- Method: test/core/frontmatter/propertiesTable.test.ts (valid link, list of links, not found, root unavailable, labels, first paint), test/integration/previewEditing.test.ts (valid link, problem tooltip), test/integration/realInput/markers.ts (keyboard focus and tooltip of a problem), test/page/runtimeScroll.test.ts (tooltip of a problem), test/visual/scenarioDefinitions1.ts (first paint, pending link, resolved after render, document changed meanwhile; the timer is also covered by a unit test of the frontmatter controller).
 - Criteria: The link carries the navigation request okf-link and the status valid. The tooltip of a problem is shown by the Studio link tooltip on hover and focus. The first render and the 300 ms table refresh do not touch the file system for links. A new request restarts the 150 ms timer.

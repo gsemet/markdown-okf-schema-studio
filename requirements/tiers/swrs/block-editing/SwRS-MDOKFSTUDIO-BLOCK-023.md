@@ -40,5 +40,5 @@ When a writer clicks a plain image, or a raw img block, in edit mode, the page S
 
 ### Verification notes
 
-- Method: Real-input scenario scenarioImageEditing in test/integration/realInput.test.ts. No unit test.
+- Method: Real-input scenario scenarioImageEditing in test/integration/realInput/renderPatching.ts. No unit test.
 - Criteria: Both blocks are mapped and open through the generic click path.

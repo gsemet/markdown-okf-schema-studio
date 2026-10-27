@@ -27,7 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/mapping/blockMove.test.ts
 - test/integration/blockMove.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/runtimeBlockSelection.test.ts
 ---
 
@@ -108,7 +108,7 @@ When a writer presses Alt+ArrowUp or Alt+ArrowDown with blocks selected and the 
 ### Verification notes
 
 - Method: test/page/runtimeBlockSelection.test.ts, unit tests `T41: Alt+ArrowDown with a two-block selection posts the span; the selection follows the patch` and `T41: Alt+ArrowUp with a selection posts the span above its neighbour` (Alt+Up and Alt+Down; render selects again); `T41: the arrows of the last selected block's bar move the span; other bars move one block` and `T41 r2: the last selected block's arrows are labelled for the selection; a dropped request leaves no pending mark` (arrows and labels; dropped request); `T41 r2: with a selection, Alt+Arrow on a block outside it moves that one block` and `T41: without a selection Alt+Arrow still moves the one focused block` (moves alone); `T41: a patch that changes the number of blocks restores nothing instead of another block` (count changed); `T41: after a full reload the selection is restored from the saved state` and `T41 r2: a saved pending selection of the same version, or an old one, selects nothing and is dropped` (reload); `T41: at either end of the document the span does not move, and the selection stays` (ends); `T41: a key repeat does not move the span twice; a refusal keeps the selection and can be retried` (repeat and refusal).
-- Method: test/integration/realInput.markers.ts, real-input scenario scenarioBlockMoveSelection (screenshot block-editing/r23) for Alt+ArrowDown with a selection.
+- Method: test/integration/realInput/markers.ts, real-input scenario scenarioBlockMoveSelection (screenshot block-editing/r23) for Alt+ArrowDown with a selection.
 - Method: test/core/mapping/blockMove.test.ts, unit tests `a span of blocks moves past one block, inner separators untouched` and `a span keeps CRLF line breaks inside and around it` (host swap); `a span at the end of the document, or past it, is refused` and `a span next to the frontmatter cannot cross it` (host refusals); test/integration/blockMove.test.ts (selection span, one undo).
 - Method: test/page/runtimeBlockSelection.test.ts (`T41: a key repeat does not move the span twice; a refusal keeps the selection and can be retried`, changed: the reason shows under the last selected block).
 - Criteria: One message with the span as the moving range. applyMoveSelection compares the block count. MOVE_SELECTION_MAX_AGE is 5000 ms. requestSelectionMove returns false without a neighbour and while a flight exists. The pending selection state is cleared on refusal. selectionEndsAt picks the bar. selectionMoveOwns is true only for selected blocks or the page. updateMoveLabels runs on every render of the selection. The result equals the expected text of each case.

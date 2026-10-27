@@ -27,7 +27,7 @@ implemented_in_files:
 - src/page/features/pageInput.ts
 - src/page/features/tableCellEditor.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/page/runtimeTableCellEditor.test.ts
@@ -99,7 +99,7 @@ When the writer presses Enter in the cell text box, with or without Cmd, Ctrl or
 
 ### Verification notes
 - Method: test/page/runtimeTableCellEditor.test.ts ("Enter in a changed table cell saves the table"; "table cell editing exposes row and column operations and saves the edited table" for Done; "the table cell editor commits and closes when focus leaves without a click"; "the table cell editor commits on blur unless a pointer press is in progress"; "table editing switches cells without losing changes and finalizes before leaving the table" for the click on a block outside the table).
-- Method: test/integration/realInput.test.ts, markers in test/integration/realInput.markers.ts (real-window scenario scenarioTableCellEnter, id table-editing/r01-cell-enter-saves: Enter after typing).
+- Method: test/integration/realInput/blockKeys.ts, markers in test/integration/realInput/markers.ts (real-window scenario scenarioTableCellEnter, id table-editing/r01-cell-enter-saves: Enter after typing).
 - Method: test/page/fmtableReqTable.requirements.test.ts ("an unchanged cell closes without a save; typed back after an autosave it saves a final text"; "a click outside any editable block saves the open cell once").
 - Method: test/page/runtimePaletteActions.test.ts (T35 "a popover opened from the cell bar keeps the editor open, outside focus still commits" and T35 "the link panel opened from the cell keeps the editor open and clicking outside commits").
 - Method: visual scenarios table-editing/v01 to v05 (Done under the field).

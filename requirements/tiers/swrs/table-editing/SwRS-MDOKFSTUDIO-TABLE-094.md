@@ -22,7 +22,7 @@ derived_by: []
 implemented_in_files:
 - src/page/modules/markdownTable.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/modules/markdownTablePreservation.test.ts
 ---
@@ -106,5 +106,5 @@ When a table is parsed and written back after a cell edit, a row insertion, a ro
 ### Verification notes
 - Method: test/page/modules/markdownTablePreservation.test.ts (unchanged table: round trip preserves the source, one per corpus table; one edited cell: one-cell edit changes exactly one line, padded, compact, indented and wider-than-padding, and lineDelta reports one removed and one added line; width: padded and wider-than-padding; any single cell edit: every single-cell edit reparses and changes at most one line; edge cell and indentation scenarios).
 - Method: test/page/modules/markdownTable.test.ts (unchanged table: pipe tables round-trip escaped cells and CRLF line endings; width: a shrinking value in a padded table keeps the original cell width and filling an empty cell keeps the table's padding; new row: inserting a row after the first body row of a padded table adds one padded line and inserting a row into a table without outer pipes adds one parseable row; deleting the first body row of a compact table removes exactly one line; edge cells: rows without outer pipes stay parseable when an edge cell is emptied and rows with only one outer pipe stay parseable). The header refusal is read from the model and has no dedicated test (untested).
-- Method: test/integration/realInput.test.ts, through the markers in test/integration/realInput.markers.ts (real window, scenarioTableMinimalDiff, ids table-editing/r02-padded-table-minimal-diff and table-editing/r03-compact-table-minimal-diff).
+- Method: test/integration/realInput/blockKeys.ts, through the markers in test/integration/realInput/markers.ts (real window, scenarioTableMinimalDiff, ids table-editing/r02-padded-table-minimal-diff and table-editing/r03-compact-table-minimal-diff).
 - Criteria: String equality for every table of the corpus, one removed and one added line per cell edit, the added line text for a new row, a line delta of one removed and zero added lines for a deletion, and the reparsed rows for the pipe and edge cell cases.

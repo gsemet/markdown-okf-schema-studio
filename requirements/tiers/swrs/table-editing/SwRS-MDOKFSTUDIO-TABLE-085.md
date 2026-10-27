@@ -24,7 +24,7 @@ implemented_in_files:
 - src/page/features/tableCellEditor.ts
 - src/page/features/textControls.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/modules/slashMenu.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/visual/capture_edit_checks.py
@@ -85,6 +85,6 @@ When a cell editor is open, the extension SHALL add to the table bar, after a se
 ### Verification notes
 - Method: test/page/runtimePaletteActions.test.ts, unit tests T35: the cell bar keeps the table operations and adds the inline group after a separator ("Cell group"), T35: Bold in a cell is one native edit, keeps the cell open and Enter still saves it ("A button applies to the cell text"), T35: the bold shortcut works in a cell and stays out of the browser ("Cmd or Ctrl with B, I or K", Bold row; the italic and link shortcuts share the same function and have no cell-specific test), T35: block-only shortcuts do nothing in a cell ("Block-only shortcut"), T35: table operations keep the inline group in the rebuilt bar (row and column buttons of "Rebuilt bar keeps the group"; the cell-switch case is read from renderTableCellEditor and has no test) and T35: the cell group leaves with the editor ("The group leaves with the editor"; the still-open case has no separate assertion).
 - Method: test/page/modules/slashMenu.test.ts, unit test P11: the table cell palette lists only the actions allowed in a cell ("Slash menu of a cell"); the entries are the cell palette's own, so they follow the palette mode.
-- Method: test/integration/realInput.test.ts, real-window scenario scenarioTableCellBold (id table-editing/r08-cell-bold-shortcut; markers in test/integration/realInput.markers.ts) ("A button applies to the cell text", "Cmd or Ctrl with B, I or K").
+- Method: test/integration/realInput/blockKeys.ts, real-window scenario scenarioTableCellBold (id table-editing/r08-cell-bold-shortcut; markers in test/integration/realInput/markers.ts) ("A button applies to the cell text", "Cmd or Ctrl with B, I or K").
 - Method: test/visual/capture_edit_checks.py, visual check check_cell_bar_formatting ("Cell group", "A button applies to the cell text").
 - Criteria: The ids of the buttons in the group and the absence of block-only ones; value, focus and open state of the editor after the press; text after the key and the prevented and stopped flags; unchanged value and no message for a block-only shortcut; the entries of the cell palette; group identity across the render; no cell group element after the close.
