@@ -7,7 +7,9 @@ description: When useJar is true in a trusted workspace, the extension SHALL
   render each PlantUML diagram by starting its own process in the workspace
   folder, java with the arguments -jar, the resolved JAR path, -pipe and -tsvg
   when jarPath is not empty and the plantuml command with -pipe and -tsvg
-  otherwise, writing the diagram text to its standard input and taking as the
+  otherwise, each process running with the PlantUML security profile ALLOWLIST
+  with the workspace folder as its allowlist path and with an image size limit
+  of 4096, writing the diagram text to its standard input and taking as the
   picture the output from the first svg start tag to the last svg end tag.
 project: markdown-okf-schema-studio
 scope: diagrams
@@ -34,17 +36,19 @@ tested_in_files:
 
 ### Normative behavior
 
-When useJar is true in a trusted workspace, the extension SHALL render each PlantUML diagram by starting its own process in the workspace folder, java with the arguments -jar, the resolved JAR path, -pipe and -tsvg when jarPath is not empty and the plantuml command with -pipe and -tsvg otherwise, writing the diagram text to its standard input and taking as the picture the output from the first svg start tag to the last svg end tag.
+When useJar is true in a trusted workspace, the extension SHALL render each PlantUML diagram by starting its own process in the workspace folder, java with the arguments -jar, the resolved JAR path, -pipe and -tsvg when jarPath is not empty and the plantuml command with -pipe and -tsvg otherwise, each process running with the PlantUML security profile ALLOWLIST with the workspace folder as its allowlist path and with an image size limit of 4096, writing the diagram text to its standard input and taking as the picture the output from the first svg start tag to the last svg end tag.
 
 ### Scenario (nominal): JAR configured
 - GIVEN useJar true, a trusted workspace and an existing JAR path
 - WHEN a preview with a PlantUML diagram is rendered
-- THEN the process started is java with the arguments -jar, the JAR path, -pipe, -tsvg
+- THEN the process started is java, taken from JAVA_HOME/bin when JAVA_HOME is an absolute path and holds a java binary and from the PATH otherwise, with the arguments -jar, the JAR path, -pipe, -tsvg preceded by the size-limit and allowlist-path properties
+- AND its environment sets PLANTUML_SECURITY_PROFILE to ALLOWLIST, PLANTUML_LIMIT_SIZE to 4096 and PLANTUML_ALLOWLIST_PATH to the workspace folder
 
 ### Scenario (nominal): PATH command
 - GIVEN useJar true, a trusted workspace and an empty jarPath
 - WHEN a preview with a PlantUML diagram is rendered
 - THEN the process started is plantuml with the arguments -pipe and -tsvg
+- AND its environment carries the same three PlantUML variables
 
 ### Scenario (boundary): Reading and resolving jarPath
 | Input | Outcome |
@@ -81,6 +85,8 @@ When useJar is true in a trusted workspace, the extension SHALL render each Plan
 
 ### Known issues
 
+- Known issue: the extension sets the ALLOWLIST profile and the allowlist path, but the allowlist check of the JAR does not fully confine includes to the workspace folder (paths that leave it through parent segments, and sibling folders sharing the folder-name prefix, are read). Remote includes are refused because no URL allowlist is set. Backlog: resolve includes in the extension before the JAR runs.
+
 - Known issue: The JAR and PATH pipeline asks for no dark variant, so its picture is the same in the light and dark preview.
 - Known issue: The renderer has an executablePath option that no setting feeds; only visual fixtures pass it, so users cannot change the command name.
 - Known issue: Many diagrams start many JVMs at once.
@@ -93,7 +99,7 @@ When useJar is true in a trusted workspace, the extension SHALL render each Plan
 - SwRS-MDOKFSTUDIO-DIAG-097: the bounds of a JAR render
 
 ### Verification notes
-
+- Method: test/core/render/plantUmlRenderer.test.ts `the JAR and the PATH command run under the allowlist security profile with a size limit` and `java is taken from JAVA_HOME ...` (environment and arguments of the started process; a relative JAVA_HOME is ignored). Observed by hand with PlantUML 1.2026.8: with this configuration an include of a file inside the workspace folder is read, an absolute include of an unrelated outside file is refused, but an include path that climbs out of the workspace through parent segments and an absolute path into a sibling folder whose name starts with the workspace folder name are read (see Known issues). The size limit 4096 equals the PlantUML default and is pinned, not tightened. The PATH command receives the environment only, so it honours the profile only with a recent PlantUML.
 - Method: test/core/render/plantUmlRenderer.test.ts (renders PlantUML through the configured external JAR and injects an image: JAR configured, relative path, stdin and working directory, SVG span; uses the PATH executable when no JAR is configured and reports missing commands: PATH command, command missing; decodes a multibyte character split across stdout chunks: split characters).
 - Method: test/core/configuration/plantUmlConfiguration.test.ts (reads and trims the configured PlantUML JAR path; uses an empty path for non-string configuration values: boundary rows for padding and non-string).
 - Method: test/core/render/diagReq.jar.requirements.test.ts (`the JAR pipeline starts one process per diagram before any of them finishes`: one process per diagram).

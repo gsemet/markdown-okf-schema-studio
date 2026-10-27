@@ -10,6 +10,10 @@ import { MAX_PLANTUML_SOURCE_LENGTH } from "./plantUmlLimits";
 const MAX_PLANTUML_OUTPUT_LENGTH = 8 * 1024 * 1024;
 const MAX_PLANTUML_STDERR_LENGTH = 64 * 1024;
 export const PLANTUML_TIMEOUT_MS = 30_000;
+// Strictest PlantUML profile that still reads local `!include` files; the allowlist path is the
+// workspace root. PlantUML's own check does not fully confine includes (see DIAG-084 Known issues).
+export const PLANTUML_SECURITY_PROFILE = "ALLOWLIST";
+export const PLANTUML_LIMIT_SIZE = 4096;
 
 interface HtmlAttribute {
   name: string;
@@ -158,6 +162,25 @@ function validateJarPath(jarPath: string): string | undefined {
   return undefined;
 }
 
+// An explicit Java: JAVA_HOME when it holds a java binary, else the one on the PATH.
+export function resolveJavaCommand(
+  environment: NodeJS.ProcessEnv = process.env,
+  platform: NodeJS.Platform = process.platform,
+): string {
+  const javaHome = environment.JAVA_HOME?.trim();
+  if (javaHome && path.isAbsolute(javaHome)) {
+    const candidate = path.join(javaHome, "bin", platform === "win32" ? "java.exe" : "java");
+    try {
+      if (fs.statSync(candidate).isFile()) {
+        return candidate;
+      }
+    } catch {
+      // Fall back to the PATH lookup.
+    }
+  }
+  return "java";
+}
+
 function resolveExecutablePath(executablePath: string, workspaceRoot: string): string {
   if (path.isAbsolute(executablePath) || executablePath.includes("/") || executablePath.includes("\\")) {
     return path.isAbsolute(executablePath) ? executablePath : path.resolve(workspaceRoot, executablePath);
@@ -192,6 +215,7 @@ function renderSource(
   source: string,
   command: string,
   args: readonly string[],
+  env: NodeJS.ProcessEnv,
   workspaceRoot: string,
   signal: AbortSignal | undefined,
 ): Promise<string> {
@@ -210,6 +234,7 @@ function renderSource(
         args,
         {
           cwd: workspaceRoot,
+          env,
           stdio: ["pipe", "pipe", "pipe"],
           detached: process.platform !== "win32",
         },
@@ -330,8 +355,12 @@ export async function renderPlantUmlDiagrams(
         diagnostics: sources.map(({ line }) => diagnostic(jarError, line)),
       };
     }
-    command = "java";
-    args = ["-jar", jarPath, "-pipe", "-tsvg"];
+    command = resolveJavaCommand();
+    args = [
+      `-Dplantuml.allowlist.path=${options.workspaceRoot}`,
+      `-DPLANTUML_LIMIT_SIZE=${PLANTUML_LIMIT_SIZE}`,
+      "-jar", jarPath, "-pipe", "-tsvg",
+    ];
   } else {
     command = resolveExecutablePath(
       options.executablePath?.trim() || "plantuml",
@@ -339,10 +368,16 @@ export async function renderPlantUmlDiagrams(
     );
     args = ["-pipe", "-tsvg"];
   }
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+    PLANTUML_SECURITY_PROFILE,
+    PLANTUML_LIMIT_SIZE: String(PLANTUML_LIMIT_SIZE),
+    PLANTUML_ALLOWLIST_PATH: options.workspaceRoot,
+  };
 
   const outcomes = await Promise.all(sources.map(async ({ source, line }) => {
     try {
-      const svg = await renderSource(source, command, args, options.workspaceRoot, options.signal);
+      const svg = await renderSource(source, command, args, env, options.workspaceRoot, options.signal);
       return { diagram: { status: "rendered", svg, ...(line === undefined ? {} : { line }) } as PlantUmlDiagramRender };
     } catch (error) {
       const message = isMissingExecutable(error)

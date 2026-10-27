@@ -12,6 +12,9 @@ import {
   resetPlantUmlTimeoutForTests,
   setPlantUmlTimeoutForTests,
   PLANTUML_TIMEOUT_MS,
+  PLANTUML_LIMIT_SIZE,
+  PLANTUML_SECURITY_PROFILE,
+  resolveJavaCommand,
   renderPlantUmlDiagrams,
   resetPlantUmlProcessSpawnerForTests,
   setPlantUmlProcessSpawnerForTests,
@@ -54,7 +57,7 @@ test("renders PlantUML through the configured external JAR and injects an image"
   let observed: { command: string; args: readonly string[]; cwd?: string } | undefined;
   setPlantUmlProcessSpawnerForTests({
     spawn: ((command: string, args: readonly string[], options: { cwd?: string }) => {
-      observed = { command, args, cwd: options.cwd };
+      observed = { command, args: args.filter((arg) => !arg.startsWith("-D")), cwd: options.cwd };
       process.nextTick(() => {
         child.stdout.emit("data", `PlantUML log\n<svg xmlns="http://www.w3.org/2000/svg"><rect /></svg>\n`);
         child.emit("close", 0, null);
@@ -72,7 +75,7 @@ test("renders PlantUML through the configured external JAR and injects an image"
     });
 
     assert.deepEqual(observed, {
-      command: "java",
+      command: resolveJavaCommand(),
       args: ["-jar", workspace.jarPath, "-pipe", "-tsvg"],
       cwd: workspace.root,
     });
@@ -418,4 +421,56 @@ test("does not group-kill a child that already exited", async () => {
     process.kill = originalKill;
   }
   assert.deepEqual(calls, []);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+test("the JAR and the PATH command run under the allowlist security profile with a size limit", async () => {
+  const workspace = createWorkspace();
+  const seen: Array<{ command: string; args: readonly string[]; env: NodeJS.ProcessEnv }> = [];
+  setPlantUmlProcessSpawnerForTests({
+    spawn: ((command: string, args: readonly string[], options: { env: NodeJS.ProcessEnv }) => {
+      seen.push({ command, args, env: options.env });
+      const child = new FakeChild();
+      process.nextTick(() => {
+        child.stdout.emit("data", "<svg></svg>");
+        child.emit("close", 0, null);
+      });
+      return child as never;
+    }) as never,
+  });
+  try {
+    await renderPlantUmlDiagrams(diagramHtml(), { jarPath: "plantuml.jar", workspaceRoot: workspace.root, trusted: true });
+    await renderPlantUmlDiagrams(diagramHtml(), { workspaceRoot: workspace.root, trusted: true });
+    assert.equal(seen.length, 2);
+    for (const call of seen) {
+      assert.equal(call.env.PLANTUML_SECURITY_PROFILE, "ALLOWLIST");
+      assert.equal(PLANTUML_SECURITY_PROFILE, "ALLOWLIST");
+      assert.equal(call.env.PLANTUML_LIMIT_SIZE, String(PLANTUML_LIMIT_SIZE));
+      assert.equal(call.env.PLANTUML_ALLOWLIST_PATH, workspace.root);
+    }
+    assert.deepEqual(seen[0]?.args, [
+      `-Dplantuml.allowlist.path=${workspace.root}`,
+      `-DPLANTUML_LIMIT_SIZE=${PLANTUML_LIMIT_SIZE}`,
+      "-jar", workspace.jarPath, "-pipe", "-tsvg",
+    ]);
+    assert.equal(seen[0]?.command, resolveJavaCommand());
+  } finally {
+    resetPlantUmlProcessSpawnerForTests();
+    fs.rmSync(workspace.root, { recursive: true, force: true });
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-084
+test("java is taken from JAVA_HOME when it holds a binary, else from the PATH", () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "markdown-okf-java-home-"));
+  try {
+    assert.equal(resolveJavaCommand({ JAVA_HOME: home }, "linux"), "java");
+    fs.mkdirSync(path.join(home, "bin"));
+    fs.writeFileSync(path.join(home, "bin", "java"), "");
+    assert.equal(resolveJavaCommand({ JAVA_HOME: home }, "linux"), path.join(home, "bin", "java"));
+    assert.equal(resolveJavaCommand({}, "linux"), "java");
+    assert.equal(resolveJavaCommand({ JAVA_HOME: path.relative(process.cwd(), home) }, "linux"), "java");
+  } finally {
+    fs.rmSync(home, { recursive: true, force: true });
+  }
 });

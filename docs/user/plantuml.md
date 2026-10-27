@@ -35,10 +35,15 @@ when one of its files changes on disk.
 
 The built-in engine loads no URL and no library: a diagram with a URL include (`!includeurl`,
 `!include https://...`), the standard library (`!include <C4/C4_Context>`), `!includedef`,
-`!import`, `!theme ... from` or emoji shows a message instead of a picture. For those, tick
+`!import`, `!theme ... from` or emoji shows a message instead of a picture. For the standard
+library and the other features the JAR supports offline, tick
 `markdownOkfSchemaStudio.plantuml.useJar`: the preview then runs Java with `plantuml.jarPath`, or
-the `plantuml` command from PATH when the path is empty, as before. The JAR runs only in a trusted
-workspace, and it resolves `!include` lines itself.
+the `plantuml` command from PATH when the path is empty. The JAR runs only in a trusted workspace.
+It runs with the PlantUML `ALLOWLIST` security profile and the workspace folder as allowlist path:
+it reads `!include` files inside the workspace folder, while URL includes (and `!theme ... from`
+a URL) are refused, so they do not work with the JAR either. The profile is PlantUML's own check;
+it is not a guarantee that every include path stays in the workspace. The `plantuml` command from
+PATH needs a recent PlantUML to honour the profile.
 
 If you already set `plantuml.jarPath`, the preview now uses the built-in engine until you tick
 `plantuml.useJar`; your path is kept and used again as soon as you do.

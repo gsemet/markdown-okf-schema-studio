@@ -313,7 +313,7 @@
           "markdownOkfSchemaStudio.plantuml.useJar": {
             "type": "boolean",
             "default": false,
-            "markdownDescription": "Chooses the engine that draws PlantUML diagrams. **On**: Java with the JAR of `#markdownOkfSchemaStudio.plantuml.jarPath#`, or the `plantuml` command on your PATH; trusted workspaces only, and needed for `!include` files and remote libraries. **Off** (default): the built-in engine bundled with the extension, with no Java, no process and no network; it also works in Restricted Mode.",
+            "markdownDescription": "Chooses the engine that draws PlantUML diagrams. **On**: Java with the JAR of `#markdownOkfSchemaStudio.plantuml.jarPath#`, or the `plantuml` command on your PATH; trusted workspaces only, and needed for `!include` files inside the workspace folder (the process runs with the PlantUML `ALLOWLIST` security profile, with the workspace folder as allowlist path; remote includes are refused, and the profile is PlantUML's own check, not a guarantee that includes stay in the workspace). **Off** (default): the built-in engine bundled with the extension, with no Java, no process and no network; it also works in Restricted Mode.",
             "order": 79
           },
           "markdownOkfSchemaStudio.plantuml.jarPath": {
