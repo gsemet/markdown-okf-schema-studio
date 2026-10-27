@@ -170,6 +170,14 @@ function fence(code: string, language: string): string {
   return marker + language + "\n" + code.replace(/\n+$/u, "") + "\n" + marker;
 }
 
+/** The lines of a monospace block copied from an editor (divs of spans, or text with line breaks). */
+function monospaceText(node: Element): string {
+  const lines = node.childNodes.some((child) => isElement(child) && child.tagName === "div")
+    ? node.childNodes.filter(isElement).map((line) => textContent(line, true).replace(/\n/gu, ""))
+    : textContent(node, true).split("\n");
+  return lines.join("\n").replace(/\u00a0/gu, " ");
+}
+
 function languageOf(...elements: Array<Element | undefined>): string {
   for (const element of elements) {
     if (!element) continue;
@@ -339,13 +347,9 @@ function convertBlocks(nodes: Node[]): string[] {
     } else if (tag === "hr") {
       blocks.push("---");
     } else if (tag === "div" && isMonospaceBlock(node)) {
-      // A VS Code copy: lines as divs of spans in a monospace block. One line stays plain text.
-      const lines = node.childNodes.some((child) => isElement(child) && child.tagName === "div")
-        ? node.childNodes.filter(isElement).map((line) => textContent(line, true).replace(/\n/gu, ""))
-        : textContent(node, true).split("\n");
-      const code = lines.join("\n").replace(/ /gu, " ");
-      if (lines.length > 1) blocks.push(fence(code, ""));
-      else if (code.trim() !== "") blocks.push(code.trim());
+      // A VS Code copy: the text as copied, never wrapped in a fence (CR 127).
+      const code = monospaceText(node);
+      if (code.trim() !== "") blocks.push(code);
     } else {
       blocks.push(...convertBlocks(node.childNodes));
     }
@@ -358,5 +362,11 @@ function convertBlocks(nodes: Node[]): string[] {
 /** The Markdown of a clipboard `text/html`; an empty string when nothing readable is left. */
 export function htmlToMarkdown(html: string): string {
   const tree = parseFragment(html);
+  // A copy from an editor is plain text: returned as copied, blank lines and edges included.
+  const elements = tree.childNodes.filter(isElement).filter((element) => !SKIPPED.has(element.tagName));
+  if (elements.length === 1 && elements[0].tagName === "div" && isMonospaceBlock(elements[0])) {
+    const code = monospaceText(elements[0]);
+    if (code.trim() !== "") return code;
+  }
   return convertBlocks(tree.childNodes).join("\n\n").replace(/\n{3,}/gu, "\n\n").trim();
 }

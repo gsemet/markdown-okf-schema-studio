@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/paste/htmlToMarkdown.test.ts
 - test/core/paste/paletteReq.requirements.test.ts
+- test/integration/imagePaste.test.ts
 ---
 
 ## Pasted HTML becomes the matching Markdown
@@ -85,14 +86,13 @@ The refusal of an unsafe address is in SwRS-MDOKFSTUDIO-PALETTE-229.
 ### Scenario (nominal): Code, inline and fenced
 - GIVEN a pre with a code element of class language-ts, a code element with a backtick inside, and a monospace block copied from VS Code
 - WHEN the HTML is converted
-- THEN a ts fence surrounds the code, the inline span uses a longer backtick run, and a VS Code copy follows the table
+- THEN a ts fence surrounds the code, the inline span uses a longer backtick run, and a VS Code copy is kept as raw text
 
 | Input | Outcome |
 | --- | --- |
 | pre element, optionally with a code child | a fenced block whose language comes from a class language-, lang-, highlight-source- or highlight-text-, with a fence longer than any backtick run inside |
 | code, kbd, samp or tt text | a backtick span, using a longer backtick run than any inside |
-| monospace block with preserved white space (a pre white-space and a monospace, consolas, menlo or courier font), three lines | a fence without language around the three lines |
-| the same block, one line | the line as plain text |
+| monospace block with preserved white space (a pre white-space and a monospace, consolas, menlo or courier font), copied from an editor, any number of lines | the lines as copied, raw, with their blank lines and any code fence they contain; never wrapped in a fence of its own |
 
 ### Scenario (nominal): Block quotes
 - GIVEN a blockquote with two paragraphs
@@ -143,6 +143,6 @@ The refusal of an unsafe address is in SwRS-MDOKFSTUDIO-PALETTE-229.
 - SwRS-MDOKFSTUDIO-PALETTE-229: the safety of pasted HTML (dropped elements, read attributes, unsafe addresses).
 
 ### Verification notes
-- Method: test/core/paste/htmlToMarkdown.test.ts, data-driven unit test T1 htmlToMarkdown, rows "Google Docs: wrapper bold at normal weight, styled spans, heading, nested lists in the parent list" (headings and emphasis, nested list), "web page: link, inline code, image as link, blockquote, script and onclick dropped" (links and images, inline code, block quote), "ordered list, task item and horizontal rule" (lists), "Word: comments and o:p dropped, list paragraphs through mso-list" (Word lists), "web page: code block with the language from its class" (fenced code), "VS Code copy: several lines become a code block" and "VS Code copy: one line stays plain text" (VS Code copy), "web page: simple table becomes a GFM table, a pipe in a cell is escaped" and "web page: a table with a colspan is not a table, only its text stays" (tables), "text that looks like Markdown is escaped" (escaping), "nothing readable" (empty result); no row checks the page fallback of an empty result, the empty heading, the empty link, the empty block quote, the rowspan or nested table, or the language classes other than language-.
+- Method: test/core/paste/htmlToMarkdown.test.ts, data-driven unit test T1 htmlToMarkdown, rows "Google Docs: wrapper bold at normal weight, styled spans, heading, nested lists in the parent list" (headings and emphasis, nested list), "web page: link, inline code, image as link, blockquote, script and onclick dropped" (links and images, inline code, block quote), "ordered list, task item and horizontal rule" (lists), "Word: comments and o:p dropped, list paragraphs through mso-list" (Word lists), "web page: code block with the language from its class" (fenced code), "VS Code copy: several lines stay raw text, never wrapped in a fence", "VS Code copy of a document with code fences and blank lines is returned as copied" and "VS Code copy: one line stays plain text" (VS Code copy), "web page: simple table becomes a GFM table, a pipe in a cell is escaped" and "web page: a table with a colspan is not a table, only its text stays" (tables), "text that looks like Markdown is escaped" (escaping), "nothing readable" (empty result); no row checks the page fallback of an empty result, the empty heading, the empty link, the empty block quote, the rowspan or nested table, or the language classes other than language-.
 - Method: test/core/paste/paletteReq.requirements.test.ts, unit test "elements that are not converted contribute their text only; converted ones keep their conversion" (other elements)
 - Criteria: A weight of 600 or more, or the words bold and bolder, counts as bold. An unchecked checkbox becomes [ ]. Each level of a Word list indents by three blanks; the marker o is a bullet; every numbered item is written with 1. The language classes recognised are language-, lang-, highlight-source- and highlight-text-. The monospace rule needs a pre white-space and a monospace, consolas, menlo or courier font. The first row of a table is the header even when it uses td cells. Underscores inside words are left alone. The blocks inside a quote are converted with the same rules. Block elements separate paragraphs; inline elements join their text.

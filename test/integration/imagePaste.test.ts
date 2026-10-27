@@ -27,6 +27,7 @@ async function waitFor(description: string, predicate: () => boolean, timeoutMs 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-090
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-196
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-217
 /** Pasting an image: written next to the document, numbered names, refusals. Files are removed. */
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
@@ -93,6 +94,22 @@ export async function run(): Promise<void> {
     assert.equal(notAnImage?.ok, false, "bytes that are not an image are refused");
     assert.deepEqual(images().sort(), ["image-1.png", "image.png"], "refusals write nothing");
     assert.equal(document.getText(), "# Chapter\n\nText.\n", "pasting edits nothing by itself");
+
+    // CR 127: a document copied from an editor (HTML of lines) comes back raw, never inside a fence.
+    const lines = ["---", "title: T", "---", "", "", "# Big", "", "```ts", "const a = 1;", "```", "", "Text."];
+    const html = '<meta charset="utf-8"><div style="font-family: Menlo, monospace;white-space: pre;">'
+      + lines.map((line) => `<div><span>${line}</span></div>`).join("") + "</div>";
+    await sendPreviewMessageForTests({
+      type: "previewPasteHtml",
+      documentId: preview.documentUri,
+      revision: document.version,
+      requestId: preview.requestId,
+      editId: "paste-edit",
+      html,
+    });
+    const converted = posted.filter((message) => message.type === "previewPasteHtmlResult").at(-1);
+    assert.equal(converted?.ok, true, String(converted?.reason));
+    assert.equal(converted?.markdown, lines.join("\n"), "the pasted document is raw text, with no fence around it");
   } finally {
     disposeActivePreviewForTests();
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
