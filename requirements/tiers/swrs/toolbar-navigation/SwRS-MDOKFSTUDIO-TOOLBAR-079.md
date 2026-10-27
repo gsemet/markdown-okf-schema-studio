@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/linkNavigation.test.ts
 - test/page/modules/toolbarReq.requirements.test.ts
+- test/session/eventFanOut.test.ts
 - test/session/toolbarReq.requirements.test.ts
 ---
 
@@ -33,7 +34,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When a link with a navigation request scrolls into view, the extension SHALL ask the host once for the target of its request, in previewLinkDiscover messages of at most 64 requests, and the host answers with previewLinkTargets that lists, for each request in order, its kind and its path or reason.
+When a link with a navigation request scrolls into view, the extension SHALL ask the host once for the target of its request, in previewLinkDiscover messages of at most 64 requests, and the host answers with previewLinkTargets that lists, for each request in order, its kind and its path or reason. When the host looks for a file by name to answer a request, it SHALL skip the folders node_modules, .git, _build, .venv and venv, SHALL NOT apply the VS Code files.exclude setting (an explicit exclude replaces it, so files hidden by files.exclude can be found), and SHALL stop at 50 matching files per root, so a name matching more files may be truncated before it is resolved or reported as ambiguous.
 
 ### Scenario (nominal): Link scrolls in
 
@@ -66,6 +67,14 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 | a page whose window has no IntersectionObserver | no discovery message is sent and clicks still reach the host (see SwRS-MDOKFSTUDIO-TOOLBAR-077) |
 | a page with the observer, a link that intersects | its request is sent |
 
+### Scenario (boundary): Search by name
+
+| Given | Outcome |
+| --- | --- |
+| a target named in a request that exists only below node_modules, .git, _build, .venv or venv | not found |
+| a target hidden by the files.exclude setting | found |
+| a name matching more than 50 files under one root | the search stops at 50 files; the answer may differ from the full set |
+
 ### Scenario (nominal): The host answers each request
 
 - GIVEN requests for an existing file, a missing file and a javascript: link
@@ -94,6 +103,7 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 
 ### Known issues
 
+- Known issue: a link name matching more than 50 files under one root is resolved from the first 50 found, not from all of them.
 - Known issue: while the preview stays focused and visible, a file created or deleted meanwhile is not noticed; the links are asked again only when the focus or the visibility comes back, or when the page is replaced.
 
 ### Related requirements
@@ -106,4 +116,5 @@ When a link with a navigation request scrolls into view, the extension SHALL ask
 - Method: test/page/modules/linkNavigation.test.ts (link discovery waits for the viewport and deduplicates bounded batches; anchor and external requests are not asked; same request twice; 130 links in batches of 64).
 - Method: test/page/modules/toolbarReq.requirements.test.ts (without an intersection observer no link is looked up and clicks still reach the host).
 - Method: test/session/toolbarReq.requirements.test.ts (the host answers a discovery with one target per request, in order; a discovery of another render gets no answer; a failed discovery shows a warning and sends no answer).
-- Criteria: each request string is sent at most once per page until the window regains focus or the preview becomes visible, which forgets what was asked; each message holds at most 64 requests; the skip pattern is the start of the request; one target per request in the order of the request; no previewLinkTargets after the render changed; showWarning is called once per failed batch.
+- Method: test/session/eventFanOut.test.ts (the search for a link target skips node_modules, .git, _build, .venv and venv and returns at most 50 files).
+- Criteria: each request string is sent at most once per page until the window regains focus or the preview becomes visible, which forgets what was asked; each message holds at most 64 requests; the search passes DISCOVERY_EXCLUDE and MAX_DISCOVERED_FILES (src/session/features/links.ts) to findFiles; the skip pattern is the start of the request; one target per request in the order of the request; no previewLinkTargets after the render changed; showWarning is called once per failed batch.

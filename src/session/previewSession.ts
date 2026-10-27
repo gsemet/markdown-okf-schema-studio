@@ -14,7 +14,6 @@ import type { CommentThread } from "../core/comments/commentModel";
 import type { HostDocument } from "../host-api/documentStore";
 import type { Disposable } from "../host-api/events";
 import type { PreviewPanel } from "../host-api/previewPanel";
-import type { FileWatcher } from "../host-api/watcher";
 import type { WorkspaceFolderInfo } from "../host-api/workspaceInfo";
 import type { PreviewStatus, PreviewWebviewResult } from "./webview";
 import type { HostToPageMessage } from "../core/protocol/hostToPage";
@@ -94,8 +93,8 @@ export class PreviewSession {
   /** The render queue of the document (set right after creation, see PreviewManager). */
   public queue!: BuildQueue<HostDocument, RenderResult>;
   /** The watch on every file below the resource root (includes, images, linked targets). */
-  public dependencyWatcher!: FileWatcher;
-  public dependencyWatcherSubscriptions: Disposable[] = [];
+  /** The session's hold on the shared dependency watcher of its resource root. */
+  public dependencyWatch!: Disposable;
   /** Subscriptions to the panel's events. */
   public readonly panelSubscriptions: Disposable[] = [];
   /** The document shown; undefined for a restored panel whose document could not be opened. */

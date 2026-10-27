@@ -4,10 +4,8 @@
  * target), and the edits of a frontmatter field from the table.
  */
 
-import * as path from "node:path";
-
 import { checkFrontmatterCandidate, FRONTMATTER_STALE, planFrontmatterSave } from "../../core/edits/frontmatterEdit";
-import { type LinkedTargetWatch, watchLinkedTargetDirectly } from "../../node-services/linkedTargetWatch";
+import type { LinkedTargetWatch } from "../../node-services/linkedTargetWatch";
 import { analyzeFrontmatter, type FrontmatterResult } from "../../core/frontmatter/okfFrontmatter";
 import { renderPropertiesTable, replacePropertiesTableHtml } from "../../core/frontmatter/propertiesTable";
 import type { HostDocument } from "../../host-api/documentStore";
@@ -19,7 +17,7 @@ import type { RenderResult } from "../../core/render/renderPipeline";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
-import { currentPreviewDocument, globLiteral, revisionOfStage } from "../sessionDocuments";
+import { currentPreviewDocument, revisionOfStage } from "../sessionDocuments";
 
 /** The watchers of one linked target: the host's one and the direct operating-system one. */
 export interface LinkedTargetWatcher {
@@ -27,6 +25,8 @@ export interface LinkedTargetWatcher {
   direct: LinkedTargetWatch;
   /** Events the host's watcher delivered (the direct watch counts its own). */
   vscodeEvents: number;
+  /** The canonical path of the target, resolved once. */
+  canonical: string;
 }
 
 /** Frontmatter state of one page (owned by the frontmatter controller). */
@@ -111,7 +111,6 @@ export class FrontmatterController {
       }
       for (const target of targets) {
         if (state.linkedTargetWatchers.has(target)) continue;
-        const watcher = this.manager.host.watcher.watch(path.dirname(target), globLiteral(path.basename(target)));
         const refresh = (): void => {
           preview.probe.linkedTargetEvents += 1;
           const document = preview.document;
@@ -119,27 +118,18 @@ export class FrontmatterController {
             this.scheduleLinkEnrichment(preview, preview.documentUri, document.revision);
           }
         };
-        // The host's watcher of a path inside a workspace folder rides on the shared recursive
-        // workspace watcher, which can miss a write on Linux: the folder is also watched directly.
-        // Both may report the same write; the link enrichment they schedule is debounced. The direct
-        // watch is armed when it returns, before the properties table shows the link as resolved.
-        const direct = watchLinkedTargetDirectly(target, refresh);
-        const entry: LinkedTargetWatcher = { dispose: () => undefined, direct, vscodeEvents: 0 };
-        const fromHost = (): void => {
+        // One host watcher and one direct watch per target, shared by the previews that link it
+        // (capped); both may report the same write, the link enrichment they schedule is debounced.
+        // The direct watch is armed when it returns, before the properties table shows the link as resolved.
+        const entry: LinkedTargetWatcher = {
+          dispose: () => undefined, direct: undefined as unknown as LinkedTargetWatch, vscodeEvents: 0,
+          canonical: this.manager.canonicalPath(target),
+        };
+        const hold = this.manager.linkedTargetWatches.acquire(target, refresh, () => {
           entry.vscodeEvents += 1;
-          refresh();
-        };
-        // Disposed in this order: the host's watcher, its three subscriptions, the direct watch.
-        const parts = [
-          watcher, watcher.onDidChange(fromHost), watcher.onDidCreate(fromHost), watcher.onDidDelete(fromHost),
-          { dispose: () => direct.dispose() },
-        ];
-        let disposed = false;
-        entry.dispose = () => {
-          if (disposed) return;
-          disposed = true;
-          parts.forEach((part) => part.dispose());
-        };
+        });
+        entry.direct = hold.direct;
+        entry.dispose = () => hold.dispose();
         state.linkedTargetWatchers.set(target, entry);
       }
     }
@@ -147,8 +137,8 @@ export class FrontmatterController {
 
   /** True when the preview watches `canonical` as a linked target (paths compared canonically). */
   public watchesLinkedTarget(preview: PreviewSession, canonical: string): boolean {
-    return [...preview.frontmatter.linkedTargetWatchers?.keys() ?? []]
-      .some((target) => this.manager.canonicalPath(target) === canonical);
+    return [...preview.frontmatter.linkedTargetWatchers?.values() ?? []]
+      .some((entry) => entry.canonical === canonical);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-063

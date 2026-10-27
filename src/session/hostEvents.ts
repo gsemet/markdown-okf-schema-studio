@@ -79,6 +79,9 @@ export class HostEvents {
   /** One `.md` watcher per workspace root: it keeps the filename-stem index of links current. */
   private readonly stemRootWatchers = new Map<string, StemRootWatcher>();
 
+  /** The canonical shown path of each session, with the path it was resolved from. */
+  private readonly activePaths = new WeakMap<PreviewSession, { raw: string; canonical: string }>();
+
   public constructor(private readonly manager: PreviewManager) {}
 
   // ---------------------------------------------------------------------------------------------
@@ -87,14 +90,17 @@ export class HostEvents {
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-044
   /** A file below the session's root changed: re-render when the page shows or depends on it. */
-  public refreshReferencedPath(session: PreviewSession, filePath: string): void {
+  public refreshReferencedPath(session: PreviewSession, filePath: string, canonical?: string): void {
     if (session.disposed || isIgnoredWatchPath(filePath, session.workspaceRoot)) {
       return;
     }
     // A file the finished renders may have read changed: a render of the same revision is stale.
     this.manager.sharedRenders.invalidate();
-    const candidate = canonicalPath(filePath);
-    if (candidate === canonicalPath(this.manager.activePathOf(session))) {
+    const candidate = canonical ?? canonicalPath(filePath);
+    if (!this.concerns(session, filePath, candidate)) {
+      return;
+    }
+    if (candidate === this.canonicalActivePath(session)) {
       session.probe.activePathChanges += 1;
       if (session.document
         && session.status !== "missing-source"
@@ -131,6 +137,30 @@ export class HostEvents {
       return;
     }
     this.manager.edits.deferWhileEditing(session, "render", () => this.manager.rendering.refreshOpenDocument(session, true));
+  }
+
+  /**
+   * Whether a change of `canonical` can matter to the session: it is the shown file, a linked
+   * target, a PlantUML include or a dependency of the last render. Answered from sets computed
+   * once (no file system call), so a change of a file nothing depends on costs the session nothing.
+   */
+  private concerns(session: PreviewSession, filePath: string, canonical: string): boolean {
+    return canonical === this.canonicalActivePath(session)
+      || this.manager.frontmatter.watchesLinkedTarget(session, canonical)
+      || session.plantUml.includeWatch.has(canonical)
+      || session.queue.dependsOn(filePath, canonical);
+  }
+
+  /** The canonical path of the shown file, resolved again only when the path itself changes. */
+  private canonicalActivePath(session: PreviewSession): string {
+    const raw = this.manager.activePathOf(session);
+    const cached = this.activePaths.get(session);
+    if (cached?.raw === raw) {
+      return cached.canonical;
+    }
+    const canonical = canonicalPath(raw);
+    this.activePaths.set(session, { raw, canonical });
+    return canonical;
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-062
@@ -178,8 +208,8 @@ export class HostEvents {
     const watcher = this.manager.host.watcher.watch(canonicalRoot, "**/*.md");
     const invalidate = (): void => invalidateStemIndex(canonicalRoot);
     const subscriptions = [
+      // Only a file that appears or disappears changes a filename stem: saving one does not.
       watcher.onDidCreate(invalidate),
-      watcher.onDidChange(invalidate),
       watcher.onDidDelete(invalidate),
     ];
     this.stemRootWatchers.set(canonicalRoot, { watcher, subscriptions });
@@ -241,6 +271,8 @@ export class HostEvents {
   }
 
   private refreshPreview(document: HostDocument, changes?: readonly BlockRangeChange[]): void {
+    // The path of a document no preview shows is resolved once for all the sessions, on demand.
+    let foreign: { path: string; canonical: string } | undefined;
     for (const session of this.manager.sessions()) {
       if (document.id === session.documentUri) {
         const edit = session.edits.active;
@@ -264,7 +296,8 @@ export class HostEvents {
           this.manager.rendering.setMissingSource(session);
         }
       } else {
-        this.refreshReferencedPath(session, this.manager.pathOf(document));
+        foreign ??= { path: this.manager.pathOf(document), canonical: canonicalPath(this.manager.pathOf(document)) };
+        this.refreshReferencedPath(session, foreign.path, foreign.canonical);
       }
     }
   }

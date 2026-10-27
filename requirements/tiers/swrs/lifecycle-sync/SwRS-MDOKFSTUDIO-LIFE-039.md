@@ -35,6 +35,7 @@ tested_in_files:
 - test/host/previewTiming.test.ts
 - test/integration/dirtySnapshots.test.ts
 - test/node-services/build/buildQueue.test.ts
+- test/session/eventFanOut.test.ts
 - test/session/previewManager.test.ts
 - test/session/sharedRenders.test.ts
 ---

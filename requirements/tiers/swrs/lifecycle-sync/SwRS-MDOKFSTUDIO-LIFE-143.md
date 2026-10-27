@@ -25,11 +25,13 @@ implemented_in_files:
 - src/session/features/diagnostics.ts
 - src/session/hostEvents.ts
 - src/session/previewManager.ts
+- src/session/sharedWatchers.ts
 tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/host/previewTiming.test.ts
 - test/integration/lifecycle.test.ts
 - test/integration/workspaceDisposal.test.ts
+- test/session/eventFanOut.test.ts
 ---
 
 ## Closing a preview or folder leaves nothing behind
@@ -54,7 +56,7 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 
 - GIVEN a preview that watches the files below its root
 - WHEN the panel is closed
-- THEN the watcher and its change, create and delete subscriptions are disposed
+- THEN the preview's hold on the watcher and its change, create and delete subscriptions are released, and the watcher itself is disposed with the last preview of that root (previews of one root share one watcher)
 
 ### Scenario (nominal): Problems entries cleared
 
@@ -78,7 +80,7 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 
 | Case | Outcome |
 | --- | --- |
-| A second preview of another root, and the first is closed | The second keeps its watcher |
+| A second preview of the same or another root, and the first is closed | The second keeps its watcher |
 | A second live preview of a.md, and the first is closed or the document is closed | The Problems entries of a.md stay |
 | A preview of a file that is in no workspace folder, and a folder is removed | The preview stays open |
 | A session that was already disposed, and it is disposed again without its panel | Nothing happens: the disposal is idempotent |
@@ -87,6 +89,6 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 
 - Method: test/host/previewTiming.test.ts "a preview disposed while its render is debouncing, building or awaiting a patch acknowledgement stays silent" (closed while rendering).
 - Method: test/integration/lifecycle.test.ts (closed idle: the active preview is undefined after disposal).
-- Method: test/host/lifeReq.requirements.test.ts "closing a preview removes its file watcher and subscriptions, not those of another preview" (watchers removed, second preview keeps its watcher), "closing a preview clears the Problems entries that no preview shows" (Problems entries cleared and kept), "deactivating the extension disposes the sessions and leaves the panels to VS Code" (deactivation, disposed twice).
+- Method: test/host/lifeReq.requirements.test.ts "previews of one root share one file watcher, which closing the last preview removes with its subscriptions" (watchers removed, second preview keeps the shared watcher), test/session/eventFanOut.test.ts (one dependency watcher for several previews of a root, released with the last; linked-target watches shared and released with the last preview), "closing a preview clears the Problems entries that no preview shows" (Problems entries cleared and kept), "deactivating the extension disposes the sessions and leaves the panels to VS Code" (deactivation, disposed twice).
 - Method: test/integration/workspaceDisposal.test.ts (folder removed; multi-root only, it asserts at least two folders). The standalone file row is untested.
-- Criteria: no post follows disposal and the live set no longer holds the session; dependencyWatcher.dispose() runs once for the session; sink.delete is called only when no live session has the document; getActivePreviewForTests is undefined and the source directory exists after a folder removal; disposeAll(false) leaves the panels undisposed.
+- Criteria: no post follows disposal and the live set no longer holds the session; the shared dependency watcher is disposed once, when the last preview of its root releases it; sink.delete is called only when no live session has the document; getActivePreviewForTests is undefined and the source directory exists after a folder removal; disposeAll(false) leaves the panels undisposed.

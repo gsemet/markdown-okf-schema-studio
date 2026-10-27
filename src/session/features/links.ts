@@ -23,6 +23,12 @@ import type { PreviewSession } from "../previewSession";
 import { globLiteral, revisionOfStage } from "../sessionDocuments";
 import { lineSelection } from "./history";
 
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-079
+/** Folders a link-target search skips: dependencies, VCS data and build output never hold a link target. */
+export const DISCOVERY_EXCLUDE = "{**/node_modules/**,**/.git/**,**/_build/**,**/.venv/**,**/venv/**}";
+/** A link name matching more files than this is ambiguous long before; the search stops there. */
+export const MAX_DISCOVERED_FILES = 50;
+
 /** Links state of one page (owned by the links controller). */
 export interface LinkState {
   /** File searches of the wiki links being resolved, by name: one search per name at a time. */
@@ -172,7 +178,9 @@ export class LinkController {
       if (existing) return existing;
       const literal = globLiteral(name);
       const discovery = Promise.all(navigationRoots.map((root) =>
-        host.workspace.findFiles({ base: root, pattern: `**/${literal}` }),
+        host.workspace.findFiles({
+          base: root, pattern: `**/${literal}`, exclude: DISCOVERY_EXCLUDE, maxResults: MAX_DISCOVERED_FILES,
+        }),
       )).then((pathGroups) => [...new Set(pathGroups.flat())]);
       preview.links.discoveries.set(name, discovery);
       try {
