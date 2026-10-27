@@ -64,7 +64,15 @@ function isRuntimeScript(node: TreeNode): node is TreeElement {
     && (hasAttribute(node, "data-sphinx-preview-scroll-sync") || hasAttribute(node, "data-sphinx-preview-runtime-context"));
 }
 
+let parsedPages = 0;
+
+/** How many pages `analyze` has parsed so far (a test reads it to check what a plan parses). */
+export function parsedPageCount(): number {
+  return parsedPages;
+}
+
 function analyze(html: string): PageAnalysis {
+  parsedPages += 1;
   const document = parse(html, { sourceCodeLocationInfo: true });
   let content: MainContent | undefined;
   let contentSeen = false;
@@ -95,10 +103,65 @@ function analyze(html: string): PageAnalysis {
     }
   };
   visit(document);
-  const key = serialize(document)
+  const key = normalizeNonces(serialize(document));
+  return { content, key };
+}
+
+function normalizeNonces(html: string): string {
+  return html
     .replace(/(\snonce=")[^"]*"/giu, `$1${NONCE_PLACEHOLDER}"`)
     .replace(/'nonce-[^'"\s;]*'/gu, `'nonce-${NONCE_PLACEHOLDER}'`);
-  return { content, key };
+}
+
+/** What the planner needs of a page it has already analyzed: the shell key, and whether it has content. */
+interface PageShell {
+  hasContent: boolean;
+  key: string;
+}
+
+/**
+ * The shells of the last pages analyzed, by the page text with its nonces normalized. The page
+ * the host loaded was the new page of the previous plan, with its nonce swapped for the loaded one
+ * (`reuseNonce`), so the next plan finds it here and parses only the new page (P-03).
+ */
+const MAX_REMEMBERED_SHELLS = 3;
+const rememberedShells = new Map<string, PageShell>();
+
+/** A 64-bit digest (two independent 32-bit mixes) plus the length: the memory keeps no page text. */
+function digest(normalizedHtml: string): string {
+  let h1 = 0xdeadbeef;
+  let h2 = 0x41c6ce57;
+  for (let i = 0; i < normalizedHtml.length; i += 1) {
+    const code = normalizedHtml.charCodeAt(i);
+    h1 = Math.imul(h1 ^ code, 2654435761);
+    h2 = Math.imul(h2 ^ code, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return `${normalizedHtml.length}:${(h1 >>> 0).toString(16)}${(h2 >>> 0).toString(16)}`;
+}
+
+function rememberShell(normalizedHtml: string, analysis: PageAnalysis): void {
+  const id = digest(normalizedHtml);
+  rememberedShells.delete(id);
+  rememberedShells.set(id, { hasContent: analysis.content !== undefined, key: analysis.key });
+  while (rememberedShells.size > MAX_REMEMBERED_SHELLS) {
+    const oldest = rememberedShells.keys().next();
+    if (oldest.done) break;
+    rememberedShells.delete(oldest.value);
+  }
+}
+
+/** The shell of `html`: from the memory when the page (up to its nonces) was analyzed before. */
+function shellOf(html: string): PageShell {
+  const normalized = normalizeNonces(html);
+  const remembered = rememberedShells.get(digest(normalized));
+  if (remembered) {
+    return remembered;
+  }
+  const analysis = analyze(html);
+  rememberShell(normalized, analysis);
+  return { hasContent: analysis.content !== undefined, key: analysis.key };
 }
 
 /** The inner HTML of the content container, or undefined when the page has none. */
@@ -114,8 +177,8 @@ export function extractMainContent(html: string): MainContent | undefined {
  * Undefined when the page has no content container (a status page).
  */
 export function shellKey(html: string): string | undefined {
-  const analysis = analyze(html);
-  return analysis.content ? analysis.key : undefined;
+  const shell = shellOf(html);
+  return shell.hasContent ? shell.key : undefined;
 }
 
 function contentIsPatchable(inner: string): boolean {
@@ -130,9 +193,10 @@ function contentIsPatchable(inner: string): boolean {
  * the shells are equal and the content carries no nonce and no script. Undefined otherwise.
  */
 export function planContentPatch(previousHtml: string, nextHtml: string): { contentHtml: string } | undefined {
-  const previous = analyze(previousHtml);
+  const previous = shellOf(previousHtml);
   const next = analyze(nextHtml);
-  if (!previous.content || !next.content || previous.key !== next.key) {
+  rememberShell(normalizeNonces(nextHtml), next);
+  if (!previous.hasContent || !next.content || previous.key !== next.key) {
     return undefined;
   }
   return contentIsPatchable(next.content.inner) ? { contentHtml: next.content.inner } : undefined;

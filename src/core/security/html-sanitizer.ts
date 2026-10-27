@@ -542,8 +542,39 @@ export function rewriteSphinxHtml(html: string, context: HtmlRewriteContext): Ht
   };
 }
 
+const HEAD_OPENING = /<head(?:\s[^>]*)?>/iu;
+const HEAD_CLOSING = /<\/head\s*>/giu;
+const CSP_META = /<meta\s[^>]*?\bhttp-equiv\s*=\s*["']?content-security-policy["']?[^>]*>/giu;
+
+function escapeAttributeValue(value: string): string {
+  return value.replace(/&/gu, "&amp;").replace(/"/gu, "&quot;").replace(/\u00a0/gu, "&nbsp;");
+}
+
+const SERIALIZED_PREFIX =
+  /^(?:<!DOCTYPE[^>]*>)?(?:<!--(?:(?!-->)[\s\S])*-->)*<html(?:\s+[^\s"'>/=]+(?:="[^"]*")?)*>$/iu;
+
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-012
+/**
+ * Puts the policy as the first element of `<head>` and drops any policy meta the head already has.
+ * A string splice on the head of a page the sanitizer wrote (one parse of the page is enough); a
+ * document without an explicit head goes through the tree instead.
+ */
 export function injectContentSecurityPolicy(html: string, contentSecurityPolicy: string): string {
+  const opening = HEAD_OPENING.exec(html);
+  // The splice is safe only when everything before the head is the serializer's own prefix; a head-like
+  // text inside an attribute value of the root element would otherwise swallow the policy.
+  if (!opening || !SERIALIZED_PREFIX.test(html.slice(0, opening.index))) {
+    return injectContentSecurityPolicyInTree(html, contentSecurityPolicy);
+  }
+  const headStart = opening.index + opening[0].length;
+  HEAD_CLOSING.lastIndex = headStart;
+  const headEnd = HEAD_CLOSING.exec(html)?.index ?? -1;
+  const headContent = headEnd === -1 ? html.slice(headStart) : html.slice(headStart, headEnd);
+  const meta = `<meta http-equiv="Content-Security-Policy" content="${escapeAttributeValue(contentSecurityPolicy)}">`;
+  return `${html.slice(0, headStart)}${meta}${headContent.replace(CSP_META, "")}${headEnd === -1 ? "" : html.slice(headEnd)}`;
+}
+
+function injectContentSecurityPolicyInTree(html: string, contentSecurityPolicy: string): string {
   const document = parse(html) as unknown as HtmlNode;
   const head = findFirst(document, "head");
   if (!head) {

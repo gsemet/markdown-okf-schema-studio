@@ -97,6 +97,12 @@ When a render finishes and the loaded page can take its content, the extension S
 - WHEN the page replaces the content
 - THEN equal blocks pair in document order and each kept node is used once, a block with a link has the same key as on the first load, and page-added or text nodes are never kept
 
+### Scenario (boundary): The loaded page is not parsed again
+
+- GIVEN a patch that moved the page to a new render, and the next render of the same document
+- WHEN the host plans the next patch against the recorded page (the new render of the last plan, with the nonce of the loaded page)
+- THEN only the new render is parsed; the shell of the loaded page comes from the plan that produced it
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-LIFE-071: the conditions that load a new page document instead of a patch
@@ -104,6 +110,7 @@ When a render finishes and the loaded page can take its content, the extension S
 ### Verification notes
 
 - Method: test/core/preview/contentPatch.test.ts (Typing, One of the exceptions): "T34: two renders of one document type have equal shell keys despite other text, nonces and identifiers".
+- Method: test/core/preview/contentPatch.test.ts (The loaded page is not parsed again): "P-03: a plan parses the new page only, because the loaded page was analyzed as the previous new page".
 - Method: test/page/runtimeContentPatch.test.ts (Typing, Patches in a chain, Ready report after a patch, What the page does when it applies a patch): "T34: a content patch replaces the content, moves the identifiers and posts previewReady", "T34: patches sent before the page acknowledged the previous one apply in order", "T34: when a patch of a chain is rejected, the later ones are ignored and nothing is acknowledged", "STAB-02: a patch that closes an open block editor reports blockEditOpen false", "T34: open disclosures of the old content are open again in the new content", "T34: a patch with an anchor or a pin positions the page like a loaded page", "T34: a patch keeps the scroll position when the host sends no anchor", "T34: the patch removes the pending overlay and the link tooltip".
 - Method: test/core/configuration/previewConfiguration.test.ts (The incrementalUpdates setting, default row): "incremental updates can be turned off and default to on"; the off path is never exercised end to end (untested).
 - Method: test/page/modules/contentMorph.test.ts (Unchanged blocks stay in place, Repeated blocks and links): "PERF-05: unchanged blocks are kept in place, changed and new ones come from the patch", "PERF-05: equal blocks pair in document order and each kept node is used once", "PERF-05: the first page and a patch give a block with a link the same key", "PERF-05: nodes without a recorded key (text, nodes the page added) are never kept", "PERF-05: a link title the host wrote itself stays part of the key".

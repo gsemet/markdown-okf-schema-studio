@@ -38,6 +38,8 @@ export interface TableAlignmentSpec {
   headerRows?: number;
   /** `{list-table}`: the cell paragraphs carry no source line, so a click edits the whole table. */
   listTable?: boolean;
+  /** A table of a raw HTML block: it exists only in the written HTML, not in the syntax tree. */
+  raw?: boolean;
 }
 
 function countRawTables(node: RawHtmlNode): number {
@@ -111,6 +113,27 @@ export function normalizeRawHtmlTable(node: MystNode, line?: number): void {
   node.type = "rawHtmlTableBlock";
 }
 
+function tableAlignmentSpec(node: MystNode): TableAlignmentSpec {
+  const headerCells = node.children?.[0]?.children ?? [];
+  return {
+    table: normalizeTableAlignment(node.align),
+    columns: headerCells.map((cell) => normalizeTableAlignment(cell.align)),
+    ...(node.position?.start?.line === undefined
+      ? {}
+      : { sourceLine: node.position.start.line }),
+    ...(node.position?.end?.line === undefined
+      ? {}
+      : { sourceEndLine: node.position.end.line }),
+    ...(node.data?.listTable === true
+      ? {
+        listTable: true,
+        widths: node.data.widths as number[] | undefined,
+        headerRows: node.data.headerRows as number | undefined,
+      }
+      : {}),
+  };
+}
+
 /** Records, in document order, the alignment spec of every table (undefined for a plain one). */
 export function collectTableAlignments(node: MystNode, output: Array<TableAlignmentSpec | undefined>): void {
   if (node.type === "rawHtmlTableBlock") {
@@ -118,29 +141,12 @@ export function collectTableAlignments(node: MystNode, output: Array<TableAlignm
     const tableAlignment = normalizeTableAlignment(node.data?.mystTableAlignment);
     output.push(...Array.from(
       { length: countRawTables(fragment) },
-      () => tableAlignment ? { table: tableAlignment, columns: [] } : undefined,
+      () => tableAlignment ? { table: tableAlignment, columns: [], raw: true } : undefined,
     ));
     return;
   }
   if (node.type === "table") {
-    const headerCells = node.children?.[0]?.children ?? [];
-    output.push({
-      table: normalizeTableAlignment(node.align),
-      columns: headerCells.map((cell) => normalizeTableAlignment(cell.align)),
-      ...(node.position?.start?.line === undefined
-        ? {}
-        : { sourceLine: node.position.start.line }),
-      ...(node.position?.end?.line === undefined
-        ? {}
-        : { sourceEndLine: node.position.end.line }),
-      ...(node.data?.listTable === true
-        ? {
-          listTable: true,
-          widths: node.data.widths as number[] | undefined,
-          headerRows: node.data.headerRows as number | undefined,
-        }
-        : {}),
-    });
+    output.push(tableAlignmentSpec(node));
   }
   for (const child of node.children ?? []) {
     collectTableAlignments(child, output);
@@ -235,6 +241,53 @@ function findRawRow(node: RawHtmlNode): RawHtmlNode | undefined {
     if (nested) return nested;
   }
   return undefined;
+}
+
+/**
+ * True when the specs need the written HTML: a list-table is laid out again after the writer, a
+ * raw HTML table exists only in the HTML, and the writer ignores the alignment of a table's
+ * cells. Pipe tables without aligned columns are handled in the syntax tree.
+ */
+export function needsHtmlTablePass(alignments: ReadonlyArray<TableAlignmentSpec | undefined>): boolean {
+  return alignments.some((alignment) =>
+    alignment?.listTable === true || alignment?.raw === true || alignment?.columns.some(Boolean) === true);
+}
+
+/**
+ * Sets the alignment and the source lines of the pipe tables on the syntax tree, so the writer
+ * emits them and the HTML needs no second parse. The writer's table handler replaces `data` of a
+ * table node, so the properties are merged in when it does (the setter below).
+ */
+export function applyTableAlignmentsToTree(node: MystNode): void {
+  if (node.type === "table") {
+    const spec = tableAlignmentSpec(node);
+    const properties: Record<string, unknown> = {
+      ...(spec.table ? { align: spec.table } : {}),
+      ...(spec.sourceLine !== undefined ? { "data-line": spec.sourceLine } : {}),
+      ...(spec.sourceEndLine !== undefined ? { "data-end-line": spec.sourceEndLine } : {}),
+    };
+    if (Object.keys(properties).length > 0) {
+      mergePropertiesAfterWriterReset(node, properties);
+    }
+  }
+  for (const child of node.children ?? []) {
+    applyTableAlignmentsToTree(child);
+  }
+}
+
+function mergePropertiesAfterWriterReset(node: MystNode, properties: Record<string, unknown>): void {
+  let data = node.data;
+  Object.defineProperty(node, "data", {
+    configurable: true,
+    enumerable: true,
+    get: () => data,
+    set: (value: Record<string, unknown> | undefined) => {
+      data = {
+        ...(value ?? {}),
+        hProperties: { ...(value?.hProperties as object ?? {}), ...properties },
+      };
+    },
+  });
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-GFM-008
