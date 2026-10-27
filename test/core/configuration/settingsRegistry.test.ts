@@ -66,12 +66,16 @@ test("the page gets the scroll, reveal, sticky band and comment chip settings in
     "markEditorSelection",
     "stickyHeadingDepth",
     "showComments",
+    "codeBlocks.darkBackground",
+    "codeBlocks.lineNumbers",
   ]);
   assert.deepEqual(PREVIEW_STARTUP_SETTING_KEYS, [
     "scrollPreviewWithEditor",
     "scrollEditorWithPreview",
     "markEditorSelection",
     "stickyHeadingDepth",
+    "codeBlocks.darkBackground",
+    "codeBlocks.lineNumbers",
   ]);
   assert.deepEqual(bootSettingKeys(PREVIEW_SETTINGS, "live"), ["showComments"]);
 });
@@ -87,6 +91,8 @@ test("the host writes the boot settings as configured, in table order", () => {
     markEditorSelection: false,
     stickyHeadingDepth: 6,
     showComments: true,
+    "codeBlocks.darkBackground": true,
+    "codeBlocks.lineNumbers": true,
   }));
 });
 
@@ -97,6 +103,8 @@ test("the page reads missing or odd boot entries with the page defaults", () => 
     markEditorSelection: false,
     stickyHeadingDepth: 3,
     showComments: true,
+    "codeBlocks.darkBackground": true,
+    "codeBlocks.lineNumbers": true,
   });
   assert.deepEqual(readPreviewBootSettings({
     scrollPreviewWithEditor: "no",
@@ -104,11 +112,15 @@ test("the page reads missing or odd boot entries with the page defaults", () => 
     markEditorSelection: "yes",
     stickyHeadingDepth: "4",
     showComments: false,
+    "codeBlocks.darkBackground": "no",
+    "codeBlocks.lineNumbers": false,
   }), {
     scrollPreviewWithEditor: true,
     scrollEditorWithPreview: false,
     markEditorSelection: false,
     stickyHeadingDepth: 3,
     showComments: false,
+    "codeBlocks.darkBackground": true,
+    "codeBlocks.lineNumbers": false,
   });
 });

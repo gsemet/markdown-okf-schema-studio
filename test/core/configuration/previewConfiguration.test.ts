@@ -16,6 +16,7 @@ test("reads independent studio preview settings without stock configuration keys
     ["stickyHeadingDepth", 2],
     ["showComments", false],
     ["showIncomingChanges", false],
+    ["codeBlocks.darkBackground", false],
   ]);
   const sections: string[] = [];
   const configuration = readPreviewConfiguration({
@@ -33,6 +34,8 @@ test("reads independent studio preview settings without stock configuration keys
     stickyHeadingDepth: 2,
     incrementalUpdates: true,
     showComments: false,
+    "codeBlocks.darkBackground": false,
+    "codeBlocks.lineNumbers": true,
     showIncomingChanges: false,
   });
   assert.deepEqual(new Set(sections), new Set([
@@ -43,6 +46,8 @@ test("reads independent studio preview settings without stock configuration keys
     "stickyHeadingDepth",
     "incrementalUpdates",
     "showComments",
+    "codeBlocks.darkBackground",
+    "codeBlocks.lineNumbers",
     "showIncomingChanges",
   ]));
   assert.match(PREVIEW_CONFIGURATION_SECTION, /^markdownOkfSchemaStudio\.preview$/u);
@@ -54,6 +59,8 @@ test("reads independent studio preview settings without stock configuration keys
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.incrementalUpdates, true);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.showComments, true);
   assert.equal(DEFAULT_PREVIEW_CONFIGURATION.showIncomingChanges, true);
+  assert.equal(DEFAULT_PREVIEW_CONFIGURATION["codeBlocks.darkBackground"], true);
+  assert.equal(DEFAULT_PREVIEW_CONFIGURATION["codeBlocks.lineNumbers"], true);
 });
 
 test("comment chips are shown by default and can be turned off", () => {

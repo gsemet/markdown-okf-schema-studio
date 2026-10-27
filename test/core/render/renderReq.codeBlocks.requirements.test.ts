@@ -7,9 +7,7 @@
 import * as assert from "node:assert/strict";
 import { mock, test } from "node:test";
 
-import hljs from "highlight.js/lib/core";
-
-import { highlightCodeBlocks } from "../../../src/core/render/highlight";
+import { getHighlighter, highlightCodeBlocks } from "../../../src/core/render/highlight";
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { findElement, findElements, hasClass, parseHtml, textContent } from "./dom";
 import { inlineDocument, isTag, workspaceRoot } from "./mystFeaturesSupport";
@@ -30,39 +28,39 @@ async function render(markdown: string): Promise<string> {
 test("the leading word of the fence label, lower-cased, selects the grammar; an empty word selects none", async () => {
   for (const label of ["Python", "PYTHON", "python,linenos", "python{linenos}", "Py"]) {
     const html = highlightCodeBlocks(block(`class="language-${label}"`, "x = &quot;a&quot;\n"));
-    assert.match(html, /<code class="hljs language-/u, `label ${label} selects Python`);
-    assert.match(html, /hljs-string/u, `label ${label} colours the string`);
+    assert.match(html, /<code class="shiki language-/u, `label ${label} selects Python`);
+    assert.match(html, /sd-ce9178/u, `label ${label} colours the string`);
   }
   const empty = block('class="language-,python"', "x = 1\n");
   assert.equal(highlightCodeBlocks(empty), empty, "an empty leading word selects no grammar");
 
   const rendered = await render("```Python {linenos}\nx = \"a\"\n```\n\n```, python\nx = 1\n```\n");
-  assert.match(rendered, /<code class="hljs language-Python"[^>]*>x = <span class="hljs-string">/u);
+  assert.match(rendered, /<code class="shiki language-Python"[^>]*>x = <span class="sd-ce9178/u);
   assert.match(rendered, /<code class="language-,"[^>]*>x = 1\n<\/code>/u, "the block stays plain");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-CODE-005
-test("numbered, emphasized and diff blocks are wrapped into lines, and an unknown language gets no hljs class", () => {
+test("numbered, emphasized and diff blocks are wrapped into lines, and an unknown language gets no shiki class", () => {
   const numbered = highlightCodeBlocks(
     block('class="language-wobblescript" data-myst-line-numbers="true"', "one\ntwo\n"),
   );
-  assert.doesNotMatch(numbered, /hljs/u);
-  assert.equal((numbered.match(/<span class="myst-code-line" data-line-number="\d">/gu) ?? []).length, 2);
+  assert.doesNotMatch(numbered, /shiki/u);
+  assert.equal((numbered.match(/<span class="myst-code-line" data-line-number="\d">[a-z]+\n<\/span>/gu) ?? []).length, 2);
 
   const emphasized = highlightCodeBlocks(
     block('class="language-wobblescript" data-myst-emphasize-lines="2"', "one\ntwo\n"),
   );
-  assert.doesNotMatch(emphasized, /hljs/u);
+  assert.doesNotMatch(emphasized, /shiki/u);
   assert.equal((emphasized.match(/myst-code-line-emphasized/gu) ?? []).length, 1);
 
   // A diff block is wrapped and classified; diff is a registered grammar, so the class stays.
   const diff = highlightCodeBlocks(block('class="language-diff"', "-old\n+new\n same\n"));
   assert.equal((diff.match(/myst-diff-line-deletion/gu) ?? []).length, 1);
   assert.equal((diff.match(/myst-diff-line-addition/gu) ?? []).length, 1);
-  assert.match(diff, /<code class="hljs language-diff">/u);
+  assert.match(diff, /<code class="shiki language-diff"/u);
 
   const plain = block('class="language-wobblescript"', "one\n");
-  assert.equal(highlightCodeBlocks(plain), plain, "a plain unknown block is not wrapped");
+  assert.equal(highlightCodeBlocks(plain), plain, "a plain unknown one-line block is not wrapped");
 });
 
 test("inline code is never highlighted; only pre and code pairs are processed", () => {
@@ -72,21 +70,23 @@ test("inline code is never highlighted; only pre and code pairs are processed", 
   const mixed = inline + block('class="language-python"', "y = 2\n");
   const html = highlightCodeBlocks(mixed);
   assert.ok(html.startsWith(inline), "the inline code stays as written");
-  assert.match(html.slice(inline.length), /<code class="hljs language-python">/u);
-  assert.doesNotMatch(html.slice(0, inline.length), /hljs/u, "the inline code has no token spans");
+  assert.match(html.slice(inline.length), /<code class="shiki language-python">/u);
+  assert.doesNotMatch(html.slice(0, inline.length), /shiki|sd-/u, "the inline code has no token spans");
 });
 
-test("a grammar that throws falls back to escaped lines for a wrapped block and to the original otherwise", () => {
-  const failing = mock.method(hljs, "highlight", () => {
+test("a block the highlighter cannot process falls back to escaped lines when wrapped and to the original otherwise", () => {
+  // A language that is registered but whose grammar throws is simulated by forcing the grammar call to fail.
+  const highlighter = getHighlighter();
+  const failing = mock.method(highlighter, "codeToTokensWithThemes", () => {
     throw new Error("grammar failure");
   });
   try {
     const numbered = highlightCodeBlocks(
       block('class="language-python" data-myst-line-numbers="true"', "a &lt; b\nc &amp;&amp; d\n"),
     );
-    assert.match(numbered, /<span class="myst-code-line" data-line-number="1">a &lt; b<\/span>/u);
-    assert.match(numbered, /<span class="myst-code-line" data-line-number="2">c &amp;&amp; d<\/span>/u);
-    assert.doesNotMatch(numbered, /hljs-/u);
+    assert.match(numbered, /<span class="myst-code-line" data-line-number="1">a &lt; b\n<\/span>/u);
+    assert.match(numbered, /<span class="myst-code-line" data-line-number="2">c &amp;&amp; d\n<\/span>/u);
+    assert.doesNotMatch(numbered, /sd-/u);
 
     const unwrapped = block('class="language-python"', "a &lt; b\n");
     assert.equal(highlightCodeBlocks(unwrapped), unwrapped);

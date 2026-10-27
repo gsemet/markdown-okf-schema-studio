@@ -29,6 +29,16 @@ chips in open
   (unsaved edits included) with a green bar on the left, like the editor gutter. Needs the built-in
   Git extension; files that are not in Git, and untrusted workspaces, show nothing. Off turns the
   marks, and their toolbar toggle, off.
+- `preview.codeBlocks.darkBackground` (default on): draw code blocks on the dark VS Code Dark+
+  background, with its syntax colors, in every preview theme, cream and white included. Off keeps the
+  light code background of the theme and uses the Light+ colors. Inline code is not affected. Syntax
+  highlighting is the same as the VS Code editor (TextMate grammars) for the common languages (Python,
+  TypeScript, JavaScript, JSON, YAML, shell, C, C++, Rust, Go, Java, SQL, TOML, diff, Markdown,
+  HTML, CSS, XML, INI, Dockerfile, PowerShell and a few more); another language shows as plain text.
+- `preview.codeBlocks.lineNumbers` (default on): number the lines of code blocks of two lines or
+  more. The numbers are never copied, neither by the copy button nor by a selection. A MyST
+  `{code-block}` with `:linenos:` or `:lineno-start:` is numbered whatever this setting says, and
+  `:emphasize-lines:` highlights the listed lines.
 - `preview.scrollPreviewWithEditor` (default on): editor scrolling moves the preview; the toolbar
   anchor button overrides it per panel.
 - `preview.scrollEditorWithPreview` (default on): preview scrolling and clicks reveal the source.

@@ -331,6 +331,9 @@ const SHAPES: Array<{ name: string; language?: string; attributes?: string; file
   { name: "diff with line numbers", language: "diff", attributes: ' data-myst-line-numbers="true"', code: "-a\n+b\n c\n" },
   { name: "filename label", filename: "src/example.ts", code: "plain in a labelled block\nsecond\n" },
   { name: "filename label, highlighted, numbered", language: "typescript", filename: "a.ts", attributes: ' data-myst-line-numbers="true"', code: "let x;\n\nlet y;\n" },
+  // @tests_req SwRS-MDOKFSTUDIO-CODE-039
+  { name: "automatically numbered block with an empty line", language: "python", code: "a = 1\n\nb = '<x>'\n" },
+  { name: "automatically numbered block of an unknown language", language: "wobblescript", code: "one\n\ntwo & three\n" },
   { name: "multi-line token", language: "typescript", attributes: ' data-myst-line-numbers="true"', code: "/* one\n   two */\nconst s = `a\nb`;\n" },
 ];
 

@@ -22,6 +22,20 @@
   removes the selection outline. A page unit test, a style test and a real-window test (cream and
   dark) cover it, CR 130.
 
+## 2026-10-27 (code blocks: Dark+ highlighting, dark background, line numbers)
+
+- SwRS-MDOKFSTUDIO-CODE-039 (new): blocks of two lines or more are numbered by the setting
+  `preview.codeBlocks.lineNumbers` (on by default); the numbers are generated content, never copied;
+  a MyST `:linenos:` or `:lineno-start:` block is numbered whatever the setting says.
+- SwRS-MDOKFSTUDIO-CODE-040 (new): code blocks are drawn on the Dark+ background with the Dark+ token
+  colours in every preview theme, by the setting `preview.codeBlocks.darkBackground` (on by default);
+  off keeps the theme background with the Light+ colours.
+- SwRS-MDOKFSTUDIO-CODE-001, CODE-005, CODE-007 and CORE-028: highlight.js is replaced by Shiki (VS Code
+  TextMate grammars, JavaScript regular expression engine, no WebAssembly, colour classes instead of
+  inline styles); every block of two lines or more is wrapped into lines; the YAML link-colour override
+  is removed because YAML has its own token colours; comments are no longer italic (as in Dark+).
+  Unit tests and the cream, white and dark visual scenarios (code-blocks v19 to v23) cover it. CR 131.
+
 ## 2026-10-26 (unclosed directives render as raw text)
 
 - SwRS-MDOKFSTUDIO-MYST-096 (new): a directive or fence the parser cannot build (an unclosed or

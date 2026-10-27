@@ -364,15 +364,17 @@ def check_content_contracts(page: Page, scenario: dict, failures: list[Failure])
               errors.push(`${language} source content is missing or parsed as markup`);
               continue;
             }
-            if (!code.querySelector('[class*="hljs-"]')) errors.push(`${language} has no syntax token scopes`);
+            if (!code.querySelector('[class*="sd-"]')) errors.push(`${language} has no syntax token scopes`);
           }
           for (const [language, scopes] of Object.entries({
             rust: ['keyword', 'string', 'number', 'comment'],
             python: ['keyword', 'string', 'number', 'comment'],
           })) {
             const code = document.querySelector(`code.language-${language}`);
+            // Dark+ token colours (see src/core/render/codeTheme.ts): the class names the colour.
+            const colours = { keyword: 'sd-569cd6', string: 'sd-ce9178', number: 'sd-b5cea8', comment: 'sd-6a9955' };
             for (const scope of scopes) {
-              if (!code?.querySelector(`.hljs-${scope}`)) errors.push(`${language} lacks ${scope} scope`);
+              if (!code?.querySelector(`.${colours[scope]}`)) errors.push(`${language} lacks ${scope} scope`);
             }
           }
           const diff = document.querySelector('code.language-diff');

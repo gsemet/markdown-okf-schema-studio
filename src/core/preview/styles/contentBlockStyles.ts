@@ -262,20 +262,6 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   min-height: 1.45em;
 }
 
-#sphinx-myst-preview-content code[data-myst-line-numbers="true"] .myst-code-line {
-  padding-inline-start: 4ch;
-}
-
-#sphinx-myst-preview-content code[data-myst-line-numbers="true"] .myst-code-line::before {
-  position: absolute;
-  inset-inline-start: 0;
-  width: 3ch;
-  color: var(--studio-descriptionForeground, #808080);
-  content: attr(data-line-number);
-  text-align: end;
-  user-select: none;
-}
-
 #sphinx-myst-preview-content .myst-code-line-emphasized {
   background: color-mix(in srgb, var(--studio-editor-findMatchHighlightBackground, #ea5c0055) 35%, transparent);
 }
@@ -393,52 +379,6 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   color: var(--studio-errorForeground, #f14c4c);
   font-style: italic;
 }
-
-html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content pre > code.language-yaml,
-html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content pre > code.language-yaml *,
-html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > code.language-yaml,
-html[data-sphinx-preview-theme-mode="cream"] #sphinx-myst-preview-content pre > code.language-yaml * {
-  color: var(--studio-textLink-foreground, #006ab1);
-}
-
-/*
- * Syntax highlighting tokens emitted by highlight.js.
- *
- * A webview cannot read the editor's TextMate token colours, so the palette is built from
- * the chart colours instead: those are defined by every theme and already track light and
- * dark variants.
- */
-#sphinx-myst-preview-content :where(.hljs-comment, .hljs-quote) {
-  color: var(--studio-descriptionForeground, #808080);
-  font-style: italic;
-}
-
-#sphinx-myst-preview-content :where(.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-type, .hljs-built_in, .hljs-name, .hljs-tag) {
-  color: var(--studio-charts-blue, #3794ff);
-}
-
-#sphinx-myst-preview-content :where(.hljs-string, .hljs-meta .hljs-string, .hljs-regexp, .hljs-char.escape_, .hljs-selector-attr, .hljs-selector-pseudo) {
-  color: var(--studio-charts-orange, #d18616);
-}
-
-#sphinx-myst-preview-content :where(.hljs-number, .hljs-symbol, .hljs-bullet, .hljs-link, .hljs-addition) {
-  color: var(--studio-charts-green, #89d185);
-}
-
-#sphinx-myst-preview-content :where(.hljs-title, .hljs-title.function_, .hljs-title.class_, .hljs-section, .hljs-doctag, .hljs-meta, .hljs-meta .hljs-keyword) {
-  color: var(--studio-charts-purple, #b180d7);
-}
-
-#sphinx-myst-preview-content :where(.hljs-attr, .hljs-attribute, .hljs-property, .hljs-variable, .hljs-template-variable, .hljs-params, .hljs-selector-id, .hljs-selector-class) {
-  color: var(--studio-charts-yellow, #cca700);
-}
-
-#sphinx-myst-preview-content :where(.hljs-deletion, .hljs-formula) {
-  color: var(--studio-charts-red, #f14c4c);
-}
-
-#sphinx-myst-preview-content .hljs-emphasis { font-style: italic; }
-#sphinx-myst-preview-content .hljs-strong { font-weight: 600; }
 
 @media (forced-colors: active) {
   #sphinx-myst-preview-content .myst-diff-line-addition {

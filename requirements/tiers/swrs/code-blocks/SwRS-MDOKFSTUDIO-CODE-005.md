@@ -5,9 +5,9 @@ uuid: e456ca49-8e8f-4f76-9600-dcd3a09c0a1a
 title: Numbered, emphasized and diff blocks are wrapped into lines
 description: When a numbered, emphasized or diff block is shown, the extension
   SHALL wrap it into lines also when its language is unknown, where the block
-  keeps no highlight class, number the lines of a MyST code directive from its
-  start value, emphasize the listed lines relative to it and show each special
-  character once.
+  keeps no highlight class, wrap every block of two lines or more the same way,
+  number the lines of a MyST code directive from its start value, emphasize the
+  listed lines relative to it and show each special character once.
 project: markdown-okf-schema-studio
 scope: code-blocks
 lifecycle: draft
@@ -20,6 +20,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/preview/styles/codeBlockStyles.ts
 - src/core/render/highlight.ts
 - src/core/render/mystNormalize.ts
 tested_in_files:
@@ -32,13 +33,19 @@ tested_in_files:
 
 ### Normative behavior
 
-When a numbered, emphasized or diff block is shown, the extension SHALL wrap it into lines also when its language is unknown, where the block keeps no highlight class, number the lines of a MyST code directive from its start value, emphasize the listed lines relative to it and show each special character once.
+When a numbered, emphasized or diff block is shown, the extension SHALL wrap it into lines also when its language is unknown, where the block keeps no highlight class, wrap every block of two lines or more the same way, number the lines of a MyST code directive from its start value, emphasize the listed lines relative to it and show each special character once.
 
 ### Scenario (nominal): An unknown language is still wrapped into lines
 
 - GIVEN a numbered block in an unknown language
 - WHEN the preview renders it
-- THEN each line is wrapped in its own line element and the block has no `hljs` class
+- THEN each line is wrapped in its own line element, which ends with its own newline so the text of the block is the source text, and the block has no `shiki` class
+
+### Scenario (boundary): A block of two lines or more is wrapped without any option
+
+- GIVEN a plain fenced block of two lines
+- WHEN the preview renders it
+- THEN each line is wrapped in its own line element, so the setting preview.codeBlocks.lineNumbers can number it (SwRS-MDOKFSTUDIO-CODE-039)
 
 ### Scenario (boundary): A diff block keeps the highlight class
 

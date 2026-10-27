@@ -73,14 +73,16 @@ export function installCodeCopy(
     return created;
   };
   // @implements_req SwRS-MDOKFSTUDIO-CODE-019
-  // Raw code. Wrapped blocks (diff, line numbers, emphasized lines) hold one span per line and no
-  // newline characters, so their lines are joined again; the trailing newline matches plain blocks.
+  // Raw code. Wrapped blocks (diff, line numbers, emphasized lines) hold one span per line, each
+  // ending with its own newline (older markup has none): the lines are joined again with exactly one
+  // newline each, and the trailing newline matches plain blocks. A line number is generated content
+  // (a CSS pseudo-element), so it is never part of the text.
   const textOf = (pre: Element): string => {
     const code = pre.querySelector("code");
     if (!code) return pre.textContent ?? "";
     const lines = Array.from(code.children).filter((child) => child.classList.contains("myst-code-line"));
     if (lines.length === 0) return code.textContent ?? "";
-    return lines.map((line) => line.textContent ?? "").join("\n") + "\n";
+    return lines.map((line) => (line.textContent ?? "").replace(/\n$/u, "")).join("\n") + "\n";
   };
   const blockOf = (node: unknown): Element | undefined => {
     if (!(node instanceof Element)) return undefined;

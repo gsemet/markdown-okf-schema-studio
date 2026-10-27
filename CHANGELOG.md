@@ -17,6 +17,12 @@
   on its margin, a window or tab that comes back), Up and Down only scrolled the page under an orange
   ring around the whole preview. They now move the block selection again, the selection is restored
   when the window or tab comes back, and the page never shows a focus ring.
+- Code blocks are easier to read: the syntax highlighting now uses the VS Code TextMate grammars
+  and Dark+ colors (through Shiki, without WebAssembly), code blocks sit on the dark Dark+
+  background in every preview theme, and blocks of two lines or more show line numbers that are
+  never copied. Two new settings, `markdownOkfSchemaStudio.preview.codeBlocks.darkBackground` and
+  `markdownOkfSchemaStudio.preview.codeBlocks.lineNumbers` (both on by default), turn these off. A
+  MyST `{code-block}` with `:linenos:` or `:lineno-start:` stays numbered whatever the setting says.
 - Dropdown admonitions show their state: a chevron at the right of the title points right while the
   dropdown is closed and down while it is open, in every admonition kind and theme.
 - Review comment threads are readable in every theme: the popover text no longer takes a pale host

@@ -137,6 +137,8 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
       "markdownOkfSchemaStudio.frontmatter.strictAdditionalProperties",
       "markdownOkfSchemaStudio.plantuml.jarPath",
       "markdownOkfSchemaStudio.plantuml.useJar",
+      "markdownOkfSchemaStudio.preview.codeBlocks.darkBackground",
+      "markdownOkfSchemaStudio.preview.codeBlocks.lineNumbers",
       "markdownOkfSchemaStudio.preview.incrementalUpdates",
       "markdownOkfSchemaStudio.preview.markEditorSelection",
       "markdownOkfSchemaStudio.preview.maxContentWidth",
@@ -172,6 +174,18 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(showIncomingChanges.default, true);
   assert.equal(showIncomingChanges.order, 22);
   assert.match(showIncomingChanges.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u);
+  // @tests_req SwRS-MDOKFSTUDIO-CODE-039
+  // @tests_req SwRS-MDOKFSTUDIO-CODE-040
+  for (const [name, order] of [["darkBackground", 23], ["lineNumbers", 24]] as const) {
+    const codeSetting = properties[
+      `markdownOkfSchemaStudio.preview.codeBlocks.${name}`
+    ] as { type: string; default: boolean; scope?: string; order: number; markdownDescription: string };
+    assert.equal(codeSetting.type, "boolean", name);
+    assert.equal(codeSetting.default, true, `${name} is on by default`);
+    assert.equal(codeSetting.scope, "resource", name);
+    assert.equal(codeSetting.order, order, name);
+    assert.match(codeSetting.markdownDescription, /\*\*On\*\*.*\*\*Off\*\*/u, name);
+  }
   const paletteMode = properties[
     "markdownOkfSchemaStudio.editing.defaultPaletteMode"
   ] as {

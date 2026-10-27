@@ -742,12 +742,14 @@ def check_forced_cream_theme(page: Page, scenario: dict, failures: list[Failure]
     if icons != ["cream"]:
         failures.append(Failure(page_name, f"forced cream visible theme icons are {icons}, expected ['cream']"))
     colors = page.evaluate(FORCED_CREAM_CHECKS)
+    dark_blocks = page.evaluate("document.documentElement.getAttribute('data-okf-code-dark-background') !== 'false'")
     for key, expected in (
       ("pageBackground", "rgb(245, 241, 232)"),
       ("pageForeground", "rgb(43, 42, 39)"),
       ("noteForeground", "rgb(43, 42, 39)"),
       ("codeForeground", "rgb(161, 78, 50)"),
-      ("blockBackground", "rgb(237, 230, 218)"),
+      # The Dark+ surface of a code block (preview.codeBlocks.darkBackground, on by default), else the cream code background.
+      ("blockBackground", "rgb(30, 30, 30)" if dark_blocks else "rgb(237, 230, 218)"),
       ("linkForeground", "rgb(161, 78, 50)"),
     ):
         if colors[key] is not None and colors[key] != expected:
