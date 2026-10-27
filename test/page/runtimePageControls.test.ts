@@ -212,6 +212,26 @@ test("T38: a read-only preview never starts in edit mode", () => {
   assert.equal(harness.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+test("a greyed Edit button does nothing and says why (untrusted or no workspace folder)", () => {
+  const untrusted = createRuntimeHarness({ initialEditMode: true, editingEnabled: false });
+  untrusted.editModeButton.dispatch("click");
+  assert.equal(untrusted.documentElement.getAttribute("data-sphinx-preview-edit-mode"), "off");
+  assert.equal(untrusted.editModeButton.getAttribute("aria-pressed"), null);
+  assert.equal(
+    untrusted.editModeButton.getAttribute("data-tooltip"),
+    "Editing is unavailable: this file is not in a trusted workspace",
+  );
+  const noFolder = createRuntimeHarness({
+    editingEnabled: false,
+    readOnlyReason: "Editing needs the file's folder opened as a workspace folder in VS Code.",
+  });
+  assert.equal(
+    noFolder.editModeButton.getAttribute("title"),
+    "Editing is unavailable: this file is not in a folder opened in the VS Code workspace",
+  );
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-001
 test("T38: toggling edit mode posts previewEditModeChanged", () => {
   const harness = createRuntimeHarness();

@@ -6,7 +6,8 @@ title: A read-only preview offers no editing affordance
 description: When a preview is read-only (created for a document that lies in no
   workspace folder, or while the workspace is untrusted), the extension SHALL
   show it with every affordance that edits, comments or changes the document
-  absent, and otherwise writable.
+  absent (the Edit button stays visible, greyed, with the reason), and otherwise
+  writable.
 project: markdown-okf-schema-studio
 scope: trust-security
 lifecycle: draft
@@ -29,6 +30,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/edits/readOnlyReasons.ts
 - src/core/frontmatter/propertiesTable.ts
 - src/core/preview/previewToolbar.ts
 - src/page/features/blockSourceEditor.ts
@@ -58,7 +60,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When a preview is read-only (created for a document that lies in no workspace folder, or while the workspace is untrusted), the extension SHALL show it with every affordance that edits, comments or changes the document absent, and otherwise writable.
+When a preview is read-only (created for a document that lies in no workspace folder, or while the workspace is untrusted), the extension SHALL show it with every affordance that edits, comments or changes the document absent, and otherwise writable. The one toolbar button that needs editing, the Edit button, is never hidden: it stays visible, greyed out (aria-disabled), and its tooltip gives the reason.
 
 ### Scenario (nominal): Writable or read-only at creation
 
@@ -80,8 +82,8 @@ When a preview is read-only (created for a document that lies in no workspace fo
 
 | Affordance | In a read-only preview |
 | --- | --- |
-| Edit button | Not rendered: the toolbar keeps the same three rows with 12 buttons (row 1 holds Refresh, Anchor and the collapse button; rows 2 and 3 are unchanged), and no element carries data-sphinx-preview-edit-toggle |
-| Edit mode at start | Off (state.editMode is false whenever the toggle button is absent), even when the context has initialEditMode true |
+| Edit button | Rendered greyed: the toolbar keeps the same three rows with 13 buttons, and the Edit button carries aria-disabled true, a dimmed icon and a not-allowed cursor. Its title and tooltip say "Editing is unavailable: this file is not in a trusted workspace" (untrusted workspace) or "Editing is unavailable: this file is not in a folder opened in the VS Code workspace" (file outside every workspace folder). A click does nothing: it is not an edit toggle |
+| Edit mode at start | Off (state.editMode is false whenever the toggle button is greyed), even when the context has initialEditMode true |
 | Edition palette | None built: no element with data-sphinx-edit-palette exists |
 | Palette mode message | previewPaletteModeChanged is never posted |
 | Comment button | Not installed: selecting text shows no Comment button, and Cmd+Alt+M or Ctrl+Alt+M does nothing (the runtime context carries commentsEnabled false and the compose module is not created); same for a preview of a standalone file |
@@ -147,13 +149,13 @@ The refusal of write requests is that of SwRS-MDOKFSTUDIO-TRUST-005.
 
 ### Verification notes
 
-- Method: Integration suites test/integration/untrusted-suite.ts (the command preview and the Open With editor of an untrusted workspace report readOnly true; the real-window scenario trust-security/r01-untrusted-read-only shows the side preview rendered with no Edit button) and test/integration/standalone-suite.ts (a file outside the workspace reports readOnly true, a document of the workspace false), which check the first scenario. The decision is taken in createSession of src/session/previewManager.ts.
+- Method: Integration suites test/integration/untrusted-suite.ts (the command preview and the Open With editor of an untrusted workspace report readOnly true; the real-window scenario trust-security/r01-untrusted-read-only shows the side preview rendered with a greyed Edit button) and test/integration/standalone-suite.ts (a file outside the workspace reports readOnly true, a document of the workspace false), which check the first scenario. The decision is taken in createSession of src/session/previewManager.ts.
 - Method: Unit test `T38: a read-only preview never starts in edit mode` in test/page/runtimePageControls.test.ts (Edit mode at start, both the read-only and the writable case).
-- Method: Unit test of the toolbar markup in test/core/preview/previewStyles.test.ts (12 buttons without the Edit button, 13 with it) and the visual toolbar check test/visual/capture_layout_checks.py, which fails when a read-only toolbar still has an Edit button.
+- Method: Unit test of the toolbar markup in test/core/preview/previewStyles.test.ts (13 buttons in both cases; the read-only Edit button is aria-disabled with the reason as title and tooltip), the unit test `a greyed Edit button does nothing and says why` in test/page/runtimePageControls.test.ts (click ignored, tooltip per reason), the integration suites untrusted-suite.ts and standalone-suite.ts (the page HTML carries the greyed button) and the visual toolbar check test/visual/capture_layout_checks.py, which fails when a read-only toolbar has no greyed Edit button.
 - Method: Unit test `T23: a read-only preview has no palette and never posts the message` in test/page/runtimeEditPalette.test.ts (palette and palette mode message rows); the host side refusal of the previewPaletteModeChanged scenario is deduced from the code (the handler checks preview.readOnly), not tested.
 - Method: The integration test test/integration/commentWrite.test.ts (a read-only preview page carries commentsEnabled false); the unit tests of the compose module install it only when comments are enabled. The absence of the button in a real page is deduced from the code (commentCompose is created only when commentsEnabled), not run.
 - Method: Unit tests `T43: no reply box without a reply hook (read-only previews)` and `T44: without resolve and delete hooks (read-only) the popover has neither button` in test/page/modules/commentThreads.test.ts (thread popover rows).
 - Method: Visual scenarios trust-security/v01-read-only-page-dark-900 and trust-security/v02-read-only-page-light-460 in test/visual/scenarioDefinitions2.ts (READ_ONLY_ASSERTIONS: no edit cell, every row not editable), and trust-security/v03-read-only-no-hover-outline-light-900 (READ_ONLY_NO_HOVER_ASSERTIONS: no edit-target mark, no outline, cursor not a pointer; no block editor after the paragraph click). These scenarios build the page in test/visual/renderFixtures.ts with the read-only flag; the host page build (first load) is covered by the unit test "the first load of a read-only page has no edit cells in the properties table" in test/session/readOnlyFirstLoad.test.ts. The table cell click and the frontmatter click rows are untested; they are deduced from the code: the click handlers of src/page/features/pageInput.ts open editors only when edit mode is on, which a page without an Edit button never is.
 - Method: Unit test "granting trust turns an open Restricted Mode preview into a writable one" in test/host/lifeReq.requirements.test.ts (trust granted scenario: same panel, readOnly false, workspace roots, one render).
 - Method: Unit test "the manifest declares limited support for untrusted workspaces" in test/security/trustReq.requirements.test.ts, which asserts the declaration, its description and the restricted settings in package.json, the inputs VS Code reads to decide (extensionManifestPropertiesService, VS Code 1.143.1 bundle: an extension with a main entry point and no declaration is disabled in Restricted Mode). The Restricted Mode integration suite test/integration/untrusted-suite.ts loads the extension from the development path, which is not disabled either way, so it asserts the declaration through the installed extension manifest instead; a packaged VSIX is not run in a Restricted Mode window.
-- Criteria: The readOnly flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; a read-only page has no Edit button, no palette, no Comment button, no reply, Resolve or Delete control, no edit cell, no edit-target mark and no editor element after the clicks; after onTrustGranted an open preview of a workspace file is a new trusted session on the same panel (readOnly false, the workspace folders as roots) and the active preview stays the active one; package.json declares capabilities.untrustedWorkspaces.supported as limited.
+- Criteria: The readOnly flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; a read-only page has a greyed Edit button with its reason, no palette, no Comment button, no reply, Resolve or Delete control, no edit cell, no edit-target mark and no editor element after the clicks; after onTrustGranted an open preview of a workspace file is a new trusted session on the same panel (readOnly false, the workspace folders as roots) and the active preview stays the active one; package.json declares capabilities.untrustedWorkspaces.supported as limited.

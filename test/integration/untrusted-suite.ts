@@ -110,7 +110,7 @@ export async function run(): Promise<void> {
     const commandPreview = getActivePreviewForTests();
     assert.ok(commandPreview);
     assert.equal(commandPreview.readOnly, true);
-    assert.doesNotMatch(commandPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+    assert.match(commandPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"[^>]*title="Editing is unavailable: this file is not in a trusted workspace"/u);
     // A read-only preview does not store a palette mode (the page cannot post it; the host refuses).
     await sendPreviewMessageForTests({
       type: "previewPaletteModeChanged",
@@ -158,7 +158,7 @@ export async function run(): Promise<void> {
     assert.ok(editorPreview);
     assert.equal(editorPreview.readOnly, true);
     assert.match(editorPreview.html, /"initialPaletteMode":"gfm"/u, "the refused message stored nothing: the default GFM mode");
-    assert.doesNotMatch(editorPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+    assert.match(editorPreview.html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"/u);
     disposeActivePreviewForTests();
     await runMystDiagnostics();
   } finally {

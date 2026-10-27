@@ -12,6 +12,7 @@
 import { isThreadSource, threadDeleteRange, threadReplyEdit } from "../comments/inlineThread";
 import { opensIncludeDirective, planBlockMove, type BlockLines } from "../mapping/blockMove";
 import { planCut, planPaste, spanText } from "../mapping/blockRange";
+import { READ_ONLY_NO_FOLDER, READ_ONLY_UNTRUSTED } from "./readOnlyReasons";
 import { STALE_REQUEST } from "../protocol/staleRequest";
 import { countRefUses, renameLabelLine } from "../mapping/labelRename";
 import { minimalReplacement } from "../mapping/textDiff";
@@ -23,10 +24,12 @@ export const CHECKBOX_GONE = "The checkbox is no longer in the source. Refresh t
 /** Refusal of a label rename whose `(name)=` line is gone. */
 export const LABEL_GONE = "The label is no longer on that line. Refresh the preview.";
 
-/** Why a preview is read-only when the workspace is not trusted. */
-export const READ_ONLY_UNTRUSTED = "Editing requires a trusted workspace.";
-/** Why a preview is read-only when the file is outside every workspace folder. */
-export const READ_ONLY_NO_FOLDER = "Editing needs the file's folder opened as a workspace folder in VS Code.";
+export {
+  EDIT_UNAVAILABLE_NO_FOLDER,
+  EDIT_UNAVAILABLE_UNTRUSTED,
+  READ_ONLY_NO_FOLDER,
+  READ_ONLY_UNTRUSTED,
+} from "./readOnlyReasons";
 /** Refusal of a checkbox toggle whose message is malformed. */
 export const MALFORMED_TOGGLE = "The checkbox request was not understood. Refresh the preview.";
 

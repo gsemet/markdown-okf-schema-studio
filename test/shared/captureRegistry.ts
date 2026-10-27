@@ -181,7 +181,7 @@ export const CAPTURES: readonly CaptureEntry[] = [
   { id: "lifecycle-sync/r16-before-window-reload", group: "lifecycle-sync", suite: "reload", legacy: "01-before-window-reload", locks: "Collapsed Description and zoom 130 % are set before the window reload.", clip: "window" },
   { id: "lifecycle-sync/r17-after-window-reload", group: "lifecycle-sync", suite: "reload", legacy: "02-after-window-reload", locks: "Collapsed Description and zoom 130 % survive Developer: Reload Window.", clip: "window" },
   { id: "lifecycle-sync/r18-after-close-reopen", group: "lifecycle-sync", suite: "reload", legacy: "03-after-close-reopen", locks: "A closed and reopened preview keeps the collapsed Description state.", clip: "window" },
-  { id: "trust-security/r01-untrusted-read-only", group: "trust-security", suite: "untrusted", legacy: "untrusted-read-only", locks: "In Restricted Mode the side preview is read-only: no Edit button and no edit affordance.", clip: "window" },
+  { id: "trust-security/r01-untrusted-read-only", group: "trust-security", suite: "untrusted", legacy: "untrusted-read-only", locks: "In Restricted Mode the side preview is read-only: the Edit button is greyed with its reason and no edit affordance works.", clip: "window" },
 ];
 
 const ID_PATTERN = /^([a-z0-9-]+)\/r(\d{2,})-([a-z0-9]+(?:-[a-z0-9]+)*)$/u;

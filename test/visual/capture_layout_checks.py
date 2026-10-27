@@ -213,9 +213,12 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
     )
     for selector, label in controls:
         if selector == '[data-sphinx-preview-edit-toggle]' and render_options.get("readOnly"):
-            # A read-only preview has no Edit button at all.
-            if toolbar.locator(selector).count() != 0:
-                failures.append(Failure(page_name, "the read-only toolbar still has an Edit button"))
+            # A read-only preview keeps the Edit button, greyed, with the reason as tooltip.
+            greyed = toolbar.locator(selector)
+            if greyed.count() != 1 or greyed.get_attribute("aria-disabled") != "true":
+                failures.append(Failure(page_name, "the read-only toolbar has no greyed Edit button"))
+            elif "Editing is unavailable" not in (greyed.get_attribute("data-tooltip") or ""):
+                failures.append(Failure(page_name, "the greyed Edit button does not say why"))
             continue
         button = toolbar.locator(selector)
         if button.count() != 1 or button.get_attribute("aria-label") != label:

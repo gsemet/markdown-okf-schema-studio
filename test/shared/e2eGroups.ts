@@ -58,7 +58,7 @@ export interface IntegrationTestRow {
 
 export const INTEGRATION_TESTS: readonly IntegrationTestRow[] = [
   { file: "test/integration/trusted-suite.ts", group: "trust-security", locks: "Trusted command preview: CSP with nonce, no unsafe-inline, KaTeX stylesheet, dirty buffer rendered, `_build` untouched" },
-  { file: "test/integration/untrusted-suite.ts", group: "trust-security", locks: "Restricted Mode: read-only side preview and Open With, no Edit button, palette-mode/image-pick/paste/move/clipboard/comment messages refused" },
+  { file: "test/integration/untrusted-suite.ts", group: "trust-security", locks: "Restricted Mode: read-only side preview and Open With, greyed Edit button with its reason, palette-mode/image-pick/paste/move/clipboard/comment messages refused" },
   { file: "test/integration/standalone-suite.ts", group: "trust-security", locks: "File outside the workspace: read-only, its folder is the resource root, schema not found, frontmatter save refused" },
   { file: "test/integration/projectFeatures.test.ts", group: "rendering-core", locks: "Webview HTML keeps links, local images/SVG, headings, admonitions, inline/display math (offline KaTeX), code directives" },
   { file: "test/integration/stockCoexistence.test.ts", group: "lifecycle-sync", locks: "Coexists with the built-in Markdown preview; status-page layout scoped by a body marker" },

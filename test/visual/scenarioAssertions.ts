@@ -483,7 +483,8 @@ export const zoomAssertions = (zoom: number): ContentAssertion[] => [
 
 export const READ_ONLY_ASSERTIONS: ContentAssertion[] = [
   { message: "the toolbar is shown", selector: "[data-sphinx-preview-toolbar]", count: 1, visible: true },
-  { message: "the read-only toolbar has no Edit (pencil) button", selector: "[data-sphinx-preview-edit-toggle]", count: 0 },
+  { message: "the read-only toolbar keeps the Edit (pencil) button, greyed", selector: "[data-sphinx-preview-edit-toggle]", count: 1, visible: true, attr: { name: "aria-disabled", value: "true" } },
+  { message: "the greyed Edit button says why", selector: "[data-sphinx-preview-edit-toggle]", attr: { name: "title", value: "Editing is unavailable: this file is not in a trusted workspace" } },
   { message: "the Refresh button is still there", selector: "[data-sphinx-preview-refresh]", count: 1 },
   { message: "edit mode is never switched on", selector: "html", expr: "document.documentElement.getAttribute('data-sphinx-preview-edit-mode') !== 'on'" },
   { message: "no frontmatter cell is editable", selector: "[data-okf-edit-cell]", count: 0 },
@@ -495,7 +496,7 @@ export const READ_ONLY_NO_HOVER_ASSERTIONS: ContentAssertion[] = [
   { message: "the paragraph under the pointer has no outline", selector: `${MAIN} p`, min: 1, expr: "(() => { const hovered = [...document.querySelectorAll('#sphinx-myst-preview-content p')].find(p => p.matches(':hover')); if (!hovered) return 'no paragraph under the pointer'; const style = getComputedStyle(hovered); return style.outlineStyle === 'none' || style.outlineWidth === '0px'; })()" },
   { message: "clicking the paragraph opened no editor", selector: "[data-sphinx-preview-block-editor], .sphinx-preview-block-editor", count: 0 },
   { message: "the pointer is a normal text cursor, not an edit affordance", selector: `${MAIN} p`, min: 1, expr: "(() => { const hovered = [...document.querySelectorAll('#sphinx-myst-preview-content p')].find(p => p.matches(':hover')); return hovered !== undefined && getComputedStyle(hovered).cursor !== 'pointer'; })()" },
-  { message: "there is no Edit button", selector: "[data-sphinx-preview-edit-toggle]", count: 0 },
+  { message: "the Edit button is greyed and not pressed", selector: "[data-sphinx-preview-edit-toggle]", count: 1, attr: { name: "aria-disabled", value: "true" } },
 ];
 
 export const MARK_EDITOR_SELECTION_ASSERTIONS: ContentAssertion[] = [

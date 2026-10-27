@@ -6,6 +6,9 @@
   fence (such as ```` ```{list-table} ````) with no closing fence and a heading after it shows its
   opening line as a code block, with an "unclosed fence" warning on that line, and the sections after
   it render normally. The source is not changed.
+- The Edit (pencil) button is no longer hidden in a read-only preview (Restricted Mode, or a file
+  outside every workspace folder): it stays in the toolbar, greyed out, and its tooltip says why
+  editing is unavailable.
 - Dropdown admonitions show their state: a chevron at the right of the title points right while the
   dropdown is closed and down while it is open, in every admonition kind and theme.
 - Review comment threads are readable in every theme: the popover text no longer takes a pale host

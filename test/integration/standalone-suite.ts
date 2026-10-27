@@ -111,7 +111,7 @@ export async function run(): Promise<void> {
     assert.match(preview.html, /Standalone document/u);
     assert.match(preview.html, /data-okf-schema-found="false"/u);
     assert.doesNotMatch(preview.html, /data-okf-enums=/u);
-    assert.doesNotMatch(preview.html, /<button[^>]*data-sphinx-preview-edit-toggle/u);
+    assert.match(preview.html, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"/u);
     assert.ok(
       preview.localResourceRoots.some((root) => root.fsPath === directory),
       "the standalone document directory should be the local resource root",
