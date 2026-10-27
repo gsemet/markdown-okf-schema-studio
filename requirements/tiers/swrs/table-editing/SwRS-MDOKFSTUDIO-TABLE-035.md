@@ -25,7 +25,7 @@ implemented_in_files:
 - src/page/features/tableCellEditor.ts
 - src/page/features/textControls.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/visual/capture_edit_checks.py
@@ -112,7 +112,7 @@ Home moves the caret to the start of the text, and Shift extends the selection.
 ### Verification notes
 
 - Method: test/page/runtimeTableCellEditor.test.ts (Tab and Shift+Tab, Tab in the last cell, Shift+Tab in the first header cell, arrow keys in every direction, native arrows with a selection, modifiers, IME or a caret inside a multi-line cell, arrow without a matching model cell, block navigation fallback for ArrowUp, Home and End; scenarios Tab along a row, Tab in the last cell, Shift+Tab, ArrowLeft and ArrowRight, ArrowUp and ArrowDown, keys that stay native, no cell in the arrow direction, Home and End).
-- Method: test/integration/realInput.markers.ts and real-window scenario scenarioTableTab (id table-editing/r05-tab-adds-row) in test/integration/realInput.test.ts (Tab along a row, Tab in the last cell).
+- Method: test/integration/realInput/markers.ts and real-window scenario scenarioTableTab (id table-editing/r05-tab-adds-row) in test/integration/realInput/editorWidgets.ts (Tab along a row, Tab in the last cell).
 - Method: test/page/runtimeBlockEditor.test.ts (a table cell arrow inside a wrapped cell does not move to another cell; keys that stay native, wrapped cell row).
 - Method: test/page/runtimeEditorFlush.test.ts (Ctrl+Tab pass-through; Shift+Tab and held modifiers, Ctrl+Tab row).
 - Method: visual scenario table-editing/v02 (step arrowdown, ArrowDown only) and check_cell_end_key in test/visual/capture_edit_checks.py on scenario table-editing/v01 (Home and End); the scroll assertions bite on macOS only, because headless Chromium on Linux moves the caret natively.

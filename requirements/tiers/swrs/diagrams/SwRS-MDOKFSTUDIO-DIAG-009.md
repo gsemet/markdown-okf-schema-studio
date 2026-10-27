@@ -22,7 +22,7 @@ implemented_in_files:
 - src/page/modules/mermaidCache.ts
 - src/page/modules/mermaidPreview.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/modules/mermaidCache.test.ts
 - test/page/modules/mermaidPreviewEntry.test.ts
 - test/page/rendererBridge.test.ts
@@ -87,6 +87,6 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 
 - Method: test/page/modules/mermaidCache.test.ts (unchanged diagram after a node replacement, changed source or theme: same source and theme give no second run, a different source or theme gives a new run)
 - Method: test/page/rendererBridge.test.ts (page events reach the diagram renderers: a content patch draws only new diagrams)
-- Method: test/integration/realInput.markers.ts (real VS Code scenario RI-T34 in test/integration/realInput.test.ts: a Mermaid diagram is drawn again in the same frame)
+- Method: test/integration/realInput/markers.ts (real VS Code scenario RI-T34 in test/integration/realInput/renderPatching.ts: a Mermaid diagram is drawn again in the same frame)
 - Method: draw passes one at a time, late picture and late error have no test (browser entry point mermaidPreview.ts; to be covered by a unit test of the queue)
 - Criteria: Same source and theme give no second run; a different source or theme gives a new run; only diagrams without a render state are drawn after a patch; passes never overlap; only the current key's result reaches the node.

@@ -26,7 +26,7 @@ implemented_in_files:
 - src/page/modules/figureDirective.ts
 - src/page/modules/figurePanel.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/integration/realWindowGaps.ts
 - test/page/modules/figureDirective.test.ts
 - test/page/paletteReq.requirements.test.ts
@@ -132,6 +132,6 @@ The range recorded at opening is never applied to a different text.
 
 - Method: test/page/runtimePaletteActions.test.ts (T32: hovering a figure in edit mode shows Edit figure, outside edit mode it does not; Edit figure opens the block editor and, once the source arrives, the form; a Markdown image alone in its paragraph converts to a figure; an invalid width shows an inline error and keeps the form open without editing; checks the Edit figure, fields, lone image and problems scenarios)
 - Method: test/page/modules/figureDirective.test.ts (T32: the width pattern matches the renderer's; locateFigure finds the directive around the caret, or the first one, and sees a Markdown image alone in its paragraph; a YAML option block and other directives are not parsed; the other validation messages are asserted as validate results only; checks the directive, width and problems scenarios)
-- Method: test/integration/realInput.test.ts (scenarioFigureEditor, with its markers in test/integration/realInput.markers.ts; checks the fields and keys scenarios)
+- Method: test/integration/realInput/editorWidgets.ts (scenarioFigureEditor, with its markers in test/integration/realInput/markers.ts; checks the fields and keys scenarios)
 - Method: test/page/paletteReq.requirements.test.ts (a figure form submitted on a text that changed is closed without writing; checks the stale submit rows)
 - Criteria: Only the width message is asserted by a panel test; the two status messages (YAML option block, No figure at the caret) are deduced from the code (openFigurePanel in src/page/features/editorChrome.ts) and not tested; parseFigure returns undefined for the YAML block and locateFigure returns undefined outside a figure or a lone image.

@@ -25,7 +25,7 @@ implemented_in_files:
 - src/page/features/insertPoints.ts
 tested_in_files:
 - test/core/preview/blockReq.requirements.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/runtimeBlockMoves.test.ts
 - test/visual/scenarioDefinitions1.ts
 ---
@@ -91,5 +91,5 @@ While edit mode is on, the page SHALL place an insert point holding a plus butto
 ### Verification notes
 - Method: test/page/runtimeBlockMoves.test.ts (three blocks, reading mode, rebuild at init, properties table bar, click on the plus, other input on the bar, placeholder of the insertion editor); real-input scenario scenarioInsertBlocksFromPreview (screenshot block-editing/r16); visual scenario block-editing/v08 for the hover
 - Method: test/core/preview/blockReq.requirements.test.ts (plus button transparent, opaque on hover of a block, of the button and on focus)
-- Method: test/integration/realInput.markers.ts and test/visual/scenarioDefinitions1.ts (visual scenarios block-editing/v09, the message carries line 9, and block-editing/v10, line 5; real-input scenario scenarioInsertAfterFinalFigure, screenshots r17 and r18 in test/integration/realInput.test.ts); the pre case has no assertion of its own
+- Method: test/integration/realInput/markers.ts and test/visual/scenarioDefinitions1.ts (visual scenarios block-editing/v09, the message carries line 9, and block-editing/v10, line 5; real-input scenario scenarioInsertAfterFinalFigure, screenshots r17 and r18 in test/integration/realInput/renderPatching.ts); the pre case has no assertion of its own
 - Criteria: one bar per body block in edit mode and none outside it; refreshInsertPoints leaves exactly one bar per body block, keeping the bar of a block with unchanged neighbours and removing the others (the keep is asserted by the unit test `P-07: edit mode keeps the insertion point of a block that did not change and moves its line`); the properties bar carries line 0 and only the plus button; the open message names the line the bar sits after; the placeholder attribute exists only for an editor with insertAfterLine; the bar is placed with insertAdjacentElement after the pre when there is one, else after the block

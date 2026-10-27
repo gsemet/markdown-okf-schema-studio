@@ -27,7 +27,7 @@ implemented_in_files:
 - src/page/features/blockEditor.ts
 - src/page/features/blockMoves.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockMoves.test.ts
 ---
@@ -110,6 +110,6 @@ The move chord is Cmd+Alt with ArrowUp or ArrowDown on macOS and Ctrl+Alt elsewh
 - Method: test/page/runtimeBlockMoves.test.ts: `T37: Alt+ArrowDown on a focused block and Alt+ArrowUp on its bar button post the move` (scenario 1), `T37: a key repeat during the round trip does not move twice; the block takes the focus` (scenarios 1 and 2), `T37: other chords and other targets do not move a block` and `T37: plain Alt+Arrow in the text box stays native; the shortcut chord is the only one handled` (scenarios 3 and 7), `T37: a refused keyboard move can be retried` (scenario 4; it asserts only that the second chord posts a second message, so the focus and the missing reason are untested), `T37: Ctrl+Alt+ArrowDown saves, moves, then reopens the editor with the caret in place` and `T37: with nothing to save the chord closes the editor and moves at once` (scenario 6), `T37: on macOS the chord is Cmd+Alt, and Ctrl+Alt does nothing special` (scenario 7).
 - Method: test/page/runtimeBlockMoves.test.ts: `T37: AltGr with an arrow in the text box is no move chord` (the AltGr scenario).
 - Method: test/page/blockReq.requirements.test.ts: `a keyboard move that never lands is forgotten after five seconds` (scenario 5).
-- Method: test/integration/realInput.markers.ts: real-input scenario scenarioBlockMoveKeys (screenshots block-editing/r21 for scenario 1 and block-editing/r22 for scenario 6).
+- Method: test/integration/realInput/markers.ts: real-input scenario scenarioBlockMoveKeys (screenshots block-editing/r21 for scenario 1 and block-editing/r22 for scenario 6).
 - Method: test/page/runtimeBlockMoves.test.ts (`T37: Alt+ArrowDown on a focused block and Alt+ArrowUp on its bar button post the move`, changed: the refusal after a key press shows its reason) and test/page/blockReq.requirements.test.ts (`a keyboard move that never lands is forgotten after five seconds`, changed: the flight timer is replaced by the six-second reason timer).
 - Criteria: A single message per key press. blockOfTarget returns the block of the bar. inFlight blocks requestBlockMove. moveChordDirection and the target checks of the keydown listener return no move for other chords. blockMoveInFlight is undefined after a refusal and after 5000 ms. The pending navigation carries direction and caretOffset. closeBlockEdit(true) precedes requestBlockMove. moveBlockFromEditor returns true for every handled chord.

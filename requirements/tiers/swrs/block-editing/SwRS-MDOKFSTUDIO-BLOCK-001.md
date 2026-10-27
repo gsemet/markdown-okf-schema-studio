@@ -26,7 +26,7 @@ derived_by: []
 implemented_in_files:
 - src/page/features/editMode.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockSelection.test.ts
@@ -102,7 +102,7 @@ When a writer clicks the Edit button of a writable preview, the page SHALL switc
 ### Verification notes
 
 - Method: test/page/runtimePageControls.test.ts (`T38: toggling edit mode posts previewEditModeChanged` clicks the button twice and asserts the two messages; scenarios edit mode turned on and off, the first message only). The tooltip and aria-pressed values are not asserted by a test. The order of previewEditModeChanged against the final save follows from the code order in bindButton (post, then applyEditMode) and is not asserted by a test.
-- Method: test/integration/realInput.test.ts (scenarioEscapeCancels keeps the typed text when edit mode is turned off: leaving edit mode with an open block editor; scenarioEditModeNoReflow, screenshot block-editing/r14: both reflow scenarios). No unit test covers the editor that is still waiting for its source.
+- Method: test/integration/realInput/textEditing.ts (scenarioEscapeCancels keeps the typed text when edit mode is turned off: leaving edit mode with an open block editor; scenarioEditModeNoReflow, screenshot block-editing/r14: both reflow scenarios). No unit test covers the editor that is still waiting for its source.
 - Method: test/page/runtimeBlockSelection.test.ts (`T39: a content patch and leaving edit mode clear the selection`: selection row of the tidy-up table).
 - Method: test/page/runtimeBlockEditor.test.ts (`edit mode hover marks the whole list that a click would edit` toggles edit mode with an outlined list and checks both modes: hover outline row and the reading mode row of the nothing-to-tidy table).
 - Method: test/page/blockReq.requirements.test.ts (`turning edit mode off closes the label rename field and posts no rename`: rename field row).

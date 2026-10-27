@@ -29,7 +29,7 @@ implemented_in_files:
 - src/page/modules/figurePanel.ts
 - src/page/modules/linkPanel.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/paletteReq.requirements.test.ts
 - test/page/runtimeEditPalette.test.ts
@@ -112,5 +112,5 @@ A button whose action has a popover has aria-haspopup menu and an aria-expanded 
 - Method: test/page/runtimeEditPalette.test.ts (T21: opening one popover closes the other and a second click closes it; T21: Escape closes an open popover first and only then cancels the editor; T24: a mouse press in the text box closes the picker; T24: typing closes the grid; T24: Escape in the filter closes the picker and keeps the editor; T24: choosing an emoji returns the focus; T22: Escape and Cancel in the link panel; T22: typing and mousedown close the link panel)
 - Method: test/page/modules/paletteReq.requirements.test.ts (a button that owns a popover announces it with aria-haspopup and an aria-expanded that follows the popover; Escape in the colour code field closes the picker and gives the focus back)
 - Method: test/page/runtimePaletteActions.test.ts (T32: Escape and Cancel in the figure form; typing in the text box closes the form)
-- Method: test/integration/realInput.test.ts (scenarioFigureEditor, via test/integration/realInput.markers.ts: Escape in the figure form)
+- Method: test/integration/realInput/editorWidgets.ts (scenarioFigureEditor, via test/integration/realInput/markers.ts: Escape in the figure form)
 - Criteria: The left offset of a popover is the smaller of the button offset and the room left in the bar (the frame width for the alert list), and never negative. After a mousedown or input event of the text box no popover element remains, unless the insertion flag of the popover is set; the link panel closes with restore false. The first Escape closes the popover and posts no cancel; the next one cancels the editor. After closing, the text box is the active element and the leave callback was not called. The mouse press and typing cases of the cell emoji picker, the colour picker and the heading list are not tested separately.

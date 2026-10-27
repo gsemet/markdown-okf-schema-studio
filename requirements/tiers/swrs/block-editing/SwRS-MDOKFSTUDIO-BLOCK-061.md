@@ -20,7 +20,7 @@ derived_by: []
 implemented_in_files:
 - src/page/modules/textEditing.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/modules/textEditing.test.ts
 - test/page/runtimeBlockEditor.test.ts
 ---
@@ -93,5 +93,5 @@ Only the indentation of the current line is continued while an odd number of fen
 ### Verification notes
 - Method: test/page/modules/textEditing.test.ts (`indentSelection indent ...` cases, including `some| prose` and `- a|`: Tab; `indentSelection outdent ...`: Shift+Tab; `continueOnEnter ...` cases, including `- |`, `a\n  - |\nb`, `>  |`, `> quote|`, `> - item|`, `    code|`, `plain|`, the fence cases, `|- a` and `-| a`, and `continueOnEnter leaves non-collapsed selections to the native behaviour`: Enter).
 - Method: test/page/runtimeBlockEditor.test.ts (`Tab and Shift+Tab indent the block editor without closing it`: Tab and Shift+Tab; `Enter in a list item continues the list, and Shift+Enter stays native`: list marker and Shift+Enter; `Enter on an empty list item empties the line and Enter in plain text stays native`: empty item and plain text).
-- Method: test/integration/realInput.markers.ts (scenarioTabIndents, screenshot block-editing/r10; scenarioEnterContinuesList, screenshot block-editing/r09); visual scenarios block-editing/v01 and v02 (Enter continues the list).
+- Method: test/integration/realInput/markers.ts (scenarioTabIndents, screenshot block-editing/r10; scenarioEnterContinuesList, screenshot block-editing/r09); visual scenarios block-editing/v01 and v02 (Enter continues the list).
 - Criteria: The edit equals the expected text of every case of the table in the unit test; only a non-list line receives spaces at the caret; an outdent without a removable character returns no edit; continueOnEnter returns no edit in the native cases; an odd number of fence lines above the caret switches to indentation-only continuation.

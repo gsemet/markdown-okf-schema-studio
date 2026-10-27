@@ -34,7 +34,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/state/editLock.test.ts
 - test/integration/lifecycle.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/runtimePageControls.test.ts
 ---
 
@@ -123,7 +123,7 @@ When the Current theme mode is shown or the active VS Code colour theme changes,
 
 ### Verification notes
 
-- Method: test/integration/realInput.markers.ts, check `38-toolbar-{host}-current` of test/integration/realInput.test.ts (captures theme-zoom/r02 and r06, which compare the four colours with the VS Code variables); the sticky heading band reads the same tokens (src/core/preview/styles/pageChromeStyles.ts) and is not asserted separately. The high-contrast case is untested: no test or visual scenario uses such a host, and the forced-colors media rules of the stylesheet cover the warning banner border, the diff lines, the focus outline and the slash menu only.
+- Method: test/integration/realInput/markers.ts, check `38-toolbar-{host}-current` of test/integration/realInput/previewWindow.ts (captures theme-zoom/r02 and r06, which compare the four colours with the VS Code variables); the sticky heading band reads the same tokens (src/core/preview/styles/pageChromeStyles.ts) and is not asserted separately. The high-contrast case is untested: no test or visual scenario uses such a host, and the forced-colors media rules of the stylesheet cover the warning banner border, the diff lines, the focus outline and the slash menu only.
 - Method: test/page/runtimePageControls.test.ts, unit test `a page whose pairing and theme messages were lost while it loaded gets both from the host's answer to its ready report` (the value 2 of the theme kind and the ready answer built with pageLiveStateMessages and dispatched); the values default, 1, 3 and 4 are untested. ScrollSyncController.postPageLiveState and the ready handler in src/session/features/rendering.ts are not covered by a session test. The pairing message of the same answer belongs to lifecycle-sync.
 - Method: test/integration/lifecycle.test.ts switches the VS Code colour theme and waits for the render that follows (step `the theme-triggered bounded render`: the request number rises once and stays stable afterwards); the themeChanged message itself, the preview without a render and the non-Markdown case (read from isDocumentEligible in src/session/sessionDocuments.ts) are not asserted.
 - Method: test/core/state/editLock.test.ts, unit tests of EditLock.shouldDeferReload, the condition deferWhileEditing uses (editor open and no editor); the CHANGELOG records the guarantee. Not asserted: the theme-render key and the order in ViewStateController.notifyTheme (src/session/features/viewState.ts). A test would hold the edit lock and count renders before and after it is released.

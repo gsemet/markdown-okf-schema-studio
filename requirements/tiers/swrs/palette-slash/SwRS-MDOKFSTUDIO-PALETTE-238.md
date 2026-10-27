@@ -27,7 +27,7 @@ implemented_in_files:
 - src/page/modules/editPalette.ts
 - src/page/modules/slashMenu.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/slashMenu.test.ts
 ---
@@ -101,6 +101,6 @@ When the slash menu opens, the extension SHALL list the actions of the palette f
 ### Verification notes
 - Method: test/page/modules/slashMenu.test.ts, unit tests "P11: the menu lists exactly the actions of the palette for each mode" (mode lists), "P11: the colour-code button is listed only with the caret inside a colour code" (colour code), "P11: the empty query groups by category, a query lists best match first with the category" (grouping and ranked list), "P11: variants write what choosing the option in the palette popover writes" and "P11: heading is offered as Heading 1 to 5 and Paragraph, alerts and admonitions as their types" (variants), "P11 r2: in MyST the MyST entry ranks before its GFM equivalent; GFM and exact labels are unchanged" (the kbd rows), "P11: no command shows a No command row; Enter and Tab are left to the editor" (No command).
 - Method: test/page/modules/editPalette.test.ts, unit test "CR038: the slash menu offers the conversion only inside a table of the other form" (List table and Pipe table rows of the mode lists).
-- Method: test/integration/realInput.markers.ts and the real-window scenario scenarioSlashMenu in test/integration/realInput.test.ts (palette-slash/r01-slash-no-command) (No command).
+- Method: test/integration/realInput/markers.ts and the real-window scenario scenarioSlashMenu in test/integration/realInput/textEditing.ts (palette-slash/r01-slash-no-command) (No command).
 - Method: visual scenarios palette-slash/v11-slash-strict-light-900, palette-slash/v12-slash-gfm-light-900, palette-slash/v13-slash-myst-light-900 (mode lists and grouping), palette-slash/v14-slash-myst-filtered-dark-900 (ranked list with categories), palette-slash/v12-slash-gfm-light-900 (the nomatch state), palette-slash/v09-mode-myst-light-900 (the kbd role button).
 - Criteria: The entries are those returned by the palette, so the menu rebuilds with the palette mode. The groups follow the first appearance of each palette group; the shortcut text is the one of the palette tooltip. The aliases are h1 title heading1, h2 heading2 and so on, text plain p for Paragraph, the type name callout github for alerts and the type name callout admonition for admonitions (see also for See also). The No command row has the role option, aria-disabled true and data-slash-none. SwRS-MDOKFSTUDIO-PALETTE-001 states that both Key buttons are offered in MyST mode.

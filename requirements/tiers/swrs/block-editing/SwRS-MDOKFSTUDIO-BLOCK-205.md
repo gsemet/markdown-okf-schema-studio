@@ -34,7 +34,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/flushWait.test.ts
 - test/integration/previewHistory.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeEditorFlush.test.ts
@@ -114,7 +114,7 @@ When the page hides, closes or leaves the document (a followed link, Back, anoth
 ### Verification notes
 - Method: test/page/runtimeBlockEditor.test.ts (hiding the page, block editor rows, nothing pending) with `pagehide flushes a pending autosave without waiting for the timer`, `visibilitychange to hidden flushes a pending autosave without waiting for the timer` and `hide events post nothing when no edit is pending or the page stays visible`.
 - Method: test/page/runtimeEditorFlush.test.ts (hiding the page with a cell editor, the page saves its open editors, answers and flags, link and Back right after typing) with `CR 025: a host flush request saves the open editor first, then answers`, `CR 025: a host flush request without an open editor only answers`, `CR 025: a host flush request saves the typed text of an open table cell`, `CR 025: pagehide saves the typed text of an open table cell`, `CR 025: following a link right after typing posts the final save before the link`, `CR 025: an anchor link inside the page keeps the open editor`, `CR 025: Back right after typing posts the final save before previewHistoryGo`, `CR 025: Back with an untouched editor open posts only the navigation` and `CR 025: a flushed block save carries the flush flag, a normal save does not`.
-- Method: test/integration/realInput.test.ts with the markers in test/integration/realInput.markers.ts (host asks the page to save before it switches, link and Back rows): real-input scenarios scenarioFlushBeforeLink, scenarioFlushBeforeBack and scenarioFlushBeforeTabSwitch (screenshot block-editing/r24).
+- Method: test/integration/realInput/flushBeforeNavigate.ts with the markers in test/integration/realInput/markers.ts (host asks the page to save before it switches, link and Back rows): real-input scenarios scenarioFlushBeforeLink, scenarioFlushBeforeBack and scenarioFlushBeforeTabSwitch (screenshot block-editing/r24).
 - Method: test/core/preview/flushWait.test.ts (the host never waits long, refused flush warning) with `CR 025: waitForSettled gives up after the timeout, so a stuck save never blocks a navigation`, `CR 025: waitForAnswer resolves true on the answer and false on silence` and `CR 025: the flush refusal warning names the field and says the text was not saved`; the posting path of the warning has no test.
 - Method: test/integration/previewHistory.test.ts (the host applies pending saves before Back: the text typed in the block editor is in the document after Back); the step settleHostEdits has no unit test.
 - Method: test/session/toolbarReq.requirements.test.ts (following a link applies the pending saves before the link is resolved).

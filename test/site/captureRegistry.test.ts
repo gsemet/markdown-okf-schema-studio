@@ -136,8 +136,10 @@ test("run folder prefixes stay the ones the LATEST readers and the pruner know",
 
 test("every id passed to the writer in a suite is registered (no literal id the registry does not know)", () => {
   const root = path.resolve(__dirname, "../../../test/integration");
-  const source = fs.readdirSync(root).filter((file) => file.endsWith(".ts"))
-    .map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
+  // The real-input scenarios live in test/integration/realInput/; the suites sit next to it.
+  const source = [root, path.join(root, "realInput")]
+    .flatMap((directory) => fs.readdirSync(directory).filter((file) => file.endsWith(".ts"))
+      .map((file) => fs.readFileSync(path.join(directory, file), "utf8"))).join("\n");
   const literals = [...source.matchAll(/"((?:[a-z0-9-]+)\/r\d{2}-[a-z0-9-]+)"/gu)].map((match) => match[1]!);
   assert.ok(literals.length > 60, `found ${literals.length} id literals`);
   assert.deepEqual(unknownCaptures(literals), []);

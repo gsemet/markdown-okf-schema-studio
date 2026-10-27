@@ -42,7 +42,11 @@ async function waitForDocument(documentUri: string): Promise<void> {
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-007
 export async function run(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
-  const directory = fs.mkdtempSync(path.join(os.homedir(), "markdown-okf-schema-standalone-"));
+  // The fixture must lie in no workspace folder (a standalone, untrusted-by-workspace file).
+  // Prefer os.tmpdir(); the test workspace can hold /tmp on Linux, then fall back to the home folder.
+  const parent = [os.tmpdir(), os.homedir()].find((candidate) =>
+    !vscode.workspace.getWorkspaceFolder(vscode.Uri.file(path.join(candidate, "probe.md")))) ?? os.homedir();
+  const directory = fs.mkdtempSync(path.join(parent, "markdown-okf-schema-standalone-"));
   const schemaDirectory = path.join(directory, "_schema");
   const filePath = path.join(directory, "finding.md");
   const source = [

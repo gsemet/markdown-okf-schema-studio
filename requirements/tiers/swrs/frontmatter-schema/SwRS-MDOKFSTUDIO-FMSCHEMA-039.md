@@ -28,7 +28,7 @@ tested_in_files:
 - test/core/frontmatter/diagReq.frontmatter.requirements.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/propertiesTable.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions2.ts
 ---
@@ -93,7 +93,7 @@ When the frontmatter has errors or warnings, the extension SHALL show in the tab
 - Method: test/core/frontmatter/propertiesTable.test.ts (errors and warnings, counts of the badge, missing required fields summary, link problems count in the badge).
 - Method: test/core/frontmatter/okfFrontmatter.test.ts (missing required fields summary, analysis part).
 - Method: test/core/frontmatter/diagReq.frontmatter.requirements.test.ts (counts of the badge: infos only, error and info).
-- Method: test/integration/realInput.markers.ts and test/page/runtimeScroll.test.ts (jump to the issue, info rows only).
-- Method: test/integration/realInput.markers.ts (link problems count in the badge).
+- Method: test/integration/realInput/markers.ts and test/page/runtimeScroll.test.ts (jump to the issue, info rows only).
+- Method: test/integration/realInput/markers.ts (link problems count in the badge).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario (missing required fields summary).
 - Criteria: The info count is shown only when errors and warnings are both zero. The first row carrying an error, warning or info class is chosen, in table order; its value cell is focused when the row has an editable value cell, otherwise its name cell. Missing names follow the order in which the effective schema collected its required lists. Link issues carry the origin link, which the field editor ignores when saving, so a link problem does not block the saving of other fields.

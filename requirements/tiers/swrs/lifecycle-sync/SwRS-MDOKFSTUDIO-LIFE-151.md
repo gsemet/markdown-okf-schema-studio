@@ -25,7 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/host-vscode/groupFocus.test.ts
 - test/host/lifeReq.requirements.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 ---
 
 ## A side preview locks its editor group
@@ -75,7 +75,7 @@ When a new side preview opens in an editor group that holds only that panel, the
 
 ### Verification notes
 
-- Method: test/integration/realInput.test.ts scenarioPreviewGroupLock (RI-T39; marked in test/integration/realInput.markers.ts) with a canary that no lock leaks before the preview exists: Quick Open from the preview, preview closed (last-group case), user lock to the right survives. A failed lock command is caught and never blocks the preview (by reading lockNewPanelGroup); the preview waits at most about 250 ms for its group to exist. The shared group scenario is checked by reading lockNewPanelGroup (a group with more than one tab is not locked).
+- Method: test/integration/realInput/previewWindow.ts scenarioPreviewGroupLock (RI-T39; marked in test/integration/realInput/markers.ts) with a canary that no lock leaks before the preview exists: Quick Open from the preview, preview closed (last-group case), user lock to the right survives. A failed lock command is caught and never blocks the preview (by reading lockNewPanelGroup); the preview waits at most about 250 ms for its group to exist. The shared group scenario is checked by reading lockNewPanelGroup (a group with more than one tab is not locked).
 - Method: test/host-vscode/groupFocus.test.ts "a group position that exists maps to its focus command", "a position past the last group gets no command, because the command would create a group" and "positions outside the supported range or not known get no command" (unlocking never creates a group).
 - Method: test/host/lifeReq.requirements.test.ts "the recorded column of a locked preview follows its group" (the recorded column scenario).
 - The unlock also restores the focus to the group that had it; a focus held outside the editor area cannot be restored through the API (known limit of the code).

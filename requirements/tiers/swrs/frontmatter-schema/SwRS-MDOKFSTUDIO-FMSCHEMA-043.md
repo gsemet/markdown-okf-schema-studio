@@ -23,7 +23,7 @@ implemented_in_files:
 - src/page/features/hostHandlers.ts
 - src/session/features/frontmatter.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/runtimeFrontmatterFields.test.ts
 ---
 
@@ -59,6 +59,6 @@ When the frontmatter of the shown document changes, the extension SHALL re-analy
 
 ### Verification notes
 
-- Method: test/integration/realInput.markers.ts (typing in the frontmatter, page not ready; unit test of the frontmatter controller and real-input test).
+- Method: test/integration/realInput/markers.ts (typing in the frontmatter, page not ready; unit test of the frontmatter controller and real-input test).
 - Method: test/page/runtimeFrontmatterFields.test.ts (new table while a field editor is open, editor closed).
 - Criteria: Each new change restarts the 300 ms timer; unchanged markup posts nothing. Only the latest deferred markup is kept.

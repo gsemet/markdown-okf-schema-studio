@@ -45,7 +45,7 @@ implemented_in_files:
 - src/session/features/viewState.ts
 tested_in_files:
 - test/host/previewTiming.test.ts
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/modules/inlineThread.test.ts
@@ -133,7 +133,7 @@ The page refuses with the open editor's status line unless the row says otherwis
 ### Verification notes
 
 - Method: test/page/runtimeContentPatch.test.ts (`a click on another block while the first editor holds changes opens it once the save is rendered`: click while changed text is held).
-- Method: test/integration/realInput.markers.ts (scenario scenarioParagraphBlurCommit: click on another block while changed text is held, asserts only that the first editor closed; scenario scenarioTypingUndoGrouping: the clicked heading's editor opens after the paragraph save and is closed with Escape) and test/page/runtimeBlockEditor.test.ts and test/page/runtimeBlockMoves.test.ts (second block editor request ignored, editors of the empty document and of an insertion open one at a time; nominal and no-editor scenarios).
+- Method: test/integration/realInput/markers.ts (scenario scenarioParagraphBlurCommit: click on another block while changed text is held, asserts only that the first editor closed; scenario scenarioTypingUndoGrouping: the clicked heading's editor opens after the paragraph save and is closed with Escape) and test/page/runtimeBlockEditor.test.ts and test/page/runtimeBlockMoves.test.ts (second block editor request ignored, editors of the empty document and of an insertion open one at a time; nominal and no-editor scenarios).
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (field editor blocks the key editor and a second value editor, a block editor blocks the field editor; refresh refused with a message while a field editor is open and works once it is closed; checkbox click refused while a field editor is open; Edit figure and the Start writing Enter shortcut ignore input; rows: field editor, refresh, checkbox).
 - Method: test/page/runtimeBlockSelection.test.ts and test/page/runtimeBlockMoves.test.ts (selection and move input ignored while a field editor is open).
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (a click on a block or a plus insert point after a blur save: the block waits for the answer, opens after a saved value, and opens after cancelling a refused one).

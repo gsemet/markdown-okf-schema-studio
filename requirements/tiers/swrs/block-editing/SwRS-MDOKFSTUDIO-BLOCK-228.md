@@ -27,7 +27,7 @@ implemented_in_files:
 - src/page/features/scrollCore.ts
 - src/session/features/scrollSync.ts
 tested_in_files:
-- test/integration/realInput.markers.ts
+- test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeScroll.test.ts
@@ -94,7 +94,7 @@ When a writer opens, saves or closes an editor, the extension SHALL keep the edi
 
 ### Verification notes
 - Method: test/page/runtimeScroll.test.ts with `a final block save carries the edited element's pin; an autosave does not` changes the target geometry when the saving status appears and checks that the final save retains the pre-status pin.
-- Method: test/integration/realInput.test.ts with the markers in test/integration/realInput.markers.ts: real-input scenario scenarioSaveKeepsBlockInPlace (screenshot block-editing/r19) checks the block pin and the opening without a jump; the same scenario with the id table-editing/r07-save-keeps-table-in-place checks the table row (drift at most 3 px).
+- Method: test/integration/realInput/editorWidgets.ts with the markers in test/integration/realInput/markers.ts: real-input scenario scenarioSaveKeepsBlockInPlace (screenshot block-editing/r19) checks the block pin and the opening without a jump; the same scenario with the id table-editing/r07-save-keeps-table-in-place checks the table row (drift at most 3 px).
 - Method: test/visual/scenarioDefinitions2.ts: visual scenarios block-editing/v13 (dark, 900 px) and block-editing/v14 (light, 460 px) check the block pin and the opening of an editor; docs/scroll-anchoring.md rule R7.
 - Method: test/session/blockReq.requirements.test.ts (the host stores the pin, a save without a pin) with `a final save with a pin stores it for five seconds, a save without the two fields stores none`.
 - Method: test/page/blockReq.requirements.test.ts (closing an editor scrolls the page back, close without a shift) with `closing an editor scrolls the page back by the shift applied on opening`.
