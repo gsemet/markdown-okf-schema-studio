@@ -7,7 +7,9 @@ description: When the text of a document changes, saved or not, the extension
   SHALL queue a render of the new text in every preview that shows that
   document, start it 40 ms after the last change and let a running render finish
   first, without writing to the shown file or to any build output folder of the
-  workspace.
+  workspace; a preview whose panel is hidden SHALL not render until the panel is
+  shown, and previews of the same document, revision and render options SHALL
+  share one render.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 lifecycle: draft
@@ -24,20 +26,24 @@ derived_by: []
 implemented_in_files:
 - src/core/render/renderPipeline.ts
 - src/node-services/build/buildQueue.ts
+- src/session/features/rendering.ts
 - src/session/hostEvents.ts
 - src/session/previewManager.ts
+- src/session/sharedRenders.ts
 tested_in_files:
 - test/core/state/editLock.test.ts
 - test/host/previewTiming.test.ts
 - test/integration/dirtySnapshots.test.ts
 - test/node-services/build/buildQueue.test.ts
+- test/session/previewManager.test.ts
+- test/session/sharedRenders.test.ts
 ---
 
 ## Typing renders the new text after a short pause, without writing files
 
 ### Normative behavior
 
-When the text of a document changes, saved or not, the extension SHALL queue a render of the new text in every preview that shows that document, start it 40 ms after the last change and let a running render finish first, without writing to the shown file or to any build output folder of the workspace.
+When the text of a document changes, saved or not, the extension SHALL queue a render of the new text in every preview that shows that document, start it 40 ms after the last change and let a running render finish first, without writing to the shown file or to any build output folder of the workspace. A preview whose panel is hidden SHALL not render until the panel is shown, and previews of the same document, revision and render options SHALL share one render.
 
 ### Scenario (nominal): Unsaved edit
 
@@ -64,6 +70,15 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 | --- | --- |
 | a render of 500 ms running and two newer edits queued | when the running render ends its result is shown and the render of the newest edit starts at once; the older queued edit is superseded |
 | a render whose buffer already changed | when the render ends its result is still shown, so the preview keeps moving while the writer types, and the newer render follows |
+
+### Scenario (boundary): Hidden panels and shared renders
+
+| Input | Outcome |
+| --- | --- |
+| a preview whose panel is hidden and a change, a refresh or a document switch | no render starts; the preview is marked dirty |
+| the dirty panel is shown | one render starts, and the mark is cleared |
+| two previews of the same document at the same revision, workspace root, trust state, read-only state and PlantUML engine | one render serves both; each receives its own stage with its own request id |
+| a file the render may have read changes, a setting changes, files are renamed or a refresh is requested | the next request renders again instead of joining a finished render |
 
 ### Scenario (nominal): Rendering writes nothing
 
@@ -95,4 +110,5 @@ When the text of a document changes, saved or not, the extension SHALL queue a r
 - Method: test/core/state/editLock.test.ts "a save of an unchanged open buffer needs no render (PERF-06)" and "a save of the already rendered buffer is skipped (PERF-06), any other state renders" cover the decision of the save rows; the wiring in refreshReferencedPath has no integration test.
 - Method: test/core/protocol/pageStateMessages.test.ts (the previewReady message accepted and refused) and test/core/state/editLock.test.ts "a previewReady with another requestId releases the lock (STAB-02)" and "previewReady without a lock releases nothing".
 - Method: the source gone scenario is untested.
+- Method: test/session/previewManager.test.ts "two previews of one document and revision share one render, each with its own request id" and "a hidden panel does not render until it is shown, then renders once" (renders counted through the render override: 2 before the change for two previews and 2 for a hidden panel, 1 and 0 after); test/session/sharedRenders.test.ts (join, release with the last copy, new revision, invalidation).
 - Criteria: the HTML of the ready render contains the typed marker; debounceMs is 40 in the session's queue and a burst yields one build; the final page holds only the newest marker and the request ids grow; both hashes equal their values before the test; isUnchangedSave is true only for the active document at the staged revision.

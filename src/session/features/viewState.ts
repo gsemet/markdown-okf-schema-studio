@@ -68,7 +68,7 @@ export class ViewStateController {
     router.on("previewRefresh", (value, preview) => {
       this.recordPreviewState(preview, value);
       if (preview.document) {
-        preview.edits.forceNextResult = true;
+        manager.prepareRefresh(preview);
         void manager.rendering.refreshPreviewDocument(preview, preview.document);
       }
     });

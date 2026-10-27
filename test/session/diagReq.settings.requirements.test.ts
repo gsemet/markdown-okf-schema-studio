@@ -28,6 +28,7 @@ function fixture(options: { lastGood?: boolean; activeIsSession?: boolean } = {}
   };
   const manager = {
     sessions: () => new Set([session]),
+    sharedRenders: { invalidate: () => undefined },
     host: {
       settings: {
         section: (name: string) => ({
@@ -137,6 +138,7 @@ test("editing a schema file refreshes nothing by itself; the next document chang
       refresh: () => calls.push("frontmatter.refresh"),
     },
     plantUml: {},
+    sharedRenders: { invalidate: () => undefined },
     edits: { deferWhileEditing: () => calls.push("deferred render") },
     rendering: { refreshPreviewDocument: () => { calls.push("render"); return Promise.resolve(); } },
   };

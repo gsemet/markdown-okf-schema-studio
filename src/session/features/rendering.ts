@@ -693,7 +693,34 @@ export class RenderingController {
       return Promise.resolve({ status: "canceled" });
     }
     preview.document = document;
+    if (this.deferWhileHidden(preview)) {
+      return Promise.resolve({ status: "canceled" });
+    }
     return preview.queue.refresh(document);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
+  /**
+   * A hidden panel renders nothing: the session is marked dirty and the render runs when the panel
+   * is shown (see {@link renderIfDirty}). True when the render was deferred.
+   */
+  public deferWhileHidden(preview: PreviewSession): boolean {
+    if (preview.panel.visible) {
+      preview.renderDirty = false;
+      return false;
+    }
+    preview.renderDirty = true;
+    return true;
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
+  /** The panel was shown: renders the document now when a render was skipped while it was hidden. */
+  public renderIfDirty(preview: PreviewSession): void {
+    if (!preview.renderDirty || preview.disposed || !preview.document) {
+      return;
+    }
+    preview.renderDirty = false;
+    void this.refreshPreviewDocument(preview, preview.document);
   }
 
   /** Renders the shown document again when the page needs it (a dependency change always does). */
