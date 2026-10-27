@@ -164,7 +164,7 @@ test("MyST code directives number and emphasize lines relative to their start", 
   assert.deepEqual(lines.map((line) => attribute(line, "data-line-number")), ["5", "6", "7", "8"]);
   assert.deepEqual(lines.map((line) => hasClass(line, "myst-code-line-emphasized")), [true, false, true, true]);
   assert.ok(findElement(html, (element) =>
-    element.tagName === "span" && hasClass(element, "hljs-built_in")), "IPython code was not highlighted as Python");
+    element.tagName === "span" && hasClass(element, "sd-dcdcaa")), "IPython code was not highlighted as Python");
   assert.equal(result.diagnostics.length, 0);
 });
 

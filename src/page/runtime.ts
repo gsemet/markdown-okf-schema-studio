@@ -81,7 +81,7 @@ import { installWidthMode } from "./modules/widthMode";
 import { createPageBus, type PageEvents } from "./pageBus";
 import { installPageDiagnostics } from "./pageDiagnostics";
 import { createPageHost } from "./pageHost";
-import { pageSettings, stickyHeadingDepthOf } from "./pageSettings";
+import { applyCodeBlockSettings, pageSettings, stickyHeadingDepthOf } from "./pageSettings";
 
 /** Starts the page runtime of one page load. */
 export function startPreviewRuntime(context: PreviewRuntimeContext, transport: HostTransport): void {
@@ -241,6 +241,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const keepReadingLine = (): void => rt.scroll.keepReadingLine();
   // Expanding a chip changes the height of the content: keep the reading line like zoom does.
   const chipToggle = installChipToggle(document, vscode, context, keepReadingLine);
+  applyCodeBlockSettings(document.documentElement, context);
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
   const incomingChanges = installIncomingChanges(document);
   // Light motion (CR 046): soft appearance after a user action, the theme colour transition, the

@@ -23,6 +23,7 @@ import {
   WIDE,
   XLARGE,
 } from "./scenarioAssertions";
+import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   {
@@ -438,6 +439,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       "Tabbing to the first code block shows its copy button with a focus ring on the block; one more Tab "
       + "moves the focus ring to the button, and Enter posts the raw code and turns the icon into a check mark.",
   })),
+  ...CODE_BLOCK_COMFORT_SCENARIOS,
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",

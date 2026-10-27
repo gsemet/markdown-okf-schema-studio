@@ -34,6 +34,10 @@ export interface ScenarioRenderOptions {
   readonly incomingChanges?: false;
   /** `true`: the page marks the block under the editor selection (`markEditorSelection` setting). Default off. */
   readonly markEditorSelection?: true;
+  /** `false`: code blocks keep the theme background (`preview.codeBlocks.darkBackground` off). Default on. */
+  readonly codeBlocksDarkBackground?: false;
+  /** `false`: no automatic line numbers (`preview.codeBlocks.lineNumbers` off). Default on. */
+  readonly codeBlocksLineNumbers?: false;
   /** `true`: a writable review-comment preview (Resolve, Delete and the reply box in the thread popover, `commentsEnabled`). Default off. */
   readonly commentsEnabled?: true;
   /**
@@ -58,6 +62,7 @@ export interface ScenarioRenderOptions {
 const OPTION_ORDER: readonly (keyof ScenarioRenderOptions)[] = [
   "trusted", "readOnly", "strictAdditionalProperties", "propertiesTable",
   "maxContentWidth", "paletteMode", "zoom", "incomingChanges", "markEditorSelection", "commentsEnabled", "hostMessages",
+  "codeBlocksDarkBackground", "codeBlocksLineNumbers",
   "freshWorkspace", "mystExtensions",
 ];
 

@@ -201,6 +201,20 @@
             "markdownDescription": "Marks the blocks you changed since the last Git commit with a green bar on their left, like the editor gutter. It compares the file, unsaved edits included, with the version in `HEAD` using the built-in Git extension. **On**: changed blocks are marked and the toolbar toggle for the marks is shown. **Off**: no marks and no toggle. Files that are not in Git show nothing.",
             "order": 22
           },
+          "markdownOkfSchemaStudio.preview.codeBlocks.darkBackground": {
+            "type": "boolean",
+            "scope": "resource",
+            "default": true,
+            "markdownDescription": "Draws code blocks on the dark VS Code Dark+ background, with its syntax colors, in every preview theme, cream and white included. **On** (default): code blocks are dark. **Off**: code blocks keep the light background of the preview theme and use the Light+ colors. Inline code is not affected.",
+            "order": 23
+          },
+          "markdownOkfSchemaStudio.preview.codeBlocks.lineNumbers": {
+            "type": "boolean",
+            "scope": "resource",
+            "default": true,
+            "markdownDescription": "Shows line numbers on code blocks of two lines or more. The numbers are never copied: neither the copy button nor a selection picks them up. **On** (default): such blocks are numbered. **Off**: no numbers. A MyST `{code-block}` with `:linenos:` or `:lineno-start:` is always numbered, whatever this setting says.",
+            "order": 24
+          },
           "markdownOkfSchemaStudio.preview.scrollPreviewWithEditor": {
             "type": "boolean",
             "default": true,
@@ -349,12 +363,12 @@
     "@plantuml/core": "1.2026.9",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
-    "highlight.js": "^11.12.0",
     "katex": "^0.19.0",
     "mermaid": "^12.2.0",
     "myst-parser": "^1.7.4",
     "myst-to-html": "^1.7.4",
     "parse5": "^8.0.1",
+    "shiki": "^4.5.0",
     "yaml": "^2.9.1"
   },
   "overrides": {

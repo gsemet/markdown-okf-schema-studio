@@ -5,11 +5,11 @@ uuid: a9e2c6ed-4d23-4ee1-a77c-663ca28f4e90
 title: Code blocks use one font scale, the theme colours and scroll long lines
 description: When a code block is shown, the extension SHALL colour keywords,
   strings, numbers, additions, titles, attributes, deletions and comments with
-  the matching VS Code chart colours, comments muted and italic, style the block
-  with the editor foreground colour, a font size of 0.92em, a 4 px radius, a
-  border and the code-block background, scroll a line wider than the block
-  inside it outside Auto width mode, and keep the background soft and readable
-  in the forced white and cream themes.
+  the VS Code Dark+ token colours, comments in green, style the block with the
+  editor foreground colour, a font size of 0.92em, a 4 px radius, a border and
+  the code-block background, scroll a line wider than the block inside it
+  outside Auto width mode, and keep the background soft and readable in the
+  forced white and cream themes.
 project: markdown-okf-schema-studio
 scope: code-blocks
 lifecycle: draft
@@ -33,19 +33,19 @@ tested_in_files:
 
 ### Normative behavior
 
-When a code block is shown, the extension SHALL colour keywords, strings, numbers, additions, titles, attributes, deletions and comments with the matching VS Code chart colours, comments muted and italic, style the block with the editor foreground colour, a font size of 0.92em, a 4 px radius, a border and the code-block background, scroll a line wider than the block inside it outside Auto width mode, and keep the background soft and readable in the forced white and cream themes.
+When a code block is shown, the extension SHALL colour keywords, strings, numbers, additions, titles, attributes, deletions and comments with the VS Code Dark+ token colours, comments in green, style the block with the editor foreground colour, a font size of 0.92em, a 4 px radius, a border and the code-block background, scroll a line wider than the block inside it outside Auto width mode, and keep the background soft and readable in the forced white and cream themes.
 
-### Scenario (nominal): Token classes use the theme colours
+### Scenario (nominal): Token classes use the Dark+ colours
 
-- GIVEN a dark VS Code theme and a highlighted block
+- GIVEN any VS Code theme and a highlighted block
 - WHEN the preview renders it
-- THEN each token class uses its theme colour variable and comments are italic and muted
+- THEN each colour class (`sd-` followed by the hex colour) is defined by a stylesheet rule with the Dark+ colour and comments are green
 
-### Scenario (boundary): A theme without chart colours uses the defaults
+### Scenario (boundary): The colours do not depend on the VS Code theme
 
 - GIVEN a theme that defines no chart colours
 - WHEN the preview renders it
-- THEN each token class uses its built-in default colour and comments stay italic
+- THEN the token colours are the same fixed Dark+ colours, because the stylesheet carries them (SwRS-MDOKFSTUDIO-CODE-040)
 
 ### Scenario (nominal): Fenced blocks share one style
 
@@ -75,17 +75,19 @@ When a code block is shown, the extension SHALL colour keywords, strings, number
 
 | Forced theme | Outcome |
 | --- | --- |
-| cream, with a Python block | The block has a soft background and readable text |
-| white, with a Python block | The text stays readable on the soft background |
+| cream, with a Python block | The block has a soft background and readable text while the dark background setting is off; by default it is the Dark+ surface (SwRS-MDOKFSTUDIO-CODE-040) |
+| white, with a Python block | The text stays readable on the soft background while the dark background setting is off |
 
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-CODE-001: highlights fenced code
 - SwRS-MDOKFSTUDIO-CODE-008: colours and shapes diff blocks
+- SwRS-MDOKFSTUDIO-CODE-040: draws code blocks on the dark background and sets the token palette
 
 ### Verification notes
 
-- Method: test/core/preview/previewStyles.test.ts (token colour variables and defaults, block style on top-level and nested blocks, white and cream rules)
+- Method: test/core/preview/previewStyles.test.ts (block style on top-level and nested blocks, white and cream rules)
+- Method: test/core/preview/codeBlockStyles.test.ts (a colour rule for every class the highlighter writes)
 - Method: test/core/preview/creamTheme.test.ts (cream and white soft background and readable text)
 - Method: test/visual/scenarioDefinitions1.ts (long line scroll at 460 px with geometry check, exact-fit line)
-- Criteria: each token class resolves to its chart colour variable, or to its built-in default when the variable is undefined, and comments are italic; computed values equal the stated style on top-level and nested blocks; block scrollWidth exceeds clientWidth for the long line, equals it for the exact-fit line and the document never overflows; the white and cream rules set a soft background and a readable text colour
+- Criteria: each token class has a rule with its Dark+ colour; computed values equal the stated style on top-level and nested blocks; block scrollWidth exceeds clientWidth for the long line, equals it for the exact-fit line and the document never overflows; the white and cream rules set a soft background and a readable text colour

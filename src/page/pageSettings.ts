@@ -30,6 +30,18 @@ export function pageSettings(context: PreviewRuntimeContext): PageSettings {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CODE-039
+// @implements_req SwRS-MDOKFSTUDIO-CODE-040
+/**
+ * Sets the code block settings of a boot context as attributes of the root element, where the
+ * stylesheet reads them (`data-okf-code-dark-background`, `data-okf-code-line-numbers`).
+ */
+export function applyCodeBlockSettings(root: Element, context: PreviewRuntimeContext): void {
+  const boot = readPreviewBootSettings(context);
+  root.setAttribute("data-okf-code-dark-background", boot["codeBlocks.darkBackground"] ? "true" : "false");
+  root.setAttribute("data-okf-code-line-numbers", boot["codeBlocks.lineNumbers"] ? "true" : "false");
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-022
 /** How many heading levels the sticky band shows: the setting rounded and clamped to 1..6, else 3. */
 export function stickyHeadingDepthOf(context: PreviewRuntimeContext): number {

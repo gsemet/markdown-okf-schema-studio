@@ -379,7 +379,7 @@ test("MyST table alignment and notebook output placeholders are styled", () => {
 test("MyST numbered and emphasized code lines are styled", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /#sphinx-myst-preview-content code\[data-myst-line-numbers="true"\] \.myst-code-line::before\s*\{[^}]*content: attr\(data-line-number\);/u,
+    /#sphinx-myst-preview-content code\[data-myst-line-numbers="true"\] \.myst-code-line::before,[^{]*\{[^}]*content: attr\(data-line-number\);/u,
   );
   assert.match(
     PREVIEW_THEME_CSS,
@@ -566,10 +566,8 @@ test("white mode keeps code backgrounds soft and code text readable blue", () =>
     PREVIEW_THEME_CSS,
     /html\[data-sphinx-preview-theme-mode="white"\] #sphinx-myst-preview-content :not\(pre\) > code\s*\{\s*color: var\(--studio-textLink-foreground/u,
   );
-  assert.match(
-    PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="white"\] #sphinx-myst-preview-content pre > code\.language-yaml,[\s\S]*?color: var\(--studio-textLink-foreground/u,
-  );
+  // YAML blocks have Dark+ token colours like every language: no blue override on the code element.
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /pre > code\.language-yaml/u);
 });
 
 test("fenced code uses the editor foreground and one font scale", () => {

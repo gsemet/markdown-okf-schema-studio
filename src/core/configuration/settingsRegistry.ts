@@ -212,6 +212,24 @@ export const PREVIEW_SETTINGS = {
     markdownDescription: "Controls how the preview refreshes while you type. **On**: the changed parts of the page are updated in place, so scroll position and open sections are kept. **Off**: the whole page reloads on every change; turn this off if the preview shows stale or broken content.",
     order: 20,
   }, asStored),
+  // @implements_req SwRS-MDOKFSTUDIO-CODE-040
+  /** Code blocks use the dark Dark+ background in every preview theme. */
+  "codeBlocks.darkBackground": startupSetting<boolean>({
+    type: "boolean",
+    scope: "resource",
+    default: true,
+    markdownDescription: "Draws code blocks on the dark VS Code Dark+ background, with its syntax colors, in every preview theme, cream and white included. **On** (default): code blocks are dark. **Off**: code blocks keep the light background of the preview theme and use the Light+ colors. Inline code is not affected.",
+    order: 23,
+  }, asStored, bootFlag(true)),
+  // @implements_req SwRS-MDOKFSTUDIO-CODE-039
+  /** Number the lines of code blocks of two lines or more. */
+  "codeBlocks.lineNumbers": startupSetting<boolean>({
+    type: "boolean",
+    scope: "resource",
+    default: true,
+    markdownDescription: "Shows line numbers on code blocks of two lines or more. The numbers are never copied: neither the copy button nor a selection picks them up. **On** (default): such blocks are numbered. **Off**: no numbers. A MyST `{code-block}` with `:linenos:` or `:lineno-start:` is always numbered, whatever this setting says.",
+    order: 24,
+  }, asStored, bootFlag(true)),
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-214
   /** Mark blocks changed since the last commit with a green bar (T16). */
   showIncomingChanges: setting<boolean>({

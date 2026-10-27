@@ -140,16 +140,16 @@ PAGE_CHECKS = """
     if (Math.abs(blockSize - codeSize) > 0.5) {
       failures.push(`fenced code is ${codeSize}px inside a ${blockSize}px pre block`);
     }
-    // A diff panel is square; so is the top of a block joined to its caption title bar.
+    // A diff panel is square unless it sits on the dark code background (a padded Dark+ block like the
+    // others); so is the top of a block joined to its caption title bar.
     const joinedToCaption = block.parentElement && block.parentElement.tagName === 'FIGURE'
       && block.parentElement.querySelector(':scope > figcaption');
-    const expectedRadius = isDiff || joinedToCaption ? '0px' : '4px';
+    const darkBackground = document.documentElement.getAttribute('data-okf-code-dark-background') !== 'false';
+    const expectedRadius = (isDiff && !darkBackground) || joinedToCaption ? '0px' : '4px';
     if (blockStyle.borderTopLeftRadius !== expectedRadius) {
       failures.push(`fenced code panel radius is ${blockStyle.borderTopLeftRadius}, expected ${expectedRadius}`);
     }
-    const forcedWhiteYaml = ['white', 'cream'].includes(document.documentElement.dataset.sphinxPreviewThemeMode)
-      && code.classList.contains('language-yaml');
-    if (!forcedWhiteYaml && codeStyle.color !== blockStyle.color) {
+    if (codeStyle.color !== blockStyle.color) {
       failures.push('fenced code does not inherit the editor foreground');
     }
   }

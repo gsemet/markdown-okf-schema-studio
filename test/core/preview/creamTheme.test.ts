@@ -113,10 +113,9 @@ test("cream mirrors the white-mode code colouring", () => {
     PREVIEW_THEME_CSS,
     /html\[data-sphinx-preview-theme-mode="cream"\] #sphinx-myst-preview-content :not\(pre\) > code,\s*html\[data-sphinx-preview-theme-mode="white"\][^{]*\{\s*color: var\(--studio-textLink-foreground/u,
   );
-  assert.match(
-    PREVIEW_THEME_CSS,
-    /html\[data-sphinx-preview-theme-mode="cream"\] #sphinx-myst-preview-content pre > code\.language-yaml,[\s\S]*?color: var\(--studio-textLink-foreground/u,
-  );
+  // The blue override of YAML blocks is gone: YAML now has Dark+ token colours like every language,
+  // and an override on the code element would flatten them.
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /pre > code\.language-yaml/u);
 });
 
 test("toolbar theme icons are well-formed sibling svgs, one per mode", () => {

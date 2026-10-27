@@ -4,6 +4,7 @@ import {
 } from "../configuration/previewConfiguration";
 import { VSCODE_THEME_TOKEN_CSS } from "./themeTokens";
 import { COMMENT_CSS } from "./styles/commentStyles";
+import { CODE_BLOCK_CSS } from "./styles/codeBlockStyles";
 import { CONTENT_BLOCK_CSS } from "./styles/contentBlockStyles";
 import { CONTENT_LAYOUT_CSS } from "./styles/contentLayoutStyles";
 import { EDIT_MODE_CSS } from "./styles/editModeStyles";
@@ -110,6 +111,7 @@ export const PREVIEW_THEME_CSS =
   + CONTENT_LAYOUT_CSS
   + COMMENT_CSS
   + CONTENT_BLOCK_CSS
+  + CODE_BLOCK_CSS
   + PROPERTIES_CSS;
 
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
