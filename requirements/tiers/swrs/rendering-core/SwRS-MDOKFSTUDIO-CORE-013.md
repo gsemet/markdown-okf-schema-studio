@@ -30,6 +30,7 @@ implemented_in_files:
 - src/core/render/renderPipeline.ts
 - src/core/security/resource-policy.ts
 tested_in_files:
+- test/core/render/contentCaches.test.ts
 - test/core/render/includeBudget.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 - test/integration/projectFeatures.test.ts
@@ -93,6 +94,12 @@ When a chain of includes reaches the 8th level, an include repeats a file alread
 - WHEN it is rendered
 - THEN the warning disappears and the content is expanded
 
+### Scenario (boundary): A file is checked once per render
+
+- GIVEN a document that references the same image or include several times, existing or missing
+- WHEN the preview renders it
+- THEN the policy asks the file system once per distinct path (one stat, one real-path lookup) and still reports every refusal; the next render asks again, so a file that appears or changes is seen
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-CORE-012: an include is expanded in place
@@ -105,4 +112,5 @@ When a chain of includes reaches the 8th level, an include repeats a file alread
 - Method: Unit test "an include that cannot be read is left unresolved" in test/security/trustReq.requirements.test.ts (boundary unreadable file)
 - Method: Unit test "canonicalizes local resources and rejects hostile paths" in test/security/resource-policy.test.ts (refusal outside the roots, URL scheme, absolute path, undecodable path, symlink)
 - Method: Integration suite run() in test/integration/projectFeatures.test.ts (refusal missing file, boundary warning ends)
+- Method: test/core/render/contentCaches.test.ts (five references to an existing and a missing file: one stat per path, one real-path lookup, five refusals reported)
 - Criteria: Depth 8 and cycles leave the directive unexpanded. One "Include budget exhausted" warning appears at the limit and none below it. The 5 MiB limit is inclusive of the file size; larger files stay placeholders. A refusal of the shared reader gives the renderer no text. Each refusal code lists a warning item and reads no file. The warning appears while the file is missing and not after.

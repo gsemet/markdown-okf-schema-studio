@@ -25,6 +25,7 @@ implemented_in_files:
 - src/core/frontmatter/okfFrontmatter.ts
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
+- test/node-services/schemaFiles.test.ts
 ---
 
 ## A typed document finds its schema in the nearest schema folder
@@ -78,6 +79,12 @@ When a document's frontmatter has a string `type`, the extension SHALL look for 
 | A document without a type in Restricted Mode | No info row is shown |
 | A Markdown file opened outside every workspace folder with a typed frontmatter | No schema is read |
 
+### Scenario (boundary): The schema folder listing is kept while the folder is unchanged
+
+- GIVEN a schema folder listed in an earlier render
+- WHEN the document is rendered again, first with the folder unchanged and then after a schema file was added or the folder removed
+- THEN the unchanged folder is not listed again, an added file is found, and a removed folder lists nothing
+
 ### Known issues
 
 - Known issue: a file outside every workspace folder in a trusted workspace is also told that schema validation requires a trusted workspace, which is misleading.
@@ -91,5 +98,6 @@ When a document's frontmatter has a string `type`, the extension SHALL look for 
 
 - Method: `test/core/frontmatter/okfFrontmatter.test.ts`, markers of the tests in `okfFrontmatter.test.ts` (schema folder search, schema file matcher, missing schema info row, analysis with schema resolution off; all scenarios).
 - Method: integration test of the untrusted workspace (generic table only; the info row in Restricted Mode is untested there).
+- Method: test/node-services/schemaFiles.test.ts (the folder is read once while unchanged, again after a file is added, and lists nothing once removed)
 - Criteria: The folder name in the message is the base name of the schema folder; the summary counts one info, also for a typed document in Restricted Mode.
 - Criteria: Schema resolution is off when the preview is read-only (no workspace folder, or an untrusted workspace).

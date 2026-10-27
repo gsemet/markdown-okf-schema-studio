@@ -25,6 +25,7 @@ implemented_in_files:
 - src/core/render/mathRenderer.ts
 - src/core/render/mystInlineTransforms.ts
 tested_in_files:
+- test/core/render/contentCaches.test.ts
 - test/core/render/mathRenderer.test.ts
 - test/core/render/mystPaletteRendering.test.ts
 - test/visual/scenarioDefinitions1.ts
@@ -114,6 +115,12 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 - WHEN the preview renders
 - THEN the four prices are text inside four strong spans, the dollar signs are retained, and no literal `**` markers appear
 
+### Scenario (boundary): A formula that did not change is not typeset again
+
+- GIVEN a valid formula and one KaTeX rejects, both typeset in an earlier render
+- WHEN the preview renders the document again
+- THEN both give the same markup without a new KaTeX run, the rejected one keeps its wavy underline and tooltip, and the memory kept for this is bounded (2000 formulas, about 2 million characters)
+
 ### Verification notes
 
 - Method: test/core/render/mystPaletteRendering.test.ts (inline and display maths: "inline, display and aligned math from the palette typeset with KaTeX")
@@ -121,4 +128,5 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 - Method: test/core/render/mathRenderer.test.ts (dollar amounts: "dollar amounts stay text while a real dollar span is maths"; emphasis: "bold dollar prices do not consume the surrounding emphasis markers")
 - Method: test/visual/scenarioDefinitions2.ts (dollar amounts: visual scenarios myst/v35 and myst/v36, fixture 55-dollar-prices, with three real math spans and four bold prices)
 - Method: test/visual/scenarioDefinitions1.ts (long display equations: visual scenario chapter-dark-half)
+- Method: test/core/render/contentCaches.test.ts (a formula and a rejected formula run KaTeX once across two renders)
 - Criteria: Typesetting runs on the host-rendered page and makes no external request; failure is local to the formula; trust is off and the bounds maxExpand 1000 and maxSize 100 are set; typesetting is idempotent; overflow is local.

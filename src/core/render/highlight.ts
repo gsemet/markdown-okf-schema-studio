@@ -49,6 +49,7 @@ import yaml from "@shikijs/langs/yaml";
 import darkPlus from "@shikijs/themes/dark-plus";
 import lightPlus from "@shikijs/themes/light-plus";
 
+import { BoundedCache } from "./boundedCache";
 import {
   DARK_CODE_SURFACE,
   darkColorClass,
@@ -162,11 +163,33 @@ const FONT_STYLE_CLASSES: ReadonlyArray<readonly [number, string]> = [
   [8, "shk-strike"],
 ];
 
+// Highlighting depends only on the language and the text, so a block that did not change between
+// two renders is served from here. Bounded: 400 blocks and about 4 M characters.
+const highlightCache = new BoundedCache<string[]>(
+  400,
+  4_000_000,
+  (key, lines) => key.length + lines.reduce((sum, line) => sum + line.length, 0),
+);
+
+/** Empties the highlight cache (the tests count grammar runs). */
+export function clearHighlightCache(): void {
+  highlightCache.clear();
+}
+
 /**
  * The highlighted HTML of each line of `source`: one `<span class="sd-… sl-…">` per coloured token.
  * Throws when the grammar fails; the caller then falls back to plain text.
  */
 function highlightLines(source: string, language: string): string[] {
+  const key = `${language}\0${source}`;
+  const cached = highlightCache.get(key);
+  if (cached) return cached;
+  const result = tokenizeLines(source, language);
+  highlightCache.set(key, result);
+  return result;
+}
+
+function tokenizeLines(source: string, language: string): string[] {
   const lines = getHighlighter().codeToTokensWithThemes(source, {
     lang: language,
     themes: { dark: DARK_THEME, light: LIGHT_THEME },

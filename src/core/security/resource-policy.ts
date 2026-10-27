@@ -166,6 +166,8 @@ export function createPreviewResourcePolicy(
   return new ResourcePolicy(roots, readOnly ? { readOnly: true } : {});
 }
 
+const MAX_FILE_FACTS = 2000;
+
 export interface ResourcePolicyOptions {
   /** Read-only preview: broad roots serve nothing and dot-segments are refused. */
   readOnly?: boolean;
@@ -177,6 +179,11 @@ export class ResourcePolicy {
   private readonly roots: CanonicalRoot[];
 
   private readonly readOnly: boolean;
+
+  // One policy serves one render. The file-system answer for a path (its real path, or that it is
+  // no regular file) is asked once per render: a page that references the same image or include
+  // many times stats it once. Bounded; a render that outgrows it starts a fresh memo.
+  private readonly fileFacts = new Map<string, string | null>();
 
   public constructor(roots: readonly ResourceRoot[], options: ResourcePolicyOptions = {}) {
     this.readOnly = options.readOnly === true;
@@ -195,6 +202,24 @@ export class ResourcePolicy {
         return [];
       }
     });
+  }
+
+  /** The real path of `candidate` when it is a regular file, else null; memoized per render. */
+  private realFile(candidate: string): string | null {
+    const memo = this.fileFacts.get(candidate);
+    if (memo !== undefined) return memo;
+    let real: string | null;
+    try {
+      if (!fs.statSync(candidate).isFile()) {
+        throw new Error("resource is not a file");
+      }
+      real = fs.realpathSync(candidate);
+    } catch {
+      real = null;
+    }
+    if (this.fileFacts.size >= MAX_FILE_FACTS) this.fileFacts.clear();
+    this.fileFacts.set(candidate, real);
+    return real;
   }
 
   public resolveResource(request: string, baseDirectory: string): string | undefined {
@@ -270,13 +295,8 @@ export class ResourcePolicy {
       }
     }
 
-    let realCandidate: string;
-    try {
-      if (!fs.statSync(candidate).isFile()) {
-        throw new Error("resource is not a file");
-      }
-      realCandidate = fs.realpathSync(candidate);
-    } catch {
+    const known = this.realFile(candidate);
+    if (known === null) {
       diagnostic(
         this.diagnostics,
         "missing-resource",
@@ -285,6 +305,7 @@ export class ResourcePolicy {
       );
       return { refusal: "missing-resource", candidate };
     }
+    const realCandidate = known;
 
     if (
       this.readOnly
