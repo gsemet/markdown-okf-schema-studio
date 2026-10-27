@@ -42,10 +42,9 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      # Dependency install scripts stay off in the job that holds the publish secrets; the one
-      # project patch the build needs (the postinstall of package.json) runs explicitly.
+      # Dependency install scripts stay off in the job that holds the publish secrets; and
+      # the build needs no install step: the MyST source patches are applied in memory by esbuild.
       - run: npm ci --ignore-scripts
-      - run: node scripts/patch-myst-imports.mjs
       - name: Verify release tag
         shell: bash
         run: |

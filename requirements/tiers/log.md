@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-27 (MyST patches applied in memory, no postinstall)
+
+- SwRS-MDOKFSTUDIO-CORE-070 (CR 135): the three MyST source patches (including the single line
+  split per parse) are applied in memory by an esbuild plugin and a Node load hook; the postinstall
+  script is gone and nothing is written into node_modules. A package version or content other than
+  the reviewed one fails loudly. Verification: test/build/mystSourcePatches.test.ts.
+
 ## 2026-10-27 (worker-thread render, abort and adaptive debounce)
 
 - SwRS-MDOKFSTUDIO-LIFE-004 (new, CR 135): in the VS Code host the MyST render runs in a worker
@@ -24,7 +31,7 @@
 - SwRS-MDOKFSTUDIO-CORE-070 (new, CR 135): the postinstall patch of markdown-it-myst splits the
   source into lines once per parse instead of once per directive fence; the tightness of each
   directive is unchanged and the parse of a 55k-line document is about 5 times faster.
-  Verification: test/build/mystTightnessPatch.test.ts, `just requirements-lint`.
+  Verification: test/build/mystSourcePatches.test.ts, `just requirements-lint`.
 
 ## 2026-10-27 (the Edit button is greyed with the reason in a read-only preview)
 

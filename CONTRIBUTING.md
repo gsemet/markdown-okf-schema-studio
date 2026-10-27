@@ -46,15 +46,19 @@ releases. The MyST packages still declare release lines that no longer get fixes
 - `csv-parse` `^7.0.3`: `myst-directives` asks for `^5.5.5`, a line without releases since
   5.6.0 (2024). It parses the CSV of the `csv-table` directive.
 
-The install script applies two import-path corrections so `myst-to-html` and
-`markdown-it-dollarmath` work with Markdown-It 14; installation fails if their versions or
-expected imports change.
+Nothing writes into `node_modules`: there is no `postinstall` script. `myst-parser` and
+`myst-to-html` are pinned to exact versions, and three source patches (the import-path correction
+for `myst-to-html` and `markdown-it-dollarmath` with Markdown-It 14, and the single line split of
+`markdown-it-myst`) are applied in memory by `scripts/myst-patches.mjs`. The esbuild bundle uses it
+as a plugin; Node-run code (unit, contract and security tests, `visual:render`, `site`) loads it
+with `node --import ./scripts/register-myst-patches.mjs`. A package version or file content that
+differs from the reviewed one fails the build or the run with a message asking for a review.
 
 Revisit the overrides when you update a MyST package, during `just update`, or when an advisory
 names one of these parsers. Run `npm ls markdown-it csv-parse`: remove an override once every
 package that pulls the parser asks for the forced line itself. Check that the parser is still on a
-patched release, and remove the matching import-path correction when Markdown-It 14 support
-arrives in the MyST packages.
+patched release, and remove the matching patch of `scripts/myst-patches.mjs` when Markdown-It 14
+support arrives in the MyST packages.
 
 ## Cleanup
 
