@@ -28,30 +28,32 @@ permissions:
 jobs:
   static:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           lfs: true
       - name: Fetch Git LFS objects
         run: git lfs pull
       - name: Verify Git LFS objects
         run: git lfs fsck
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           enable-cache: true
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
       - run: just dev-ci
       - run: just ci-static
       - name: Publish reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: reports-static
           path: out/reports/
@@ -59,23 +61,25 @@ jobs:
 
   visual:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           lfs: true
       - name: Fetch Git LFS objects
         run: git lfs pull
       - name: Verify Git LFS objects
         run: git lfs fsck
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           enable-cache: true
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
       # Only this job installs Ubuntu packages (just dev-ci visual); it keeps their archives in a
@@ -87,7 +91,7 @@ jobs:
         run: echo "RUNNER_IMAGE_OS=${ImageOS:-unknown}" >> "$GITHUB_ENV"
       - name: Restore Ubuntu package archives
         id: apt-archives
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .cache/apt-archives
           key: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}
@@ -100,14 +104,14 @@ jobs:
           hashFiles('.cache/apt-archives/*.deb') != '' &&
           steps.apt-archives.outputs.cache-matched-key != format('apt-archives-visual-{0}-{1}-{2}-{3}',
           runner.os, env.RUNNER_IMAGE_OS, runner.arch, hashFiles('.cache/apt-archives/*.deb'))
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .cache/apt-archives
           key: apt-archives-visual-${{ runner.os }}-${{ env.RUNNER_IMAGE_OS }}-${{ runner.arch }}-${{ hashFiles('.cache/apt-archives/*.deb') }}
       - run: just ci-visual
       - name: Publish reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: e2e-visual
           path: out/reports/
@@ -119,30 +123,32 @@ jobs:
   integration:
     if: github.event_name == 'workflow_dispatch' && inputs.heavy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           lfs: true
       - name: Fetch Git LFS objects
         run: git lfs pull
       - name: Verify Git LFS objects
         run: git lfs fsck
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           enable-cache: true
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
       - run: just dev-ci
       - run: xvfb-run --auto-servernum just ci-integration
       - name: Publish reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: e2e-integration
           path: out/reports/
@@ -155,31 +161,33 @@ jobs:
   stress:
     if: github.event_name == 'workflow_dispatch' && inputs.heavy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 30
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           lfs: true
       - name: Fetch Git LFS objects
         run: git lfs pull
       - name: Verify Git LFS objects
         run: git lfs fsck
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           enable-cache: true
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
       - run: just dev-ci
       - run: xvfb-run --auto-servernum just ci-stress
       - name: Publish reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: stress-integration
           path: out/reports/
@@ -189,27 +197,29 @@ jobs:
     needs: [visual, integration]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           lfs: true
       - name: Fetch Git LFS objects
         run: git lfs pull
       - name: Verify Git LFS objects
         run: git lfs fsck
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           enable-cache: true
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
       - run: just dev-ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: e2e-*
           path: out/reports/
@@ -218,7 +228,7 @@ jobs:
       - run: just ci-report ${{ (github.event_name == 'workflow_dispatch' && inputs.heavy) && 'all' || 'visual' }}
       - name: Publish merged reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: studio-reports
           path: out/reports/
@@ -229,34 +239,36 @@ jobs:
     # The gallery and its README images need the real-window captures of the heavy jobs.
     if: github.event_name == 'workflow_dispatch' && inputs.gallery && inputs.heavy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           lfs: true
       - name: Fetch Git LFS objects
         run: git lfs pull
       - name: Verify Git LFS objects
         run: git lfs fsck
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           enable-cache: true
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
       - run: just dev-ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: studio-reports
           path: out/reports/
       - run: just ci-gallery
       - name: Publish gallery and site
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: studio-site
           path: out/site/
@@ -268,6 +280,8 @@ jobs:
     needs: [static, visual, report]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 15
     steps:
       - name: Require every check job to pass
@@ -289,11 +303,11 @@ jobs:
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
       - name: Tag a committed version bump
         id: tag
         env:

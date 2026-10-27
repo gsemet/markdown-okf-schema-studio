@@ -235,7 +235,7 @@ Privacy & Security > Automation; allow it, or the run fails with a message that 
 permission.
 
 CI runs the same stages as parallel jobs, each calling one target after `just dev-ci`:
-`just ci-static` (justfile format, `check`, `sphinx-check`), `just ci-visual`,
+`just ci-static` (justfile format, `check`, `audit`, `sphinx-check`), `just ci-visual`,
 `just ci-integration`, then `just ci-report` (merges the visual and integration outputs into the
 review index and `out/reports/e2e/e2e-manifest.json`; it fails when a stage manifest is missing or
 failed) and `just ci-gallery` (gallery and site from the existing outputs, no E2E re-run).

@@ -131,6 +131,10 @@ generate-settings:
 # Format the justfile and run TypeScript, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks.
 check: format compile check-boundaries check-limits check-markers check-settings unit contracts security release-tests requirements-lint
 
+# Audit the production npm dependencies against the registry advisories (online): fails on high or critical.
+audit:
+    {{ npm }} audit --omit=dev --audit-level=high
+
 # Validate the okfreq requirements bundle: schemas, links, navigation and generated coverage.
 requirements-lint:
     {{ okfreq }} validate requirements --check-links --project-root .
@@ -152,7 +156,7 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release pytest test/build/test_release.py
+    uv run --group docs --group release pytest test/build/test_release.py test/build/test_workflows.py
 
 # Generate user-facing notes for an exact Git range with gh copilot.
 release-notes FROM_REF TO_REF OUTPUT="release-notes.md":
@@ -188,11 +192,11 @@ site: e2e requirements-report
     {{ npm }} run site:gallery
     {{ npm }} run site
 
-# CI job "static": justfile format check, TypeScript, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks, Sphinx contract, requirements report.
+# CI job "static": justfile format check, TypeScript, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks, online npm audit, Sphinx contract, requirements report.
 ci-static:
     #!/usr/bin/env bash
     set -uo pipefail
-    if just --unstable --fmt --check && just check && just sphinx-check && just requirements-report; then
+    if just --unstable --fmt --check && just check && just audit && just sphinx-check && just requirements-report; then
         echo "ci-static: passed"
     else
         echo "ci-static: FAILED" >&2

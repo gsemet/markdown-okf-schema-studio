@@ -18,7 +18,7 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-${{ inputs.tag || github.ref_name }}
@@ -28,19 +28,24 @@ jobs:
   package:
     environment: release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.tag || github.ref_name }}
           fetch-depth: 0
           lfs: true
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      # Dependency install scripts stay off in the job that holds the publish secrets; the one
+      # project patch the build needs (the postinstall of package.json) runs explicitly.
+      - run: npm ci --ignore-scripts
+      - run: node scripts/patch-myst-imports.mjs
       - name: Verify release tag
         shell: bash
         run: |
@@ -57,13 +62,13 @@ jobs:
             exit 1
           fi
           node -e 'const p=require("./package.json"), l=require("./package-lock.json"); if(l.version!==p.version || l.packages[""].version!==p.version) process.exit(1)'
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
       - name: Generate user-facing release notes
         env:
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
         run: uv run python scripts/release_notes.py --to-ref "$RELEASE_TAG"
       - name: Upload validated notes
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-notes-${{ env.RELEASE_TAG }}
           path: release-notes.md
@@ -83,7 +88,7 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
       - name: Attach VSIX to GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           body_path: release-notes.md
