@@ -339,6 +339,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
   const commands = new Map<string, (...args: unknown[]) => unknown>();
   const executedCommands: Array<{ id: string; args: unknown[] }> = [];
   const shownMessages: Array<{ kind: string; text: string }> = [];
+  const outputLines: string[] = [];
   const events = {
     changeTextDocument: new Emitter<unknown>(),
     saveTextDocument: new Emitter<unknown>(),
@@ -410,6 +411,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       window.visibleTextEditors = [editor];
       return Promise.resolve(editor);
     },
+    createOutputChannel: () => ({ appendLine: (line: string) => void outputLines.push(line) }),
     showInformationMessage: (text: string) => {
       shownMessages.push({ kind: "information", text });
       return Promise.resolve(undefined);
@@ -588,6 +590,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       commands,
       executedCommands,
       shownMessages,
+      outputLines,
       events,
       showDocument,
       /** Makes a custom editor tab of `filePath` the active tab (no text editor is active then). */

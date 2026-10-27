@@ -30,6 +30,7 @@ import { canonicalPath } from "../node-services/paths";
 import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
 import { isDocumentEligible } from "./sessionDocuments";
+import { fireAndForget } from "../host-api/logger";
 
 /** A file the host renamed or moved; `local` when both paths are files of the local file system. */
 export interface RenamedFile {
@@ -172,7 +173,7 @@ export class HostEvents {
     const document = session.document ?? this.manager.host.documents.get(session.documentUri);
     if (document) {
       session.document = document;
-      void this.manager.rendering.refreshPreviewDocument(session, document);
+      fireAndForget(this.manager.host.logger, this.manager.rendering.refreshPreviewDocument(session, document), "refreshPreviewDocument");
     }
   }
 
@@ -291,7 +292,7 @@ export class HostEvents {
         }
         if (this.manager.sourceAvailable(session)) {
           this.manager.frontmatter.refresh(session, document);
-          void this.manager.rendering.refreshPreviewDocument(session, document);
+          fireAndForget(this.manager.host.logger, this.manager.rendering.refreshPreviewDocument(session, document), "refreshPreviewDocument");
         } else {
           this.manager.rendering.setMissingSource(session);
         }
@@ -315,9 +316,7 @@ export class HostEvents {
         this.manager.frontmatter.scheduleLinkEnrichment(session, session.documentUri, session.document.revision);
       }
     }
-    void this.manager.comments.persistAnchors(document).catch((error: unknown) => {
-      console.error("Failed to save the moved review comment anchors.", error);
-    });
+    fireAndForget(this.manager.host.logger, this.manager.comments.persistAnchors(document), "Saving the moved review comment anchors");
   }
 
   /** A document was closed: its problems go unless a live preview still shows it. */
@@ -327,7 +326,7 @@ export class HostEvents {
 
   /** Files were renamed or moved: comments files follow, previews of a renamed source stop. */
   public onFilesRenamed(files: readonly RenamedFile[]): void {
-    void this.manager.comments.moveSidecars(files);
+    fireAndForget(this.manager.host.logger, this.manager.comments.moveSidecars(files), "moveSidecars");
     this.manager.sharedRenders.invalidate();
     for (const session of this.manager.sessions()) {
       const activePath = this.manager.activePathOf(session);
@@ -344,7 +343,7 @@ export class HostEvents {
         session.queue.dependsOn(file.oldPath)
         || session.queue.dependsOn(file.newPath));
       if (dependencyRenamed) {
-        void this.manager.rendering.refreshPreviewDocument(session, session.document);
+        fireAndForget(this.manager.host.logger, this.manager.rendering.refreshPreviewDocument(session, session.document), "refreshPreviewDocument");
       }
     }
   }
@@ -411,7 +410,7 @@ export class HostEvents {
         this.manager.frontmatter.refresh(session, document);
       }
       if (plantUmlConfigurationChanged && document && document.id === session.documentUri) {
-        void this.manager.rendering.refreshPreviewDocument(session, document);
+        fireAndForget(this.manager.host.logger, this.manager.rendering.refreshPreviewDocument(session, document), "refreshPreviewDocument");
       } else {
         const lastGood = session.queue.getState().lastGood;
         if (lastGood) {

@@ -14,6 +14,7 @@ import type { RenderResult } from "../../core/render/renderPipeline";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
+import { fireAndForget } from "../../host-api/logger";
 
 /** PlantUML state of one page (owned by the PlantUML controller). */
 export interface PlantUmlState {
@@ -64,9 +65,9 @@ export class PlantUmlController {
       if (!manager.rendering.isCurrentRender(preview, result, generation)) {
         return;
       }
-      void result.resolvePlantUml().then((plantUml) => {
+      fireAndForget(this.manager.host.logger, result.resolvePlantUml().then((plantUml) => {
         manager.edits.deferWhileEditing(preview, "plantuml", () => this.apply(preview, result, generation, plantUml));
-      });
+      }), "resolvePlantUml");
     }, 0);
   }
 
@@ -155,10 +156,10 @@ export class PlantUmlController {
   public notifyIncludesChanged(preview: PreviewSession): void {
     this.manager.edits.deferWhileEditing(preview, "plantuml-includes", () => {
       if (!preview.disposed) {
-        void preview.postToPage({
+        fireAndForget(this.manager.host.logger, preview.postToPage({
           type: "previewPlantUmlIncludesChanged",
           documentId: preview.documentUri,
-        });
+        }), "postToPage");
       }
     });
   }

@@ -7,6 +7,7 @@ import { changedLineRanges } from "../../core/mapping/lineDiff";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { revisionOfStage } from "../sessionDocuments";
+import { fireAndForget } from "../../host-api/logger";
 
 /** Incoming-change marks of one page (owned by the incoming changes controller). */
 export interface IncomingState {
@@ -61,14 +62,14 @@ export class IncomingChangesController {
     state.enabledPosted = enabled;
     preview.probe.incomingPosts += 1;
     preview.probe.lastIncomingChanges = { enabled, ranges };
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewIncomingChanges",
       enabled,
       ranges,
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
-    });
+    }), "postToPage");
   }
 
   /** Posts again when the HEAD commit of the repository changes (commit, checkout, pull). */
@@ -88,9 +89,7 @@ export class IncomingChangesController {
     if (state.timer) clearTimeout(state.timer);
     state.timer = setTimeout(() => {
       state.timer = undefined;
-      void this.post(preview).catch((error: unknown) => {
-        console.error("Failed to mark the incoming changes.", error);
-      });
+      fireAndForget(this.manager.host.logger, this.post(preview), "Marking the incoming changes");
     }, delay);
   }
 

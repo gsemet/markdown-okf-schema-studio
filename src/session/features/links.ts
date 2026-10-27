@@ -22,6 +22,7 @@ import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { globLiteral, revisionOfStage } from "../sessionDocuments";
 import { lineSelection } from "./history";
+import { fireAndForget } from "../../host-api/logger";
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-079
 /** Folders a link-target search skips: dependencies, VCS data and build output never hold a link target. */
@@ -64,7 +65,7 @@ export class LinkController {
   public register(router: PageMessageRouter): void {
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-006
     router.on("previewLinkDiscover", (message, preview) => {
-      void this.handleDiscovery(preview, message);
+      fireAndForget(this.manager.host.logger, this.handleDiscovery(preview, message), "handleDiscovery");
     });
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-113
     router.on("previewLink", (message, preview) => {
@@ -205,7 +206,7 @@ export class LinkController {
       if (!manager.matchesCurrent(preview, message)) return;
       await preview.postToPage({ type: "previewLinkTargets", ...manager.rendering.runtimeContext(preview.stage!), targets });
     } catch (error) {
-      if (!preview.disposed) void manager.host.ui.showWarning(`Preview link discovery failed: ${String(error)}`);
+      if (!preview.disposed) fireAndForget(manager.host.logger, manager.host.ui.showWarning(`Preview link discovery failed: ${String(error)}`), "showWarning");
     }
   }
 
@@ -232,12 +233,12 @@ export class LinkController {
     try {
       navigation = await this.resolve(preview, request);
     } catch (error) {
-      void host.ui.showWarning(`Preview link resolution failed: ${String(error)}`);
+      fireAndForget(host.logger, host.ui.showWarning(`Preview link resolution failed: ${String(error)}`), "showWarning");
       return;
     }
     if (preview.disposed || preview.stage?.activeDocumentIdentity !== stage.activeDocumentIdentity) return;
     if (navigation.kind === "blocked") {
-      void host.ui.showWarning(`Markdown OKF-Schema Studio could not follow the link: ${navigation.reason}`);
+      fireAndForget(host.logger, host.ui.showWarning(`Markdown OKF-Schema Studio could not follow the link: ${navigation.reason}`), "showWarning");
       return;
     }
     if (navigation.kind === "anchor") {
@@ -250,7 +251,7 @@ export class LinkController {
       if (fragmentRange) {
         manager.history.recordNavigation(preview, { uri: preview.documentUri, line: fragmentRange.startLine });
       }
-      void preview.postToPage({
+      fireAndForget(this.manager.host.logger, preview.postToPage({
         type: "navigateAnchor",
         value: navigation.value,
         ...(fragmentRange ? {
@@ -260,7 +261,7 @@ export class LinkController {
         documentId: stage.activeDocumentIdentity,
         revision: revisionOfStage(stage),
         requestId: stage.requestId,
-      });
+      }), "postToPage");
       return;
     }
     if (navigation.kind === "external") {
@@ -294,9 +295,9 @@ export class LinkController {
       }
       await host.navigation.showDocument(targetId, selection);
     } catch (error) {
-      void host.ui.showWarning(
+      fireAndForget(host.logger, host.ui.showWarning(
         `Markdown OKF-Schema Studio could not open ${navigation.path}: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      ), "showWarning");
     }
   }
 }

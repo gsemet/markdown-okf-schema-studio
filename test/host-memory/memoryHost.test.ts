@@ -1,8 +1,10 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { fireAndForget } from "../../src/host-api/logger";
 import { readTextFile } from "../../src/host-api/fileSystem";
 import { createMemoryDocumentStore } from "../../src/host-memory/memoryDocumentStore";
+import { createMemoryLogger } from "../../src/host-memory/memoryLogger";
 import { createMemoryFileSystem, normalizePosixPath } from "../../src/host-memory/memoryFileSystem";
 
 test("a memory document applies text edits, moves its revision on and reports the change", async () => {
@@ -109,4 +111,15 @@ test("the memory file system reads, writes, lists and renames files", async () =
   await assert.rejects(files.stat("/w/docs/b.md"), { code: "ENOENT" });
   await assert.rejects(files.delete("/w/docs/b.md"), { code: "ENOENT" });
   assert.equal(normalizePosixPath("//a/./b/../c/"), "/a/c");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-002
+test("a rejected background task is logged by the host's logger, not left unhandled", async () => {
+  const logger = createMemoryLogger();
+  const failure = new Error("disk full");
+  fireAndForget(logger, Promise.reject(failure), "Saving the choice");
+  fireAndForget(logger, Promise.resolve("fine"), "Reading the choice");
+  fireAndForget(logger, undefined, "Skipping the choice");
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(logger.entries, [{ level: "error", message: "Saving the choice failed.", error: failure }]);
 });

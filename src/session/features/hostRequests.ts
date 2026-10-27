@@ -27,6 +27,7 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { currentPaletteDocument, isDocumentEligible, isPathWithin, previewReadOnlyReason } from "../sessionDocuments";
+import { fireAndForget } from "../../host-api/logger";
 
 /** The answer of a palette list request. */
 export type HostListAnswer =
@@ -128,14 +129,14 @@ export class HostRequestController {
       | { ok: true; id: string; text: string }
       | { ok: false; reason: string },
   ): void {
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: `${message.type}Result`,
       documentId: message.documentId,
       revision: message.revision,
       requestId: message.requestId,
       editId: message.editId,
       ...result,
-    });
+    }), "postToPage");
   }
 
   /** The citation keys of the workspace's `.bib` files next to `documentPath` (bounded scan). */

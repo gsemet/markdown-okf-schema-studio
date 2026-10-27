@@ -12,6 +12,7 @@ import type { DocumentStore } from "./documentStore";
 import type { FileSystem } from "./fileSystem";
 import type { SchemaFiles } from "../core/frontmatter/schemaFiles";
 import type { HostUi } from "./hostUi";
+import type { Logger } from "./logger";
 import type { Navigation } from "./navigation";
 import type { ProcessRunner } from "./processRunner";
 import type { Settings } from "./settings";
@@ -39,6 +40,7 @@ export { EventSource, type Disposable, type HostEvent } from "./events";
 export { isFileNotFound, readTextFile, type FileKind, type FileStat, type FileSystem } from "./fileSystem";
 export type { HostUi, PickedFile, PickFileOptions } from "./hostUi";
 export type { SchemaFiles } from "../core/frontmatter/schemaFiles";
+export { describeError, fireAndForget, type Logger } from "./logger";
 export type { KeyValueStore } from "./keyValueStore";
 export type { Navigation } from "./navigation";
 export type { PanelGroups, PreviewPanel } from "./previewPanel";
@@ -64,6 +66,8 @@ export interface HostServices {
   readonly ui: HostUi;
   readonly vcs: VcsInfo;
   readonly diagnostics: Diagnostics;
+  /** Where background failures are reported (VS Code: an output channel). */
+  readonly logger: Logger;
   readonly watcher: Watcher;
   readonly processes: ProcessRunner;
   readonly navigation: Navigation;

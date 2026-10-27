@@ -15,6 +15,7 @@ import type { DiagnosticEntry, DiagnosticSeverity, Diagnostics } from "../host-a
 import type { TextRange } from "../host-api/documentStore";
 import type { FileKind, FileSystem } from "../host-api/fileSystem";
 import type { HostUi } from "../host-api/hostUi";
+import { describeError, fireAndForget, type Logger } from "../host-api/logger";
 import type { HostServices } from "../host-api/index";
 import type { ColorTheme } from "../host-api/colorTheme";
 import type { Navigation } from "../host-api/navigation";
@@ -127,7 +128,7 @@ function createVscodeSettings(): Settings {
   };
 }
 
-function createVscodeUi(): HostUi {
+function createVscodeUi(logger: Logger): HostUi {
   return {
     showInformation: (message) => vscode.window.showInformationMessage(message),
     showWarning: (message) => vscode.window.showWarningMessage(message),
@@ -146,7 +147,11 @@ function createVscodeUi(): HostUi {
     showProblems: () => vscode.commands.executeCommand<void>("workbench.actions.view.problems"),
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
     setPreviewEditing: (editing) => {
-      void vscode.commands.executeCommand("setContext", "markdownOkfSchemaStudio.previewEditing", editing);
+      fireAndForget(
+        logger,
+        vscode.commands.executeCommand("setContext", "markdownOkfSchemaStudio.previewEditing", editing),
+        "Setting the previewEditing context",
+      );
     },
     readClipboard: () => vscode.env.clipboard.readText(),
     writeClipboard: (text) => vscode.env.clipboard.writeText(text),
@@ -291,9 +296,25 @@ function createVscodeTheme(): ColorTheme {
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-002
+/** The log lines go to one output channel, created when the first line is written. */
+function createVscodeLogger(): Logger {
+  let channel: vscode.OutputChannel | undefined;
+  const write = (level: string, message: string): void => {
+    channel ??= vscode.window.createOutputChannel("Markdown OKF-Schema Studio");
+    channel.appendLine(`${new Date().toISOString()} [${level}] ${message}`);
+  };
+  return {
+    error: (message, error) => write("error", error === undefined ? message : `${message} ${describeError(error)}`),
+    warn: (message) => write("warn", message),
+    info: (message) => write("info", message),
+  };
+}
+
 /** Creates the VS Code host. */
 export function createVscodeHost(): VscodeHost {
   const documents = createVscodeDocumentStore();
+  const logger = createVscodeLogger();
   return {
     capabilities: {
       undo: true,
@@ -309,9 +330,10 @@ export function createVscodeHost(): VscodeHost {
     schemaFiles: nodeSchemaFiles,
     settings: createVscodeSettings(),
     workspace: createVscodeWorkspaceInfo(),
-    ui: createVscodeUi(),
+    ui: createVscodeUi(logger),
     vcs: createVscodeVcsInfo(),
     diagnostics: createVscodeDiagnostics(),
+    logger,
     watcher: createVscodeWatcher(),
     processes: createNodeProcessRunner(),
     navigation: createVscodeNavigation(),

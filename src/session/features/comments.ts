@@ -32,6 +32,7 @@ import type { RenamedFile } from "../hostEvents";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { previewReadOnlyReason, revisionOfStage } from "../sessionDocuments";
+import { fireAndForget } from "../../host-api/logger";
 
 /** Comment threads of one page (owned by the comments controller). */
 export interface CommentsState {
@@ -149,9 +150,9 @@ export class CommentsController {
       stored = parsed.threads;
       if (parsed.errors.length > 0 && state.warned !== text) {
         state.warned = text;
-        void this.manager.host.ui.showWarning(
+        fireAndForget(this.manager.host.logger, this.manager.host.ui.showWarning(
           `The review comments file ${path.basename(sidecar)} is not valid and is ignored: ${parsed.errors[0]}.`,
-        );
+        ), "showWarning");
       }
     }
     // T45: the page gets the live anchors. Same sidecar text as the last time: the in-memory view that
@@ -190,13 +191,13 @@ export class CommentsController {
     state.shown = threads.length > 0;
     preview.probe.commentPosts += 1;
     preview.probe.lastComments = threads;
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewComments",
       threads,
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
-    });
+    }), "postToPage");
   }
 
   /** The text of the document: the open buffer when there is one, else the file (bounded size). */
@@ -300,7 +301,7 @@ export class CommentsController {
   private warnAnchorsNotSaved(reason: string): void {
     if (this.lastAnchorWarning === reason) return;
     this.lastAnchorWarning = reason;
-    void this.manager.host.ui.showWarning(`The review comments were not re-anchored in their file: ${reason}`);
+    fireAndForget(this.manager.host.logger, this.manager.host.ui.showWarning(`The review comments were not re-anchored in their file: ${reason}`), "showWarning");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-125
@@ -326,9 +327,9 @@ export class CommentsController {
         const parsed = parseSidecar(oldText);
         if (parsed.errors.length === 0 && parsed.document !== oldName) continue;
         const keep = (reason: string): void => {
-          void ui.showWarning(
+          fireAndForget(this.manager.host.logger, ui.showWarning(
             `The review comments of ${oldName} stay in ${path.basename(oldSidecar)}: ${reason}`,
-          );
+          ), "showWarning");
         };
         if (parsed.errors.length > 0) {
           keep("that file is not valid.");
@@ -345,7 +346,7 @@ export class CommentsController {
         await files.rename(oldSidecar, newSidecar, { overwrite: false });
         await this.store.update(newSidecar, newName, (threads) => threads, { renameDocument: true });
       } catch (error) {
-        console.error("Failed to move the review comments with the renamed document.", error);
+        this.manager.host.logger.error("Failed to move the review comments with the renamed document.", error);
       }
     }
   }
@@ -370,9 +371,7 @@ export class CommentsController {
     if (state.timer) clearTimeout(state.timer);
     state.timer = setTimeout(() => {
       state.timer = undefined;
-      void this.post(preview).catch((error: unknown) => {
-        console.error("Failed to show the review comments.", error);
-      });
+      fireAndForget(this.manager.host.logger, this.post(preview), "Showing the review comments");
     }, delay);
   }
 
@@ -403,7 +402,7 @@ export class CommentsController {
   ): Promise<CommentOutcome> {
     const { host } = this.manager;
     const refuse = (reason: string): CommentOutcome => {
-      void host.ui.showWarning(`The comment was not saved: ${reason}`);
+      fireAndForget(host.logger, host.ui.showWarning(`The comment was not saved: ${reason}`), "showWarning");
       return { ok: false, reason };
     };
     if (preview.readOnly) return refuse(previewReadOnlyReason(preview));
@@ -446,13 +445,13 @@ export class CommentsController {
       ...(threadId !== undefined ? { threadId } : {}),
     };
     preview.probe.lastCommentResult = result;
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewCommentResult",
       ...result,
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
-    });
+    }), "postToPage");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-090

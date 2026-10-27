@@ -18,6 +18,7 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { revisionOfStage } from "../sessionDocuments";
+import { fireAndForget } from "../../host-api/logger";
 
 /** Scroll state of one page (owned by the scroll sync controller). */
 export interface ScrollState {
@@ -163,14 +164,14 @@ export class ScrollSyncController {
           preview.scroll.anchor = { line: sourceLine, owner: "editor", documentId: documentIdentity };
         }
         preview.scroll.lastSourceScrollLine = sourceLine;
-        void preview.postToPage({
+        fireAndForget(this.manager.host.logger, preview.postToPage({
           type: "sourceScroll",
           documentId: stage.activeDocumentIdentity,
           revision: revisionOfStage(stage),
           requestId: stage.requestId,
           line: sourceLine,
           selectionLine: sourceEditor.selectionLine + 1,
-        });
+        }), "postToPage");
       }
     }
   }
@@ -244,13 +245,13 @@ export class ScrollSyncController {
     if (!preview.configuration.markEditorSelection || !stage || !editor) {
       return;
     }
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "sourceScroll",
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
       selectionLine: editor.selectionLine + 1,
-    });
+    }), "postToPage");
   }
 
   /** A scroll of the page or a reveal request moves the text editor, as the settings allow. */
@@ -296,13 +297,13 @@ export class ScrollSyncController {
     if (preview.disposed || !stage) {
       return;
     }
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewPairing",
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
       requestId: stage.requestId,
       pairedTextEditor: this.visibleEditorFor(preview) !== undefined,
-    });
+    }), "postToPage");
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-THEME-016
@@ -318,7 +319,7 @@ export class ScrollSyncController {
       pairedTextEditor: this.visibleEditorFor(preview) !== undefined,
       themeKind: this.manager.host.theme.kind,
     })) {
-      void preview.postToPage(message);
+      fireAndForget(this.manager.host.logger, preview.postToPage(message), "postToPage");
     }
   }
 

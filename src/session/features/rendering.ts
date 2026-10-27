@@ -43,6 +43,7 @@ import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { isDocumentEligible, previewReadOnlyReason, revisionOfStage } from "../sessionDocuments";
 import { CONTENT_PATCH_ACK_TIMEOUT_MS, PENDING_OVERLAY_DELAY_MS, type ToolbarState } from "./pageLoadState";
+import { fireAndForget } from "../../host-api/logger";
 
 function diagnosticDetails(error: unknown): PreviewDiagnostic[] {
   return error instanceof RenderError ? error.diagnostics : [];
@@ -190,7 +191,7 @@ export class RenderingController {
     if (!stage || preview.disposed) {
       return;
     }
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewPendingOverlay",
       documentId: stage.activeDocumentIdentity,
       revision: revisionOfStage(stage),
@@ -198,7 +199,7 @@ export class RenderingController {
       visible,
       label: PREVIEW_STATUS_LABELS.pending,
       message: preview.overlay.message,
-    });
+    }), "postToPage");
   }
 
   /** A render finished or failed: stop the timer and hide an overlay that stays in the loaded page. */
@@ -347,7 +348,7 @@ export class RenderingController {
       toVersion: next.activeDocumentRevision,
       ranges: updatedRanges.map((range) => ({ start: range.start, end: range.end })),
     }];
-    void preview.postToPage({
+    fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewContentPatch",
       // The runtime matches this against its own document identity; the page can only be patched
       // when the previous and the next stage show the same document, so previous is also the target.
@@ -365,7 +366,7 @@ export class RenderingController {
       label: PREVIEW_STATUS_LABELS[patch.status],
       diagnostics: patch.diagnostics,
       ...(updatedRanges.length > 0 ? { updatedRanges } : {}),
-    });
+    }), "postToPage");
   }
 
   /** Loads the full document when a patched page does not report ready for its stage in time. */
@@ -720,7 +721,7 @@ export class RenderingController {
       return;
     }
     preview.renderDirty = false;
-    void this.refreshPreviewDocument(preview, preview.document);
+    fireAndForget(this.manager.host.logger, this.refreshPreviewDocument(preview, preview.document), "refreshPreviewDocument");
   }
 
   /** Renders the shown document again when the page needs it (a dependency change always does). */
@@ -733,7 +734,7 @@ export class RenderingController {
         documentVersion: preview.document.revision,
         stageVersion: preview.stage?.activeDocumentRevision,
       })) {
-      void this.refreshPreviewDocument(preview, preview.document);
+      fireAndForget(this.manager.host.logger, this.refreshPreviewDocument(preview, preview.document), "refreshPreviewDocument");
     }
   }
 
