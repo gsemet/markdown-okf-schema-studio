@@ -206,6 +206,19 @@ export class PageDocumentController {
     }
   }
 
+  /**
+   * Settles the change kept pending by `noteOutsideChange`: a keystroke seen since the change
+   * means the writer typed it; none means another tool made it.
+   */
+  private settlePendingOutsideChange(preview: PreviewSession): void {
+    const pending = preview.page.pendingOutsideChange;
+    if (!pending) return;
+    preview.page.pendingOutsideChange = undefined;
+    const lastKeystroke = this.manager.host.editors.lastKeystrokeAt?.();
+    if (lastKeystroke !== undefined && lastKeystroke >= pending.at) return;
+    preview.page.outsideChangeVersion = Math.max(preview.page.outsideChangeVersion ?? 0, pending.version);
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-094
   /**
    * Sends the new content of the page to the loaded webview (T34). The message is addressed to the
@@ -230,6 +243,7 @@ export class PageDocumentController {
     preview.page.propertiesTableAwaited = undefined;
     preview.page.recordKeepsLoadedNonce = true;
     preview.page.patchedRequestId = next.requestId;
+    this.settlePendingOutsideChange(preview);
     const updatedRanges = updatedRangesForPatch(
       { sourceText: previous.sourceText, version: previous.activeDocumentRevision },
       { sourceText: next.sourceText, version: next.activeDocumentRevision },

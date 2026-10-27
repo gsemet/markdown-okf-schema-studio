@@ -15,6 +15,10 @@
 - A table column in the preview never narrows below 5em of text, so a table with many columns no
   longer wraps words letter by letter ("docu / ment"); a table that no longer fits scrolls sideways
   or breaks out in Auto width. Edit mode keeps its larger 8em cell minimum.
+- An edit another tool applies to the document you have open in the text editor now glows in the
+  preview too, when you pressed no key in the last half second or the edit is away from your cursor.
+  Typing at your cursor still does not glow. Backspace, Delete and a paste glow when they are the
+  first key after a pause.
 - PlantUML through Java (`plantuml.useJar`) now runs with the PlantUML `ALLOWLIST` security profile
   (the workspace folder as allowlist path) and an explicit image size limit of 4096. Includes of files
   inside the workspace still work; URL includes are refused. `JAVA_HOME` is used when it is an

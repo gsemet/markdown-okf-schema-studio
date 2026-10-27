@@ -43,6 +43,11 @@ export interface PageLoadState {
    * the content patch that first shows it makes the updated blocks glow.
    */
   outsideChangeVersion?: number;
+  /**
+   * A change that touched a cursor before any keystroke was seen (CR 139): typing, when the
+   * keystroke arrives right after it, an outside change otherwise. Settled by the next patch.
+   */
+  pendingOutsideChange?: { version: number; at: number };
 }
 
 /** The floating pending overlay of one page (D-22). */

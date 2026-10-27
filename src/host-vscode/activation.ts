@@ -18,6 +18,7 @@ import { parsePreviewPanelState } from "../core/state/previewState";
 import { resetRenderHooksForTests } from "../core/render/renderPipeline";
 import { createVscodePanelGroups, type VscodePanelGroups } from "./groupLock";
 import { createVscodePreviewPanel, type VscodePreviewPanel } from "./previewPanel";
+import { startKeystrokeTracking } from "./keystrokes";
 import { createVscodeHost, type VscodeHost } from "./vscodeHost";
 import { fireAndForget } from "../host-api/logger";
 
@@ -100,6 +101,8 @@ export class StudioActivation {
       vscode.window.onDidChangeActiveTextEditor((editor) =>
         manager.events.onActiveEditorChanged(editor ? host.editorOf(editor) : undefined)),
       vscode.window.onDidChangeVisibleTextEditors(() => manager.events.onVisibleEditorsChanged()),
+      // @implements_req SwRS-MDOKFSTUDIO-LIFE-094
+      startKeystrokeTracking(),
       vscode.window.onDidChangeTextEditorVisibleRanges((event) =>
         manager.events.onVisibleRangesChanged(host.editorOf(event.textEditor))),
       vscode.window.onDidChangeActiveColorTheme(() => manager.events.onThemeChanged()),

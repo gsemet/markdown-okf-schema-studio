@@ -19,8 +19,11 @@ a second) and never lets them move the text:
 - The theme button fades the colours from one theme to the next.
 - After a change made outside the preview (another tool or an agent writing the file, a file
   changed on disk) or an undo or redo, the blocks that changed glow once with a light wash of the
-  focus colour. Edits you make in the preview itself do not glow, and neither does typing in the
-  active text editor nor a change spread over many places (a checkout, a reload of the file).
+  focus colour. This includes an edit an agent applies to the file you have open in the text editor,
+  when you pressed no key in the last half second or the edit is away from your cursor. Edits you
+  make in the preview itself do not glow, and neither does typing at your cursor nor a change spread
+  over many places (a checkout, a reload of the file). Backspace, Delete and a paste glow when
+  they are the first key after a pause.
 
 Nothing animates when the page loads, when it is refreshed in place or when it follows the
 editor's scrolling. With your system's "reduce motion" accessibility setting on
