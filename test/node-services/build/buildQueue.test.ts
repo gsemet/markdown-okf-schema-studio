@@ -215,3 +215,150 @@ test("disposal releases the last result once and rejects future requests", async
   assert.deepEqual(disposed, ["result"]);
   assert.equal((await queue.request(document(2, "new"))).status, "canceled");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+test("adapts the debounce to twice the last build time, within its bounds", async (context) => {
+  context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
+  const started: number[] = [];
+  const queue = new BuildQueue<TestDocument, string>({
+    debounceMs: 40,
+    maxDebounceMs: 1000,
+    revisionOf: (queued) => queued.version,
+    // Each build takes 300 ms of (mocked) time.
+    build: (request) => {
+      started.push(request.requestId);
+      return new Promise((resolve) => setTimeout(() => resolve(`r${request.requestId}`), 300));
+    },
+  });
+  context.after(() => queue.dispose());
+  assert.equal(queue.currentDebounceMs(), 40);
+  const first = queue.request(document(1, "first"));
+  context.mock.timers.tick(40);
+  assert.deepEqual(started, [1]);
+  context.mock.timers.tick(300);
+  assert.equal((await first).status, "ready");
+  // The last build took 300 ms: the next one waits 600 ms after the last edit, not 40 ms.
+  assert.equal(queue.currentDebounceMs(), 600);
+  const second = queue.request(document(2, "second"));
+  context.mock.timers.tick(40);
+  assert.deepEqual(started, [1]);
+  context.mock.timers.tick(559);
+  assert.deepEqual(started, [1]);
+  context.mock.timers.tick(1);
+  assert.deepEqual(started, [1, 2]);
+  context.mock.timers.tick(300);
+  assert.equal((await second).status, "ready");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+test("aborts a build that overruns twice the last build time once a newer edit is due", async (context) => {
+  context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
+  const signals = new Map<number, AbortSignal>();
+  const finishers = new Map<number, (value: string) => void>();
+  const disposed: string[] = [];
+  const queue = new BuildQueue<TestDocument, string>({
+    debounceMs: 40,
+    // The overrun limit is never below the longest wait; 200 ms keeps the numbers small.
+    maxDebounceMs: 200,
+    revisionOf: (queued) => queued.version,
+    build: (request, signal) => {
+      signals.set(request.requestId, signal);
+      return new Promise((resolve) => {
+        finishers.set(request.requestId, resolve);
+        // The first build takes 100 ms; the others wait for the test.
+        if (request.requestId === 1) setTimeout(() => resolve("r1"), 100);
+      });
+    },
+    disposeResult: (result) => disposed.push(result),
+  });
+  context.after(() => queue.dispose());
+  const first = queue.request(document(1, "first"));
+  context.mock.timers.tick(40);
+  context.mock.timers.tick(100);
+  assert.equal((await first).status, "ready");
+  // The next build runs long (the document grew); a newer edit arrives 50 ms into it.
+  const slow = queue.request(document(2, "slow"));
+  context.mock.timers.tick(200);
+  assert.ok(signals.has(2));
+  context.mock.timers.tick(50);
+  const newest = queue.request(document(3, "newest"));
+  // Its 200 ms wait elapses 250 ms into the slow build, past twice the last build time.
+  context.mock.timers.tick(199);
+  assert.equal(signals.get(2)!.aborted, false);
+  context.mock.timers.tick(1);
+  assert.equal(signals.get(2)!.aborted, true);
+  const slowOutcome = await slow;
+  assert.equal(slowOutcome.status, "superseded");
+  assert.equal(slowOutcome.lastGood, "r1");
+  assert.ok(signals.has(3), "the newest edit builds at once");
+  // The aborted build ran 250 ms at least: the next wait grows with it, up to its bound.
+  assert.equal(queue.currentDebounceMs(), 200);
+  // A late result of the aborted build is dropped.
+  finishers.get(2)!("late");
+  finishers.get(3)!("r3");
+  const outcome = await newest;
+  assert.equal(outcome.status, "ready");
+  assert.equal(outcome.result, "r3");
+  await Promise.resolve();
+  assert.ok(disposed.includes("late"));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+test("the adaptive wait uses the duration the result reports, and keeps its estimate without one", async (context) => {
+  context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
+  const durations: Array<number | undefined> = [250, undefined];
+  const queue = new BuildQueue<TestDocument, number | undefined>({
+    debounceMs: 40,
+    revisionOf: (queued) => queued.version,
+    // The build itself takes no time; the reported duration is what counts (a worker start is not).
+    build: async () => durations.shift(),
+    durationOf: (result) => result,
+  });
+  context.after(() => queue.dispose());
+  const first = queue.request(document(1, "first"));
+  context.mock.timers.tick(40);
+  await first;
+  assert.equal(queue.currentDebounceMs(), 500);
+  const second = queue.request(document(2, "second"));
+  context.mock.timers.tick(500);
+  await second;
+  assert.equal(queue.currentDebounceMs(), 500);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-039
+test("never aborts a build of a small document whose wall time exceeds its reported render time", async (context) => {
+  context.mock.timers.enable({ apis: ["setTimeout", "Date"] });
+  const signals = new Map<number, AbortSignal>();
+  const queue = new BuildQueue<TestDocument, string>({
+    debounceMs: 40,
+    revisionOf: (queued) => queued.version,
+    // The render itself takes 2 ms; the build takes 60 ms of wall time (a busy host, a worker
+    // starting, the patch to the page).
+    build: (request, signal) => {
+      signals.set(request.requestId, signal);
+      return new Promise((resolve) => setTimeout(() => resolve(`r${request.requestId}`), 60));
+    },
+    durationOf: () => 2,
+  });
+  context.after(() => queue.dispose());
+  const first = queue.request(document(1, "first"));
+  context.mock.timers.tick(40);
+  context.mock.timers.tick(60);
+  assert.equal((await first).status, "ready");
+  assert.equal(queue.currentDebounceMs(), 40);
+  const second = queue.request(document(2, "second"));
+  context.mock.timers.tick(40);
+  assert.ok(signals.has(2));
+  // A newer edit arrives as the build starts; its 40 ms wait elapses while the build still runs.
+  const third = queue.request(document(3, "third"));
+  context.mock.timers.tick(40);
+  assert.equal(signals.get(2)!.aborted, false);
+  context.mock.timers.tick(20);
+  const secondOutcome = await second;
+  assert.equal(secondOutcome.status, "ready");
+  assert.equal(signals.get(2)!.aborted, false);
+  // The newer edit starts right after the build finished.
+  assert.ok(signals.has(3));
+  context.mock.timers.tick(60);
+  assert.equal((await third).status, "ready");
+});

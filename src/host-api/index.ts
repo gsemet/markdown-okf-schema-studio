@@ -14,6 +14,7 @@ import type { SchemaFiles } from "../core/frontmatter/schemaFiles";
 import type { HostUi } from "./hostUi";
 import type { Logger } from "./logger";
 import type { Navigation } from "./navigation";
+import type { PreviewRenderer } from "./previewRenderer";
 import type { ProcessRunner } from "./processRunner";
 import type { Settings } from "./settings";
 import type { TextEditors } from "./textEditors";
@@ -44,6 +45,7 @@ export { describeError, fireAndForget, type Logger } from "./logger";
 export type { KeyValueStore } from "./keyValueStore";
 export type { Navigation } from "./navigation";
 export type { PanelGroups, PreviewPanel } from "./previewPanel";
+export type { PreviewRenderer } from "./previewRenderer";
 export type { ProcessOptions, ProcessResult, ProcessRunner } from "./processRunner";
 export type { Settings, SettingsChange, SettingsSection } from "./settings";
 export type { PairedEditor, RevealPosition, TextEditors } from "./textEditors";
@@ -74,4 +76,6 @@ export interface HostServices {
   /** The text editors beside the preview; none when `capabilities.editorPairing` is false. */
   readonly editors: TextEditors;
   readonly theme: ColorTheme;
+  /** Where the source renders of the previews run; none: in-process. */
+  readonly previewRenderer?: PreviewRenderer;
 }

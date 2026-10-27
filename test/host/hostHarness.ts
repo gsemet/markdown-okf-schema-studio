@@ -29,6 +29,11 @@ const originalLoad = nodeModule._load;
 nodeModule._load = function load(request: string, ...rest: unknown[]): unknown {
   return request === "vscode" ? fake.vscode : originalLoad.call(this, request, ...rest);
 };
+// The harness drives the host on a mocked clock and expects a render to end within a few event-loop
+// turns: renders stay in-process here (the worker thread has its own tests).
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+(require("../../src/node-services/renderWorker") as typeof import("../../src/node-services/renderWorker"))
+  .setRenderWorkersEnabledForTests(false);
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const extension = require("../../src/extension") as {
   activate(context: unknown): void;

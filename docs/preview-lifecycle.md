@@ -87,6 +87,13 @@ The trusted extension-host suites verify:
   earlier shared render;
 - a hidden preview does not render until it is shown, and previews of one document and revision
   share one render (each with its own request id);
+- the MyST render runs in a worker thread (`out/bundle/renderWorker.js`), not on the extension
+  host thread (the sanitizer and the source mapping still run there); an aborted render
+  terminates its worker at once, and a worker that cannot start leaves the render in-process with
+  the same output;
+- the wait after the last edit is 40 ms, or twice the last render time when that is longer (at most
+  1 s); a running render finishes first unless it has run more than 1 s and more than twice the
+  wall-clock time of the last render when the newer render is due, in which case it is aborted;
 - delayed obsolete work is canceled or discarded by request, document, and panel identity checks;
 - serializer restoration reopens a real fixture with its document identity, source line, and scroll
   state, while a missing restored source produces an explicit missing-source view;

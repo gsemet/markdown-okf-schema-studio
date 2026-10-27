@@ -41,7 +41,18 @@ export interface BuildQueueOptions<
   TDocument extends QueueDocument,
   TResult,
 > {
+  /**
+   * The shortest wait after the last request before its build starts. The wait adapts to the
+   * builds: twice the duration of the last build, at least `debounceMs`, at most `maxDebounceMs`.
+   */
   debounceMs?: number;
+  /** The longest adaptive wait (ms); default 1000. */
+  maxDebounceMs?: number;
+  /**
+   * The duration of a finished build as the result reports it (ms), for the adaptive wait;
+   * undefined keeps the previous estimate. Omitted: the time from the start of the build to its end.
+   */
+  durationOf?: (result: TResult) => number | undefined;
   build: (request: BuildRequest<TDocument>, signal: AbortSignal) => Promise<TResult>;
   onState?: (state: BuildQueueState<TResult, TDocument>) => void;
   disposeResult?: (result: TResult) => void;
@@ -61,7 +72,15 @@ interface PendingBuild<TDocument extends QueueDocument, TResult> {
 interface ActiveBuild<TDocument extends QueueDocument, TResult>
   extends PendingBuild<TDocument, TResult> {
   controller: AbortController;
+  /** `Date.now()` when the build started. */
+  startedAt: number;
 }
+
+/**
+ * Builds faster than this (ms) leave the wait at `debounceMs`: twice their time is below any useful
+ * debounce, and a millisecond clock cannot measure them.
+ */
+const MIN_ADAPTIVE_BUILD_MS = 10;
 
 function canonicalPath(filePath: string): string {
   try {
@@ -73,6 +92,8 @@ function canonicalPath(filePath: string): string {
 
 export class BuildQueue<TDocument extends QueueDocument, TResult> {
   private readonly debounceMs: number;
+  private readonly maxDebounceMs: number;
+  private readonly durationOf: ((result: TResult) => number | undefined) | undefined;
   private readonly build: BuildQueueOptions<TDocument, TResult>["build"];
   private readonly onState: NonNullable<BuildQueueOptions<TDocument, TResult>["onState"]>;
   private readonly disposeResult: NonNullable<BuildQueueOptions<TDocument, TResult>["disposeResult"]>;
@@ -81,6 +102,18 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
   private requestCounter = 0;
   private latestRequestId = 0;
   private timer: NodeJS.Timeout | undefined;
+  /** Re-checks a running build for an overrun while a newer request waits for it. */
+  private overrunTimer: NodeJS.Timeout | undefined;
+  /**
+   * How long the last build took (ms) as `durationOf` reports it, or at least how long an aborted
+   * one had run: drives the adaptive wait.
+   */
+  private lastBuildMs: number | undefined;
+  /**
+   * The wall-clock time of the last completed build (ms), or at least how long an aborted one had
+   * run: drives the overrun limit, which it is compared with.
+   */
+  private lastWallMs: number | undefined;
   private pending: PendingBuild<TDocument, TResult> | undefined;
   private active: ActiveBuild<TDocument, TResult> | undefined;
   private lastGood: TResult | undefined;
@@ -92,6 +125,8 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
 
   public constructor(options: BuildQueueOptions<TDocument, TResult>) {
     this.debounceMs = options.debounceMs ?? 120;
+    this.maxDebounceMs = Math.max(this.debounceMs, options.maxDebounceMs ?? 1000);
+    this.durationOf = options.durationOf;
     this.build = options.build;
     this.onState = options.onState ?? (() => undefined);
     this.disposeResult = options.disposeResult ?? (() => undefined);
@@ -130,6 +165,16 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
     return this.dependencyCache.canonical;
   }
 
+  /**
+   * The wait before a requested build starts: `debounceMs` until a build finished, then twice the
+   * last build's duration within `[debounceMs, maxDebounceMs]` (builds under 10 ms do not count), so a slow document is not rebuilt
+   * on every short pause in typing.
+   */
+  public currentDebounceMs(): number {
+    if (this.lastBuildMs === undefined || this.lastBuildMs < MIN_ADAPTIVE_BUILD_MS) return this.debounceMs;
+    return Math.min(this.maxDebounceMs, Math.max(this.debounceMs, Math.round(2 * this.lastBuildMs)));
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
   public request(document: TDocument): Promise<BuildQueueOutcome<TResult, TDocument>> {
     const request: BuildRequest<TDocument> = {
@@ -143,8 +188,8 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
       return Promise.resolve({ status: "canceled", request });
     }
 
-    // Edits coalesce into the pending slot; an in-flight render is left alone so the
-    // preview keeps refreshing at build cadence instead of restarting on every keystroke.
+    // Edits coalesce into the pending slot; an in-flight render is left alone so the preview keeps
+    // refreshing at build cadence, unless it overruns (see `startPending`).
     this.supersedePending();
     return new Promise((resolve) => {
       this.pending = { request, resolve };
@@ -154,7 +199,10 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
         lastGood: this.lastGood,
         stale: this.lastGood !== undefined,
       });
-      this.timer = setTimeout(() => this.startPending(), this.debounceMs);
+      this.timer = setTimeout(() => {
+        this.timer = undefined;
+        this.startPending();
+      }, this.currentDebounceMs());
     });
   }
 
@@ -168,6 +216,7 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
     }
     const canceledRequest = this.active?.request ?? this.pending?.request;
     this.latestRequestId = this.requestCounter + 1;
+    this.clearOverrunTimer();
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = undefined;
@@ -206,6 +255,7 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
       return;
     }
     this.disposed = true;
+    this.clearOverrunTimer();
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = undefined;
@@ -238,22 +288,63 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
     }
     this.settle(this.pending, { status: "superseded", request: this.pending.request });
     this.pending = undefined;
+    this.clearOverrunTimer();
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = undefined;
     }
   }
 
+  private clearOverrunTimer(): void {
+    if (this.overrunTimer) {
+      clearTimeout(this.overrunTimer);
+      this.overrunTimer = undefined;
+    }
+  }
+
+  /**
+   * How long a build may run, once a build completed, before a newer request stops it: twice the
+   * wall-clock time of the last build, and never less than `maxDebounceMs`. The floor covers what a
+   * restart costs (a fresh render thread loads its engine first), so the builds of a small document
+   * are never aborted.
+   */
+  private overrunMs(): number | undefined {
+    return this.lastWallMs === undefined ? undefined : Math.max(this.maxDebounceMs, 2 * this.lastWallMs);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
+  /**
+   * Starts the pending request once its wait elapsed. A running build is left to finish (its
+   * result is still worth showing), unless it overruns: it has run more than twice the wall-clock
+   * time of the last build, and at least `maxDebounceMs`. Its result is then too late to matter, so it is aborted and the newest request starts.
+   * Before any build finished there is no build time to compare with (the first build also loads
+   * the engine), so the first build always finishes.
+   */
   private startPending(): void {
-    this.timer = undefined;
-    if (this.disposed || !this.pending || this.active) {
+    if (this.disposed || !this.pending) {
       return;
     }
+    if (this.active) {
+      const overrunMs = this.overrunMs();
+      if (overrunMs === undefined) return;
+      const elapsed = Date.now() - this.active.startedAt;
+      if (elapsed < overrunMs) {
+        this.clearOverrunTimer();
+        this.overrunTimer = setTimeout(() => {
+          this.overrunTimer = undefined;
+          if (!this.timer) this.startPending();
+        }, overrunMs - elapsed);
+        return;
+      }
+      this.abortOverrun(this.active, elapsed);
+    }
+    this.clearOverrunTimer();
     const pending = this.pending;
     this.pending = undefined;
     const active: ActiveBuild<TDocument, TResult> = {
       ...pending,
       controller: new AbortController(),
+      startedAt: Date.now(),
     };
     this.active = active;
     this.publish({
@@ -263,6 +354,15 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
       stale: this.lastGood !== undefined,
     });
     void this.run(active);
+  }
+
+  /** Stops an overrunning build; the time it ran is a lower bound of the next build time. */
+  private abortOverrun(active: ActiveBuild<TDocument, TResult>, elapsed: number): void {
+    this.lastBuildMs = Math.max(this.lastBuildMs ?? 0, elapsed);
+    this.lastWallMs = Math.max(this.lastWallMs ?? 0, elapsed);
+    this.active = undefined;
+    active.controller.abort();
+    this.settle(active, { status: "superseded", request: active.request, lastGood: this.lastGood });
   }
 
   private isCurrent(): boolean {
@@ -300,6 +400,10 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
       const previous = this.lastGood;
       this.lastGood = result;
       this.active = undefined;
+      const wallMs = Date.now() - active.startedAt;
+      this.lastWallMs = wallMs;
+      this.lastBuildMs = this.durationOf ? this.durationOf(result) ?? this.lastBuildMs : wallMs;
+      this.clearOverrunTimer();
       this.publish({
         phase: "ready",
         request: active.request,
@@ -318,6 +422,7 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
         return;
       }
       this.active = undefined;
+      this.clearOverrunTimer();
       if (!this.isCurrent()) {
         this.disposeError(error);
         this.publish({

@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-10-27 (worker-thread render, abort and adaptive debounce)
+
+- SwRS-MDOKFSTUDIO-LIFE-004 (new, CR 135): in the VS Code host the MyST render runs in a worker
+  thread; an aborted render terminates its worker at once, and a worker that cannot start leaves
+  renders in-process. SwRS-MDOKFSTUDIO-LIFE-039: the wait after the last edit is 40 ms or twice the
+  last render time (at most 1 s), and a running render that has run more than 1 s and twice the
+  wall-clock time of the last render is aborted when a newer render is due. Verification: test/node-services/renderWorker.test.ts,
+  test/node-services/build/buildQueue.test.ts, test/core/render/renderPipeline.test.ts,
+  `just requirements-lint`.
+
 ## 2026-10-27 (lifecycle and typing nits)
 
 - SwRS-MDOKFSTUDIO-REVIEW-012: the watch of the comments file disposes its three subscriptions with
