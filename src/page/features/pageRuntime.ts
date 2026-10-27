@@ -42,6 +42,7 @@ import type { MarkdownTableModel, MarkdownTableTools } from "../modules/markdown
 import type { installMotion } from "../modules/motion";
 import type { PasteHtml } from "../modules/pasteHtml";
 import type { PasteImage } from "../modules/pasteImage";
+import type { PasteUrl } from "../modules/pasteUrl";
 import type { SlashMenu } from "../modules/slashMenu";
 import type { createTextEditingTools, TextEdit } from "../modules/textEditing";
 import type { installTocColumn } from "../modules/tocColumn";
@@ -318,6 +319,7 @@ export interface PageParts {
   plantUmlFileRequests: HostRequests;
   pasteImage: PasteImage;
   pasteHtml: PasteHtml;
+  pasteUrl: PasteUrl;
   warningBanner: ReturnType<typeof installWarningBanner>;
   figureEditButton: FigureEditButton;
   chipToggle: ReturnType<typeof installChipToggle>;

@@ -658,6 +658,11 @@
 - SwRS-MDOKFSTUDIO-PALETTE-003 (CR 142, new): the Table of contents palette action and the `/toc`
   slash entry insert a `[TOC]` line after the current line, in every mode. Verification:
   test/page/modules/tocAction.test.ts.
+- SwRS-MDOKFSTUDIO-PALETTE-264 (new, CR 145): a plain-text http, https or mailto address pasted into
+  the block text box becomes `[text](url)` over a selection, an autolink alone or an image for a
+  picture address; Cmd/Ctrl+Shift+V, rich text, other schemes and code stay native. Verification:
+  test/page/modules/pasteUrl.test.ts, test/page/runtimePaletteActions.test.ts,
+  test/integration/pasteUrl.test.ts, `just requirements-lint`.
 
 ## 2026-10-28
 
