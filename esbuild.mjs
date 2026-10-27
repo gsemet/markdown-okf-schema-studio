@@ -3,6 +3,7 @@ import { cpSync, mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import * as path from "node:path";
 
+import { mystPatchPlugin } from "./scripts/myst-patches.mjs";
 import { pageBundleOptions } from "./scripts/page-bundle.mjs";
 
 // The MyST engine is ESM-only and pulls in the whole unified ecosystem; bundling keeps the
@@ -17,6 +18,22 @@ await build({
   sourcemap: true,
   minify: true,
   external: ["vscode"],
+  plugins: [mystPatchPlugin],
+  logLevel: "info",
+});
+
+// The integration tests run in the VS Code extension host, which loads no Node hook: they get the
+// renderer from this bundle (patched like the extension) and never import the MyST engine.
+await build({
+  entryPoints: ["src/core/render/mystRenderer.ts"],
+  outfile: "out/test/bundle/mystRenderer.js",
+  bundle: true,
+  platform: "node",
+  target: "node20",
+  format: "cjs",
+  sourcemap: false,
+  external: ["vscode"],
+  plugins: [mystPatchPlugin],
   logLevel: "info",
 });
 

@@ -46,7 +46,7 @@ def test_workflow_default_permissions_are_read_only(path: Path) -> None:
 def test_release_job_keeps_dependency_install_scripts_off() -> None:
     text = (ROOT / ".github/workflows/release.yml").read_text()
     assert "npm ci --ignore-scripts" in text
-    assert "node scripts/patch-myst-imports.mjs" in text
+    assert "patch-myst-imports" not in text
 
 
 def test_static_ci_target_runs_an_online_audit_of_production_dependencies() -> None:

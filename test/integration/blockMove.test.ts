@@ -10,7 +10,6 @@ import {
   sendPreviewMessageForTests,
 } from "./extensionApi";
 import { runUndo as runBlockClipboardUndo } from "./blockClipboard.test";
-import { renderMyst } from "../../src/core/render/mystRenderer";
 
 async function waitFor(description: string, predicate: () => boolean, timeoutMs = 20_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -116,7 +115,11 @@ export async function run(): Promise<void> {
 
 /** The line range of every top-level heading and list the renderer maps, as the page sends it. */
 async function renderedRanges(text: string): Promise<Array<{ tag: string; line: number; endLine: number }>> {
-  const { html } = await renderMyst(text);
+  // The bundled renderer (esbuild.mjs): the host has no Node hook, so the engine is never imported here.
+  const bundled = require(path.resolve(__dirname, "../bundle/mystRenderer.js")) as {
+    renderMyst(source: string): Promise<{ html: string }>;
+  };
+  const { html } = await bundled.renderMyst(text);
   return [...html.matchAll(/^<(h[1-6]|ul|ol) data-line="(\d+)" data-end-line="(\d+)"/gmu)]
     .map((match) => ({ tag: match[1], line: Number(match[2]), endLine: Number(match[3]) }));
 }
