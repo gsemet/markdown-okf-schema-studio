@@ -262,6 +262,25 @@ export interface PreviewThreadDeleteMessage extends PageMessageBase<"previewThre
   endLine: number;
 }
 
+/** One replacement of the find bar: a matched text of the rendered page and what it becomes. */
+export interface FindReplaceItem {
+  /** The source lines of the mapped block the match is in. */
+  line: number;
+  endLine: number;
+  /** The matched text as the page shows it. */
+  find: string;
+  /** Which occurrence of `find` among the `occurrences` of the block's rendered text it is (0-based). */
+  occurrence: number;
+  occurrences: number;
+  /** The replacement text (a regular expression's `$1` groups are already expanded). */
+  replacement: string;
+}
+
+/** Replace matches of the find bar: the host edits only the matched source spans. */
+export interface PreviewFindReplaceMessage extends PageMessageBase<"previewFindReplace">, HostRequestFields {
+  items: FindReplaceItem[];
+}
+
 /** Move of a body block past its neighbour from the "+" bar. */
 export interface PreviewBlockMoveMessage extends PageMessageBase<"previewBlockMove"> {
   line: number;
@@ -373,6 +392,7 @@ export type PageToHostMessage =
   | PreviewLabelRenameMessage
   | PreviewThreadReplyMessage
   | PreviewThreadDeleteMessage
+  | PreviewFindReplaceMessage
   | PreviewBlockMoveMessage
   | PreviewBlocksCopyMessage
   | PreviewBlocksCutMessage

@@ -106,6 +106,41 @@ test("an open Markdown edit on the host side refuses a thread change before the 
   assert.equal(none.results[0]!.ok, true);
 });
 
+const findItem = (extra: Record<string, unknown> = {}) =>
+  ({ line: 1, endLine: 1, find: "Title", occurrence: 0, occurrences: 1, replacement: "Heading", ...extra });
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+test("find and replace edits the matched spans in one undo step and answers with the counts", async () => {
+  const writable = setup();
+  await writable.handlers.get("previewFindReplace")!(request({
+    items: [findItem(), findItem({ line: 8, endLine: 8, find: "After", replacement: "Before" }), findItem({ find: "Nope", occurrences: 1 })],
+  }), writable.preview);
+  assert.deepEqual(writable.applied, [[{ start: 2, end: 7, text: "Heading" }, { start: TEXT.indexOf("After"), end: TEXT.indexOf("After") + 5, text: "Before" }]]);
+  assert.deepEqual(writable.results.map((result) => [result.type, result.ok, result.replaced, result.skipped]),
+    [["previewFindReplaceResult", true, 2, 1]]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-012
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-014
+test("find and replace is refused in a read-only preview, during an open edit and when nothing maps", async () => {
+  const refused = setup({ readOnly: true });
+  await refused.handlers.get("previewFindReplace")!(request({ items: [findItem()] }), refused.preview);
+  assert.deepEqual(refused.results.map((result) => [result.ok, result.reason]), [[false, TRUSTED_REFUSAL]]);
+  assert.deepEqual(refused.applied, []);
+  assert.equal(refused.readText(), 0, "answered before the document is read");
+
+  const open = setup({ editOpen: true });
+  await open.handlers.get("previewFindReplace")!(request({ items: [findItem()] }), open.preview);
+  assert.deepEqual(open.results.map((result) => [result.ok, result.reason]),
+    [[false, "Save or cancel the open Markdown edit before replacing."]]);
+  assert.equal(open.readText(), 0);
+
+  const none = setup();
+  await none.handlers.get("previewFindReplace")!(request({ items: [findItem({ find: "Nope" })] }), none.preview);
+  assert.equal(none.results[0]!.ok, false);
+  assert.deepEqual(none.applied, []);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-065
 test("a thread request that names another revision gets the out-of-date answer", async () => {
   const old = setup();

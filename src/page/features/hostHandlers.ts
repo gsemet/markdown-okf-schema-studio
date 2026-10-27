@@ -38,6 +38,8 @@ export function registerHostHandlers(rt: PageRuntime): void {
     if (message.command === "foldAll") parts.headingFold.foldAll();
     else parts.headingFold.unfoldAll();
   });
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+  hostMessages.on("previewFindCommand", () => parts.find.open());
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-156
   hostMessages.on("previewShowComments", (message) => {
     parts.chipToggle.setShowComments(message.showComments !== false);

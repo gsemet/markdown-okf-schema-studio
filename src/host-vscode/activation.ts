@@ -44,6 +44,8 @@ const FOLD_COMMAND_IDS: Readonly<Record<PreviewFoldCommandName, string>> = {
   foldAll: "markdown-okf-schema-studio.foldAll",
   unfoldAll: "markdown-okf-schema-studio.unfoldAll",
 };
+/** The command of the Cmd/Ctrl+F key binding on a focused preview (CR 144). */
+const FIND_COMMAND_ID = "markdown-okf-schema-studio.find";
 /** The view type of the side preview panels (and of their serializer). */
 export const PANEL_VIEW_TYPE = "markdown-okf-schema-studio.preview";
 /** The view type of the custom editor (a fixed preview of one document). */
@@ -104,6 +106,8 @@ export class StudioActivation {
       // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
       ...PREVIEW_FOLD_COMMANDS.map((command) =>
         vscode.commands.registerCommand(FOLD_COMMAND_IDS[command], () => manager.runFoldCommand(command))),
+      // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+      vscode.commands.registerCommand(FIND_COMMAND_ID, () => manager.runFindCommand()),
       vscode.window.registerWebviewPanelSerializer(PANEL_VIEW_TYPE, {
         deserializeWebviewPanel: (panel, state) => this.deserializePreviewPanel(panel, state),
       }),

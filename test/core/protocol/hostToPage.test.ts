@@ -24,6 +24,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewBlocksResult: { op: "copy", ok: true },
   previewThreadReplyResult: { editId: "h", ok: true },
   previewThreadDeleteResult: { editId: "h", ok: true },
+  previewFindReplaceResult: { editId: "h", ok: true, replaced: 2, skipped: 1 },
   previewListTargetsResult: { editId: "h", ok: true, items: [], truncated: false },
   previewListCitationsResult: { editId: "h", ok: true, items: [], truncated: false },
   previewPickDocumentResult: { editId: "h", ok: true, path: "a.md" },
@@ -46,6 +47,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewPairing: { pairedTextEditor: true },
   previewEditCommand: { command: "undo" },
   previewFoldCommand: { command: "foldAll" },
+  previewFindCommand: { command: "open" },
   themeChanged: { themeKind: 2 },
 };
 
@@ -95,6 +97,7 @@ test("the payload checks refuse what the page used to refuse", () => {
     ["previewEditCommand", { command: undefined }],
     ["previewFoldCommand", { command: "undo" }],
     ["previewFoldCommand", { command: undefined }],
+    ["previewFindCommand", { command: "replace" }],
     ["previewEditorWatch", { editId: undefined }],
     ["previewContentPatch", { next: undefined }],
     ["previewContentPatch", { next: { revision: "8", requestId: 12 } }],

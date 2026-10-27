@@ -9,6 +9,7 @@ import sys
 
 from playwright.sync_api import Page
 
+from capture_find_checks import check_find_bar
 from capture_support import Failure, HERE, VISUAL_REPORT_DIR, report_path, save_step
 
 
@@ -320,6 +321,7 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
     if rows[2]["buttons"] != 6:
         failures.append(Failure(page_name, f"toolbar row 3 does not hold 6 buttons: {rows[2]['buttons']}"))
     check_heading_fold(page, toolbar, page_name, failures)
+    check_find_bar(page, toolbar, page_name, failures)
     check_diff_toggle(page, toolbar, page_name, failures, starts_pressed=render_options.get("incomingChanges") is not False)
     if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5 or rows[1]["rect"]["bottom"] > rows[2]["rect"]["top"] + 0.5:
         failures.append(Failure(page_name, "toolbar rows overlap"))

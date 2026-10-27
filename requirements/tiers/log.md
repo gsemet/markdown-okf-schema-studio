@@ -71,6 +71,21 @@
   split per parse) are applied in memory by an esbuild plugin and a Node load hook; the postinstall
   script is gone and nothing is written into node_modules. A package version or content other than
   the reviewed one fails loudly. Verification: test/build/mystSourcePatches.test.ts.
+## 2026-10-27 (find and replace in the preview)
+
+- StRS-MDOKFSTUDIO-TOOLBAR-003 and SwRS-MDOKFSTUDIO-TOOLBAR-009 to -012 and -014 (CR 144): new. Cmd/Ctrl+F
+  in the preview opens a find bar (the key is taken in the page before VS Code's webview find, and
+  left to the text editor and to the fields of an open editor), the matches of the rendered text are
+  painted with the CSS Custom Highlight API and walked with Enter, Shift+Enter and F3 (a match in a
+  folded section unfolds it), match case, whole word and regular expression, and Replace / Replace
+  all edit only the matched source spans through the new page request previewFindReplace (one
+  undo step, groups of a regular expression expanded, matches that do not map one-to-one to the
+  source skipped and counted, refused in a read-only preview or during an open edit).
+  SwRS-MDOKFSTUDIO-CORE-043 is unchanged: the webview find widget stays enabled for the entry
+  points that do not go through the page. Verification: unit tests under test/core/find,
+  test/core/edits, test/core/protocol, test/page/modules and test/session, the real-window run
+  test/integration/findInPreview.test.ts, `just requirements-lint`, real-window screenshots under
+  the CR 144 reports.
 ## 2026-10-27 (fold and unfold sections in the preview)
 
 - StRS-MDOKFSTUDIO-TOOLBAR-002 and SwRS-MDOKFSTUDIO-TOOLBAR-003 to -006 and -008 (CR 143): new. The

@@ -248,6 +248,7 @@ test("every request of the render gate from an older render is answered with the
     [{ type: "previewBlocksPaste", insertAfterLine: 3 }, "previewBlocksResult", { op: "paste" }],
     [{ type: "previewThreadReply", editId: "e", line: 3, endLine: 4, text: "x" }, "previewThreadReplyResult", { editId: "e" }],
     [{ type: "previewThreadDelete", editId: "e", line: 3, endLine: 4 }, "previewThreadDeleteResult", { editId: "e" }],
+    [{ type: "previewFindReplace", editId: "e", items: [{ line: 3, endLine: 4, find: "a", occurrence: 0, occurrences: 1, replacement: "b" }] }, "previewFindReplaceResult", { editId: "e" }],
     [{ type: "previewListTargets", editId: "e" }, "previewListTargetsResult", { editId: "e" }],
     [{ type: "previewListCitations", editId: "e" }, "previewListCitationsResult", { editId: "e" }],
     [{ type: "previewPickDocument", editId: "e" }, "previewPickDocumentResult", { editId: "e" }],

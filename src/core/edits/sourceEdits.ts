@@ -24,6 +24,8 @@ export const CHECKBOX_GONE = "The checkbox is no longer in the source. Refresh t
 /** Refusal of a label rename whose `(name)=` line is gone. */
 export const LABEL_GONE = "The label is no longer on that line. Refresh the preview.";
 
+export { FIND_REPLACE_NOTHING, planFindReplace } from "./findReplace";
+
 export {
   EDIT_UNAVAILABLE_NO_FOLDER,
   EDIT_UNAVAILABLE_UNTRUSTED,

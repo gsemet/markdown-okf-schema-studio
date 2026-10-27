@@ -8,6 +8,7 @@ The [project README](../../README.md) shows what Studio does. These pages hold t
 - [Floating Toolbar](toolbar.md): the three rows of buttons and the collapse chevron.
 - [Folding Sections](folding.md): fold and unfold the sections under headings, the Fold button and
   the command palette.
+- [Find and Replace](find.md): `Cmd/Ctrl+F` in the preview, match options, replace in the source.
 - [Slash Menu](slash-menu.md): the `/` command menu in a block text box.
 - [Preview Themes and Motion](themes-and-motion.md): Dark, White, Cream, and the short animations.
 - [Wide Tables and Figures](wide-tables.md): the Auto width mode.

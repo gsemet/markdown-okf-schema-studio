@@ -127,6 +127,7 @@ export type HostRequestType =
   | "previewCopyText"
   | "previewThreadReply"
   | "previewThreadDelete"
+  | "previewFindReplace"
   | "previewListTargets"
   | "previewListCitations"
   | "previewPickDocument"
@@ -153,6 +154,9 @@ export interface HostRequestResultMessage extends RenderMessage<`${HostRequestTy
   fileName?: string;
   /** Pasted HTML: the Markdown it became. */
   markdown?: string;
+  /** Find and replace: the matches replaced, and the ones the host could not map to the source. */
+  replaced?: number;
+  skipped?: number;
   /** PlantUML include: the id of the file read and its text. */
   id?: string;
   text?: string;
@@ -261,6 +265,11 @@ export interface PreviewFoldCommandMessage extends RenderMessage<"previewFoldCom
   command: PreviewFoldCommandName;
 }
 
+/** A command of the host opens the find bar of the page (the key binding of Cmd/Ctrl+F). */
+export interface PreviewFindCommandMessage extends RenderMessage<"previewFindCommand"> {
+  command: "open";
+}
+
 /** Every message a host sends to a preview page. */
 export type HostToPageMessage =
   | PreviewPendingOverlayMessage
@@ -287,6 +296,7 @@ export type HostToPageMessage =
   | PreviewPairingMessage
   | PreviewEditCommandMessage
   | PreviewFoldCommandMessage
+  | PreviewFindCommandMessage
   | ThemeChangedMessage;
 
 /** The type names of {@link HostToPageMessage}. */
@@ -370,6 +380,7 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewCopyTextResult: ownId,
     previewThreadReplyResult: ownId,
     previewThreadDeleteResult: ownId,
+    previewFindReplaceResult: ownId,
     previewListTargetsResult: ownId,
     previewListCitationsResult: ownId,
     previewPickDocumentResult: ownId,
@@ -403,6 +414,8 @@ export function createHostMessageFilter(): HostMessageFilter {
       addressing: "render",
       isValid: (message) => (PREVIEW_FOLD_COMMANDS as readonly unknown[]).includes(message.command),
     },
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+    previewFindCommand: { addressing: "render", isValid: (message) => message.command === "open" },
     themeChanged: render,
   };
   return {
