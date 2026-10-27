@@ -5,6 +5,8 @@
  * are never searched for text patterns. Pure: no I/O.
  */
 
+import { frontmatterRange } from "../syntax/markdownSyntax";
+
 export interface DetectNode {
   type: string;
   children?: DetectNode[];
@@ -66,14 +68,6 @@ function inlineDollarLine(
     }
   }
   return undefined;
-}
-
-function frontmatterEnd(lines: readonly string[]): number {
-  if (lines[0]?.trim() !== "---") return 0;
-  for (let index = 1; index < lines.length; index += 1) {
-    if (lines[index].trim() === "---" || lines[index].trim() === "...") return index + 1;
-  }
-  return 0;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-072
@@ -179,7 +173,7 @@ export function detectMystSyntax(root: DetectNode, source: string): MystSyntaxUs
 
   // Task list items: the renderer swaps the checkbox markers out before parsing, so the
   // marker text in the source is the reliable signal. Lines inside code and frontmatter do not count.
-  const skipUntil = frontmatterEnd(lines);
+  const skipUntil = frontmatterRange(lines);
   for (let line = skipUntil + 1; line <= lines.length; line += 1) {
     if (TASK_ITEM.test(lines[line - 1]) && !codeRanges.some(([from, to]) => line >= from && line <= to)) {
       record("tasklist", "- [ ]", line);

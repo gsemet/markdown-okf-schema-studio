@@ -14,18 +14,11 @@ import {
   SOURCE_LINE_ATTRIBUTE,
   type SourceMappingOptions,
 } from "../mapping/sourceMapping";
+import { escapeHtml } from "../syntax/markdownSyntax";
 import { stringify } from "yaml";
 import { parse, type DefaultTreeAdapterTypes } from "parse5";
 
 export const MAX_LIST_ITEMS = 50;
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/gu, "&amp;")
-    .replace(/</gu, "&lt;")
-    .replace(/>/gu, "&gt;")
-    .replace(/"/gu, "&quot;");
-}
 
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) {

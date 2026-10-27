@@ -21,6 +21,7 @@
  */
 
 import { shiftLineForEdits } from "../scroll/anchorPolicy";
+import { advanceFence, frontmatterRange } from "../syntax/markdownSyntax";
 import type { CommentThread } from "./commentModel";
 
 export type AnchorState = "anchored" | "moved" | "orphaned";
@@ -138,7 +139,6 @@ function plainLine(raw: string): string {
 }
 
 const TABLE_RULE = /^\s*\|?\s*:?-{2,}:?\s*(?:\|\s*:?-{2,}:?\s*)*\|?\s*$/u;
-const FENCE = /^\s{0,3}(`{3,}|~{3,})/u;
 
 export interface DocumentIndex {
   /** Number of lines of the source. */
@@ -161,29 +161,13 @@ export function createDocumentIndex(text: string): DocumentIndex {
   const lines: number[] = [];
   const parts: string[] = [];
   let offset = 0;
-  let fence: { char: string; length: number } | undefined;
-  let index = 0;
-  if (source[0]?.trim() === "---") {
-    // Front matter: up to the closing marker; an unclosed one is ordinary text.
-    for (let probe = 1; probe < source.length; probe += 1) {
-      const marker = source[probe].trim();
-      if (marker === "---" || marker === "...") {
-        index = probe + 1;
-        break;
-      }
-    }
-  }
-  for (; index < source.length; index += 1) {
+  let fence: string | undefined;
+  // Front matter is skipped; an unclosed one is ordinary text.
+  for (let index = frontmatterRange(source); index < source.length; index += 1) {
     const raw = source[index];
-    const open = FENCE.exec(raw);
-    if (fence) {
-      if (open && open[1][0] === fence.char && open[1].length >= fence.length && raw.trim() === open[1]) fence = undefined;
-      continue;
-    }
-    if (open) {
-      fence = { char: open[1][0], length: open[1].length };
-      continue;
-    }
+    const wasInFence = fence !== undefined;
+    fence = advanceFence(raw, fence);
+    if (wasInFence || fence !== undefined) continue;
     if (TABLE_RULE.test(raw) && raw.includes("-") && raw.includes("|")) continue;
     const plain = plainLine(raw);
     if (plain === "") continue;

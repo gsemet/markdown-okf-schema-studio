@@ -606,3 +606,7 @@
   (until 750 ms after the edit settled); wording of the sticking line under the band corrected.
   Verification: test/session/toolbarReq.requirements.test.ts, real-window test
   test/integration/tallBlockScroll.test.ts, `just requirements-lint`.
+- SwRS-MDOKFSTUDIO-MYST-097 (new, CR 135 T20): code fences and front matter are read by one shared
+  primitive (`src/core/syntax/markdownSyntax.ts`): a fence opens at up to three spaces of indent and
+  closes only with a matching fence followed by white space; front matter is a first-line `---`
+  closed by `---` or `...`. Verification: test/core/syntax/markdownSyntax.test.ts.

@@ -31,8 +31,8 @@ import {
 } from "../core/protocol/bootContext";
 import { renderMathHtml } from "../core/render/mathRenderer";
 import { classifyPreviewReference } from "../core/navigation/previewNavigation";
+import { escapeHtml } from "../core/syntax/markdownSyntax";
 import {
-  escapeHtml,
   type PreviewStatus,
   type PreviewStatusDiagnostic,
   statusMarkup,
