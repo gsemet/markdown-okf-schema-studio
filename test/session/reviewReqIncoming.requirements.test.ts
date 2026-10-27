@@ -48,7 +48,7 @@ function fixture(t: TestContext, uri = "file:///w/a.md"): Fixture {
       },
     },
   };
-  const manager: any = { host, choices: { viewPreferences: { get incomingChanges() { return state.diff; } } } };
+  const manager: any = { host, sharedRenders: { invalidate: () => undefined }, choices: { viewPreferences: { get incomingChanges() { return state.diff; } } } };
   const preview: any = {
     disposed: false,
     documentUri: uri,

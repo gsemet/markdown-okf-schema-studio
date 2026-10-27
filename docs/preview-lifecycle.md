@@ -83,7 +83,10 @@ The trusted extension-host suites verify:
   document's HTML;
 - a failed build for the same document retains last-good HTML with a visible stale status and
   recovers after the next valid edit;
-- explicit refresh produces a newer request and renders the current dirty buffer;
+- explicit refresh produces a newer request and renders the current dirty buffer, never joining an
+  earlier shared render;
+- a hidden preview does not render until it is shown, and previews of one document and revision
+  share one render (each with its own request id);
 - delayed obsolete work is canceled or discarded by request, document, and panel identity checks;
 - serializer restoration reopens a real fixture with its document identity, source line, and scroll
   state, while a missing restored source produces an explicit missing-source view;

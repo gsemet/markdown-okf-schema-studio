@@ -49,6 +49,7 @@ import { PageMessageDispatcher, type PageMessageResult, type PageMessageRouter }
 import { HostEvents } from "./hostEvents";
 import { PreviewSession } from "./previewSession";
 import { isDocumentEligible, isPathWithin, revisionOfStage } from "./sessionDocuments";
+import { SharedRenders } from "./sharedRenders";
 import { WorkspaceChoices } from "./workspaceChoices";
 
 /** The identity a page message names, as the render gate compares it. */
@@ -77,6 +78,8 @@ export class PreviewManager {
   public readonly choices: WorkspaceChoices;
   /** The host events (documents, files, editors, settings) and the watchers they feed. */
   public readonly events: HostEvents;
+  /** Renders shared by the previews of one document (one render per document, revision, options). */
+  public readonly sharedRenders = new SharedRenders();
 
   public readonly rendering: RenderingController;
   public readonly edits: BlockEditController;
@@ -332,19 +335,32 @@ export class PreviewManager {
     session.queue = new BuildQueue<HostDocument, RenderResult>({
       debounceMs: 40,
       revisionOf: (queued) => queued.revision,
-      build: (request, signal) => renderPreviewDocument({
-        document: previewDocumentOf(request.document, this.pathOf(request.document)),
-        revision: request.document.revision,
-        workspaceRoot: resourceRoot,
-        readOnly,
-        requestId: request.requestId,
-        documentIdentity: request.document.id,
+      build: (request, signal) => this.sharedRenders.acquire(
+        {
+          documentId: request.document.id,
+          revision: request.document.revision,
+          workspaceRoot: resourceRoot,
+          readOnly,
+          trusted: host.workspace.trusted,
+          plantUmlJarPath: session.plantUmlConfiguration.jarPath,
+          plantUmlEngine: this.plantUml.engineFor(session),
+        },
+        request.requestId,
         signal,
-        isWorkspaceTrusted: () => host.workspace.trusted,
-        allowUntrusted: true,
-        plantUmlJarPath: session.plantUmlConfiguration.jarPath,
-        plantUmlEngine: this.plantUml.engineFor(session),
-      }),
+        (sharedSignal) => renderPreviewDocument({
+          document: previewDocumentOf(request.document, this.pathOf(request.document)),
+          revision: request.document.revision,
+          workspaceRoot: resourceRoot,
+          readOnly,
+          requestId: request.requestId,
+          documentIdentity: request.document.id,
+          signal: sharedSignal,
+          isWorkspaceTrusted: () => host.workspace.trusted,
+          allowUntrusted: true,
+          plantUmlJarPath: session.plantUmlConfiguration.jarPath,
+          plantUmlEngine: this.plantUml.engineFor(session),
+        }),
+      ),
       onState: (state) => this.rendering.handleQueueState(session, state),
       disposeResult: (result) => result.stage.dispose(),
     });
@@ -388,6 +404,8 @@ export class PreviewManager {
         wasVisible = panel.visible;
         if (becameVisible) {
           this.scroll.restorePreviewState(session);
+          // A render skipped while the panel was hidden runs now (one render, on show).
+          this.rendering.renderIfDirty(session);
         }
       }),
       panel.onDidChangeLayout(() => {
@@ -443,6 +461,9 @@ export class PreviewManager {
       return;
     }
     session.document = document;
+    if (this.rendering.deferWhileHidden(session)) {
+      return;
+    }
     const outcome = await session.queue.request(document);
     if (outcome.status === "failed" && this.live.has(session) && !session.stage) {
       this.rendering.setStatus(session, "error", outcome.error instanceof Error ? outcome.error.message : "The render failed.");
@@ -632,12 +653,20 @@ export class PreviewManager {
     }
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-032
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
+  /** A refresh was asked (command or page button): the result replaces the page and no earlier shared render is joined. */
+  public prepareRefresh(session: PreviewSession): void {
+    session.edits.forceNextResult = true;
+    this.sharedRenders.invalidate();
+  }
+
   /** The reader asked for a refresh: the render replaces the page even over an open inline editor. */
   public async refreshActive(activeDocument: HostDocument | undefined): Promise<void> {
     const session = this.activeSession;
     const document = activeDocument ?? session?.document;
     if (session && document && document.id === session.documentUri) {
-      session.edits.forceNextResult = true;
+      this.prepareRefresh(session);
       await this.requestDocument(session, document);
     }
   }

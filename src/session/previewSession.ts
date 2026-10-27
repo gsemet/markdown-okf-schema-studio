@@ -116,6 +116,8 @@ export class PreviewSession {
   /** Status the loaded page shows while `status` is "pending" over a rendered page (D-22). */
   public shownStatus?: PreviewStatus;
   public hadFailure = false;
+  /** A render was skipped while the panel was hidden; it runs when the panel is shown. */
+  public renderDirty = false;
   /** The page's scroll and disclosure state per document, and the one of the shown document. */
   public readonly states: BoundedMap<PreviewPanelState>;
   public state?: PreviewPanelState;

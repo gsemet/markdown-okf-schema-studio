@@ -34,6 +34,7 @@ tested_in_files:
 - test/integration/lifecycle.test.ts
 - test/page/runtimeScroll.test.ts
 - test/security/package-contract.test.ts
+- test/session/previewManager.test.ts
 ---
 
 ## Refresh Preview renders the shown document again
@@ -104,7 +105,7 @@ When a reader runs Refresh Preview, by the command or by the Refresh button, the
 
 - Method: test/security/package-contract.test.ts "contributes only opt-in Markdown OKF-Schema Studio commands" (command declaration).
 - Method: test/integration/lifecycle.test.ts (dirty buffer, the explicitly refreshed dirty render).
-- Method: test/host/previewTiming.test.ts "Refresh Preview brings the render to the page even over an open inline editor" (over an open editor); the previewRefresh handler itself (current and stale render rows) is untested and checked by reading ViewStateController.register, where previewRefresh sets forceNextResult.
+- Method: test/host/previewTiming.test.ts "Refresh Preview brings the render to the page even over an open inline editor" (over an open editor); the previewRefresh handler itself (current and stale render rows) is untested and checked by reading ViewStateController.register, where previewRefresh sets forceNextResult. test/session/previewManager.test.ts "a page refresh inside the join window renders again instead of joining the shared render" (two previews of one document, Refresh button inside the 250 ms window: 1 render before the change, 2 after).
 - Method: test/host/lifeReq.requirements.test.ts "Refresh Preview does nothing while the active text editor shows another document" and "Refresh Preview acts on the preview created last that is still open" (other document, which preview the command acts on); checked by reading refreshActive, activeSession and latest() in src/session/previewManager.ts (activeSession is set when a session is created, not when it switches documents).
 - Method: test/page/runtimeScroll.test.ts "refresh preserves viewport state while reverse synchronization stays disabled" (button pressed: asserts the message type, scrollTop and a numeric sourceLine; anchorLine, the focused block, the selected text, the open sections, the Description state and the closing of the tooltip are untested); the button over an open editor is checked by the tests of SwRS-MDOKFSTUDIO-BLOCK-041.
 - Method: test/core/protocol/pageStateMessages.test.ts (the previewRefresh message accepted and refused).

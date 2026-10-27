@@ -91,6 +91,8 @@ export class HostEvents {
     if (session.disposed || isIgnoredWatchPath(filePath, session.workspaceRoot)) {
       return;
     }
+    // A file the finished renders may have read changed: a render of the same revision is stale.
+    this.manager.sharedRenders.invalidate();
     const candidate = canonicalPath(filePath);
     if (candidate === canonicalPath(this.manager.activePathOf(session))) {
       session.probe.activePathChanges += 1;
@@ -160,6 +162,7 @@ export class HostEvents {
       locateConfFor(this.manager.pathOf(session.document!), session.workspaceRoot);
     const before = new Map(candidates.map((session) => [session, locate(session)]));
     invalidateConfCache();
+    this.manager.sharedRenders.invalidate();
     for (const session of candidates) {
       if (sameFile(before.get(session), filePath) || sameFile(locate(session), filePath)) {
         this.manager.edits.deferWhileEditing(session, "render", () => this.manager.rendering.refreshOpenDocument(session, true));
@@ -292,6 +295,7 @@ export class HostEvents {
   /** Files were renamed or moved: comments files follow, previews of a renamed source stop. */
   public onFilesRenamed(files: readonly RenamedFile[]): void {
     void this.manager.comments.moveSidecars(files);
+    this.manager.sharedRenders.invalidate();
     for (const session of this.manager.sessions()) {
       const activePath = this.manager.activePathOf(session);
       for (const file of files) {
@@ -344,6 +348,7 @@ export class HostEvents {
   /** Settings changed: the previews read theirs again and update the page. */
   public onSettingsChanged(event: SettingsChange): void {
     const { host } = this.manager;
+    this.manager.sharedRenders.invalidate();
     if (this.manager.sessions().size === 0
       || (!event.affects(PREVIEW_CONFIGURATION_SECTION)
         && !event.affects(PLANTUML_CONFIGURATION_SECTION)
