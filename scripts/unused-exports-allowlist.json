@@ -1,0 +1,25 @@
+{
+  "src/core/render/commentMarkers.ts": {
+    "isToolComment": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module."
+  },
+  "src/core/render/documentGlob.ts": {
+    "MAX_GLOB_MATCHES": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module.",
+    "globToRegExp": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module."
+  },
+  "src/core/render/highlight.ts": {
+    "clearHighlightCache": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module."
+  },
+  "src/core/render/mathRenderer.ts": {
+    "clearMathCache": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module."
+  },
+  "src/core/render/mystGridToctree.ts": {
+    "GRID_BREAKPOINTS": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module.",
+    "GRID_BREAKPOINT_WIDTHS": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module.",
+    "GRID_MAX_COLUMNS": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module.",
+    "gridColumns": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module.",
+    "clearHeadingCache": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module."
+  },
+  "src/core/render/plantUmlRenderer.ts": {
+    "plantUmlCacheSizeForTests": "Re-checked after the T17/T18/T21/T23 integration: still no consumer in src/; kept as public API of the module."
+  }
+}

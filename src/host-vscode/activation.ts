@@ -27,7 +27,7 @@ export const COMMAND_ID = "markdown-okf-schema-studio.openPreview";
 /** The command that renders the active preview again. */
 export const REFRESH_COMMAND_ID = "markdown-okf-schema-studio.refreshPreview";
 /** The commands VS Code's key bindings run on the text box being edited (CR 119). */
-export const EDIT_COMMAND_IDS: Readonly<Record<PreviewEditCommandName, string>> = {
+ const EDIT_COMMAND_IDS: Readonly<Record<PreviewEditCommandName, string>> = {
   undo: "markdown-okf-schema-studio.editUndo",
   redo: "markdown-okf-schema-studio.editRedo",
   selectAll: "markdown-okf-schema-studio.editSelectAll",

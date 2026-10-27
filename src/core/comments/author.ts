@@ -5,7 +5,7 @@
  * is cut at 100 characters.
  */
 
-export const MAX_AUTHOR_LENGTH = 100;
+ const MAX_AUTHOR_LENGTH = 100;
 
 export interface AuthorSources {
   setting?: string;

@@ -44,7 +44,7 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 ## Main targets
 
 - Build: `just compile`; format the justfile: `just format`; package a VSIX: `just package`
-- Formatting, TypeScript, import boundaries, file size, settings schema, unit, contract and
+- Formatting, TypeScript, import boundaries, file size, unused exports, settings schema, unit, contract and
   security checks: `just check`
 - Settings schema of `package.json` from the settings registry: `just generate-settings`
 - Python Sphinx source-mapping contract: `just sphinx-check`

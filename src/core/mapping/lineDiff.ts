@@ -6,9 +6,9 @@ export interface LineRange {
 }
 
 /** Above this many middle lines (after the common prefix and suffix) the whole middle is changed. */
-export const MAX_DIFF_LINES = 20_000;
+ const MAX_DIFF_LINES = 20_000;
 /** Above this many edits Myers stops and the whole middle is changed. */
-export const MAX_DIFF_EDITS = 2000;
+ const MAX_DIFF_EDITS = 2000;
 
 function splitLines(text: string): string[] {
   const lines = text.split(/\r\n|\n|\r/u);

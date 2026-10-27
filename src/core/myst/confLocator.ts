@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { parseConf, type ParsedConf } from "./confParser";
 
 /** How long a lookup stays trusted before the disk is checked again. */
-export const CONF_RECHECK_MS = 2000;
+ const CONF_RECHECK_MS = 2000;
 
 /** Checked in the workspace root when no conf.py is found above the document (decision D29). */
 const FALLBACK_CANDIDATES = [

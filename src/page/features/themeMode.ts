@@ -10,7 +10,7 @@ import type { HostMessageRouter } from "../hostMessages";
 import type { PageHostApi, PageSavedState } from "../pageHost";
 
 /** The theme modes in the order the theme button cycles through them. */
-export const PREVIEW_THEME_MODES: readonly PreviewThemeMode[] = ["current", "dark", "white", "cream"];
+ const PREVIEW_THEME_MODES: readonly PreviewThemeMode[] = ["current", "dark", "white", "cream"];
 
 const THEME_LABELS: Readonly<Record<PreviewThemeMode, string>> = {
   current: "Current theme",

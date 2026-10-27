@@ -52,7 +52,7 @@ export function targetChoices(text: string): HostListAnswer & { ok: true } {
  * overwrite, so the name appears complete and a file another writer created in between is kept.
  * On failure the hidden file is removed and nothing is left under either name.
  */
-export async function writeNewFileAtomically(
+ async function writeNewFileAtomically(
   files: FileSystem,
   folderPath: string,
   fileName: string,
@@ -73,14 +73,14 @@ export async function writeNewFileAtomically(
 const STALE_PARTIAL_NAME = /^\.image(?:-\d+)?\.(?:png|jpg|gif|webp)\.[0-9a-z]{1,8}\.partial$/u;
 
 /** A hidden partial file older than this is the leftover of a save that never ended. */
-export const STALE_PARTIAL_AGE_MS = 10 * 60 * 1000;
+ const STALE_PARTIAL_AGE_MS = 10 * 60 * 1000;
 
 /**
  * Deletes the leftovers of an interrupted pasted-image save from a folder: files whose name has
  * exactly the form of `writeNewFileAtomically`'s hidden file and that were last modified more
  * than `STALE_PARTIAL_AGE_MS` before `now`. Any other file is left alone, and a failure is ignored.
  */
-export async function removeStalePartialFiles(
+ async function removeStalePartialFiles(
   files: FileSystem,
   folderPath: string,
   entries: Array<[string, string]>,

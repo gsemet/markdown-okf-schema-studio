@@ -3,7 +3,6 @@ import { directiveAttributeRule } from "../directives/registry";
 import { isSafeOkfColor, SAFE_COLOR_NAME_PATTERN } from "./spanColors";
 
 import {
-  relativeResourcePath,
   ResourcePolicy,
   rewriteSrcset,
   SecurityDiagnostic,
@@ -199,7 +198,7 @@ function removeNode(removed: Set<HtmlNode>, child: HtmlNode): void {
 }
 
 /** Deepest element nesting the preview keeps; deeper content is cut with a visible marker. */
-export const MAX_SANITIZER_DEPTH = 256;
+ const MAX_SANITIZER_DEPTH = 256;
 const DEPTH_MARKER_TEXT = "[Content cut: nesting is too deep for the preview.]";
 
 interface WalkFrame {
@@ -667,8 +666,4 @@ export function sanitizeCss(
   sanitized = sanitized.replace(/expression\s*\([^)]*\)/giu, "none");
   sanitized = sanitized.replace(/-moz-binding\s*:[^;]+;?/giu, "");
   return sanitized;
-}
-
-export function stylesheetRelativePath(stylesheetPath: string, resourcePath: string): string {
-  return relativeResourcePath(stylesheetPath, resourcePath);
 }

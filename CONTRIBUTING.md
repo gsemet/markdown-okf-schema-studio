@@ -104,6 +104,12 @@ Tests mirror this tree under `test/` (`test/core/render/` tests `src/core/render
   in `test/`. The files that were larger are listed in `scripts/file-size-baseline.json` and may
   only shrink; when one shrinks, lower its entry with `node scripts/check-file-sizes.mjs --update`
   (the check says so). The same target fails on any `@ts-nocheck` or `@ts-ignore` in `src/`.
+- `just check-exports` fails when a runtime export (function, class, constant) of `src/` is
+  mentioned by no other module of `src/`, `test/` or `scripts/`: make it private or delete it.
+  Exported types are not checked. The check matches names, so it can miss a dead export that
+  shares its name with a live one, but it never reports a live one. A deliberate exception goes in
+  `scripts/unused-exports-allowlist.json` with its reason; an entry that is no longer needed fails
+  the check.
 - `just check-markers` checks the companion marker files (`*.markers.ts`): each names an existing
   host file (`// Companion of: <path>`) and marks only existing requirements.
 - `just check-settings` fails when the `contributes.configuration` of `package.json` differs from

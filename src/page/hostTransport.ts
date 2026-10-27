@@ -46,7 +46,7 @@ export type TransportWindow = Pick<Window, "addEventListener"> & Partial<Pick<Wi
  * window with its own origin, or an event dispatched in the page itself (no sender, empty origin).
  * A message from any other window, frame or opener is dropped.
  */
-export function isTrustedMessageSender(event: MessageSource, window: TransportWindow): boolean {
+ function isTrustedMessageSender(event: MessageSource, window: TransportWindow): boolean {
   const { source, origin } = event;
   if (source === undefined || source === null) {
     return origin === undefined || origin === "";

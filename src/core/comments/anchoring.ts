@@ -40,18 +40,18 @@ export interface LineChange {
 }
 
 /** Lines around the old position inside which a weak match is still accepted. */
-export const WINDOW_LINES = 50;
+ const WINDOW_LINES = 50;
 /** A quote with fewer characters (plain text) is accepted only inside the window. */
-export const MIN_FAR_QUOTE = 12;
+ const MIN_FAR_QUOTE = 12;
 /** Fuzzy matches may differ by this share of the quote length. */
-export const FUZZY_RATIO = 0.2;
+ const FUZZY_RATIO = 0.2;
 /** Share of the quote's words that must still be found, in order, in the old lines to keep a thread there. */
-export const RESEMBLANCE = 0.6;
+ const RESEMBLANCE = 0.6;
 const MAX_CANDIDATES = 200;
 const MAX_RARE_OCCURRENCES = 20;
 const MAX_FUZZY_TEXT = 2_000_000;
 /** Cells of edit-distance work allowed for one call of `reanchorThreads` (or one `reanchor`). */
-export const FUZZY_BUDGET = 20_000_000;
+ const FUZZY_BUDGET = 20_000_000;
 
 /** `TextDocumentContentChangeEvent`-like input of `toLineChanges` (0-based lines). */
 export interface ContentChangeLike {
@@ -110,7 +110,7 @@ function decodeEntities(value: string): string {
  * source does not hold ({cite}, {ref} without text) are dropped, entities are decoded, HTML
  * comments and footnote markers removed.
  */
-export function plainInline(value: string): string {
+ function plainInline(value: string): string {
   const withoutRoles = value.replace(/\{([A-Za-z][\w:+.-]*)\}`([^`]*)`/gu, (_whole, name: string, content: string) => {
     if (OPAQUE_NAME.test(name)) {
       const titled = /^(.*?)\s*<[^>]*>$/u.exec(content);

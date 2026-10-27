@@ -6,7 +6,7 @@
 
 import { escapeRegExp } from "../syntax/markdownSyntax";
 
-export const MAX_LABEL_LENGTH = 100;
+ const MAX_LABEL_LENGTH = 100;
 
 /**
  * The one label name pattern: the renderer (anchor icon), the page (rename field) and the host

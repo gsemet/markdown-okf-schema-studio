@@ -10,7 +10,7 @@
  * for rgba). No comments, `!important`, `var()`, `url()`, `expression()`, escapes, `;`, braces,
  * quotes or any other function or keyword: a value outside this grammar is refused whole.
  */
-export const SAFE_COLOR_NAMES: ReadonlySet<string> = new Set([
+ const SAFE_COLOR_NAMES: ReadonlySet<string> = new Set([
   "aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
   "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse",
   "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue", "darkcyan",
@@ -43,7 +43,7 @@ const SPACE_FORM = /^([^\s/]+)[ \t]+([^\s/]+)[ \t]+([^\s/]+)(?:[ \t]*\/[ \t]*([^
 const HUE = new RegExp("^(" + NUMBER + ")(?:deg)?$", "iu");
 
 /** The keywords accepted besides the colour names. */
-export const SAFE_COLOR_KEYWORDS: ReadonlySet<string> = new Set(["currentcolor", "inherit", "initial", "unset"]);
+ const SAFE_COLOR_KEYWORDS: ReadonlySet<string> = new Set(["currentcolor", "inherit", "initial", "unset"]);
 
 /** A regular-expression alternation of the closed name and keyword lists (for composite values). */
 export const SAFE_COLOR_NAME_PATTERN: string = [...SAFE_COLOR_NAMES, ...SAFE_COLOR_KEYWORDS].join("|");
