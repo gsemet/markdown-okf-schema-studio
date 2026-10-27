@@ -28,6 +28,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/diagReq.frontmatter.requirements.test.ts
 - test/core/frontmatter/frontmatterFence.test.ts
+- test/core/frontmatter/frontmatterParseOnce.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/visual/scenarioDefinitions2.ts
 ---

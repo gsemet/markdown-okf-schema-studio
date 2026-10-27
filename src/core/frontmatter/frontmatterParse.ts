@@ -50,6 +50,36 @@ export function matchFrontmatterBlock(source: string): FrontmatterBlock | undefi
   };
 }
 
+/** Bodies kept by {@link extractFrontmatterShared}: enough for the documents open at once. */
+const SHARED_EXTRACTION_LIMIT = 8;
+const sharedExtractions = new Map<string, FrontmatterExtraction>();
+
+// @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
+/**
+ * Like {@link extractFrontmatter}, but parses a given frontmatter body once and hands the same
+ * extraction to every reader (analysis at render, the 300 ms refresh, the link enrichment). The
+ * result is shared: read it, never mutate its `document` or `frontmatter`. Writers that patch the
+ * YAML document call {@link extractFrontmatter}.
+ */
+export function extractFrontmatterShared(source: string): FrontmatterExtraction {
+  const block = matchFrontmatterBlock(source);
+  if (!block) return extractFrontmatter(source);
+  const cached = sharedExtractions.get(block.body);
+  if (cached) {
+    // Refresh the entry's recency.
+    sharedExtractions.delete(block.body);
+    sharedExtractions.set(block.body, cached);
+    return cached;
+  }
+  const extraction = extractFrontmatter(source);
+  sharedExtractions.set(block.body, extraction);
+  if (sharedExtractions.size > SHARED_EXTRACTION_LIMIT) {
+    const oldest = sharedExtractions.keys().next();
+    if (!oldest.done) sharedExtractions.delete(oldest.value);
+  }
+  return extraction;
+}
+
 /** Extracts the frontmatter block the way MyST does: leading `---` fence. */
 export function extractFrontmatter(source: string): FrontmatterExtraction {
   const match = matchFrontmatterBlock(source);

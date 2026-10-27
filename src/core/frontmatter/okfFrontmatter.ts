@@ -19,7 +19,7 @@ import {
   filenameStemSuggestions,
   type FileLinkInspectionOptions,
 } from "./fileLinks";
-import { extractFrontmatter, stripJson5Comments } from "./frontmatterParse";
+import { extractFrontmatter, extractFrontmatterShared, stripJson5Comments } from "./frontmatterParse";
 import {
   defaultValueOf,
   docOf,
@@ -319,7 +319,7 @@ export function analyzeFrontmatter(options: FrontmatterOptions): FrontmatterResu
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
 function analyzeFrontmatterCore(options: FrontmatterOptions): FrontmatterResult {
-  const extraction = extractFrontmatter(options.sourceText);
+  const extraction = extractFrontmatterShared(options.sourceText);
   if (!extraction.present) {
     return {
       present: false,
