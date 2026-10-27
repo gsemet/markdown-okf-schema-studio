@@ -23,9 +23,11 @@ implemented_in_files:
 - src/page/modules/warningBanner.ts
 - src/session/features/diagnostics.ts
 - src/session/features/viewState.ts
+- src/session/workspaceChoices.ts
 tested_in_files:
 - test/integration/mystDiagnostics.test.ts
 - test/page/modules/warningBanner.test.ts
+- test/session/commentAuthorResource.test.ts
 - test/visual/scenarioDefinitions2.ts
 ---
 
@@ -75,6 +77,11 @@ The message carries only the envelope and passes the document gate.
 
 The warnings stay in the status region in every case.
 
+### Scenario (boundary): The memory of closed banners is bounded
+| Input | Outcome |
+| --- | --- |
+| A banner closed for a 201st document in one session | The least recently used dismissal is forgotten (that document shows its banner again) and the memory keeps at most 200 documents |
+
 ### Scenario (boundary): Restricted Mode lists the warnings in the tooltip
 - GIVEN an untrusted workspace
 - WHEN the preview renders
@@ -85,6 +92,7 @@ The warnings stay in the status region in every case.
 
 ### Verification notes
 - Method: test/page/modules/warningBanner.test.ts ("CR 050: the banner text is short and counts the warnings": nominal; "CR 050: Open Problems asks the host to open the Problems view": Open Problems; "CR 050: closing removes the banner, tells the host the key and keeps it closed until the set changes": closing; "CR 050: the key names the warning set, whatever the order and the line of each warning": warning set; "CR 050: in Restricted Mode the banner has no Problems button and lists the warnings in its tooltip": Restricted Mode)
+- Method: test/session/commentAuthorResource.test.ts ("the closed warning banners of a session are bounded to the most recent documents": bounded memory)
 - Method: test/integration/mystDiagnostics.test.ts (run(): Restricted Mode publishes no warning to the Problems view)
 - Method: test/visual/scenarioDefinitions2.ts (`myst/v${number}-conf-warning-banner-${mode ?? theme}-900`: nominal and layout in light, dark, cream and 460 px)
 - Criteria: The visual family covers the layout checks only visually; the standalone variant has no assertion; other statuses showing the full list have no named test (untested).

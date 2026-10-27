@@ -79,6 +79,7 @@ export function installLinkNavigation(
   };
   const observed = new WeakSet<Element>();
   let observe = (_link: Element): void => undefined;
+  let unobserve = (_link: Element): void => undefined;
   if (typeof window.IntersectionObserver === "function") {
     const observer = new window.IntersectionObserver((entries) => {
       for (const entry of entries) {
@@ -92,6 +93,10 @@ export function installLinkNavigation(
       observed.add(link);
       observer.observe(link);
     };
+    unobserve = (link: Element): void => {
+      observer.unobserve(link);
+      observed.delete(link);
+    };
     links.forEach(observe);
     window.addEventListener("unload", () => observer.disconnect(), { once: true });
     // Files may have been created or deleted while the reader was elsewhere: when the preview
@@ -100,8 +105,7 @@ export function installLinkNavigation(
       discovered.clear();
       links = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
       for (const link of links) {
-        observer.unobserve(link);
-        observed.delete(link);
+        unobserve(link);
         observe(link);
       }
     };
@@ -129,11 +133,16 @@ export function installLinkNavigation(
   document.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") activate(event);
   });
-  // Called after the content was replaced: observes the links that are not observed yet and makes
-  // the target hints apply to the links of the new content.
+  // Called after the content was replaced: observes the links that are not observed yet, releases
+  // the ones the content no longer holds and makes the target hints apply to the new links.
   return {
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-079
     rescan(): void {
-      links = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
+      const next = Array.from(document.querySelectorAll<HTMLAnchorElement>(selector));
+      const kept = new Set<Element>(next);
+      // Links of the replaced content are detached: the observer must not keep them alive.
+      for (const link of links) if (!kept.has(link)) unobserve(link);
+      links = next;
       links.forEach(observe);
     },
     // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-085
