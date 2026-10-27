@@ -8,7 +8,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { promisify } from "node:util";
 
-import type { FileKind, FileStat, FileSystem } from "../host-api/fileSystem";
+import { isFileNotFound, type FileKind, type FileStat, type FileSystem } from "../host-api/fileSystem";
 
 /**
  * The JS `fs.realpath` (not `fs.realpath.native`, which `fs/promises` uses): it gives the same path
@@ -57,6 +57,14 @@ export function createNodeFileSystem(): FileSystem {
     },
     async delete(file) {
       await fs.unlink(file);
+    },
+    async isSymbolicLink(file) {
+      try {
+        return (await fs.lstat(file)).isSymbolicLink();
+      } catch (error) {
+        if (isFileNotFound(error)) return false;
+        throw error;
+      }
     },
     /** Resolves symbolic links like `fs.realpathSync` (the JS implementation, see {@link realpathLikeSync}). */
     realpath(file) {

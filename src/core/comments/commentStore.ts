@@ -15,6 +15,12 @@ export interface CommentFileIo {
   /** The text of the file; undefined when it does not exist. */
   read(path: string): Promise<string | undefined>;
   write(path: string, text: string): Promise<void>;
+  /** True when the path itself is a symbolic link (not followed); false when it does not exist. */
+  isSymbolicLink(path: string): Promise<boolean>;
+  /** Moves `from` onto `to`, replacing `to` itself (never what a link at `to` points to). */
+  rename(from: string, to: string): Promise<void>;
+  /** Deletes a file; used to drop a temporary file after a failed write. */
+  remove(path: string): Promise<void>;
 }
 
 export type CommentUpdateResult =
@@ -37,6 +43,19 @@ export function newId(prefix: "t_" | "c_"): string {
   return formatId(prefix, randomBytes(4));
 }
 
+/** Writes a temporary file next to `path`, then renames it onto `path`: readers never see a partial file. */
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-054
+async function writeAtomically(io: CommentFileIo, path: string, text: string): Promise<void> {
+  const temporary = `${path}.${randomBytes(6).toString("hex")}.tmp`;
+  try {
+    await io.write(temporary, text);
+    await io.rename(temporary, path);
+  } catch (error) {
+    await io.remove(temporary).catch(() => undefined);
+    throw error;
+  }
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-054
 export function createCommentStore(io: CommentFileIo): {
   /** `renameDocument` stores `documentName` in the file even when the file already names another. */
@@ -57,6 +76,9 @@ export function createCommentStore(io: CommentFileIo): {
     renameDocument: boolean,
   ): Promise<CommentUpdateResult> => {
     try {
+      if (await io.isSymbolicLink(path)) {
+        return { ok: false, reason: "the comments file is a symbolic link and is left untouched" };
+      }
       const existing = await io.read(path);
       let threads: CommentThread[] = [];
       let document = documentName;
@@ -74,7 +96,7 @@ export function createCommentStore(io: CommentFileIo): {
       if (new TextEncoder().encode(text).length > MAX_SIDECAR_BYTES) {
         return { ok: false, reason: "the comments file would become too large" };
       }
-      await io.write(path, text);
+      await writeAtomically(io, path, text);
       return { ok: true, text, hash: hashText(text) };
     } catch (error) {
       return { ok: false, reason: error instanceof Error ? error.message : String(error) };

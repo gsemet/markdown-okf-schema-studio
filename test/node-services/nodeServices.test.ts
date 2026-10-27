@@ -65,3 +65,15 @@ test("the Node process runner stops a program on abort", async () => {
   const result = await running;
   assert.equal(result.stopped, true);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-054
+test("the Node file system reports a link itself, a dangling one included, and not a missing path", async (t) => {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "okf-node-link-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const files = createNodeFileSystem();
+  fs.writeFileSync(path.join(root, "plain.txt"), "x");
+  fs.symlinkSync(path.join(root, "gone.txt"), path.join(root, "dangling.txt"));
+  assert.equal(await files.isSymbolicLink(path.join(root, "dangling.txt")), true);
+  assert.equal(await files.isSymbolicLink(path.join(root, "plain.txt")), false);
+  assert.equal(await files.isSymbolicLink(path.join(root, "missing.txt")), false);
+});

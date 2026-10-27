@@ -24,6 +24,9 @@ test("a change that makes the serialized file larger than 2 MiB is refused befor
   const store = createCommentStore({
     read: async (path) => files.get(path),
     write: async (path, text) => { writes += 1; files.set(path, text); },
+    isSymbolicLink: async () => false,
+    rename: async (from, to) => { files.set(to, files.get(from)!); files.delete(from); },
+    remove: async (path) => { files.delete(path); },
   });
 
   // Within the limit: written.

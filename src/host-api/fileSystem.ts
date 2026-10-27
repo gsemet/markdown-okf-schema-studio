@@ -30,6 +30,8 @@ export interface FileSystem {
   rename(from: string, to: string, options?: { overwrite?: boolean }): Promise<void>;
   /** Deletes a file (not a directory); rejects with a not-found error when it does not exist. */
   delete(path: string): Promise<void>;
+  /** True when `path` itself is a symbolic link (not followed, dangling ones included); false when it does not exist. */
+  isSymbolicLink(path: string): Promise<boolean>;
   /** The canonical path: symbolic links resolved. */
   realpath(path: string): Promise<string>;
 }

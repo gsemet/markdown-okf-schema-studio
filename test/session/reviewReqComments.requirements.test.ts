@@ -73,14 +73,18 @@ function setup(): Setup {
         return encode(text);
       },
       writeFile: async (path: string, data: Uint8Array) => {
-        writes.push(path);
+        // The store writes a temporary file and renames it: the write counts when it lands on its path.
+        if (!path.endsWith(".tmp")) writes.push(path);
         files.set(path, new TextDecoder().decode(data));
       },
       rename: async (from: string, to: string) => {
-        renames.push([from, to]);
+        if (from.endsWith(".tmp")) writes.push(to);
+        else renames.push([from, to]);
         files.set(to, files.get(from)!);
         files.delete(from);
       },
+      delete: async (path: string) => { files.delete(path); },
+      isSymbolicLink: async () => false,
     },
     ui: { showWarning: (text: string) => { warnings.push(text); return Promise.resolve(); } },
     documents: {
