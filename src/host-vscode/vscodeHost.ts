@@ -215,6 +215,9 @@ function createVscodeWatcher(): Watcher {
   };
 }
 
+/** The only schemes handed to the operating system. */
+const EXTERNAL_URI_SCHEMES: ReadonlySet<string> = new Set(["http", "https", "mailto"]);
+
 function createVscodeNavigation(): Navigation {
   return {
     async showDocument(documentId, selection) {
@@ -227,7 +230,18 @@ function createVscodeNavigation(): Navigation {
         ...(selection ? { selection: toVscodeRange(selection) } : {}),
       });
     },
-    openExternal: (url) => vscode.env.openExternal(vscode.Uri.parse(url)),
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+    openExternal: async (url) => {
+      // Last line of defence: the parsed URI, not the raw string, decides what the OS opens.
+      let uri: vscode.Uri;
+      try {
+        uri = vscode.Uri.parse(url, true);
+      } catch {
+        return false;
+      }
+      if (!EXTERNAL_URI_SCHEMES.has(uri.scheme.toLowerCase())) return false;
+      return vscode.env.openExternal(uri);
+    },
   };
 }
 

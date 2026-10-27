@@ -217,6 +217,7 @@ export class ResourcePolicy {
     return { path: realCandidate };
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-090
   public resolveNavigation(request: string, baseDirectory: string): NavigationResult {
     const trimmed = request.trim();
     if (trimmed.startsWith("#")) {
@@ -235,9 +236,12 @@ export class ResourcePolicy {
       return { kind: "blocked" };
     }
 
-    const scheme = schemeOf(decoded);
+    // The scheme is read on the raw string, because the raw string is what is opened: a `%` before
+    // the first `:` hides the scheme from the opener, and the link is never external.
+    const rawScheme = schemeOf(trimmed);
+    const scheme = rawScheme ?? schemeOf(decoded);
     if (scheme) {
-      if (EXTERNAL_SCHEMES.has(scheme)) {
+      if (rawScheme !== undefined && EXTERNAL_SCHEMES.has(rawScheme)) {
         return { kind: "external", value: trimmed };
       }
       diagnostic(

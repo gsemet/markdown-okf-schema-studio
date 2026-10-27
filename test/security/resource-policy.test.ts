@@ -72,6 +72,9 @@ test("allows only explicit navigation schemes", () => {
   });
   assert.deepEqual(policy.resolveNavigation("javascript:alert(1)", output), { kind: "blocked" });
   assert.deepEqual(policy.resolveNavigation("vscode://file/secret", output), { kind: "blocked" });
+  // A percent sign before the first colon hides the scheme from the opener: never external.
+  assert.deepEqual(policy.resolveNavigation("https%3A/../../System/Applications/Calculator.app", output), { kind: "blocked" });
+  assert.deepEqual(policy.resolveNavigation("mailto%3Aa@example.test", output), { kind: "blocked" });
 });
 
 test("rewrites srcset candidates without allowing data or script URLs", () => {

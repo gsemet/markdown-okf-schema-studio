@@ -6,7 +6,9 @@ title: "A link is an anchor, external, local or blocked"
 description: "When a link request is followed or looked up, the extension SHALL classify
   it before any file access as an anchor, an external link or a relative or wiki path,
   and block it with a reason when it is an invalid anchor, a query-only target, an
-  undecodable path, a scheme other than http, https or mailto, or an absolute path."
+  undecodable path, a scheme other than http, https or mailto, or an absolute path.
+  The scheme is read on the raw link, and the host re-checks the parsed URI before
+  opening it."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
 lifecycle: draft
@@ -20,9 +22,12 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/navigation/previewNavigation.ts
+- src/core/security/resource-policy.ts
+- src/host-vscode/vscodeHost.ts
 tested_in_files:
 - test/core/navigation/previewNavigation.test.ts
 - test/core/preview/toolbarReq.requirements.test.ts
+- test/host-vscode/openExternal.test.ts
 - test/session/previewNavigator.test.ts
 ---
 
@@ -50,6 +55,7 @@ When a link request is followed or looked up, the extension SHALL classify it be
 | #, #not a valid anchor, #a#b | blocked with The preview anchor is invalid. |
 | javascript:alert(1), file:///tmp/secret | blocked with The navigation scheme is not allowed in the preview. |
 | wiki:https://example.test | blocked, because a wiki link is never external |
+| https%3A/../../System/Applications/Calculator.app, mailto%3Aa@b.c | blocked with The navigation scheme is not allowed in the preview. (the scheme is read on the raw link; a percent sign before the first colon is never external) |
 | /tmp/secret, //example.test | blocked with Absolute navigation targets are not allowed. |
 | ?x=1 | blocked with Query-only navigation targets are not valid file links. |
 | %5Csecret, %00.md (backslash or NUL after decoding) | blocked with The navigation target could not be decoded safely. |
@@ -77,4 +83,5 @@ A blocked request causes no file access.
 - Method: test/session/previewNavigator.test.ts (classifies anchors, external links, relative links without touching the filesystem and workspace-local files; blocks unsafe anchors, schemes and paths including the space anchor, /tmp/secret, //example.test, %00.md and %5Csecret); the # and #a#b anchors, the case-insensitive scheme, the wiki prefix, the percent cases are in previewNavigation.test.ts.
 - Method: test/core/navigation/previewNavigation.test.ts (blocked schemes and absolute paths; double-encoded path; unsafe characters); the exact scheme and absolute reason texts are not asserted, and the malformed escape case is untested.
 - Method: test/core/preview/toolbarReq.requirements.test.ts (a query-only link is blocked and a file with a query is relative).
+- Method: test/core/navigation/previewNavigation.test.ts, test/security/resource-policy.test.ts, test/host-vscode/openExternal.test.ts (the host refuses any parsed scheme but http, https and mailto) and test/integration/previewHistory.test.ts (a percent-encoded scheme never reaches openExternal).
 - Criteria: ANCHOR_PATTERN is ^#[^\s#?]+$; schemes are compared in lower case against http:, https:, mailto:; no file access for a blocked request; decoded paths starting with / are blocked; a request starting with ? and an empty path part is blocked; decodePath decodes once and returns undefined for a malformed escape, and a decoded NUL or backslash blocks the request.

@@ -428,3 +428,22 @@ test("emits dir=auto on block elements and keeps only ltr, rtl and auto", () => 
   assert.doesNotMatch(result.html, /<div[^>]* dir=/u);
   assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-dir"));
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-042
+test("a blocked link has no href and names the reason in its title", () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
+  temporaryDirectories.push(output);
+  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const result = rewriteSphinxHtml(
+    "<html><body><a href=\"https%3A/../x\">bad</a></body></html>",
+    {
+      outputRoot: output,
+      policy,
+      nonce: "unit-nonce",
+      resolveResource: () => undefined,
+      resolveNavigation: () => ({ kind: "blocked", reason: "The navigation scheme is not allowed in the preview." }),
+    },
+  );
+  assert.doesNotMatch(result.html, /href="https/u);
+  assert.match(result.html, /title="The navigation scheme is not allowed in the preview\."/u);
+});
