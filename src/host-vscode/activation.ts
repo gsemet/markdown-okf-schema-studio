@@ -60,6 +60,7 @@ export class StudioActivation {
     const { host, manager } = this;
     manager.choices.refreshThreadAuthor(host.workspace.folders()[0]?.id);
     preloadMystEngine();
+    host.previewRenderer?.warm();
     manager.choices.load(context.workspaceState);
     for (const folder of host.workspace.folders()) {
       manager.events.watchStemRoot(folder.path);
@@ -126,6 +127,7 @@ export class StudioActivation {
     manager.diagnostics.stop();
     manager.events.disposeStemRootWatchers();
     manager.choices.unload();
+    this.host.previewRenderer?.dispose();
     resetRenderHooksForTests();
   }
 

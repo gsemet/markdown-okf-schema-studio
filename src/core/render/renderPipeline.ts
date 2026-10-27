@@ -1,6 +1,7 @@
 import * as path from "node:path";
 
 import { listGlobDocuments } from "./documentGlob";
+import { loadEngine } from "./mystEngine";
 import { renderMyst, RenderDiagnostic } from "./mystRenderer";
 import {
   renderPlantUmlDiagrams,
@@ -57,6 +58,11 @@ export interface RenderResult {
   plantUmlEngine: PlantUmlEngine;
   diagnostics: PreviewDiagnostic[];
   latencyMs: number;
+  /**
+   * How long the MyST render itself took (ms), as the source renderer measured it: without the
+   * engine load or a worker start. Undefined for a render the test override made.
+   */
+  renderMs?: number;
 }
 
 /** The inputs of one render. */
@@ -87,7 +93,42 @@ export interface RenderOptions {
    * the behaviour of callers that predate the built-in engine; the extension always passes it.
    */
   plantUmlEngine?: PlantUmlEngine;
+  /**
+   * Renders the source text to HTML: a host may run it off its main thread (a worker) and stop it
+   * when `signal` aborts. Omitted: `renderPreviewSource`, in-process. The test override wins.
+   */
+  renderSource?: SourceRenderer;
 }
+
+/**
+ * The inputs of the source render, plain data only: they cross a thread boundary as they are.
+ */
+export interface SourceRenderInput {
+  text: string;
+  /** The absolute path of the document. */
+  documentPath: string;
+  workspaceRoot: string;
+  readOnly: boolean;
+  /**
+   * The MyST extensions the governing `conf.py` enables (see `enabledMystExtensionsFor`), looked
+   * up by the caller so a worker never holds a stale `conf.py` cache. Undefined: unknown.
+   */
+  enabledMystExtensions?: readonly string[];
+}
+
+/** What the source render produced, plain data only. */
+export interface SourceRenderOutput {
+  html: string;
+  /** The security diagnostics of the resource policy, then the renderer's, with code and file. */
+  diagnostics: PreviewDiagnostic[];
+  /** The files the render read (includes, diagram files). */
+  dependencies: string[];
+  /** How long the MyST render took (ms), without loading the engine or starting a thread. */
+  renderMs?: number;
+}
+
+/** Renders one source; rejects with `RenderCanceledError` when `signal` stopped it. */
+export type SourceRenderer = (input: SourceRenderInput, signal?: AbortSignal) => Promise<SourceRenderOutput>;
 
 /** Thrown when the workspace is untrusted and the render is not allowed there. */
 export class WorkspaceTrustError extends Error {
@@ -157,6 +198,47 @@ function createStage(options: RenderOptions, diagnostics: PreviewDiagnostic[]): 
   };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-CORE-013
+/**
+ * The source render, in-process: MyST to HTML under the preview's resource policy (includes,
+ * diagram files and toctree globs are read through it). Plain data in and out, so a worker thread
+ * runs the same function (`src/node-services/renderWorker.ts`).
+ */
+export async function renderPreviewSource(input: SourceRenderInput): Promise<SourceRenderOutput> {
+  const documentDirectory = path.dirname(input.documentPath);
+  const resourcePolicy = createPreviewResourcePolicy(documentDirectory, input.workspaceRoot, input.readOnly);
+  // The first render loads the engine; that time is not the render's.
+  await loadEngine();
+  const started = performance.now();
+  const rendered = await renderMyst(input.text, {
+    sourcePath: input.documentPath,
+    ...(input.enabledMystExtensions ? { enabledMystExtensions: new Set(input.enabledMystExtensions) } : {}),
+    resolveInclude: (request, sourcePath) => {
+      const read = readBoundedText(resourcePolicy, request, path.dirname(sourcePath));
+      return read.ok ? { path: read.path, source: read.source } : undefined;
+    },
+    // `{uml} file.puml`: the same read as `{include}`, with the reason of a refusal.
+    readDiagramFile: (request, sourcePath) => readBoundedText(resourcePolicy, request, path.dirname(sourcePath)),
+    listDocuments: (pattern, sourcePath) => listGlobDocuments(
+      pattern,
+      path.dirname(sourcePath),
+      (candidate) => resourcePolicy.resolveResource(candidate, path.dirname(sourcePath)) !== undefined,
+      sourcePath,
+    ),
+  });
+  const diagnostics: PreviewDiagnostic[] = resourcePolicy.diagnostics.map((securityDiagnostic) => ({
+    message: securityDiagnostic.message,
+    severity: "warning",
+    code: securityDiagnostic.code,
+    file: input.documentPath,
+    value: securityDiagnostic.value,
+  }));
+  for (const diagnostic of rendered.diagnostics) {
+    diagnostics.push({ ...diagnostic, code: diagnostic.code === "myst-extension" ? diagnostic.code : "myst-diagnostic", file: input.documentPath });
+  }
+  return { html: rendered.html, diagnostics, dependencies: rendered.dependencies, renderMs: performance.now() - started };
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-CORE-001
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-024
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
@@ -184,52 +266,38 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
     options.signal?.removeEventListener("abort", abortDeferred);
     originalDispose();
   };
-  const resourcePolicy = createPreviewResourcePolicy(
-    path.dirname(stage.activeDocumentPath),
-    options.workspaceRoot,
-    options.readOnly === true,
-  );
-
   let html: string;
+  let renderMs: number | undefined;
   let resolvePlantUml: () => Promise<PlantUmlRenderResult> = () => Promise.resolve({
     diagrams: [],
     diagnostics: [],
   });
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-004
+  // A render whose request was already given up never starts.
+  if (options.signal?.aborted) {
+    stage.dispose();
+    throw new RenderCanceledError();
+  }
   try {
-    const rendered = renderOverride
-      ? await renderOverride(options.document.getText())
-      : await renderMyst(options.document.getText(), {
-        sourcePath: stage.activeDocumentPath,
-        enabledMystExtensions: enabledMystExtensionsFor(stage.activeDocumentPath, options.workspaceRoot),
-        // @implements_req SwRS-MDOKFSTUDIO-CORE-013
-        resolveInclude: (request, sourcePath) => {
-          const read = readBoundedText(resourcePolicy, request, path.dirname(sourcePath));
-          return read.ok ? { path: read.path, source: read.source } : undefined;
-        },
-        // `{uml} file.puml`: the same read as `{include}`, with the reason of a refusal.
-        readDiagramFile: (request, sourcePath) => readBoundedText(resourcePolicy, request, path.dirname(sourcePath)),
-        listDocuments: (pattern, sourcePath) => listGlobDocuments(
-          pattern,
-          path.dirname(sourcePath),
-          (candidate) => resourcePolicy.resolveResource(candidate, path.dirname(sourcePath)) !== undefined,
-          sourcePath,
-        ),
-      });
-    html = rendered.html;
-    if (!renderOverride && "dependencies" in rendered) {
-      stage.dependencies = rendered.dependencies;
-      for (const securityDiagnostic of resourcePolicy.diagnostics) {
-        diagnostics.push({
-          message: securityDiagnostic.message,
-          severity: "warning",
-          code: securityDiagnostic.code,
-          file: stage.activeDocumentPath,
-          value: securityDiagnostic.value,
-        });
+    if (renderOverride) {
+      const rendered = await renderOverride(options.document.getText());
+      html = rendered.html;
+      for (const diagnostic of rendered.diagnostics ?? []) {
+        diagnostics.push({ ...diagnostic, code: diagnostic.code === "myst-extension" ? diagnostic.code : "myst-diagnostic", file: stage.activeDocumentPath });
       }
-    }
-    for (const diagnostic of rendered.diagnostics ?? []) {
-      diagnostics.push({ ...diagnostic, code: diagnostic.code === "myst-extension" ? diagnostic.code : "myst-diagnostic", file: stage.activeDocumentPath });
+    } else {
+      const enabled = enabledMystExtensionsFor(stage.activeDocumentPath, options.workspaceRoot);
+      const rendered = await (options.renderSource ?? renderPreviewSource)({
+        text: options.document.getText(),
+        documentPath: stage.activeDocumentPath,
+        workspaceRoot: options.workspaceRoot,
+        readOnly: options.readOnly === true,
+        ...(enabled ? { enabledMystExtensions: [...enabled] } : {}),
+      }, options.signal);
+      html = rendered.html;
+      renderMs = rendered.renderMs;
+      stage.dependencies = rendered.dependencies;
+      diagnostics.push(...rendered.diagnostics);
     }
     if (!renderOverride && options.plantUmlEngine !== "builtin") {
       let plantUmlPromise: Promise<PlantUmlRenderResult> | undefined;
@@ -250,6 +318,10 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
       };
     }
   } catch (error) {
+    if (error instanceof RenderCanceledError || options.signal?.aborted) {
+      stage.dispose();
+      throw new RenderCanceledError();
+    }
     throw new RenderError(
       error instanceof Error ? error.message : String(error),
       stage,
@@ -272,5 +344,6 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
     plantUmlEngine: options.plantUmlEngine ?? "jar",
     diagnostics,
     latencyMs: performance.now() - started,
+    ...(renderMs === undefined ? {} : { renderMs }),
   };
 }

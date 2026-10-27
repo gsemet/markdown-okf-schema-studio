@@ -26,6 +26,7 @@ import type { FileWatcher, Watcher } from "../host-api/watcher";
 import type { WorkspaceFolderInfo, WorkspaceInfo } from "../host-api/workspaceInfo";
 import { createNodeFileSystem } from "../node-services/nodeFileSystem";
 import { createNodeProcessRunner } from "../node-services/processRunner";
+import { createWorkerRenderer } from "../node-services/renderWorker";
 import { nodeSchemaFiles } from "../node-services/schemaFiles";
 import { createVscodeDocumentStore, type VscodeDocumentStore } from "./documents";
 
@@ -339,6 +340,9 @@ export function createVscodeHost(): VscodeHost {
     navigation: createVscodeNavigation(),
     editors: createVscodeEditors(documents),
     theme: createVscodeTheme(),
+    // @implements_req SwRS-MDOKFSTUDIO-LIFE-004
+    // The source renders run in a worker thread: the extension host stays free while one runs.
+    previewRenderer: createWorkerRenderer(),
     editorOf: (editor) => pairedEditor(editor, documents),
     assets: (webview, extensionUri) => ({
       get cspSource() {

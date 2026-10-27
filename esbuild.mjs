@@ -20,6 +20,20 @@ await build({
   logLevel: "info",
 });
 
+// The render worker (src/node-services/renderWorker.ts) is its own entry: the extension starts it
+// as a worker thread from out/bundle/renderWorker.js, next to extension.js.
+await build({
+  entryPoints: ["src/node-services/renderWorker.ts"],
+  outfile: "out/bundle/renderWorker.js",
+  bundle: true,
+  platform: "node",
+  target: "node20",
+  format: "cjs",
+  sourcemap: true,
+  minify: true,
+  logLevel: "info",
+});
+
 await build({
   entryPoints: ["src/page/modules/mermaidPreview.ts"],
   outfile: "out/bundle/mermaidPreview.js",

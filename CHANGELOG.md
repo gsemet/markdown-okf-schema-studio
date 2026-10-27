@@ -8,6 +8,10 @@
 - Failures of work the extension runs in the background (saving a display choice, refreshing the
   preview, moving the comments of a renamed file) are now written to the "Markdown OKF-Schema Studio"
   output channel (View > Output) instead of the developer console.
+- The MyST render of the preview no longer runs on the extension host thread: it runs in a
+  background thread, a render that a newer edit made useless is stopped once it has run more than 1 s
+  and twice the last render time, and the preview waits a little longer after the last keystroke when
+  the document is slow to render (twice the last render time, at most 1 s).
 - PlantUML through Java (`plantuml.useJar`) now runs with the PlantUML `ALLOWLIST` security profile
   (the workspace folder as allowlist path) and an explicit image size limit of 4096. Includes of files
   inside the workspace still work; URL includes are refused. `JAVA_HOME` is used when it is an

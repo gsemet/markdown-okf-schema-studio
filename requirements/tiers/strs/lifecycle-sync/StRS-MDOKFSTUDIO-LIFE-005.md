@@ -18,6 +18,7 @@ user_need: As a writer, I see my unsaved changes in the preview as I type, and a
   file, rename a file or change a setting and the open preview follows, without
   reloading the window or making the page jump.
 derived_by:
+- SwRS-MDOKFSTUDIO-LIFE-004
 - SwRS-MDOKFSTUDIO-LIFE-032
 - SwRS-MDOKFSTUDIO-LIFE-039
 - SwRS-MDOKFSTUDIO-LIFE-044

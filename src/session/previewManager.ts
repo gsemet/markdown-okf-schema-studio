@@ -342,6 +342,8 @@ export class PreviewManager {
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
     session.queue = new BuildQueue<HostDocument, RenderResult>({
       debounceMs: 40,
+      // The MyST render time alone: a worker start or the engine load does not slow typing down.
+      durationOf: (result) => result.renderMs,
       revisionOf: (queued) => queued.revision,
       build: (request, signal) => this.sharedRenders.acquire(
         {
@@ -367,6 +369,9 @@ export class PreviewManager {
           allowUntrusted: true,
           plantUmlJarPath: session.plantUmlConfiguration.jarPath,
           plantUmlEngine: this.plantUml.engineFor(session),
+          // @implements_req SwRS-MDOKFSTUDIO-LIFE-004
+          // The host's renderer (a worker thread in VS Code), else in-process.
+          renderSource: host.previewRenderer?.render,
         }),
       ),
       onState: (state) => this.rendering.handleQueueState(session, state),

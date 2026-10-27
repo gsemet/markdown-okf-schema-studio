@@ -129,3 +129,46 @@ test("MyST syntax missing from the nearest conf.py warns once per extension, ren
   const uncertain = await render();
   assert.deepEqual(uncertain.diagnostics.filter((entry) => entry.code === "myst-extension"), []);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+test("a render whose request was already given up never starts", async (context) => {
+  context.after(resetRenderHooksForTests);
+  let calls = 0;
+  setRenderOverrideForTests(async () => { calls += 1; return { html: "<p>Stale</p>" }; });
+  const controller = new AbortController();
+  controller.abort();
+  await assert.rejects(renderPreviewDocument(options({ signal: controller.signal })), RenderCanceledError);
+  assert.equal(calls, 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-004
+test("the host's source renderer gets plain data and the signal, and its cancellation stays a cancellation", async () => {
+  const seen: unknown[] = [];
+  const controller = new AbortController();
+  const result = await renderPreviewDocument(options({
+    readOnly: true,
+    signal: controller.signal,
+    renderSource: async (input, signal) => {
+      seen.push(input, signal);
+      return {
+        html: "<p>From the worker</p>",
+        diagnostics: [{ code: "myst-diagnostic", severity: "warning", message: "m", file: input.documentPath }],
+        dependencies: ["/workspace/included.md"],
+      };
+    },
+  }));
+  assert.deepEqual(seen[0], {
+    text: "# Unsaved buffer\n", documentPath: result.stage.activeDocumentPath, workspaceRoot: "/workspace", readOnly: true,
+  });
+  assert.equal(seen[1], controller.signal);
+  assert.equal(result.html, "<p>From the worker</p>");
+  assert.deepEqual(result.stage.dependencies, ["/workspace/included.md"]);
+  assert.equal(result.diagnostics.length, 1);
+  await assert.rejects(renderPreviewDocument(options({
+    signal: controller.signal,
+    renderSource: async () => {
+      controller.abort();
+      throw new RenderCanceledError();
+    },
+  })), RenderCanceledError);
+});
