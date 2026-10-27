@@ -342,21 +342,23 @@ test("the side preview and the Open With editor do not retain their page while h
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-143
-test("closing a preview removes its file watcher and subscriptions, not those of another preview", async (t) => {
+test("previews of one root share one file watcher, which closing the last preview removes with its subscriptions", async (t) => {
   const studio = start(t);
   const file = writeFile("# Watched\n");
   const { panel } = await studio.openSide(file);
   const otherPanel = await openWith(studio, file);
-  const [first, second] = studio.dependencyWatchers(workspaceRoot);
-  assert.ok(first && second && first !== second);
-  assert.equal(first.disposed, false);
-  assert.ok(first.changed.size > 0 && first.created.size > 0 && first.deleted.size > 0);
+  const watchers = studio.dependencyWatchers(workspaceRoot);
+  assert.equal(watchers.length, 1, "both previews share one watcher of the root");
+  const [shared] = watchers;
+  assert.equal(shared!.disposed, false);
+  assert.ok(shared!.changed.size > 0 && shared!.created.size > 0 && shared!.deleted.size > 0);
   panel.dispose();
-  assert.equal(first.disposed, true, "the watcher of the closed preview is disposed");
-  assert.deepEqual([first.changed.size, first.created.size, first.deleted.size], [0, 0, 0]);
-  assert.equal(second.disposed, false, "the other preview keeps its watcher");
-  assert.ok(second.changed.size > 0);
+  assert.equal(shared!.disposed, false, "the other preview keeps the watcher");
+  assert.ok(shared!.changed.size > 0);
   assert.equal(otherPanel.disposed, false);
+  otherPanel.dispose();
+  assert.equal(shared!.disposed, true, "the watcher goes with the last preview");
+  assert.deepEqual([shared!.changed.size, shared!.created.size, shared!.deleted.size], [0, 0, 0]);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-026

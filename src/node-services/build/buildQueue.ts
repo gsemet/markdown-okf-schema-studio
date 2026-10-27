@@ -99,18 +99,35 @@ export class BuildQueue<TDocument extends QueueDocument, TResult> {
     this.revisionOf = options.revisionOf;
   }
 
+  private dependencyCache: { source: readonly string[]; canonical: ReadonlySet<string> } | undefined;
+
   public getState(): BuildQueueState<TResult, TDocument> {
     return this.state;
   }
 
-  public dependsOn(filePath: string): boolean {
+  /** Whether the last good stage depends on `filePath`; `canonical` is its canonical form when the caller has it (no file system call). */
+  public dependsOn(filePath: string, canonical?: string): boolean {
     const result = this.lastGood;
     if (!result || typeof result !== "object" || result === null || !("stage" in result)) {
       return false;
     }
     const stage = (result as { stage?: { dependencies?: readonly string[] } }).stage;
-    const candidate = canonicalPath(filePath);
-    return stage?.dependencies?.some((dependency) => canonicalPath(dependency) === candidate) ?? false;
+    const dependencies = stage?.dependencies;
+    if (!dependencies) {
+      return false;
+    }
+    return this.canonicalDependencies(dependencies).has(canonical ?? canonicalPath(filePath));
+  }
+
+  /**
+   * The canonical form of the dependencies of the last good stage, computed once per stage (one
+   * `realpathSync` per dependency, not per query).
+   */
+  private canonicalDependencies(dependencies: readonly string[]): ReadonlySet<string> {
+    if (this.dependencyCache?.source !== dependencies) {
+      this.dependencyCache = { source: dependencies, canonical: new Set(dependencies.map(canonicalPath)) };
+    }
+    return this.dependencyCache.canonical;
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-039

@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/stemIndex.test.ts
+- test/session/eventFanOut.test.ts
 ---
 ## A filename stem resolves when exactly one file matches
 
@@ -89,4 +90,5 @@ When a link annotation has the resolution `filename-stem`, the extension SHALL l
 ### Verification notes
 
 - Method: test/core/frontmatter/okfFrontmatter.test.ts (unique stem, fragment, ambiguous and unknown stem, broken symbolic link, readable candidate), test/core/frontmatter/stemIndex.test.ts (unique stem, excluded folders, ordinary folder, unavailable flag, file created, folder removed, host events). The case "Same.md does not satisfy the stem same" has no test (untested).
-- Criteria: The stem is the file name without .md; a match whose real path leaves its root is refused. A stale index is rebuilt once before the answer is given. An unreadable candidate is neither a match nor a not-found. The exclusion of node_modules, .git, _build, .venv, out, dist, output and dot-folders applies at every depth. Stems are compared case-sensitively and only files whose name ends in lowercase `.md` are indexed.
+- Method: test/session/eventFanOut.test.ts (saving a Markdown file keeps the cached index; creating or deleting one rebuilds it).
+- Criteria: The cached index of a workspace root is invalidated by a created or deleted Markdown file, not by a change. The stem is the file name without .md; a match whose real path leaves its root is refused. A stale index is rebuilt once before the answer is given. An unreadable candidate is neither a match nor a not-found. The exclusion of node_modules, .git, _build, .venv, out, dist, output and dot-folders applies at every depth. Stems are compared case-sensitively and only files whose name ends in lowercase `.md` are indexed.

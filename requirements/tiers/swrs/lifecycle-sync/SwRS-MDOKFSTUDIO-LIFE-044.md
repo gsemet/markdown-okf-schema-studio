@@ -26,6 +26,7 @@ tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/integration/dirtySnapshots.test.ts
 - test/node-services/build/buildQueue.test.ts
+- test/session/eventFanOut.test.ts
 ---
 
 ## Changes to files and settings the render depends on render again
@@ -69,6 +70,10 @@ When a file that the shown render depends on is changed, created, deleted or ren
 - WHEN the settings event arrives
 - THEN the event is ignored by the preview lifecycle
 
+### Known issues
+
+- Known issue: the canonical form of the shown file is cached per raw path for the session, so a symlink retargeted under the shown file is not noticed until the path string changes.
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-BLOCK-193: the render is deferred while an inline editor is open.
@@ -80,4 +85,5 @@ When a file that the shown render depends on is changed, created, deleted or ren
 - Method: test/node-services/build/buildQueue.test.ts "tracks referenced dependencies for refresh decisions".
 - Method: test/host/lifeReq.requirements.test.ts "renaming a file the render depends on renders the document again, an unrelated rename does not" (rename rows; checked by reading onFilesRenamed in src/session/hostEvents.ts) and "file events below build and tool folders do not trigger a render (only the segments below the root count)" (folders the preview ignores; checked by reading IGNORED_WATCH_SEGMENTS and isIgnoredWatchPath in src/session/hostEvents.ts).
 - Method: test/core/configuration/previewConfiguration.test.ts "incremental updates can be turned off and default to on" covers the reading of the preview setting; the settings scenarios are untested at the integration level and checked by reading onSettingsChanged.
-- Criteria: requestId grows and the HTML holds the updated marker; refreshPreviewDocument runs only when queue.dependsOn names the old or new path; refreshReferencedPath returns before any dependency, enrichment or include handling when any segment of the path below the session's root is in the list; session.configuration equals readPreviewConfiguration after the event.
+- Method: test/session/eventFanOut.test.ts (a change of a document no preview depends on costs no `realpathSync` per preview; a dependency still refreshes only its preview).
+- Criteria: a change of a path that is neither the shown file, a linked target, a PlantUML include nor in the canonical dependency set of the last render returns before any other work (the canonical forms are computed once per render and per path, not per event and preview); requestId grows and the HTML holds the updated marker; refreshPreviewDocument runs only when queue.dependsOn names the old or new path; refreshReferencedPath returns before any dependency, enrichment or include handling when any segment of the path below the session's root is in the list; session.configuration equals readPreviewConfiguration after the event.

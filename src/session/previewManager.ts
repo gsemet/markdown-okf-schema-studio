@@ -50,6 +50,7 @@ import { HostEvents } from "./hostEvents";
 import { PreviewSession } from "./previewSession";
 import { isDocumentEligible, isPathWithin, revisionOfStage } from "./sessionDocuments";
 import { SharedRenders } from "./sharedRenders";
+import { SharedLinkedTargetWatches, SharedWatchers } from "./sharedWatchers";
 import { WorkspaceChoices } from "./workspaceChoices";
 
 /** The identity a page message names, as the render gate compares it. */
@@ -80,6 +81,10 @@ export class PreviewManager {
   public readonly events: HostEvents;
   /** Renders shared by the previews of one document (one render per document, revision, options). */
   public readonly sharedRenders = new SharedRenders();
+  /** The host watchers shared by the previews (one per root and pattern). */
+  public readonly sharedWatchers: SharedWatchers;
+  /** The linked-target watches shared by the previews (one per target, capped). */
+  public readonly linkedTargetWatches: SharedLinkedTargetWatches;
 
   public readonly rendering: RenderingController;
   public readonly edits: BlockEditController;
@@ -115,6 +120,8 @@ export class PreviewManager {
     private readonly groups: PanelGroups,
   ) {
     this.navigator = createPreviewNavigator(host.files);
+    this.sharedWatchers = new SharedWatchers(host.watcher);
+    this.linkedTargetWatches = new SharedLinkedTargetWatches(this.sharedWatchers);
     this.events = new HostEvents(this);
     this.choices = new WorkspaceChoices(host);
     this.router = createMessageRouter<PageToHostMessage, [PreviewSession], PageMessageResult>();
@@ -364,26 +371,24 @@ export class PreviewManager {
       onState: (state) => this.rendering.handleQueueState(session, state),
       disposeResult: (result) => result.stage.dispose(),
     });
-    const dependencyWatcher = host.watcher.watch(resourceRoot, "**/*");
-    session.dependencyWatcher = dependencyWatcher;
-    session.dependencyWatcherSubscriptions = [
-      dependencyWatcher.onDidChange((changedPath) => {
+    session.dependencyWatch = this.sharedWatchers.acquire(resourceRoot, "**/*", {
+      onDidChange: (changedPath) => {
         this.events.refreshReferencedPath(session, changedPath);
-      }),
-      dependencyWatcher.onDidCreate((createdPath) => {
+      },
+      onDidCreate: (createdPath) => {
         this.events.refreshReferencedPath(session, createdPath);
         if (session.status === "missing-source") {
           this.events.recoverMissingSource(session);
         }
-      }),
-      dependencyWatcher.onDidDelete((deletedPath) => {
+      },
+      onDidDelete: (deletedPath) => {
         if (canonicalPath(deletedPath) === canonicalPath(this.activePathOf(session))) {
           this.rendering.setMissingSource(session, "The active Markdown source was deleted.");
         } else {
           this.events.refreshReferencedPath(session, deletedPath);
         }
-      }),
-    ];
+      },
+    });
     this.rendering.setResourceRoots(session, []);
     this.rendering.assignWebviewHtml(session, session.webview.html);
     panel.title = document ? this.previewTitle(session, this.pathOf(document)) : "Studio";
@@ -635,10 +640,7 @@ export class PreviewManager {
     for (const subscription of session.panelSubscriptions) {
       subscription.dispose();
     }
-    for (const subscription of session.dependencyWatcherSubscriptions) {
-      subscription.dispose();
-    }
-    session.dependencyWatcher.dispose();
+    session.dependencyWatch.dispose();
     session.queue.dispose();
     this.diagnostics.clear(session.documentUri);
     if (disposePanel) {
