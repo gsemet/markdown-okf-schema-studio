@@ -36,7 +36,7 @@ export interface HtmlRewriteContext {
   resolveNavigation: (
     request: string,
     baseDirectory: string,
-  ) => { kind: "anchor" | "external" | "deferred" | "blocked"; value?: string } | ResolvedResource;
+  ) => { kind: "anchor" | "external" | "deferred" | "blocked"; value?: string; reason?: string } | ResolvedResource;
   processStylesheet?: (stylesheetPath: string) => void;
   allowExternalScripts?: boolean;
 }
@@ -429,6 +429,8 @@ function rewriteNode(
         removeAttr(node, attribute.name);
         if (name === "href") {
           setAttr(node, "data-sphinx-preview-navigation", originalRequest);
+          // An unsupported link has no click action; its tooltip names the reason.
+          if (link.reason && !attr(node, "title")) setAttr(node, "title", link.reason);
         }
         addDiagnostic(diagnostics, "blocked-navigation", "Removed navigation outside the preview policy.", originalRequest);
       }

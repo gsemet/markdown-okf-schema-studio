@@ -172,11 +172,14 @@ export async function run(): Promise<void> {
     const count = historyOf().entries.length;
     const index = historyOf().index;
     void sendPreviewMessageForTests({ type: "previewLink", ...context(), request: "javascript:alert(1)" });
+    // A percent sign before the first colon hides the scheme: never handed to the system.
+    void sendPreviewMessageForTests({ type: "previewLink", ...context(), request: "https%3A/../../System/Applications/Calculator.app" });
     if (externalStubbed) {
       void sendPreviewMessageForTests({ type: "previewLink", ...context(), request: "https://example.invalid/page" });
       await waitFor("the external link to be handed to the system", () => externalCalls.length === 1);
     }
     await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    assert.ok(externalCalls.every((call) => /^https?:/u.test(call)), "only http(s) reaches openExternal");
     assert.equal(historyOf().entries.length, count);
     assert.equal(historyOf().index, index);
   } finally {

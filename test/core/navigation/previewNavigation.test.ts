@@ -66,3 +66,20 @@ test("a MyST (label)= line is the target of its fragment, but not inside a fence
   assert.equal(markdownFragmentRange(source, "#shown"), undefined);
   assert.equal(markdownFragmentRange(source, "#missing"), undefined);
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-090
+test("the scheme is read on the raw link: a percent sign before the first colon is never external", () => {
+  for (const request of [
+    "https%3A/../../System/Applications/Calculator.app",
+    "HTTP%3a//example.test",
+    "mailto%3Aa@b.c",
+    "https%3A//example.test",
+    "javascript%3Aalert(1)",
+  ]) {
+    const reference = classifyPreviewReference(request);
+    assert.equal(reference.kind, "blocked", request);
+  }
+  for (const request of ["https://example.test/a%3Ab", "HTTPS://example.test", "mailto:a@b.c"]) {
+    assert.equal(classifyPreviewReference(request).kind, "external", request);
+  }
+});

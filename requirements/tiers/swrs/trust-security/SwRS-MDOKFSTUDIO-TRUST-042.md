@@ -6,10 +6,11 @@ title: The sanitizer rewrites links and records each removal
 description: "When the sanitizer finds a link in a page, it SHALL keep an anchor or
   an http, https or mailto address as the href, turn a relative or wiki request into
   the href # that the host routes from data-sphinx-preview-navigation, remove the
-  address of a blocked request, remove a linked stylesheet (recording the diagnostic
-  that it is ignored when the file is inside the roots), and record each removal or
-  rewrite as a diagnostic with a code, a message and the value on the record of the
-  page, without showing it in the status area of the preview."
+  address of a blocked request (and name the reason in its title when it has none),
+  remove a linked stylesheet (recording the diagnostic that it is ignored when the
+  file is inside the roots), and record each removal or rewrite as a diagnostic with
+  a code, a message and the value on the record of the page, without showing it in
+  the status area of the preview."
 project: markdown-okf-schema-studio
 scope: trust-security
 lifecycle: draft
@@ -35,7 +36,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, https or mailto address as the href, turn a relative or wiki request into the href # that the host routes from data-sphinx-preview-navigation, remove the address of a blocked request, remove a linked stylesheet (recording a diagnostic that it is ignored when the file is inside the roots), and record each removal or rewrite as a diagnostic with a code, a message and the value on the record of the page, without showing it in the status area of the preview.
+When the sanitizer finds a link in a page, it SHALL keep an anchor or an http, https or mailto address as the href, turn a relative or wiki request into the href # that the host routes from data-sphinx-preview-navigation, remove the address of a blocked request (naming the reason in the title of the link when it has none), remove a linked stylesheet (recording a diagnostic that it is ignored when the file is inside the roots), and record each removal or rewrite as a diagnostic with a code, a message and the value on the record of the page, without showing it in the status area of the preview.
 
 ### Scenario (nominal): Anchor and external addresses
 

@@ -135,9 +135,12 @@ export function classifyPreviewReference(request: string): PreviewReference {
   if (!decoded || decoded.includes("\0") || decoded.includes("\\")) {
     return { kind: "blocked", reason: "The navigation target could not be decoded safely." };
   }
-  const scheme = schemeOf(decoded);
+  // The scheme is read on the raw string, because the raw string is what is opened: a `%` before
+  // the first `:` hides the scheme from the opener, and the link is never external.
+  const rawScheme = schemeOf(wiki ? trimmed.slice(5) : trimmed);
+  const scheme = rawScheme ?? schemeOf(decoded);
   if (scheme) {
-    return !wiki && EXTERNAL_SCHEMES.has(scheme)
+    return !wiki && rawScheme !== undefined && EXTERNAL_SCHEMES.has(rawScheme)
       ? { kind: "external", value: trimmed }
       : { kind: "blocked", reason: "The navigation scheme is not allowed in the preview." };
   }
