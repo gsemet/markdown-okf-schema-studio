@@ -17,6 +17,13 @@ test("P4: a caret below the viewport is brought back in", () => {
   assert.equal(caretRevealDelta({ top: 880, bottom: 900 }, stuckBar, frameAbove, 900), 8);
 });
 
+test("CR 123: a caret pasted below the viewport is brought in even when the palette is not stuck", () => {
+  // The palette in its place above the frame (a 4 px reserve under it): the end of a large paste.
+  assert.equal(caretRevealDelta({ top: 4867, bottom: 4885 }, { bottom: 142 }, { top: 145 }, 699), 4885 - 691);
+  // Above the frame, a caret over the bar's line is not hidden: no scroll up.
+  assert.equal(caretRevealDelta({ top: 60, bottom: 80 }, { bottom: 142 }, { top: 145 }, 699), 0);
+});
+
 test("P4: a clear caret, or a palette that is not stuck, needs no scroll", () => {
   assert.equal(caretRevealDelta({ top: 400, bottom: 420 }, stuckBar, frameAbove, 900), 0);
   assert.equal(caretRevealDelta({ top: 190, bottom: 210 }, stuckBar, frameAbove, 900), 0, "touching the bar is clear");

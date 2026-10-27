@@ -1064,6 +1064,36 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "overflowing it, and its heading list stays inside the box's width.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+    id: "palette-slash/v27-palette-clears-content-cream-1100",
+    fixture: "67-toolbar-cover",
+    theme: "dark",
+    previewThemeMode: "cream",
+    width: 1100,
+    height: 800,
+    scroll: { kind: "top" },
+    editMode: true,
+    paletteClearance: true,
+    description:
+      "1100 px cream preview: the edition palette wraps onto two rows above an open block editor "
+      + "and takes its real height there, so the text box and the figure form start below it; "
+      + "a code block taller than the pane, opened scrolled, keeps its first seen row under the bar.",
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+    id: "palette-slash/v28-palette-clears-text-rule-cream-900",
+    fixture: "64-rule-edit",
+    theme: "dark",
+    previewThemeMode: "cream",
+    ...WIDE,
+    scroll: { kind: "top" },
+    editMode: true,
+    paletteClearance: "first-paragraph",
+    description:
+      "900 px cream preview on a dark host (the CR 112 evidence): the paragraph under the title "
+      + "opens with its text box fully below the two-row edition palette.",
+  },
+  {
     id: "edit-insert-point-hover",
     fixture: "04-code-and-tables",
     theme: "light",

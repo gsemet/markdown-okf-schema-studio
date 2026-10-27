@@ -1001,6 +1001,12 @@ test("P4: the palette sits on top of the frame and sticks below the sticky band 
   assert.doesNotMatch(css, /sphinx-preview-edit-palette[^{]*\{[^}]*style=/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+test("CR 123: the frame reserves the distance the sticky palette rides down, as a top margin", () => {
+  assert.match(PREVIEW_THEME_CSS,
+    /#sphinx-myst-preview-content \.sphinx-preview-block-editor-host > \.sphinx-preview-block-editor \{\s*margin-top: var\(--sphinx-preview-palette-reserve, 0px\);/u);
+});
+
 test("P4: the palette stays in the flow in short panes and when the runtime says it is too tall", () => {
   const css = PREVIEW_THEME_CSS;
   assert.match(css,

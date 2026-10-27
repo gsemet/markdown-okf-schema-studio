@@ -156,6 +156,14 @@ export interface Scenario {
    */
   editPaletteTall?: boolean;
   /**
+   * CR 123: in a narrow pane the palette wraps onto several rows and takes its real height above
+   * the frame: the text box and the figure form start below it, at the top of the page and
+   * slightly scrolled, and a tall block opened scrolled keeps its first seen row visible under the
+   * stuck bar. `first-paragraph`: only the first paragraph, opened at the top. Steps: `text`,
+   * `figure`, `tall` (v28 writes none: its open editor is the CR 112 tooltip scenario's frame).
+   */
+  paletteClearance?: boolean | "first-paragraph";
+  /**
    * CR 034: a table cell of a table taller than the viewport is open in its editor. The table
    * toolbar sits above the table; with the table top scrolled out it rides down to the top of the
    * viewport, stays inside the table and leaves with the table's end. Steps: `top`, `end`.

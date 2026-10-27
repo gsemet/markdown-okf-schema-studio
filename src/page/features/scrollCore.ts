@@ -212,6 +212,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
         if (barHeight !== editing.paletteHeight) {
           editing.paletteHeight = barHeight;
           rt.editorChrome.syncPaletteSticky(editing);
+          rt.editorChrome.reservePaletteClearance(editing);
           rt.editorChrome.revealTableToolbar(editing.palette.element, editing.textarea);
         }
       }
@@ -332,6 +333,8 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
   function postScroll(): void {
     frame = undefined;
     rt.parts.stickyBand.updateStickyHeadings(true);
+    // A tall frame's bar sticks under the band: follow the band it just updated (CR 123).
+    if (state.activeBlockEdit?.host) rt.editorChrome.syncPaletteSticky(state.activeBlockEdit);
     rt.parts.tocColumn.track();
     const scrollTop = window.scrollY;
     if (expectedScroll && Date.now() <= expectedScroll.until

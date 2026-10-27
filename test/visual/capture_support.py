@@ -505,7 +505,7 @@ OKF_SCHEMA_CHECKS = """
 # Every step PNG a check can write (`<scenario id>-<step>.png`). A scenario's `steps` list selects
 # which of them are written; the other steps are skipped silently (their check still runs) and a
 # name that is not in this registry fails the check that asks for it.
-STEP_NAMES = frozenset({"alert", "arrowdown", "bar", "cell-bar", "cell-emoji", "collapsed", "colour", "colour-code", "emoji", "end", "filtered", "flip", "glow", "grid", "hover", "insert-point", "menu", "nomatch", "open", "palette", "pasted", "selected", "top"})
+STEP_NAMES = frozenset({"alert", "arrowdown", "bar", "cell-bar", "cell-emoji", "collapsed", "colour", "colour-code", "emoji", "end", "figure", "filtered", "flip", "glow", "grid", "hover", "insert-point", "menu", "nomatch", "open", "palette", "pasted", "selected", "tall", "text", "top"})
 
 
 def save_step(page: Page, scenario: dict, step: str, caret: str = "hide",

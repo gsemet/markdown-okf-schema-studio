@@ -12,6 +12,8 @@ import { run as runCheckboxToggle } from "./checkboxToggle.test";
 import { run as runDirtySnapshots } from "./dirtySnapshots.test";
 import { run as runGenericMarkdown } from "./genericMarkdown.test";
 import { run as runTableEmptyColumn } from "./tableEmptyColumn.test";
+import { run as runEditToolbarCover } from "./editToolbarCover.test";
+import { run as runTallBlockScroll } from "./tallBlockScroll.test";
 import { run as runPreviewEditing } from "./previewEditing.test";
 import { run as runImagePicker } from "./imagePicker.test";
 import { run as runImagePaste } from "./imagePaste.test";
@@ -103,6 +105,15 @@ export async function run(): Promise<void> {
     await runTableEmptyColumn();
     return;
   }
+  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "toolbar-cover") {
+    await runEditToolbarCover();
+    await runTallBlockScroll();
+    return;
+  }
+  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "tall-block-scroll") {
+    await runTallBlockScroll();
+    return;
+  }
   const onlyRealInput = process.env.STUDIO_REAL_INPUT_SCENARIO !== undefined;
   if (!onlyRealInput) {
     await runProjectFeatures();
@@ -115,6 +126,8 @@ export async function run(): Promise<void> {
     throw error;
   }
   if (!onlyRealInput) await runTableEmptyColumn();
+  if (!onlyRealInput) await runEditToolbarCover();
+  if (!onlyRealInput) await runTallBlockScroll();
   try {
     if (process.env.STUDIO_REAL_INPUT_SCENARIO === "comment-contrast") await runCommentContrast();
     else await runRealInput();

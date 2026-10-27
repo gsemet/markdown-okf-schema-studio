@@ -270,6 +270,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     editorChrome.syncPaletteSticky(edit);
     const shift = editorChrome.keepTextInPlaceBelowPalette(edit, textTopBefore);
     if (shift) edit.paletteShift = shift;
+    editorChrome.reservePaletteClearance(edit);
     rt.scroll.applyAnchor();
     textarea.addEventListener("mousedown", () => {
       palette.closePopover();

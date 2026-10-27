@@ -77,10 +77,11 @@ export function caretRevealDelta(
 ): number {
   const gap = 8;
   if (![caret.top, caret.bottom, bar.bottom, frame.top, viewportHeight].every(Number.isFinite)) return 0;
-  if (!(bar.bottom > frame.top + 0.5)) return 0;
-  // The caret line may touch the bar's lower edge; only a hidden caret moves the page.
+  // The caret line may touch the bar's lower edge; only a hidden caret moves the page. A bar still
+  // in its place above the frame hides nothing.
   const limit = bar.bottom;
-  if (caret.top < limit) return caret.top - limit;
+  if (bar.bottom > frame.top + 0.5 && caret.top < limit) return caret.top - limit;
+  // Below the viewport whether the bar is stuck or not: a large paste ends the caret there (CR 123).
   if (caret.bottom > viewportHeight - gap) return caret.bottom - (viewportHeight - gap);
   return 0;
 }

@@ -231,6 +231,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const figureEditButton = installFigureEditButton(document, window, {
     isEditMode: () => state.editMode,
     open: (figure) => rt.editorChrome.openFigureEditor(figure as HTMLElement),
+    usableTop: (box) => rt.editorChrome.toolbarUsableTop(box),
   });
   // Zoom changes layout only: keep the source line at the reading line across it.
   const keepReadingLine = (): void => rt.scroll.keepReadingLine();

@@ -7,6 +7,197 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 from capture_support import Failure, save_step
 
 
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+def check_edit_palette_clearance(page: Page, scenario: dict, failures: list[Failure]) -> None:
+  """CR 123: in a narrow pane the palette wraps onto several rows; the text box and the figure form
+  inside the frame start below it, at the top of the page and slightly scrolled."""
+  if not scenario.get("paletteClearance"):
+    return
+  page_name = scenario["page"]
+  measure = """() => {
+    const box = (selector) => {
+      const element = document.querySelector(selector);
+      if (!element) return null;
+      const r = element.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, height: r.height };
+    };
+    return {
+      palette: box('.sphinx-preview-edit-palette'),
+      frame: box('[data-sphinx-preview-block-editor]'),
+      textarea: box('[data-sphinx-preview-block-editor] textarea'),
+      dialog: box('[data-sphinx-preview-block-editor] [role=dialog]'),
+      scrollY: window.scrollY,
+    };
+  }"""
+
+  def close_editor() -> None:
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(200)
+    if page.locator("[data-sphinx-preview-block-editor]").count():
+      page.locator("[data-sphinx-preview-block-editor] [data-sphinx-block-cancel], [data-sphinx-preview-block-editor] button:has-text('Cancel')").first.click()
+      page.wait_for_timeout(200)
+
+  def check(name: str, step: str, first_line: str, shoot: bool) -> None:
+    page.wait_for_timeout(500)
+    geometry = page.evaluate(measure)
+    if not geometry["palette"] or not geometry[first_line]:
+      failures.append(Failure(page_name, f"{name}: no palette or no {first_line} was measured: {geometry}"))
+      return
+    if geometry["palette"]["height"] < 50:
+      failures.append(Failure(page_name, f"{name}: the palette did not wrap ({geometry['palette']['height']} px)"))
+    if geometry["palette"]["bottom"] > geometry[first_line]["top"] + 0.5:
+      failures.append(Failure(
+        page_name,
+        f"{name}: the palette's bottom edge {geometry['palette']['bottom']:.1f} is below the top of the {first_line} "
+        f"{geometry[first_line]['top']:.1f}: {geometry}",
+      ))
+    if geometry["frame"] and geometry["palette"]["bottom"] > geometry["frame"]["top"] + 0.5:
+      failures.append(Failure(page_name, f"{name}: the palette covers the top of the frame: {geometry}"))
+    if shoot:
+      page.mouse.move(2, 2)
+      save_step(page, scenario, step, caret="hide")
+
+  def bring_to_top(locator, offset: int) -> None:
+    """Scrolls the page so the block's top is `offset` px under the top of the viewport."""
+    locator.evaluate("(element, offset) => window.scrollBy(0, element.getBoundingClientRect().top - offset)", offset)
+    page.wait_for_timeout(150)
+
+  if scenario["paletteClearance"] == "first-paragraph":
+    # The user's case (CR 112 evidence): the paragraph under the title, opened at the top of the page.
+    page.locator("main p").first.click()
+    page.locator("[data-sphinx-preview-block-editor] textarea").wait_for(state="visible")
+    check("text area (paragraph under the title)", "text", "textarea", True)
+    close_editor()
+    return
+
+  check_tall_block_scrolled(page, scenario, failures, close_editor, bring_to_top)
+
+  # The block sits 20, 60 and 140 px under the top of the pane: the palette's own place is above the
+  # line under the toolbar, so it rides down over the frame unless the frame reserves that distance.
+  # The figure also opens already scrolled (its top 100 px above the line: a tall block in the
+  # middle of the page) and through the Edit figure button of the hovered figure.
+  for offset in (20, 60, 140):
+    paragraph = page.locator("main p", has_text="Wrapped paragraphs keep their caret")
+    bring_to_top(paragraph, offset)
+    paragraph.click()
+    page.locator("[data-sphinx-preview-block-editor] textarea").wait_for(state="visible")
+    check(f"text area (block at {offset})", "text", "textarea", offset == 20)
+    close_editor()
+  for offset, how in ((20, "palette"), (60, "palette"), (140, "palette"), (-100, "palette"), (20, "button"), (60, "button"), (140, "button")):
+    figure = page.locator("figure").first
+    bring_to_top(figure, offset)
+    if how == "palette":
+      figure.click()
+      page.locator("[data-sphinx-preview-block-editor] textarea").wait_for(state="visible")
+      page.locator(".sphinx-preview-edit-palette [data-edit-action='figure']").click()
+    else:
+      page.mouse.move(2, 2)
+      page.wait_for_timeout(100)
+      box = figure.bounding_box()
+      page.mouse.move(box["x"] + box["width"] / 2, max(box["y"], 0) + 40, steps=4)
+      page.wait_for_timeout(200)
+      page.locator(".sphinx-preview-figure-edit-button:not([hidden])").click()
+    try:
+      page.locator("[data-sphinx-preview-block-editor] [role=dialog]").wait_for(state="visible", timeout=5000)
+    except PlaywrightTimeoutError:
+      failures.append(Failure(page_name, f"figure form via {how} (block at {offset}): the form did not open: "
+        + str(page.evaluate("() => [document.querySelectorAll('[data-sphinx-preview-block-editor]').length, document.querySelectorAll('[role=dialog]').length, window.scrollY]"))))
+      close_editor()
+      continue
+    first_line = "dialog"
+    check(f"figure form via {how} (block at {offset})", "figure", first_line, offset == 20 and how == "palette")
+    close_editor()
+
+
+# The rendered rows of the tall code block: viewport top and bottom of each "Tall line NN".
+TALL_ROWS = """(pre) => {
+  const code = pre.querySelector('code') || pre;
+  const rows = [];
+  const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    const pattern = /Tall line (\\d\\d)/g;
+    let match;
+    while ((match = pattern.exec(node.textContent))) {
+      const range = document.createRange();
+      range.setStart(node, match.index);
+      range.setEnd(node, match.index + 1);
+      const r = range.getBoundingClientRect();
+      rows.push({ index: Number(match[1]), top: r.top, bottom: r.bottom });
+    }
+  }
+  return rows;
+}"""
+
+# The same row in the editor's text box: its viewport top, from the box's line height.
+TALL_ROW_IN_EDITOR = """(index) => {
+  const textarea = document.querySelector('[data-sphinx-preview-block-editor] textarea');
+  const palette = document.querySelector('.sphinx-preview-edit-palette').getBoundingClientRect();
+  const style = getComputedStyle(textarea);
+  const row = textarea.value.split('\\n').findIndex((line) => line.startsWith('Tall line ' + String(index).padStart(2, '0')));
+  const box = textarea.getBoundingClientRect();
+  const lineHeight = parseFloat(style.lineHeight);
+  const top = box.top + parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop) + row * lineHeight - textarea.scrollTop;
+  return { row, rowTop: top, lineHeight, paletteTop: palette.top, paletteBottom: palette.bottom,
+    textareaTop: box.top, textareaHeight: box.height, textareaScroll: textarea.scrollTop, scrollY: window.scrollY };
+}"""
+
+
+# @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+def check_tall_block_scrolled(page: Page, scenario: dict, failures: list[Failure], close_editor, bring_to_top) -> None:
+  """CR 123, the user's rule for a block taller than the pane: opened with its top scrolled above the
+  viewport, the row the user clicked stays where it was (the bar sticks at the top of the pane and
+  may cover the first lines), and scrolling down with the wheel never moves the page back up while
+  the bar stays on its sticking line."""
+  page_name = scenario["page"]
+  tall = page.locator("main pre", has_text="Tall line 01").first
+  bring_to_top(tall, -150)
+  # The top of the reading area: under the sticky heading band.
+  reading_top = page.evaluate("""() => {
+    const band = document.querySelector('[data-sphinx-preview-sticky-headings]');
+    return band && !band.hidden ? Math.max(0, band.getBoundingClientRect().bottom) : 0;
+  }""")
+  rows = [row for row in tall.evaluate(TALL_ROWS) if row["top"] >= reading_top + 150]
+  if not rows:
+    failures.append(Failure(page_name, "tall block: no rendered row was measured in the reading area"))
+    return
+  clicked = rows[0]
+  box = tall.bounding_box()
+  page.mouse.click(box["x"] + 60, (clicked["top"] + clicked["bottom"]) / 2)
+  page.locator("[data-sphinx-preview-block-editor] textarea").wait_for(state="visible")
+  page.wait_for_timeout(500)
+  after = page.evaluate(TALL_ROW_IN_EDITOR, clicked["index"])
+  bar_height = after["paletteBottom"] - after["paletteTop"]
+  if after["row"] < 0 or abs(after["rowTop"] - clicked["top"]) >= bar_height or after["rowTop"] < after["paletteBottom"]:
+    failures.append(Failure(
+      page_name,
+      f"tall block scrolled: the clicked row (Tall line {clicked['index']:02d}, at {clicked['top']:.1f} before "
+      f"opening) moved to {after['rowTop']:.1f} (by a bar height or more, or under the bar): {after}",
+    ))
+  page.mouse.move(2, 2)
+  save_step(page, scenario, "tall", caret="hide")
+  page.mouse.move(box["x"] + 60, 400)
+  previous = page.evaluate("() => window.scrollY")
+  for step in range(1, 7):
+    page.mouse.wheel(0, 120)
+    page.wait_for_timeout(200)
+    now = page.evaluate("""() => {
+      const palette = document.querySelector('.sphinx-preview-edit-palette');
+      const bar = palette.getBoundingClientRect();
+      const frame = document.querySelector('[data-sphinx-preview-block-editor]').getBoundingClientRect();
+      return { scrollY: window.scrollY, top: bar.top, stuckAt: parseFloat(getComputedStyle(palette).top),
+        spans: frame.top < bar.top && frame.bottom > bar.bottom + 40 };
+    }""")
+    if now["scrollY"] < previous - 1:
+      failures.append(Failure(page_name, f"tall block: wheel step {step} moved the page back up from {previous} to {now['scrollY']}"))
+      break
+    if now["spans"] and abs(now["top"] - now["stuckAt"]) > 2:
+      failures.append(Failure(page_name, f"tall block: wheel step {step} left the bar off its sticking line: {now}"))
+      break
+    previous = now["scrollY"]
+  close_editor()
+
+
 # @tests_req SwRS-MDOKFSTUDIO-PALETTE-031
 def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> None:
   """T21: the edition palette above an open block editor."""
