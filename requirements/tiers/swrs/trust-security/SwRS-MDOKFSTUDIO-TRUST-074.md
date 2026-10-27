@@ -5,7 +5,8 @@ uuid: b9bcebca-dbe5-426b-9fef-251b9e3ed9ea
 title: The package ships its icon and its bundle
 description: The package SHALL declare images/logo.png, a PNG of 256 by 256
   pixels, as its extension icon and keep the folder out/bundle, which holds the
-  built-in engine bundle and its licence, in the VSIX.
+  built-in engine bundle and its licence, in the VSIX, and SHALL leave source
+  maps, internal docs, agent files and pyproject.toml out of the VSIX.
 project: markdown-okf-schema-studio
 scope: trust-security
 lifecycle: draft
@@ -55,6 +56,12 @@ The package SHALL declare images/logo.png, a PNG of 256 by 256 pixels, as its ex
 - WHEN it is read
 - THEN an esbuild entry point builds out/bundle/plantumlPreview.js from src/page/modules/plantumlPreview.ts, and the engine LICENSE is copied to out/bundle/plantuml/LICENSE
 
+### Scenario (nominal): Leftovers excluded
+
+- GIVEN the .vscodeignore file
+- WHEN its lines are read
+- THEN it lists **/*.map, .claude/**, pyproject.toml and docs/*.md, and no line excludes the whole docs folder
+
 ### Scenario (refusal): Contract broken
 
 | Input | Outcome |
@@ -62,6 +69,7 @@ The package SHALL declare images/logo.png, a PNG of 256 by 256 pixels, as its ex
 | a manifest whose icon key names another file | the package contract test fails |
 | an icon file that is not a 256 by 256 PNG | the package contract test fails |
 | a .vscodeignore with the line out/** | the package contract test fails |
+| a .vscodeignore without the line **/*.map | the package contract test fails |
 
 ### Verification notes
 

@@ -39,3 +39,7 @@ guidelines.yml
 guidelines.lock.json
 .guidelines-operation.lock
 images/logo-proposals/**
+**/*.map
+.claude/**
+pyproject.toml
+docs/*.md
