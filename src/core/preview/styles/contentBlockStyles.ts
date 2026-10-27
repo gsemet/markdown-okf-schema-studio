@@ -428,6 +428,23 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   vertical-align: top;
 }
 
+/* A column never narrows below 5em of text, so a table with many columns keeps whole words in its
+   cells ("document", "parse") instead of breaking them letter by letter. A table that then no
+   longer fits the column uses the wide-table behaviour (breakout in Auto, scroll otherwise). The
+   frontmatter properties table sizes its own columns. In edit mode the larger cell minimum below
+   (8em) wins. */
+#sphinx-myst-preview-content table:not(.okf-properties) :where(th, td) {
+  min-width: 5em;
+}
+
+/* A short identifier (one word, up to 24 characters) never splits inside a cell, wide table or not:
+   the global overflow-wrap: anywhere would otherwise break "Coverage" or "OPS-1042" letter by letter
+   when the columns are squeezed. The cell keeps the word whole, so the table grows and then breaks
+   out in Auto or scrolls. */
+#sphinx-myst-preview-content table :where(th, td)[data-sphinx-short-cell="true"] {
+  white-space: nowrap;
+}
+
 #sphinx-myst-preview-content th {
   background: var(--studio-textBlockQuote-background, rgba(128, 128, 128, 0.12));
   font-weight: 600;

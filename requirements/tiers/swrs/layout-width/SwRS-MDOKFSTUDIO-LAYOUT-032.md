@@ -7,7 +7,11 @@ description: When a table is wider than the pane outside Auto breakout, the
   extension SHALL let it scroll sideways inside its own box, limited to the
   column width, without widening the page, mark it as overflowing when it is
   more than 1 px wider than its box so that the theme shades its edges, and keep
-  a cell holding a single word of at most 24 characters on one line.
+  a cell holding a single word of at most 24 characters on one line. The
+  extension SHALL also give every cell of a content table (not the frontmatter
+  properties table) a minimum width of 5em, so that columns never wrap words
+  letter by letter and a table that no longer fits uses this wide-table
+  behaviour.
 project: markdown-okf-schema-studio
 scope: layout-width
 lifecycle: draft
@@ -24,6 +28,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/runtimeScroll.test.ts
+- test/visual/scenarioAssertions.ts
 - test/visual/scenarioDefinitions1.ts
 ---
 
@@ -31,7 +36,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When a table is wider than the pane outside Auto breakout, the extension SHALL let it scroll sideways inside its own box, limited to the column width, without widening the page, mark it as overflowing when it is more than 1 px wider than its box so that the theme shades its edges, and keep a cell holding a single word of at most 24 characters on one line.
+When a table is wider than the pane outside Auto breakout, the extension SHALL let it scroll sideways inside its own box, limited to the column width, without widening the page, mark it as overflowing when it is more than 1 px wider than its box so that the theme shades its edges, and keep a cell holding a single word of at most 24 characters on one line. The extension SHALL also give every cell of a content table (not the frontmatter properties table) a minimum width of 5em, so that columns never wrap words letter by letter and a table that no longer fits uses this wide-table behaviour.
 
 ### Scenario (nominal): Service-level table at 460 px
 - GIVEN a service-level table in a 460 px pane in dark theme, Margin mode
@@ -42,6 +47,11 @@ When a table is wider than the pane outside Auto breakout, the extension SHALL l
 - GIVEN a table with sixteen columns in a 900 px pane in dark theme
 - WHEN the table is scrolled to its end
 - THEN the far-right column is reachable and the page has no sideways scroll
+
+### Scenario (nominal): Table with many columns
+- GIVEN a seven-column table whose header words "document" and "parse" would otherwise be squeezed to one or two letters per line, in Margin mode
+- WHEN it is shown
+- THEN every cell has a computed minimum width of at least 5em, the words stay whole, and the table scrolls sideways when the columns no longer fit
 
 ### Scenario (refusal): Table that fits
 - GIVEN a table that fits
