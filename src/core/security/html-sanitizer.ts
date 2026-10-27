@@ -38,6 +38,7 @@ export interface HtmlRewriteContext {
     baseDirectory: string,
   ) => { kind: "anchor" | "external" | "deferred" | "blocked"; value?: string; reason?: string } | ResolvedResource;
   processStylesheet?: (stylesheetPath: string) => void;
+  /** Ignored: the sanitizer removes every document script, whatever the preview mode. */
   allowExternalScripts?: boolean;
 }
 
@@ -76,7 +77,7 @@ const ALLOWED_ATTRIBUTES = new Set([
   "low", "high", "optimum", "rel", "target", "download", "hreflang", "cite", "datetime",
   "controls", "loop", "muted", "preload", "autoplay", "loading", "decoding", "media", "usemap",
   "shape", "coords", "charset", "content", "color", "face", "size", "border", "cellpadding",
-  "cellspacing", "nonce", "async", "defer", "crossorigin", "integrity", "referrerpolicy",
+  "cellspacing", "async", "defer", "crossorigin", "integrity", "referrerpolicy",
   "xmlns", "xmlns:xlink", "xml:space", "viewbox", "preserveaspectratio", "version",
   "d", "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "points", "transform",
   "fill", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "stroke-dasharray",
@@ -189,10 +190,23 @@ function removeAttr(node: HtmlNode, name: string): void {
   }
 }
 
-function removeNode(parent: HtmlNode, child: HtmlNode): void {
-  if (parent.childNodes) {
-    parent.childNodes = parent.childNodes.filter((candidate) => candidate !== child);
-  }
+/**
+ * Marks a node for removal. The walk drops all marked children of a parent in one pass when it
+ * leaves the parent, so removing n siblings costs O(n) and not O(n^2).
+ */
+function removeNode(removed: Set<HtmlNode>, child: HtmlNode): void {
+  removed.add(child);
+}
+
+/** Deepest element nesting the preview keeps; deeper content is cut with a visible marker. */
+export const MAX_SANITIZER_DEPTH = 256;
+const DEPTH_MARKER_TEXT = "[Content cut: nesting is too deep for the preview.]";
+
+interface WalkFrame {
+  node: HtmlNode;
+  children: HtmlNode[];
+  index: number;
+  removed: Set<HtmlNode>;
 }
 
 function addDiagnostic(
@@ -204,14 +218,39 @@ function addDiagnostic(
   diagnostics.push({ code, message, value });
 }
 
+/**
+ * Rewrites the descendants of `root` depth first with an explicit stack, so the nesting depth of
+ * the input never reaches the call stack. Content below {@link MAX_SANITIZER_DEPTH} is replaced
+ * by a visible marker.
+ */
 function walkChildren(
-  node: HtmlNode,
+  root: HtmlNode,
   context: HtmlRewriteContext,
   diagnostics: SecurityDiagnostic[],
   tableStyles: Map<string, string>,
 ): void {
-  for (const child of [...(node.childNodes ?? [])]) {
-    rewriteNode(child, node, context, diagnostics, tableStyles);
+  const stack: WalkFrame[] = [{ node: root, children: [...(root.childNodes ?? [])], index: 0, removed: new Set() }];
+  while (stack.length > 0) {
+    const frame = stack[stack.length - 1];
+    if (frame.index >= frame.children.length) {
+      if (frame.removed.size > 0 && frame.node.childNodes) {
+        frame.node.childNodes = frame.node.childNodes.filter((candidate) => !frame.removed.has(candidate));
+      }
+      stack.pop();
+      continue;
+    }
+    const child = frame.children[frame.index++];
+    if (!rewriteNode(child, frame.removed, context, diagnostics, tableStyles)) {
+      continue;
+    }
+    if (stack.length >= MAX_SANITIZER_DEPTH) {
+      if (child.childNodes && child.childNodes.length > 0) {
+        child.childNodes = [{ nodeName: "#text", value: DEPTH_MARKER_TEXT }];
+        addDiagnostic(diagnostics, "truncated-depth", "Cut content nested too deeply for the preview.");
+      }
+      continue;
+    }
+    stack.push({ node: child, children: [...(child.childNodes ?? [])], index: 0, removed: new Set() });
   }
 }
 
@@ -225,25 +264,25 @@ function walkChildren(
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-042
 function rewriteNode(
   node: HtmlNode,
-  parent: HtmlNode,
+  removed: Set<HtmlNode>,
   context: HtmlRewriteContext,
   diagnostics: SecurityDiagnostic[],
   tableStyles: Map<string, string>,
-): void {
+): boolean {
   const tagName = (node.tagName ?? node.nodeName).toLowerCase();
   if (REMOVED_ELEMENTS.has(tagName)) {
-    removeNode(parent, node);
+    removeNode(removed, node);
     addDiagnostic(diagnostics, "blocked-active-element", `Removed <${tagName}> from preview output.`);
-    return;
+    return false;
   }
 
   if (tagName === "link") {
-    removeNode(parent, node);
+    removeNode(removed, node);
     const isStylesheet = attr(node, "rel")?.value.toLowerCase().split(/\s+/u).includes("stylesheet");
     const stylesheet = attr(node, "href");
     if (!isStylesheet || !stylesheet) {
       addDiagnostic(diagnostics, "blocked-element", "Removed <link> from preview output.");
-      return;
+      return false;
     }
     const resolved = context.resolveResource(stylesheet.value, context.outputRoot);
     if (resolved) {
@@ -251,43 +290,30 @@ function rewriteNode(
     } else {
       addDiagnostic(diagnostics, "blocked-stylesheet", "Removed a stylesheet outside staged output.", stylesheet.value);
     }
-    return;
+    return false;
   }
 
   if (!tagName.startsWith("#") && !ALLOWED_ELEMENTS.has(tagName)) {
-    removeNode(parent, node);
+    removeNode(removed, node);
     addDiagnostic(diagnostics, "blocked-element", `Removed <${tagName}> from preview output.`);
-    return;
+    return false;
   }
 
   if (tagName === "script") {
-    if (context.allowExternalScripts === false) {
-      removeNode(parent, node);
-      addDiagnostic(diagnostics, "blocked-script", "Removed script from reduced preview output.");
-      return;
-    }
-    const source = attr(node, "src");
-    if (!source) {
-      removeNode(parent, node);
+    // No document script reaches the preview. The host adds its own scripts after sanitizing.
+    removeNode(removed, node);
+    if (attr(node, "src")) {
+      addDiagnostic(diagnostics, "blocked-script", "Removed script from preview output.");
+    } else {
       addDiagnostic(diagnostics, "blocked-inline-script", "Removed inline script from preview output.");
-      return;
     }
-    const resolved = context.resolveResource(source.value, context.outputRoot);
-    if (!resolved) {
-      removeNode(parent, node);
-      addDiagnostic(diagnostics, "blocked-script-resource", "Removed a script outside staged output.", source.value);
-      return;
-    }
-    setAttr(node, "src", resolved.uri);
-    setAttr(node, "nonce", context.nonce);
-    walkChildren(node, context, diagnostics, tableStyles);
-    return;
+    return false;
   }
 
   if (tagName === "style") {
-    removeNode(parent, node);
+    removeNode(removed, node);
     addDiagnostic(diagnostics, "blocked-inline-style", "Removed inline style from preview output.");
-    return;
+    return false;
   }
 
   if (tagName === "img" && !attr(node, "alt")) {
@@ -296,9 +322,9 @@ function rewriteNode(
 
   const refresh = attr(node, "http-equiv");
   if (tagName === "meta" && refresh?.value.trim().toLowerCase() === "refresh") {
-    removeNode(parent, node);
+    removeNode(removed, node);
     addDiagnostic(diagnostics, "blocked-refresh", "Removed automatic navigation from preview output.");
-    return;
+    return false;
   }
 
   for (const attribute of [...(node.attrs ?? [])]) {
@@ -450,7 +476,7 @@ function rewriteNode(
     setAttr(node, "tabindex", "0");
   }
 
-  walkChildren(node, context, diagnostics, tableStyles);
+  return true;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-119
