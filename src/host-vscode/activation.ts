@@ -9,7 +9,12 @@ import * as path from "node:path";
 
 import * as vscode from "vscode";
 
-import { PREVIEW_EDIT_COMMANDS, type PreviewEditCommandName } from "../core/protocol/hostToPage";
+import {
+  PREVIEW_EDIT_COMMANDS,
+  PREVIEW_FOLD_COMMANDS,
+  type PreviewEditCommandName,
+  type PreviewFoldCommandName,
+} from "../core/protocol/hostToPage";
 import { preloadMystEngine } from "../core/render/mystRenderer";
 import { buildStatusWebviewHtml } from "../session/webview";
 import { PreviewManager } from "../session/previewManager";
@@ -33,6 +38,11 @@ export const REFRESH_COMMAND_ID = "markdown-okf-schema-studio.refreshPreview";
   redo: "markdown-okf-schema-studio.editRedo",
   selectAll: "markdown-okf-schema-studio.editSelectAll",
   deleteLine: "markdown-okf-schema-studio.editDeleteLine",
+};
+/** The palette commands that fold or unfold every section of the focused preview (CR 143). */
+const FOLD_COMMAND_IDS: Readonly<Record<PreviewFoldCommandName, string>> = {
+  foldAll: "markdown-okf-schema-studio.foldAll",
+  unfoldAll: "markdown-okf-schema-studio.unfoldAll",
 };
 /** The view type of the side preview panels (and of their serializer). */
 export const PANEL_VIEW_TYPE = "markdown-okf-schema-studio.preview";
@@ -91,6 +101,9 @@ export class StudioActivation {
       // @implements_req SwRS-MDOKFSTUDIO-BLOCK-003
       ...PREVIEW_EDIT_COMMANDS.map((command) =>
         vscode.commands.registerCommand(EDIT_COMMAND_IDS[command], () => manager.runEditCommand(command))),
+      // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+      ...PREVIEW_FOLD_COMMANDS.map((command) =>
+        vscode.commands.registerCommand(FOLD_COMMAND_IDS[command], () => manager.runFoldCommand(command))),
       vscode.window.registerWebviewPanelSerializer(PANEL_VIEW_TYPE, {
         deserializeWebviewPanel: (panel, state) => this.deserializePreviewPanel(panel, state),
       }),

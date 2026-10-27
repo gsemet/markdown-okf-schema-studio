@@ -194,6 +194,64 @@ def check_preview_toolbar(page: Page, scenario: dict, failures: list[Failure]) -
             page.wait_for_timeout(200)
 
 
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+# @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+def check_heading_fold(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
+    """In Chromium the Fold button folds every section with content, a folded block keeps no height, and a chevron folds one section."""
+    button = toolbar.locator("[data-sphinx-preview-fold-toggle]")
+    if button.count() != 1:
+        failures.append(Failure(page_name, "the Fold button is missing or duplicated"))
+        return
+    headings = page.locator("#sphinx-myst-preview-content > :is(h1, h2, h3, h4, h5, h6)[data-okf-fold]")
+    if headings.count() == 0:
+        return
+    measure = """() => {
+      const kids = [...document.getElementById('sphinx-myst-preview-content').children];
+      const folded = kids.filter(item => item.hasAttribute('data-okf-folded'));
+      const shownHeadings = kids.filter(item => /^H[1-6]$/.test(item.tagName) && !item.hasAttribute('data-okf-folded'));
+      return {
+        folded: folded.length,
+        untilFound: folded.every(item => item.getAttribute('hidden') === 'until-found'),
+        tall: folded.filter(item => item.getBoundingClientRect().height > 0.5).length,
+        closed: kids.filter(item => item.getAttribute('data-okf-fold') === 'closed').length,
+        headingsTall: shownHeadings.every(item => item.getBoundingClientRect().height > 0),
+        text: kids.map(item => item.textContent).join(''),
+        scrollY: window.scrollY,
+      };
+    }"""
+    scroll = page.evaluate("window.scrollY")
+    before = page.evaluate(measure)
+    if before["folded"] != 0:
+        failures.append(Failure(page_name, f"{before['folded']} blocks are folded before any fold"))
+    button.evaluate("element => element.click()")
+    page.wait_for_timeout(150)
+    folded = page.evaluate(measure)
+    if folded["folded"] == 0 or folded["closed"] == 0 or button.get_attribute("aria-pressed") != "true":
+        failures.append(Failure(page_name, f"the Fold button did not fold the sections: {folded}"))
+    elif folded["tall"] != 0 or not folded["untilFound"] or not folded["headingsTall"]:
+        failures.append(Failure(page_name, f"folded blocks must be hidden until found without height, headings shown: {folded}"))
+    elif folded["text"] != before["text"]:
+        failures.append(Failure(page_name, "folding changed the text of the content"))
+    button.evaluate("element => element.click()")
+    page.wait_for_timeout(150)
+    opened = page.evaluate(measure)
+    if opened["folded"] != 0 or opened["closed"] != 0 or button.get_attribute("aria-pressed") != "false":
+        failures.append(Failure(page_name, f"the Fold button did not unfold the sections: {opened}"))
+    first = headings.first
+    chevron = first.locator("[data-okf-fold-toggle]")
+    if chevron.count() == 1:
+        chevron.evaluate("element => element.click()")
+        page.wait_for_timeout(100)
+        if chevron.get_attribute("aria-expanded") != "false" or page.evaluate(measure)["folded"] == 0:
+            failures.append(Failure(page_name, "the chevron did not fold its section"))
+        chevron.evaluate("element => element.click()")
+        page.wait_for_timeout(100)
+        if page.evaluate(measure)["folded"] != 0:
+            failures.append(Failure(page_name, "the chevron did not unfold its section"))
+    page.evaluate(f"window.scrollTo(0, {scroll})")
+    page.wait_for_timeout(100)
+
+
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
 # @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failure]) -> None:
@@ -259,8 +317,9 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
         failures.append(Failure(page_name, f"toolbar row 1 does not hold {expected_main} buttons: {rows[0]['buttons']}"))
     if rows[1]["buttons"] != 4:
         failures.append(Failure(page_name, f"toolbar row 2 does not hold 4 buttons: {rows[1]['buttons']}"))
-    if rows[2]["buttons"] != 5:
-        failures.append(Failure(page_name, f"toolbar row 3 does not hold 5 buttons: {rows[2]['buttons']}"))
+    if rows[2]["buttons"] != 6:
+        failures.append(Failure(page_name, f"toolbar row 3 does not hold 6 buttons: {rows[2]['buttons']}"))
+    check_heading_fold(page, toolbar, page_name, failures)
     check_diff_toggle(page, toolbar, page_name, failures, starts_pressed=render_options.get("incomingChanges") is not False)
     if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5 or rows[1]["rect"]["bottom"] > rows[2]["rect"]["top"] + 0.5:
         failures.append(Failure(page_name, "toolbar rows overlap"))

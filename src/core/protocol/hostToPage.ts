@@ -250,6 +250,17 @@ export interface PreviewEditCommandMessage extends RenderMessage<"previewEditCom
   command: PreviewEditCommandName;
 }
 
+/** The folding commands of the command palette, run on the focused preview. */
+export const PREVIEW_FOLD_COMMANDS = ["foldAll", "unfoldAll"] as const;
+
+/** One of {@link PREVIEW_FOLD_COMMANDS}. */
+export type PreviewFoldCommandName = (typeof PREVIEW_FOLD_COMMANDS)[number];
+
+/** A command of the host folds or unfolds every section of the page. */
+export interface PreviewFoldCommandMessage extends RenderMessage<"previewFoldCommand"> {
+  command: PreviewFoldCommandName;
+}
+
 /** Every message a host sends to a preview page. */
 export type HostToPageMessage =
   | PreviewPendingOverlayMessage
@@ -275,6 +286,7 @@ export type HostToPageMessage =
   | PreviewPlantUmlIncludesChangedMessage
   | PreviewPairingMessage
   | PreviewEditCommandMessage
+  | PreviewFoldCommandMessage
   | ThemeChangedMessage;
 
 /** The type names of {@link HostToPageMessage}. */
@@ -385,6 +397,11 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewEditCommand: {
       addressing: "render",
       isValid: (message) => (PREVIEW_EDIT_COMMANDS as readonly unknown[]).includes(message.command),
+    },
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+    previewFoldCommand: {
+      addressing: "render",
+      isValid: (message) => (PREVIEW_FOLD_COMMANDS as readonly unknown[]).includes(message.command),
     },
     themeChanged: render,
   };

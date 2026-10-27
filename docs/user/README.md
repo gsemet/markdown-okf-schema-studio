@@ -6,6 +6,8 @@ The [project README](../../README.md) shows what Studio does. These pages hold t
 - [Features and Inline Editing](editing.md): MyST rendering, block editing, the edition palette,
   block selection, rich paste.
 - [Floating Toolbar](toolbar.md): the three rows of buttons and the collapse chevron.
+- [Folding Sections](folding.md): fold and unfold the sections under headings, the Fold button and
+  the command palette.
 - [Slash Menu](slash-menu.md): the `/` command menu in a block text box.
 - [Preview Themes and Motion](themes-and-motion.md): Dark, White, Cream, and the short animations.
 - [Wide Tables and Figures](wide-tables.md): the Auto width mode.

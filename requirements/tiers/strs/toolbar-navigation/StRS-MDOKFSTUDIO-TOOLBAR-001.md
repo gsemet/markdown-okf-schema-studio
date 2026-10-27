@@ -42,7 +42,7 @@ As a reader, I find the preview controls in three clear rows, fold the toolbar d
 
 ### Rationale and constraints
 
-- Row 1 holds Refresh, Anchor, Edit and the collapse button; row 2 holds Back, Next, Zoom out and Zoom in; row 3 holds Theme, Width, Table of contents, Diff and Comments.
+- Row 1 holds Refresh, Anchor, Edit and the collapse button; row 2 holds Back, Next, Zoom out and Zoom in; row 3 holds Theme, Width, Table of contents, Fold, Diff and Comments.
 - A read-only preview (untrusted workspace, standalone file) shows the same rows, with the Edit button greyed and a tooltip that gives the reason.
 - The rows stay inside the pane at narrow and wide widths, at the zoom limits, in the light, dark, white and cream themes, expanded or collapsed.
 - Pressing the chevron of the toolbar hides or shows the navigation and view rows, and the choice is kept for the workspace.

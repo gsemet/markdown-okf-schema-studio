@@ -485,7 +485,7 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 test("preview toolbar has three rows: actions with the collapse button, navigation, view options", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
-  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 13);
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 14);
   const [mainRow, rest] = toolbar.split('<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">');
   const [viewRow, optionsRow] = rest.split('<div data-sphinx-preview-toolbar-row="options">');
   assert.match(mainRow, /data-sphinx-preview-toolbar-row="main"/u);
@@ -495,12 +495,12 @@ test("preview toolbar has three rows: actions with the collapse button, navigati
   assert.match(viewRow, /^<div data-sphinx-preview-toolbar-row="view">/u);
   assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 4);
   assert.match(viewRow, /data-sphinx-preview-back[\s\S]*data-sphinx-preview-next[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in/u);
-  assert.equal((optionsRow.match(/<button\b/gu) ?? []).length, 5);
-  assert.match(optionsRow, /data-sphinx-preview-theme-toggle[\s\S]*data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
+  assert.equal((optionsRow.match(/<button\b/gu) ?? []).length, 6);
+  assert.match(optionsRow, /data-sphinx-preview-theme-toggle[\s\S]*data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-fold-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
   assert.match(optionsRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><button[^>]*data-sphinx-preview-comments-toggle aria-pressed="true"[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
   // Read-only previews: the Edit button stays, greyed (aria-disabled) with the reason as tooltip.
   const readOnly = renderPreviewToolbar(false);
-  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 13);
+  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 14);
   assert.match(readOnly, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"[^>]*title="Editing is unavailable: this file is not in a trusted workspace"[^>]*data-tooltip="Editing is unavailable: this file is not in a trusted workspace"/u);
   assert.doesNotMatch(toolbar, /aria-disabled/u);
   assert.match(PREVIEW_THEME_CSS, /button\[aria-disabled="true"\]\s*\{[^}]*cursor: not-allowed;/u);
@@ -516,7 +516,7 @@ test("preview toolbar has three rows: actions with the collapse button, navigati
   ]) {
     assert.ok(toolbar.includes(control), `expected toolbar control ${control}`);
   }
-  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 13);
+  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 14);
   assert.match(
     PREVIEW_THEME_CSS,
     /button\[data-tooltip\]::after\s*\{[^}]*content: attr\(data-tooltip\);[^}]*visibility: hidden;[^}]*opacity: 0;/u,
@@ -1271,4 +1271,18 @@ test("in edit mode table cells keep a minimum width and the edited cell is wider
   );
   // The rendered (read) view has no such rule.
   assert.doesNotMatch(PREVIEW_THEME_CSS, /(?:^|\n)#sphinx-myst-preview-content table :where\(th, td\) \{[^}]*min-width/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-003
+test("CR 143: the chevron shows on hover, focus and while folded, and a folded block drops its spacing", () => {
+  assert.match(PREVIEW_THEME_CSS, /\[data-okf-fold-toggle\] \{[^}]*position: absolute;[^}]*opacity: 0;/u);
+  assert.match(PREVIEW_THEME_CSS,
+    /:hover > \[data-okf-fold-toggle\],[^{]*:focus-within > \[data-okf-fold-toggle\],[^{]*\[data-okf-fold="closed"\] > \[data-okf-fold-toggle\] \{\s*opacity: 1;/u);
+  assert.match(PREVIEW_THEME_CSS, /> \[data-okf-folded\] \{[^}]*margin: 0 !important;[^}]*padding: 0 !important;/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-005
+test("CR 143: the toolbar has a Fold button, off until a section is folded", () => {
+  assert.match(renderPreviewToolbar(),
+    /<button type="button" data-sphinx-preview-fold-toggle aria-pressed="false" aria-label="Fold all sections"/u);
 });

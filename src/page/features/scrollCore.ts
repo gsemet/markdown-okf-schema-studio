@@ -39,7 +39,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
     ) || undefined;
     const selection = window.getSelection?.();
     const selectedText = selection?.toString?.().slice(0, 4096) || undefined;
-    const { themeMode, anchorMode, viewControls, widthMode, tocColumn, chipToggle } = parts();
+    const { themeMode, anchorMode, viewControls, widthMode, tocColumn, chipToggle, headingFold } = parts();
     const snapshot: PanelStateSnapshot = {
       documentId: context.documentId,
       sourceFile: context.activeSourceFile,
@@ -62,6 +62,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
       viewWidthMode: widthMode.mode(),
       viewToc: tocColumn.open(),
       tocCollapsed: tocColumn.collapsed(),
+      ...(Object.keys(headingFold.state()).length > 0 ? { headingFolds: headingFold.state() } : {}),
       expandedChips: chipToggle.expanded(),
     };
     if (throttled) rt.pageHost.setStateThrottled(snapshot);
@@ -460,7 +461,9 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
   }
 
   // Puts an element at the reading line, below the sticky heading band.
+  // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-006
   function revealElement(target: Element): void {
+    if (rt.parts.headingFold.reveal(target)) measure();
     const rectangle = target.getBoundingClientRect?.();
     if (!rectangle) return;
     revealAt(anchorPolicy.scrollTopForY(rectangle.top + window.scrollY, readingOffset(), maxScrollTop()));
@@ -537,6 +540,9 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
           ? document.getElementById?.(decodedValue.slice(1))
           : undefined);
       if (!target) return;
+      // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-006
+      // A target inside a folded section unfolds it first, then the layout is measured again.
+      if (rt.parts.headingFold.reveal(target)) measure();
       const rectangle = target.getBoundingClientRect?.();
       if (!rectangle) return;
       const mappedScrollTop = mappedEntry && Number.isInteger(fragmentSourceLine)

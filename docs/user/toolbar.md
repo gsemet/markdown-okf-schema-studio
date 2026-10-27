@@ -5,8 +5,9 @@ The floating toolbar at the top right of the preview has three rows:
 1. **Actions:** Refresh, Anchor (link the preview scroll to the text editor), Edit (writable
    previews only), and a chevron button that hides or shows rows 2 and 3.
 2. **Navigation:** Back, Next, Zoom out and Zoom in.
-3. **View options:** Theme, Width, Table of contents, the incoming-changes (Diff) toggle and the
-   Comments toggle (hides or shows the gray comment chips, in preview and in edit mode).
+3. **View options:** Theme, Width, Table of contents, Fold (folds every section, or unfolds them
+   all when any is folded; see [Folding sections](folding.md)), the incoming-changes (Diff) toggle
+   and the Comments toggle (hides or shows the gray comment chips, in preview and in edit mode).
 
 The Table of contents toolbar button shows the outline of the whole document next to the preview. A
 `[TOC]` line (or `[[_TOC_]]`, or a `{contents}` directive) in the text (inserted by the Table of contents button of the edition palette or by

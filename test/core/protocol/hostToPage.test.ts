@@ -45,6 +45,7 @@ const WELL_FORMED: { readonly [T in HostToPageType]: Record<string, unknown> } =
   previewPlantUmlIncludesChanged: {},
   previewPairing: { pairedTextEditor: true },
   previewEditCommand: { command: "undo" },
+  previewFoldCommand: { command: "foldAll" },
   themeChanged: { themeKind: 2 },
 };
 
@@ -92,6 +93,8 @@ test("the payload checks refuse what the page used to refuse", () => {
     ["previewFlushEdit", { flushId: 42 }],
     ["previewEditCommand", { command: "format" }],
     ["previewEditCommand", { command: undefined }],
+    ["previewFoldCommand", { command: "undo" }],
+    ["previewFoldCommand", { command: undefined }],
     ["previewEditorWatch", { editId: undefined }],
     ["previewContentPatch", { next: undefined }],
     ["previewContentPatch", { next: { revision: "8", requestId: 12 } }],

@@ -71,6 +71,17 @@
   split per parse) are applied in memory by an esbuild plugin and a Node load hook; the postinstall
   script is gone and nothing is written into node_modules. A package version or content other than
   the reviewed one fails loudly. Verification: test/build/mystSourcePatches.test.ts.
+## 2026-10-27 (fold and unfold sections in the preview)
+
+- StRS-MDOKFSTUDIO-TOOLBAR-002 and SwRS-MDOKFSTUDIO-TOOLBAR-003 to -006 and -008 (CR 143): new. The
+  preview folds the sections under its headings: a chevron per heading, the section shortcut, the
+  Fold button and the Fold All / Unfold All palette commands, the folds kept per document in the
+  webview state (never in the file), unfolding by the browser find and by navigation, and no
+  selection or edit of a block in a folded section. SwRS-MDOKFSTUDIO-TOOLBAR-001 and
+  StRS-MDOKFSTUDIO-TOOLBAR-001 now list the Fold button (14 buttons, 6 in row 3). Verification:
+  unit tests under test/core/state, test/page/modules, test/session and test/security, the Chromium
+  check check_heading_fold in test/visual/capture_layout_checks.py, `just requirements-lint`, real-window
+  screenshots under the CR 143 reports.
 
 ## 2026-10-28 (MyST cards, tabs and version titles)
 
