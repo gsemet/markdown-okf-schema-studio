@@ -13,6 +13,7 @@ import { afterEach, test } from "node:test";
 
 import {
   injectPlantUmlDiagrams,
+  clearPlantUmlCacheForTests,
   renderPlantUmlDiagrams,
   resetPlantUmlProcessSpawnerForTests,
   setPlantUmlProcessSpawnerForTests,
@@ -261,6 +262,7 @@ test("one failing JAR diagram leaves the pictures of the other diagrams intact",
       child.emit("close", 2, null);
     });
   });
+  clearPlantUmlCacheForTests(); // the first pass was cached; this pass must meet the new failing process
   const failed = await renderPlantUmlDiagrams(html, { jarPath, workspaceRoot: root, trusted: true });
   assert.deepEqual(failed.diagrams.map((item) => item.status), ["error", "error", "error"]);
 });

@@ -68,6 +68,94 @@ export function resetPlantUmlProcessSpawnerForTests(): void {
   processSpawner = defaultProcessSpawner;
 }
 
+// A render that finished is reused for the same source under the same invocation, so editing
+// another part of the page does not start a JVM per unchanged diagram.
+export const PLANTUML_MAX_CONCURRENT_RENDERS = 2;
+const PLANTUML_CACHE_MAX_ENTRIES = 64;
+const svgCache = new Map<string, string>();
+// Diagram text that reads files or the environment can change output without changing the text.
+const UNCACHEABLE_SOURCE = /!(?:include|import|theme|pragma)|%(?:getenv|load_json|date|now|random|file_exists|dirpath|filename)/iu;
+
+export function clearPlantUmlCacheForTests(): void {
+  svgCache.clear();
+}
+
+export function plantUmlCacheSizeForTests(): number {
+  return svgCache.size;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-097
+function cacheKey(
+  source: string,
+  command: string,
+  args: readonly string[],
+  workspaceRoot: string,
+): string | undefined {
+  if (UNCACHEABLE_SOURCE.test(source)) {
+    return undefined;
+  }
+  // The JAR identity (size and mtime) joins the key so replacing the JAR invalidates its entries.
+  const jarIndex = args.indexOf("-jar");
+  let jarIdentity = "";
+  if (jarIndex >= 0) {
+    try {
+      const stat = fs.statSync(args[jarIndex + 1] ?? "");
+      jarIdentity = `${stat.size}:${stat.mtimeMs}`;
+    } catch {
+      return undefined;
+    }
+  }
+  // The whole tuple is the key (no digest), so a hash collision can never serve another diagram.
+  return JSON.stringify([command, args, workspaceRoot, PLANTUML_SECURITY_PROFILE, jarIdentity, source]);
+}
+
+function cacheStore(key: string, svg: string): void {
+  svgCache.delete(key);
+  svgCache.set(key, svg);
+  while (svgCache.size > PLANTUML_CACHE_MAX_ENTRIES) {
+    const oldest = svgCache.keys().next().value;
+    if (oldest === undefined) {
+      break;
+    }
+    svgCache.delete(oldest);
+  }
+}
+
+let activeRenders = 0;
+const renderWaiters: Array<() => void> = [];
+
+// Returns undefined when a slot was taken at once, so the process starts in the same tick.
+function acquireRenderSlot(signal: AbortSignal | undefined): Promise<void> | undefined {
+  if (activeRenders < PLANTUML_MAX_CONCURRENT_RENDERS) {
+    activeRenders += 1;
+    return undefined;
+  }
+  return new Promise<void>((resolve, reject) => {
+    const waiter = (): void => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    };
+    const onAbort = (): void => {
+      const index = renderWaiters.indexOf(waiter);
+      if (index >= 0) {
+        renderWaiters.splice(index, 1);
+      }
+      reject(new Error("PlantUML rendering was canceled."));
+    };
+    renderWaiters.push(waiter);
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+function releaseRenderSlot(): void {
+  const next = renderWaiters.shift();
+  if (next) {
+    next(); // The slot passes straight to the waiter.
+    return;
+  }
+  activeRenders -= 1;
+}
+
 let timeoutMs = PLANTUML_TIMEOUT_MS;
 
 export function setPlantUmlTimeoutForTests(milliseconds: number): void {
@@ -375,9 +463,40 @@ export async function renderPlantUmlDiagrams(
     PLANTUML_ALLOWLIST_PATH: options.workspaceRoot,
   };
 
+  const inFlight = new Map<string, Promise<string>>();
+  const renderCached = (source: string): Promise<string> => {
+    if (source.length > MAX_PLANTUML_SOURCE_LENGTH || options.signal?.aborted) {
+      return renderSource(source, command, args, env, options.workspaceRoot, options.signal);
+    }
+    const key = cacheKey(source, command, args, options.workspaceRoot);
+    const hit = key === undefined ? undefined : svgCache.get(key);
+    if (key !== undefined && hit !== undefined) {
+      cacheStore(key, hit);
+      return Promise.resolve(hit);
+    }
+    const pending = key === undefined ? undefined : inFlight.get(key);
+    if (pending) {
+      return pending;
+    }
+    const start = (): Promise<string> => renderSource(
+      source, command, args, env, options.workspaceRoot, options.signal,
+    ).finally(releaseRenderSlot);
+    const waiting = acquireRenderSlot(options.signal);
+    const run = waiting ? waiting.then(start) : start();
+    if (key !== undefined) {
+      inFlight.set(key, run);
+    }
+    return run.then((svg) => {
+      if (key !== undefined) {
+        cacheStore(key, svg);
+      }
+      return svg;
+    });
+  };
+
   const outcomes = await Promise.all(sources.map(async ({ source, line }) => {
     try {
-      const svg = await renderSource(source, command, args, env, options.workspaceRoot, options.signal);
+      const svg = await renderCached(source);
       return { diagram: { status: "rendered", svg, ...(line === undefined ? {} : { line }) } as PlantUmlDiagramRender };
     } catch (error) {
       const message = isMissingExecutable(error)
