@@ -5,13 +5,15 @@ import * as path from "node:path";
 import { parse, serialize } from "parse5";
 
 import type { RenderDiagnostic } from "./mystRenderer";
+import { findEscapingPlantUmlInclude } from "./plantUmlIncludes";
 import { MAX_PLANTUML_SOURCE_LENGTH } from "./plantUmlLimits";
 
 const MAX_PLANTUML_OUTPUT_LENGTH = 8 * 1024 * 1024;
 const MAX_PLANTUML_STDERR_LENGTH = 64 * 1024;
 export const PLANTUML_TIMEOUT_MS = 30_000;
 // Strictest PlantUML profile that still reads local `!include` files; the allowlist path is the
-// workspace root. PlantUML's own check does not fully confine includes (see DIAG-084 Known issues).
+// workspace root. PlantUML's own check does not fully confine includes, so the extension
+// refuses a diagram whose includes leave the root before the process starts (plantUmlIncludes).
 export const PLANTUML_SECURITY_PROFILE = "ALLOWLIST";
 export const PLANTUML_LIMIT_SIZE = 4096;
 
@@ -496,6 +498,10 @@ export async function renderPlantUmlDiagrams(
 
   const outcomes = await Promise.all(sources.map(async ({ source, line }) => {
     try {
+      const escape = findEscapingPlantUmlInclude(source, options.workspaceRoot);
+      if (escape) {
+        throw new Error(escape);
+      }
       const svg = await renderCached(source);
       return { diagram: { status: "rendered", svg, ...(line === undefined ? {} : { line }) } as PlantUmlDiagramRender };
     } catch (error) {
