@@ -204,6 +204,39 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     rememberSelectionAnchor(blocks[target]);
   }
 
+  /**
+   * True for a key target that is the page itself: the document, its body or the content root
+   * (`<main tabindex="-1">`, which a click on the margin or a window that comes back focuses).
+   */
+  function isPageTarget(target: EventTarget | null): boolean {
+    return !(target instanceof Element) || target === document.body || target === document.documentElement
+      || target === document.getElementById?.("sphinx-myst-preview-content");
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
+  // The window or the tab comes back with the page itself holding the focus: the selection is
+  // restored (its block, else the last one the keyboard selected, else the block nearest the top of
+  // the viewport) and the focus moves to that block, so Up / Down carry on and the page never shows
+  // the focus ring. A focus on a toolbar button, a block or an editor is left alone.
+  function restoreBlockSelection(): void {
+    if (!state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return;
+    if (document.visibilityState === "hidden") return;
+    if (!isPageTarget(document.activeElement ?? null)) return;
+    const blocks = syncSelectionModel();
+    if (blocks.length === 0) return;
+    if (blockSelection.isActive()) {
+      focusSelectionEnd(blocks, false);
+      return;
+    }
+    const remembered = selectionAnchor && selectionAnchor.count === blocks.length
+      && selectionAnchor.index < blocks.length && !rt.blocks.isIncludedBlock(blocks[selectionAnchor.index])
+      ? selectionAnchor.index : undefined;
+    const target = remembered ?? topVisibleIndex(blocks);
+    if (target < 0) return;
+    selectBlocksNow(undefined, target, false);
+    rememberSelectionAnchor(blocks[target]);
+  }
+
   /** True for a key target that keeps its own keys (a text box, a field, an editor, the properties). */
   function ownsKeys(target: EventTarget | null, selector: string, contentEditable: boolean): boolean {
     return target instanceof Element
@@ -258,8 +291,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         const focused = target instanceof Element ? rt.insertPoints.blockOfTarget(target) : undefined;
         // With a selection the keys are ours only on a block, an insertion bar or the page itself:
         // toolbar buttons and menus keep their arrow keys.
-        if (!focused && target instanceof Element
-          && target !== document.body && target !== document.documentElement
+        if (!focused && target instanceof Element && !isPageTarget(target)
           && !target.closest(".sphinx-preview-insert-point")) return;
         const blocks = syncSelectionModel();
         if (!blockSelection.isActive() && (!focused || focused.getAttribute("data-okf-properties") !== null)) return;
@@ -288,8 +320,7 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         const toggle = target instanceof Element && target === rt.editModeButton;
         if (!toggle && ownsKeys(target, "[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]", true)) return;
         const focused = target instanceof Element ? rt.insertPoints.blockOfTarget(target) : undefined;
-        if (!toggle && !focused && target instanceof Element
-          && target !== document.body && target !== document.documentElement) return;
+        if (!toggle && !focused && !isPageTarget(target)) return;
         if (arrow) {
           event.preventDefault?.();
           event.stopPropagation?.();
@@ -305,6 +336,9 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         event.stopPropagation?.();
         rt.editMode.openMappedEditor(block, block);
       });
+
+      window.addEventListener("focus", restoreBlockSelection);
+      document.addEventListener("visibilitychange", restoreBlockSelection);
 
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Escape" || !blockSelection.isActive()) return;

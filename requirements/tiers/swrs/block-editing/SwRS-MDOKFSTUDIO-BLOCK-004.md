@@ -6,7 +6,8 @@ title: Arrow keys, Enter and Escape drive block editing without the mouse
 description: When edit mode is on and no editor is open, the page SHALL move a
   one-block selection with ArrowUp and ArrowDown, open the selected block with
   Enter, and, when an editor closes through Escape or Cmd/Ctrl+Enter, leave the
-  edited block selected.
+  edited block selected; the keys SHALL work while the page itself holds the
+  focus, and a window or tab that comes back SHALL restore the selection.
 project: markdown-okf-schema-studio
 scope: block-editing
 lifecycle: draft
@@ -20,6 +21,7 @@ derived_by: []
 implemented_in_files:
 - src/page/features/blockSelectionView.ts
 tested_in_files:
+- test/integration/windowSwitchKeys.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/visual/scenarioDefinitions1.ts
 ---
@@ -28,7 +30,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When edit mode is on and no editor is open, the page SHALL move a one-block selection with ArrowUp and ArrowDown, open the selected block with Enter, and, when an editor closes through Escape or Cmd/Ctrl+Enter, leave the edited block selected.
+When edit mode is on and no editor is open, the page SHALL move a one-block selection with ArrowUp and ArrowDown, open the selected block with Enter, and, when an editor closes through Escape or Cmd/Ctrl+Enter, leave the edited block selected. The keys SHALL work while the page itself (the document, its body or the content root) holds the focus, the page itself SHALL show no focus ring, and when the window or tab comes back with the page holding the focus in edit mode with no editor open, the page SHALL select the block that was selected, else the last block the keyboard selected, else the block nearest the top of the viewport.
 
 ### Scenario (nominal): Up and Down select, Enter opens, Escape or Cmd/Ctrl+Enter returns to the selection
 
@@ -48,6 +50,12 @@ The selection is the one of SwRS-MDOKFSTUDIO-BLOCK-140: it is outlined in the fo
 | Enter with no selection | Nothing opens |
 | Enter on the page itself (the focus lost to the body) with a selection | The editor of the free end of the selection opens |
 
+### Scenario (nominal): Coming back to the window
+
+- GIVEN edit mode on, no editor open, and the page itself holds the focus (the writer clicked the margin of the page, or the window or the tab comes back)
+- WHEN the writer presses ArrowDown
+- THEN the selection moves as above and the page shows no focus ring; when the window or tab comes back, the block that was selected (else the last one the keyboard selected, else the block nearest the top of the viewport) is selected again and holds the focus before any key is pressed
+
 ### Scenario (refusal): Keys that belong to other controls
 
 | Input | Outcome |
@@ -56,11 +64,13 @@ The selection is the one of SwRS-MDOKFSTUDIO-BLOCK-140: it is outlined in the fo
 | ArrowDown in a block editor text box, a field or the properties table | The key stays with that control |
 | ArrowDown with Shift, Alt, Ctrl or Cmd | Not handled here: Shift extends a run (BLOCK-140), Alt moves the block |
 | ArrowDown on the edit-mode toggle right after it was pressed | Handled as on the page |
+| The window comes back with a toolbar button, a block or an editor focused, or outside edit mode | The selection is left as it is |
 
 Table-cell editors keep their own Escape and Cmd/Ctrl+Enter and do not select a block when they close.
 
 ### Verification notes
 
-- Method: test/page/runtimeBlockSelection.test.ts, unit tests `CR 120: plain Up and Down select a block, starting at the block nearest the viewport top`, `CR 120: plain Up collapses a block run onto the neighbour of its free end`, `CR 120: plain Up and Down do nothing outside edit mode, in a text box or with a modifier`, `CR 120: Enter opens the editor of the selected block`, `CR 120: Enter with no selection opens nothing`, `CR 120: Escape closes the editor and leaves its block selected for the arrow keys`, `CR 120: Cmd/Ctrl+Enter without changes closes the editor and selects its block` and `CR 120: Cmd/Ctrl+Enter with changes saves, and the block is selected once the patch is in`. The included-block skip and the toggle-button focus rows are untested.
+- Method: test/page/runtimeBlockSelection.test.ts, unit tests `CR 120: plain Up and Down select a block, starting at the block nearest the viewport top`, `CR 120: plain Up collapses a block run onto the neighbour of its free end`, `CR 120: plain Up and Down do nothing outside edit mode, in a text box or with a modifier`, `CR 120: Enter opens the editor of the selected block`, `CR 120: Enter with no selection opens nothing`, `CR 120: Escape closes the editor and leaves its block selected for the arrow keys`, `CR 120: Cmd/Ctrl+Enter without changes closes the editor and selects its block` and `CR 120: Cmd/Ctrl+Enter with changes saves, and the block is selected once the patch is in`. The included-block skip and the toggle-button focus rows are untested. CR 129 unit tests `CR 129: plain Up and Down on the focused content root move the block selection`, `CR 129: Shift+Down on the focused content root extends a selection`, `CR 129: the window coming back selects the block nearest the top when nothing was selected`, `CR 129: the window coming back restores the last block the keyboard selected` and `CR 129: the window coming back selects nothing outside edit mode, in an editor or on another control`.
+- Method: test/integration/windowSwitchKeys.test.ts, real VS Code window: after a click on the page margin, and after leaving for another editor tab and coming back, ArrowDown selects a block and the page shows no focus ring. A switch to another application cannot be driven from the test window; the focus event it raises is covered by the unit tests.
 - Method: test/visual/scenarioDefinitions2.ts, visual scenarios block-editing/v18 (cream and dark): real key presses Down, Down, Enter, Escape leave one block outlined and announced.
 - Criteria: The plain-key handler requires edit mode, no open editor and no modifier; the target is the page, a block or the edit-mode toggle. The edited block is read before the editor closes and selected by position.
