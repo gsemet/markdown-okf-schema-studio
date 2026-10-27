@@ -279,8 +279,9 @@ export class ScrollSyncController {
   /** A hidden panel shown again catches up with an editor that moved meanwhile. */
   public restorePreviewState(preview: PreviewSession): void {
     preview.probe.restoreCalls += 1;
-    // A retained webview keeps its own scroll; it only needs to catch up with an
-    // editor that moved while the panel was hidden.
+    // A hidden webview is not retained: the page reloads from its saved state (scroll, edit state);
+    // the host only needs to catch up with an editor
+    // that moved while the panel was hidden.
     if (preview.configuration.scrollPreviewWithEditor) {
       const editor = this.visibleEditorFor(preview);
       if (editor) {
