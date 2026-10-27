@@ -27,6 +27,7 @@ export const PALETTE_ICONS = {
   quote: svg("M5 11h4v6H5zM5 11c0-3 1-5 4-6M14 11h4v6h-4zM14 11c0-3 1-5 4-6"),
   link: svg("M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"),
   rule: svg("M3 12h4M10 12h4M17 12h4"),
+  toc: svg("M4 6h2M9 6h11M7 12h2M12 12h8M7 18h2M12 18h8"),
   todo: svg("M5 4v17M5 5h12l-2 4 2 4H5"),
   thread: svg("M4 4h16v12H10l-5 4v-4H4z"),
   alert: svg("M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5v5.5M12 16v.5") + caret,

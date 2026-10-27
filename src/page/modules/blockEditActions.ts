@@ -1,6 +1,6 @@
 /**
  * The block edit actions of the palette: headings, quotes, lists, code fences, rules, alerts,
- * checkboxes, details, footnotes, MyST admonitions, definition lists, math, images, figures,
+ * checkboxes, table of contents, details, footnotes, MyST admonitions, definition lists, math, images, figures,
  * dropdowns and Mermaid diagrams.
  */
 
@@ -148,6 +148,15 @@ export function insertRule(ctx: EditActionContext): TextEdit | undefined {
   const text = gap + "---\n\n";
   const caret = start + text.length;
   return { start, end, text, selectionStart: caret, selectionEnd: caret };
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-003
+/** A `[TOC]` marker set apart after the line the selection ends on, the caret after it. */
+export function insertToc(ctx: EditActionContext): TextEdit | undefined {
+  if (!validSelection(ctx)) return undefined;
+  const marker = "[TOC]";
+  const { lastEnd } = touchedLines({ ...ctx, selectionStart: ctx.selectionEnd });
+  return insertBlockAt({ ...ctx, selectionStart: lastEnd, selectionEnd: lastEnd }, marker, marker.length, 0);
 }
 
 const ALERT_HEAD = /^(\s{0,3}>\s?\[!)(NOTE|TIP|IMPORTANT|WARNING|CAUTION)(\][ \t]*)$/iu;

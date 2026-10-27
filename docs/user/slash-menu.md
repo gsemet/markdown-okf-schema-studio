@@ -4,7 +4,7 @@ In a block text box (a paragraph editor, an insertion point, Start writing, a ta
 at the start of a line or after a space to open a command menu at the caret. It lists the same
 commands as the edition palette for the palette mode you chose (Strict, GFM or MyST), grouped by
 category, each with its icon and shortcut. Keep typing to filter: `/h2`, `/table`, `/note`,
-`/todo`, `/code`, `/image`, `/link`, `/math`, `/bullet`, `/numbered`. Names and short aliases
+`/todo`, `/code`, `/image`, `/link`, `/math`, `/bullet`, `/numbered`, `/toc`. Names and short aliases
 match, best match first; in MyST mode the MyST command wins over its GitHub twin (`/note` finds the
 admonition). Bulleted and Numbered list exist only in this menu (the palette has no list button).
 If the only matches are loose ones (letters inside a word), Enter and Tab stay plain keys unless you

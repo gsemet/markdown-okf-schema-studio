@@ -49,6 +49,18 @@ environments),
   and `class` attributes and script links are never kept. In edit mode each such block (`div`,
   `p`, `picture`) is framed like an admonition and titled with its literal opening tag, for example
   `<div align="center">`; a click edits the raw source of that block and nothing outside it.
+  A paragraph that holds only `[TOC]` or `[[_TOC_]]` (any case; the markers of GitLab, Typora and
+  Markdown Preview Enhanced), or a MyST `{contents}` directive, renders as the table of contents of
+  the document: the headings as a nested list of links, each one scrolling to its heading. Limit
+  the depth with `:depth: 2` and keep only the current section with `:local:`, both on
+  `{contents}`; the bracket markers take no option. The list is generated and never written to the
+  file; only the marker is saved, and the list follows the headings as you edit them. It lists the
+  headings of the document itself, not those of an `{include}`, and a repeated heading text gets
+  the usual `-1`, `-2` suffix. In edit mode the block is framed like an admonition and titled with
+  the literal marker (`[TOC]`, `[[_TOC_]]` or `{contents}`) in code font instead of showing the
+  list, and a click edits the marker line. The Table of contents button of the edition palette
+  (also `/toc` in the slash menu) inserts
+  `[TOC]` after the current line.
   In a block or table-cell text box the VS Code keys apply: Cmd/Ctrl+Z undoes and
   Cmd+Shift+Z (Ctrl+Shift+Z or Ctrl+Y) redoes the last change, as many times as you need;
   Cmd/Ctrl+A selects the whole text of the text box; Cmd/Ctrl+Shift+K deletes the current line or

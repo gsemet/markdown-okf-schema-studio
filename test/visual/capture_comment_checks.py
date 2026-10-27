@@ -939,7 +939,7 @@ def check_palette_mode(page: Page, scenario: dict, failures: list[Failure]) -> N
   if not mode:
     return
   page_name = scenario["page"]
-  strict = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread"]
+  strict = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "toc", "table", "emoji", "todo", "thread"]
   gfm = strict + ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
   myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd"]
   expected = {"strict": strict, "gfm": gfm, "myst": myst}[mode]
@@ -989,7 +989,7 @@ def check_slash_menu(page: Page, scenario: dict, failures: list[Failure]) -> Non
     return
   mode = shot["mode"]
   page_name = scenario["page"]
-  strict = ["heading", "bold", "italic", "strikethrough", "color", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread"]
+  strict = ["heading", "bold", "italic", "strikethrough", "color", "link", "image", "codeFence", "quote", "rule", "toc", "table", "emoji", "todo", "thread"]
   gfm = strict + ["alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd"]
   myst = gfm + ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "figure", "roleKbd"]
   # The palette's buttons (minus the caret-dependent colour code and table conversions) plus the two menu-only list entries.

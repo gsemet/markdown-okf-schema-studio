@@ -46,7 +46,7 @@ test("T21: the palette sits in a host above the block editor frame, not inside i
   assert.deepEqual(
     palette.childElements.slice(1).map((child) => child.getAttribute("data-edit-action")),
     [
-      "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table",
+      "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "toc", "table",
       "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
       "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",
@@ -117,7 +117,7 @@ test("T21: every palette control keeps the focus in the text box on mousedown", 
   openBlockEditorWithSource(harness);
   const controls = harness.createdElements.filter((element) =>
     element.getAttribute("data-edit-action") !== null);
-  assert.equal(controls.length, 38);
+  assert.equal(controls.length, 39);
   for (const control of controls) {
     let prevented = false;
     control.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
