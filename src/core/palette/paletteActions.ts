@@ -305,6 +305,16 @@ export const PALETTE_ACTIONS = {
     modes: ["strict"],
     scopes: ["block"],
   },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-003
+  toc: {
+    slash: { aliases: ["toc", "contents", "table of contents", "outline", "summary"] },
+    label: "Table of contents",
+    title: "Table of contents ([TOC])",
+    icon: "toc",
+    group: "block",
+    modes: ["strict"],
+    scopes: ["block"],
+  },
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-106
   table: {
     slash: { aliases: ["grid", "tbl"] },

@@ -195,6 +195,7 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
         maxScrollTop(),
         window.scrollY + viewportTop - state.editAnchor.viewportTop,
       ));
+      const scrollBefore = window.scrollY;
       programmaticScroll(target);
       const line = lineAtScroll(target);
       if (line !== undefined) state.anchor = { line, owner: state.anchor?.owner ?? "preview" };
@@ -210,6 +211,11 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
       } else if (editing?.palette && editing.textarea) {
         const barHeight = editing.palette.element.getBoundingClientRect?.()?.height;
         if (barHeight !== editing.paletteHeight) {
+          // The bar grew or shrank by a wrapped row (a button appearing, a new entry): the scroll that kept
+          // the text still is part of the shift closing the editor gives back.
+          if (editing.paletteHeight !== undefined && !editing.selectedCell) {
+            editing.paletteShift = (editing.paletteShift ?? 0) + (window.scrollY - scrollBefore);
+          }
           editing.paletteHeight = barHeight;
           rt.editorChrome.syncPaletteSticky(editing);
           rt.editorChrome.reservePaletteClearance(editing);

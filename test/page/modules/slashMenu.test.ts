@@ -251,7 +251,7 @@ test("P11: the table cell palette lists only the actions allowed in a cell", () 
   const ids = [...new Set(entries.map((entry) => entry.id))];
   assert.deepEqual(ids, buttonIds(h.palette.element as unknown as FakeElement).filter((id) => !CARET_DEPENDENT.includes(id)));
   assert.equal(ids.includes("bulletList") || ids.includes("numberedList"), false, "no list entries in a cell");
-  for (const blockOnly of ["table", "codeFence", "quote", "rule", "alert", "admonition", "figure", "image"]) {
+  for (const blockOnly of ["table", "codeFence", "quote", "rule", "toc", "alert", "admonition", "figure", "image"]) {
     assert.equal(ids.includes(blockOnly), false, blockOnly + " is a block action");
   }
   assert.equal(ids.includes("bold"), true);
@@ -318,6 +318,8 @@ test("P11: the registry's aliases find the expected command first", () => {
   assert.equal(first("strict", "code"), "codeFence");
   assert.equal(first("strict", "quote"), "quote");
   assert.equal(first("strict", "hr"), "rule");
+  assert.equal(first("strict", "toc"), "toc");
+  assert.equal(first("myst", "toc"), "toc", "listed in every mode");
   assert.equal(first("strict", "link"), "link");
   assert.equal(first("strict", "image"), "image");
   assert.equal(first("strict", "bold"), "bold");

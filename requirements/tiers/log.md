@@ -649,6 +649,16 @@
   new sanitizer attribute. Verification: test/core/render/mystRawHtml.test.ts,
   test/core/preview/previewStyles.test.ts, real-window scenario test/integration/readmeHtmlWindow.ts.
 
+- SwRS-MDOKFSTUDIO-CORE-072 (CR 142, new): a paragraph made only of `[TOC]` or `[[_TOC_]]` (any case),
+  or a MyST `{contents}` directive (`:depth:`, `:local:`), renders the headings of the document as a nested list of links to heading ids (duplicate texts get
+  `-1`, `-2`; includes are left out; the list is generated and never written to the file), and in
+  edit mode the block is an admonition-like frame titled with the literal marker (`[TOC]`, `[[_TOC_]]` or the `{contents}` line). Verification:
+  test/core/render/mystToc.test.ts, real-window scenario
+  test/integration/tocWindow.ts.
+- SwRS-MDOKFSTUDIO-PALETTE-003 (CR 142, new): the Table of contents palette action and the `/toc`
+  slash entry insert a `[TOC]` line after the current line, in every mode. Verification:
+  test/page/modules/tocAction.test.ts.
+
 ## 2026-10-28
 
 - SwRS-MDOKFSTUDIO-LIFE-039, SwRS-MDOKFSTUDIO-LIFE-062, SwRS-MDOKFSTUDIO-FMSCHEMA-067 (CR 135 T24,

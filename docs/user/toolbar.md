@@ -8,6 +8,10 @@ The floating toolbar at the top right of the preview has three rows:
 3. **View options:** Theme, Width, Table of contents, the incoming-changes (Diff) toggle and the
    Comments toggle (hides or shows the gray comment chips, in preview and in edit mode).
 
+The Table of contents toolbar button shows the outline of the whole document next to the preview. A
+`[TOC]` line (or `[[_TOC_]]`, or a `{contents}` directive) in the text (inserted by the Table of contents button of the edition palette or by
+`/toc`) renders the same headings as a list inside the document itself.
+
 The chevron button collapses the toolbar to its first row when you want the most room for the
 text, and expands it again. The choice is remembered per workspace; a new workspace starts with
 the toolbar collapsed, so click the chevron to reach rows 2 and 3. Hidden rows are skipped by the

@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { commentTagTitle, openingTagTitle, TAG_TITLE_MAX } from "../../../src/core/render/blockTagTitle";
+import { commentTagTitle, openingTagTitle, TAG_TITLE_MAX, tocTagTitle, contentsTagTitle } from "../../../src/core/render/blockTagTitle";
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
 test("a comment is titled with its literal opener", () => {
@@ -33,4 +33,12 @@ test("text that is not an opening tag has no title", () => {
   assert.equal(openingTagTitle("plain text"), undefined);
   assert.equal(openingTagTitle("</div>"), undefined);
   assert.equal(openingTagTitle("<!-- note -->"), undefined);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-072
+test("a table-of-contents block is titled with its marker", () => {
+  assert.equal(tocTagTitle("[TOC]"), "[TOC]");
+  assert.equal(tocTagTitle(" [[_toc_]] "), "[[_toc_]]");
+  assert.equal(contentsTagTitle(), "{contents}");
+  assert.equal(contentsTagTitle("Page  outline"), "{contents} Page outline");
 });

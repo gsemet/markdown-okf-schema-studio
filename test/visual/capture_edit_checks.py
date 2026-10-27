@@ -244,7 +244,7 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   }""")
   if not geometry["first"]:
     failures.append(Failure(page_name, "the palette is not on top of the edit box (previous sibling, outside the frame)"))
-  expected = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "table", "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd", "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd"]
+  expected = ["heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote", "rule", "toc", "table", "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd", "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd"]
   if geometry["labels"] != expected:
     failures.append(Failure(page_name, f"palette buttons are {geometry['labels']}, expected {expected}"))
   if geometry["barBottom"] > geometry["frameTop"] + 0.5 or geometry["frameTop"] - geometry["barBottom"] > 6:

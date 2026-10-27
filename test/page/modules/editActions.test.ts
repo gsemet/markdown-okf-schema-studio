@@ -198,7 +198,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     registry.actions.filter((action) => !action.slash?.menuOnly).map((action) => action.id),
     [
       "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote",
-      "rule", "table",
+      "rule", "toc", "table",
       "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
       "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",

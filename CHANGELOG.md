@@ -19,6 +19,13 @@
   preview too, when you pressed no key in the last half second or the edit is away from your cursor.
   Typing at your cursor still does not glow. Backspace, Delete and a paste glow when they are the
   first key after a pause.
+- A `[TOC]` or `[[_TOC_]]` line on its own (the GitLab, Typora and Markdown Preview Enhanced
+  markers, any case), or a MyST `{contents}` directive, renders the table of contents of the
+  document: its headings as a nested list of links to them (`:depth:` limits the depth of
+  `{contents}`, `:local:` keeps the current section). The list is generated, never written to the
+  file, and follows the headings as they change. The edition palette has a Table of contents button,
+  and `/toc` in the slash menu inserts `[TOC]`. In edit mode the block is an admonition-like frame
+  titled with the literal marker instead of the list.
 - README-style HTML renders like on GitHub: `<div align="center">` and `<p align>`, `<br>`, `<img>`
   with its width, height and alt, logos and badges inside `<a>`, `<picture>` with
   `prefers-color-scheme` sources (the image follows the preview theme), `<details>`, `<kbd>`,

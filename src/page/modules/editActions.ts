@@ -26,6 +26,7 @@ import {
   insertMath,
   insertMermaid,
   insertRule,
+  insertToc,
   setHeading,
   toggleCheckbox,
   toggleList,
@@ -218,6 +219,7 @@ export function createEditActions(
     numberedList: { apply: (ctx) => toggleList(ctx, true) },
     quote: { apply: toggleQuote },
     rule: { apply: insertRule },
+    toc: { apply: insertToc },
     table: { apply: insertTable },
     emoji: { apply: insertEmoji },
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-160

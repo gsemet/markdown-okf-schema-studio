@@ -21,6 +21,7 @@ import {
 } from "./mystBlockTransforms";
 import { normalizeContextTagContainers, repairGroupedContextTagHtml } from "./mystContextTags";
 import { expandRawHtmlElements } from "./mystRawHtml";
+import { expandTocMarkers } from "./mystToc";
 import { loadEngine, MYST_PARSE_OPTIONS, type MystEngine } from "./mystEngine";
 import { neutralizeDirectiveErrors } from "./mystDirectiveErrors";
 import { splitUnclosedFences } from "./mystUnclosedFences";
@@ -396,6 +397,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
   { name: "version admonitions", run: (state) => expandVersionAdmonitions(state.ast, state.mystParse) },
   { name: "dollar placeholders", run: (state) => restoreDollarPlaceholders(state.ast) },
   { name: "dollar amounts", run: (state) => restoreDollarAmounts(state.ast) },
+  { name: "toc markers", run: (state) => expandTocMarkers(state.ast) },
   { name: "wiki links", run: (state) => expandWikiLinks(state.ast) },
   {
     name: "checkboxes",
