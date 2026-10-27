@@ -34,6 +34,7 @@ import {
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import { PreviewDiagnostic, RenderError, RenderResult, RenderStage } from "../../core/render/renderPipeline";
 import { createNonce } from "../../core/security/csp";
+import { isBroadReadOnlyRoot } from "../../core/security/resource-policy";
 import { needsRefresh } from "../../core/state/editLock";
 import type { PreviewPanelState } from "../../core/state/previewState";
 import type { PreviewRuntimeContext } from "../../core/protocol/bootContext";
@@ -72,6 +73,12 @@ export function editingBootState(
 }
 
 /** Renders, page documents, content patches, status and the pending overlay. */
+// @implements_req SwRS-MDOKFSTUDIO-TRUST-002
+/** The webview's local resource roots (before the extension bundle): none for a broad read-only root. */
+export function previewLocalResourceRoots(workspaceRoot: string, readOnly: boolean): string[] {
+  return readOnly && isBroadReadOnlyRoot(workspaceRoot) ? [] : [workspaceRoot];
+}
+
 export class RenderingController {
   public constructor(private readonly manager: PreviewManager) {}
 
@@ -407,7 +414,9 @@ export class RenderingController {
         ...editingBootState(preview),
       },
     );
-    const localResourceRoots = [preview.workspaceRoot];
+    // @implements_req SwRS-MDOKFSTUDIO-TRUST-002
+    // A read-only preview in the home folder or a file-system root loads nothing from it.
+    const localResourceRoots = previewLocalResourceRoots(preview.workspaceRoot, preview.readOnly);
     const plantUmlRenderer = result.plantUmlEngine === "builtin" ? "builtin" : "host";
     // Every rendered page loads its runtime and stylesheet from the bundle (PERF-11), and the
     // diagram engines when it has diagrams: the bundle folder is always a resource root.
@@ -455,6 +464,7 @@ export class RenderingController {
       !preview.readOnly,
       [],
       plantUmlRenderer,
+      preview.readOnly,
     );
     const status: PreviewStatus = preview.hadFailure ? "recovery" : "success";
     const html = setPreviewStatus(webview.html, status, undefined, result.diagnostics);

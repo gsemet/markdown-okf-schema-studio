@@ -336,6 +336,7 @@ export class PreviewManager {
         document: previewDocumentOf(request.document, this.pathOf(request.document)),
         revision: request.document.revision,
         workspaceRoot: resourceRoot,
+        readOnly,
         requestId: request.requestId,
         documentIdentity: request.document.id,
         signal,

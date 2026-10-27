@@ -165,8 +165,10 @@ export function buildPreviewWebviewHtml(
   plantUmlDiagrams: readonly PlantUmlDiagramRender[] = [],
   /** `builtin`: the page loads the bundled PlantUML engine; `host`: the diagrams come injected. */
   plantUmlRenderer: "builtin" | "host" = "host",
+  /** A read-only preview: the resource policy is narrowed (TRUST-002). */
+  readOnly = false,
 ): PreviewWebviewResult {
-  const policy = createPreviewResourcePolicy(outputDirectory, workspaceRoot);
+  const policy = createPreviewResourcePolicy(outputDirectory, workspaceRoot, readOnly);
   const nonce = createNonce();
   const resolvedStylesheets = new Set<string>();
   const stylesheetDiagnostics: SecurityDiagnostic[] = [];

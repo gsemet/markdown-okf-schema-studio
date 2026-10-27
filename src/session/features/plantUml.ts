@@ -126,7 +126,7 @@ export class PlantUmlController {
     const { manager } = this;
     const answer = resolvePlantUmlInclude(
       { path: message.path, from: message.from },
-      { documentPath: manager.activePathOf(preview), workspaceRoot: preview.workspaceRoot, trusted: manager.host.workspace.trusted },
+      { documentPath: manager.activePathOf(preview), workspaceRoot: preview.workspaceRoot, trusted: manager.host.workspace.trusted, readOnly: preview.readOnly },
     );
     if (answer.watch) {
       preview.plantUml.includeWatch.remember(manager.canonicalPath(answer.watch));

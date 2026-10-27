@@ -69,6 +69,11 @@ export interface RenderOptions {
    */
   revision?: number;
   workspaceRoot: string;
+  /**
+   * A read-only preview (no workspace folder, or Restricted Mode): includes and resources are
+   * narrowed (no home folder or file-system root, no dot-directory). Omitted: not read-only.
+   */
+  readOnly?: boolean;
   requestId: number;
   documentIdentity?: string;
   signal?: AbortSignal;
@@ -182,6 +187,7 @@ export async function renderPreviewDocument(options: RenderOptions): Promise<Ren
   const resourcePolicy = createPreviewResourcePolicy(
     path.dirname(stage.activeDocumentPath),
     options.workspaceRoot,
+    options.readOnly === true,
   );
 
   let html: string;
