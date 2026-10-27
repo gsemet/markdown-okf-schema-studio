@@ -96,7 +96,7 @@ function injectRuntimeTags(html: string, tag: string): string {
 }
 
 function injectMermaidRenderer(html: string, rendererUri: string, nonce: string): string {
-  const tag = `<script nonce="${escapeHtml(nonce)}" src="${escapeHtml(rendererUri)}" defer data-sphinx-preview-mermaid></script>`;
+  const tag = `<script type="module" nonce="${escapeHtml(nonce)}" src="${escapeHtml(rendererUri)}" data-sphinx-preview-mermaid></script>`;
   if (/<\/body>/iu.test(html)) {
     return html.replace(/<\/body>/iu, () => `${tag}</body>`);
   }

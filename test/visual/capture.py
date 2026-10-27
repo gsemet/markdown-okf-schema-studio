@@ -243,7 +243,10 @@ def capture_scenarios(page_directory: pathlib.Path, scenarios: list[dict]) -> tu
     failures: list[Failure] = []
     results: list[dict] = []
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch()
+        browser = playwright.chromium.launch(
+            # The Mermaid renderer is an ES module with chunks; Chromium refuses module scripts on file:// otherwise.
+            args=["--allow-file-access-from-files"],
+        )
         try:
             for scenario in scenarios:
                 start_failures = len(failures)

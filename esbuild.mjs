@@ -4,23 +4,12 @@ import { createRequire } from "node:module";
 import * as path from "node:path";
 
 import { mystPatchPlugin } from "./scripts/myst-patches.mjs";
-import { pageBundleOptions } from "./scripts/page-bundle.mjs";
+import { extensionBundleOptions, lazyModuleOptions, mermaidBundleOptions, pageBundleOptions } from "./scripts/page-bundle.mjs";
 
 // The MyST engine is ESM-only and pulls in the whole unified ecosystem; bundling keeps the
 // VSIX to a handful of files and avoids paying module resolution on activation.
-await build({
-  entryPoints: ["src/extension.ts"],
-  outfile: "out/bundle/extension.js",
-  bundle: true,
-  platform: "node",
-  target: "node20",
-  format: "cjs",
-  sourcemap: true,
-  minify: true,
-  external: ["vscode"],
-  plugins: [mystPatchPlugin],
-  logLevel: "info",
-});
+const extensionOptions = extensionBundleOptions();
+await build({ ...extensionOptions, plugins: [mystPatchPlugin, ...extensionOptions.plugins] });
 
 // The integration tests run in the VS Code extension host, which loads no Node hook: they get the
 // renderer from this bundle (patched like the extension) and never import the MyST engine.
@@ -39,28 +28,18 @@ await build({
 
 // The render worker (src/node-services/renderWorker.ts) is its own entry: the extension starts it
 // as a worker thread from out/bundle/renderWorker.js, next to extension.js.
+// It shares the extension's lazy Shiki/KaTeX files and the YAML shim, so it carries no second copy.
 await build({
+  ...extensionOptions,
   entryPoints: ["src/node-services/renderWorker.ts"],
   outfile: "out/bundle/renderWorker.js",
-  bundle: true,
-  platform: "node",
-  target: "node20",
-  format: "cjs",
-  sourcemap: true,
-  minify: true,
-  logLevel: "info",
 });
 
-await build({
-  entryPoints: ["src/page/modules/mermaidPreview.ts"],
-  outfile: "out/bundle/mermaidPreview.js",
-  bundle: true,
-  platform: "browser",
-  target: "es2020",
-  format: "iife",
-  minify: true,
-  logLevel: "info",
-});
+// Shiki (with its grammars) and KaTeX are loaded by the extension host on first use only.
+await build(lazyModuleOptions({ katexEntry: createRequire(import.meta.url).resolve("katex") }));
+
+// Mermaid is an ES module with code splitting: diagram types load when a document uses them.
+await build(mermaidBundleOptions());
 
 // The PlantUML engine (@plantuml/core, MIT) needs a DOM, so it runs in the webview. Smetana layout
 // only: viz-global.js (Graphviz as WebAssembly) would need 'wasm-unsafe-eval' in the CSP.

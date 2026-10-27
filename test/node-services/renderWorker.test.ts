@@ -152,7 +152,8 @@ test("the extension bundle ships the worker next to extension.js, where the rend
   const repositoryRoot = path.resolve(__dirname, "../../..");
   const esbuild = fs.readFileSync(path.join(repositoryRoot, "esbuild.mjs"), "utf8");
   assert.match(esbuild, /entryPoints: \["src\/node-services\/renderWorker\.ts"\],\s*outfile: "out\/bundle\/renderWorker\.js"/u);
-  assert.match(esbuild, /outfile: "out\/bundle\/extension\.js"/u);
+  const pageBundle = fs.readFileSync(path.join(repositoryRoot, "scripts/page-bundle.mjs"), "utf8");
+  assert.match(pageBundle, /outfile: "out\/bundle\/extension\.js"/u);
   // The renderer resolves `renderWorker.js` beside its own module: out/bundle/ in the VSIX.
   const source = fs.readFileSync(path.join(repositoryRoot, "src/node-services/renderWorker.ts"), "utf8");
   assert.match(source, /path\.join\(__dirname, "renderWorker\.js"\)/u);

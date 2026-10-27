@@ -348,7 +348,7 @@ window.resolveVisualFrontmatterLinks = () => {
   if (page.includes('class="myst-mermaid-figure"')) {
     page = page.replace(
       /<\/body>/iu,
-      `<script src="${mermaidRendererUri}" defer></script></body>`,
+      `<script type="module" src="${mermaidRendererUri}"></script></body>`,
     );
   }
   fs.writeFileSync(

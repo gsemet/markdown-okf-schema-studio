@@ -23,7 +23,9 @@ derived_by: []
 implemented_in_files:
 - src/core/preview/styles/codeBlockStyles.ts
 - src/core/render/highlight.ts
+- src/core/render/mystRenderer.ts
 tested_in_files:
+- test/build/bundleSplit.test.ts
 - test/core/preview/codeBlockStyles.test.ts
 - test/core/render/codeBlockComfort.requirements.test.ts
 - test/core/render/contentCaches.test.ts
@@ -96,6 +98,12 @@ When a document contains a fenced code block, the extension SHALL colour the key
 - SwRS-MDOKFSTUDIO-CODE-005: wraps numbered, emphasized and diff blocks into lines
 - SwRS-MDOKFSTUDIO-CODE-008: marks the lines of `diff` and `patch` blocks
 
+### Scenario (nominal): The highlighter loads on the first code block
+- GIVEN the packaged extension bundle
+- WHEN a document without a code block is rendered
+- THEN Shiki and its grammars are not loaded: they are a separate file, `lazy/highlight.js`, read on the first code block
+- AND the extension host bundle `extension.js` holds no grammar
+
 ### Verification notes
 
 - Method: test/core/render/highlight.test.ts (tokens of each bundled language, alias `py`, no inline style, unknown language left unchanged, plain output equals the input block)
@@ -104,3 +112,4 @@ When a document contains a fenced code block, the extension SHALL colour the key
 - Method: test/visual/scenarioDefinitions1.ts (highlighting family, unknown-language scenario, source-fragment scenarios)
 - Method: test/core/render/contentCaches.test.ts (an unchanged block runs no grammar the second time, an edited block does; the bound of the cache)
 - Criteria: token spans exist for each token class of the supported grammars; an empty block yields an empty block; an unlisted label, an empty leading word and an absent label yield none and no `shiki` class; only pre/code pairs are processed; rendered code text equals the source text; the fallback output is escaped wrapped text for wrapped blocks and the original block otherwise
+- Method: test/build/bundleSplit.test.ts (the grammars are outside extension.js and in lazy/highlight.js; the split bundle highlights a block)

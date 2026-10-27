@@ -25,6 +25,7 @@ implemented_in_files:
 - src/core/render/mathRenderer.ts
 - src/core/render/mystInlineTransforms.ts
 tested_in_files:
+- test/build/bundleSplit.test.ts
 - test/core/render/contentCaches.test.ts
 - test/core/render/mathRenderer.test.ts
 - test/core/render/mystPaletteRendering.test.ts
@@ -121,6 +122,12 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 - WHEN the preview renders the document again
 - THEN both give the same markup without a new KaTeX run, the rejected one keeps its wavy underline and tooltip, and the memory kept for this is bounded (2000 formulas, about 2 million characters)
 
+### Scenario (nominal): KaTeX loads on the first equation
+- GIVEN the packaged extension bundle
+- WHEN the extension starts and a document without an equation is rendered
+- THEN KaTeX is not loaded: it is a separate file, `lazy/katex.js`, read on the first equation
+- AND the extension host bundle `extension.js` holds no KaTeX code
+
 ### Verification notes
 
 - Method: test/core/render/mystPaletteRendering.test.ts (inline and display maths: "inline, display and aligned math from the palette typeset with KaTeX")
@@ -130,3 +137,4 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 - Method: test/visual/scenarioDefinitions1.ts (long display equations: visual scenario chapter-dark-half)
 - Method: test/core/render/contentCaches.test.ts (a formula and a rejected formula run KaTeX once across two renders)
 - Criteria: Typesetting runs on the host-rendered page and makes no external request; failure is local to the formula; trust is off and the bounds maxExpand 1000 and maxSize 100 are set; typesetting is idempotent; overflow is local.
+- Method: test/build/bundleSplit.test.ts (KaTeX is outside extension.js and in lazy/katex.js; the split bundle typesets an equation)
