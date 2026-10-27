@@ -7,7 +7,7 @@
 
 import * as path from "node:path";
 
-import { extractFrontmatter, matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
+import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
 import { type CheckboxMarker, prepareCheckboxMarkers } from "./checkboxMarkers";
 import { convertCommentMarkers } from "./commentMarkers";
 import { highlightCodeBlocks } from "./highlight";
@@ -484,10 +484,7 @@ export async function renderMyst(
  * `language-yaml` code block, duplicating the properties table above the body.
  */
 function stripFrontmatter(source: string): string {
-  const extraction = extractFrontmatter(source);
-  if (!extraction.present || !extraction.text) {
-    return source;
-  }
+  // The fence alone decides: no YAML parse here (the analysis parses the block once).
   const match = matchFrontmatterBlock(source);
-  return match ? source.slice(match.length) : source;
+  return match?.body ? source.slice(match.length) : source;
 }
