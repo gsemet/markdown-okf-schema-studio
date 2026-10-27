@@ -45,10 +45,17 @@ const CASES: Array<{ name: string; html: string; markdown: string }> = [
     markdown: "Wide\n\na b",
   },
   {
-    name: "VS Code copy: several lines become a code block",
+    name: "VS Code copy: several lines stay raw text, never wrapped in a fence",
     html: '<meta charset="utf-8"><div style="color: #ccc;font-family: Menlo, monospace;white-space: pre;">'
       + "<div><span>function f() {</span></div><div><span>  return 1;</span></div><div><span>}</span></div></div>",
-    markdown: "```\nfunction f() {\n  return 1;\n}\n```",
+    markdown: "function f() {\n  return 1;\n}",
+  },
+  {
+    name: "VS Code copy of a document with code fences and blank lines is returned as copied",
+    html: '<meta charset="utf-8"><div style="font-family: Menlo, monospace;white-space: pre;">'
+      + "<div><span>---</span></div><div><span>title: T</span></div><div><span>---</span></div><div><span></span></div>"
+      + "<div><span></span></div><div><span>```ts</span></div><div><span>const a = 1;</span></div><div><span>```</span></div></div>",
+    markdown: "---\ntitle: T\n---\n\n\n```ts\nconst a = 1;\n```",
   },
   {
     name: "VS Code copy: one line stays plain text",
