@@ -41,6 +41,8 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 | The same drag dropped on the left half of a cell of the third column | The column sits before the third column |
 | While the pointer is held over a column | The dragged column is dimmed and a line on the left or the right of the column under the pointer shows where it would land, until the drop or the end of the drag |
 | Dropped on the half of the next column that leaves the column in place, or on the column itself | Nothing is requested from the host and the document is not edited |
+| The pointer is held anywhere over the columns of the table or over the strip of the handles above the table (over another column's handle too) | The marker shows on the nearest gap: the line on the left of the column when the pointer is on its left half, on the right on its right half; it follows the pointer from column to column and a drop there moves the column |
+| The pointer leaves the table and its handle strip | No marker shows; a drop there requests nothing and the document is not edited |
 
 ### Scenario (nominal): Keyboard move with Alt+Left and Alt+Right
 
@@ -97,6 +99,8 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 
 ### Verification notes
 
+- Method: test/integration/tableMoves.ts (real VS Code window: a real mouse drag of a column handle of a pipe table and of a list-table, held over the handle strip and the middle of a column: marker on the nearest gap, none outside the table, a release outside leaves the document as it was, a release in the strip moves the column).
+- Method: test/page/runtimeTableRowMove.test.ts (a column drag over the handle strip shows the marker on the nearest gap, none beyond the strip or beside the table, and a drop in the strip moves the column).
 - Method: test/page/modules/tableColumnMove.test.ts (a pipe column moves with its colons, padding and outer pipes as written; the model refuses an index outside the table or the same place; a list-table column moves with continuation lines, empty and nested cells, indentation, fence and line endings, and the `:widths:` numbers; ragged rows and non-list-tables refused; the same grid after a conversion).
 - Method: test/page/runtimeTableRowMove.test.ts (column handles above the columns of a pipe table and a list-table, outside the cells, none for a captioned table or a one-column table; a drag moves with one save and no cell editor; a drop in place requests nothing; Alt+Left and Alt+Right; refused or unreadable source; a click on a handle; a move while a cell editor is open).
 - Method: test/integration/tableMoves.ts (real VS Code window: real mouse drag and Alt+Left of a column of a pipe table and of a list-table, the handles above their header cells, and a column dragged while a cell editor is open).
