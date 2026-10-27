@@ -1,6 +1,8 @@
 import katex from "katex";
 import { parse, parseFragment, serialize, type DefaultTreeAdapterTypes } from "parse5";
 
+import { BoundedCache } from "./boundedCache";
+
 type HtmlNode = DefaultTreeAdapterTypes.Node;
 type HtmlElement = DefaultTreeAdapterTypes.Element;
 
@@ -27,6 +29,41 @@ export function safeKatexStyle(style: string): string {
     .filter((declaration) => declaration !== "" && declaration.includes(":")
       && !UNSAFE_STYLE_CHARACTERS.test(declaration))
     .join(";");
+}
+
+// KaTeX output depends only on the mode and the formula text; an equation that did not change
+// between two renders is served from here (a formula KaTeX rejects is remembered too).
+// Bounded: 2000 formulas and about 2 M characters.
+const typesetCache = new BoundedCache<string | null>(
+  2000,
+  2_000_000,
+  (key, html) => key.length + (html?.length ?? 0),
+);
+
+/** Empties the typesetting cache (the tests count KaTeX runs). */
+export function clearMathCache(): void {
+  typesetCache.clear();
+}
+
+function typeset(source: string, displayMode: boolean): string {
+  const key = `${displayMode ? "d" : "i"}\0${source}`;
+  let html = typesetCache.get(key);
+  if (html === undefined) {
+    try {
+      html = katex.renderToString(source, {
+        displayMode,
+        trust: false,
+        throwOnError: true,
+        maxExpand: 1000,
+        maxSize: 100,
+      });
+    } catch {
+      html = null;
+    }
+    typesetCache.set(key, html);
+  }
+  if (html === null) throw new Error("KaTeX could not typeset the formula");
+  return html;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-024
@@ -68,13 +105,7 @@ export function renderMathHtml(html: string, stylesheetUri: string, nonce: strin
         const source = rawSource.replace(/^\\\[([\s\S]*)\\\]$|^\\\(([\s\S]*)\\\)$/u,
           (_match, display: string | undefined, inline: string | undefined) => display ?? inline ?? "");
         try {
-          const fragment = parseFragment(katex.renderToString(source, {
-            displayMode,
-            trust: false,
-            throwOnError: true,
-            maxExpand: 1000,
-            maxSize: 100,
-          }));
+          const fragment = parseFragment(typeset(source, displayMode));
           fragment.childNodes.forEach(extractStyles);
           node.childNodes = fragment.childNodes;
           node.childNodes.forEach((child) => { child.parentNode = node; });

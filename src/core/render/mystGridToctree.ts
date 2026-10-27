@@ -7,6 +7,8 @@
  * every colour and size). Pure apart from the callbacks it is given.
  */
 
+import { BoundedCache } from "./boundedCache";
+
 export interface GridNode {
   type: string;
   children?: GridNode[];
@@ -310,8 +312,25 @@ function cleanHeading(raw: string): string {
     .trim();
 }
 
+// The first heading depends only on the text of the document. A target that did not change
+// between two renders is served from here. Bounded: 500 documents and about 2 M characters.
+const headingCache = new BoundedCache<string | null>(500, 2_000_000, (key, heading) => key.length + (heading?.length ?? 0));
+
+/** Empties the first-heading cache (the tests count scans). */
+export function clearHeadingCache(): void {
+  headingCache.clear();
+}
+
 /** The text of the first level-1 heading (ATX or setext) outside code fences, else undefined. */
 export function firstHeading(source: string): string | undefined {
+  const cached = headingCache.get(source);
+  if (cached !== undefined) return cached ?? undefined;
+  const heading = scanFirstHeading(source);
+  headingCache.set(source, heading ?? null);
+  return heading;
+}
+
+function scanFirstHeading(source: string): string | undefined {
   const lines = source.replace(/\r\n?/gu, "\n").split("\n");
   let index = 0;
   if (lines[0]?.trim() === "---") {
@@ -398,6 +417,19 @@ function toctreeEntries(node: GridNode, context: ToctreeContext): unknown[] {
 
 /** Rewrites every `{toctree}` directive under `node` into a list of links to its documents. */
 export function expandToctrees(node: GridNode, context: ToctreeContext): void {
+  // A target listed by several toctrees (or twice) is read once per render.
+  const reads = new Map<string, ReturnType<ToctreeContext["read"]>>();
+  const read = context.read;
+  expandToctreesOnce(node, {
+    ...context,
+    read: (request) => {
+      if (!reads.has(request)) reads.set(request, read(request));
+      return reads.get(request);
+    },
+  });
+}
+
+function expandToctreesOnce(node: GridNode, context: ToctreeContext): void {
   for (const child of node.children ?? []) {
     if (child.type === "mystDirective" && child.name?.toLowerCase() === "toctree") {
       const hidden = child.options?.hidden === true || child.options?.hidden === "";
@@ -417,7 +449,7 @@ export function expandToctrees(node: GridNode, context: ToctreeContext): void {
       });
       child.data = { ...child.data, hChildren };
     } else {
-      expandToctrees(child, context);
+      expandToctreesOnce(child, context);
     }
   }
 }

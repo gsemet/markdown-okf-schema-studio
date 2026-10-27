@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/codeBlockStyles.test.ts
 - test/core/render/codeBlockComfort.requirements.test.ts
+- test/core/render/contentCaches.test.ts
 - test/core/render/highlight.test.ts
 - test/core/render/renderReq.codeBlocks.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
@@ -84,6 +85,12 @@ When a document contains a fenced code block, the extension SHALL colour the key
 - WHEN the preview renders it
 - THEN a block that is wrapped into lines shows the escaped source text in wrapped lines, and an unwrapped block is returned unchanged
 
+### Scenario (boundary): A block that did not change is not highlighted again
+
+- GIVEN a fenced block that was highlighted in an earlier render, and the same block after an edit
+- WHEN the preview renders the document again
+- THEN the unchanged block gets the same markup without a new grammar run, the edited block is highlighted again, and the memory kept for this is bounded (400 blocks, about 4 million characters)
+
 ### Related requirements
 
 - SwRS-MDOKFSTUDIO-CODE-005: wraps numbered, emphasized and diff blocks into lines
@@ -95,4 +102,5 @@ When a document contains a fenced code block, the extension SHALL colour the key
 - Method: test/core/render/codeBlockComfort.requirements.test.ts (no WebAssembly, strict page policy)
 - Method: test/core/render/renderReq.codeBlocks.requirements.test.ts (label case and leading word, inline code not highlighted, literal fence text, shorter backtick line, failing grammar fallback with a throwing grammar stub)
 - Method: test/visual/scenarioDefinitions1.ts (highlighting family, unknown-language scenario, source-fragment scenarios)
+- Method: test/core/render/contentCaches.test.ts (an unchanged block runs no grammar the second time, an edited block does; the bound of the cache)
 - Criteria: token spans exist for each token class of the supported grammars; an empty block yields an empty block; an unlisted label, an empty leading word and an absent label yield none and no `shiki` class; only pre/code pairs are processed; rendered code text equals the source text; the fallback output is escaped wrapped text for wrapped blocks and the original block otherwise

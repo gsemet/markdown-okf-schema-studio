@@ -21,6 +21,7 @@ implemented_in_files:
 - src/core/render/documentGlob.ts
 - src/core/render/mystGridToctree.ts
 tested_in_files:
+- test/core/render/contentCaches.test.ts
 - test/core/render/gridToctree.test.ts
 - test/core/render/renderReq.myst.requirements.test.ts
 ---
@@ -79,7 +80,14 @@ A glob entry uses `*`, `**`, `?` or `[abc]` and lists the matching `.md`, `.mark
 
 No warning is added to the status region or the Problems view either way, and no diagnostic is raised.
 
+### Scenario (boundary): A target is read once per render
+
+- GIVEN several toctrees, or one toctree, that list the same document
+- WHEN the preview renders the page
+- THEN the document is read once for that render, and the title taken from its first heading is kept in a bounded memory (500 documents, about 2 million characters) keyed by the text of the document, so an edited document gets its new title
+
 ### Verification notes
 - Method: test/core/render/gridToctree.test.ts ("a toctree lists links labelled by the target H1, the file name or an explicit title": labelled links, entry kinds, caption and hidden; "a glob entry lists the matching documents sorted": glob entries; "listGlobDocuments returns the sorted matching Markdown documents below the folder": glob scan limits; "a missing target is shown with the warning style and no link": missing documents)
 - Method: test/core/render/renderReq.myst.requirements.test.ts ("a toctree with :reversed: flips the entry order and keeps the written order otherwise": reversed; "a toctree shows at most 500 entries and all of them when there are 500": 500 entries)
+- Method: test/core/render/contentCaches.test.ts (a target listed in two toctrees is read once; the first heading is found, absent and repeated)
 - Criteria: Reads follow the resource policy and the standalone preview reads its own folder; matches are Markdown documents, sorted; scan limits and skipped folders hold; no diagnostic either way.
