@@ -85,8 +85,9 @@ The Webview receives a nonce-bearing CSP with these deliberate allowances:
 - `default-src 'none'` disables unspecified resource classes.
 - `img-src`, `style-src`, `font-src`, and `media-src` allow only the VS Code Webview origin. These
   classes are needed for Sphinx theme CSS, local images, fonts, and media.
-- `script-src` allows the same Webview origin plus the generated nonce. Sphinx JavaScript is
-  retained only when it is a staged local resource and receives the nonce.
+- `script-src` allows the same Webview origin plus the generated nonce. Document and theme
+  scripts are removed in every mode; only the preview's own scripts, added by the host after
+  sanitizing, carry the nonce.
 - `connect-src 'none'`, `frame-src 'none'`, `object-src 'none'`, `worker-src 'none'`,
   `base-uri 'none'`, and `form-action 'none'` remove unrelated network, embedding, worker, base,
   and form capabilities.

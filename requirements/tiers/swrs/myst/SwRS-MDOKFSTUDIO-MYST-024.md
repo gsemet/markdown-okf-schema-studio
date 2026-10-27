@@ -55,6 +55,12 @@ When a document holds `$...$`, `$$...$$`, the `{math}` role or directive, or an 
 - WHEN the preview renders offline
 - THEN the equation is typeset with the KaTeX stylesheet and fonts of the extension bundle, with no script, no network request and no inline style attribute, the styles being classes in one nonce-protected style block
 
+### Scenario (refusal): A style declaration that could leave its rule
+
+- GIVEN typeset maths whose style value holds a declaration with a brace, an angle bracket, an at sign or a backslash
+- WHEN the nonce style block is built
+- THEN that declaration is dropped and the other declarations stay
+
 ### Scenario (refusal): The KaTeX bundle is missing
 
 - GIVEN the KaTeX bundle is missing

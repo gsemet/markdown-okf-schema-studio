@@ -13,6 +13,22 @@ function textContent(node: HtmlNode): string {
   return "childNodes" in node ? node.childNodes.map(textContent).join("") : "";
 }
 
+/** Characters that could close a rule, open a tag or start an at-rule inside the nonce stylesheet. */
+const UNSAFE_STYLE_CHARACTERS = /[{}<>@\\]|\/\*/u;
+
+/**
+ * Keeps only the declarations of a KaTeX `style` value that cannot break out of a CSS rule.
+ * Returns an empty string when nothing is left.
+ */
+export function safeKatexStyle(style: string): string {
+  return style
+    .split(";")
+    .map((declaration) => declaration.trim())
+    .filter((declaration) => declaration !== "" && declaration.includes(":")
+      && !UNSAFE_STYLE_CHARACTERS.test(declaration))
+    .join(";");
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-MYST-024
 export function renderMathHtml(html: string, stylesheetUri: string, nonce: string): string {
   if (!/class="[^"]*\b(?:math-inline|math-display|math)\b/u.test(html)) return html;
@@ -22,14 +38,17 @@ export function renderMathHtml(html: string, stylesheetUri: string, nonce: strin
 
   const extractStyles = (node: HtmlNode): void => {
     if ("tagName" in node) {
-      const style = attribute(node, "style");
+      const rawStyle = attribute(node, "style");
+      const style = rawStyle === undefined ? undefined : safeKatexStyle(rawStyle);
+      if (rawStyle !== undefined) {
+        node.attrs = node.attrs.filter((entry) => entry.name !== "style");
+      }
       if (style) {
         let className = styles.get(style);
         if (!className) {
           className = "studio-math-style-" + styles.size;
           styles.set(style, className);
         }
-        node.attrs = node.attrs.filter((entry) => entry.name !== "style");
         const existing = node.attrs.find((entry) => entry.name === "class");
         if (existing) existing.value += " " + className;
         else node.attrs.push({ name: "class", value: className });

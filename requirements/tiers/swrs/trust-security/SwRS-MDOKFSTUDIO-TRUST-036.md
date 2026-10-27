@@ -9,7 +9,8 @@ description: When the sanitizer processes a page, it SHALL remove every embed,
   is srcdoc or style (except the style of a span and the table style attribute
   that other rules handle), give an img without an alt attribute an empty alt,
   and remove every element and attribute that is not on its list of supported
-  ones.
+  ones, in time linear in the size of the page, and cut content nested deeper
+  than 256 levels with a visible marker.
 project: markdown-okf-schema-studio
 scope: trust-security
 lifecycle: draft
@@ -32,7 +33,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When the sanitizer processes a page, it SHALL remove every embed, foreignObject, form, iframe, object and style element, every meta element whose http-equiv is refresh, and every attribute whose name starts with on or is srcdoc or style (except the style of a span and the table style attribute that other rules handle), give an img without an alt attribute an empty alt, and remove every element and attribute that is not on its list of supported ones (an allow-list: the elements and attributes of the supported rendering, the aria-* attributes and the data attributes of the preview).
+When the sanitizer processes a page, it SHALL remove every embed, foreignObject, form, iframe, object and style element, every meta element whose http-equiv is refresh, and every attribute whose name starts with on or is srcdoc or style (except the style of a span and the table style attribute that other rules handle), give an img without an alt attribute an empty alt, and remove every element and attribute that is not on its list of supported ones, in time linear in the size of the page, and cut content nested deeper than 256 levels with a visible marker (an allow-list: the elements and attributes of the supported rendering, the aria-* attributes and the data attributes of the preview).
 
 ### Scenario (nominal): Active elements are removed with their content
 
@@ -89,6 +90,13 @@ The diagnostic blocked-event-attribute is recorded for each removal.
 | a paragraph with a class, an aria-label, a data-line or a data-okf-color attribute | the attribute stays |
 
 The list holds the elements and attributes the supported rendering needs: the HTML text, list, table, media and form elements, the basic SVG and MathML elements, the aria-* attributes and the data attributes written by the renderer (data-line, data-end-line, data-line-number, data-footnote*, data-plantuml-* and the prefixes data-sphinx-, data-okf- and data-myst-).
+
+### Scenario (boundary): Many removals and deep nesting
+
+| Input | Outcome |
+| --- | --- |
+| 50 000 sibling elements of an unknown name | all removed, each with the diagnostic blocked-element, in well under a second |
+| Nesting of 10 000 levels | no error; content deeper than 256 levels is replaced by a visible marker and the diagnostic truncated-depth is recorded |
 
 ### Related requirements
 

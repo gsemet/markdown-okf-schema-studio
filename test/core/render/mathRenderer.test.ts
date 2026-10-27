@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { renderMathHtml } from "../../../src/core/render/mathRenderer";
+import { renderMathHtml, safeKatexStyle } from "../../../src/core/render/mathRenderer";
 import { renderPreviewDocument } from "../../../src/core/render/renderPipeline";
 import { attribute, findElements, hasClass, parseHtml, textContent } from "./dom";
 import { inlineDocument, workspaceRoot } from "./mystFeaturesSupport";
@@ -75,4 +75,13 @@ test("bold dollar prices do not consume the surrounding emphasis markers", async
   assert.equal(bold.length, 4);
   assert.doesNotMatch(textContent(paragraph), /\*\*/u);
   assert.doesNotMatch(result.html, /\*\*/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-024
+test("drops style declarations that could leave their CSS rule", () => {
+  assert.equal(safeKatexStyle("height:0.5em;vertical-align:-0.2em"), "height:0.5em;vertical-align:-0.2em");
+  assert.equal(safeKatexStyle("color:red;} body{display:none"), "color:red");
+  assert.equal(safeKatexStyle("width:1em;background:url(x)@import;top:0.1em"), "width:1em;top:0.1em");
+  assert.equal(safeKatexStyle("a:b<c;d:e\\f"), "");
+  assert.equal(safeKatexStyle("a:b;c:d/* open;e:f"), "a:b;e:f");
 });

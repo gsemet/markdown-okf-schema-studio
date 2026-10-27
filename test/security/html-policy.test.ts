@@ -56,7 +56,8 @@ test("rewrites local resources and removes active HTML content", () => {
   assert.doesNotMatch(result.html, /theme\.css|<link/u);
   assert.match(result.html, /webview:\/\/image\.png/);
   assert.match(result.html, /webview:\/\/movie\.mp4/);
-  assert.match(result.html, /nonce=\"unit-nonce\"/);
+  // A trusted preview drops the script too; the host adds its own scripts after sanitizing.
+  assert.doesNotMatch(result.html, /<script|nonce=/u);
   assert.doesNotMatch(result.html, /onclick|onload|href="javascript:|foreignObject|<iframe/iu);
   assert.doesNotMatch(result.html, /href="webview:\/\/chapter\.html"/u);
   assert.match(result.html, /href="#"[^>]+data-sphinx-preview-navigation="chapter\.html"/u);
@@ -94,6 +95,64 @@ test("reduced previews remove external scripts while retaining contained media",
   assert.doesNotMatch(result.html, /<script/u);
   assert.match(result.html, /webview:\/\/image\.png/u);
   assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-script"));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-011
+test("trusted previews also remove scripts and a nonce attribute of the document", () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "liveview-html-test-"));
+  temporaryDirectories.push(output);
+  fs.writeFileSync(path.join(output, "theme.js"), "alert(1)");
+  const policy = new ResourcePolicy([{ label: "output", directory: output }]);
+  const result = rewriteSphinxHtml(
+    '<html><body><script src="theme.js"></script><script src="https://example.invalid/x.js"></script>'
+    + '<p nonce="stolen">text</p></body></html>',
+    {
+      outputRoot: output,
+      policy,
+      nonce: "unit-nonce",
+      resolveResource: (request, baseDirectory) => {
+        const resourcePath = policy.resolveResource(request, baseDirectory);
+        return resourcePath ? { path: resourcePath, uri: `webview://${path.basename(resourcePath)}` } : undefined;
+      },
+      resolveNavigation: () => ({ kind: "blocked" }),
+    },
+  );
+
+  assert.doesNotMatch(result.html, /<script|nonce=|theme\.js/u);
+  assert.equal(result.diagnostics.filter((entry) => entry.code === "blocked-script").length, 2);
+  assert.ok(result.diagnostics.some((entry) => entry.code === "blocked-attribute"));
+});
+
+const bareContext = {
+  outputRoot: "/workspace",
+  policy: new ResourcePolicy([]),
+  nonce: "unit-nonce",
+  resolveResource: () => undefined,
+  resolveNavigation: () => ({ kind: "blocked" as const }),
+};
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+test("removes tens of thousands of siblings in linear time", () => {
+  const count = 50_000;
+  const html = `<html><body><main>${"<foo>x</foo>".repeat(count)}<p>kept</p></main></body></html>`;
+  const started = performance.now();
+  const result = rewriteSphinxHtml(html, bareContext);
+  const elapsed = performance.now() - started;
+
+  assert.match(result.html, /<p dir="auto">kept<\/p>/u);
+  assert.equal(result.diagnostics.filter((entry) => entry.code === "blocked-element").length, count);
+  assert.ok(elapsed < 2000, `50k removals took ${elapsed.toFixed(0)} ms`);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-036
+test("cuts very deep nesting with a visible marker instead of throwing", () => {
+  const depth = 10_000;
+  const html = `<html><body><main>${"<ul><li>".repeat(depth)}deep${"</li></ul>".repeat(depth)}</main></body></html>`;
+  const result = rewriteSphinxHtml(html, bareContext);
+
+  assert.match(result.html, /Content cut: nesting is too deep/u);
+  assert.doesNotMatch(result.html, /deep<\/li>/u);
+  assert.ok(result.diagnostics.some((entry) => entry.code === "truncated-depth"));
 });
 
 test("maps rendered source lines to the active preview document", () => {
