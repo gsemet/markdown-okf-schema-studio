@@ -19,6 +19,7 @@ user_need: As a writer, I see the notes left in the source without opening the
   as a to-do and unmark it without typing the comment markers.
 derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-170
+- SwRS-MDOKFSTUDIO-REVIEW-003
 - SwRS-MDOKFSTUDIO-REVIEW-133
 - SwRS-MDOKFSTUDIO-REVIEW-139
 - SwRS-MDOKFSTUDIO-REVIEW-143

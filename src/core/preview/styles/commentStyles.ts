@@ -107,6 +107,14 @@ export const COMMENT_CSS = `
   content: "TODO";
 }
 
+/* Edit mode titles an opened comment with the literal tag that produced it, in code font
+   (<!-- --> or <!-- TODO -->); read mode keeps the words Comment and TODO. */
+html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content .okf-comment > .okf-comment-body[data-okf-tag]:not([hidden])::before {
+  content: attr(data-okf-tag);
+  font-family: var(--studio-editor-font-family, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.9em;
+}
+
 /* An open thread: one entry per message, then the reply box and Delete. The message text is a text
    node, so its line breaks are kept; the body itself wraps normally. */
 #sphinx-myst-preview-content .okf-comment[data-okf-comment-kind="thread"] > .okf-comment-body:not([hidden]) {

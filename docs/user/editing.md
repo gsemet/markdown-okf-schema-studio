@@ -37,6 +37,9 @@ environments),
   Alt+Up/Down moves the focused block; Cmd/Ctrl+Alt+Up/Down does it from the block text box.
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
   toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
+  In edit mode an opened comment chip is titled with the syntax that produced it, in code font:
+  `<!-- -->` for a comment and `<!-- TODO -->` for a comment whose text starts with TODO, in any case,
+  with or without a colon, on one line or several. Read mode keeps the words Comment and TODO.
   In a block or table-cell text box the VS Code keys apply: Cmd/Ctrl+Z undoes and
   Cmd+Shift+Z (Ctrl+Shift+Z or Ctrl+Y) redoes the last change, as many times as you need;
   Cmd/Ctrl+A selects the whole text of the text box; Cmd/Ctrl+Shift+K deletes the current line or

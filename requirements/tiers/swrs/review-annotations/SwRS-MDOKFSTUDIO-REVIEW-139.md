@@ -4,10 +4,11 @@ id: SwRS-MDOKFSTUDIO-REVIEW-139
 uuid: a3974cfb-3f30-4d82-b571-cd71ef3dd38c
 title: TODO words and TODO comments show as green chips
 description: When a paragraph holds the word TODO not glued to letters, digits
-  or an underscore, or an HTML comment starts with that word, the renderer SHALL
-  replace the word by a green TODO chip titled TODO and leave the rest of the
-  sentence unchanged, and leave the word TODO plain in inline code, a fenced
-  code block, link text, a URL and math.
+  or an underscore, or an HTML comment starts with that word in any case (with
+  or without a colon, on one or several lines), the renderer SHALL replace the
+  word by a green TODO chip titled TODO and leave the rest of the sentence
+  unchanged, and leave the word TODO plain in inline code, a fenced code block,
+  link text, a URL and math.
 project: markdown-okf-schema-studio
 scope: review-annotations
 lifecycle: draft
@@ -29,7 +30,7 @@ tested_in_files:
 
 ### Normative behavior
 
-When a paragraph holds the word TODO not glued to letters, digits or an underscore, or an HTML comment starts with that word, the renderer SHALL replace the word by a green TODO chip titled TODO and leave the rest of the sentence unchanged, and leave the word TODO plain in inline code, a fenced code block, link text, a URL and math.
+When a paragraph holds the word TODO not glued to letters, digits or an underscore, or an HTML comment starts with that word in any case (with or without a colon, on one or several lines), the renderer SHALL replace the word by a green TODO chip titled TODO and leave the rest of the sentence unchanged, and leave the word TODO plain in inline code, a fenced code block, link text, a URL and math.
 
 ### Scenario (nominal): Word in a sentence
 
@@ -55,7 +56,7 @@ When a paragraph holds the word TODO not glued to letters, digits or an undersco
 
 ### Scenario (nominal): TODO comment
 
-- GIVEN the comment "`<!-- TODO: finish the chapter -->`"
+- GIVEN the comment "`<!-- TODO: finish the chapter -->`" or "`<!-- todo finish the chapter -->`"
 - WHEN the document is rendered
 - THEN a wrapper of kind todo holds a green chip reading TODO with the title "TODO: finish the chapter" and a hidden body with the comment text
 

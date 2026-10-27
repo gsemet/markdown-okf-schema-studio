@@ -927,6 +927,14 @@ test("T15: an open comment is an admonition-like box and showComments off hides 
   assert.doesNotMatch(css, /data-okf-show-comments="false"\][^{]*kind="todo"/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-003
+test("edit mode titles an open comment with its literal tag in code font", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /html\[data-sphinx-preview-edit-mode="on"\] #sphinx-myst-preview-content \.okf-comment > \.okf-comment-body\[data-okf-tag\]:not\(\[hidden\]\)::before \{\s*content: attr\(data-okf-tag\);\s*font-family: var\(--studio-editor-font-family/u);
+  // Read mode keeps the words.
+  assert.match(css, /\.okf-comment > \.okf-comment-body:not\(\[hidden\]\)::before \{\s*content: "Comment";/u);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-152
 test("the Comments toolbar button hides the gray and thread chips at once and goes away with the setting", () => {
   const css = PREVIEW_THEME_CSS;
