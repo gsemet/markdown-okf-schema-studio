@@ -11,6 +11,7 @@
  * as plain text. A token carries a colour class, never a `style` attribute (see `codeTheme.ts`).
  */
 
+import { escapeHtml } from "../syntax/markdownSyntax";
 import { createHighlighterCoreSync, type HighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 
@@ -148,13 +149,6 @@ function attributeValue(attributes: string, name: string): string | undefined {
   return new RegExp(`${name}="([^"]*)"`, "u").exec(attributes)?.[1];
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
 // Shiki font style bits (VS Code): italic, bold, underline, strikethrough.
 const FONT_STYLE_CLASSES: ReadonlyArray<readonly [number, string]> = [
   [1, "shk-italic"],
@@ -215,7 +209,7 @@ function tokenizeLines(source: string, language: string): string[] {
     for (const [bit, name] of FONT_STYLE_CLASSES) {
       if ((fontStyle & bit) !== 0) classes.push(name);
     }
-    const text = escapeHtml(token.content);
+    const text = escapeHtml(token.content, false);
     return classes.length === 0 ? text : `<span class="${classes.join(" ")}">${text}</span>`;
   }).join(""));
 }
@@ -309,7 +303,7 @@ export function highlightCodeBlocks(html: string): string {
         return match;
       }
     }
-    const plainLines = (): string[] => lines.map(escapeHtml);
+    const plainLines = (): string[] => lines.map((line) => escapeHtml(line, false));
 
     let withShikiClass = codeAttributes;
     if (language && lineHtml !== undefined) {
@@ -341,7 +335,7 @@ export function highlightCodeBlocks(html: string): string {
     }
     const filenameLabel = filename === undefined
       ? ""
-      : `<span class="myst-code-filename">${escapeHtml(decodeEntities(filename))}</span>`;
+      : `<span class="myst-code-filename">${escapeHtml(decodeEntities(filename), false)}</span>`;
     const styledPreAttributes = isDiffLanguage
       ? preAttributes.includes('class="')
         ? preAttributes.replace(/class="/u, 'class="myst-code-block-diff ')

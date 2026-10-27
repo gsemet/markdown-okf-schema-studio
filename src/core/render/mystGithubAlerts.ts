@@ -3,6 +3,8 @@
  * admonitions before parsing, leaving fenced code untouched.
  */
 
+import { advanceFence } from "../syntax/markdownSyntax";
+
 const GITHUB_ALERT_TYPES = new Map([
   ["NOTE", "note"],
   ["TIP", "tip"],
@@ -18,41 +20,18 @@ function stripQuote(line: string): string {
   return line.replace(/^\s*>\s?/u, "");
 }
 
-interface MarkdownFence {
-  marker: "`" | "~";
-  length: number;
-}
-
-function openingFence(line: string): MarkdownFence | undefined {
-  const marker = /^\s*(`{3,}|~{3,})/u.exec(line)?.[1];
-  return marker ? { marker: marker[0] as "`" | "~", length: marker.length } : undefined;
-}
-
-function closesFence(line: string, fence: MarkdownFence): boolean {
-  const marker = /^(`+|~+)[ \t]*$/u.exec(line.trimStart())?.[1];
-  return Boolean(marker && marker[0] === fence.marker && marker.length >= fence.length);
-}
-
 // @implements_req SwRS-MDOKFSTUDIO-GFM-009
 /** Rewrites alert blockquotes, including optional titles, into MyST admonitions. */
 export function expandGithubAlerts(text: string): string {
   const lines = text.split(/\r?\n/u);
   const output: string[] = [];
-  let fence: MarkdownFence | undefined;
+  let fence: string | undefined;
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
-    if (fence) {
-      output.push(line);
-      if (closesFence(line, fence)) {
-        fence = undefined;
-      }
-      continue;
-    }
-
-    const nextFence = openingFence(line);
-    if (nextFence) {
-      fence = nextFence;
+    const wasInFence = fence !== undefined;
+    fence = advanceFence(line, fence);
+    if (wasInFence || fence !== undefined) {
       output.push(line);
       continue;
     }

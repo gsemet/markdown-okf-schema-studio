@@ -4,6 +4,8 @@
  * import `vscode`.
  */
 
+import { escapeRegExp } from "../syntax/markdownSyntax";
+
 export const MAX_LABEL_LENGTH = 100;
 
 /**
@@ -57,7 +59,7 @@ export function renameLabelLine(
 /** Number of `` {ref}`name` `` and `` {ref}`text <name>` `` uses of `name`. */
 export function countRefUses(text: string, name: string): number {
   if (!isValidLabelName(name)) return 0;
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const escaped = escapeRegExp(name);
   const pattern = new RegExp(
     "\\{ref\\}`(?:\\s*" + escaped + "\\s*|[^`<]*<\\s*" + escaped + "\\s*>\\s*)`", "gu");
   return text.match(pattern)?.length ?? 0;

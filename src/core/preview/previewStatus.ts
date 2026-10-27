@@ -4,6 +4,8 @@
  * visual page builder uses the same markup as the webview.
  */
 
+import { escapeHtml } from "../syntax/markdownSyntax";
+
 export type PreviewStatus =
   | "pending"
   | "success"
@@ -31,14 +33,6 @@ export const PREVIEW_STATUS_LABELS: Record<PreviewStatus, string> = {
   "missing-source": "Preview source missing",
   recovery: "Preview recovered",
 };
-
-export function escapeHtml(value: string): string {
-  return value
-    .replace(/&/gu, "&amp;")
-    .replace(/</gu, "&lt;")
-    .replace(/>/gu, "&gt;")
-    .replace(/"/gu, "&quot;");
-}
 
 /** One line of the status region: the severity attribute and the formatted location and message. */
 export interface PreviewStatusDiagnosticItem {

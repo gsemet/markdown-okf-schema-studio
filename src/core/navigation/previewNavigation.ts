@@ -4,6 +4,7 @@
  * links and wikilinks, plus the source line a Markdown fragment or marker points to. The checks
  * that read the disk are in `session/previewNavigator.ts`.
  */
+import { advanceFence, escapeRegExp } from "../syntax/markdownSyntax";
 import { resourcePathPart } from "../security/resource-policy";
 
 /** Where a followed link leads: an anchor, an external URL, a local file, or nowhere (with why). */
@@ -47,13 +48,9 @@ export function markdownFragmentRange(source: string, suffix: string): MarkdownF
   const slug = (value: string) => value.trim().toLowerCase().replace(/[^\p{L}\p{N}_\s-]/gu, "").replace(/\s+/gu, "-");
   let fence: string | undefined;
   for (let index = 0; index < lines.length; index += 1) {
-    const marker = /^ {0,3}(`{3,}|~{3,})/u.exec(lines[index])?.[1];
-    if (marker) {
-      if (!fence) fence = marker;
-      else if (marker[0] === fence[0] && marker.length >= fence.length) fence = undefined;
-      continue;
-    }
-    if (fence) continue;
+    const wasInFence = fence !== undefined;
+    fence = advanceFence(lines[index], fence);
+    if (wasInFence || fence !== undefined) continue;
     // A MyST `(label)=` line is the target of `#label`.
     if (target === /^ {0,3}\(([A-Za-z0-9_.:-]+)\)=\s*$/u.exec(lines[index])?.[1]) {
       return { startLine: index + 1, endLine: index + 1 };
@@ -81,10 +78,6 @@ export function markdownFragmentRange(source: string, suffix: string): MarkdownF
 /** The first source line of {@link markdownFragmentRange}. */
 export function markdownFragmentLine(source: string, suffix: string): number | undefined {
   return markdownFragmentRange(source, suffix)?.startLine;
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-067

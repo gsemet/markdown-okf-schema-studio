@@ -7,6 +7,7 @@
 
 import * as path from "node:path";
 
+import { advanceFence } from "../syntax/markdownSyntax";
 import { isValidLabelName } from "./labelRename";
 
 export const MAX_TARGETS = 500;
@@ -27,7 +28,6 @@ export interface BibKey {
 }
 
 const LABEL_LINE = /^[ \t]*\(([^()\s]+)\)=[ \t]*$/u;
-const FENCE_LINE = /^[ \t]{0,3}(`{3,}|~{3,})/u;
 const HEADING_LINE = /^[ \t]{0,3}#{1,6}[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$/u;
 
 function clip(text: string): string {
@@ -42,13 +42,9 @@ export function documentTargets(text: string): { items: DocumentTarget[]; trunca
   const items: DocumentTarget[] = [];
   let fence: string | undefined;
   for (let index = 0; index < lines.length; index += 1) {
-    const marker = FENCE_LINE.exec(lines[index])?.[1];
-    if (marker) {
-      if (fence === undefined) fence = marker[0].repeat(marker.length);
-      else if (marker[0] === fence[0] && marker.length >= fence.length) fence = undefined;
-      continue;
-    }
-    if (fence !== undefined) continue;
+    const wasInFence = fence !== undefined;
+    fence = advanceFence(lines[index], fence);
+    if (wasInFence || fence !== undefined) continue;
     const name = LABEL_LINE.exec(lines[index])?.[1];
     if (name === undefined || !isValidLabelName(name)) continue;
     if (items.length >= MAX_TARGETS) return { items, truncated: true };

@@ -7,6 +7,7 @@
  * every colour and size). Pure apart from the callbacks it is given.
  */
 
+import { advanceFence, frontmatterRange } from "../syntax/markdownSyntax";
 import { BoundedCache } from "./boundedCache";
 
 export interface GridNode {
@@ -332,21 +333,13 @@ export function firstHeading(source: string): string | undefined {
 
 function scanFirstHeading(source: string): string | undefined {
   const lines = source.replace(/\r\n?/gu, "\n").split("\n");
-  let index = 0;
-  if (lines[0]?.trim() === "---") {
-    const end = lines.findIndex((line, at) => at > 0 && /^(?:---|\.\.\.)\s*$/u.test(line));
-    if (end > 0) index = end + 1;
-  }
   let fence: string | undefined;
-  for (; index < lines.length; index += 1) {
+  for (let index = frontmatterRange(lines); index < lines.length; index += 1) {
     const line = lines[index];
-    const opening = /^ {0,3}(`{3,}|~{3,}|:{3,})/u.exec(line);
-    if (opening) {
-      if (!fence) fence = opening[1];
-      else if (opening[1][0] === fence[0] && opening[1].length >= fence.length && line.trim() === opening[1]) fence = undefined;
-      continue;
-    }
-    if (fence) continue;
+    // Colon fences (MyST directives) hide their content too, like code fences.
+    const wasInFence = fence !== undefined;
+    fence = advanceFence(line, fence, true);
+    if (wasInFence || fence !== undefined) continue;
     const atx = /^ {0,3}#[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$/u.exec(line);
     if (atx) {
       const heading = cleanHeading(atx[1]);
