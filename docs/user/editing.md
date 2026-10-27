@@ -101,10 +101,14 @@ environments),
   written inside a paragraph is drawn in its line of text; an image alone in its paragraph is a
   centred figure. Pasting rich text (from Google Docs, Word, a web page or VS Code) into a
   block editor inserts it as Markdown (headings, bold, italic, strikethrough, links, lists, code,
-  quotes, simple tables, images as links) in one undo step; Cmd/Ctrl+Shift+V pastes plain text. A
-select at its start
-  (Cmd/Ctrl+Shift+M) chooses the Strict, GFM or MyST button set for the workspace (GFM until you
-  choose, or the `editing.defaultPaletteMode` setting).
+  quotes, simple tables, images as links) in one undo step; Cmd/Ctrl+Shift+V pastes plain text.
+  Pasting a web address (`http:`, `https:` or `mailto:`, copied as plain text) into a block editor
+  makes a link: over selected text it gives `[text](url)`, on its own it gives `<url>`, and an image
+  address (`.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`) gives `![](url)` (`![text](url)` over
+  selected text). Cmd/Ctrl+Shift+V pastes the address as it is. Inside code, inside the target of a
+  link and for any other scheme the paste is left as plain text. Only the pasted span changes.
+  A select at its start (Cmd/Ctrl+Shift+M) chooses the Strict, GFM or MyST button set for the
+  workspace (GFM until you choose, or the `editing.defaultPaletteMode` setting).
   The palette sits just above the text box, never over its text; when you scroll so the top of the
   box is out of view, it stays at the top of the viewport (below the preview controls) until the
   box ends, in narrow panes too, where it wraps inside the pane. The table toolbar of a cell

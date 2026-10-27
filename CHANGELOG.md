@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Pasting a web address (`http:`, `https:` or `mailto:`) into a block editor makes a Markdown link: `[text](url)`
+  over selected text, `<url>` alone and `![](url)` for an image address (`.png`, `.jpg`, `.gif`, `.svg`,
+  `.webp`). Cmd/Ctrl+Shift+V still pastes the raw text, and code, link targets and other schemes are
+  left alone.
 - Link-target search by name (wiki-style links) skips `node_modules`, `.git`, `_build`, `.venv` and
   `venv`, no longer applies VS Code's `files.exclude` (files hidden by it can now be found) and stops
   at 50 matches per root, so a name matching more files may resolve from the first 50 only.

@@ -70,6 +70,7 @@ import { createMarkdownTableTools } from "./modules/markdownTable";
 import { installMotion } from "./modules/motion";
 import { installPasteHtml } from "./modules/pasteHtml";
 import { installPasteImage } from "./modules/pasteImage";
+import { installPasteUrl } from "./modules/pasteUrl";
 import { installPlantUmlFileRequests, PLANTUML_FILE_REQUEST_TIMEOUT_MS } from "./modules/plantumlFileRequests";
 import { isSafeOkfColor } from "./modules/spanColors";
 import { createTextEditingTools } from "./modules/textEditing";
@@ -228,6 +229,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // Pasting an image into the text box: the host saves it next to the document and names it.
   const pasteImage = installPasteImage(window);
   const pasteHtml = installPasteHtml();
+  const pasteUrl = installPasteUrl();
   // CR 050: the conf.py warnings of a successful render, as a closable banner over the top of the page.
   const warningBanner = installWarningBanner(document, vscode, context,
     warningBannerState, warningBannerText);
@@ -362,7 +364,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const linkTooltip = installLinkTooltip(document, window);
   rt.parts = {
     contentMorph, stickyBand, statusRegion, commentThreads, commentCompose, linkNavigation, firstClearance,
-    codeCopy, labelRename, hostRequests, plantUmlFileRequests, pasteImage, pasteHtml, warningBanner,
+    codeCopy, labelRename, hostRequests, plantUmlFileRequests, pasteImage, pasteHtml, pasteUrl, warningBanner,
     figureEditButton, chipToggle, incomingChanges, motion, historyControls, viewControls, widthMode,
     tocColumn, themeMode, anchorMode, checkboxes, inlineThreads, linkTooltip,
   };

@@ -817,3 +817,52 @@ test("T1: Cmd+Shift+V, an image paste and a clipboard without HTML stay untouche
   textarea.dispatch("paste", image.event);
   assert.equal(harness.messages.at(-1)!.type, "previewPasteImage");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-264
+test("CR 145: a pasted URL makes a link over a selection, an autolink alone and an image for a picture", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  textarea.value = "See the docs here";
+  textarea.selectionStart = 4;
+  textarea.selectionEnd = 12;
+  const link = htmlPasteEvent("", "https://example.com/docs");
+  textarea.dispatch("paste", link.event);
+  assert.equal(link.wasPrevented(), true);
+  assert.equal(textarea.value, "See [the docs](https://example.com/docs) here");
+  assert.equal(textarea.selectionStart, textarea.selectionEnd);
+  assert.equal(textarea.selectionStart, 4 + "[the docs](https://example.com/docs)".length);
+  textarea.value = "A  B";
+  textarea.selectionStart = 2;
+  textarea.selectionEnd = 2;
+  textarea.dispatch("paste", htmlPasteEvent("", "https://example.com/").event);
+  assert.equal(textarea.value, "A <https://example.com/> B");
+  textarea.value = "";
+  textarea.selectionStart = 0;
+  textarea.selectionEnd = 0;
+  textarea.dispatch("paste", htmlPasteEvent("", "https://example.com/logo.svg").event);
+  assert.equal(textarea.value, "![](https://example.com/logo.svg)");
+  assert.equal(harness.messages.length, before, "no host request: the conversion is local");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-264
+test("CR 145: Ctrl+Shift+V, other schemes, other text and rich text keep their own paste", () => {
+  const harness = createRuntimeHarness();
+  const textarea = openBlockEditorWithSource(harness);
+  textarea.value = "word";
+  textarea.selectionStart = 0;
+  textarea.selectionEnd = 4;
+  textarea.dispatch("keydown", { key: "v", shiftKey: true, ctrlKey: true });
+  const raw = htmlPasteEvent("", "https://example.com/");
+  textarea.dispatch("paste", raw.event);
+  assert.equal(raw.wasPrevented(), false, "paste as plain text stays native");
+  for (const text of ["javascript:alert(1)", "two words", "ftp://x.org/a"]) {
+    const other = htmlPasteEvent("", text);
+    textarea.dispatch("paste", other.event);
+    assert.equal(other.wasPrevented(), false, text);
+  }
+  assert.equal(textarea.value, "word");
+  const rich = htmlPasteEvent("<a href='https://example.com/'>x</a>", "https://example.com/");
+  textarea.dispatch("paste", rich.event);
+  assert.equal(harness.messages.at(-1)!.type, "previewPasteHtml", "rich text still goes to the host");
+});

@@ -31,7 +31,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     const edit = state.activeBlockEdit;
     if (!edit || message.editId !== edit.editId) return;
     const { blockEditor, editorChrome, textControls } = rt;
-    const { hostRequests, pasteImage, pasteHtml } = rt.parts;
+    const { hostRequests, pasteImage, pasteHtml, pasteUrl } = rt.parts;
     if (typeof message.error === "string") {
       blockEditor.clearPendingBlockNavigation();
       state.pendingBlockSelection = undefined;
@@ -145,8 +145,9 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       blockEditor.saveBlockEdit();
     });
     textarea.addEventListener("blur", () => edit.slashMenu?.close());
-    textarea.addEventListener("keydown", (event) => pasteHtml.noteKey(event));
+    textarea.addEventListener("keydown", (event) => { pasteHtml.noteKey(event); pasteUrl.noteKey(event); });
     // @implements_req SwRS-MDOKFSTUDIO-PALETTE-213
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-264
     // Only this text box takes over a paste; the table cell editor has no paste listener (native paste).
     textarea.addEventListener("paste", (event) => {
       // An image on an otherwise empty clipboard first, then rich text; plain text stays native.
@@ -163,6 +164,13 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
             blockEditor.autosaveBlockEdit();
           });
         },
+      })) return;
+      // CR 145: a lone http(s) or mailto address becomes a link, an autolink or an image.
+      if (pasteUrl.handle(event, textarea, (urlEdit) => {
+        textControls.applyTextEdit(textarea, urlEdit, () => {
+          resizeTextarea();
+          blockEditor.autosaveBlockEdit();
+        });
       })) return;
       pasteHtml.handle(event, textarea, {
         send: (html, done) => hostRequests.ask("previewPasteHtml", { html }, { timeoutMs: 10000 }, done),
