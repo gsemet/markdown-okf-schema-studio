@@ -26,14 +26,15 @@ implemented_in_files:
 - src/session/features/hostRequests.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
+- test/page/modules/codeCopy.test.ts
 - test/session/renderReq.codeCopy.requirements.test.ts
 ---
 
-## An invalid or oversized copy request is refused
+## An invalid, oversized or gestureless copy request is refused
 
 ### Normative behavior
 
-When a copy request carries text that is not a string or is longer than 1 000 000 characters, the extension SHALL refuse it without writing the clipboard, and answer every copy request it handles with whether the text was copied.
+When a copy request carries text that is not a string or is longer than 1 000 000 characters, or does not follow a click of the user on the copy button, the extension SHALL refuse it without writing the clipboard, and answer every copy request it handles with whether the text was copied.
 
 ### Scenario (nominal): A copy request of 1 000 000 characters is written
 
@@ -49,7 +50,7 @@ When a copy request carries text that is not a string or is longer than 1 000 00
 
 ### Scenario (boundary): Accepted shape of the copy request
 
-A `previewCopyText` message has the identity fields of every page message (see SwRS-MDOKFSTUDIO-TRUST-052) an `editId` (non-empty) and one field `text`:
+A `previewCopyText` message has the identity fields of every page message (see SwRS-MDOKFSTUDIO-TRUST-052) an `editId` (non-empty) a boolean `userGesture` and one field `text`:
 
 | `text` | Outcome |
 | --- | --- |
@@ -60,6 +61,8 @@ A `previewCopyText` message has the identity fields of every page message (see S
 | a string of 20 000 001 characters | rejected |
 | `5` (a number) | rejected |
 | `undefined` (absent) | rejected |
+
+`userGesture` is true only when the page sent the request from a click event the user made (`isTrusted`). A message without a boolean `userGesture` is rejected by the shape check. A well-formed message with `userGesture` false is answered `ok: false`, "Copy needs a click on the copy button.", and the clipboard is unchanged.
 
 A request is answered by `editId` (see SwRS-MDOKFSTUDIO-TRUST-090). The shape check accepts a string of up to 20 000 000 characters, so that the host can answer the size limit; a text of 1 000 001 characters or more is answered `ok: false`, "Too large to copy.", and a non-string is dropped: nothing is written to the clipboard.
 
@@ -82,5 +85,5 @@ A request is answered by `editId` (see SwRS-MDOKFSTUDIO-TRUST-090). The shape ch
 ### Verification notes
 
 - Method: test/core/protocol/pageToHost.test.ts (nominal, refusal and the shape table)
-- Method: test/session/renderReq.codeCopy.requirements.test.ts (stale and read-only page, size refusal, failing clipboard, answers)
+- Method: test/session/renderReq.codeCopy.requirements.test.ts (gestureless request refused, stale and read-only page, size refusal, failing clipboard, answers)
 - Criteria: 1 000 000 copied, 1 000 001 accepted by the shape check and answered "Too large to copy.", 20 000 001 and non-strings rejected; a stale message leaves the clipboard unchanged; a read-only preview writes the requested code and processes no edit request

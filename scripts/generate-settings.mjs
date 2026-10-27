@@ -3,7 +3,8 @@
  *
  * The `contributes.configuration` of `package.json` is generated from the settings registry,
  * `src/core/configuration/settingsRegistry.ts` (`contributedConfiguration()`): categories, their
- * order and title, and every field of every setting. Edit the registry, then run
+ * order and title, and every field of every setting, and the `restrictedConfigurations` of the
+ * untrusted workspace declaration. Edit the registry, then run
  * `just generate-settings`; never edit that part of `package.json` by hand.
  *
  * Without arguments the script rewrites `package.json`; with `--check` it changes nothing and fails
@@ -35,16 +36,17 @@ async function loadRegistry() {
 }
 
 /** `package.json` with its `contributes.configuration` replaced by the generated one. */
-function withConfiguration(text, configuration) {
+function withConfiguration(text, configuration, restricted) {
   const manifest = JSON.parse(text);
   manifest.contributes.configuration = configuration;
+  manifest.capabilities.untrustedWorkspaces.restrictedConfigurations = restricted;
   return `${JSON.stringify(manifest, null, 2)}\n`;
 }
 
 const check = process.argv.includes("--check");
 const registry = await loadRegistry();
 const current = readFileSync(packagePath, "utf8");
-const generated = withConfiguration(current, registry.contributedConfiguration());
+const generated = withConfiguration(current, registry.contributedConfiguration(), registry.restrictedConfigurationNames());
 const settingCount = registry.contributedConfiguration()
   .reduce((count, category) => count + Object.keys(category.properties).length, 0);
 

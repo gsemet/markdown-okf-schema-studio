@@ -6,7 +6,7 @@
 export function installCodeCopy(
   document: Document,
   window: Window & typeof globalThis,
-  post: (text: string, done: (result: { ok?: boolean; reason?: string }) => void) => void,
+  post: (text: string, done: (result: { ok?: boolean; reason?: string }) => void, userGesture: boolean) => void,
 ): { hide(): void; refresh(): void } {
   const contentId = "sphinx-myst-preview-content";
   const size = 26;
@@ -56,6 +56,8 @@ export function installCodeCopy(
       event.stopPropagation();
       const pre = current;
       if (!pre) return;
+      // A click the user made (`isTrusted`); a script's dispatched click is not one.
+      const userGesture = event.isTrusted === true;
       resetCopied();
       const mine = clickSequence;
       // "Copied" only when the host says the clipboard was written; otherwise its reason.
@@ -68,7 +70,7 @@ export function installCodeCopy(
         else created.setAttribute("title", label);
         created.innerHTML = copied ? checkIcon : refusedIcon;
         copiedTimer = window.setTimeout(resetCopied, copied ? 1500 : 3000);
-      });
+      }, userGesture);
     });
     return created;
   };

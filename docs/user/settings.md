@@ -62,6 +62,10 @@ chips in open
 - `frontmatter.allowOutsideWorkspaceLinks` (default off): resolve document-relative links that
   leave the workspace.
 
+In Restricted Mode (untrusted workspace) a value set by the workspace for `frontmatter.bundleRoot`,
+`frontmatter.projectRoot` and `frontmatter.allowOutsideWorkspaceLinks` is ignored; the defaults
+apply. Your user settings still count.
+
 **Comments**
 
 - `comments.authorName` (default empty): the name stored with the review comments you write in the

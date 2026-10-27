@@ -51,6 +51,11 @@ When the host serves an include file, or refuses one that does not exist inside 
 - WHEN the host refuses it
 - THEN nothing is remembered for it
 
+### Scenario (refusal): The engine is not the built-in one, or the file id is not the host's
+- GIVEN a previewPlantUmlInclude request
+- WHEN the Java engine is selected (useJar on, trusted or not), or the request names a `from` that the host never gave in an answer of this document
+- THEN the host answers ok false and reads no file; a `from` of null (the document itself) and a `from` the host issued are served as before
+
 ### Scenario (nominal): A changed file tells the page
 - GIVEN an include file remembered by the watch
 - WHEN it changes on disk
@@ -81,7 +86,8 @@ When the host serves an include file, or refuses one that does not exist inside 
 | --- | --- |
 | 1025 remembered files, the last one just remembered | the set holds 1024 and the first is gone |
 | An old file remembered again when the limit is exceeded | an older untouched file is forgotten first (the set never exceeds 1024) |
-| The preview follows another document | the include watch is empty, so a file remembered for the earlier document that changes afterwards does not tell the page |
+| An include whose parent id was dropped from the 1024 issued ids | refused as an unissued id |
+| The preview follows another document | the include watch and the issued file ids are empty, so a file remembered for the earlier document that changes afterwards does not tell the page |
 
 ### Known issues
 
@@ -100,4 +106,5 @@ When the host serves an include file, or refuses one that does not exist inside 
 - Method: test/page/modules/plantumlDiagram.test.ts (after an included file changed, the diagrams that read files are drawn again from the host: redraw scenario, including the diagram without includes).
 - Method: test/page/pageMessages.test.ts (host message acceptance, shape of previewPlantUmlIncludesChanged and addressing by document); the host event path, the deferral while editing and the sending of the message have no session test.
 - Method: test/session/diagReq.plantuml.requirements.test.ts (`the include watch is emptied when the preview follows another document`: document switch row).
+- Method: test/session/diagReq.plantuml.requirements.test.ts (`an include request is refused for the Java engine and for a file id the host never issued`: refusal scenario).
 - Criteria: Only served and allowed-missing paths are watched; watched changes notify the page once the editor is closed; only diagrams that read files are redrawn; size never exceeds 1024; no stale watch survives a switch.

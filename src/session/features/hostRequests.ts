@@ -146,6 +146,12 @@ export class HostRequestController {
   // @implements_req SwRS-MDOKFSTUDIO-CODE-026
   /** Writes the code to the clipboard, then answers whether it was copied (always answers). */
   private handleCopyText(preview: PreviewSession, message: PageMessageOf<"previewCopyText">): PromiseLike<void> | undefined {
+    // The flag only blocks clicks dispatched by a script; a script cannot post the message itself
+    // because the webview API handle is not exposed to it. Do not rely on the flag alone.
+    if (message.userGesture !== true) {
+      this.postHostResult(preview, message, { ok: false, reason: "Copy needs a click on the copy button." });
+      return undefined;
+    }
     if (message.text.length > MAX_COPY_TEXT_LENGTH) {
       this.postHostResult(preview, message, { ok: false, reason: "Too large to copy." });
       return undefined;

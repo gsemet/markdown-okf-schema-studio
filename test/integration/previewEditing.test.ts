@@ -1412,6 +1412,7 @@ export async function run(): Promise<void> {
       ...currentContext(document),
       editId: "copy-1",
       text: copyText,
+      userGesture: true,
     });
     assert.equal(await vscode.env.clipboard.readText(), copyText);
     const referenceDirectory = path.join(directory, "references");

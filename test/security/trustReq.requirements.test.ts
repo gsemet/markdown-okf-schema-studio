@@ -361,6 +361,12 @@ test("the manifest declares limited support for untrusted workspaces", () => {
   }
   assert.deepEqual(
     untrusted?.restrictedConfigurations,
-    ["markdownOkfSchemaStudio.plantuml.useJar", "markdownOkfSchemaStudio.plantuml.jarPath"],
+    [
+      "markdownOkfSchemaStudio.plantuml.useJar",
+      "markdownOkfSchemaStudio.plantuml.jarPath",
+      "markdownOkfSchemaStudio.frontmatter.bundleRoot",
+      "markdownOkfSchemaStudio.frontmatter.projectRoot",
+      "markdownOkfSchemaStudio.frontmatter.allowOutsideWorkspaceLinks",
+    ],
   );
 });

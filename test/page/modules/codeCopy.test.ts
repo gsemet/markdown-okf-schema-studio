@@ -136,6 +136,7 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
   const timers: Array<{ id: number; callback: () => void; delay: number }> = [];
   let nextTimer = 1;
   const posted: string[] = [];
+  const gestures: boolean[] = [];
   const document = {
     body,
     createElement: (tag: string) => new FakeElement(tag),
@@ -155,10 +156,10 @@ function harness(options: { band?: ReturnType<typeof rect> } = {}) {
     addEventListener: (type: string, handler: Handler) => windowListeners.set(type, [...(windowListeners.get(type) ?? []), handler]),
   };
   provideGlobalElement(FakeElement);
-  const runtime: { hide(): void; refresh(): void } = installCodeCopy(document as never, window as never, (text: string, done) => { posted.push(text); held.push(done); if (reply) done(reply); });
+  const runtime: { hide(): void; refresh(): void } = installCodeCopy(document as never, window as never, (text: string, done, userGesture: boolean) => { posted.push(text); gestures.push(userGesture); held.push(done); if (reply) done(reply); });
   return {
     button(): any { return body.querySelector("[data-sphinx-preview-code-copy]") as any; },
-    body, content, band, makePre, posted, timers, runtime, window,
+    body, content, band, makePre, posted, gestures, timers, runtime, window,
     over(target: FakeElement, related: FakeElement | null = null) {
       hovered = target;
       for (const handler of documentListeners.get("mouseover") ?? []) handler({ target, relatedTarget: related });
@@ -448,4 +449,14 @@ test("the button says Copied only after the host answers ok, and shows the refus
   } finally {
     reply = saved;
   }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CODE-026
+test("a click the user made carries the gesture flag, a dispatched click does not", () => {
+  const t = harness();
+  const { code } = t.makePre("a\n", 100);
+  t.over(code);
+  t.button().fire("click", { isTrusted: true });
+  t.button().fire("click", { isTrusted: false });
+  assert.deepEqual(t.gestures, [true, false]);
 });
