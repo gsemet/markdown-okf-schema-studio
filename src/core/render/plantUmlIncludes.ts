@@ -5,6 +5,10 @@
  * folder or the workspace (only the document's folder and below in Restricted Mode), no symlink
  * escape, at most 5 MiB. URLs and the standard library (`<C4/...>`) are never read.
  *
+ * It also checks the includes of a diagram sent to the PlantUML JAR (`findEscapingPlantUmlInclude`),
+ * because the JAR's own ALLOWLIST check still reads a path that climbs out of the workspace through
+ * parent segments and an absolute path into a sibling folder sharing the folder-name prefix.
+ *
  * This module must not import `vscode`.
  */
 import * as path from "node:path";
@@ -133,4 +137,91 @@ export class PlantUmlIncludeWatch {
   public get size(): number {
     return this.paths.size;
   }
+}
+
+const MAX_JAR_INCLUDE_DEPTH = 8;
+const MAX_JAR_INCLUDED_FILES = 64;
+const JAR_INCLUDE_LINE = /^\s*!(?:include(?:_many|_once|sub)?|import)\s+(.+?)\s*$/iu;
+const URL_PREFIX = /^[a-z][a-z\d+.-]+:\/\//iu;
+
+/** The file part of an include argument: quotes and the `!SUB` / `#id` selector removed. */
+function includeFile(argument: string): string {
+  let value = argument.trim();
+  if (value.length >= 2 && /^["'].*["']$/u.test(value)) {
+    value = value.slice(1, -1);
+  }
+  const selector = value.search(/[!#]/u);
+  return selector > 0 ? value.slice(0, selector) : value;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-084
+/**
+ * The refusal message when an include of a diagram source for the PlantUML JAR (or of a file it
+ * includes) leaves `workspaceRoot`, or is computed (`%function()`, `$variable`) and so cannot be
+ * checked; undefined when every include stays inside. Containment is decided on path segments
+ * after the real path (never a string prefix). URLs and `<standard library>` names are not files
+ * and are left to the JAR.
+ */
+export function findEscapingPlantUmlInclude(
+  source: string,
+  workspaceRoot: string,
+): string | undefined {
+  const root = path.resolve(workspaceRoot);
+  const policy = createPreviewResourcePolicy(root);
+  const visited = new Set<string>();
+  const outside = (name: string): string =>
+    `PlantUML include "${name}" is outside the workspace folder and was not read.`;
+
+  const check = (text: string, baseDirectory: string, depth: number): string | undefined => {
+    for (const line of text.split(/\r?\n/u)) {
+      const argument = JAR_INCLUDE_LINE.exec(line)?.[1];
+      if (argument === undefined) {
+        continue;
+      }
+      const name = includeFile(argument);
+      if (!name || name.startsWith("<") || URL_PREFIX.test(name)) {
+        continue;
+      }
+      if (/[%$]/u.test(name)) {
+        return `PlantUML include "${name}" is computed and cannot be checked; `
+          + "write the path out so it can be confirmed to stay inside the workspace.";
+      }
+      // An absolute path is judged by its segments below the root, then read like a relative one.
+      let requests: Array<{ request: string; base: string }>;
+      if (path.isAbsolute(name)) {
+        const relative = path.relative(root, path.resolve(name));
+        if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+          return outside(name);
+        }
+        requests = [{ request: relative.split(path.sep).join("/"), base: root }];
+      } else {
+        // PlantUML looks a relative path up from the working directory (the root) and from the
+        // including file; both must stay inside.
+        requests = [{ request: name, base: root }, { request: name, base: baseDirectory }];
+      }
+      for (const { request, base } of requests) {
+        const read = readBoundedText(policy, request, base);
+        if (read.ok) {
+          if (!visited.has(read.path) && visited.size < MAX_JAR_INCLUDED_FILES && depth < MAX_JAR_INCLUDE_DEPTH) {
+            visited.add(read.path);
+            const refusal = check(read.source, path.dirname(read.path), depth + 1);
+            if (refusal) {
+              return refusal;
+            }
+          }
+        } else if (
+          read.refusal === "resource-outside-root"
+          || read.refusal === "symlink-escape"
+          || read.refusal === "invalid-resource-path"
+          || read.refusal === "blocked-resource-scheme"
+        ) {
+          return outside(name);
+        }
+        // Missing, too large or unreadable: left to the JAR to report.
+      }
+    }
+    return undefined;
+  };
+
+  return check(source, root, 0);
 }
