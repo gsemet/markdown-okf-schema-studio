@@ -17,6 +17,7 @@ import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { currentPreviewDocument, isDocumentEligible, revisionOfStage } from "../sessionDocuments";
+import { OWN_EDIT_ECHO_MS } from "./scrollSync";
 
 /** The block edit the host holds for the page's open inline editor. */
 export interface ActiveBlockEdit {
@@ -295,7 +296,11 @@ export class BlockEditController {
       return;
     }
     edit.applying = true;
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
+    // CR 134: the text editor scrolls to the edit; the page must not follow that echo.
+    preview.scroll.ownEditUntil = Infinity;
     void this.manager.host.documents.applyEdits(source.document, [textEdit]).then((applied) => {
+      preview.scroll.ownEditUntil = Date.now() + OWN_EDIT_ECHO_MS;
       if (preview.edits.active !== edit) {
         return;
       }
@@ -309,6 +314,7 @@ export class BlockEditController {
       edit.hasAppliedEdit = true;
       this.drainActiveBlockEdit(preview, edit);
     }, (error: unknown) => {
+      preview.scroll.ownEditUntil = Date.now() + OWN_EDIT_ECHO_MS;
       if (preview.edits.active !== edit) {
         return;
       }

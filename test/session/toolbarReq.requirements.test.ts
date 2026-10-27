@@ -672,6 +672,30 @@ test("the host sends the first visible line and the cursor line when the editor 
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+test("the page does not follow the editor's scroll caused by an edit the preview applied (CR 134)", () => {
+  const f = fixture();
+  try {
+    f.preview.configuration = { ...f.preview.configuration, markEditorSelection: true } as never;
+    const editor = editorOf(f.preview, { first: 21, cursor: 30 });
+    f.state.editors = [editor];
+    // The edit is being applied, then settled a moment ago: the editor revealed its end (a large paste).
+    f.preview.scroll.ownEditUntil = Infinity;
+    f.manager.scroll.syncEditorToPreview(editor);
+    f.preview.scroll.ownEditUntil = Date.now() + 500;
+    f.manager.scroll.syncEditorToPreview(editor);
+    assert.equal(f.posted.length, 0, "the page stays where the writer is");
+    assert.equal(f.preview.scroll.anchor, undefined, "the editor does not take the anchor");
+    // Later, a scroll of the editor by the reader reaches the page again.
+    f.preview.scroll.ownEditUntil = Date.now() - 1;
+    f.manager.scroll.syncEditorToPreview(editor);
+    assert.equal(f.posted.length, 1);
+    assert.equal(f.posted[0].line, 22);
+  } finally {
+    f.cleanup();
+  }
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-120
 test("turning the anchor mode on aligns the preview with the text editor", async () => {
   const f = fixture();

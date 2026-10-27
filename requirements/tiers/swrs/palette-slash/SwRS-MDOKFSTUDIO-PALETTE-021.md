@@ -28,6 +28,8 @@ implemented_in_files:
 - src/page/features/blockSourceEditor.ts
 - src/page/features/editorChrome.ts
 - src/page/modules/caretRect.ts
+- src/session/features/blockEdits.ts
+- src/session/features/scrollSync.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/integration/editToolbarCover.test.ts
@@ -36,6 +38,7 @@ tested_in_files:
 - test/page/figureEditButtonClearance.test.ts
 - test/page/modules/caretReveal.test.ts
 - test/page/runtimeEditPalette.test.ts
+- test/session/toolbarReq.requirements.test.ts
 - test/visual/capture_edit_checks.py
 - test/visual/scenarioDefinitions1.ts
 ---
@@ -75,7 +78,7 @@ When a block editor opens, the extension SHALL place the edition palette as a to
 | Scroll position | Palette |
 | --- | --- |
 | the top of the frame is out of view | at the top of the viewport, 4 px below the larger of the reading offset and the toolbar bottom, below the sticky band and the floating toolbar, uncovered, inside its host; the box has not moved, and Bold keeps the editor open and the focus in the box |
-| the top of the frame is out of view, the frame is taller than the viewport and none of the palette's buttons shares columns with the floating toolbar (it overlaps only the bar's empty end) | 4 px below the larger of the reading offset and the visible bottom of the sticky band (for the first block of the document, 4 px below the band's bottom, 0 when hidden): the host carries data-sphinx-palette-top and the custom property --sphinx-preview-palette-top, measured again when the pane, the bar, the band or the tall state change; a button under the floating toolbar keeps the line below the toolbar |
+| the top of the frame is out of view, the frame is taller than the viewport and none of the palette's buttons shares columns with the floating toolbar (it overlaps only the bar's empty end) | 4 px below the visible bottom of the sticky band (4 px from the top of the viewport when the band is hidden, also for the first block of the document): the host carries data-sphinx-palette-top and the custom property --sphinx-preview-palette-top, measured again when the pane, the bar, the band or the tall state change; a button under the floating toolbar keeps the line below the toolbar |
 | the wheel scrolls a frame taller than the viewport down, one notch at a time | the page only goes down and the palette stays on its sticking line until the end of the frame |
 | the end of the editor | it has left with the end of the frame and is not below it |
 
@@ -103,6 +106,7 @@ When a block editor opens, the extension SHALL place the edition palette as a to
 | the caret line ends less than 8 px above the bottom of the viewport, or below it, the palette stuck or not (the end of a large paste) | the page scrolls down so that the caret line ends 8 px above the bottom of the viewport |
 | the caret is below the palette, or more than 8 px above the viewport bottom | the page does not scroll |
 | the palette is still above the frame (not stuck) and the caret line is above its bottom | the page does not scroll |
+| the text of a paste is applied to the document by the autosave | the editor stays open, the caret stays where the paste ended and the page does not move: the scroll of the text editor to the applied edit does not move the page, from the start of the autosave until 750 ms after it settled (CR 134) |
 
 ### Scenario (nominal): Native scrolling keeps clear of the stuck palette
 
