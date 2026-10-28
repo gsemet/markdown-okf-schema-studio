@@ -10,6 +10,7 @@
 
 import { advanceFence, frontmatterRange } from "../syntax/markdownSyntax";
 import { BoundedCache } from "./boundedCache";
+import { isCommentHtml } from "./commentMarkers";
 
 export interface GridNode {
   type: string;
@@ -323,6 +324,28 @@ function tabLabel(node: GridNode, parse: GridParse, index: number): string {
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-098
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-133
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-167
+/**
+ * Drops the source line attributes under a tab item, so that only the item itself is a mapped block
+ * (a table, code block, grid, card or nested tab set in the item is no block of its own). The node
+ * positions stay, for the stages that read them. A comment or thread keeps its own lines, as the
+ * review actions (reply, delete) and the comment anchors need them.
+ */
+function unmapPlainBlocks(nodes: readonly GridNode[]): void {
+  for (const node of nodes) {
+    if (node.type === "html" && isCommentHtml(node.value)) continue;
+    const properties = node.data?.hProperties as Record<string, unknown> | undefined;
+    if (properties) {
+      delete properties["data-line"];
+      delete properties["data-end-line"];
+    }
+    node.data = { ...(node.data ?? {}), noSourceLine: true };
+    unmapPlainBlocks(node.children ?? []);
+  }
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-MYST-098
 function buildTabSet(node: GridNode, source: GridSource, parse: GridParse, depth: number): void {
   const raw = directiveBody(node, source);
   const { options, body } = splitOptions(raw.lines);
@@ -358,6 +381,8 @@ function buildTabSet(node: GridNode, source: GridSource, parse: GridParse, depth
 
     item.type = "mystTabPanel";
     item.children = parseBody(itemOptions.body, itemOptions.firstLine, parse, depth);
+    // A tab item is one block: a click in its panel edits the whole item, not the paragraph inside.
+    unmapPlainBlocks(item.children);
     setHast(item, "div", {
       class: "myst-tab-panel",
       role: "tabpanel",

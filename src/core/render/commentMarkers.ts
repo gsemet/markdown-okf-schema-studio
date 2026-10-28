@@ -73,6 +73,11 @@ function commentBodies(value: string | undefined): string[] | undefined {
   return bodies;
 }
 
+/** Whether an html value is only comments, which edit mode treats as blocks of their own. */
+export function isCommentHtml(value: string | undefined): boolean {
+  return commentText(value) !== undefined || commentBodies(value) !== undefined;
+}
+
 export function isToolComment(text: string): boolean {
   return TOOL_COMMENT.test(text);
 }

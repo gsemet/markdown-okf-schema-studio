@@ -30,6 +30,14 @@ const KEYBOARD_ASSERTIONS: ContentAssertion[] = [
   { message: "the tabs that are not selected leave the tab order", selector: TABS, expr: "[...document.querySelectorAll('#sphinx-myst-preview-content > .myst-tab-set > .myst-tab-list > .myst-tab')].map((tab) => tab.getAttribute('tabindex')).join() === '-1,-1,0'" },
 ];
 
+const EDITOR = "[data-sphinx-preview-block-editor]";
+const NODE_ITEM_SOURCE = ":::{tab-item} Node\n:sync: node\n:selected:\nInstall it with `npm install studio`.\n:::";
+
+const TAB_PANEL_EDIT_ASSERTIONS: ContentAssertion[] = [
+  { message: "exactly one block editor is open after the click on the shown tab panel", selector: EDITOR, count: 1 },
+  { message: "the editor holds the whole Node tab item (opening line, :selected: option and body), not only its paragraph", selector: `${EDITOR} textarea, ${EDITOR} .cm-content`, min: 1, expr: `(() => { const field = document.querySelector('${EDITOR} textarea'); const value = field ? field.value : document.querySelector('${EDITOR} .cm-content').innerText; return value.replace(/\\r/g, '').trim() === ${JSON.stringify(NODE_ITEM_SOURCE)}; })()` },
+];
+
 export const CARDS_TABS_SCENARIOS: ScenarioDefinition[] = [
   ...([
     { name: "cream", theme: "light", mode: "cream" },
@@ -65,4 +73,20 @@ export const CARDS_TABS_SCENARIOS: ScenarioDefinition[] = [
     contentAssertions: KEYBOARD_ASSERTIONS,
     description: "A click on the third tab, then Home, ArrowRight and End on the focused tab, light theme, 900 px pane.",
   },
+  ...([
+    { name: "light", theme: "light" },
+    { name: "dark", theme: "dark" },
+  ] as const).map((variant, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-MYST-098
+    id: `myst/v${44 + index}-tab-panel-edit-${variant.name}-900`,
+    fixture: "68-cards-tabs-version",
+    theme: variant.theme,
+    width: 900,
+    height: 1000,
+    scroll: { kind: "selector" as const, value: "main .myst-tab-set", offset: 120 },
+    editMode: true,
+    pageActions: [{ click: `${TABS} > .myst-tab-panel:not([hidden]) p` }],
+    contentAssertions: TAB_PANEL_EDIT_ASSERTIONS,
+    description: `A click on the paragraph of the shown tab panel in edit mode opens the whole Node tab item in one Markdown editor, ${variant.name} theme, 900 px pane.`,
+  })),
 ];

@@ -523,7 +523,8 @@ function normalizeNode(node: MystNode, diagnostics: RenderDiagnostic[], inherite
       index = -1;
     }
   }
-  if (line !== undefined && BLOCK_TYPES.has(node.type)) {
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-098
+  if (line !== undefined && BLOCK_TYPES.has(node.type) && node.data?.noSourceLine !== true) {
     mergeProperties(node, sourcePositionProperties(node, line));
   }
 }

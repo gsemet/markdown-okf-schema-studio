@@ -21,6 +21,8 @@ derived_by: []
 implemented_in_files:
 - src/core/preview/styles/contentBlockStyles.ts
 - src/core/render/mystGridToctree.ts
+- src/core/render/mystNode.ts
+- src/core/render/mystNormalize.ts
 - src/page/features/editMode.ts
 - src/page/features/pageInput.ts
 tested_in_files:

@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-10-28 (a click in a MyST tab panel edits the whole tab item)
+
+- SwRS-MDOKFSTUDIO-MYST-098 (text unchanged, implementation fixed): the blocks inside a tab
+  panel carry no source line of their own, so a click on the shown panel in edit mode opens the
+  whole `{tab-item}` in the Markdown editor instead of the inner paragraph alone. A table (so no
+  row or column handles), a code block, a card, a grid and a nested tab set in an item are no
+  blocks of their own either: a click in a nested set edits the outer item. A comment, a TODO
+  comment and a THREAD in a panel keep their own source line range, so replying to or deleting
+  a thread and anchoring a comment still work. Verification: test/core/render/cardsTabs.test.ts,
+  test/visual/cardsTabsScenarios.ts, test/integration/mystBlocksWindow.ts.
+
 ## 2026-10-28 (front matter change bars)
 
 - SwRS-MDOKFSTUDIO-REVIEW-215 (new, CR 155, `proposed`, derives from StRS-MDOKFSTUDIO-REVIEW-017,

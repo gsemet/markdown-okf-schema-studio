@@ -20,7 +20,9 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/render/commentMarkers.ts
+- src/core/render/mystGridToctree.ts
 tested_in_files:
+- test/core/render/cardsTabs.test.ts
 - test/core/render/commentMarkers.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
