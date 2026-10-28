@@ -10,6 +10,12 @@
   folder is only a last resort for hosts without plugin support), and the skill tells the reader how
   to install the extension. The plugin manifests are not part of the VSIX, and `just version` keeps
   their `version` equal to the extension version (a test fails on drift).
+- Motion for the floating toolbar: every tooltip (main toolbar, edit bar and table menu) now slides
+  in from the left with a short fade; rows 2 to 5 unroll and roll up as one block when you press the
+  chevron; and when a preview opens with the toolbar collapsed it unrolls for a moment and rolls up
+  again, to show that it can expand (a press or key press cancels it, your saved choice is not
+  changed, and it plays once per panel, never again on a refresh, a reload or when the panel follows
+  another document). With the system preference for reduced motion none of this animates.
 - Keyboard navigation goes down and up the structure of the page in edit mode: Right moves the
   selection into a table (its first cell), an admonition, card or tab (its first inner block) or,
   with nothing selected, to the first block; Left and Escape go back up. On a table cell the arrow

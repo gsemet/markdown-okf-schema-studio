@@ -739,6 +739,9 @@ export function createRuntimeHarness(configuration: Partial<{
     addEventListener: (type: string, listener: RuntimeListener): void => {
       addListener(windowListeners, type, listener);
     },
+    removeEventListener: (type: string, listener: RuntimeListener): void => {
+      windowListeners.set(type, (windowListeners.get(type) ?? []).filter((entry) => entry !== listener));
+    },
     requestAnimationFrame: (callback: () => void): number => {
       frameQueue.push(callback);
       return frameQueue.length;

@@ -16,6 +16,20 @@
   and the TODO action and its tooltip have no shortcut. A TODO or THREAD comment line is left alone
   by the shortcut. Verification: `just requirements-update`, `just check`.
 
+## 2026-10-28 (toolbar motion)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-129 (new, proposed, CR 162): the tooltip bubbles of the floating toolbar,
+  the edit bar and the table menu share one slide-in (6 px from the left, 120 ms fade); the edit
+  bar's own 3 px drop is replaced. Verification: test/core/preview/previewStyles.test.ts.
+- SwRS-MDOKFSTUDIO-TOOLBAR-130 (new, proposed, CR 162): rows 2 to 5 of the toolbar unroll and roll
+  up as one block (160 ms), and a panel that opens its preview with the toolbar saved as collapsed
+  shows a load hint once (rows open for 700 ms, cancelled by a press, saved choice unchanged, not
+  replayed on refresh, reload, patch or when the panel follows another document; a click on the
+  chevron during the hint keeps the open rows); reduced motion turns all of it off.
+  SwRS-MDOKFSTUDIO-CORE-050 and TOOLBAR-007 are unchanged. Verification:
+  test/page/modules/toolbarCollapse.test.ts, test/page/runtimeToolbarHint.test.ts (state snapshots
+  keep the "hint shown" mark), test/core/preview/previewStyles.test.ts.
+
 ## 2026-10-28 (find in preview: replace-all check waits for the host)
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-012: the real-window replace-all check now waits for the host's answer

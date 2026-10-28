@@ -64,6 +64,10 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
       tocCollapsed: tocColumn.collapsed(),
       ...(Object.keys(headingFold.state()).length > 0 ? { headingFolds: headingFold.state() } : {}),
       expandedChips: chipToggle.expanded(),
+      // Kept across snapshots: this panel already showed the toolbar load hint (toolbarCollapse.ts).
+      // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+      ...((host.getState?.() as { viewToolbarHintShown?: unknown } | undefined)?.viewToolbarHintShown === true
+        ? { viewToolbarHintShown: true } : {}),
     };
     if (throttled) rt.pageHost.setStateThrottled(snapshot);
     else host.setState?.(snapshot);

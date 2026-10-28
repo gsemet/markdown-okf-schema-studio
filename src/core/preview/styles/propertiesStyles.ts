@@ -1,5 +1,7 @@
 // @implements_req SwRS-MDOKFSTUDIO-CORE-050
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-005
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-129
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
 /**
  * The OKF frontmatter properties table and the motion rules (transitions, reduced motion).
  *
@@ -499,6 +501,15 @@ html[data-sphinx-preview-theme-switching="true"] body * {
   html[data-sphinx-preview-theme-switching="true"] body *,
   [data-sphinx-preview-edit-closed="true"],
   #sphinx-myst-preview-content [data-sphinx-preview-updated="true"] {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* The toolbar motion of pageChromeStyles: the tooltip slide-in and the unroll of rows 2 to 5. */
+  [data-sphinx-preview-toolbar] button[data-tooltip]::after,
+  .sphinx-preview-table-menu button[data-tooltip]::after,
+  .sphinx-preview-edit-palette > button[data-tooltip]::after,
+  [data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating] {
     animation: none !important;
     transition: none !important;
   }

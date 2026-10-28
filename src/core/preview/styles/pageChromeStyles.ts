@@ -1,4 +1,6 @@
 // @implements_req SwRS-MDOKFSTUDIO-PALETTE-002
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-129
+// @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-130
 import { CALLOUT_ICONS } from "../calloutIcons";
 import { DEFAULT_PREVIEW_CONTENT_WIDTH } from "../../configuration/previewConfiguration";
 
@@ -236,6 +238,30 @@ ${FORCED_THEME_MODES_CSS}
   display: none;
 }
 
+/* The rows unroll and roll up as one block (height and fade). Everything sits under the mark the
+   runtime sets just before it changes 'hidden', so a page that loads with the rows open never
+   animates them. 'display' and the starting style let the hidden state animate too. */
+[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating] {
+  overflow: hidden;
+  interpolate-size: allow-keywords;
+  transition: height var(--sphinx-preview-motion, 160ms) var(--sphinx-preview-motion-ease, ease),
+    opacity var(--sphinx-preview-motion, 160ms) var(--sphinx-preview-motion-ease, ease),
+    display var(--sphinx-preview-motion, 160ms) allow-discrete;
+}
+
+[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating][hidden] {
+  height: 0;
+  opacity: 0;
+}
+
+[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating]:not([hidden]) {
+  animation: sphinx-preview-toolbar-unroll var(--sphinx-preview-motion, 160ms) var(--sphinx-preview-motion-ease, ease);
+}
+
+@keyframes sphinx-preview-toolbar-unroll {
+  from { height: 0; opacity: 0; }
+}
+
 /* Shown by the runtime when a render stays pending; fixed and pointer-transparent, so no content moves. */
 [data-sphinx-preview-pending-overlay] {
   position: fixed;
@@ -256,7 +282,7 @@ ${FORCED_THEME_MODES_CSS}
 }
 
 /* Below the toolbar: five rows, or one row when rows 2 to 5 are collapsed. */
-html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending-overlay] {
+html[data-sphinx-preview-toolbar-state="collapsed"]:not([data-sphinx-preview-toolbar-hint]) [data-sphinx-preview-pending-overlay] {
   inset-block-start: 62px;
 }
 
@@ -475,7 +501,7 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -3px);
-  transition: opacity 100ms ease, transform 100ms ease;
+  transition: none;
 }
 
 [data-sphinx-preview-toolbar] button[data-tooltip]::after {
@@ -487,6 +513,14 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending
 [data-sphinx-preview-toolbar] button[data-tooltip]:hover::after,
 [data-sphinx-preview-toolbar] button[data-tooltip]:focus-visible::after {
   transform: none;
+}
+
+/* One slide-in for every tooltip bubble (main toolbar, edit palette, table menu): from 6 px to the
+   left of its place, fading in. It uses 'translate', which adds to each bubble's own 'transform'.
+   Reduced motion turns it off (end of the Motion section of propertiesStyles). */
+@keyframes sphinx-preview-tooltip-in {
+  from { opacity: 0; translate: -6px 0; }
+  to { opacity: 1; translate: 0 0; }
 }
 
 .sphinx-preview-table-menu button[data-tooltip]::after,
@@ -506,10 +540,11 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending
 .sphinx-preview-edit-palette > button[data-tooltip]:focus-visible::after {
   visibility: visible;
   opacity: 1;
+  animation: sphinx-preview-tooltip-in var(--sphinx-preview-motion-fast, 120ms) var(--sphinx-preview-motion-ease, ease);
 }
 
 /* Tooltip bubble (shared rules in pageChromeStyles): centred under the button and sliding in like the
-   floating toolbar's. It is not rendered until the button is hovered or focused (a hidden bubble would
+   other tooltips (sphinx-preview-tooltip-in). It is not rendered until the button is hovered or focused (a hidden bubble would
    still widen the page near the bar's right edge); the first buttons align to the bar's start edge so
    the bubble stays inside. */
 .sphinx-preview-edit-palette > button[data-tooltip] {
@@ -533,12 +568,6 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending
 .sphinx-preview-edit-palette > button[data-tooltip]:hover::after,
 .sphinx-preview-edit-palette > button[data-tooltip]:focus-visible::after {
   display: block;
-  animation: sphinx-preview-edit-tooltip-in 100ms ease;
-}
-
-@keyframes sphinx-preview-edit-tooltip-in {
-  from { opacity: 0; transform: translate(var(--sphinx-preview-edit-tooltip-x), -3px); }
-  to { opacity: 1; transform: translate(var(--sphinx-preview-edit-tooltip-x), 0); }
 }
 
 /* Fixed, out of flow: showing or resizing the band never moves the content (scroll anchoring R8). */
