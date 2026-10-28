@@ -20,7 +20,13 @@
     "onWebviewPanel:markdown-okf-schema-studio.preview"
   ],
   "categories": [
-    "Other"
+    "Programming Languages",
+    "Formatters"
+  ],
+  "keywords": [
+    "markdown",
+    "OKF",
+    "MyST"
   ],
   "main": "./out/bundle/extension.js",
   "capabilities": {
