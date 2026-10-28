@@ -1,0 +1,72 @@
+1
+00:00:03,600 --> 00:00:04,651
+Open any Markdown file
+
+2
+00:00:04,701 --> 00:00:07,818
+Click Open Preview to Side
+
+3
+00:00:07,868 --> 00:00:10,861
+The styled page appears next to your source
+
+4
+00:00:10,911 --> 00:00:14,439
+Front matter becomes a table, prose becomes a page
+
+5
+00:00:14,489 --> 00:00:16,553
+Edit where you read: switch on Edit mode
+
+6
+00:00:16,603 --> 00:00:19,476
+Click a paragraph and type
+
+7
+00:00:19,526 --> 00:00:22,121
+Done: the page, the source and the file stay in step
+
+8
+00:00:22,171 --> 00:00:25,771
+Bold with Cmd+B
+
+9
+00:00:27,627 --> 00:00:30,888
+Save, and the file on disk is up to date
+
+10
+00:00:30,938 --> 00:00:34,262
+Type / for the command menu
+
+11
+00:00:34,312 --> 00:00:37,912
+Pick a block: a callout, a table, a figure
+
+12
+00:00:44,797 --> 00:00:48,397
+MyST cards and tabs render live: switch a tab with a click
+
+13
+00:00:51,879 --> 00:00:55,062
+Vega-Lite charts render in place
+
+14
+00:00:55,112 --> 00:00:58,712
+and so do Mermaid diagrams
+
+15
+00:01:01,271 --> 00:01:04,871
+Review: select a phrase and comment
+
+16
+00:01:06,868 --> 00:01:09,883
+The thread opens on the phrase, stored beside the document
+
+17
+00:01:09,933 --> 00:01:13,533
+Navigate with the outline and the toolbar
+
+18
+00:01:14,854 --> 00:01:18,454
+Switch the theme: Cream to Dark
+
