@@ -18,6 +18,7 @@ scopes:
     source_dirs:
       - src
       - sphinx
+      - skills
     test_dirs:
       - test
       - sphinx/tests

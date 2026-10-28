@@ -30,6 +30,15 @@
   assertions that listed the three modes (palette select, setting enum in package.json, the
   host message check, the registry order and modes) changed with it; their intent is unchanged.
   Verification: `just requirements-lint`, `just check`.
+## 2026-10-28 (the writing skill for Studio)
+
+- SwRS-MDOKFSTUDIO-CORE-073 (new, CR 150): the writing skill `skills/writing-for-markdown-okf-schema-studio/`
+  holds only examples that the preview pipeline renders without a diagnostic or an unresolved
+  directive, covers every syntax family it lists, and stays a short self-contained folder.
+  `requirements/config.yml`: `skills` added to the `source_dirs` of the rendering-core scope, since
+  the skill is the implementation (marker in `SKILL.md`). Verification:
+  test/core/render/writingSkill.test.ts (4 tests, failing while the skill folder is absent),
+  `just requirements-update`.
 
 ## 2026-10-28 (real-window scenarios leave edit mode off)
 
