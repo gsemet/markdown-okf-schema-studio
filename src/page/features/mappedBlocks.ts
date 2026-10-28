@@ -14,8 +14,8 @@ export function normalizeSourcePath(value: string): string {
 
 /** The mapped-block helpers of a page. */
 export function createMappedBlocks(document: Document, context: PreviewRuntimeContext): MappedBlocks {
-  function topLevelMappedBlocks(): HTMLElement[] {
-    const mapped = Array.from(document.querySelectorAll<HTMLElement>(MAPPINGS_SELECTOR)).filter((element) => {
+  function validMappedBlocks(): HTMLElement[] {
+    return Array.from(document.querySelectorAll<HTMLElement>(MAPPINGS_SELECTOR)).filter((element) => {
       const sourceFile = element.getAttribute("data-sphinx-source-file");
       const documentId = element.getAttribute("data-sphinx-preview-document");
       const sourceLine = Number(element.getAttribute("data-sphinx-source-line"));
@@ -25,6 +25,14 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
         && Number.isSafeInteger(sourceLine)
         && sourceLine >= 1;
     });
+  }
+
+  function byLine(left: Element, right: Element): number {
+    return Number(left.getAttribute("data-sphinx-source-line")) - Number(right.getAttribute("data-sphinx-source-line"));
+  }
+
+  function topLevelMappedBlocks(): HTMLElement[] {
+    const mapped = validMappedBlocks();
     const mappedSet = new Set<Element>(mapped);
     return mapped
       .filter((element) => {
@@ -33,8 +41,22 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
         }
         return true;
       })
-      .sort((left, right) => Number(left.getAttribute("data-sphinx-source-line"))
-        - Number(right.getAttribute("data-sphinx-source-line")));
+      .sort(byLine);
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-254
+  // The mapped blocks one level inside `block`: those whose nearest mapped ancestor is `block`.
+  function mappedChildren(block: Element): HTMLElement[] {
+    const mapped = validMappedBlocks();
+    const mappedSet = new Set<Element>(mapped);
+    return mapped
+      .filter((element) => {
+        if (element === block || !block.contains(element)) return false;
+        let parent = element.parentElement;
+        while (parent && !mappedSet.has(parent)) parent = parent.parentElement;
+        return parent === block;
+      })
+      .sort(byLine);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-148
@@ -113,6 +135,7 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
 
   return {
     topLevelMappedBlocks,
+    mappedChildren,
     selectableBlocks,
     blockRange,
     isIncludedBlock,
