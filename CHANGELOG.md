@@ -2,31 +2,54 @@
 
 ## Unreleased
 
-- A new review comment thread no longer risks staying invisible when the preview updated the threads
-  twice in a row: the second update could skip the new thread, and only a reload showed it. The
-  highlight of a comment thread no longer stays on old lines after the document changes under it: a
-  reload from disk, a revert or an undo to the saved text, or lines added or removed while the save
-  writes the comments file, now place the threads again against the current text, even when the
-  comments file itself did not change.
+## 1.0.1 - 2026-10-29
+
+- Cmd/Ctrl+F with the focus in a block editor, a table cell editor or a front matter field opens the
+  find bar at once, so what you type next goes into the find query: the first characters no longer
+  land in the Markdown and get saved. A single-line selection in the field seeds the query, and
+  Escape in the find bar no longer returns the focus to an editor that is still saving.
+- A table cell editor whose source arrives after you pressed Cmd/Ctrl+F no longer takes the focus
+  from the find field, so the search text no longer ends up in the table cell.
+- A click in the body of a GitHub alert (`> [!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`,
+  `[!CAUTION]`) in edit mode opens the whole alert, from the marker line to its last quoted line,
+  instead of the clicked paragraph only. A list, diagram or code block inside an alert opens the
+  alert too; an alert inside a list item opens that alert only.
+- A comment thread keeps its highlight and badge after edits. A new thread no longer stays invisible
+  when the preview updated the threads twice in a row (only a reload showed it), and after a reload
+  from disk, a revert or an undo to the saved text, or lines added or removed while the comments
+  file is saved, the threads are placed again against the current text.
+- Mermaid flowchart labels are no longer cut off in the VS Code preview ("Yes|", "Nc", "Hold and
+  inspe", "Swap with a spar"). The page's security policy blocked Mermaid's own style sheet while
+  Mermaid measured the labels, so they were measured in the page font and drawn wider in the
+  diagram picture. Labels are now measured and drawn with the same pinned system font and size,
+  and a drawing waits for the page fonts to be ready first. Labels stay HTML labels.
 - The editor refuses to open or save a block whose range, as sent by the preview, starts on a blank
   line: it answers that the preview and the document disagree about the block's lines (refresh and
   try again) and changes nothing, instead of editing the wrong text.
 - A GitHub alert (`> [!NOTE]`) inside a `:::{card}`, a `:::{tab-item}` or another colon container no
   longer ends that container early: the text after the alert stays in the card or tab.
-- For contributors: a hung real VS Code window test now fails fast and explains itself instead of
-  running to the 30-minute job timeout. Each step of the trusted window runs within a budget and
-  logs `STEP start` / `STEP done`; single VS Code calls that once never returned (closing tabs after
-  the stock coexistence check, the checkbox scenario setup) fail with the name of the call. The
-  extension host writes a heartbeat file every 5 seconds, and `run-tests` stops a launch whose
-  heartbeat is silent for 90 seconds or that runs past 15 minutes (`STUDIO_LAUNCH_TIMEOUT_MS`):
-  it kills the VS Code processes and names the last step. Every timeout writes a dump (processes,
-  VS Code log tails, window state and tabs, screenshots) under `out/reports/e2e/hang-dumps/`, and
-  the CI integration step stops at 20 minutes, then `just ci-hang-dump` collects what is left.
-- Mermaid flowchart labels are no longer cut off in the VS Code preview ("Yes|", "Nc", "Hold and
-  inspe", "Swap with a spar"). The page's security policy blocked Mermaid's own style sheet while
-  Mermaid measured the labels, so they were measured in the page font and size and drawn wider in
-  the diagram picture. Labels are now measured in a page element styled like the picture, and
-  measured and drawn with the same pinned system font and size. Labels stay HTML labels.
+- The Marketplace listing is now filed under the categories Programming Languages and Formatters,
+  with the keywords markdown, OKF and MyST (they take effect with this publication). The README
+  announces 1.0, no longer links the reports index, and the requirements page links its `tiers/`
+  folder.
+- For contributors, release: a push to main that changes the version runs the heavy real-window
+  jobs (integration and stress) in its own CI run, and the version is tagged only when they and
+  the checks are green; otherwise the run says "Release not tagged", and "Re-run failed jobs" on
+  that run tags it once green (see CONTRIBUTING). Artifacts are named per attempt, so a re-run
+  publishes the reports of the new attempt, not the first one. Pages reuses the reports of that
+  run, validates a manually given run id, and falls back to running the suite when a download
+  fails. Also since 1.0.0: the tag job no longer gets skipped behind skipped heavy jobs, and the
+  release-notes prompt stays under the argument-size limit.
+- For contributors, tests: a hung real-window run fails within minutes, naming its last step, and
+  leaves a dump under `out/reports/e2e/hang-dumps/` instead of hitting the 30-minute job timeout.
+  The alert-dropdown and review-thread stress scenarios record the focus and window events behind
+  their rare failures and redo a step once only when the window provably lost the focus. Find in
+  preview joins the stress plan, a real-input test covers Find right after a block click, and the
+  headless table bar check now requires the exact shipped position. The real-window step for the
+  table of contents in edit mode, which failed twice in CI with "Edit mode did not switch to off",
+  now records the edit toggle state before each click and in its failure message, and joins the
+  trusted stress run. This is instrumentation and stress coverage; the cause of that flake is not
+  proven.
 
 ## 1.0.0 - 2026-10-28
 
