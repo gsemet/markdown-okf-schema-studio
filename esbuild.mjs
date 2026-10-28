@@ -33,6 +33,7 @@ await build({
   ...extensionOptions,
   entryPoints: ["src/node-services/renderWorker.ts"],
   outfile: "out/bundle/renderWorker.js",
+  plugins: [mystPatchPlugin, ...extensionOptions.plugins],
 });
 
 // Shiki (with its grammars) and KaTeX are loaded by the extension host on first use only.
