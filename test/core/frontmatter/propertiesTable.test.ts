@@ -3,6 +3,8 @@ import { test } from "node:test";
 
 import type { FieldEntry, FrontmatterResult } from "../../../src/core/frontmatter/okfFrontmatter";
 import type { FrontmatterLinkResult } from "../../../src/core/frontmatter/fileLinks";
+import { nodeSchemaFiles } from "../../../src/node-services/schemaFiles";
+import { analyzeFrontmatter } from "../../../src/core/frontmatter/okfFrontmatter";
 import {
   linkStatusLabel,
   MAX_LIST_ITEMS,
@@ -870,4 +872,22 @@ test("a long key carries its full name as tooltip, a short key keeps the row too
   }), true);
   assert.match(markup, new RegExp(`<span class="okf-name-text" title="${longName}">${longName}</span>`, "u"));
   assert.match(markup, /<span class="okf-name-text">name<\/span>/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215
+test("CR 155: with source mapping every field row carries the source lines of its field", () => {
+  const sourceText = "---\ntitle: Example\ntags:\n  - a\n  - b\nowner: Team\n---\n\n# Body\n";
+  const result = analyzeFrontmatter({
+    schemaFiles: nodeSchemaFiles,
+    sourceText,
+    filePath: "/workspace/doc.md",
+    strictAdditionalProperties: false,
+  });
+  const mapping = { documentId: "file:///workspace/doc.md", activeSourceFile: "/workspace/doc.md" };
+  const markup = renderPropertiesTable(result, true, mapping);
+  const row = (name: string): string => new RegExp(`<tr [^>]*data-okf-field="${name}"[^>]*>`, "u").exec(markup)?.[0] ?? "";
+  assert.match(row("title"), /data-okf-line="2" data-okf-end-line="2"/u);
+  assert.match(row("tags"), /data-okf-line="3" data-okf-end-line="5"/u);
+  assert.match(row("owner"), /data-okf-line="6" data-okf-end-line="6"/u);
+  assert.doesNotMatch(renderPropertiesTable(result, true), /data-okf-line/u);
 });

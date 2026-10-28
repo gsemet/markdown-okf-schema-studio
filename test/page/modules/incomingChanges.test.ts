@@ -40,8 +40,8 @@ function setup() {
   const document = {
     documentElement: root,
     querySelectorAll: (selector: string) => {
-      const name = selector.replace(/^\[|\]$/g, "");
-      return all().filter((element) => element.attrs.has(name));
+      const names = selector.split(",").map((part) => part.trim().replace(/^\[|\]$/g, ""));
+      return all().filter((element) => names.some((name) => element.attrs.has(name)));
     },
   };
   const marks = installIncomingChanges(document as never);
@@ -161,8 +161,8 @@ test("T16: one bar per marked block in a layer, at the block's top and height, n
     defaultView: undefined,
     createElement: (name: string) => new Box(name),
     querySelectorAll: (selector: string) => {
-      const name = selector.replace(/^\[|\]$/g, "");
-      return all().filter((element) => element.attrs.has(name));
+      const names = selector.split(",").map((part) => part.trim().replace(/^\[|\]$/g, ""));
+      return all().filter((element) => names.some((name) => element.attrs.has(name)));
     },
   };
   const marks = installIncomingChanges(document as never);
@@ -183,4 +183,26 @@ test("T16: one bar per marked block in a layer, at the block's top and height, n
   assert.equal(bars[0].style.values.get("top"), "220px");
   marks.setRanges([]);
   assert.deepEqual(bars.map((bar) => bar.hidden), [true, true, true]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215
+test("CR 155: a properties table row is marked by the lines of its field, not the table around it", () => {
+  const { main, marks, marked } = setup();
+  const table = main.append(new FakeElement("section", { "data-line": "1" }));
+  const title = table.append(new FakeElement("tr", { "data-okf-line": "2", "data-okf-end-line": "2" }));
+  const status = table.append(new FakeElement("tr", { "data-okf-line": "4", "data-okf-end-line": "4" }));
+  const tags = table.append(new FakeElement("tr", { "data-okf-line": "5", "data-okf-end-line": "7" }));
+  marks.setRanges([{ start: 4, end: 4 }, { start: 6, end: 6 }]);
+  assert.deepEqual(marked(), [status, tags]);
+  assert.equal(title.hasAttribute("data-sphinx-preview-changed"), false);
+  assert.equal(table.hasAttribute("data-sphinx-preview-changed"), false);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-215
+test("CR 155: a range on line 1 with no row marked marks the whole properties table", () => {
+  const { main, marks, marked } = setup();
+  const table = main.append(new FakeElement("section", { "data-line": "1" }));
+  table.append(new FakeElement("tr", { "data-okf-line": "2", "data-okf-end-line": "2" }));
+  marks.setRanges([{ start: 1, end: 1 }]);
+  assert.deepEqual(marked(), [table]);
 });

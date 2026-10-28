@@ -27,7 +27,9 @@ width;
 chips in open
   previews at once and removes that button. TODO chips always show.
 - `preview.showIncomingChanges` (default on): mark blocks changed since the last Git commit
-  (unsaved edits included) with a green bar on the left, like the editor gutter. Needs the built-in
+  (unsaved edits included) with a green bar on the left, like the editor gutter. A changed or added
+  front matter field gets its own bar on its row of the properties table; a removed field puts one
+  bar on the whole table (unless a changed or added field already has its own). Needs the built-in
   Git extension; files that are not in Git, and untrusted workspaces, show nothing. Off turns the
   marks, and their toolbar toggle, off.
 - `preview.codeBlocks.darkBackground` (default on): draw code blocks on the dark VS Code Dark+

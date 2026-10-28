@@ -35,6 +35,8 @@ export interface FieldEntry {
   linkResults?: FrontmatterLinkResult[];
   /** Known Markdown filename stems, set only for filename-stem link fields after link inspection. */
   linkSuggestions?: string[];
+  /** The source lines of the field (1-based, whole file); set by `analyzeFrontmatter`. */
+  sourceLines?: { start: number; end: number };
 }
 
 /**

@@ -8,7 +8,8 @@ export interface IncomingChangeRange {
  * commit.
  *
  * The host sends line ranges (1-based, whole file). The innermost mapped elements (`data-line`
- * with an optional `data-end-line`) whose lines meet a range get `data-sphinx-preview-changed`;
+ * with an optional `data-end-line`; a properties table row has `data-okf-line` and
+ * `data-okf-end-line`, the lines of its field) whose lines meet a range get `data-sphinx-preview-changed`;
  * elements in or under an open inline editor are skipped. The last ranges are kept, so `apply()`
  * puts them on content that was replaced by a patch. `enabled` follows the setting (the toolbar
  * toggle of the marks is hidden when it is false).
@@ -68,6 +69,7 @@ export function installIncomingChanges(document: Document): {
   };
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-207
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-215
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-208
   const apply = (): void => {
     marked.forEach((element) => element.removeAttribute(MARK));
@@ -77,10 +79,13 @@ export function installIncomingChanges(document: Document): {
       return;
     }
     const candidates: Element[] = [];
-    document.querySelectorAll("[data-line]").forEach((element) => {
-      const start = Number(element.getAttribute("data-line"));
+    // A properties table row carries the lines of its field (`data-okf-line`); the table itself is
+    // the block of line 1, so a row is innermost and the table is marked only when no row is.
+    document.querySelectorAll("[data-line], [data-okf-line]").forEach((element) => {
+      const field = element.getAttribute("data-okf-line") !== null;
+      const start = Number(element.getAttribute(field ? "data-okf-line" : "data-line"));
       if (!Number.isFinite(start)) return;
-      const endValue = Number(element.getAttribute("data-end-line"));
+      const endValue = Number(element.getAttribute(field ? "data-okf-end-line" : "data-end-line"));
       const end = Number.isFinite(endValue) && endValue >= start ? endValue : start;
       if (!ranges.some((range) => range.start <= end && range.end >= start)) return;
       if (element.closest("[data-sphinx-preview-block-editor], [data-sphinx-preview-editing]")) return;
