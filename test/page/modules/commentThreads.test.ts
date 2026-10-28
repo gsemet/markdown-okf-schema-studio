@@ -588,6 +588,40 @@ test("T44: Escape closes the popover and forgets the question", () => {
   assert.equal(popoverOf(document).querySelector("[data-okf-comment-confirm]"), null);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-081
+test("CR 174: the trace names what closed an open popover, and a re-apply that keeps it is silent", () => {
+  const document = new FakeDocument();
+  provideGlobalElement(FakeElement);
+  const traced: Array<[string, string]> = [];
+  const comments = installCommentThreads(document as never, { innerWidth: 800, innerHeight: 600 } as never,
+    undefined, (event, detail) => { traced.push([event, detail]); });
+  const paragraph = document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  comments.setThreads([thread({ resolved: true })]);
+  assert.ok(popoverOf(document), "the popover stays open across a re-apply");
+  assert.deepEqual(traced, [], "nothing closed it");
+  comments.setThreads([]);
+  assert.equal(document.querySelector("[data-okf-comment-popover]"), null);
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  comments.setThreads([thread({ id: "t2" })]);
+  marks(document)[0].fire("click");
+  paragraph.fire("pointerdown");
+  marks(document)[0].fire("click");
+  document.fire("keydown", { key: "Escape" });
+  assert.deepEqual(traced, [
+    ["comment popover closed", "re-apply without threads, thread t1"],
+    ["comment popover closed", "re-apply without the thread, thread t1, 1 thread(s)"],
+    ["comment popover closed", "pointerdown outside on p, thread t2"],
+    ["comment popover closed", "Escape, thread t2"],
+  ]);
+  marks(document)[0].fire("click");
+  marks(document)[0].fire("click");
+  comments.close();
+  assert.deepEqual(traced.slice(4), [["comment popover closed", "toggled, thread t2"]], "a closed popover records nothing");
+});
+
 test("T44: without resolve and delete hooks (read-only) the popover has neither button", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");
