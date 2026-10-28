@@ -1,0 +1,16 @@
+1
+00:00:01,864 --> 00:00:06,196
+Agents write rich Markdown: grids, diagrams, charts.
+
+2
+00:00:06,969 --> 00:00:09,335
+Most editors show raw text. The Studio shows the page.
+
+3
+00:00:09,517 --> 00:00:13,899
+Sequence diagrams and charts, rendered in place.
+
+4
+00:00:14,172 --> 00:00:17,918
+Wide tables get room. Text stays easy to read.
+

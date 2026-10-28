@@ -1,0 +1,24 @@
+1
+00:00:01,700 --> 00:00:04,549
+Your agent wrote this.
+
+2
+00:00:05,149 --> 00:00:07,104
+Here is what you read.
+
+3
+00:00:07,304 --> 00:00:09,440
+Key figures as cards.
+
+4
+00:00:09,640 --> 00:00:12,645
+Sequence diagrams...
+
+5
+00:00:12,845 --> 00:00:15,450
+...and charts, rendered in place.
+
+6
+00:00:15,650 --> 00:00:20,070
+Wide tables scroll. Text stays readable.
+
