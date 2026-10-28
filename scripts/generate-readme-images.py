@@ -130,11 +130,21 @@ def main() -> int:
     parser.add_argument("--visual-only", action="store_true",
                         help="write (or with --check, compare) only the images cropped from the headless visual "
                              "scenarios; skips the real-window crops and does not need REAL-INPUT-LATEST.md")
+    parser.add_argument("--real-only", action="store_true",
+                        help="write only the six images cropped from the real-window captures of the latest "
+                             "passing real-input run; does not need the headless visual PNGs")
     arguments = parser.parse_args()
+    if arguments.visual_only and arguments.real_only:
+        parser.error("--visual-only and --real-only exclude each other")
     if arguments.check is not None:
         return check(arguments.check, arguments.visual_only)
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    crops = visual_crops() if arguments.visual_only else build_crops(latest_real_input_directory())
+    if arguments.visual_only:
+        crops = visual_crops()
+    elif arguments.real_only:
+        crops = real_crops(latest_real_input_directory())
+    else:
+        crops = build_crops(latest_real_input_directory())
     for crop in crops:
         render(crop)
     print(f"Generated {len(crops)} README images in {OUTPUT.relative_to(ROOT)}")

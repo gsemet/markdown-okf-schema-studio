@@ -107,10 +107,27 @@ test("the six real-window README crops and three curated images are registered w
     "open-preview-to-side.png", "open-with-editor.png", "preview-beside-editor.png",
   ]);
   const admonitions = readme.find((source) => source.file === "myst-admonitions.png");
-  assert.deepEqual(admonitions?.crop, [790, 140, 1315, 445]);
+  assert.deepEqual(admonitions?.crop, [790, 70, 1388, 470]);
   assert.equal(admonitions?.width, 720);
   assert.deepEqual(CAPTURES.filter((entry) => entry.curated !== undefined).map((entry) => entry.curated).sort(),
     ["01-paragraph-blur-commit.png", "21-edit-hover.png", "38-edit-mode-remembered.png"]);
+});
+
+test("real-window README crops keep the five-row floating toolbar and the framed editor whole", () => {
+  // Boxes measured on the 1400x900 window captures: [x0, y0, x1, y1] of what each picture must show.
+  const MUST_SHOW: Record<string, readonly [number, number, number, number]> = {
+    "myst-admonitions.png": [1264, 80, 1366, 250],
+    "inline-editing.png": [1264, 80, 1366, 462],
+    "open-with-editor.png": [1264, 102, 1366, 268],
+    "open-preview-to-side.png": [1280, 80, 1380, 246],
+    "preview-beside-editor.png": [1280, 80, 1380, 246],
+  };
+  const readme = CAPTURES.flatMap((entry) => (entry.readme ?? []).map((source) => source));
+  for (const [file, [x0, y0, x1, y1]] of Object.entries(MUST_SHOW)) {
+    const [left, top, right, bottom] = readme.find((source) => source.file === file)!.crop;
+    assert.ok(left <= x0 && top <= y0 && right >= x1 && bottom >= y1,
+      `${file}: crop [${left}, ${top}, ${right}, ${bottom}] cuts the box [${x0}, ${y0}, ${x1}, ${y1}]`);
+  }
 });
 
 test("missingCaptures expects every PNG capture of the suite and ignores assertion-only ones", () => {
