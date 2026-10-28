@@ -603,6 +603,8 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "block-editing/v17-block-selection-light-900": "In edit mode a Shift+click on two blocks outlines both as selected, announces two selected blocks and opens no editor.",
   "block-editing/v18-keyboard-selection-cream-900": "In the cream preview, Down, Down, Enter and Escape from the keyboard open and close the second block and leave it outlined as selected, with no editor open.",
   "block-editing/v19-keyboard-selection-dark-900": "In the dark preview, Down, Down, Enter and Escape from the keyboard open and close the second block and leave it outlined as selected, with no editor open.",
+  "block-editing/v20-keyboard-table-cell-light-900": "In the light theme, Down selects the table and Right moves the selection into it: the first header cell is outlined as selected and no editor is open.",
+  "block-editing/v21-keyboard-table-cell-dark-900": "In the dark theme, Down selects the table and Right moves the selection into it: the first header cell is outlined as selected and no editor is open.",
   "palette-slash/v21-slash-gfm-light-360": "In a 360 px light pane the gfm slash menu opens inside the pane, uncovered and clear of the toolbar, and flips above the caret near the bottom.",
   "layout-width/v85-max-width-setting-light-2000": "A 1400 px maximum content width is honoured in a 2000 px pane: the column is exactly 1400 px wide and centred.",
   "layout-width/v86-empty-start-writing-hint-light-700": "In the light theme at 700 px an empty document in edit mode shows the Start writing button with the selection ring and, under it, the hint line \"Enter to create a new block\" in the typography of the editor hint line, at least 20 px below the top, clear of the floating toolbar.",

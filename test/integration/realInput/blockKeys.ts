@@ -217,9 +217,10 @@ export async function scenarioBlockMoveKeys(page: Page, evidence: Evidence): Pro
   });
 }
 
-/** T39: Shift+click across three blocks, Shift+Up shrinks, Escape clears; nothing is edited. */
+/** T39: Shift+click across three blocks, Shift+Up shrinks, Escape clears; CR 157: Right and Escape walk into and out of a table; nothing is edited. */
 export async function scenarioBlockSelection(page: Page, evidence: Evidence): Promise<void> {
-  const text = ["# Selection", "", "Alpha paragraph.", "", "Beta paragraph.", "", "Gamma paragraph.", ""].join("\n");
+  const text = ["# Selection", "", "Alpha paragraph.", "", "Beta paragraph.", "", "Gamma paragraph.", "",
+    "| Head one | Head two |", "| --- | --- |", "| cell a | cell b |", ""].join("\n");
   await withDocument("realinput-block-selection", text, async (document) => {
     await openSidePreview(document);
     await waitForRender(document);
@@ -243,6 +244,24 @@ export async function scenarioBlockSelection(page: Page, evidence: Evidence): Pr
     assert.equal(await announced(), "2 blocks selected");
     await press(page, "Escape");
     await waitFor("Escape to clear the selection", async () => (await selected()).length === 0);
+    // CR 157: with the keyboard on the table, Right goes down into its first cell and Escape back up.
+    const cellFocus = (): Promise<string[]> => withCurrentFrame(page, (frame) =>
+      frame.evaluate(() => Array.from(window.document.querySelectorAll("[data-sphinx-preview-cell-focus]"))
+        .map((element) => (element.textContent ?? "").trim())));
+    for (let step = 0; step < 8 && !(await selected()).some((entry) => entry.includes("Head one")); step += 1) {
+      await press(page, "ArrowDown");
+    }
+    await waitFor("the table to be selected from the keyboard", async () =>
+      (await selected()).some((entry) => entry.includes("Head one")));
+    await press(page, "ArrowRight");
+    await waitFor("Right to select the first header cell", async () => (await cellFocus()).join() === "Head one");
+    assert.equal((await selected()).length, 0, "the cell, not the table block, is outlined");
+    await press(page, "ArrowRight");
+    await waitFor("Right to move to the next cell", async () => (await cellFocus()).join() === "Head two");
+    await press(page, "Escape");
+    await waitFor("Escape to select the table block again", async () =>
+      (await cellFocus()).length === 0 && (await selected()).some((entry) => entry.includes("Head one")));
+    await waitForNoBlockEditor(page, "the structural keys open no block editor");
     assert.equal(bufferText(document), text, "selecting changes nothing in the document");
   });
 }

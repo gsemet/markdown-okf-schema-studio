@@ -563,6 +563,15 @@ export const KEYBOARD_SELECTION_ASSERTIONS: ContentAssertion[] = [
   { message: "no editor is open", selector: ".sphinx-preview-block-editor", count: 0 },
 ];
 
+/** CR 157: Down selects the table, Right moves the selection to its first header cell. */
+export const KEYBOARD_TABLE_CELL_ASSERTIONS: ContentAssertion[] = [
+  { message: "one table cell is selected, the first header cell", selector: "[data-sphinx-preview-cell-focus=\"true\"]", count: 1, visible: true, text: "Depot" },
+  { message: "the selected cell is outlined in the focus colour", selector: "[data-sphinx-preview-cell-focus=\"true\"]", css: { outlineStyle: "solid", outlineWidth: "2px" } },
+  { message: "the table block itself is no longer outlined", selector: "[data-sphinx-preview-block-selected=\"true\"]", count: 0 },
+  { message: "the cell is announced", selector: ".sphinx-preview-selection-status", count: 1, text: "Table cell row 1, column 1 selected" },
+  { message: "no editor is open", selector: ".sphinx-preview-block-editor", count: 0 },
+];
+
 export const MAX_WIDTH_ASSERTIONS: ContentAssertion[] = [
   { message: "the content column is 1400 px wide, the configured maximum", selector: MAIN,
     expr: "Math.abs(document.querySelector('#sphinx-myst-preview-content').getBoundingClientRect().width - 1400) <= 1" },

@@ -9,6 +9,7 @@ import {
   FRONTMATTER_LONG_KEYS_ASSERTIONS,
   FRONTMATTER_SKILL_ASSERTIONS,
   KEYBOARD_SELECTION_ASSERTIONS,
+  KEYBOARD_TABLE_CELL_ASSERTIONS,
   MAIN,
   MARK_CONTAINING_BLOCK_ASSERTIONS,
   NARROW,
@@ -1361,5 +1362,24 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
     contentAssertions: KEYBOARD_SELECTION_ASSERTIONS,
     description: `Edit mode on, ${name} theme: Down, Down, Enter and Escape from the keyboard open the second block and close it again; `
       + "the block is left outlined as selected and announced, with no editor open.",
+  })),
+  ...([
+    ["light", "light", 20],
+    ["dark", "dark", 21],
+  ] as const).map(([name, theme, number]) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-254
+    id: `block-editing/v${number}-keyboard-table-cell-${name}-900`,
+    fixture: "26-first-table",
+    theme,
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    pageActions: [
+      { click: "[data-sphinx-preview-edit-toggle]" },
+      { press: "ArrowDown" },
+      { press: "ArrowRight" },
+    ],
+    contentAssertions: KEYBOARD_TABLE_CELL_ASSERTIONS,
+    description: `Edit mode on, ${name} theme: Down selects the table, Right moves into it; `
+      + "the first header cell is outlined as selected, and no editor is open.",
   })),
 ];

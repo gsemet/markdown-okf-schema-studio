@@ -3,6 +3,7 @@
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-087
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-109
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-140
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-254
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-001
 // @implements_req SwRS-MDOKFSTUDIO-TABLE-006
 // @implements_req SwRS-MDOKFSTUDIO-TABLE-048
@@ -40,6 +41,12 @@ html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-edit-hover="true"]
 html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-block-selected="true"] {
   outline: 2px solid var(--studio-focusBorder, Highlight);
   outline-offset: 3px;
+}
+
+/* The table cell the keyboard selected: the same ring, drawn inside the cell so neighbours keep theirs. */
+html[data-sphinx-preview-edit-mode="on"] [data-sphinx-preview-cell-focus="true"] {
+  outline: 2px solid var(--studio-focusBorder, Highlight);
+  outline-offset: -2px;
 }
 
 /* Whichever moved last owns the block actions: after a pointer move the selection ring goes away. */
