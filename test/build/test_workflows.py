@@ -288,3 +288,65 @@ def test_release_checkout_does_not_persist_credentials() -> None:
     for step in _release_steps():
         if str(step.get("uses", "")).startswith("actions/checkout@"):
             assert step["with"].get("persist-credentials") is False, "checkout must not persist the token"
+
+
+# The Pages site reuses the end-to-end reports of the latest green heavy run of the tagged commit
+# and runs the suite only when there is none.
+PAGES = ROOT / ".github/workflows/pages.yml"
+SELECT = ROOT / "scripts/select_e2e_run.py"
+
+
+def _pages() -> dict:
+    import yaml
+
+    return yaml.safe_load(PAGES.read_text())
+
+
+def _pages_step(name: str) -> dict:
+    steps = [s for s in _pages()["jobs"]["build-site"]["steps"] if s.get("name", "").startswith(name)]
+    assert len(steps) == 1, f"pages.yml: no single step starting with {name!r}"
+    return steps[0]
+
+
+def test_pages_dry_run_needs_no_tag_and_never_deploys() -> None:
+    pages = _pages()
+    inputs = pages[True]["workflow_dispatch"]["inputs"]
+    assert inputs["tag"]["required"] is False
+    assert inputs["dry_run"]["type"] == "boolean"
+    assert "inputs.dry_run" in str(pages["jobs"]["build-site"]["if"])
+    assert pages["jobs"]["deploy-pages"]["needs"] == "build-site"
+    assert "!inputs.dry_run" in str(pages["jobs"]["deploy-pages"]["if"])
+    assert "environment" not in pages["jobs"]["build-site"]
+    assert "pages" not in pages["jobs"]["build-site"]["permissions"]
+
+
+def test_pages_build_downloads_reports_when_a_run_was_found_and_runs_the_suite_otherwise() -> None:
+    found = "steps.reports.outputs.run_id != ''"
+    missing = "steps.reports.outputs.run_id == ''"
+    download = _pages_step("Download the end-to-end reports")
+    assert download["if"] == found
+    for artifact in ("e2e-visual", "e2e-integration", "studio-reports"):
+        assert artifact in download["run"]
+    assert _pages_step("Build Pages site from the downloaded reports")["run"] == "just site-assemble"
+    assert _pages_step("Build Pages site from the downloaded reports")["if"] == found
+    fallback = _pages_step("Build Pages site by running the suite")
+    assert fallback["if"] == missing and "just site" in fallback["run"]
+    assert "site-assemble" not in fallback["run"]
+    assert _pages_step("Install the end-to-end suite dependencies")["if"] == missing
+
+
+def test_pages_tag_verification_only_applies_to_a_real_deployment() -> None:
+    assert _pages_step("Verify deployment tag")["if"] == "env.DEPLOYMENT_TAG != ''"
+
+
+def test_called_pages_workflow_may_read_actions_to_download_reports() -> None:
+    assert _ci_jobs()["pages"]["permissions"]["actions"] == "read"
+    assert _pages()["permissions"]["actions"] == "read"
+
+
+def test_site_recipes_keep_the_local_suite_and_add_the_report_only_path() -> None:
+    justfile = (ROOT / "justfile").read_text()
+    assert re.search(r"(?m)^site: e2e site-assemble$", justfile)
+    assemble = re.search(r"(?m)^site-assemble: requirements-report\n((?:    .*\n)+)", justfile)
+    assert assemble and "e2e" not in assemble.group(1).replace("e2e-", "")
+    assert re.search(r"(?m)^site-from-run RUN_ID:$", justfile)

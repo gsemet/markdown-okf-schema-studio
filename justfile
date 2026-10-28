@@ -160,7 +160,7 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release pytest test/build/test_release.py test/build/test_workflows.py test/build/test_plugin_manifests.py
+    uv run --group docs --group release pytest test/build/test_release.py test/build/test_select_e2e_run.py test/build/test_workflows.py test/build/test_plugin_manifests.py
 
 # Generate user-facing notes for an exact Git range with gh copilot.
 release-notes FROM_REF TO_REF OUTPUT="release-notes.md":
@@ -191,10 +191,24 @@ e2e:
 gallery: e2e
     {{ npm }} run gallery:generate
 
-# Build the site after end-to-end tests and the requirements report.
-site: e2e requirements-report
+# Build the site from end-to-end reports already under out/reports (for example downloaded CI artifacts).
+site-assemble: requirements-report
+    {{ npm }} run compile
     {{ npm }} run site:gallery
     {{ npm }} run site
+
+# Build the site after end-to-end tests and the requirements report.
+site: e2e site-assemble
+
+# Find the latest green heavy CI run of a commit (prints its id, nothing if none) for the Pages build.
+site-run REPO SHA:
+    uv run --no-sync python scripts/select_e2e_run.py --repo "{{ REPO }}" --sha "{{ SHA }}"
+
+# Dry run of the Pages build, no tag and no deploy: download the reports of RUN_ID, assemble out/site.
+site-from-run RUN_ID:
+    mkdir -p out/reports
+    for name in e2e-visual e2e-integration studio-reports; do gh run download "{{ RUN_ID }}" --name "$name" --dir out/reports; done
+    just site-assemble
 
 # CI job "static": justfile format check, TypeScript, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks, online npm audit, Sphinx contract, requirements report.
 ci-static:
