@@ -8,7 +8,7 @@ import * as path from "node:path";
 const IMPORT_ORIGINAL = "markdown-it/lib/common/utils.js";
 const IMPORT_CORRECTED = "markdown-it/lib/common/utils.mjs";
 
-// markdown-it-myst 1.0.18 splits the whole source into lines for every directive fence to find out
+// markdown-it-myst 1.0.19 splits the whole source into lines for every directive fence to find out
 // whether blank lines surround it, which makes a parse O(directives x size). The patch splits the
 // source once per parse state and reuses the lines for every fence of that parse.
 const TIGHTNESS_MARKER = "const blockLinesByState = new WeakMap();";
@@ -30,8 +30,8 @@ const TIGHTNESS_PATCHED_CALL = "tight: computeBlockTightness(state, token.map),"
 /** @type {readonly { name: string; version: string; file: string; apply: (source: string) => string | undefined }[]} */
 export const MYST_PATCHES = [
   { name: "markdown-it-dollarmath", version: "0.5.0", file: "dist/index.js", apply: patchImport },
-  { name: "myst-to-html", version: "1.7.4", file: "dist/utils.js", apply: patchImport },
-  { name: "markdown-it-myst", version: "1.0.18", file: "dist/directives.js", apply: patchTightness },
+  { name: "myst-to-html", version: "1.7.5", file: "dist/utils.js", apply: patchImport },
+  { name: "markdown-it-myst", version: "1.0.19", file: "dist/directives.js", apply: patchTightness },
 ];
 
 /** @returns {string | undefined} the patched source, or undefined when the content is unknown */

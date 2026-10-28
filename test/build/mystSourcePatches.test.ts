@@ -185,7 +185,7 @@ test("a MyST package of another version or with unexpected content fails the bui
       const directory = path.join(root, "node_modules/markdown-it-myst");
       if (change === "version") {
         const manifest = path.join(directory, "package.json");
-        fs.writeFileSync(manifest, fs.readFileSync(manifest, "utf8").replace('"1.0.18"', '"1.0.19"'));
+        fs.writeFileSync(manifest, fs.readFileSync(manifest, "utf8").replace('"1.0.19"', '"1.0.20"'));
       } else {
         const file = path.join(directory, "dist/directives.js");
         fs.writeFileSync(file, fs.readFileSync(file, "utf8").replace("function computeBlockTightness", "function computeTightness"));

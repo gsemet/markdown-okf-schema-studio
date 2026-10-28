@@ -45,7 +45,7 @@ When a document is parsed, the MyST parser SHALL split the source text into line
 
 ### Scenario (refusal): An unknown package version
 
-- GIVEN a markdown-it-myst version other than 1.0.18, or a file that does not match the expected code
+- GIVEN a markdown-it-myst version other than 1.0.19, or a file that does not match the expected code
 - WHEN the bundle is built or the package is loaded
 - THEN it fails with a message asking for a review of the patch, instead of patching blindly
 
