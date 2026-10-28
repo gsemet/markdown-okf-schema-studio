@@ -366,3 +366,11 @@ def test_site_recipes_keep_the_local_suite_and_add_the_report_only_path() -> Non
     assemble = re.search(r"(?m)^site-assemble: requirements-report\n((?:    .*\n)+)", justfile)
     assert assemble and "e2e" not in assemble.group(1).replace("e2e-", "")
     assert re.search(r"(?m)^site-from-run RUN_ID:$", justfile)
+
+
+def test_pages_fallback_clears_leftover_reports_before_the_suite() -> None:
+    text = (ROOT / ".github/workflows/pages.yml").read_text()
+    step = text.split("Decide whether the downloaded reports are used", 1)[1].split("- name:", 1)[0]
+    fallback = step.split("else\n", 2)[-1]
+    assert "rm -rf out/reports" in fallback
+    assert fallback.index("rm -rf out/reports") < fallback.index('echo "reports=false"')
