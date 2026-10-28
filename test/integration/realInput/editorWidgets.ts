@@ -750,10 +750,19 @@ export async function scenarioTableToolbar(page: Page, evidence: Evidence): Prom
       assert.equal(status, "Row 1 of 2 \u00b7 column 2 of 2");
       const labels = await frame.locator(".sphinx-preview-table-menu-label").allTextContents();
       assert.deepEqual(labels, ["Row above", "Row below", "Row \u2212", "Col left", "Col right", "Col \u2212", "List table"]);
-      const position = await frame.locator("[data-sphinx-table-menu]").evaluate((element) => getComputedStyle(element).position);
-      // In the flow: "relative" (no offset) is how the bar is lifted above the handle layer (CR 168).
-      assert.ok(position === "static" || position === "relative",
-        "the table bar must stay in the document flow (static or relative), computed position: " + position);
+      const bar = await frame.locator("[data-sphinx-table-menu]").evaluate((element) => {
+        const style = getComputedStyle(element);
+        return { position: style.position, top: style.top, left: style.left, bottom: style.bottom,
+          right: style.right, zIndex: style.zIndex };
+      });
+      // In the flow (CR 168): "relative" with no offset (auto or 0px on every side) and z-index 3,
+      // which lifts the bar above the row-handle layer without moving it.
+      assert.equal(bar.position, "relative", "table bar computed position: " + bar.position);
+      for (const side of ["top", "left", "bottom", "right"] as const) {
+        assert.ok(bar[side] === "auto" || bar[side] === "0px",
+          "table bar computed " + side + " must be auto or 0px (no offset), got: " + bar[side]);
+      }
+      assert.equal(bar.zIndex, "3", "table bar computed z-index: " + bar.zIndex);
     });
     await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "table-editing/r06-cell-bar-in-flow",
       "Edit mode on; the cell `one` is open. The toolbar sits in the flow above the table with text labels, "
