@@ -1,0 +1,24 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Default,Helvetica Neue,40,&H00F0FAFF,&H000000FF,&H00141618,&HC8141618,-1,0,0,0,100,100,0,0,3,14,0,2,60,60,52,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+Dialogue: 0,0:00:02.80,0:00:04.61,Default,,0,0,0,,Open any Markdown file, press Open Preview.\NYou get a styled page, not raw text.
+Dialogue: 0,0:00:04.73,0:00:07.33,Default,,0,0,0,,Front matter becomes a clean properties table.
+Dialogue: 0,0:00:07.69,0:00:11.29,Default,,0,0,0,,Edit where you read.\NSwitch on edit mode, click a paragraph, type.
+Dialogue: 0,0:00:12.05,0:00:14.29,Default,,0,0,0,,Select, press Cmd+B: bold, right in the page.
+Dialogue: 0,0:00:14.41,0:00:15.98,Default,,0,0,0,,Save, and the page updates in place.
+Dialogue: 0,0:00:16.10,0:00:19.90,Default,,0,0,0,,Type / for the slash menu:\Ntables, admonitions, diagrams and more.
+Dialogue: 0,0:00:23.14,0:00:25.94,Default,,0,0,0,,Save: a styled Tip admonition lands in the document.
+Dialogue: 0,0:00:26.45,0:00:29.85,Default,,0,0,0,,MyST cards and tabs render natively.\NClick a tab to switch.
+Dialogue: 0,0:00:33.65,0:00:37.05,Default,,0,0,0,,Vega-Lite charts and Mermaid diagrams, drawn in the page.
+Dialogue: 0,0:00:42.46,0:00:45.66,Default,,0,0,0,,Review in context: comment on any sentence.
+Dialogue: 0,0:00:50.78,0:00:54.18,Default,,0,0,0,,The change bar marks what you edited since the last commit.
+Dialogue: 0,0:00:55.35,0:00:59.35,Default,,0,0,0,,A table of contents, a toolbar that rolls up,\Nand a theme for every taste.
+Dialogue: 0,0:01:02.52,0:01:05.72,Default,,0,0,0,,Cream by default. Dark when you want it.

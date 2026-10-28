@@ -1,0 +1,57 @@
+1
+00:00:02,800 --> 00:00:04,606
+Open any Markdown file, press Open Preview.
+You get a styled page, not raw text.
+
+2
+00:00:04,726 --> 00:00:07,326
+Front matter becomes a clean properties table.
+
+3
+00:00:07,692 --> 00:00:11,292
+Edit where you read.
+Switch on edit mode, click a paragraph, type.
+
+4
+00:00:12,052 --> 00:00:14,291
+Select, press Cmd+B: bold, right in the page.
+
+5
+00:00:14,411 --> 00:00:15,976
+Save, and the page updates in place.
+
+6
+00:00:16,096 --> 00:00:19,896
+Type / for the slash menu:
+tables, admonitions, diagrams and more.
+
+7
+00:00:23,139 --> 00:00:25,939
+Save: a styled Tip admonition lands in the document.
+
+8
+00:00:26,451 --> 00:00:29,851
+MyST cards and tabs render natively.
+Click a tab to switch.
+
+9
+00:00:33,655 --> 00:00:37,055
+Vega-Lite charts and Mermaid diagrams, drawn in the page.
+
+10
+00:00:42,458 --> 00:00:45,658
+Review in context: comment on any sentence.
+
+11
+00:00:50,783 --> 00:00:54,183
+The change bar marks what you edited since the last commit.
+
+12
+00:00:55,346 --> 00:00:59,346
+A table of contents, a toolbar that rolls up,
+and a theme for every taste.
+
+13
+00:01:02,519 --> 00:01:05,719
+Cream by default. Dark when you want it.
+
