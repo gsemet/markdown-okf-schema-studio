@@ -15,6 +15,7 @@ import type { MockTimers } from "node:test";
 
 import { RUNTIME_CONTEXT_ATTRIBUTE } from "../../src/core/protocol/bootContext";
 import { identityOf, type PageIdentity } from "../shared/previewIdentity";
+import { freezeRenderClock, releaseRenderClock, wallNow } from "./renderClock";
 import { createFakeVscode, missingMembers, type FakeTextDocument, type FakeWebviewPanel } from "./fakeVscode";
 
 const workspaceRoot = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "studio-host-")));
@@ -96,6 +97,8 @@ export async function openPreview(timers: MockTimers, markdown: string): Promise
   const filePath = path.join(workspaceRoot, `note-${process.pid}-${fileCounter}.md`);
   fs.writeFileSync(filePath, markdown, "utf8");
   timers.enable({ apis: ["setTimeout"] });
+  // Render times count on the mock clock (none), so the debounce stays the one the test ticks.
+  freezeRenderClock();
   const context = fake.controls.context();
   extension.activate(context);
   sessions.push({ context });
@@ -105,11 +108,13 @@ export async function openPreview(timers: MockTimers, markdown: string): Promise
   assert.ok(command, "activate registers Open Preview");
   // Settles once the first render is requested, which needs the debounce to pass: not awaited.
   void Promise.resolve(command());
+  /** The panel the waits report on, once it exists. */
+  let opened: FakeWebviewPanel | undefined;
   const until = async (condition: () => boolean, label: string): Promise<void> => {
-    const deadline = performance.now() + 30_000;
+    const deadline = wallNow() + 30_000;
     while (!condition()) {
       assert.deepEqual([...missingMembers], [], "the extension used members the fake vscode module lacks");
-      assert.ok(performance.now() < deadline, `timed out waiting for: ${label}`);
+      if (wallNow() >= deadline) assert.fail(`timed out waiting for: ${label}; ${hostState(opened)}`);
       await turn();
       // Timers already due run, as they would on a real event loop; the clock does not move.
       timers.tick(0);
@@ -117,6 +122,7 @@ export async function openPreview(timers: MockTimers, markdown: string): Promise
   };
   await until(() => fake.controls.panels.length > panelsBefore, "the preview panel");
   const panel = fake.controls.panels.at(-1)!;
+  opened = panel;
   // The first render starts after the queue's debounce; the clock moves only when a test says so.
   const hasRenderedDocument = (): boolean => panel.htmlAssignments.some((html) => identityOfDocument(html) !== undefined);
   for (let step = 0; step < 100 && !hasRenderedDocument(); step += 1) {
@@ -169,6 +175,14 @@ export async function openPreview(timers: MockTimers, markdown: string): Promise
   return session;
 }
 
+/** What the host had sent when a wait timed out: the page's messages and documents so far. */
+function hostState(panel: FakeWebviewPanel | undefined): string {
+  if (!panel) return `no preview panel (${fake.controls.panels.length} panel(s) in the process)`;
+  const types = panel.posted.slice(-12).map((message) => String(message.type));
+  return `${panel.htmlAssignments.length} document(s) assigned, ${panel.posted.length} message(s) posted, `
+    + `the last ones: ${types.join(", ") || "none"}`;
+}
+
 const sessions: Array<{ context: { subscriptions: Array<{ dispose(): unknown }> } }> = [];
 
 /** Deactivates the extension and drops every subscription of the sessions this process opened. */
@@ -180,4 +194,5 @@ export function closeHost(timers: MockTimers): void {
   }
   for (const panel of fake.controls.panels) panel.dispose();
   timers.reset();
+  releaseRenderClock();
 }
