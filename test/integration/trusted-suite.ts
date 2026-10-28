@@ -50,22 +50,15 @@ import { run as runWorkspaceDisposal } from "./workspaceDisposal.test";
 import { attribute, findElements, parseHtml } from "../core/render/dom";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
+import { step, withSuiteWatchdog } from "./stepWatchdog";
 
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-012
 export async function run(): Promise<void> {
-  assert.equal(vscode.workspace.isTrusted, true);
-  await pinStoredWorkspaceChoices();
-  // CDP input and the undo steps need a window macOS has activated (windowFocus.ts).
-  await ensureTestWindowFocused();
-  // The block actions scenario needs no fixture document: it runs before the shared preview.md checks.
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "paste-url") {
-    await runPasteUrl();
-    return;
-  }
-  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "block-actions") {
-    await runBlockActions();
-    return;
-  }
+  await withSuiteWatchdog("trusted-suite", runTrustedSuite);
+}
+
+/** The shared preview.md checks: trusted command, page security, styles, dirty buffer, no build. */
+async function runPreviewSmoke(): Promise<void> {
   const extensionRoot = path.resolve(__dirname, "../../..");
   const workspaceRoot = extensionRoot;
   const fixturePath = path.join(extensionRoot, "test", "integration", "fixtures", "preview.md");
@@ -117,89 +110,123 @@ export async function run(): Promise<void> {
     );
     await vscode.workspace.applyEdit(restoreEdit);
   }
+}
+
+/** A real-input scenario selected by STUDIO_REAL_INPUT_SCENARIO, or the whole real-input campaign. */
+async function runRealInputScenario(): Promise<void> {
+  const scenario = process.env.STUDIO_REAL_INPUT_SCENARIO;
+  if (scenario === "comment-contrast") await runCommentContrast();
+  else if (scenario === "comment-title") await runCommentTitle();
+  else if (scenario === "readme-html") await runReadmeHtml();
+  else if (scenario === "toc") await runToc();
+  else if (scenario === "myst-blocks") await runMystBlocks();
+  else await runRealInput();
+}
+
+/**
+ * Every step runs under the hang watchdog (stepWatchdog.ts): a budget per step, `STEP start/done`
+ * lines in the log, and a dump that names the step and its last progress marker on a timeout.
+ */
+async function runTrustedSuite(): Promise<void> {
+  assert.equal(vscode.workspace.isTrusted, true);
+  await step("setup", async () => {
+    await pinStoredWorkspaceChoices();
+    // CDP input and the undo steps need a window macOS has activated (windowFocus.ts).
+    await ensureTestWindowFocused();
+  });
+  // The block actions scenario needs no fixture document: it runs before the shared preview.md checks.
+  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "paste-url") {
+    await step("paste-url", runPasteUrl);
+    return;
+  }
+  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "block-actions") {
+    await step("block-actions", runBlockActions);
+    return;
+  }
+  await step("preview-smoke", runPreviewSmoke);
 
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "window-switch-keys") {
-    await runWindowSwitchKeys();
+    await step("window-switch-keys", runWindowSwitchKeys);
     return;
   }
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "empty-column") {
-    await runTableEmptyColumn();
+    await step("table-empty-column", runTableEmptyColumn);
     return;
   }
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "toolbar-cover") {
-    await runEditToolbarCover();
-    await runTallBlockScroll();
+    await step("edit-toolbar-cover", runEditToolbarCover);
+    await step("tall-block-scroll", runTallBlockScroll);
     return;
   }
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "find-in-preview") {
-    await runFindInPreview();
+    await step("find-in-preview", runFindInPreview);
     return;
   }
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "tall-block-scroll") {
-    await runTallBlockScroll();
+    await step("tall-block-scroll", runTallBlockScroll);
     return;
   }
   const onlyRealInput = process.env.STUDIO_REAL_INPUT_SCENARIO !== undefined;
   if (!onlyRealInput) {
-    await runProjectFeatures();
-    await runStockCoexistence();
+    await step("project-features", runProjectFeatures);
+    await step("stock-coexistence", runStockCoexistence);
   }
   try {
-    if (!onlyRealInput) await runCheckboxToggle();
+    if (!onlyRealInput) await step("checkbox-toggle", runCheckboxToggle);
   } catch (error) {
     console.error("Checkbox toggle integration failed:", error);
     throw error;
   }
-  if (!onlyRealInput) await runTableEmptyColumn();
-  if (!onlyRealInput) await runEditToolbarCover();
-  if (!onlyRealInput) await runTallBlockScroll();
-  if (!onlyRealInput) await runBlockActions();
-  if (!onlyRealInput) await runFindInPreview();
+  if (!onlyRealInput) {
+    await step("table-empty-column", runTableEmptyColumn);
+    await step("edit-toolbar-cover", runEditToolbarCover);
+    await step("tall-block-scroll", runTallBlockScroll);
+    await step("block-actions", runBlockActions);
+    await step("find-in-preview", runFindInPreview);
+  }
   try {
-    if (process.env.STUDIO_REAL_INPUT_SCENARIO === "comment-contrast") await runCommentContrast();
-    else if (process.env.STUDIO_REAL_INPUT_SCENARIO === "comment-title") await runCommentTitle();
-    else if (process.env.STUDIO_REAL_INPUT_SCENARIO === "readme-html") await runReadmeHtml();
-    else if (process.env.STUDIO_REAL_INPUT_SCENARIO === "toc") await runToc();
-    else if (process.env.STUDIO_REAL_INPUT_SCENARIO === "myst-blocks") await runMystBlocks();
-    else await runRealInput();
+    await step("real-input", runRealInputScenario);
   } catch (error) {
     console.error("Real-input integration failed:", error);
     throw error;
   }
   if (onlyRealInput) return;
   try {
-    await runPreviewEditing();
+    await step("preview-editing", runPreviewEditing);
   } catch (error) {
     console.error("Preview editing integration failed:", error);
     throw error;
   }
-  await runEditKeys();
-  await runPasteUrl();
-  await runWindowSwitchKeys();
-  await runPreviewHistory();
-  await runPaletteMode();
-  await runLabelRename();
-  await runInlineThread();
-  await runBlockMove();
-  await runBlockClipboard();
-  await runMystPickers();
-  await runImagePicker();
-  await runImagePaste();
-  await runIncomingChanges();
-  await runUpdateGlow();
-  await runReviewComments();
-  await runCommentWrite();
-  await runCommentContrast();
-  await runCommentTitle();
-  await runReadmeHtml();
-  await runToc();
-  await runMystBlocks();
-  await runCommentAnchors();
-  await runGenericMarkdown();
-  await runDirtySnapshots();
-  await runSourceMapping();
-  await runLifecycle();
-  await runMystDiagnostics();
-  await runSerializer();
-  await runWorkspaceDisposal();
+  const remainingSteps: ReadonlyArray<readonly [string, () => Promise<void>]> = [
+    ["edit-keys", runEditKeys],
+    ["paste-url", runPasteUrl],
+    ["window-switch-keys", runWindowSwitchKeys],
+    ["preview-history", runPreviewHistory],
+    ["palette-mode", runPaletteMode],
+    ["label-rename", runLabelRename],
+    ["inline-thread", runInlineThread],
+    ["block-move", runBlockMove],
+    ["block-clipboard", runBlockClipboard],
+    ["myst-pickers", runMystPickers],
+    ["image-picker", runImagePicker],
+    ["image-paste", runImagePaste],
+    ["incoming-changes", runIncomingChanges],
+    ["update-glow", runUpdateGlow],
+    ["review-comments", runReviewComments],
+    ["comment-write", runCommentWrite],
+    ["comment-contrast", runCommentContrast],
+    ["comment-title", runCommentTitle],
+    ["readme-html", runReadmeHtml],
+    ["toc", runToc],
+    ["myst-blocks", runMystBlocks],
+    ["comment-anchors", runCommentAnchors],
+    ["generic-markdown", runGenericMarkdown],
+    ["dirty-snapshots", runDirtySnapshots],
+    ["source-mapping", runSourceMapping],
+    ["lifecycle", runLifecycle],
+    ["myst-diagnostics", runMystDiagnostics],
+    ["serializer", runSerializer],
+    ["workspace-disposal", runWorkspaceDisposal],
+  ];
+  for (const [name, runRemaining] of remainingSteps) await step(name, runRemaining);
 }

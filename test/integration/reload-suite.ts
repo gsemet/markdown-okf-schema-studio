@@ -1,5 +1,5 @@
 import * as assert from "node:assert/strict";
-import { execFileSync, spawn } from "node:child_process";
+import { execFileSync, spawn, type ChildProcess } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { chromium, Frame, Page } from "playwright-core";
@@ -106,9 +106,11 @@ async function ensureCampaignWindowFocused(page: Page, pid: number | undefined):
     + JSON.stringify({ windowPid: pid, frontmostPid: frontmostPid(), titlebar, ...macFocusDiagnostics() }));
 }
 
+/** `onSpawn` hands the window process, its user-data directory and CDP port to the hang watchdog. */
 // @tests_req StRS-MDOKFSTUDIO-LIFE-014
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-170
-export async function runReloadCampaign(executable: string, extensionRoot: string, workspaceRoot: string): Promise<void> {
+export async function runReloadCampaign(executable: string, extensionRoot: string, workspaceRoot: string,
+  onSpawn?: (child: ChildProcess, userDataDirectory: string, port: number) => void): Promise<void> {
   const temporary = fs.mkdtempSync("/tmp/studio-reload-");
   fs.mkdirSync(E2E_REPORT_ROOT, { recursive: true });
   fs.mkdirSync(E2E_SCREENSHOT_ROOT, { recursive: true });
@@ -125,6 +127,7 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
   fs.writeFileSync(workspaceFile, JSON.stringify({ folders: [{ path: workspaceRoot }, { path: temporary }], settings: { "workbench.startupEditor": "none" } }));
   const port = await freePort();
   const child = spawn(executable, ["--no-sandbox", "--disable-updates", "--skip-welcome", "--skip-release-notes", "--disable-workspace-trust", `--user-data-dir=${path.join(temporary, "profile")}`, `--extensions-dir=${path.join(temporary, "extensions")}`, `--extensionDevelopmentPath=${extensionRoot}`, `--remote-debugging-port=${port}`, "--remote-debugging-address=127.0.0.1", workspaceFile, "--goto", sourcePath], { stdio: "ignore" });
+  onSpawn?.(child, path.join(temporary, "profile"), port);
   let browser: Awaited<ReturnType<typeof chromium.connectOverCDP>> | undefined;
   let passed = false;
   try {

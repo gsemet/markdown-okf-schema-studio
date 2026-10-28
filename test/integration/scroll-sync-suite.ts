@@ -10,6 +10,7 @@ import { captureByLegacy, captureFile } from "../shared/captureRegistry";
 import { RealWindowEvidence } from "./evidence";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
+import { withSuiteWatchdog } from "./stepWatchdog";
 
 async function waitFor(description: string, predicate: () => boolean | Promise<boolean>): Promise<void> {
   const deadline = Date.now() + 15_000;
@@ -273,6 +274,11 @@ async function runBlockNavigation(
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-108
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-119
 export async function run(): Promise<void> {
+  // Heartbeat and timeout dumps of the hang watchdog (stepWatchdog.ts).
+  await withSuiteWatchdog("scroll-sync-suite", runScrollSyncSuite);
+}
+
+async function runScrollSyncSuite(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the E2E runner must expose a loopback CDP port");
   await pinStoredWorkspaceChoices();
   // CDP input needs a window macOS has activated (windowFocus.ts).

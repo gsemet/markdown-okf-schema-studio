@@ -13,6 +13,8 @@ import {
   setRenderDelayForTests,
 } from "./extensionApi";
 import { buildStatusWebviewHtml } from "../../src/session/webview";
+import { markProgress } from "../shared/hangWatchdog";
+import { bounded } from "./stepWatchdog";
 
 async function waitFor(
   description: string,
@@ -242,6 +244,7 @@ export async function run(): Promise<void> {
     assert.equal(delayedPreview.status, "success");
     assert.match(delayedPreview.html, /Second Preview Fixture/u);
 
+    markProgress("coexistence checks passed; closing the tabs");
     console.log(JSON.stringify({
       stockPreview: "pass",
       stockSettingsUnchanged: "pass",
@@ -252,15 +255,17 @@ export async function run(): Promise<void> {
     }));
   } finally {
     setRenderDelayForTests(0);
+    // A heavy CI run hung here once with nothing bounded: each close names itself if it never returns.
     for (const tab of [...customEditorTabs(EDITOR_VIEW_TYPE)]) {
-      await vscode.window.tabGroups.close(tab, true);
+      await bounded(`tabGroups.close of the MyST editor tab "${tab.label}"`, vscode.window.tabGroups.close(tab, true));
     }
     for (const tab of [...tabs()]) {
       if (tab.input instanceof vscode.TabInputCustom
         && tab.input.viewType === "vscode.markdown.preview.editor") {
-        await vscode.window.tabGroups.close(tab, true);
+        await bounded(`tabGroups.close of the stock preview tab "${tab.label}"`, vscode.window.tabGroups.close(tab, true));
       }
     }
+    markProgress("disposeActivePreviewForTests");
     disposeActivePreviewForTests();
     for (const filePath of createdDiffFiles) {
       fs.rmSync(filePath, { force: true });

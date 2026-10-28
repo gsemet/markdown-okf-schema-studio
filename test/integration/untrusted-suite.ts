@@ -18,6 +18,7 @@ import { closeAllEditors, connectWorkbench, createEvidence } from "./realInput/h
 import { scenarioUntrustedReadOnly } from "./realWindowGaps";
 import { hostStressPlan } from "../shared/stressPlan";
 import { ensureTestWindowFocused } from "./windowFocus";
+import { withSuiteWatchdog } from "./stepWatchdog";
 
 async function waitForPreview(): Promise<void> {
   const deadline = Date.now() + 10_000;
@@ -88,6 +89,11 @@ async function runCaptures(): Promise<void> {
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-006
 export async function run(): Promise<void> {
+  // Heartbeat and timeout dumps of the hang watchdog (stepWatchdog.ts).
+  await withSuiteWatchdog("untrusted-suite", runUntrustedSuite);
+}
+
+async function runUntrustedSuite(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, false);
   // A development extension is not disabled in Restricted Mode, a packaged one is unless its manifest
   // declares the limited support: this window cannot tell, so it checks the declaration VS Code reads.

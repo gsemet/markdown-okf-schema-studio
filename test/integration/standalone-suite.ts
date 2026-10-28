@@ -10,6 +10,7 @@ import {
   getActivePreviewForTests,
   sendPreviewMessageForTests,
 } from "./extensionApi";
+import { withSuiteWatchdog } from "./stepWatchdog";
 
 async function waitForPreview(): Promise<void> {
   const deadline = Date.now() + 10_000;
@@ -41,6 +42,11 @@ async function waitForDocument(documentUri: string): Promise<void> {
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-005
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-007
 export async function run(): Promise<void> {
+  // Heartbeat and timeout dumps of the hang watchdog (stepWatchdog.ts).
+  await withSuiteWatchdog("standalone-suite", runStandaloneSuite);
+}
+
+async function runStandaloneSuite(): Promise<void> {
   assert.equal(vscode.workspace.isTrusted, true);
   // The fixture must lie in no workspace folder (a standalone, untrusted-by-workspace file).
   // Prefer os.tmpdir(); the test workspace can hold /tmp on Linux, then fall back to the home folder.

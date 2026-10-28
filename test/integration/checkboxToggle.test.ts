@@ -12,6 +12,8 @@ import {
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { RealWindowEvidence } from "./evidence";
 import { traceDocumentChanges, windowFocusReport } from "./windowFocus";
+import { markProgress } from "../shared/hangWatchdog";
+import { bounded } from "./stepWatchdog";
 
 async function waitFor(description: string, predicate: () => boolean | Promise<boolean>, timeoutMs = 10_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -107,7 +109,8 @@ async function capture(
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-058
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
-  const browser: Browser = await chromium.connectOverCDP(`http://127.0.0.1:${process.env.STUDIO_CDP_PORT}`);
+  const browser: Browser = await bounded("chromium.connectOverCDP to the workbench",
+    chromium.connectOverCDP(`http://127.0.0.1:${process.env.STUDIO_CDP_PORT}`));
   const page = browser.contexts()[0]?.pages().find((candidate) => candidate.url().includes("workbench"));
   assert.ok(page, "the VS Code workbench is attached");
   const extensionRoot = path.resolve(__dirname, "../../..");
@@ -133,16 +136,22 @@ export async function run(): Promise<void> {
     "",
   ].join("\n");
   fs.writeFileSync(filePath, source);
-  const document = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
+  const document = await bounded("workspace.openTextDocument of tasks.md",
+    vscode.workspace.openTextDocument(vscode.Uri.file(filePath)));
   try {
-    await page.setViewportSize({ width: 1400, height: 900 });
-    await vscode.commands.executeCommand("workbench.action.closeSidebar");
-    await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
-    await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
-    await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
-    await vscode.commands.executeCommand(COMMAND_ID);
+    // Setup calls bounded one by one: a hang after the coexistence step names the call that never returned.
+    await bounded("page.setViewportSize", page.setViewportSize({ width: 1400, height: 900 }));
+    await bounded("workbench.action.closeSidebar", vscode.commands.executeCommand("workbench.action.closeSidebar"));
+    // The chat view sits in the auxiliary bar.
+    await bounded("workbench.action.closeAuxiliaryBar", vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar"));
+    await bounded("window.showTextDocument of tasks.md", vscode.window.showTextDocument(document, vscode.ViewColumn.One));
+    await bounded("workbench.action.focusFirstEditorGroup",
+      vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup"));
+    await bounded(`${COMMAND_ID} on tasks.md`, vscode.commands.executeCommand(COMMAND_ID));
+    markProgress("waiting for the first checkbox render");
     await waitForRender(document);
     let frame = await currentPreviewFrame(page);
+    markProgress("first checkbox capture");
 
     assert.equal(await frame.locator("input.myst-checkbox").count(), 4);
     assert.equal(await frame.locator("li.task-list-item").count(), 2);
