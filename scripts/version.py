@@ -14,6 +14,11 @@ from pathlib import Path
 from commitizen.config import read_cfg
 from commitizen.providers.npm_provider import NpmProvider
 
+# @implements_req SwRS-MDOKFSTUDIO-CORE-075
+# Plugin manifests whose "version" always equals package.json (Claude Code and Agent Plugins).
+PLUGIN_MANIFESTS = ("plugin.json", ".claude-plugin/plugin.json")
+VERSIONED_PATHS = ("package.json", "package-lock.json", *PLUGIN_MANIFESTS)
+
 VERSION = re.compile(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)")
 
 
@@ -24,6 +29,13 @@ def version_tuple(value: str) -> tuple[int, ...]:
             f"Expected X.Y.Z without a prefix or leading zeroes: {value!r}"
         )
     return tuple(map(int, value.split(".")))
+
+
+def set_manifest_version(path: Path, version: str) -> None:
+    """Rewrite the "version" of a JSON manifest, keeping its other keys and order."""
+    manifest = json.loads(path.read_text())
+    manifest["version"] = version
+    path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
 
 
 def git(*arguments: str) -> str:
@@ -120,14 +132,16 @@ def main() -> int:
             raise ValueError(f"Version must be newer than {baseline}: {next_version}")
         if git("tag", "--list", f"v{next_version}"):
             raise ValueError(f"Tag v{next_version} already exists")
-        if git("status", "--porcelain", "--", "package.json", "package-lock.json"):
+        if git("status", "--porcelain", "--", *VERSIONED_PATHS):
             raise ValueError(
-                "Commit or stash existing npm manifest edits before changing the version"
+                "Commit or stash existing npm manifest edits (package and plugin manifests) before changing the version"
             )
         git("var", "GIT_AUTHOR_IDENT")
         git("var", "GIT_COMMITTER_IDENT")
         NpmProvider(read_cfg()).set_version(next_version)
-        print(f"Updated npm versions: {current} -> {next_version}")
+        for name in PLUGIN_MANIFESTS:
+            set_manifest_version(Path(name), next_version)
+        print(f"Updated npm and plugin versions: {current} -> {next_version}")
         git(
             "commit",
             "--only",
@@ -135,8 +149,7 @@ def main() -> int:
             "-m",
             f"chore: version {next_version}",
             "--",
-            "package.json",
-            "package-lock.json",
+            *VERSIONED_PATHS,
         )
         print(f"Created signed-off commit: chore: version {next_version}")
         print("CI creates the tag after merge.")

@@ -1,0 +1,20 @@
+{
+  "name": "markdown-okf-schema-studio",
+  "interface": {
+    "displayName": "Markdown OKF-Schema Studio"
+  },
+  "plugins": [
+    {
+      "name": "markdown-okf-schema-studio",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

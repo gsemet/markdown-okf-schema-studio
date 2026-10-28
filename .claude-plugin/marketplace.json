@@ -1,0 +1,18 @@
+{
+  "name": "markdown-okf-schema-studio",
+  "owner": {
+    "name": "Gaetan Semet",
+    "url": "https://github.com/gsemet"
+  },
+  "metadata": {
+    "description": "Agent plugins for Markdown OKF-Schema Studio."
+  },
+  "plugins": [
+    {
+      "name": "markdown-okf-schema-studio",
+      "source": "./",
+      "description": "Skill that teaches how to write Markdown that renders well in Markdown OKF-Schema Studio.",
+      "category": "documentation"
+    }
+  ]
+}

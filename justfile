@@ -160,7 +160,7 @@ requirements-report:
 
 # Test version updates, automatic tagging, and release-note validation in isolation.
 release-tests:
-    uv run --group docs --group release pytest test/build/test_release.py test/build/test_workflows.py
+    uv run --group docs --group release pytest test/build/test_release.py test/build/test_workflows.py test/build/test_plugin_manifests.py
 
 # Generate user-facing notes for an exact Git range with gh copilot.
 release-notes FROM_REF TO_REF OUTPUT="release-notes.md":
