@@ -207,7 +207,10 @@ site-run REPO SHA:
 # Dry run of the Pages build, no tag and no deploy: download the reports of RUN_ID, assemble out/site.
 site-from-run RUN_ID:
     mkdir -p out/reports
-    for name in e2e-visual e2e-integration studio-reports; do gh run download "{{ RUN_ID }}" --name "$name" --dir out/reports; done
+    for name in e2e-visual e2e-integration studio-reports; do \
+        gh run download "{{ RUN_ID }}" --name "$name" --dir "out/reports-download/$name" && cp -R "out/reports-download/$name/." out/reports/; \
+    done
+    rm -rf out/reports-download
     just site-assemble
 
 # CI job "static": justfile format check, TypeScript, boundary, size, marker companion, settings schema, unit, contract, security and requirements checks, online npm audit, Sphinx contract, requirements report.
