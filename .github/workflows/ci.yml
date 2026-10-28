@@ -334,6 +334,7 @@ jobs:
     if: ${{ !cancelled() && needs.tag-release.result == 'success' && needs.tag-release.outputs.tag != '' }}
     permissions:
       contents: read
+      actions: read
       pages: write
       id-token: write
     uses: ./.github/workflows/pages.yml
