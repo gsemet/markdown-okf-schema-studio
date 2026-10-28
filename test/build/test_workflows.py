@@ -130,3 +130,161 @@ def test_release_and_pages_run_when_a_tag_was_created(name: str) -> None:
     for part in ("!cancelled()", "needs.tag-release.result == 'success'",
                  "needs.tag-release.outputs.tag != ''"):
         assert part in condition, f"{name}: {part} missing from: {condition}"
+
+
+# The release workflow checks out the tag. A manual dispatch runs the notes script of the workflow's
+# own ref, so a fix on main can release an older tag; tag pushes and workflow_call keep the tag's.
+RELEASE = ROOT / ".github/workflows/release.yml"
+DISPATCH = "github.event_name == 'workflow_dispatch'"
+
+
+def _release() -> dict:
+    import yaml
+
+    return yaml.safe_load(RELEASE.read_text())
+
+
+def _release_steps() -> list[dict]:
+    return _release()["jobs"]["package"]["steps"]
+
+
+def _step(name: str) -> dict:
+    steps = [step for step in _release_steps() if step.get("name") == name]
+    assert len(steps) == 1, f"release.yml: no single step named {name!r}"
+    return steps[0]
+
+
+def _notes_steps() -> list[dict]:
+    """Steps that generate notes with Copilot (they call the script with --to-ref)."""
+    return [s for s in _release_steps() if "release_notes.py" in str(s.get("run", "")) and "--to-ref" in str(s.get("run", ""))]
+
+
+def test_release_dispatch_runs_the_notes_script_of_the_workflow_ref() -> None:
+    load = _step("Load the release notes script of the workflow ref")
+    assert DISPATCH in str(load["if"])
+    assert 'git show "$GITHUB_SHA:scripts/release_notes.py"' in load["run"]
+    assert '"$RUNNER_TEMP/tools/release_notes.py"' in load["run"]
+    step = _step("Generate user-facing release notes (workflow ref script)")
+    condition = str(step["if"])
+    assert DISPATCH in condition and "inputs.notes != 'placeholder'" in condition
+    assert step["run"].strip() == 'uv run python "$RUNNER_TEMP/tools/release_notes.py" --to-ref "$RELEASE_TAG"'
+    steps = _release_steps()
+    assert steps.index(load) < steps.index(step)
+
+
+def test_release_tag_and_call_run_the_notes_script_of_the_tag() -> None:
+    step = _step("Generate user-facing release notes")
+    assert str(step["if"]) == "github.event_name != 'workflow_dispatch'"
+    assert step["run"].strip() == 'uv run python scripts/release_notes.py --to-ref "$RELEASE_TAG"'
+    checkout = [s for s in _release_steps() if str(s.get("uses", "")).startswith("actions/checkout@")]
+    assert len(checkout) == 1
+    assert checkout[0]["with"]["ref"] == "${{ inputs.tag || github.ref_name }}"
+
+
+def test_release_dispatch_can_publish_placeholder_notes(tmp_path: Path) -> None:
+    import subprocess
+
+    import importlib.util
+
+    notes_input = _release()[True]["workflow_dispatch"]["inputs"]["notes"]
+    assert notes_input["type"] == "choice"
+    assert notes_input["default"] == "generated"
+    assert set(notes_input["options"]) == {"generated", "placeholder"}
+    step = _step("Write placeholder release notes")
+    assert str(step["if"]) == f"{DISPATCH} && inputs.notes == 'placeholder'"
+    subprocess.run(["bash", "-euo", "pipefail", "-c", step["run"]], cwd=tmp_path, check=True)
+    spec = importlib.util.spec_from_file_location("release_notes", ROOT / "scripts/release_notes.py")
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.validate_notes((tmp_path / "release-notes.md").read_text())
+    steps = _release_steps()
+    upload = _step("Upload validated notes")
+    assert upload["with"]["path"] == "release-notes.md"
+    assert steps.index(step) < steps.index(upload)
+
+
+def _git(repository: Path, *arguments: str) -> str:
+    import subprocess
+
+    return subprocess.check_output(["git", *arguments], cwd=repository, text=True).strip()
+
+
+def _verify_tag(repository: Path, tag: str) -> int:
+    import os
+    import subprocess
+
+    script = _step("Verify release tag")["run"].replace(
+        "${{ github.event.repository.default_branch }}", "main"
+    )
+    assert "${{" not in script
+    return subprocess.run(
+        ["bash", "-c", script],
+        cwd=repository,
+        env={**os.environ, "RELEASE_TAG": tag},
+        capture_output=True,
+    ).returncode
+
+
+@pytest.fixture
+def released_main(tmp_path: Path) -> Path:
+    """A main branch at version 1.0.0 tagged v1.0.0, as a dispatch from main checks it out."""
+    import json
+
+    (tmp_path / "package.json").write_text(json.dumps({"version": "1.0.0"}))
+    (tmp_path / "package-lock.json").write_text(
+        json.dumps({"version": "1.0.0", "packages": {"": {"version": "1.0.0"}}})
+    )
+    for arguments in (
+        ["init", "--quiet", "-b", "main"],
+        ["config", "user.email", "test@example.com"],
+        ["config", "user.name", "Release Test"],
+        ["add", "."],
+        ["commit", "--quiet", "-m", "chore: version 1.0.0"],
+        ["tag", "v1.0.0"],
+        ["update-ref", "refs/remotes/origin/main", "main"],
+        ["checkout", "--quiet", "--detach", "v1.0.0"],
+    ):
+        _git(tmp_path, *arguments)
+    return tmp_path
+
+
+def test_release_dispatch_from_main_verifies_an_existing_tag(released_main: Path) -> None:
+    assert _verify_tag(released_main, "v1.0.0") == 0
+
+
+def test_release_tag_verification_rejects_a_tag_not_at_head(released_main: Path) -> None:
+    _git(released_main, "checkout", "--quiet", "main")
+    _git(released_main, "commit", "--quiet", "--allow-empty", "-m", "fix: later")
+    _git(released_main, "update-ref", "refs/remotes/origin/main", "main")
+    assert _verify_tag(released_main, "v1.0.0") != 0
+
+
+def test_release_tag_verification_rejects_a_version_mismatch(released_main: Path) -> None:
+    _git(released_main, "tag", "v1.0.1")
+    assert _verify_tag(released_main, "v1.0.1") != 0
+
+
+def test_release_tag_verification_rejects_a_tag_off_main(released_main: Path) -> None:
+    _git(released_main, "checkout", "--quiet", "-b", "side")
+    _git(released_main, "commit", "--quiet", "--allow-empty", "-m", "fix: side")
+    _git(released_main, "tag", "-f", "v1.0.0")
+    assert _verify_tag(released_main, "v1.0.0") != 0
+
+
+def test_release_copilot_token_stays_in_the_notes_steps_env() -> None:
+    text = RELEASE.read_text()
+    notes_steps = _notes_steps()
+    assert len(notes_steps) == 2
+    for step in notes_steps:
+        assert step["env"] == {"COPILOT_GITHUB_TOKEN": "${{ secrets.COPILOT_GITHUB_TOKEN }}"}
+    assert text.count("COPILOT_GITHUB_TOKEN") == 2 * len(notes_steps)
+    for step in _release_steps():
+        if step not in notes_steps:
+            assert "COPILOT_GITHUB_TOKEN" not in str(step), step.get("name")
+
+
+def test_release_checkout_does_not_persist_credentials() -> None:
+    for step in _release_steps():
+        if str(step.get("uses", "")).startswith("actions/checkout@"):
+            assert step["with"].get("persist-credentials") is False, "checkout must not persist the token"
