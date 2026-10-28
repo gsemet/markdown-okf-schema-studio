@@ -653,6 +653,9 @@ export const LOCKS_BY_ID: Readonly<Record<string, string>> = {
   "myst/v38-unclosed-directives-dark-900": "In the dark preview at 900 px, a table directive with no body and an unclosed list-table each render their own lines as a code block, an open label and its target stay paragraphs and the text around them renders.",
   "myst/v39-unclosed-fence-mid-document-cream-900": "In the cream preview at 900 px, a list-table fence and a table fence left open between sections each show their opening line as a code block, and the headings and paragraphs after them render.",
   "myst/v40-unclosed-fence-mid-document-dark-900": "In the dark preview at 900 px, a list-table fence and a table fence left open between sections each show their opening line as a code block, and the headings and paragraphs after them render.",
+  "myst/v41-cards-tabs-version-cream-900": "In the cream preview at 900 px, the version notes are titled Added in version 0.47, Changed in version 0.50 and Deprecated since version 1.0 without a trailing colon, a standalone card shows its header above its title, then its body and footer, and a tab set shows its bar with three tabs and only the panel of the selected Node tab.",
+  "myst/v42-cards-tabs-version-dark-900": "In the dark preview at 900 px, the version notes are titled Added in version 0.47, Changed in version 0.50 and Deprecated since version 1.0 without a trailing colon, a standalone card shows its header above its title, then its body and footer, and a tab set shows its bar with three tabs and only the panel of the selected Node tab.",
+  "myst/v43-tabs-keyboard-light-900": "In the light theme at 900 px, a click on the third tab and then the Home, ArrowRight and End keys move the selection and the focus, and the last tab ends selected, focused and alone in showing its panel.",
 };
 
 /**
@@ -833,6 +836,8 @@ export const README_BY_ID: Readonly<Record<string, { file: string; crop: [number
   "layout-width/v84-break-auto-readme-cream-1200": { file: "margin-break-cream.png", crop: [0, 0, 2400, 1800], width: 1200 },
   "rendering-core/v25-readme-showcase-hero-cream-1200": { file: "showcase-hero.png", crop: [0, 0, 2400, 1580], width: 1200 },
   "myst/v34-readme-showcase-edit-cream-1000": { file: "showcase-myst-edit.png", crop: [0, 118, 2000, 1800], width: 1000 },
+  "myst/v41-cards-tabs-version-cream-900": { file: "myst-cards-tabs-cream.png", crop: [0, 0, 1800, 1560], width: 720 },
+  "myst/v42-cards-tabs-version-dark-900": { file: "myst-cards-tabs-dark.png", crop: [0, 0, 1800, 1560], width: 720 },
   "frontmatter-schema/v23-readme-showcase-schema-cream-1000": { file: "showcase-schema-cream.png", crop: [0, 0, 2000, 1110], width: 1000 },
   "review-annotations/v21-readme-showcase-diff-cream-1000": { file: "showcase-diff-cream.png", crop: [0, 118, 2000, 1800], width: 1000 },
   "review-annotations/v26-readme-showcase-comment-thread-cream-1000": { file: "showcase-comment-thread.png", crop: [0, 890, 2000, 1700], width: 1000 },

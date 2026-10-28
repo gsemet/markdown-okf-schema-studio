@@ -22,6 +22,7 @@ import type { AnchorPolicy, ScrollAnchor } from "../../core/scroll/anchorPolicy"
 import type { HostMessageRouter } from "../hostMessages";
 import type { createBlockSelection } from "../modules/blockSelection";
 import type { installChipToggle } from "../modules/chipToggle";
+import type { installTabs } from "../modules/tabs";
 import type { installCodeCopy } from "../modules/codeCopy";
 import type { installCommentCompose } from "../modules/commentCompose";
 import type { installCommentThreads } from "../modules/commentThreads";
@@ -323,6 +324,7 @@ export interface PageParts {
   warningBanner: ReturnType<typeof installWarningBanner>;
   figureEditButton: FigureEditButton;
   chipToggle: ReturnType<typeof installChipToggle>;
+  tabs: ReturnType<typeof installTabs>;
   incomingChanges: ReturnType<typeof installIncomingChanges>;
   motion: ReturnType<typeof installMotion>;
   historyControls: ReturnType<typeof installHistoryControls>;

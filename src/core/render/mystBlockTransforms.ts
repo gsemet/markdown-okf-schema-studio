@@ -257,7 +257,7 @@ export function expandVersionAdmonitions(
         type: "admonitionTitle",
         children: [{
           type: "text",
-          value: `${title}${version ? ` ${version}` : ""}:`,
+          value: `${title}${version ? ` ${version}` : ""}`,
         }],
       });
     }

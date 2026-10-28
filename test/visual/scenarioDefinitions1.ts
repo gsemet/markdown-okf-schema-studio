@@ -23,6 +23,7 @@ import {
   WIDE,
   XLARGE,
 } from "./scenarioAssertions";
+import { CARDS_TABS_SCENARIOS } from "./cardsTabsScenarios";
 import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
 
 export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
@@ -440,6 +441,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "moves the focus ring to the button, and Enter posts the raw code and turns the icon into a check mark.",
   })),
   ...CODE_BLOCK_COMFORT_SCENARIOS,
+  ...CARDS_TABS_SCENARIOS,
   {
     id: "code-dark-top",
     fixture: "04-code-and-tables",

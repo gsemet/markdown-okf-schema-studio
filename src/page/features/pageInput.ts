@@ -184,6 +184,9 @@ export function installPageInput(rt: PageRuntime): PageInput {
           && (event.target.closest("[data-okf-row-handle]") || event.target.closest("[data-okf-col-handle]"))) return;
         // A chip is reserved for expanding its comment; the rest of the block edits.
         if (event.target instanceof Element && event.target.closest(".okf-chip")) return;
+        // @implements_req SwRS-MDOKFSTUDIO-MYST-098
+        // The tab bar of a tab set only selects a tab; the panels below it edit.
+        if (event.target instanceof Element && event.target.closest(".myst-tab-list")) return;
         // The open thread is a small form of its own: clicking in it never opens the block editor.
         if (event.target instanceof Element
           && event.target.closest('.okf-comment[data-okf-comment-kind="thread"] > .okf-comment-body')) return;

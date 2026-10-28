@@ -4,8 +4,8 @@ id: SwRS-MDOKFSTUDIO-MYST-011
 uuid: 35ffdc89-f8ce-46f6-96bc-0397713d2106
 title: Version admonitions show their version title
 description: 'When a document holds `{versionadded}`, `{versionchanged}` or `{deprecated}`,
-  the extension SHALL render an admonition titled Added in version X:, Changed in
-  version X: or Deprecated since version X: followed by the body.'
+  the extension SHALL render an admonition titled Added in version X, Changed in version
+  X or Deprecated since version X followed by the body.'
 project: markdown-okf-schema-studio
 scope: myst
 lifecycle: superseded
@@ -25,13 +25,13 @@ superseded_by: SwRS-MDOKFSTUDIO-MYST-001
 
 ### Normative behavior
 
-When a document holds `{versionadded}`, `{versionchanged}` or `{deprecated}`, the extension SHALL render an admonition titled Added in version X:, Changed in version X: or Deprecated since version X: followed by the body.
+When a document holds `{versionadded}`, `{versionchanged}` or `{deprecated}`, the extension SHALL render an admonition titled Added in version X, Changed in version X or Deprecated since version X followed by the body.
 
 ### Scenario: Nominal
 
 - GIVEN `{versionadded} 2.1` with a body
 - WHEN the preview renders
-- THEN the panel title reads Added in version 2.1: and the body follows
+- THEN the panel title reads Added in version 2.1 and the body follows
 
 ### Scenario: Boundary or refusal
 

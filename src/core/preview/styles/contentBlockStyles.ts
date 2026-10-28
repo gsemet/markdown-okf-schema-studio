@@ -2,6 +2,8 @@ import { directiveStyle } from "../../directives/registry";
 import { gridColumnCss } from "../../render/mystGridToctree";
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-002
+// @implements_req SwRS-MDOKFSTUDIO-MYST-100
+// @implements_req SwRS-MDOKFSTUDIO-MYST-098
 // @implements_req SwRS-MDOKFSTUDIO-CODE-007
 // @implements_req SwRS-MDOKFSTUDIO-CODE-008
 // @implements_req SwRS-MDOKFSTUDIO-CODE-014
@@ -587,6 +589,70 @@ ${gridColumnCss()}
   content: "";
   position: absolute;
   inset: 0;
+}
+
+/* MyST standalone {card}: the grid card look, in the flow of the page. */
+#sphinx-myst-preview-content .myst-card {
+  margin: 1.2em 0;
+}
+
+/* MyST {tab-set}: a tab bar, one panel shown at a time. */
+#sphinx-myst-preview-content .myst-tab-set {
+  margin: 1.2em 0;
+}
+
+#sphinx-myst-preview-content .myst-tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em;
+  border-bottom: 1px solid var(--sphinx-preview-border);
+}
+
+#sphinx-myst-preview-content .myst-tab {
+  margin: 0 0 -1px;
+  padding: 0.45em 0.9em;
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--studio-descriptionForeground, inherit);
+  font: inherit;
+  font-size: 0.95em;
+  cursor: pointer;
+}
+
+#sphinx-myst-preview-content .myst-tab:hover {
+  color: var(--studio-editor-foreground, inherit);
+}
+
+#sphinx-myst-preview-content .myst-tab[aria-selected="true"] {
+  border-color: var(--sphinx-preview-border);
+  border-bottom-color: var(--studio-editor-background, Canvas);
+  color: var(--studio-editor-foreground, inherit);
+  font-weight: 600;
+}
+
+#sphinx-myst-preview-content .myst-tab:focus-visible {
+  outline: 2px solid var(--studio-focusBorder, currentColor);
+  outline-offset: -2px;
+}
+
+#sphinx-myst-preview-content .myst-tab-panel {
+  padding: 0.8em 1em;
+  border: 1px solid var(--sphinx-preview-border);
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+}
+
+#sphinx-myst-preview-content .myst-tab-panel[hidden] {
+  display: none;
+}
+
+#sphinx-myst-preview-content .myst-tab-panel > :first-child {
+  margin-top: 0;
+}
+
+#sphinx-myst-preview-content .myst-tab-panel > :last-child {
+  margin-bottom: 0;
 }
 
 /* MyST {toctree}: a list of links to the referenced documents. */

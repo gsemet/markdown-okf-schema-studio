@@ -17,6 +17,26 @@
   script is gone and nothing is written into node_modules. A package version or content other than
   the reviewed one fails loudly. Verification: test/build/mystSourcePatches.test.ts.
 
+## 2026-10-28 (MyST cards, tabs and version titles)
+
+- SwRS-MDOKFSTUDIO-MYST-100 (new, CR 148): a standalone `{card}` renders like a grid card, with its
+  `:header:` / `:footer:` options and `^^^` / `+++` separators (header first), `:link:` and the safe
+  names of `:class-card:` (also taken by `{grid-item-card}`). Verification:
+  test/core/render/cardsTabs.test.ts, screenshot scenarios myst/v41 and myst/v42, test/integration/mystBlocksWindow.ts.
+- SwRS-MDOKFSTUDIO-MYST-098 (new, CR 148): `{tab-set}` / `{tab-item}` render a tab bar with ARIA tab
+  roles, one panel shown (the `:selected:` item, else the first), `:sync:` and `:sync-group:` kept as
+  attributes, and every tab item a mapped block that edit mode edits on its own lines. The sanitizer
+  is unchanged. Verification: test/core/render/cardsTabs.test.ts, test/integration/mystBlocksWindow.ts.
+- SwRS-MDOKFSTUDIO-MYST-099 (new, CR 148): click, arrows, Home and End select a tab and move the
+  focus, synced tabs follow, the page keeps the choices over a content patch. Verification:
+  test/page/modules/tabs.test.ts, screenshot scenario myst/v43, test/integration/mystBlocksWindow.ts.
+- SwRS-MDOKFSTUDIO-MYST-001 (CR 148): the version admonitions are titled "Added in version X",
+  "Changed in version X" and "Deprecated since version X" without a trailing colon; the superseded
+  SwRS-MDOKFSTUDIO-MYST-011 and SwRS-MDOKFSTUDIO-CORE-061 follow. The existing unit assertions
+  changed with it (the three titles lost their colon).
+  Verification: test/core/render/mystFeatures.test.ts, test/core/render/cardsTabs.test.ts,
+  `just requirements-lint`.
+
 ## 2026-10-27 (worker-thread render, abort and adaptive debounce)
 
 - SwRS-MDOKFSTUDIO-LIFE-004 (new, CR 135): in the VS Code host the MyST render runs in a worker

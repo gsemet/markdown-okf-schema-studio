@@ -1,10 +1,11 @@
 /**
- * MyST `{grid}` and `{toctree}` directives for the active-file preview.
+ * MyST `{grid}`, `{card}`, `{tab-set}` and `{toctree}` directives for the active-file preview.
  *
- * The parser leaves `{grid}` (and its `grid-item` / `grid-item-card` children) as unknown
- * directives that only carry their raw body, and gives `{toctree}` an empty project node. Both
- * are rewritten here into nodes the HTML writer can emit, with classes only (the stylesheet owns
- * every colour and size). Pure apart from the callbacks it is given.
+ * The parser leaves `{grid}` (and its `grid-item` / `grid-item-card` children), the standalone
+ * `{card}` and `{tab-set}` (with its `{tab-item}` children) as unknown directives that only carry
+ * their raw body, and gives `{toctree}` an empty project node. All are rewritten here into nodes
+ * the HTML writer can emit, with classes only (the stylesheet owns every colour and size). Pure
+ * apart from the callbacks it is given.
  */
 
 import { advanceFence, frontmatterRange } from "../syntax/markdownSyntax";
@@ -198,7 +199,31 @@ function plainText(nodes: readonly GridNode[]): string {
   return nodes.map((node) => node.value ?? plainText(node.children ?? [])).join("");
 }
 
-function buildCard(node: GridNode, source: GridSource, parse: GridParse, depth: number): void {
+/** Class names a document may add to a card: plain names, none of the preview's own prefixes. */
+const RESERVED_CLASS_PREFIX = /^(?:okf|sphinx|myst|vscode|studio)-/iu;
+const SAFE_CLASS_NAME = /^[A-Za-z_][\w-]{0,63}$/u;
+
+function userClasses(value: string | undefined): string[] {
+  return (value ?? "").split(/\s+/u)
+    .filter((name) => SAFE_CLASS_NAME.test(name) && !RESERVED_CLASS_PREFIX.test(name))
+    .slice(0, 8);
+}
+
+/**
+ * An option text as inline content in a plain `div`: it has no source line of its own, so it must
+ * not become a mapped paragraph (a click would edit a line that does not hold it).
+ */
+function optionLine(text: string, parse: GridParse): GridNode {
+  const line: GridNode = {
+    type: "mystGridCardOption",
+    children: parse(text).children?.[0]?.children ?? [{ type: "text", value: text }],
+  };
+  setHast(line, "div", { class: "myst-grid-card-option" });
+  return line;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-MYST-100
+function buildCard(node: GridNode, source: GridSource, parse: GridParse, depth: number, standalone = false): void {
   const raw = directiveBody(node, source);
   const { options, body } = splitOptions(raw.lines);
   const parts: GridNode[] = [];
@@ -229,23 +254,34 @@ function buildCard(node: GridNode, source: GridSource, parse: GridParse, depth: 
     addPart("title", inner);
   }
 
+  // The `:header:` and `:footer:` options come before the blocks the `^^^` and `+++` separators cut.
+  const optionHeader = standalone ? options.get("header") : undefined;
+  const optionFooter = standalone ? options.get("footer") : undefined;
+  const extra: Record<string, GridNode[]> = {
+    header: optionHeader ? [optionLine(optionHeader, parse)] : [],
+    footer: optionFooter ? [optionLine(optionFooter, parse)] : [],
+  };
   for (const section of splitCardSections(body)) {
     const children = parseBody(section.lines, raw.firstLine + section.start, parse, depth);
     if (section.kind === "body") {
       if (children.length > 0 || parts.length === 0) addPart("body", children);
-    } else if (children.length > 0) {
-      addPart(section.kind, children);
+    } else {
+      extra[section.kind].push(...children);
     }
   }
-  // Header goes before the body; the title leads the card.
-  const order = ["title", "header", "body", "footer"];
+  for (const kind of ["header", "footer"] as const) {
+    if (extra[kind].length > 0) addPart(kind, extra[kind]);
+  }
+  // A standalone card leads with its header, like MyST; the title leads a grid card.
+  const order = standalone ? ["header", "title", "body", "footer"] : ["title", "header", "body", "footer"];
   const rank = (part: GridNode): number => order.findIndex((kind) =>
     (part.data?.hProperties as { class?: string } | undefined)?.class === `myst-grid-card-${kind}`);
   parts.sort((a, b) => rank(a) - rank(b));
 
   node.type = "mystGridCard";
   node.children = parts;
-  setHast(node, "div", { class: "myst-grid-item myst-grid-card", ...sourceProperties(node) });
+  const classes = [standalone ? "myst-card" : "myst-grid-item", "myst-grid-card", ...userClasses(options.get("class-card"))];
+  setHast(node, "div", { class: classes.join(" "), ...sourceProperties(node) });
 }
 
 function buildItem(node: GridNode, source: GridSource, parse: GridParse, depth: number): void {
@@ -277,11 +313,84 @@ function buildGrid(node: GridNode, source: GridSource, parse: GridParse, depth: 
   setHast(node, "div", { class: "myst-grid", ...sourceProperties(node) });
 }
 
-/** Rewrites every `{grid}` directive under `node` (recursively, nested grids included). */
+/** A tab set keeps its tabs in `data-myst-tab-group`; the group of sets that follow each other. */
+const DEFAULT_TAB_GROUP = "tab";
+
+function tabLabel(node: GridNode, parse: GridParse, index: number): string {
+  const title = (node.args ?? "").trim();
+  if (!title) return `Tab ${index + 1}`;
+  return plainText(parse(title).children?.[0]?.children ?? [{ type: "text", value: title }]).trim() || title;
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-MYST-098
+function buildTabSet(node: GridNode, source: GridSource, parse: GridParse, depth: number): void {
+  const raw = directiveBody(node, source);
+  const { options, body } = splitOptions(raw.lines);
+  const bodySource = { lines: body, firstLine: raw.firstLine };
+  const content = parseBody(body, raw.firstLine, parse, depth);
+  const setLine = lineOf(node);
+  const items = content.filter((child) => child.type === "mystDirective" && child.name?.toLowerCase() === "tab-item");
+  const raws = items.map((item) => {
+    const itemRaw = directiveBody(item, bodySource);
+    return { firstLine: itemRaw.firstLine, ...splitOptions(itemRaw.lines) };
+  });
+  // The first `:selected:` item shows; without one, the first item.
+  const selected = Math.max(0, raws.findIndex((entry) => entry.options.has("selected")));
+
+  const buttons: GridNode[] = [];
+  items.forEach((item, index) => {
+    const itemOptions = raws[index];
+    const tabId = `myst-tab-${setLine}-${index}`;
+    const panelId = `myst-tabpanel-${setLine}-${index}`;
+    const sync = itemOptions.options.get("sync");
+    const button: GridNode = { type: "mystTab", children: [{ type: "text", value: tabLabel(item, parse, index) }] };
+    setHast(button, "button", {
+      class: "myst-tab",
+      type: "button",
+      role: "tab",
+      id: tabId,
+      "aria-controls": panelId,
+      "aria-selected": index === selected ? "true" : "false",
+      tabindex: index === selected ? "0" : "-1",
+      ...(sync ? { "data-myst-tab-sync": sync } : {}),
+    });
+    buttons.push(button);
+
+    item.type = "mystTabPanel";
+    item.children = parseBody(itemOptions.body, itemOptions.firstLine, parse, depth);
+    setHast(item, "div", {
+      class: "myst-tab-panel",
+      role: "tabpanel",
+      id: panelId,
+      "aria-labelledby": tabId,
+      ...(index === selected ? {} : { hidden: true }),
+      ...sourceProperties(item),
+    });
+  });
+
+  const list: GridNode = { type: "mystTabList", children: buttons };
+  setHast(list, "div", { class: "myst-tab-list", role: "tablist" });
+  node.type = "mystTabSet";
+  node.children = [list, ...content];
+  const group = (options.get("sync-group") ?? "").trim() || DEFAULT_TAB_GROUP;
+  const classes = ["myst-tab-set", ...userClasses(options.get("class"))];
+  setHast(node, "div", {
+    class: classes.join(" "),
+    "data-myst-tab-group": group,
+    ...sourceProperties(node),
+  });
+}
+
+/** Rewrites every `{grid}`, `{card}` and `{tab-set}` directive under `node` (recursively, nested ones included). */
 export function expandGrids(node: GridNode, parse: GridParse, source: GridSource, depth = 0): void {
   for (const child of node.children ?? []) {
-    if (child.type === "mystDirective" && child.name?.toLowerCase() === "grid" && depth < MAX_GRID_DEPTH) {
+    const name = child.type === "mystDirective" && depth < MAX_GRID_DEPTH ? child.name?.toLowerCase() : undefined;
+    if (name === "grid") {
       buildGrid(child, source, parse, depth);
+    } else if (name === "card") {
+      buildCard(child, source, parse, depth, true);
+    } else if (name === "tab-set") {
+      buildTabSet(child, source, parse, depth);
     } else {
       expandGrids(child, parse, source, depth);
     }

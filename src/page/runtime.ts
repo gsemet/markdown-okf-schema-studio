@@ -50,6 +50,7 @@ import { createPageHostMessages } from "./hostMessages";
 import type { HostTransport } from "./hostTransport";
 import { createBlockSelection } from "./modules/blockSelection";
 import { installChipToggle } from "./modules/chipToggle";
+import { installTabs } from "./modules/tabs";
 import { installCodeCopy } from "./modules/codeCopy";
 import { installCommentCompose } from "./modules/commentCompose";
 import { installCommentThreads } from "./modules/commentThreads";
@@ -243,6 +244,8 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   const keepReadingLine = (): void => rt.scroll.keepReadingLine();
   // Expanding a chip changes the height of the content: keep the reading line like zoom does.
   const chipToggle = installChipToggle(document, vscode, context, keepReadingLine);
+  // MyST tab sets: a click or an arrow key on a tab shows its panel.
+  const tabs = installTabs(document);
   applyCodeBlockSettings(document.documentElement, context);
   // Green bars on blocks changed since the last commit; the host sends the ranges (T16).
   const incomingChanges = installIncomingChanges(document);
@@ -365,7 +368,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.parts = {
     contentMorph, stickyBand, statusRegion, commentThreads, commentCompose, linkNavigation, firstClearance,
     codeCopy, labelRename, hostRequests, plantUmlFileRequests, pasteImage, pasteHtml, pasteUrl, warningBanner,
-    figureEditButton, chipToggle, incomingChanges, motion, historyControls, viewControls, widthMode,
+    figureEditButton, chipToggle, tabs, incomingChanges, motion, historyControls, viewControls, widthMode,
     tocColumn, themeMode, anchorMode, checkboxes, inlineThreads, linkTooltip,
   };
   rt.editorChrome.bindPaletteSticky();

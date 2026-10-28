@@ -25,7 +25,10 @@ implemented_in_files:
 tested_in_files:
 - test/core/directives/registry.test.ts
 - test/core/preview/previewStyles.test.ts
+- test/core/render/cardsTabs.test.ts
 - test/core/render/mystFeatures.test.ts
+- test/integration/mystBlocksWindow.ts
+- test/visual/cardsTabsScenarios.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 ---
@@ -84,9 +87,9 @@ When a document holds an admonition directive, the extension SHALL render a pane
 
 | Directive | Title | Accent |
 | --- | --- | --- |
-| `{versionadded}` | Added in version X: (for example Added in version 2.1:) | green |
-| `{versionchanged}` | Changed in version X: | yellow |
-| `{deprecated}` | Deprecated since version X: | red |
+| `{versionadded}` | Added in version X (for example Added in version 2.1), no trailing colon | green |
+| `{versionchanged}` | Changed in version X | yellow |
+| `{deprecated}` | Deprecated since version X | red |
 
 ### Scenario (nominal): Custom admonition title and class
 
