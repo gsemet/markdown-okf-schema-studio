@@ -40,6 +40,11 @@
   Mermaid. The new **Full** palette mode (Strict, GFM, MyST, Full) adds the Vega-Lite chart and
   Vega chart commands to the palette and the slash menu (`/chart`, `/vega`). See
   `docs/user/charts.md`.
+- A writing skill for agents. The folder `skills/writing-for-markdown-okf-schema-studio/` teaches an
+  agent (Claude Code, GitHub Copilot) which Markdown Studio renders and how to choose between SVG,
+  Mermaid, PlantUML, Vega-Lite, cards, tabs, admonitions and tables, so a generated plan or report
+  looks good in the preview. It is self-contained, ships in the extension package, and a test renders
+  all its examples. Copy the folder to your skills folder to use it.
 - A `[TOC]` or `[[_TOC_]]` line on its own (the GitLab, Typora and Markdown Preview Enhanced
   markers, any case), or a MyST `{contents}` directive, renders the table of contents of the
   document: its headings as a nested list of links to them (`:depth:` limits the depth of

@@ -32,6 +32,8 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 - `test/`: unit, contract, integration and visual tests. `tests/fixtures/`: Python Sphinx contract
   fixtures. `sphinx/`: the package-owned Sphinx configuration and source-mapping extension.
 - `requirements/`: the okfreq requirements bundle. `justfile`: development and release checks.
+- `skills/`: the agent skill that teaches writing Markdown for Studio (shipped content, kept in
+  sync with the renderer).
 
 ## Setup
 
@@ -67,6 +69,10 @@ When two instructions conflict, the higher source wins, and the conflict is repo
 - When picking up backlog work, change requests or PRs (`.agents/changes/`), including Parallel
   Change Requests Orchestration:
   [change-requests-lifecycle.guidelines.md](.agents/guidelines/change-requests-lifecycle.guidelines.md)
+- When adding, removing or changing a rendered syntax (directive, role, fence language, marker,
+  HTML element, palette mode, limit): update the writing skill `skills/writing-for-markdown-okf-schema-studio/`
+  in the same pull request, per
+  [writing-skill-maintenance.guideline.md](.agents/guidelines/writing-skill-maintenance.guideline.md)
 - Shared vocabulary of UI and code terms: [.agents/glossary/common.md](.agents/glossary/common.md).
   Use these words in code, tests, commits and docs; add new terms there.
 

@@ -56,7 +56,15 @@ Details: [change-requests-lifecycle.guidelines.md](guidelines/change-requests-li
 - Dependencies come from the official PyPI and npm registries and are pinned by the lock files.
 - An agent adds, upgrades or installs a dependency only when its task allows it.
 
-## 6. Repository hygiene
+## 6. The writing skill
+
+- `skills/writing-for-markdown-okf-schema-studio/` is part of the product: a change to a rendered
+  syntax updates it in the same pull request, and it stays self-contained (no link into the
+  repository) and minimal. A test renders its examples, so it cannot drift.
+
+Details: [writing-skill-maintenance.guideline.md](guidelines/writing-skill-maintenance.guideline.md).
+
+## 7. Repository hygiene
 
 - Repository content (code, comments, docs, commits, PRs) is in English.
 - No reference from maintained source or tests back to the white-paper repository.
