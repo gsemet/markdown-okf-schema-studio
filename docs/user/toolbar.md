@@ -21,6 +21,13 @@ text, and expands it again. The choice is remembered per workspace; a new worksp
 the toolbar collapsed, so click the chevron to reach rows 2 to 5. Hidden rows are skipped by the
 Tab key.
 
+Rows 2 to 5 unroll and roll up as one block when you press the chevron. When a panel opens its
+preview with the toolbar collapsed, it unrolls for a moment and rolls up again, to show that it can
+expand; a mouse or key press cancels it, it never changes your saved choice, and it does not replay
+on a refresh, a reload or when the panel follows another document. Tooltips of the toolbar, the edit
+bar and the table menu slide in from the left. With the system setting "reduce motion" none of these
+animate.
+
 | Expanded | Collapsed |
 | --- | --- |
 | [![The floating toolbar expanded: five rows of buttons](../../images/readme/toolbar-expanded.png)](../../images/readme/toolbar-expanded.png) | [![The floating toolbar collapsed to its first row](../../images/readme/toolbar-collapsed.png)](../../images/readme/toolbar-collapsed.png) |

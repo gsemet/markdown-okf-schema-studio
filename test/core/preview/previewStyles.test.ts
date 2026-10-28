@@ -892,7 +892,7 @@ test("T08: zoom scales the content font size and the column width together", () 
   );
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar-row\]\s*\{[^}]*display: flex;/u);
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 192px;/u);
-  assert.match(PREVIEW_THEME_CSS, /html\[data-sphinx-preview-toolbar-state="collapsed"\] \[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 62px;/u);
+  assert.match(PREVIEW_THEME_CSS, /html\[data-sphinx-preview-toolbar-state="collapsed"\]:not\(\[data-sphinx-preview-toolbar-hint\]\) \[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 62px;/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-081
@@ -1272,7 +1272,65 @@ test("CR 107: the preview block quote background outranks the VS Code webview de
 test("CR 112: the edit bar buttons share the floating toolbar's tooltip bubble and slide it in on hover", () => {
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-edit-palette > button\[data-tooltip\]::after[^{]*\{[^}]*content: attr\(data-tooltip\);/u);
   assert.match(PREVIEW_THEME_CSS, /\.sphinx-preview-edit-palette > button\[data-tooltip\]:hover::after[^{]*\{[^}]*visibility: visible;[^}]*opacity: 1;/u);
-  assert.match(PREVIEW_THEME_CSS, /@keyframes sphinx-preview-edit-tooltip-in/u);
+  // CR 162: the palette's own keyframes became the animation every tooltip shares.
+  assert.match(PREVIEW_THEME_CSS, /@keyframes sphinx-preview-tooltip-in/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-129
+test("CR 162: every tooltip bubble slides in from the left with one shared animation", () => {
+  const keyframes = /@keyframes sphinx-preview-tooltip-in \{([^@]*?)\n\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  assert.match(keyframes, /from \{[^}]*opacity: 0;[^}]*translate: -6px 0;/u);
+  assert.match(keyframes, /to \{[^}]*opacity: 1;[^}]*translate: 0 0;/u);
+  assert.match(PREVIEW_THEME_CSS, /--sphinx-preview-motion-fast: 120ms;/u);
+  const rules = cssRules(PREVIEW_THEME_CSS);
+  for (const owner of [
+    '[data-sphinx-preview-toolbar] button[data-tooltip]:hover::after',
+    ".sphinx-preview-table-menu button[data-tooltip]:hover::after",
+    ".sphinx-preview-edit-palette > button[data-tooltip]:hover::after",
+  ]) {
+    const animated = rules.filter(([selector, body]) => selector.split(",").map((part) => part.trim()).includes(owner)
+      && /animation: sphinx-preview-tooltip-in var\(--sphinx-preview-motion-fast, 120ms\)/u.test(body));
+    assert.ok(animated.length > 0, `${owner} plays the shared slide-in`);
+  }
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /sphinx-preview-edit-tooltip-in/u, "no tooltip keeps an animation of its own");
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /button\[data-tooltip\]::after\s*\{[^}]*transition: opacity 100ms/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+test("CR 162: the toolbar rows unroll as one block, only under the animating mark", () => {
+  const mark = "[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating]";
+  const rules = cssRules(PREVIEW_THEME_CSS);
+  const body = (selector: string): string => rules.find(([entry]) => entry === selector)?.[1] ?? "";
+  const rolling = body(mark);
+  assert.match(rolling, /transition: height var\(--sphinx-preview-motion, 160ms\)/u);
+  assert.match(rolling, /opacity var\(--sphinx-preview-motion, 160ms\)/u);
+  assert.match(rolling, /display var\(--sphinx-preview-motion, 160ms\) allow-discrete/u);
+  assert.match(rolling, /overflow: hidden;/u);
+  assert.match(body(mark + "[hidden]"), /height: 0;[^}]*opacity: 0;/u);
+  assert.match(body(mark + ":not([hidden])"), /animation: sphinx-preview-toolbar-unroll var\(--sphinx-preview-motion, 160ms\)/u);
+  assert.match(PREVIEW_THEME_CSS, /@keyframes sphinx-preview-toolbar-unroll \{\s*from \{ height: 0; opacity: 0; \}/u);
+  assert.match(PREVIEW_THEME_CSS, /--sphinx-preview-motion: 160ms;/u);
+  // At rest the rows have no transition or animation, so a page that loads open shows no motion.
+  for (const [selector, rule] of rules) {
+    if (!selector.includes("[data-sphinx-preview-toolbar-more]") || selector.includes("animating")) continue;
+    assert.doesNotMatch(rule, /transition|animation/u, selector);
+  }
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-129
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-130
+test("CR 162: reduced motion turns off the tooltip slide-in and the toolbar rows unroll", () => {
+  const reduced = reducedMotionBlock(PREVIEW_THEME_CSS);
+  const selectors = reduced.slice(reduced.lastIndexOf("/* The toolbar motion"));
+  for (const part of [
+    "[data-sphinx-preview-toolbar] button[data-tooltip]::after",
+    ".sphinx-preview-table-menu button[data-tooltip]::after",
+    ".sphinx-preview-edit-palette > button[data-tooltip]::after",
+    "[data-sphinx-preview-toolbar-more][data-sphinx-preview-toolbar-animating]",
+  ]) {
+    assert.ok(selectors.includes(part), `reduced motion covers ${part}`);
+  }
+  assert.match(selectors, /animation: none !important;\s*transition: none !important;/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-002

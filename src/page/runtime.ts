@@ -269,7 +269,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     stickyBand.refreshStickyHeadingPosition();
     tocColumn.layout();
     widthMode.update();
-  });
+  }, window);
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-020
   // The width mode changes layout only as well; Auto re-measures wide elements on every layout pass.
   const widthMode = installWidthMode(document, window, vscode, context, () => {

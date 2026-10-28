@@ -17,13 +17,18 @@ user_need: As a reader, I find the preview controls in five clear rows, fold the
   toolbar down to its first row to free the top of the pane and unfold it again,
   and find my view choices (zoom, width mode, table of contents, incoming-change
   marks, comments and the collapsed toolbar) again when I reopen a preview of
-  the same workspace, even in a read-only preview where I cannot edit.
+  the same workspace, even in a read-only preview where I cannot edit. The
+  toolbar and its tooltips move softly (not at all when my system asks for
+  reduced motion), and a newly opened collapsed toolbar shows briefly that it
+  can expand.
 derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TOOLBAR-001
 - SwRS-MDOKFSTUDIO-TOOLBAR-007
 - SwRS-MDOKFSTUDIO-TOOLBAR-013
+- SwRS-MDOKFSTUDIO-TOOLBAR-129
+- SwRS-MDOKFSTUDIO-TOOLBAR-130
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-TRUST-006
 default_owner_email: gaetan@xeberon.net
