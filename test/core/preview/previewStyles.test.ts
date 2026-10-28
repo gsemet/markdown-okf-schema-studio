@@ -721,10 +721,20 @@ test("preview content width is configurable and can be unlimited", () => {
   );
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-064
+test("CR 168: the table toolbar paints above the row and column handle layer", () => {
+  const rule = /\.sphinx-preview-table-menu\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  const layer = /\[data-okf-row-handle-layer\]\s*\{([^}]*)\}/u.exec(PREVIEW_THEME_CSS)?.[1] ?? "";
+  const zIndex = (text: string): number => Number(/z-index: (\d+);/u.exec(text)?.[1] ?? Number.NaN);
+  const positioned = /position: (?:relative|absolute|fixed|sticky);/u.test(rule);
+  assert.ok(positioned, "z-index applies to the bar only when it is positioned");
+  assert.ok(zIndex(rule) > zIndex(layer), `bar z-index ${zIndex(rule)} above handle layer ${zIndex(layer)}`);
+});
+
 test("table toolbar sits in the document flow above the table with labelled buttons", () => {
   assert.match(
     PREVIEW_THEME_CSS,
-    /\.sphinx-preview-table-menu\s*\{\s*position: static;[^}]*flex-wrap: wrap;[^}]*margin: 0 0 6px;/u,
+    /\.sphinx-preview-table-menu\s*\{\s*position: relative;\s*z-index: 3;[^}]*flex-wrap: wrap;[^}]*margin: 0 0 6px;/u,
   );
   const rule = /\.sphinx-preview-table-menu\s*\{[^}]*\}/u.exec(PREVIEW_THEME_CSS)?.[0] ?? "";
   assert.doesNotMatch(rule, /position: fixed|--sphinx-preview-table-menu-(top|left)|100vw/u);

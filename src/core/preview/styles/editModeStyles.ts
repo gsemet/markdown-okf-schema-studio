@@ -347,8 +347,12 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
   line-height: 1.4;
 }
 
+/* CR 168: positioned (no offset, so still in the flow) with a z-index above the row and column handle
+   layer (2): a handle that lands on a button, because it was placed before the bar grew or wrapped or
+   because the table sits right of the bar, never takes the press. */
 .sphinx-preview-table-menu {
-  position: static;
+  position: relative;
+  z-index: 3;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -368,7 +372,7 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
 
 /* CR 034: while its table scrolls, the runtime translates the bar down to just under the sticky band
    or the preview controls (never past the table's bottom); nothing is laid out again, so the text
-   stays where it is. The menu is static otherwise. */
+   stays where it is. The menu is not translated otherwise. */
 .sphinx-preview-table-menu[data-sphinx-table-menu-stuck="true"] {
   position: relative;
   z-index: 3;

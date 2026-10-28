@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-28 (table bar above the row handles, CR 168)
+
+- SwRS-MDOKFSTUDIO-TABLE-064: the table bar is positioned in the flow with a z-index above the row
+  and column handle layer, so a handle that lands on a button of the bar (heavy CI real-input
+  scenarioTableStructure: "Delete selected column" was intercepted by the row 1 handle) no longer
+  takes the press. Verification: test/core/preview/previewStyles.test.ts,
+  test/visual/capture_table_menu.py.
+
 ## 2026-10-28 (table bar inset after the reveal, CR 167)
 
 - SwRS-MDOKFSTUDIO-TABLE-064: the inset of a table bar that opens under the five-row preview
