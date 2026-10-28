@@ -21,7 +21,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/core/frontmatter/fileLinks.ts
+- src/core/frontmatter/fileLinkAnnotations.ts
 tested_in_files:
 - test/core/frontmatter/fileLinks.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts

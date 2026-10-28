@@ -22,7 +22,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/preview/contentPatch.ts
-- src/session/features/rendering.ts
+- src/session/features/pageDocument.ts
 - src/session/pageMessages.ts
 tested_in_files:
 - test/core/preview/contentPatch.test.ts

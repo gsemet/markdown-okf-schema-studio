@@ -22,7 +22,7 @@ derived_by: []
 implemented_in_files:
 - src/core/preview/updatedRanges.ts
 - src/page/modules/motion.ts
-- src/session/features/rendering.ts
+- src/session/features/pageDocument.ts
 - src/session/hostEvents.ts
 tested_in_files:
 - test/core/preview/updatedRanges.test.ts

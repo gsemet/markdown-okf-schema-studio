@@ -647,3 +647,14 @@
   `fileLinkTypes.ts` breaks the `fileLinks` / `okfFrontmatter` cycle; the session-to-node-services
   exception list of `.dependency-cruiser.cjs` is empty. Verification:
   test/host-memory/memoryHostSession.test.ts, `just check-boundaries`, `just check`.
+- SwRS-MDOKFSTUDIO-FMSCHEMA-046, SwRS-MDOKFSTUDIO-LIFE-004, SwRS-MDOKFSTUDIO-LIFE-038,
+  SwRS-MDOKFSTUDIO-LIFE-039, SwRS-MDOKFSTUDIO-LIFE-049, SwRS-MDOKFSTUDIO-LIFE-071,
+  SwRS-MDOKFSTUDIO-LIFE-094, SwRS-MDOKFSTUDIO-TABLE-076, SwRS-MDOKFSTUDIO-TABLE-080,
+  SwRS-MDOKFSTUDIO-TRUST-001, SwRS-MDOKFSTUDIO-TRUST-007, SwRS-MDOKFSTUDIO-TRUST-022 (CR 135 T26,
+  pure refactor, behaviour unchanged): the 700+ line modules are split and their `@implements_req`
+  markers moved with the code: `fileLinkAnnotations.ts` (out of `fileLinks.ts`),
+  `pageDocument.ts` (the page-document base class of `rendering.ts`), `tableConversion.ts` (out of
+  `markdownTable.ts`), `sessionFactory.ts` (session creation out of `previewManager.ts`); the
+  message types of `pageToHost.ts` and the types of `editPalette.ts` moved to
+  `pageToHostMessages.ts` and `editPaletteTypes.ts` (no markers). Requirement texts unchanged; only
+  the generated source lists. Verification: `just requirements-update`, `just check`.

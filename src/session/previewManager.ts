@@ -9,26 +9,16 @@
 
 import * as path from "node:path";
 
-import { FRONTMATTER_CONFIGURATION_SECTION, readFrontmatterConfiguration } from "../core/configuration/frontmatterConfiguration";
-import {
-  PLANTUML_CONFIGURATION_SECTION,
-  readPlantUmlConfiguration,
-  readPlantUmlEngineSettings,
-} from "../core/configuration/plantUmlConfiguration";
-import { PREVIEW_CONFIGURATION_SECTION, readPreviewConfiguration } from "../core/configuration/previewConfiguration";
 import type { HostDocument } from "../host-api/documentStore";
 import type { HostServices } from "../host-api/index";
 import type { PanelGroups, PreviewPanel } from "../host-api/previewPanel";
 import type { WorkspaceFolderInfo } from "../host-api/workspaceInfo";
 import { createPreviewNavigator, type PreviewNavigator } from "./previewNavigator";
 import { LatestRequest } from "../core/preview/flushWait";
-import { buildStatusWebviewHtml, type PreviewStatus } from "./webview";
 import { createMessageRouter } from "../core/protocol/router";
 import type { PreviewEditCommandName } from "../core/protocol/hostToPage";
 import type { PageToHostMessage } from "../core/protocol/pageToHost";
 import type { Revision } from "../core/protocol/revision";
-import { renderPreviewDocument, type PreviewDocument, type RenderResult } from "../core/render/renderPipeline";
-import { BoundedMap, MAX_DOCUMENT_STATES } from "../core/state/boundedState";
 import type { PreviewPanelState } from "../core/state/previewState";
 import { BlockEditController } from "./features/blockEdits";
 import { CommentsController } from "./features/comments";
@@ -45,7 +35,8 @@ import { SourceEditController } from "./features/sourceEdits";
 import { ViewStateController } from "./features/viewState";
 import { PageMessageDispatcher, type PageMessageResult, type PageMessageRouter } from "./pageMessages";
 import { HostEvents } from "./hostEvents";
-import { PreviewSession } from "./previewSession";
+import type { PreviewSession } from "./previewSession";
+import { SessionFactory } from "./sessionFactory";
 import { isDocumentEligible, isPathWithin, revisionOfStage } from "./sessionDocuments";
 import { SharedRenders } from "./sharedRenders";
 import { SharedLinkedTargetWatches, SharedWatchers } from "./sharedWatchers";
@@ -59,15 +50,6 @@ export interface PageMessageIdentity {
   revision: Revision;
   requestId: number;
   editId?: string;
-}
-
-/** The render pipeline's view of a host document (a saved Markdown file). */
-function previewDocumentOf(document: HostDocument, filePath: string): PreviewDocument {
-  return {
-    uri: { scheme: "file", fsPath: filePath },
-    languageId: "markdown",
-    getText: () => document.getText(),
-  };
 }
 
 /** The live previews of one activation and the controllers of their features. */
@@ -109,6 +91,8 @@ export class PreviewManager {
   /** Document switches of a panel queue behind each other; only the latest request is applied. */
   private readonly switchChains = new WeakMap<PreviewPanel, Promise<void>>();
   private readonly latestSwitches = new WeakMap<PreviewPanel, LatestRequest<HostDocument>>();
+  /** Builds the sessions; the manager keeps the live set and the active session. */
+  private readonly factory: SessionFactory;
 
   /**
    * `host`: the ports. `groups`: the editor-group lock of side previews. Every feature controller
@@ -144,6 +128,13 @@ export class PreviewManager {
       controller.register(this.router);
     }
     this.dispatcher = new PageMessageDispatcher(this, this.router);
+    this.factory = new SessionFactory(this, {
+      adopt: (session) => {
+        this.live.add(session);
+        this.activeSession = session;
+      },
+      releaseGroupLock: (session) => this.releaseGroupLock(session),
+    });
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -269,14 +260,10 @@ export class PreviewManager {
   // Lifecycle of a session
   // ---------------------------------------------------------------------------------------------
 
-  // @implements_req SwRS-MDOKFSTUDIO-LIFE-049
-  // @implements_req SwRS-MDOKFSTUDIO-LIFE-038
-  // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
-  // @implements_req SwRS-MDOKFSTUDIO-TRUST-007
   /**
    * Creates the session of `panel` for `document` (or, for a restored panel whose document could
    * not be opened, for the document `restoredState` names). The session renders nothing until
-   * {@link requestDocument}.
+   * {@link requestDocument}. Built by the {@link SessionFactory}.
    */
   public createSession(
     panel: PreviewPanel,
@@ -285,153 +272,7 @@ export class PreviewManager {
     restoredState?: PreviewPanelState,
     followsActiveEditor = true,
   ): PreviewSession {
-    const { host } = this;
-    const documentUri = document?.id ?? restoredState?.documentId ?? "";
-    const sourcePath = (document ? document.path : undefined) ?? restoredState?.sourceFile;
-    if (!sourcePath) {
-      throw new Error("The preview source path is unavailable.");
-    }
-    const savedDescriptions = this.choices.collapsedDescriptionsOf(documentUri);
-    if (restoredState?.descriptionsCollapsed === undefined && typeof savedDescriptions === "boolean") {
-      restoredState = { ...restoredState, documentId: documentUri, sourceFile: sourcePath,
-        descriptionsCollapsed: savedDescriptions };
-    }
-    const documentDirectory = path.dirname(path.resolve(sourcePath));
-    const readOnly = workspaceFolder === undefined || !host.workspace.trusted;
-    const resourceRoot = readOnly ? documentDirectory : workspaceFolder.path;
-    const sessionRoots = readOnly ? [] : host.workspace.folders().map((folder) => folder.path);
-    const navigationRoots = readOnly
-      ? [documentDirectory]
-      : [...new Set([resourceRoot, ...sessionRoots])];
-    const initialStatus: PreviewStatus = document
-      && isDocumentEligible(document)
-      && host.paths.sourceExists(this.pathOf(document))
-      ? "pending"
-      : "missing-source";
-    const initialMessage = initialStatus === "pending"
-      ? "Waiting for the first render."
-      : "The active Markdown source is unavailable.";
-    const session = new PreviewSession({
-      panel,
-      followsActiveEditor,
-      document,
-      documentUri,
-      workspaceRoot: resourceRoot,
-      sessionRoots,
-      navigationRoots,
-      workspaceFolder,
-      readOnly,
-      webview: {
-        html: buildStatusWebviewHtml(initialStatus, panel.cspSource, initialMessage),
-        diagnostics: [],
-        nonce: "",
-      },
-      states: new BoundedMap<PreviewPanelState>(
-        MAX_DOCUMENT_STATES,
-        restoredState ? [[documentUri, restoredState]] : [],
-      ),
-      state: restoredState,
-      status: initialStatus,
-      configuration: readPreviewConfiguration(host.settings.section(PREVIEW_CONFIGURATION_SECTION)),
-      plantUmlConfiguration: readPlantUmlConfiguration(host.settings.section(PLANTUML_CONFIGURATION_SECTION)),
-      plantUmlEngineSettings: readPlantUmlEngineSettings(host.settings.section(PLANTUML_CONFIGURATION_SECTION)),
-      frontmatterConfiguration: readFrontmatterConfiguration(host.settings.section(FRONTMATTER_CONFIGURATION_SECTION)),
-    });
-    // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
-    session.queue = host.renderQueues.create<HostDocument, RenderResult>({
-      debounceMs: 40,
-      // The MyST render time alone: a worker start or the engine load does not slow typing down.
-      durationOf: (result) => result.renderMs,
-      revisionOf: (queued) => queued.revision,
-      build: (request, signal) => this.sharedRenders.acquire(
-        {
-          documentId: request.document.id,
-          revision: request.document.revision,
-          workspaceRoot: resourceRoot,
-          readOnly,
-          trusted: host.workspace.trusted,
-          plantUmlJarPath: session.plantUmlConfiguration.jarPath,
-          plantUmlEngine: this.plantUml.engineFor(session),
-        },
-        request.requestId,
-        signal,
-        (sharedSignal) => renderPreviewDocument({
-          document: previewDocumentOf(request.document, this.pathOf(request.document)),
-          revision: request.document.revision,
-          workspaceRoot: resourceRoot,
-          readOnly,
-          requestId: request.requestId,
-          documentIdentity: request.document.id,
-          signal: sharedSignal,
-          isWorkspaceTrusted: () => host.workspace.trusted,
-          allowUntrusted: true,
-          plantUmlJarPath: session.plantUmlConfiguration.jarPath,
-          plantUmlEngine: this.plantUml.engineFor(session),
-          // @implements_req SwRS-MDOKFSTUDIO-LIFE-004
-          // The host's renderer (a worker thread in VS Code), else in-process.
-          renderSource: host.previewRenderer?.render,
-        }),
-      ),
-      onState: (state) => this.rendering.handleQueueState(session, state),
-      disposeResult: (result) => result.stage.dispose(),
-    });
-    session.dependencyWatch = this.sharedWatchers.acquire(resourceRoot, "**/*", {
-      onDidChange: (changedPath) => {
-        this.events.refreshReferencedPath(session, changedPath);
-      },
-      onDidCreate: (createdPath) => {
-        this.events.refreshReferencedPath(session, createdPath);
-        if (session.status === "missing-source") {
-          this.events.recoverMissingSource(session);
-        }
-      },
-      onDidDelete: (deletedPath) => {
-        if (this.canonicalPath(deletedPath) === this.canonicalPath(this.activePathOf(session))) {
-          this.rendering.setMissingSource(session, "The active Markdown source was deleted.");
-        } else {
-          this.events.refreshReferencedPath(session, deletedPath);
-        }
-      },
-    });
-    this.rendering.setResourceRoots(session, []);
-    this.rendering.assignWebviewHtml(session, session.webview.html);
-    panel.title = document ? this.previewTitle(session, this.pathOf(document)) : "Studio";
-    this.live.add(session);
-    this.activeSession = session;
-    // The view state also changes when the panel only gains or loses focus. Only a hidden panel
-    // that becomes visible needs to catch up with the editor; a focus change keeps its anchor.
-    let wasVisible = panel.visible;
-    session.panelSubscriptions.push(
-      panel.onDidReceiveMessage((message) => this.handlePageMessage(session, message)),
-      panel.onDidChangeViewState(() => {
-        if (session.lockedColumn !== undefined && panel.column !== undefined) {
-          // The column shifts when a group on the left closes, but the locked group is the same.
-          session.lockedColumn = panel.column;
-        }
-        this.syncEditingContext();
-        const becameVisible = panel.visible && !wasVisible;
-        wasVisible = panel.visible;
-        if (becameVisible) {
-          this.scroll.restorePreviewState(session);
-          // A render skipped while the panel was hidden runs now (one render, on show).
-          this.rendering.renderIfDirty(session);
-        }
-      }),
-      panel.onDidChangeLayout(() => {
-        // Closing a group on the left shifts the column of the locked group without a view-state event.
-        if (session.lockedColumn === undefined || session.disposed) return;
-        try {
-          if (panel.column !== undefined) session.lockedColumn = panel.column;
-        } catch {
-          // The panel is already gone.
-        }
-      }),
-      panel.onDidDispose(() => {
-        this.releaseGroupLock(session);
-        this.disposeSession(session, false);
-      }),
-    );
-    return session;
+    return this.factory.createSession(panel, document, workspaceFolder, restoredState, followsActiveEditor);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-151

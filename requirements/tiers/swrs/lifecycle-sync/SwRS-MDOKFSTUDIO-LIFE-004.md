@@ -20,7 +20,7 @@ implemented_in_files:
 - src/core/render/renderPipeline.ts
 - src/host-vscode/vscodeHost.ts
 - src/node-services/renderWorker.ts
-- src/session/previewManager.ts
+- src/session/sessionFactory.ts
 tested_in_files:
 - test/core/render/renderPipeline.test.ts
 - test/node-services/renderWorker.test.ts

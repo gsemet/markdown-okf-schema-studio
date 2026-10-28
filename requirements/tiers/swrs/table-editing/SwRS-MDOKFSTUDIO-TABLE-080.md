@@ -19,7 +19,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/page/modules/markdownTable.ts
+- src/page/modules/tableConversion.ts
 tested_in_files:
 - test/integration/tableMoves.ts
 - test/page/modules/listTable.test.ts
