@@ -6,6 +6,7 @@
 
 import { planBlockTextEdit, withLineEndingOf } from "../../core/edits/sourceEdits";
 import type { HostDocument } from "../../host-api/documentStore";
+import { checkBlockLines, type BlockRangeRefusal } from "../../core/mapping/blockRange";
 import { sourceRangeForLines } from "../../core/mapping/sourceMapping";
 import { insertionText, planInsertion, type InsertionPlan } from "../../core/mapping/insertion";
 import { FLUSH_WAIT_MS, flushRefusalMessage, waitForAnswer, waitForSettled } from "../../core/preview/flushWait";
@@ -116,13 +117,18 @@ export class BlockEditController {
   private currentSourceEdit(
     preview: PreviewSession,
     message: BlockEditMessage,
-  ): BlockSource | undefined {
+  ): BlockSource | BlockRangeRefusal | undefined {
     const document = currentPreviewDocument(preview, message);
     if (!document || message.line === undefined || message.endLine === undefined) {
       return undefined;
     }
     const offsets = sourceRangeForLines(document.getText(), message.line, message.endLine);
-    return offsets ? { document, start: offsets.start, end: offsets.end } : undefined;
+    if (!offsets) {
+      return undefined;
+    }
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-256
+    const refusal = checkBlockLines(document.getText(), message.line, message.endLine);
+    return refusal ?? { document, start: offsets.start, end: offsets.end };
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-094
@@ -157,6 +163,10 @@ export class BlockEditController {
       return;
     }
     const source = this.currentSourceEdit(preview, message);
+    if (source && "refused" in source) {
+      this.postEditSourceError(preview, message, source.refused);
+      return;
+    }
     if (!source || message.line === undefined || message.endLine === undefined) {
       this.postEditSourceError(preview, message, "The preview is stale. Refresh it before editing this block.");
       return;
@@ -364,6 +374,10 @@ export class BlockEditController {
       this.beginActiveBlockEdit(preview, edit);
     } else if (!edit) {
       const source = this.currentSourceEdit(preview, message);
+      if (source && "refused" in source) {
+        this.postEditSourceError(preview, message, source.refused);
+        return;
+      }
       if (!source || message.originalText === undefined || message.editedText === undefined) {
         this.postEditSourceError(preview, message, "The preview is stale. Reopen the block before saving.");
         return;
