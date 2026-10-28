@@ -38,6 +38,18 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     integration and stress jobs, 15 for the others, 10 for the report job). A hung job must fail fast and name
     where it stopped, never run to the platform default of six hours. Never raise a timeout to
     make a slow or flaky run pass: find what waits.
+    - **A hang names its step and leaves a dump.** The step that runs the tests has its own
+      `timeout-minutes` below the job's (20 for `integration`), so a hang cancels that step and the
+      `if: always()` steps still collect diagnostics (`just ci-hang-dump`) and upload the reports.
+      This is the one job with a third target, and it only collects files.
+    - **Real-window tests run under the hang watchdog** (`test/shared/hangWatchdog.ts`, one module
+      for every threshold): each trusted-window step has a budget and logs `STEP start` / `STEP
+      done`; a single VS Code call that must return is wrapped in `bounded()` so a timeout names the
+      call; the extension host writes a heartbeat file every 5 s and the launcher kills a launch
+      whose heartbeat is silent for 90 s or that passes its deadline (`STUDIO_LAUNCH_TIMEOUT_MS`,
+      15 min). Every timeout writes `out/reports/e2e/hang-dumps/<time>-<step>/` (processes, VS Code
+      log tails, window state and tabs, heartbeat, screenshots). A new step gets a budget about
+      twice its healthy duration; never raise one to make a run pass.
 12. **A flake is a bug, fixed at its cause and proved by repetition.** A test that fails without a
     change is not retried, and its timeout is not raised: it is a race in the product or the test.
     - **Root cause with evidence.** Collect every failing run (`gh run view <id> --log-failed`),

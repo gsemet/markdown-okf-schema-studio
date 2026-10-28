@@ -178,7 +178,12 @@ jobs:
         with:
           just-version: 1.58.0
       - run: just dev-ci
+      # Below the job's 30 minutes: a hang cancels this step and the dump and upload steps still run.
       - run: xvfb-run --auto-servernum just ci-integration
+        timeout-minutes: 20
+      - name: Collect hang diagnostics
+        if: always()
+        run: just ci-hang-dump
       - name: Publish reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

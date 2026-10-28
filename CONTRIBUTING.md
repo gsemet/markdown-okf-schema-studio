@@ -425,6 +425,20 @@ user-data directory, extensions directory, CDP port and evidence folders; the ma
 `instanceId`. The LATEST pointers and `integration-manifest.json` are shared files, so the last run
 to finish wins them; use the run folder named in the console for a specific run.
 
+A hung real-window run fails fast and leaves a dump (CI rule 11). Each step of the trusted window
+runs under `step()` (`test/integration/stepWatchdog.ts`), with a budget per step, `STEP start` and
+`STEP done` lines in the log, and `bounded()` around single VS Code calls that must return. The scroll,
+Restricted Mode and standalone windows run as one step each, and the reload campaign has its own
+3-minute deadline. Every
+suite writes a heartbeat file (`out/reports/e2e/heartbeat-<instance>-<suite>.json`) every 5
+seconds; `run-tests` stops a launch whose heartbeat is silent for 90 seconds (frozen extension host
+or renderer) or that runs past its deadline (15 minutes, `STUDIO_LAUNCH_TIMEOUT_MS`; `just
+ci-stress` raises it to 26), kills its VS Code processes and names the last step. Thresholds live in
+`test/shared/hangWatchdog.ts`. Each timeout writes `out/reports/e2e/hang-dumps/<time>-<step>/`:
+`ps` output, the tails of the VS Code logs, the window state and tabs, the heartbeat and screenshots
+(through CDP, and of the X display when `import` or `xwd` exists). In CI the integration step stops
+at 20 minutes and `just ci-hang-dump` adds the processes and logs left behind (`post-step/`).
+
 Run folders of the real-window suites pile up under `out/reports/e2e/screenshots/`.
 `npm run review:finish` keeps the latest 5 per kind (`STUDIO_E2E_KEEP_RUNS` changes it). Run
 `npm run review:prune -- --dry-run` to list what would go, `npm run review:prune -- --keep 3` to

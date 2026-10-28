@@ -7,6 +7,15 @@
   try again) and changes nothing, instead of editing the wrong text.
 - A GitHub alert (`> [!NOTE]`) inside a `:::{card}`, a `:::{tab-item}` or another colon container no
   longer ends that container early: the text after the alert stays in the card or tab.
+- For contributors: a hung real VS Code window test now fails fast and explains itself instead of
+  running to the 30-minute job timeout. Each step of the trusted window runs within a budget and
+  logs `STEP start` / `STEP done`; single VS Code calls that once never returned (closing tabs after
+  the stock coexistence check, the checkbox scenario setup) fail with the name of the call. The
+  extension host writes a heartbeat file every 5 seconds, and `run-tests` stops a launch whose
+  heartbeat is silent for 90 seconds or that runs past 15 minutes (`STUDIO_LAUNCH_TIMEOUT_MS`):
+  it kills the VS Code processes and names the last step. Every timeout writes a dump (processes,
+  VS Code log tails, window state and tabs, screenshots) under `out/reports/e2e/hang-dumps/`, and
+  the CI integration step stops at 20 minutes, then `just ci-hang-dump` collects what is left.
 
 ## 1.0.0 - 2026-10-28
 

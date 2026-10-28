@@ -253,6 +253,31 @@ ci-integration:
         exit 1
     fi
 
+# CI job "integration", after its test step whatever its outcome (a hang cancels that step at its
+# timeout): append the process list and the tails of the VS Code logs left in the temporary
+# user-data directories to out/reports/e2e/hang-dumps/post-step/. Diagnostics only: never fails.
+ci-hang-dump:
+    #!/usr/bin/env bash
+    set -u
+    target=out/reports/e2e/hang-dumps/post-step
+    mkdir -p "$target" || exit 0
+    {
+        echo "== $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        # `timeout` is GNU coreutils, absent on stock macOS: plain ps there.
+        bounded() { if command -v timeout >/dev/null 2>&1; then timeout 10 "$@"; else "$@"; fi; }
+        bounded ps -eo pid,ppid,etime,stat,pcpu,rss,args --forest 2>/dev/null || bounded ps -axo pid,ppid,etime,stat,pcpu,rss,args
+    } >>"$target/ps.txt" 2>&1 || true
+    for profile in /tmp/studio-*-d-* /tmp/studio-reload-*/profile; do
+        [[ -d "$profile/logs" ]] || continue
+        name="$(basename "$(dirname "$profile")")-$(basename "$profile")"
+        mkdir -p "$target/$name" || continue
+        while IFS= read -r log; do
+            relative="${log#"$profile/logs/"}"
+            tail -n 300 "$log" >>"$target/$name/${relative//\//__}" 2>/dev/null || true
+        done < <(find "$profile/logs" -name '*.log' -type f 2>/dev/null)
+    done
+    echo "ci-hang-dump: done ($target)"
+
 # Filter with STUDIO_STRESS_SCENARIOS=name,name (test/shared/stressPlan.ts). CI only: it opens VS
 # Code windows, and preflight already runs each of these scenarios once.
 # CI job "stress": repeat the flake-prone real-window scenarios REPEAT times, in the trusted window
@@ -261,6 +286,9 @@ ci-stress REPEAT="20":
     #!/usr/bin/env bash
     set -uo pipefail
     export STUDIO_REAL_INPUT_SCENARIO=stress STUDIO_STRESS_REPEAT="{{ REPEAT }}"
+    # 20 rounds take about 18 minutes in the trusted window: the 15-minute launch deadline of the
+    # hang watchdog (test/shared/hangWatchdog.ts) would cut a healthy run; 26 still fails before the job.
+    export STUDIO_LAUNCH_TIMEOUT_MS="${STUDIO_LAUNCH_TIMEOUT_MS:-1560000}"
     if {{ npm }} run test:integration -- --trusted-only && node out/test/integration/run-tests.js --untrusted-only; then
         echo "ci-stress: passed ({{ REPEAT }} rounds)"
     else
