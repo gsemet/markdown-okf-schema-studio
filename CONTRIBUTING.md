@@ -382,7 +382,9 @@ To refresh only these headless pictures (no real-window run, no `REAL-INPUT-LATE
 `npm run visual:render`, `uv run --group docs python test/visual/capture.py`, then
 `uv run --group docs python scripts/generate-readme-images.py --visual-only`; the real-window
 pictures in `images/readme/` stay untouched. `--visual-only` also narrows `--check <dir>` to the
-visual-sourced images. The campaign runs with reduced motion, so these captures are settled frames.
+visual-sourced images. `--real-only` writes only the six real-window pictures, cropped from the latest
+passing real-input run under `out/reports/e2e/screenshots/` (a downloaded CI artifact works); it needs the
+manifest from `npm run visual:render` but no visual PNGs. The campaign runs with reduced motion, so these captures are settled frames.
 A README crop that starts at the top of the page must reach the viewport's right edge, or it cuts
 the floating toolbar (`test/site/scenarioInvariants.test.ts` checks it).
 

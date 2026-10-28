@@ -123,6 +123,7 @@ test("generate-readme-images.py reads the visual README sources from the metadat
   assert.ok(!/VISUAL \/ "/u.test(source), "no hard-coded scenario PNG path is left in the script");
   assert.match(source, /visual_crops\(\)/u);
   assert.match(source, /--visual-only/u, "the generator can write only the headless images");
+  assert.match(source, /--real-only/u, "the generator can write only the real-window images");
 });
 
 test("the orphan-box scenario scrolls on until the box in the bottom padding is in the frame", () => {
