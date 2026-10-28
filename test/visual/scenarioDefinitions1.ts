@@ -1088,6 +1088,22 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "a code block taller than the pane, opened scrolled, keeps its first seen row under the bar.",
   },
   {
+    // @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+    id: "palette-slash/v29-edit-figure-button-narrow-cream-420",
+    fixture: "68-figure-button-narrow",
+    theme: "dark",
+    previewThemeMode: "cream",
+    width: 420,
+    height: 800,
+    scroll: { kind: "top" },
+    editMode: true,
+    figureButton: true,
+    description:
+      "420 px cream preview (the width of the real VS Code window): the Edit figure button of a "
+      + "figure near the top of the pane takes the press next to the five-row preview controls, and "
+      + "the figure form opens below the palette.",
+  },
+  {
     // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
     id: "palette-slash/v28-palette-clears-text-rule-cream-900",
     fixture: "64-rule-edit",

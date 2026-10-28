@@ -268,6 +268,8 @@ export interface FigureEditButtonOptions {
   open(figure: Element): void;
   /** Top of the strip the button can be pressed in at this column span (below the sticky chrome). */
   usableTop?(box: { top: number; left: number; right: number; width: number }): number;
+  /** The box of the sticky preview controls, when the button must not be placed under it. */
+  obstacle?(): { top: number; bottom: number; left: number; right: number } | undefined;
 }
 
 export interface FigureEditButton {
@@ -323,13 +325,20 @@ export function installFigureEditButton(
     const button = ensure();
     current = element;
     const bounds = element.getBoundingClientRect();
-    const left = Math.round(Math.max(8, (bounds.right ?? bounds.left + bounds.width) - 96));
+    let left = Math.round(Math.max(8, (bounds.right ?? bounds.left + bounds.width) - 96));
     // A figure scrolled under the sticky preview controls: the button stays below them, inside the figure.
     let top = Math.round(bounds.top + 6);
     const usable = options.usableTop?.({ top, left, right: left + 96, width: 96 });
     if (usable !== undefined && Number.isFinite(usable) && usable > top) {
       const lowest = Number.isFinite(bounds.bottom) ? bounds.bottom - 34 : top;
       top = Math.round(Math.max(top, Math.min(usable + 2, lowest)));
+    }
+    // A figure shorter than the controls' column leaves no room below them: the button moves to the
+    // left of the controls instead of staying under them (CR 161).
+    const controls = options.obstacle?.();
+    if (controls && [controls.top, controls.bottom, controls.left, controls.right].every(Number.isFinite)
+      && left < controls.right && left + 96 > controls.left && top < controls.bottom && top + 34 > controls.top) {
+      left = Math.round(Math.max(8, controls.left - 96 - 4));
     }
     button.style.setProperty("top", top + "px");
     button.style.setProperty("left", left + "px");
