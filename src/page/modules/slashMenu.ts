@@ -83,6 +83,7 @@ export function createSlashMenu(
     annotation: "Annotations",
     github: "GFM",
     myst: "MyST",
+    full: "Full",
   };
   const MAX_HEIGHT = 320;
   const EDGE = 8;

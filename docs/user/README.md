@@ -10,6 +10,7 @@ The [project README](../../README.md) shows what Studio does. These pages hold t
 - [Preview Themes and Motion](themes-and-motion.md): Dark, White, Cream, and the short animations.
 - [Wide Tables and Figures](wide-tables.md): the Auto width mode.
 - [PlantUML Diagrams](plantuml.md): the built-in engine, includes and the optional JAR.
+- [Vega-Lite and Vega Charts](charts.md): `vega-lite` and `vega` fences, data files, the Full mode.
 - [Review Comments](review-comments.md): comment threads stored next to the document.
 - [Open Knowledge Format](okf.md): schema-aware properties and linked-file annotations.
 - [Sphinx Projects](sphinx.md): the `myst_enable_extensions` check against `conf.py`.

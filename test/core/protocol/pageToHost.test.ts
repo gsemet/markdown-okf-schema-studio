@@ -112,9 +112,10 @@ test("previewHistoryGo accepts only back or forward", () => {
   assert.equal(isRegisteredPreviewMessage({ ...base }), false);
 });
 
-test("previewPaletteModeChanged accepts only strict, gfm or myst", () => {
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-010
+test("previewPaletteModeChanged accepts only strict, gfm, myst or full", () => {
   const base = { type: "previewPaletteModeChanged", documentId: "doc", revision: 1, requestId: 1 };
-  for (const mode of ["strict", "gfm", "myst"]) {
+  for (const mode of ["strict", "gfm", "myst", "full"]) {
     assert.equal(isRegisteredPreviewMessage({ ...base, mode }), true, mode);
   }
   assert.equal(isRegisteredPreviewMessage({ ...base, mode: "html" }), false);

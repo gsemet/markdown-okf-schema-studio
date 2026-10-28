@@ -796,6 +796,25 @@ test("T23: the stored workspace mode is used, and the saved webview state wins o
   assert.equal(paletteOf(invalid)!.getAttribute("data-palette-mode"), "gfm");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
+test("CR 149: the Full mode is a mode of the page: stored, saved, chosen in the select and reported to the host", () => {
+  const stored = createRuntimeHarness({ initialPaletteMode: "full" });
+  openBlockEditorWithSource(stored);
+  assert.equal(paletteOf(stored)!.getAttribute("data-palette-mode"), "full");
+  assert.equal(paletteSelect(stored).value, "full");
+  assert.equal(stored.getWebviewState().paletteMode, "full");
+
+  const harness = createRuntimeHarness({ initialPaletteMode: "myst" });
+  openBlockEditorWithSource(harness);
+  const before = harness.messages.length;
+  choosePaletteMode(harness, "full");
+  const posted = harness.messages.slice(before).filter((message) => message.type === "previewPaletteModeChanged");
+  assert.equal(posted.length, 1);
+  assert.equal(posted[0].mode, "full");
+  assert.equal(paletteOf(harness)!.getAttribute("data-palette-mode"), "full");
+  assert.equal(harness.getWebviewState().paletteMode, "full");
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169
 test("T23: choosing a mode posts previewPaletteModeChanged once and keeps the editor open", () => {
   const harness = createRuntimeHarness({ initialPaletteMode: "myst" });

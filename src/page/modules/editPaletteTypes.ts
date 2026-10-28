@@ -75,7 +75,7 @@ export interface EditPaletteMenuEntry {
   /** The registered action it runs. */
   id: string;
   label: string;
-  /** The palette group of the action (`inline`, `block`, `insert`, `annotation`, `github`, `myst`). */
+  /** The palette group of the action (`inline`, `block`, `insert`, `annotation`, `github`, `myst`, `full`). */
   group: string;
   /** Static icon markup of the palette button (never user text). */
   icon: string;

@@ -6,6 +6,7 @@
  */
 
 import { ADMONITION_TITLES } from "../directives/admonition";
+import { chartKindOf, type ChartFiles } from "./chartData";
 import { OKF_WIDTH } from "../directives/figure";
 import { directiveNamed } from "../directives/registry";
 import {
@@ -50,11 +51,11 @@ const BUILD_ONLY_TYPES = new Set([
 function normalizeDiagram(
   node: MystNode,
   line: number | undefined,
-  kind: "mermaid" | "plantuml",
+  kind: "mermaid" | "plantuml" | "vega",
   diagramProperties: Record<string, string> = {},
 ): void {
   const source = node.value ?? "";
-  const label = kind === "mermaid" ? "Mermaid" : "PlantUML";
+  const label = kind === "mermaid" ? "Mermaid" : kind === "vega" ? "Chart" : "PlantUML";
   setHast(node, "figure", {
     class: `myst-${kind}-figure`,
     ...sourcePositionProperties(node, line),
@@ -72,7 +73,7 @@ function normalizeDiagram(
           type: "element",
           tagName: "summary",
           properties: {},
-          children: [{ type: "text", value: "Diagram source" }],
+          children: [{ type: "text", value: kind === "vega" ? "Chart source" : "Diagram source" }],
         },
         {
           type: "element",
@@ -146,6 +147,22 @@ const NODE_RULES: readonly NodeRule[] = [
         return false;
       }
       normalizeDiagram(node, line, "mermaid");
+      return true;
+    },
+  },
+  {
+    // @implements_req SwRS-MDOKFSTUDIO-DIAG-121
+    // @implements_req SwRS-MDOKFSTUDIO-DIAG-122
+    name: "vega chart",
+    kinds: ["code"],
+    run: (node, { line }) => {
+      const kind = chartKindOf(node);
+      if (!kind) return false;
+      const properties: Record<string, string> = { "data-myst-chart-kind": kind };
+      const chart = node.data?.chartFiles as ChartFiles | undefined;
+      if (chart && Object.keys(chart.files).length > 0) properties["data-myst-chart-files"] = JSON.stringify(chart.files);
+      if (chart && Object.keys(chart.errors).length > 0) properties["data-myst-chart-errors"] = JSON.stringify(chart.errors);
+      normalizeDiagram(node, line, "vega", properties);
       return true;
     },
   },

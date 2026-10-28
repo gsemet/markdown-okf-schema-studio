@@ -375,7 +375,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
         getEntries: () => cellPalette.menuEntries(),
         run: (key, range) => cellPalette.runMenuEntry(key, range),
         getCaretRect: () => caretRectOf(document, window, edit.tableInput!),
-        preferGroup: () => (state.paletteMode === "myst" ? "myst" : undefined),
+        preferGroup: () => (state.paletteMode === "myst" ? "myst" : state.paletteMode === "full" ? "full" : undefined),
       });
     }
     const separator = document.createElement("span");

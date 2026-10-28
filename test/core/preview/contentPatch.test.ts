@@ -135,6 +135,19 @@ test("T34: shell keys differ when Mermaid appears or disappears, and when math a
   assert.notEqual(shellKey(plain), shellKey(math), "the math stylesheet is part of the shell");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-124
+test("CR 149: shell keys differ when a chart appears or disappears, and charts of two pages share a shell", async () => {
+  const chart = '```vega-lite\n{"mark":"bar","data":{"values":[{"a":1}]}}\n```\n';
+  const plain = await page("Text only.\n");
+  const withChart = await page("Text only.\n\n" + chart);
+  assert.match(withChart, /myst-vega-figure/u);
+  assert.match(withChart, /data-sphinx-preview-vega/u, "the chart runtime script is part of the page");
+  assert.notEqual(shellKey(plain), shellKey(withChart));
+  assert.equal(canPatch(plain, withChart), false);
+  assert.equal(canPatch(withChart, plain), false);
+  assert.equal(canPatch(withChart, await page("Other text.\n\n" + chart.replace('"a":1', '"a":2'))), true);
+});
+
 test("T34: canPatch refuses next content that carries a script or a nonce", async () => {
   const previous = await page("Text.\n");
   const next = await page("Other text.\n");

@@ -41,7 +41,7 @@ export function installCommentCompose(
   const SAVE = "data-okf-comment-compose-save";
   const CANCEL = "data-okf-comment-compose-cancel";
   const SKIP = "pre, code, script, style, textarea, svg, .katex, .math, .math-inline, .math-display, "
-    + ".myst-mermaid-figure, .myst-plantuml-figure, [data-okf-properties], "
+    + ".myst-mermaid-figure, .myst-plantuml-figure, .myst-vega-figure, [data-okf-properties], "
     + ".okf-comment, .okf-chip, [data-sphinx-preview-block-editor], [data-sphinx-preview-editing], "
     + `[data-sphinx-preview-included], [data-okf-comment-popover], [${BOX}], [${BUTTON}]`;
   const MAX_QUOTE = 500;

@@ -13,7 +13,7 @@ import type { PaletteIcon } from "./paletteIcons";
 
 export type { EmojiCategory, EmojiEntry } from "./emoji";
 
-/** A palette mode: an action listed for `strict` shows in every mode, `gfm` in GFM and MyST. */
+/** A palette mode (additive, see {@link PaletteActionDescriptor}). */
 export type EditActionMode = PaletteMode;
 
 /** Where the text box of an action lives: a block editor or a table cell editor. */
@@ -62,15 +62,15 @@ export interface EditActionSlash {
 /**
  * The data of one palette action: what the palette and the `/` menu show and how they open it.
  * The palette renders `label`, `icon` and `group`; a shortcut and the palette button run the same
- * handler. Modes are additive: an action listed for `strict` shows in every mode, `gfm` in GFM and
- * MyST.
+ * handler. Modes are additive: an action listed for `strict` shows in every mode, `gfm` in GFM,
+ * MyST and Full, `myst` in MyST and Full, `full` in Full only.
  */
 export interface PaletteActionDescriptor {
   /** The button's accessible name and the `/` menu entry. */
   label: string;
   /** The icon of the button and of the `/` menu entry (see `PALETTE_ICONS`). */
   icon: PaletteIcon;
-  /** The palette group (`inline`, `block`, `insert`, `annotation`, `github`, `myst`). */
+  /** The palette group (`inline`, `block`, `insert`, `annotation`, `github`, `myst`, `full`). */
   group: string;
   /** The modes that list the action (additive, see the interface comment). */
   modes: EditActionMode[];
@@ -591,6 +591,26 @@ export const PALETTE_ACTIONS = {
     group: "myst",
     modes: ["myst"],
     scopes: ["block", "cell"],
+  },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-265
+  vegaLite: {
+    slash: { aliases: ["chart", "vega-lite", "vegalite", "plot", "graph"] },
+    label: "Vega-Lite chart",
+    title: "Vega-Lite chart",
+    icon: "chart",
+    group: "full",
+    modes: ["full"],
+    scopes: ["block"],
+  },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-265
+  vega: {
+    slash: { aliases: ["vega", "chart", "plot"] },
+    label: "Vega chart",
+    title: "Vega chart",
+    icon: "chart",
+    group: "full",
+    modes: ["full"],
+    scopes: ["block"],
   },
 } satisfies Record<string, PaletteActionDescriptor>;
 

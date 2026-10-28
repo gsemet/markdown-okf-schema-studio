@@ -490,6 +490,66 @@ export function insertDropdown(ctx: EditActionContext): TextEdit | undefined {
   return insertBlockAt(ctx, text, titleAt, 5);
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-265
+/** A fenced Vega-Lite bar chart with inline data, set apart after the selection, its title selected. */
+export function insertVegaLite(ctx: EditActionContext): TextEdit | undefined {
+  if (!validSelection(ctx)) return undefined;
+  return insertBlockAfterSelection(ctx, [
+    "```vega-lite",
+    "{",
+    '  "title": "Chart title",',
+    '  "data": { "values": [',
+    '    { "category": "A", "amount": 28 },',
+    '    { "category": "B", "amount": 55 },',
+    '    { "category": "C", "amount": 43 }',
+    "  ] },",
+    '  "mark": "bar",',
+    '  "encoding": {',
+    '    "x": { "field": "category", "type": "nominal" },',
+    '    "y": { "field": "amount", "type": "quantitative" }',
+    "  }",
+    "}",
+    "```",
+  ].join("\n"), "Chart title");
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-265
+/** A fenced Vega bar chart with inline data, set apart after the selection, its title selected. */
+export function insertVega(ctx: EditActionContext): TextEdit | undefined {
+  if (!validSelection(ctx)) return undefined;
+  return insertBlockAfterSelection(ctx, [
+    "```vega",
+    "{",
+    '  "$schema": "https://vega.github.io/schema/vega/v6.json",',
+    '  "title": "Chart title",',
+    '  "width": 300,',
+    '  "height": 160,',
+    '  "padding": 5,',
+    '  "data": [{ "name": "table", "values": [',
+    '    { "category": "A", "amount": 28 },',
+    '    { "category": "B", "amount": 55 },',
+    '    { "category": "C", "amount": 43 }',
+    "  ] }],",
+    '  "scales": [',
+    '    { "name": "x", "type": "band", "domain": { "data": "table", "field": "category" }, "range": "width", "padding": 0.1 },',
+    '    { "name": "y", "domain": { "data": "table", "field": "amount" }, "nice": true, "range": "height" }',
+    "  ],",
+    '  "axes": [{ "orient": "bottom", "scale": "x" }, { "orient": "left", "scale": "y" }],',
+    '  "marks": [{',
+    '    "type": "rect",',
+    '    "from": { "data": "table" },',
+    '    "encode": { "enter": {',
+    '      "x": { "scale": "x", "field": "category" },',
+    '      "width": { "scale": "x", "band": 1 },',
+    '      "y": { "scale": "y", "field": "amount" },',
+    '      "y2": { "scale": "y", "value": 0 }',
+    "    } }",
+    "  }]",
+    "}",
+    "```",
+  ].join("\n"), "Chart title");
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-017
 /** A fenced Mermaid flowchart set apart after the selection, its first node label selected. */
 export function insertMermaid(ctx: EditActionContext): TextEdit | undefined {

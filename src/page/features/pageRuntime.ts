@@ -62,7 +62,7 @@ import type { StickyHeadings } from "./stickyHeadings";
 import type { ThemeMode } from "./themeMode";
 
 /** The palette modes of the block editor (see `PALETTE_MODES`). */
-export type PaletteMode = "strict" | "gfm" | "myst";
+export type PaletteMode = "strict" | "gfm" | "myst" | "full";
 
 /**
  * Where the caret goes in a text box that opens: its start, the end of its text, a text offset, or

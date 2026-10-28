@@ -90,7 +90,7 @@ function selectOf(root: FakeElement): FakeElement {
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
-test("the palette starts with a labelled select of the three modes", () => {
+test("the palette starts with a labelled select of the four modes", () => {
   const { root } = open("gfm");
   const select = root.children[0];
   assert.equal(select.tagName, "select");
@@ -102,6 +102,7 @@ test("the palette starts with a labelled select of the three modes", () => {
       ["strict", "Strict Markdown"],
       ["gfm", "GitHub (GFM)"],
       ["myst", "MyST"],
+      ["full", "Full"],
     ],
   );
   assert.equal(root.getAttribute("data-palette-mode"), "gfm");
@@ -126,6 +127,7 @@ test("modes are additive: strict is within GFM, which is within MyST", () => {
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-017
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
 test("P6: the real registry shows the MyST-specific buttons in MyST mode only, per mode", () => {
   const ids = (mode: EditActionMode): string[] => {
     const textbox = { value: "", selectionStart: 0, selectionEnd: 0, focus: () => undefined };
@@ -149,6 +151,10 @@ test("P6: the real registry shows the MyST-specific buttons in MyST mode only, p
   assert.deepEqual(myst, [...gfm, ...mystOnly]);
   for (const id of [...gfmOnly, ...mystOnly]) assert.equal(strict.includes(id), false, id);
   for (const id of mystOnly) assert.equal(gfm.includes(id), false, id);
+  // CR 149: Full is MyST plus the chart commands, which no other mode lists.
+  const full = ids("full");
+  assert.deepEqual(full, [...myst, "vegaLite", "vega"]);
+  for (const id of ["vegaLite", "vega"]) assert.equal(myst.includes(id), false, id);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-169

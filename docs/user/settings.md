@@ -47,9 +47,11 @@ chips in open
 **Editing**
 
 - `editing.defaultPaletteMode` (default `gfm`): buttons the edition palette shows in a workspace
-  that has not chosen yet: `strict` (plain Markdown), `gfm` (strict plus GitHub Flavored Markdown)
-  or `myst` (GFM plus MyST). The select at the start of the palette changes it and the choice is
-  remembered per workspace; it changes the buttons only, never the rendering.
+  that has not chosen yet: `strict` (plain Markdown), `gfm` (strict plus GitHub Flavored Markdown),
+  `myst` (GFM plus MyST) or `full` (MyST plus the commands of Studio's own extensions: the
+  Vega-Lite and Vega chart commands, see [Charts](charts.md)). The select at the start of the
+  palette changes it and the choice is remembered per workspace; it changes the buttons only, never
+  the rendering.
 
 **Frontmatter**
 

@@ -80,7 +80,7 @@ export function installCommentThreads(
   const ACTIONS = "data-okf-comment-thread-actions";
   const ACTION_ERROR = "data-okf-comment-action-error";
   const SKIP = "pre, code, script, style, textarea, svg, .katex, .math, .math-inline, .math-display, "
-    + ".myst-mermaid-figure, .myst-plantuml-figure, [data-okf-properties], "
+    + ".myst-mermaid-figure, .myst-plantuml-figure, .myst-vega-figure, [data-okf-properties], "
     + ".okf-comment, .okf-chip, [data-sphinx-preview-block-editor], [data-sphinx-preview-editing], "
     + "[data-sphinx-preview-included], "
     + `[${MARK}], [${BADGE}], [${POPOVER}]`;

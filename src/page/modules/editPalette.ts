@@ -43,7 +43,7 @@ export type {
  * (mousedown is cancelled), so clicking never commits the editor.
  */
 export function createEditPalette(document: Document, deps: EditPaletteDeps): EditPalette {
-  // Modes are additive: a mode lists the actions of its rank and below (strict 0, gfm 1, myst 2).
+  // Modes are additive: a mode lists the actions of its rank and below (strict 0, gfm 1, myst 2, full 3).
   const MODE_RANK: Record<string, number> = Object.fromEntries(PALETTE_MODES.map((name, rank) => [name, rank]));
   const icons: Readonly<Record<string, string>> = PALETTE_ICONS;
 
@@ -100,6 +100,7 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
     ["strict", "Strict Markdown"],
     ["gfm", "GitHub (GFM)"],
     ["myst", "MyST"],
+    ["full", "Full"],
   ];
   for (const [value, label] of MODE_LABELS) {
     const option = document.createElement("option");

@@ -37,6 +37,7 @@ export const PALETTE_ICONS = {
   htmlTable: svg("M4 5h16v14H4zM4 10h16M9 12.5l-1.7 1.7L9 16M15 12.5l1.7 1.7L15 16"),
   details: svg("M5 5l4 4 4-4M5 14h14M5 19h10"),
   footnote: svg("M5 9h8M9 5v10M5 19h14M16 5.5l1.5-1v5"),
+  chart: svg("M4 4v16h16M8 16v-5M12 16V8M16 16v-8"),
   mermaid: svg("M4 5h6v4H4zM14 15h6v4h-6zM7 9v3a2 2 0 0 0 2 2h5"),
   columnAlign: svg("M4 6h16M4 10h10M4 14h16M4 18h10") + caret,
   admonition: svg("M4 5h16v14H4zM4 9h16M8 13h8M8 16h5") + caret,

@@ -236,7 +236,7 @@ export interface PreviewViewPreferenceChangedMessage extends PageMessageBase<"pr
 
 /** The palette mode select of the edition palette (workspace state). */
 export interface PreviewPaletteModeChangedMessage extends PageMessageBase<"previewPaletteModeChanged"> {
-  mode: "strict" | "gfm" | "myst";
+  mode: "strict" | "gfm" | "myst" | "full";
 }
 
 /** Rename of a MyST label from its anchor icon. */

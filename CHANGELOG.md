@@ -31,6 +31,15 @@
   mode each tab item is a block of its own. `{versionadded}`, `{versionchanged}` and `{deprecated}`
   are now titled "Added in version X", "Changed in version X" and "Deprecated since version X",
   without the trailing colon.
+- Vega-Lite and Vega charts. A `vega-lite` or `vega` fenced block (JSON or YAML) is drawn as a chart
+  in the preview, in every palette mode, as an SVG picture that follows the preview theme. The
+  chart runtime is bundled, loads only on a page that holds a chart and needs no `unsafe-eval`
+  (expressions run in the Vega interpreter); the page keeps `connect-src 'none'`. Data is inline or a
+  CSV, TSV or JSON file next to the document, read with the rules of `{include}`; a remote URL
+  shows a message instead of the chart. An invalid specification shows its error in place, like
+  Mermaid. The new **Full** palette mode (Strict, GFM, MyST, Full) adds the Vega-Lite chart and
+  Vega chart commands to the palette and the slash menu (`/chart`, `/vega`). See
+  `docs/user/charts.md`.
 - A `[TOC]` or `[[_TOC_]]` line on its own (the GitLab, Typora and Markdown Preview Enhanced
   markers, any case), or a MyST `{contents}` directive, renders the table of contents of the
   document: its headings as a nested list of links to them (`:depth:` limits the depth of

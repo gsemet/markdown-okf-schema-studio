@@ -74,7 +74,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 | View choice | Page control | Saved-state field | Message and field | Accepted values | Host validation | Storage key | Read-only preview |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Edit mode | Edit button | editMode | previewEditModeChanged, editMode | boolean | Dropped unless the preview is writable and the value is a boolean | markdownOkfSchemaStudio.editMode | Not stored |
-| Palette mode | Mode select of the block editor | paletteMode | previewPaletteModeChanged, mode | strict, gfm, myst | Dropped unless the preview is writable and the mode is one of the three | markdownOkfSchemaStudio.paletteMode | Not stored |
+| Palette mode | Mode select of the block editor | paletteMode | previewPaletteModeChanged, mode | strict, gfm, myst, full | Dropped unless the preview is writable and the mode is one of the four | markdownOkfSchemaStudio.paletteMode | Not stored |
 | Theme mode | Theme button | previewThemeMode | previewThemeModeChanged, previewThemeMode | current, dark, white, cream | Dropped unless the value is one of the four | previewThemeMode | Stored |
 | Zoom | Zoom in and Zoom out | viewZoom | previewViewPreferenceChanged, preference zoom | integer from 70 to 200 | Refused outside the range or when not an integer | markdownOkfSchemaStudio.viewPreferences, field zoom | Stored |
 | Width mode | Width button | viewWidthMode | previewViewPreferenceChanged, preference widthMode | margin, auto, full | Refused for any other value | markdownOkfSchemaStudio.viewPreferences, field widthMode | Stored |
@@ -111,7 +111,7 @@ When the writer changes a view choice on the page, the extension SHALL keep it i
 ### Scenario (refusal): The host refuses a value outside the table
 
 - GIVEN an open preview
-- WHEN a message arrives with the width mode wide, a zoom outside 70 to 200, a preference name that is not in the table, a theme mode that is not one of the four, a palette mode that is not strict, gfm or myst, or an editMode or anchorToEditor that is not a boolean
+- WHEN a message arrives with the width mode wide, a zoom outside 70 to 200, a preference name that is not in the table, a theme mode that is not one of the four, a palette mode that is not strict, gfm, myst or full, or an editMode or anchorToEditor that is not a boolean
 - THEN the message is refused or ignored by the validator of its type and the stored value is unchanged
 
 ### Scenario (refusal): A stale message or a read-only preview stores nothing where the row says so

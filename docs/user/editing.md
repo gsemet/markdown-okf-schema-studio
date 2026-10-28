@@ -119,7 +119,7 @@ environments),
   address (`.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`) gives `![](url)` (`![text](url)` over
   selected text). Cmd/Ctrl+Shift+V pastes the address as it is. Inside code, inside the target of a
   link and for any other scheme the paste is left as plain text. Only the pasted span changes.
-  A select at its start (Cmd/Ctrl+Shift+M) chooses the Strict, GFM or MyST button set for the
+  A select at its start (Cmd/Ctrl+Shift+M) chooses the Strict, GFM, MyST or Full button set for the
   workspace (GFM until you choose, or the `editing.defaultPaletteMode` setting).
   The palette sits just above the text box, never over its text; when you scroll so the top of the
   box is out of view, it stays at the top of the viewport (below the preview controls) until the
@@ -130,7 +130,8 @@ environments),
   table column alignment and `<kbd>` keys; MyST mode adds admonitions with a type list,
   definition lists, math (inline, display, aligned), subscript, superscript, `(name)=` labels,
   `{ref}` and `{doc}` references, `{cite}` citations from the workspace `.bib` files, dropdowns,
-  tables with a caption, figures and `{kbd}` keys. In edit mode, hovering a figure shows Edit figure
+  tables with a caption, figures and `{kbd}` keys; Full mode adds, on top of MyST, the
+  [Vega-Lite and Vega chart](charts.md) commands. In edit mode, hovering a figure shows Edit figure
   (or press Figure with the caret in a `{figure}`): a form edits the source (with Browse), alt text,
   caption, legend, width, alignment and name, and leaves every other option as it was. Figure on a plain paragraph picks an image, writes the
   `{figure}` and opens the same form at once on the caption; Escape keeps the figure as inserted.

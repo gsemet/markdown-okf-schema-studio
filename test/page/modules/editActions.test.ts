@@ -191,6 +191,7 @@ test("the todo toggle is its own inverse", () => {
   assert.equal(run("todo", wrapped), "[" + original + "]");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
 test("the registry lists the actions with metadata and indexes them by id", () => {
   // P11: the `/` menu's own entries (Bulleted and Numbered list) are registered but have no button.
   assert.deepEqual(registry.actions.filter((action) => action.slash?.menuOnly).map((action) => action.id), ["bulletList", "numberedList"]);
@@ -201,7 +202,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
       "rule", "toc", "table",
       "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
-      "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",
+      "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd", "vegaLite", "vega",
     ],
   );
   for (const action of registry.actions) {
@@ -213,7 +214,8 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     ].includes(action.id);
     const myst = ["admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
       "tableCaption", "listTable", "pipeTable", "figure", "roleKbd"].includes(action.id);
-    assert.deepEqual(action.modes, myst ? ["myst"] : github ? ["gfm"] : ["strict"], action.id);
+    const full = ["vegaLite", "vega"].includes(action.id);
+    assert.deepEqual(action.modes, full ? ["full"] : myst ? ["myst"] : github ? ["gfm"] : ["strict"], action.id);
     if (action.slash?.menuOnly) assert.equal(action.shortcut, undefined, "no shortcut: " + action.id);
     assert.ok(action.scopes.includes("block"));
   }

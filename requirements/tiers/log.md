@@ -1,5 +1,36 @@
 # Update Log
 
+## 2026-10-28 (Vega-Lite and Vega charts, the Full palette mode)
+
+- SwRS-MDOKFSTUDIO-DIAG-121 (new, CR 149): a `vega-lite` or `vega` fence renders, in every palette
+  mode, as a chart figure holding the specification text, its kind and a collapsed Chart source
+  section. Verification: test/core/render/chartRendering.test.ts, test/core/render/chartData.test.ts,
+  test/page/chartCsp.test.ts.
+- SwRS-MDOKFSTUDIO-DIAG-122 (new, CR 149): a relative chart data url (csv, tsv, json) is read
+  through the include resource policy (workspace, Restricted Mode, symlinks, 5 MiB, 16 files,
+  include budget) and handed to the page; a remote url or a refused file shows a message and loads
+  nothing. Verification: test/core/render/chartRendering.test.ts, test/core/render/chartData.test.ts,
+  test/page/modules/vegaChart.test.ts.
+- SwRS-MDOKFSTUDIO-DIAG-123 (new, CR 149): the page draws each chart as one themed SVG picture,
+  draws it again on a theme change only, and shows the reason in place of an invalid chart.
+  Verification: test/page/modules/vegaChart.test.ts, test/page/modules/chartError.test.ts,
+  test/page/chartCsp.test.ts.
+- SwRS-MDOKFSTUDIO-DIAG-124 (new, CR 149): the chart runtime script is added only to a page with a
+  chart and runs under the unchanged page policy (no unsafe-eval, connect-src none; expressions by
+  vega-interpreter). Verification: test/session/diagReq.chart.requirements.test.ts,
+  test/page/chartCsp.test.ts (headless Chromium, real policy, no violation),
+  test/page/modules/vegaChart.test.ts (eval and new Function refused), test/security/package-contract.test.ts.
+- SwRS-MDOKFSTUDIO-PALETTE-265 (new, CR 149): the Full palette mode lists the Vega-Lite chart and
+  Vega chart actions in the palette and the slash menu (`/chart`, `/vega`) and no other mode does.
+  Verification: test/core/palette/paletteActions.test.ts, test/page/modules/editActions.test.ts,
+  test/page/modules/editPalette.test.ts, test/page/modules/slashMenu.test.ts,
+  test/page/runtimeEditPalette.test.ts.
+- SwRS-MDOKFSTUDIO-PALETTE-001, SwRS-MDOKFSTUDIO-PALETTE-010, SwRS-MDOKFSTUDIO-LIFE-169 and
+  SwRS-MDOKFSTUDIO-LIFE-170 (CR 149): the palette modes are strict, gfm, myst and full. The unit
+  assertions that listed the three modes (palette select, setting enum in package.json, the
+  host message check, the registry order and modes) changed with it; their intent is unchanged.
+  Verification: `just requirements-lint`, `just check`.
+
 ## 2026-10-28 (real-window scenarios leave edit mode off)
 
 - SwRS-MDOKFSTUDIO-BLOCK-004, SwRS-MDOKFSTUDIO-PALETTE-264 (CR 152): the paste-URL real-window
