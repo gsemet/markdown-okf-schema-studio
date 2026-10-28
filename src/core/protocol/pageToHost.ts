@@ -209,6 +209,9 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   previewViewPreferenceChanged: (message) => typeof message.preference === "string"
     && Object.hasOwn(VIEW_PREFERENCE_VALIDATORS, message.preference)
     && VIEW_PREFERENCE_VALIDATORS[message.preference](message.value),
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-007
+  // The side-by-side diff button of toolbar row 3: on or off.
+  previewSideBySideChanged: (message) => typeof message.on === "boolean",
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-010
   // The palette mode select of the edition palette: strict, GFM or MyST buttons (workspace state).
   previewPaletteModeChanged: (message) => isOneOf(message.mode, PALETTE_MODES),

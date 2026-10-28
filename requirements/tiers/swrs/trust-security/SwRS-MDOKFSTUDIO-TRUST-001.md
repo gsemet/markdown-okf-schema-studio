@@ -84,7 +84,7 @@ When a preview is read-only (created for a document that lies in no workspace fo
 
 | Affordance | In a read-only preview |
 | --- | --- |
-| Edit button | Rendered greyed: the toolbar keeps the same three rows with 13 buttons, and the Edit button carries aria-disabled true, a dimmed icon and a not-allowed cursor. Its title and tooltip say "Editing is unavailable: this file is not in a trusted workspace" (untrusted workspace) or "Editing is unavailable: this file is not in a folder opened in the VS Code workspace" (file outside every workspace folder). A click does nothing: it is not an edit toggle |
+| Edit button | Rendered greyed: the toolbar keeps the same three rows with 14 buttons, and the Edit button carries aria-disabled true, a dimmed icon and a not-allowed cursor. Its title and tooltip say "Editing is unavailable: this file is not in a trusted workspace" (untrusted workspace) or "Editing is unavailable: this file is not in a folder opened in the VS Code workspace" (file outside every workspace folder). A click does nothing: it is not an edit toggle |
 | Edit mode at start | Off (state.editMode is false whenever the toggle button is greyed), even when the context has initialEditMode true |
 | Edition palette | None built: no element with data-sphinx-edit-palette exists |
 | Palette mode message | previewPaletteModeChanged is never posted |
@@ -105,7 +105,7 @@ When a preview is read-only (created for a document that lies in no workspace fo
 
 | Affordance | In a writable preview |
 | --- | --- |
-| Edit button | Present: the toolbar holds 13 buttons |
+| Edit button | Present: the toolbar holds 14 buttons |
 | Edit mode at start | On when the context has initialEditMode true (a page that has the Edit button) |
 | Properties table | The name and value cells carry data-okf-edit-cell and the rows say data-okf-editable true |
 | Edit target under the pointer | With edit mode on, a paragraph under the pointer is outlined as the block a click would edit (see SwRS-MDOKFSTUDIO-BLOCK-017) |
@@ -153,7 +153,7 @@ The refusal of write requests is that of SwRS-MDOKFSTUDIO-TRUST-005.
 
 - Method: Integration suites test/integration/untrusted-suite.ts (the command preview and the Open With editor of an untrusted workspace report readOnly true; the real-window scenario trust-security/r01-untrusted-read-only shows the side preview rendered with a greyed Edit button) and test/integration/standalone-suite.ts (a file outside the workspace reports readOnly true, a document of the workspace false), which check the first scenario. The decision is taken in createSession of src/session/previewManager.ts.
 - Method: Unit test `T38: a read-only preview never starts in edit mode` in test/page/runtimePageControls.test.ts (Edit mode at start, both the read-only and the writable case).
-- Method: Unit test of the toolbar markup in test/core/preview/previewStyles.test.ts (13 buttons in both cases; the read-only Edit button is aria-disabled with the reason as title and tooltip), the unit test `a greyed Edit button does nothing and says why` in test/page/runtimePageControls.test.ts (click ignored, tooltip per reason), the integration suites untrusted-suite.ts and standalone-suite.ts (the page HTML carries the greyed button) and the visual toolbar check test/visual/capture_layout_checks.py, which fails when a read-only toolbar has no greyed Edit button.
+- Method: Unit test of the toolbar markup in test/core/preview/previewStyles.test.ts (14 buttons in both cases; the read-only Edit button is aria-disabled with the reason as title and tooltip), the unit test `a greyed Edit button does nothing and says why` in test/page/runtimePageControls.test.ts (click ignored, tooltip per reason), the integration suites untrusted-suite.ts and standalone-suite.ts (the page HTML carries the greyed button) and the visual toolbar check test/visual/capture_layout_checks.py, which fails when a read-only toolbar has no greyed Edit button.
 - Method: Unit test `T23: a read-only preview has no palette and never posts the message` in test/page/runtimeEditPalette.test.ts (palette and palette mode message rows); the host side refusal of the previewPaletteModeChanged scenario is deduced from the code (the handler checks preview.readOnly), not tested.
 - Method: The integration test test/integration/commentWrite.test.ts (a read-only preview page carries commentsEnabled false); the unit tests of the compose module install it only when comments are enabled. The absence of the button in a real page is deduced from the code (commentCompose is created only when commentsEnabled), not run.
 - Method: Unit tests `T43: no reply box without a reply hook (read-only previews)` and `T44: without resolve and delete hooks (read-only) the popover has neither button` in test/page/modules/commentThreads.test.ts (thread popover rows).

@@ -485,7 +485,8 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 test("preview toolbar has three rows: actions with the collapse button, navigation, view options", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
-  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 14);
+  // Row 3 holds Theme, Width, TOC, Fold, Diff, Side-by-side and Comments (15 buttons in all).
+  assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 15);
   const [mainRow, rest] = toolbar.split('<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">');
   const [viewRow, optionsRow] = rest.split('<div data-sphinx-preview-toolbar-row="options">');
   assert.match(mainRow, /data-sphinx-preview-toolbar-row="main"/u);
@@ -495,12 +496,12 @@ test("preview toolbar has three rows: actions with the collapse button, navigati
   assert.match(viewRow, /^<div data-sphinx-preview-toolbar-row="view">/u);
   assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 4);
   assert.match(viewRow, /data-sphinx-preview-back[\s\S]*data-sphinx-preview-next[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in/u);
-  assert.equal((optionsRow.match(/<button\b/gu) ?? []).length, 6);
+  assert.equal((optionsRow.match(/<button\b/gu) ?? []).length, 7);
   assert.match(optionsRow, /data-sphinx-preview-theme-toggle[\s\S]*data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-fold-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
-  assert.match(optionsRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><button[^>]*data-sphinx-preview-comments-toggle aria-pressed="true"[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
+  assert.match(optionsRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><button[^>]*data-sphinx-preview-sbs-toggle[^>]*><svg[\s\S]*<\/svg><\/button><button[^>]*data-sphinx-preview-comments-toggle aria-pressed="true"[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
   // Read-only previews: the Edit button stays, greyed (aria-disabled) with the reason as tooltip.
   const readOnly = renderPreviewToolbar(false);
-  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 14);
+  assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 15);
   assert.match(readOnly, /<button[^>]*data-sphinx-preview-edit-toggle[^>]*aria-disabled="true"[^>]*title="Editing is unavailable: this file is not in a trusted workspace"[^>]*data-tooltip="Editing is unavailable: this file is not in a trusted workspace"/u);
   assert.doesNotMatch(toolbar, /aria-disabled/u);
   assert.match(PREVIEW_THEME_CSS, /button\[aria-disabled="true"\]\s*\{[^}]*cursor: not-allowed;/u);
@@ -516,7 +517,7 @@ test("preview toolbar has three rows: actions with the collapse button, navigati
   ]) {
     assert.ok(toolbar.includes(control), `expected toolbar control ${control}`);
   }
-  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 14);
+  assert.equal((toolbar.match(/data-tooltip="/gu) ?? []).length, 15);
   assert.match(
     PREVIEW_THEME_CSS,
     /button\[data-tooltip\]::after\s*\{[^}]*content: attr\(data-tooltip\);[^}]*visibility: hidden;[^}]*opacity: 0;/u,
@@ -1285,4 +1286,21 @@ test("CR 143: the chevron shows on hover, focus and while folded, and a folded b
 test("CR 143: the toolbar has a Fold button, off until a section is folded", () => {
   assert.match(renderPreviewToolbar(),
     /<button type="button" data-sphinx-preview-fold-toggle aria-pressed="false" aria-label="Fold all sections"/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-008
+test("CR147: the toolbar offers a Side-by-side button after the Diff button, not pressed at first", () => {
+  const toolbar = renderPreviewToolbar();
+  assert.match(toolbar, /data-sphinx-preview-diff-toggle[\s\S]*data-sphinx-preview-sbs-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-comments-toggle/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-009
+test("CR147: the side-by-side cards are two columns, switch off with the page attribute and never show in edit mode", () => {
+  const css = PREVIEW_THEME_CSS;
+  assert.match(css, /\[data-okf-sbs-card\] \{[^}]*display: grid;[^}]*grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\);/u);
+  assert.match(css, /html\[data-sphinx-preview-sbs="off"\] \[data-okf-sbs-card\],\s*html\[data-sphinx-preview-edit-mode="on"\] \[data-okf-sbs-card\] \{\s*display: none;/u);
+  assert.match(css, /html\[data-sphinx-preview-sbs="on"\]:not\(\[data-sphinx-preview-edit-mode="on"\]\) \[data-okf-sbs-replaced\] \{\s*display: none;/u);
+  assert.match(css, /\[data-okf-sbs-word="removed"\] \{[^}]*text-decoration: line-through;/u);
+  assert.match(css, /\[data-okf-sbs-word="added"\] \{[^}]*text-decoration: underline;/u);
+  assert.match(css, /html\[data-okf-incoming-changes="false"\] \[data-sphinx-preview-sbs-toggle\] \{\s*display: none;/u);
 });
