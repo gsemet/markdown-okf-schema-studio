@@ -1,0 +1,8 @@
+1
+00:00:00,300 --> 00:00:02,900
+Agents write plans in Markdown. Raw text is hard to review.
+
+2
+00:00:04,900 --> 00:00:11,700
+Read the same plan as a real page: cards, diagram, table.
+
