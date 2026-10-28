@@ -14,6 +14,7 @@ import { pathToFileURL } from "node:url";
 
 import type { HostDocument } from "../../src/host-api/documentStore";
 import type { HostServices } from "../../src/host-api/index";
+import { nodeHostPorts } from "./nodeHostPorts";
 import type { PanelGroups, PreviewPanel } from "../../src/host-api/previewPanel";
 import type { PairedEditor } from "../../src/host-api/textEditors";
 import { createNodeFileSystem } from "../../src/node-services/nodeFileSystem";
@@ -71,6 +72,7 @@ function fixture(options: { readOnly?: boolean; followsActiveEditor?: boolean; a
     editors: [] as PairedEditor[],
   };
   const host = {
+    ...nodeHostPorts,
     capabilities: { editorPairing: true },
     files,
     documents: {

@@ -7,7 +7,7 @@
 
 import type * as vscode from "vscode";
 
-import type { BuildQueueState } from "../node-services/build/buildQueue";
+import type { BuildQueueState } from "../core/render/buildQueue";
 import type { CommentThread } from "../core/comments/commentModel";
 import type { PaletteMode } from "../core/configuration/editingConfiguration";
 import type { HostDocument } from "../host-api/documentStore";

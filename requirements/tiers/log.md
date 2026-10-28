@@ -636,3 +636,14 @@
   primitive (`src/core/syntax/markdownSyntax.ts`): a fence opens at up to three spaces of indent and
   closes only with a matching fence followed by white space; front matter is a first-line `---`
   closed by `---` or `...`. Verification: test/core/syntax/markdownSyntax.test.ts.
+
+## 2026-10-28
+
+- SwRS-MDOKFSTUDIO-LIFE-039, SwRS-MDOKFSTUDIO-LIFE-062, SwRS-MDOKFSTUDIO-FMSCHEMA-067 (CR 135 T24,
+  pure refactor, behaviour unchanged): the render queue moved to `src/core/render/buildQueue.ts`
+  (host-neutral); the session layer reaches the canonical path, the source check, the user name, the
+  render queue and the direct watches of linked targets through the `HostPaths`, `RenderQueues` and
+  `LinkedTargetWatcher` ports (Node implementations in node-services, in-memory ones in host-memory);
+  `fileLinkTypes.ts` breaks the `fileLinks` / `okfFrontmatter` cycle; the session-to-node-services
+  exception list of `.dependency-cruiser.cjs` is empty. Verification:
+  test/host-memory/memoryHostSession.test.ts, `just check-boundaries`, `just check`.

@@ -5,7 +5,7 @@
  */
 
 import { checkFrontmatterCandidate, FRONTMATTER_STALE, planFrontmatterSave } from "../../core/edits/frontmatterEdit";
-import type { LinkedTargetWatch } from "../../node-services/linkedTargetWatch";
+import type { LinkedTargetWatch } from "../../host-api/linkedTargets";
 import { analyzeFrontmatter, type FrontmatterResult } from "../../core/frontmatter/okfFrontmatter";
 import { renderPropertiesTable, replacePropertiesTableHtml } from "../../core/frontmatter/propertiesTable";
 import type { HostDocument } from "../../host-api/documentStore";

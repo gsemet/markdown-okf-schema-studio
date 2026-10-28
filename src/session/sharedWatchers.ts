@@ -8,7 +8,7 @@ import * as path from "node:path";
 
 import type { Disposable } from "../host-api/events";
 import type { Watcher } from "../host-api/watcher";
-import { type LinkedTargetWatch, watchLinkedTargetDirectly } from "../node-services/linkedTargetWatch";
+import type { LinkedTargetWatch, LinkedTargetWatcher } from "../host-api/linkedTargets";
 import { globLiteral } from "./sessionDocuments";
 
 /** The callbacks of one listener of a shared watcher; each receives the file system path. */
@@ -104,6 +104,17 @@ const CAPPED_WATCH: LinkedTargetWatch = {
   dispose: () => undefined,
 };
 
+/** Direct watches for a host without a direct watcher: armed, they never deliver an event. */
+const NO_DIRECT_WATCHER: LinkedTargetWatcher = {
+  watch: () => {
+    let closed = false;
+    return {
+      state: () => ({ status: closed ? "closed" : "watching", events: 0 }),
+      dispose: () => { closed = true; },
+    };
+  },
+};
+
 /**
  * The watches of linked targets (host watcher plus direct watch), one pair per target however many
  * previews link it, at most {@link MAX_LINKED_TARGET_WATCHES} targets. Past the cap a target gets no
@@ -116,6 +127,7 @@ export class SharedLinkedTargetWatches {
   public constructor(
     private readonly watchers: SharedWatchers,
     private readonly limit = MAX_LINKED_TARGET_WATCHES,
+    private readonly direct: LinkedTargetWatcher = NO_DIRECT_WATCHER,
   ) {}
 
   /** How many targets are watched. */
@@ -153,7 +165,7 @@ export class SharedLinkedTargetWatches {
       });
       // The host's watcher of a path inside a workspace folder rides on the shared recursive
       // workspace watcher, which can miss a write on Linux: the folder is also watched directly.
-      entry = { listeners, hostListeners, hostHold, direct: watchLinkedTargetDirectly(target, broadcast) };
+      entry = { listeners, hostListeners, hostHold, direct: this.direct.watch(target, broadcast) };
       this.entries.set(target, entry);
     }
     const shared = entry;

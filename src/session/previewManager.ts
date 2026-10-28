@@ -9,7 +9,6 @@
 
 import * as path from "node:path";
 
-import { BuildQueue } from "../node-services/build/buildQueue";
 import { FRONTMATTER_CONFIGURATION_SECTION, readFrontmatterConfiguration } from "../core/configuration/frontmatterConfiguration";
 import {
   PLANTUML_CONFIGURATION_SECTION,
@@ -22,7 +21,6 @@ import type { HostServices } from "../host-api/index";
 import type { PanelGroups, PreviewPanel } from "../host-api/previewPanel";
 import type { WorkspaceFolderInfo } from "../host-api/workspaceInfo";
 import { createPreviewNavigator, type PreviewNavigator } from "./previewNavigator";
-import { canonicalPath, sourceExists } from "../node-services/paths";
 import { LatestRequest } from "../core/preview/flushWait";
 import { buildStatusWebviewHtml, type PreviewStatus } from "./webview";
 import { createMessageRouter } from "../core/protocol/router";
@@ -122,7 +120,7 @@ export class PreviewManager {
   ) {
     this.navigator = createPreviewNavigator(host.files);
     this.sharedWatchers = new SharedWatchers(host.watcher);
-    this.linkedTargetWatches = new SharedLinkedTargetWatches(this.sharedWatchers);
+    this.linkedTargetWatches = new SharedLinkedTargetWatches(this.sharedWatchers, undefined, host.linkedTargets);
     this.events = new HostEvents(this);
     this.choices = new WorkspaceChoices(host);
     this.router = createMessageRouter<PageToHostMessage, [PreviewSession], PageMessageResult>();
@@ -249,15 +247,15 @@ export class PreviewManager {
   }
 
   /** The path with its symbolic links resolved; the resolved path when the file does not exist. */
-  public readonly canonicalPath = canonicalPath;
+  public readonly canonicalPath = (filePath: string): string => this.host.paths.canonicalPath(filePath);
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-062
   /** True when the session's source is an existing Markdown file inside its root. */
   public sourceAvailable(session: PreviewSession): boolean {
     const sourcePath = this.activePathOf(session);
     return (!session.document || isDocumentEligible(session.document))
-      && isPathWithin(canonicalPath(session.workspaceRoot), canonicalPath(sourcePath))
-      && sourceExists(sourcePath);
+      && isPathWithin(this.canonicalPath(session.workspaceRoot), this.canonicalPath(sourcePath))
+      && this.host.paths.sourceExists(sourcePath);
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-LIFE-024
@@ -307,7 +305,7 @@ export class PreviewManager {
       : [...new Set([resourceRoot, ...sessionRoots])];
     const initialStatus: PreviewStatus = document
       && isDocumentEligible(document)
-      && sourceExists(this.pathOf(document))
+      && host.paths.sourceExists(this.pathOf(document))
       ? "pending"
       : "missing-source";
     const initialMessage = initialStatus === "pending"
@@ -340,7 +338,7 @@ export class PreviewManager {
       frontmatterConfiguration: readFrontmatterConfiguration(host.settings.section(FRONTMATTER_CONFIGURATION_SECTION)),
     });
     // @implements_req SwRS-MDOKFSTUDIO-LIFE-039
-    session.queue = new BuildQueue<HostDocument, RenderResult>({
+    session.queue = host.renderQueues.create<HostDocument, RenderResult>({
       debounceMs: 40,
       // The MyST render time alone: a worker start or the engine load does not slow typing down.
       durationOf: (result) => result.renderMs,
@@ -388,7 +386,7 @@ export class PreviewManager {
         }
       },
       onDidDelete: (deletedPath) => {
-        if (canonicalPath(deletedPath) === canonicalPath(this.activePathOf(session))) {
+        if (this.canonicalPath(deletedPath) === this.canonicalPath(this.activePathOf(session))) {
           this.rendering.setMissingSource(session, "The active Markdown source was deleted.");
         } else {
           this.events.refreshReferencedPath(session, deletedPath);

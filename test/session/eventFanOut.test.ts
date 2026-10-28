@@ -13,6 +13,7 @@ import { mock, test } from "node:test";
 
 import { getCachedMarkdownStemIndex } from "../../src/core/frontmatter/stemIndex";
 import type { HostServices } from "../../src/host-api/index";
+import { nodeHostPorts } from "./nodeHostPorts";
 import type { PanelGroups } from "../../src/host-api/previewPanel";
 import { createMemoryDocumentStore } from "../../src/host-memory/memoryDocumentStore";
 import { DISCOVERY_EXCLUDE, LinkController, MAX_DISCOVERED_FILES } from "../../src/session/features/links";
@@ -65,6 +66,7 @@ function fixture(sessionCount: number) {
   const store = createMemoryDocumentStore();
   const fakeWatchers = fakeWatcherPort();
   const host = {
+    ...nodeHostPorts,
     files: {},
     documents: store,
     editors: { active: () => undefined },

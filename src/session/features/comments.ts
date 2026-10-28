@@ -25,7 +25,6 @@ import { createCommentStore, hashText, newId } from "../../core/comments/comment
 import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../../core/configuration/commentsConfiguration";
 import type { DocumentChange, HostDocument } from "../../host-api/documentStore";
 import { isFileNotFound } from "../../host-api/fileSystem";
-import { osUserName } from "../../node-services/paths";
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { RenamedFile } from "../hostEvents";
@@ -427,7 +426,7 @@ export class CommentsController {
     const author = await resolveAuthor({
       setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION, documentId)).authorName,
       gitName: () => host.vcs.userName(documentId),
-      osUserName,
+      osUserName: () => host.paths.userName(),
     });
     const now = new Date();
     const result = await this.store.update(sidecar, path.basename(documentPath), change(author, now));

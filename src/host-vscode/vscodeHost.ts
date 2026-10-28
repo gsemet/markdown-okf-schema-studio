@@ -24,6 +24,9 @@ import type { PairedEditor, TextEditors } from "../host-api/textEditors";
 import type { VcsInfo } from "../host-api/vcsInfo";
 import type { FileWatcher, Watcher } from "../host-api/watcher";
 import type { WorkspaceFolderInfo, WorkspaceInfo } from "../host-api/workspaceInfo";
+import { nodeRenderQueues } from "../node-services/build/buildQueue";
+import { nodeLinkedTargetWatcher } from "../node-services/linkedTargetWatch";
+import { nodeHostPaths } from "../node-services/paths";
 import { createNodeFileSystem } from "../node-services/nodeFileSystem";
 import { createNodeProcessRunner } from "../node-services/processRunner";
 import { createWorkerRenderer } from "../node-services/renderWorker";
@@ -329,6 +332,10 @@ export function createVscodeHost(): VscodeHost {
     files: createVscodeFileSystem(),
     // The extension host runs in Node: the synchronous schema lookup reads the disk directly.
     schemaFiles: nodeSchemaFiles,
+    // Likewise the synchronous path checks, the render queue and the direct watches of linked files.
+    paths: nodeHostPaths,
+    renderQueues: nodeRenderQueues,
+    linkedTargets: nodeLinkedTargetWatcher,
     settings: createVscodeSettings(),
     workspace: createVscodeWorkspaceInfo(),
     ui: createVscodeUi(logger),

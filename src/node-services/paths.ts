@@ -9,6 +9,8 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
+import type { HostPaths } from "../host-api/hostPaths";
+
 /** `path` with its symbolic links resolved, or `path.resolve(path)` when it cannot be resolved. */
 export function canonicalPath(filePath: string): string {
   try {
@@ -31,3 +33,10 @@ export function sourceExists(filePath: string): boolean {
 export function osUserName(): string {
   return os.userInfo().username;
 }
+
+/** The synchronous path facts of a Node host, as the `HostPaths` port. */
+export const nodeHostPaths: HostPaths = {
+  canonicalPath,
+  sourceExists,
+  userName: osUserName,
+};

@@ -14,10 +14,10 @@
 
 import * as path from "node:path";
 import { parseDocument } from "yaml";
+import type { FileLinkInspectionOptions } from "./fileLinkTypes";
 import {
   inspectFrontmatterLinks,
   filenameStemSuggestions,
-  type FileLinkInspectionOptions,
 } from "./fileLinks";
 import { extractFrontmatter, extractFrontmatterShared, stripJson5Comments } from "./frontmatterParse";
 import {

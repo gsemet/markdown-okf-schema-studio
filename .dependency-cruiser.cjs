@@ -13,7 +13,7 @@
  *   node-services  Node implementations of ports and Node-only services (files, processes,
  *                  Sphinx build, watchers).
  *   session        the host-neutral controllers: PreviewManager, PreviewSession, feature
- *                  controllers. Ports only (plus the debt listed in SESSION_NODE_SERVICES_DEBT).
+ *                  controllers. Ports only (no node-services, no exception).
  *   host-memory    an in-memory host (documents and files) for tests and future headless hosts.
  *   host-vscode    the VS Code host: activation, adapters of the ports, test hooks. With
  *                  `src/extension.ts`, the only code that may import `vscode`.
@@ -69,17 +69,6 @@ const NODE_DEBT = {
   "src/core/security/resource-policy.ts": {
     builtins: ["fs", "path"], reason: "realpath checks of local resources", removal: PORT_FOLLOW_UP },
 };
-
-/**
- * node-services modules the session layer still imports directly instead of through a port. Each
- * is synchronous Node access the session needs today; it goes away when a port covers it (a
- * `realpath`/`exists` on `FileSystem`, a build-queue factory and a linked-file watcher on the host).
- */
-const SESSION_NODE_SERVICES_DEBT = [
-  "src/node-services/paths.ts", // canonicalPath (realpathSync), sourceExists (statSync), OS user name
-  "src/node-services/build/buildQueue.ts", // the render queue (its canonicalPath reads the disk)
-  "src/node-services/linkedTargetWatch.ts", // fs.watch on frontmatter link targets
-];
 
 const { builtinModules } = require("node:module");
 
@@ -194,11 +183,11 @@ module.exports = {
       to: { dependencyTypes: ["core"], pathNot: builtins(["path"]) },
     },
     {
-      name: "session-node-services-debt",
-      comment: "The session layer uses node-services only through ports, except the listed debt.",
+      name: "session-not-to-node-services",
+      comment: "The session layer uses node-services only through ports: no exception.",
       severity: "error",
       from: { path: "^src/session/" },
-      to: { path: "^src/node-services/", pathNot: exactly(SESSION_NODE_SERVICES_DEBT) },
+      to: { path: "^src/node-services/" },
     },
     // ----- host-memory -----
     {

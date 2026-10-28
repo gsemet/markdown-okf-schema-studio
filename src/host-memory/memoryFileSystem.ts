@@ -13,6 +13,8 @@ export interface MemoryFileSystem extends FileSystem {
   addFile(path: string, text: string, mtimeMs?: number): void;
   /** Creates an empty directory and its parents. */
   addDirectory(path: string): void;
+  /** True when `path` is a file (not a directory); synchronous, for the `HostPaths` port. */
+  fileExists(path: string): boolean;
 }
 
 function notFound(path: string): Error {
@@ -67,6 +69,7 @@ export function createMemoryFileSystem(): MemoryFileSystem {
       modified.set(target, mtimeMs ?? Date.now());
     },
     addDirectory,
+    fileExists: (path) => files.has(normalizePosixPath(path)),
     async stat(path): Promise<FileStat> {
       const target = normalizePosixPath(path);
       const kind = kindAt(target);

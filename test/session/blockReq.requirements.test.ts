@@ -10,6 +10,7 @@ import { test } from "node:test";
 
 import type { TextEdit } from "../../src/core/edits/textEdit";
 import type { HostServices } from "../../src/host-api/index";
+import { nodeHostPorts } from "./nodeHostPorts";
 import type { PanelGroups } from "../../src/host-api/previewPanel";
 import { createMemoryDocumentStore } from "../../src/host-memory/memoryDocumentStore";
 import { PreviewManager } from "../../src/session/previewManager";
@@ -64,6 +65,7 @@ function fixture(options: FixtureOptions = {}) {
   });
   const warnings: string[] = [];
   const host = {
+    ...nodeHostPorts,
     files: {},
     documents,
     ui: {

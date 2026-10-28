@@ -1,23 +1,9 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-/** What a direct watch of one linked target holds, for the test snapshot and failure messages. */
-export interface LinkedTargetWatchState {
-  /**
-   * `watching` while the operating-system watch is armed; `failed` when it could not be armed or
-   * broke (then `error` says why); `closed` after dispose.
-   */
-  status: "watching" | "failed" | "closed";
-  /** The error code (or message) that stopped the watch, when `status` is `failed`. */
-  error?: string;
-  /** How many events naming the target (or unnamed) the watch delivered. */
-  events: number;
-}
+import type { LinkedTargetWatch, LinkedTargetWatcher, LinkedTargetWatchState } from "../host-api/linkedTargets";
 
-export interface LinkedTargetWatch {
-  state(): LinkedTargetWatchState;
-  dispose(): void;
-}
+export type { LinkedTargetWatch, LinkedTargetWatchState };
 
 function errorText(error: unknown): string {
   const code = (error as NodeJS.ErrnoException | undefined)?.code;
@@ -71,3 +57,6 @@ export function watchLinkedTargetDirectly(target: string, onEvent: () => void): 
     },
   };
 }
+
+/** The direct watches of linked targets of a Node host, as the `LinkedTargetWatcher` port. */
+export const nodeLinkedTargetWatcher: LinkedTargetWatcher = { watch: watchLinkedTargetDirectly };
