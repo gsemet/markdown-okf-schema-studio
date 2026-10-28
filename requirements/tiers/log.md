@@ -517,6 +517,16 @@
   BLOCK-004 (a preview that has just opened holds no keyboard focus in the test window).
   Verification: test/build/integrationEditModeRestore.test.ts, test/integration/windowSwitchKeys.test.ts.
 
+### Files dropped from the Explorer become links
+
+- SwRS-MDOKFSTUDIO-PALETTE-004 (new, CR 146): files dropped from the Explorer onto the preview in
+  edit mode (no block editor open) mark the nearest insertion bar and are written as a new block with
+  one relative reference each, `![name](path)` for an image and `[title](path)` otherwise (first
+  heading of a Markdown file), in one undo step; files outside the workspace folders are skipped.
+  Verification: test/core/mapping/dropReferences.test.ts, test/page/modules/dropFiles.test.ts,
+  test/page/runtimeFileDrop.test.ts, test/session/dropFiles.requirements.test.ts,
+  test/integration/dropFiles.test.ts, `just requirements-update`.
+
 ### MyST cards, tabs and version titles
 
 - SwRS-MDOKFSTUDIO-MYST-100 (new, CR 148): a standalone `{card}` renders like a grid card, with its

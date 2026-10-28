@@ -24,6 +24,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-001
 - SwRS-MDOKFSTUDIO-PALETTE-002
 - SwRS-MDOKFSTUDIO-PALETTE-003
+- SwRS-MDOKFSTUDIO-PALETTE-004
 - SwRS-MDOKFSTUDIO-PALETTE-021
 - SwRS-MDOKFSTUDIO-PALETTE-039
 - SwRS-MDOKFSTUDIO-PALETTE-043
@@ -103,6 +104,7 @@ As a writer, I format and insert Markdown from buttons or keyboard shortcuts wit
   - [SwRS-MDOKFSTUDIO-PALETTE-001](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-001.md): The palette mode decides the button sets, in registry order
   - [SwRS-MDOKFSTUDIO-PALETTE-002](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-002.md): Every edit bar button shows the slide-in tooltip and the rule button a dashes icon
   - [SwRS-MDOKFSTUDIO-PALETTE-003](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-003.md): The Table of contents action inserts a \[TOC\] marker
+  - [SwRS-MDOKFSTUDIO-PALETTE-004](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-004.md): Files dropped from the Explorer become links or images at the drop point
   - [SwRS-MDOKFSTUDIO-PALETTE-021](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-021.md): The palette is a toolbar above the editor that sticks over a tall editor
   - [SwRS-MDOKFSTUDIO-PALETTE-039](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-039.md): A palette action edits in one undo step or leaves the text unchanged and says why
   - [SwRS-MDOKFSTUDIO-PALETTE-043](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-043.md): The Heading list sets the heading level of the touched lines

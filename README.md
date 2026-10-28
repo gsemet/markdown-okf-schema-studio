@@ -175,6 +175,7 @@ are one button away.
 - A Notion-style slash menu and an edition palette (Strict, GFM, MyST or Full buttons).
 - Block selection, multi-block copy, cut, paste and move.
 - Rich paste from Google Docs, Word or a web page, converted to Markdown.
+- Dropping files from the Explorer writes links and images at the drop point.
 - Pasting a URL makes a link (over selected text), an autolink or, for an image address, an image.
 - A Sphinx check of the syntax you use against `myst_enable_extensions` in `conf.py`.
 

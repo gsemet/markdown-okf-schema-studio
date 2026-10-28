@@ -22,6 +22,7 @@
 
 import { isValidAnchor, MAX_BODY_LENGTH } from "../comments/commentModel";
 import { MAX_THREAD_REPLY_LENGTH } from "../comments/inlineThread";
+import { MAX_DROPPED_FILES, MAX_DROPPED_URI_LENGTH } from "../mapping/dropReferences";
 import { isValidLabelName } from "../mapping/labelRename";
 import { isBase64, MAX_PASTED_IMAGE_BASE64_LENGTH, PASTED_IMAGE_MIME_TYPES } from "../mapping/pastedImage";
 import { isPreviewThemeMode } from "../state/previewTheme";
@@ -291,6 +292,16 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-243
   previewBlocksPaste: (message) => Number.isSafeInteger(message.insertAfterLine)
     && (message.insertAfterLine as number) >= 0
+    && (message.pinLine === undefined || isSourceLine(message.pinLine))
+    && isPinViewportTop(message.pinViewportTop),
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-004
+  // Files dropped from the Explorer (CR 146): the `file:` addresses (the host re-checks every one)
+  // and the line to write the links after.
+  previewDropFiles: (message) => Number.isSafeInteger(message.insertAfterLine)
+    && (message.insertAfterLine as number) >= 0
+    && Array.isArray(message.uris)
+    && message.uris.length > 0 && message.uris.length <= MAX_DROPPED_FILES
+    && message.uris.every((uri) => isBoundedString(uri, MAX_DROPPED_URI_LENGTH) && uri !== "")
     && (message.pinLine === undefined || isSourceLine(message.pinLine))
     && isPinViewportTop(message.pinViewportTop),
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-069

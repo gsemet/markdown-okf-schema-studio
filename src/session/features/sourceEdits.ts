@@ -25,6 +25,14 @@ import {
   STALE_REQUEST,
 } from "../../core/edits/sourceEdits";
 import type { TextEdit } from "../../core/edits/textEdit";
+import {
+  droppedFilePath,
+  droppedText,
+  firstHeadingTitle,
+  isMarkdownFileName,
+  MAX_HEADING_SCAN_BYTES,
+  type DroppedFile,
+} from "../../core/mapping/dropReferences";
 import type { HostDocument } from "../../host-api/documentStore";
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
@@ -52,6 +60,7 @@ export class SourceEditController {
     router.on("previewBlocksCopy", (message, preview) => this.handleBlocksCopyCut(preview, message));
     router.on("previewBlocksCut", (message, preview) => this.handleBlocksCopyCut(preview, message));
     router.on("previewBlocksPaste", (message, preview) => this.handleBlocksPaste(preview, message));
+    router.on("previewDropFiles", (message, preview) => this.handleDropFiles(preview, message));
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-058
@@ -379,7 +388,7 @@ export class SourceEditController {
 
   private postBlocksResult(
     preview: PreviewSession,
-    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksPaste">,
+    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksPaste" | "previewDropFiles">,
     op: BlocksOp,
     result: { ok: true } | { ok: false; reason: string },
   ): void {
@@ -396,7 +405,7 @@ export class SourceEditController {
   /** Read-only, open-editor and stale-version refusals shared by copy, cut and paste of blocks. */
   private blocksDocument(
     preview: PreviewSession,
-    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksPaste">,
+    message: PageMessageOf<"previewBlocksCopy" | "previewBlocksCut" | "previewBlocksPaste" | "previewDropFiles">,
     op: BlocksOp,
   ): HostDocument | undefined {
     const refuse = (reason: string): undefined => {
@@ -501,6 +510,78 @@ export class SourceEditController {
       return this.apply(document, [plan.edit]).then((applied) => {
         if (!applied) {
           refuse("VS Code could not apply the paste.");
+          return;
+        }
+        this.manager.scroll.storePendingPin(preview, {
+          documentId: message.documentId,
+          pinLine: message.pinLine,
+          pinViewportTop: message.pinViewportTop,
+        }, document.revision);
+        this.postBlocksResult(preview, message, "paste", { ok: true });
+      });
+    }).then(undefined, (error: unknown) => refuse(error instanceof Error ? error.message : String(error)));
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-004
+  /**
+   * Files dropped from the Explorer: one relative Markdown reference per file, written as a new
+   * block after the line of the drop. Only `file:` addresses inside a workspace folder count; the
+   * first heading of a Markdown file is read (at most 64 KiB) for the link text. Refused like a
+   * paste of blocks (read-only, open editor, stale version, next to an included block).
+   */
+  private handleDropFiles(
+    preview: PreviewSession,
+    message: PageMessageOf<"previewDropFiles">,
+  ): PromiseLike<void> | undefined {
+    const { host } = this.manager;
+    const document = this.blocksDocument(preview, message, "paste");
+    if (!document) {
+      return undefined;
+    }
+    const refuse = (reason: string): void => this.postBlocksResult(preview, message, "paste", { ok: false, reason });
+    const documentPath = document.path;
+    if (documentPath === undefined) {
+      refuse("Save the document before dropping files into it.");
+      return undefined;
+    }
+    const nextToInclude = checkBlocksPaste(document.getText(), message.insertAfterLine);
+    if (nextToInclude) {
+      refuse(nextToInclude.refused);
+      return undefined;
+    }
+    const paths = message.uris
+      .map(droppedFilePath)
+      .filter((file): file is string => file !== undefined && host.workspace.folderOf(file) !== undefined);
+    if (paths.length === 0) {
+      refuse("Only files inside a workspace folder can be dropped.");
+      return undefined;
+    }
+    const describe = async (file: string): Promise<DroppedFile> => {
+      if (!isMarkdownFileName(file)) return { path: file };
+      try {
+        const bytes = await host.files.readFile(file);
+        const title = firstHeadingTitle(new TextDecoder().decode(bytes.subarray(0, MAX_HEADING_SCAN_BYTES)));
+        return title === undefined ? { path: file } : { path: file, title };
+      } catch {
+        return { path: file };
+      }
+    };
+    return Promise.all(paths.map(describe)).then((files) => {
+      if (preview.document !== document || document.revision !== message.revision) {
+        refuse("The document changed while dropping. Try again.");
+        return undefined;
+      }
+      const text = droppedText(documentPath, files);
+      const plan = text === undefined
+        ? { refused: "Those files cannot be referenced from this document (another drive, or an unusual name)." }
+        : planBlocksPaste(document.getText(), message.insertAfterLine, text);
+      if ("refused" in plan) {
+        refuse(plan.refused);
+        return undefined;
+      }
+      return this.apply(document, [plan.edit]).then((applied) => {
+        if (!applied) {
+          refuse("VS Code could not apply the drop.");
           return;
         }
         this.manager.scroll.storePendingPin(preview, {

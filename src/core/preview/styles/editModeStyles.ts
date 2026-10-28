@@ -89,6 +89,23 @@ html:not([data-sphinx-preview-edit-mode="on"]) .sphinx-preview-insert-point {
   display: none;
 }
 
+/* Files dragged from the Explorer: a line across the page where the links will land. */
+.sphinx-preview-insert-point--drop::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -2px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--studio-focusBorder, Highlight);
+  pointer-events: none;
+}
+
+.sphinx-preview-insert-point--drop button {
+  opacity: 1;
+}
+
 .sphinx-preview-insert-point button {
   position: absolute;
   left: -1.6em;
