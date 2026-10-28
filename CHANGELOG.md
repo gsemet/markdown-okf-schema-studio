@@ -3,13 +3,13 @@
 ## Unreleased
 
 - The writing skill can be installed as an agent plugin: the repository root is a plugin for Claude
-  Code (`.claude-plugin/`), an Agent Plugins 1.0.0 `plugin.json` read by GitHub Copilot, VS Code agent
-  plugins and OpenAI Codex, and a Codex marketplace (`.agents/plugins/marketplace.json`), all
-  pointing at the single `skills/writing-for-markdown-okf-schema-studio/` folder. The README section "Usage with coding agent"
-  lists the install commands of each host (plugin first; copying the skill folder is only a last resort for
-  hosts without plugin support), and the skill tells the reader how to install the extension. The
-  plugin manifests are not part of the VSIX, and `just version` keeps their `version` equal to the
-  extension version (a test fails on drift).
+  Code (`.claude-plugin/`), an Agent Plugins 1.0.0 `plugin.json` read by GitHub Copilot, VS Code
+  agent plugins and OpenAI Codex, and a Codex marketplace (`.agents/plugins/marketplace.json`), all
+  pointing at the single `skills/writing-for-markdown-okf-schema-studio/` folder. The README section
+  "Usage with coding agent" lists the install commands of each host (plugin first; copying the skill
+  folder is only a last resort for hosts without plugin support), and the skill tells the reader how
+  to install the extension. The plugin manifests are not part of the VSIX, and `just version` keeps
+  their `version` equal to the extension version (a test fails on drift).
 - Keyboard navigation goes down and up the structure of the page in edit mode: Right moves the
   selection into a table (its first cell), an admonition, card or tab (its first inner block) or,
   with nothing selected, to the first block; Left and Escape go back up. On a table cell the arrow
