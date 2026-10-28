@@ -560,6 +560,9 @@
 - `~~text~~` now renders struck through in the preview, like on GitHub.
 - Editing a block that comes from an included file now opens the `{include}` directive in the
   host document instead of unrelated lines.
+- Editing, moving or deleting a block placed after a GitHub alert (`> [!NOTE]`) now acts on that
+  block's own lines; before, each alert shifted every block after it by one line, so an edit could
+  overwrite the wrong lines.
 - Pointing at any code block shows a copy button at its top right; one click copies the raw code and
   the icon turns into a check mark for a moment.
 - Every setting now explains what it does and what each value changes, in a grouped order; the
