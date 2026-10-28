@@ -39,7 +39,6 @@ jobs:
     env:
       STUDIO_NPM: npm --registry=https://registry.npmjs.org/
       DEPLOYMENT_TAG: ${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
-      GH_TOKEN: ${{ github.token }}
     permissions:
       contents: read
       actions: read
@@ -78,48 +77,68 @@ jobs:
             echo "Deployment tag $DEPLOYMENT_TAG does not match package version $expected_tag" >&2
             exit 1
           fi
+      # Reuse of CI reports: on the automatic release path (tag-release calls this workflow in the same
+      # push run) no heavy run of the release commit exists yet, so the selection finds nothing and
+      # the suite runs below. The reuse pays off for a later manual dispatch after a heavy run of the
+      # commit (backlog item require-green-heavy-before-tagging tracks the real fix).
+      # An explicit run_id goes through the same checks and fails closed on any mismatch; the
+      # automatic selection falls back to the suite on any API or download problem.
       - name: Find the end-to-end reports of this commit
         id: reports
         shell: bash
         env:
+          GH_TOKEN: ${{ github.token }}
           REQUESTED_RUN_ID: ${{ inputs.run_id }}
         run: |
           set -euo pipefail
-          run_id="$REQUESTED_RUN_ID"
-          if [[ -z "$run_id" ]]; then
-            run_id="$(uv run --no-sync python scripts/select_e2e_run.py --repo "$GITHUB_REPOSITORY" --sha "$(git rev-parse HEAD)")"
+          args=(--repo "$GITHUB_REPOSITORY" --sha "$(git rev-parse HEAD)")
+          if [[ -n "$REQUESTED_RUN_ID" ]]; then
+            args+=(--run-id "$REQUESTED_RUN_ID")
           fi
+          run_id="$(uv run --no-sync python scripts/select_e2e_run.py "${args[@]}")"
           echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
           echo "Reports from run: ${run_id:-none (the suite runs below)}"
-      # The merged studio-reports artifact repeats files of the two stage artifacts: download it
-      # last so that it wins.
-      - name: Download the end-to-end reports (stages)
+      # studio-reports merges both stage artifacts (e2e-visual, e2e-integration): it alone is enough.
+      - name: Download the end-to-end reports
+        id: download
         if: steps.reports.outputs.run_id != ''
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          pattern: e2e-*
-          path: out/reports/
-          merge-multiple: true
-          run-id: ${{ steps.reports.outputs.run_id }}
-          github-token: ${{ github.token }}
-      - name: Download the end-to-end reports (merged)
-        if: steps.reports.outputs.run_id != ''
+        continue-on-error: true
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: studio-reports
           path: out/reports/
           run-id: ${{ steps.reports.outputs.run_id }}
           github-token: ${{ github.token }}
+      - name: Decide whether the downloaded reports are used
+        id: usable
+        shell: bash
+        env:
+          FOUND: ${{ steps.reports.outputs.run_id }}
+          DOWNLOAD: ${{ steps.download.outcome }}
+          REQUESTED_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$FOUND" && "$DOWNLOAD" == "success" ]]; then
+            echo "reports=true" >> "$GITHUB_OUTPUT"
+          elif [[ -n "$FOUND" && -n "$REQUESTED_RUN_ID" ]]; then
+            echo "::error::Download of the reports of the requested run $FOUND failed"
+            exit 1
+          else
+            if [[ -n "$FOUND" ]]; then
+              echo "::warning::Download of the reports of run $FOUND failed; the suite runs instead"
+            fi
+            echo "reports=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Build Pages site from the downloaded reports
-        if: steps.reports.outputs.run_id != ''
+        if: steps.usable.outputs.reports == 'true'
         run: just site-assemble
       - name: Install the end-to-end suite dependencies (fallback)
-        if: steps.reports.outputs.run_id == ''
+        if: steps.usable.outputs.reports != 'true'
         run: |
           sudo -n apt-get update && sudo -n apt-get install --yes --no-install-recommends plantuml graphviz
           uv run --no-sync --group docs playwright install --with-deps chromium
       - name: Build Pages site by running the suite (fallback)
-        if: steps.reports.outputs.run_id == ''
+        if: steps.usable.outputs.reports != 'true'
         run: xvfb-run --auto-servernum just site
       - name: Upload Pages site
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3

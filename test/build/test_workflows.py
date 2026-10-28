@@ -321,23 +321,34 @@ def test_pages_dry_run_needs_no_tag_and_never_deploys() -> None:
 
 
 def test_pages_build_downloads_reports_when_a_run_was_found_and_runs_the_suite_otherwise() -> None:
-    found = "steps.reports.outputs.run_id != ''"
-    missing = "steps.reports.outputs.run_id == ''"
-    stages = _pages_step("Download the end-to-end reports (stages)")
-    merged = _pages_step("Download the end-to-end reports (merged)")
-    steps = _pages()["jobs"]["build-site"]["steps"]
-    assert steps.index(stages) < steps.index(merged), "studio-reports must be downloaded last"
-    for download in (stages, merged):
-        assert download["if"] == found
-        assert download["with"]["run-id"] == "${{ steps.reports.outputs.run_id }}"
-    assert stages["with"]["pattern"] == "e2e-*" and stages["with"]["merge-multiple"] is True
-    assert merged["with"]["name"] == "studio-reports"
+    used = "steps.usable.outputs.reports == 'true'"
+    missing = "steps.usable.outputs.reports != 'true'"
+    download = _pages_step("Download the end-to-end reports")
+    assert download["if"] == "steps.reports.outputs.run_id != ''"
+    assert download["continue-on-error"] is True
+    assert download["with"]["run-id"] == "${{ steps.reports.outputs.run_id }}"
+    assert download["with"]["name"] == "studio-reports"
+    assert "pattern" not in download["with"]
+    decide = _pages_step("Decide whether the downloaded reports are used")
+    assert "steps.download.outcome" in str(decide["env"])
     assert _pages_step("Build Pages site from the downloaded reports")["run"] == "just site-assemble"
-    assert _pages_step("Build Pages site from the downloaded reports")["if"] == found
+    assert _pages_step("Build Pages site from the downloaded reports")["if"] == used
     fallback = _pages_step("Build Pages site by running the suite")
     assert fallback["if"] == missing and "just site" in fallback["run"]
     assert "site-assemble" not in fallback["run"]
     assert _pages_step("Install the end-to-end suite dependencies")["if"] == missing
+
+
+def test_pages_validates_a_requested_run_id_and_scopes_the_token_to_the_selection() -> None:
+    build = _pages()["jobs"]["build-site"]
+    assert "GH_TOKEN" not in build["env"]
+    find = _pages_step("Find the end-to-end reports")
+    assert "GH_TOKEN" in find["env"]
+    assert "--run-id" in find["run"]
+    assert "REQUESTED_RUN_ID" in find["env"]
+    for step in build["steps"]:
+        if step.get("id") != "reports":
+            assert "GH_TOKEN" not in step.get("env", {})
 
 
 def test_pages_tag_verification_only_applies_to_a_real_deployment() -> None:
