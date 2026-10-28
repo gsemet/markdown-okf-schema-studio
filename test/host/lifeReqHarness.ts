@@ -13,6 +13,7 @@ import type { MockTimers } from "node:test";
 
 import { RUNTIME_CONTEXT_ATTRIBUTE } from "../../src/core/protocol/bootContext";
 import { identityOf, type PageIdentity } from "../shared/previewIdentity";
+import { freezeRenderClock, releaseRenderClock, wallNow } from "./renderClock";
 import { createFakeVscode, Disposable, FakeTextDocument, missingMembers, Uri, type Emitter, type FakeWebviewPanel } from "./fakeVscode";
 
 /** The workspace folder of the fake host. */
@@ -123,6 +124,8 @@ export function writeFile(text: string, directory = workspaceRoot, name?: string
 /** A started activation of the extension over the fake host. */
 export function startStudio(timers: MockTimers, options: { trusted?: boolean } = {}) {
   timers.enable({ apis: ["setTimeout"] });
+  // Render times count on the mock clock (none), so the debounce stays the one the test ticks.
+  freezeRenderClock();
   windowApi.activeTextEditor = undefined;
   fake.controls.activateCustomEditorTab(undefined);
   windowApi.visibleTextEditors = [];
@@ -136,10 +139,10 @@ export function startStudio(timers: MockTimers, options: { trusted?: boolean } =
   const watchersBefore = captured.watchers.length;
 
   const until = async (condition: () => boolean, label: string): Promise<void> => {
-    const deadline = performance.now() + 30_000;
+    const deadline = wallNow() + 30_000;
     while (!condition()) {
       assert.deepEqual([...missingMembers], [], "the extension used members the fake vscode module lacks");
-      assert.ok(performance.now() < deadline, `timed out waiting for: ${label}`);
+      assert.ok(wallNow() < deadline, `timed out waiting for: ${label}`);
       await turn();
       timers.tick(0);
     }
@@ -210,6 +213,7 @@ export function startStudio(timers: MockTimers, options: { trusted?: boolean } =
       for (const subscription of context.subscriptions.splice(0)) subscription.dispose();
       for (const panel of fake.controls.panels) panel.dispose();
       timers.reset();
+      releaseRenderClock();
       resetRenderHooksForTests();
     },
   };
