@@ -57,6 +57,9 @@ const mermaidRendererUri = pathToFileURL(
 const runtimeUri = pathToFileURL(
   path.resolve(__dirname, "../../../out/bundle/preview.js"),
 ).toString();
+const vegaRendererUri = pathToFileURL(
+  path.resolve(__dirname, "../../../out/bundle/vegaPreview.js"),
+).toString();
 const plantUmlRendererUri = pathToFileURL(
   path.resolve(__dirname, "../../../out/bundle/plantumlPreview.js"),
 ).toString();
@@ -344,6 +347,10 @@ window.resolveVisualFrontmatterLinks = () => {
       /<\/body>/iu,
       `<script src="${plantUmlRendererUri}" defer></script></body>`,
     );
+  }
+  if (page.includes('class="myst-vega-figure"')) {
+    // The chart runtime is its own bundle, added only to a page that has a chart (as the host does).
+    page = page.replace(/<\/body>/iu, `<script src="${vegaRendererUri}" defer></script></body>`);
   }
   if (page.includes('class="myst-mermaid-figure"')) {
     page = page.replace(

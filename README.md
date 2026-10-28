@@ -15,6 +15,8 @@ page and click any block to edit its source. It renders [CommonMark](https://com
 
 ![A Cream preview of a handbook: properties table, title, card grid, admonition and figure](images/readme/showcase-hero.png)
 
+[![A long Cream page in Auto width: figure, tables, a wide table breaking out of the column, a chart and a diagram](images/readme/release-showcase.png)](images/readme/release-showcase.png)
+
 ## Why Studio
 
 ### Edit MyST visually

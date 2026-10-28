@@ -203,6 +203,8 @@ export interface Scenario {
   widthModeChecks?: boolean;
   /** Switches the Width button to Auto before the screenshot (README capture of the margin break). */
   widthModeShot?: "auto";
+  /** Switches the Width button to this mode and nothing else; the scenario's content assertions measure the result. */
+  widthModeSwitch?: "auto";
   /** P2/P7: sets this width mode, records the side margins of text, table, code and figure, asserts the break-out geometry. */
   widthModeBreak?: "margin" | "auto" | "full";
   /** Opens the TOC column and measures it against the toolbar, the content, the width modes and zoom. */

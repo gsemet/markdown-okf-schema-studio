@@ -60,6 +60,7 @@ ADMONITION_DIRECTIVE = re.compile(
 GFM_ALERT = re.compile(r"^>[ \t]*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]", re.MULTILINE)
 FIGURE_DIRECTIVE = re.compile(r"^(?:`{3,}|:{3,})\{figure\}\s+\S+", re.MULTILINE)
 MERMAID_BLOCK = re.compile(r"^`{3,}(?:\{)?mermaid(?:\})?(?:\s|$)", re.MULTILINE)
+CHART_BLOCK = re.compile(r"^`{3,}(?:\{)?vega(?:-lite)?(?:\})?(?:\s|$)", re.MULTILINE)
 # `{uml} path.puml` (sphinxcontrib-plantuml) is a PlantUML diagram too.
 PLANTUML_BLOCK = re.compile(r"^`{3,}(?:\{)?plantuml(?:\})?(?:\s|$)|^`{3,}\{uml\}(?:\s|$)", re.MULTILINE)
 CONTEXT_TAG_OPEN = re.compile(
@@ -89,6 +90,12 @@ def count_mermaid_blocks(fixture: str) -> int:
     """Count Mermaid code fences and directives so missing diagrams fail loudly."""
     source = (FIXTURE_DIR / f"{fixture}.md").read_text(encoding="utf-8")
     return len(MERMAID_BLOCK.findall(source))
+
+
+def count_chart_blocks(fixture: str) -> int:
+    """Count Vega and Vega-Lite fences so a chart that is not drawn fails loudly."""
+    source = (FIXTURE_DIR / f"{fixture}.md").read_text(encoding="utf-8")
+    return len(CHART_BLOCK.findall(source))
 
 
 def count_plantuml_blocks(fixture: str) -> int:
@@ -154,7 +161,7 @@ PAGE_CHECKS = """
     }
   }
 
-  const figureImages = [...main.querySelectorAll('figure:not(.myst-mermaid-figure):not(.myst-plantuml-figure) img')];
+  const figureImages = [...main.querySelectorAll('figure:not(.myst-mermaid-figure):not(.myst-plantuml-figure):not(.myst-vega-figure) img')];
   if (figureImages.length !== __EXPECTED_FIGURES__) {
     failures.push(`expected __EXPECTED_FIGURES__ figure image(s), found ${figureImages.length}`);
   }
