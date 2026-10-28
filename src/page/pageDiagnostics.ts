@@ -47,6 +47,18 @@ export function installPageDiagnostics(
   editorTrace.record("page", "request " + context.requestId + " version " + context.revision);
   window.addEventListener("focus", () => editorTrace.record("page focus", traceFocus()));
   window.addEventListener("blur", () => editorTrace.record("page blur", traceFocus()));
+  // A press that reached the page, once its handlers ran: where it landed (a palette button or
+  // option by its key) and whether it was cancelled (a cancelled press keeps the text box focused).
+  // An editor blur with no press before it came from outside the page.
+  window.addEventListener("mousedown", (event) => {
+    const target = event.target as { closest?: (selector: string) => Element | null } | null;
+    const control = target?.closest?.("[data-edit-option],[data-edit-action]");
+    const option = control?.getAttribute("data-edit-option");
+    const where = control
+      ? (option !== null && option !== undefined ? "option=" + option : "action=" + control.getAttribute("data-edit-action"))
+      : tagOf(event.target);
+    editorTrace.record("mousedown", where + " prevented=" + String(event.defaultPrevented === true) + " " + traceFocus());
+  });
   // Cmd/Ctrl+A in a text control selects that control's text and never reaches the workbench
   // (see selectAllKey.ts: the workbench would otherwise focus the text editor in some cases).
   installSelectAllInControls(document, isTextSelectAll,

@@ -1221,6 +1221,65 @@ test("T25: dismissing the type list leaves NOTE, the focus in the text box and t
   assert.equal(textarea.value, "> [!NOTE]\n> ", "the second click only opened the list on the existing alert");
 });
 
+// CR 180: what the page trace holds when a type is picked, and when the focus leaves the page.
+function traceOf(harness: RuntimeHarness): Array<{ event: string; detail?: string }> {
+  const diagnostics = harness.window.__studioDiagnostics as { trace(): Array<{ event: string; detail?: string }> } | undefined;
+  assert.ok(diagnostics, "the page exposes its diagnostics");
+  return diagnostics.trace();
+}
+
+test("T25: a press on a type option is cancelled, traced and never saves; the type changes", () => {
+  const harness = createRuntimeHarness({ initialPaletteMode: "gfm" });
+  const textarea = openBlockEditorWithSource(harness);
+  stubExecCommand(harness, textarea);
+  textarea.value = "Second paragraph.";
+  textarea.setSelectionRange(17, 17);
+  paletteButton(harness, "alert").dispatch("click", { preventDefault: () => undefined });
+  const count = harness.messages.length;
+  const warning = menuOption(paletteMenu(harness)!, "WARNING");
+  // The browser's order: the option's own listeners, its ancestors', then the window's.
+  let prevented = false;
+  const press = { target: warning, preventDefault: () => { prevented = true; }, stopPropagation: () => undefined };
+  warning.dispatch("mousedown", press);
+  harness.dispatchWindow("mousedown", { ...press, defaultPrevented: prevented });
+  warning.dispatch("click", { preventDefault: () => undefined, stopPropagation: () => undefined });
+  assert.equal(textarea.value, "> [!WARNING]\n> Second paragraph.");
+  assert.equal(messagesAfter(harness, count).some((message) => message.type === "previewEditSave"), false, "no commit");
+  const events = traceOf(harness);
+  assert.ok(events.some((entry) => entry.event === "mousedown"
+    && /^option=WARNING prevented=true active=\S+ pageFocus=\S+$/u.test(entry.detail ?? "")), JSON.stringify(events));
+  assert.equal(events.some((entry) => entry.event === "block editor blur"), false, JSON.stringify(events));
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-047
+test("T25: a blur to nowhere while the page loses the focus commits the editor and says so in the trace", () => {
+  // Characterization of the CI failure's signature: the frame lost the focus (no related target,
+  // the page no longer focused) and the commit-on-leave rule saved the text.
+  const harness = createRuntimeHarness({ initialPaletteMode: "gfm" });
+  const textarea = openBlockEditorWithSource(harness);
+  stubExecCommand(harness, textarea);
+  textarea.value = "Second paragraph.";
+  textarea.setSelectionRange(17, 17);
+  paletteButton(harness, "alert").dispatch("click", { preventDefault: () => undefined });
+  const count = harness.messages.length;
+  harness.document.hasFocus = () => false;
+  textarea.dispatch("blur", { relatedTarget: null });
+  const saves = messagesAfter(harness, count).filter((message) => message.type === "previewEditSave");
+  assert.equal(saves.length, 1);
+  assert.equal(saves[0].final, true);
+  assert.equal(saves[0].editedText, "> [!NOTE]\n> Second paragraph.\n");
+  const blur = traceOf(harness).find((entry) => entry.event === "block editor blur");
+  assert.match(blur?.detail ?? "", /^related=none commit active=\S+ pageFocus=false$/u);
+  // Focus moving into the palette is traced too, and keeps the editor open.
+  const other = createRuntimeHarness({ initialPaletteMode: "gfm" });
+  const box = openBlockEditorWithSource(other);
+  const before = other.messages.length;
+  box.dispatch("blur", { relatedTarget: paletteOf(other)!.childElements[0] });
+  assert.equal(messagesAfter(other, before).some((message) => message.type === "previewEditSave"), false);
+  assert.match(traceOf(other).find((entry) => entry.event === "block editor blur")?.detail ?? "",
+    /^related=select kept-in-frame /u);
+});
+
 test("T25: Checkbox and HTML table edit the text box as one undo step each", () => {
   const harness = createRuntimeHarness({ initialPaletteMode: "gfm" });
   const textarea = openBlockEditorWithSource(harness);

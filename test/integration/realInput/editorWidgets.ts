@@ -6,6 +6,7 @@ import { type Page } from "playwright-core";
 import {
   getActivePreviewForTests,
   getActivePreviewPanelForTests,
+  previewGroupFocusMovesForTests,
 } from "../extensionApi";
 import {
   bufferText,
@@ -127,9 +128,18 @@ export async function scenarioFigureEditor(page: Page, evidence: Evidence): Prom
 /** RI-T25: the Alert button writes a GitHub alert and its type list changes it; undo steps back. */
 export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Promise<void> {
   await withSmokeDocument("realinput-t25", async (source) => {
+    // Each step with its time since the scenario started, for the failure message (CI rule 12).
+    const startedAt = Date.now();
+    const steps: Array<{ at: number; step: string }> = [];
+    const step = (name: string): void => {
+      steps.push({ at: Date.now() - startedAt, step: name });
+    };
+    step("open preview");
     await openSidePreview(source);
     await waitForRender(source);
+    step("edit mode on");
     await setEditMode(page, true);
+    step("paragraph click");
     await withCurrentFrame(page, (frame) => frame.locator("p", { hasText: "Second paragraph." }).click());
     await waitForEditor(page, "[data-sphinx-preview-block-editor] textarea");
     const readEditor = async (): Promise<{ tag: string | undefined; value: string | undefined }> => {
@@ -143,11 +153,30 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
         };
       });
     };
+    // What the scenario did and when, the host's document, the focus commands the extension ran
+    // on its own ("at" on the scenario's clock, negative: before it started), then the window and
+    // page focus with the page's editor trace.
+    // The page trace's "at" 0 on the scenario's clock, so its entries line up with the steps.
+    const pageTraceStart = async (): Promise<number | undefined> => {
+      const startedAtInPage = await (await findCurrentFrame(page))?.evaluate(() =>
+        (window as unknown as { __studioDiagnostics?: { startedAt?: () => number } }).__studioDiagnostics?.startedAt?.());
+      return typeof startedAtInPage === "number" ? startedAtInPage - startedAt : undefined;
+    };
+    const explain = async (error: unknown): Promise<Error> => new Error(String(error)
+      + " Editor state: " + JSON.stringify(await readEditor())
+      + " Scenario: " + JSON.stringify({
+        steps,
+        pageTraceStart: await pageTraceStart(),
+        host: { version: source.version, dirty: source.isDirty, text: source.getText() },
+        focusMoves: previewGroupFocusMovesForTests(startedAt - 5_000)
+          .map((move) => ({ at: move.at - startedAt, command: move.command })),
+      })
+      + " " + await windowFocusReport(page));
     const expectValue = async (description: string, expected: string): Promise<void> => {
       try {
         await waitFor(description, async () => (await readEditor()).value === expected);
       } catch (error) {
-        throw new Error(String(error) + " Editor state: " + JSON.stringify(await readEditor()) + " " + await windowFocusReport(page));
+        throw await explain(error);
       }
     };
     const count = async (selector: string): Promise<number> => {
@@ -155,10 +184,13 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
       return current === undefined ? -1 : current.locator(selector).count();
     };
     const original = "Second paragraph.";
+    step("End");
     await press(page, "End");
 
+    step("alert click");
     await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='alert']").click());
     await expectValue("Alert to write the head and quote the line", "> [!NOTE]\n> " + original);
+    step("type list");
     await waitFor("the type list", async () => await count(".sphinx-preview-edit-palette-menu[data-edit-popover='alert']") === 1);
     assert.equal((await readEditor()).tag, "TEXTAREA", "the focus stays in the text box");
     // The list sits at the caret: inside the text box's horizontal span, below the caret line.
@@ -171,20 +203,39 @@ export async function scenarioAlertDropdown(page: Page, evidence: Evidence): Pro
       "the list opens next to the text: " + JSON.stringify(placement));
     assert.equal(placement.menuLeft > placement.boxLeft + 20, true, "and to the right of the text start");
 
+    // The page reports a steady editor before the pick: the text box has the caret, the page has
+    // the focus and the type list is open. A focus taken from the page shows here, with the trace.
+    step("steady editor");
+    try {
+      await waitFor("the text box focused in a focused page with the type list open", async () => {
+        const current = await findCurrentFrame(page);
+        return current !== undefined && await current.evaluate(() =>
+          document.activeElement instanceof HTMLTextAreaElement
+          && document.hasFocus()
+          && document.querySelector(".sphinx-preview-edit-palette-menu[data-edit-popover='alert']") !== null);
+      });
+    } catch (error) {
+      throw await explain(error);
+    }
+    step("warning click");
     await withCurrentFrame(page, (frame) => frame.locator("[data-edit-option='WARNING']").click());
     await expectValue("Warning to change the type", "> [!WARNING]\n> " + original);
     assert.equal(await count(".sphinx-preview-edit-palette-menu"), 0, "choosing closes the list");
     assert.equal((await readEditor()).tag, "TEXTAREA");
 
+    step("first undo");
     await press(page, MOD + "+z");
     await expectValue("one undo to revert the type", "> [!NOTE]\n> " + original);
+    step("second undo");
     await press(page, MOD + "+z");
     await expectValue("one more undo to remove the alert", original);
     assert.equal(await count("[data-sphinx-preview-block-editor] textarea"), 1, "the editor stayed open");
 
     // Escape closes the list and leaves NOTE; the focus is in the text box and the editor open.
+    step("second alert click");
     await withCurrentFrame(page, (frame) => frame.locator("[data-edit-action='alert']").click());
     await waitFor("the type list again", async () => await count(".sphinx-preview-edit-palette-menu") === 1);
+    step("Escape");
     await press(page, "Escape");
     await waitFor("Escape to close the list", async () => await count(".sphinx-preview-edit-palette-menu") === 0);
     await expectValue("NOTE to remain after Escape", "> [!NOTE]\n> " + original);

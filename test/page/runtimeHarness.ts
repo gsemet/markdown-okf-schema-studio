@@ -219,6 +219,8 @@ export class RuntimeElement {
         || (selector === "input.myst-checkbox" && current.tagName === "INPUT"
           && current.getAttribute("class") === "myst-checkbox")
         || (selector.includes("data-sphinx-source-line") && current.getAttribute("data-sphinx-source-line") !== null)
+        || (selector === "[data-edit-option],[data-edit-action]"
+          && (current.getAttribute("data-edit-option") !== null || current.getAttribute("data-edit-action") !== null))
       ) {
         return current;
       }
