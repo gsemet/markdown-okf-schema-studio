@@ -71,6 +71,17 @@
   split per parse) are applied in memory by an esbuild plugin and a Node load hook; the postinstall
   script is gone and nothing is written into node_modules. A package version or content other than
   the reviewed one fails loudly. Verification: test/build/mystSourcePatches.test.ts.
+
+## 2026-10-28 (files dropped from the Explorer become links)
+
+- SwRS-MDOKFSTUDIO-PALETTE-004 (new, CR 146): files dropped from the Explorer onto the preview in
+  edit mode (no block editor open) mark the nearest insertion bar and are written as a new block with
+  one relative reference each, `![name](path)` for an image and `[title](path)` otherwise (first
+  heading of a Markdown file), in one undo step; files outside the workspace folders are skipped.
+  Verification: test/core/mapping/dropReferences.test.ts, test/page/modules/dropFiles.test.ts,
+  test/page/runtimeFileDrop.test.ts, test/session/dropFiles.requirements.test.ts,
+  test/integration/dropFiles.test.ts, `just requirements-update`.
+
 ## 2026-10-27 (fold and unfold sections in the preview)
 
 - StRS-MDOKFSTUDIO-TOOLBAR-002 and SwRS-MDOKFSTUDIO-TOOLBAR-003 to -006 and -008 (CR 143): new. The
