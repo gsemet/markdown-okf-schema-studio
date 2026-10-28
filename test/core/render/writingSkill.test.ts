@@ -106,7 +106,7 @@ test("the writing skill is a self-contained folder of the expected shape", () =>
   const description = header[1]!.replace(/^[\s\S]*?^description:\s*/mu, "").replace(/\n {2}/gu, " ").trim();
   assert.ok(description.length > 0 && description.length <= 1024, `description length ${description.length}`);
   assert.match(description, /\bwrite\b/iu);
-  assert.match(description, /Studio/u);
+  assert.match(description, /Markdown OKF Schema Studio/u);
   assert.ok(text.split("\n").length <= MAX_SKILL_LINES, `SKILL.md has more than ${MAX_SKILL_LINES} lines: move detail to references/`);
   for (const file of skillSources()) {
     const content = fs.readFileSync(file, "utf8");
@@ -120,7 +120,7 @@ test("the writing skill is a self-contained folder of the expected shape", () =>
     }
     assert.doesNotMatch(content, /\b(?:src|test|out|docs|requirements|\.agents)\/[\w./-]+\.(?:ts|md|json|mjs)\b/u,
       `${path.basename(file)} points into the repository sources`);
-    assert.doesNotMatch(content, /(?:\/Users\/|[A-Za-z]:\\|github\.com\/gsemet)/u, `${path.basename(file)} holds an absolute path or repository URL`);
+    assert.doesNotMatch(content, /(?:\/Users\/|[A-Za-z]:\\|github\.com\/gsemet\/markdown-okf-schema-studio)/u, `${path.basename(file)} holds an absolute path or repository URL`);
   }
 });
 

@@ -1,21 +1,30 @@
 ---
 name: writing-for-markdown-okf-schema-studio
 description: Write or generate a Markdown document (implementation plan, report, design note,
-  README, spec, runbook) that renders well in Markdown OKF-Schema Studio, the VS Code Markdown
-  preview. Use when asked to write, draft or generate a .md file for Studio, to make a document
-  look good in Studio, or to choose diagrams, charts, cards, tabs or admonitions for it.
+  README, spec, runbook) that renders well in Markdown OKF Schema Studio, the VS Code Markdown
+  preview. Use when asked to write, draft or generate a .md file for Markdown OKF Schema Studio, to
+  make a document look good in it, or to choose diagrams, charts, cards, tabs or admonitions for it.
 ---
 
-# Writing Markdown for Studio
+# Writing Markdown for Markdown OKF Schema Studio
 
-Studio is a VS Code extension that renders Markdown as a styled page (themes Cream, White, Dark)
-and lets the reader click a block to edit it. You already know CommonMark, GFM, MyST, Mermaid,
-PlantUML, SVG and Vega-Lite. This skill says only what Studio renders, what it does not, and how
-to choose. Every example in this skill is rendered by Studio's own pipeline in a test.
+Markdown OKF Schema Studio is a VS Code extension that renders Markdown as a styled page (themes
+Cream, White, Dark) and lets the reader click a block to edit it. You already know CommonMark, GFM,
+MyST, Mermaid, PlantUML, SVG and Vega-Lite. This skill says only what the extension renders, what
+it does not, and how to choose. Every example here is rendered by its own pipeline in a test.
+
+- **OKF**, the Open Knowledge Format: a folder with sub-folders of Markdown files that carry YAML
+  front matter.
+- **OKF-Schema**: a separate tool that provides JSON Schemas for OKF bundles
+  (https://github.com/gsemet/okf-schema) and validates the front matter of the Markdown files. Full
+  validation needs it installed: `uv tool install okf-schema` (commands `okf-schema`, `okfkb`,
+  `okfreq`). The extension only helps to visualise the schema (field descriptions, enum values) and
+  does not replace the validator.
+- OKF-Schema and Markdown OKF Schema Studio have the same author.
 
 ## What renders
 
-| Family | Syntax Studio renders |
+| Family | Syntax rendered |
 | --- | --- |
 | GFM | headings, tables with `:--` `--:` alignment, task lists `- [ ]`, footnotes `[^1]`, alerts `> [!NOTE]` (also TIP, IMPORTANT, WARNING, CAUTION), autolinks, `~~strike~~` |
 | Code | fenced code with a language (highlighted), `{code-block}` with `:caption:`, `:linenos:` |
@@ -66,7 +75,7 @@ Dark; no scripts, no external fonts, no `foreignObject`. Keep text at 14 px or m
 :width: 80%
 :alt: Three layers: page, session, core
 
-Studio is three layers; each imports only the one below.
+The extension is three layers; each imports only the one below.
 ```
 ````
 
@@ -125,7 +134,7 @@ front matter, review comments, README HTML): [references/examples.md](references
 - No remote resources: no `https://` images, chart data, fonts or PlantUML `!include` URLs.
   Download the file next to the document; `data:` URIs work.
 - Built-in PlantUML: no URL includes, no standard library (`!include <C4/...>`).
-- Not Studio syntax: `[[toc]]` (use `[TOC]`), emoji shortcodes such as `:smile:`, bare
+- Not rendered: `[[toc]]` (use `[TOC]`), emoji shortcodes such as `:smile:`, bare
   `{dropdown}` (use `:class: dropdown`). An unknown directive shows as a warning box: write
   only the names above.
 - Restricted Mode (untrusted workspace) renders everything above; included files and chart data
