@@ -13,20 +13,62 @@ page and click any block to edit its source. It renders [CommonMark](https://com
 [OKF](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) and
 [OKF-Schema](https://github.com/gsemet/okf-schema).
 
-![A Cream preview of a handbook: properties table, title, card grid, admonition and figure](images/readme/showcase-hero.png)
+**Example of complex Markdown rendering**
 
 [![A long Cream page in Auto width: figure, tables, a wide table breaking out of the column, a chart and a diagram](images/readme/release-showcase.png)](images/readme/release-showcase.png)
 
-## Why Studio
+## Why Markdown OKF-Schema Studio?
+
+> [!IMPORTANT]
+> TL;DR: I love [MyST](https://mystmd.org/). It is underrated, it allows complex Markdown
+> structures, and LLMs know it very well.
+>
+> I also use [OKF bundles](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
+> a lot, and I added JSON Schema validation to them with
+> [OKF-Schema](https://github.com/gsemet/okf-schema), so I needed an elegant way to view their
+> front matter.
+>
+> With the rise of agentic coding, I also review Markdown documents all day long, and it strains
+> the eyes. HTML artifacts (asking the agent to generate HTML) are not collaborative: you cannot
+> annotate them.
+> In one sentence: I need (and hopefully many others do too) a beautiful, rich and collaborative
+> surface between me and my agents.
+>
+> And I wanted Mermaid, PlantUML, Vega-Lite, tables and rich admonitions.
+
+> [!NOTE]
+> The Markdown rendering and editing experience of Obsidian is nice, but I hate having to work
+> through a "vault" and to install a plugin for everything.
+
+
+### Markdown is the natural language of coding agents
+
+LLMs love Markdown. It is an ideal format for collaborating on documents.
+But plain Markdown lacks rich capabilities such as structured grids and columns,
+so we usually end up asking the agent for an HTML specification instead.
+
+And we lose collaboration instantly.
+
+### Highest respect for the raw Markdown
+
+Edits touch only the block you change, in one undo step.
+This editor never rewraps or reformats the rest of the file,
+so edits stay small and the diff stays clean.
 
 ### Edit MyST visually
 
-Click a grid card, a nested admonition, a figure or a `{list-table}` and edit it in place.
-Edits touch only the block you change, in one undo step; the rest of the file is never rewrapped.
+Sphinx MyST is an awesome but underrated Markdown extension
+that gives just the right amount of structure to Markdown documents:
+
+- grids, columns
+- admonitions
+- figures
+- `{list-table}`
+
+Here is an example of edition on a MyST documentation,
+that will be later published on ReadTheDocs for instance:
 
 ![Editing a MyST admonition while the card grid and figure stay rendered](images/readme/showcase-myst-edit.png)
-
-### Version notes, cards and tabs
 
 `{versionadded}`, `{versionchanged}` and `{deprecated}` get their title ("Added in version 0.47"),
 a standalone `{card}` shows its `:header:` and `:footer:`, and a `{tab-set}` becomes a tab bar with
@@ -39,15 +81,21 @@ item is a block of its own.
 
 ### Edit schema-aware properties
 
-Frontmatter becomes a properties table with JSON Schema diagnostics, enum controls and typed
-editors. `x-okf-link` annotations show metadata and line numbers of linked evidence.
+Agents loves markdown with frontmatter but lack structure.
+OKF-Schema is an external tool that adds a customizable schema
+these frontmatter that become a properties table
+with description, enum controls and typed editors.
+
+`x-okf-link` is an optional extension from OKF-Schema that allows
+to dynamically show metadata and line numbers of related links.
 
 ![The OKF properties table with type icons and field descriptions](images/readme/showcase-schema-cream.png)
 
 ### Read wide tables and text
 
-In Auto width the text keeps a comfortable narrow column, while a wide table or figure breaks out
-of it and is centred.
+In Auto width the text keeps a comfortable narrow column,
+while a wide table or figure breaks out of it and is centred
+(heavily inspired by [Medium](https://medium.com/) user experience)
 
 ![A narrow text column with a wide table and a wide figure breaking out of it](images/readme/margin-break-cream.png)
 
@@ -107,21 +155,6 @@ are one button away.
 - Rich paste from Google Docs, Word or a web page, converted to Markdown.
 - Pasting a URL makes a link (over selected text), an autolink or, for an image address, an image.
 - A Sphinx check of the syntax you use against `myst_enable_extensions` in `conf.py`.
-
-## How it compares
-
-Checked on 2026-10-25 against the VS Code Markdown editor and preview, Markdown All in One,
-Markdown Preview Enhanced, other WYSIWYG extensions and the MyST extension.
-
-| Studio feature | Found elsewhere |
-| --- | --- |
-| Visual editing of MyST grids, admonitions, figures and list tables | No equivalent found |
-| Schema-aware OKF frontmatter editing and `x-okf-link` evidence | No equivalent found |
-| Human review threads in a JSON file next to the document | No equivalent found |
-| Mermaid and PlantUML together, without Java | No equivalent found |
-
-"No equivalent found" means the pages we read do not document one; that is not proof of absence.
-Versions and sources are in [the comparison](docs/user/comparison.md).
 
 ## Install
 
@@ -184,11 +217,6 @@ Last resort, for a host without plugin support: copy the folder
 `.claude/skills/`) of your project or home folder.
 
 The plugin version always equals the extension version.
-
-## Open Studio
-
-Use **Open With...** on a Markdown tab and select **Markdown OKF-Schema Studio**. For a side-by-side
-source and preview, select the book icon in the editor title bar.
 
 ## Documentation
 
