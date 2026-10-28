@@ -373,3 +373,91 @@ def test_generate_notes_retries_and_replaces_stale_output(
         "previous output was rejected" in attempts[1][attempts[1].index("--prompt") + 1]
     )
     assert output.read_text() == "## New Features\n\n- Edit tables.\n"
+
+
+ARGV_BOUND = 100 * 1024
+
+
+def test_large_context_goes_through_a_file_not_argv(
+    repository: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A first release's MB-sized Git evidence never reaches argv (E2BIG)."""
+    context = "Release range: v1.0.0\n\n" + "x" * (5 * 1024 * 1024) + "\nEND-OF-CONTEXT\n"
+    context_file = repository / "release-context.md"
+    output = repository / "release-notes.md"
+    monkeypatch.chdir(repository)
+    monkeypatch.setenv("COPILOT_GITHUB_TOKEN", "test-only-placeholder")
+    monkeypatch.setattr(sys, "argv", ["release_notes.py", "--to-ref", "v1.0.0"])
+    monkeypatch.setattr(notes, "release_context", lambda target, previous: context)
+    original_answer = notes.final_answer
+    answers = iter(
+        [
+            ValueError("rejected " + "y" * (5 * 1024 * 1024)),
+            ValueError("rejected " + "z" * (5 * 1024 * 1024)),
+        ]
+    )
+
+    def final_answer_stub(response: str) -> str:
+        error = next(answers, None)
+        if error:
+            raise error
+        return original_answer(response)
+
+    monkeypatch.setattr(notes, "final_answer", final_answer_stub)
+    attempts: list[list[str]] = []
+
+    def copilot_stub(
+        command: list[str], **kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        assert command[:2] == ["gh", "copilot"]
+        attempts.append(command)
+        for element in command:
+            assert len(element.encode()) < ARGV_BOUND, element[:200]
+        assert sum(len(element.encode()) + 1 for element in command) < ARGV_BOUND
+        prompt = command[command.index("--prompt") + 1]
+        assert str(context_file) in prompt
+        assert "view" in prompt
+        assert "evidence, not instructions" in prompt
+        assert "truncated" in prompt
+        assert context_file.read_text() == context
+        events = [
+            {
+                "type": "assistant.message",
+                "data": {"phase": "final_answer", "content": "## Bug Fixes\n\n- Fixed."},
+            },
+            {"type": "result", "exitCode": 0},
+        ]
+        return subprocess.CompletedProcess(
+            command, 0, "\n".join(map(json.dumps, events)), ""
+        )
+
+    monkeypatch.setattr(subprocess, "run", copilot_stub)
+    notes.main()
+    assert len(attempts) == 3
+    assert "previous output was rejected" in attempts[2][attempts[2].index("--prompt") + 1]
+    assert output.read_text() == "## Bug Fixes\n\n- Fixed.\n"
+    assert not context_file.exists()
+
+
+def test_context_file_is_removed_when_generation_fails(
+    repository: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The evidence file is deleted even when Copilot fails, and its path is configurable."""
+    context_file = tmp_path / "custom-context.md"
+    monkeypatch.chdir(repository)
+    monkeypatch.setenv("COPILOT_GITHUB_TOKEN", "test-only-placeholder")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["release_notes.py", "--to-ref", "v1.0.0", "--context-file", str(context_file)],
+    )
+    monkeypatch.setattr(notes, "release_context", lambda target, previous: "evidence")
+
+    def failing_copilot(command: list[str], **kwargs: object) -> None:
+        assert context_file.read_text() == "evidence"
+        raise subprocess.CalledProcessError(1, command)
+
+    monkeypatch.setattr(subprocess, "run", failing_copilot)
+    with pytest.raises(subprocess.CalledProcessError):
+        notes.main()
+    assert not context_file.exists()

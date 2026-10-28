@@ -1,7 +1,7 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { pastedBlockText, planCut, planPaste, spanText } from "../../../src/core/mapping/blockRange";
+import { checkBlockLines, pastedBlockText, planCut, planPaste, spanText } from "../../../src/core/mapping/blockRange";
 
 function cut(text: string, line: number, endLine: number): string | { refused: string } {
   const plan = planCut(text, line, endLine);
@@ -126,4 +126,24 @@ test("paste refuses an empty clipboard, the frontmatter and stale lines", () => 
   assert.deepEqual(Object.keys(paste("A\n\nB\n", 2, "X") as object), ["refused"], "blank line");
   assert.deepEqual(Object.keys(paste("A\n", 9, "X") as object), ["refused"]);
   assert.deepEqual(Object.keys(paste("A\n", -1, "X") as object), ["refused"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-256
+test("checkBlockLines refuses a range that starts on a blank line or leaves the document", () => {
+  const text = "A\n\n### Edit\n\nB\n";
+  const disagree = { refused: "The preview and the document disagree about this block's lines. Refresh the preview and try again." };
+  assert.deepEqual(checkBlockLines(text, 2, 3), disagree, "the shifted range: a blank line, then the heading");
+  assert.deepEqual(checkBlockLines(text, 3, 9), disagree, "past the end");
+  assert.deepEqual(checkBlockLines(text, 3, 2), disagree, "unordered");
+  assert.deepEqual(checkBlockLines(text, 0, 1), disagree);
+  assert.deepEqual(checkBlockLines(text, 1.5, 3), disagree);
+  assert.deepEqual(checkBlockLines("A\n", 2, 2), disagree, "the empty line after the final line break");
+});
+
+test("checkBlockLines accepts blocks with blank lines inside, a list ending on its separator and the frontmatter", () => {
+  assert.equal(checkBlockLines("```\na\n\nb\n```\n", 1, 5), undefined);
+  assert.equal(checkBlockLines("- a\n\n- b\n\nC\n", 1, 4), undefined, "a list range ending on its blank separator");
+  assert.equal(checkBlockLines("A", 1, 1), undefined);
+  assert.equal(checkBlockLines("A\r\n\r\nB", 3, 3), undefined);
+  assert.equal(checkBlockLines("---\na: 1\n---\n\nB\n", 1, 3), undefined, "the frontmatter rule is not part of this check");
 });

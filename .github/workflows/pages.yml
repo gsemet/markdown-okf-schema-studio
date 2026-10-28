@@ -13,31 +13,40 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing version tag to deploy"
-        required: true
+        description: "Existing version tag to deploy (leave empty for a dry run)"
+        required: false
         type: string
+        default: ""
+      dry_run:
+        description: "Build the site from the checked-out ref without deploying; no tag needed"
+        type: boolean
+        default: false
+      run_id:
+        description: "CI run whose end-to-end reports to use (default: latest green heavy run of the commit)"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
-  deploy-pages:
-    if: inputs.tag != '' || github.ref_type == 'tag'
+  build-site:
+    # A real deployment needs a tag; a dry run (manual dispatch) needs none and never deploys.
+    if: inputs.tag != '' || github.ref_type == 'tag' || inputs.dry_run
     runs-on: ubuntu-latest
     env:
       STUDIO_NPM: npm --registry=https://registry.npmjs.org/
-      DEPLOYMENT_TAG: ${{ inputs.tag || github.ref_name }}
+      DEPLOYMENT_TAG: ${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
+      GH_TOKEN: ${{ github.token }}
     permissions:
       contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      actions: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ inputs.tag || github.ref_name }}
+          ref: ${{ inputs.tag || github.ref }}
           fetch-depth: 0
           lfs: true
       - name: Fetch Git LFS objects
@@ -54,12 +63,10 @@ jobs:
       - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
         with:
           just-version: 1.58.0
-      - name: Install PlantUML and Graphviz
-        run: sudo -n apt-get update && sudo -n apt-get install --yes --no-install-recommends plantuml graphviz
       - run: npm ci
       - run: uv sync --group docs --group requirements
-      - run: uv run --no-sync --group docs playwright install --with-deps chromium
       - name: Verify deployment tag
+        if: env.DEPLOYMENT_TAG != ''
         shell: bash
         run: |
           set -euo pipefail
@@ -71,11 +78,64 @@ jobs:
             echo "Deployment tag $DEPLOYMENT_TAG does not match package version $expected_tag" >&2
             exit 1
           fi
-      - name: Build Pages site
+      - name: Find the end-to-end reports of this commit
+        id: reports
+        shell: bash
+        env:
+          REQUESTED_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          set -euo pipefail
+          run_id="$REQUESTED_RUN_ID"
+          if [[ -z "$run_id" ]]; then
+            run_id="$(uv run --no-sync python scripts/select_e2e_run.py --repo "$GITHUB_REPOSITORY" --sha "$(git rev-parse HEAD)")"
+          fi
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "Reports from run: ${run_id:-none (the suite runs below)}"
+      # The merged studio-reports artifact repeats files of the two stage artifacts: download it
+      # last so that it wins.
+      - name: Download the end-to-end reports (stages)
+        if: steps.reports.outputs.run_id != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: e2e-*
+          path: out/reports/
+          merge-multiple: true
+          run-id: ${{ steps.reports.outputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download the end-to-end reports (merged)
+        if: steps.reports.outputs.run_id != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: studio-reports
+          path: out/reports/
+          run-id: ${{ steps.reports.outputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Build Pages site from the downloaded reports
+        if: steps.reports.outputs.run_id != ''
+        run: just site-assemble
+      - name: Install the end-to-end suite dependencies (fallback)
+        if: steps.reports.outputs.run_id == ''
+        run: |
+          sudo -n apt-get update && sudo -n apt-get install --yes --no-install-recommends plantuml graphviz
+          uv run --no-sync --group docs playwright install --with-deps chromium
+      - name: Build Pages site by running the suite (fallback)
+        if: steps.reports.outputs.run_id == ''
         run: xvfb-run --auto-servernum just site
       - name: Upload Pages site
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: out/site
+
+  deploy-pages:
+    needs: build-site
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

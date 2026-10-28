@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-28 (CI skipped tagging and release on main, CR 172)
+
+- SwRS-MDOKFSTUDIO-CORE-076: new, proposed. On a push to main the manual heavy jobs are skipped, so
+  `tag-release`, `release` and `pages` inherited a false success() and never ran. They now use
+  `!cancelled()` with an explicit `needs.<job>.result` check.
+  Verification: test/build/test_workflows.py.
+
 ## 2026-10-28 (paragraph of a GitHub alert opens the editor on the wrong lines, CR 171)
 
 - SwRS-MDOKFSTUDIO-GFM-009: new boundary scenario "Every block keeps the lines of the document".

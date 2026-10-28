@@ -295,7 +295,9 @@ jobs:
 
   tag-release:
     needs: checks
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # `checks` runs even though the heavy jobs above it are skipped; a plain `if` carries an
+    # implicit success() that is false when any ancestor was skipped, so ask for the result.
+    if: ${{ !cancelled() && needs.checks.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -316,7 +318,8 @@ jobs:
 
   release:
     needs: tag-release
-    if: needs.tag-release.outputs.tag != ''
+    # Same reason as tag-release: do not inherit success() from the skipped heavy ancestors.
+    if: ${{ !cancelled() && needs.tag-release.result == 'success' && needs.tag-release.outputs.tag != '' }}
     permissions:
       contents: write
     uses: ./.github/workflows/release.yml
@@ -327,9 +330,11 @@ jobs:
   # Tags pushed with GITHUB_TOKEN do not trigger tag workflows, so deploy Pages from here.
   pages:
     needs: tag-release
-    if: needs.tag-release.outputs.tag != ''
+    # Same reason as tag-release: do not inherit success() from the skipped heavy ancestors.
+    if: ${{ !cancelled() && needs.tag-release.result == 'success' && needs.tag-release.outputs.tag != '' }}
     permissions:
       contents: read
+      actions: read
       pages: write
       id-token: write
     uses: ./.github/workflows/pages.yml
