@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.0.0 - 2026-10-28
+
 - The writing skill can be installed as an agent plugin: the repository root is a plugin for Claude
   Code (`.claude-plugin/`), an Agent Plugins 1.0.0 `plugin.json` read by GitHub Copilot, VS Code
   agent plugins and OpenAI Codex, and a Codex marketplace (`.agents/plugins/marketplace.json`), all
@@ -243,7 +245,7 @@
   editor above or below the block you edit no longer closes it; a change inside that block shows an
   explicit error in the editor instead of losing your text.
 - New starting points for a workspace that has not chosen yet: the preview opens in the cream
-  theme, the floating toolbar is collapsed to its first row (the chevron shows rows 2 and 3) and
+  theme, the floating toolbar is collapsed to its first row (the chevron shows the other rows) and
   the edition palette offers the GFM buttons (`editing.defaultPaletteMode` now defaults to `gfm`).
   If you already picked a theme, expanded the toolbar or chose a palette mode in a workspace, that
   choice is kept; a palette mode you set in your settings is kept too. In the Settings UI the
@@ -377,10 +379,8 @@
   their palette buttons, and closes on Escape, a second `/`, a space or leaving the text box.
   It also offers Bulleted and Numbered list (menu only), ranks MyST commands first in MyST mode,
   and keeps Enter and Tab as plain keys when only a loose match exists.
-- The floating toolbar now has three rows: Refresh, Anchor, Edit and a new chevron button on the
-  first row; Back, Next, Zoom - and Zoom + on the second; Theme, Width, TOC and Diff on the third.
-  The chevron button collapses rows 2 and 3 (hidden from the Tab key too) and the choice is
-  remembered per workspace.
+- A chevron button on the first row of the floating toolbar collapses the other rows (hidden from
+  the Tab key too), and the choice is remembered per workspace.
 - Full width mode now uses the same 16 px side margins as a table that breaks out of the column
   in Auto mode, instead of up to 78 px of empty space on each side.
 - The gap above the first element is now the same 40 px everywhere: a title, text, picture, table,
@@ -506,10 +506,10 @@
   inserts the character at the caret (Shift+click keeps the picker open). Both close with Escape.
 - A select at the start of the edition palette chooses its buttons: Strict Markdown, GitHub (GFM)
   or MyST. The choice is remembered per workspace and the new setting
-  `editing.defaultPaletteMode` (default MyST) gives the starting mode; rendering is unchanged.
+  `editing.defaultPaletteMode` gives the starting mode; rendering is unchanged.
 - The block editor gets a Link button and Cmd/Ctrl+K. A small panel with Text and URL fields opens
   under the palette, prefilled from the selection (a selected URL fills the URL, a selected link is
-  <!-- TODO: read back); Enter inserts `[text](url)` as one undo step and Escape returns to the text box. -->
+  read back); Enter inserts `[text](url)` as one undo step and Escape returns to the text box.
 - An edition palette now sits above the text box of an open block editor, also when you insert a
   new block: heading level (Paragraph, H1 to H5), bold, italic, strikethrough, code block with a
   language list, blockquote, horizontal rule and TODO. Buttons never close the editor, each is one
