@@ -5,8 +5,9 @@
 - The writing skill can be installed as an agent plugin: the repository root is a plugin for Claude
   Code (`.claude-plugin/`), an Agent Plugins 1.0.0 `plugin.json` read by GitHub Copilot, VS Code agent
   plugins and OpenAI Codex, and a Codex marketplace (`.agents/plugins/marketplace.json`), all
-  pointing at the single `skills/writing-for-markdown-okf-schema-studio/` folder. The README lists the
-  install command of each host, and the skill tells the reader how to install the extension. The
+  pointing at the single `skills/writing-for-markdown-okf-schema-studio/` folder. The README section "Usage with coding agent"
+  lists the install commands of each host (plugin first; copying the skill folder is only a last resort for
+  hosts without plugin support), and the skill tells the reader how to install the extension. The
   plugin manifests are not part of the VSIX, and `just version` keeps their `version` equal to the
   extension version (a test fails on drift).
 - Keyboard navigation goes down and up the structure of the page in edit mode: Right moves the
@@ -63,7 +64,8 @@
   agent (Claude Code, GitHub Copilot) which Markdown Studio renders and how to choose between SVG,
   Mermaid, PlantUML, Vega-Lite, cards, tabs, admonitions and tables, so a generated plan or report
   looks good in the preview. It is self-contained, ships in the extension package, and a test renders
-  all its examples. Copy the folder to your skills folder to use it.
+  all its examples. Install it as a plugin (see "Usage with coding agent" in the README); copying
+  the folder to your skills folder is only a last resort for hosts without plugin support.
 - A `[TOC]` or `[[_TOC_]]` line on its own (the GitLab, Typora and Markdown Preview Enhanced
   markers, any case), or a MyST `{contents}` directive, renders the table of contents of the
   document: its headings as a nested list of links to them (`:depth:` limits the depth of

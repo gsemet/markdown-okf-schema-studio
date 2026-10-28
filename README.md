@@ -127,20 +127,59 @@ Install **Markdown OKF-Schema Studio** from the
 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio),
 or search for it in the Extensions view and select **Install**.
 
-## Install the writing skill
+## Usage with coding agent
 
 The repository also ships an agent skill, `writing-for-markdown-okf-schema-studio`, that teaches
 an AI agent which Markdown Studio renders well (cards, tabs, admonitions, charts, diagrams). The
-repository root is the plugin, so every host below reads the same `skills/` folder.
+repository root is a plugin, so every host below reads the same `skills/` folder. Install the plugin
+with your host; copying the skill folder is only a last resort.
 
-| Host | Install |
-| --- | --- |
-| [Claude Code](https://code.claude.com/docs/en/plugin-marketplaces) | `/plugin marketplace add gsemet/markdown-okf-schema-studio`, then `/plugin install markdown-okf-schema-studio@markdown-okf-schema-studio` (shell: `claude plugin marketplace add ...` and `claude plugin install ...`) |
-| [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/plugins-marketplace) | `copilot plugin marketplace add gsemet/markdown-okf-schema-studio`, then install the plugin from it (the documentation page gives no install-from-marketplace command; see `copilot plugin --help`). From a local clone: `copilot plugin install ./markdown-okf-schema-studio` |
-| [VS Code agent plugins](https://code.visualstudio.com/docs/copilot/customization/agent-plugins) | Command Palette, **Chat: Install Plugin From Source**, with the repository URL; or add `gsemet/markdown-okf-schema-studio` to the `chat.plugins.marketplaces` setting |
-| [OpenAI Codex](https://developers.openai.com/codex/plugins/build) | `codex plugin marketplace add gsemet/markdown-okf-schema-studio`, then install the plugin from it (the documentation gives no further install command) |
-| [Agent Plugins](https://agent-plugins.org/specification) (any compatible client) | The root `plugin.json` follows the open Agent Plugins 1.0.0 format; the specification defines no install command, so use your client's own |
-| Any other skills host | Copy `skills/writing-for-markdown-okf-schema-studio/` into `.agents/skills/` (or `.github/skills/`, `.claude/skills/`) of your project or home folder |
+1. [Claude Code](https://code.claude.com/docs/en/plugin-marketplaces): add the repository as a
+   marketplace, then install the plugin from it.
+
+   ```text
+   /plugin marketplace add gsemet/markdown-okf-schema-studio
+   /plugin install markdown-okf-schema-studio@markdown-okf-schema-studio
+   ```
+
+   From a shell: `claude plugin marketplace add gsemet/markdown-okf-schema-studio`, then
+   `claude plugin install markdown-okf-schema-studio@markdown-okf-schema-studio`.
+
+2. GitHub Copilot, in one of three ways depending on the harness.
+   - (a) Copilot CLI (terminal): add the marketplace, then install the plugin as
+     `PLUGIN-NAME@MARKETPLACE-NAME`.
+
+     ```bash
+     copilot plugin marketplace add gsemet/markdown-okf-schema-studio
+     copilot plugin install markdown-okf-schema-studio@markdown-okf-schema-studio
+     ```
+
+     A direct install also works: `copilot plugin install gsemet/markdown-okf-schema-studio`. The
+     accepted sources are `plugin@marketplace`, `owner/repo`, `owner/repo:path` and a git URL (see
+     `copilot plugin install --help` and
+     [Finding and installing plugins](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/plugins-finding-installing)).
+   - (b) VS Code with the local Copilot harness, per the
+     [VS Code agent plugins](https://code.visualstudio.com/docs/copilot/customization/agent-plugins)
+     page: add `gsemet/markdown-okf-schema-studio` to the setting
+     [`chat.plugins.marketplaces`](vscode://settings/chat.plugins.marketplaces), then open the
+     Extensions view, search `@agentPlugins` and select **Install**. Alternatively, run the Command
+     Palette command **Chat: Install Plugin From Source** with the repository URL.
+   - (c) VS Code with the Copilot CLI or Copilot SDK harness: in the session, run
+     `/plugin marketplace add gsemet/markdown-okf-schema-studio`, then
+     `/plugin install markdown-okf-schema-studio@markdown-okf-schema-studio`. VS Code also
+     discovers plugins installed by Copilot CLI (`~/.copilot/installed-plugins/`).
+
+3. [OpenAI Codex](https://developers.openai.com/codex/plugins/build):
+   `codex plugin marketplace add gsemet/markdown-okf-schema-studio`. The documentation gives no
+   further CLI install command.
+
+4. [Agent Plugins](https://agent-plugins.org/specification) (any compatible client): the root
+   `plugin.json` follows the open Agent Plugins 1.0.0 format. The specification defines no install
+   command, so use your client's own.
+
+Last resort, for a host without plugin support: copy the folder
+`skills/writing-for-markdown-okf-schema-studio/` into `.agents/skills/` (or `.github/skills/`,
+`.claude/skills/`) of your project or home folder.
 
 The plugin version always equals the extension version.
 
