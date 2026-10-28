@@ -24,6 +24,7 @@ import {
   WIDE,
   XLARGE,
 } from "./scenarioAssertions";
+import { ALERT_EDITING_SCENARIOS } from "./alertEditingScenarios";
 import { CARDS_TABS_SCENARIOS } from "./cardsTabsScenarios";
 import { FRONTMATTER_CHANGE_BAR_SCENARIOS } from "./frontmatterChangeBarScenarios";
 import { CODE_BLOCK_COMFORT_SCENARIOS } from "./codeBlockComfortScenarios";
@@ -444,6 +445,7 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
   })),
   ...CODE_BLOCK_COMFORT_SCENARIOS,
   ...CARDS_TABS_SCENARIOS,
+  ...ALERT_EDITING_SCENARIOS,
   ...FRONTMATTER_CHANGE_BAR_SCENARIOS,
   {
     id: "code-dark-top",

@@ -21,6 +21,8 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/render/mystGithubAlerts.ts
+- src/core/render/mystNormalize.ts
+- src/page/features/mappedBlocks.ts
 tested_in_files:
 - test/core/render/alertInsideColonContainer.test.ts
 - test/core/render/alertSourceLines.test.ts
@@ -28,6 +30,7 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
 - test/session/alertBlockEditOpen.test.ts
+- test/visual/alertEditingScenarios.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-GFM-010
@@ -102,6 +105,20 @@ still the lines of the file as written.
 | an unclosed fence after an alert | the warning and the opening line shown as code carry the line of the fence |
 | alert markers inside a fenced code block | they stay literal and later lines are unchanged |
 
+### Scenario (nominal): A click in the body of an alert opens the whole alert
+
+The admonition of a rewritten alert carries `data-okf-github-alert="true"`. In edit mode, a click
+(or Enter or Space) on a block in its body opens one block editor on the whole alert, from the
+marker line to the last quoted line, like a click on its title (SwRS-MDOKFSTUDIO-BLOCK-014).
+
+| Clicked block in edit mode | Lines of previewEditOpen and text of the editor |
+| --- | --- |
+| either paragraph of a `> [!NOTE]` alert of two paragraphs (lines 7 to 10, after a frontmatter block) | lines 7 to 10, the marker line and every quoted line |
+| the body of one of several consecutive alerts (`[!NOTE]`, a titled `[!TIP]` of two paragraphs, a `> **Warning**` bold marker, `[!CAUTION]`) | the lines of that alert only, never those of the alert before or after it |
+| the second paragraph of an alert indented in a list item | the lines of the alert only, with the indentation of the list item; a click on another item of the list still opens the whole list |
+| an item of a list inside an alert | the lines of the whole alert |
+| an alert in a tab item | no change: the tab item is the mapped block (SwRS-MDOKFSTUDIO-MYST-098) |
+
 ### Scenario (boundary): Alerts inside a colon container
 
 An admonition written with a colon fence closes at the first colon-only line at least as long as
@@ -127,6 +144,7 @@ its own, and a container nested in another must use a shorter fence than the out
 - Method: test/core/render/mystPaletteRendering.test.ts (alert types, end at the first unquoted line: unit tests on the render pipeline output).
 - Method: test/core/render/crlfAlerts.test.ts (fence scenario and CRLF scenario: unit tests on the render pipeline output).
 - Method: test/core/render/alertSourceLines.test.ts (every block keeps the lines of the document: unit tests on the `data-line` and `data-end-line` of the rendered blocks, including a README-shaped synthetic fixture with an important alert then a note alert).
-- Method: test/session/alertBlockEditOpen.test.ts (the host opens the editor of the paragraph of the second alert of that README on that paragraph's lines: `previewEditOpen` through the real `PreviewManager`).
+- Method: test/session/alertBlockEditOpen.test.ts (the host answers `previewEditOpen` for the paragraph of the second alert of that README with that paragraph's lines, through the real `PreviewManager`; the click in the body of an alert: the rendered and sanitized page is read by `createMappedBlocks(...).editingElementFor`, the range is posted to the real `PreviewManager` and the answer is the whole alert, for the two-paragraph, consecutive, list-item and list-in-alert rows).
+- Method: visual scenario gfm/v09-alert-body-opens-whole-alert-dark-900 in test/visual/alertEditingScenarios.ts (a real click on the second paragraph of a two-paragraph note: one `previewEditOpen` for lines 5 to 8, the editor holds the whole alert and the alerts after it stay rendered). The tab item row is not asserted for the click.
 - Method: test/core/render/alertInsideColonContainer.test.ts (alerts inside a card, a tab item and a nested grid card: unit tests on the rendered structure and on the `data-line` and `data-end-line` of the blocks).
-- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains only quoted lines; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written; an alert inside a colon container is a backtick directive whose fence is longer than any backtick fence of its body, so neither the body nor its closing line ends the container.
+- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains only quoted lines; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written; a click in the body of a mapped alert posts the alert's own range, never a paragraph's or the enclosing list's; an alert inside a colon container is a backtick directive whose fence is longer than any backtick fence of its body, so neither the body nor its closing line ends the container.
