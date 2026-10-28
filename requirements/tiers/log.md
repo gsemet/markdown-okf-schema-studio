@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-10-28 (structural keyboard navigation)
+
+- SwRS-MDOKFSTUDIO-BLOCK-254 (new, CR 157): with edit mode on and no editor open, ArrowRight moves
+  the keyboard selection one level down (a table to its first cell, an admonition, card or tab to its
+  first inner block, the whole page to its first block), ArrowLeft and Escape one level up, the four
+  arrows walk the cells of a selected table without wrapping, Escape returns to the table block and
+  Enter opens the cell editor; the selected cell is outlined and announced. Verification:
+  test/page/modules/structuralCursor.test.ts, test/page/runtimeStructuralNavigation.test.ts, visual
+  scenarios block-editing/v20 and v21, test/integration/realInput/blockKeys.ts.
+
 ## 2026-10-28 (empty document started from the keyboard)
 
 - SwRS-MDOKFSTUDIO-BLOCK-253 (new, proposed, CR 156): in edit mode on an empty document the Start

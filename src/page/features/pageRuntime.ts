@@ -346,6 +346,8 @@ export interface PageParts {
 export interface MappedBlocks {
   /** The mapped blocks of this document that no other mapped block contains, by source line. */
   topLevelMappedBlocks(): HTMLElement[];
+  /** The mapped blocks one level inside `block` (its nearest mapped descendants), by source line. */
+  mappedChildren(block: Element): HTMLElement[];
   /** The top-level blocks without the properties section. */
   selectableBlocks(): HTMLElement[];
   /** The first and last source line of a block. */
