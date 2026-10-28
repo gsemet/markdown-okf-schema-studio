@@ -62,12 +62,12 @@ function traceStartup(
     const toolbar = [harness.themeButton, harness.refreshButton, harness.anchorButton, harness.editModeButton];
     const themeAttributes = ["data-sphinx-preview-theme", "data-sphinx-preview-reduced-motion",
       "data-sphinx-preview-zoom", "data-sphinx-preview-width", "data-sphinx-preview-toc",
-      "data-okf-show-comments", "data-sphinx-preview-incoming", "data-sphinx-preview-toolbar-state"];
+      "data-okf-show-comments", "data-sphinx-preview-incoming", "data-sphinx-preview-sbs", "data-sphinx-preview-toolbar-state"];
     // The zoom buttons and the zoom of the root do not depend on the content (T08); the Diff
     // button of row 2 does not either (T17).
     // The collapse button and its rows are content-independent too (P8).
     const zoomButtons = [harness.zoomOutButton, harness.zoomInButton, harness.widthButton, harness.diffButton,
-      harness.collapseButton, harness.moreRows];
+      harness.sideBySideButton, harness.collapseButton, harness.moreRows];
     return {
       effects: entries
         .filter((entry) => !(entry.method === "addEventListener" && toolbar.includes(entry.element)))

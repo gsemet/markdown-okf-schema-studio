@@ -31,7 +31,8 @@ Markdown Pro, and the MyST extension (ExecutableBookProject.myst-highlight) 0.11
 - Changes since the last commit: VS Code renders Markdown diffs in the preview and, in the
   experimental hybrid editor, shows Git change markers and Markdown diffs (the baseline is not
   stated). Studio marks the blocks changed since the last Git commit with a green bar in the live
-  preview, with a toolbar toggle. We claim only that form.
+  preview, with a toolbar toggle, and a second toggle shows each changed block as a small
+  side-by-side diff against that commit in reading mode. We claim only that form.
 - Themes and slash menu: Markdown Pro documents both, and the Markdown Editor (zaaack) documents
   themes.
 - Image paste and code copy buttons: the VS Code Markdown editor has both since 1.142.

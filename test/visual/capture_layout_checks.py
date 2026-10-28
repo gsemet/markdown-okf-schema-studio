@@ -9,11 +9,12 @@ import sys
 
 from playwright.sync_api import Page
 
+from capture_sbs_checks import check_side_by_side
 from capture_support import Failure, HERE, VISUAL_REPORT_DIR, report_path, save_step
 
 
 def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failure], starts_pressed: bool = True) -> None:
-    """The Diff button is second to last in row 3 (Comments is last), shows both states, and hides with the setting. It starts pressed unless the scenario starts with the view preference off."""
+    """The Diff button is third to last in row 3 (Side-by-side, then Comments), shows both states, and hides with the setting. It starts pressed unless the scenario starts with the view preference off."""
     diff = toolbar.locator('[data-sphinx-preview-diff-toggle]')
     if diff.count() != 1:
         return
@@ -22,8 +23,8 @@ def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failur
           .map(item => item.getAttribute('aria-label'))"""
     )
     hide_label, show_label = "Hide changes since last commit", "Show changes since last commit"
-    if not order or order[-2:] != [hide_label if starts_pressed else show_label, "Hide comments"]:
-        failures.append(Failure(page_name, f"the Diff and Comments buttons are not the last two of row 3: {order}"))
+    if not order or order[-3:-2] + order[-1:] != [hide_label if starts_pressed else show_label, "Hide comments"] or "side-by-side" not in order[-2]:
+        failures.append(Failure(page_name, f"the Diff, Side-by-side and Comments buttons are not the last three of row 3: {order}"))
     root = "document.documentElement.getAttribute('data-sphinx-preview-incoming')"
     try:
         if diff.get_attribute("aria-pressed") != ("true" if starts_pressed else "false") or page.evaluate(root) != ("on" if starts_pressed else "off"):
@@ -317,9 +318,10 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
         failures.append(Failure(page_name, f"toolbar row 1 does not hold {expected_main} buttons: {rows[0]['buttons']}"))
     if rows[1]["buttons"] != 4:
         failures.append(Failure(page_name, f"toolbar row 2 does not hold 4 buttons: {rows[1]['buttons']}"))
-    if rows[2]["buttons"] != 6:
-        failures.append(Failure(page_name, f"toolbar row 3 does not hold 6 buttons: {rows[2]['buttons']}"))
+    if rows[2]["buttons"] != 7:
+        failures.append(Failure(page_name, f"toolbar row 3 does not hold 7 buttons: {rows[2]['buttons']}"))
     check_heading_fold(page, toolbar, page_name, failures)
+    check_side_by_side(page, toolbar, page_name, failures)
     check_diff_toggle(page, toolbar, page_name, failures, starts_pressed=render_options.get("incomingChanges") is not False)
     if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5 or rows[1]["rect"]["bottom"] > rows[2]["rect"]["top"] + 0.5:
         failures.append(Failure(page_name, "toolbar rows overlap"))

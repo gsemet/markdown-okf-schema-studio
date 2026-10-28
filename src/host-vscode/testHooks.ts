@@ -113,6 +113,8 @@ export function getActivePreviewForTests():
     pendingOverlayVisible: boolean;
     pendingOverlayShown: number;
     incomingChanges: { posts: number; last?: { enabled: boolean; ranges: { start: number; end: number }[] } };
+    /** Side-by-side diff baselines posted to the page (CR 147). */
+    baseline: { posts: number; last?: { hunks: number; htmlLength: number } };
     /** Review comment threads posted to the page (T42). */
     comments: { posts: number; last?: Array<CommentThread & { orphaned?: boolean }>; result?: { ok: boolean; reason?: string; kind: string; threadId?: string } };
     /** True while the host holds an open block edit (its final save has not completed). */
@@ -177,6 +179,7 @@ export function getActivePreviewForTests():
     pendingOverlayVisible: preview.overlay.visible,
     pendingOverlayShown: probe.pendingOverlayShown,
     incomingChanges: { posts: probe.incomingPosts, last: probe.lastIncomingChanges },
+    baseline: { posts: probe.baselinePosts, last: probe.lastBaseline },
     comments: { posts: probe.commentPosts, last: probe.lastComments, result: probe.lastCommentResult },
     blockEditOpen: preview.edits.active !== undefined,
     pageEditorOpen: preview.edits.lock.pageEditorOpen,

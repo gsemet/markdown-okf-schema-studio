@@ -29,7 +29,8 @@ chips in open
 - `preview.showIncomingChanges` (default on): mark blocks changed since the last Git commit
   (unsaved edits included) with a green bar on the left, like the editor gutter. Needs the built-in
   Git extension; files that are not in Git, and untrusted workspaces, show nothing. Off turns the
-  marks, and their toolbar toggle, off.
+  marks, and their toolbar toggle, off. It also turns off the side-by-side diff of changed blocks and
+  its toolbar button.
 - `preview.codeBlocks.darkBackground` (default on): draw code blocks on the dark VS Code Dark+
   background, with its syntax colors, in every preview theme, cream and white included. Off keeps the
   light code background of the theme and uses the Light+ colors. Inline code is not affected. Syntax

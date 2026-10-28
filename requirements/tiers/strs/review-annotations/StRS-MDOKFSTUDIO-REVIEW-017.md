@@ -16,6 +16,12 @@ user_need: As a writer, I see at a glance what I changed since the last commit,
   unsaved edits included, and I read the document without the bars when I do not
   need them.
 derived_by:
+- SwRS-MDOKFSTUDIO-REVIEW-005
+- SwRS-MDOKFSTUDIO-REVIEW-006
+- SwRS-MDOKFSTUDIO-REVIEW-007
+- SwRS-MDOKFSTUDIO-REVIEW-008
+- SwRS-MDOKFSTUDIO-REVIEW-009
+- SwRS-MDOKFSTUDIO-REVIEW-010
 - SwRS-MDOKFSTUDIO-REVIEW-195
 - SwRS-MDOKFSTUDIO-REVIEW-200
 - SwRS-MDOKFSTUDIO-REVIEW-203

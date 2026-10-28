@@ -188,6 +188,24 @@ export interface PreviewIncomingChangesMessage extends RenderMessage<"previewInc
   ranges: readonly SourceLineRange[];
 }
 
+/** One difference with HEAD: base lines `baseStart..baseEnd` became lines `start..end` (empty: end = start - 1). */
+export interface BaselineHunk {
+  baseStart: number;
+  baseEnd: number;
+  start: number;
+  end: number;
+}
+
+/**
+ * The text at HEAD rendered like the page (`html`: the sanitized inner HTML of the content container,
+ * its blocks numbered with the lines of the HEAD text) and the hunks that tell which HEAD lines became
+ * which current lines. The side-by-side diff of changed blocks is made from it.
+ */
+export interface PreviewBaselineDiffMessage extends RenderMessage<"previewBaselineDiff"> {
+  html: string;
+  hunks: readonly BaselineHunk[];
+}
+
 /** The review comment threads of the document (T42), orphaned ones flagged. */
 export interface PreviewCommentsMessage extends RenderMessage<"previewComments"> {
   threads: ReadonlyArray<CommentThread & { orphaned?: boolean }>;
@@ -278,6 +296,7 @@ export type HostToPageMessage =
   | PreviewHistoryStateMessage
   | PreviewShowCommentsMessage
   | PreviewIncomingChangesMessage
+  | PreviewBaselineDiffMessage
   | PreviewCommentsMessage
   | PreviewCommentResultMessage
   | PreviewFlushEditMessage
@@ -351,6 +370,19 @@ export function createHostMessageFilter(): HostMessageFilter {
         && entry.severity.length <= 50 && typeof entry.text === "string" && entry.text.length <= 20000
         && (entry.code === undefined || (typeof entry.code === "string" && entry.code.length <= 100)));
   };
+  const MAX_BASELINE_LENGTH = 20 * 1024 * 1024;
+  const MAX_BASELINE_HUNKS = 100_000;
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-007
+  const isValidBaselineDiff = (message: Readonly<Record<string, unknown>>): boolean => {
+    if (typeof message.html !== "string" || message.html.length > MAX_BASELINE_LENGTH) return false;
+    const hunks = message.hunks;
+    return Array.isArray(hunks) && hunks.length <= MAX_BASELINE_HUNKS && hunks.every((hunk) => {
+      if (!hunk || typeof hunk !== "object") return false;
+      const { baseStart, baseEnd, start, end } = hunk as Record<string, unknown>;
+      return [baseStart, baseEnd, start, end].every((value) => Number.isSafeInteger(value) && (value as number) >= 0)
+        && (baseEnd as number) >= (baseStart as number) - 1 && (end as number) >= (start as number) - 1;
+    });
+  };
   const render: HostMessageRule = { addressing: "render" };
   const ownId: HostMessageRule = { addressing: "own-id" };
   const rules: { readonly [T in HostToPageType]: HostMessageRule } = {
@@ -383,6 +415,7 @@ export function createHostMessageFilter(): HostMessageFilter {
     previewHistoryState: render,
     previewShowComments: render,
     previewIncomingChanges: render,
+    previewBaselineDiff: { addressing: "render", isValid: isValidBaselineDiff },
     previewComments: render,
     previewCommentResult: render,
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-064

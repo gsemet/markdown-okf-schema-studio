@@ -54,6 +54,10 @@ export function registerHostHandlers(rt: PageRuntime): void {
     parts.incomingChanges.setEnabled(message.enabled !== false);
     parts.incomingChanges.setRanges(message.ranges);
   });
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-009
+  hostMessages.on("previewBaselineDiff", (message) => {
+    parts.sideBySide.setBaseline({ html: message.html, hunks: message.hunks, revision: message.revision });
+  });
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-205
   hostMessages.on("previewFlushEdit", (message) => {
     // The host is about to switch document: post the final saves, then the answer, in that order.

@@ -61,7 +61,7 @@ function fixture(t: TestContext, uri = "file:///w/a.md"): Fixture {
     },
     configuration: { showIncomingChanges: true, showComments: true },
     incoming: createIncomingState(),
-    probe: { incomingPosts: 0 },
+    probe: { incomingPosts: 0, baselinePosts: 0 },
     queue: { getState: () => ({ lastGood: undefined }) },
     postToPage: (message: Record<string, unknown>) => {
       posted.push(message);
@@ -226,4 +226,114 @@ test("the value of preview.showComments is posted to the page when the settings 
   assert.equal(shown[1]!.showComments, false);
   assert.equal(f.posted.some((message) => message.type === "previewContentPatch"), false, "no render was asked for");
   f.controller.clear(f.preview);
+});
+
+/** A fixture whose controller renders the baseline with a stub that counts its calls. */
+function sideBySideFixture(t: TestContext, html: string | null = "<p data-line=\"2\">two</p>") {
+  const f = fixture(t);
+  const renders: string[] = [];
+  const controller = new IncomingChangesController(f.manager, async (_manager, _preview, _stage, text) => {
+    renders.push(text);
+    return html ?? undefined;
+  });
+  f.manager.incoming = controller;
+  t.after(() => controller.clear(f.preview));
+  const baselines = () => f.posted.filter((message) => message.type === "previewBaselineDiff");
+  const run = async (): Promise<void> => {
+    controller.schedule(f.preview, 0);
+    t.mock.timers.tick(1);
+    await flush();
+  };
+  return { ...f, controller, renders, baselines, run };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+test("CR147: with the side-by-side diff on, the page gets the HEAD rendering and the hunks, rendered once per HEAD text", async (t) => {
+  const f = sideBySideFixture(t);
+  await f.run();
+  assert.deepEqual(f.baselines(), [], "nothing while the diff is off");
+  assert.deepEqual(f.renders, []);
+
+  f.controller.setSideBySide(f.preview, true);
+  t.mock.timers.tick(1);
+  await flush();
+  assert.deepEqual(f.baselines(), [{
+    type: "previewBaselineDiff",
+    html: "<p data-line=\"2\">two</p>",
+    hunks: [{ baseStart: 2, baseEnd: 2, start: 2, end: 2 }, { baseStart: 4, baseEnd: 4, start: 4, end: 4 }],
+    documentId: "file:///w/a.md",
+    revision: 7,
+    requestId: 3,
+  }]);
+  assert.deepEqual(f.renders, [HEAD]);
+
+  // The shown text changes: new hunks, the same HEAD text is not rendered again.
+  f.preview.stage.sourceText = "one\nTWO\nthree\nfour\n";
+  await f.run();
+  assert.equal(f.baselines().length, 2);
+  assert.deepEqual((f.baselines()[1] as any).hunks, [{ baseStart: 2, baseEnd: 2, start: 2, end: 2 }]);
+  assert.equal(f.renders.length, 1);
+
+  // Another commit: rendered again.
+  f.state.head = "one\ntwo\nthree\nfour\nfive\n";
+  await f.run();
+  assert.equal(f.renders.length, 2);
+
+  // Off: nothing more is posted or rendered.
+  f.controller.setSideBySide(f.preview, false);
+  await f.run();
+  assert.equal(f.baselines().length, 3);
+  assert.equal(f.renders.length, 2);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+test("CR147: the baseline does not depend on the Diff button and is empty for an untracked file", async (t) => {
+  const f = sideBySideFixture(t);
+  f.state.diff = false;
+  f.controller.setSideBySide(f.preview, true);
+  t.mock.timers.tick(1);
+  await flush();
+  assert.equal(f.baselines().length, 1, "the baseline does not depend on the Diff button");
+  assert.deepEqual(incoming(f).map((message) => message.ranges), [], "and no ranges are posted");
+
+  // A file Git does not know: an empty baseline, no render.
+  f.state.head = undefined;
+  await f.run();
+  assert.deepEqual([(f.baselines()[1] as any).html, (f.baselines()[1] as any).hunks], ["", []]);
+
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+test("CR147: a HEAD text that cannot be rendered is posted empty, so the page keeps the green bars", async (t) => {
+  const broken = sideBySideFixture(t, null);
+  broken.controller.setSideBySide(broken.preview, true);
+  t.mock.timers.tick(1);
+  await flush();
+  assert.deepEqual([(broken.baselines()[0] as any).html, (broken.baselines()[0] as any).hunks], ["", []]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+test("CR147: with preview.showIncomingChanges off nothing is read or posted", async (t) => {
+  const off = sideBySideFixture(t);
+  off.preview.configuration.showIncomingChanges = false;
+  off.controller.setSideBySide(off.preview, true);
+  t.mock.timers.tick(1);
+  await flush();
+  assert.equal(off.baselines().length, 0);
+  assert.equal(off.headReads(), 0);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-006
+test("CR147: the page message switches the diff on the session", async (t) => {
+  const f = sideBySideFixture(t);
+  const handlers = new Map<string, (message: any, preview: any) => void>();
+  f.manager.view.register({ on: (type: string, handler: (message: any, preview: any) => void) => handlers.set(type, handler) } as never);
+  handlers.get("previewSideBySideChanged")!({ on: true }, f.preview);
+  assert.equal(f.preview.incoming.sideBySide, true);
+  t.mock.timers.tick(1);
+  await flush();
+  assert.equal(f.baselines().length, 1);
+  handlers.get("previewSideBySideChanged")!({ on: false }, f.preview);
+  assert.equal(f.preview.incoming.sideBySide, false);
+  assert.equal(f.preview.incoming.baseline, undefined);
 });

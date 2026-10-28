@@ -6,11 +6,11 @@ title: "The toolbar has three rows of titled buttons that float over the page"
 description: "When a preview page is built, the extension SHALL render the toolbar,
   named Preview controls with the role toolbar, as three rows of buttons in a fixed
   order (for a writable preview: Refresh, Anchor, Edit and the collapse button; Back,
-  Next, Zoom out and Zoom in; Theme, Width, Table of contents, Fold, Diff and Comments),
-  give every button a data-tooltip equal to its title, show that tooltip with a readable
-  contrast on hover and on keyboard focus, and fix the toolbar at the top right of
-  the pane above the page content, inside the pane and without overlap between its
-  rows."
+  Next, Zoom out and Zoom in; Theme, Width, Table of contents, Fold, Diff, Side-by-side
+  and Comments), give every button a data-tooltip equal to its title, show that tooltip
+  with a readable contrast on hover and on keyboard focus, and fix the toolbar at
+  the top right of the pane above the page content, inside the pane and without overlap
+  between its rows."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
 lifecycle: proposed
@@ -36,7 +36,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a preview page is built, the extension SHALL render the toolbar, named Preview controls with the role toolbar, as three rows of buttons in a fixed order (for a writable preview: Refresh, Anchor, Edit and the collapse button; Back, Next, Zoom out and Zoom in; Theme, Width, Table of contents, Fold, Diff and Comments), give every button a data-tooltip equal to its title, show that tooltip with a readable contrast on hover and on keyboard focus, and fix the toolbar at the top right of the pane above the page content, inside the pane and without overlap between its rows.
+When a preview page is built, the extension SHALL render the toolbar, named Preview controls with the role toolbar, as three rows of buttons in a fixed order (for a writable preview: Refresh, Anchor, Edit and the collapse button; Back, Next, Zoom out and Zoom in; Theme, Width, Table of contents, Fold, Diff, Side-by-side and Comments), give every button a data-tooltip equal to its title, show that tooltip with a readable contrast on hover and on keyboard focus, and fix the toolbar at the top right of the pane above the page content, inside the pane and without overlap between its rows.
 
 ### Scenario (nominal): Writable preview
 - GIVEN a writable preview
