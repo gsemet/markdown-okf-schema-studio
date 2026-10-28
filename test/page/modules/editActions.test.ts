@@ -200,7 +200,7 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     [
       "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence", "quote",
       "rule", "toc", "table",
-      "emoji", "todo", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
+      "emoji", "todo", "comment", "thread", "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
       "admonition", "deflist", "math", "sub", "sup", "label",
       "ref", "doc", "cite", "dropdown", "tableCaption", "listTable", "pipeTable", "figure", "roleKbd", "vegaLite", "vega",
     ],
@@ -220,6 +220,9 @@ test("the registry lists the actions with metadata and indexes them by id", () =
     assert.ok(action.scopes.includes("block"));
   }
   assert.equal(registry.byId.get("todo")!.scopes.includes("cell"), false);
+  assert.equal(registry.byId.get("comment")!.scopes.includes("cell"), false);
+  assert.equal(registry.byId.get("comment")!.shortcutOnly, true);
+  assert.equal(registry.byId.get("todo")!.shortcut, undefined);
 });
 
 type KeyInit = Record<string, unknown>;
@@ -251,8 +254,8 @@ test("shortcutFor reads the typed key first and the physical code only for non-L
 test("shortcutFor accepts Ctrl+/ and Cmd+/ on every platform", () => {
   for (const mac of [true, false]) {
     for (const mod of ["metaKey", "ctrlKey"]) {
-      assert.equal(key({ [mod]: true, code: "Slash", key: "/" }, mac)?.id, "todo");
-      assert.equal(key({ [mod]: true, code: "Digit3", key: "/", shiftKey: true }, mac)?.id, "todo");
+      assert.equal(key({ [mod]: true, code: "Slash", key: "/" }, mac)?.id, "comment");
+      assert.equal(key({ [mod]: true, code: "Digit3", key: "/", shiftKey: true }, mac)?.id, "comment");
     }
   }
 });
@@ -412,8 +415,9 @@ test("shortcutLabel shows Cmd on macOS and Ctrl elsewhere", () => {
   assert.equal(registry.shortcutLabel(registry.byId.get("bold")!, true), "Cmd+B");
   assert.equal(registry.shortcutLabel(registry.byId.get("bold")!, false), "Ctrl+B");
   assert.equal(registry.shortcutLabel(registry.byId.get("italic")!, false), "Ctrl+I");
-  assert.equal(registry.shortcutLabel(registry.byId.get("todo")!, false), "Ctrl+/");
-  assert.equal(registry.shortcutLabel(registry.byId.get("todo")!, true), "Cmd+/");
+  assert.equal(registry.shortcutLabel(registry.byId.get("comment")!, false), "Ctrl+/");
+  assert.equal(registry.shortcutLabel(registry.byId.get("comment")!, true), "Cmd+/");
+  assert.equal(registry.shortcutLabel(registry.byId.get("todo")!, false), "");
   assert.equal(registry.shortcutLabel(registry.byId.get("rule")!, false), "");
 });
 

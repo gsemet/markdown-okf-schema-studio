@@ -378,7 +378,8 @@ export function createEditPalette(document: Document, deps: EditPaletteDeps): Ed
   function visibleActions(): EditAction[] {
     const rank = MODE_RANK[mode] ?? 0;
     return deps.actions.actions.filter((action) =>
-      action.scopes.includes(scope)
+      !action.shortcutOnly
+      && action.scopes.includes(scope)
       // Modes are additive: an action listed for a lower mode shows in every higher one.
       && action.modes.some((candidate) => (MODE_RANK[candidate] ?? 0) <= rank));
   }

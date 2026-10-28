@@ -467,11 +467,11 @@ export async function scenarioShortcuts(page: Page, evidence: Evidence): Promise
     await expectValue("one undo to restore the word", original);
 
     await press(page, "Control+/");
-    await expectValue("Ctrl+/ to wrap the line in a TODO comment", "<!-- TODO: " + original + " -->");
-    // Captured with the TODO wrapper visible, before the undo that restores the line.
+    await expectValue("Ctrl+/ to wrap the line in a comment", "<!-- " + original + " -->");
+    // Captured with the comment wrapper visible, before the undo that restores the line.
     await captureAfter(evidence, page, "palette-slash/r03-shortcuts-bold-todo",
       "Edit mode on; Cmd/Ctrl+B bolded the selected word (undone by one Cmd/Ctrl+Z) and Ctrl+/ wrapped the line "
-      + "in a TODO comment; the image shows the wrapped line before its single Cmd/Ctrl+Z, with the focus in the text box.");
+      + "in a plain comment; the image shows the wrapped line before its single Cmd/Ctrl+Z, with the focus in the text box.");
     await press(page, MOD + "+z");
     await expectValue("one undo to restore the line", original);
     await escapeBlockEditor(page, "the block editor to close after Escape");

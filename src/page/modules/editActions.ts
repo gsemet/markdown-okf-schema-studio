@@ -44,6 +44,7 @@ import {
   insertThread,
   roleArgument,
   toggleAsterisks,
+  toggleComment,
   toggleKbd,
   toggleStrikethrough,
   toggleTodo,
@@ -226,6 +227,8 @@ export function createEditActions(
     emoji: { apply: insertEmoji },
     // @implements_req SwRS-MDOKFSTUDIO-REVIEW-160
     todo: { apply: toggleTodo },
+    // @implements_req SwRS-MDOKFSTUDIO-PALETTE-266
+    comment: { apply: toggleComment },
     thread: { apply: (ctx) => insertThread(ctx, threadAuthor) },
     alert: { apply: insertAlert },
     checkbox: { apply: toggleCheckbox },

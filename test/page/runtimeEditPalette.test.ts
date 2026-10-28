@@ -97,18 +97,12 @@ test("T21: the palette buttons show the real shortcut in their tooltip", () => {
   openBlockEditorWithSource(harness);
   assert.equal(paletteButton(harness, "bold").getAttribute("title"), "Bold (Ctrl+B)");
   assert.equal(paletteButton(harness, "italic").getAttribute("title"), "Italic (Ctrl+I)");
-  assert.equal(
-    paletteButton(harness, "todo").getAttribute("title"),
-    "Toggle TODO comment (Ctrl+/)",
-  );
+  assert.equal(paletteButton(harness, "todo").getAttribute("title"), "Toggle TODO comment");
   assert.equal(paletteButton(harness, "rule").getAttribute("title"), "Horizontal rule");
   const mac = createRuntimeHarness({ platform: "MacIntel" });
   openBlockEditorWithSource(mac);
   assert.equal(paletteButton(mac, "bold").getAttribute("title"), "Bold (Cmd+B)");
-  assert.equal(
-    paletteButton(mac, "todo").getAttribute("title"),
-    "Toggle TODO comment (Cmd+/)",
-  );
+  assert.equal(paletteButton(mac, "todo").getAttribute("title"), "Toggle TODO comment");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-036

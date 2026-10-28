@@ -570,7 +570,7 @@ test("T35: block-only shortcuts do nothing in a cell", () => {
   control.dispatch("keydown", {
     key: "/", code: "Slash", ctrlKey: true, preventDefault: () => undefined, stopPropagation: () => undefined,
   });
-  assert.equal(control.value, "foo", "the TODO comment toggle is a block action");
+  assert.equal(control.value, "foo", "the comment toggle is a block action");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-091

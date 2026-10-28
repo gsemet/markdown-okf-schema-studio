@@ -284,7 +284,7 @@
   `<group>/rNN-<slug>` id, a folder per feature group inside its run folder, a "locks" sentence and
   an entry in the run manifest and the product-owner gallery. Several real-window runs can now
   run at the same time (own user-data and extensions directories, debugging port and evidence
-  folders per run). Four captures were taken at a more telling moment (the TODO wrapper
+  folders per run). Four captures were taken at a more telling moment (the comment wrapper
   after `Ctrl+/`, the open language list, the open link panel, the open field picker before
   Escape) and the frontmatter ones are cropped to the preview.
 - MyST `{list-table}` directives now render like pipe tables, with their title, `:header-rows:`
@@ -500,7 +500,9 @@
   language list, blockquote, horizontal rule and TODO. Buttons never close the editor, each is one
   undo step, and the tooltips show the shortcut of your platform.
 - In the block editor, Cmd/Ctrl+B toggles **bold**, Cmd/Ctrl+I toggles *italic* and Ctrl+/ (Cmd+/)
-  toggles a `<!-- TODO: … -->` comment around the current line or the selected lines. Each is one
+  toggles a plain `<!-- … -->` comment around the current line or the selected lines, like Toggle
+  Line Comment in a code editor (a `<!-- TODO: … -->` line is left alone). The TODO button and the
+  `/todo` command still insert a TODO comment, and the TODO tooltip shows no shortcut. Each is one
   undo step.
 - Tables and figures narrower than the text column are now centred in every width mode. In Auto,
   a wide table or figure takes the width it needs, up to the space left of the table of contents,

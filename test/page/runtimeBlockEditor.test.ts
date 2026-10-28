@@ -926,12 +926,13 @@ test("a table cell wraps its selection with the marker too", () => {
   assert.match(String(harness.messages.at(-1)?.editedText ?? ""), /_foo_/u);
 });
 
-test("Cmd/Ctrl+B, Cmd/Ctrl+I and Ctrl+/ edit the block text box in one native step without saving", () => {
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-266
+test("Cmd/Ctrl+B, Cmd/Ctrl+I and Ctrl+/ (a plain comment) edit the block text box in one native step without saving", () => {
   const cases: [Record<string, unknown>, string, [number, number], string][] = [
     [{ ctrlKey: true, code: "KeyB", key: "b" }, "say foo now", [4, 7], "say **foo** now"],
     [{ ctrlKey: true, code: "KeyI", key: "i" }, "say foo now", [4, 7], "say *foo* now"],
-    [{ ctrlKey: true, code: "Slash", key: "/" }, "say foo", [0, 0], "<!-- TODO: say foo -->"],
-    [{ metaKey: true, code: "Slash", key: "/" }, "say foo", [0, 0], "<!-- TODO: say foo -->"],
+    [{ ctrlKey: true, code: "Slash", key: "/" }, "say foo", [0, 0], "<!-- say foo -->"],
+    [{ metaKey: true, code: "Slash", key: "/" }, "say foo", [0, 0], "<!-- say foo -->"],
   ];
   for (const [init, value, [start, end], expected] of cases) {
     const harness = createRuntimeHarness();

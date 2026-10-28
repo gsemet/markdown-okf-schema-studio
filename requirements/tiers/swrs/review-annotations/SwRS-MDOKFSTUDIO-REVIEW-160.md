@@ -66,13 +66,11 @@ When a writer runs the TODO action in a block editor on lines that are not wrapp
 | The line "a --> b" with the caret | No edit is made |
 | The lines "a" and "b --> c" selected | Only the first line is wrapped |
 
-### Scenario (nominal): Ctrl+/ or Cmd+/ runs the action
-| Keys in the text box of a block editor | Outcome |
+### Scenario (boundary): The TODO action has no shortcut
+| Input | Outcome |
 | --- | --- |
-| Ctrl+/ or Cmd+/, on macOS or elsewhere, with or without Shift | The TODO action runs |
-| Ctrl+Alt+/ (Alt held) | The shortcut is not matched |
-
-In a table cell the shortcut does nothing, see SwRS-MDOKFSTUDIO-TABLE-085.
+| Ctrl+/ or Cmd+/ in the text box of a block editor | The TODO action does not run: the shortcut toggles a plain comment, see SwRS-MDOKFSTUDIO-PALETTE-266 |
+| The tooltip of the TODO button | Toggle TODO comment, with no shortcut in parentheses |
 
 ### Scenario (nominal): The slash menu finds the action by three names
 | Typed after the slash in a block editor | Outcome |
@@ -82,10 +80,10 @@ In a table cell the shortcut does nothing, see SwRS-MDOKFSTUDIO-TABLE-085.
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-PALETTE-001: the TODO button of the palette is listed with the palette buttons; the slash menu mechanics belong to the palette-slash scope.
-- SwRS-MDOKFSTUDIO-TABLE-085: the shortcut does nothing in a table cell.
+- SwRS-MDOKFSTUDIO-PALETTE-266: the Ctrl+/ shortcut, which toggles a plain comment.
 
 ### Verification notes
-- Method: test/page/modules/editActions.test.ts (the table cases generated as `editActions todo ` plus the input: caret in a line, selection, wrapped inputs, the mixed input, the input "[a\n]b", the inputs "|", "  |" and an empty TODO comment with the caret; `the todo toggle is its own inverse`; `a line containing --> is never wrapped in a TODO comment`; `shortcutFor accepts Ctrl+/ and Cmd+/ on every platform`, `shortcutFor ignores plain keys, other modifiers, composition and AltGr`; `the registry lists the actions with metadata and indexes them by id` for the slash menu entry).
+- Method: test/page/modules/editActions.test.ts (the table cases generated as `editActions todo ` plus the input: caret in a line, selection, wrapped inputs, the mixed input, the input "[a\n]b", the inputs "|", "  |" and an empty TODO comment with the caret; `the todo toggle is its own inverse`; `a line containing --> is never wrapped in a TODO comment`; `the registry lists the actions with metadata and indexes them by id` (the TODO action has no shortcut, and the slash menu entry)).
 - Method: test/page/modules/editActions.test.ts (marker file of the tile).
-- Method: real window palette-slash/r03-shortcuts-bold-todo in test/integration/realInput/textEditing.ts (shortcut).
-- Criteria: The produced text equals the expected wrapped text for each case, the caret offset equals the end of the opening marker on a blank line, a line with --> is returned unchanged, shortcutFor returns the todo action for either modifier with or without Shift and nothing with Alt, and the registry entry todo has the title and the three aliases and the block scope. The aliases are not asserted by name.
+- Method: test/page/runtimeEditPalette.test.ts (T21: the TODO button tooltip has no shortcut).
+- Criteria: The produced text equals the expected wrapped text for each case, the caret offset equals the end of the opening marker on a blank line, a line with --> is returned unchanged, the TODO action has no shortcut, its tooltip has none, and the registry entry todo has the title and the three aliases and the block scope. The aliases are not asserted by name.
