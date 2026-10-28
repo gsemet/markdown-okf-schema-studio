@@ -103,10 +103,26 @@ test("README sources are scenarios that write a PNG, with a crop and a unique de
   }
 });
 
+test("README crops that start at the top of the page keep the floating toolbar whole (right edge reaches the viewport)", () => {
+  // The toolbar floats in the top-right corner: at most 400 PNG px tall (2x scale), flush with the right edge.
+  const TOOLBAR_BOTTOM = 400;
+  const SCALE = 2;
+  for (const scenario of SCENARIOS.filter((entry) => entry.readme !== undefined)) {
+    const [, top, right] = scenario.readme!.crop;
+    if (top >= TOOLBAR_BOTTOM) {
+      continue;
+    }
+    assert.ok(right >= scenario.width * SCALE,
+      `${scenario.id}: README crop of ${scenario.readme!.file} ends at x=${right}, left of the viewport edge `
+      + `${scenario.width * SCALE}: it cuts the floating toolbar`);
+  }
+});
+
 test("generate-readme-images.py reads the visual README sources from the metadata, not from names", () => {
   const source = fs.readFileSync(path.join(ROOT, "scripts/generate-readme-images.py"), "utf8");
   assert.ok(!/VISUAL \/ "/u.test(source), "no hard-coded scenario PNG path is left in the script");
   assert.match(source, /visual_crops\(\)/u);
+  assert.match(source, /--visual-only/u, "the generator can write only the headless images");
 });
 
 test("the orphan-box scenario scrolls on until the box in the bottom padding is in the frame", () => {
