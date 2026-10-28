@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Keyboard navigation goes down and up the structure of the page in edit mode: Right moves the
+  selection into a table (its first cell), an admonition, card or tab (its first inner block) or,
+  with nothing selected, to the first block; Left and Escape go back up. On a table cell the arrow
+  keys move cell to cell and stop at the edges, Escape returns to the table and Enter opens the cell
+  editor. The selected cell is outlined and announced.
 - Clicking the shown panel of a `{tab-item}` in edit mode opens the whole tab item for editing, as
   documented, instead of the single paragraph inside it.
 - A front matter field changed or added since the last commit now gets its own green change bar on its

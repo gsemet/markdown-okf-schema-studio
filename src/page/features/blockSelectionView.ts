@@ -7,6 +7,7 @@
 
 import { isApplePlatform } from "../pageSettings";
 import type { BlockSelectionView, PageRuntime, SelectionAnchor } from "./pageRuntime";
+import { installStructuralNavigationView } from "./structuralNavigationView";
 
 /** The selection view of a page. */
 export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
@@ -46,7 +47,20 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     ensureSelectionStatus().textContent = count === 0 ? "" : count + (count === 1 ? " block selected" : " blocks selected");
   }
 
+  const structural = installStructuralNavigationView(rt, {
+    selectTopLevel(index) {
+      const blocks = syncSelectionModel();
+      blockSelection.clear();
+      selectBlocksNow(undefined, index);
+      rememberSelectionAnchor(blocks[index]);
+    },
+    announce(text) {
+      ensureSelectionStatus().textContent = text;
+    },
+  });
+
   function renderBlockSelection(blocks: HTMLElement[]): void {
+    structural.reset();
     selectionElements.forEach((element) => element.removeAttribute("data-sphinx-preview-block-selected"));
     selectionElements = blockSelection.indices()
       .map((index) => blocks[index])
@@ -242,6 +256,22 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
     rememberSelectionAnchor(blocks[target]);
   }
 
+  /**
+   * The target of a plain key (no modifier) that the block selection may take: edit mode with no
+   * editor open, on a block, the edit-mode toggle or the page itself. `focused` is the top-level
+   * block the key target sits in. Undefined when the key is not ours.
+   */
+  function plainKeyTarget(event: KeyboardEvent): { focused: HTMLElement | undefined } | undefined {
+    if (!state.editMode || event.isComposing || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return undefined;
+    if (state.activeBlockEdit || state.activeFrontmatterEdit || event.defaultPrevented) return undefined;
+    const target = event.target;
+    const toggle = target instanceof Element && target === rt.editModeButton;
+    if (!toggle && ownsKeys(target, "[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]", true)) return undefined;
+    const focused = target instanceof Element ? rt.insertPoints.blockOfTarget(target) : undefined;
+    if (!toggle && !focused && !isPageTarget(target)) return undefined;
+    return { focused };
+  }
+
   /** True for a key target that keeps its own keys (a text box, a field, an editor, the properties). */
   function ownsKeys(target: EventTarget | null, selector: string, contentEditable: boolean): boolean {
     return target instanceof Element
@@ -312,20 +342,27 @@ export function installBlockSelectionView(rt: PageRuntime): BlockSelectionView {
         }
       });
 
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-254
+      // Structural keys: Right goes down a level, Left and Escape up, the arrows walk table cells.
+      // Registered before the plain-key listener and the page input, so Enter on a cell is ours.
+      document.addEventListener("keydown", (event) => {
+        if (!/^(Arrow(Left|Right|Up|Down)|Escape|Enter)$/.test(event.key) || !plainKeyTarget(event)) return;
+        if (!structural.handleKey(event)) return;
+        event.preventDefault?.();
+        event.stopPropagation?.();
+        event.stopImmediatePropagation?.();
+      });
+
       // @implements_req SwRS-MDOKFSTUDIO-BLOCK-004
       // Keyboard-only editing: plain Up / Down move the block selection, Enter opens the selected
       // block (the Enter of a focused block is the page input's; this one covers a page that lost
       // the focus to the body). The edit-mode toggle may hold the focus right after it was pressed.
       document.addEventListener("keydown", (event) => {
-        if (!state.editMode || event.isComposing || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+        const keyed = plainKeyTarget(event);
+        if (!keyed) return;
+        const { focused } = keyed;
         const arrow = event.key === "ArrowUp" || event.key === "ArrowDown";
         if (!arrow && event.key !== "Enter") return;
-        if (state.activeBlockEdit || state.activeFrontmatterEdit || event.defaultPrevented) return;
-        const target = event.target;
-        const toggle = target instanceof Element && target === rt.editModeButton;
-        if (!toggle && ownsKeys(target, "[data-sphinx-preview-block-editor], [data-okf-properties], [data-okf-frontmatter-editor]", true)) return;
-        const focused = target instanceof Element ? rt.insertPoints.blockOfTarget(target) : undefined;
-        if (!toggle && !focused && !isPageTarget(target)) return;
         if (arrow) {
           event.preventDefault?.();
           event.stopPropagation?.();

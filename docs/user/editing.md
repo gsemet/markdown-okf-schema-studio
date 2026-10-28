@@ -94,6 +94,13 @@ environments),
   of the page keeps Up and Down working; the page itself never shows a focus ring.
   On an empty document the Start writing button is the selection (it shows the selection ring and
   the hint "Enter to create a new block"): Enter or Down opens the new-block editor, no click needed.
+  Structure: with a block selected, Right goes down one level (a table to its first cell, an
+  admonition, card or tab to its first inner block, and with nothing selected the first block of the
+  page); Left and Escape go back up one level. On a selected table cell the four arrows move cell to
+  cell and stop at the edges of the table, Escape returns to the table block, and Enter opens the
+  cell editor as a click does; the selected cell is outlined and announced. Up and Down on an inner
+  block move to its neighbours inside the same parent. Left at the top level does nothing, and
+  Escape at the top level clears the selection as before.
   Block selection: Shift+click selects the blocks between the last clicked block and the one you
   click, Shift+Up/Down extends or shrinks the selection, Escape or a click clears it.
   With a selection, Cmd/Ctrl+C copies its exact Markdown, Cmd/Ctrl+X cuts it (one undo step), and
