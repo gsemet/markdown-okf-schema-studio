@@ -21,6 +21,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-087
 - SwRS-MDOKFSTUDIO-BLOCK-094
 - SwRS-MDOKFSTUDIO-BLOCK-102
+- SwRS-MDOKFSTUDIO-BLOCK-253
 default_owner_email: gaetan@xeberon.net
 ---
 

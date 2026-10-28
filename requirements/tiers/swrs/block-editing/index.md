@@ -63,5 +63,6 @@
 - [SwRS-MDOKFSTUDIO-BLOCK-249 — The editor events are kept in a short trace](SwRS-MDOKFSTUDIO-BLOCK-249.md) — While a page runs, it SHALL keep its last 40 editor events in a trace, each with the time since the page started, the event name, and an optional detail and caller stack.
 - [SwRS-MDOKFSTUDIO-BLOCK-250 — The trace names the nearest callers of an event](SwRS-MDOKFSTUDIO-BLOCK-250.md) — When a trace event is recorded with a stack, callers SHALL name the nearest named functions of that stack, innermost first, joined by " < ".
 - [SwRS-MDOKFSTUDIO-BLOCK-252 — Overlapping or out-of-range planned edits leave the document unchanged](SwRS-MDOKFSTUDIO-BLOCK-252.md) — When the edits planned for a move, a cut or a paste overlap each other or lie outside the text, the extension SHALL refuse the operation and leave the document unchanged.
+- [SwRS-MDOKFSTUDIO-BLOCK-253 — Start writing is the keyboard selection of an empty document](SwRS-MDOKFSTUDIO-BLOCK-253.md) — While edit mode is on and the body of the document is empty, the page SHALL make the Start writing button the keyboard selection, open the new-block editor on Enter or Arrow Down exactly as a click on it does, and show the hint "Enter to create a new block" under it.
 
 <!-- okfreq:index:end -->

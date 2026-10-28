@@ -92,6 +92,8 @@ environments),
   so Up, Down and Enter carry on from it. After you leave the window or the tab and come back, the
   selection is restored (the same block, else the one nearest the top), and a click on the margin
   of the page keeps Up and Down working; the page itself never shows a focus ring.
+  On an empty document the Start writing button is the selection (it shows the selection ring and
+  the hint "Enter to create a new block"): Enter or Down opens the new-block editor, no click needed.
   Block selection: Shift+click selects the blocks between the last clicked block and the one you
   click, Shift+Up/Down extends or shrinks the selection, Escape or a click clears it.
   With a selection, Cmd/Ctrl+C copies its exact Markdown, Cmd/Ctrl+X cuts it (one undo step), and

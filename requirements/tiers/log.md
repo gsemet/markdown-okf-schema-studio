@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-10-28 (empty document started from the keyboard)
+
+- SwRS-MDOKFSTUDIO-BLOCK-253 (new, proposed, CR 156): in edit mode on an empty document the Start
+  writing button is the keyboard selection (selection marker and ring), Enter and Arrow Down open
+  the new-block editor as a click does (also when the focus is on the body, the preview, the
+  edit-mode toggle or the button itself), and the hint "Enter to create a new block" sits under it
+  in the editor hint typography. The Enter shortcut row of SwRS-MDOKFSTUDIO-BLOCK-041 is unchanged.
+  Verification: test/page/runtimeEmptyDocumentStart.test.ts, test/visual/capture_start_hint.py
+  (scenarios layout-width/v86 and v87, 700 px).
+
 ## 2026-10-28 (a click in a MyST tab panel edits the whole tab item)
 
 - SwRS-MDOKFSTUDIO-MYST-098 (text unchanged, implementation fixed): the blocks inside a tab
