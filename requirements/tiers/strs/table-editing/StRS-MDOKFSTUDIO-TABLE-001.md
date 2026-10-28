@@ -11,7 +11,9 @@ description: When a writer in edit mode clicks a cell of a pipe table, the
   Cancel, and save the typed text before the preview leaves the document.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

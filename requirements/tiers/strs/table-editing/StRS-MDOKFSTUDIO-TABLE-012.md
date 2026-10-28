@@ -10,7 +10,9 @@ description: When a writer applies bold, italic, a link, a colour or another
   the table at the caret.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

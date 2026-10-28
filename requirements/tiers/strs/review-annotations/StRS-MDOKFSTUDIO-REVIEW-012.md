@@ -10,7 +10,9 @@ description: When a document holds an HTML comment or the word TODO, the Studio
   editor.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

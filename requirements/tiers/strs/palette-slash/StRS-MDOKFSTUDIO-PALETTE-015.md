@@ -11,7 +11,9 @@ description: When a writer types a slash at the start of a line or after a space
   technology.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

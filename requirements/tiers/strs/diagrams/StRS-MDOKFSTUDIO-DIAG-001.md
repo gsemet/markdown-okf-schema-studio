@@ -11,7 +11,9 @@ description: When a writer previews a document with a Mermaid fence or
   flowchart fence that renders at once.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

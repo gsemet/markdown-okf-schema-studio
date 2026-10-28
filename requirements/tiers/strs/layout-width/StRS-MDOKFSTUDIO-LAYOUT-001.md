@@ -9,7 +9,9 @@ description: When a document holds wide content, long words or long URLs, the
   sideways inside its own box.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

@@ -7,6 +7,8 @@ guideline that gives the details. A rule changes only by a pull request the main
 `AGENTS.md` covers how to set up, build and run the project; this file covers what a change must
 respect.
 
+[VISION.md](../docs/VISION.md) gives the unbreakable rules and the target of this project.
+
 ## 1. Product contract: requirements anchored to the code
 
 - The requirements in `requirements/` (okfreq, StRS and SwRS) describe what the extension does
