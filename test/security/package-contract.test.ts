@@ -374,3 +374,12 @@ test("CR 135: the VSIX leaves out source maps, internal docs, agent files and th
   }
   assert.ok(!ignore.some((line) => /^docs\/(\*\*)?$/u.test(line)), "docs/user pages linked from the README must ship");
 });
+
+test("the Marketplace listing declares its categories and keywords", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
+    categories: string[];
+    keywords: string[];
+  };
+  assert.deepEqual(manifest.categories, ["Programming Languages", "Formatters"]);
+  assert.deepEqual(manifest.keywords, ["markdown", "OKF", "MyST"]);
+});

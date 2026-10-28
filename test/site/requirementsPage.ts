@@ -362,7 +362,7 @@ ${stats?.example ? renderExample(stats.example, root) : ""}
 <p>The requirement checks run in CI with the other static checks (<code>just check</code> runs <code>just requirements-lint</code>): <code>okfreq validate</code> checks the requirement files and their links, <code>okfreq lint --check</code> checks the generated navigation, and <code>okfreq update-coverage --check</code> fails when a marker is missing, unknown or out of date. A change that moves marked code or tests moves the markers in the same commit.</p>
 ${figures}
 <h2>Browse the requirements</h2>
-<p>Browsing the requirements from this site, from a use case to its behaviours and their tests, with a page per requirement and a search, is planned and not available yet. Until then the requirements are readable in the repository, under <code>requirements/tiers/</code>.</p>`;
+<p>Browsing the requirements from this site, from a use case to its behaviours and their tests, with a page per requirement and a search, is planned and not available yet. Until then the requirements are readable in the repository, under <a href="https://github.com/gsemet/markdown-okf-schema-studio/tree/main/requirements/tiers"><code>requirements/tiers/</code></a>.</p>`;
 }
 
 /** Write requirements.html; a missing or invalid report degrades the page and never throws. */

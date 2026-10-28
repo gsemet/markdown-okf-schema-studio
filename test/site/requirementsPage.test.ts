@@ -171,3 +171,13 @@ test("marker snippets come from the repository files and fall back to the path",
   const html = renderRequirementsPage(stats, "/nonexistent-root");
   assert.ok(html.includes("<code>src/a.ts</code>") && html.includes("Browse the requirements"));
 });
+
+test("the requirements folder in the Browse section links to the repository tree", () => {
+  const stats = parseRequirementsReport(fixture());
+  const html = renderRequirementsPage(stats, "/nonexistent-root");
+  assert.ok(
+    html.includes(
+      '<a href="https://github.com/gsemet/markdown-okf-schema-studio/tree/main/requirements/tiers"><code>requirements/tiers/</code></a>'
+    )
+  );
+});
