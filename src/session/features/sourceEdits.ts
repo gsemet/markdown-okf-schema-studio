@@ -23,7 +23,6 @@ import {
 } from "../../core/edits/sourceEdits";
 import type { TextEdit } from "../../core/edits/textEdit";
 import type { HostDocument } from "../../host-api/documentStore";
-import { osUserName } from "../../node-services/paths";
 import type { PageMessageOf } from "../../core/protocol/pageToHost";
 import type { PageMessageRouter } from "../pageMessages";
 import type { PreviewManager } from "../previewManager";
@@ -226,7 +225,7 @@ export class SourceEditController {
     return resolveAuthor({
       setting: readCommentsConfiguration(host.settings.section(COMMENTS_CONFIGURATION_SECTION, document.id)).authorName,
       gitName: () => host.vcs.userName(document.id),
-      osUserName,
+      osUserName: () => host.paths.userName(),
     }).then((author) => {
       const current = currentPreviewDocument(preview, message);
       if (!current || current.revision !== document.revision) {

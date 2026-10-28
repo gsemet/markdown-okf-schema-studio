@@ -24,6 +24,7 @@ implemented_in_files:
 - src/session/hostEvents.ts
 - src/session/previewManager.ts
 tested_in_files:
+- test/host-memory/memoryHostSession.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/integration/serializer.test.ts
 ---

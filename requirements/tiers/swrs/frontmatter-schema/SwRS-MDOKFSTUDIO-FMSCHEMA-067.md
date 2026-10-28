@@ -34,6 +34,7 @@ tested_in_files:
 - test/core/frontmatter/frontmatterFence.test.ts
 - test/core/frontmatter/propertiesTable.test.ts
 - test/core/navigation/previewNavigation.test.ts
+- test/host-memory/memoryHostSession.test.ts
 - test/integration/previewEditing.test.ts
 - test/node-services/linkedTargetWatch.test.ts
 - test/page/runtimeScroll.test.ts

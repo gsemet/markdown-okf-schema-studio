@@ -8,6 +8,7 @@ import { test } from "node:test";
 import * as path from "node:path";
 
 import type { HostServices } from "../../src/host-api/index";
+import { nodeHostPorts } from "./nodeHostPorts";
 import type { PanelGroups } from "../../src/host-api/previewPanel";
 import { EditorEchoGuard } from "../../src/core/scroll/anchorPolicy";
 import { PreviewManager } from "../../src/session/previewManager";
@@ -31,6 +32,7 @@ function setup(options: { pairing?: boolean; lineCount?: number } = {}) {
     revealLine: (line, position) => revealed.push({ line, position }),
   };
   const host = {
+    ...nodeHostPorts,
     files: {},
     capabilities: { editorPairing: options.pairing ?? true },
     editors: { visible: () => [editor] },

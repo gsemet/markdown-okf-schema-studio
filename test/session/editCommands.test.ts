@@ -8,6 +8,7 @@ import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
 import type { HostServices } from "../../src/host-api/index";
+import { nodeHostPorts } from "./nodeHostPorts";
 import type { PanelGroups } from "../../src/host-api/previewPanel";
 import { createMemoryDocumentStore } from "../../src/host-memory/memoryDocumentStore";
 import { PreviewManager } from "../../src/session/previewManager";
@@ -26,6 +27,7 @@ function fixture() {
   const document = store.add("file:///w/a.md", MARKDOWN, "/w/a.md");
   const contexts: boolean[] = [];
   const host = {
+    ...nodeHostPorts,
     files: {},
     documents: store,
     ui: { setPreviewEditing: (editing: boolean) => { contexts.push(editing); } },

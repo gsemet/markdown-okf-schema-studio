@@ -11,6 +11,7 @@ import * as path from "node:path";
 import { test } from "node:test";
 
 import type { HostServices } from "../../src/host-api/index";
+import { nodeHostPorts } from "./nodeHostPorts";
 import type { PanelGroups } from "../../src/host-api/previewPanel";
 import { createMemoryDocumentStore } from "../../src/host-memory/memoryDocumentStore";
 import { resetRenderHooksForTests, setRenderOverrideForTests } from "../../src/core/render/renderPipeline";
@@ -40,6 +41,7 @@ function renderFixture() {
   const store = createMemoryDocumentStore();
   const document = store.add("file:///w/a.md", "# Title\n\nText.\n", file);
   const host = {
+    ...nodeHostPorts,
     files: {},
     documents: store,
     settings: { section: () => ({ get: <T>(_key: string, fallback: T): T => fallback }) },

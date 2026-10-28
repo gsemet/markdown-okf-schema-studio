@@ -5,7 +5,7 @@
  * when a patched page does not acknowledge it, and answers the page's ready report.
  */
 
-import { BuildQueueState } from "../../node-services/build/buildQueue";
+import type { BuildQueueState } from "../../core/render/buildQueue";
 import {
   DEFAULT_PREVIEW_CONFIGURATION,
   PREVIEW_STARTUP_SETTING_KEYS,

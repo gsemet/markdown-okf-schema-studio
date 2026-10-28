@@ -26,7 +26,6 @@ import type { SettingsChange } from "../host-api/settings";
 import type { PairedEditor } from "../host-api/textEditors";
 import type { FileWatcher } from "../host-api/watcher";
 import type { WorkspaceFolderInfo } from "../host-api/workspaceInfo";
-import { canonicalPath } from "../node-services/paths";
 import type { PreviewManager } from "./previewManager";
 import type { PreviewSession } from "./previewSession";
 import { isDocumentEligible } from "./sessionDocuments";
@@ -66,7 +65,7 @@ function isIgnoredWatchPath(filePath: string, root: string): boolean {
   return (inside ? relative : filePath).split(path.sep).some((segment) => IGNORED_WATCH_SEGMENTS.has(segment));
 }
 
-function sameFile(a: string | undefined, b: string): boolean {
+function sameFile(canonicalPath: (filePath: string) => string, a: string | undefined, b: string): boolean {
   return a !== undefined && canonicalPath(a) === canonicalPath(b);
 }
 
@@ -97,7 +96,7 @@ export class HostEvents {
     }
     // A file the finished renders may have read changed: a render of the same revision is stale.
     this.manager.sharedRenders.invalidate();
-    const candidate = canonical ?? canonicalPath(filePath);
+    const candidate = canonical ?? this.manager.canonicalPath(filePath);
     if (!this.concerns(session, filePath, candidate)) {
       return;
     }
@@ -159,7 +158,7 @@ export class HostEvents {
     if (cached?.raw === raw) {
       return cached.canonical;
     }
-    const canonical = canonicalPath(raw);
+    const canonical = this.manager.canonicalPath(raw);
     this.activePaths.set(session, { raw, canonical });
     return canonical;
   }
@@ -195,7 +194,8 @@ export class HostEvents {
     invalidateConfCache();
     this.manager.sharedRenders.invalidate();
     for (const session of candidates) {
-      if (sameFile(before.get(session), filePath) || sameFile(locate(session), filePath)) {
+      if (sameFile(this.manager.canonicalPath, before.get(session), filePath)
+        || sameFile(this.manager.canonicalPath, locate(session), filePath)) {
         this.manager.edits.deferWhileEditing(session, "render", () => this.manager.rendering.refreshOpenDocument(session, true));
       }
     }
@@ -204,7 +204,7 @@ export class HostEvents {
   // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-055
   /** Watches the Markdown files of a workspace root for the filename-stem index of links. */
   public watchStemRoot(root: string): void {
-    const canonicalRoot = canonicalPath(root);
+    const canonicalRoot = this.manager.canonicalPath(root);
     if (this.stemRootWatchers.has(canonicalRoot)) return;
     const watcher = this.manager.host.watcher.watch(canonicalRoot, "**/*.md");
     const invalidate = (): void => invalidateStemIndex(canonicalRoot);
@@ -218,7 +218,7 @@ export class HostEvents {
 
   /** Stops watching a workspace root (see {@link watchStemRoot}). */
   public unwatchStemRoot(root: string): void {
-    const canonicalRoot = canonicalPath(root);
+    const canonicalRoot = this.manager.canonicalPath(root);
     const entry = this.stemRootWatchers.get(canonicalRoot);
     if (!entry) return;
     for (const subscription of entry.subscriptions) {
@@ -297,7 +297,7 @@ export class HostEvents {
           this.manager.rendering.setMissingSource(session);
         }
       } else {
-        foreign ??= { path: this.manager.pathOf(document), canonical: canonicalPath(this.manager.pathOf(document)) };
+        foreign ??= { path: this.manager.pathOf(document), canonical: this.manager.canonicalPath(this.manager.pathOf(document)) };
         this.refreshReferencedPath(session, foreign.path, foreign.canonical);
       }
     }
@@ -309,7 +309,7 @@ export class HostEvents {
    * the link enrichment is scheduled; a dependency (an include) is re-rendered by its watcher as before.
    */
   public onDocumentSaved(document: HostDocument): void {
-    const saved = canonicalPath(this.manager.pathOf(document));
+    const saved = this.manager.canonicalPath(this.manager.pathOf(document));
     for (const session of this.manager.sessions()) {
       if (!session.disposed && session.document && document.id !== session.documentUri
         && this.manager.frontmatter.watchesLinkedTarget(session, saved)) {
@@ -331,7 +331,7 @@ export class HostEvents {
     for (const session of this.manager.sessions()) {
       const activePath = this.manager.activePathOf(session);
       for (const file of files) {
-        if (canonicalPath(file.oldPath) === canonicalPath(activePath)) {
+        if (this.manager.canonicalPath(file.oldPath) === this.manager.canonicalPath(activePath)) {
           this.manager.rendering.setMissingSource(session, "The active Markdown source was renamed or deleted.");
           continue;
         }

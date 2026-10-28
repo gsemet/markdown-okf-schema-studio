@@ -6,7 +6,7 @@
  * reached through the ports of `src/host-api/`.
  */
 
-import type { BuildQueue } from "../node-services/build/buildQueue";
+import type { BuildQueue } from "../core/render/buildQueue";
 import type { FrontmatterConfiguration } from "../core/configuration/frontmatterConfiguration";
 import type { PlantUmlConfiguration, PlantUmlEngineSettings } from "../core/configuration/plantUmlConfiguration";
 import type { PreviewConfiguration } from "../core/configuration/previewConfiguration";

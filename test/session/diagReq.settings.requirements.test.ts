@@ -126,6 +126,7 @@ test("editing a schema file refreshes nothing by itself; the next document chang
     activePathOf: () => "/notes/doc.md",
     pathOf: () => "/notes/doc.md",
     sourceAvailable: () => true,
+    canonicalPath: (filePath: string) => filePath,
     host: {
       editors: { active: () => undefined },
       documents: { isApplying: () => false },

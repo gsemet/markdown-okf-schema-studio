@@ -26,14 +26,15 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
+- src/core/render/buildQueue.ts
 - src/core/render/renderPipeline.ts
-- src/node-services/build/buildQueue.ts
 - src/session/features/rendering.ts
 - src/session/hostEvents.ts
 - src/session/previewManager.ts
 - src/session/sharedRenders.ts
 tested_in_files:
 - test/core/state/editLock.test.ts
+- test/host-memory/memoryHostSession.test.ts
 - test/host/previewTiming.test.ts
 - test/integration/dirtySnapshots.test.ts
 - test/node-services/build/buildQueue.test.ts

@@ -10,7 +10,6 @@ import { COMMENTS_CONFIGURATION_SECTION, readCommentsConfiguration } from "../co
 import { EDITING_CONFIGURATION_SECTION, initialPaletteModeOf, PaletteMode } from "../core/configuration/editingConfiguration";
 import type { HostServices } from "../host-api/index";
 import type { KeyValueStore } from "../host-api/keyValueStore";
-import { osUserName } from "../node-services/paths";
 import {
   BoundedMap,
   loadCollapsedMap,
@@ -101,7 +100,7 @@ export class WorkspaceChoices {
     fireAndForget(this.host.logger, resolveAuthor({
       setting: readCommentsConfiguration(this.host.settings.section(COMMENTS_CONFIGURATION_SECTION, documentId)).authorName,
       gitName: documentId ? () => this.host.vcs.userName(documentId) : undefined,
-      osUserName,
+      osUserName: () => this.host.paths.userName(),
     }).then((author) => {
       this.author = author;
     }, () => undefined), "resolveAuthor");
