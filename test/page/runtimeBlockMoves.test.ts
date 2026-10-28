@@ -73,7 +73,10 @@ test("T36: the properties point and the Start writing point have no move buttons
   });
   assert.equal(insertPointAfterLine(withProperties, 0).childElements.length, 1);
   const empty = createRuntimeHarness({ emptyBody: true, previewStatus: "success", savedState: { editMode: true } });
-  assert.equal(insertPointAfterLine(empty, 0).childElements.length, 1);
+  // The Start writing point also holds its hint line (not a control): one button, no move buttons.
+  const startPoint = insertPointAfterLine(empty, 0).childElements;
+  assert.equal(startPoint.filter((element) => element.tagName === "BUTTON").length, 1);
+  assert.equal(startPoint.length, 2);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-127

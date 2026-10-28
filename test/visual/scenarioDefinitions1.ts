@@ -1197,6 +1197,20 @@ export const SCENARIO_DEFINITIONS_1: ScenarioDefinition[] = [
       + "open with its caret in it, replacing the Start writing button, with at least 20 px above its frame.",
   },
   ...(["light", "dark"] as const).map((theme, index) => ({
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-253
+    id: `layout-width/v${86 + index}-empty-start-writing-hint-${theme}-700`,
+    fixture: "20-empty-document",
+    theme,
+    width: 700,
+    height: 600,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    topSpacingChecks: "empty-start" as const,
+    description:
+      `Edit mode on with an empty file in the ${theme} theme: the Start writing button carries the selection ring `
+      + "and the hint line \"Enter to create a new block\" is visible under it, at least 20 px below the top edge.",
+  })),
+  ...(["light", "dark"] as const).map((theme, index) => ({
     // @tests_req StRS-MDOKFSTUDIO-TOOLBAR-004
     // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-018
     id: `toolbar-navigation/v${39 + index}-sticky-running-text-${theme}-900`,

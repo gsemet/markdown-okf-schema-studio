@@ -9,6 +9,9 @@
 
 import { MAPPINGS_SELECTOR, type InsertMove, type InsertPoints, type PageRuntime } from "./pageRuntime";
 
+const START_HINT = "Enter to create a new block";
+const START_HINT_ID = "sphinx-preview-start-hint";
+
 /** The insertion points of a page. */
 export function installInsertPoints(rt: PageRuntime): InsertPoints {
   const { document, state } = rt;
@@ -65,6 +68,12 @@ export function installInsertPoints(rt: PageRuntime): InsertPoints {
     button.setAttribute("type", "button");
     button.setAttribute("aria-label", standalone ? label : "Insert a block here");
     button.textContent = label;
+    if (standalone) {
+      // The keyboard selection of an empty document (Enter or Arrow Down opens its editor), named by
+      // the hint line under it.
+      button.setAttribute("data-sphinx-preview-start-selected", "true");
+      button.setAttribute("aria-describedby", START_HINT_ID);
+    }
     button.addEventListener("click", (event) => {
       event.preventDefault?.();
       event.stopPropagation?.();
@@ -73,6 +82,13 @@ export function installInsertPoints(rt: PageRuntime): InsertPoints {
       openInsertPoint(point, Number.isSafeInteger(line) ? line : afterLine);
     });
     point.appendChild(button);
+    if (standalone) {
+      const hint = document.createElement("p");
+      hint.setAttribute("id", START_HINT_ID);
+      hint.setAttribute("data-sphinx-preview-start-hint", "");
+      hint.textContent = START_HINT;
+      point.appendChild(hint);
+    }
     if (move) rt.blockMoves.addMoveButtons(point, move);
     return point;
   }
@@ -180,19 +196,24 @@ export function installInsertPoints(rt: PageRuntime): InsertPoints {
     refreshInsertPoints,
     blockOfTarget,
     // @implements_req SwRS-MDOKFSTUDIO-BLOCK-041
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-253
     bindKeys() {
-      // Enter on an empty document opens the "Start writing" editor, like clicking the button.
+      // Enter and Arrow Down on an empty document open the "Start writing" editor, like clicking the
+      // button. The button is the keyboard selection, so they also work while it (or the edit-mode
+      // toggle pressed a moment ago) holds the focus.
       document.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter" || !state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return;
+        if (event.key !== "Enter" && event.key !== "ArrowDown") return;
+        if (!state.editMode || state.activeBlockEdit || state.activeFrontmatterEdit) return;
         if (event.shiftKey || event.altKey || event.metaKey || event.ctrlKey || event.isComposing) return;
-        const target = event.target;
-        if (target instanceof Element
-          && (["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"].includes(target.tagName)
-            || (target as HTMLElement).isContentEditable
-            || target.closest("[data-okf-properties], [data-sphinx-preview-block-editor]"))) return;
         const start = insertPoints.find((point) =>
           point.className.split(" ").includes("sphinx-preview-insert-point--start"));
         if (!start) return;
+        const target = event.target;
+        const ownsFocus = target instanceof Element && (target === rt.editModeButton || start.contains(target));
+        if (target instanceof Element && !ownsFocus
+          && (["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"].includes(target.tagName)
+            || (target as HTMLElement).isContentEditable
+            || target.closest("[data-okf-properties], [data-sphinx-preview-block-editor]"))) return;
         event.preventDefault?.();
         openInsertPoint(start, 0);
       });

@@ -10,6 +10,7 @@ import sys
 from playwright.sync_api import Page
 
 from capture_find_checks import check_find_bar
+from capture_start_hint import check_start_hint
 from capture_support import Failure, HERE, VISUAL_REPORT_DIR, report_path, save_step
 
 
@@ -727,6 +728,7 @@ def check_top_spacing(page: Page, scenario: dict, failures: list[Failure]) -> No
     selector = ".sphinx-preview-block-editor-host"  # P4: the palette on top of the frame is the first thing on the page
   elif mode == "empty-start":
     selector = ".sphinx-preview-insert-point--start button"
+    check_start_hint(page, page_name, failures)
   else:
     selector = ".sphinx-preview-block-editor-host"  # P4: the palette on top of the frame is the first thing on the page
   target = page.locator(selector)
