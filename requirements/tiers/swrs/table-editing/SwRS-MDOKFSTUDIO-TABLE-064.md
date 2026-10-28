@@ -7,7 +7,9 @@ description: When a cell editor is open and the table bar would lie under the
   sticky band or the preview controls, the extension SHALL keep the bar visible,
   by translating it down with a tall table to 4 px below the usable top and
   never past the end of the table, and by scrolling the page up by exactly the
-  missing distance when the bar appears above the reading offset.
+  missing distance when the bar appears above the reading offset. The bar SHALL
+  paint above the row and column handles, so that no handle takes a press meant
+  for a button of the bar.
 project: markdown-okf-schema-studio
 scope: table-editing
 lifecycle: proposed
@@ -25,9 +27,11 @@ implemented_in_files:
 - src/page/features/editorChrome.ts
 - src/page/features/tableCellEditor.ts
 tested_in_files:
+- test/core/preview/previewStyles.test.ts
 - test/integration/tableStructureReal.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+- test/visual/capture_table_menu.py
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -35,7 +39,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a cell editor is open and the table bar would lie under the sticky band or the preview controls, the extension SHALL keep the bar visible, by translating it down with a tall table to 4 px below the usable top and never past the end of the table, and by scrolling the page up by exactly the missing distance when the bar appears above the reading offset.
+When a cell editor is open and the table bar would lie under the sticky band or the preview controls, the extension SHALL keep the bar visible, by translating it down with a tall table to 4 px below the usable top and never past the end of the table, and by scrolling the page up by exactly the missing distance when the bar appears above the reading offset. The bar SHALL paint above the row and column handles, so that no handle takes a press meant for a button of the bar.
 
 ### Scenario (nominal): Scrolled into a tall table
 - GIVEN a table taller than the pane scrolled so that its top is under the sticky band
@@ -89,6 +93,11 @@ The inset is measured when the bar is filled, never on a scroll, so a scroll nev
 | The bar is shown and its status wraps onto a new line, which moves the bar above the usable top, then the edit anchor is restored | The bar is revealed again by the missing distance |
 | The bar size is unchanged and the writer has scrolled, then the edit anchor is restored | The writer's scroll is not undone |
 
+### Scenario (boundary): A handle on a button of the bar
+| Input | Outcome |
+| --- | --- |
+| A row or column handle whose box lies on a button of the bar | The press on the button reaches the button: the bar is positioned in the flow (no offset) with a z-index above the handle layer, so the handle does not take it |
+
 ### Related requirements
 - SwRS-MDOKFSTUDIO-TABLE-048: the table bar that this behaviour keeps visible.
 
@@ -98,6 +107,8 @@ The inset is measured when the bar is filled, never on a scroll, so a scroll nev
 - Method: test/page/runtimeTableCellEditor.test.ts, unit test a bar that wraps left of the controls does not also scroll the page (five-row controls): the inset is set and the page keeps its offset (it fails when the reveal runs before the inset is decided).
 - Method: test/integration/tableStructureReal.ts (real VS Code window: every structural button of the bar of a pipe table right under the first heading is clicked, Delete selected column included, which the four-row toolbar would otherwise cover).
 - Method: test/page/fmtableReqTable.requirements.test.ts, unit tests a table bar taller than 40 percent of the viewport keeps its place above the table (tall bar and small bar of "Size of the bar against the viewport") and the table bar position follows a window resize and stops once the editor is closed ("Window resize while the editor is open").
+- Method: test/core/preview/previewStyles.test.ts, unit test CR 168: the table toolbar paints above the row and column handle layer ("A handle on a button of the bar": the bar rule is positioned and its z-index is above the layer's; it fails when the bar is static).
+- Method: test/visual/capture_table_menu.py (every table-editing cell-editor scenario of the visual campaign: a row handle is moved onto each button of the bar and the point is hit-tested; the buttons must answer, not the handle).
 - Method: visual scenarios palette-slash/v19 and v20 (cited by the palette-slash scope) check the bar riding down with a tall table.
 - Method: "Near the end of the table" is checked by the assertion of a bar not below the table end in the CR 034 test above; the exact translation value (usable top plus 4 minus the natural top, limited by the room to the table bottom) is the stickyBarShift formula and is not asserted.
 - Criteria: A positive shift, the stuck mark, a bar inside the viewport and a bar not below the table end; the shift value (0 px) for the tall bar; the shift changing with the resize and the listeners removed at close; the scroll target equal to the previous offset minus the delta; no programmatic scroll in the three no-scroll cases; a new programmatic scroll when the status wraps and none when the size is unchanged.

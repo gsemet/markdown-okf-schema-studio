@@ -751,7 +751,9 @@ export async function scenarioTableToolbar(page: Page, evidence: Evidence): Prom
       const labels = await frame.locator(".sphinx-preview-table-menu-label").allTextContents();
       assert.deepEqual(labels, ["Row above", "Row below", "Row \u2212", "Col left", "Col right", "Col \u2212", "List table"]);
       const position = await frame.locator("[data-sphinx-table-menu]").evaluate((element) => getComputedStyle(element).position);
-      assert.equal(position, "static");
+      // In the flow: "relative" (no offset) is how the bar is lifted above the handle layer (CR 168).
+      assert.ok(position === "static" || position === "relative",
+        "the table bar must stay in the document flow (static or relative), computed position: " + position);
     });
     await withCurrentFrame(page, (frame) => evidence.capture(page, frame, "table-editing/r06-cell-bar-in-flow",
       "Edit mode on; the cell `one` is open. The toolbar sits in the flow above the table with text labels, "
