@@ -19,6 +19,7 @@ user_need: As a writer, I can click the first block editor, the Start writing
   toolbar covering them.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-LAYOUT-004
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Nothing clickable hides under the floating toolbar

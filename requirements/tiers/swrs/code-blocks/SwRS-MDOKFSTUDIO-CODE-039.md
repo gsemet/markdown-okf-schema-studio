@@ -11,7 +11,7 @@ description: When a code block of two lines or more is shown and the setting
   whatever the setting says.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/pageSettings.test.ts
 - test/security/package-contract.test.ts
 - test/visual/codeBlockComfortScenarios.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Code blocks of two lines or more are numbered by a setting, never in the copied text

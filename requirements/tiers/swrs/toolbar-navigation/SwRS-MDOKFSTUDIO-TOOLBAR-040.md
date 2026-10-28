@@ -9,7 +9,7 @@ description: "When the column is built, the extension SHALL list the headings h1
   contents landmark and a twisty on each entry that has deeper entries."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ tested_in_files:
 - test/page/modules/tocColumn.test.ts
 - test/page/runtimePageControls.test.ts
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The column lists the h1 to h4 headings with folding

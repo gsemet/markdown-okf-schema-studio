@@ -10,7 +10,7 @@ description: When a reader writes a comment in the comment box, the page SHALL
   answers that the comment is saved.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/comments/commentEditing.test.ts
 - test/page/modules/commentCompose.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The comment box sends a comment and keeps its text until the host accepts it

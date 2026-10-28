@@ -8,7 +8,7 @@ description: "When a writer presses Alt+ArrowUp or Alt+ArrowDown with blocks sel
   previewBlockMove with the line span of the selection and the neighbouring block."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/integration/blockMove.test.ts
 - test/integration/realInput/markers.ts
 - test/page/runtimeBlockSelection.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A block selection moves as a whole

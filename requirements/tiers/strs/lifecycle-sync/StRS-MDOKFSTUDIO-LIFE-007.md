@@ -8,7 +8,7 @@ description: While a preview waits for a render, shows a render that failed,
   preview and, for a missing source, say why.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -23,6 +23,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-062
 - SwRS-MDOKFSTUDIO-LIFE-069
 - SwRS-MDOKFSTUDIO-LIFE-127
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The reader knows the render state and why a preview has no source

@@ -10,7 +10,7 @@ description: "When a followed link names a fragment or a frontmatter marker, the
   the marker followed by the exact identity, and select nothing when no line matches."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/navigation/previewNavigation.test.ts
 - test/session/links.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A link fragment selects a source line, block id, label, heading or field

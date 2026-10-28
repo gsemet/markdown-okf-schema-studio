@@ -10,7 +10,7 @@ description: 'When the writer presses Colour, the extension SHALL open a picker 
   edit for a value the sanitizer would strip.'
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Colour picker wraps the selection in a safe colour span

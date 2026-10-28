@@ -9,7 +9,7 @@ description: When the host writes a new block after a line, it SHALL put one
   empty or whitespace-only text or for a line that is not in the document.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/mapping/insertion.test.ts
 - test/integration/previewEditing.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host inserts a new block with clean blank lines

@@ -11,7 +11,7 @@ description: "When the page starts, the page receives a history state for its re
   document cannot be opened."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/session/toolbarReq.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Back and Next follow the host's history state

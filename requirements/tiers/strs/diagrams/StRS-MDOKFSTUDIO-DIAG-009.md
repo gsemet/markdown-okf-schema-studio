@@ -10,7 +10,7 @@ description: When a bundled-engine diagram includes local files or a document
   be read.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -54,6 +54,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-DIAG-114
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## PlantUML diagrams use local include files and PUML files

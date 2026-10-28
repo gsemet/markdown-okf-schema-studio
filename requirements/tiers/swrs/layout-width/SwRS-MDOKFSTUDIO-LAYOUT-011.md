@@ -11,7 +11,7 @@ description: When the floating toolbar covers the first control of the page (the
   above the 40 px gap, so that the first element keeps exactly 40 px.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/firstClearance.test.ts
 - test/visual/capture_comment_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A control under the floating toolbar is moved or narrowed out of its way

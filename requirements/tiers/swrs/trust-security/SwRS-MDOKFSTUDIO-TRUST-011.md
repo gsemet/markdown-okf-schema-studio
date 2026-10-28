@@ -8,7 +8,7 @@ description: "When the extension builds the page of a document, it SHALL have th
   in every preview mode, and never keep a nonce attribute written by the document."
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/session/features/rendering.ts
 tested_in_files:
 - test/security/html-policy.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Document scripts run only when trusted, from the roots, with the page nonce

@@ -17,6 +17,7 @@ user_need: As a schema author, I edit a schema and see the new rules applied to
   my documents.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Schema edits are picked up on the next analysis

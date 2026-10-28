@@ -12,7 +12,7 @@ description: When a page message reaches the host, the extension SHALL pass it
   date. Try again once it has refreshed." or a reopen hint.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -53,6 +53,7 @@ tested_in_files:
 - test/session/reviewReqThreads.requirements.test.ts
 - test/session/toolbarReq.requirements.test.ts
 - test/session/trustReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A page message is matched to the shown render or document by the gate of its type

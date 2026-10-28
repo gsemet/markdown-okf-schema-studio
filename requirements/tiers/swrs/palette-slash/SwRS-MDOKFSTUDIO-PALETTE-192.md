@@ -12,7 +12,7 @@ description: When previewPickImage reaches the host for a trusted, saved
   with a reason the page shows, and read or write nothing.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/mapping/imageReference.test.ts
 - test/integration/imagePicker.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host image picker answers a path relative to the document

@@ -12,7 +12,7 @@ description: When `markdownOkfSchemaStudio.frontmatter.bundleRoot` or
   whether a document-relative link may leave every workspace folder.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/core/configuration/frontmatterConfiguration.test.ts
 - test/core/frontmatter/fileLinks.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 ## The bundleRoot, projectRoot and allowOutsideWorkspaceLinks settings set the roots
 

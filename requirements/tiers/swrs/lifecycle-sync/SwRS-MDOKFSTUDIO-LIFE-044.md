@@ -10,7 +10,7 @@ description: When a file that the shown render depends on is changed, created,
   below build and tool folders of that root.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/integration/dirtySnapshots.test.ts
 - test/node-services/build/buildQueue.test.ts
 - test/session/eventFanOut.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Changes to files and settings the render depends on render again

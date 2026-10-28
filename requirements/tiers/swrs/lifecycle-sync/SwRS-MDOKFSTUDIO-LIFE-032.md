@@ -9,7 +9,7 @@ description: When a reader runs Refresh Preview, by the command or by the
   active text editor shows another document.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -35,6 +35,7 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/security/package-contract.test.ts
 - test/session/previewManager.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Refresh Preview renders the shown document again

@@ -11,7 +11,7 @@ description: When a cell editor opens in a table, the extension SHALL create
   cells of that table, and remove it when the editor closes.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/runtimeTableCellEditor.test.ts
 - test/visual/capture_edit_checks.py
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A labelled table bar above the table tells the position and holds the buttons

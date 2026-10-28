@@ -8,7 +8,7 @@ description: When a document contains inline, display or aligned maths, the
   formula readable.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -21,6 +21,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-027
 - SwRS-MDOKFSTUDIO-MYST-028
 - SwRS-MDOKFSTUDIO-MYST-029
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Maths is typeset offline and bad formulas stay readable

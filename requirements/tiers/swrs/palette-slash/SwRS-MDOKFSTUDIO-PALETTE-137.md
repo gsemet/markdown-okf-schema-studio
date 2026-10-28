@@ -8,7 +8,7 @@ description: "When the writer presses Dropdown, the extension SHALL write a note
   or around the sample Content, with Title selected."
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/modules/blockEditActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Dropdown writes a note admonition with the dropdown class

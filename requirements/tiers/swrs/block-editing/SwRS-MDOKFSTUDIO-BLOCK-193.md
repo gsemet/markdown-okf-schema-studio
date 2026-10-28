@@ -9,7 +9,7 @@ description: "While the page has an inline editor open, the extension SHALL hold
   of those that waited once the editor closes."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Page updates wait while an inline editor is open

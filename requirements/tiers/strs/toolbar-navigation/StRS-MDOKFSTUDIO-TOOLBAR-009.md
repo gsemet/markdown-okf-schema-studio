@@ -10,7 +10,7 @@ description: When a reader follows links and anchors in the preview, the Studio
   navigates.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -29,6 +29,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-071
 - SwRS-MDOKFSTUDIO-TOOLBAR-072
 - SwRS-MDOKFSTUDIO-TRUST-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The reader goes Back and Next through followed links without losing typed text

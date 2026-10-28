@@ -8,7 +8,7 @@ description: "When the page posts previewLabelRename, the extension SHALL accept
   previewLabelRenameResult with the same edit id."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
 - test/integration/labelRename.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The label rename message is validated and answered

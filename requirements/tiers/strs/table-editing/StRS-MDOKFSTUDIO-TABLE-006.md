@@ -9,7 +9,7 @@ description: When a writer presses Tab, Shift+Tab or an arrow key in a table
   redo, select all or a wrapping marker act on the text of that cell only.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -22,6 +22,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-045
 - SwRS-MDOKFSTUDIO-TABLE-046
 - SwRS-MDOKFSTUDIO-TABLE-047
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Tab, arrows and editing keys work in a table cell

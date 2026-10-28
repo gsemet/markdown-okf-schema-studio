@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CODE-005
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Show special characters once in highlighted code

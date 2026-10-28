@@ -10,7 +10,7 @@ description: When any part of the review comments file of a shown document is
   distinct content of the file, and refuse every change to it.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/core/comments/commentModel.test.ts
 - test/integration/commentWrite.test.ts
 - test/integration/reviewComments.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A review comments file with any problem or over its limits is ignored with one warning

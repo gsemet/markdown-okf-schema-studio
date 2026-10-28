@@ -10,7 +10,7 @@ description: When the page receives line ranges, the extension SHALL mark the
   left margin of the page, without moving any block or text edge.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/modules/reviewReq.requirements.test.ts
 - test/page/runtimePageControls.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Changed blocks get a thin change bar that moves nothing

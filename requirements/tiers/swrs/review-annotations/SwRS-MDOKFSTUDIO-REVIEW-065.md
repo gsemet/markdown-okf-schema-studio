@@ -10,7 +10,7 @@ description: When the host stores a comment or a reply, the extension SHALL use
   characters.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/integration/commentWrite.test.ts
 - test/security/package-contract.test.ts
 - test/session/commentAuthorResource.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A comment carries the configured, Git or system author name

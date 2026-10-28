@@ -17,7 +17,7 @@ description: When a JAR render meets a bound on the diagram text, the output,
   or the environment is never reused.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/core/render/diagReq.jar.requirements.test.ts
 - test/core/render/plantUmlCache.test.ts
 - test/core/render/plantUmlRenderer.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A JAR render is bounded in input, output, time and process lifetime

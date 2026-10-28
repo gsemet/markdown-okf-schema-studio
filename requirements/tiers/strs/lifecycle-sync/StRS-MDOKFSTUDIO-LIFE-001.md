@@ -11,7 +11,7 @@ description: When a writer or reader asks for a preview of a Markdown file, the
   untouched.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -35,6 +35,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-151
 - SwRS-MDOKFSTUDIO-LIFE-156
 - SwRS-MDOKFSTUDIO-TRUST-072
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer opens previews beside the editor or as tabs, beside the built-in preview

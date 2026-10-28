@@ -9,7 +9,7 @@ description: When PlantUML diagrams are drawn, the extension SHALL select the
   markdownOkfSchemaStudio.plantuml.jarPath, when it is true.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -34,6 +34,7 @@ tested_in_files:
 - test/security/package-contract.test.ts
 - test/session/diagReq.settings.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The useJar and jarPath settings choose the PlantUML engine

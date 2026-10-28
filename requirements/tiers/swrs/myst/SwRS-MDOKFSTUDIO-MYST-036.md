@@ -10,7 +10,7 @@ description: "When a document holds a `(name)=` label, the extension SHALL show 
   absolute source line of its label."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/mystPaletteRendering.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Labels show an anchor icon on the next block

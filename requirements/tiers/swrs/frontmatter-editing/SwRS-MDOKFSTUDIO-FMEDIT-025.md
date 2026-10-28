@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-024
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Enter or leaving the key editor renames the key

@@ -9,7 +9,7 @@ description: When the writer changes a view choice on the page, the extension
   workspace according to the table of view choices.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -57,6 +57,7 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/session/diagReq.viewState.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A view choice made on the page is stored for the workspace

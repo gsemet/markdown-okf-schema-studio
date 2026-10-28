@@ -13,7 +13,7 @@ description: When a document holds a directive or fence the parser cannot build
   the document renders.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/renderReq.syntaxErrors.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## EARS Expression

@@ -8,7 +8,7 @@ description: When the writer types an alternative name after the slash, the
   the current palette mode, as it lists it for its label.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editPalette.test.ts
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Slash commands have short alternative names

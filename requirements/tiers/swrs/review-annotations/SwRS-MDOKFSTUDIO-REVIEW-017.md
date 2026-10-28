@@ -11,7 +11,7 @@ description: When review threads are applied to the page, the extension SHALL
   included content.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/modules/commentThreads.ts
 tested_in_files:
 - test/page/modules/commentThreads.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The quote of a thread is highlighted once in its block

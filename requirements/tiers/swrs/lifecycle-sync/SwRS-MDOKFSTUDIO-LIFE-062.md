@@ -9,7 +9,7 @@ description: When the source of a preview is not an existing Markdown file
   its file is created.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/host-memory/memoryHostSession.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/integration/serializer.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A preview without a source says why and recovers when it returns

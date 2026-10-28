@@ -9,7 +9,7 @@ description: "When the page draws a Mermaid diagram, the extension SHALL take it
   when the theme colours change."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/themeTokens.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Mermaid colours follow the preview theme

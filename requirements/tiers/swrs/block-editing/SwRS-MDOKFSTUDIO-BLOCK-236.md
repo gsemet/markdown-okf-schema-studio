@@ -6,7 +6,7 @@ title: "previewEditModeChanged carries a boolean edit mode"
 description: "The host SHALL accept previewEditModeChanged only with a boolean editMode."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## previewEditModeChanged carries a boolean edit mode

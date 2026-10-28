@@ -10,7 +10,7 @@ description: When a writer presses the toggle in a column header of a schema
   it.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/integration/previewEditing.test.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Description column collapses and the choice is kept per document

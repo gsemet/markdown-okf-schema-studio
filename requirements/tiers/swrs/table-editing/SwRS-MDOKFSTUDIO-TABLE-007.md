@@ -9,7 +9,7 @@ description: When the writer drags the handle above a column of a pipe table or
   position in every row as one source edit.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/integration/tableMoves.ts
 - test/page/modules/tableColumnMove.test.ts
 - test/page/runtimeTableRowMove.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Table column handle reorders columns in edit mode

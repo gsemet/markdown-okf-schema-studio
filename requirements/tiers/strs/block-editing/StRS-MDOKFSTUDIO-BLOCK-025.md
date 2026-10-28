@@ -10,7 +10,7 @@ description: When a writer's edit, move, cut or paste reaches the file, the
   reason the writer can read and leave the file and the clipboard as they were.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -60,6 +60,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-059
 - SwRS-MDOKFSTUDIO-TRUST-064
 - SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason

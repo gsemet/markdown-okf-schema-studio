@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-032
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Short identifiers stay on one line in a scrolling table

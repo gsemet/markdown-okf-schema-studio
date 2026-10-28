@@ -9,7 +9,7 @@ description: When the user runs the Table of contents action from the edition
   selection ends on and place the caret after it, in every palette mode.
 project: MDOKFSTUDIO
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/modules/blockEditActions.ts
 tested_in_files:
 - test/page/modules/tocAction.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Table of contents action inserts a [TOC] marker

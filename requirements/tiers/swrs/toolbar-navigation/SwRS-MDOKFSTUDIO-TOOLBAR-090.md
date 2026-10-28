@@ -11,7 +11,7 @@ description: "When a link request is followed or looked up, the extension SHALL 
   opening it."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/core/preview/toolbarReq.requirements.test.ts
 - test/host-vscode/openExternal.test.ts
 - test/session/previewNavigator.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A link is an anchor, external, local or blocked

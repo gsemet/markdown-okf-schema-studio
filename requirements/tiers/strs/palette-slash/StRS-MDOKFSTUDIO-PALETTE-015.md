@@ -11,7 +11,7 @@ description: When a writer types a slash at the start of a line or after a space
   technology.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -31,6 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-256
 - SwRS-MDOKFSTUDIO-PALETTE-263
 - SwRS-MDOKFSTUDIO-TABLE-085
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer runs any palette command from an accessible slash menu

@@ -13,7 +13,7 @@ description: When a link annotation has the resolution `document-relative`,
   `allowOutsideWorkspaceLinks` is true.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/core/frontmatter/diagReq.frontmatter.requirements.test.ts
 - test/core/frontmatter/fileLinks.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 ## Links resolve from the document, bundle or project root and stay inside it
 

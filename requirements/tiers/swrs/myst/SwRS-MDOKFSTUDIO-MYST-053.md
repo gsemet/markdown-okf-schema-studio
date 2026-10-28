@@ -9,7 +9,7 @@ description: "When a document holds a `{grid}` with `{grid-item-card}` items, th
   and show each card with its title, header, body, footer and link."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/gridToctree.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Grids lay out cards in responsive columns

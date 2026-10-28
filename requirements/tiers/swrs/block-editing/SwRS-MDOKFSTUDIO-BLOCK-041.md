@@ -9,7 +9,7 @@ description: "While a block editor or a field editor is open, the extension SHAL
   toggle and a refresh) with the reason of its row in the table below and change nothing."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -56,6 +56,7 @@ tested_in_files:
 - test/session/blockReq.requirements.test.ts
 - test/session/renderReq.labelRename.requirements.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## One edit at a time: an open editor blocks other edits, opens and refreshes

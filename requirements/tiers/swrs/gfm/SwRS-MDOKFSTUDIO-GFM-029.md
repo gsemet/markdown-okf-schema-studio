@@ -10,7 +10,7 @@ description: When a document contains raw HTML, the extension SHALL render a raw
   cap, and omit raw HTML outside the supported subset from the rendering.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/render/mystPaletteRendering.test.ts
 - test/core/render/renderReq.gfm.requirements.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A small raw HTML subset renders and the rest is dropped

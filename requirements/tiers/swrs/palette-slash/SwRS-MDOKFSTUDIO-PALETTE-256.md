@@ -10,7 +10,7 @@ description: When the slash menu opens, the extension SHALL place it under the
   resizes.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/page/modules/slashMenu.ts
 tested_in_files:
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The slash menu stays next to the caret inside the viewport

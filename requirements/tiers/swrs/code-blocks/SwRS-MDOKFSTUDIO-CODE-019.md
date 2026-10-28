@@ -10,7 +10,7 @@ description: When the reader clicks the copy button, the extension SHALL put the
   reason instead when it refuses, and keep the focus and the editors untouched.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 - src/page/modules/codeCopy.ts
 tested_in_files:
 - test/page/modules/codeCopy.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The copy button copies the raw code and confirms it

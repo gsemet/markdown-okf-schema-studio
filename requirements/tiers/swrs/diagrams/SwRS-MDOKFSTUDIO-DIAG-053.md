@@ -10,7 +10,7 @@ description: When the host serves an include file, or refuses one that does not
   again.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
 - test/page/pageMessages.test.ts
 - test/session/diagReq.plantuml.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Served include files are watched and redraw their diagrams

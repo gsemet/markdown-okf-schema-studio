@@ -8,7 +8,7 @@ description: When the writer presses Blockquote, the extension SHALL put > and a
   quote level when every non-blank touched line is already quoted.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/page/modules/blockEditActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Blockquote prefixes the touched lines or removes one quote level

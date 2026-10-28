@@ -10,7 +10,7 @@ description: "When a writer clicks a rendered block in edit mode, or presses Ent
   in previewEditSource."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -35,6 +35,7 @@ tested_in_files:
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A click or Enter on a mapped block opens its editor

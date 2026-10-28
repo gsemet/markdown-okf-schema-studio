@@ -8,7 +8,7 @@ description: When a reader scrolls a document, the Studio SHALL keep the current
   moving the text, as many levels as the reader set, between one and six.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -22,6 +22,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-022
 - SwRS-MDOKFSTUDIO-TOOLBAR-025
 - SwRS-MDOKFSTUDIO-TOOLBAR-030
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The reader always sees the section being read

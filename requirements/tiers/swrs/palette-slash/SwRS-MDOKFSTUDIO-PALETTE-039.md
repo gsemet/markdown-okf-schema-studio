@@ -12,7 +12,7 @@ description: When a palette button, a slash command or a shortcut runs an
   reason in the status line when the action has one.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/modules/editPalette.test.ts
 - test/page/runtimeEditPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A palette action edits in one undo step or leaves the text unchanged and says why

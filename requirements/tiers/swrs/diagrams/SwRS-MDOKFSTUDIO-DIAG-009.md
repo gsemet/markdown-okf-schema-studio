@@ -10,7 +10,7 @@ description: "When the page needs a Mermaid diagram, the extension SHALL draw on
   the node no longer has."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/modules/mermaidCache.test.ts
 - test/page/modules/mermaidPreviewEntry.test.ts
 - test/page/rendererBridge.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Mermaid diagrams are drawn once and late results are dropped

@@ -17,6 +17,7 @@ user_need: As a writer, a heavy or broken diagram never freezes the editor or
   leaves processes running.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-DIAG-007
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A runaway PlantUML process cannot hang the preview

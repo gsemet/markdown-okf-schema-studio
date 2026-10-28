@@ -8,7 +8,7 @@ description: When the text of a document changes or the document is renamed or
   the review comments file along with the document.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -23,6 +23,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-107
 - SwRS-MDOKFSTUDIO-REVIEW-119
 - SwRS-MDOKFSTUDIO-REVIEW-125
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Review threads follow edits and renames of the document

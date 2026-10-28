@@ -11,7 +11,7 @@ description: When VS Code loads the extension manifest, the extension SHALL
   Markdown support is neither activated nor replaced.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/integration/stockCoexistence.test.ts
 - test/security/lifeReq.requirements.test.ts
 - test/security/package-contract.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The extension activates only on its own entry points

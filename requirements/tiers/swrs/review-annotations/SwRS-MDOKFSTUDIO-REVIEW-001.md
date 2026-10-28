@@ -9,7 +9,7 @@ description: When a document is shown, the extension SHALL look for its review
   fields of the format, and write them back in one stable form.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/core/comments/commentModel.test.ts
 - test/integration/reviewComments.test.ts
 - test/page/modules/commentThreads.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The review comments file next to a document holds its threads as data

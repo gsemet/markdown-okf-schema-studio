@@ -11,7 +11,7 @@ description: When the slash menu opens, the extension SHALL list the actions of
   when the query matches nothing.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The slash menu lists the palette commands of the mode and scope

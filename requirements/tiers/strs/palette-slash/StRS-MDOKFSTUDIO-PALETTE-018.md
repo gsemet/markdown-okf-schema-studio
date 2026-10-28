@@ -10,7 +10,7 @@ description: When a writer pastes an image or rich text into a block text box,
   addresses, in one undoable step saved with the other text of that editor.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-229
 - SwRS-MDOKFSTUDIO-PALETTE-264
 - SwRS-MDOKFSTUDIO-TRUST-005
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer pastes screenshots and rich text safely as Markdown

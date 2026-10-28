@@ -11,7 +11,7 @@ description: When a reader opens a .md file with the optional Markdown
   the preview cannot be created.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/integration/stockCoexistence.test.ts
 - test/security/package-contract.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Open With editor shows its own Markdown file

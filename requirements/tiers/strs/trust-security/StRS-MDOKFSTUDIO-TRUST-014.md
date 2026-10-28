@@ -8,7 +8,7 @@ description: When a maintainer installs, builds and packages the Studio, the
   package the bundles the preview loads.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -19,6 +19,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-069
 - SwRS-MDOKFSTUDIO-TRUST-074
 - SwRS-MDOKFSTUDIO-TRUST-075
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The extension is built from pinned dependencies and ships what it loads

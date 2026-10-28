@@ -10,7 +10,7 @@ description: "When the column is open, the extension SHALL place it eight pixels
   the choice stays."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/modules/tocColumn.test.ts
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The column sits below the toolbar on the right and never covers the text

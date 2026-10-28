@@ -14,7 +14,7 @@ description: When the window is resized, the column, toolbar or leading
   trailing update.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/modules/firstClearance.test.ts
 - test/visual/capture_comment_checks.py
 - test/visual/scenarioAssertions.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The clearance is measured again after layout events, in bounded bursts

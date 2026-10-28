@@ -10,7 +10,7 @@ description: When a reader previews any document, the Studio SHALL keep the
   neutralising unsafe raw HTML before the page shows it.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-036
 - SwRS-MDOKFSTUDIO-TRUST-042
 - SwRS-MDOKFSTUDIO-TRUST-050
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The preview runs no foreign code and unsafe HTML is made inert

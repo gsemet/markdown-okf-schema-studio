@@ -9,7 +9,7 @@ description: "When a document holds a `{toctree}`, the extension SHALL list its 
   that cannot be found as warned text without a link."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ tested_in_files:
 - test/core/render/contentCaches.test.ts
 - test/core/render/gridToctree.test.ts
 - test/core/render/renderReq.myst.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Toctree lists linked documents and marks missing ones

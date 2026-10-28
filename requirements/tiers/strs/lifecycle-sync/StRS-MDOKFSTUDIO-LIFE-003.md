@@ -9,7 +9,7 @@ description: When a writer moves to another Markdown file, the Studio SHALL
   text and keep the reading position.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-100
 - SwRS-MDOKFSTUDIO-LIFE-119
 - SwRS-MDOKFSTUDIO-LIFE-125
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The side preview follows the active file and refreshes on demand

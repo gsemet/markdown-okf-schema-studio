@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-BLOCK-041
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The figure editor and the Start writing Enter shortcut ignore input while a field editor is open

@@ -9,7 +9,7 @@ description: When the slash menu is open, the extension SHALL take ArrowDown,
   to the text box.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Keys and clicks drive the slash menu and run the lit command

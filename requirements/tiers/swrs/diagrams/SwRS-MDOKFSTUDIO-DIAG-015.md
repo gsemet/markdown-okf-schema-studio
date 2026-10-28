@@ -10,7 +10,7 @@ description: "When Mermaid cannot draw a diagram, the page SHALL show at the top
   error."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/mermaidError.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Invalid Mermaid shows one message with the parser reason

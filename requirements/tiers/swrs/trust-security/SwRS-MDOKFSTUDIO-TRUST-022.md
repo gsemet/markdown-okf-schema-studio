@@ -12,7 +12,7 @@ description: When the extension builds a page, it SHALL draw a nonce of 18
   it loads the record as a new document.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/security/html-policy.test.ts
 - test/security/trustReq.requirements.test.ts
 - test/session/previewRuntimeFile.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Each page gets a fresh nonce that every extension script and style carries

@@ -9,7 +9,7 @@ description: "When the ranges of a block move, the range of a copy or a cut, or 
   answer with the reason of that case and change nothing."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/core/mapping/blockRange.test.ts
 - test/integration/blockClipboard.test.ts
 - test/integration/blockMove.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Moves and clipboard edits are refused for ranges that do not match the document

@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-002
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Open previews follow a change of the width setting

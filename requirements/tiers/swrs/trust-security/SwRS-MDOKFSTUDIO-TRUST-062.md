@@ -7,7 +7,7 @@ description: When the page receives previewPropertiesTable, it SHALL accept it
   only if its markup is a string.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/core/protocol/hostToPage.ts
 tested_in_files:
 - test/core/protocol/hostToPage.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A properties table message needs string markup

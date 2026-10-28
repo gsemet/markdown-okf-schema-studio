@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-023
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Auto uses the author's pixel width for an image breakout

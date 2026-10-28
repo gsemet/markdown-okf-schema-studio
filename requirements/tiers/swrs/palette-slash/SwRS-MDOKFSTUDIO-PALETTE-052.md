@@ -10,7 +10,7 @@ description: When the writer runs Bulleted list, the extension SHALL put - and a
   palette button and without a shortcut.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Bulleted list toggles a dash prefix, from the slash menu only

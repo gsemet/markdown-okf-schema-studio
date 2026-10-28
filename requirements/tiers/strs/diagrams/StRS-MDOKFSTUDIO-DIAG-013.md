@@ -18,6 +18,7 @@ user_need: As a writer, I know whether Restricted Mode, a wrong path, a missing
   command or a PlantUML error stopped my diagram.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-DIAG-007
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Understand why a JAR-rendered diagram failed or was blocked

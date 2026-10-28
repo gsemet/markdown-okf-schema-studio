@@ -12,7 +12,7 @@ description: When a document holds `$...$`, `$$...$$`, the `{math}` role or
   own box.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/render/mystPaletteRendering.test.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Maths is typeset offline by KaTeX and bad formulas stay readable

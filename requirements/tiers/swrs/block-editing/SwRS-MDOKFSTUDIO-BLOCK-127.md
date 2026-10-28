@@ -9,7 +9,7 @@ description: "When a move, a copy, a cut, a block selection or a paste would inv
   host by answering with the reason of that case, and change nothing."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -40,6 +40,7 @@ tested_in_files:
 - test/page/modules/blockSelection.test.ts
 - test/page/runtimeBlockMoves.test.ts
 - test/page/runtimeBlockSelection.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An included block is never moved, cut, copied, selected or pasted after

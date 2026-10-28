@@ -18,6 +18,7 @@ exemption_reason: "Archived. Another requirement specifies this behaviour, so no
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## After a patch the page answers only to the new identifiers

@@ -10,7 +10,7 @@ description: When the writer opens a cell of a plain list-table (one header row,
   an untouched list-table as it was.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/modules/tableStructure.ts
 tested_in_files:
 - test/page/runtimeTableCellEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## EARS Expression

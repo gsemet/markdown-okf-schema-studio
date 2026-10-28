@@ -10,7 +10,7 @@ description: When a cell editor is open and the table bar would lie under the
   missing distance when the bar appears above the reading offset.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The table bar rides down with a tall table and stays visible

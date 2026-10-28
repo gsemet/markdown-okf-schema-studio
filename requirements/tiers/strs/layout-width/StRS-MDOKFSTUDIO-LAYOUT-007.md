@@ -18,6 +18,7 @@ user_need: As a reader, I see wide tables, pictures and diagrams in full when
   the pane has room, without turning the whole page to full width.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-LAYOUT-003
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Auto width lets wide content break out of the column

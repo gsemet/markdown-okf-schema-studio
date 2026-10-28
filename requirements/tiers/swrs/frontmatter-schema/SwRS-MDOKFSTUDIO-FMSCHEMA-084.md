@@ -9,7 +9,7 @@ description: When the frontmatter is validated against its schema, the extension
   its own otherwise.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/frontmatter/propertiesTable.test.ts
 - test/integration/previewEditing.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Every schema violation is reported on its field or in a row of its own

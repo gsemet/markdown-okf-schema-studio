@@ -8,7 +8,7 @@ description: When a document uses MyST admonitions, context tags, definition
   SHALL show each as a readable block in the preview without a Sphinx build.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -65,6 +65,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-098
 - SwRS-MDOKFSTUDIO-MYST-099
 - SwRS-MDOKFSTUDIO-MYST-100
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## MyST directives and roles render as readable blocks

@@ -10,7 +10,7 @@ description: When the writer presses Thread, the extension SHALL insert after
   `-->`, with the caret on the empty line.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/page/modules/inlineEditActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Thread inserts an empty comment thread after the block with the author and the date

@@ -8,7 +8,7 @@ description: When a writer opens or edits a Markdown file, the Studio SHALL show
   displays text in any script and direction readably inside the preview column.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -61,6 +61,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-GFM-029
 - SwRS-MDOKFSTUDIO-LIFE-094
 - SwRS-MDOKFSTUDIO-TRUST-052
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A reader reads a faithful rendering of any document

@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CODE-008
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Use system colours for diff lines in forced-colours mode

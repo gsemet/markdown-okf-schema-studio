@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-043
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Values ending in three dots or dashes stay inside the block

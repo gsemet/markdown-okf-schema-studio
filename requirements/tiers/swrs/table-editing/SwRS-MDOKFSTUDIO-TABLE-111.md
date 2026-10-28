@@ -9,7 +9,7 @@ description: When the writer runs Column alignment with left, center or right,
   on the right (right) of its dashes, keeping at least three dashes.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Column alignment sets the colons of the caret's column

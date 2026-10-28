@@ -21,6 +21,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-MYST-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Admonition galleries keep one title line per panel without sideways scroll

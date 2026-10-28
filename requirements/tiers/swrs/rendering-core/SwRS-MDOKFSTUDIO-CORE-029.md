@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CORE-028
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Style headings

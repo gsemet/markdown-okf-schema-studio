@@ -13,7 +13,7 @@ description: "When the sanitizer finds a link in a page, it SHALL keep an anchor
   the status area of the preview."
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/host/trustReq.requirements.test.ts
 - test/security/html-policy.test.ts
 - test/security/trustReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The sanitizer rewrites links and records each removal

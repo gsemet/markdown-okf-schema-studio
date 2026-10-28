@@ -9,7 +9,7 @@ description: When a writer presses Tab, Shift+Tab or Enter in the text box of a
   current line, and leave the key to the text box when no rule applies.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/modules/textEditing.test.ts
 - test/page/runtimeBlockEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Tab, Shift+Tab and Enter indent and continue lists, quotes and fences

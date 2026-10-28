@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-023
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Relative schema references are inlined from the schema folder

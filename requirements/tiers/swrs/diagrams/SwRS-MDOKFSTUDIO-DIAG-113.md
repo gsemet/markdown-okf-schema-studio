@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-DIAG-046
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Include silence and malformed answers reach the diagram as reasons

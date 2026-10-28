@@ -13,7 +13,7 @@ description: When the sanitizer processes a page, it SHALL remove every embed,
   than 256 levels with a visible marker.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/security/html-policy.test.ts
 - test/security/trustReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The sanitizer removes active content and keeps the rest

@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-TRUST-005
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Read-only previews disable checkboxes

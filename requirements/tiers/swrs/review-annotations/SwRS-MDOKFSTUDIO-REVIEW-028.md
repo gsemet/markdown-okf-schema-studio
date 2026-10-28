@@ -7,7 +7,7 @@ description: When the page cannot place a review thread, the extension SHALL
   list it as an entry of an Orphaned comments region placed after the content.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/modules/commentThreads.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Threads that cannot be placed are listed in the Orphaned comments box

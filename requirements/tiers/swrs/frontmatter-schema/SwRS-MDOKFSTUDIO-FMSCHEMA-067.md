@@ -12,7 +12,7 @@ description: "When a link annotation lists `tooltip_shows_fields`, `preview_show
   until it closes."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -40,6 +40,7 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/session/eventFanOut.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 ## A link tooltip shows the fields and an excerpt of the linked file
 

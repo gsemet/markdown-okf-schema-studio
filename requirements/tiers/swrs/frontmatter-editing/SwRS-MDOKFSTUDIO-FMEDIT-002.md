@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-BLOCK-041
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A field editor does not open while another editor is open

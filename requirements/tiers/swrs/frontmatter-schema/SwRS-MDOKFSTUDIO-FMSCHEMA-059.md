@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-055
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The stem index is rebuilt when a Markdown file changes

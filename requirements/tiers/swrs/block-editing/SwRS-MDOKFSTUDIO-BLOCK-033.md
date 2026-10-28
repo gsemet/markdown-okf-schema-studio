@@ -10,7 +10,7 @@ description: When a writer opens a block editor, the page SHALL insert the
   button.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockMoves.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The status line shows the lines and keys, with Done and Cancel beside it

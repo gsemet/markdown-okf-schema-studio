@@ -12,7 +12,7 @@ description: When a schema annotates a property with `x-okf-link`, the extension
   from its `?query` and `#fragment`.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/fileLinks.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## x-okf-link annotations declare link fields and their syntax

@@ -10,7 +10,7 @@ description: 'When the caret or selection lies inside a #rgb, #rrggbb or rgb() c
   replace the code under the caret in place and close when the caret leaves the code.'
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Colour code button edits a colour code at the caret

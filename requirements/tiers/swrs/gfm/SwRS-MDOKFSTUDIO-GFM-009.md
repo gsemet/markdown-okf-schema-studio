@@ -10,7 +10,7 @@ description: When a block quote starts with [!NOTE], [!TIP], [!IMPORTANT],
   admonition at the first unquoted line.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/core/render/crlfAlerts.test.ts
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## GitHub alerts render as admonitions

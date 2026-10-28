@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CODE-014
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Join a code caption to its block as a title bar

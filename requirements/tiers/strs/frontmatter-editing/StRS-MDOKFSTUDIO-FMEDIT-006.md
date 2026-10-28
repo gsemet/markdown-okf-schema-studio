@@ -18,6 +18,7 @@ user_need: As a writer, I add the metadata fields my schema expects, or a custom
   one, and fill them in at once.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMEDIT-005
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Add a metadata field

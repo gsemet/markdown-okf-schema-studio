@@ -10,7 +10,7 @@ description: When the writer opens the figure form, from the Edit figure button
   each problem under its field while the form stays open and unchanged.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/modules/figureDirective.test.ts
 - test/page/paletteReq.requirements.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The figure form edits the options of a figure and checks them

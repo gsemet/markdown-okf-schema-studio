@@ -18,6 +18,7 @@ user_need: As a writer, I am protected from saving metadata that the schema
   rejects or that no longer matches the document.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMEDIT-008
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Refuse metadata edits that break the schema or the document state

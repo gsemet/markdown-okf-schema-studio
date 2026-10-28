@@ -20,6 +20,7 @@ exemption_reason: "Archived. Another requirement specifies this behaviour, so no
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Typing a marker character over a selection in a cell wraps it as one undoable step

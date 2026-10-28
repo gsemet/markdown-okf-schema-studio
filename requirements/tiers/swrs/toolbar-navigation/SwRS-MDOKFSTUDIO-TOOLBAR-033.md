@@ -10,7 +10,7 @@ description: "When the reader presses the Table of contents button, the extensio
   or closed, and run the layout update for the changed available width once."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/tocColumn.test.ts
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Table of contents button shows and hides the column

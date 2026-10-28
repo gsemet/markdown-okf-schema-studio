@@ -11,7 +11,7 @@ description: When the writer presses Table, the extension SHALL open a popover
   the focus to the text box.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editPalette.test.ts
 - test/page/runtimeEditPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Table button opens a 9 by 9 size grid and inserts a table of the chosen size

@@ -13,7 +13,7 @@ description: "When a preview page is built, the extension SHALL render the toolb
   rows."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/visual/capture_final_checks.py
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The toolbar has three rows of titled buttons that float over the page

@@ -8,7 +8,7 @@ description: When a writer clicks a checkbox in the preview, the Studio SHALL
   reason when the preview is stale or read-only.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -31,6 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-GFM-027
 - SwRS-MDOKFSTUDIO-GFM-028
 - SwRS-MDOKFSTUDIO-TRUST-005
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer toggles task checkboxes from the preview

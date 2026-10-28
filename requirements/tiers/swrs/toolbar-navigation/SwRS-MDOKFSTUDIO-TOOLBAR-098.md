@@ -10,7 +10,7 @@ description: "When a wikilink is followed, the extension SHALL search every work
   does."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/session/previewNavigator.test.ts
 - test/session/toolbarReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A wikilink is found by file name, or refused when ambiguous or empty

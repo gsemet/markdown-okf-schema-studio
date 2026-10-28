@@ -18,6 +18,7 @@ user_need: As a writer, I change a metadata value with a control suited to its
   type so that I enter valid values without knowing YAML.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMEDIT-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Edit each kind of metadata value with a fitting control

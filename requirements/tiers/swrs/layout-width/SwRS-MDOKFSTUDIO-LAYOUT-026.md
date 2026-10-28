@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-023
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Auto leaves edited and relatively sized elements in the column

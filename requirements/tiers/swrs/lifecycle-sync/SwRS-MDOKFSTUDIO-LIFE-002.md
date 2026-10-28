@@ -10,7 +10,7 @@ description: When a task the extension starts without waiting for it (a
   rejection or writing to the console.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/host-memory/memoryHost.test.ts
 - test/session/diagReq.viewState.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A background failure is logged to the extension output channel

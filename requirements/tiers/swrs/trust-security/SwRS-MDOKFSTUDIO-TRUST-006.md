@@ -9,7 +9,7 @@ description: When a read-only preview sends a page message that is none of the
   refuses a write.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -38,6 +38,7 @@ tested_in_files:
 - test/session/paletteReq.requirements.test.ts
 - test/session/renderReq.codeCopy.requirements.test.ts
 - test/session/toolbarReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A read-only preview keeps every viewing action

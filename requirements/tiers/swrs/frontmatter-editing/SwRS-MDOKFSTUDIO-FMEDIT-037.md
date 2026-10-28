@@ -11,7 +11,7 @@ description: 'When a writer adds a field, the extension SHALL insert it as one l
   at the end of the block.'
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An added field is one inserted line where its row shows, and its editor opens

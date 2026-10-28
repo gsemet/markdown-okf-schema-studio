@@ -10,7 +10,7 @@ description: When the page draws a Vega-Lite or Vega chart, it SHALL replace the
   chart when the specification is invalid.
 project: MDOKFSTUDIO
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/chartCsp.test.ts
 - test/page/modules/chartError.test.ts
 - test/page/modules/vegaChart.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Charts are drawn as themed SVG pictures with errors in place

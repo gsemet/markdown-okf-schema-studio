@@ -10,7 +10,7 @@ description: When the extension builds the edition palette of a block editor,
   the start of each group.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -36,6 +36,7 @@ tested_in_files:
 - test/page/runtimeEditPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/security/package-contract.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The palette mode decides the button sets, in registry order

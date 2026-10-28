@@ -9,7 +9,7 @@ description: When a document uses `{ref}` to a heading, figure, table, equation
   readable link, not an empty one.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Reference roles link to in-page targets

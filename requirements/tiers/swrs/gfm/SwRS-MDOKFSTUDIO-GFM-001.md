@@ -10,7 +10,7 @@ description: When prose contains a bare http://, https:// or www. URL, the
   that has another meaning or another scheme.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/core/render/mystInlineTransforms.ts
 tested_in_files:
 - test/core/render/bareUrlAutolink.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Bare URLs become safe links

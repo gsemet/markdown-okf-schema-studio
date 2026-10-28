@@ -12,7 +12,7 @@ description: When the writer types a query after the slash, the extension SHALL
   the highlight was not moved.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 - src/page/modules/slashMenu.ts
 tested_in_files:
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The slash query ranks matches and leaves loose matches to the text

@@ -10,7 +10,7 @@ description: "When the writer presses the Heading button, the extension SHALL op
   and removing the prefix for Paragraph."
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/runtimeEditPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Heading list sets the heading level of the touched lines

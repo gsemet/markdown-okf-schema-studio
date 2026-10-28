@@ -9,7 +9,7 @@ description: When VS Code restores a Studio preview panel, the extension SHALL
   Preview source missing with the reason the panel cannot be restored.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/state/previewState.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/integration/serializer.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A restored panel reopens its document or explains why it cannot

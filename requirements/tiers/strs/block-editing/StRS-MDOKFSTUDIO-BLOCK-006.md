@@ -11,7 +11,7 @@ description: While a writer types in a block editor, the Studio SHALL write the
   switches to another document.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -41,6 +41,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-064
 - SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Typed text is saved, survives updates and is never lost on leaving

@@ -11,7 +11,7 @@ description: When a live preview shows a document with extension warnings in a
   the open previews a created, edited or deleted conf.py governs.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 - src/session/hostEvents.ts
 tested_in_files:
 - test/integration/mystDiagnostics.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Extension warnings appear in the Problems view and follow conf.py

@@ -9,7 +9,7 @@ description: When the writer presses Col left on the table bar, the extension
   the cell editor in the new column.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/page/modules/tableStructure.ts
 tested_in_files:
 - test/page/runtimeTableCellEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## EARS Expression

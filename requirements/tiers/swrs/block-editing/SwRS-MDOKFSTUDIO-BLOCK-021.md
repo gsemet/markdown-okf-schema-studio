@@ -19,6 +19,7 @@ exemption_reason: "Archived. Another requirement specifies this behaviour, so no
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Clicking any part of an admonition edits its whole directive

@@ -9,7 +9,7 @@ description: When a document opens, in read or edit mode, the Studio SHALL start
   would cover it, by giving up width or moving it down only as far as needed.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -34,6 +34,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LAYOUT-019
 - SwRS-MDOKFSTUDIO-LAYOUT-037
 - SwRS-MDOKFSTUDIO-LAYOUT-042
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The first element starts clear of the top and of the floating toolbar

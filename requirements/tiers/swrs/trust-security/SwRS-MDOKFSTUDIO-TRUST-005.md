@@ -9,7 +9,7 @@ description: When the host receives a write request from a read-only preview for
   writes a file, and change nothing.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -52,6 +52,7 @@ tested_in_files:
 - test/session/renderReq.labelRename.requirements.test.ts
 - test/session/reviewReqComments.requirements.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host refuses every write request of a read-only preview with a reason

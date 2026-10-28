@@ -10,7 +10,7 @@ description: When the text editor of a previewed document scrolls while the
   reporting that scroll back to the editor.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -36,6 +36,7 @@ tested_in_files:
 - test/page/runtimeContentPatch.test.ts
 - test/page/runtimeScroll.test.ts
 - test/session/lifeReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Scrolling the text editor scrolls the preview to the same line

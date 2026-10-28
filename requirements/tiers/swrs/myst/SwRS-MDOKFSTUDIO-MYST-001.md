@@ -9,7 +9,7 @@ description: When a document holds an admonition directive, the extension SHALL
   its own title and decoration.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/visual/cardsTabsScenarios.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Admonitions render as coloured callouts with a title

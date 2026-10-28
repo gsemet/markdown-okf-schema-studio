@@ -10,7 +10,7 @@ description: "When the host receives a label rename, the extension SHALL change 
   the preview, without searching other lines."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/edits/sourceEdits.test.ts
 - test/core/mapping/labelRename.test.ts
 - test/integration/labelRename.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host renames only the label text in one undo step

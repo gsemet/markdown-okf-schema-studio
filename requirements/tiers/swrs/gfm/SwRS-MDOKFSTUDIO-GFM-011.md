@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-GFM-009
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Legacy bold markers render as admonitions

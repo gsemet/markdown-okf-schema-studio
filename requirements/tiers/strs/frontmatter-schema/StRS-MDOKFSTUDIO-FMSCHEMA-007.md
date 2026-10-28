@@ -17,6 +17,7 @@ user_need: As a schema author, I write schemas in the format I prefer and reuse
   shared definitions across files.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Schema files can be written in several formats and share parts

@@ -11,7 +11,7 @@ description: When a preview is read-only (no workspace folder, or Restricted
   showing the reason as a diagnostic.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/security/readOnlyRoot.requirements.test.ts
 - test/session/readOnlyLocalRoots.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A read-only preview reads no home folder and no dot-directory

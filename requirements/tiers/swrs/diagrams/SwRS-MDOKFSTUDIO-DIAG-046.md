@@ -12,7 +12,7 @@ description: When a built-in diagram contains !include, !include_many,
   an answer that is not well formed.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
 - test/page/modules/plantumlFileRequests.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## PlantUML includes are read through the extension and refusals reach the diagram

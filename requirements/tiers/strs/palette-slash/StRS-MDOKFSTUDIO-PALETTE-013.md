@@ -12,7 +12,7 @@ description: When a writer inserts a reference, a document link, a citation or a
   with the result or a reason the writer can read.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -37,6 +37,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-006
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer picks labels, documents, citations and code languages from host lists, with feedback

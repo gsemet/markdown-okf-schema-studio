@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CODE-008
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Colour diff file header lines like ordinary lines

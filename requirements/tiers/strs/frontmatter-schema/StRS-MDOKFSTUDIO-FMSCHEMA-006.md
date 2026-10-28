@@ -9,7 +9,7 @@ description: When a document's frontmatter has a string type, the Studio SHALL
   applies or when the schema cannot be used, without hiding the metadata.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -33,6 +33,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-077
 - SwRS-MDOKFSTUDIO-FMSCHEMA-078
 - SwRS-MDOKFSTUDIO-FMSCHEMA-088
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A document finds its schema and schema problems are reported

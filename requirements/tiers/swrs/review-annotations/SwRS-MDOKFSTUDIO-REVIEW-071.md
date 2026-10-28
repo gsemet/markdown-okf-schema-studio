@@ -8,7 +8,7 @@ description: When a previewCommentResolve or previewCommentDelete message
   a non-empty thread id and, for resolve, a boolean resolved flag.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 - src/session/features/comments.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Resolve and delete messages name a thread; resolve carries a flag

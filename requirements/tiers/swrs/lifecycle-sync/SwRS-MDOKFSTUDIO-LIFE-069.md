@@ -9,7 +9,7 @@ description: When a render finishes and the loaded page can take its content,
   document.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/core/preview/contentPatch.test.ts
 - test/page/modules/contentMorph.test.ts
 - test/page/runtimeContentPatch.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A render of the loaded document updates the page in place

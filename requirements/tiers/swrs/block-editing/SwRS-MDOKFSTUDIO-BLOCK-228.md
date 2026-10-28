@@ -10,7 +10,7 @@ description: "When a writer opens, saves or closes an editor, the extension SHAL
   host puts back at the same viewport top on the next render."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Opening, saving and closing an editor keep the reading position

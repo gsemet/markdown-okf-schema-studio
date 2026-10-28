@@ -10,7 +10,7 @@ description: When the writer presses Enter in the cell text box, with or without
   text equals the text the host sent and no autosave reached the document.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Enter, Done, leaving the cell or a click elsewhere commits the cell

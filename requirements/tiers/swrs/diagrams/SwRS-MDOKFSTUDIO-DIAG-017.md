@@ -10,7 +10,7 @@ description: "When a writer picks the Mermaid action of the edition palette or t
   the selection, with the label Start selected."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Mermaid action inserts a starter flowchart in GFM mode

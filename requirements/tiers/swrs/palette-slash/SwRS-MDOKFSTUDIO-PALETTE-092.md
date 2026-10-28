@@ -10,7 +10,7 @@ description: When the writer presses Enter in the Text or URL field of the link
   focus to the text box.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/runtimeEditPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The link panel writes a safe inline Markdown link

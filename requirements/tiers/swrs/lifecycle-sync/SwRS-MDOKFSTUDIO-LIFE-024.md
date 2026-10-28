@@ -10,7 +10,7 @@ description: When a preview panel is created, restored, switched to another
   shows.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/lifecycle.test.ts
 - test/integration/serializer.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The panel title names the document and whether it follows

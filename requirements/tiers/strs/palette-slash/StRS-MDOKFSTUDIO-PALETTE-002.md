@@ -10,7 +10,7 @@ description: When a writer works in a workspace, the Studio SHALL let the writer
   settings, and let the writer reach the choice from the keyboard.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-017
 - SwRS-MDOKFSTUDIO-PALETTE-036
 - SwRS-MDOKFSTUDIO-TRUST-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer chooses which palette buttons are offered

@@ -16,7 +16,7 @@ description: When the writer presses a row or column button of the table bar,
   slash menu of the cell it leaves.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Row and column buttons add and remove rows and columns

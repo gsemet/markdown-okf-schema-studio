@@ -13,7 +13,7 @@ description: When a chain of includes reaches the 8th level, an include repeats
   budget, list a warning naming the request without reading a refused file.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -36,6 +36,7 @@ tested_in_files:
 - test/integration/projectFeatures.test.ts
 - test/security/resource-policy.test.ts
 - test/security/trustReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Includes are bounded by depth, budget, size and allowed roots

@@ -11,7 +11,7 @@ description: When the writer presses Admonition and chooses a type from the menu
   unknown type.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/modules/blockEditActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Admonition wraps lines in a colon fence of a chosen type

@@ -10,7 +10,7 @@ description: When the frontmatter has errors or warnings, the extension SHALL
   that names the missing required fields.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The title badge counts the issues and jumps to the first one

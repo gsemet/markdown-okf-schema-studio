@@ -9,7 +9,7 @@ description: "When the zoom is set, the extension SHALL set the content font siz
   the page again."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/core/preview/contentPatch.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Zoom scales the text and the column without a redraw

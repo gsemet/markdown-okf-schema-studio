@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CODE-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Read the fence label case-insensitively up to its first separator

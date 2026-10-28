@@ -9,7 +9,7 @@ description: When a reader opens a preview, the Studio SHALL show its controls
   in read-only previews too.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-013
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-TRUST-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The toolbar groups its controls, collapses and remembers view choices

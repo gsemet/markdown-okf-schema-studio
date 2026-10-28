@@ -9,7 +9,7 @@ description: While a writer edits a document, the Studio SHALL show a handle
   the columns as one undoable edit.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -19,6 +19,7 @@ user_need: As a writer, I reorder the rows and the columns of a table by
 derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-002
 - SwRS-MDOKFSTUDIO-TABLE-007
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A table row or column moves by its handle in edit mode

@@ -10,7 +10,7 @@ description: "When the reader clicks, middle-clicks or presses Enter or Space on
   with the reason when it cannot."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/page/modules/linkNavigation.test.ts
 - test/page/modules/toolbarReq.requirements.test.ts
 - test/session/toolbarReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A click or Enter on a link is routed to the host and opened or refused with a warning

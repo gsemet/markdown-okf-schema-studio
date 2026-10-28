@@ -17,6 +17,7 @@ derives_from: []
 user_need: Reviewers need to see what a change adds and removes at a glance.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-CODE-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Read diffs as additions and deletions

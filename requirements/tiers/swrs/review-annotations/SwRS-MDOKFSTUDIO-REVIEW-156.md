@@ -8,7 +8,7 @@ description: When a previewShowComments message names another document, revision
   state.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/features/hostHandlers.ts
 tested_in_files:
 - test/page/runtimePageControls.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A show-comments message of another render is ignored

@@ -10,7 +10,7 @@ description: When a page opens, the extension SHALL start each view choice from
   value before the saved panel state.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -58,6 +58,7 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A new page starts each view choice from the panel, stored or default value

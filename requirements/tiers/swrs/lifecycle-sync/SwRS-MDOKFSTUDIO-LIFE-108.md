@@ -10,7 +10,7 @@ description: When the reader scrolls the preview to another source line or
   shows that file or the report names another file.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/integration/sourceMapping.test.ts
 - test/page/runtimeScroll.test.ts
 - test/session/lifeReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Scrolling or clicking the preview reveals the source line

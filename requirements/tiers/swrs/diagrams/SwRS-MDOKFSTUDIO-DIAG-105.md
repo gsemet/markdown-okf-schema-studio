@@ -11,7 +11,7 @@ description: When the JAR pipeline finishes the diagrams of the current render,
   and the state error or unavailable.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/state/editLock.test.ts
 - test/session/diagReq.plantuml.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## JAR results replace the diagrams of the current render in order

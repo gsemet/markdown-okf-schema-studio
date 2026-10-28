@@ -11,7 +11,7 @@ description: When a writer asks for a link, an image, a figure, a table, a
   untouched.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -37,6 +37,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-263
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer inserts links, images, figures, tables, colours and emoji through pickers

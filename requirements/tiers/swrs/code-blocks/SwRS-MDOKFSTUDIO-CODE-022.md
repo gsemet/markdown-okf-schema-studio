@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CODE-017
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Offer no copy button for edited blocks, editors, diagram sources and blocks outside the content

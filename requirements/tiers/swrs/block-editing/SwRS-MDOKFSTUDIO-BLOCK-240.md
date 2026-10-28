@@ -8,7 +8,7 @@ description: "The host SHALL accept previewBlockMove only with four positive int
   within 100000."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## previewBlockMove needs both ranges and a direction

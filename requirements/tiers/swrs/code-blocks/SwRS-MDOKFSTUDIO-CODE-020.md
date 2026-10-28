@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CODE-019
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Confirm a copy with a Copied state for 1.5 seconds

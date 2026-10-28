@@ -8,7 +8,7 @@ description: When a preview renders a document in the VS Code host, the
   the render is aborted, and render in-process when no worker can start.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/renderPipeline.test.ts
 - test/node-services/renderWorker.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Previews render in a worker thread that an abort stops

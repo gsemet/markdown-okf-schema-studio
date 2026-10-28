@@ -10,7 +10,7 @@ description: When the writer presses Alert, the extension SHALL quote the
   replaces the type word of the head of the alert at the caret.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/runtimeEditPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Alert inserts a GitHub alert and offers its type list

@@ -13,7 +13,7 @@ description: When the writer pastes into the block text box a clipboard whose
   .webp, in one undo step, leaving the rest of the source unchanged.
 project: MDOKFSTUDIO
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/integration/pasteUrl.test.ts
 - test/page/modules/pasteUrl.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A pasted URL becomes a link, an autolink or an image in the block text box

@@ -9,7 +9,7 @@ description: "When the stylesheet is built, the extension SHALL declare each neu
   token the stylesheet or the Mermaid theme reads is in it."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/core/preview/themeTokens.ts
 tested_in_files:
 - test/core/preview/themeTokens.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Page colours go through one token map of VS Code variables

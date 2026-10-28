@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-029
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host refuses to remove a required field

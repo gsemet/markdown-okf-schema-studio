@@ -8,7 +8,7 @@ description: When the repository is checked, the writing skill for Studio SHALL
   or an unresolved directive, and that cover the syntaxes the skill lists.
 project: MDOKFSTUDIO
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -20,6 +20,7 @@ implemented_in_files:
 - skills/writing-for-markdown-okf-schema-studio/SKILL.md
 tested_in_files:
 - test/core/render/writingSkill.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The writing skill's examples render without error

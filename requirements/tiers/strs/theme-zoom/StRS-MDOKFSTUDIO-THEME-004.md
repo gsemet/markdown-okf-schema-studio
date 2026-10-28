@@ -11,7 +11,7 @@ description: When the reader picks a theme mode, the Studio SHALL remember it
   value that is not a known theme mode.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -28,6 +28,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-THEME-001
 - SwRS-MDOKFSTUDIO-THEME-013
 - SwRS-MDOKFSTUDIO-THEME-016
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The theme choice holds for the workspace and survives slow loads and bad values

@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-010
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Backspace in an empty list item removes it

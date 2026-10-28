@@ -10,7 +10,7 @@ description: When a document holds a `<!-- THREAD` comment as its own block, the
   text, and write any other THREAD comment as an ordinary comment chip.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/core/comments/inlineThread.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/core/render/commentMarkers.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An inline THREAD comment shows as a thread chip with its messages

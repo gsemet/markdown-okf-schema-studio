@@ -11,7 +11,7 @@ description: When the preview shows a render state, the extension SHALL label
   while a render is pending.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -36,6 +36,7 @@ tested_in_files:
 - test/integration/lifecycle.test.ts
 - test/integration/stockCoexistence.test.ts
 - test/node-services/build/buildQueue.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The status names the render state and shows pending, failed and recovered notices

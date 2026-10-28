@@ -9,7 +9,7 @@ description: The package SHALL declare images/logo.png, a PNG of 256 by 256
   maps, internal docs, agent files and pyproject.toml out of the VSIX.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 - src/page/modules/plantumlBundle.markers.ts
 tested_in_files:
 - test/security/package-contract.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The package ships its icon and its bundle

@@ -8,7 +8,7 @@ description: When the writer presses Collapsible, the extension SHALL wrap the
   select the summary text and leave a blank line after the summary.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/page/modules/blockEditActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Collapsible wraps the touched lines in a details element with a summary

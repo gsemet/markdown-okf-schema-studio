@@ -10,7 +10,7 @@ description: When a writer opens a document that starts with YAML frontmatter,
   after the last edit.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -39,6 +39,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-044
 - SwRS-MDOKFSTUDIO-FMSCHEMA-045
 - SwRS-MDOKFSTUDIO-FMSCHEMA-075
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Frontmatter appears as a readable, configurable properties table

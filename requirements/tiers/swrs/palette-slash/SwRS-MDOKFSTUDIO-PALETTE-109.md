@@ -8,7 +8,7 @@ description: When the writer presses Image, the extension SHALL ask the host for
   and insert or replace an image reference only when a valid path comes back.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Image button inserts or replaces an image reference

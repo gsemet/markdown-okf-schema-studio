@@ -9,7 +9,7 @@ description: When a document defines a label or links to a heading, figure,
   apply a rename from the anchor as one undoable edit or explain why it refuses.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -39,6 +39,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-094
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer sees, links and renames labels safely

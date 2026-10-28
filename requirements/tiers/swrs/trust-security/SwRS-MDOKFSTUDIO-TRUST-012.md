@@ -13,7 +13,7 @@ description: When the extension builds the policy of a page, it SHALL set its
   the document.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/security/html-policy.test.ts
 - test/security/trustReq.requirements.test.ts
 - test/session/previewRuntimeFile.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Every page carries a deny-by-default content security policy

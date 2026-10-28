@@ -8,7 +8,7 @@ description: When a built-in diagram includes files, the page SHALL refuse the
   and stop at an include cycle, with a reason shown on the diagram.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/modules/plantumlDiagram.ts
 tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Includes nest at most 8 deep, 64 files and 1 MiB

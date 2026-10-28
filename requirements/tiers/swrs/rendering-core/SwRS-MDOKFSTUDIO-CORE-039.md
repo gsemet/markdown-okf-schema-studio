@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CORE-034
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Wrap CJK text in the pane

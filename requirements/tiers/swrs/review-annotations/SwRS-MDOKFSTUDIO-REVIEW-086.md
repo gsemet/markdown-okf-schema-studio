@@ -9,7 +9,7 @@ description: When a reader presses Resolve or Reopen in a thread popover, the
   the highlight only when the thread is posted again.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/modules/commentThreads.ts
 tested_in_files:
 - test/page/modules/commentThreads.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Resolve, Reopen and a confirmed Delete wait for the host, one action at a time

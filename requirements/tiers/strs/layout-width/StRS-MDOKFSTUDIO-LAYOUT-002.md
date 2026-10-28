@@ -19,6 +19,7 @@ user_need: As a reader, I reach every column of a wide table without the page
   readable.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-LAYOUT-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Wide tables scroll inside their own box

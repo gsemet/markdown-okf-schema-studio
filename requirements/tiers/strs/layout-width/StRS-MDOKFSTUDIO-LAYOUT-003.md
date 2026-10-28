@@ -10,7 +10,7 @@ description: When a writer or team sets the maximum width of the text column or
   the setting.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -47,6 +47,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LAYOUT-041
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A reader chooses how wide the text column is

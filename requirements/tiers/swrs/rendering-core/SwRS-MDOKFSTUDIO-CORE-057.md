@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-MYST-063
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Render list-table headers, widths and alignment

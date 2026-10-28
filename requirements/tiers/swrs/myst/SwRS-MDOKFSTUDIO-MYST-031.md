@@ -9,7 +9,7 @@ description: When a document holds a `{figure}` directive with colon or backtick
   block from opening line to closing fence.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/core/render/mystPaletteRendering.test.ts
 - test/security/html-policy.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Figures render with image, caption, label, width and alignment

@@ -10,7 +10,7 @@ description: "When a document holds a term followed by `: Definition` lines or a
   or an inert placeholder for the numbered reference."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
 - test/core/render/renderReq.myst.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Definition lists and inline roles are typeset

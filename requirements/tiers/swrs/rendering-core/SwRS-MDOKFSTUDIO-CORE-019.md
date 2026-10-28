@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CORE-013
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Warn about a missing included file

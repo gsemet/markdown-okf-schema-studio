@@ -10,7 +10,7 @@ description: "When a link annotation has the resolution `filename-stem`, the ext
   W15 for an unreadable candidate."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/stemIndex.test.ts
 - test/session/eventFanOut.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 ## A filename stem resolves when exactly one file matches
 

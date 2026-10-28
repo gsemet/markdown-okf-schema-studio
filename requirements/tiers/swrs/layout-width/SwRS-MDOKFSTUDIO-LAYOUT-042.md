@@ -21,6 +21,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-011
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A first-block editor's palette keeps its place unless the frame is under the toolbar

@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CODE-017
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Hide the copy button on a click inside the block until the pointer moves

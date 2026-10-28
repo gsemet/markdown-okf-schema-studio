@@ -10,7 +10,7 @@ description: "When the reader presses the Zoom in button below 200 % or the Zoom
   at its limit."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/diagReq.themeZoom.requirements.test.ts
 - test/page/runtimePageControls.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Zoom in and out change the zoom by 10 points within limits

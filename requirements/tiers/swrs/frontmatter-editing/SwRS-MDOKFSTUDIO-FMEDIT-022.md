@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-019
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A save in flight disables the editor and shows Saving

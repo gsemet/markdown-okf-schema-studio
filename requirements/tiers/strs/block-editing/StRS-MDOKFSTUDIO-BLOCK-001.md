@@ -9,7 +9,7 @@ description: When a writer clicks the Edit button of a writable preview, or
   preview in edit mode unless it cannot edit the file.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -24,6 +24,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
 - SwRS-MDOKFSTUDIO-TRUST-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer switches edit mode and finds it as left

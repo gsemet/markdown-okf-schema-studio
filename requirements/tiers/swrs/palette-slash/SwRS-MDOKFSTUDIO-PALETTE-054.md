@@ -11,7 +11,7 @@ description: When the writer presses Code block, the extension SHALL open a menu
   names no language when none or an invalid name is given.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/runtimeEditPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Code block list wraps lines in a fence of a highlighted language

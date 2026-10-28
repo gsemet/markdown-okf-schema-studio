@@ -10,7 +10,7 @@ description: "When a document contains a plantuml fence, or a {plantuml} or {uml
   draws as one inert centred picture in the light or dark variant of the preview."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
 - test/session/diagReq.webview.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## PlantUML fences become centred inert pictures drawn by the built-in engine

@@ -16,6 +16,7 @@ derives_from: []
 user_need: As a reader, I read Markdown from an untrusted source without the
   preview being able to edit, comment or read beyond the file's folder.
 derived_by: []
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A preview outside a trusted workspace is safe to read

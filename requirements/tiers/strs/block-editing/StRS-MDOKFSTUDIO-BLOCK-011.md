@@ -10,7 +10,7 @@ description: When a writer clicks the insert point after a block in edit mode,
   each side.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -21,6 +21,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-087
 - SwRS-MDOKFSTUDIO-BLOCK-094
 - SwRS-MDOKFSTUDIO-BLOCK-102
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer adds blocks and starts an empty document from the preview

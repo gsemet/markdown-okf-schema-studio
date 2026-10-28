@@ -11,7 +11,7 @@ description: "When the band is shown, hidden or changes its number of lines, the
   a one pixel rule."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_final_checks.py
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The sticky band is fixed, aligned with the column and clear of the toolbar

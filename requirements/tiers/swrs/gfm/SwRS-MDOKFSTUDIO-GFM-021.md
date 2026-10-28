@@ -9,7 +9,7 @@ description: When a writer clicks a checkbox in reading or edit mode, the
   few seconds (and as its tooltip) when the host refuses the toggle.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/page/runtimeContentPatch.test.ts
 - test/page/runtimePageControls.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Clicking a checkbox toggles one source character

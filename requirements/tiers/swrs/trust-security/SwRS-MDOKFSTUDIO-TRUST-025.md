@@ -11,7 +11,7 @@ description: When the extension resolves a resource reference of a page, it
   the attribute that held it.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/security/html-policy.test.ts
 - test/security/resource-policy.test.ts
 - test/security/trustReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A resource reference resolves only to an existing file inside a root

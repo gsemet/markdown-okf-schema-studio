@@ -10,7 +10,7 @@ description: When a writer clicks a rendered block in edit mode, the Studio
   file open the include directive of the edited document instead.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -31,6 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-041
 - SwRS-MDOKFSTUDIO-BLOCK-102
 - SwRS-MDOKFSTUDIO-BLOCK-127
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer edits the raw Markdown of a block in a framed editor

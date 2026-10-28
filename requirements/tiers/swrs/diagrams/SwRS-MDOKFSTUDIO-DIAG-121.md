@@ -9,7 +9,7 @@ description: When a document contains a vega-lite or vega fenced code block, the
   document source.
 project: MDOKFSTUDIO
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ tested_in_files:
 - test/core/render/chartData.test.ts
 - test/core/render/chartRendering.test.ts
 - test/page/chartCsp.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Vega-Lite and Vega fences become chart figures

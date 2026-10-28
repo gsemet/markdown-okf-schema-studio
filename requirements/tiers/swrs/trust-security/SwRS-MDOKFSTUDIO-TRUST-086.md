@@ -8,7 +8,7 @@ description: When the host receives previewWarningBannerClosed, it SHALL accept
   and digits, a hyphen and eight hexadecimal digits.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The warning banner close message has a bounded key

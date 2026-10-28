@@ -9,7 +9,7 @@ description: When a writer saves a value, the extension SHALL change only the
   that does not parse or whose keys are not exactly the expected ones.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/frontmatter/frontmatterFence.test.ts
 - test/core/frontmatter/frontmatterPreservation.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A frontmatter edit changes only the lines of its field

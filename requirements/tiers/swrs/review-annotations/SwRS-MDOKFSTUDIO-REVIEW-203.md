@@ -10,7 +10,7 @@ description: When the extension needs the text of a file at HEAD, it SHALL read
   only when the HEAD commit id has changed.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/host-vscode/headBaseline.ts
 tested_in_files:
 - test/host-vscode/headBaseline.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The HEAD text comes from the built-in Git extension for small files

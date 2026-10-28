@@ -9,7 +9,7 @@ description: When a cell editor is open, the extension SHALL add to the table
   their shortcuts and the cell slash menu to the cell text.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/modules/slashMenu.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/visual/capture_edit_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The table bar's cell group formats the cell text

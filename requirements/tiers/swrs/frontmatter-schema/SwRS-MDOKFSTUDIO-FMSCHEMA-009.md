@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Empty lists and null values show as YAML tokens

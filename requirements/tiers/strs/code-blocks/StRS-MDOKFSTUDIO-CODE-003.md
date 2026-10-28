@@ -18,6 +18,7 @@ user_need: Authors need listings that point readers at specific lines and name
   their source.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-CODE-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Read numbered, emphasized and captioned listings

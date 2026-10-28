@@ -9,7 +9,7 @@ description: The repository SHALL pin Node.js 24 in its .nvmrc file, resolve
   1.2026.6 or later, and not at a range.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files:
 - test/security/package-contract.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The extension is built from pinned, official dependencies

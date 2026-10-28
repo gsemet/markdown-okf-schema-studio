@@ -9,7 +9,7 @@ description: When a new side preview opens in an editor group that holds only
   preview occupies it.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/host-vscode/groupFocus.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/integration/realInput/markers.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A side preview locks its editor group

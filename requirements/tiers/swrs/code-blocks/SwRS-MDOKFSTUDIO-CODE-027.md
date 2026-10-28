@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Drop a copy request from a stale page

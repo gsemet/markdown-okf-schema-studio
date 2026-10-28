@@ -10,7 +10,7 @@ description: When a document opens in read mode or in edit mode, the extension
   button of an empty document.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/visual/capture_comment_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The first element starts 40 px below the top

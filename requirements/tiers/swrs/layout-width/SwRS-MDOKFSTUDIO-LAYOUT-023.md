@@ -9,7 +9,7 @@ description: When the width mode is Auto, the extension SHALL widen a table,
   measuring it again whenever the layout may have changed.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Auto width lets wide blocks break out of the column

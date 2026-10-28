@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-MYST-081
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The banner returns when the warning set changes

@@ -9,7 +9,7 @@ description: "When a block editor saves for the first time, the host SHALL hold 
   a reload, or the block changes in the document."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/host/previewTiming.test.ts
 - test/integration/previewEditing.test.ts
 - test/page/runtimeBlockEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host holds an open block edit and ends it when the block changes

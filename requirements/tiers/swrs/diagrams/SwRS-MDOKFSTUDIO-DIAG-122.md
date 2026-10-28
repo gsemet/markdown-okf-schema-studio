@@ -10,7 +10,7 @@ description: When a Vega-Lite or Vega chart names a relative data url, the
   message.
 project: MDOKFSTUDIO
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/render/chartRendering.test.ts
 - test/page/chartCsp.test.ts
 - test/page/modules/vegaChart.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Chart data files are read through the resource policy

@@ -9,7 +9,7 @@ description: When a conversion between a pipe table, a {list-table} and a simple
   no table gets neither a conversion nor a reason.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/fmtableReqTable.requirements.test.ts
 - test/page/modules/listTable.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A conversion that would lose content is refused with a reason

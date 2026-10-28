@@ -11,7 +11,7 @@ description: When the writer types a slash with no selection at the start of a
   command holds a space or a second slash, leaving the text as typed.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A slash opens the slash menu only where a command is meant

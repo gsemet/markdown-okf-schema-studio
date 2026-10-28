@@ -17,6 +17,7 @@ user_need: As a writer, I want all table directive forms to look like tables so
   that I can review data without building.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-MYST-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Table directives render as ordinary tables

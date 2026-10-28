@@ -10,7 +10,7 @@ description: When a reader runs Open Preview to Side on a saved Markdown file,
   extension is .md.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/integration/lifecycle.test.ts
 - test/security/package-contract.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Open Preview to Side opens or reveals a side preview

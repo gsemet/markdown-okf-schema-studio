@@ -11,7 +11,7 @@ description: When edit mode is on and the writer clicks a cell of a rendered
   editor.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -34,6 +34,7 @@ tested_in_files:
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A click on a pipe table cell opens a cell editor in place

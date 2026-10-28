@@ -11,7 +11,7 @@ description: "When the reader presses the collapse button, the extension SHALL t
   to collapsed or expanded."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The chevron collapses the toolbar to its first row

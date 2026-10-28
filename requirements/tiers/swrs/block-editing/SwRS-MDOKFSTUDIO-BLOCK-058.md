@@ -10,7 +10,7 @@ description: "When the host writes an edit of the source document for the previe
   could not apply\" or with the text of the error."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -40,6 +40,7 @@ tested_in_files:
 - test/integration/previewEditing.test.ts
 - test/integration/realInput/markers.ts
 - test/session/blockReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Every host source edit is one undo step, renders once and reports a failed apply

@@ -20,6 +20,7 @@ implemented_in_files: []
 tested_in_files:
 - test/session/diagReq.viewState.requirements.test.ts
 superseded_by: SwRS-MDOKFSTUDIO-LIFE-169
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A width mode choice is saved for the workspace

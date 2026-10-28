@@ -10,7 +10,7 @@ description: When a trusted document holds an `{include}` directive for a
   unresolved placeholder.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/core/render/includeBudget.test.ts
 - test/core/render/includeMapping.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An include is expanded in place and mapped to its directive

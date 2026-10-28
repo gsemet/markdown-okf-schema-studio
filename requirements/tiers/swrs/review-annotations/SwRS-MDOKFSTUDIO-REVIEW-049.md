@@ -9,7 +9,7 @@ description: When a reader saves a comment on a selection, the page SHALL anchor
   characters and up to 32 characters of text before and after it.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/modules/commentCompose.ts
 tested_in_files:
 - test/page/modules/commentCompose.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A new comment is anchored by its lines, quote and surroundings

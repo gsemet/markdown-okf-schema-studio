@@ -11,7 +11,7 @@ description: When a code block is shown and the setting
   tokens in the Light+ colours.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/pageSettings.test.ts
 - test/security/package-contract.test.ts
 - test/visual/codeBlockComfortScenarios.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Code blocks sit on a dark Dark+ background in every preview theme by a setting

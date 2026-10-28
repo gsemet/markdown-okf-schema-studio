@@ -9,7 +9,7 @@ description: When a writer changes a Markdown file, saved or not, or a file or a
   saving the file or reopening the preview.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -36,6 +36,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-093
 - SwRS-MDOKFSTUDIO-LIFE-094
 - SwRS-MDOKFSTUDIO-LIFE-100
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The preview updates in place as the text and its dependencies change

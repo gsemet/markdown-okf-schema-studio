@@ -18,6 +18,7 @@ user_need: As a maintainer, I can read the last editor events of a page when a
 derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-249
 - SwRS-MDOKFSTUDIO-BLOCK-250
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Diagnose an editor that closed by itself

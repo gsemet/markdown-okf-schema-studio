@@ -17,6 +17,7 @@ user_need: As a writer, I type in the document and the diagrams I did not touch
   do not flicker or disappear.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-DIAG-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Mermaid diagrams stay in place while typing

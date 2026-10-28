@@ -10,7 +10,7 @@ description: When a writer presses Alt+ArrowUp or Alt+ArrowDown on a focused
   the caret where it was.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockMoves.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Alt+Up and Alt+Down move the focused block, also from the text box

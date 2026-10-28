@@ -8,7 +8,7 @@ description: When a reader opens the Studio settings in the settings editor, the
   defaults and descriptions.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -19,6 +19,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-097
 - SwRS-MDOKFSTUDIO-LIFE-156
 - SwRS-MDOKFSTUDIO-TRUST-073
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The settings editor lists the Studio settings in clear groups

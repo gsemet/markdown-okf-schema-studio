@@ -11,7 +11,7 @@ description: When a writer previews a document with a fenced code block, a diff
   sets.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -44,6 +44,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CODE-039
 - SwRS-MDOKFSTUDIO-CODE-040
 - SwRS-MDOKFSTUDIO-CORE-028
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A reader reads highlighted, numbered and diff code

@@ -10,7 +10,7 @@ description: When the properties table is displayed, the extension SHALL show
   a table drawn without outer border that fits a preview 640 px wide or less.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/core/frontmatter/propertiesTable.test.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Property values read like YAML in a lean table

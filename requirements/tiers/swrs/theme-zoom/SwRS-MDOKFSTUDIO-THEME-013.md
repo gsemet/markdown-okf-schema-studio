@@ -8,7 +8,7 @@ description: "When a previewThemeModeChanged message carries a mode other than c
   or answering."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 - src/session/features/viewState.ts
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host drops a theme-mode message with an unknown mode

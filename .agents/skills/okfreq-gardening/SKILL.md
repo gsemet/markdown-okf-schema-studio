@@ -15,10 +15,12 @@ This specialized workflow extends the foundational `okfreq` skill. Load the
 project-guideline precedence, and traceability semantics remain in force
 throughout gardening. Do not assume that installed skills share a directory.
 
-If the target bundle has no local requirements guideline, use the parent skill's
-`references/requirements.guidelines.md` resource as the fallback. Locate that
-resource from the installed `okfreq` skill by skill name. Read it during Phase 1,
-after checking the project's own `AGENTS.md` and guidelines.
+Read the bundle's `guidelines/requirements.guidelines.md` during Phase 1, after
+checking the project's own `AGENTS.md`, then any project guideline in the same
+folder (by convention `project.guidelines.md`), which wins where it specializes
+the shared text. `okfreq init` installs the shared file; if it is missing or
+outdated, run `okfreq init <bundle> --force`, which replaces it with the
+packaged text and never touches the project files.
 
 Perform an explicit, evidence-based maintenance pass over an `okfreq` bundle.
 The primary users are coding agents working on brownfield projects where source
@@ -39,12 +41,12 @@ unrelated implementation task.
    and do not create both locations for the same configuration.
 - Treat the bundle as split. The bundle root owns `config.yml`, `guidelines/`,
    and generated reports; `<bundle>/tiers/` owns `_schema/`, `index.md`,
-   `log.md`, and the level folders. Read `config.yml` and every file in
+   `log.md`, and the tier folders. Read `config.yml` and every file in
    `<bundle>/tiers/_schema/` before editing anything.
 - Preserve requirement IDs, UUIDs, authored frontmatter, unknown properties,
   YAML comments, and Markdown bodies.
-- Never hand-edit `derived_by`, `implemented_in_files`, `tested_in_files`, indexes,
-  or reports. Use explicit `okfreq` commands for generated data.
+- Never hand-edit `derived_by`, `supersedes`, `implemented_in_files`, `tested_in_files`,
+  `default_owner_email`, indexes or reports. Use explicit `okfreq` commands for generated data.
 - Never claim implementation or test coverage without source evidence and
   markers. Markers are links, not proof that tests pass.
 - Never change lifecycle or approval state as an incidental edit.
@@ -73,8 +75,9 @@ requires no access to the tool's source repository or documentation site.
    layout and the tool disagree, and that drift is the first finding to fix.
 4. Read the project task runner and CI configuration to identify validation and
    test commands. Do not assume a universal runner.
-5. Record configured levels, parent relationships, ID policy, lifecycle values,
-   marker keywords, generated-field ownership, and scope mappings.
+5. Record configured tiers, parent relationships, ID policy, lifecycle values,
+   owners and approval locks, marker keywords, generated-field ownership, and
+   scope mappings.
 6. Inspect `git status` so pre-existing changes are not attributed to gardening.
 
 ## Phase 2 — Establish a read-only baseline
@@ -82,9 +85,9 @@ requires no access to the tool's source repository or documentation site.
 Run the project-prescribed validation and test checks before changing files.
 Then inspect requirements frontmatter before bodies and inventory:
 
-- every requirement by ID, UUID, level, scope, origin, and lifecycle;
-- authored `derives_from` and `depends_on` relationships;
-- generated `derived_by`, implementation, and test fields;
+- every requirement by ID, UUID, tier, scope, origin, and lifecycle;
+- authored `derives_from`, `depends_on`, `superseded_by` and `relates_to` relationships;
+- generated `derived_by`, `supersedes`, implementation, and test fields;
 - verification methods and criteria;
 - unknown producer metadata and preservation-sensitive comments;
 - source and test files covered by each configured scope.
@@ -106,11 +109,13 @@ and scan warnings as separate findings.
 ## Phase 3 — Repair structural and graph issues
 
 1. Identify malformed frontmatter, missing required fields, invalid UUIDs, invalid
-   levels, invalid lifecycle values, and unknown hierarchy targets.
-2. Detect orphaned upper-level requirements and requirements whose parent level
+   tiers, invalid lifecycle values, and unknown hierarchy targets.
+2. Detect orphaned upper-level requirements and requirements whose parent tier
    violates the configured hierarchy.
 3. Use `okfreq graph` to inspect reverse derivation. Rebuild generated
-   `derived_by` only through `okfreq update-coverage` after previewing it.
+   `derived_by` and `supersedes` only through `okfreq update-coverage` after
+   previewing it. Every `superseded` requirement must name its replacements in
+   `superseded_by`; report one that does not instead of guessing a replacement.
 4. Never repair an uncertain relationship by guessing. Report it as an open
    discrepancy and ask for a decision.
 5. Preserve all authored and unknown metadata while making approved repairs.
@@ -122,8 +127,8 @@ Run `okfreq trace . --json` and classify results:
 - `implemented` — source files containing implementation markers;
 - `tested` — test files containing test markers;
 - `missing_ids` — markers that reference no known requirement;
-- `duplicates` — the same ID marked twice inside one file; markers for one ID in
-  several distinct files are legitimate multi-file coverage, not a duplicate;
+- `duplicates` — always empty: the same ID may be marked several times in one
+  file, and in several files; the key is kept for report compatibility;
 - `non_leaf` — markers on an upper-level requirement, normally a warning;
 - `warnings` — missing or otherwise incomplete scan locations.
 
@@ -132,7 +137,7 @@ links. Distinguish these cases:
 
 1. **Existing behavior, missing marker:** propose adding the correct marker near
    the relevant function, class, module, or test.
-2. **New behavior with no requirement:** propose a new configured-level
+2. **New behavior with no requirement:** propose a new configured-tier
    requirement through `okfreq new`, link it with `derives_from`, and do not
    repurpose an existing ID.
 3. **Requirement with no matching behavior:** report `req_not_in_code`; do not
@@ -197,16 +202,38 @@ regenerate the log or invent entries for a no-op pass.
 
 Treat `draft`, `proposed`, `approved`, `deprecated`, and `superseded` as distinct.
 An approved requirement needs configured verification information and successful
-structural validation; a marker alone is insufficient. Lifecycle changes are
+structural validation; a marker alone is insufficient. It also records its
+owner's agreement (`approved_by`, `approved_on`) on a tier and scope whose
+`approval_lock` is true; report a gap, never fill these fields yourself during an
+audit. Implemented drafts are reported as candidates for `proposed`; the change
+itself follows the user's decision. Lifecycle changes are
 explicit and confirmed:
 
 ```console
 okfreq archive REQUIREMENT-ID --yes
-okfreq supersede OLD-ID REPLACEMENT-ID --yes
+okfreq supersede OLD-ID REPLACEMENT-ID [REPLACEMENT-ID...] --yes
 ```
 
-Archive never deletes. Supersession requires a real replacement target. Do not
+Archive never deletes. Supersession requires at least one real replacement
+target and records them all in the `superseded_by` list. A draft
+that was never published may be discarded with `okfreq retire ID --yes`, which
+records the ID in `retired_ids` so the number is never reused; do not delete
+requirement files by hand. Do not
 mutate lifecycle state merely because prose, coverage, or indexes changed.
+
+## Phase 6b — Simplify and restructure
+
+Measure whether the bundle has grown too fine or repetitive for the local
+guideline's granularity rule: several SwRS that are scenarios of one behaviour,
+the same rule repeated per feature, near-duplicates across scopes, or SwRS that
+describe internals rather than observable behaviour. Report the counts with
+example IDs and a proposed mapping from old to new requirements.
+
+Restructuring (merging, superseding or archiving requirements) changes the
+contract: do it only after the user approves the proposed mapping. Without
+approval, report the proposal and stop this phase. Never delete a published
+requirement; supersede or archive it. Use `okfreq retire` only for drafts that
+were never published.
 
 ## Phase 7 — Reports and final validation
 

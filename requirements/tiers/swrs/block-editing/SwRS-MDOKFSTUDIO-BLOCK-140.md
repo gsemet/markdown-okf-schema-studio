@@ -9,7 +9,7 @@ description: "When a writer Shift+clicks a body block, or presses Shift+ArrowUp 
   to the free end of the selection, and open no editor."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/modules/blockSelection.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Shift+click and Shift+Arrow select a run of blocks

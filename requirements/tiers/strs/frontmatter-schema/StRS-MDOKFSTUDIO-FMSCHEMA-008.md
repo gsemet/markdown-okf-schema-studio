@@ -18,6 +18,7 @@ user_need: As a schema author, I see immediately that my schema is broken and
   why, instead of silently losing validation.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Schema problems are reported without hiding the metadata

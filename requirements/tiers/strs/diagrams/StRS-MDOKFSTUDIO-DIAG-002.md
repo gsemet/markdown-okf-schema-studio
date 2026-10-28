@@ -18,6 +18,7 @@ user_need: As a reader, I want Mermaid diagrams to match the dark, white, cream
   or light preview so their labels stay legible.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-DIAG-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Mermaid diagrams follow the preview theme

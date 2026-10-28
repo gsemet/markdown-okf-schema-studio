@@ -11,7 +11,7 @@ description: When a reviewer selects text in the preview and saves a comment, or
   typed text on screen and tell the reviewer why.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -41,6 +41,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-119
 - SwRS-MDOKFSTUDIO-REVIEW-143
 - SwRS-MDOKFSTUDIO-REVIEW-186
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A reviewer comments, replies, resolves and deletes, and no comment is lost

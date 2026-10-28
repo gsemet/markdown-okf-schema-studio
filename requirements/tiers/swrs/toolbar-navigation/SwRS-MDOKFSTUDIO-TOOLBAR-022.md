@@ -10,7 +10,7 @@ description: "When the page reads markdownOkfSchemaStudio.preview.stickyHeadingD
   is open."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/pageSettings.test.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The sticky heading depth setting decides how many levels stay pinned

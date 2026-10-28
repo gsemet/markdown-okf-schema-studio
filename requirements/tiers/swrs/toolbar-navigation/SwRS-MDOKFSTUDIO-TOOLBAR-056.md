@@ -7,7 +7,7 @@ description: "When previewHistoryState names another document, document version 
   request than the page's render, the extension SHALL ignore it."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/core/protocol/hostToPage.ts
 tested_in_files:
 - test/page/runtimePageControls.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A history state of another render is ignored

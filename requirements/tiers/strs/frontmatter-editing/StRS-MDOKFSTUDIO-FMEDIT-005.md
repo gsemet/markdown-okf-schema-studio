@@ -10,7 +10,7 @@ description: When a writer renames a field by clicking its name in edit mode, or
   used name and the removal of a required field.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -42,6 +42,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMEDIT-084
 - SwRS-MDOKFSTUDIO-FMEDIT-086
 - SwRS-MDOKFSTUDIO-FMSCHEMA-084
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer adds, renames and removes metadata fields

@@ -10,7 +10,7 @@ description: "When a writer edits the value of a text field, the extension SHALL
   line breaks."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Text values are edited as one or several lines

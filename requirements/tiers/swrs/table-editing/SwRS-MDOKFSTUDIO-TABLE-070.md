@@ -8,7 +8,7 @@ description: When the writer presses List table in the table bar, the extension
   {list-table} directive in one final save.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ tested_in_files:
 - test/integration/tableMoves.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The List table button converts the edited table in one final save

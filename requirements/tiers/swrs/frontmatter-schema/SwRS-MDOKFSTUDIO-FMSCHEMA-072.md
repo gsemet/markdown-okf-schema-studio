@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-067
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A link tooltip closes on leaving, Escape, scroll, resize and outside click

@@ -8,7 +8,7 @@ description: When the preview shows an editor, a bar, a menu, a closed editor or
   scenarios and apply no preview motion when the user prefers reduced motion.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/diagReq.themeZoom.requirements.test.ts
 - test/page/modules/motion.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Soft appearance and colour transitions honour reduced motion

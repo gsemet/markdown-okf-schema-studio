@@ -9,7 +9,7 @@ description: When a reader presses the Table of contents button, the Studio
   keep the text, the tables and the pinned headings clear of the column.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-037
 - SwRS-MDOKFSTUDIO-TOOLBAR-040
 - SwRS-MDOKFSTUDIO-TOOLBAR-045
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The reader uses a table of contents beside the document

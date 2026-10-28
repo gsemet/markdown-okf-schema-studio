@@ -10,7 +10,7 @@ description: When the writer runs HTML table, the extension SHALL replace the
   selection, set apart by blank lines, with Column 1 selected.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/modules/tableInsertAfterTable.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## HTML table converts or inserts an HTML table

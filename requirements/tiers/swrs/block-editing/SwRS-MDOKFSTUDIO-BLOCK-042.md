@@ -9,7 +9,7 @@ description: When a writer types in a block editor, the extension SHALL autosave
   host writes as the smallest single replacement of the text last written.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/core/mapping/textDiff.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/session/blockReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Typing is autosaved as the smallest single replacement

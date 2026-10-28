@@ -18,6 +18,7 @@ user_need: As a writer, I use the raw HTML that GitHub documents rely on and
   nothing unsafe is rendered.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-GFM-002
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Small raw HTML subset renders safely

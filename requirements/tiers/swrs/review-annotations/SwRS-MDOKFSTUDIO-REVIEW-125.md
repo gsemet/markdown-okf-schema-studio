@@ -9,7 +9,7 @@ description: When a document is renamed or moved, the extension SHALL rename its
   safe.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/commentAnchors.test.ts
 - test/session/reviewReqComments.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A renamed document takes its review comments file along

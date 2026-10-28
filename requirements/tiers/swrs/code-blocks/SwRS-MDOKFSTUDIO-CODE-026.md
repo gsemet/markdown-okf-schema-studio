@@ -9,7 +9,7 @@ description: When a copy request carries text that is not a string or is longer
   copied.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/protocol/pageToHost.test.ts
 - test/page/modules/codeCopy.test.ts
 - test/session/renderReq.codeCopy.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An invalid, oversized or gestureless copy request is refused

@@ -7,7 +7,7 @@ description: "When previewPairing names another document, document version or re
   than the page's, the extension SHALL not change the Anchor button."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/core/protocol/hostToPage.ts
 tested_in_files:
 - test/page/runtimePageControls.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A pairing message for another document is ignored

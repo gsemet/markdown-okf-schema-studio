@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-DIAG-015
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An invalid Mermaid diagram keeps exactly one error

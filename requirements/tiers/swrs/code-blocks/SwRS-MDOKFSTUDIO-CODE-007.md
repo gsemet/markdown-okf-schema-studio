@@ -12,7 +12,7 @@ description: When a code block is shown, the extension SHALL colour keywords,
   forced white and cream themes.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/preview/creamTheme.test.ts
 - test/core/preview/previewStyles.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Code blocks use one font scale, the theme colours and scroll long lines

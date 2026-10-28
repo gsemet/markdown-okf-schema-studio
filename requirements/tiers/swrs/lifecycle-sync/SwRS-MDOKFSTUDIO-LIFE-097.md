@@ -10,7 +10,7 @@ description: When the text editor is scrolled or a block of the preview is
   on by default) allow.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/integration/sourceMapping.test.ts
 - test/page/pageSettings.test.ts
 - test/page/runtimeScroll.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Two settings decide how the panes follow each other

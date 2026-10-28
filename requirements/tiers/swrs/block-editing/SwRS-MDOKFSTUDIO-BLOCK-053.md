@@ -9,7 +9,7 @@ description: When a writer presses Cancel or Escape in a block editor, the page
   the block back in one edit.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/integration/previewEditing.test.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Cancel and Escape restore the saved text

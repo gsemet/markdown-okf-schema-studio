@@ -11,7 +11,7 @@ description: "When the extension plans or writes back a preview edit, it SHALL t
   of a table and the presence or absence of its final line ending."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/page/modules/markdownTable.test.ts
 - test/session/blockReq.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Preview edits keep the line endings of the document

@@ -11,7 +11,7 @@ description: When a writer previews a document with a Mermaid fence or
   flowchart fence that renders at once.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -48,6 +48,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-DIAG-124
 - SwRS-MDOKFSTUDIO-REVIEW-017
 - SwRS-MDOKFSTUDIO-REVIEW-038
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer reads and inserts Mermaid diagrams that follow the theme

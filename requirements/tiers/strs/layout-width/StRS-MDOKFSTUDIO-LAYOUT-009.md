@@ -19,6 +19,7 @@ user_need: As a maintainer, I can run machine layout checks on any preview and
   not apply.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-LAYOUT-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Layout measurements stay trustworthy for maintainers

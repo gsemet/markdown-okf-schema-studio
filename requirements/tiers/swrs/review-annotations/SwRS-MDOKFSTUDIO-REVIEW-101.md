@@ -8,7 +8,7 @@ description: When the quote of a review thread cannot be found and its old lines
   its stored lines and comments.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/core/comments/anchoring.ts
 tested_in_files:
 - test/core/comments/anchoring.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A thread whose quote is gone or ambiguous is orphaned and keeps its lines

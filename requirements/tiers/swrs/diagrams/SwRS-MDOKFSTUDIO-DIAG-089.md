@@ -9,7 +9,7 @@ description: When the JAR pipeline cannot draw a PlantUML diagram, the extension
   document path in addition to the message on the diagram.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/render/plantUmlRenderer.test.ts
 - test/session/diagReq.plantuml.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## JAR failures are reported on the diagram and in the status line

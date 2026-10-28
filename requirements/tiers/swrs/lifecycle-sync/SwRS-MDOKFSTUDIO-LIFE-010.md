@@ -11,7 +11,7 @@ description: "When Open Preview to Side runs, the extension SHALL preview only a
   and open no preview."
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/integration/lifecycle.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Open Preview to Side checks the file it is given

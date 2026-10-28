@@ -9,7 +9,7 @@ description: When a render changes the page shell, for example a diagram engine
   of a content patch.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/contentPatch.test.ts
 - test/host/previewTiming.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A render that cannot patch loads a new page document

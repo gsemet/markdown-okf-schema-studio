@@ -10,7 +10,7 @@ description: When a document's type has a schema, the extension SHALL show a
   and the properties of composed schemas merged into one field list.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/propertiesTable.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A schema table lists the declared fields with their type

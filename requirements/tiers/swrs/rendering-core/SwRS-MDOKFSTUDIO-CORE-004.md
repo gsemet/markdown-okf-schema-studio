@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CORE-003
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Map a multi-line block to its end line

@@ -8,7 +8,7 @@ description: When lines are inserted or removed above a review thread in an
   the same number of lines in memory.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/comments/anchoring.test.ts
 - test/integration/commentAnchors.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Edits move the stored lines of a thread in memory

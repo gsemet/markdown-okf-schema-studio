@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-037
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Without a schema, an added field follows the row whose menu was used

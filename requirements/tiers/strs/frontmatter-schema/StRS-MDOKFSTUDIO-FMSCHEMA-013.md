@@ -18,6 +18,7 @@ user_need: As a writer, I see validation results update while I type, without
   the preview jumping.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The table follows edits to the document

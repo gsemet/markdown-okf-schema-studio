@@ -9,7 +9,7 @@ description: When the rendered content contains a chart figure, the extension
   policy keeps no unsafe-eval and no network access.
 project: MDOKFSTUDIO
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/modules/vegaChart.test.ts
 - test/security/package-contract.test.ts
 - test/session/diagReq.chart.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The chart runtime loads only with a chart and needs no eval

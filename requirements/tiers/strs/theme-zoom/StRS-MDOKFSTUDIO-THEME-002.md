@@ -9,7 +9,7 @@ description: When the reader presses the Theme button, the Studio SHALL switch
   colours of that mode.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -32,6 +32,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-THEME-031
 - SwRS-MDOKFSTUDIO-THEME-034
 - SwRS-MDOKFSTUDIO-THEME-056
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A reader chooses a preview theme that paints the whole page readably

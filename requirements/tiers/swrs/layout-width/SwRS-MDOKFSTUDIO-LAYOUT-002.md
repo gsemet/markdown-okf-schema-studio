@@ -11,7 +11,7 @@ description: When a preview page is built or the setting
   with no cap when the value is 0.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/session/previewRuntimeFile.test.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The text column width follows the maxContentWidth setting

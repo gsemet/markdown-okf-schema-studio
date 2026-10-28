@@ -8,7 +8,7 @@ description: "When the reader presses the Theme button, the extension SHALL swit
   and show the active mode and the next one on the button."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Theme button cycles Current, Dark, White and Cream

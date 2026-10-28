@@ -10,7 +10,7 @@ description: When a numbered, emphasized or diff block is shown, the extension
   listed lines relative to it and show each special character once.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/render/highlight.test.ts
 - test/core/render/mystFeatures.test.ts
 - test/core/render/renderReq.codeBlocks.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Numbered, emphasized and diff blocks are wrapped into lines

@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-005
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The properties section maps to source line 1

@@ -10,7 +10,7 @@ description: When a document is rendered, the extension SHALL give every
   frontmatter block is left out of the body.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 - src/core/render/mystRenderer.ts
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Every rendered block maps to its absolute source lines

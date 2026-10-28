@@ -8,7 +8,7 @@ description: "When a previewLinkDiscover message reaches the host, the extension
   characters each."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host accepts discovery messages of bounded size
