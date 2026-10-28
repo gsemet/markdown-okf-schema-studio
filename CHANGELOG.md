@@ -11,6 +11,9 @@
   documented, instead of the single paragraph inside it.
 - A front matter field changed or added since the last commit now gets its own green change bar on its
   row of the properties table, like a changed block of the body. A removed field marks the whole table.
+- The floating toolbar now has five rows of at most three buttons: Refresh, Edit and the chevron;
+  Anchor, Back and Next; Theme, Zoom out and Zoom in; Width and Table of contents; then Fold, Diff and
+  Comments. It is narrower (three buttons instead of six), so it covers less of the page.
 - Pasting a web address (`http:`, `https:` or `mailto:`) into a block editor makes a Markdown link: `[text](url)`
   over selected text, `<url>` alone and `![](url)` for an image address (`.png`, `.jpg`, `.gif`, `.svg`,
   `.webp`). Cmd/Ctrl+Shift+V still pastes the raw text, and code, link targets and other schemes are

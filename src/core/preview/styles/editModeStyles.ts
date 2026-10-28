@@ -7,6 +7,7 @@
 // @implements_req SwRS-MDOKFSTUDIO-DIAG-001
 // @implements_req SwRS-MDOKFSTUDIO-TABLE-006
 // @implements_req SwRS-MDOKFSTUDIO-TABLE-048
+// @implements_req SwRS-MDOKFSTUDIO-TABLE-064
 /**
  * Edit mode: scroll anchoring, editable blocks, insert points and move buttons, the block and table
  * cell editors and the table menu.
@@ -355,7 +356,9 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content table :whe
   margin: 0 0 6px;
   padding: 3px;
   width: max-content;
-  max-width: 100%;
+  /* The runtime sets the inset when the bar opens under the floating preview controls at the top of
+     the page: the bar then wraps left of them. */
+  max-width: calc(100% - var(--sphinx-preview-table-menu-inset, 0px));
   border: 1px solid var(--studio-widget-border, var(--sphinx-preview-border));
   border-radius: 18px;
   background: var(--studio-editorWidget-background, var(--studio-editor-background, Canvas));

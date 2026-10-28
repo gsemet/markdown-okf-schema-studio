@@ -468,12 +468,20 @@ function openTableForToolbarReveal(options: {
   scrollY: number;
   /** The floating controls cover the right end of the table toolbar box; its items are given. */
   controlsOverRightEnd?: boolean;
+  /** The left edge of the floating controls (150 by default) and the width of the column holding the table. */
+  controlsLeft?: number;
+  columnWidth?: number;
 }) {
   const harness = createRuntimeHarness({ viewportHeight: 600 });
   if (options.controlsOverRightEnd) {
-    harness.toolbar.rectProvider = () => ({ top: 12, height: 100, bottom: 112, left: 150, right: 280, width: 130 });
+    const left = options.controlsLeft ?? 150;
+    harness.toolbar.rectProvider = () => ({ top: 12, height: 100, bottom: 112, left, right: left + 130, width: 130 });
   }
   const section = new RuntimeElement({}, harness.windowState, 0, 2000, "section");
+  if (options.columnWidth !== undefined) {
+    const width = options.columnWidth;
+    section.rectProvider = () => ({ top: -harness.windowState.scrollY, height: 2000, left: 0, width });
+  }
   harness.body.appendChild(section);
   const table = new RuntimeElement({
     "data-sphinx-source-end-line": "23",
@@ -552,6 +560,27 @@ test("P8: a toolbar box is not revealed when only its empty part is under the pr
   // scrolls by the 10 px that bring the status text under them, not by the 26 px of the box.
   const covered = openTableForToolbarReveal({ cellTop: 340, barTop: 66, scrollY: 300, controlsOverRightEnd: true });
   assert.deepEqual(covered.scrolls, [300, 300 - 10]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-064
+test("a table bar that opens under the preview controls at the top of the page wraps left of them", () => {
+  const inset = (options: { barTop: number; scrollY: number; columnWidth: number; controlsLeft?: number }): string => {
+    const { harness } = openTableForToolbarReveal({ cellTop: 340, controlsOverRightEnd: true, controlsLeft: 250, ...options });
+    const menu = harness.body.childElements.flatMap((child) => child.childElements)
+      .find((child) => child.getAttribute("data-sphinx-table-menu") === "true");
+    assert.ok(menu, "the table bar is open");
+    return menu.style.getPropertyValue("--sphinx-preview-table-menu-inset");
+  };
+  // Page at its top, bar top 90 under the controls (bottom 112, left 250) in a 600 px column: the bar
+  // gives up the 354 px from the controls' left edge (minus 4) to the column's right edge.
+  assert.equal(inset({ barTop: 90, scrollY: 0, columnWidth: 600 }), "354px");
+  // The page can scroll the bar below the controls: the reveal does it and the bar keeps its width.
+  assert.equal(inset({ barTop: 90, scrollY: 300, columnWidth: 600 }), "");
+  // A bar that opens below the controls keeps its width.
+  assert.equal(inset({ barTop: 120, scrollY: 0, columnWidth: 600 }), "");
+  // A narrow pane, the controls 150 px from the column's left edge, would leave the bar under 200 px:
+  // it keeps the whole width.
+  assert.equal(inset({ barTop: 90, scrollY: 0, columnWidth: 360, controlsLeft: 150 }), "");
 });
 
 test("a toolbar that is already visible causes no extra scroll", () => {

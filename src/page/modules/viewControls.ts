@@ -6,7 +6,7 @@ export interface ViewControlsContext {
 }
 
 /**
- * Zoom controls of toolbar row 2. `onZoomChange` runs after the zoom variable changed and lets
+ * Zoom controls of toolbar row 3. `onZoomChange` runs after the zoom variable changed and lets
  * the page keep its reading line.
  */
 export function installViewControls(

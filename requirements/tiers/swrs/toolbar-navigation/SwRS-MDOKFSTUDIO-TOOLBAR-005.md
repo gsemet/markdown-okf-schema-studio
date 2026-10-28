@@ -42,7 +42,7 @@ When the reader presses the Fold button of the toolbar, or runs the command Fold
 
 ### Scenario (nominal): Fold all and unfold all from the toolbar
 - GIVEN a document with several sections and none folded
-- WHEN the reader presses the Fold button in row 3 of the toolbar
+- WHEN the reader presses the Fold button in row 5 of the toolbar
 - THEN every heading that has a section is folded, the button reads Unfold all sections with aria-pressed true; pressing it again unfolds every section and the button reads Fold all sections again
 
 ### Scenario (nominal): Fold all and unfold all from the command palette

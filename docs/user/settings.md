@@ -9,7 +9,7 @@ theme and the toolbar state are built-in starting points, not settings; the pale
 **Preview**
 
 - `preview.maxContentWidth` (default 960): width of the text column in pixels; `0` is full width.
-  The Width button on the third toolbar row switches between Margin (this column), Auto (tables,
+  The Width button on the fourth toolbar row switches between Margin (this column), Auto (tables,
   figures, images and code blocks wider than the column break out, centred, up to the free pane
 width;
   narrower tables and figures are centred) and Full width;

@@ -141,6 +141,7 @@ html[data-sphinx-preview-theme-mode="cream"] body {
 }`;
 
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-002
+// @implements_req SwRS-MDOKFSTUDIO-LIFE-049
 // @implements_req SwRS-MDOKFSTUDIO-MYST-081
 // @implements_req SwRS-MDOKFSTUDIO-THEME-031
 // @implements_req SwRS-MDOKFSTUDIO-THEME-043
@@ -222,7 +223,7 @@ ${FORCED_THEME_MODES_CSS}
   gap: 2px;
 }
 
-/* Rows 2 and 3: the collapse button of row 1 hides them (the hidden attribute removes them from
+/* Rows 2 to 5: the collapse button of row 1 hides them (the hidden attribute removes them from
    the Tab order as well). */
 [data-sphinx-preview-toolbar-more] {
   display: flex;
@@ -238,7 +239,7 @@ ${FORCED_THEME_MODES_CSS}
 /* Shown by the runtime when a render stays pending; fixed and pointer-transparent, so no content moves. */
 [data-sphinx-preview-pending-overlay] {
   position: fixed;
-  inset-block-start: 128px;
+  inset-block-start: 192px;
   inset-inline-end: 14px;
   z-index: 1099;
   box-sizing: border-box;
@@ -254,7 +255,7 @@ ${FORCED_THEME_MODES_CSS}
   pointer-events: none;
 }
 
-/* Below the toolbar: three rows, or one row when rows 2-3 are collapsed. */
+/* Below the toolbar: five rows, or one row when rows 2 to 5 are collapsed. */
 html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending-overlay] {
   inset-block-start: 62px;
 }
@@ -291,14 +292,10 @@ html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-pending
   font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
-  /* Widest toolbar row (6 buttons of 30px, 2px gaps, 3px padding, 1px border) + 14px margin + 4px clearance + 4px slack. */
-  --sphinx-preview-warning-banner-reserve: calc(6 * 30px + 5 * 2px + 8px + 14px + 8px);
+  /* Widest toolbar row, expanded or collapsed (3 buttons of 30px, 2px gaps, 3px padding, 1px border)
+     + 14px margin + 4px clearance + 4px slack. */
+  --sphinx-preview-warning-banner-reserve: calc(3 * 30px + 2 * 2px + 8px + 14px + 8px);
   --sphinx-preview-warning-accent: color-mix(in srgb, var(--studio-charts-yellow, #bf8803) 75%, var(--studio-editor-foreground, CanvasText));
-}
-
-/* Rows 2-3 collapsed: the toolbar is one row of at most four buttons. */
-html[data-sphinx-preview-toolbar-state="collapsed"] [data-sphinx-preview-warning-banner] {
-  --sphinx-preview-warning-banner-reserve: 164px;
 }
 
 [data-sphinx-preview-warning-icon] {

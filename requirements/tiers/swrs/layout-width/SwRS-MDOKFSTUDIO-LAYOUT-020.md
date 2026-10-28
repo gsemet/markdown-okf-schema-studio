@@ -57,7 +57,7 @@ When the reader presses the Width button, the extension SHALL switch the width m
 - THEN the anchor is taken from the line at the current scroll position, when that line is known
 
 ### Known issues
-- Known issue: docs/user/toolbar.md and the code place the Width button on the third toolbar row, but the file header of widthMode.ts and an older bullet of the Unreleased CHANGELOG entry say the second row (stale).
+- Known issue: docs/user/toolbar.md and the code place the Width button on the fourth toolbar row, but the file header of widthMode.ts and an older bullet of the Unreleased CHANGELOG entry say the second row (stale).
 
 ### Related requirements
 - SwRS-MDOKFSTUDIO-LAYOUT-018: the same change callback measures the first-element clearance again.

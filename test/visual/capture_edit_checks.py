@@ -206,7 +206,9 @@ def check_edit_palette(page: Page, scenario: dict, failures: list[Failure]) -> N
   page_name = scenario["page"]
   page.add_style_tag(content="[data-sphinx-preview-sticky-headings] { display: none !important; }")
   paragraph = page.locator("main > p[data-sphinx-source-line]").nth(3)
-  paragraph.evaluate("element => element.scrollIntoView({ block: 'center' })")
+  # CR 153: the paragraph sits at 60% of the pane height, not at 50%: a palette wrapped onto six rows at 360 px
+  # plus the five-row toolbar above it need the room, and the text can only stay in place when the bar fits above it.
+  paragraph.evaluate("element => { element.scrollIntoView({ block: 'center' }); window.scrollBy(0, element.getBoundingClientRect().top - window.innerHeight * 0.6); }")
   page.wait_for_timeout(150)
   before = paragraph.evaluate("element => element.getBoundingClientRect().top")
   paragraph.click()

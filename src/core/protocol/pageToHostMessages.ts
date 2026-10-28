@@ -228,7 +228,7 @@ export interface PreviewHistoryGoMessage extends PageMessageBase<"previewHistory
   direction: "back" | "forward";
 }
 
-/** A view preference of toolbar row 2, with a value valid for that preference. */
+/** A view preference of the toolbar, with a value valid for that preference. */
 export interface PreviewViewPreferenceChangedMessage extends PageMessageBase<"previewViewPreferenceChanged"> {
   preference: ViewPreferenceKey;
   value: unknown;

@@ -308,6 +308,31 @@ test("P4: a palette taller than 40% of the viewport is not sticky; a small one i
   assert.equal(host.getAttribute("data-sphinx-palette-static"), null);
 });
 
+test("P4: the clearance reserve is uncapped at the page top and capped to one bar height when scrolled", () => {
+  // @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
+  const measure = (scrollY: number): string | undefined => {
+    const harness = createRuntimeHarness();
+    openBlockEditorWithSource(harness);
+    const palette = paletteOf(harness)!;
+    const host = palette.parentElement!;
+    palette.height = 30;
+    // The bar sticks 60 px under the pane top (a five-row toolbar); its host is at the pane top,
+    // so the distance (60) is more than one bar height plus 3.
+    host.rectProvider = () => ({ top: 0, height: 40, bottom: 40 });
+    palette.rectProvider = () => ({ top: 0, height: 30, bottom: 30 });
+    harness.window.getComputedStyle = () => ({
+      position: "sticky",
+      top: "60px",
+      getPropertyValue: () => "",
+    });
+    harness.windowState.scrollY = scrollY;
+    harness.dispatchWindow("resize");
+    return host.style.getPropertyValue("--sphinx-preview-palette-reserve") || undefined;
+  };
+  assert.equal(measure(0), "63px", "at the page top the whole distance is reserved");
+  assert.equal(measure(200), undefined, "scrolled, a distance past one bar height is already under the bar");
+});
+
 function openCompensatedEditor(harness: RuntimeHarness): RuntimeElement {
   harness.windowState.scrollY = 200;
   harness.dispatchWindow("scroll");

@@ -77,7 +77,7 @@ The panel state is the state the webview saved with the panel (restored panel or
 | Palette mode | saved paletteMode | the host gives the valid mode stored for the workspace, else the value of the setting markdownOkfSchemaStudio.editing.defaultPaletteMode | gfm | only strict, gfm, myst and full |
 | Width mode | saved viewWidthMode | stored widthMode | margin | only margin, auto and full |
 | Zoom | saved viewZoom | stored zoom | 100 | rounded to a multiple of 10 and clamped to 70 to 200; a value that is not a finite number is ignored |
-| Toolbar rows 2 and 3 | saved viewToolbarCollapsed, a boolean | stored toolbarCollapsed | collapsed | only the stored value false expands, so a missing value gives collapsed |
+| Toolbar rows 2 to 5 | saved viewToolbarCollapsed, a boolean | stored toolbarCollapsed | collapsed | only the stored value false expands, so a missing value gives collapsed |
 | Contents column | saved viewToc, a boolean | stored toc, open only when true | closed | a saved non-boolean is ignored |
 | Comments button | saved viewComments, a boolean | stored comments, hidden only when false | shown | a saved non-boolean is ignored |
 | Anchor mode | saved anchorToEditor, a boolean | no stored value: the setting markdownOkfSchemaStudio.preview.scrollPreviewWithEditor | the setting value | a saved non-boolean is ignored |

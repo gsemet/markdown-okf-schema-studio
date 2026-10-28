@@ -155,6 +155,30 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     menu.style?.setProperty?.("--sphinx-preview-table-menu-shift", shift + "px");
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-064
+  // A bar that opens under the floating preview controls where the page cannot scroll up enough to
+  // bring it below them (a table right under the first heading, at the top of the page) gives up the
+  // width the controls cover: its buttons wrap left of them and stay clickable. Measured when the bar
+  // is filled, never on a scroll, so scrolling never reflows the page.
+  function clearPreviewControls(menu: HTMLElement): void {
+    const property = "--sphinx-preview-table-menu-inset";
+    menu.style?.removeProperty?.(property);
+    const controls = document.querySelector?.("[data-sphinx-preview-toolbar]")?.getBoundingClientRect?.();
+    const bar = menu.getBoundingClientRect?.();
+    const parent = menu.parentElement;
+    const column = parent?.getBoundingClientRect?.();
+    if (!controls || !bar || !parent || !column || !(controls.width > 0) || !Number.isFinite(bar.top)) return;
+    const barRight = Number.isFinite(bar.right) ? bar.right : bar.left + bar.width;
+    const missing = controls.bottom + 4 - bar.top;
+    if (!(missing > window.scrollY) || bar.top >= controls.bottom || !(barRight > controls.left)) return;
+    const columnRight = (Number.isFinite(column.right) ? column.right : column.left + column.width)
+      - (Number.parseFloat(window.getComputedStyle?.(parent)?.paddingRight ?? "") || 0);
+    const inset = Math.ceil(columnRight - controls.left + 4);
+    // A narrow pane keeps the whole width: a bar squeezed under 200 px would be worse than covered.
+    if (!(inset > 0) || column.width - inset < 200) return;
+    menu.style?.setProperty?.(property, inset + "px");
+  }
+
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-055
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-091
@@ -404,6 +428,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     cellActions.appendChild(blockEditor.createEditorButtons(edit));
     edit.element.appendChild(cellActions);
     resizeInput();
+    clearPreviewControls(menu);
     syncTableMenuSticky(edit);
     // stabilizeLayout (window and content resize) re-fits the field when the width changes.
     edit.resizeTextarea = resizeInput;

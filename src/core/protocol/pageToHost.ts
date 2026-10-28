@@ -219,7 +219,7 @@ const stateMessage = (type: PageStateType, payload: MessageValidator = () => tru
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-058
   // Back / Next of toolbar row 2: the host walks the panel's navigation history.
   previewHistoryGo: (message) => isOneOf(message.direction, ["back", "forward"] as const),
-  // A view preference of toolbar row 2 (zoom, width mode, TOC, incoming changes, collapsed toolbar).
+  // A view preference of the toolbar (zoom, width mode, TOC, incoming changes, collapsed toolbar).
   previewViewPreferenceChanged: (message) => typeof message.preference === "string"
     && Object.hasOwn(VIEW_PREFERENCE_VALIDATORS, message.preference)
     && VIEW_PREFERENCE_VALIDATORS[message.preference](message.value),

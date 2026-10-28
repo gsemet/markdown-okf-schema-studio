@@ -58,6 +58,6 @@ The root never carries a data-sphinx-preview-toolbar attribute.
 - THEN the attribute is expanded at start, collapsed after the first press and expanded after the second
 
 ### Verification notes
-- Method: test/page/runtimePageControls.test.ts (unit test P8: the collapse button hides rows 2-3, label and aria-expanded after a click, the root attribute and the assertion that the root never matches the toolbar selector; scenarios Collapse then expand, Button and root attribute per state, At start and after each press).
+- Method: test/page/runtimePageControls.test.ts (unit test P8: the collapse button hides rows 2 to 5, label and aria-expanded after a click, the root attribute and the assertion that the root never matches the toolbar selector; scenarios Collapse then expand, Button and root attribute per state, At start and after each press).
 - Method: test/visual/capture_layout_checks.py (check_toolbar_collapse on toolbar-navigation/v07, v09, v11, v13, v15, v17, v19 and v21: Tab order, height shrinks, the toolbar does not move, expanding restores it, aria-expanded true or false; scenarios Collapse then expand, Keyboard order when collapsed, Button and root attribute per state).
 - Criteria: rows.hidden follows the state; the collapsed Tab order is the main row plus Show view controls; the toolbar top and right do not change; aria-expanded and the three texts follow the collapsed flag; the root attribute equals collapsed or expanded and the root has no data-sphinx-preview-toolbar attribute.

@@ -48,6 +48,40 @@
   test/core/frontmatter/propertiesTable.test.ts, test/page/modules/incomingChanges.test.ts and the
   visual scenarios review-annotations/v27 and v28.
 
+## 2026-10-28 (five-row floating toolbar)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-001 and StRS-MDOKFSTUDIO-TOOLBAR-001 (updated, CR 153): the floating
+  toolbar has five rows of at most three buttons (Refresh, Edit, collapse; Anchor, Back, Next;
+  Theme, Zoom out, Zoom in; Width, Table of contents; Fold, Diff, Comments). It is 102 px wide
+  instead of 198 px, and never wider than 134 px, so it no longer covers the column handle strip
+  of a table under the first heading in the 1400x900 integration window (boundary scenario,
+  checked by test/integration/tableMoves.ts and the width check of the visual layout checks).
+- SwRS-MDOKFSTUDIO-TABLE-064 (updated): a table bar that opens under the preview controls at the
+  top of the page gives up the width they cover, so its buttons wrap left of them (the taller
+  toolbar covered the Delete selected column button of a table under the first heading).
+- SwRS-MDOKFSTUDIO-MYST-081 (updated): the warning banner reserve is the three-button width in both
+  toolbar states (124 px). SwRS-MDOKFSTUDIO-LIFE-049 (updated): the pending overlay sits 192 px
+  from the top under the expanded toolbar.
+- SwRS-MDOKFSTUDIO-TOOLBAR-005, SwRS-MDOKFSTUDIO-TOOLBAR-007, SwRS-MDOKFSTUDIO-LIFE-170,
+  SwRS-MDOKFSTUDIO-TRUST-001, SwRS-MDOKFSTUDIO-THEME-038, SwRS-MDOKFSTUDIO-LAYOUT-020,
+  StRS-MDOKFSTUDIO-THEME-011, StRS-MDOKFSTUDIO-LAYOUT-003 and StRS-MDOKFSTUDIO-LAYOUT-006
+  (updated, wording): the Fold button is on row 5, Zoom on row 3, Width on row 4, the collapse
+  button hides rows 2 to 5; the read-only toolbar keeps the same five rows with 14 buttons.
+- SwRS-MDOKFSTUDIO-TABLE-007 and SwRS-MDOKFSTUDIO-TABLE-002: the scenario rows "the floating
+  toolbar lets a table drag through" go with their CSS rule; the narrow toolbar keeps the handle
+  strip clear instead (TABLE-007 verification note: the strip is not under the toolbar).
+- SwRS-MDOKFSTUDIO-PALETTE-021 (fix to the specified behaviour, verification note): a code block
+  taller than the pane, opened scrolled, whose bar sticks under the band (`data-sphinx-palette-top`)
+  is no longer revealed by the anchor pass, which scrolled the page up to the reading offset
+  (src/page/features/scrollCore.ts). A frame that grows taller than the pane after it opened now
+  gives back the distance reserved at open for its stuck bar, so the bar stays attached to the
+  frame; at the top of the page the bar's reserve is no longer capped at one bar height, so the
+  bar stays above the frame under the taller toolbar (visual palette-slash/v04 and v28;
+  src/page/features/editorChrome.ts).
+- Approval: the owner (`gaetan@xeberon.net`) approved changing the toolbar requirements for this
+  layout on 2026-10-28. None of the requirements changed above is `approved` (all are `proposed`,
+  SwRS-MDOKFSTUDIO-TOOLBAR-005 is `draft`), so no `approved_by` / `approved_on` field changes.
+
 ## 2026-10-28 (lifecycle meanings, owners and approval locks)
 
 - Moved every `draft` requirement to `proposed` (466 StRS and SwRS): each one is implemented

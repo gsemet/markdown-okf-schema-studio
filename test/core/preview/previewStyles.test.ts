@@ -482,22 +482,37 @@ test("floating preview toolbar supports forced dark and white palettes", () => {
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
 // @tests_req SwRS-MDOKFSTUDIO-TRUST-001
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-054
-test("preview toolbar has three rows: actions with the collapse button, navigation, view options", () => {
+test("preview toolbar has five rows: actions with the collapse button, navigation, appearance, layout, content", () => {
   const toolbar = renderPreviewToolbar();
   assert.match(toolbar, /role="toolbar" aria-label="Preview controls"/u);
   assert.equal((toolbar.match(/<button\b/gu) ?? []).length, 14);
   const [mainRow, rest] = toolbar.split('<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">');
-  const [viewRow, optionsRow] = rest.split('<div data-sphinx-preview-toolbar-row="options">');
+  const [navigationRow, afterNavigation] = rest.split('<div data-sphinx-preview-toolbar-row="appearance">');
+  const [appearanceRow, afterAppearance] = afterNavigation.split('<div data-sphinx-preview-toolbar-row="layout">');
+  const [layoutRow, contentRow] = afterAppearance.split('<div data-sphinx-preview-toolbar-row="content">');
+  const count = (row: string): number => (row.match(/<button\b/gu) ?? []).length;
   assert.match(mainRow, /data-sphinx-preview-toolbar-row="main"/u);
-  assert.match(mainRow, /data-sphinx-preview-refresh[\s\S]*data-sphinx-preview-anchor[\s\S]*data-sphinx-preview-edit-toggle[\s\S]*data-sphinx-preview-toolbar-collapse/u);
-  assert.equal((mainRow.match(/<button\b/gu) ?? []).length, 4);
+  assert.match(mainRow, /data-sphinx-preview-refresh[\s\S]*data-sphinx-preview-edit-toggle[\s\S]*data-sphinx-preview-toolbar-collapse/u);
+  assert.equal(count(mainRow), 3);
   assert.match(mainRow, /data-sphinx-preview-toolbar-collapse[^>]*aria-expanded="true"[^>]*aria-controls="sphinx-preview-toolbar-more"[^>]*aria-label="Hide view controls"[^>]*title="Hide view controls"/u);
-  assert.match(viewRow, /^<div data-sphinx-preview-toolbar-row="view">/u);
-  assert.equal((viewRow.match(/<button\b/gu) ?? []).length, 4);
-  assert.match(viewRow, /data-sphinx-preview-back[\s\S]*data-sphinx-preview-next[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in/u);
-  assert.equal((optionsRow.match(/<button\b/gu) ?? []).length, 6);
-  assert.match(optionsRow, /data-sphinx-preview-theme-toggle[\s\S]*data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-fold-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
-  assert.match(optionsRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><button[^>]*data-sphinx-preview-comments-toggle aria-pressed="true"[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
+  assert.match(navigationRow, /^<div data-sphinx-preview-toolbar-row="navigation">/u);
+  assert.equal(count(navigationRow), 3);
+  assert.match(navigationRow, /data-sphinx-preview-anchor[\s\S]*data-sphinx-preview-back[\s\S]*data-sphinx-preview-next/u);
+  assert.equal(count(appearanceRow), 3);
+  assert.match(appearanceRow, /data-sphinx-preview-theme-toggle[\s\S]*data-sphinx-preview-zoom-out[\s\S]*data-sphinx-preview-zoom-in/u);
+  assert.equal(count(layoutRow), 2);
+  assert.match(layoutRow, /data-sphinx-preview-width-toggle[\s\S]*data-sphinx-preview-toc-toggle aria-pressed="false"[^>]*><svg[\s\S]*<\/svg><\/button><\/div>$/u);
+  assert.equal(count(contentRow), 3);
+  assert.match(contentRow, /^<button[^>]*data-sphinx-preview-fold-toggle aria-pressed="false"[\s\S]*data-sphinx-preview-diff-toggle aria-pressed="true"/u);
+  assert.match(contentRow, /data-sphinx-preview-diff-toggle[^>]*><svg[\s\S]*<\/svg><\/button><button[^>]*data-sphinx-preview-comments-toggle aria-pressed="true"[^>]*><svg[\s\S]*<\/svg><\/button><\/div><\/div><\/div>$/u);
+  // No row holds more than three buttons: the toolbar stays three buttons wide.
+  for (const row of [mainRow, navigationRow, appearanceRow, layoutRow, contentRow]) assert.ok(count(row) <= 3);
+  // Tab order follows the rows, left to right and top to bottom.
+  const order = [...toolbar.matchAll(/<button type="button" data-sphinx-preview-([a-z-]+)/gu)].map((match) => match[1]);
+  assert.deepEqual(order, [
+    "refresh", "edit-toggle", "toolbar-collapse", "anchor", "back", "next", "theme-toggle", "zoom-out", "zoom-in",
+    "width-toggle", "toc-toggle", "fold-toggle", "diff-toggle", "comments-toggle",
+  ]);
   // Read-only previews: the Edit button stays, greyed (aria-disabled) with the reason as tooltip.
   const readOnly = renderPreviewToolbar(false);
   assert.equal((readOnly.match(/<button\b/gu) ?? []).length, 14);
@@ -876,8 +891,17 @@ test("T08: zoom scales the content font size and the column width together", () 
     /--sphinx-preview-column-width: calc\(var\(--sphinx-preview-content-max-width\) \* var\(--sphinx-preview-zoom, 1\)\);/u,
   );
   assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-toolbar-row\]\s*\{[^}]*display: flex;/u);
-  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 128px;/u);
+  assert.match(PREVIEW_THEME_CSS, /\[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 192px;/u);
   assert.match(PREVIEW_THEME_CSS, /html\[data-sphinx-preview-toolbar-state="collapsed"\] \[data-sphinx-preview-pending-overlay\]\s*\{[^}]*inset-block-start: 62px;/u);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-081
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
+test("the warning banner keeps clear of the three-button-wide toolbar, expanded or collapsed", () => {
+  assert.match(PREVIEW_THEME_CSS,
+    /\[data-sphinx-preview-warning-banner\]\s*\{[^}]*--sphinx-preview-warning-banner-reserve: calc\(3 \* 30px \+ 2 \* 2px \+ 8px \+ 14px \+ 8px\);/u);
+  // The collapsed toolbar is as wide as the expanded one: no second reserve.
+  assert.doesNotMatch(PREVIEW_THEME_CSS, /toolbar-state="collapsed"\] \[data-sphinx-preview-warning-banner\]/u);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-LAYOUT-022
