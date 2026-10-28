@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-048
 - SwRS-MDOKFSTUDIO-TABLE-055
 - SwRS-MDOKFSTUDIO-TABLE-064
+- SwRS-MDOKFSTUDIO-TABLE-118
 default_owner_email: gaetan@xeberon.net
 ---
 

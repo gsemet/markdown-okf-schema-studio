@@ -1270,3 +1270,48 @@ test("a click on a cell of a table the cell editor cannot read opens the raw edi
   assert.equal(cell.childElements.some((child) => child.getAttribute("data-sphinx-table-cell-content") === "true"),
     false, "the cell has its rendered content back");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-118
+test("a table cell editor that opens after the find bar took the focus leaves it in the find field", () => {
+  const harness = createRuntimeHarness({ trackFocus: true });
+  const table = new RuntimeElement({
+    "data-sphinx-source-end-line": "23",
+    "data-sphinx-source-file": "/workspace/active.md",
+    "data-sphinx-source-line": "20",
+  }, harness.windowState, 100, 100, "table");
+  const row = new RuntimeElement({}, harness.windowState, 100, 30, "tr");
+  row.rowIndex = 1;
+  const cell = new RuntimeElement({}, harness.windowState, 100, 30, "td");
+  cell.cellIndex = 1;
+  table.appendChild(row);
+  row.appendChild(cell);
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", {
+    target: cell,
+    preventDefault: () => undefined,
+    stopPropagation: () => undefined,
+  });
+  const editId = harness.messages.at(-1)?.editId;
+  assert.equal(harness.messages.at(-1)?.type, "previewEditOpen");
+  // Cmd/Ctrl+F before the source came back: the find bar opens and its field takes the focus.
+  harness.dispatchMessage({ type: "previewFindCommand", documentId: "file:///active.md", revision: 7, requestId: 11, command: "open" });
+  const findInput = harness.createdElements.find((element) => element.getAttribute("data-find-input") !== null);
+  assert.ok(findInput, "the find bar is built");
+  assert.equal(harness.document.activeElement, findInput);
+  harness.dispatchMessage({
+    type: "previewEditSource", documentId: "file:///active.md", revision: 7, requestId: 11, editId,
+    originalText: "| A | B |\n| --- | --- |\n| x | y |\n",
+  });
+  const input = harness.createdElements.filter((element) =>
+    element.getAttribute("aria-label") === "Markdown table cell").at(-1);
+  assert.ok(input, "the cell editor is built");
+  assert.equal(harness.document.activeElement, findInput, "the find field keeps the focus");
+  assert.equal(input.focusOptions, undefined, "the cell input was not focused");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-118
+test("a table cell editor that opens with the focus still on the page takes the focus", () => {
+  const harness = createRuntimeHarness({ trackFocus: true });
+  const input = openTableCellEditor(harness);
+  assert.equal(harness.document.activeElement, input);
+});

@@ -38,6 +38,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     rt.blockEditor.restoreTableCellContent(edit);
     edit.selectedCell!.removeAttribute("data-sphinx-preview-table-cell-selected");
     edit.element.remove();
+    edit.focusAtOpen = document.activeElement;
     edit.selectedCell = selectedCell;
     edit.tableRowIndex = rowIndex;
     edit.tableColumnIndex = columnIndex;
@@ -286,6 +287,7 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       button.addEventListener("click", () => {
         rememberCellValue();
         handler();
+        edit.focusAtOpen = document.activeElement;
         if (!edit.finishing) renderTableCellEditor(edit);
       });
       menu.appendChild(button);
@@ -486,9 +488,16 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
         blockEditor.saveBlockEdit();
       }
     });
-    textControls.focusTextControlAtLastContent(input, edit.initialCaretPosition);
-    editorTrace.record("cell editor focused", "line=" + edit.line + " row=" + edit.tableRowIndex
-      + " column=" + edit.tableColumnIndex + " " + traceFocus());
+    // @implements_req SwRS-MDOKFSTUDIO-TABLE-118
+    // Same guard as the block source editor (BLOCK-255): a text field outside the editor that took
+    // the focus since the editor opened (the find field) keeps it.
+    if (textControls.focusMovedToAnotherField(edit)) {
+      editorTrace.record("cell editor left unfocused", "line=" + edit.line + " " + traceFocus());
+    } else {
+      textControls.focusTextControlAtLastContent(input, edit.initialCaretPosition);
+      editorTrace.record("cell editor focused", "line=" + edit.line + " row=" + edit.tableRowIndex
+        + " column=" + edit.tableColumnIndex + " " + traceFocus());
+    }
   }
 
   return {
