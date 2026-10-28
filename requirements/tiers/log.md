@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-10-28 (find in preview: replace-all check waits for the host)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-012: the real-window replace-all check now waits for the host's answer
+  before reading the status note (it could read the transient "Replacing..."). Test only, no
+  behaviour change. Verification: test/integration/findInPreview.test.ts.
+
 ## 2026-10-28 (structural keyboard navigation)
 
 - SwRS-MDOKFSTUDIO-BLOCK-254 (new, CR 157): with edit mode on and no editor open, ArrowRight moves
