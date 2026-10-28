@@ -147,9 +147,23 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
     // a focus that goes outside the frame (or nowhere) commits.
     textarea.addEventListener("blur", (event) => {
       const next = event && event.relatedTarget as Node | null;
-      if (next && editorChrome.frameContains(edit, next)) return;
+      // The trace says where the focus went and whether the page still had it: a blur with no
+      // related target while the page lost the focus came from outside the page.
+      const traceBlur = (outcome: string): void => {
+        const tag = next ? (next as { tagName?: unknown }).tagName : undefined;
+        editorTrace.record("block editor blur", "related=" + (tag ? String(tag).toLowerCase() : "none")
+          + " " + outcome + " " + traceFocus());
+      };
+      if (next && editorChrome.frameContains(edit, next)) {
+        traceBlur("kept-in-frame");
+        return;
+      }
       // A native dialog of the host (the {doc} file picker) took the focus: not leaving.
-      if (hostRequests.isDialogOpen()) return;
+      if (hostRequests.isDialogOpen()) {
+        traceBlur("kept-for-dialog");
+        return;
+      }
+      traceBlur("commit");
       blockEditor.saveBlockEdit();
     });
     textarea.addEventListener("blur", () => edit.slashMenu?.close());

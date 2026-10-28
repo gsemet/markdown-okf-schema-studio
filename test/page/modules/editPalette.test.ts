@@ -570,6 +570,41 @@ test("T25: the dropdown acts on the live selection, not the one at opening time"
     "read at pick time: the caret is on the last line, so that line becomes the alert");
 });
 
+// CR 180: the steps of the real-window scenario (caret at the end of the line, then Warning).
+test("T25: with the caret at the end of the line, Alert then Warning changes NOTE to WARNING", () => {
+  const text = "Second paragraph.";
+  const h = openGfm(text, text.length);
+  button(h.root, "alert").dispatch("click", click);
+  assert.equal(h.textbox.value, "> [!NOTE]\n> " + text);
+  assert.equal(h.textbox.selectionStart, h.textbox.value.length, "the caret is on the quoted line, at its end");
+  options(popover(h.root)!).find((e) => e.getAttribute("data-edit-option") === "WARNING")!.dispatch("click", click);
+  assert.equal(h.textbox.value, "> [!WARNING]\n> " + text);
+  assert.equal(h.textbox.selectionStart, h.textbox.value.length, "the caret stayed at the end of the text");
+  assert.equal(h.leaves, 0, "no save");
+});
+
+test("T25: below another alert, the type list changes the new alert's head only", () => {
+  const before = "> [!TIP]\n> First alert.\n\n";
+  const h = openGfm(before + "Second paragraph.", (before + "Second paragraph.").length);
+  button(h.root, "alert").dispatch("click", click);
+  assert.equal(h.textbox.value, before + "> [!NOTE]\n> Second paragraph.", "the first alert is untouched");
+  options(popover(h.root)!).find((e) => e.getAttribute("data-edit-option") === "WARNING")!.dispatch("click", click);
+  assert.equal(h.textbox.value, before + "> [!WARNING]\n> Second paragraph.");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-036
+test("T25: pressing a type option is cancelled, so the text box keeps the focus and nothing saves", () => {
+  const h = openGfm("x", 1);
+  button(h.root, "alert").dispatch("click", click);
+  const warning = options(popover(h.root)!).find((e) => e.getAttribute("data-edit-option") === "WARNING")!;
+  let prevented = false;
+  warning.dispatch("mousedown", { preventDefault: () => { prevented = true; } });
+  assert.equal(prevented, true, "the press does not move the focus out of the text box");
+  warning.dispatch("click", click);
+  assert.equal(h.textbox.value, "> [!WARNING]\n> x");
+  assert.equal(h.leaves, 0, "choosing a type never commits the editor");
+});
+
 test("T25: Escape dismisses the dropdown, keeps NOTE and puts the focus in the text box", () => {
   const h = openGfm("x", 1);
   button(h.root, "alert").dispatch("click", click);

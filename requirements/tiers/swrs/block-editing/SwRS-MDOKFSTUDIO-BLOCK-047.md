@@ -33,6 +33,7 @@ tested_in_files:
 - test/page/modules/hostRequests.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockMoves.test.ts
+- test/page/runtimeEditPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
