@@ -323,10 +323,15 @@ def test_pages_dry_run_needs_no_tag_and_never_deploys() -> None:
 def test_pages_build_downloads_reports_when_a_run_was_found_and_runs_the_suite_otherwise() -> None:
     found = "steps.reports.outputs.run_id != ''"
     missing = "steps.reports.outputs.run_id == ''"
-    download = _pages_step("Download the end-to-end reports")
-    assert download["if"] == found
-    for artifact in ("e2e-visual", "e2e-integration", "studio-reports"):
-        assert artifact in download["run"]
+    stages = _pages_step("Download the end-to-end reports (stages)")
+    merged = _pages_step("Download the end-to-end reports (merged)")
+    steps = _pages()["jobs"]["build-site"]["steps"]
+    assert steps.index(stages) < steps.index(merged), "studio-reports must be downloaded last"
+    for download in (stages, merged):
+        assert download["if"] == found
+        assert download["with"]["run-id"] == "${{ steps.reports.outputs.run_id }}"
+    assert stages["with"]["pattern"] == "e2e-*" and stages["with"]["merge-multiple"] is True
+    assert merged["with"]["name"] == "studio-reports"
     assert _pages_step("Build Pages site from the downloaded reports")["run"] == "just site-assemble"
     assert _pages_step("Build Pages site from the downloaded reports")["if"] == found
     fallback = _pages_step("Build Pages site by running the suite")

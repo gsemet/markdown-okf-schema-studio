@@ -91,15 +91,25 @@ jobs:
           fi
           echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
           echo "Reports from run: ${run_id:-none (the suite runs below)}"
-      - name: Download the end-to-end reports
+      # The merged studio-reports artifact repeats files of the two stage artifacts: download it
+      # last so that it wins.
+      - name: Download the end-to-end reports (stages)
         if: steps.reports.outputs.run_id != ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p out/reports
-          for name in e2e-visual e2e-integration studio-reports; do
-            gh run download "${{ steps.reports.outputs.run_id }}" --repo "$GITHUB_REPOSITORY" --name "$name" --dir out/reports
-          done
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: e2e-*
+          path: out/reports/
+          merge-multiple: true
+          run-id: ${{ steps.reports.outputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download the end-to-end reports (merged)
+        if: steps.reports.outputs.run_id != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: studio-reports
+          path: out/reports/
+          run-id: ${{ steps.reports.outputs.run_id }}
+          github-token: ${{ github.token }}
       - name: Build Pages site from the downloaded reports
         if: steps.reports.outputs.run_id != ''
         run: just site-assemble
