@@ -12,7 +12,7 @@ import {
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("reads the default palette mode of the editing section", () => {
   const sections: string[] = [];
-  for (const mode of ["strict", "gfm", "myst"]) {
+  for (const mode of ["strict", "gfm", "myst", "full"]) {
     const configuration = readEditingConfiguration({
       get<T>(section: string, _defaultValue: T): T {
         sections.push(section);
@@ -51,7 +51,7 @@ test("a fresh workspace starts the palette in GFM", () => {
 
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 test("stored choice wins: a stored palette mode is kept over the default and the setting", () => {
-  for (const mode of ["strict", "gfm", "myst"] as const) {
+  for (const mode of ["strict", "gfm", "myst", "full"] as const) {
     assert.equal(initialPaletteModeOf(mode, UNSET), mode);
     assert.equal(initialPaletteModeOf(mode, { get: <T>() => "strict" as T }), mode);
   }

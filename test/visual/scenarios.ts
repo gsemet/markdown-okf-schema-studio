@@ -174,7 +174,7 @@ export interface Scenario {
    * checked against the mode, in a paragraph editor (`palette` step) and in an insertion
    * point editor (`insert-point` step, dropped when equal to the final frame).
    */
-  paletteModeShot?: "strict" | "gfm" | "myst";
+  paletteModeShot?: "strict" | "gfm" | "myst" | "full";
   /**
    * P11: the slash command menu in a paragraph editor of this palette mode. Steps: `open` (all
    * commands), `filtered`, `nomatch` (No command row), `flip` (editor near the viewport bottom: the

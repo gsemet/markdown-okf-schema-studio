@@ -452,7 +452,7 @@ export function createRuntimeHarness(configuration: Partial<{
   frontmatterRowAttributes: Record<string, string>;
   pairedTextEditor: boolean;
   initialEditMode: boolean;
-  initialPaletteMode: "strict" | "gfm" | "myst";
+  initialPaletteMode: "strict" | "gfm" | "myst" | "full";
   initialViewPreferences: ViewPreferences;
   commentsEnabled: boolean;
   /** The reason a read-only page gives for its disabled checkboxes. */

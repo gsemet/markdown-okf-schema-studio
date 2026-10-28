@@ -77,6 +77,17 @@ no network, and it works in Restricted Mode.
 
 ![A Mermaid flowchart and a PlantUML sequence diagram rendered inline](images/readme/showcase-diagrams-cream.png)
 
+### Charts, no executable
+
+`vega-lite` and `vega` fences are drawn as charts in the preview, themed like the page, from inline
+data or a CSV file next to the document. The runtime is bundled and loads only on a page that has a
+chart; nothing runs outside VS Code and nothing is fetched. The new **Full** palette mode adds the
+Vega-Lite chart and Vega chart commands (`/chart`, `/vega`).
+
+| Cream | Dark |
+| --- | --- |
+| ![A Vega-Lite bar chart and a Vega line chart on the cream page](images/readme/charts-cream.png) | ![The same charts on the dark page](images/readme/charts-dark.png) |
+
 ### Themes
 
 Cream, a warm low-glare paper palette, is the default; Dark, White and the current VS Code theme
@@ -88,7 +99,7 @@ are one button away.
 
 ### And more
 
-- A Notion-style slash menu and an edition palette (Strict, GFM or MyST buttons).
+- A Notion-style slash menu and an edition palette (Strict, GFM, MyST or Full buttons).
 - Block selection, multi-block copy, cut, paste and move.
 - Rich paste from Google Docs, Word or a web page, converted to Markdown.
 - Pasting a URL makes a link (over selected text), an autolink or, for an image address, an image.
@@ -128,7 +139,7 @@ source and preview, select the book icon in the editor title bar.
   [slash menu](docs/user/slash-menu.md)
 - [Themes and motion](docs/user/themes-and-motion.md) and
   [wide tables](docs/user/wide-tables.md)
-- [PlantUML](docs/user/plantuml.md) and [review comments](docs/user/review-comments.md)
+- [PlantUML](docs/user/plantuml.md), [charts](docs/user/charts.md) and [review comments](docs/user/review-comments.md)
 - [OKF and linked-file annotations](docs/user/okf.md) and [Sphinx projects](docs/user/sphinx.md)
 - [Settings](docs/user/settings.md) and [comparison](docs/user/comparison.md)
 - [CONTRIBUTING.md](CONTRIBUTING.md): development setup, validation, packaging and release evidence.

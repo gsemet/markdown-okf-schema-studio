@@ -48,7 +48,7 @@ export interface PreviewRuntimeContext extends ScrollContext, Partial<PreviewBoo
   /** The workspace-wide edit mode choice, used when the webview has no saved state. */
   initialEditMode?: boolean;
   /** The workspace's palette mode (stored choice, else the setting); saved state wins on load. */
-  initialPaletteMode?: "strict" | "gfm" | "myst";
+  initialPaletteMode?: "strict" | "gfm" | "myst" | "full";
   /** Fractional source line to show at the preview reading line on load (see anchorPolicy). */
   initialAnchor?: number;
   /** Set after an inline save: the edited element's source line and viewport top (rule R7). */

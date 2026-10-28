@@ -37,6 +37,7 @@ test("extension icon is a 256 pixel PNG and the Sphinx favicon matches the share
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-032
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-001
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-156
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-001
 test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as {
     name: string;
@@ -199,12 +200,12 @@ test("contributes only opt-in Markdown OKF-Schema Studio commands", () => {
   assert.equal(paletteMode.type, "string");
   assert.equal(paletteMode.default, "gfm");
   assert.equal(paletteMode.order, 40);
-  assert.deepEqual(paletteMode.enum, ["strict", "gfm", "myst"]);
+  assert.deepEqual(paletteMode.enum, ["strict", "gfm", "myst", "full"]);
   assert.equal(paletteMode.enumDescriptions.length, paletteMode.enum.length);
   for (const description of paletteMode.enumDescriptions) {
     assert.ok(description.trim().length > 0);
   }
-  assert.match(paletteMode.markdownDescription, /\*\*strict\*\*.*\*\*gfm\*\*.*\*\*myst\*\*/u);
+  assert.match(paletteMode.markdownDescription, /\*\*strict\*\*.*\*\*gfm\*\*.*\*\*myst\*\*.*\*\*full\*\*/u);
   assert.match(paletteMode.markdownDescription, /\*\*gfm\*\* \(the default\)/u);
   assert.equal(
     properties["markdown.preview.scrollPreviewWithEditor"],
@@ -281,6 +282,23 @@ test("the built-in PlantUML engine ships pinned and the JAR is an explicit opt-i
   assert.match(esbuild, /out\/bundle\/plantumlPreview\.js/u);
   const ignore = fs.readFileSync(path.join(extensionRoot, ".vscodeignore"), "utf8").split(/\r?\n/u);
   assert.ok(!ignore.some((line) => /^out\/bundle|^out\/\*\*/u.test(line.trim())), "the webview bundles must ship in the VSIX");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-124
+test("CR 149: the chart runtime ships pinned in its own bundle and evaluates expressions with the interpreter", () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")) as { dependencies: Record<string, string> };
+  for (const name of ["vega", "vega-lite", "vega-interpreter"]) {
+    assert.match(packageJson.dependencies[name] ?? "", /^\d+\.\d+\.\d+$/u, `${name} is an exact pin`);
+  }
+  const esbuild = fs.readFileSync(path.join(extensionRoot, "esbuild.mjs"), "utf8");
+  assert.match(esbuild, /src\/page\/modules\/vegaPreview\.ts/u);
+  assert.match(esbuild, /out\/bundle\/vegaPreview\.js/u);
+  const chart = fs.readFileSync(path.join(extensionRoot, "src/page/modules/vegaChart.ts"), "utf8");
+  assert.match(chart, /ast: true/u, "the spec is parsed to an expression AST");
+  assert.match(chart, /expr: expressionInterpreter/u, "the view evaluates it with vega-interpreter");
+  assert.doesNotMatch(chart, /\beval\(|new Function/u);
+  const preview = fs.readFileSync(path.join(extensionRoot, "src/page/modules/vegaPreview.ts"), "utf8");
+  assert.doesNotMatch(preview, /\bfetch\(|XMLHttpRequest|import\(/u, "the chart runtime loads nothing by itself");
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-003

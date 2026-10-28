@@ -22,7 +22,7 @@ test("the registry lists every palette action once, in display order", () => {
     "bulletList", "numberedList", "quote", "rule", "toc", "table", "emoji", "todo", "thread",
     "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
-    "tableCaption", "listTable", "pipeTable", "figure", "roleKbd",
+    "tableCaption", "listTable", "pipeTable", "figure", "roleKbd", "vegaLite", "vega",
   ]);
 });
 
@@ -48,4 +48,19 @@ test("a popover descriptor carries what its popover shows", () => {
   }
   assert.deepEqual(PALETTE_ACTIONS.alert.options.map((option) => option.value), ALERT_TYPES);
   assert.deepEqual(PALETTE_ACTIONS.admonition.options.map((option) => option.value), [...ADMONITION_TYPES, "custom"]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
+test("the two chart actions are listed for Full only, in the Full group, with the chart slash names", () => {
+  for (const id of ["vegaLite", "vega"] as const) {
+    const descriptor = PALETTE_ACTIONS[id] as PaletteActionDescriptor;
+    assert.deepEqual(descriptor.modes, ["full"], id);
+    assert.equal(descriptor.group, "full", id);
+    assert.deepEqual(descriptor.scopes, ["block"], id);
+    assert.ok(descriptor.slash?.aliases?.includes("chart"), id);
+  }
+  assert.equal(PALETTE_ACTIONS.vegaLite.label, "Vega-Lite chart");
+  assert.equal(PALETTE_ACTIONS.vega.label, "Vega chart");
+  assert.deepEqual([...PALETTE_MODES], ["strict", "gfm", "myst", "full"]);
+  assert.ok(PALETTE_ACTION_IDS.every((id) => id === "vegaLite" || id === "vega" || !(PALETTE_ACTIONS[id] as PaletteActionDescriptor).modes.includes("full")));
 });

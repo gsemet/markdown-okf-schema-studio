@@ -351,6 +351,67 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   white-space: pre-wrap;
 }
 
+/* Charts (Vega-Lite, Vega) are drawn like Mermaid diagrams: one contained picture, the source and
+   the error in place. */
+#sphinx-myst-preview-content .myst-vega-diagram {
+  min-height: 1.5em;
+  overflow-x: auto;
+  font-family: var(--studio-editor-font-family, monospace);
+  text-align: start;
+  white-space: pre-wrap;
+}
+
+#sphinx-myst-preview-content .myst-vega-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+#sphinx-myst-preview-content details.myst-vega-source {
+  margin-top: 0.75em;
+  text-align: start;
+}
+
+#sphinx-myst-preview-content .myst-vega-source summary {
+  color: var(--studio-descriptionForeground, inherit);
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+#sphinx-myst-preview-content .myst-vega-error {
+  color: var(--studio-errorForeground, #f14c4c);
+  text-align: start;
+}
+
+#sphinx-myst-preview-content .myst-vega-error > p {
+  margin: 0 0 0.25em;
+  font-style: italic;
+}
+
+#sphinx-myst-preview-content .myst-vega-error-details {
+  margin-bottom: 0.5em;
+  font-size: 0.9em;
+}
+
+#sphinx-myst-preview-content .myst-vega-error-details summary {
+  color: var(--studio-descriptionForeground, inherit);
+  cursor: pointer;
+}
+
+#sphinx-myst-preview-content .myst-vega-error-details pre {
+  margin: 0.4em 0 0;
+  padding: 0.5em 0.75em;
+  overflow-x: auto;
+  border: 1px solid var(--sphinx-preview-border);
+  border-radius: 4px;
+  background: var(--studio-textCodeBlock-background);
+  color: var(--studio-editor-foreground);
+  font-family: var(--studio-editor-font-family, monospace);
+  font-style: normal;
+  white-space: pre-wrap;
+}
+
 #sphinx-myst-preview-content .myst-plantuml-diagram {
   min-height: 1.5em;
   overflow-x: auto;

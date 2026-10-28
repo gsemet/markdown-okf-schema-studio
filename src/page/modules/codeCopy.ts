@@ -92,7 +92,7 @@ export function installCodeCopy(
     const content = document.getElementById(contentId);
     if (!pre || !content || !content.contains(pre)) return undefined;
     if (pre.getAttribute("data-sphinx-preview-editing") === "true"
-      || pre.closest(".myst-mermaid-figure, .myst-plantuml-figure, [data-sphinx-preview-block-editor]")) {
+      || pre.closest(".myst-mermaid-figure, .myst-plantuml-figure, .myst-vega-figure, [data-sphinx-preview-block-editor]")) {
       return undefined;
     }
     return pre;

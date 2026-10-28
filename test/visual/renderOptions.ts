@@ -27,7 +27,7 @@ export interface ScenarioRenderOptions {
   /** Content width in px (`maxContentWidth` setting). Default: the product default. */
   readonly maxContentWidth?: number;
   /** Initial palette mode (the workspace choice). Default: the runtime default. */
-  readonly paletteMode?: "strict" | "gfm" | "myst";
+  readonly paletteMode?: "strict" | "gfm" | "myst" | "full";
   /** Initial zoom in percent (70 to 200, the stored view preference). Default 100. */
   readonly zoom?: number;
   /** `false`: the Diff toggle starts off (the `incomingChanges` view preference). Default on. */

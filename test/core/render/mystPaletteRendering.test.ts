@@ -125,6 +125,17 @@ test("a Mermaid fence inserted by the edition palette renders a diagram containe
   assert.match(textContent(diagram), /flowchart TD/u);
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
+test("the Vega-Lite and Vega charts inserted by the edition palette render as chart figures", async () => {
+  for (const [id, kind] of [["vegaLite", "vega-lite"], ["vega", "vega"]] as const) {
+    const { html } = await renderPalette(paletteInsert(id, "Intro", 5));
+    const chart = findElement(html, (element) => hasClass(element, "myst-vega-diagram"));
+    assert.ok(chart, `${id}: no chart node`);
+    assert.equal(attribute(chart, "data-myst-chart-kind"), kind);
+    assert.match(textContent(chart), /Chart title/u);
+  }
+});
+
 test("a column aligned by the edition palette renders with that alignment only", async () => {
   const source = "| Name | Qty |\n| --- | --- |\n| a | 1 |";
   const at = source.indexOf("Qty");

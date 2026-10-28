@@ -272,7 +272,7 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       getEntries: () => palette.menuEntries(),
       run: (key, range) => palette.runMenuEntry(key, range),
       getCaretRect: () => caretRectOf(document, window, textarea),
-      preferGroup: () => (state.paletteMode === "myst" ? "myst" : undefined),
+      preferGroup: () => (state.paletteMode === "myst" ? "myst" : state.paletteMode === "full" ? "full" : undefined),
     });
     editorChrome.placePaletteAboveFrame(edit, palette.element);
     editorChrome.syncPaletteSticky(edit);

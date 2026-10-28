@@ -103,6 +103,14 @@ function injectMermaidRenderer(html: string, rendererUri: string, nonce: string)
   return `${html}${tag}`;
 }
 
+function injectChartRenderer(html: string, rendererUri: string, nonce: string): string {
+  const tag = `<script nonce="${escapeHtml(nonce)}" src="${escapeHtml(rendererUri)}" defer data-sphinx-preview-vega></script>`;
+  if (/<\/body>/iu.test(html)) {
+    return html.replace(/<\/body>/iu, () => `${tag}</body>`);
+  }
+  return `${html}${tag}`;
+}
+
 function injectPlantUmlRenderer(html: string, rendererUri: string, nonce: string): string {
   const tag = `<script nonce="${escapeHtml(nonce)}" src="${escapeHtml(rendererUri)}" defer data-sphinx-preview-plantuml></script>`;
   if (/<\/body>/iu.test(html)) {
@@ -249,12 +257,19 @@ export function buildPreviewWebviewHtml(
     && rewritten.html.includes('class="myst-plantuml-figure"')
     ? assets.bundleUri("plantumlPreview.js")
     : undefined;
+  // @implements_req SwRS-MDOKFSTUDIO-DIAG-124
+  const chartRendererUri = rewritten.html.includes('class="myst-vega-figure"')
+    ? assets.bundleUri("vegaPreview.js")
+    : undefined;
   const withMermaid = mermaidRendererUri
     ? injectMermaidRenderer(withMath, mermaidRendererUri, nonce)
     : withMath;
-  const withMermaidRenderer = plantUmlRendererUri
-    ? injectPlantUmlRenderer(withMermaid, plantUmlRendererUri, nonce)
+  const withChart = chartRendererUri
+    ? injectChartRenderer(withMermaid, chartRendererUri, nonce)
     : withMermaid;
+  const withMermaidRenderer = plantUmlRendererUri
+    ? injectPlantUmlRenderer(withChart, plantUmlRendererUri, nonce)
+    : withChart;
   const runtimeUri = bundleUri("preview.js");
   const html = !scrollContext
     ? withMermaidRenderer

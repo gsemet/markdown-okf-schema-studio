@@ -8,6 +8,15 @@
 import * as path from "node:path";
 
 import { matchFrontmatterBlock } from "../frontmatter/okfFrontmatter";
+import {
+  type ChartFiles,
+  chartDataUrls,
+  chartKindOf,
+  describeChartFileRefusal,
+  isRemoteDataUrl,
+  MAX_CHART_FILES,
+  parseChartSource,
+} from "./chartData";
 import { type CheckboxMarker, prepareCheckboxMarkers } from "./checkboxMarkers";
 import { convertCommentMarkers } from "./commentMarkers";
 import {
@@ -187,6 +196,55 @@ function resolvePlantUmlFile(
   node.data = { ...node.data, plantUmlFile: request, plantUmlBase: read.path };
 }
 
+// @implements_req SwRS-MDOKFSTUDIO-DIAG-122
+/**
+ * Reads the relative data files of a Vega-Lite or Vega chart under the rules of `{include}`,
+ * charged to the include budget and recorded as dependencies. The texts (and the reason of each
+ * refusal) are kept for `normalizeNode`; a remote url is left for the page to refuse.
+ */
+function resolveChartFiles(
+  node: MystNode,
+  sourcePath: string,
+  context: MystRenderContext,
+  diagnostics: RenderDiagnostic[],
+  dependencies: Set<string>,
+  budget: IncludeBudget,
+): void {
+  const parsed = parseChartSource(node.value ?? "");
+  if (!parsed.ok) return;
+  const line = node.position?.start?.line;
+  const chart: ChartFiles = { files: {}, errors: {} };
+  for (const url of chartDataUrls(parsed.spec).filter((candidate) => !isRemoteDataUrl(candidate)).slice(0, MAX_CHART_FILES)) {
+    if (budget.exhausted) {
+      chart.errors[url] = `Chart data file ${url} was not read: the include budget of this render is exhausted.`;
+      continue;
+    }
+    const read: BoundedTextRead = context.readDiagramFile
+      ? context.readDiagramFile(url, sourcePath)
+      : { ok: false, refusal: "missing-resource" };
+    if (!read.ok) {
+      if (read.candidate) dependencies.add(read.candidate);
+      chart.errors[url] = describeChartFileRefusal(url, read.refusal);
+      diagnostics.push({ message: chart.errors[url], severity: "warning", ...(line === undefined ? {} : { line }) });
+      continue;
+    }
+    dependencies.add(read.path);
+    if (
+      budget.expansions >= INCLUDE_BUDGET_MAX_EXPANSIONS
+      || budget.bytes + read.source.length > INCLUDE_BUDGET_MAX_CHARS
+    ) {
+      budget.exhausted = true;
+      diagnostics.push(includeBudgetDiagnostic(line));
+      chart.errors[url] = `Chart data file ${url} was not read: the include budget of this render is exhausted.`;
+      continue;
+    }
+    budget.expansions += 1;
+    budget.bytes += read.source.length;
+    chart.files[url] = read.source;
+  }
+  node.data = { ...node.data, chartFiles: chart };
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-CORE-012
 // @implements_req SwRS-MDOKFSTUDIO-CORE-013
 function expandIncludes(
@@ -205,6 +263,11 @@ function expandIncludes(
 
   const expandedChildren: MystNode[] = [];
   for (const child of node.children) {
+    if (chartKindOf(child)) {
+      resolveChartFiles(child, sourcePath, context, diagnostics, dependencies, budget);
+      expandedChildren.push(child);
+      continue;
+    }
     const plantUmlFile = plantUmlFileRequest(child);
     if (plantUmlFile) {
       resolvePlantUmlFile(child, plantUmlFile, sourcePath, context, diagnostics, dependencies, budget);

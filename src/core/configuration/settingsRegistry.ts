@@ -143,7 +143,7 @@ export function normalizeStickyHeadingDepth(value: unknown): number {
 }
 
 /** The palette modes, from the fewest buttons to the most (each mode adds to the previous one). */
-export const PALETTE_MODES = ["strict", "gfm", "myst"] as const;
+export const PALETTE_MODES = ["strict", "gfm", "myst", "full"] as const;
 
 /** A palette mode: which buttons the edition palette shows. */
 export type PaletteMode = (typeof PALETTE_MODES)[number];
@@ -251,9 +251,10 @@ export const EDITING_SETTINGS = {
       "Strict Markdown: only buttons for plain Markdown syntax.",
       "GitHub Flavored Markdown: the strict buttons plus the GFM ones.",
       "MyST Markdown: the GFM buttons plus the MyST ones.",
+      "Full: the MyST buttons plus the extensions of this extension (Vega-Lite and Vega charts).",
     ],
     default: "gfm",
-    markdownDescription: "Chooses which buttons the edition palette shows in a workspace that has not picked a mode yet. The select at the start of the palette changes the mode for the workspace, and the choice is remembered. **strict**: plain Markdown only. **gfm** (the default): strict plus GitHub Flavored Markdown. **myst**: GFM plus MyST. The mode only changes the buttons, never how the preview renders.",
+    markdownDescription: "Chooses which buttons the edition palette shows in a workspace that has not picked a mode yet. The select at the start of the palette changes the mode for the workspace, and the choice is remembered. **strict**: plain Markdown only. **gfm** (the default): strict plus GitHub Flavored Markdown. **myst**: GFM plus MyST. **full**: MyST plus the extension's own additions (chart commands). The mode only changes the buttons, never how the preview renders.",
     order: 40,
   }, (value) => isPaletteMode(value) ? value : "gfm"),
 };

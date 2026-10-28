@@ -304,6 +304,7 @@ test("P11: ranking puts a prefix before a word start before a subsequence", () =
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-017
 // @tests_req SwRS-MDOKFSTUDIO-PALETTE-263
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-265
 test("P11: the registry's aliases find the expected command first", () => {
   const first = (mode: EditActionMode, query: string): string | undefined => {
     const h = setup(mode);
@@ -335,6 +336,13 @@ test("P11: the registry's aliases find the expected command first", () => {
   assert.equal(first("myst", "admonition"), "admonition", "the picker itself");
   assert.equal(first("myst", "cite"), "cite");
   assert.equal(first("strict", "mermaid"), undefined, "a GFM command is not in Strict");
+  // CR 149: the chart commands belong to Full only.
+  assert.equal(first("full", "vega"), "vega");
+  assert.equal(first("full", "vega-lite"), "vegaLite");
+  const chartKeys = (() => { const h = setup("full"); return h.slash.match("chart", h.palette.menuEntries()).map((entry) => entry.key); })();
+  assert.ok(chartKeys.includes("vegaLite") && chartKeys.includes("vega"), "/chart lists both chart commands (and Mermaid, which has the alias too)");
+  assert.equal(first("myst", "vega"), undefined, "a Full command is not in MyST");
+  assert.equal(first("myst", "vega-lite"), undefined);
   assert.equal(first("strict", "zzzz"), undefined);
 });
 

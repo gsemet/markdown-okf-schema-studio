@@ -78,7 +78,7 @@ const isPinViewportTop = (value: unknown): boolean => value === undefined
 const isCommentBody = (value: unknown): boolean =>
   typeof value === "string" && value.length >= 1 && value.length <= MAX_BODY_LENGTH;
 
-const PALETTE_MODES = ["strict", "gfm", "myst"] as const;
+const PALETTE_MODES = ["strict", "gfm", "myst", "full"] as const;
 
 type PageStateType = PageStateMessageUnion["type"];
 

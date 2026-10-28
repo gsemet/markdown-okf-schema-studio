@@ -42,6 +42,19 @@ await build(lazyModuleOptions({ katexEntry: createRequire(import.meta.url).resol
 // Mermaid is an ES module with code splitting: diagram types load when a document uses them.
 await build(mermaidBundleOptions());
 
+// The chart runtime (Vega-Lite, Vega and the CSP-safe vega-interpreter) is its own bundle: the host
+// adds it only to a page that has a chart figure, like Mermaid and PlantUML. No eval, no network.
+await build({
+  entryPoints: ["src/page/modules/vegaPreview.ts"],
+  outfile: "out/bundle/vegaPreview.js",
+  bundle: true,
+  platform: "browser",
+  target: "es2020",
+  format: "iife",
+  minify: true,
+  logLevel: "info",
+});
+
 // The PlantUML engine (@plantuml/core, MIT) needs a DOM, so it runs in the webview. Smetana layout
 // only: viz-global.js (Graphviz as WebAssembly) would need 'wasm-unsafe-eval' in the CSP.
 await build({
