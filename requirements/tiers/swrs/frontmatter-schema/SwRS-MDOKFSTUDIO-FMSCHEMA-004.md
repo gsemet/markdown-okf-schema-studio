@@ -27,6 +27,9 @@ tested_in_files:
 - test/session/diagReq.settings.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-045
+- SwRS-MDOKFSTUDIO-FMSCHEMA-075
 ---
 
 ## The propertiesTable setting hides the table while the body renders

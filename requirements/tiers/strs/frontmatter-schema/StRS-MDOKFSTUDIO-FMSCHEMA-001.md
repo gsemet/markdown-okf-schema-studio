@@ -40,6 +40,11 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-045
 - SwRS-MDOKFSTUDIO-FMSCHEMA-075
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-FMSCHEMA-003
+- StRS-MDOKFSTUDIO-FMSCHEMA-004
+- StRS-MDOKFSTUDIO-FMSCHEMA-005
+- StRS-MDOKFSTUDIO-FMSCHEMA-013
 ---
 
 ## Frontmatter appears as a readable, configurable properties table

@@ -33,6 +33,10 @@ tested_in_files:
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-012
+- SwRS-MDOKFSTUDIO-FMSCHEMA-013
+- SwRS-MDOKFSTUDIO-FMSCHEMA-088
 ---
 
 ## Without a schema the table lists the keys in source order, escaped

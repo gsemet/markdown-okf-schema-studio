@@ -45,6 +45,9 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CODE-040
 - SwRS-MDOKFSTUDIO-CORE-028
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-CODE-002
+- StRS-MDOKFSTUDIO-CODE-003
 ---
 
 ## A reader reads highlighted, numbered and diff code

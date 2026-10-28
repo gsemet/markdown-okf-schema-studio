@@ -26,6 +26,10 @@ tested_in_files:
 - test/core/frontmatter/fileLinks.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-047
+- SwRS-MDOKFSTUDIO-FMSCHEMA-048
+- SwRS-MDOKFSTUDIO-FMSCHEMA-049
 ---
 
 ## x-okf-link annotations declare link fields and their syntax

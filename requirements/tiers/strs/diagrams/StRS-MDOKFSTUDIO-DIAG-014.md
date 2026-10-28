@@ -10,13 +10,12 @@ scope: diagrams
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-007; no marker expected."
 derives_from: []
 user_need: As a writer, a heavy or broken diagram never freezes the editor or
   leaves processes running.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-DIAG-007
+superseded_by:
+- StRS-MDOKFSTUDIO-DIAG-007
 default_owner_email: gaetan@xeberon.net
 ---
 

@@ -32,6 +32,12 @@ tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-002
+- SwRS-MDOKFSTUDIO-FMSCHEMA-003
+- SwRS-MDOKFSTUDIO-FMSCHEMA-017
+- SwRS-MDOKFSTUDIO-FMSCHEMA-018
+- SwRS-MDOKFSTUDIO-FMSCHEMA-076
 ---
 
 ## The frontmatter block is found by its fences and parsed as a YAML mapping

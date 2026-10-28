@@ -32,6 +32,15 @@ tested_in_files:
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-061
+- SwRS-MDOKFSTUDIO-MYST-002
+- SwRS-MDOKFSTUDIO-MYST-004
+- SwRS-MDOKFSTUDIO-MYST-005
+- SwRS-MDOKFSTUDIO-MYST-010
+- SwRS-MDOKFSTUDIO-MYST-011
+- SwRS-MDOKFSTUDIO-MYST-012
+- SwRS-MDOKFSTUDIO-MYST-087
 ---
 
 ## Admonitions render as coloured callouts with a title

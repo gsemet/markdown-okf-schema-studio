@@ -10,13 +10,12 @@ scope: myst
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derives_from: []
 user_need: As a writer, I want all table directive forms to look like tables so
   that I can review data without building.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-MYST-001
+superseded_by:
+- StRS-MDOKFSTUDIO-MYST-001
 default_owner_email: gaetan@xeberon.net
 ---
 

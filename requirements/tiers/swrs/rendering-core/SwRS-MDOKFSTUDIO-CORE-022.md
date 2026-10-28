@@ -34,6 +34,14 @@ tested_in_files:
 - test/integration/projectFeatures.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-023
+- SwRS-MDOKFSTUDIO-CORE-036
+- SwRS-MDOKFSTUDIO-CORE-047
+- SwRS-MDOKFSTUDIO-MYST-020
+- SwRS-MDOKFSTUDIO-MYST-021
+- SwRS-MDOKFSTUDIO-MYST-022
+- SwRS-MDOKFSTUDIO-MYST-023
 ---
 
 ## Build-dependent constructs show an inert placeholder with a warning

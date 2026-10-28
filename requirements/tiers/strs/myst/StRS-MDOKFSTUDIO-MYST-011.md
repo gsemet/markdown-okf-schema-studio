@@ -10,13 +10,12 @@ scope: myst
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derives_from: []
 user_need: As a writer, I want card layouts that stay usable in narrow panes so
   that I can design pages in VS Code.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-MYST-001
+superseded_by:
+- StRS-MDOKFSTUDIO-MYST-001
 default_owner_email: gaetan@xeberon.net
 ---
 

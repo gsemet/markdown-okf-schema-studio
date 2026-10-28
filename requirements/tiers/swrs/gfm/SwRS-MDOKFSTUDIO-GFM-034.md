@@ -33,6 +33,9 @@ tested_in_files:
 - test/security/html-policy.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-GFM-035
+- SwRS-MDOKFSTUDIO-GFM-036
 ---
 
 ## Colour spans keep safe colours only

@@ -25,6 +25,10 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-039
+- SwRS-MDOKFSTUDIO-CORE-040
+- SwRS-MDOKFSTUDIO-CORE-042
 ---
 
 ## Long words, URLs, identifiers and CJK text wrap in the column

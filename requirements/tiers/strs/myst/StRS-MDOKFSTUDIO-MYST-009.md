@@ -40,6 +40,9 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-MYST-004
+- StRS-MDOKFSTUDIO-MYST-010
 ---
 
 ## A writer sees, links and renames labels safely

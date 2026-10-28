@@ -31,6 +31,12 @@ tested_in_files:
 - test/session/commentAuthorResource.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-082
+- SwRS-MDOKFSTUDIO-MYST-083
+- SwRS-MDOKFSTUDIO-MYST-084
+- SwRS-MDOKFSTUDIO-MYST-085
+- SwRS-MDOKFSTUDIO-MYST-086
 ---
 
 ## A closable banner announces conf.py warnings

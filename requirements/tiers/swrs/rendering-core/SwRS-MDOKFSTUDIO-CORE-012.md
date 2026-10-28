@@ -31,6 +31,11 @@ tested_in_files:
 - test/core/render/includeMapping.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-014
+- SwRS-MDOKFSTUDIO-CORE-015
+- SwRS-MDOKFSTUDIO-CORE-017
+- SwRS-MDOKFSTUDIO-CORE-045
 ---
 
 ## An include is expanded in place and mapped to its directive

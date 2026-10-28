@@ -28,6 +28,11 @@ tested_in_files:
 - test/page/diagReq.themeZoom.requirements.test.ts
 - test/page/modules/motion.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-051
+- SwRS-MDOKFSTUDIO-CORE-052
+- SwRS-MDOKFSTUDIO-CORE-053
+- SwRS-MDOKFSTUDIO-CORE-068
 ---
 
 ## Soft appearance and colour transitions honour reduced motion

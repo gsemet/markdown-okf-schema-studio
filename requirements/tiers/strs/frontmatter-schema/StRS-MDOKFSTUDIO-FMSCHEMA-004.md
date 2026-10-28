@@ -11,13 +11,12 @@ scope: frontmatter-schema
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-001; no marker expected."
 derives_from: []
 user_need: As a writer, I hide the Description column when I need room and find
   it hidden again next time.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-001
+superseded_by:
+- StRS-MDOKFSTUDIO-FMSCHEMA-001
 default_owner_email: gaetan@xeberon.net
 ---
 

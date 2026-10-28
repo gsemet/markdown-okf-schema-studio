@@ -26,6 +26,9 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/codeCopy.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-020
+- SwRS-MDOKFSTUDIO-CODE-021
 ---
 
 ## The copy button copies the raw code and confirms it

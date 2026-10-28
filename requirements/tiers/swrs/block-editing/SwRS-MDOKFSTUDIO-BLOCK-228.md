@@ -34,6 +34,8 @@ tested_in_files:
 - test/session/blockReq.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-057
 ---
 
 ## Opening, saving and closing an editor keep the reading position

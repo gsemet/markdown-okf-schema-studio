@@ -30,6 +30,13 @@ tested_in_files:
 - test/core/frontmatter/fileLinks.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-051
+- SwRS-MDOKFSTUDIO-FMSCHEMA-052
+- SwRS-MDOKFSTUDIO-FMSCHEMA-053
+- SwRS-MDOKFSTUDIO-FMSCHEMA-054
+- SwRS-MDOKFSTUDIO-FMSCHEMA-079
+- SwRS-MDOKFSTUDIO-FMSCHEMA-080
 ---
 ## Links resolve from the document, bundle or project root and stay inside it
 

@@ -28,6 +28,14 @@ tested_in_files:
 - test/core/render/renderReq.myst.requirements.test.ts
 - test/page/modules/warningBanner.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-064
+- SwRS-MDOKFSTUDIO-MYST-030
+- SwRS-MDOKFSTUDIO-MYST-073
+- SwRS-MDOKFSTUDIO-MYST-074
+- SwRS-MDOKFSTUDIO-MYST-075
+- SwRS-MDOKFSTUDIO-MYST-076
+- SwRS-MDOKFSTUDIO-MYST-077
 ---
 
 ## MyST syntax of a disabled extension is reported with its line

@@ -29,6 +29,11 @@ tested_in_files:
 - test/page/rendererBridge.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-041
+- SwRS-MDOKFSTUDIO-DIAG-042
+- SwRS-MDOKFSTUDIO-DIAG-043
+- SwRS-MDOKFSTUDIO-DIAG-044
 ---
 
 ## Built-in pictures are kept by source and drawn one at a time

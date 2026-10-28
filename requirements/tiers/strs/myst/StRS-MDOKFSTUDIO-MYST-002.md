@@ -11,13 +11,12 @@ scope: myst
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derives_from: []
 user_need: As a writer, I want pasted context tags to stay readable and inert so
   that I never lose text or run active markup.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-MYST-001
+superseded_by:
+- StRS-MDOKFSTUDIO-MYST-001
 default_owner_email: gaetan@xeberon.net
 ---
 

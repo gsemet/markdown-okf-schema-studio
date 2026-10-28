@@ -41,6 +41,10 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/session/blockReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-053
+- SwRS-MDOKFSTUDIO-FMEDIT-055
+- SwRS-MDOKFSTUDIO-GFM-022
 ---
 
 ## Every host source edit is one undo step, renders once and reports a failed apply

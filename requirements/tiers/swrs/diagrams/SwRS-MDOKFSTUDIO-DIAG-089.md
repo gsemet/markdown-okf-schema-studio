@@ -28,6 +28,15 @@ tested_in_files:
 - test/session/diagReq.plantuml.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-090
+- SwRS-MDOKFSTUDIO-DIAG-091
+- SwRS-MDOKFSTUDIO-DIAG-092
+- SwRS-MDOKFSTUDIO-DIAG-093
+- SwRS-MDOKFSTUDIO-DIAG-094
+- SwRS-MDOKFSTUDIO-DIAG-095
+- SwRS-MDOKFSTUDIO-DIAG-096
+- SwRS-MDOKFSTUDIO-DIAG-107
 ---
 
 ## JAR failures are reported on the diagram and in the status line

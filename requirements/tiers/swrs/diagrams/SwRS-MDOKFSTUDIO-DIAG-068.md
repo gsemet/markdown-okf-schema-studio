@@ -29,6 +29,13 @@ tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-069
+- SwRS-MDOKFSTUDIO-DIAG-070
+- SwRS-MDOKFSTUDIO-DIAG-071
+- SwRS-MDOKFSTUDIO-DIAG-072
+- SwRS-MDOKFSTUDIO-DIAG-073
+- SwRS-MDOKFSTUDIO-DIAG-074
 ---
 
 ## A {uml} directive renders a PUML file as a render dependency

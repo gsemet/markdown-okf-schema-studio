@@ -63,6 +63,10 @@ derived_by:
 - SwRS-MDOKFSTUDIO-DIAG-118
 - SwRS-MDOKFSTUDIO-DIAG-120
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-DIAG-012
+- StRS-MDOKFSTUDIO-DIAG-013
+- StRS-MDOKFSTUDIO-DIAG-014
 ---
 
 ## A writer renders PlantUML with an own JAR or command, safely bounded

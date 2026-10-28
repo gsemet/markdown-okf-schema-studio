@@ -27,6 +27,8 @@ implemented_in_files:
 tested_in_files:
 - test/page/runtimeBlockSelection.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-063
 ---
 
 ## A block selection survives saves and is cleared by patches

@@ -28,6 +28,9 @@ implemented_in_files:
 tested_in_files:
 - test/integration/mystDiagnostics.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-079
+- SwRS-MDOKFSTUDIO-MYST-080
 ---
 
 ## Extension warnings appear in the Problems view and follow conf.py

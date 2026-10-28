@@ -30,6 +30,11 @@ tested_in_files:
 - test/visual/capture_page_checks.py
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-013
+- SwRS-MDOKFSTUDIO-FMEDIT-065
+- SwRS-MDOKFSTUDIO-FMEDIT-066
+- SwRS-MDOKFSTUDIO-FMEDIT-087
 ---
 
 ## A click on a field in edit mode opens its editor in place

@@ -11,13 +11,12 @@ scope: diagrams
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-009; no marker expected."
 derives_from: []
 user_need: As a writer, I keep diagrams in separate puml files, reference them
   from the document, and see them drawn.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-DIAG-009
+superseded_by:
+- StRS-MDOKFSTUDIO-DIAG-009
 default_owner_email: gaetan@xeberon.net
 ---
 

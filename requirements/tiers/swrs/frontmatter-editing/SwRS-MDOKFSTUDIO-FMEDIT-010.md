@@ -26,6 +26,12 @@ tested_in_files:
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-011
+- SwRS-MDOKFSTUDIO-FMEDIT-012
+- SwRS-MDOKFSTUDIO-FMEDIT-014
+- SwRS-MDOKFSTUDIO-FMEDIT-077
+- SwRS-MDOKFSTUDIO-FMEDIT-078
 ---
 
 ## List fields and link lists are edited item by item

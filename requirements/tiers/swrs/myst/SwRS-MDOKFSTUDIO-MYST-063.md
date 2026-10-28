@@ -25,6 +25,13 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-057
+- SwRS-MDOKFSTUDIO-CORE-058
+- SwRS-MDOKFSTUDIO-MYST-064
+- SwRS-MDOKFSTUDIO-MYST-065
+- SwRS-MDOKFSTUDIO-MYST-088
+- SwRS-MDOKFSTUDIO-MYST-092
 ---
 
 ## Table directives render as ordinary tables

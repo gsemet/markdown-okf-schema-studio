@@ -26,6 +26,8 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/runtimeFrontmatterFields.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-044
 ---
 
 ## The table is refreshed in place after edits, after the field editor closes

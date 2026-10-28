@@ -35,6 +35,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LAYOUT-037
 - SwRS-MDOKFSTUDIO-LAYOUT-042
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-LAYOUT-005
 ---
 
 ## The first element starts clear of the top and of the floating toolbar

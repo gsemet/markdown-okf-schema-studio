@@ -28,6 +28,9 @@ tested_in_files:
 - test/integration/previewEditing.test.ts
 - test/session/links.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-074
+- SwRS-MDOKFSTUDIO-FMSCHEMA-082
 ---
 ## A resolving frontmatter link opens its target, others are refused with a warning
 

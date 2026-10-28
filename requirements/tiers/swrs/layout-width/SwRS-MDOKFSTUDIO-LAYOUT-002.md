@@ -33,6 +33,12 @@ tested_in_files:
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-003
+- SwRS-MDOKFSTUDIO-LAYOUT-004
+- SwRS-MDOKFSTUDIO-LAYOUT-005
+- SwRS-MDOKFSTUDIO-LAYOUT-006
+- SwRS-MDOKFSTUDIO-LAYOUT-036
 ---
 
 ## The text column width follows the maxContentWidth setting

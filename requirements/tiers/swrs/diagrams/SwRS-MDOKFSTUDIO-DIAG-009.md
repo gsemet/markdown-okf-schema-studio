@@ -27,6 +27,11 @@ tested_in_files:
 - test/page/modules/mermaidPreviewEntry.test.ts
 - test/page/rendererBridge.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-011
+- SwRS-MDOKFSTUDIO-DIAG-012
+- SwRS-MDOKFSTUDIO-DIAG-014
+- SwRS-MDOKFSTUDIO-DIAG-116
 ---
 
 ## Mermaid diagrams are drawn once and late results are dropped

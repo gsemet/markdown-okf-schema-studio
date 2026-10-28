@@ -11,13 +11,12 @@ scope: diagrams
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-007; no marker expected."
 derives_from: []
 user_need: As a writer, I know whether Restricted Mode, a wrong path, a missing
   command or a PlantUML error stopped my diagram.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-DIAG-007
+superseded_by:
+- StRS-MDOKFSTUDIO-DIAG-007
 default_owner_email: gaetan@xeberon.net
 ---
 

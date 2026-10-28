@@ -31,6 +31,10 @@ tested_in_files:
 - test/visual/scenarioAssertions.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-035
+- SwRS-MDOKFSTUDIO-LAYOUT-033
+- SwRS-MDOKFSTUDIO-LAYOUT-034
 ---
 
 ## A wide table scrolls inside its own box with shaded edges

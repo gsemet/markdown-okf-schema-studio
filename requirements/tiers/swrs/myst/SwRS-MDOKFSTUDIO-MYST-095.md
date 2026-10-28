@@ -18,7 +18,8 @@ exemption_reason: "Produced by the MyST parser library, with no code of this pro
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
-superseded_by: SwRS-MDOKFSTUDIO-MYST-017
+superseded_by:
+- SwRS-MDOKFSTUDIO-MYST-017
 default_owner_email: gaetan@xeberon.net
 ---
 

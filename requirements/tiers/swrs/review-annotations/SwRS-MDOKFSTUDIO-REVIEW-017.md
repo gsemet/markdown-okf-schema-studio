@@ -27,6 +27,8 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/commentThreads.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-019
 ---
 
 ## The quote of a thread is highlighted once in its block

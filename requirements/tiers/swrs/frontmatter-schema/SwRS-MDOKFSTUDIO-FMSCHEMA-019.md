@@ -27,6 +27,11 @@ tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/node-services/schemaFiles.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-020
+- SwRS-MDOKFSTUDIO-FMSCHEMA-021
+- SwRS-MDOKFSTUDIO-FMSCHEMA-022
+- SwRS-MDOKFSTUDIO-FMSCHEMA-077
 ---
 
 ## A typed document finds its schema in the nearest schema folder

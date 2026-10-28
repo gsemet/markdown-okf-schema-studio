@@ -11,13 +11,12 @@ scope: rendering-core
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-CORE-001; no marker expected."
 derives_from: []
 user_need: Writers need to read documents in any script and direction without
   horizontal scrolling.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-CORE-001
+superseded_by:
+- StRS-MDOKFSTUDIO-CORE-001
 default_owner_email: gaetan@xeberon.net
 ---
 

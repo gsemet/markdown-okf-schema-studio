@@ -27,6 +27,12 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_layout_checks.py
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-024
+- SwRS-MDOKFSTUDIO-LAYOUT-025
+- SwRS-MDOKFSTUDIO-LAYOUT-026
+- SwRS-MDOKFSTUDIO-LAYOUT-027
+- SwRS-MDOKFSTUDIO-LAYOUT-031
 ---
 
 ## Auto width lets wide blocks break out of the column

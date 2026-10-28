@@ -29,6 +29,9 @@ tested_in_files:
 - test/security/html-policy.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-009
+- SwRS-MDOKFSTUDIO-CORE-065
 ---
 
 ## Images fit the column, sit on the line and survive a missing file

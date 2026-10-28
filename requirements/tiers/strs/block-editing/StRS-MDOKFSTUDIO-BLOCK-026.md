@@ -10,8 +10,6 @@ scope: block-editing
 lifecycle: deprecated
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Archived. Not an observable behaviour; no marker expected."
 derives_from: []
 user_need: As a maintainer, I can read the last editor events of a page when a
   report says an editor closed or lost the focus by itself.

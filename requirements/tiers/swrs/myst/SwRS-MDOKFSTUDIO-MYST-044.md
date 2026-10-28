@@ -18,7 +18,8 @@ exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TRUST-065; no marker expected.
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
-superseded_by: SwRS-MDOKFSTUDIO-TRUST-065
+superseded_by:
+- SwRS-MDOKFSTUDIO-TRUST-065
 default_owner_email: gaetan@xeberon.net
 ---
 

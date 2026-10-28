@@ -29,6 +29,15 @@ tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-033
+- SwRS-MDOKFSTUDIO-DIAG-034
+- SwRS-MDOKFSTUDIO-DIAG-035
+- SwRS-MDOKFSTUDIO-DIAG-036
+- SwRS-MDOKFSTUDIO-DIAG-037
+- SwRS-MDOKFSTUDIO-DIAG-038
+- SwRS-MDOKFSTUDIO-DIAG-082
+- SwRS-MDOKFSTUDIO-DIAG-112
 ---
 
 ## The built-in engine refuses what needs a URL, a library or more than 1 MiB

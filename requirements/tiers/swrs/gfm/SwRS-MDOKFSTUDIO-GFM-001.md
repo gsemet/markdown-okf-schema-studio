@@ -24,6 +24,13 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/bareUrlAutolink.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-GFM-002
+- SwRS-MDOKFSTUDIO-GFM-003
+- SwRS-MDOKFSTUDIO-GFM-004
+- SwRS-MDOKFSTUDIO-GFM-005
+- SwRS-MDOKFSTUDIO-GFM-006
+- SwRS-MDOKFSTUDIO-GFM-007
 ---
 
 ## Bare URLs become safe links

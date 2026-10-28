@@ -11,13 +11,12 @@ scope: gfm
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-GFM-002; no marker expected."
 derives_from: []
 user_need: As a writer, I use the raw HTML that GitHub documents rely on and
   nothing unsafe is rendered.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-GFM-002
+superseded_by:
+- StRS-MDOKFSTUDIO-GFM-002
 default_owner_email: gaetan@xeberon.net
 ---
 

@@ -27,6 +27,12 @@ tested_in_files:
 - test/core/myst/confLocator.test.ts
 - test/core/myst/confParser.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-067
+- SwRS-MDOKFSTUDIO-MYST-068
+- SwRS-MDOKFSTUDIO-MYST-069
+- SwRS-MDOKFSTUDIO-MYST-070
+- SwRS-MDOKFSTUDIO-MYST-089
 ---
 
 ## The governing conf.py is found and read as text

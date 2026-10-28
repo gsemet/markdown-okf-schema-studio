@@ -12,13 +12,12 @@ scope: rendering-core
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-CORE-003; no marker expected."
 derives_from: []
 user_need: Writers need the preview to stay trustworthy while they type and when
   something goes wrong.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-CORE-003
+superseded_by:
+- StRS-MDOKFSTUDIO-CORE-003
 default_owner_email: gaetan@xeberon.net
 ---
 
