@@ -52,6 +52,9 @@ export interface PageCommentThread {
  * thread. `orphaned: true` goes straight to the box; `orphaned: false` trusts the posted lines
  * (the page never searches the quote elsewhere for such a thread). Threads without the field
  * (older hosts, tests) keep the T44 placement rules.
+ *
+ * `trace` (diagnostics only, it changes nothing) hears why an open popover went away: a press
+ * outside, Escape, a toggle, a close by the page, or a re-apply that found no thread or holder.
  */
 export function installCommentThreads(
   document: Document,
@@ -61,6 +64,7 @@ export function installCommentThreads(
     resolve?: (threadId: string, resolved: boolean) => void;
     remove?: (threadId: string) => void;
   },
+  trace?: (event: string, detail: string) => void,
 ): {
   setThreads(threads: unknown): void;
   apply(): void;
@@ -240,7 +244,8 @@ export function installCommentThreads(
     send(threadId);
   };
 
-  const close = (): void => {
+  const close = (why?: string): void => {
+    if (why !== undefined && popover) trace?.("comment popover closed", `${why}, thread ${openId ?? "none"}`);
     popover?.remove();
     popover = undefined;
     openId = undefined;
@@ -478,7 +483,10 @@ export function installCommentThreads(
     const asking = confirming;
     close();
     clear();
-    if (threads.length === 0) return;
+    if (threads.length === 0) {
+      if (reopen !== undefined) trace?.("comment popover closed", `re-apply without threads, thread ${reopen}`);
+      return;
+    }
     const orphans: PageCommentThread[] = [];
     for (const thread of threads) {
       if (thread.orphaned === true || (!attach(thread) && !badge(thread))) orphans.push(thread);
@@ -494,6 +502,9 @@ export function installCommentThreads(
         confirming = asking === reopen ? asking : undefined;
         paintReply();
         paintActions();
+      } else {
+        trace?.("comment popover closed", `re-apply without ${thread ? "a holder" : "the thread"}, `
+          + `thread ${reopen}, ${threads.length} thread(s)`);
       }
     }
   };
@@ -591,7 +602,7 @@ export function installCommentThreads(
     const id = idOf(holder);
     const thread = threads.find((candidate) => candidate.id === id);
     if (!thread) return false;
-    if (openId === thread.id) close();
+    if (openId === thread.id) close("toggled");
     else open(thread, holder);
     return true;
   };
@@ -668,7 +679,7 @@ export function installCommentThreads(
     const target = event.target;
     if (event.key === "Escape") {
       if (!popover) return;
-      close();
+      close("Escape");
       event.stopImmediatePropagation();
       return;
     }
@@ -691,7 +702,7 @@ export function installCommentThreads(
   document.addEventListener("pointerdown", (event) => {
     const target = event.target;
     if (!popover || (target instanceof Element && (target.closest(`[${POPOVER}]`) || holderOf(target)))) return;
-    close();
+    close(`pointerdown outside on ${target instanceof Element ? target.tagName.toLowerCase() : "no element"}`);
   }, true);
 
   return {
@@ -733,7 +744,7 @@ export function installCommentThreads(
       apply();
     },
     apply,
-    close,
+    close: () => close("closed by the page"),
     openThread(id) {
       // Compared in code, never put into a selector: the id is file data.
       const holder = Array.from(document.querySelectorAll(`[${MARK}], [${BADGE}], [${ORPHAN}]`))

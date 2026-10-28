@@ -172,7 +172,9 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
       resolve: (threadId, resolved) => postCommentMessage("previewCommentResolve", { threadId, resolved }),
       remove: (threadId) => postCommentMessage("previewCommentDelete", { threadId }),
     }
-    : undefined);
+    : undefined,
+  // Diagnostics only: the page trace names what closed an open thread popover.
+  (event, detail) => pageDiagnostics.editorTrace.record(event, detail, pageDiagnostics.traceStack()));
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
   // The Comment button of a text selection (writable previews only, T43). Not shown while a block
   // editor is open or blocks are selected; it never changes the selection.
