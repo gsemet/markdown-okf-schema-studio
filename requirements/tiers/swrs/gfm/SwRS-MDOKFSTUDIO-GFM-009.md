@@ -22,6 +22,7 @@ derived_by: []
 implemented_in_files:
 - src/core/render/mystGithubAlerts.ts
 tested_in_files:
+- test/core/render/alertInsideColonContainer.test.ts
 - test/core/render/alertSourceLines.test.ts
 - test/core/render/crlfAlerts.test.ts
 - test/core/render/mystFeatures.test.ts
@@ -101,6 +102,18 @@ still the lines of the file as written.
 | an unclosed fence after an alert | the warning and the opening line shown as code carry the line of the fence |
 | alert markers inside a fenced code block | they stay literal and later lines are unchanged |
 
+### Scenario (boundary): Alerts inside a colon container
+
+An admonition written with a colon fence closes at the first colon-only line at least as long as
+its own, and a container nested in another must use a shorter fence than the outer one; a
+`:::{note}` inside a `:::{card}` would therefore end the card early.
+
+| Input | Outcome |
+| --- | --- |
+| an alert inside a `:::{card}`, a `:::{tab-item}` of a tab set or a three-colon card of a nested grid, followed by a paragraph | the admonition is a backtick directive; the paragraph stays inside the card or tab and the text after the container stays outside |
+| the same documents | the blocks carry the lines of the file as written (the tab panels carry the lines of their items) |
+| an alert outside every colon container | it is a colon-fence admonition, as before |
+
 ### Scenario (boundary): CRLF documents
 
 | Input | Outcome |
@@ -115,4 +128,5 @@ still the lines of the file as written.
 - Method: test/core/render/crlfAlerts.test.ts (fence scenario and CRLF scenario: unit tests on the render pipeline output).
 - Method: test/core/render/alertSourceLines.test.ts (every block keeps the lines of the document: unit tests on the `data-line` and `data-end-line` of the rendered blocks, including a README-shaped synthetic fixture with an important alert then a note alert).
 - Method: test/session/alertBlockEditOpen.test.ts (the host opens the editor of the paragraph of the second alert of that README on that paragraph's lines: `previewEditOpen` through the real `PreviewManager`).
-- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains only quoted lines; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written.
+- Method: test/core/render/alertInsideColonContainer.test.ts (alerts inside a card, a tab item and a nested grid card: unit tests on the rendered structure and on the `data-line` and `data-end-line` of the blocks).
+- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains only quoted lines; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written; an alert inside a colon container is a backtick directive whose fence is longer than any backtick fence of its body, so neither the body nor its closing line ends the container.

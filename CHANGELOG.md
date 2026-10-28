@@ -5,6 +5,8 @@
 - The editor refuses to open or save a block whose range, as sent by the preview, starts on a blank
   line: it answers that the preview and the document disagree about the block's lines (refresh and
   try again) and changes nothing, instead of editing the wrong text.
+- A GitHub alert (`> [!NOTE]`) inside a `:::{card}`, a `:::{tab-item}` or another colon container no
+  longer ends that container early: the text after the alert stays in the card or tab.
 
 ## 1.0.0 - 2026-10-28
 

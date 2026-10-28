@@ -18,6 +18,9 @@ const GITHUB_ALERT_TYPES = new Map([
 const ALERT_MARKER = /^(\s*)>\s*\[!([A-Za-z]+)\](?:[ \t]+(\S(?:.*?\S)?))?[ \t]*$/u;
 const GITHUB_BOLD_ALERT_MARKER = /^(\s*)>\s*\*\*(Note|Important|Warning)\*\*[ \t]*$/iu;
 
+const COLON_OPEN = /^\s*(:{3,})(?!:)\s*\S/u;
+const COLON_CLOSE = /^\s*(:{3,})[ \t]*$/u;
+
 function stripQuote(line: string): string {
   return line.replace(/^\s*>\s?/u, "");
 }
@@ -41,6 +44,8 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
   const sourceLines: number[] = [];
   let rewritten = false;
   let fence: string | undefined;
+  /** The lengths of the colon fences (`:::{card}`) still open at the current line. */
+  const colonFences: number[] = [];
   /** Appends output lines that come from the zero-based input line `from`. */
   const push = (from: number, ...added: string[]): void => {
     for (const line of added) {
@@ -59,6 +64,13 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
     }
 
     const alertMarker = line.match(ALERT_MARKER);
+    const colonOpen = alertMarker ? undefined : line.match(COLON_OPEN);
+    const colonClose = colonOpen ? undefined : line.match(COLON_CLOSE);
+    if (colonClose && colonFences.length > 0 && colonClose[1].length >= colonFences[colonFences.length - 1]) {
+      colonFences.pop();
+    } else if (colonOpen) {
+      colonFences.push(colonOpen[1].length);
+    }
     const boldMarker = line.match(GITHUB_BOLD_ALERT_MARKER);
     const marker = alertMarker ?? boldMarker;
     const kind = alertMarker
@@ -72,7 +84,21 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
     rewritten = true;
     const indent = marker[1];
     const title = alertMarker?.[3];
-    push(index, `${indent}:::{${kind}}${title ? ` ${title}` : ""}`, `${indent}:class: simple`);
+    // A colon fence closes at the first colon line at least as long as the container's own, and
+    // an inner container must be shorter than the enclosing one, so inside a colon container
+    // (the shortest has three colons) the alert is a backtick directive instead: its closing
+    // line cannot end the container.
+    let colons = ":::";
+    if (colonFences.length > 0) {
+      // Longer than any backtick fence opened in the quoted body, so the body cannot close it.
+      let longest = 3;
+      for (let at = index + 1; at < lines.length && /^\s*>/u.test(lines[at]); at += 1) {
+        const run = stripQuote(lines[at]).match(/^\s*(`{3,})/u);
+        if (run) longest = Math.max(longest, run[1].length);
+      }
+      colons = "`".repeat(longest + 1);
+    }
+    push(index, `${indent}${colons}{${kind}}${title ? ` ${title}` : ""}`, `${indent}:class: simple`);
     let cursor = index + 1;
     while (cursor < lines.length && /^\s*>/u.test(lines[cursor])) {
       push(cursor, indent + stripQuote(lines[cursor]));
@@ -82,9 +108,9 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
     // before an unquoted line) map there.
     const last = cursor - 1;
     if (cursor < lines.length && lines[cursor].trim() === "") {
-      push(last, `${indent}:::`);
+      push(last, `${indent}${colons}`);
     } else {
-      push(last, `${indent}:::`, "");
+      push(last, `${indent}${colons}`, "");
       cursor -= 1;
     }
     index = cursor;
