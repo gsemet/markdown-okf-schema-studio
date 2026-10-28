@@ -27,6 +27,8 @@ const FOLD_BUTTON = `<button type="button" data-sphinx-preview-fold-toggle aria-
 
 const DIFF_BUTTON = `<button type="button" data-sphinx-preview-diff-toggle aria-pressed="true" aria-label="Hide changes since last commit" title="Hide changes since last commit" data-tooltip="Hide changes since last commit"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 4v12M8 16a2.5 2.5 0 1 0 0 .01M16 20V8M16 8a2.5 2.5 0 1 0 0-.01M13.5 5.5 16 8l2.5-2.5"></path></svg></button>`;
 
+const SIDE_BY_SIDE_BUTTON = `<button type="button" data-sphinx-preview-sbs-toggle aria-pressed="false" aria-label="Show side-by-side changes since last commit" title="Show side-by-side changes since last commit" data-tooltip="Show side-by-side changes since last commit"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h6v14H4ZM14 5h6v14h-6Z"></path><path d="M6.5 10h1M6.5 13h1M16.5 10h1M16.5 13h1"></path></svg></button>`;
+
 const COMMENTS_BUTTON = `<button type="button" data-sphinx-preview-comments-toggle aria-pressed="true" aria-label="Hide comments" title="Hide comments" data-tooltip="Hide comments"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 5h16v11H9l-5 4Z"></path><path d="M8 9.5h8M8 12.5h5"></path></svg></button>`;
 
 const COLLAPSE_BUTTON = `<button type="button" data-sphinx-preview-toolbar-collapse aria-expanded="true" aria-controls="sphinx-preview-toolbar-more" aria-label="Hide view controls" title="Hide view controls" data-tooltip="Hide view controls"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-collapse-icon="hide"><path d="m6 15 6-6 6 6"></path></svg><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-collapse-icon="show"><path d="m6 9 6 6 6-6"></path></svg></button>`;
@@ -37,7 +39,7 @@ const COLLAPSE_BUTTON = `<button type="button" data-sphinx-preview-toolbar-colla
 /**
  * Five rows of at most three buttons, so the toolbar stays narrow. Row 1 (actions): Refresh, Edit (greyed with the
  * reason in read-only previews) and the collapse button. Row 2 (navigation): Anchor, Back, Next. Row 3 (appearance):
- * Theme, Zoom out, Zoom in. Row 4 (layout): Width, TOC. Row 5 (content): Fold, Diff, Comments. Rows 2 to 5 sit in one
+ * Theme, Zoom out, Zoom in. Row 4 (layout): Width, TOC, Side-by-side. Row 5 (content): Fold, Diff, Comments. Rows 2 to 5 sit in one
  * group that the collapse button hides; the Tab order follows the rows.
  */
 export function renderPreviewToolbar(editingEnabled = true): string {
@@ -45,7 +47,7 @@ export function renderPreviewToolbar(editingEnabled = true): string {
   const mainRow = row("main", `${REFRESH_BUTTON}${editingEnabled ? EDIT_BUTTON : EDIT_BUTTON_UNAVAILABLE}${COLLAPSE_BUTTON}`);
   const navigationRow = row("navigation", `${ANCHOR_BUTTON}${BACK_BUTTON}${NEXT_BUTTON}`);
   const appearanceRow = row("appearance", `${THEME_BUTTON}${ZOOM_OUT_BUTTON}${ZOOM_IN_BUTTON}`);
-  const layoutRow = row("layout", `${WIDTH_BUTTON}${TOC_BUTTON}`);
+  const layoutRow = row("layout", `${WIDTH_BUTTON}${TOC_BUTTON}${SIDE_BY_SIDE_BUTTON}`);
   const contentRow = row("content", `${FOLD_BUTTON}${DIFF_BUTTON}${COMMENTS_BUTTON}`);
   const moreRows = `<div data-sphinx-preview-toolbar-more id="sphinx-preview-toolbar-more">${navigationRow}${appearanceRow}${layoutRow}${contentRow}</div>`;
   return `<div data-sphinx-preview-toolbar role="toolbar" aria-label="Preview controls">${mainRow}${moreRows}</div>`;

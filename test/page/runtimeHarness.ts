@@ -385,6 +385,7 @@ export interface RuntimeHarness {
   readonly zoomInButton: RuntimeElement;
   readonly widthButton: RuntimeElement;
   readonly diffButton: RuntimeElement;
+  readonly sideBySideButton: RuntimeElement;
   readonly collapseButton: RuntimeElement;
   readonly moreRows: RuntimeElement;
   readonly backButton: RuntimeElement;
@@ -600,6 +601,7 @@ export function createRuntimeHarness(configuration: Partial<{
   const zoomInButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const widthButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const diffButton = new RuntimeElement({}, windowState, 0, 30, "button");
+  const sideBySideButton = new RuntimeElement({}, windowState, 0, 30, "button");
   const collapseButton = new RuntimeElement({ "aria-expanded": "true" }, windowState, 0, 30, "button");
   const moreRows = new RuntimeElement({}, windowState, 0, 60);
   const backButton = new RuntimeElement({}, windowState, 0, 30, "button");
@@ -856,6 +858,7 @@ export function createRuntimeHarness(configuration: Partial<{
       if (selector === "[data-sphinx-preview-zoom-in]") return zoomInButton;
       if (selector === "[data-sphinx-preview-width-toggle]") return widthButton;
       if (selector === "[data-sphinx-preview-diff-toggle]") return diffButton;
+      if (selector === "[data-sphinx-preview-sbs-toggle]") return sideBySideButton;
       if (selector === "[data-sphinx-preview-toolbar-collapse]") return collapseButton;
       if (selector === "[data-sphinx-preview-toolbar-more]") return moreRows;
       if (selector === "[data-sphinx-preview-back]") return backButton;
@@ -990,6 +993,7 @@ export function createRuntimeHarness(configuration: Partial<{
     zoomInButton,
     widthButton,
     diffButton,
+    sideBySideButton,
     collapseButton,
     moreRows,
     backButton,

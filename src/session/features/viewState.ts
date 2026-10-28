@@ -33,6 +33,12 @@ export class ViewStateController {
         manager.incoming.schedule(preview, 0);
       }
     });
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-006
+    // The side-by-side diff is a view of the page like the preferences above: no document edit, so a
+    // read-only preview accepts it; the baseline is posted for a trusted, tracked file only.
+    router.on("previewSideBySideChanged", (message, preview) => {
+      manager.incoming.setSideBySide(preview, message.on);
+    });
     // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
     // The palette mode is a workspace choice like the edit mode: it changes buttons only, never the
     // rendering, so it is saved from the page and only a document edit needs a writable preview.

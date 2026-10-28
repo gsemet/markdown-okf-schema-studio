@@ -17,6 +17,12 @@ user_need: As a writer, I see at a glance what I changed since the last commit,
   unsaved edits included, and I read the document without the bars when I do not
   need them.
 derived_by:
+- SwRS-MDOKFSTUDIO-REVIEW-005
+- SwRS-MDOKFSTUDIO-REVIEW-006
+- SwRS-MDOKFSTUDIO-REVIEW-007
+- SwRS-MDOKFSTUDIO-REVIEW-008
+- SwRS-MDOKFSTUDIO-REVIEW-009
+- SwRS-MDOKFSTUDIO-REVIEW-010
 - SwRS-MDOKFSTUDIO-REVIEW-195
 - SwRS-MDOKFSTUDIO-REVIEW-200
 - SwRS-MDOKFSTUDIO-REVIEW-203
@@ -49,6 +55,12 @@ As a writer, I see at a glance what I changed since the last commit, unsaved edi
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-005](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-005.md): The word diff reports the added and removed words
+  - [SwRS-MDOKFSTUDIO-REVIEW-006](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-006.md): The host posts the baseline rendering while the side-by-side diff is on
+  - [SwRS-MDOKFSTUDIO-REVIEW-007](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-007.md): The side-by-side messages are validated and gated
+  - [SwRS-MDOKFSTUDIO-REVIEW-008](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-008.md): The Side-by-side button switches the diff and is disabled in edit mode
+  - [SwRS-MDOKFSTUDIO-REVIEW-009](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-009.md): A changed block shows as a side-by-side diff
+  - [SwRS-MDOKFSTUDIO-REVIEW-010](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-010.md): The line diff reports hunks with both sides
   - [SwRS-MDOKFSTUDIO-REVIEW-195](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-195.md): The host posts the lines that differ from the last commit
   - [SwRS-MDOKFSTUDIO-REVIEW-200](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-200.md): The line diff reports added and modified lines
   - [SwRS-MDOKFSTUDIO-REVIEW-203](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-203.md): The HEAD text comes from the built-in Git extension for small files

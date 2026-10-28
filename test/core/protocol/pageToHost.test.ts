@@ -359,3 +359,12 @@ test("CR 050: the warning banner messages are registered with a bounded key", ()
   }
   assert.equal(isRegisteredPreviewMessage({ type: "previewShowProblems" }), false, "the envelope is required");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-007
+test("CR147: previewSideBySideChanged carries a boolean and names the current render", () => {
+  const base = { type: "previewSideBySideChanged", documentId: "doc", revision: 1, requestId: 1 };
+  assert.equal(isRegisteredPreviewMessage({ ...base, on: true }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, on: false }), true);
+  assert.equal(isRegisteredPreviewMessage({ ...base, on: "yes" }), false);
+  assert.equal(isRegisteredPreviewMessage({ ...base }), false);
+});

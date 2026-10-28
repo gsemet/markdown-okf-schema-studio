@@ -86,7 +86,7 @@ When a preview is read-only (created for a document that lies in no workspace fo
 
 | Affordance | In a read-only preview |
 | --- | --- |
-| Edit button | Rendered greyed: the toolbar keeps the same five rows with 14 buttons, and the Edit button carries aria-disabled true, a dimmed icon and a not-allowed cursor. Its title and tooltip say "Editing is unavailable: this file is not in a trusted workspace" (untrusted workspace) or "Editing is unavailable: this file is not in a folder opened in the VS Code workspace" (file outside every workspace folder). A click does nothing: it is not an edit toggle |
+| Edit button | Rendered greyed: the toolbar keeps the same five rows with 15 buttons, and the Edit button carries aria-disabled true, a dimmed icon and a not-allowed cursor. Its title and tooltip say "Editing is unavailable: this file is not in a trusted workspace" (untrusted workspace) or "Editing is unavailable: this file is not in a folder opened in the VS Code workspace" (file outside every workspace folder). A click does nothing: it is not an edit toggle |
 | Edit mode at start | Off (state.editMode is false whenever the toggle button is greyed), even when the context has initialEditMode true |
 | Edition palette | None built: no element with data-sphinx-edit-palette exists |
 | Palette mode message | previewPaletteModeChanged is never posted |
