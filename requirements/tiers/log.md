@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-10-28 (real-window scenarios leave edit mode off)
+
+- SwRS-MDOKFSTUDIO-BLOCK-004, SwRS-MDOKFSTUDIO-PALETTE-264 (CR 152): the paste-URL real-window
+  scenario left the workspace in edit mode, so the next scenario (windowSwitchKeys) opened its
+  preview in edit mode, never clicked the toggle and its arrow keys reached no page. The scenario
+  now turns edit mode off again; test/build/integrationEditModeRestore.test.ts checks every
+  top-level scenario that turns it on. No product behaviour changed; a known issue is recorded in
+  BLOCK-004 (a preview that has just opened holds no keyboard focus in the test window).
+  Verification: test/build/integrationEditModeRestore.test.ts, test/integration/windowSwitchKeys.test.ts.
+
 ## 2026-10-27 (MyST patches applied in memory, no postinstall)
 
 - SwRS-MDOKFSTUDIO-CORE-070 (CR 135): the three MyST source patches (including the single line

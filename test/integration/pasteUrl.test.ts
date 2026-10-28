@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as vscode from "vscode";
 
-import { disposeActivePreviewForTests, storeWorkspaceChoicesForTests } from "./extensionApi";
+import { disposeActivePreviewForTests, storedEditModeForTests, storeWorkspaceChoicesForTests } from "./extensionApi";
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
@@ -147,7 +147,17 @@ export async function run(): Promise<void> {
     await currentPreviewFrame(page);
     if (tag !== "before") assert.deepEqual(failures, [], failures.join("\n"));
     else console.log(`paste-url BEFORE state (not failing): ${JSON.stringify(failures)}`);
+    // CR 152: the workspace remembers the edit mode for the next preview. Leave it off, as the next
+    // scenarios expect: one that starts in edit mode never clicks the toggle and its page never
+    // takes the keyboard focus (windowSwitchKeys.test.ts timed out on its first ArrowDown).
+    await setEditMode(page, false);
+    await waitFor("the workspace to remember edit mode off", () => storedEditModeForTests() !== true);
   } finally {
+    try {
+      await setEditMode(page, false);
+    } catch {
+      // Best effort: a failure here must not hide the scenario's own result.
+    }
     disposeActivePreviewForTests();
     await pinStoredWorkspaceChoices();
     await workbench.update("colorTheme", originalTheme, vscode.ConfigurationTarget.Workspace);
