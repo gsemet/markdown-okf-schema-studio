@@ -295,6 +295,16 @@ export function installTextControls(rt: PageRuntime): TextControls {
     control.setSelectionRange(position, position);
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-255
+  // @implements_req SwRS-MDOKFSTUDIO-TABLE-118
+  /** A text field outside the editor took the focus after the editor opened. */
+  function focusMovedToAnotherField(edit: { element: HTMLElement; focusAtOpen?: Element | null }): boolean {
+    const active = document.activeElement;
+    if (!active || active === edit.focusAtOpen || edit.element.contains?.(active)) return false;
+    return ["INPUT", "TEXTAREA", "SELECT"].includes(String(active.tagName || "").toUpperCase())
+      || (active as HTMLElement).isContentEditable === true;
+  }
+
   return {
     boundaryNavigation,
     homeEndInControl,
@@ -305,5 +315,6 @@ export function installTextControls(rt: PageRuntime): TextControls {
     paletteShortcut,
     applyTextEdit,
     focusTextControlAtLastContent,
+    focusMovedToAnotherField,
   };
 }

@@ -435,6 +435,8 @@ export interface TextControls {
   paletteShortcut(event: KeyboardEvent, control: TextControl, onFallbackInput: () => void): boolean;
   applyTextEdit(control: TextControl, rawEdit: ControlTextEdit, onFallbackInput: () => void): void;
   focusTextControlAtLastContent(control: HTMLElement, caretPosition?: CaretPosition): void;
+  /** A text field outside the editor frame took the focus after the editor opened (the find field). */
+  focusMovedToAnotherField(edit: { element: HTMLElement; focusAtOpen?: Element | null }): boolean;
 }
 
 /** The block editor: open, save, autosave, close, flush (`features/blockEditor.ts`). */

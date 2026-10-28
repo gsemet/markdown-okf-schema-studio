@@ -21,6 +21,7 @@ derived_by: []
 implemented_in_files:
 - src/page/features/blockEditor.ts
 - src/page/features/blockSourceEditor.ts
+- src/page/features/textControls.ts
 tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/runtimeBlockEditor.test.ts
