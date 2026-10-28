@@ -8,6 +8,7 @@ import {
   COMMAND_ID,
   disposeActivePreviewForTests,
   getActivePreviewForTests,
+  storedEditModeForTests,
   storeWorkspaceChoicesForTests,
 } from "./extensionApi";
 import { E2E_REPORT_ROOT } from "../reportPaths";
@@ -18,13 +19,14 @@ async function waitFor(
   description: string,
   predicate: () => boolean | Promise<boolean>,
   timeoutMs = 15_000,
+  explain?: () => Promise<string>,
 ): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await predicate()) return;
     await new Promise<void>((resolve) => setTimeout(resolve, 25));
   }
-  throw new Error(`Timed out waiting for ${description}.`);
+  throw new Error(`Timed out waiting for ${description}.${explain ? ` State: ${await explain()}` : ""}`);
 }
 
 /** The first Studio webview frame that is showing now (the page may re-render between steps). */
@@ -101,7 +103,7 @@ export async function run(): Promise<void> {
     await vscode.window.showTextDocument(notes, vscode.ViewColumn.One);
     await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
     await vscode.commands.executeCommand(COMMAND_ID);
-    await waitFor("the rendered preview", async () => {
+    await settle("the rendered preview", async () => {
       const preview = getActivePreviewForTests();
       if (preview?.documentUri !== notes.uri.toString() || preview.phase !== "ready") return false;
       const frame = await liveFrame(page).catch(() => undefined);
@@ -113,11 +115,78 @@ export async function run(): Promise<void> {
     disposeActivePreviewForTests();
     await vscode.commands.executeCommand("workbench.action.closeAllEditors");
   };
+  // CR 169: what the host and the page hold when a step times out, so a heavy run explains itself:
+  // the edit mode, an open (or loading) editor, the focused element, the element under the title's
+  // centre (the test's click target), the find field and replace toggle, the table menu's box if
+  // one exists, and the tail of the page's editor trace. The host's `pageEditorOpen` stays true after
+  // an editor closed unchanged (Escape posts nothing) until the host next asks the page about it, so
+  // it alone does not mean an editor is open: the page fields say that.
+  const pageState = async (): Promise<string> => {
+    const preview = getActivePreviewForTests();
+    const host = { storedEditMode: storedEditModeForTests(), blockEditOpen: preview?.blockEditOpen, pageEditorOpen: preview?.pageEditorOpen };
+    const view = await liveFrame(page).then((live) => live.evaluate(() => {
+      const name = (element: Element | null | undefined): string => {
+        if (!element) return "none";
+        const data = Array.from(element.attributes).filter((attribute) => attribute.name.startsWith("data-"))
+          .slice(0, 3).map((attribute) => `[${attribute.name}]`).join("");
+        return `${element.tagName.toLowerCase()}${data}:${(element.textContent ?? "").trim().slice(0, 24)}`;
+      };
+      const root = document.documentElement;
+      const title = document.querySelector("#sphinx-myst-preview-content h1")?.getBoundingClientRect();
+      const menu = document.querySelector(".sphinx-preview-table-menu")?.getBoundingClientRect();
+      const toggle = document.querySelector("[data-find-toggle-replace]");
+      const diagnostics = (window as unknown as { __studioDiagnostics?: { trace(): unknown[] } }).__studioDiagnostics;
+      return {
+        editMode: root.getAttribute("data-sphinx-preview-edit-mode"),
+        blockEditing: root.hasAttribute("data-sphinx-preview-block-editing"),
+        editors: document.querySelectorAll("[data-sphinx-preview-block-editor]").length,
+        editing: name(document.querySelector("[data-sphinx-preview-editing], [data-sphinx-preview-table-cell-selected]")),
+        active: name(document.activeElement),
+        pageFocus: document.hasFocus(),
+        titleHit: title ? name(document.elementFromPoint(title.x + title.width / 2, title.y + title.height / 2)) : "no title",
+        findInput: document.querySelector<HTMLInputElement>("[data-find-input]")?.value,
+        findCount: document.querySelector("[data-find-count]")?.textContent,
+        replaceToggle: toggle ? `${toggle.getAttribute("aria-disabled") ?? "enabled"} ${toggle.getAttribute("title")}` : "none",
+        tableMenu: menu ? { x: menu.x, y: menu.y, width: menu.width, height: menu.height } : null,
+        trace: diagnostics?.trace().slice(-12),
+      };
+    })).catch((error: unknown) => `unreadable: ${String(error)}`);
+    return JSON.stringify({ host, page: view });
+  };
+  const settle = (description: string, predicate: () => boolean | Promise<boolean>, timeoutMs?: number): Promise<void> =>
+    waitFor(description, predicate, timeoutMs, pageState);
+  // CR 169: the suite runs this test in edit mode (an earlier test turned it on and the workspace
+  // remembers it), where a click on the title opens its block editor. That editor gets its source
+  // after a round trip to the host and takes the focus when it does: a Cmd/Ctrl+F pressed before then
+  // opened the find bar, the late editor took the focus back (the search text went into the
+  // Markdown source) and stayed open (replace refused "Save or cancel the open edit"). The click
+  // now waits for the editor to hold the focus and closes it with Escape (nothing changed, nothing
+  // saved): the frame keeps the keyboard focus and no editor is open or on its way.
+  const focusPageWithoutEdit = async (live: Frame): Promise<void> => {
+    if (await live.locator("html").getAttribute("data-sphinx-preview-edit-mode") !== "on") {
+      await live.locator("[data-sphinx-preview-edit-toggle]").click();
+      await settle("edit mode", async () =>
+        await (await liveFrame(page)).locator("html").getAttribute("data-sphinx-preview-edit-mode") === "on");
+    }
+    await live.locator("h1").first().click();
+    await settle("the title's block editor to hold the focus", async () => await (await liveFrame(page)).evaluate(() =>
+      document.hasFocus() && document.activeElement?.tagName === "TEXTAREA"
+      && document.activeElement.closest("[data-sphinx-preview-block-editor]") !== null));
+    await page.keyboard.press("Escape");
+    await settle("the block editor to close, the frame keeping the focus", async () => await (await liveFrame(page)).evaluate(() =>
+      document.hasFocus() && !document.documentElement.hasAttribute("data-sphinx-preview-block-editing")
+      && document.querySelector("[data-sphinx-preview-block-editor]") === null));
+  };
+  const assertReplaceAllowed = async (): Promise<void> => {
+    const toggle = (await liveFrame(page)).locator("[data-find-toggle-replace]");
+    assert.equal(await toggle.getAttribute("aria-disabled"), null, `the replace toggle is enabled; state: ${await pageState()}`);
+  };
   try {
     // Cream: the find bar over the page.
     let frame = await openPreview("cream", LIGHT_THEME);
-    await frame.locator("h1").first().click();
-    await waitFor("the preview frame to hold the keyboard focus", async () =>
+    if (before) await frame.locator("h1").first().click();
+    else await focusPageWithoutEdit(frame);
+    await settle("the preview frame to hold the keyboard focus", async () =>
       await (await liveFrame(page)).evaluate(() => document.hasFocus()));
     await page.keyboard.press(find);
     if (before) {
@@ -136,13 +205,14 @@ export async function run(): Promise<void> {
     }
 
     const bar = (live: Frame) => live.locator("[data-sphinx-preview-find]");
-    await waitFor("the find bar", async () => await bar(await liveFrame(page)).isVisible());
-    await waitFor("the find field to hold the focus", async () =>
-      await (await liveFrame(page)).evaluate(() => document.activeElement?.hasAttribute("data-find-input") === true));
+    const findFieldFocused = async (): Promise<boolean> =>
+      await (await liveFrame(page)).evaluate(() => document.activeElement?.hasAttribute("data-find-input") === true);
+    await settle("the find bar", async () => await bar(await liveFrame(page)).isVisible());
+    await settle("the find field to hold the focus", findFieldFocused);
     await page.keyboard.type("studio");
     const count = async (): Promise<string> => (await (await liveFrame(page)).locator("[data-find-count]").textContent()) ?? "";
     // Headline, paragraph x2, admonition, table, link, math, last words: "studio" in any case.
-    await waitFor("the match count", async () => /^1 of \d+$/u.test(await count()));
+    await settle("the match count", async () => /^1 of \d+$/u.test(await count()));
     const total = Number((await count()).split(" of ")[1]);
     assert.ok(total >= 7, `matches in rendered text (tables, admonitions, links): ${total}`);
     assert.equal(await (await liveFrame(page)).evaluate(() => CSS.highlights.get("studio-find")?.size ?? 0), total);
@@ -158,30 +228,31 @@ export async function run(): Promise<void> {
 
     // Match case narrows the matches; Escape closes the bar.
     await (await liveFrame(page)).locator("[data-find-case]").click();
-    await waitFor("a narrower count", async () => Number((await count()).split(" of ")[1]) < total);
+    await settle("a narrower count", async () => Number((await count()).split(" of ")[1]) < total);
     await (await liveFrame(page)).locator("[data-find-case]").click();
     await page.keyboard.press("Escape");
-    await waitFor("the bar to close", async () => !(await bar(await liveFrame(page)).isVisible()));
+    await settle("the bar to close", async () => !(await bar(await liveFrame(page)).isVisible()));
 
     // A match inside a folded section unfolds it.
     frame = await liveFrame(page);
     await frame.locator("h2", { hasText: "Details" }).locator("[data-okf-fold-toggle]").click();
-    await waitFor("the section to fold", async () =>
+    await settle("the section to fold", async () =>
       await (await liveFrame(page)).locator("h2", { hasText: "Details" }).getAttribute("data-okf-fold") === "closed");
     await page.keyboard.press(find);
     await page.keyboard.type("hidden gem");
-    await waitFor("the section to unfold", async () =>
+    await settle("the section to unfold", async () =>
       await (await liveFrame(page)).locator("h2", { hasText: "Details" }).getAttribute("data-okf-fold") === "open");
     assert.equal(await count(), "1 of 1");
 
     // Replace all: the matched spans only, one undo step; math, link target and the like are skipped.
     await (await liveFrame(page)).locator("[data-find-input]").fill("studio");
     await (await liveFrame(page)).locator("[data-find-case]").click();
+    await assertReplaceAllowed();
     await (await liveFrame(page)).locator("[data-find-toggle-replace]").click();
     await (await liveFrame(page)).locator("[data-find-replace-input]").fill("atelier");
     await shoot("cream-replace");
     await (await liveFrame(page)).locator("[data-find-replace-all]").click();
-    await waitFor("the document to change", () => notes.getText() !== SOURCE);
+    await settle("the document to change", () => notes.getText() !== SOURCE);
     const replaced = SOURCE
       .replace("and the studio keeps", "and the atelier keeps")
       .replace("the studio table cell", "the atelier table cell");
@@ -190,7 +261,7 @@ export async function run(): Promise<void> {
     const readNote = async (): Promise<string> =>
       await (await liveFrame(page)).locator("[data-find-note]").textContent() ?? "";
     let note = "";
-    await waitFor("the host's final replace answer in the find note", async () => {
+    await settle("the host's final replace answer in the find note", async () => {
       note = await readNote();
       return note !== "" && !/^Replacing/u.test(note);
     }).catch((error: unknown) => {
@@ -200,16 +271,18 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
     await vscode.window.showTextDocument(notes, vscode.ViewColumn.One);
     await vscode.commands.executeCommand("undo");
-    await waitFor("one undo step to restore the source", () => notes.getText() === SOURCE);
+    await settle("one undo step to restore the source", () => notes.getText() === SOURCE);
     await closePreview();
 
     // Dark.
     frame = await openPreview("dark", DARK_THEME);
-    await frame.locator("h1").first().click();
+    await focusPageWithoutEdit(frame);
     await page.keyboard.press(find);
-    await waitFor("the find bar", async () => await bar(await liveFrame(page)).isVisible());
+    await settle("the find bar", async () => await bar(await liveFrame(page)).isVisible());
+    await settle("the find field to hold the focus", findFieldFocused);
     await page.keyboard.type("studio");
-    await waitFor("the match count", async () => /^1 of \d+$/u.test(await count()));
+    await settle("the match count", async () => /^1 of \d+$/u.test(await count()));
+    await assertReplaceAllowed();
     await (await liveFrame(page)).locator("[data-find-toggle-replace]").click();
     await (await liveFrame(page)).locator("[data-find-replace-input]").fill("atelier");
     await shoot("dark-find");

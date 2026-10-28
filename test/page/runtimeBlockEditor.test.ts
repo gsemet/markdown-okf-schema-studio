@@ -1248,3 +1248,36 @@ test("ArrowUp from the first body block under a properties table keeps the edito
   assert.equal(harness.messages.length, before, "no message is posted");
   assert.equal(first.getAttribute("data-sphinx-preview-editing"), "true", "the editor stays open");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
+test("CR 169: a block source that arrives after the find bar took the focus leaves it in the find field", () => {
+  const harness = createRuntimeHarness({ trackFocus: true });
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  const editId = harness.messages.at(-1)?.editId;
+  assert.equal(harness.messages.at(-1)?.type, "previewEditOpen");
+  // Cmd/Ctrl+F before the source came back: the find bar opens and its field takes the focus.
+  harness.dispatchMessage({ type: "previewFindCommand", documentId: "file:///active.md", revision: 7, requestId: 11, command: "open" });
+  const findInput = harness.createdElements.find((element) => element.getAttribute("data-find-input") !== null);
+  assert.ok(findInput, "the find bar is built");
+  assert.equal(harness.document.activeElement, findInput);
+  harness.dispatchMessage({
+    type: "previewEditSource", documentId: "file:///active.md", revision: 7, requestId: 11, editId,
+    originalText: "Raw line one\nRaw line two\n",
+  });
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea, "the editor is built");
+  assert.equal(harness.document.activeElement, findInput, "the find field keeps the focus");
+  assert.equal(textarea.focusOptions, undefined, "the text box was not focused");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
+test("CR 169: a block source that arrives with the focus still on the page takes the focus", () => {
+  const harness = createRuntimeHarness({ trackFocus: true });
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  sourceReply(harness, "Raw line one\nRaw line two\n");
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea);
+  assert.equal(harness.document.activeElement, textarea);
+});

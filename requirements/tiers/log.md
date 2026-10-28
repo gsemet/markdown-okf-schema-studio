@@ -1,5 +1,18 @@
 # Update Log
 
+## 2026-10-28 (a late block editor leaves the focus in the find field, CR 169)
+
+- SwRS-MDOKFSTUDIO-BLOCK-255 (new, proposed): a block editor whose source reaches the page after
+  another text field outside it took the focus (the find field, opened with Cmd/Ctrl+F right after
+  the click that opened the editor) is built without taking the focus, so the search text no longer
+  lands in the Markdown source (heavy CI on eca17c42, find-in-preview: "Timed out waiting for the
+  match count" and "Save or cancel the open edit before replacing."). Verification:
+  test/page/runtimeBlockEditor.test.ts.
+- SwRS-MDOKFSTUDIO-TOOLBAR-012: the real-window find check runs in edit mode (the suite leaves it
+  on), where its click on the title opens the title's block editor. It now waits for that editor
+  to hold the focus, closes it with Escape and waits for no editor before Cmd/Ctrl+F; its waits
+  report the page and host state on failure. Verification: test/integration/findInPreview.test.ts.
+
 ## 2026-10-28 (table bar above the row handles, CR 168)
 
 - SwRS-MDOKFSTUDIO-TABLE-064: the table bar is positioned in the flow with a z-index above the row

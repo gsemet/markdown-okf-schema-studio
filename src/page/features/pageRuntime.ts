@@ -124,6 +124,8 @@ export interface BlockEdit {
   tableRowIndex?: number;
   tableColumnIndex?: number;
   initialCaretPosition: CaretPosition;
+  /** The element that held the focus when the editor opened (its source was not there yet). */
+  focusAtOpen?: Element | null;
   /** The host refused to open this editor: the frame holds the reason and a way out. */
   openRefused?: boolean;
   originalText?: string;
