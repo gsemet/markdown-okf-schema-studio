@@ -11,7 +11,7 @@ import numpy as np
 FF = "/opt/homebrew/bin/ffmpeg"
 OW, OH, FPS = 1080, 1920, 30
 BAND = 300                    # top band for subtitles; the 1080x1620 window capture sits below it
-SPEED, COVER, END, XF, WIPE, HOLD_RAW = 1.1, 1.5, 3.0, 0.5, 0.7, 0.3
+SPEED, COVER, END, XF, WIPE, HOLD_RAW = 1.21, 1.5, 3.0, 0.5, 0.7, 0.3
 raw_dir, pre_dir, out = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]); out.mkdir(parents=True, exist_ok=True)
 logo_path = Path(__file__).resolve().parents[2] / "images" / "logo.png"
 

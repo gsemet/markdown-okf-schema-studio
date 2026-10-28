@@ -10,7 +10,7 @@ import numpy as np
 FF = "/opt/homebrew/bin/ffmpeg"
 OW, OH, FPS = 1920, 1080, 30
 WH = 940                      # window region height; the strip below (140 px) holds the subtitles
-SPEED, COVER, END, XF = 1.1, 1.5, 3.0, 0.5
+SPEED, COVER, END, XF = 1.21, 1.5, 3.0, 0.5
 take, out = Path(sys.argv[1]), Path(sys.argv[2]); out.mkdir(parents=True, exist_ok=True)
 logo_path = Path(__file__).resolve().parents[2] / "images" / "logo.png"
 fr = json.load(open(take / "frames.json")); ev = json.load(open(take / "events.json"))

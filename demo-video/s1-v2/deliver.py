@@ -8,9 +8,11 @@ FF = "/opt/homebrew/bin/ffmpeg"; hd, vd = Path(sys.argv[1]), Path(sys.argv[2])
 subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(hd / "s1-h.mp4"), "-vf",
     "fps=12,scale=960:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=160:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4",
     str(hd / "s1-h.gif")], check=True)
+def dur(mp4):
+    return float(subprocess.check_output(["/opt/homebrew/bin/ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(mp4)]))
 def sheet(mp4, out, times, tw, th, cols):
-    tiles = []
-    for t in times:
+    tiles = []; k = (dur(mp4) - 0.3) / max(times)   # spread the stills over the whole video
+    for t in [round(t * k, 1) for t in times]:
         p = out.parent / "_c.png"
         subprocess.run([FF, "-y", "-loglevel", "error", "-ss", str(t), "-i", str(mp4), "-frames:v", "1", "-vf", f"scale={tw}:{th}", str(p)], check=True)
         tiles.append((t, Image.open(p).copy())); p.unlink()
