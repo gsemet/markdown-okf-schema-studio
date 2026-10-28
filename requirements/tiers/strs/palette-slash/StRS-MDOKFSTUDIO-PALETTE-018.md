@@ -20,6 +20,7 @@ user_need: As a writer, I paste a screenshot and it becomes a picture of the
   block, with no script or tracking content that a later reader could be exposed
   to.
 derived_by:
+- SwRS-MDOKFSTUDIO-PALETTE-004
 - SwRS-MDOKFSTUDIO-PALETTE-196
 - SwRS-MDOKFSTUDIO-PALETTE-203
 - SwRS-MDOKFSTUDIO-PALETTE-213

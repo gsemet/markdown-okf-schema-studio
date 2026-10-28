@@ -37,6 +37,7 @@ import { run as runPaletteMode } from "./paletteMode.test";
 import { run as runPreviewHistory } from "./previewHistory.test";
 import { run as runEditKeys } from "./editKeys.test";
 import { run as runPasteUrl } from "./pasteUrl.test";
+import { run as runDropFiles } from "./dropFiles.test";
 import { run as runWindowSwitchKeys } from "./windowSwitchKeys.test";
 import { run as runRealInput } from "./realInput/run";
 import { run as runLifecycle } from "./lifecycle.test";
@@ -57,6 +58,10 @@ export async function run(): Promise<void> {
   // CDP input and the undo steps need a window macOS has activated (windowFocus.ts).
   await ensureTestWindowFocused();
   // The block actions scenario needs no fixture document: it runs before the shared preview.md checks.
+  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "drop-files") {
+    await runDropFiles();
+    return;
+  }
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "paste-url") {
     await runPasteUrl();
     return;
@@ -169,6 +174,7 @@ export async function run(): Promise<void> {
   }
   await runEditKeys();
   await runPasteUrl();
+  await runDropFiles();
   await runWindowSwitchKeys();
   await runPreviewHistory();
   await runPaletteMode();

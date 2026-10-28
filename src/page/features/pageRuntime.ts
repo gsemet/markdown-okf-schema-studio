@@ -543,6 +543,11 @@ export interface InsertPoints {
   bindKeys(): void;
 }
 
+/** Files dragged from the Explorer onto the page (`features/fileDrop.ts`). */
+export interface FileDrop {
+  bindEvents(): void;
+}
+
 /** Moves of blocks and block selections (`features/blockMoves.ts`). */
 export interface BlockMoves {
   /** True while a keyboard move waits for its result and render. */
@@ -625,6 +630,7 @@ export interface PageRuntime {
   frontmatter: FrontmatterEditor;
   selection: BlockSelectionView;
   insertPoints: InsertPoints;
+  fileDrop: FileDrop;
   blockMoves: BlockMoves;
   tableRowMove: TableRowMove;
   editMode: EditMode;

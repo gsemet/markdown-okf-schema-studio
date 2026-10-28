@@ -119,6 +119,12 @@ environments),
   address (`.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`) gives `![](url)` (`![text](url)` over
   selected text). Cmd/Ctrl+Shift+V pastes the address as it is. Inside code, inside the target of a
   link and for any other scheme the paste is left as plain text. Only the pasted span changes.
+  Dropping files from the VS Code Explorer onto the page in edit mode (hold Shift while dropping,
+  otherwise VS Code opens the file) shows a line at the nearest gap between blocks and writes a new
+  block there with one link per file, relative to the document: `[First heading](relative%20path.md)`
+  for a Markdown file (its name when it has no heading), `![name](relative/path.png)` for an image
+  and `[name](path)` for any other file. Files outside the workspace folders are skipped, and
+  nothing happens while a block editor is open. The drop is one undo step.
   A select at its start (Cmd/Ctrl+Shift+M) chooses the Strict, GFM, MyST or Full button set for the
   workspace (GFM until you choose, or the `editing.defaultPaletteMode` setting).
   The palette sits just above the text box, never over its text; when you scroll so the top of the
