@@ -53,6 +53,27 @@ function checkSpan(text: string, span: BlockSpan): BlockRangeRefusal | undefined
   return undefined;
 }
 
+const DISAGREE_ON_LINES =
+  "The preview and the document disagree about this block's lines. Refresh the preview and try again.";
+
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-256
+/**
+ * Validates the lines the page sends to edit one block: integers in the document, and a first line
+ * that is not blank. The last line may be blank because the renderer ends a list, or a list item
+ * followed by a blank line, on that blank separator; the text of the range is still the block's.
+ * The frontmatter is not refused here: only the shape of the range is checked.
+ */
+export function checkBlockLines(text: string, line: number, endLine: number): BlockRangeRefusal | undefined {
+  if (!Number.isSafeInteger(line) || !Number.isSafeInteger(endLine) || line < 1 || endLine < line) {
+    return { refused: DISAGREE_ON_LINES };
+  }
+  const lines = splitLines(text);
+  if (endLine > lines.length || isBlank(lines[line - 1].text)) {
+    return { refused: DISAGREE_ON_LINES };
+  }
+  return undefined;
+}
+
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-166
 /**
  * The exact source text of the lines `line`..`endLine`, without the final line break, with the
