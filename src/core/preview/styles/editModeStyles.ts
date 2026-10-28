@@ -168,6 +168,17 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   opacity: 1;
 }
 
+#sphinx-myst-preview-content .sphinx-preview-insert-point--start [data-sphinx-preview-start-hint] {
+  margin-block-start: 10px;
+  line-height: 1.4;
+}
+
+/* The keyboard selection of an empty document: the ring of a selected block. */
+html[data-sphinx-preview-edit-mode="on"] .sphinx-preview-insert-point--start button[data-sphinx-preview-start-selected="true"] {
+  outline: 2px solid var(--studio-focusBorder, Highlight);
+  outline-offset: 3px;
+}
+
 .sphinx-preview-block-editor {
   position: relative;
   z-index: 1;
@@ -248,7 +259,8 @@ html[data-sphinx-preview-block-editing="true"] .sphinx-preview-insert-point .sph
   color: var(--studio-button-foreground, HighlightText);
 }
 
-.sphinx-preview-block-editor [data-sphinx-preview-edit-status] {
+.sphinx-preview-block-editor [data-sphinx-preview-edit-status],
+#sphinx-myst-preview-content .sphinx-preview-insert-point--start [data-sphinx-preview-start-hint] {
   margin: 6px 0 0;
   color: var(--studio-descriptionForeground, GrayText);
   font-size: 0.75em;
