@@ -9,7 +9,7 @@ export interface ToolbarCollapseContext {
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-170
 /**
- * Collapse button of toolbar row 1: hides or shows rows 2 and 3 (the `hidden` attribute also
+ * Collapse button of toolbar row 1: hides or shows rows 2 to 5 (the `hidden` attribute also
  * takes them out of the Tab order). The choice is the `toolbarCollapsed` view preference:
  * posted to the host (kept per workspace) and mirrored on `<html>` as
  * `data-sphinx-preview-toolbar-state` ("expanded" / "collapsed"). Without a stored choice the toolbar

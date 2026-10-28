@@ -50,6 +50,7 @@ function listRows(text: string): string[][] {
   return rows;
 }
 
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-064
 export async function scenarioTableStructure(page: Page): Promise<void> {
   const fixture = createFixture("realinput-t114", { "structure.md": SOURCE });
   try {

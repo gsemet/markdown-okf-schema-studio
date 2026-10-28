@@ -6,7 +6,7 @@ export interface IncomingToggleContext {
 }
 
 /**
- * Diff button of toolbar row 2: shows or hides the incoming-change marks (green bars).
+ * Diff button of toolbar row 5: shows or hides the incoming-change marks (green bars).
  * The choice is the `incomingChanges` view preference: it is posted to the host (which stops or
  * starts sending line ranges and keeps it per workspace) and mirrored on `<html>` as
  * `data-sphinx-preview-incoming` ("on" / "off"), so CSS hides the marks at once. Whether the

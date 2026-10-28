@@ -605,7 +605,7 @@ test("T17: the Diff button is hidden through the document attribute when the set
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-007
-test("P8: the collapse button hides rows 2-3, posts the preference and keeps the state", () => {
+test("P8: the collapse button hides rows 2 to 5, posts the preference and keeps the state", () => {
   // A workspace that stored the expanded toolbar (the fresh default is collapsed).
   const harness = createRuntimeHarness({
     initialViewPreferences: { zoom: 100, widthMode: "margin", toc: false, incomingChanges: true, comments: true, toolbarCollapsed: false },
@@ -652,7 +652,7 @@ test("P8: the stored preference and the saved webview state decide the collapsed
 // @tests_req SwRS-MDOKFSTUDIO-THEME-001
 test("fresh workspace: the toolbar starts collapsed and the preview theme starts in cream", () => {
   const fresh = createRuntimeHarness();
-  assert.equal(fresh.moreRows.hidden, true, "rows 2 and 3 are hidden without a stored choice");
+  assert.equal(fresh.moreRows.hidden, true, "rows 2 to 5 are hidden without a stored choice");
   assert.equal(fresh.collapseButton.getAttribute("aria-expanded"), "false");
   assert.equal(fresh.collapseButton.getAttribute("aria-label"), "Show view controls");
   assert.equal(fresh.documentElement.getAttribute("data-sphinx-preview-toolbar-state"), "collapsed");

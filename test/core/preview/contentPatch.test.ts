@@ -286,7 +286,7 @@ test("T08: two renders with different zoom have the same shell key and the same 
   const first = await page("# Title\n\nText.\n", { requestId: 21, version: 21, zoom: 100 });
   const second = await page("# Title\n\nText.\n", { requestId: 23, version: 23, zoom: 130 });
   assert.match(first, /data-sphinx-preview-zoom-out/u);
-  assert.match(first, /data-sphinx-preview-toolbar-row="view"/u);
+  assert.match(first, /data-sphinx-preview-toolbar-row="appearance"/u);
   assert.equal(shellKey(first), shellKey(second));
   assert.equal(canPatch(first, second), true);
   const base = { documentId: "file:///a.md", activeSourceFile: "/a.md" };

@@ -65,7 +65,7 @@ As a writer or team, I choose how wide the text column is, from a narrow measure
 - Accepted values of the width setting are 0 to 2400 pixels (default 960, step 50 in the settings UI): 1 to 2400 limits and centres the column, 0 lifts the limit, a larger value is cut to 2400, a negative or non-numeric value falls back to 960 and a decimal is rounded.
 - At 100% zoom a pane wider than the cap shows a column exactly the cap wide and centred (960 px by default in a 1600 px pane, 1400 px in a 2000 px pane); the zoom scaling of the column belongs to the theme-zoom scope.
 - The rule is written into each rendered page, and a change of the setting updates open previews from their last good render without reloading the editor.
-- The Width button sits in the third toolbar row (the options row, after Theme); the placement itself is checked by the toolbar-navigation scope.
+- The Width button sits in the fourth toolbar row (the layout row, with Table of contents); the placement itself is checked by the toolbar-navigation scope.
 - The order is Margin, Auto, Full width, then Margin again; the icon, label and tooltip read "Width: Margin", "Width: Auto" and "Width: Full width".
 - The choice is kept per workspace: at start the saved page state wins over the stored workspace preference, which wins over Margin; an invalid value is ignored and Margin applies.
 - In Auto, a table, figure, image, code block or Mermaid diagram wider than the column uses the available width, centred and clear of the pane edges; elements not wider are left alone, and a gain of 1 px or less is ignored.
@@ -78,6 +78,6 @@ As a writer or team, I choose how wide the text column is, from a narrow measure
 - In every mode a table or figure narrower than the column is centred at its own width, a narrow figure and its caption are centred under the picture, a paragraph holding only an image is marked as a figure, and code blocks stay left with their width.
 - Known issue: docs/user/settings.md says that with the setting at 0 the three width modes look the same, which is not exact because Full width keeps a 16 px gutter while the other modes keep up to 78 px.
 - Known issue: the update of an open preview after a setting change has no automated test.
-- Known issue: the code and docs/user/toolbar.md put the button on row 3, while the file header of the width mode module and an older bullet of the Unreleased change-log entry say row 2.
+- Known issue: the code and docs/user/toolbar.md put the button on row 4, while the file header of the width mode module and an older bullet of the Unreleased change-log entry say row 2.
 - Known issue: the paths for %/em/rem figures, declared pixel widths, the Mermaid wrapper and the 1 px tolerance are not directly tested, and no visual scenario combines the open table-of-contents column with Auto.
 - Known issue: some visual scenario titles (`v05`, `v06` "full") do not match what they assert.

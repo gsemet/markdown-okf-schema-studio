@@ -767,13 +767,18 @@ def check_code_copy(page: Page, scenario: dict, failures: list[Failure]) -> None
     return {
       pre: { top: pre.top, right: pre.right, left: pre.left },
       rect: { top: rect.top, right: rect.right, width: rect.width, height: rect.height },
+      toolbar: bar ? { left: bar.left, right: bar.right, bottom: bar.bottom } : null,
       overlaps: !!bar && rect.left < bar.right && rect.right > bar.left && rect.top < bar.bottom && rect.bottom > bar.top,
     };
   }""")
   rect, pre = geometry["rect"], geometry["pre"]
   if abs(rect["width"] - 26) > 1 or abs(rect["height"] - 26) > 1:
     failures.append(Failure(page_name, f"copy button is {rect['width']}x{rect['height']}, expected 26x26"))
-  if abs((pre["right"] - rect["right"]) - 6) > 2 or abs((rect["top"] - pre["top"]) - 6) > 2:
+  # CR 153 (SwRS CODE-017): below the floating toolbar when it covers the corner (the five-row toolbar reaches below the first block).
+  toolbar = geometry["toolbar"]
+  covered = bool(toolbar) and pre["top"] + 6 < toolbar["bottom"] + 4 and rect["right"] - rect["width"] < toolbar["right"] and rect["right"] > toolbar["left"]
+  expected_top = toolbar["bottom"] + 4 if covered else pre["top"] + 6
+  if abs((pre["right"] - rect["right"]) - 6) > 2 or abs(rect["top"] - expected_top) > 2:
     failures.append(Failure(page_name, f"copy button is not 6px inside the block's top right: {geometry}"))
   if geometry["overlaps"]:
     failures.append(Failure(page_name, "the copy button overlaps the floating toolbar"))
@@ -1324,6 +1329,7 @@ def check_table_toolbar_tall(page: Page, scenario: dict, failures: list[Failure]
       stuck: menu ? menu.getAttribute('data-sphinx-table-menu-stuck') : null,
       covered: !(hit && menu && (hit === menu || menu.contains(hit))),
       scrollY: window.scrollY, viewport: window.innerHeight,
+      readingOffset: parseFloat(document.documentElement.style.getPropertyValue('--sphinx-preview-reading-offset')) || 0,
       focusInCell: Boolean(document.activeElement && document.activeElement.closest('td, th')),
       docWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth,
     };
@@ -1344,7 +1350,9 @@ def check_table_toolbar_tall(page: Page, scenario: dict, failures: list[Failure]
   save_step(page, scenario, "top", caret="hide")
 
   def usable_top(state: dict) -> float:
-    usable = 0.0
+    # The reading area starts at the reading offset the page reserves for the band, or the band's
+    # bottom when it is lower; the floating toolbar counts only where it shares columns with the bar.
+    usable = float(state["readingOffset"])
     if state["band"]:
       usable = max(usable, state["band"]["bottom"])
     toolbar = state["toolbar"]

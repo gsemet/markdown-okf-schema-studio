@@ -25,6 +25,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/core/preview/previewStatus.ts
+- src/core/preview/styles/pageChromeStyles.ts
 - src/page/features/statusRegion.ts
 - src/session/features/pageDocument.ts
 - src/session/sessionFactory.ts
@@ -88,7 +89,7 @@ When the preview shows a render state, the extension SHALL label the status Prev
 
 | Input | Outcome |
 | --- | --- |
-| the notice shown with the toolbar expanded | the notice is fixed 14 px from the right and 128 px from the top, with pointer-events none and no effect on the layout |
+| the notice shown with the toolbar expanded | the notice is fixed 14 px from the right and 192 px from the top (below the five rows of the toolbar), with pointer-events none and no effect on the layout |
 | the toolbar collapsed to its first row | the notice sits 62 px from the top |
 
 ### Related requirements
@@ -102,5 +103,5 @@ When the preview shows a render state, the extension SHALL label the status Prev
 - Method: test/node-services/build/buildQueue.test.ts "retains a successful result as stale after a failed newer build" (recovery).
 - Method: test/host/previewTiming.test.ts "a render pending for 1500 ms over a ready page shows the overlay, hidden again before the patch", "a render that finishes before 1500 ms never shows the overlay" and "a preview disposed while its render is debouncing, building or awaiting a patch acknowledgement stays silent" (pending render over a shown page, the 1.5 second notice); the nothing-shown case is by reading handleQueueState, the pending message texts of the pending render are untested there, and the clearing of the notice on assignment is by reading assignWebviewHtml.
 - Method: test/host/lifeReq.requirements.test.ts "pending renders say Waiting for the latest edit. then Rendering the active buffer.", "a notice that falls due while the page is loading is posted when the page is ready" and "a failed render of a document that was not shown yet shows Preview unavailable" (checked by reading handleQueueState, armPendingOverlay, onReady and showRenderFailure); the page half of the notice is test/page/pageMessages.test.ts (host message previewPendingOverlay).
-- Method: test/core/preview/previewStyles.test.ts "T43: the pending overlay is fixed, pointer-transparent and never in flow" and "T08: zoom scales the content font size and the column width together" (the 128 px and 62 px offsets).
+- Method: test/core/preview/previewStyles.test.ts "T43: the pending overlay is fixed, pointer-transparent and never in flow" and "T08: zoom scales the content font size and the column width together" (the 160 px and 62 px offsets).
 - Criteria: the aside of the status region holds the label of the status; the first page holds the pending status region; htmlAssignments does not grow while the render is pending; overlay.message holds the text of the phase; pendingOverlayShown is 1 for the slow case and 0 for the fast case; overlay.due is set by the timer and consumed by onReady; overlay.visible and overlay.due are false after a changed assignment; status is error when the stage identity differs from the session document; the status is recovery once and success afterwards; the stylesheet rule holds position fixed, pointer-events none and the two offsets.

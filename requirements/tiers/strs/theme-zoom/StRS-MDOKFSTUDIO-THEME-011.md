@@ -41,7 +41,7 @@ As a reader, I enlarge or shrink the text with two buttons, the column grows or 
 
 ### Rationale and constraints
 
-- The buttons are on toolbar row 2; the range 70 to 200 % is stated in the CHANGELOG, docs/user/toolbar.md only lists the buttons.
+- The buttons are on toolbar row 3; the range 70 to 200 % is stated in the CHANGELOG, docs/user/toolbar.md only lists the buttons.
 - Zoom starts at 100 %. At 70 % or 200 % the matching button is disabled.
 - The toolbar buttons keep their size; only the content text, the heading band text and the column scale.
 - The page never scrolls sideways at any zoom (layout-width requirements).

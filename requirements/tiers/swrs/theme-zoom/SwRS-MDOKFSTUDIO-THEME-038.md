@@ -38,7 +38,7 @@ When the reader presses the Zoom in button below 200 % or the Zoom out button ab
 
 ### Scenario (nominal): Zoom in, one step
 
-- GIVEN a page at 100 % and the Zoom in button on toolbar row 2 (accessible name "Zoom in")
+- GIVEN a page at 100 % and the Zoom in button on toolbar row 3 (accessible name "Zoom in")
 - WHEN the button is clicked
 - THEN --sphinx-preview-zoom is 1.1, data-sphinx-preview-zoom is 110 and one previewViewPreferenceChanged message with value 110 is posted (stored under SwRS-MDOKFSTUDIO-LIFE-169)
 
@@ -50,7 +50,7 @@ When the reader presses the Zoom in button below 200 % or the Zoom out button ab
 
 ### Scenario (nominal): Zoom out, two steps
 
-- GIVEN a page at 110 % and the Zoom out button on toolbar row 2 (accessible name "Zoom out")
+- GIVEN a page at 110 % and the Zoom out button on toolbar row 3 (accessible name "Zoom out")
 - WHEN the button is clicked twice
 - THEN data-sphinx-preview-zoom reads 100, then 90 and the last posted message carries the value 90
 

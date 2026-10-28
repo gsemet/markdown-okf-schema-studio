@@ -382,6 +382,53 @@ async function pointIn(page: Page, selector: string, at: { x: number; y: number 
   return { x: box.x + box.width * at.x, y: box.y + box.height * at.y };
 }
 
+/**
+ * The geometry around `point` (workbench coordinates), for an assertion message: the preview frame,
+ * the floating toolbar, the table, the column handles and the element under the point.
+ */
+async function dropGeometry(page: Page, point: { x: number; y: number }): Promise<string> {
+  try {
+    return await withCurrentFrame(page, async (frame) => {
+      const frameBox = await (await frame.frameElement()).boundingBox();
+      const local = { x: point.x - (frameBox?.x ?? 0), y: point.y - (frameBox?.y ?? 0) };
+      const inside = await frame.locator("html").evaluate((root, at) => {
+        const rect = (element: Element | null): string => {
+          if (!element) return "none";
+          const box = element.getBoundingClientRect();
+          return `${Math.round(box.left)},${Math.round(box.top)} ${Math.round(box.width)}x${Math.round(box.height)}`;
+        };
+        const doc = root.ownerDocument;
+        const hit = doc.elementFromPoint(at.x, at.y);
+        const path: string[] = [];
+        for (let element = hit; element && path.length < 4; element = element.parentElement) {
+          const attributes = Array.from(element.attributes).map((attribute) => attribute.name)
+            .filter((name) => name.startsWith("data-")).slice(0, 2).join(",");
+          path.push(`${element.tagName.toLowerCase()}${element.className ? "." + String(element.className).split(" ").join(".") : ""}${attributes ? `[${attributes}]` : ""}`);
+        }
+        const handles = Array.from(doc.querySelectorAll(".okf-table-col-handle")).map(rect).join(" | ");
+        return `viewport ${doc.documentElement.clientWidth}x${doc.documentElement.clientHeight}, scroll ${Math.round(window.scrollY)}; `
+          + `toolbar ${rect(doc.querySelector("[data-sphinx-preview-toolbar]"))}; `
+          + `table ${rect(doc.querySelector("#sphinx-myst-preview-content table"))}; column handles ${handles}; `
+          + `under the pointer ${path.join(" < ") || "nothing"}`;
+      }, local);
+      return `pointer ${Math.round(local.x)},${Math.round(local.y)} in the frame at ${Math.round(frameBox?.x ?? 0)},${Math.round(frameBox?.y ?? 0)}; ${inside}`;
+    });
+  } catch (error) {
+    return `geometry unavailable: ${String(error)}`;
+  }
+}
+
+/** Whether the element the page finds at `point` (workbench coordinates) is in the floating toolbar. */
+async function underToolbar(page: Page, point: { x: number; y: number }): Promise<boolean> {
+  return withCurrentFrame(page, async (frame) => {
+    const frameBox = await (await frame.frameElement()).boundingBox();
+    assert.ok(frameBox, "the preview frame has a box");
+    return frame.locator("html").evaluate((root, at) =>
+      root.ownerDocument.elementFromPoint(at.x, at.y)?.closest("[data-sphinx-preview-toolbar]") != null,
+    { x: point.x - frameBox.x, y: point.y - frameBox.y });
+  });
+}
+
 /** Saves a screenshot of the drag for the PR when STUDIO_T128_SHOTS names a folder. */
 async function dropShot(page: Page, name: string): Promise<void> {
   const folder = process.env.STUDIO_T128_SHOTS;
@@ -404,6 +451,7 @@ async function setPreviewTheme(page: Page, mode: "dark" | "cream"): Promise<void
 }
 
 // @tests_req SwRS-MDOKFSTUDIO-TABLE-007
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-001
 /**
  * CR 128: while a column handle is held, the strip of the handles above the table and every cell
  * of a column are a drop zone (the marker shows on the nearest gap and follows the pointer); a
@@ -419,10 +467,16 @@ async function scenarioColumnDropZone(page: Page, syntax: "pipe" | "list-table")
     const handleBox = await withCurrentFrame(page, (frame) => frame.locator(COLUMN_HANDLE(2)).first().boundingBox());
     const header = await pointIn(page, `${TABLE} th:nth-child(3)`, { x: 0.8, y: 0.5 });
     assert.ok(handleBox, "the handle of the third column has a box");
-    await holdAt(page, { x: header.x, y: handleBox.y + handleBox.height / 2 });
+    const stripPoint = { x: header.x, y: handleBox.y + handleBox.height / 2 };
+    await holdAt(page, stripPoint);
     await dropShot(page, `${syntax}-${theme}-column-strip`);
+    // At the 1400x900 window the floating toolbar, three buttons wide (102 px), ends right of the strip point.
+    const geometry = await dropGeometry(page, stripPoint);
+    console.log(`table moves: ${syntax} column strip geometry: ${geometry}`);
+    assert.equal(await underToolbar(page, stripPoint), false,
+      `the floating toolbar does not cover the handle strip (${geometry})`);
     assert.deepEqual(await dropMarker(page, "column"), { index: 2, side: "after" },
-      "the marker shows after the third column while the pointer is in the handle strip");
+      `the marker shows after the third column while the pointer is in the handle strip (${await dropGeometry(page, stripPoint)})`);
     // Over a body cell in the middle of the second column, on its right half.
     await holdAt(page, await pointIn(page, `${TABLE} tbody tr:nth-child(2) td:nth-child(2)`, { x: 0.75, y: 0.5 }));
     await dropShot(page, `${syntax}-${theme}-column-middle`);

@@ -5,7 +5,7 @@ The [project README](../../README.md) shows what Studio does. These pages hold t
 - [Install and Open Studio](open-studio.md): Marketplace install, Open With, preview to the side.
 - [Features and Inline Editing](editing.md): MyST rendering, block editing, the edition palette,
   block selection, rich paste.
-- [Floating Toolbar](toolbar.md): the three rows of buttons and the collapse chevron.
+- [Floating Toolbar](toolbar.md): the five rows of buttons and the collapse chevron.
 - [Folding Sections](folding.md): fold and unfold the sections under headings, the Fold button and
   the command palette.
 - [Find and Replace](find.md): `Cmd/Ctrl+F` in the preview, match options, replace in the source.

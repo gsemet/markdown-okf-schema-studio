@@ -15,17 +15,17 @@ from capture_support import Failure, HERE, VISUAL_REPORT_DIR, report_path, save_
 
 
 def check_diff_toggle(page: Page, toolbar, page_name: str, failures: list[Failure], starts_pressed: bool = True) -> None:
-    """The Diff button is second to last in row 3 (Comments is last), shows both states, and hides with the setting. It starts pressed unless the scenario starts with the view preference off."""
+    """The Diff button is second to last in row 5 (Comments is last), shows both states, and hides with the setting. It starts pressed unless the scenario starts with the view preference off."""
     diff = toolbar.locator('[data-sphinx-preview-diff-toggle]')
     if diff.count() != 1:
         return
     order = toolbar.evaluate(
-        """element => [...element.querySelector('[data-sphinx-preview-toolbar-row="options"]').children]
+        """element => [...element.querySelector('[data-sphinx-preview-toolbar-row="content"]').children]
           .map(item => item.getAttribute('aria-label'))"""
     )
     hide_label, show_label = "Hide changes since last commit", "Show changes since last commit"
     if not order or order[-2:] != [hide_label if starts_pressed else show_label, "Hide comments"]:
-        failures.append(Failure(page_name, f"the Diff and Comments buttons are not the last two of row 3: {order}"))
+        failures.append(Failure(page_name, f"the Diff and Comments buttons are not the last two of row 5: {order}"))
     root = "document.documentElement.getAttribute('data-sphinx-preview-incoming')"
     try:
         if diff.get_attribute("aria-pressed") != ("true" if starts_pressed else "false") or page.evaluate(root) != ("on" if starts_pressed else "off"):
@@ -81,7 +81,7 @@ def toolbar_probe(page: Page) -> dict:
 
 # @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-007
 def check_toolbar_collapse(page: Page, toolbar, page_name: str, failures: list[Failure]) -> None:
-    """P8: the collapse button hides rows 2-3 (not focusable), shrinks the toolbar and restores it."""
+    """P8: the collapse button hides rows 2 to 5 (not focusable), shrinks the toolbar and restores it."""
     button = toolbar.locator('[data-sphinx-preview-toolbar-collapse]')
     if button.count() != 1:
         failures.append(Failure(page_name, "the toolbar collapse button is missing"))
@@ -97,12 +97,16 @@ def check_toolbar_collapse(page: Page, toolbar, page_name: str, failures: list[F
             failures.append(Failure(page_name, f"expanded toolbar state is wrong: {start}"))
         labels = start["tabOrder"]
         collapse = labels.index("Hide view controls") if "Hide view controls" in labels else -1
-        row_one = [name for name in labels[:collapse] if name in (
-            "Refresh preview", "Anchor preview to text editor", "Toggle edit mode")]
-        if collapse < 2 or len(row_one) != collapse or labels[collapse + 1:collapse + 5] != ["Back", "Next", "Zoom out", "Zoom in"]:
+        row_one = [name for name in labels[:collapse] if name in ("Refresh preview", "Toggle edit mode")]
+        after = labels[collapse + 1:]
+        if collapse < 1 or len(row_one) != collapse or after[:3] != ["Anchor preview to text editor", "Back", "Next"]:
             failures.append(Failure(page_name, f"toolbar Tab order does not follow the rows: {labels}"))
-        elif not labels[collapse + 5].startswith("Preview theme"):
-            failures.append(Failure(page_name, f"toolbar row 3 does not start with the theme button: {labels}"))
+        elif len(after) < 9 or not after[3].startswith("Preview theme") or after[4:6] != ["Zoom out", "Zoom in"]:
+            failures.append(Failure(page_name, f"toolbar row 3 is not Theme, Zoom out, Zoom in: {labels}"))
+        elif not after[6].startswith("Width") or after[7] != "Show table of contents":
+            failures.append(Failure(page_name, f"toolbar row 4 is not Width, TOC: {labels}"))
+        elif after[8] not in ("Fold all sections", "Unfold all sections"):
+            failures.append(Failure(page_name, f"toolbar row 5 does not start with the Fold button: {labels}"))
         if start["overlapsViewport"]:
             failures.append(Failure(page_name, f"toolbar leaves the pane: {start}"))
         button.click()
@@ -111,7 +115,10 @@ def check_toolbar_collapse(page: Page, toolbar, page_name: str, failures: list[F
         if collapsed["expanded"] != "false" or collapsed["html"] != "collapsed" or not collapsed["moreHidden"] or collapsed["moreVisible"]:
             failures.append(Failure(page_name, f"collapsed toolbar state is wrong: {collapsed}"))
         if collapsed["tabOrder"] != labels[:collapse] + ["Show view controls"]:
-            failures.append(Failure(page_name, f"collapsed toolbar keeps rows 2-3 focusable: {collapsed['tabOrder']}"))
+            failures.append(Failure(page_name, f"collapsed toolbar keeps rows 2 to 5 focusable: {collapsed['tabOrder']}"))
+        # No row holds more buttons than a full row 1 (3): the expanded toolbar is then as wide as the collapsed one.
+        if collapse == 2 and abs(start["width"] - collapsed["width"]) > 0.5:
+            failures.append(Failure(page_name, f"the expanded toolbar is not as wide as row 1: {start['width']} vs {collapsed['width']}"))
         if collapsed["height"] >= start["height"] - 40:
             failures.append(Failure(page_name, f"collapsing did not shrink the toolbar: {start['height']} -> {collapsed['height']}"))
         if collapsed["top"] != start["top"] or collapsed["right"] != start["right"]:
@@ -163,7 +170,7 @@ FRESH_WORKSPACE_STATE_JS = """() => {
 
 # @tests_req SwRS-MDOKFSTUDIO-LIFE-170
 def check_fresh_workspace(page: Page, scenario: dict, failures: list[Failure]) -> None:
-    """A workspace that stored nothing opens in the cream theme mode with rows 2-3 of the toolbar hidden, before any click."""
+    """A workspace that stored nothing opens in the cream theme mode with rows 2 to 5 of the toolbar hidden, before any click."""
     if not (scenario.get("render") or {}).get("freshWorkspace"):
         return
     state = page.evaluate(FRESH_WORKSPACE_STATE_JS)
@@ -311,21 +318,24 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
           rect: (({top, bottom, left, right}) => ({top, bottom, left, right}))(child.getBoundingClientRect()),
         }))"""
     )
-    expected_main = 4 if toolbar.locator('[data-sphinx-preview-edit-toggle]').count() else 3
-    if [row["row"] for row in rows] != ["main", "view", "options"]:
-        failures.append(Failure(page_name, f"toolbar is not three rows (main, view, options): {rows}"))
+    expected_main = 3 if toolbar.locator('[data-sphinx-preview-edit-toggle]').count() else 2
+    if [row["row"] for row in rows] != ["main", "navigation", "appearance", "layout", "content"]:
+        failures.append(Failure(page_name, f"toolbar is not five rows (main, navigation, appearance, layout, content): {rows}"))
         return
     if rows[0]["buttons"] != expected_main:
         failures.append(Failure(page_name, f"toolbar row 1 does not hold {expected_main} buttons: {rows[0]['buttons']}"))
-    if rows[1]["buttons"] != 4:
-        failures.append(Failure(page_name, f"toolbar row 2 does not hold 4 buttons: {rows[1]['buttons']}"))
-    if rows[2]["buttons"] != 6:
-        failures.append(Failure(page_name, f"toolbar row 3 does not hold 6 buttons: {rows[2]['buttons']}"))
+    for index, count in ((1, 3), (2, 3), (3, 2), (4, 3)):
+        if rows[index]["buttons"] != count:
+            failures.append(Failure(page_name, f"toolbar row {index + 1} does not hold {count} buttons: {rows[index]['buttons']}"))
     check_heading_fold(page, toolbar, page_name, failures)
     check_find_bar(page, toolbar, page_name, failures)
     check_diff_toggle(page, toolbar, page_name, failures, starts_pressed=render_options.get("incomingChanges") is not False)
-    if rows[0]["rect"]["bottom"] > rows[1]["rect"]["top"] + 0.5 or rows[1]["rect"]["bottom"] > rows[2]["rect"]["top"] + 0.5:
+    if any(upper["rect"]["bottom"] > lower["rect"]["top"] + 0.5 for upper, lower in zip(rows, rows[1:])):
         failures.append(Failure(page_name, "toolbar rows overlap"))
+    # CR 153: the toolbar stays no wider than 134 px, so it never covers the table handle strip of a 1400 px window.
+    toolbar_width = toolbar.evaluate("element => element.getBoundingClientRect().width")
+    if toolbar_width > 134.5:
+        failures.append(Failure(page_name, f"the toolbar is wider than 134 px: {toolbar_width}"))
     if toolbar.evaluate("element => element.getBoundingClientRect().left") < 0:
         failures.append(Failure(page_name, "toolbar leaves the pane on the left"))
     check_toolbar_collapse(page, toolbar, page_name, failures)

@@ -220,7 +220,13 @@ export function installScrollCore(rt: PageRuntime): ScrollCore {
           editing.paletteHeight = barHeight;
           rt.editorChrome.syncPaletteSticky(editing);
           rt.editorChrome.reservePaletteClearance(editing);
-          rt.editorChrome.revealTableToolbar(editing.palette.element, editing.textarea);
+          // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
+          // A frame taller than the viewport whose bar sticks on its own line under the band as shown
+          // (data-sphinx-palette-top) is not revealed: that line is above the reading offset by design,
+          // and the page never scrolls up to bring the first lines below the bar (CR 123).
+          if (editing.host?.getAttribute?.("data-sphinx-palette-top") !== "true") {
+            rt.editorChrome.revealTableToolbar(editing.palette.element, editing.textarea);
+          }
         }
       }
       return;

@@ -4,7 +4,7 @@ id: StRS-MDOKFSTUDIO-TOOLBAR-001
 uuid: 4a5407ea-d383-42da-b785-a7d78937fb65
 title: The toolbar groups its controls, collapses and remembers view choices
 description: When a reader opens a preview, the Studio SHALL show its controls
-  in three clearly grouped rows that never overlap each other, let the reader
+  in five clearly grouped rows that never overlap each other, let the reader
   collapse them to the first row, and keep the view choices for the workspace,
   in read-only previews too.
 project: markdown-okf-schema-studio
@@ -13,12 +13,11 @@ lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
-user_need: As a reader, I find the preview controls in three clear rows, fold
-  the toolbar down to its first row to free the top of the pane and unfold it
-  again, and find my view choices (zoom, width mode, table of contents,
-  incoming-change marks, comments and the collapsed toolbar) again when I reopen
-  a preview of the same workspace, even in a read-only preview where I cannot
-  edit.
+user_need: As a reader, I find the preview controls in five clear rows, fold the
+  toolbar down to its first row to free the top of the pane and unfold it again,
+  and find my view choices (zoom, width mode, table of contents, incoming-change
+  marks, comments and the collapsed toolbar) again when I reopen a preview of
+  the same workspace, even in a read-only preview where I cannot edit.
 derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
@@ -34,18 +33,18 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a reader opens a preview, the Studio SHALL show its controls in three clearly grouped rows that never overlap each other, let the reader collapse them to the first row, and keep the view choices for the workspace, in read-only previews too.
+When a reader opens a preview, the Studio SHALL show its controls in five clearly grouped rows that never overlap each other, let the reader collapse them to the first row, and keep the view choices for the workspace, in read-only previews too.
 
 ### Preserved stakeholder intent
 
-As a reader, I find the preview controls in three clear rows, fold the toolbar down to its first row to free the top of the pane and unfold it again, and find my view choices (zoom, width mode, table of contents, incoming-change marks, comments and the collapsed toolbar) again when I reopen a preview of the same workspace, even in a read-only preview where I cannot edit.
+As a reader, I find the preview controls in five clear rows, fold the toolbar down to its first row to free the top of the pane and unfold it again, and find my view choices (zoom, width mode, table of contents, incoming-change marks, comments and the collapsed toolbar) again when I reopen a preview of the same workspace, even in a read-only preview where I cannot edit.
 
 ### Rationale and constraints
 
-- Row 1 holds Refresh, Anchor, Edit and the collapse button; row 2 holds Back, Next, Zoom out and Zoom in; row 3 holds Theme, Width, Table of contents, Fold, Diff and Comments.
+- Row 1 holds Refresh, Edit and the collapse button; row 2 holds Anchor, Back and Next; row 3 holds Theme, Zoom out and Zoom in; row 4 holds Width and Table of contents; row 5 holds Fold, Diff and Comments. No row holds more than three buttons, so the toolbar stays narrow and covers little of the page.
 - A read-only preview (untrusted workspace, standalone file) shows the same rows, with the Edit button greyed and a tooltip that gives the reason.
 - The rows stay inside the pane at narrow and wide widths, at the zoom limits, in the light, dark, white and cream themes, expanded or collapsed.
-- Pressing the chevron of the toolbar hides or shows the navigation and view rows, and the choice is kept for the workspace.
+- Pressing the chevron of the toolbar hides or shows rows 2 to 5, and the choice is kept for the workspace.
 - A workspace that has stored no choice opens with the toolbar collapsed.
 - Hidden rows are skipped by the Tab key, so keyboard users reach only what is shown.
 - The state of a restored panel wins over the workspace choice, which wins over the default.

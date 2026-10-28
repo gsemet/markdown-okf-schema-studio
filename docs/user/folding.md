@@ -18,7 +18,7 @@ heading that has content below it can fold that content in the preview.
 
 ## Fold all and unfold all
 
-- **Toolbar:** the Fold button in the third row folds every section at once. While any section is
+- **Toolbar:** the Fold button in the fifth row folds every section at once. While any section is
   folded it shows as pressed and the next click unfolds them all.
 - **Command palette:** `Markdown OKF-Schema Studio: Fold All Sections in Preview` and
   `Markdown OKF-Schema Studio: Unfold All Sections in Preview` run on the preview that has the

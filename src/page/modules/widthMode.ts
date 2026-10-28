@@ -8,7 +8,7 @@ export interface WidthModeContext {
 // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-020
 // @implements_req SwRS-MDOKFSTUDIO-LIFE-169
 /**
- * Width button of toolbar row 2: Margin (the configured column), Auto (the column stays, but
+ * Width button of toolbar row 4: Margin (the configured column), Auto (the column stays, but
  * tables, figures, images and code blocks wider than it break out, up to the available width and
  * centred on it; code blocks stay in the list and are not centred when narrow) and Full
  * width (no column limit). `onChange` runs after the mode changed and lets the page keep its

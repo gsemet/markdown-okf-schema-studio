@@ -1,6 +1,6 @@
 /**
  * View preferences: per-workspace preview settings changed from the toolbar (zoom, width mode,
- * table of contents, incoming changes, comment chips, collapsed rows 2-3). This module must not import `vscode`.
+ * table of contents, incoming changes, comment chips, collapsed rows 2 to 5). This module must not import `vscode`.
  */
 
 export type ViewWidthMode = "margin" | "auto" | "full";
@@ -12,7 +12,7 @@ export interface ViewPreferences {
   incomingChanges: boolean;
   /** The gray comment chips show (toolbar Comments button); on by default. */
   comments: boolean;
-  /** Rows 2 and 3 of the floating toolbar are hidden; collapsed by default. */
+  /** Rows 2 to 5 of the floating toolbar are hidden; collapsed by default. */
   toolbarCollapsed: boolean;
 }
 

@@ -25,6 +25,7 @@ implemented_in_files:
 - src/session/features/viewState.ts
 - src/session/workspaceChoices.ts
 tested_in_files:
+- test/core/preview/previewStyles.test.ts
 - test/integration/mystDiagnostics.test.ts
 - test/page/modules/warningBanner.test.ts
 - test/session/commentAuthorResource.test.ts
@@ -52,7 +53,7 @@ When a render succeeds with conf.py warnings, the extension SHALL show a one-lin
 | Input | Outcome |
 | --- | --- |
 | The banner appears or closes | No content or scroll anchor moves |
-| The banner shows | It sits in the 40 px gap left of the floating toolbar without covering it and scrolls away with the page top |
+| The banner shows | It sits in the 40 px gap left of the floating toolbar without covering it and scrolls away with the page top; it keeps 124 px clear at the right (the three-button width of the toolbar, its 14 px margin and 8 px of clearance), with the toolbar expanded or collapsed |
 | A very narrow pane (460 px) | It stays on one line with an ellipsis and adds no sideways scroll |
 | Light, dark and cream themes | It stays readable |
 
@@ -93,6 +94,7 @@ The warnings stay in the status region in every case.
 
 ### Verification notes
 - Method: test/page/modules/warningBanner.test.ts ("CR 050: the banner text is short and counts the warnings": nominal; "CR 050: Open Problems asks the host to open the Problems view": Open Problems; "CR 050: closing removes the banner, tells the host the key and keeps it closed until the set changes": closing; "CR 050: the key names the warning set, whatever the order and the line of each warning": warning set; "CR 050: in Restricted Mode the banner has no Problems button and lists the warnings in its tooltip": Restricted Mode)
+- Method: test/core/preview/previewStyles.test.ts ("the warning banner keeps clear of the three-button-wide toolbar, expanded or collapsed": the 124 px reserve and no collapsed override)
 - Method: test/session/commentAuthorResource.test.ts ("the closed warning banners of a session are bounded to the most recent documents": bounded memory)
 - Method: test/integration/mystDiagnostics.test.ts (run(): Restricted Mode publishes no warning to the Problems view)
 - Method: test/visual/scenarioDefinitions2.ts (`myst/v${number}-conf-warning-banner-${mode ?? theme}-900`: nominal and layout in light, dark, cream and 460 px)

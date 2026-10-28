@@ -142,6 +142,10 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
       host.removeAttribute("data-sphinx-palette-top");
       host.style?.removeProperty?.("--sphinx-preview-palette-top");
     }
+    // The frame became tall (or short again) after it opened, typically by typing or pasting: the
+    // distance reserved at open for a stuck bar does not apply to a tall frame, and applies again
+    // to a short one. Without this the bar stays detached from the frame by the stale reserve.
+    reservePaletteClearance(edit);
   }
 
   // A tall box scrolls under the stuck palette: the palette stays sticky only while it is small
@@ -245,7 +249,9 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
   // that distance as its top margin (collapsed with the bar's own 3px, so the gap is distance + 3),
   // and the page keeps the text where the user sees it. Measured when the editor opens and when
   // the layout changes (resize, the bar wrapping), never while the user scrolls. Past one bar
-  // height the frame's top is already scrolled under the bar: nothing to reserve. A frame taller
+  // height the frame's top is already scrolled under the bar: nothing to reserve, unless the page
+  // is at its top (scrollY 0), where nothing is scrolled under the bar and the whole distance is
+  // reserved (the five-row toolbar puts the sticking line farther than one bar height). A frame taller
   // than the viewport reserves nothing either: its bar may cover the first lines (CR 123).
   function reservePaletteClearance(edit: BlockEdit): void {
     const host = edit.host;
@@ -260,7 +266,10 @@ export function installEditorChrome(rt: PageRuntime): EditorChrome {
       if (Number.isFinite(stuckAt) && hostTop !== undefined && Number.isFinite(hostTop)
         && barHeight !== undefined && Number.isFinite(barHeight)) {
         const distance = stuckAt - hostTop;
-        if (distance > 0.5 && distance <= barHeight + 3) reserve = Math.ceil(distance) + 3;
+        // A page at its top has nothing scrolled under the bar: the taller five-row toolbar can put
+        // the stuck line more than one bar height under a block near the top, and the bar still
+        // rests on its frame there.
+        if (distance > 0.5 && (distance <= barHeight + 3 || !(window.scrollY > 0))) reserve = Math.ceil(distance) + 3;
       }
     }
     const before = edit.paletteReserve ?? 0;

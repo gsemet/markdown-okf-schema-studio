@@ -262,7 +262,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     (navigate) => rt.blockEditor.flushOpenEditorsThen(navigate));
   const viewControls = installViewControls(document, vscode, context, keepReadingLine);
   // @implements_req SwRS-MDOKFSTUDIO-LAYOUT-018
-  // The toolbar changes size when rows 2-3 are collapsed: re-measure everything placed around it.
+  // The toolbar changes size when rows 2 to 5 are collapsed: re-measure everything placed around it.
   installToolbarCollapse(document, vscode, context, () => {
     firstClearance.update();
     stickyBand.refreshStickyHeadingPosition();
