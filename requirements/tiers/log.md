@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-28 (table bar inset after the reveal, CR 167)
+
+- SwRS-MDOKFSTUDIO-TABLE-064: the inset of a table bar that opens under the five-row preview
+  controls is decided before the reveal, so a bar that wraps left of the controls no longer also
+  scrolls the page (the selected cell moved 105 px in the heavy CI real-input scenarioTableToolbar).
+  Verification: test/page/runtimeTableCellEditor.test.ts.
+
 ## 2026-10-28 (Edit figure button clear of the preview controls, CR 161)
 
 - SwRS-MDOKFSTUDIO-PALETTE-153: in a narrow pane (about 420 px) a figure shorter than the five-row

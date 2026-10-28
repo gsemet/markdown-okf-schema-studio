@@ -79,6 +79,7 @@ When a cell editor is open and the table bar would lie under the sticky band or 
 | The same bar with the page scrolled enough to bring it below the controls | No inset: the scroll into view above reveals it |
 | A bar that opens below the controls | No inset |
 | A narrow pane where the inset would leave the bar under 200 px | No inset: the bar keeps the whole width |
+| A bar that gets the inset | The inset is decided before the reveal, from the page as it is when the bar appears; the buttons then lie left of the controls and the page is not scrolled for them |
 
 The inset is measured when the bar is filled, never on a scroll, so a scroll never reflows the page.
 
@@ -94,6 +95,7 @@ The inset is measured when the bar is filled, never on a scroll, so a scroll nev
 ### Verification notes
 - Method: test/page/runtimeTableCellEditor.test.ts, unit tests CR 034: the table toolbar rides down with a tall table and leaves with the table (scenarios "Scrolled into a tall table", small bar of "Size of the bar against the viewport"), a toolbar that appears above the reading offset is scrolled into view by the exact delta ("Bar appearing above the reading offset"), a toolbar that is already visible causes no extra scroll, P8: a toolbar box is not revealed when only its empty part is under the preview controls and the toolbar is not revealed when that would push the selected cell out of the viewport ("No scroll into view"), and a later layout change that pushes the toolbar above the reading offset is revealed again ("A later layout change hides the bar again", the unchanged-size case is covered by the already-visible test).
 - Method: test/page/runtimeTableCellEditor.test.ts, unit test a table bar that opens under the preview controls at the top of the page wraps left of them ("Bar opening under the preview controls at the top of the page": the inset value, and none when the page can scroll, the bar opens below the controls or the pane is narrow).
+- Method: test/page/runtimeTableCellEditor.test.ts, unit test a bar that wraps left of the controls does not also scroll the page (five-row controls): the inset is set and the page keeps its offset (it fails when the reveal runs before the inset is decided).
 - Method: test/integration/tableStructureReal.ts (real VS Code window: every structural button of the bar of a pipe table right under the first heading is clicked, Delete selected column included, which the four-row toolbar would otherwise cover).
 - Method: test/page/fmtableReqTable.requirements.test.ts, unit tests a table bar taller than 40 percent of the viewport keeps its place above the table (tall bar and small bar of "Size of the bar against the viewport") and the table bar position follows a window resize and stops once the editor is closed ("Window resize while the editor is open").
 - Method: visual scenarios palette-slash/v19 and v20 (cited by the palette-slash scope) check the bar riding down with a tall table.

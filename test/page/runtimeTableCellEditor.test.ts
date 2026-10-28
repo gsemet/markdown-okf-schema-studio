@@ -471,6 +471,8 @@ function openTableForToolbarReveal(options: {
   /** The left edge of the floating controls (150 by default) and the width of the column holding the table. */
   controlsLeft?: number;
   columnWidth?: number;
+  /** The bar moves down with the page when a scroll brings the page up, as in a real layout. */
+  barFollowsScroll?: boolean;
 }) {
   const harness = createRuntimeHarness({ viewportHeight: 600 });
   if (options.controlsOverRightEnd) {
@@ -497,19 +499,22 @@ function openTableForToolbarReveal(options: {
   row.appendChild(cell);
   const insertBefore = section.insertBefore.bind(section);
   const bar = { top: options.barTop, height: 76 };
+  const barTop = (): number => bar.top + (options.barFollowsScroll ? options.scrollY - harness.windowState.scrollY : 0);
   section.insertBefore = (child: RuntimeElement, reference: RuntimeElement | null): RuntimeElement => {
     if (child.getAttribute("data-sphinx-table-menu") === "true") {
       // The toolbar's viewport top is fixed by the test, as after the R7 anchor restore.
       child.rectProvider = () => ({
-        top: bar.top, bottom: bar.top + bar.height, height: bar.height, left: 0, width: options.controlsOverRightEnd ? 300 : 200,
+        top: barTop(), bottom: barTop() + bar.height, height: bar.height, left: 0, width: options.controlsOverRightEnd ? 300 : 200,
       });
       if (options.controlsOverRightEnd) {
         // Line 1 (the buttons) ends left of the controls; the status text on line 2 sits under them.
         const place = (item: RuntimeElement): void => {
           const status = item.getAttribute("data-sphinx-preview-edit-status") !== null;
           item.rectProvider = () => ({
-            top: bar.top + (status ? 40 : 10), height: 20, bottom: bar.top + (status ? 60 : 30),
-            left: status ? 200 : 0, width: status ? 90 : 20,
+            top: barTop() + (status ? 40 : 10), height: 20, bottom: barTop() + (status ? 60 : 30),
+            // A bar given an inset wraps its buttons left of the controls, the status included.
+            left: status && child.style.getPropertyValue("--sphinx-preview-table-menu-inset") === "" ? 200 : 0,
+            width: status ? 90 : 20,
           });
         };
         child.childElements.forEach(place);
@@ -581,6 +586,23 @@ test("a table bar that opens under the preview controls at the top of the page w
   // A narrow pane, the controls 150 px from the column's left edge, would leave the bar under 200 px:
   // it keeps the whole width.
   assert.equal(inset({ barTop: 90, scrollY: 0, columnWidth: 360, controlsLeft: 150 }), "");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TABLE-064
+test("a bar that wraps left of the controls does not also scroll the page (five-row controls)", () => {
+  // Controls bottom 112, left 250. The bar box top is 66 (50 px short of 116) with the page at
+  // 40 px: the page cannot bring the box below the controls, so the bar wraps left of them. Its status
+  // (line 2, top 106) is then clear, so the reveal has nothing to do: the page stays at 40 px and the
+  // selected cell does not move. Revealing first moved the page by 10 px for a bar that then wrapped.
+  const { harness, scrolls } = openTableForToolbarReveal({
+    cellTop: 340, barTop: 66, scrollY: 40, controlsOverRightEnd: true, controlsLeft: 250, columnWidth: 600,
+    barFollowsScroll: true,
+  });
+  const menu = harness.body.childElements.flatMap((child) => child.childElements)
+    .find((child) => child.getAttribute("data-sphinx-table-menu") === "true");
+  assert.ok(menu, "the table bar is open");
+  assert.equal(menu.style.getPropertyValue("--sphinx-preview-table-menu-inset"), "354px");
+  assert.deepEqual(scrolls, [40, 40]);
 });
 
 test("a toolbar that is already visible causes no extra scroll", () => {
