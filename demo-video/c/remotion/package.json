@@ -1,0 +1,19 @@
+{
+  "name": "demo-video-c",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts Demo out/demo.mp4 --codec=h264 --pixel-format=yuv420p --crf=18",
+    "render:cut": "remotion render src/index.ts Cut15 out/cut15.mp4 --codec=h264 --pixel-format=yuv420p --crf=18",
+    "srt": "node --experimental-strip-types scripts/build-srt.ts"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.539",
+    "@remotion/transitions": "4.0.539",
+    "react": "^19",
+    "react-dom": "^19",
+    "remotion": "4.0.539"
+  },
+  "devDependencies": { "@types/react": "^19", "typescript": "^5" }
+}

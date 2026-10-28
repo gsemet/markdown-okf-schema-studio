@@ -1,0 +1,63 @@
+1
+00:00:04,750 --> 00:00:07,550
+Open any Markdown file and press Open Preview.
+
+2
+00:00:07,750 --> 00:00:11,650
+Front matter, prose and layout, drawn as a styled page.
+
+3
+00:00:12,400 --> 00:00:15,400
+Click a paragraph and edit it right where you read.
+
+4
+00:00:15,500 --> 00:00:17,400
+Select a word, press Cmd+B to make it bold.
+
+5
+00:00:17,700 --> 00:00:19,600
+Done. The page updates in place.
+
+6
+00:00:20,279 --> 00:00:23,379
+Type / on a new line to open the command menu.
+
+7
+00:00:23,479 --> 00:00:26,832
+Pick a MyST admonition, a table, math and more.
+
+8
+00:00:26,909 --> 00:00:28,063
+Everything stays plain Markdown.
+
+9
+00:00:28,690 --> 00:00:33,790
+MyST tabs switch panels with a click.
+
+10
+00:00:34,090 --> 00:00:36,990
+Cards, admonitions and dropdowns render natively.
+
+11
+00:00:36,940 --> 00:00:39,740
+Vega-Lite charts render right in the page.
+
+12
+00:00:39,940 --> 00:00:43,940
+So do Mermaid diagrams, and both stay editable as text.
+
+13
+00:00:44,490 --> 00:00:46,790
+Review threads attach to a sentence.
+
+14
+00:00:46,890 --> 00:00:50,690
+A change bar marks what you edited since the last commit.
+
+15
+00:00:51,090 --> 00:00:54,590
+A table of contents is one click away.
+
+16
+00:00:56,115 --> 00:00:59,215
+Switch the page theme: Cream, White or Dark.

@@ -1,0 +1,19 @@
+1
+00:00:01,250 --> 00:00:03,950
+Edit where you read.
+
+2
+00:00:03,700 --> 00:00:06,400
+A slash menu for MyST blocks.
+
+3
+00:00:06,150 --> 00:00:08,650
+Tabs, cards, charts, diagrams.
+
+4
+00:00:08,400 --> 00:00:11,100
+Review and track changes.
+
+5
+00:00:10,850 --> 00:00:13,150
+Cream, or Dark.
