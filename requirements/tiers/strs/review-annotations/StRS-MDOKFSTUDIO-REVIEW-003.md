@@ -11,7 +11,9 @@ description: When a reviewer selects text in the preview and saves a comment, or
   typed text on screen and tell the reviewer why.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

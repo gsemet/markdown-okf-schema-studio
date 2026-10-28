@@ -10,7 +10,9 @@ description: When a document uses bare http(s) or www URLs, GitHub alerts,
   HTML, unsafe colours and unsafe link schemes.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

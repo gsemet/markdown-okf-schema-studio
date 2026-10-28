@@ -8,7 +8,9 @@ description: When a document uses MyST admonitions, context tags, definition
   SHALL show each as a readable block in the preview without a Sphinx build.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

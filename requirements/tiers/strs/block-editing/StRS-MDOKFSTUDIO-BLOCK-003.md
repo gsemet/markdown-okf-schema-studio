@@ -10,7 +10,9 @@ description: When a writer clicks a rendered block in edit mode, the Studio
   file open the include directive of the edited document instead.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []

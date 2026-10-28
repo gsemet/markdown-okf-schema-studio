@@ -11,7 +11,9 @@ description: When a document has a review comments file next to it, the Studio
   file.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+lifecycle: approved
+approved_by: gaetan@xeberon.net
+approved_on: 2026-10-28
 origin: native
 tier: StRS
 derives_from: []
