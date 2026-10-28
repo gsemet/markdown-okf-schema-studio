@@ -25,6 +25,7 @@ implemented_in_files:
 - src/core/render/mystDirectiveErrors.ts
 - src/core/render/mystUnclosedFences.ts
 tested_in_files:
+- test/core/render/alertSourceLines.test.ts
 - test/core/render/renderReq.syntaxErrors.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
@@ -64,5 +65,6 @@ Markdown runs an unclosed fence to the end of the file; the preview departs from
 
 ### Verification notes
 - Method: test/core/render/renderReq.syntaxErrors.requirements.test.ts (unclosed backtick and colon directives, options without body, nested directive, empty directive at the end of the file, labels, frontmatter and CRLF, the fixture, the rebuilt opening line); the visual scenarios myst/v37 and myst/v38 render the fixture test/visual/fixtures/64-unclosed-directives.md; the unclosed-fence tests of the same file (backtick, colon, plain and nested fences in the middle of a document, two open fences, closed fence, frontmatter and CRLF lines) and the visual scenarios myst/v39 and myst/v40 render test/visual/fixtures/65-unclosed-fence-mid-document.md.
+- Method: test/core/render/alertSourceLines.test.ts (an unclosed fence after a GitHub alert: the warning and the opening line shown as code carry the fence's own line).
 - Criteria: the render never fails; each broken construct is one code block of its own lines; the rest of the document renders.
 - Known issue: only a fence left open before a heading reports a diagnostic; a directive shown raw for another reason (no body, or open to the end of the file with no heading after it) has no hint.

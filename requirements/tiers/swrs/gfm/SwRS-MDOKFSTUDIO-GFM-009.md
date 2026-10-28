@@ -22,9 +22,11 @@ derived_by: []
 implemented_in_files:
 - src/core/render/mystGithubAlerts.ts
 tested_in_files:
+- test/core/render/alertSourceLines.test.ts
 - test/core/render/crlfAlerts.test.ts
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
+- test/session/alertBlockEditOpen.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
 - SwRS-MDOKFSTUDIO-GFM-010
@@ -85,6 +87,20 @@ When a block quote starts with [!NOTE], [!TIP], [!IMPORTANT], [!WARNING] or [!CA
 | an alert followed directly by an unquoted paragraph | the paragraph is outside the admonition |
 | an alert followed by a blank line and a paragraph | the paragraph is outside the admonition and later source line numbers are unchanged |
 
+### Scenario (boundary): Every block keeps the lines of the document
+
+The alert is rewritten into an admonition of more lines before parsing; the source lines of the
+blocks (`data-line`, `data-end-line`, which the block editor opens, saves, cuts and moves) are
+still the lines of the file as written.
+
+| Input | Outcome |
+| --- | --- |
+| two consecutive alerts (lines 1-2 and 4-6), then a heading on line 8 and a paragraph on line 10 | the admonitions carry lines 1-2 and 4-6, their paragraphs 2 and 5-6, the heading 8 and the paragraph 10 |
+| any alert type, a bold marker or a titled alert, an alert followed directly by an unquoted line, an alert ending the file without a final line break, a CRLF document | the admonition starts on its marker line and ends on its last quoted line; every other block keeps its own lines |
+| an alert after a frontmatter block, inside a list item, a grid card, a tab item or between context tags (also kept as one raw HTML block) | the same, counted in the whole file |
+| an unclosed fence after an alert | the warning and the opening line shown as code carry the line of the fence |
+| alert markers inside a fenced code block | they stay literal and later lines are unchanged |
+
 ### Scenario (boundary): CRLF documents
 
 | Input | Outcome |
@@ -97,4 +113,6 @@ When a block quote starts with [!NOTE], [!TIP], [!IMPORTANT], [!WARNING] or [!CA
 - Method: test/core/render/mystFeatures.test.ts (alert types, unknown type, title, legacy bold markers: unit tests on the render pipeline output).
 - Method: test/core/render/mystPaletteRendering.test.ts (alert types, end at the first unquoted line: unit tests on the render pipeline output).
 - Method: test/core/render/crlfAlerts.test.ts (fence scenario and CRLF scenario: unit tests on the render pipeline output).
-- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains only quoted lines; CRLF and LF outputs are identical.
+- Method: test/core/render/alertSourceLines.test.ts (every block keeps the lines of the document: unit tests on the `data-line` and `data-end-line` of the rendered blocks, including a README-shaped synthetic fixture with an important alert then a note alert).
+- Method: test/session/alertBlockEditOpen.test.ts (the host opens the editor of the paragraph of the second alert of that README on that paragraph's lines: `previewEditOpen` through the real `PreviewManager`).
+- Criteria: One admonition per known type and none for unknown types; the title equals the marker trailing text, else the default; simple admonitions only for lone bold markers; no admonition inside a fence while alerts outside are unaffected; the admonition body contains only quoted lines; CRLF and LF outputs are identical; every rendered block's `data-line` and `data-end-line` are the lines of the file as written.

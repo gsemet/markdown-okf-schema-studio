@@ -34,7 +34,13 @@ import { expandTocMarkers } from "./mystToc";
 import { loadEngine, MYST_PARSE_OPTIONS, type MystEngine } from "./mystEngine";
 import { neutralizeDirectiveErrors } from "./mystDirectiveErrors";
 import { splitUnclosedFences } from "./mystUnclosedFences";
-import { expandGithubAlerts } from "./mystGithubAlerts";
+import {
+  alertLineMapper,
+  expandGithubAlerts,
+  expandGithubAlertsWithLines,
+  type ExpandedGithubAlerts,
+  mapAlertSourceLines,
+} from "./mystGithubAlerts";
 import { expandGrids, expandToctrees } from "./mystGridToctree";
 import {
   autolinkBareUrls,
@@ -372,6 +378,8 @@ interface RenderState {
   readonly lineOffset: number;
   /** The text the parser read (after the source passes). */
   readonly parsedText: string;
+  /** The GitHub alert rewrite: the parsed text's lines mapped to the document's. */
+  readonly alerts: ExpandedGithubAlerts;
   readonly checkboxMarkers: readonly CheckboxMarker[];
   readonly ast: MystNode;
   anchorLabels: ReadonlySet<string>;
@@ -395,6 +403,7 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
       lineOffset: state.lineOffset,
       parse: (fragment) => state.mystParse(fragment, MYST_PARSE_OPTIONS),
       diagnostics: state.diagnostics,
+      sourceLine: alertLineMapper(state.alerts, state.lineOffset + 1),
     }),
   },
   {
@@ -406,6 +415,8 @@ const TREE_PASSES: ReadonlyArray<RenderPass<RenderState>> = [
     ),
   },
   { name: "context tags", run: (state) => repairGroupedContextTagHtml(state.ast, state.mystParse) },
+  // The passes above read the parsed text line for line; from here on, every line is the document's.
+  { name: "alert source lines", run: (state) => mapAlertSourceLines(state.ast, state.alerts, state.lineOffset + 1) },
   {
     // @implements_req SwRS-MDOKFSTUDIO-MYST-072
     name: "MyST extension check",
@@ -527,7 +538,8 @@ export async function renderMyst(
   const removedPrefix = source.slice(0, source.length - markdown.length);
   const lineOffset = removedPrefix.match(/\r\n|\r|\n/gu)?.length ?? 0;
   const checkboxes = prepareCheckboxMarkers(markdown, lineOffset + 1);
-  const parsedText = prepareDollarAmounts(expandGithubAlerts(checkboxes.text));
+  const alerts = expandGithubAlertsWithLines(checkboxes.text);
+  const parsedText = prepareDollarAmounts(alerts.text);
   const state: RenderState = {
     source,
     context,
@@ -536,6 +548,7 @@ export async function renderMyst(
     dependencies: new Set<string>(),
     lineOffset,
     parsedText,
+    alerts,
     checkboxMarkers: checkboxes.markers,
     ast: mystParse(parsedText, MYST_PARSE_OPTIONS),
     anchorLabels: new Set<string>(),
