@@ -419,7 +419,10 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
       ? "Header · " + columnText
       : "Row " + edit.tableRowIndex + " of " + (edit.tableModel!.rows.length - 2) + " · " + columnText;
     menu.appendChild(edit.status);
-    // The menu now has its items: check them against the floating controls.
+    // The menu now has its items: check them against the floating controls. The inset is decided
+    // first, from the page as it is when the bar appears: a bar that wraps left of the controls
+    // needs no reveal, so the selected cell does not move for a scroll the wrap makes useless.
+    clearPreviewControls(menu);
     rt.scroll.applyAnchor();
     edit.element.appendChild(input);
     // Done and Cancel under the field, without the status hint (the toolbar carries the position).
@@ -428,7 +431,6 @@ export function installTableCellEditor(rt: PageRuntime): TableCellEditor {
     cellActions.appendChild(blockEditor.createEditorButtons(edit));
     edit.element.appendChild(cellActions);
     resizeInput();
-    clearPreviewControls(menu);
     syncTableMenuSticky(edit);
     // stabilizeLayout (window and content resize) re-fits the field when the width changes.
     edit.resizeTextarea = resizeInput;
