@@ -71,6 +71,7 @@ export const PAGE_MESSAGE_GATES: { readonly [T in PageToHostType]: PageMessageGa
   previewBlocksCopy: "render",
   previewBlocksCut: "render",
   previewBlocksPaste: "render",
+  previewDropFiles: "render",
   previewListTargets: "render",
   previewListCitations: "render",
   previewPickDocument: "render",
@@ -172,6 +173,7 @@ export class PageMessageDispatcher {
       case "previewBlocksCopy":
       case "previewBlocksCut":
       case "previewBlocksPaste":
+      case "previewDropFiles":
         fireAndForget(this.manager.host.logger, preview.postToPage({
           ...identity,
           type: "previewBlocksResult",

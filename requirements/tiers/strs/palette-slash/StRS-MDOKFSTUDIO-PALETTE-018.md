@@ -21,6 +21,7 @@ user_need: As a writer, I paste a screenshot and it becomes a picture of the
   block, with no script or tracking content that a later reader could be exposed
   to.
 derived_by:
+- SwRS-MDOKFSTUDIO-PALETTE-004
 - SwRS-MDOKFSTUDIO-PALETTE-196
 - SwRS-MDOKFSTUDIO-PALETTE-203
 - SwRS-MDOKFSTUDIO-PALETTE-213
@@ -58,6 +59,7 @@ As a writer, I paste a screenshot and it becomes a picture of the document witho
 <!-- Generated from the frontmatter relations; edit them instead. -->
 
 - Derived by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-004](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-004.md): Files dropped from the Explorer become links or images at the drop point
   - [SwRS-MDOKFSTUDIO-PALETTE-196](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-196.md): The host saves a pasted image next to the document under a name it chooses
   - [SwRS-MDOKFSTUDIO-PALETTE-203](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-203.md): A pasted image is sent to the host and its name inserted on its own paragraph
   - [SwRS-MDOKFSTUDIO-PALETTE-213](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-213.md): Pasted rich text is converted by the host and replaces the selection in one step

@@ -31,6 +31,7 @@ import { installCheckboxes } from "./features/checkboxes";
 import { installContentPatch } from "./features/contentPatch";
 import { installEditMode } from "./features/editMode";
 import { installEditorChrome } from "./features/editorChrome";
+import { installFileDrop } from "./features/fileDrop";
 import { installFrontmatterEditor } from "./features/frontmatterEditor";
 import { registerHostHandlers } from "./features/hostHandlers";
 import { installInsertPoints } from "./features/insertPoints";
@@ -398,6 +399,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.frontmatter = installFrontmatterEditor(rt);
   rt.selection = installBlockSelectionView(rt);
   rt.insertPoints = installInsertPoints(rt);
+  rt.fileDrop = installFileDrop(rt);
   rt.blockMoves = installBlockMoves(rt);
   rt.tableRowMove = installTableRowMove(rt);
   rt.editMode = installEditMode(rt);
@@ -408,6 +410,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.frontmatter.bindKeys();
   rt.tableCellEditor.bindKeys();
   rt.insertPoints.bindKeys();
+  rt.fileDrop.bindEvents();
   rt.selection.bindKeys();
   rt.blockMoves.bindKeys();
   // The tooltip of frontmatter links (features/linkTooltip.ts).

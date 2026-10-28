@@ -107,6 +107,11 @@
 - The floating toolbar now has five rows of at most three buttons: Refresh, Edit and the chevron;
   Anchor, Back and Next; Theme, Zoom out and Zoom in; Width and Table of contents; then Fold, Diff and
   Comments. It is narrower (three buttons instead of six), so it covers less of the page.
+- Dropping files from the VS Code Explorer onto the preview in edit mode (hold Shift while dropping, so
+  VS Code hands the drop to the page) writes a Markdown link per file at the drop point: a bar shows
+  where it lands, a Markdown file becomes `[first heading](relative%20path.md)`, an image becomes
+  `![name](relative/path.png)` and any other file a link with its name. Only files inside a workspace
+  folder count, and only the inserted block changes in the source.
 - Pasting a web address (`http:`, `https:` or `mailto:`) into a block editor makes a Markdown link: `[text](url)`
   over selected text, `<url>` alone and `![](url)` for an image address (`.png`, `.jpg`, `.gif`, `.svg`,
   `.webp`). Cmd/Ctrl+Shift+V still pastes the raw text, and code, link targets and other schemes are

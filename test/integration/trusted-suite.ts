@@ -40,6 +40,7 @@ import { run as runPreviewHistory } from "./previewHistory.test";
 import { run as runEditKeys } from "./editKeys.test";
 import { run as runGridCardEditorBlur } from "./gridCardEditorBlur.test";
 import { run as runPasteUrl } from "./pasteUrl.test";
+import { run as runDropFiles } from "./dropFiles.test";
 import { run as runWindowSwitchKeys } from "./windowSwitchKeys.test";
 import { run as runRealInput } from "./realInput/run";
 import { run as runLifecycle } from "./lifecycle.test";
@@ -137,6 +138,10 @@ async function runTrustedSuite(): Promise<void> {
     await ensureTestWindowFocused();
   });
   // The block actions scenario needs no fixture document: it runs before the shared preview.md checks.
+  if (process.env.STUDIO_REAL_INPUT_SCENARIO === "drop-files") {
+    await step("drop-files", runDropFiles);
+    return;
+  }
   if (process.env.STUDIO_REAL_INPUT_SCENARIO === "paste-url") {
     await step("paste-url", runPasteUrl);
     return;
@@ -204,6 +209,7 @@ async function runTrustedSuite(): Promise<void> {
     ["edit-keys", runEditKeys],
     ["grid-card-editor-blur", runGridCardEditorBlur],
     ["paste-url", runPasteUrl],
+    ["drop-files", runDropFiles],
     ["window-switch-keys", runWindowSwitchKeys],
     ["preview-history", runPreviewHistory],
     ["palette-mode", runPaletteMode],

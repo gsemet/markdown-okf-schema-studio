@@ -317,6 +317,14 @@ export interface PreviewBlocksPasteMessage extends PageMessageBase<"previewBlock
   pinViewportTop?: number;
 }
 
+/** Files dropped from the Explorer: their `file:` addresses and the source line to write the links after. */
+export interface PreviewDropFilesMessage extends PageMessageBase<"previewDropFiles"> {
+  insertAfterLine: number;
+  uris: string[];
+  pinLine?: number;
+  pinViewportTop?: number;
+}
+
 /** A new review comment thread on a selection. */
 export interface PreviewCommentCreateMessage extends PageMessageBase<"previewCommentCreate"> {
   anchor: CommentAnchor;
@@ -402,6 +410,7 @@ export type PageToHostMessage =
   | PreviewBlocksCopyMessage
   | PreviewBlocksCutMessage
   | PreviewBlocksPasteMessage
+  | PreviewDropFilesMessage
   | PreviewCommentCreateMessage
   | PreviewCommentReplyMessage
   | PreviewCommentResolveMessage
