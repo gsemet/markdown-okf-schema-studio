@@ -195,6 +195,7 @@ function nameTitleAttribute(name: string, escapedTooltip: string): string {
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-014
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-039
 // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
+// @implements_req SwRS-MDOKFSTUDIO-REVIEW-215
 /**
  * Builds the Obsidian-style properties table. Two columns (name | value) by
  * default; when an OKF schema matched, a third column shows each field's
@@ -273,7 +274,10 @@ export function renderPropertiesTable(
     const typeLabel = withDocs
       ? `<span class="okf-type-label">(${typeNameLabelOf(field)})</span>`
       : "";
-    return `<tr class="${rowClass}" data-okf-field="${escapeHtml(field.name)}" data-okf-schema-found="${result.schemaFound}" data-okf-value-kind="${escapeHtml(field.valueKind)}" data-okf-nullable="${field.nullable}"${field.required ? ' data-okf-required="true"' : ""} data-okf-type="${escapeHtml(field.fieldType ?? "unknown")}" data-okf-value="${escapeHtml(valueJson)}" data-okf-value-yaml="${escapeHtml(valueYaml)}" data-okf-editable="${editable}"${suggestionsAttribute}${enumsJson ? ` data-okf-enums="${escapeHtml(enumsJson)}"` : ""} title="${tooltip}"><th scope="row"${nameCellAttributes}><span class="okf-name-cell">${typeIcon}<span class="okf-name-text"${nameTitleAttribute(field.name, tooltip)}>${escapeHtml(field.name)}</span>${typeLabel}</span></th><td class="${worst ? SEVERITY_CLASS[worst] : ""}"${valueCellAttributes}>${valueDisplay}</td>${withDocs ? `<td class="okf-doc">${escapeHtml(field.doc?.description ?? "")}</td>` : ""}</tr>`;
+    const lineAttributes = sourceMapping && field.sourceLines
+      ? ` data-okf-line="${field.sourceLines.start}" data-okf-end-line="${field.sourceLines.end}"`
+      : "";
+    return `<tr class="${rowClass}" data-okf-field="${escapeHtml(field.name)}"${lineAttributes} data-okf-schema-found="${result.schemaFound}" data-okf-value-kind="${escapeHtml(field.valueKind)}" data-okf-nullable="${field.nullable}"${field.required ? ' data-okf-required="true"' : ""} data-okf-type="${escapeHtml(field.fieldType ?? "unknown")}" data-okf-value="${escapeHtml(valueJson)}" data-okf-value-yaml="${escapeHtml(valueYaml)}" data-okf-editable="${editable}"${suggestionsAttribute}${enumsJson ? ` data-okf-enums="${escapeHtml(enumsJson)}"` : ""} title="${tooltip}"><th scope="row"${nameCellAttributes}><span class="okf-name-cell">${typeIcon}<span class="okf-name-text"${nameTitleAttribute(field.name, tooltip)}>${escapeHtml(field.name)}</span>${typeLabel}</span></th><td class="${worst ? SEVERITY_CLASS[worst] : ""}"${valueCellAttributes}>${valueDisplay}</td>${withDocs ? `<td class="okf-doc">${escapeHtml(field.doc?.description ?? "")}</td>` : ""}</tr>`;
   }).join("");
   const infoRows = result.info.length > 0
     ? result.info.map((issue) => `<tr class="okf-info-row ${SEVERITY_CLASS[issue.severity]}" title="${escapeHtml(issue.message)}"><th scope="row" colspan="${withDocs ? 3 : 2}"${issue.severity === "error" ? ' role="alert"' : ""}>${escapeHtml(issue.severity === "error" ? "✖" : issue.severity === "warning" ? "⚠" : "ℹ")} ${escapeHtml(issue.message)}</th></tr>`).join("")

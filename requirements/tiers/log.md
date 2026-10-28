@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-10-28 (front matter change bars)
+
+- SwRS-MDOKFSTUDIO-REVIEW-215 (new, CR 155, `proposed`, derives from StRS-MDOKFSTUDIO-REVIEW-017,
+  relates to SwRS-MDOKFSTUDIO-REVIEW-195 and SwRS-MDOKFSTUDIO-REVIEW-207): a front matter field
+  changed or added since HEAD gets its own change bar on its properties table row; a removed
+  field adds a range on line 1 so that the table as a whole gets one bar when no row has one.
+  Before, the table was the block of line 1 only, so a change in a field showed no bar. The
+  approved requirements were not touched. Verification: test/core/frontmatter/frontmatterChanges.test.ts,
+  test/core/frontmatter/propertiesTable.test.ts, test/page/modules/incomingChanges.test.ts and the
+  visual scenarios review-annotations/v27 and v28.
+
 ## 2026-10-28 (lifecycle meanings, owners and approval locks)
 
 - Moved every `draft` requirement to `proposed` (466 StRS and SwRS): each one is implemented

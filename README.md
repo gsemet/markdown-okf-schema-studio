@@ -52,7 +52,8 @@ of it and is centred.
 ### See what changed since the last commit
 
 Blocks changed since the last Git commit, unsaved edits included, are marked with a green bar in
-the live preview. A toolbar button toggles the marks.
+the live preview, and so is each changed or added front matter field in the properties table. A
+toolbar button toggles the marks.
 
 ![Blocks changed since the last commit marked with a green bar](images/readme/showcase-diff-cream.png)
 

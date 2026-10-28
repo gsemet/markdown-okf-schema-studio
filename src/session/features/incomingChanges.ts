@@ -3,7 +3,7 @@
  * read through the `VcsInfo` port, and posts them again when HEAD moves.
  */
 
-import { changedLineRanges } from "../../core/mapping/lineDiff";
+import { incomingChangeRanges } from "../../core/frontmatter/frontmatterChanges";
 import type { PreviewManager } from "../previewManager";
 import type { PreviewSession } from "../previewSession";
 import { revisionOfStage } from "../sessionDocuments";
@@ -33,6 +33,7 @@ export class IncomingChangesController {
   public constructor(private readonly manager: PreviewManager) {}
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-195
+  // @implements_req SwRS-MDOKFSTUDIO-REVIEW-215
   /**
    * Tells the page which source lines differ from HEAD (T16). Nothing is posted for a file Git does
    * not know, unless marks or a different "enabled" value must be taken back. Stale ids are dropped by
@@ -50,7 +51,7 @@ export class IncomingChangesController {
       const base = await host.vcs.headText(documentId, stage.sourceText.length);
       if (preview.disposed || preview.stage !== stage) return;
       if (base) {
-        ranges = changedLineRanges(base.text, stage.sourceText);
+        ranges = incomingChangeRanges(base.text, stage.sourceText);
         this.watchBaseline(preview, documentId, stage.activeDocumentPath);
       }
     }

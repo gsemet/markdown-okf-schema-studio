@@ -19,6 +19,7 @@ import {
   inspectFrontmatterLinks,
   filenameStemSuggestions,
 } from "./fileLinks";
+import { frontmatterFieldLines } from "./frontmatterChanges";
 import { extractFrontmatter, extractFrontmatterShared, stripJson5Comments } from "./frontmatterParse";
 import {
   defaultValueOf,
@@ -310,8 +311,13 @@ export interface FrontmatterOptions {
 /** Builds the webview payload for a document's frontmatter. */
 export function analyzeFrontmatter(options: FrontmatterOptions): FrontmatterResult {
   const result = analyzeFrontmatterCore(options);
+  const lines = frontmatterFieldLines(options.sourceText);
+  const fields = lines.size === 0 ? result.fields : result.fields.map((field) => {
+    const sourceLines = lines.get(field.name);
+    return sourceLines ? { ...field, sourceLines } : field;
+  });
   // Without a matched schema every key is allowed.
-  return { ...result, additionalPropertiesAllowed: result.additionalPropertiesAllowed ?? true };
+  return { ...result, fields, additionalPropertiesAllowed: result.additionalPropertiesAllowed ?? true };
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-FMSCHEMA-001
