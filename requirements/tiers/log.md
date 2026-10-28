@@ -886,3 +886,8 @@
   message types of `pageToHost.ts` and the types of `editPalette.ts` moved to
   `pageToHostMessages.ts` and `editPaletteTypes.ts` (no markers). Requirement texts unchanged; only
   the generated source lists. Verification: `just requirements-update`, `just check`.
+- SwRS-MDOKFSTUDIO-CORE-074, SwRS-MDOKFSTUDIO-CORE-075 (CR 160, new, proposed): the writing skill is
+  packaged as an agent plugin (Claude Code, Agent Plugins 1.0.0 for Copilot, VS Code and Codex, Codex
+  marketplace) over the single `skills/` folder, kept out of the VSIX, and `scripts/version.py` writes
+  the package version to every plugin manifest. Verification: test/build/test_plugin_manifests.py,
+  test/build/test_release.py, `claude plugin validate . --strict`.

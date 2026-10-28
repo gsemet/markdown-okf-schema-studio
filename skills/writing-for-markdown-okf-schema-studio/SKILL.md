@@ -22,6 +22,14 @@ it does not, and how to choose. Every example here is rendered by its own pipeli
   does not replace the validator.
 - OKF-Schema and Markdown OKF Schema Studio have the same author.
 
+## Install the extension
+
+The skill only writes the documents; the reader needs the extension to see them. If it is missing,
+tell the user to install it from the
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=GaetanSemet.markdown-okf-schema-studio),
+with `code --install-extension GaetanSemet.markdown-okf-schema-studio`, or by searching for
+"Markdown OKF-Schema Studio" in the Extensions view.
+
 ## What renders
 
 | Family | Syntax rendered |
@@ -141,3 +149,4 @@ front matter, review comments, README HTML): [references/examples.md](references
   stay inside the document's folder.
 
 <!-- @implements_req SwRS-MDOKFSTUDIO-CORE-073 -->
+<!-- @implements_req SwRS-MDOKFSTUDIO-CORE-074 -->
