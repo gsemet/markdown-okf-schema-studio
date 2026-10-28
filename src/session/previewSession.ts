@@ -53,6 +53,9 @@ export interface SessionProbe {
   /** How many previewIncomingChanges messages were posted, and the last one. */
   incomingPosts: number;
   lastIncomingChanges?: { enabled: boolean; ranges: { start: number; end: number }[] };
+  /** How many previewBaselineDiff messages were posted, and the last one (hunk count, html length). */
+  baselinePosts: number;
+  lastBaseline?: { hunks: number; htmlLength: number };
   /** How many previewComments messages were posted, the last threads and the last result. */
   commentPosts: number;
   lastComments?: Array<CommentThread & { orphaned?: boolean }>;
@@ -155,6 +158,7 @@ export class PreviewSession {
     updateGlowPatches: [],
     pendingOverlayShown: 0,
     incomingPosts: 0,
+    baselinePosts: 0,
     commentPosts: 0,
   };
 

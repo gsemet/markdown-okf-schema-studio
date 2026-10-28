@@ -10,6 +10,7 @@ import sys
 from playwright.sync_api import Page
 
 from capture_find_checks import check_find_bar
+from capture_sbs_checks import check_side_by_side
 from capture_start_hint import check_start_hint
 from capture_support import Failure, HERE, VISUAL_REPORT_DIR, report_path, save_step
 
@@ -101,11 +102,11 @@ def check_toolbar_collapse(page: Page, toolbar, page_name: str, failures: list[F
         after = labels[collapse + 1:]
         if collapse < 1 or len(row_one) != collapse or after[:3] != ["Anchor preview to text editor", "Back", "Next"]:
             failures.append(Failure(page_name, f"toolbar Tab order does not follow the rows: {labels}"))
-        elif len(after) < 9 or not after[3].startswith("Preview theme") or after[4:6] != ["Zoom out", "Zoom in"]:
+        elif len(after) < 10 or not after[3].startswith("Preview theme") or after[4:6] != ["Zoom out", "Zoom in"]:
             failures.append(Failure(page_name, f"toolbar row 3 is not Theme, Zoom out, Zoom in: {labels}"))
-        elif not after[6].startswith("Width") or after[7] != "Show table of contents":
-            failures.append(Failure(page_name, f"toolbar row 4 is not Width, TOC: {labels}"))
-        elif after[8] not in ("Fold all sections", "Unfold all sections"):
+        elif not after[6].startswith("Width") or after[7] != "Show table of contents" or "side-by-side" not in after[8].lower():
+            failures.append(Failure(page_name, f"toolbar row 4 is not Width, TOC, Side-by-side: {labels}"))
+        elif after[9] not in ("Fold all sections", "Unfold all sections"):
             failures.append(Failure(page_name, f"toolbar row 5 does not start with the Fold button: {labels}"))
         if start["overlapsViewport"]:
             failures.append(Failure(page_name, f"toolbar leaves the pane: {start}"))
@@ -324,11 +325,9 @@ def check_preview_toolbar_rows(page: Page, scenario: dict, failures: list[Failur
         return
     if rows[0]["buttons"] != expected_main:
         failures.append(Failure(page_name, f"toolbar row 1 does not hold {expected_main} buttons: {rows[0]['buttons']}"))
-    for index, count in ((1, 3), (2, 3), (3, 2), (4, 3)):
-        if rows[index]["buttons"] != count:
-            failures.append(Failure(page_name, f"toolbar row {index + 1} does not hold {count} buttons: {rows[index]['buttons']}"))
-    check_heading_fold(page, toolbar, page_name, failures)
-    check_find_bar(page, toolbar, page_name, failures)
+    failures.extend(Failure(page_name, f"toolbar row {index + 1} does not hold 3 buttons: {rows[index]['buttons']}") for index in range(1, 5) if rows[index]["buttons"] != 3)
+    for check in (check_heading_fold, check_find_bar, check_side_by_side):
+        check(page, toolbar, page_name, failures)
     check_diff_toggle(page, toolbar, page_name, failures, starts_pressed=render_options.get("incomingChanges") is not False)
     if any(upper["rect"]["bottom"] > lower["rect"]["top"] + 0.5 for upper, lower in zip(rows, rows[1:])):
         failures.append(Failure(page_name, "toolbar rows overlap"))

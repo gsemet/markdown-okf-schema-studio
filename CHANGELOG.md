@@ -124,6 +124,11 @@
   over selected text, `<url>` alone and `![](url)` for an image address (`.png`, `.jpg`, `.gif`, `.svg`,
   `.webp`). Cmd/Ctrl+Shift+V still pastes the raw text, and code, link targets and other schemes are
   left alone.
+- A new Side-by-side button in the floating toolbar (reading mode) turns each block changed since the
+  last Git commit into a small diff: the block at the last commit on the left, as it is now on the
+  right, both rendered, with removed and added words marked. Added blocks have an empty left side and
+  deleted blocks come back with an empty right side. The green bar stays the default; the button is
+  disabled in edit mode and the file is never changed.
 - Link-target search by name (wiki-style links) skips `node_modules`, `.git`, `_build`, `.venv` and
   `venv`, no longer applies VS Code's `files.exclude` (files hidden by it can now be found) and stops
   at 50 matches per root, so a name matching more files may resolve from the first 50 only.

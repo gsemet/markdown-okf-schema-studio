@@ -2,6 +2,24 @@
 
 ## 2026-10-31
 
+### Side-by-side diff of changed blocks
+
+- SwRS-MDOKFSTUDIO-REVIEW-010, -005, -006, -007, -008 and -009 (new, CR 147): the side-by-side diff of
+  changed blocks. A Side-by-side button in toolbar row 4 (reading mode only, disabled in edit mode)
+  turns each block changed since the last commit into a card: the block at HEAD on the left, the
+  current block on the right, both rendered, removed and added words marked; an added block has an
+  empty left side and a removed block comes back with an empty right side. REVIEW-010 line hunks with
+  both sides, REVIEW-005 word diff, REVIEW-006 the host posts the HEAD rendering and the hunks,
+  REVIEW-007 the two new messages and their validation, REVIEW-008 the button, REVIEW-009 the cards.
+  The default (green bars) is unchanged. Verification: test/core/mapping/lineHunks.test.ts,
+  test/core/mapping/wordDiff.test.ts, test/session/reviewReqIncoming.requirements.test.ts,
+  test/session/baselineDiff.test.ts, test/core/protocol/hostToPage.test.ts,
+  test/core/protocol/pageToHost.test.ts, test/page/runtimePageControls.test.ts,
+  test/core/preview/previewStyles.test.ts, `just requirements-lint`; real-window scenario
+  incoming-changes (review-annotations/r07-side-by-side-diff) written, not run (screen locked).
+- SwRS-MDOKFSTUDIO-TOOLBAR-001 and SwRS-MDOKFSTUDIO-TRUST-001 (CR 147): the toolbar holds 15 buttons
+  (row 4 has three) with the new Side-by-side button. Verification: test/core/preview/previewStyles.test.ts.
+
 ### Link list suggestions and warning in large workspaces
 
 - SwRS-MDOKFSTUDIO-FMEDIT-010 (proposed): the list editor of a filename-stem link list warns only
