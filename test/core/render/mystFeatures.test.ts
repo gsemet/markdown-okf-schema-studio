@@ -247,6 +247,7 @@ test("PlantUML fences and directives preserve diagram source for external render
   }
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-MYST-001
 test("Sphinx version admonitions render generated titles and Markdown bodies", async () => {
   const result = await renderPreviewDocument({
     document: inlineDocument(
@@ -260,9 +261,9 @@ test("Sphinx version admonitions render generated titles and Markdown bodies", a
   });
   const html = parseHtml(result.html);
   const cases = [
-    { type: "versionadded", title: "Added in version 1.2.3:" },
-    { type: "versionchanged", title: "Changed in version 2.0.0:" },
-    { type: "deprecated", title: "Deprecated since version 3.1.0:" },
+    { type: "versionadded", title: "Added in version 1.2.3" },
+    { type: "versionchanged", title: "Changed in version 2.0.0" },
+    { type: "deprecated", title: "Deprecated since version 3.1.0" },
   ];
 
   for (const admonitionCase of cases) {

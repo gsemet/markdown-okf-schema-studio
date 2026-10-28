@@ -23,6 +23,14 @@
   preview too, when you pressed no key in the last half second or the edit is away from your cursor.
   Typing at your cursor still does not glow. Backspace, Delete and a paste glow when they are the
   first key after a pause.
+- MyST cards, tabs and version notes render like MyST. A standalone `{card}` shows its `:header:` and
+  `:footer:` options (or the `^^^` and `+++` separators), `:link:` and `:class-card:`, like a
+  `{grid-item-card}`. A `{tab-set}` of `{tab-item}`s shows a tab bar with ARIA tab roles and one
+  panel at a time; click a tab, or use the arrow keys, Home and End. `:selected:` picks the tab
+  shown first, and tabs with the same `:sync:` key follow each other in one `:sync-group:`. In edit
+  mode each tab item is a block of its own. `{versionadded}`, `{versionchanged}` and `{deprecated}`
+  are now titled "Added in version X", "Changed in version X" and "Deprecated since version X",
+  without the trailing colon.
 - A `[TOC]` or `[[_TOC_]]` line on its own (the GitLab, Typora and Markdown Preview Enhanced
   markers, any case), or a MyST `{contents}` directive, renders the table of contents of the
   document: its headings as a nested list of links to them (`:depth:` limits the depth of

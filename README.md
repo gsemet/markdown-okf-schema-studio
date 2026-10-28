@@ -24,6 +24,17 @@ Edits touch only the block you change, in one undo step; the rest of the file is
 
 ![Editing a MyST admonition while the card grid and figure stay rendered](images/readme/showcase-myst-edit.png)
 
+### Version notes, cards and tabs
+
+`{versionadded}`, `{versionchanged}` and `{deprecated}` get their title ("Added in version 0.47"),
+a standalone `{card}` shows its `:header:` and `:footer:`, and a `{tab-set}` becomes a tab bar with
+one panel at a time: click a tab, or move with the arrow keys, Home and End. In edit mode each tab
+item is a block of its own.
+
+| Cream | Dark |
+| --- | --- |
+| ![Version notes, a card with header and footer, and a tab set on the cream page](images/readme/myst-cards-tabs-cream.png) | ![The same version notes, card and tab set on the dark page](images/readme/myst-cards-tabs-dark.png) |
+
 ### Edit schema-aware properties
 
 Frontmatter becomes a properties table with JSON Schema diagnostics, enum controls and typed

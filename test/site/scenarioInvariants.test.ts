@@ -88,7 +88,7 @@ test("every STEPS_BY_ID key is a scenario and each step name is registered in ca
 test("README sources are scenarios that write a PNG, with a crop and a unique destination", () => {
   const sources = SCENARIOS.filter((entry) => entry.readme !== undefined);
   assert.equal(sources.length, Object.keys(README_BY_ID).length, "every README_BY_ID key is a scenario");
-  assert.equal(sources.length, 15, "fifteen README images come from visual scenarios");
+  assert.equal(sources.length, 17, "seventeen README images come from visual scenarios");
   const files = new Set<string>();
   for (const scenario of sources) {
     assert.notEqual(scenario.capture, false, `${scenario.id} is a README source but assertion-only`);

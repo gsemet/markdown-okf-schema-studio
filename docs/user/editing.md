@@ -17,6 +17,18 @@ Markdown flavours and extensions:
 | --- | --- | --- |
 | [![JSON Schema-aware OKF properties table](../../images/readme/schema-properties.png)](../../images/readme/schema-properties.png) | [![Editing an OKF frontmatter property in place](../../images/readme/edit-frontmatter.png)](../../images/readme/edit-frontmatter.png) | [![Edit affordance on rendered Markdown](../../images/readme/inline-editing.png)](../../images/readme/inline-editing.png) |
 
+| Version notes, a card and tabs (cream) | Version notes, a card and tabs (dark) |
+| --- | --- |
+| [![Version notes, a card with header and footer, and a tab set on the cream page](../../images/readme/myst-cards-tabs-cream.png)](../../images/readme/myst-cards-tabs-cream.png) | [![The same version notes, card and tab set on the dark page](../../images/readme/myst-cards-tabs-dark.png)](../../images/readme/myst-cards-tabs-dark.png) |
+
+- **MyST cards, tabs and version notes:** a standalone `{card}` shows its `:header:` and `:footer:`
+  options (or the `^^^` and `+++` separators), a `:link:` and `:class-card:` names, like a
+  `{grid-item-card}`. A `{tab-set}` of `{tab-item}`s shows a tab bar and one panel at a time: click
+  a tab or use the Left and Right arrow keys, Home and End; `:selected:` picks the first tab shown
+  and tabs with the same `:sync:` key follow each other in the sets of one `:sync-group:`. In edit
+  mode a click on a tab only selects it, and a click on the shown panel edits that `{tab-item}`.
+  `{versionadded}`, `{versionchanged}` and `{deprecated}` are titled "Added in version X",
+  "Changed in version X" and "Deprecated since version X".
 - **MyST rendering:** directives, admonitions, `{grid}` cards (columns follow the pane width) and
   `{toctree}` lists of links to the documents they name, tables, math (including `align`
 environments),

@@ -113,6 +113,7 @@ export function installContentPatch(rt: PageRuntime): ContentPatch {
     parts.firstClearance.update();
     parts.tocColumn.refresh();
     parts.chipToggle.apply();
+    parts.tabs.apply();
     parts.inlineThreads.apply();
     parts.incomingChanges.apply();
     // Idempotent: puts the last threads back on replaced content; skips blocks being edited.

@@ -23,10 +23,12 @@ export function installEditMode(rt: PageRuntime): EditMode {
 
   // @implements_req SwRS-MDOKFSTUDIO-BLOCK-017
   // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
+  // @implements_req SwRS-MDOKFSTUDIO-MYST-098
   // The element whose outline shows what a click at this node would edit, or undefined.
   function editHoverTarget(node: EventTarget | null): Element | undefined {
     if (!state.editMode || !(node instanceof Element)) return undefined;
-    if (node.closest("[data-okf-properties]") || node.closest("[data-sphinx-preview-block-editor]")) {
+    if (node.closest("[data-okf-properties]") || node.closest("[data-sphinx-preview-block-editor]")
+      || node.closest(".myst-tab-list")) {
       return undefined;
     }
     const mapped = node.closest<HTMLElement>(MAPPINGS_SELECTOR);
