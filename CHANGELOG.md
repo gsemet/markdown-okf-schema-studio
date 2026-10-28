@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The editor refuses to open or save a block whose range, as sent by the preview, starts on a blank
+  line: it answers that the preview and the document disagree about the block's lines (refresh and
+  try again) and changes nothing, instead of editing the wrong text.
+
 ## 1.0.0 - 2026-10-28
 
 - The writing skill can be installed as an agent plugin: the repository root is a plugin for Claude
