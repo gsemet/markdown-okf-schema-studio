@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/features/blockSourceEditor.ts
 - src/page/modules/pasteUrl.ts
 tested_in_files:
+- test/build/integrationEditModeRestore.test.ts
 - test/integration/pasteUrl.test.ts
 - test/page/modules/pasteUrl.test.ts
 - test/page/runtimePaletteActions.test.ts
@@ -74,5 +75,5 @@ When the writer pastes into the block text box a clipboard whose plain text is a
 ### Verification notes
 - Method: test/page/modules/pasteUrl.test.ts (the edit for each case of the tables, the scheme rule and the plain text mark)
 - Method: test/page/runtimePaletteActions.test.ts (a URL pasted into the text box of a block editor makes a link, an autolink or an image; Cmd+Shift+V, rich text and other schemes stay untouched)
-- Method: test/integration/pasteUrl.test.ts (real VS Code window: real clipboard paste, the autosave writes only the pasted spans)
+- Method: test/integration/pasteUrl.test.ts (real VS Code window: real clipboard paste, the autosave writes only the pasted spans; the scenario turns edit mode off again and waits until the workspace remembers it, CR 152, checked by test/build/integrationEditModeRestore.test.ts)
 - Criteria: the text outside `[start, end)` of the text box is identical before and after the paste.

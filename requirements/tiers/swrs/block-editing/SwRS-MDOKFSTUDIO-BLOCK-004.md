@@ -21,6 +21,7 @@ derived_by: []
 implemented_in_files:
 - src/page/features/blockSelectionView.ts
 tested_in_files:
+- test/build/integrationEditModeRestore.test.ts
 - test/integration/windowSwitchKeys.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/visual/scenarioDefinitions1.ts
@@ -72,5 +73,10 @@ Table-cell editors keep their own Escape and Cmd/Ctrl+Enter and do not select a 
 
 - Method: test/page/runtimeBlockSelection.test.ts, unit tests `CR 120: plain Up and Down select a block, starting at the block nearest the viewport top`, `CR 120: plain Up collapses a block run onto the neighbour of its free end`, `CR 120: plain Up and Down do nothing outside edit mode, in a text box or with a modifier`, `CR 120: Enter opens the editor of the selected block`, `CR 120: Enter with no selection opens nothing`, `CR 120: Escape closes the editor and leaves its block selected for the arrow keys`, `CR 120: Cmd/Ctrl+Enter without changes closes the editor and selects its block` and `CR 120: Cmd/Ctrl+Enter with changes saves, and the block is selected once the patch is in`. The included-block skip and the toggle-button focus rows are untested. CR 129 unit tests `CR 129: plain Up and Down on the focused content root move the block selection`, `CR 129: Shift+Down on the focused content root extends a selection`, `CR 129: the window coming back selects the block nearest the top when nothing was selected`, `CR 129: the window coming back restores the last block the keyboard selected` and `CR 129: the window coming back selects nothing outside edit mode, in an editor or on another control`.
 - Method: test/integration/windowSwitchKeys.test.ts, real VS Code window: after a click on the page margin, and after leaving for another editor tab and coming back, ArrowDown selects a block and the page shows no focus ring. A switch to another application cannot be driven from the test window; the focus event it raises is covered by the unit tests.
+- Method: test/build/integrationEditModeRestore.test.ts (CR 152): every top-level real-window scenario that turns edit mode on turns it off again, so windowSwitchKeys.test.ts starts with edit mode off and its toggle click gives the page the keyboard focus (pasteUrl.test.ts left it on and the first ArrowDown went to the workbench).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenarios block-editing/v18 (cream and dark): real key presses Down, Down, Enter, Escape leave one block outlined and announced.
 - Criteria: The plain-key handler requires edit mode, no open editor and no modifier; the target is the page, a block or the edit-mode toggle. The edited block is read before the editor closes and selected by position.
+
+### Known issues
+
+- Known issue (CR 152): in the real-window test, a preview that has just opened holds no keyboard focus (the workbench body has it, `document.hasFocus()` is false in the page), so the arrow keys act only once the page, the margin or a toolbar button was clicked or the tab was focused again.
