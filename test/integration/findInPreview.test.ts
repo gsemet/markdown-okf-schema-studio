@@ -186,8 +186,17 @@ export async function run(): Promise<void> {
       .replace("and the studio keeps", "and the atelier keeps")
       .replace("the studio table cell", "the atelier table cell");
     assert.equal(notes.getText(), replaced);
-    assert.match(await (await liveFrame(page)).locator("[data-find-note]").textContent() ?? "",
-      /cannot be replaced from the preview/u);
+    // The host answers after it applied the edit, so the note holds "Replacing..." until then.
+    const readNote = async (): Promise<string> =>
+      await (await liveFrame(page)).locator("[data-find-note]").textContent() ?? "";
+    let note = "";
+    await waitFor("the host's final replace answer in the find note", async () => {
+      note = await readNote();
+      return note !== "" && !/^Replacing/u.test(note);
+    }).catch((error: unknown) => {
+      throw new Error(`${String(error)} (note: ${JSON.stringify(note)}, document: ${JSON.stringify(notes.getText())})`);
+    });
+    assert.match(note, /cannot be replaced from the preview/u);
     await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
     await vscode.window.showTextDocument(notes, vscode.ViewColumn.One);
     await vscode.commands.executeCommand("undo");
