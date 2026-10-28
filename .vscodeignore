@@ -43,3 +43,6 @@ images/logo-proposals/**
 .claude/**
 pyproject.toml
 docs/*.md
+plugin.json
+.claude-plugin/**
+.agents/plugins/**

@@ -838,8 +838,8 @@ export const STEPS_BY_ID: Readonly<Record<string, readonly string[]>> = {
  * still listed in the script (T1 moves them to the capture registry).
  */
 export const README_BY_ID: Readonly<Record<string, { file: string; crop: [number, number, number, number]; width: number }>> = {
-  "frontmatter-schema/v05-okf-schema-table-dark-900": { file: "schema-properties.png", crop: [120, 20, 1680, 1100], width: 720 },
-  "frontmatter-editing/v02-edit-enum-value-dark-900": { file: "edit-frontmatter.png", crop: [120, 20, 1680, 1110], width: 720 },
+  "frontmatter-schema/v05-okf-schema-table-dark-900": { file: "schema-properties.png", crop: [120, 20, 1800, 1100], width: 720 },
+  "frontmatter-editing/v02-edit-enum-value-dark-900": { file: "edit-frontmatter.png", crop: [120, 20, 1800, 1110], width: 720 },
   "rendering-core/v01-handbook-top-dark-900": { file: "theme-dark.png", crop: [0, 20, 1800, 930], width: 720 },
   "theme-zoom/v01-forced-white-handbook-white-900": { file: "theme-white.png", crop: [0, 20, 1800, 930], width: 720 },
   "theme-zoom/v02-forced-cream-handbook-cream-900": { file: "theme-cream.png", crop: [0, 20, 1800, 930], width: 720 },

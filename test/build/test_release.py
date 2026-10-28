@@ -12,7 +12,10 @@ from pathlib import Path
 
 import pytest
 
+# @tests_req SwRS-MDOKFSTUDIO-CORE-075
+
 ROOT = Path(__file__).resolve().parents[2]
+PLUGIN_MANIFESTS = ("plugin.json", ".claude-plugin/plugin.json")
 
 spec = importlib.util.spec_from_file_location(
     "release_notes", ROOT / "scripts/release_notes.py"
@@ -75,6 +78,9 @@ def repository(tmp_path: Path) -> Path:
             }
         )
     )
+    (tmp_path / ".claude-plugin").mkdir()
+    for name in PLUGIN_MANIFESTS:
+        (tmp_path / name).write_text(json.dumps({"name": "demo", "version": "0.2.0"}))
     for arguments in (
         ["init", "--quiet"],
         ["config", "user.email", "test@example.com"],
@@ -137,7 +143,11 @@ def assert_version(repository: Path, arguments: list[str], expected: str) -> Non
         cwd=repository,
         text=True,
     ).splitlines()
-    assert changed == ["package-lock.json", "package.json"]
+    assert changed == sorted(
+        ["package-lock.json", "package.json", *PLUGIN_MANIFESTS]
+    )
+    for name in PLUGIN_MANIFESTS:
+        assert json.loads((repository / name).read_text())["version"] == expected, name
     assert subprocess.check_output(["git", "tag"], cwd=repository).strip() == b"v0.2.0"
 
 
@@ -188,6 +198,25 @@ def test_version_rejects_existing_manifest_edits(
     assert (
         subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository) == before
     )
+
+
+@pytest.mark.parametrize("name", PLUGIN_MANIFESTS)
+def test_version_rejects_existing_plugin_manifest_edits(
+    repository: Path, name: str
+) -> None:
+    """Refuse to include pre-existing plugin manifest edits in the version commit."""
+    manifest = repository / name
+    manifest.write_text(json.dumps({"name": "demo", "version": "0.2.0", "x": 1}))
+    original = manifest.read_bytes()
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/version.py")],
+        cwd=repository,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert "existing" in result.stderr
+    assert manifest.read_bytes() == original
 
 
 def test_stale_manifest(repository: Path) -> None:
