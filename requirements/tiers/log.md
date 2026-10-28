@@ -1,5 +1,13 @@
 # Update Log
 
+## 2026-10-28 (Edit figure button clear of the preview controls, CR 161)
+
+- SwRS-MDOKFSTUDIO-PALETTE-153: in a narrow pane (about 420 px) a figure shorter than the five-row
+  preview controls left no room below them, so the Edit figure button stayed under the "Fold all
+  sections" button and could not be pressed (heavy CI integration, editToolbarCover). The button now
+  sits left of the controls in that case. Verification: test/page/figureEditButtonClearance.test.ts,
+  visual scenario palette-slash/v29-edit-figure-button-narrow-cream-420.
+
 ## 2026-10-28 (find in preview: replace-all check waits for the host)
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-012: the real-window replace-all check now waits for the host's answer

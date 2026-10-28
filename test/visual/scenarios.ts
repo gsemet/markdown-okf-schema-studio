@@ -164,6 +164,11 @@ export interface Scenario {
    */
   paletteClearance?: boolean | "first-paragraph";
   /**
+   * CR 161: in a 420 px pane the Edit figure button of a short figure takes the press next to the
+   * five-row preview controls and the form it opens starts below the palette. Step: `figure`.
+   */
+  figureButton?: boolean;
+  /**
    * CR 034: a table cell of a table taller than the viewport is open in its editor. The table
    * toolbar sits above the table; with the table top scrolled out it rides down to the top of the
    * viewport, stays inside the table and leaves with the table's end. Steps: `top`, `end`.

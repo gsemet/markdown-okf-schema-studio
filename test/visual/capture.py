@@ -101,6 +101,7 @@ from capture_comment_checks import (
   check_table_toolbar_tall,
 )
 from capture_edit_checks import check_edit_palette, check_edit_palette_clearance, check_preview_edit_mode
+from capture_figure_button import check_edit_figure_button
 from capture_final_checks import (
   check_content_assertions,
   check_content_contracts,
@@ -210,7 +211,7 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
   position = apply_scroll(page, scenario["scroll"])
   result["actions"].append(position)
   for check in (
-    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_comment_button_thread, check_checkbox_refusal, check_inline_thread, check_change_bar, check_update_glow, check_code_copy, check_page_actions, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_clearance, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, check_paste_image, stress_frontmatter_scroll,
+    apply_toolbar_state, check_edit_activation_scroll, check_preview_edit_mode, check_top_spacing, check_first_element_gap, check_width_modes, apply_width_shot, check_width_mode_break, check_toc_column, check_toc_shot, check_figure_anchors, check_comment_chips, check_comment_toggle, check_comment_button_thread, check_checkbox_refusal, check_inline_thread, check_change_bar, check_update_glow, check_code_copy, check_page_actions, check_content_assertions, check_edit_affordances, check_edit_palette, check_edit_palette_clearance, check_edit_figure_button, check_edit_palette_tall, check_table_toolbar_tall, check_palette_mode, check_slash_menu, check_insert_after_figure, check_nested_list_typing, check_editor_keyboard, check_paste_rich_text, check_paste_image, stress_frontmatter_scroll,
     stress_sticky_heading_scroll, check_horizontal_access, check_link_details,
   ):
     try:

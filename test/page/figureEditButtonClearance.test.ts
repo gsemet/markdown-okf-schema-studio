@@ -73,3 +73,41 @@ test("a scroll after the hover keeps the Edit figure button on the hovered figur
   assert.equal(hidden.has("hidden"), false, "the button stays shown");
   assert.equal(style.get("top"), "146px", "and follows the figure");
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-PALETTE-153
+test("the Edit figure button of a figure shorter than the preview controls sits left of them (CR 161)", () => {
+  const style = new Map<string, string>();
+  const document = {
+    body: { appendChild: () => undefined },
+    createElement: () => ({
+      style: { setProperty: (name: string, value: string) => style.set(name, value) },
+      setAttribute: () => undefined,
+      removeAttribute: () => undefined,
+      addEventListener: () => undefined,
+    }),
+  } as unknown as Document;
+  const window = { addEventListener: () => undefined } as unknown as Window & typeof globalThis;
+  // The five-row controls of a 420 px pane: 304..406 across, 12..178 down; the figure is 93 px high.
+  const controls = { top: 12, bottom: 178, left: 304, right: 406 };
+  const button = installFigureEditButton(document, window, {
+    isEditMode: () => true,
+    open: () => undefined,
+    usableTop: () => 182,
+    obstacle: () => controls,
+  });
+  const figure = {
+    tagName: "FIGURE",
+    getBoundingClientRect: () => ({ top: 60, bottom: 153, left: 34, right: 386, width: 352, height: 93 }),
+  } as unknown as Element;
+  button.sync(figure);
+  assert.equal(style.get("top"), "119px", "still inside the figure");
+  const left = Number(style.get("left")?.replace("px", ""));
+  assert.ok(left + 96 <= controls.left, `the button (left ${left}) ends before the controls (${controls.left})`);
+  // A figure with room below the controls keeps the button at its top right.
+  const tall = {
+    tagName: "FIGURE",
+    getBoundingClientRect: () => ({ top: 60, bottom: 400, left: 34, right: 386, width: 352, height: 340 }),
+  } as unknown as Element;
+  button.sync(tall);
+  assert.equal(style.get("left"), "290px");
+});

@@ -28,9 +28,12 @@ implemented_in_files:
 tested_in_files:
 - test/integration/realInput/markers.ts
 - test/integration/realWindowGaps.ts
+- test/page/figureEditButtonClearance.test.ts
 - test/page/modules/figureDirective.test.ts
 - test/page/paletteReq.requirements.test.ts
 - test/page/runtimePaletteActions.test.ts
+- test/visual/capture_figure_button.py
+- test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -56,6 +59,14 @@ When the writer opens the figure form, from the Edit figure button over a hovere
 | a press on the button | the focus never moves |
 
 The button is a child of the body placed with the CSSOM, so a content patch never removes it.
+
+### Scenario (boundary): Edit figure button next to the preview controls
+
+- GIVEN edit mode on, a figure whose top right is covered by the fixed preview controls, and no room under them inside the figure (a figure shorter than the controls' bottom edge, in a pane about 420 px wide)
+- WHEN the pointer is over the figure
+- THEN the Edit figure button is placed left of the preview controls, inside the figure, so a press on it reaches the button and not a control
+
+A figure with room below the controls keeps the button at its top right, below them.
 
 ### Scenario (nominal): Fields of the form
 
@@ -132,6 +143,7 @@ The range recorded at opening is never applied to a different text.
 ### Verification notes
 
 - Method: test/page/runtimePaletteActions.test.ts (T32: hovering a figure in edit mode shows Edit figure, outside edit mode it does not; Edit figure opens the block editor and, once the source arrives, the form; a Markdown image alone in its paragraph converts to a figure; an invalid width shows an inline error and keeps the form open without editing; checks the Edit figure, fields, lone image and problems scenarios)
+- Method: test/page/figureEditButtonClearance.test.ts (a figure shorter than the preview controls gets the button left of them, a taller one keeps it at its top right) and the visual scenario palette-slash/v29-edit-figure-button-narrow-cream-420 (check_edit_figure_button in test/visual/capture_figure_button.py: at 420 px a 93 px high figure 60 and 140 px under the top of the pane; the point at the button's centre is the button, the press opens the form and the form clears the palette; fails when the button stays under the controls)
 - Method: test/page/modules/figureDirective.test.ts (T32: the width pattern matches the renderer's; locateFigure finds the directive around the caret, or the first one, and sees a Markdown image alone in its paragraph; a YAML option block and other directives are not parsed; the other validation messages are asserted as validate results only; checks the directive, width and problems scenarios)
 - Method: test/integration/realInput/editorWidgets.ts (scenarioFigureEditor, with its markers in test/integration/realInput/markers.ts; checks the fields and keys scenarios)
 - Method: test/page/paletteReq.requirements.test.ts (a figure form submitted on a text that changed is closed without writing; checks the stale submit rows)
