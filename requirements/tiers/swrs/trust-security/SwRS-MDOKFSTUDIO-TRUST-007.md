@@ -27,8 +27,8 @@ implemented_in_files:
 - src/host-vscode/activation.ts
 - src/host-vscode/previewPanel.ts
 - src/session/features/links.ts
-- src/session/features/rendering.ts
-- src/session/previewManager.ts
+- src/session/features/pageDocument.ts
+- src/session/sessionFactory.ts
 - src/session/webview.ts
 tested_in_files:
 - test/integration/standalone-suite.ts

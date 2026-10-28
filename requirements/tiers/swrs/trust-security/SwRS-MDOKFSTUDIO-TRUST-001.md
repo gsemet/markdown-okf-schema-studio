@@ -41,7 +41,7 @@ implemented_in_files:
 - src/page/runtime.ts
 - src/session/features/viewState.ts
 - src/session/hostEvents.ts
-- src/session/previewManager.ts
+- src/session/sessionFactory.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/host/lifeReq.requirements.test.ts

@@ -22,7 +22,7 @@ exemption_reason:
 derived_by: []
 implemented_in_files:
 - src/host-vscode/activation.ts
-- src/session/previewManager.ts
+- src/session/sessionFactory.ts
 tested_in_files:
 - test/integration/serializer.test.ts
 ---

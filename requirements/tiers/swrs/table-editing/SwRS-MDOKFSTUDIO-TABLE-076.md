@@ -19,7 +19,7 @@ annotation_exemption: false
 exemption_reason:
 derived_by: []
 implemented_in_files:
-- src/page/modules/markdownTable.ts
+- src/page/modules/tableConversion.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/fmtableReqTable.requirements.test.ts

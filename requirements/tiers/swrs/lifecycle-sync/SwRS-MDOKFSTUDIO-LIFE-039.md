@@ -31,6 +31,7 @@ implemented_in_files:
 - src/session/features/rendering.ts
 - src/session/hostEvents.ts
 - src/session/previewManager.ts
+- src/session/sessionFactory.ts
 - src/session/sharedRenders.ts
 tested_in_files:
 - test/core/state/editLock.test.ts

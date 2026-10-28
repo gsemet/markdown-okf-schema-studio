@@ -25,7 +25,7 @@ implemented_in_files:
 - src/core/preview/contentPatch.ts
 - src/core/protocol/bootContext.ts
 - src/core/security/csp.ts
-- src/session/features/rendering.ts
+- src/session/features/pageDocument.ts
 - src/session/webview.ts
 tested_in_files:
 - test/core/preview/contentPatch.test.ts
