@@ -5,7 +5,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { test } from "node:test";
 
-import { build, type BuildOptions, type Metafile } from "esbuild";
+import { build, type BuildOptions, type Metafile, type Plugin } from "esbuild";
 
 const root = path.resolve(__dirname, "../../..");
 const bundles = require(path.join(root, "scripts", "page-bundle.mjs")) as {
@@ -13,6 +13,8 @@ const bundles = require(path.join(root, "scripts", "page-bundle.mjs")) as {
   lazyModuleOptions(options: { katexEntry: string; minify?: boolean }): BuildOptions;
   mermaidBundleOptions(options?: { minify?: boolean }): BuildOptions;
 };
+// The MyST packages are patched in memory, as in esbuild.mjs; without it a clean install does not resolve.
+const { mystPatchPlugin } = require(path.join(root, "scripts", "myst-patches.mjs")) as { mystPatchPlugin: Plugin };
 const katexEntry = createRequire(path.join(root, "package.json")).resolve("katex");
 
 /** Bytes each package contributes to one output of a metafile. */
@@ -29,6 +31,7 @@ function packageBytes(output: Metafile["outputs"][string]): Map<string, number> 
 async function metafileOf(options: BuildOptions): Promise<Metafile> {
   const result = await build({
     ...options,
+    plugins: [mystPatchPlugin, ...(options.plugins ?? [])],
     absWorkingDir: root,
     outdir: options.outfile ? undefined : "out/unused",
     outfile: options.outfile ? "out/unused/extension.js" : undefined,
@@ -77,6 +80,7 @@ test("the split bundle still highlights code, typesets maths and reads YAML dire
     const options = bundles.extensionBundleOptions({ minify: false });
     await build({
       ...options,
+      plugins: [mystPatchPlugin, ...(options.plugins ?? [])],
       entryPoints: undefined,
       stdin: {
         contents: 'export { renderMyst } from "./src/core/render/mystRenderer";\n'

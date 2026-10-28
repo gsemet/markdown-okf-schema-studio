@@ -161,7 +161,13 @@ test("a missing java is reported like a missing command; other spawn errors keep
   scriptSpawner((_input, child) => {
     process.nextTick(() => child.emit("error", Object.assign(new Error("spawn java ENOENT"), { code: "ENOENT" })));
   });
-  const absent = await renderPlantUmlDiagrams(figure("a", 2), { jarPath, workspaceRoot: root, trusted: true });
+  // A machine with JAVA_HOME set (a CI runner) would name the absolute java path instead of "java".
+  const javaHome = process.env.JAVA_HOME;
+  delete process.env.JAVA_HOME;
+  const absent = await renderPlantUmlDiagrams(figure("a", 2), { jarPath, workspaceRoot: root, trusted: true })
+    .finally(() => {
+      if (javaHome !== undefined) process.env.JAVA_HOME = javaHome;
+    });
   assert.deepEqual(absent.diagrams, [{
     status: "unavailable",
     message: 'PlantUML executable "java" was not found on PATH. '
