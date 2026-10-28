@@ -5,7 +5,7 @@ commit that finished green, whose ``integration`` job succeeded and that still h
 report artifacts. Prints the run id, or nothing when no run qualifies (the caller then runs the
 suite itself).
 
-Failure policy: a ``gh api`` error during the automatic selection is logged as a warning and prints
+Failure policy: a ``gh api`` error or malformed JSON during the automatic selection is logged as a warning and prints
 nothing, so the caller falls back to the suite. With ``--run-id`` the run is requested explicitly:
 it must pass the same checks, and any mismatch or API error exits non-zero (fail closed).
 """
@@ -135,7 +135,7 @@ def main(argv: list[str] | None = None) -> int:
             "workflow_runs",
         )
         found = select_run(runs, args.sha, jobs_of, artifacts_of)
-    except subprocess.CalledProcessError as error:
+    except (subprocess.CalledProcessError, ValueError) as error:
         print(f"warning: GitHub API failed ({error}); the suite runs instead", file=sys.stderr)
         return 0
     if found is None:

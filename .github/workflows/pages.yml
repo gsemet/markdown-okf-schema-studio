@@ -127,6 +127,7 @@ jobs:
             if [[ -n "$FOUND" ]]; then
               echo "::warning::Download of the reports of run $FOUND failed; the suite runs instead"
             fi
+            rm -rf out/reports
             echo "reports=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Build Pages site from the downloaded reports

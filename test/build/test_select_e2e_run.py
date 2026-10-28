@@ -106,3 +106,13 @@ def test_main_automatic_selection_falls_back_when_the_api_fails(monkeypatch, cap
     assert select.main(["--repo", "o/r", "--sha", SHA]) == 0
     captured = capsys.readouterr()
     assert captured.out == "" and "warning" in captured.err
+
+
+def test_main_automatic_selection_falls_back_on_malformed_json(monkeypatch, capsys) -> None:
+    def bad(*_a, **_k):
+        raise ValueError("Expecting value: line 1 column 1 (char 0)")
+
+    monkeypatch.setattr(select, "gh_api", bad)
+    assert select.main(["--repo", "o/r", "--sha", SHA]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == "" and "warning" in captured.err
