@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-TRUST-090
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Include answers are matched by their edit id

@@ -9,7 +9,7 @@ description: When content cannot be rendered or loaded, or a render fails, the
   silent gap, and keep showing the previous page until a newer render is ready.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -34,6 +34,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-036
 - SwRS-MDOKFSTUDIO-CORE-047
 - SwRS-MDOKFSTUDIO-CORE-067
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A reader sees what cannot be rendered and keeps a usable preview

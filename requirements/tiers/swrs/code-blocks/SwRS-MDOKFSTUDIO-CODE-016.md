@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-CODE-007
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Keep code backgrounds soft and readable in the forced white and cream themes

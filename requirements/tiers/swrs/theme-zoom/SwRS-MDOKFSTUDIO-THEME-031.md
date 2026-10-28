@@ -9,7 +9,7 @@ description: "When the Cream theme mode is shown, the extension SHALL give the f
   surfaces, and draw the paragraph after an admonition in the body text colour."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/core/preview/creamTheme.test.ts
 - test/visual/capture_page_checks.py
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Cream text meets a 4.5 to 1 contrast and keeps the body colour after an admonition

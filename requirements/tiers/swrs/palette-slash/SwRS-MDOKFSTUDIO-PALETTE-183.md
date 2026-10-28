@@ -12,7 +12,7 @@ description: When the host answers previewListCitations, the extension SHALL
   error when the scan fails.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/core/mapping/mystTargets.test.ts
 - test/integration/mystPickers.test.ts
 - test/session/paletteReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host scans nearby bibliography files for citation keys within bounds

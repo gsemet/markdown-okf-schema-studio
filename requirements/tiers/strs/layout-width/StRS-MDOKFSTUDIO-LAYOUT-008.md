@@ -19,6 +19,7 @@ user_need: As a reader, I can rely on Margin to keep everything in a readable
   being centred in all modes.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-LAYOUT-003
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Margin and Full width modes frame the content predictably

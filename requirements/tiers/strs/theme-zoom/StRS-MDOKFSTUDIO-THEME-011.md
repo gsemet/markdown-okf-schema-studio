@@ -9,7 +9,7 @@ description: When the reader presses Zoom in or Zoom out, the Studio SHALL scale
   for the panel.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-THEME-055
 - SwRS-MDOKFSTUDIO-TOOLBAR-013
 - SwRS-MDOKFSTUDIO-TRUST-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A reader zooms the text and the column and keeps the zoom

@@ -18,6 +18,7 @@ exemption_reason: "Archived. Another requirement specifies this behaviour, so no
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A saved state keeps at most 100 open-section indexes between 0 and 9999

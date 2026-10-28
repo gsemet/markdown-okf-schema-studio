@@ -9,7 +9,7 @@ description: While the Studio runs, the extension SHALL open its side preview
   the built-in Markdown preview as they were.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/host-vscode/activation.ts
 tested_in_files:
 - test/integration/stockCoexistence.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Studio runs beside the built-in Markdown preview

@@ -11,7 +11,7 @@ description: When a reader presses the Anchor button, the Studio SHALL switch,
   cursor line.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TOOLBAR-122
 - SwRS-MDOKFSTUDIO-TOOLBAR-126
 - SwRS-MDOKFSTUDIO-TOOLBAR-128
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The reader decides how the panes scroll together and sees the cursor block

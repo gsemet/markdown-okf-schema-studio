@@ -10,7 +10,7 @@ description: When a document's type has a schema, the Studio SHALL list its
   is on.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -35,6 +35,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-084
 - SwRS-MDOKFSTUDIO-FMSCHEMA-085
 - SwRS-MDOKFSTUDIO-FMSCHEMA-089
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Fields follow the schema and problems show on the field concerned

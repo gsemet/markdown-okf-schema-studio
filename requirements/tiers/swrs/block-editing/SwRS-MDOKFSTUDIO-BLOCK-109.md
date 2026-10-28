@@ -9,7 +9,7 @@ description: "While edit mode is on, the page SHALL give the insert point of eve
   swap the block with its neighbour."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -34,6 +34,7 @@ tested_in_files:
 - test/core/protocol/pageToHost.test.ts
 - test/integration/blockActionsFollowSelection.test.ts
 - test/page/runtimeBlockMoves.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The up and down arrows of an insert point move its block

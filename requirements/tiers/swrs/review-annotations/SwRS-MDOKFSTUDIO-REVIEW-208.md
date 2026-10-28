@@ -7,7 +7,7 @@ description: When a range received by the page is not a pair of integers with 1
   <= start <= end, the extension SHALL ignore it.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/page/modules/incomingChanges.ts
 tested_in_files:
 - test/page/modules/incomingChanges.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Malformed incoming-change ranges are ignored

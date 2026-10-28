@@ -9,7 +9,7 @@ description: When a writer presses an arrow key with the caret at an edge of the
   caret at its end or at its start, and otherwise leave the key to the text box.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/blockReq.requirements.test.ts
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Arrow keys at the edges open the previous or next block

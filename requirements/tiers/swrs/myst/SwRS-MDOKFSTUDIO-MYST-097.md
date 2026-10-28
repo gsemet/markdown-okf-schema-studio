@@ -12,7 +12,7 @@ description: When the extension reads a Markdown source to render it, to anchor
   front matter.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 - src/core/syntax/markdownSyntax.ts
 tested_in_files:
 - test/core/syntax/markdownSyntax.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## EARS Expression

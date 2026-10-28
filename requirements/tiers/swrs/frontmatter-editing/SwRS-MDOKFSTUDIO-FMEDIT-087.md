@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A tall properties table scrolls to both ends at 460 px and returns to line 1 on source sync

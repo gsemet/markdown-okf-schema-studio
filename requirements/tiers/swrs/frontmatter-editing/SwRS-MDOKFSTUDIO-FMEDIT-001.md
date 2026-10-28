@@ -8,7 +8,7 @@ description: "When a writer clicks, or presses Enter or Space on, a name or valu
   inside that cell."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/page/runtimeFrontmatterFields.test.ts
 - test/visual/capture_page_checks.py
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A click on a field in edit mode opens its editor in place

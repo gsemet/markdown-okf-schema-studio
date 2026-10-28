@@ -18,6 +18,7 @@ user_need: As a reviewer, I jump from a metadata reference to the file and line
   it names.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-014
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Frontmatter links can be followed

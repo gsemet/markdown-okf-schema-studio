@@ -10,7 +10,7 @@ description: 'When a document holds a {tab-set} with {tab-item} children, the ex
   on the tabs.'
 project: MDOKFSTUDIO
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/render/cardsTabs.test.ts
 - test/integration/mystBlocksWindow.ts
 - test/visual/cardsTabsScenarios.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Tab sets render a tab bar with one panel shown at a time

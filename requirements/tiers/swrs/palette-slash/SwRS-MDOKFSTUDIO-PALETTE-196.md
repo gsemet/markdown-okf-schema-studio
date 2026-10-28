@@ -14,7 +14,7 @@ description: When previewPasteImage is accepted, the extension SHALL check the
   or the write fails.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -37,6 +37,7 @@ tested_in_files:
 - test/integration/imagePaste.test.ts
 - test/session/paletteReq.requirements.test.ts
 - test/session/pasteImageWrite.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host saves a pasted image next to the document under a name it chooses

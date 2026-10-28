@@ -9,7 +9,7 @@ description: When a word, a URL, an inline code identifier or a Japanese,
   horizontal overflow of the page.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Long words, URLs, identifiers and CJK text wrap in the column

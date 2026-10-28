@@ -11,7 +11,7 @@ description: "When the reader follows a link to another Markdown document in a p
   line selected or scroll the preview to the stored line."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/integration/previewHistory.test.ts
 - test/page/runtimeScroll.test.ts
 - test/session/toolbarReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Followed links and anchor jumps are recorded per panel and replayed at their line

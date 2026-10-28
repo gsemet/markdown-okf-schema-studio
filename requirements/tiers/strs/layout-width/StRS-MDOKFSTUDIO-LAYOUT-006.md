@@ -18,6 +18,7 @@ user_need: As a reader, I switch between a narrow reading column, a column that
   still there when I come back.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-LAYOUT-003
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## One button switches the width mode

@@ -10,7 +10,7 @@ description: When edit mode is on and no editor is open, the page SHALL move a
   focus, and a window or tab that comes back SHALL restore the selection.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/integration/windowSwitchKeys.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Arrow keys, Enter and Escape drive block editing without the mouse

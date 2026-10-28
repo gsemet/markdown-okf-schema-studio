@@ -10,7 +10,7 @@ description: When a writer Shift+clicks a block or presses Shift+Up or
   blank separator, or paste the clipboard text as new blocks.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -34,6 +34,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-BLOCK-243
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer selects blocks and copies, cuts and pastes them as Markdown

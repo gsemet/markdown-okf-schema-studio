@@ -12,7 +12,7 @@ description: When the page applies the Diff state, the page SHALL set the Diff
   markdownOkfSchemaStudio.preview.showIncomingChanges is false.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/session/toolbarReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Diff button and the showIncomingChanges setting hide the change bars

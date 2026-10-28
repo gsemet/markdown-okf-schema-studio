@@ -11,7 +11,7 @@ description: When the writer opens, leaves or dismisses a popover of the
   text box and keeping the editor open.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -35,6 +35,7 @@ tested_in_files:
 - test/page/runtimeEditPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/visual/capture_edit_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Palette popovers open in the frame, one at a time, and Escape or typing closes them

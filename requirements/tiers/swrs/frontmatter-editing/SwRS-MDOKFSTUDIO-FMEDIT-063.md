@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-BLOCK-148
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The properties table is never part of a block selection or move

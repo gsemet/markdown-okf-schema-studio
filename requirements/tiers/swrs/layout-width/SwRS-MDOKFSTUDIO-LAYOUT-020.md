@@ -9,7 +9,7 @@ description: When the reader presses the Width button, the extension SHALL
   position of the page.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/diagReq.layout.requirements.test.ts
 - test/page/runtimePageControls.test.ts
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Width button cycles Margin, Auto and Full and keeps the reading line

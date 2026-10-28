@@ -10,7 +10,7 @@ description: When a document uses bare http(s) or www URLs, GitHub alerts,
   HTML, unsafe colours and unsafe link schemes.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -48,6 +48,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-GFM-036
 - SwRS-MDOKFSTUDIO-GFM-037
 - SwRS-MDOKFSTUDIO-GFM-038
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## GitHub Flavored Markdown renders as on GitHub, safely

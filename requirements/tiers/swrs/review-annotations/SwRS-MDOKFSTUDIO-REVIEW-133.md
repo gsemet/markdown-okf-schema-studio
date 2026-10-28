@@ -9,7 +9,7 @@ description: When a document holds an HTML comment that is not a tool comment,
   written as HTML.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/core/render/commentMarkers.ts
 tested_in_files:
 - test/core/render/commentMarkers.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## HTML comments show as gray chips carried as data

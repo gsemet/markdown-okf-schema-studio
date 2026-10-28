@@ -9,7 +9,7 @@ description: When a navigation or a host flush request occurs while a field or
   checks.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/edits/frontmatterEdit.test.ts
 - test/core/preview/flushWait.test.ts
 - test/page/runtimeEditorFlush.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A navigation saves the open field editor as an unchecked flush

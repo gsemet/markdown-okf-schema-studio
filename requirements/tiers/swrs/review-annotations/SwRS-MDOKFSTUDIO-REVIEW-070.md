@@ -8,7 +8,7 @@ description: When a previewCommentReply message reaches the host, the extension
   of 1 to 10 000 characters.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 - src/session/features/comments.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A comment reply message names a thread and carries a bounded body

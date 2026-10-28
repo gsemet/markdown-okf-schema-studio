@@ -9,7 +9,7 @@ description: When a field editor is open, the extension SHALL show inside the
   fields still missing or typed as a custom key.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The field action menu offers the missing schema fields or a custom key

@@ -10,7 +10,7 @@ description: While edit mode is on, when the writer opens an HTML comment chip,
   TODO comment.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/core/render/blockTagTitle.test.ts
 - test/core/render/commentMarkers.test.ts
 - test/integration/commentTitleWindow.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Edit mode titles an open comment with its literal tag

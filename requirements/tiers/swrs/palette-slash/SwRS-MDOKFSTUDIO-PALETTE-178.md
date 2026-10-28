@@ -11,7 +11,7 @@ description: When the host answers previewListTargets, the extension SHALL list
   entries, and set the truncated flag when the list is cut.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/mapping/mystTargets.test.ts
 - test/integration/mystPickers.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host lists the label targets of the document

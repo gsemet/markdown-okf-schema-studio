@@ -10,7 +10,7 @@ description: "When a {uml} directive or a {plantuml} directive without a body na
   reason it cannot be read in place of the diagram."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/render/plantUmlFile.test.ts
 - test/page/modules/plantumlDiagram.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A {uml} directive renders a PUML file as a render dependency

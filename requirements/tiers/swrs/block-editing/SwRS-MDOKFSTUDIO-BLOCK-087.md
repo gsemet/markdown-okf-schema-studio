@@ -10,7 +10,7 @@ description: While edit mode is on, the page SHALL place an insert point holding
   insertion editor at that place.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/runtimeBlockMoves.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Edit mode places an insert point with a plus button after every body block

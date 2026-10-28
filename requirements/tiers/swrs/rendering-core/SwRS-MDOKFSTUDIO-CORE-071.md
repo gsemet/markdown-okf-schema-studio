@@ -12,7 +12,7 @@ description: When a document holds README-style HTML (div and p with align, br,
   already keep.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/core/render/mystRawHtml.test.ts
 - test/integration/readmeHtmlWindow.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## README-style HTML renders like GitHub and shows its tag in edit mode

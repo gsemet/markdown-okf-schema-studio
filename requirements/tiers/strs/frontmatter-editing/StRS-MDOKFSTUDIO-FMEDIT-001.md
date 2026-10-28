@@ -9,7 +9,7 @@ description: When a writer clicks, or presses Enter or Space on, a field name or
   leave the table inert in reading mode and in a read-only preview.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -60,6 +60,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMEDIT-081
 - SwRS-MDOKFSTUDIO-FMEDIT-082
 - SwRS-MDOKFSTUDIO-FMEDIT-087
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer edits metadata values in place with fitting controls

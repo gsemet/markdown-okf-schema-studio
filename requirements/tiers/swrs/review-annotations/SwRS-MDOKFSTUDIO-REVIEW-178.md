@@ -9,7 +9,7 @@ description: When a previewThreadReply or previewThreadDelete message reaches
   that is not blank.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An inline thread change message carries valid lines and a non-blank text

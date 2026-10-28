@@ -9,7 +9,7 @@ description: When the writer presses Escape in a cell editor outside an IME
   input-method composition, leave the editor open and post nothing.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/runtimeTableCellEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Escape cancels the cell edit, except during a composition

@@ -10,7 +10,7 @@ description: "When a document contains a mermaid fence or a {mermaid} directive,
   column."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -34,6 +34,7 @@ tested_in_files:
 - test/page/diagReq.diagramEdit.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Mermaid fences become inert diagram pictures

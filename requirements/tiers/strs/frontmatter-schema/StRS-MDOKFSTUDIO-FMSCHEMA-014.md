@@ -10,7 +10,7 @@ description: When a schema annotates a field with x-okf-link, the Studio SHALL
   unusable links with a reason.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -58,6 +58,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-086
 - SwRS-MDOKFSTUDIO-FMSCHEMA-087
 - SwRS-MDOKFSTUDIO-TOOLBAR-113
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Frontmatter link fields resolve, show their status and can be followed

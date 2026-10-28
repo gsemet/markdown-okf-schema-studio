@@ -7,7 +7,7 @@ description: When a document contains a table of contents directive, the Studio
   SHALL list the documents it names as links and mark missing ones.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -22,6 +22,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-060
 - SwRS-MDOKFSTUDIO-MYST-061
 - SwRS-MDOKFSTUDIO-MYST-062
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A toctree shows the linked documents and marks missing ones

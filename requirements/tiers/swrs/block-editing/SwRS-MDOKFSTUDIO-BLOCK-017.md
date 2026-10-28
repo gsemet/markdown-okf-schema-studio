@@ -10,7 +10,7 @@ description: "While edit mode is on, the page SHALL outline with a dashed line t
   file and line."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The hover outline shows what a click would edit

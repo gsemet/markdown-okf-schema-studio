@@ -11,7 +11,7 @@ description: When the extension compares a base text with the current text, it
   when more than 20 000 lines differ or more than 2000 edits are needed.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 - src/core/mapping/lineDiff.ts
 tested_in_files:
 - test/core/mapping/lineDiff.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The line diff reports added and modified lines

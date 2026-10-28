@@ -10,7 +10,7 @@ description: When the page reports its reading state while the reader scrolls,
   recent documents.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/host/lifeReq.requirements.test.ts
 - test/integration/lifecycle.test.ts
 - test/page/pageTimers.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The reading state of recent documents is saved within bounds

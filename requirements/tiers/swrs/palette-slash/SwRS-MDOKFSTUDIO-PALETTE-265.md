@@ -9,7 +9,7 @@ description: When the palette mode is Full, the extension SHALL list the
   selection, and no other mode SHALL list them.
 project: MDOKFSTUDIO
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/modules/editPalette.test.ts
 - test/page/modules/slashMenu.test.ts
 - test/page/runtimeEditPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Full palette mode adds Vega-Lite and Vega chart commands

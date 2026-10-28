@@ -11,7 +11,7 @@ description: When a writer edits a block in edit mode, the Studio SHALL offer an
   apply.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -64,6 +64,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-264
 - SwRS-MDOKFSTUDIO-PALETTE-265
 - SwRS-MDOKFSTUDIO-TABLE-111
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer formats and inserts Markdown, GFM and MyST constructs from the palette

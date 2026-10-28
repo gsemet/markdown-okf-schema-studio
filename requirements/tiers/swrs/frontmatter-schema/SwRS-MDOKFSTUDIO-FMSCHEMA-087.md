@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-039
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A link problem counts in the badge

@@ -11,7 +11,7 @@ description: When a cell editor is open, the extension SHALL style its text box
   at least 8em wide and the cell being edited at least 300 px wide.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/integration/tableEmptyColumn.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/visual/capture_edit_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The cell text box wraps and fits its text in the block editor font

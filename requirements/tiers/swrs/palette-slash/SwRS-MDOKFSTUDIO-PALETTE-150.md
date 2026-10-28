@@ -9,7 +9,7 @@ description: "When the host answers a path for the Figure button outside a figur
   caption."
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/integration/realWindowGaps.ts
 - test/page/modules/editActions.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Figure writes a figure directive for a picked image

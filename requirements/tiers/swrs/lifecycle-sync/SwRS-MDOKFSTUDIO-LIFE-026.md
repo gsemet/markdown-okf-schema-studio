@@ -11,7 +11,7 @@ description: When another saved Markdown file becomes the active editor, the
   other editor change.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/preview/flushWait.test.ts
 - test/host/lifeReq.requirements.test.ts
 - test/integration/lifecycle.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The side preview follows the active Markdown editor

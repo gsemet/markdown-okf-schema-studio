@@ -7,7 +7,7 @@ description: When the extension shows a text to the reader, it SHALL NOT mention
   Sphinx.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files:
 - test/security/userFacingText.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Visible text speaks of the product, not of its build tool

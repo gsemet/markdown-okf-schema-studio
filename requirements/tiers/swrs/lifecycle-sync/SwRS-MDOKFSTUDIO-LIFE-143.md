@@ -11,7 +11,7 @@ description: When a preview panel is closed, a document is closed, a workspace
   preview still uses.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/integration/lifecycle.test.ts
 - test/integration/workspaceDisposal.test.ts
 - test/session/eventFanOut.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Closing a preview or folder leaves nothing behind

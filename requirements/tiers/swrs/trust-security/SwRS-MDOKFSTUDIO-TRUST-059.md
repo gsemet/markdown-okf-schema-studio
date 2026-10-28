@@ -10,7 +10,7 @@ description: When the page receives a value from the host, it SHALL treat it as
   document alone, or no render identity but an identifier of its own.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/protocol/hostToPage.test.ts
 - test/page/hostMessages.test.ts
 - test/page/runtimeBlockMoves.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The page accepts only registered host messages addressed to its render

@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-019
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Schema lookup is off in Restricted Mode and for standalone files

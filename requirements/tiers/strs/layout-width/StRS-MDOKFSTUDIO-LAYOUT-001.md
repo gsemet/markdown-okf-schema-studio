@@ -9,7 +9,7 @@ description: When a document holds wide content, long words or long URLs, the
   sideways inside its own box.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -25,6 +25,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LAYOUT-033
 - SwRS-MDOKFSTUDIO-LAYOUT-034
 - SwRS-MDOKFSTUDIO-LAYOUT-035
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The preview never scrolls sideways and wide content scrolls in its box

@@ -10,7 +10,7 @@ description: When a writer previews a document with a PlantUML fence or
   draw it.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -56,6 +56,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-038
 - SwRS-MDOKFSTUDIO-TRUST-074
 - SwRS-MDOKFSTUDIO-TRUST-075
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer reads PlantUML diagrams without any setup

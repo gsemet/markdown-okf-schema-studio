@@ -9,7 +9,7 @@ description: When the writer chooses a key in the Citation list, the extension
   backtick, an angle bracket or a line break.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/page/modules/editActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A chosen bibliography key is written as a cite role

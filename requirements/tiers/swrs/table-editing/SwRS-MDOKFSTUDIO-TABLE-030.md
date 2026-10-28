@@ -19,6 +19,7 @@ exemption_reason: "Archived. Another requirement specifies this behaviour, so no
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Following a link or pressing Back or Next saves an open cell first

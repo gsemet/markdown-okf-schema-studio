@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-016
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A save for a missing field or revision is refused as stale

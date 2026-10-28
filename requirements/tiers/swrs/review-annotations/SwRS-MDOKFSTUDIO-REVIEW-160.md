@@ -9,7 +9,7 @@ description: When a writer runs the TODO action in a block editor on lines that
   when every non-blank touched line is already wrapped.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/page/modules/inlineEditActions.ts
 tested_in_files:
 - test/page/modules/editActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The TODO action wraps or unwraps the touched lines in TODO comments

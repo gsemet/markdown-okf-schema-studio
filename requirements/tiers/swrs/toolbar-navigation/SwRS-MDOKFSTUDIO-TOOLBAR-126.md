@@ -7,7 +7,7 @@ description: "When previewAnchorModeChanged reaches the host, the extension SHAL
   accept it only when anchorToEditor is a boolean."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host accepts only a boolean anchor mode

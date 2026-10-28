@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-MYST-024
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Long display equations scroll inside their box

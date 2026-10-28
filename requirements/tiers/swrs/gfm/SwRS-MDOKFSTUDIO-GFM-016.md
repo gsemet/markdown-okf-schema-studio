@@ -10,7 +10,7 @@ description: When a task-list item, paragraph, table cell, directive body or
   its attributes in the sanitized webview HTML.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/checkboxMarkers.test.ts
 - test/core/render/checkboxRendering.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Task list markers render as checkboxes with their source position

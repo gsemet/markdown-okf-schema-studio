@@ -17,6 +17,7 @@ user_need: As a writer, I want card layouts that stay usable in narrow panes so
   that I can design pages in VS Code.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-MYST-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Grid cards adapt to the pane width

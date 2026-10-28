@@ -7,7 +7,7 @@ description: When a reader points at or tabs to a code block in any preview, the
   Studio SHALL offer a one-click copy of the exact code and confirm the copy.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -32,6 +32,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CODE-035
 - SwRS-MDOKFSTUDIO-TRUST-006
 - SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A reader copies the exact code of a block

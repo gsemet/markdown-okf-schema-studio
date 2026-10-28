@@ -18,6 +18,7 @@ exemption_reason: "Archived. Not an observable behaviour; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A directive name registered twice is refused

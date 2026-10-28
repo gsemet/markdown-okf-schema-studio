@@ -21,6 +21,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-GFM-031
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Rebuild raw HTML tables from an allow-list

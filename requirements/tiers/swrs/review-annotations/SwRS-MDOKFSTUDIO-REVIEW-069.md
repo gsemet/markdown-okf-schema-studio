@@ -9,7 +9,7 @@ description: When a previewCommentCreate message reaches the host, the extension
   at most 32 characters, and its body has 1 to 10 000 characters.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/comments/commentEditing.test.ts
 - test/core/protocol/pageToHost.test.ts
 - test/integration/commentWrite.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A comment create message needs a valid anchor and a bounded body

@@ -10,7 +10,7 @@ description: "When a heading of level h1 to h6 of the running text lies at or ab
   when no heading lies at or above the reading line."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_final_checks.py
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The sticky band shows the current heading path

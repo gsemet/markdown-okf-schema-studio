@@ -10,7 +10,7 @@ description: When the pointer is over a code block of the preview content, or
   pointer, a click, scrolling, a resize or a content patch makes it unusable.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/modules/codeCopy.test.ts
 - test/page/modules/renderReq.codeCopy.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A Copy code button appears on a hovered or focused code block

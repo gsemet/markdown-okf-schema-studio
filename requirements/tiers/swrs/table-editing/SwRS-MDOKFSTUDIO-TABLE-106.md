@@ -12,7 +12,7 @@ description: When the writer runs the Table action with a size of R x C, 1 to 9
   out-of-range size.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/slashMenu.test.ts
 - test/page/modules/tableInsertAfterTable.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Table action inserts a pipe table of the chosen size on its own lines

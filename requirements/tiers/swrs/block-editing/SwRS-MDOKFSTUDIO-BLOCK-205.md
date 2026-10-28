@@ -10,7 +10,7 @@ description: "When the page hides, closes or leaves the document (a followed lin
   to reach the document."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -39,6 +39,7 @@ tested_in_files:
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeEditorFlush.test.ts
 - test/session/toolbarReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Open editors are saved before the page hides or leaves the document

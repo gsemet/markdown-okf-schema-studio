@@ -9,7 +9,7 @@ description: When a table row is split into cells for editing, the extension
   pipe, also one inside a code span, as the preview does.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/modules/markdownTable.ts
 tested_in_files:
 - test/page/modules/markdownTable.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Edge pipes are optional and only an escaped pipe stays in its cell

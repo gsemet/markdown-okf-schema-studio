@@ -10,7 +10,7 @@ description: When a writable preview shows an inline thread, the page SHALL add
   delete of the thread to the host with its source lines.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/inlineThread.test.ts
 - test/page/modules/inlineThread.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An open inline thread offers Reply and Delete thread

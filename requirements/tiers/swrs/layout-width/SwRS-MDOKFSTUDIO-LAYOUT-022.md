@@ -10,7 +10,7 @@ description: When the width mode is Margin or Full width, the extension SHALL
   at their own width in every width mode.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/runtimePageControls.test.ts
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Margin keeps blocks in the column and Full removes the limit

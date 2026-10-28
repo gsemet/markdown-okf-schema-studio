@@ -13,7 +13,7 @@ description: When a document holds a construct that only a full project build
   stays successful.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/core/render/mystPaletteRendering.test.ts
 - test/integration/projectFeatures.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Build-dependent constructs show an inert placeholder with a warning

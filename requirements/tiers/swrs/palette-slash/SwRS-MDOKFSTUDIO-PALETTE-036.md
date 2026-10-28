@@ -10,7 +10,7 @@ description: When the writer presses the mouse on a palette control or the focus
   when the focus goes outside the editor frame.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/page/modules/paletteReq.requirements.test.ts
 - test/page/runtimeEditPalette.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Leaving the frame from a palette control saves once and a press keeps the text box focus

@@ -8,7 +8,7 @@ description: "When a place is pushed to the history of a panel, the extension SH
   the places after the current one."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/core/state/navigationHistory.ts
 tested_in_files:
 - test/core/state/navigationHistory.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The history keeps the last 50 places without duplicates

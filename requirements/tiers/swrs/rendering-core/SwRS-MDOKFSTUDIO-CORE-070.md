@@ -11,7 +11,7 @@ description: When a document is parsed, the MyST parser SHALL split the source
   and after it) SHALL stay unchanged.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/core/render/mystTightness.markers.ts
 tested_in_files:
 - test/build/mystSourcePatches.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A parse splits the source into lines once, whatever the number of directives

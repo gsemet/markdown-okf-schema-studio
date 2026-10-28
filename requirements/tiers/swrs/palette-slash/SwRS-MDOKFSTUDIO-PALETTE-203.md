@@ -13,7 +13,7 @@ description: When the writer pastes into the block text box a clipboard that
   and inserting nothing.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/modules/paletteReq.requirements.test.ts
 - test/page/modules/pasteImage.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A pasted image is sent to the host and its name inserted on its own paragraph

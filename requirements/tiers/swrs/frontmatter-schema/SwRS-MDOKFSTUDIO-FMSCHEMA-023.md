@@ -11,7 +11,7 @@ description: When a schema file is written in YAML, JSON or JSON5, the extension
   compile.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/core/frontmatter/schemaRegistry.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Schemas in YAML, JSON or JSON5 with relative references compile or report a row

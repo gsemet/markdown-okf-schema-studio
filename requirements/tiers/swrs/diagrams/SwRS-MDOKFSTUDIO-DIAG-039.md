@@ -11,7 +11,7 @@ description: When the page needs built-in diagrams, it SHALL show the kept
   element.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
 - test/page/rendererBridge.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Built-in pictures are kept by source and drawn one at a time

@@ -18,6 +18,7 @@ user_need: As a writer, I hide the Description column when I need room and find
   it hidden again next time.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Description column can be collapsed

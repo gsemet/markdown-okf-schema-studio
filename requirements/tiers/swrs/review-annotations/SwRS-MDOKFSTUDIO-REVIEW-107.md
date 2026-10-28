@@ -10,7 +10,7 @@ description: When a review thread quote has no exact copy, the extension SHALL
   and orphan the thread when there is no such place or the places are ambiguous.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 - src/core/comments/anchoring.ts
 tested_in_files:
 - test/core/comments/anchoring.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A slightly changed quote is followed by a bounded fuzzy search

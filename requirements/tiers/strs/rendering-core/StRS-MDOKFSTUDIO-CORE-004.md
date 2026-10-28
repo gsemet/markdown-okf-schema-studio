@@ -18,6 +18,7 @@ user_need: Writers need to read documents in any script and direction without
   horizontal scrolling.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-CORE-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Read text in any script and direction

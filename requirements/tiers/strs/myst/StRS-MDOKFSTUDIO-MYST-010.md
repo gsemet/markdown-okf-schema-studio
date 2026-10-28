@@ -17,6 +17,7 @@ user_need: As a writer, I want safe label renaming so that references do not
   silently break.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-MYST-009
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A label can be renamed safely from its anchor

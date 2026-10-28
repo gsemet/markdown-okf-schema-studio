@@ -11,7 +11,7 @@ description: When a writer presses the VS Code key binding of undo, redo, select
   applies.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -38,6 +38,7 @@ tested_in_files:
 - test/page/runtimeBlockEditor.test.ts
 - test/security/package-contract.test.ts
 - test/session/editCommands.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Edit-mode text box follows VS Code undo, redo, select-all and delete-line key bindings

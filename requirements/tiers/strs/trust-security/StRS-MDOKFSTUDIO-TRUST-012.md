@@ -8,7 +8,7 @@ description: When the Studio shows a text to the reader or appears in the
   internal build tool and showing its own icon.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -18,6 +18,7 @@ user_need: As a reader, I see messages that speak of the preview, not of the
 derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-070
 - SwRS-MDOKFSTUDIO-TRUST-074
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Visible text and the icon speak of the product

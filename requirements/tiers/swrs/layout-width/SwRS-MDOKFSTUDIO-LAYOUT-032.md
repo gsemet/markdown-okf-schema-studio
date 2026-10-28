@@ -14,7 +14,7 @@ description: When a table is wider than the pane outside Auto breakout, the
   behaviour.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioAssertions.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A wide table scrolls inside its own box with shaded edges

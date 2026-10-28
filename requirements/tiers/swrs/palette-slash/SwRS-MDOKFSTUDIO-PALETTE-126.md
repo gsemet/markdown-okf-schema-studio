@@ -9,7 +9,7 @@ description: When the writer presses Key, the extension SHALL wrap the selection
   nothing is selected.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Key wraps the selection in kbd tags, removes them, or inserts a sample

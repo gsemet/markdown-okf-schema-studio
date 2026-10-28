@@ -11,7 +11,7 @@ description: "When the reader follows an anchor, the extension SHALL post naviga
   or element is found or the request names another render."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/integration/previewHistory.test.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An in-page anchor scrolls the page to its target at the reading line

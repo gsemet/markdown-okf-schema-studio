@@ -19,6 +19,7 @@ user_need: As a writer, I turn the metadata table off or adjust how frontmatter
   is checked and see the effect at once.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Frontmatter settings control the table and apply live

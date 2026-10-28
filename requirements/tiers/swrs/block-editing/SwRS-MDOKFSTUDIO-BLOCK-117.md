@@ -10,7 +10,7 @@ description: When the host moves a block past its neighbour, it SHALL replace
   the swap would glue a block to a non-blank line.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/edits/sourceEdits.test.ts
 - test/core/mapping/blockMove.test.ts
 - test/integration/blockMove.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host swaps two blocks in one edit and keeps their separators

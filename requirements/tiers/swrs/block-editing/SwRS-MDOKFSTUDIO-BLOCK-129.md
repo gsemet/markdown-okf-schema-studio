@@ -7,7 +7,7 @@ description: "When a previewBlockMoveResult names another document, revision or 
   than the page shows, the page SHALL ignore it."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/page/features/blockMoves.ts
 tested_in_files:
 - test/page/runtimeBlockMoves.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The page applies a move result only for its own render

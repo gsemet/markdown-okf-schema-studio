@@ -24,13 +24,14 @@ or implementation details of the underlying tool.
 
 Keep this entrypoint as the first read. The packaged operations reference is
 self-contained: agents need the installed CLI and target project, not this
-package's source code or documentation website. For local policy, a local
-`<bundle>/guidelines/requirements.guidelines.md` always takes precedence.
+package's source code or documentation website. The requirements guideline is
+not shipped with this skill: `okfreq init` installs it into the bundle as
+`<bundle>/guidelines/requirements.guidelines.md`, and that file is the single
+guideline to follow.
 
 | Need | Read |
 |---|---|
 | Commands, backfilling existing features, harness setup, reports, or troubleshooting | [Standalone operations](references/operations.md) |
-| Baseline authoring and validation when no local guideline exists | [Requirements guidelines](references/requirements.guidelines.md) |
 
 ## Installation
 
@@ -54,18 +55,21 @@ agent's skills directory.
    `config.yml`; its requirement documents and schemas normally live in
    `tiers/`.
 2. Read the nearest `AGENTS.md` and any requirements guideline it registers.
-3. Prefer the bundle's own
-   `<bundle>/guidelines/requirements.guidelines.md`. This in-project guideline
-   is authoritative because it can define local paths, scopes, commands, and
-   review rules.
-4. If that file is absent, read
-   [the bundled requirements guideline](references/requirements.guidelines.md)
-   as the baseline. Resolve project-specific paths, scopes, and quality commands
-   from `config.yml`, `AGENTS.md`, and the project itself rather than assuming
-   that example names apply universally.
+3. Read `<bundle>/guidelines/requirements.guidelines.md`, installed by
+   `okfreq init`, then any other guideline file in that folder (by convention
+   `project.guidelines.md`). The project files carry local paths, scopes,
+   commands, and review rules and win where they specialize the shared text.
+   Resolve project-specific paths, scopes, and quality commands from
+   `config.yml`, `AGENTS.md`, and the project itself rather than assuming that
+   example names apply universally.
+4. Never put project rules in `requirements.guidelines.md`:
+   `okfreq init <bundle> --force` replaces it with the packaged text, which is
+   how a missing or outdated copy is installed or refreshed. It leaves every
+   other file of `guidelines/` untouched.
 5. Before changing requirements, read `config.yml` and every schema under
-   `tiers/_schema/`. Local configuration and schemas define the actual levels,
-   hierarchy, IDs, lifecycle values, markers, scopes, and allowed fields.
+   `tiers/_schema/`. Local configuration and schemas define the actual tiers,
+   hierarchy, IDs, lifecycle values, owners, approval locks, markers, scopes, and
+   allowed fields.
 
 ## The goal of okfreq
 
@@ -92,10 +96,13 @@ satisfied. It is not an issue title, design choice, code comment, or task.
   requirements into bounded behavior that code can implement and tests can
   observe.
 - **Authored derivation points upward.** Author `derives_from`; let `okfreq`
-  compute reverse `derived_by` links.
+  compute reverse `derived_by` links. Likewise author `superseded_by` (through
+  `okfreq supersede OLD NEW...`) and let `okfreq` compute `supersedes`; use
+  `relates_to` for lateral links with no derivation or replacement meaning.
 - **Leaf requirements connect to evidence.** Place `@implements_req <ID>` near
-   the relevant production behavior and `@tests_req <ID>` once in each relevant
-   test file. StRS never receives implementation markers; in the stricter
+   the relevant production behavior and `@tests_req <ID>` near each relevant
+   test. The same ID may repeat at distinct evidence points in one file.
+   StRS never receives implementation markers; in the stricter
    `linked-swrs-and-validation-test` mode, a direct `@tests_req <StRS-ID>` marker
    defines a stakeholder validation test.
 - **Markers are links, not proof.** A test marker says where verification lives,
@@ -104,15 +111,19 @@ satisfied. It is not an issue title, design choice, code comment, or task.
   test-link coverage, structural health, and lifecycle counts separate; do not
   collapse them into a misleading success score.
 - **Lifecycle is explicit.** Creating, formatting, linking, or testing a
-  requirement never silently promotes it from `draft` to `proposed` or
-  `approved`.
+  requirement never silently changes its lifecycle. A requirement delivered with
+  its code starts `proposed`; `draft` is a proposal not implemented yet.
+- **`approved` belongs to the owner.** It freezes a requirement; only the owner
+  agrees to approve or change one, recorded in `approved_by` and `approved_on`.
+  Owners and approval locks come from `config.yml` per tier and scope. Repair
+  steps for an agent: [references/operations.md](references/operations.md#lifecycle-ownership-and-approval).
 
 ## Route the intent
 
 | Intent | Action |
 |---|---|
 | Understand what belongs in requirements | Apply the core model and distinguish stakeholder outcomes from software behavior. |
-| Set up a requirements base | Run `okfreq init <project>` and review the generated configuration, schemas, and local guideline before authoring. |
+| Set up a requirements base | Use the `okfreq-setup` skill when it is installed; otherwise run `okfreq init <project>` and review the generated configuration, schemas, and local guideline before authoring. |
 | Capture stakeholder intent | Create an StRS with a stakeholder-observable `SHALL` statement and a preserved `--user-need`. |
 | Refine intent into software behavior | Create an SwRS with one bounded `SHALL` response and at least one valid StRS `--derives-from` parent. |
 | Implement a software requirement | Change code and focused tests together, add source/test markers near the evidence, run tests, then refresh coverage explicitly. |
@@ -239,7 +250,8 @@ Neither API executes tests or treats a marker as proof beyond the configured
 traceability report.
 
 `implemented_in_files` and `tested_in_files` use exact project-relative paths.
-`derives_from`, `derived_by`, and `depends_on` use case-sensitive Markdown
+`derives_from`, `derived_by`, `depends_on`, `superseded_by`, `supersedes`, and
+`relates_to` use case-sensitive Markdown
 filename stems without `.md`. Preserve the existing requirement-ID graph
 validation and use matching requirement IDs and basenames for file navigation.
 `external_id` is not a local-file annotation. Initialization preserves existing
@@ -294,8 +306,8 @@ format, not a generic document heading.
    exemptions, or lifecycle transitions.
 3. Never renumber an existing requirement. Allocate new identities through
    `okfreq new` under the configured ID policy.
-4. Never treat generated `derived_by`, `implemented_in_files`, or
-   `tested_in_files` as authored truth.
+4. Never treat generated `derived_by`, `supersedes`, `implemented_in_files`,
+   `tested_in_files` or `default_owner_email` as authored truth.
 5. Keep `okfreq` requirements independent from `okfkb` knowledge documents.
    They may coexist and both use OKF-compatible Markdown, but they have distinct
    purposes and lifecycles.

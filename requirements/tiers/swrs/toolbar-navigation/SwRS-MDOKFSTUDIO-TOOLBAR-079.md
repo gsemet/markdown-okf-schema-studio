@@ -9,7 +9,7 @@ description: "When a link with a navigation request scrolls into view, the exten
   for each request in order, its kind and its path or reason."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/modules/toolbarReq.requirements.test.ts
 - test/session/eventFanOut.test.ts
 - test/session/toolbarReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Links in view are looked up in bounded batches

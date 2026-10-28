@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-DIAG-068
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Nested diagrams resolve includes next to their own file

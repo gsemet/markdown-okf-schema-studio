@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-DIAG-084
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## jarPath is read as a trimmed string

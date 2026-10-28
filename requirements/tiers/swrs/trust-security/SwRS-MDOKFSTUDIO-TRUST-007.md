@@ -11,7 +11,7 @@ description: When the extension shows a document, it SHALL allow the webview to
   page.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -36,6 +36,7 @@ tested_in_files:
 - test/session/previewRuntimeFile.test.ts
 - test/session/toolbarReq.requirements.test.ts
 - test/session/trustReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A page loads local files only from its resource roots

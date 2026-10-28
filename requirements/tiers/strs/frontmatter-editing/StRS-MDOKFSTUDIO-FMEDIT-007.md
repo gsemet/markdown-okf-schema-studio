@@ -18,6 +18,7 @@ user_need: As a writer, I remove an obsolete metadata field safely, without
   losing other fields or comments.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMEDIT-005
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Remove a metadata field

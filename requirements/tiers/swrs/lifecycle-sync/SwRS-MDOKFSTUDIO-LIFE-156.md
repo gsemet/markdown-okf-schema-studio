@@ -11,7 +11,7 @@ description: The extension SHALL contribute exactly the settings of its settings
   typed boot entry of the page, as its default.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/bootContext.test.ts
 - test/page/pageSettings.test.ts
 - test/security/package-contract.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The settings editor lists the Studio settings in titled groups

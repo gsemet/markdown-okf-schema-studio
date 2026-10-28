@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-004
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## In a multi-line text value Enter adds a line and Cmd or Ctrl+Enter saves

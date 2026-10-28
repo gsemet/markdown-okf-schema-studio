@@ -11,7 +11,7 @@ description: "When the band changes its height or the page updates it after a la
   input."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/modules/toolbarReq.requirements.test.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_page_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The reading offset below the band settles without oscillation

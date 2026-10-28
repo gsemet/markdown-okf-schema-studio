@@ -12,7 +12,7 @@ description: "When a writer presses the platform paste chord with blocks selecte
   text or the document changed while it was read."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -35,6 +35,7 @@ tested_in_files:
 - test/integration/blockClipboard.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/session/blockReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Paste inserts the clipboard as new blocks after the selection or insert point

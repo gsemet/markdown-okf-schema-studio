@@ -9,7 +9,7 @@ description: "When a writer presses the platform copy chord with blocks selected
   the host puts the exact Markdown of those lines on the clipboard."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/core/mapping/blockRange.test.ts
 - test/integration/blockClipboard.test.ts
 - test/page/runtimeBlockSelection.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Cmd/Ctrl+C copies the exact Markdown of the selected blocks

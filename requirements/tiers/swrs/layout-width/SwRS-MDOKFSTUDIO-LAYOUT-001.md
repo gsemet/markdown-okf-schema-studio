@@ -8,7 +8,7 @@ description: When a document holds wide content, long words or long URLs, the
   width mode, theme and pane width.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ tested_in_files:
 - test/page/geometryChecks.test.ts
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The preview page never scrolls sideways

@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-DIAG-105
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## One failing JAR diagram does not affect the others

@@ -10,7 +10,7 @@ description: When a paragraph, heading, list item, block quote or table cell
   Hebrew or Arabic text aligns to the right edge of the column.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 - src/core/security/html-sanitizer.ts
 tested_in_files:
 - test/security/html-policy.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Right-to-left text aligns to the right and blocks get an automatic direction

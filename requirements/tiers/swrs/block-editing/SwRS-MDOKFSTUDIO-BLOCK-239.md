@@ -6,7 +6,7 @@ title: "previewEditCancel needs an edit id and a line range"
 description: "The host SHALL accept previewEditCancel only with the fields of a previewEditOpen."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -20,6 +20,7 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## previewEditCancel needs an edit id and a line range

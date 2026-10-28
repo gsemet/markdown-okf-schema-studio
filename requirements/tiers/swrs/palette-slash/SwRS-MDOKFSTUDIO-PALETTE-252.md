@@ -9,7 +9,7 @@ description: While the slash menu is open, the extension SHALL expose it as a
   when the system forces colours.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/paste/paletteReq.requirements.test.ts
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The slash menu is an announced listbox of text-only rows

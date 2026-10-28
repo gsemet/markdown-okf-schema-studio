@@ -11,7 +11,7 @@ description: "When a properties table with annotated link values is rendered, th
   the full \"[E10]\" or \"[W15]\" message in a keyboard-focusable tooltip."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 ## Each link value shows whether it resolves
 

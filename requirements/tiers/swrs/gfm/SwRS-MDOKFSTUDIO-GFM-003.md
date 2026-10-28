@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-GFM-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Text with a meaning is not autolinked

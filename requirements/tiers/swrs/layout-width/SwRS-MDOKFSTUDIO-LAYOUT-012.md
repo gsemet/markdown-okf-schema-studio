@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-011
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A first-block editor too narrow to be narrowed is pushed below the toolbar

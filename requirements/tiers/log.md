@@ -1,5 +1,20 @@
 # Update Log
 
+## 2026-10-28 (lifecycle meanings, owners and approval locks)
+
+- Moved every `draft` requirement to `proposed` (466 StRS and SwRS): each one is implemented
+  and linked, and `draft` now means a proposal not implemented yet. No requirement is
+  `approved`: approval is the owner's decision.
+- `config.yml` uses the okfreq 0.16 names: `tiers` instead of `levels`, and `lifecycle.field`
+  instead of repeating the values, which now come from `base.schema.yaml`. StRS have
+  `approval_lock: true`, SwRS `false`; both tiers name the owner, and
+  `default_owner_email` is generated into every requirement.
+- `base.schema.yaml` describes each lifecycle state and adds `owner_email`,
+  `default_owner_email`, `approved_by` and `approved_on`. The installed requirements
+  guideline was refreshed with `okfreq init --force`.
+- Needs okf-schema 0.16.0 or later: earlier releases reject `default_owner_email` in
+  `generated_fields` and do not read `tiers`.
+
 ## 2026-10-28 (Vega-Lite and Vega charts, the Full palette mode)
 
 - SwRS-MDOKFSTUDIO-DIAG-121 (new, CR 149): a `vega-lite` or `vega` fence renders, in every palette

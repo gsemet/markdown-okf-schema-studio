@@ -7,7 +7,7 @@ description: When a document uses citations, a bibliography or an unknown
   directive, the Studio SHALL show an inert, labelled placeholder for it.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-023
 - SwRS-MDOKFSTUDIO-MYST-096
 - SwRS-MDOKFSTUDIO-MYST-097
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Build-dependent constructs appear as labelled placeholders

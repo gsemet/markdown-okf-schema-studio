@@ -9,7 +9,7 @@ description: When a MyST code directive sets `:filename:` or `:caption:`, the
   the block's top as a left-aligned monospace title bar.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/core/render/mystFeatures.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A code directive shows its file name or caption above the code

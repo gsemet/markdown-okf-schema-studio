@@ -9,7 +9,7 @@ description: When a pipe table, a {list-table} or a simple HTML table is
   carry the alignment only where the target form has it.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/tableMoves.ts
 - test/page/modules/listTable.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A conversion keeps cells, escapes and alignment across forms

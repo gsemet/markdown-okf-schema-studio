@@ -9,7 +9,7 @@ description: When a reader clicks a comment chip, or presses Enter or Space on a
   are open for the panel.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/modules/chipToggle.test.ts
 - test/page/modules/reviewReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A click or Enter on a chip toggles its comment box

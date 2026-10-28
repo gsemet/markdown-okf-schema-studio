@@ -9,7 +9,7 @@ description: When the page sends a request to the host, the extension SHALL
   its timeout.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -48,6 +48,7 @@ tested_in_files:
 - test/page/modules/plantumlFileRequests.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/session/diagReq.plantuml.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Every page request is answered once by its id and result type, or ends with a readable error

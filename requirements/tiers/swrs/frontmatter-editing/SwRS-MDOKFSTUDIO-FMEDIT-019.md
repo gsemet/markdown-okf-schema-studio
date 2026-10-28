@@ -9,7 +9,7 @@ description: "When a writer commits a field editor with Enter, with a checkbox c
   progress and the outcome of the save in the editor."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/page/runtimeEditorFlush.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A field editor saves a changed value and Escape cancels it

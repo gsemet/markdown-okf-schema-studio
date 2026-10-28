@@ -8,7 +8,7 @@ description: When the page posts previewPaletteModeChanged with a mode other
   keep the stored mode unchanged.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/protocol/pageToHost.test.ts
 - test/integration/paletteMode.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An unknown palette mode is refused and stores nothing

@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-MYST-066
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## conf.py is read as text and the check needs a MyST parser

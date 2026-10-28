@@ -9,7 +9,7 @@ description: "When a reader clicks the anchor icon of a label in edit mode, the 
   show the answer of the host in the field."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/page/modules/labelRename.test.ts
 - test/page/modules/renderReq.labelRename.requirements.test.ts
 - test/session/trustReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The anchor icon opens a rename field that sends valid names

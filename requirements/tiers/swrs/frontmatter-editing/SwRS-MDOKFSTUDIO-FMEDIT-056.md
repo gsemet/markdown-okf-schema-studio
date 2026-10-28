@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-019
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Undo and redo keys in a field editor act on the field text

@@ -10,7 +10,7 @@ description: When the preview shows paragraphs, list items, table cells, quotes,
   the document by the rules of the scenarios.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 - test/visual/capture_page_checks.py
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Body text, headings, lists and inline code are typeset readably

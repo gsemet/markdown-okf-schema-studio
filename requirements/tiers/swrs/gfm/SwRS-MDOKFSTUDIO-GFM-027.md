@@ -10,7 +10,7 @@ description: When the host receives a previewCheckboxToggle message, the
   refusal.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
 - test/session/checkboxRefusal.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host validates checkbox toggle messages

@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-MYST-017
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Doc and download roles render as plain links

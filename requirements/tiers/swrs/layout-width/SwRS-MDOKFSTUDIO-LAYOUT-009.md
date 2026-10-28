@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-007
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The open first-block editor keeps the 40 px gap

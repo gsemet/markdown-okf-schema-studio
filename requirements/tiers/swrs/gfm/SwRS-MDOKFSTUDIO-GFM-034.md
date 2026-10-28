@@ -12,7 +12,7 @@ description: When a span style declares color or background-color as a named
   unsafe style attribute.') for a removed declaration.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/page/modules/spanColors.test.ts
 - test/security/html-policy.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Colour spans keep safe colours only

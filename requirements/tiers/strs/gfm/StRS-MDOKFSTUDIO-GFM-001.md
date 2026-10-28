@@ -18,6 +18,7 @@ user_need: As a writer, I paste plain URLs and get working links without
   breaking code or existing links.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-GFM-002
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Bare URLs become safe links

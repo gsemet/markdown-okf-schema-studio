@@ -8,7 +8,7 @@ description: When the active Markdown buffer changes, the extension SHALL render
   process and keep only the result of the newest edit.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/render/renderPipeline.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The preview renders the unsaved buffer completely, in process

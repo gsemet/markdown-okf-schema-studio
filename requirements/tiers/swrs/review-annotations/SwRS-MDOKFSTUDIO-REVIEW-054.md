@@ -13,7 +13,7 @@ description: When the host receives a create message from a writable preview of
   the comments file and never into a comments file that is a symbolic link.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -35,6 +35,7 @@ tested_in_files:
 - test/integration/commentWrite.test.ts
 - test/node-services/nodeServices.test.ts
 - test/session/reviewReqComments.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host writes comment changes one after another within the file limits

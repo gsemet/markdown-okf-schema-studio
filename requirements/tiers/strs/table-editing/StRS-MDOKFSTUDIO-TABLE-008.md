@@ -10,7 +10,7 @@ description: While a writer edits a table cell, the Studio SHALL show a labelled
   button is pressed, keeping the editor open on the new position.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-048
 - SwRS-MDOKFSTUDIO-TABLE-055
 - SwRS-MDOKFSTUDIO-TABLE-064
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A table bar locates the writer and edits rows and columns

@@ -18,6 +18,7 @@ user_need: As a writer, I can trust that a link which shows as valid points to
   the intended file.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-014
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Links resolve against the right root

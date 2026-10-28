@@ -11,7 +11,7 @@ description: "When the Current theme mode is shown or the active VS Code colour 
   editor is open."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -36,6 +36,7 @@ tested_in_files:
 - test/integration/lifecycle.test.ts
 - test/integration/realInput/markers.ts
 - test/page/runtimePageControls.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Current mode follows the VS Code theme and redraws on change

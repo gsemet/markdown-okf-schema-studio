@@ -10,7 +10,7 @@ description: When a preview is scrolled, rebuilt, re-laid out or edited, the
   anchor through the update.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/page/lifeReq.requirements.test.ts
 - test/page/runtimeContentPatch.test.ts
 - test/page/runtimeScroll.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Both panes share one reading anchor that survives updates

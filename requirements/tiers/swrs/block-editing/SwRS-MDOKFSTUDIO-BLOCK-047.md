@@ -10,7 +10,7 @@ description: When a writer presses Done, presses Enter with Ctrl or Cmd in the
   original and nothing was autosaved.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -34,6 +34,7 @@ tested_in_files:
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockMoves.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Done, Cmd/Ctrl+Enter or leaving the text box commits the edit

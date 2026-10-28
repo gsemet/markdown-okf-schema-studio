@@ -9,7 +9,7 @@ description: When a field editor is open, the extension SHALL show in its field
   disabled and refused by the host for a field the schema requires.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Remove field deletes exactly the lines of a non-required field

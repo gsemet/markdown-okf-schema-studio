@@ -18,6 +18,7 @@ user_need: As a writer, I maintain list metadata such as related documents item
   by item, with help picking existing files.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMEDIT-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Edit list fields and link lists item by item

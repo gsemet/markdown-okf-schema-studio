@@ -11,7 +11,7 @@ description: When a writer edits a metadata field, the Studio SHALL change only
   dropping it when the writer navigates away.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -65,6 +65,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMEDIT-085
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Metadata edits keep the source intact, follow the schema and never lose text

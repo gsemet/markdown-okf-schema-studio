@@ -11,7 +11,7 @@ description: When a document is shown or its review comments file is created,
   read that a newer read overtook.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/integration/commentWrite.test.ts
 - test/integration/reviewComments.test.ts
 - test/session/reviewReqComments.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host posts the threads of the review comments file and follows its changes

@@ -10,7 +10,7 @@ description: When a document holds `[[Note]]`, `[[Folder/Note#Heading|Label]]`
   link, an image, math, raw HTML or an `![[...]]` embed.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/core/render/mystInlineTransforms.ts
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Wikilinks render as links where they are text

@@ -9,7 +9,7 @@ description: 'When the host receives a frontmatter save whose YAML value does no
   value and with the matching message otherwise, and change nothing.'
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/edits/frontmatterEdit.test.ts
 - test/integration/previewEditing.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host refuses a value that breaks YAML, the field type or the schema

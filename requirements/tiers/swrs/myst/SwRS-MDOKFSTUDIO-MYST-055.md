@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-MYST-053
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Grid item cards show title, header, body, footer and link

@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-007
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The first element starts 40 px below the top in edit mode

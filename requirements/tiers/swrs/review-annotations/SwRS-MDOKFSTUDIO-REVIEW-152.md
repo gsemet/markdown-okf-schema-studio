@@ -10,7 +10,7 @@ description: When the setting markdownOkfSchemaStudio.preview.showComments is
   chips while it is on.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/page/modules/commentsToggle.test.ts
 - test/session/reviewReqIncoming.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The showComments setting and the Comments button hide and show the chips

@@ -10,7 +10,7 @@ description: "When the setting markdownOkfSchemaStudio.preview.markEditorSelecti
   the editor."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -34,6 +34,7 @@ tested_in_files:
 - test/session/toolbarReq.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The block at the editor cursor is outlined when the setting is on

@@ -9,7 +9,7 @@ description: When the document is saved, the extension SHALL write the moved
   unsaved changes in an editor.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/commentAnchors.test.ts
 - test/session/reviewReqComments.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Moved thread lines are written with the document save only

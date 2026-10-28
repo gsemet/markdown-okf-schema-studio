@@ -9,7 +9,7 @@ description: When the writer drags the handle of a body row of a pipe table or a
   source edit and keep the header rows in place.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/modules/markdownTable.test.ts
 - test/page/runtimeTableRowMove.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Table row handle reorders body rows in edit mode

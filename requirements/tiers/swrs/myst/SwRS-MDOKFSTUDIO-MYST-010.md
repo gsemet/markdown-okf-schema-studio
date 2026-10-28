@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-MYST-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Simple and icon-less admonitions drop their decoration

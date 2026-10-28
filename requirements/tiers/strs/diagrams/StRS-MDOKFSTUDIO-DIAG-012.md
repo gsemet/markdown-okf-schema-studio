@@ -18,6 +18,7 @@ user_need: As a writer with a PlantUML installation, I use its exact output,
   including features the bundled engine lacks.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-DIAG-007
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Render PlantUML with my own JAR or command

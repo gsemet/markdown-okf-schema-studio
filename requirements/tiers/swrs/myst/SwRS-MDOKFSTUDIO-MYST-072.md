@@ -9,7 +9,7 @@ description: When a document uses syntax of a MyST extension that the governing
   itself, at most 10 per render, and leave the rendering unchanged.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/render/renderPipeline.test.ts
 - test/core/render/renderReq.myst.requirements.test.ts
 - test/page/modules/warningBanner.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## MyST syntax of a disabled extension is reported with its line

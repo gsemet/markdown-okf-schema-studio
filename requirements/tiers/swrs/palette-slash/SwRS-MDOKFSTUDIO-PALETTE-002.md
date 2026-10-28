@@ -10,7 +10,7 @@ description: While a block editor is open, the extension SHALL give every button
   floating toolbar, and SHALL draw the Horizontal rule button as three dashes.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/runtimeEditPalette.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Every edit bar button shows the slide-in tooltip and the rule button a dashes icon

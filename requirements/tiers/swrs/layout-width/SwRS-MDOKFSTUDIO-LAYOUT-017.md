@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-018
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The toolbar bottom edge is published for the sticky palette

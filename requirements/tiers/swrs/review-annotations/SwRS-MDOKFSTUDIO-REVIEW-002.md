@@ -9,7 +9,7 @@ description: When a review comment thread is shown in the preview in the Dark,
   surface, without dimming text through opacity.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ tested_in_files:
 - test/core/preview/commentContrast.test.ts
 - test/integration/commentContrastWindow.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Comment thread text stays readable on every theme

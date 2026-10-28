@@ -8,7 +8,7 @@ description: When the writer applies the figure form with a change, the
   keeps every untouched part byte for byte, and keep the editor open.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/figureDirective.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Apply rewrites the figure directive in one minimal edit

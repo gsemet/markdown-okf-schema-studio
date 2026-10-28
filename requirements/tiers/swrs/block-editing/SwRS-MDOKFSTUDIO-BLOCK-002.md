@@ -9,7 +9,7 @@ description: The extension SHALL give every rendered horizontal rule a box 25 px
   the rule's block editor.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A horizontal rule has a tall invisible hit area

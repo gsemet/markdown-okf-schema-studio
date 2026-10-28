@@ -8,7 +8,7 @@ description: When a file tracked by Git differs from its last commit, the Studio
   showing the bars when the writer hides the changes.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -22,6 +22,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-207
 - SwRS-MDOKFSTUDIO-REVIEW-208
 - SwRS-MDOKFSTUDIO-REVIEW-214
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer sees which blocks changed since the last commit

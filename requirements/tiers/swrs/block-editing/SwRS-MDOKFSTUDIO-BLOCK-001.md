@@ -10,7 +10,7 @@ description: "When a writer clicks the Edit button of a writable preview, the pa
   block selection and the hover outline and close the label rename field."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/page/runtimePageControls.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Edit button turns edit mode on and off and tidies up on exit

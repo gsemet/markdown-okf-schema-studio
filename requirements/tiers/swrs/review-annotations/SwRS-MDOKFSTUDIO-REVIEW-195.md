@@ -10,7 +10,7 @@ description: When the shown document is a file tracked by Git, in a trusted
   post an empty list of ranges only to take back marks the page shows.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/incomingChanges.test.ts
 - test/session/reviewReqIncoming.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host posts the lines that differ from the last commit

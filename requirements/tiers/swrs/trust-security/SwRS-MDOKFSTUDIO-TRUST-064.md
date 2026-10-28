@@ -8,7 +8,7 @@ description: When the page receives previewFlushEdit or previewEditorWatch, it
   whatever the document the message names.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/protocol/hostToPage.test.ts
 - test/page/runtimeBlockEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Flush and editor watch messages are addressed by their own id

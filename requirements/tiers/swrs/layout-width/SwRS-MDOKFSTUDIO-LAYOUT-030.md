@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-022
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A paragraph holding only an image is marked as a figure

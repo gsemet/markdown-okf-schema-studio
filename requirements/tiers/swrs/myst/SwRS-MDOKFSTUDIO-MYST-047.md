@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-MYST-038
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A successful rename reports the remaining uses

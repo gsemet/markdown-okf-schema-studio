@@ -17,6 +17,7 @@ user_need: As a team lead, I want misspelled or stray metadata fields to be
   flagged.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-010
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Unknown fields can be flagged

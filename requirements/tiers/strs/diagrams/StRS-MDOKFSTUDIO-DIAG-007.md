@@ -10,7 +10,7 @@ description: When a writer sets the PlantUML options, the Studio SHALL draw with
   diagram that is too large, too slow, too chatty or cancelled.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -62,6 +62,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-DIAG-117
 - SwRS-MDOKFSTUDIO-DIAG-118
 - SwRS-MDOKFSTUDIO-DIAG-120
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer renders PlantUML with an own JAR or command, safely bounded

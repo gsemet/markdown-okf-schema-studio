@@ -10,7 +10,7 @@ description: "When the page receives previewLinkTargets, the extension SHALL set
   the original navigation request and the look of the link unchanged."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/modules/toolbarReq.requirements.test.ts
 - test/page/runtimeContentPatch.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A link shows its target kind in a tooltip without changing its target

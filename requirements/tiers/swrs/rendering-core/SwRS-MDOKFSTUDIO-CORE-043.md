@@ -7,7 +7,7 @@ description: When the preview panel is created, the extension SHALL enable the
   find widget so that Cmd/Ctrl+F searches the rendered page.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -20,6 +20,7 @@ implemented_in_files:
 - src/host-vscode/activation.ts
 tested_in_files:
 - test/integration/projectFeatures.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Find works in the preview

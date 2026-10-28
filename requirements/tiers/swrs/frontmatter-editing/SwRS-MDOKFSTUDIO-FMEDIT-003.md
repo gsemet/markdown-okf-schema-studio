@@ -9,7 +9,7 @@ description: "When a writer opens the editor of a schema enum, number, date, tim
   a one-click toggle for a boolean and a Set to null button for a nullable field."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/page/runtimeEditorFlush.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Enum, number, date, boolean and nullable fields use fitting controls

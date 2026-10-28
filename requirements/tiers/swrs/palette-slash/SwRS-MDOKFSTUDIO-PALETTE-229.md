@@ -9,7 +9,7 @@ description: When the clipboard HTML of a paste is converted, the extension
   only the text of a link or image whose address is not safe.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 - src/core/paste/htmlToMarkdown.ts
 tested_in_files:
 - test/core/paste/htmlToMarkdown.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Pasted HTML never brings active content

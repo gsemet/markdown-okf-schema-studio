@@ -8,7 +8,7 @@ description: When a reader selects text inside mapped body blocks of a writable
   comment box for that selection on Cmd+Alt+M (macOS) or Ctrl+Alt+M (elsewhere).
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/commentCompose.test.ts
 - test/page/modules/diagReq.diagrams.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Selected body text offers a Comment button and a keyboard shortcut

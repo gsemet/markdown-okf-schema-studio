@@ -11,7 +11,7 @@ description: When a maintainer builds the Pages site, the build SHALL write a
   build.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 - src/core/render/requirementsPage.markers.ts
 tested_in_files:
 - test/site/requirementsPage.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The site Requirements page shows the requirements chain and the report figures

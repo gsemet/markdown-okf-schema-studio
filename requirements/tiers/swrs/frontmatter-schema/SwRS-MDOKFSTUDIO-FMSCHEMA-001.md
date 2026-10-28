@@ -11,7 +11,7 @@ description: "When a document starts with a `---` line, the extension SHALL take
   below the table or the error row in both cases."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/core/frontmatter/frontmatterParseOnce.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The frontmatter block is found by its fences and parsed as a YAML mapping

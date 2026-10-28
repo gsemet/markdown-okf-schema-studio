@@ -9,7 +9,7 @@ description: When a document shows an image, the extension SHALL size it to at
   text in document order when its local file is missing.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/security/html-policy.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Images fit the column, sit on the line and survive a missing file

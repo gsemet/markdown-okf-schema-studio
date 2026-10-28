@@ -8,7 +8,7 @@ description: When a document's frontmatter is not valid YAML or is not a
   while still rendering the Markdown body.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -19,6 +19,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-017
 - SwRS-MDOKFSTUDIO-FMSCHEMA-018
 - SwRS-MDOKFSTUDIO-FMSCHEMA-076
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Invalid frontmatter is explained and the body still renders

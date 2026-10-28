@@ -11,7 +11,7 @@ description: When the preview page asks the extension to do something or the
   render to a newer one.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -33,6 +33,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-086
 - SwRS-MDOKFSTUDIO-TRUST-090
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## What the page and the host exchange is checked and never applied to another version

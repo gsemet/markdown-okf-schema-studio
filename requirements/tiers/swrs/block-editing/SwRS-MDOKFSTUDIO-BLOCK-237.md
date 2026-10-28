@@ -8,7 +8,7 @@ description: "The host SHALL accept previewEditOpen only with a non-empty string
   that is absent or a non-negative integer, and no save or pin fields."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/core/protocol/pageToHost.ts
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## previewEditOpen needs an edit id and a line range

@@ -10,7 +10,7 @@ description: When a document contains a raw HTML table, the extension SHALL
   and object elements with their content and dropping comments.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/security/html-policy.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Raw HTML tables are rebuilt from an allow-list

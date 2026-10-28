@@ -10,7 +10,7 @@ description: "When the reading line passes a heading, the extension SHALL mark t
   the sticky band without navigating."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/page/modules/tocColumn.test.ts
 - test/visual/capture_layout_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The column marks the section being read and jumps on click

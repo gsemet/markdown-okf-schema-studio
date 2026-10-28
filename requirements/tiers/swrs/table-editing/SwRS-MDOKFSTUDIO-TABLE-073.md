@@ -9,7 +9,7 @@ description: When the caret is on any line of a pipe table or a simple HTML
   after it, and offer it nowhere else.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/editPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## List table converts the table at the caret to a list-table in one edit

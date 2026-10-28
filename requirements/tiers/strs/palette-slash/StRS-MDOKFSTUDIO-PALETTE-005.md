@@ -12,7 +12,7 @@ description: While a writer edits a block, the Studio SHALL keep the edition
   leaves it.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-PALETTE-031
 - SwRS-MDOKFSTUDIO-PALETTE-036
 - SwRS-MDOKFSTUDIO-PALETTE-115
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The palette stays in reach, appears softly and never closes the editor by accident

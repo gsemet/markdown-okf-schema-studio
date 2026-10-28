@@ -10,7 +10,7 @@ description: When a document holds an inline thread comment, the Studio SHALL
   open, telling the writer to save or cancel the edit first.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-190
 - SwRS-MDOKFSTUDIO-REVIEW-192
 - SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer keeps a discussion in the Markdown source and answers it from the preview

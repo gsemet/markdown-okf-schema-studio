@@ -11,7 +11,7 @@ description: When the writer presses Cmd+B, Cmd+I or Cmd+K on macOS, or Ctrl+B,
   each palette button.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/runtimeEditPalette.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Cmd or Ctrl with B, I or K runs Bold, Italic or Link on the platform's command key

@@ -9,7 +9,7 @@ description: "When the page applies a content patch, it SHALL clear the block se
   while the properties table is never part of a block selection."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/features/mappedBlocks.ts
 tested_in_files:
 - test/page/runtimeBlockSelection.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A block selection survives saves and is cleared by patches

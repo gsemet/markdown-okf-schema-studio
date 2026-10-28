@@ -10,7 +10,7 @@ description: When a document holds a lower-case context tag alone on its line
   unpaired or non-context tag visible as literal text.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Context tags render as titled panels

@@ -20,22 +20,68 @@ Requirement documents live only under `tiers/`.
 
 - Read the nearest `AGENTS.md`, constitution and registered requirements rules.
   Follow the project's authority order; this shared guide does not override it.
+- Read every other guideline in this `guidelines/` folder (by convention
+  `project.guidelines.md`). Project guidelines specialize this shared text and
+  win where they differ. Never edit this file for project rules:
+  `okfreq init <bundle> --force` replaces it with the packaged text. Put them in
+  a separate file of the folder, which initialization never touches.
 - Read the bundle's `config.yml` and every schema under `tiers/_schema/`.
-- Derive levels, folders, ID prefixes, scopes, lifecycle values, marker syntax,
+- Derive tiers, folders, ID prefixes, scopes, lifecycle values, owners and
+  approval locks, marker syntax,
   evidence directories and coverage policy from that configuration. Do not
   hard-code another project's names, paths, counts or commands.
 - Use `okfreq` for creation, validation, indexing, traceability, and lifecycle changes.
 - Use the project's configured environment and task runner; `okfreq` in this
   guide stands for the prescribed invocation, including its environment wrapper.
 - Read `okfreq --help` for the authoritative command options.
-- When backfilling an existing feature, inspect agreed documentation, source and
-  tests first. Propose intended behavior with evidence and open questions;
-  do not assume every implemented detail is a desired requirement.
+- When backfilling an existing feature, specify what the code does today (see
+  "Anchored to the code"), from the source, the tests and the documentation.
 - Follow the governing project's policy for known defects. Describe verified
   behavior accurately, record discrepancies explicitly, and use a `Known issues`
   section when required. Never present a planned fix as already implemented.
 - Missing evidence is a coverage gap. Do not repair it by inventing markers,
   approvals, external ownership, exemptions or successful test results.
+
+## Anchored to the code
+
+- Requirements state what the software does today, never the desired state.
+- A behaviour that looks wrong is still specified as it behaves, with a line
+  "Known issue: …" in the SwRS. The fix changes the code, the test and the SwRS
+  in the same change.
+- The anchor is the marker pair: `@implements_req` at the code that produces the
+  behaviour, `@tests_req` at the test that checks it. When marked code or tests
+  move, the markers move in the same change.
+- A requirement never names a backlog item or ticket; the ticket names the
+  requirement.
+
+## Granularity
+
+- One SwRS is one observable behaviour, with all its scenarios: the nominal
+  case, each refusal and each boundary. Do not split them into several SwRS.
+- A rule shared by many features (a refusal, a validation, a limit) is written
+  once and cited by `depends_on`; it is not repeated per feature.
+- Settings, commands and buttons are scenarios of the behaviour they drive, not
+  SwRS of their own, unless the project guideline says otherwise.
+- An StRS is a user use case; a scope usually has 3 to 8.
+- A project may set a finer or coarser rule in its own guideline section.
+
+## Identities
+
+- Never reuse or hand-allocate an ID; create with `okfreq new`.
+- `okfreq new` numbers a requirement one above the highest number ever used in
+  its level prefix and scope, counting the IDs in `retired_ids` of `config.yml`.
+  A number freed by deleting a file is therefore not handed out again, and
+  `okfreq validate` rejects a requirement whose ID is listed as retired.
+- Retire published requirements with `okfreq archive` or `okfreq supersede`,
+  never by deleting the file.
+- Discard a draft that was never published (for example one merged into another
+  requirement) with `okfreq retire <ID> --yes`, not with `rm` or `git rm`. It
+  deletes the file, records the ID in `retired_ids` and appends an entry to
+  `tiers/log.md`. It refuses a requirement that is not a draft or that another
+  requirement (`derives_from`, `depends_on`, `relates_to`, `superseded_by`) or a
+  marker still references: fix those first. Then run `okfreq update-coverage` and `okfreq lint`.
+- Deleting a requirement file by hand skips the record: the number stays free
+  if it was the highest one. Never delete a file without `okfreq retire`.
 
 ## While editing
 
@@ -48,10 +94,13 @@ Requirement documents live only under `tiers/`.
 - Use the filename and ID convention established by the bundle.
 - Create requirements through `okfreq new`, never by allocating IDs or writing
   frontmatter manually. Preserve IDs, UUIDs, authored fields, unknown metadata,
-  comments and bodies. Never reuse a retired ID; use the configured `archive`
-  or `supersede` operations for lifecycle changes.
-- Author parent relationships with `derives_from`; never hand-edit generated
-  `derived_by`, `implemented_in_files`, or `tested_in_files` fields.
+  comments and bodies.
+- Author parent relationships with `derives_from`. Retire a published requirement
+  with `okfreq supersede OLD NEW [NEW...] --yes`, which writes the authored
+  `superseded_by` list (required, non-empty, on every `superseded` requirement and
+  only there). Link requirements that are merely connected with `relates_to`.
+  Never hand-edit generated `derived_by`, `supersedes`, `implemented_in_files`,
+  or `tested_in_files` fields.
 - For leaf software requirements, add `@implements_req <ID>` markers near the
   implementation and `@tests_req <ID>` markers near corresponding tests. Do not
   use source markers on stakeholder or other non-leaf levels. A real direct
@@ -64,6 +113,30 @@ Requirement documents live only under `tiers/`.
 - Use the project's shared vocabulary. Keep issue/backlog references outside
   normative statements so an issue's lifecycle cannot change their meaning.
 
+## Lifecycle and approval
+
+- `draft`: a proposal, not implemented yet. Requirements delivered with their
+  code start `proposed` (`okfreq new ... --lifecycle proposed`); a draft on the
+  default branch is a gap to report.
+- `proposed`: implemented, in force, not frozen. Change it with the code through
+  the usual plan and review.
+- `approved`: frozen by its owner. Never approve a requirement, change its
+  meaning, deprecate it or supersede it on your own decision. Editorial fixes that
+  keep the meaning are allowed.
+- The owner of a requirement is its `owner_email`, else its generated
+  `default_owner_email` (from `config.yml`: scope and tier, then scope, then
+  tier). Whether a tier may be approved is its `approval_lock`, which a scope can
+  override per tier. Never edit owners or locks without the owner's request.
+- When the task asks you to change an approved requirement, the owner usually
+  agreed during planning, out of your sight: proceed as if they agreed. Set
+  `approved_by` to the owner's email and `approved_on` to today's date, list the
+  approved requirements you touched in the pull or merge request, and request the
+  owner's review of those files. If nothing in the task asks for the change,
+  restore the previous content and report the conflict.
+- `okfreq validate` fails on an `approved` requirement without `approved_by` and
+  `approved_on`, or whose tier and scope are not lockable. Follow its message;
+  never silence it by downgrading the lifecycle without the owner's agreement.
+
 ## Traceability markers
 
 - Use the configured marker prefixes near actual evidence. With the defaults,
@@ -75,10 +148,9 @@ Requirement documents live only under `tiers/`.
   remove these links or consolidate them at the first test merely to make
   the ID unique per file. Repeating an identical marker at the same evidence
   point adds no useful information.
-- A scanner's repeated-marker diagnostic is not by itself evidence of an
-  invalid link. Review the marked code or tests; distinct evidence points are
-  legitimate. A generated file-level coverage list neither enumerates tests
-  nor proves that each marked test ran successfully.
+- `okfreq` accepts repeated markers silently and lists the file once in the
+  generated coverage. That file-level list neither enumerates tests nor
+  proves that each marked test ran successfully.
 - Markers must start a line after optional indentation and a supported comment
   opener (`//`, `#`, `/*`, `*` or `<!--`). A marker after executable code on
   the same line is not recognized. In JSDoc, use a separate ` * ` line rather
@@ -107,9 +179,10 @@ preserved and are not migrated by `okfreq init`.
   generated normative behavior, user need, and rationale/constraints sections.
   Do not add SwRS scenarios or verification notes.
 - For an SwRS, pass one observable, bounded `SHALL` response as `--description`
-  and at least one valid StRS ID with `--derives-from`. Complete both generated
-  GIVEN-WHEN-THEN scenarios and the objective verification notes. Do not add an
-  StRS user-need or stakeholder-constraints section.
+  and at least one valid StRS ID with `--derives-from`. Complete the generated
+  GIVEN-WHEN-THEN scenarios, adding one per refusal or boundary of the same
+  behaviour, and the objective verification notes. Do not add an StRS user-need
+  or stakeholder-constraints section.
 - Cover nominal behavior and relevant refusal, failure or boundary cases.
   Group equivalent inputs and outcomes in a scenario table. Split unrelated
   behaviors rather than growing an unbounded scenario list in one SwRS.
@@ -134,7 +207,8 @@ preserved and are not migrated by `okfreq init`.
   project-relative `dist/` directory when no output policy is defined.
 - Missing or malformed requirement frontmatter and missing IDs fail explicitly;
   repair the document instead of dropping it from the reported inventory.
-- Treat `draft`, `proposed`, and `approved` as distinct lifecycle states.
+- Treat `draft`, `proposed`, and `approved` as distinct lifecycle states (see
+  "Lifecycle and approval").
 - Run the project's own test suite; a marker is a link, not proof that a test passes.
 - Run the complete project quality gate. Do not claim complete traceability
   when non-exempt leaf requirements lack source or test links, markers reference
@@ -142,9 +216,9 @@ preserved and are not migrated by `okfreq init`.
 - A behavior change updates affected requirements, tests, human documentation,
   release notes, standalone agent guidance and examples in the same change.
   Preserve unrelated working-tree edits and review generated diffs.
-- Synchronize explicitly maintained copies when this shared guide changes.
-  Initialization preserves existing project files; it must not silently replace
-  project policies with new defaults.
+- Initialization preserves existing project files; it must not silently replace
+  project policies with new defaults. The one exception is this file, which
+  `okfreq init --force` replaces so that it can be refreshed.
 
 ## Navigation and change history
 

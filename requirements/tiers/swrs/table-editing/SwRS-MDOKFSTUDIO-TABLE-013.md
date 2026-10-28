@@ -10,7 +10,7 @@ description: When the writer types in a cell text box, the extension SHALL
   same edit session when the editor moves to another cell of the table.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 - src/page/features/tableCellEditor.ts
 tested_in_files:
 - test/page/runtimeTableCellEditor.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A cell edit saves the whole table and moves between cells without reopening

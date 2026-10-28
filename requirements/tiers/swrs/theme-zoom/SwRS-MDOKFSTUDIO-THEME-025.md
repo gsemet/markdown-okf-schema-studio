@@ -11,7 +11,7 @@ description: "When a forced theme mode (Dark, White or Cream) is shown, the exte
   Code theme."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/visual/capture_page_checks.py
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Dark, White and Cream paint the whole page the same on any VS Code theme

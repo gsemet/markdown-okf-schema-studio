@@ -11,7 +11,7 @@ description: When a reader previews a document in an untrusted workspace or a
   theme, following links and copying code work as in a writable preview.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -24,6 +24,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-001
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A document outside a trusted folder opens read-only and keeps the viewing actions

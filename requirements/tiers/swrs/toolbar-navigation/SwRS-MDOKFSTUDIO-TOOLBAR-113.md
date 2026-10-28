@@ -9,7 +9,7 @@ description: "When previewLink reaches the host, the extension SHALL record the 
   reason The frontmatter link request is invalid."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/session/diagReq.links.requirements.test.ts
 - test/session/toolbarReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A link message needs a request, else it is ignored or refused

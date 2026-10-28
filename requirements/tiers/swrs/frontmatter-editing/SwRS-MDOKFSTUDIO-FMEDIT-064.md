@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-BLOCK-109
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The insert point after the table has no move buttons

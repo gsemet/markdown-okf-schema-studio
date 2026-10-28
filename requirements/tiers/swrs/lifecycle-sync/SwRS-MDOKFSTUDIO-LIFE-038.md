@@ -10,7 +10,7 @@ description: When several previews are open, the extension SHALL give each its
   file name.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 - src/session/sessionFactory.ts
 tested_in_files:
 - test/integration/serializer.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Each preview has its own state and only the newest follows

@@ -10,7 +10,7 @@ description: When a preview is read-only (created for a document that lies in no
   writable.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -55,6 +55,7 @@ tested_in_files:
 - test/session/readOnlyFirstLoad.test.ts
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A read-only preview offers no editing affordance

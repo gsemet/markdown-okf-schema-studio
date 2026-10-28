@@ -8,7 +8,7 @@ description: When a schema file or a file it refers to changes content, the
   rather than modification time, without refreshing an open preview by itself.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -21,6 +21,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/frontmatter/schemaRegistry.test.ts
 - test/session/diagReq.settings.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Schema edits are picked up on the next analysis

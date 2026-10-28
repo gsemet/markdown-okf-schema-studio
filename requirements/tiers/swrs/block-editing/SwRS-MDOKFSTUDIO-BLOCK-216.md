@@ -9,7 +9,7 @@ description: "When the host refuses to open a block editor or to save its text, 
   typed."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/integration/previewEditing.test.ts
 - test/page/blockReq.requirements.test.ts
 - test/session/blockReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A refused open or save keeps the typed text and says why

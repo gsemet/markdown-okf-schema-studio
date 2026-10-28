@@ -17,6 +17,7 @@ user_need: As a writer, I keep typing while the diagrams I did not touch stay
   drawn and the preview stays responsive.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-DIAG-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Keep PlantUML pictures in place while typing

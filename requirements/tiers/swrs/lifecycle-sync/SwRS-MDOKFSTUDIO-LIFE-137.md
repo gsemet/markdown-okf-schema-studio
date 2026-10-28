@@ -20,6 +20,7 @@ exemption_reason: "Archived. Another requirement specifies this behaviour, so no
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A saved state keeps a focused block id of at most 200 characters, a selection of at most 4096 and a boolean Description state

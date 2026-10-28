@@ -9,7 +9,7 @@ description: When the writer presses Reference or Citation, the extension SHALL
   typed in the filter.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editPalette.test.ts
 - test/page/modules/paletteReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Reference and Citation open a filterable list filled by the host

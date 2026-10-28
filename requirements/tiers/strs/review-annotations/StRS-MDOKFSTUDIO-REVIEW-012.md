@@ -10,7 +10,7 @@ description: When a document holds an HTML comment or the word TODO, the Studio
   editor.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -26,6 +26,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-152
 - SwRS-MDOKFSTUDIO-REVIEW-156
 - SwRS-MDOKFSTUDIO-REVIEW-160
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A writer sees HTML comments and TODO notes as chips and toggles them

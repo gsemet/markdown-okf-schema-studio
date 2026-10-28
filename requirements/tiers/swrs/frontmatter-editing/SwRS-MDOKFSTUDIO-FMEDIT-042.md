@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMEDIT-037
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A new custom key is saved as a plain scalar when that is safe

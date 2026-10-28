@@ -8,7 +8,7 @@ description: When the page receives a pending notice whose visible field is not
   extension SHALL ignore it.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 - src/page/features/statusRegion.ts
 tested_in_files:
 - test/page/lifeReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The page ignores a pending notice with an oversized or malformed field

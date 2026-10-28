@@ -10,7 +10,7 @@ description: When prose contains ~~text~~, a footnote reference with its
   ~x~ pair and tildes in code literal.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
 - test/core/render/mystTablesTree.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Strikethrough, footnotes and pipe tables render as on GitHub

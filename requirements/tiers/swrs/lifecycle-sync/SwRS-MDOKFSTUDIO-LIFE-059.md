@@ -9,7 +9,7 @@ description: When the extension writes a status, it SHALL write an aside with
   and never as markup.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/stockCoexistence.test.ts
 - test/page/runtimeContentPatch.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The status region is a polite live region of plain text

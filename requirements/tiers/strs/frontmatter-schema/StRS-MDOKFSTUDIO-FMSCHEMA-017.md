@@ -18,6 +18,7 @@ user_need: As a reviewer, I see key facts about a linked file without opening
   it.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-014
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Linked files show their evidence

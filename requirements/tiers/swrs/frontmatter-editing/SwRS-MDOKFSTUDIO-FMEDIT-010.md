@@ -10,7 +10,7 @@ description: "When a writer opens the editor of a list field, the extension SHAL
   offered on a list of filename-stem links."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## List fields and link lists are edited item by item

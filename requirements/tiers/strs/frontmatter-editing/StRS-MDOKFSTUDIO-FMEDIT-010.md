@@ -18,6 +18,7 @@ user_need: As a writer, I do not lose what I typed in a metadata field when I
   follow a link or go back.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMEDIT-008
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Keep typed metadata text when leaving the editor

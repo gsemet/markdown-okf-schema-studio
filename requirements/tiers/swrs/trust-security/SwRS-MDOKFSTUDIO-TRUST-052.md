@@ -11,7 +11,7 @@ description: When the host receives a value from the page, it SHALL hand it to a
   bounds, ignoring any other value without a visible change.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
 - test/core/protocol/pageToHost.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Every page message has a registered type and a valid envelope before any handler runs

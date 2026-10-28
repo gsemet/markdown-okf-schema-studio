@@ -20,6 +20,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-011
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A leading properties table gives up the toolbar width for its Description toggle

@@ -10,7 +10,7 @@ description: When a writer applies bold, italic, a link, a colour or another
   the table at the caret.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-111
 - SwRS-MDOKFSTUDIO-TABLE-115
 - SwRS-MDOKFSTUDIO-TABLE-117
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Tables and cell text are formatted, inserted, aligned and captioned

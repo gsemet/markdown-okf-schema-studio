@@ -18,6 +18,7 @@ user_need: As a writer, I see exactly which metadata is wrong, and can jump to
   it.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-010
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Validation problems show on the field concerned

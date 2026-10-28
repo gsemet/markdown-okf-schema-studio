@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-043
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A new table waits while a field editor is open

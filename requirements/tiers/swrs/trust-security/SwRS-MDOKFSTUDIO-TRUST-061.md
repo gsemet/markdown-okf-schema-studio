@@ -13,7 +13,7 @@ description: When the page receives previewContentPatch, it SHALL accept it only
   when present, a code of at most 100 characters.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/protocol/hostToPage.test.ts
 - test/page/runtimeContentPatch.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A content patch message is applied only within its bounds

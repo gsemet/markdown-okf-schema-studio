@@ -9,7 +9,7 @@ description: When the built-in engine asks the host for an include file, the
   and refuse every other request with a reason.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ implemented_in_files:
 - src/core/render/plantUmlIncludes.ts
 tested_in_files:
 - test/core/render/plantUmlIncludes.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host reads an include only next to the including file in allowed folders

@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-BLOCK-079
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Boundary navigation does not step into the properties table

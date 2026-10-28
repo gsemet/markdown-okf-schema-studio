@@ -9,7 +9,7 @@ description: When a tab of a tab set is clicked, or has the focus and receives
   same sync key in the other tab sets of the same sync group.
 project: MDOKFSTUDIO
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ tested_in_files:
 - test/integration/mystBlocksWindow.ts
 - test/page/modules/tabs.test.ts
 - test/visual/cardsTabsScenarios.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Tabs follow the keyboard and the click

@@ -11,7 +11,7 @@ description: When a document is checked, the extension SHALL take its enabled
   never run, and report nothing when no certain list results.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/myst/confLocator.test.ts
 - test/core/myst/confParser.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The governing conf.py is found and read as text

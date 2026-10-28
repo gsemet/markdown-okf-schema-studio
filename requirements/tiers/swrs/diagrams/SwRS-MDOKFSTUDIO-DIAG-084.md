@@ -18,7 +18,7 @@ description: When useJar is true in a trusted workspace, the extension SHALL
   tag to the last svg end tag.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -37,6 +37,7 @@ tested_in_files:
 - test/core/render/diagReq.jar.requirements.test.ts
 - test/core/render/plantUmlJarIncludes.test.ts
 - test/core/render/plantUmlRenderer.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The JAR pipeline runs java or plantuml once per diagram on stdin

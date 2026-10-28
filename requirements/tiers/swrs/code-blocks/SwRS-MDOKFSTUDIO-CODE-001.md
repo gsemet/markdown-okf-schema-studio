@@ -11,7 +11,7 @@ description: When a document contains a fenced code block, the extension SHALL
   and the text of every code block as literal text.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/core/render/highlight.test.ts
 - test/core/render/renderReq.codeBlocks.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Fenced code in a supported language is highlighted, other code stays literal

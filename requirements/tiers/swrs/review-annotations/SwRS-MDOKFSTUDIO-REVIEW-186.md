@@ -11,7 +11,7 @@ description: When the host receives a reply to an inline thread, the extension
   otherwise answer with the reason and leave the document unchanged.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -35,6 +35,7 @@ tested_in_files:
 - test/core/edits/sourceEdits.test.ts
 - test/integration/inlineThread.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The host appends a reply inside the thread comment under the author

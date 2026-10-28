@@ -9,7 +9,7 @@ description: While edit mode is on and the body of a rendered document has no
   first-block editor from it on a click or on Enter.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockMoves.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## An empty body offers one Start writing button

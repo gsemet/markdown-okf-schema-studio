@@ -11,7 +11,7 @@ description: When the frontmatter of the shown document changes, the extension
   closes.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/runtimeFrontmatterFields.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The table is refreshed in place after edits, after the field editor closes

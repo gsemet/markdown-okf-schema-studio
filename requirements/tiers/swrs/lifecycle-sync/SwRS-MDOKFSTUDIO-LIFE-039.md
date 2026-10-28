@@ -14,7 +14,7 @@ description: When the text of a document changes, saved or not, the extension
   same document, revision and render options SHALL share one render.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -42,6 +42,7 @@ tested_in_files:
 - test/session/eventFanOut.test.ts
 - test/session/previewManager.test.ts
 - test/session/sharedRenders.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Typing renders the new text after a short pause, without writing files

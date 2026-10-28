@@ -9,7 +9,7 @@ description: When the popover of a review thread opens in a writable preview,
   a Reply button.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ implemented_in_files:
 - src/page/modules/commentThreads.ts
 tested_in_files:
 - test/page/modules/commentThreads.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The thread popover of a writable preview sends a reply and keeps it until accepted

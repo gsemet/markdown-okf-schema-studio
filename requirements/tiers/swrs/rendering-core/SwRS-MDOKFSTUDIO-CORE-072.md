@@ -12,7 +12,7 @@ description: When a paragraph holds only [TOC] or [[_TOC_]] (any case), or a
   literal marker instead of the list.
 project: MDOKFSTUDIO
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/core/render/blockTagTitle.test.ts
 - test/core/render/mystToc.test.ts
 - test/integration/tocWindow.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A [TOC] marker or a contents directive renders the table of contents

@@ -9,7 +9,7 @@ description: When a writer asks to convert a table, the Studio SHALL write it in
   the table's padding, alignment, escaping, indentation and line endings.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -27,6 +27,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TABLE-080
 - SwRS-MDOKFSTUDIO-TABLE-094
 - SwRS-MDOKFSTUDIO-TABLE-102
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A table converts between forms and a cell edit is a one-line change

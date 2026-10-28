@@ -9,7 +9,7 @@ description: When a Sphinx project's configuration does not enable MyST syntax
   view, without running the configuration file.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -41,6 +41,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-085
 - SwRS-MDOKFSTUDIO-MYST-086
 - SwRS-MDOKFSTUDIO-MYST-089
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Sphinx configuration gaps are reported before building

@@ -12,7 +12,7 @@ description: When a block editor opens, the extension SHALL place the edition
   panels in it.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -41,6 +41,7 @@ tested_in_files:
 - test/session/toolbarReq.requirements.test.ts
 - test/visual/capture_edit_checks.py
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The palette is a toolbar above the editor that sticks over a tall editor

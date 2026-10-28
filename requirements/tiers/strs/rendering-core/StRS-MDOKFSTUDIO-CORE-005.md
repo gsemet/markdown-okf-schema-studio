@@ -19,6 +19,7 @@ user_need: Writers need the preview to stay trustworthy while they type and when
   something goes wrong.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-CORE-003
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Keep the preview usable when a render fails

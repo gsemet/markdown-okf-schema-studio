@@ -9,7 +9,7 @@ description: When the writer types text into a table cell or inserts text into a
   of text inserted from the bar or pasted into the cell with a space.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ tested_in_files:
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/modules/markdownTablePreservation.test.ts
 - test/page/runtimePaletteActions.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Pipes in cell text are escaped and line breaks become spaces

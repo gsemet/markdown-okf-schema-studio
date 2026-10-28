@@ -9,7 +9,7 @@ description: When a reader previews a document and it refers to a local image,
   every workspace folder is its own folder and nothing else.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -21,6 +21,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-002
 - SwRS-MDOKFSTUDIO-TRUST-007
 - SwRS-MDOKFSTUDIO-TRUST-025
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Local files load only from the allowed folders

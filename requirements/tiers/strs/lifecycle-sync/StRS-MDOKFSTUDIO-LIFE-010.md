@@ -9,7 +9,7 @@ description: When a writer scrolls the text editor or a reader scrolls or clicks
   on the same text when it updates, resizes or the text above it changes.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -31,6 +31,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-119
 - SwRS-MDOKFSTUDIO-LIFE-125
 - SwRS-MDOKFSTUDIO-LIFE-156
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The panes scroll together and the reading position survives updates

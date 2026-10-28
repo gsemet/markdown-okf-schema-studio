@@ -18,6 +18,7 @@ user_need: As a writer, I learn why my diagram has no picture and what to
   change, instead of seeing a blank block.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-DIAG-006
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Understand why a bundled PlantUML diagram is not drawn

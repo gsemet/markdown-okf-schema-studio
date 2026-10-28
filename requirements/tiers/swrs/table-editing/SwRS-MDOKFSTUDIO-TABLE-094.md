@@ -10,7 +10,7 @@ description: When a table is parsed and written back after a cell edit, a row
   exactly the original text.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -25,6 +25,7 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/modules/markdownTable.test.ts
 - test/page/modules/markdownTablePreservation.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Editing one cell changes exactly one line of the source

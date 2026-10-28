@@ -10,7 +10,7 @@ description: When the host handles a reply, resolve or delete message for a
   not exist or already holds 200 comments.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/core/comments/commentEditing.test.ts
 - test/integration/commentWrite.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Reply, resolve, reopen and delete change the named thread only

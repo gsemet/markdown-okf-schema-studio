@@ -18,6 +18,7 @@ user_need: As a writer, I want pasted context tags to stay readable and inert so
   that I never lose text or run active markup.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-MYST-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Context tags render as readable panels

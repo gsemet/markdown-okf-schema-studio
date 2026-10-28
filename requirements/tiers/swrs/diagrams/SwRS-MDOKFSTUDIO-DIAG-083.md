@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-DIAG-023
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The PlantUML source disclosure is styled like Mermaid's

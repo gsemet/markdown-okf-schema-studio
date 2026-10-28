@@ -18,6 +18,7 @@ user_need: As a writer, I know whether my metadata edit was saved, refused or
   cancelled, and I can undo it like any other edit.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMEDIT-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Save, cancel and follow metadata edits

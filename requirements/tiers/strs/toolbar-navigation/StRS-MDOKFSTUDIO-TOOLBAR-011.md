@@ -11,7 +11,7 @@ description: When a reader clicks a link in the preview, the Studio SHALL open
   frontmatter outside-link setting.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: StRS
 derives_from: []
@@ -35,6 +35,7 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-007
 - SwRS-MDOKFSTUDIO-TRUST-063
 - SwRS-MDOKFSTUDIO-TRUST-065
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Links open the right target, show where they lead, or are refused with a reason

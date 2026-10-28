@@ -19,6 +19,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-DIAG-089
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Each JAR failure is also a status-line warning

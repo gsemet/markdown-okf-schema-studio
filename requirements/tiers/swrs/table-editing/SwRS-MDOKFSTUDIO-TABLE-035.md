@@ -11,7 +11,7 @@ description: When the writer presses Tab, Shift+Tab or an arrow key at the edge
   can take it.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -29,6 +29,7 @@ tested_in_files:
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeTableCellEditor.test.ts
 - test/visual/capture_edit_checks.py
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Tab and the arrow keys move through the table cells

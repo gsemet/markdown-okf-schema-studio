@@ -17,6 +17,7 @@ user_need: As a writer, I want figure sizing reflected immediately so that I can
   lay out the page.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-MYST-001
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Figure width and alignment show in the preview

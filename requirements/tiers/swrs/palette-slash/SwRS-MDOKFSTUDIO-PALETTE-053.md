@@ -8,7 +8,7 @@ description: When the writer runs Numbered list, the extension SHALL put 1. , 2.
   and remove the markers when every non-blank touched line already has one.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -22,6 +22,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/slashMenu.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Numbered list numbers the touched non-blank lines

@@ -10,7 +10,7 @@ description: "When a writer cuts selected blocks, the host SHALL put their Markd
   clipboard write."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -33,6 +33,7 @@ tested_in_files:
 - test/core/mapping/blockRange.test.ts
 - test/page/runtimeBlockSelection.test.ts
 - test/session/blockReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Cut removes the selected blocks with one blank separator

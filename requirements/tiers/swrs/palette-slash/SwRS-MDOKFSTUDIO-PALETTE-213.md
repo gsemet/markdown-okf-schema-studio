@@ -13,7 +13,7 @@ description: When the writer pastes into the block text box a clipboard that
   still open.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -35,6 +35,7 @@ tested_in_files:
 - test/page/paletteReq.requirements.test.ts
 - test/page/runtimePaletteActions.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Pasted rich text is converted by the host and replaces the selection in one step

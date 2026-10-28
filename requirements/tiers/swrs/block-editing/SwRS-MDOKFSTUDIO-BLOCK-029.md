@@ -11,7 +11,7 @@ description: "When a block editor is open, the page SHALL expose its frame as a 
   block it replaces."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The block editor is a labelled one-pixel frame that hides its rendered block

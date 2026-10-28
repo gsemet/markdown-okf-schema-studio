@@ -18,6 +18,7 @@ user_need: As a writer, I am not surprised by other edits or refreshes
   interfering with a metadata edit in progress.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMEDIT-008
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Keep metadata editing separate from other editing

@@ -12,7 +12,7 @@ description: When a writer presses a key in the text box of an open editor, the
   key the editor handled from reaching VS Code.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -38,6 +38,7 @@ tested_in_files:
 - test/page/modules/textEditing.test.ts
 - test/page/runtimeBlockEditor.test.ts
 - test/visual/scenarioDefinitions1.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Marker keys wrap a selection; Home, End, select-all and undo stay in the text box

@@ -9,7 +9,7 @@ description: When the host applies a delete of an inline thread, the extension
   ends the file, and change nothing else.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -30,6 +30,7 @@ tested_in_files:
 - test/core/comments/inlineThread.test.ts
 - test/core/edits/sourceEdits.test.ts
 - test/integration/inlineThread.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Deleting an inline thread removes whole lines

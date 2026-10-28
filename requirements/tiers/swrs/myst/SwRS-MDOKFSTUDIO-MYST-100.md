@@ -9,7 +9,7 @@ description: 'When a document holds a {card} directive outside a grid, the exten
   add the safe names of :class-card: to the card.'
 project: MDOKFSTUDIO
 scope: myst
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -24,6 +24,7 @@ tested_in_files:
 - test/core/render/cardsTabs.test.ts
 - test/integration/mystBlocksWindow.ts
 - test/visual/cardsTabsScenarios.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Standalone cards show header, title, body and footer

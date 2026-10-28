@@ -11,7 +11,7 @@ description: "When the reader presses the enabled Anchor button, or the page lea
   shows its document."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -31,6 +31,7 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/page/runtimeScroll.test.ts
 - test/session/toolbarReq.requirements.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The Anchor button switches whether the preview follows the editor

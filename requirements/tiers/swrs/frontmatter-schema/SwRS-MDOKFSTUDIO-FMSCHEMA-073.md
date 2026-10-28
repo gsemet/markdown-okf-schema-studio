@@ -12,7 +12,7 @@ description: "When a writer activates a frontmatter link (click or Enter in read
   follow the link: {reason}\" with the problem message as the reason."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -27,6 +27,7 @@ implemented_in_files:
 tested_in_files:
 - test/integration/previewEditing.test.ts
 - test/session/links.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 ## A resolving frontmatter link opens its target, others are refused with a warning
 

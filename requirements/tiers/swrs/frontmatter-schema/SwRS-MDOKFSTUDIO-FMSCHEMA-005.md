@@ -11,7 +11,7 @@ description: When the frontmatter has no string `type`, or no schema lookup is
   one line in a key column as wide as its longest key, up to 40% of the table.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/integration/genericMarkdown.test.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Without a schema the table lists the keys in source order, escaped

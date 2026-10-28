@@ -18,6 +18,7 @@ derived_by: []
 implemented_in_files: []
 tested_in_files: []
 superseded_by: SwRS-MDOKFSTUDIO-LAYOUT-022
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Full width centres the content with gutters of at least 15 px

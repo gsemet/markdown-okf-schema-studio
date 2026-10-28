@@ -9,7 +9,7 @@ description: When the text of a previewed document changes by an undo, a redo or
   text readable and nothing moved.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -32,6 +32,7 @@ tested_in_files:
 - test/page/modules/motion.test.ts
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Blocks changed by another tool glow briefly

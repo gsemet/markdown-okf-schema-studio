@@ -10,7 +10,7 @@ description: When a render fails with an exception or yields diagnostics, the
   exists.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -26,6 +26,7 @@ tested_in_files:
 - test/core/render/renderPipeline.test.ts
 - test/node-services/build/buildQueue.test.ts
 - test/page/runtimeContentPatch.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## A failed render keeps the previous page and lists its diagnostics

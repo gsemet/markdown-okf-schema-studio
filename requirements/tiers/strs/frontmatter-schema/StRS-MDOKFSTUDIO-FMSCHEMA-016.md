@@ -16,6 +16,7 @@ derives_from: []
 user_need: As a writer, I see at a glance which references are broken and why.
 derived_by: []
 superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-014
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Link status is visible on each value

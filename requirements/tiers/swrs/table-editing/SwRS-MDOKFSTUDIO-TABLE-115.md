@@ -9,7 +9,7 @@ description: When the writer runs Table with caption, the extension SHALL wrap
   word Caption.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -23,6 +23,7 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/editActions.test.ts
 - test/page/modules/tableInsertAfterTable.test.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## Table with caption wraps the table at the caret in a table directive

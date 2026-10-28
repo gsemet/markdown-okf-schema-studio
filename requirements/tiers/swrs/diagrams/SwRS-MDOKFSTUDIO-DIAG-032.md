@@ -10,7 +10,7 @@ description: When a built-in diagram needs a URL, a library, a theme read from a
   instead of a picture, and fetch or load nothing.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: draft
+lifecycle: proposed
 origin: native
 tier: SwRS
 derives_from:
@@ -28,6 +28,7 @@ tested_in_files:
 - test/core/preview/diagReq.styles.requirements.test.ts
 - test/page/modules/plantumlDiagram.test.ts
 - test/visual/scenarioDefinitions2.ts
+default_owner_email: gaetan@xeberon.net
 ---
 
 ## The built-in engine refuses what needs a URL, a library or more than 1 MiB
