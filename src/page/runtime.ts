@@ -69,6 +69,7 @@ import { matchRange, paintMatches } from "./modules/findDom";
 import { installHeadingFold } from "./modules/headingFold";
 import { installIncomingChanges } from "./modules/incomingChanges";
 import { installIncomingToggle } from "./modules/incomingToggle";
+import { installSideBySide } from "./modules/sideBySide";
 import { installInlineThreads } from "./modules/inlineThread";
 import { installLabelRename } from "./modules/labelRename";
 import { installLinkNavigation } from "./modules/linkNavigation";
@@ -262,6 +263,8 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   // fade of a block an editor gives back and the glow of blocks an outside change or an undo updated.
   const motion = installMotion(document, window);
   installIncomingToggle(document, vscode, context);
+  // Side-by-side diff of the changed blocks (CR 147): the host sends the text at the last commit.
+  const sideBySide = installSideBySide(document, vscode, context, keepReadingLine);
   // Toolbar Comments button: hides the chips and every review mark, which moves the content like
   // expanding a chip does; the thread module closes its popover and updates the Tab order.
   installCommentsToggle(document, vscode, context, () => {
@@ -424,7 +427,7 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
   rt.parts = {
     contentMorph, stickyBand, statusRegion, commentThreads, commentCompose, linkNavigation, firstClearance,
     codeCopy, labelRename, hostRequests, plantUmlFileRequests, pasteImage, pasteHtml, pasteUrl, warningBanner,
-    figureEditButton, chipToggle, tabs, incomingChanges, motion, historyControls, viewControls, widthMode,
+    figureEditButton, chipToggle, tabs, incomingChanges, sideBySide, motion, historyControls, viewControls, widthMode,
     tocColumn, headingFold, find: findBar, themeMode, anchorMode, checkboxes, inlineThreads, linkTooltip,
   };
   rt.editorChrome.bindPaletteSticky();

@@ -236,6 +236,96 @@ html[data-sphinx-preview-edit-mode="on"] #sphinx-myst-preview-content .okf-comme
   background: var(--studio-editorGutter-addedBackground, #2ea043);
 }
 
+/* Side-by-side diff of changed blocks (CR 147). The Side-by-side button turns each block changed since
+   the last commit into a card: the block as it was on the left, as it is on the right, the removed and
+   added words marked. The page script puts the cards in front of the blocks and hides those; the
+   attribute on <html> switches both off at once, and edit mode never shows them. */
+html[data-sphinx-preview-sbs="off"] [data-okf-sbs-card],
+html[data-sphinx-preview-edit-mode="on"] [data-okf-sbs-card] {
+  display: none;
+}
+
+html[data-sphinx-preview-sbs="on"]:not([data-sphinx-preview-edit-mode="on"]) [data-okf-sbs-replaced] {
+  display: none;
+}
+
+[data-okf-sbs-card] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-block: 0.6em;
+  border: 1px solid var(--studio-panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+[data-okf-sbs-side] {
+  position: relative;
+  min-width: 0;
+  padding: 1.2em 0.8em 0.4em;
+  overflow-x: auto;
+}
+
+[data-okf-sbs-side]:empty {
+  min-height: 2.6em;
+}
+
+[data-okf-sbs-side]::before {
+  content: attr(data-okf-sbs-label);
+  position: absolute;
+  inset-block-start: 0.3em;
+  inset-inline-start: 0.8em;
+  font-size: 0.65em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--studio-descriptionForeground, currentColor);
+  opacity: 0.8;
+}
+
+[data-okf-sbs-side="base"] {
+  background: color-mix(in srgb, var(--studio-errorForeground, #f14c4c) 8%, transparent);
+  border-inline-end: 1px solid var(--studio-panel-border, rgba(128, 128, 128, 0.35));
+}
+
+[data-okf-sbs-side="current"] {
+  background: color-mix(in srgb, var(--studio-editorGutter-addedBackground, #2ea043) 8%, transparent);
+}
+
+[data-okf-sbs-side] > :first-child {
+  margin-block-start: 0;
+}
+
+[data-okf-sbs-side] > :last-child {
+  margin-block-end: 0;
+}
+
+[data-okf-sbs-word="removed"] {
+  background: color-mix(in srgb, var(--studio-errorForeground, #f14c4c) 32%, transparent);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+[data-okf-sbs-word="added"] {
+  background: color-mix(in srgb, var(--studio-editorGutter-addedBackground, #2ea043) 32%, transparent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+@media (max-width: 560px) {
+  [data-okf-sbs-card] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-okf-sbs-side="base"] {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--studio-panel-border, rgba(128, 128, 128, 0.35));
+  }
+}
+
+/* preview.showIncomingChanges off: the Side-by-side button goes with the Diff button. */
+html[data-okf-incoming-changes="false"] [data-sphinx-preview-sbs-toggle] {
+  display: none;
+}
+
 /* Review comments: a highlighted quote (or a badge on its block) opens a popover with the thread.
    Marks only paint; badges and the popover are out of the flow, so nothing moves. */
 #sphinx-myst-preview-content mark[data-okf-comment-thread] {

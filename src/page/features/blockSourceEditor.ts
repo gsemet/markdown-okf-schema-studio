@@ -300,7 +300,16 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
       edit.closeFigurePanel?.(false);
     });
     // @implements_req SwRS-MDOKFSTUDIO-PALETTE-031
+    let wasTall = false;
     textarea.addEventListener("input", (event) => {
+      // A frame that grows taller than the viewport (or shrinks back) changes what the palette
+      // reserves above it: measure again when that state flips, not on every key.
+      const tall = (edit.element.getBoundingClientRect?.()?.height ?? 0) > window.innerHeight;
+      if (tall !== wasTall) {
+        wasTall = tall;
+        editorChrome.syncPaletteSticky(edit);
+        editorChrome.reservePaletteClearance(edit);
+      }
       palette.closePopover();
       edit.closeLinkPanel?.(false);
       edit.closeFigurePanel?.(false);
