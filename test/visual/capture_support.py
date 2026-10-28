@@ -57,7 +57,7 @@ ADMONITION_DIRECTIVE = re.compile(
     r"^[ \t]*(?:`{3,}|:{3,})\{(admonition|attention|caution|danger|error|hint|important|note|seealso|tip|warning|versionadded|versionchanged|deprecated)\}",
     re.MULTILINE,
 )
-GFM_ALERT = re.compile(r"^>[ \t]*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]", re.MULTILINE)
+GFM_ALERT = re.compile(r"^[ \t]*>[ \t]*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]", re.MULTILINE)
 FIGURE_DIRECTIVE = re.compile(r"^(?:`{3,}|:{3,})\{figure\}\s+\S+", re.MULTILINE)
 MERMAID_BLOCK = re.compile(r"^`{3,}(?:\{)?mermaid(?:\})?(?:\s|$)", re.MULTILINE)
 CHART_BLOCK = re.compile(r"^`{3,}(?:\{)?vega(?:-lite)?(?:\})?(?:\s|$)", re.MULTILINE)

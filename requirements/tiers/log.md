@@ -1,5 +1,17 @@
 # Update Log
 
+## 2026-10-29 (a click in the body of a GitHub alert opens the whole alert)
+
+- SwRS-MDOKFSTUDIO-GFM-009: new nominal scenario "A click in the body of an alert opens the whole
+  alert". The admonition of a rewritten alert carries `data-okf-github-alert`; the page edits a
+  block inside it (a paragraph, a list) as the whole alert, from the marker line to the last quoted
+  line, before any list around it. Before, only the clicked paragraph opened.
+  Verification: test/session/alertBlockEditOpen.test.ts, visual scenario
+  gfm/v09-alert-body-opens-whole-alert-dark-900.
+- SwRS-MDOKFSTUDIO-BLOCK-014: the nominal scenario and the table name the GitHub alert. The claim
+  that a click on the body of a MyST admonition opens the complete directive did not hold (only the
+  paragraph opens; a click on the title opens the directive): it is now a "Known issue".
+
 ## 2026-10-29 (Cmd/Ctrl+F from an editor field opens the find bar at once, CR 196)
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-009: the page now takes Cmd/Ctrl+F in a field of an open block, table

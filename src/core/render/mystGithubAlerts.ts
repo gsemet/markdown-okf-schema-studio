@@ -34,6 +34,8 @@ export interface ExpandedGithubAlerts {
    * come from the marker line, its closing line from the alert's last line.
    */
   readonly sourceLines: readonly number[] | undefined;
+  /** The one-based lines of `text` where the admonition of a rewritten alert opens. */
+  readonly alertLines: readonly number[];
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-GFM-009
@@ -42,6 +44,7 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
   const lines = text.split(/\r?\n/u);
   const output: string[] = [];
   const sourceLines: number[] = [];
+  const alertLines: number[] = [];
   let rewritten = false;
   let fence: string | undefined;
   /** The lengths of the colon fences (`:::{card}`) still open at the current line. */
@@ -98,6 +101,7 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
       }
       colons = "`".repeat(longest + 1);
     }
+    alertLines.push(output.length + 1);
     push(index, `${indent}${colons}{${kind}}${title ? ` ${title}` : ""}`, `${indent}:class: simple`);
     let cursor = index + 1;
     while (cursor < lines.length && /^\s*>/u.test(lines[cursor])) {
@@ -116,7 +120,7 @@ export function expandGithubAlertsWithLines(text: string): ExpandedGithubAlerts 
     index = cursor;
   }
 
-  return { text: output.join("\n"), sourceLines: rewritten ? sourceLines : undefined };
+  return { text: output.join("\n"), sourceLines: rewritten ? sourceLines : undefined, alertLines };
 }
 
 /** Rewrites alert blockquotes, including optional titles, into MyST admonitions. */
@@ -146,12 +150,19 @@ export function alertLineMapper(expanded: ExpandedGithubAlerts, firstLine = 1): 
 /**
  * Maps the source lines of a tree parsed from `expanded.text` back to the lines of the input
  * text (see `alertLineMapper`): the positions of every node and the `data-line` /
- * `data-end-line` attributes a pass has already set.
+ * `data-end-line` attributes a pass has already set. The admonition of each rewritten alert is
+ * flagged `githubAlert`, so the page can open the whole alert in one block editor.
  */
 export function mapAlertSourceLines(root: MystNode, expanded: ExpandedGithubAlerts, firstLine = 1): void {
   if (!expanded.sourceLines) return;
   const map = alertLineMapper(expanded, firstLine);
+  const alertLines = new Set(expanded.alertLines.map((line) => line + firstLine - 1));
   const visit = (node: MystNode): void => {
+    if (node.type === "mystDirective" && alertLines.has(node.position?.start?.line ?? 0)) {
+      for (const child of node.children ?? []) {
+        if (child.type === "admonition") child.data = { ...(child.data ?? {}), githubAlert: true };
+      }
+    }
     if (node.position?.start?.line !== undefined) {
       node.position.start.line = map(node.position.start.line);
     }

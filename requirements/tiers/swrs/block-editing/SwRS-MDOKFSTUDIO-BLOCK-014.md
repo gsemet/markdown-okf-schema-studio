@@ -34,6 +34,8 @@ tested_in_files:
 - test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
+- test/session/alertBlockEditOpen.test.ts
+- test/visual/alertEditingScenarios.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -46,9 +48,12 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 
 ### Scenario (nominal): Paragraph, image or admonition
 
-- GIVEN edit mode on, a paragraph mapped to lines 5 to 6, a plain image paragraph and an admonition directive
-- WHEN the writer clicks the paragraph, the image, or the title or the body of the admonition
-- THEN the page posts previewEditOpen with the lines of the mapped block (5 and 6 for the paragraph, the complete directive from opening to closing fence for the admonition), hides the block and shows an editor frame after it
+- GIVEN edit mode on, a paragraph mapped to lines 5 to 6, a plain image paragraph, an admonition directive and a GitHub alert (`> [!NOTE]`)
+- WHEN the writer clicks the paragraph, the image, the title of the admonition, or the title or the body of the alert
+- THEN the page posts previewEditOpen with the lines of the mapped block (5 and 6 for the paragraph, the complete directive from opening to closing fence for the admonition, the whole alert from its marker line to its last quoted line for the alert), hides the block and shows an editor frame after it
+
+Known issue: a click on a paragraph in the body of a MyST admonition (a `{note}` directive) opens
+that paragraph only, not the complete directive.
 
 ### Scenario (nominal): Enter or Space on a focused block
 
@@ -62,6 +67,7 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 | --- | --- |
 | an item of a list mapped to lines 5 to 8 with items at lines 5, 6 and 7 (also in a 460 px wide pane with long wrapped items), click on the item at line 6 | previewEditOpen carries line 5 and endLine 8; one editor holds every item and continuation line, appears after the hidden list, and the wrapped list source is not clipped |
 | an item of a list nested in another list | the editor holds the nested list only, not the outer list (the nearest list wins) |
+| a paragraph or a list item in the body of a GitHub alert, also an alert indented in a list item | previewEditOpen carries the lines of the alert, marker line to last quoted line, and the editor holds them with their indentation; the alert wins over the list around it or inside it (SwRS-MDOKFSTUDIO-GFM-009) |
 | a fenced code block | the frame is a sibling after the pre, the pre carries data-sphinx-preview-editing true, and the text box holds the fence lines exactly as in the file; after the writer adds a line and presses Done, the final save still starts and ends with the fence lines |
 | a block that comes from an {include} | previewEditOpen names the lines of the {include} directive in the edited document and the editor holds the directive text; the included block carries data-sphinx-preview-included true |
 | the words Diagram source of the collapsed disclosure of a Mermaid or PlantUML figure | the default toggle is prevented, the disclosure stays closed and the editor of the figure opens on the lines of the diagram block |
@@ -127,7 +133,8 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 - Method: test/page/blockReq.requirements.test.ts (`a click on a link inside a paragraph follows the link and opens no editor`, `Enter or Space on a link inside a paragraph opens no editor`: link inside a paragraph row).
 - Method: test/page/blockReq.requirements.test.ts (`Enter or Space on a focused block opens its editor with the caret at the end`: Enter scenario; `a click on a comment chip, an open thread or a block inside a link opens no editor`: chip, open thread and linked block rows; `a click on a cell of the properties table never opens a block editor`: properties table rows; `a click on Diagram source in edit mode opens the editor of the figure and not the disclosure`: Diagram source row and reading mode row). The insert point part of the Enter and Space row is asserted by `T28: document-level click and keydown on an insertion point never open a block editor` in test/page/runtimeBlockMoves.test.ts.
 - Method: test/integration/realInput/renderPatching.ts (scenarioImageEditing, screenshot block-editing/r04, clicks plain, linked and raw img blocks: paragraph or image scenario; scenarioSaveKeepsBlockInPlace: fenced code row). No unit test covers the capture listener or the Cmd and Ctrl click of the linked image scenario.
-- Method: visual scenarios in test/visual/scenarioDefinitions2.ts, block-editing/v04 (paragraph click), block-editing/v05 (admonition title click and fenced block; a click on the admonition body has no test) and block-editing/v12 (edit-list-narrow: list item row). The nested list case, the line range of a list (sourceRangeForList in src/page/features/mappedBlocks.ts) and lists that mix files are untested.
+- Method: test/session/alertBlockEditOpen.test.ts (GitHub alert row and the alert of the nominal scenario: the range `editingElementFor` gives for a click in the body of an alert of the rendered page, answered by the real `PreviewManager`; the known issue: a click on a paragraph of a MyST admonition body opens that paragraph) and visual scenario gfm/v09-alert-body-opens-whole-alert-dark-900 in test/visual/alertEditingScenarios.ts (real click on the body of an alert).
+- Method: visual scenarios in test/visual/scenarioDefinitions2.ts, block-editing/v04 (paragraph click), block-editing/v05 (admonition title click and fenced block) and block-editing/v12 (edit-list-narrow: list item row). The nested list case, the line range of a list (sourceRangeForList in src/page/features/mappedBlocks.ts) and lists that mix files are untested.
 - Method: test/core/render/includeMapping.test.ts and test/integration/previewEditing.test.ts (an included block maps to the directive lines and carries data-sphinx-preview-included; a changed include target renders only after the edit: include row).
 - Method: the previewEditSource scenarios (nominal answer, error and malformed rows) are not asserted by a dedicated test; the page receives the answer in the unit tests of test/page/runtimeBlockEditor.test.ts and in the integration flow of test/integration/previewEditing.test.ts.
-- Criteria: One previewEditOpen per click, carrying the mapped line range of the clicked block; the keydown listener opens the editor only for a mapped block outside the listed controls; the line range of a list is the span of the mapped elements of the nearest list that belong to the same source file and document; the frame is never inside the pre and the rendered text of the fence is the raw source; the capture listener of bindEditModeCaptureClicks acts only for an IMG inside an anchor outside the properties table and the editors; the click handler returns before openMappedEditor for the excluded targets and openMappedEditor returns at once when the event target is inside [data-okf-properties]; the editor range equals the directive lines and the included file is never opened; the click target of Diagram source resolves to the figure through the mapped-block selector and event.preventDefault is called in edit mode.
+- Criteria: One previewEditOpen per click, carrying the mapped line range of the clicked block; the keydown listener opens the editor only for a mapped block outside the listed controls; the line range of a list is the span of the mapped elements of the nearest list that belong to the same source file and document; the line range of a block inside a mapped element carrying data-okf-github-alert of the same source file and document is that element's range, before any list; the frame is never inside the pre and the rendered text of the fence is the raw source; the capture listener of bindEditModeCaptureClicks acts only for an IMG inside an anchor outside the properties table and the editors; the click handler returns before openMappedEditor for the excluded targets and openMappedEditor returns at once when the event target is inside [data-okf-properties]; the editor range equals the directive lines and the included file is never opened; the click target of Diagram source resolves to the figure through the mapped-block selector and event.preventDefault is called in edit mode.

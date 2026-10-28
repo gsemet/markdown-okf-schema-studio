@@ -118,7 +118,29 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
     return Number.isFinite(firstLine) ? { line: firstLine, endLine: lastLine } : undefined;
   }
 
+  // @implements_req SwRS-MDOKFSTUDIO-GFM-009
+  // @implements_req SwRS-MDOKFSTUDIO-BLOCK-014
+  // The lines of a mapped GitHub alert of the same file and document as `reference`: from its
+  // marker line to its last quoted line.
+  function sourceRangeForAlert(alert: Element, reference: Element): { line: number; endLine: number } | undefined {
+    if (
+      alert.getAttribute("data-sphinx-source-file") !== reference.getAttribute("data-sphinx-source-file")
+      || alert.getAttribute("data-sphinx-preview-document") !== reference.getAttribute("data-sphinx-preview-document")
+    ) return undefined;
+    const line = Number(alert.getAttribute("data-sphinx-source-line"));
+    const endLine = Number(alert.getAttribute("data-sphinx-source-end-line") || line);
+    if (!Number.isSafeInteger(line) || line < 1 || !Number.isSafeInteger(endLine) || endLine < line) return undefined;
+    return { line, endLine };
+  }
+
   function editingElementFor(target: HTMLElement): ReturnType<MappedBlocks["editingElementFor"]> {
+    // A block in the body of a GitHub alert (a paragraph, a list) edits the whole alert, like a
+    // click on its title; an alert inside a list item edits that alert, not the list.
+    const alert = target.closest?.<HTMLElement>("[data-okf-github-alert]");
+    if (alert) {
+      const sourceRange = sourceRangeForAlert(alert, target);
+      if (sourceRange) return { element: alert, sourceRange };
+    }
     const list = target.closest?.<HTMLElement>("ul, ol");
     if (list) {
       const sourceRange = sourceRangeForList(list, target);
