@@ -27,6 +27,9 @@ tested_in_files:
 - test/core/render/mystPaletteRendering.test.ts
 - test/core/render/renderReq.myst.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-018
+- SwRS-MDOKFSTUDIO-MYST-095
 ---
 
 ## Definition lists and inline roles are typeset

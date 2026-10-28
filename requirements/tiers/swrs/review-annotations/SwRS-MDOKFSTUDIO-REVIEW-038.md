@@ -27,6 +27,8 @@ tested_in_files:
 - test/page/modules/commentCompose.test.ts
 - test/page/modules/diagReq.diagrams.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-020
 ---
 
 ## Selected body text offers a Comment button and a keyboard shortcut

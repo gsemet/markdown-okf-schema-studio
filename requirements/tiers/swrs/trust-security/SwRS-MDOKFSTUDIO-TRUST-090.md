@@ -49,6 +49,9 @@ tested_in_files:
 - test/page/runtimePaletteActions.test.ts
 - test/session/diagReq.plantuml.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-047
+- SwRS-MDOKFSTUDIO-DIAG-052
 ---
 
 ## Every page request is answered once by its id and result type, or ends with a readable error

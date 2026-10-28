@@ -17,7 +17,8 @@ exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-FMSCHEMA-084; no marker expect
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
-superseded_by: SwRS-MDOKFSTUDIO-FMSCHEMA-084
+superseded_by:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-084
 default_owner_email: gaetan@xeberon.net
 ---
 

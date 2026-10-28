@@ -49,6 +49,11 @@ derived_by:
 - SwRS-MDOKFSTUDIO-REVIEW-017
 - SwRS-MDOKFSTUDIO-REVIEW-038
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-DIAG-002
+- StRS-MDOKFSTUDIO-DIAG-003
+- StRS-MDOKFSTUDIO-DIAG-004
+- StRS-MDOKFSTUDIO-DIAG-005
 ---
 
 ## A writer reads and inserts Mermaid diagrams that follow the theme

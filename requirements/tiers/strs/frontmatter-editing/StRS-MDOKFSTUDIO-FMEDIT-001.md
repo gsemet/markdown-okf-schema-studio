@@ -61,6 +61,10 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMEDIT-082
 - SwRS-MDOKFSTUDIO-FMEDIT-087
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-FMEDIT-002
+- StRS-MDOKFSTUDIO-FMEDIT-003
+- StRS-MDOKFSTUDIO-FMEDIT-004
 ---
 
 ## A writer edits metadata values in place with fitting controls

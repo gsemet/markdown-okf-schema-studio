@@ -32,6 +32,11 @@ tested_in_files:
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-038
+- SwRS-MDOKFSTUDIO-FMEDIT-040
+- SwRS-MDOKFSTUDIO-FMEDIT-041
+- SwRS-MDOKFSTUDIO-FMEDIT-042
 ---
 
 ## An added field is one inserted line where its row shows, and its editor opens

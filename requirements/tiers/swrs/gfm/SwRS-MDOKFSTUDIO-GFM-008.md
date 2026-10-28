@@ -28,6 +28,9 @@ tested_in_files:
 - test/core/render/mystPaletteRendering.test.ts
 - test/core/render/mystTablesTree.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-GFM-014
+- SwRS-MDOKFSTUDIO-GFM-015
 ---
 
 ## Strikethrough, footnotes and pipe tables render as on GitHub

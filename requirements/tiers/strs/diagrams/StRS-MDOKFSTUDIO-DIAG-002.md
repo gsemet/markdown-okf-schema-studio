@@ -11,13 +11,12 @@ scope: diagrams
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-001; no marker expected."
 derives_from: []
 user_need: As a reader, I want Mermaid diagrams to match the dark, white, cream
   or light preview so their labels stay legible.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-DIAG-001
+superseded_by:
+- StRS-MDOKFSTUDIO-DIAG-001
 default_owner_email: gaetan@xeberon.net
 ---
 

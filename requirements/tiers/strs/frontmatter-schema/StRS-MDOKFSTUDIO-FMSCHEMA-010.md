@@ -36,6 +36,9 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-085
 - SwRS-MDOKFSTUDIO-FMSCHEMA-089
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-FMSCHEMA-011
+- StRS-MDOKFSTUDIO-FMSCHEMA-012
 ---
 
 ## Fields follow the schema and problems show on the field concerned

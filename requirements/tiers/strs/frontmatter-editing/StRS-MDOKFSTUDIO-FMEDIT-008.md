@@ -66,6 +66,10 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-005
 - SwRS-MDOKFSTUDIO-TRUST-065
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-FMEDIT-009
+- StRS-MDOKFSTUDIO-FMEDIT-010
+- StRS-MDOKFSTUDIO-FMEDIT-011
 ---
 
 ## Metadata edits keep the source intact, follow the schema and never lose text

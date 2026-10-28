@@ -35,6 +35,8 @@ tested_in_files:
 - test/integration/blockActionsFollowSelection.test.ts
 - test/page/runtimeBlockMoves.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-064
 ---
 
 ## The up and down arrows of an insert point move its block

@@ -27,6 +27,12 @@ tested_in_files:
 - test/core/frontmatter/okfFrontmatter.test.ts
 - test/page/runtimeFrontmatterEditor.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-005
+- SwRS-MDOKFSTUDIO-FMEDIT-006
+- SwRS-MDOKFSTUDIO-FMEDIT-015
+- SwRS-MDOKFSTUDIO-FMEDIT-075
+- SwRS-MDOKFSTUDIO-FMEDIT-076
 ---
 
 ## Text values are edited as one or several lines

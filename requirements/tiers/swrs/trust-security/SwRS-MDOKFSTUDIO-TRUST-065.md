@@ -54,6 +54,11 @@ tested_in_files:
 - test/session/toolbarReq.requirements.test.ts
 - test/session/trustReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-027
+- SwRS-MDOKFSTUDIO-DIAG-051
+- SwRS-MDOKFSTUDIO-FMEDIT-052
+- SwRS-MDOKFSTUDIO-MYST-044
 ---
 
 ## A page message is matched to the shown render or document by the gate of its type

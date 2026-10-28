@@ -11,13 +11,12 @@ scope: frontmatter-editing
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-005; no marker expected."
 derives_from: []
 user_need: As a writer, I remove an obsolete metadata field safely, without
   losing other fields or comments.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-FMEDIT-005
+superseded_by:
+- StRS-MDOKFSTUDIO-FMEDIT-005
 default_owner_email: gaetan@xeberon.net
 ---
 

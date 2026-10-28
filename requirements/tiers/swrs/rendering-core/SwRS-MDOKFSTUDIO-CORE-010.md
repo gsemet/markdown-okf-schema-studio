@@ -24,6 +24,8 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-011
 ---
 
 ## Wikilinks render as links where they are text

@@ -26,6 +26,10 @@ tested_in_files:
 - test/core/render/highlight.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-009
+- SwRS-MDOKFSTUDIO-CODE-010
+- SwRS-MDOKFSTUDIO-CODE-036
 ---
 
 ## Diff blocks show additions and deletions

@@ -18,7 +18,8 @@ exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-TOOLBAR-113; no marker expecte
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
-superseded_by: SwRS-MDOKFSTUDIO-TOOLBAR-113
+superseded_by:
+- SwRS-MDOKFSTUDIO-TOOLBAR-113
 default_owner_email: gaetan@xeberon.net
 ---
 

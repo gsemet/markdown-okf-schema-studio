@@ -11,14 +11,13 @@ scope: layout-width
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-004; no marker expected."
 derives_from: []
 user_need: As a writer, I can click the first block editor, the Start writing
   button and the properties controls at any pane width without the floating
   toolbar covering them.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-LAYOUT-004
+superseded_by:
+- StRS-MDOKFSTUDIO-LAYOUT-004
 default_owner_email: gaetan@xeberon.net
 ---
 

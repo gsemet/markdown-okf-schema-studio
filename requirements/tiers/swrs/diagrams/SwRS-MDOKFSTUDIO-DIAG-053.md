@@ -34,6 +34,11 @@ tested_in_files:
 - test/page/pageMessages.test.ts
 - test/session/diagReq.plantuml.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-045
+- SwRS-MDOKFSTUDIO-DIAG-065
+- SwRS-MDOKFSTUDIO-DIAG-066
+- SwRS-MDOKFSTUDIO-DIAG-067
 ---
 
 ## Served include files are watched and redraw their diagrams

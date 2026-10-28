@@ -26,6 +26,9 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/core/render/mystFeatures.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-015
+- SwRS-MDOKFSTUDIO-CODE-028
 ---
 
 ## A code directive shows its file name or caption above the code

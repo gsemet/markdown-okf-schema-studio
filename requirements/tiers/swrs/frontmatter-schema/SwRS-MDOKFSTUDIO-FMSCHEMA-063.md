@@ -33,6 +33,11 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-064
+- SwRS-MDOKFSTUDIO-FMSCHEMA-065
+- SwRS-MDOKFSTUDIO-FMSCHEMA-066
+- SwRS-MDOKFSTUDIO-FMSCHEMA-086
 ---
 ## Each link value shows whether it resolves
 

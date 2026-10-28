@@ -27,6 +27,10 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/security/html-policy.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-056
+- SwRS-MDOKFSTUDIO-GFM-032
+- SwRS-MDOKFSTUDIO-GFM-038
 ---
 
 ## Raw HTML tables are rebuilt from an allow-list

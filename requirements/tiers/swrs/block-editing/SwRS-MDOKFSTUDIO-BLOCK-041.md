@@ -57,6 +57,15 @@ tested_in_files:
 - test/session/renderReq.labelRename.requirements.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-002
+- SwRS-MDOKFSTUDIO-FMEDIT-058
+- SwRS-MDOKFSTUDIO-FMEDIT-059
+- SwRS-MDOKFSTUDIO-FMEDIT-072
+- SwRS-MDOKFSTUDIO-FMEDIT-073
+- SwRS-MDOKFSTUDIO-GFM-025
+- SwRS-MDOKFSTUDIO-MYST-043
+- SwRS-MDOKFSTUDIO-MYST-050
 ---
 
 ## One edit at a time: an open editor blocks other edits, opens and refreshes

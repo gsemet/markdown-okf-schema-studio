@@ -11,13 +11,12 @@ scope: frontmatter-schema
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-014; no marker expected."
 derives_from: []
 user_need: As a reviewer, I see key facts about a linked file without opening
   it.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-014
+superseded_by:
+- StRS-MDOKFSTUDIO-FMSCHEMA-014
 default_owner_email: gaetan@xeberon.net
 ---
 

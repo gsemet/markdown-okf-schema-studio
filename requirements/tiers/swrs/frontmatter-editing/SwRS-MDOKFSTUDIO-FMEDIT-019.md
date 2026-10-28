@@ -31,6 +31,13 @@ tested_in_files:
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-020
+- SwRS-MDOKFSTUDIO-FMEDIT-021
+- SwRS-MDOKFSTUDIO-FMEDIT-022
+- SwRS-MDOKFSTUDIO-FMEDIT-023
+- SwRS-MDOKFSTUDIO-FMEDIT-056
+- SwRS-MDOKFSTUDIO-FMEDIT-082
 ---
 
 ## A field editor saves a changed value and Escape cancels it

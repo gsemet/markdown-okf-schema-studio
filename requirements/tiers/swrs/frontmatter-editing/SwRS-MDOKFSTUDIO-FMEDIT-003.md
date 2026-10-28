@@ -27,6 +27,13 @@ tested_in_files:
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-007
+- SwRS-MDOKFSTUDIO-FMEDIT-008
+- SwRS-MDOKFSTUDIO-FMEDIT-009
+- SwRS-MDOKFSTUDIO-FMEDIT-017
+- SwRS-MDOKFSTUDIO-FMEDIT-050
+- SwRS-MDOKFSTUDIO-FMEDIT-074
 ---
 
 ## Enum, number, date, boolean and nullable fields use fitting controls

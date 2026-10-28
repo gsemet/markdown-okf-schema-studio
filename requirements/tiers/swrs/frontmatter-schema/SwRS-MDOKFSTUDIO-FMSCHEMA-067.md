@@ -41,6 +41,12 @@ tested_in_files:
 - test/session/eventFanOut.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-068
+- SwRS-MDOKFSTUDIO-FMSCHEMA-069
+- SwRS-MDOKFSTUDIO-FMSCHEMA-070
+- SwRS-MDOKFSTUDIO-FMSCHEMA-071
+- SwRS-MDOKFSTUDIO-FMSCHEMA-072
 ---
 ## A link tooltip shows the fields and an excerpt of the linked file
 

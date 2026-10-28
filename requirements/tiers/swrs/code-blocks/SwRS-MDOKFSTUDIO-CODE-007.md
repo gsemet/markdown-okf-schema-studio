@@ -28,6 +28,10 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-012
+- SwRS-MDOKFSTUDIO-CODE-013
+- SwRS-MDOKFSTUDIO-CODE-016
 ---
 
 ## Code blocks use one font scale, the theme colours and scroll long lines

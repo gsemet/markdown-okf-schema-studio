@@ -26,6 +26,11 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/visual/capture_layout_checks.py
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-028
+- SwRS-MDOKFSTUDIO-LAYOUT-029
+- SwRS-MDOKFSTUDIO-LAYOUT-030
+- SwRS-MDOKFSTUDIO-LAYOUT-039
 ---
 
 ## Margin keeps blocks in the column and Full removes the limit

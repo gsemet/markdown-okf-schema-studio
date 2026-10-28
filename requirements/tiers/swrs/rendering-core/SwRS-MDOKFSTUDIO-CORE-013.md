@@ -37,6 +37,11 @@ tested_in_files:
 - test/security/resource-policy.test.ts
 - test/security/trustReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-016
+- SwRS-MDOKFSTUDIO-CORE-018
+- SwRS-MDOKFSTUDIO-CORE-019
+- SwRS-MDOKFSTUDIO-CORE-067
 ---
 
 ## Includes are bounded by depth, budget, size and allowed roots

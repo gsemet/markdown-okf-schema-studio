@@ -20,7 +20,8 @@ exemption_reason: "The result comes from the whole renderer and stylesheet toget
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
-superseded_by: SwRS-MDOKFSTUDIO-MYST-006
+superseded_by:
+- SwRS-MDOKFSTUDIO-MYST-006
 default_owner_email: gaetan@xeberon.net
 ---
 

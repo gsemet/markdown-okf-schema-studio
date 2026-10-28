@@ -22,6 +22,8 @@ tested_in_files:
 - test/core/frontmatter/schemaRegistry.test.ts
 - test/session/diagReq.settings.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-028
 ---
 
 ## Schema edits are picked up on the next analysis

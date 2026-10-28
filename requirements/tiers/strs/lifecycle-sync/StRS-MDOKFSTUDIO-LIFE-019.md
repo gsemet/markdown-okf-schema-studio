@@ -10,8 +10,6 @@ scope: lifecycle-sync
 lifecycle: deprecated
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Archived. Not an observable behaviour; no marker expected."
 derives_from: []
 user_need: As a reader, I read Markdown from an untrusted source without the
   preview being able to edit, comment or read beyond the file's folder.

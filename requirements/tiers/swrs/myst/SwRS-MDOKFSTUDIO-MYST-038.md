@@ -30,6 +30,15 @@ tested_in_files:
 - test/page/modules/renderReq.labelRename.requirements.test.ts
 - test/session/trustReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-039
+- SwRS-MDOKFSTUDIO-MYST-040
+- SwRS-MDOKFSTUDIO-MYST-041
+- SwRS-MDOKFSTUDIO-MYST-047
+- SwRS-MDOKFSTUDIO-MYST-048
+- SwRS-MDOKFSTUDIO-MYST-049
+- SwRS-MDOKFSTUDIO-MYST-090
+- SwRS-MDOKFSTUDIO-MYST-094
 ---
 
 ## The anchor icon opens a rename field that sends valid names

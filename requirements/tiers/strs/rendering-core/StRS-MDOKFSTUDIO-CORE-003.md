@@ -35,6 +35,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-CORE-047
 - SwRS-MDOKFSTUDIO-CORE-067
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-CORE-005
 ---
 
 ## A reader sees what cannot be rendered and keeps a usable preview

@@ -30,6 +30,9 @@ tested_in_files:
 - test/page/runtimeBlockSelection.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-060
+- SwRS-MDOKFSTUDIO-FMEDIT-061
 ---
 
 ## Page updates wait while an inline editor is open

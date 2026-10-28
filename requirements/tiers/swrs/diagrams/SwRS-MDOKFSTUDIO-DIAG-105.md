@@ -32,6 +32,13 @@ tested_in_files:
 - test/session/diagReq.plantuml.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-106
+- SwRS-MDOKFSTUDIO-DIAG-108
+- SwRS-MDOKFSTUDIO-DIAG-109
+- SwRS-MDOKFSTUDIO-DIAG-110
+- SwRS-MDOKFSTUDIO-DIAG-111
+- SwRS-MDOKFSTUDIO-DIAG-117
 ---
 
 ## JAR results replace the diagrams of the current render in order

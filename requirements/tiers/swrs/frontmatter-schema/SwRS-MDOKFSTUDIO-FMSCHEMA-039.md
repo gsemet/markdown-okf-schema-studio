@@ -32,6 +32,11 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-038
+- SwRS-MDOKFSTUDIO-FMSCHEMA-040
+- SwRS-MDOKFSTUDIO-FMSCHEMA-085
+- SwRS-MDOKFSTUDIO-FMSCHEMA-087
 ---
 
 ## The title badge counts the issues and jumps to the first one

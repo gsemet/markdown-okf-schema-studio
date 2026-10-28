@@ -24,6 +24,8 @@ tested_in_files:
 - test/page/modules/mermaidError.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-016
 ---
 
 ## Invalid Mermaid shows one message with the parser reason

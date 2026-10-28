@@ -32,6 +32,12 @@ tested_in_files:
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-025
+- SwRS-MDOKFSTUDIO-MYST-026
+- SwRS-MDOKFSTUDIO-MYST-027
+- SwRS-MDOKFSTUDIO-MYST-028
+- SwRS-MDOKFSTUDIO-MYST-029
 ---
 
 ## Maths is typeset offline by KaTeX and bad formulas stay readable

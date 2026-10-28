@@ -26,6 +26,9 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LAYOUT-034
 - SwRS-MDOKFSTUDIO-LAYOUT-035
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-LAYOUT-002
+- StRS-MDOKFSTUDIO-LAYOUT-009
 ---
 
 ## The preview never scrolls sideways and wide content scrolls in its box

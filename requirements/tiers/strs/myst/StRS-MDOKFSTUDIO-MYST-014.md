@@ -11,13 +11,12 @@ scope: myst
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-007; no marker expected."
 derives_from: []
 user_need: As a Sphinx author, I want a quiet warning with a path to details so
   that I can act without being interrupted.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-MYST-007
+superseded_by:
+- StRS-MDOKFSTUDIO-MYST-007
 default_owner_email: gaetan@xeberon.net
 ---
 

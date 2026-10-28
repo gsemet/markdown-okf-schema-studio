@@ -23,6 +23,10 @@ tested_in_files:
 - test/core/preview/themeTokens.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-006
+- SwRS-MDOKFSTUDIO-DIAG-007
+- SwRS-MDOKFSTUDIO-DIAG-008
 ---
 
 ## Mermaid colours follow the preview theme

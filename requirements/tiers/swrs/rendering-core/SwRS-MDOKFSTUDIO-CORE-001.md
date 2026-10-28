@@ -28,6 +28,12 @@ tested_in_files:
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-002
+- SwRS-MDOKFSTUDIO-CORE-021
+- SwRS-MDOKFSTUDIO-CORE-026
+- SwRS-MDOKFSTUDIO-CORE-038
+- SwRS-MDOKFSTUDIO-CORE-046
 ---
 
 ## The preview renders the unsaved buffer completely, in process

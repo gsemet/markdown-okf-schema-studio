@@ -31,6 +31,11 @@ tested_in_files:
 - test/visual/capture_comment_checks.py
 - test/visual/scenarioAssertions.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-013
+- SwRS-MDOKFSTUDIO-LAYOUT-017
+- SwRS-MDOKFSTUDIO-LAYOUT-019
+- SwRS-MDOKFSTUDIO-LAYOUT-041
 ---
 
 ## The clearance is measured again after layout events, in bounded bursts

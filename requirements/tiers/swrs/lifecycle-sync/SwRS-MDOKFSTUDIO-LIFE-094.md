@@ -33,6 +33,9 @@ tested_in_files:
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-048
+- SwRS-MDOKFSTUDIO-CORE-049
 ---
 
 ## Blocks changed by another tool glow briefly

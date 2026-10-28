@@ -34,6 +34,10 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-GFM-023
+- SwRS-MDOKFSTUDIO-GFM-024
+- SwRS-MDOKFSTUDIO-GFM-028
 ---
 
 ## Clicking a checkbox toggles one source character

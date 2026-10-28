@@ -64,6 +64,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-094
 - SwRS-MDOKFSTUDIO-TRUST-052
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-CORE-004
 ---
 
 ## A reader reads a faithful rendering of any document

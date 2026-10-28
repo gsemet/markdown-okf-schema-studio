@@ -27,6 +27,12 @@ tested_in_files:
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-003
+- SwRS-MDOKFSTUDIO-MYST-007
+- SwRS-MDOKFSTUDIO-MYST-008
+- SwRS-MDOKFSTUDIO-MYST-009
+- SwRS-MDOKFSTUDIO-MYST-052
 ---
 
 ## Admonitions nest, collapse and map as one block

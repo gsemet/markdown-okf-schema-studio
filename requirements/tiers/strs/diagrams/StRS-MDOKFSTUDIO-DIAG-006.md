@@ -57,6 +57,9 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-074
 - SwRS-MDOKFSTUDIO-TRUST-075
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-DIAG-008
+- StRS-MDOKFSTUDIO-DIAG-010
 ---
 
 ## A writer reads PlantUML diagrams without any setup
