@@ -75,15 +75,16 @@ def real_crops(real_input: Path) -> list[Crop]:
     return crops
 
 
-def check(baseline: Path) -> int:
+def check(baseline: Path, visual_only: bool = False) -> int:
     """Re-render the README images into a temp directory and compare them pixel for pixel with the
     images of `baseline`: the visual-sourced ones always, the real-window ones when the latest
-    real-input run passed (otherwise they are reported as skipped)."""
+    real-input run passed (otherwise they are reported as skipped; `visual_only` skips them)."""
     crops = visual_crops()
-    try:
-        crops += real_crops(latest_real_input_directory())
-    except (OSError, RuntimeError) as error:
-        print(f"real-window README images skipped: {error}")
+    if not visual_only:
+        try:
+            crops += real_crops(latest_real_input_directory())
+        except (OSError, RuntimeError) as error:
+            print(f"real-window README images skipped: {error}")
     differences = 0
     with tempfile.TemporaryDirectory() as temporary:
         for crop in crops:
@@ -126,12 +127,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", type=Path, metavar="BASELINE_DIR",
                         help="compare the visual-sourced images with this directory instead of writing images/readme")
+    parser.add_argument("--visual-only", action="store_true",
+                        help="write (or with --check, compare) only the images cropped from the headless visual "
+                             "scenarios; skips the real-window crops and does not need REAL-INPUT-LATEST.md")
     arguments = parser.parse_args()
     if arguments.check is not None:
-        return check(arguments.check)
-    real_input = latest_real_input_directory()
+        return check(arguments.check, arguments.visual_only)
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    crops = build_crops(real_input)
+    crops = visual_crops() if arguments.visual_only else build_crops(latest_real_input_directory())
     for crop in crops:
         render(crop)
     print(f"Generated {len(crops)} README images in {OUTPUT.relative_to(ROOT)}")

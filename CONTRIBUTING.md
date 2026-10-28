@@ -378,6 +378,14 @@ scenarios (`README_BY_ID` in `test/visual/scenarioIds.ts`: file, crop box, width
 `scripts/generate-readme-images.py` reads it from the render manifest. Do not change a README
 scenario's viewport, fixture, theme, scroll or crop unless the image is meant to change.
 
+To refresh only these headless pictures (no real-window run, no `REAL-INPUT-LATEST.md` needed), run
+`npm run visual:render`, `uv run --group docs python test/visual/capture.py`, then
+`uv run --group docs python scripts/generate-readme-images.py --visual-only`; the real-window
+pictures in `images/readme/` stay untouched. `--visual-only` also narrows `--check <dir>` to the
+visual-sourced images. The campaign runs with reduced motion, so these captures are settled frames.
+A README crop that starts at the top of the page must reach the viewport's right edge, or it cuts
+the floating toolbar (`test/site/scenarioInvariants.test.ts` checks it).
+
 ### Real-window captures: registry and parallel runs
 
 Every screenshot taken in a real VS Code window has a stable id `<group>/rNN-<slug>` registered in
