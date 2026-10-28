@@ -82,6 +82,25 @@ Unless specified by user through your context otherwise, here are the default ro
 | 10 Notify | driver | CI green: `status: ready` in the header, then return. |
 | 11 Land | orchestrator | After the user merges: write `report.md`, move the PRD folder to `04-archives/`, update `INDEX.md`, remove the worktree and the CR branch (keep its `-assets` branch). |
 
+**Requirements traceability** (every CR, no exception): the reviewer returns
+`Verdict: FIX-REQUIRED` when a behaviour change has no SwRS update, or a touched requirement lacks
+its `@implements_req` or a `@tests_req` at each test, or `just requirements-update` was not run.
+Before the PR is opened, the driver (the stack driver in stack mode, per branch) runs the check as
+CI runs it (`okfreq validate --check-links --project-root .` and coverage with CI's okfreq
+version); a gap is a new round. The PR body's Tests section lists the requirement IDs added or
+changed with their source and test files.
+
+**Approved requirements**: during the grill, the main session lists every `approved` requirement
+the CR would change (normative statement, scenarios, criteria, deprecation, supersession) with its
+owner (`owner_email`, else `default_owner_email`) and asks the owner explicitly whether they agree;
+the answer goes into `00-request.md`. No agreement: the CR does not change those requirements. With
+agreement, the coder sets `approved_by` to the owner's email and `approved_on` to the day, the PR
+body lists those requirements under "Approved requirements changed", and the driver requests the
+owner's review on the PR. A coder never approves a requirement nor changes an approved one without
+that recorded agreement; `okfreq validate` fails on an approved requirement without `approved_by`
+and `approved_on`. New requirements delivered with their code are created `proposed`
+(`okfreq new … --lifecycle proposed`), never `draft`.
+
 **Round limit**: a round is one coder pass, whether a review or a CI failure triggered it. At most
 3 rounds per CR, all causes together. After round 3 without green CI, the driver sets
 `status: blocked` with its diagnosis and a question, and returns. Only the user grants more rounds
@@ -265,6 +284,12 @@ Proposing a smart order (bottom to top):
 One "stack driver" owns all the stacked branches (it restacks and pushes); the CR drivers stop
 pushing once their PR is in the stack. Changing a lower PR means restacking everything above it.
 
+**Demo tour** (main session, once the stack top has green heavy CI): install the VSIX built from
+the top branch, write one `.agents/changes/demo/tour.md` (git-ignored, inside the trusted
+workspace so edit mode works) with a section per CR that exercises its
+change, then guide the user one step at a time (what to do, what they should see), waiting for
+their reply between steps. Warn before any VS Code reload.
+
 ### PR body for an external reader
 
 The PR is read by people outside the agent session: reviewers, stakeholders, future maintainers.
@@ -316,9 +341,13 @@ even in git.
 - Run only the gates `task.md` lists, in the foreground; leave nothing running.
 - Touch only the files the task needs. Never change an existing assertion's intent. New tests must
   fail on the unchanged code.
-- A behaviour change updates its SwRS and the `@implements_req` / `@tests_req` markers in the same
-  task; a refactor moves the markers with the code
-  (`requirements/guidelines/requirements.guidelines.md`).
+- A behaviour change updates its SwRS and the markers in the same task, following
+  `requirements/guidelines/requirements.guidelines.md`: `@implements_req <ID>` next to the
+  implementation **and** `@tests_req <ID>` next to **each** test that checks it, for every touched
+  leaf requirement; `just requirements-update` run and its generated files committed; a dated entry
+  in the bundle's `tiers/log.md`; a refactor moves the markers with the code. Never leave a touched
+  requirement without a source or a test link. The report lists the IDs with their source and
+  test files.
 - Report: files changed, tests added and their failure before the change, changed assertions and
   why, gate results with counts, screenshot paths, open points.
 
