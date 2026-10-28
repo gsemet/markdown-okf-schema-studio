@@ -297,6 +297,8 @@ export function installBlockEditor(rt: PageRuntime): BlockEditor {
       ...(insertAfterLine !== undefined ? { insertAfterLine } : {}),
       ...(selectedCell ? { selectedCell, renderedCellContent, tableRowIndex: rowIndex, tableColumnIndex: columnIndex } : {}),
       initialCaretPosition,
+      // @implements_req SwRS-MDOKFSTUDIO-BLOCK-255
+      focusAtOpen: document.activeElement,
     };
     document.documentElement?.setAttribute?.("data-sphinx-preview-block-editing", "true");
     if (rt.refreshButton) rt.refreshButton.disabled = true;

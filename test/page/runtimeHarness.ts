@@ -58,7 +58,7 @@ export class RuntimeElement {
 
   public constructor(
     attributes: Record<string, string>,
-    private readonly windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number },
+    private readonly windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number; focused?: RuntimeElement },
     public top: number,
     public height = 40,
     tagName = "div",
@@ -324,6 +324,7 @@ export class RuntimeElement {
 
   public focus(options?: FocusOptions): void {
     this.focusOptions = options;
+    this.windowState.focused = this;
     if (!options?.preventScroll) this.windowState.scrollY = this.top;
   }
 
@@ -465,6 +466,8 @@ export function createRuntimeHarness(configuration: Partial<{
    * throttles follow `advanceTimers` instead of the wall clock (absent: no `performance`).
    */
   virtualClock: boolean;
+  /** True gives the page a `document.activeElement`: the last element focused (absent: undefined). */
+  trackFocus: boolean;
   /**
    * A runtime script to run instead of the test build of the page bundle (the shipped, minified
    * file). The page carries the context as the JSON element the runtime reads.
@@ -493,7 +496,7 @@ export function createRuntimeHarness(configuration: Partial<{
     runtimeScript,
     ...runtimeConfiguration
   } = configuration;
-  const windowState = { scrollY: 0 };
+  const windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number; focused?: RuntimeElement } = { scrollY: 0 };
   const mappings = emptyBody ? [] : [
     ...(frontmatterHeight > 0 ? [new RuntimeElement(
       {
@@ -847,6 +850,18 @@ export function createRuntimeHarness(configuration: Partial<{
             : propertiesMapped ? [frontmatterProperties, ...mappings] : mappings
     ),
   };
+  // Tests that set `document.activeElement` themselves keep doing so; with `trackFocus` it follows
+  // the last `focus()` and can still be set.
+  if (configuration.trackFocus) {
+    Object.defineProperty(document, "activeElement", {
+      configurable: true,
+      enumerable: true,
+      get: (): RuntimeElement | null => windowState.focused ?? null,
+      set: (element: RuntimeElement | undefined) => {
+        windowState.focused = element;
+      },
+    });
+  }
   class ResizeObserver {
     public constructor(callback: () => void) {
       resizeObserverCallback = callback;

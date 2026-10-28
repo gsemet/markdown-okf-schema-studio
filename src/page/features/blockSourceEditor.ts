@@ -26,6 +26,14 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
   // @implements_req SwRS-MDOKFSTUDIO-PALETTE-021
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-001
   // @implements_req SwRS-MDOKFSTUDIO-TABLE-034
+  /** A text field outside the editor took the focus after the editor opened. */
+  const focusMovedToAnotherField = (edit: { element: HTMLElement; focusAtOpen?: Element | null }): boolean => {
+    const active = document.activeElement;
+    if (!active || active === edit.focusAtOpen || edit.element.contains?.(active)) return false;
+    return ["INPUT", "TEXTAREA", "SELECT"].includes(String(active.tagName || "").toUpperCase())
+      || (active as HTMLElement).isContentEditable === true;
+  };
+
   const receiveBlockEditSource: BlockSourceEditor["receiveBlockEditSource"] = (message) => {
     if (rt.tableRowMove.receiveSource(message)) return;
     const edit = state.activeBlockEdit;
@@ -393,8 +401,16 @@ export function installBlockSourceEditor(rt: PageRuntime): BlockSourceEditor {
         rt.selection.finishEditorWithSelection("save", () => blockEditor.saveBlockEdit());
       }
     });
-    textControls.focusTextControlAtLastContent(textarea, edit.initialCaretPosition);
-    editorTrace.record("block editor focused", "line=" + edit.line + " " + traceFocus());
+    // @implements_req SwRS-MDOKFSTUDIO-BLOCK-255
+    // The source arrives after a round trip to the host. A text field outside the editor that took
+    // the focus in the meantime (the find field, opened with Cmd/Ctrl+F right after the click) keeps
+    // it: what the writer types there never lands in the Markdown source.
+    if (focusMovedToAnotherField(edit)) {
+      editorTrace.record("block editor left unfocused", "line=" + edit.line + " " + traceFocus());
+    } else {
+      textControls.focusTextControlAtLastContent(textarea, edit.initialCaretPosition);
+      editorTrace.record("block editor focused", "line=" + edit.line + " " + traceFocus());
+    }
     if (edit.openFigureForm) {
       edit.openFigureForm = false;
       editorChrome.openFigurePanel(textarea, () => {
