@@ -66,6 +66,12 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-099
 - SwRS-MDOKFSTUDIO-MYST-100
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-MYST-002
+- StRS-MDOKFSTUDIO-MYST-003
+- StRS-MDOKFSTUDIO-MYST-008
+- StRS-MDOKFSTUDIO-MYST-011
+- StRS-MDOKFSTUDIO-MYST-013
 ---
 
 ## MyST directives and roles render as readable blocks

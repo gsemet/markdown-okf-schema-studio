@@ -48,6 +48,10 @@ derived_by:
 - SwRS-MDOKFSTUDIO-LIFE-169
 - SwRS-MDOKFSTUDIO-LIFE-170
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-LAYOUT-006
+- StRS-MDOKFSTUDIO-LAYOUT-007
+- StRS-MDOKFSTUDIO-LAYOUT-008
 ---
 
 ## A reader chooses how wide the text column is

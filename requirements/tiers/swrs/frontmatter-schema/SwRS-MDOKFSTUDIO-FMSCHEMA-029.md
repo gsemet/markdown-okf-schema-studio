@@ -26,6 +26,12 @@ tested_in_files:
 - test/core/frontmatter/propertiesTable.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-030
+- SwRS-MDOKFSTUDIO-FMSCHEMA-031
+- SwRS-MDOKFSTUDIO-FMSCHEMA-032
+- SwRS-MDOKFSTUDIO-FMSCHEMA-033
+- SwRS-MDOKFSTUDIO-FMSCHEMA-034
 ---
 
 ## A schema table lists the declared fields with their type

@@ -34,6 +34,9 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-015
+- SwRS-MDOKFSTUDIO-FMSCHEMA-016
 ---
 
 ## The Description column collapses and the choice is kept per document

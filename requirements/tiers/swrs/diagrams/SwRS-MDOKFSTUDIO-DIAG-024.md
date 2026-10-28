@@ -35,6 +35,15 @@ tested_in_files:
 - test/session/diagReq.settings.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-025
+- SwRS-MDOKFSTUDIO-DIAG-026
+- SwRS-MDOKFSTUDIO-DIAG-027
+- SwRS-MDOKFSTUDIO-DIAG-031
+- SwRS-MDOKFSTUDIO-DIAG-075
+- SwRS-MDOKFSTUDIO-DIAG-076
+- SwRS-MDOKFSTUDIO-DIAG-077
+- SwRS-MDOKFSTUDIO-DIAG-078
 ---
 
 ## The useJar and jarPath settings choose the PlantUML engine

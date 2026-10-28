@@ -29,6 +29,11 @@ tested_in_files:
 - test/core/frontmatter/frontmatterPreservation.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-039
+- SwRS-MDOKFSTUDIO-FMEDIT-044
+- SwRS-MDOKFSTUDIO-FMEDIT-045
+- SwRS-MDOKFSTUDIO-FMEDIT-046
 ---
 
 ## A frontmatter edit changes only the lines of its field

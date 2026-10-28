@@ -42,6 +42,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-MYST-086
 - SwRS-MDOKFSTUDIO-MYST-089
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-MYST-014
 ---
 
 ## Sphinx configuration gaps are reported before building

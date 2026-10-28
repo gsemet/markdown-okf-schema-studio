@@ -34,6 +34,10 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-078
 - SwRS-MDOKFSTUDIO-FMSCHEMA-088
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-FMSCHEMA-007
+- StRS-MDOKFSTUDIO-FMSCHEMA-008
+- StRS-MDOKFSTUDIO-FMSCHEMA-009
 ---
 
 ## A document finds its schema and schema problems are reported

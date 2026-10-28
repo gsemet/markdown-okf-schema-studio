@@ -33,6 +33,14 @@ tested_in_files:
 - test/core/render/plantUmlCache.test.ts
 - test/core/render/plantUmlRenderer.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-098
+- SwRS-MDOKFSTUDIO-DIAG-099
+- SwRS-MDOKFSTUDIO-DIAG-100
+- SwRS-MDOKFSTUDIO-DIAG-101
+- SwRS-MDOKFSTUDIO-DIAG-102
+- SwRS-MDOKFSTUDIO-DIAG-103
+- SwRS-MDOKFSTUDIO-DIAG-118
 ---
 
 ## A JAR render is bounded in input, output, time and process lifetime

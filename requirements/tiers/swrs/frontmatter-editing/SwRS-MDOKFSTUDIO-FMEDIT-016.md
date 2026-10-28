@@ -27,6 +27,13 @@ tested_in_files:
 - test/core/edits/frontmatterEdit.test.ts
 - test/integration/previewEditing.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-018
+- SwRS-MDOKFSTUDIO-FMEDIT-047
+- SwRS-MDOKFSTUDIO-FMEDIT-048
+- SwRS-MDOKFSTUDIO-FMEDIT-049
+- SwRS-MDOKFSTUDIO-FMEDIT-079
+- SwRS-MDOKFSTUDIO-FMEDIT-083
 ---
 
 ## The host refuses a value that breaks YAML, the field type or the schema

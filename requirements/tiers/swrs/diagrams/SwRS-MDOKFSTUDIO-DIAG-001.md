@@ -35,6 +35,11 @@ tested_in_files:
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-002
+- SwRS-MDOKFSTUDIO-DIAG-003
+- SwRS-MDOKFSTUDIO-DIAG-004
+- SwRS-MDOKFSTUDIO-DIAG-022
 ---
 
 ## Mermaid fences become inert diagram pictures

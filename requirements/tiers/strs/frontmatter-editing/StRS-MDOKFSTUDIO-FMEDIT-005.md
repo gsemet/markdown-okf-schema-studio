@@ -43,6 +43,9 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMEDIT-086
 - SwRS-MDOKFSTUDIO-FMSCHEMA-084
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-FMEDIT-006
+- StRS-MDOKFSTUDIO-FMEDIT-007
 ---
 
 ## A writer adds, renames and removes metadata fields

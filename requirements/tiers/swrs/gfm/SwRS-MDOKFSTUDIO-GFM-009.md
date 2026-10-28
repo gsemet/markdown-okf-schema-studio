@@ -26,6 +26,12 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-GFM-010
+- SwRS-MDOKFSTUDIO-GFM-011
+- SwRS-MDOKFSTUDIO-GFM-012
+- SwRS-MDOKFSTUDIO-GFM-013
+- SwRS-MDOKFSTUDIO-GFM-037
 ---
 
 ## GitHub alerts render as admonitions

@@ -31,6 +31,11 @@ tested_in_files:
 - test/page/modules/plantumlFileRequests.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-048
+- SwRS-MDOKFSTUDIO-DIAG-049
+- SwRS-MDOKFSTUDIO-DIAG-113
+- SwRS-MDOKFSTUDIO-DIAG-114
 ---
 
 ## PlantUML includes are read through the extension and refusals reach the diagram

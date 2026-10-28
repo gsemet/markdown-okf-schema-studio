@@ -58,6 +58,8 @@ tested_in_files:
 - test/session/blockReq.requirements.test.ts
 - test/session/diagReq.viewState.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-021
 ---
 
 ## A view choice made on the page is stored for the workspace

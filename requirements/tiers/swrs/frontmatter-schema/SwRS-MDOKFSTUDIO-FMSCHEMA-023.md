@@ -28,6 +28,10 @@ tested_in_files:
 - test/core/frontmatter/schemaRegistry.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-024
+- SwRS-MDOKFSTUDIO-FMSCHEMA-025
+- SwRS-MDOKFSTUDIO-FMSCHEMA-026
 ---
 
 ## Schemas in YAML, JSON or JSON5 with relative references compile or report a row

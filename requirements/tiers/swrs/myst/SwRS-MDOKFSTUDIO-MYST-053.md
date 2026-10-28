@@ -23,6 +23,10 @@ tested_in_files:
 - test/core/render/gridToctree.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-054
+- SwRS-MDOKFSTUDIO-MYST-055
+- SwRS-MDOKFSTUDIO-MYST-056
 ---
 
 ## Grids lay out cards in responsive columns

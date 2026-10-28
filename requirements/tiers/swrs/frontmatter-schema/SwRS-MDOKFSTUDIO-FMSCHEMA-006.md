@@ -26,6 +26,12 @@ tested_in_files:
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-007
+- SwRS-MDOKFSTUDIO-FMSCHEMA-008
+- SwRS-MDOKFSTUDIO-FMSCHEMA-009
+- SwRS-MDOKFSTUDIO-FMSCHEMA-010
+- SwRS-MDOKFSTUDIO-FMSCHEMA-011
 ---
 
 ## Property values read like YAML in a lean table

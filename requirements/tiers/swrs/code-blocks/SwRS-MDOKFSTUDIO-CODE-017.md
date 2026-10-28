@@ -28,6 +28,16 @@ tested_in_files:
 - test/page/modules/renderReq.codeCopy.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-018
+- SwRS-MDOKFSTUDIO-CODE-022
+- SwRS-MDOKFSTUDIO-CODE-023
+- SwRS-MDOKFSTUDIO-CODE-024
+- SwRS-MDOKFSTUDIO-CODE-029
+- SwRS-MDOKFSTUDIO-CODE-032
+- SwRS-MDOKFSTUDIO-CODE-033
+- SwRS-MDOKFSTUDIO-CODE-034
+- SwRS-MDOKFSTUDIO-CODE-035
 ---
 
 ## A Copy code button appears on a hovered or focused code block

@@ -31,6 +31,8 @@ tested_in_files:
 - test/page/modules/editPalette.test.ts
 - test/page/modules/slashMenu.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-018
 ---
 
 ## The Mermaid action inserts a starter flowchart in GFM mode

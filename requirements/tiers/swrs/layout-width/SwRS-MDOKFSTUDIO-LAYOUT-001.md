@@ -24,6 +24,8 @@ tested_in_files:
 - test/visual/capture_layout_checks.py
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-035
 ---
 
 ## The preview page never scrolls sideways

@@ -11,13 +11,12 @@ scope: frontmatter-editing
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMEDIT-008; no marker expected."
 derives_from: []
 user_need: As a writer, I am not surprised by other edits or refreshes
   interfering with a metadata edit in progress.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-FMEDIT-008
+superseded_by:
+- StRS-MDOKFSTUDIO-FMEDIT-008
 default_owner_email: gaetan@xeberon.net
 ---
 

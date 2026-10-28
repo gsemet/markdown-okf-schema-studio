@@ -114,6 +114,41 @@ properties:
         id_marker: id
     description: Authored dependency IDs; file navigation uses matching Markdown
       filename stems.
+  superseded_by:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: filename-stem
+        syntax: plain
+        id_marker: id
+        tooltip_shows_fields: [description]
+        preview_shows_fields: [description]
+    description: Requirement IDs that replace this one; required when the lifecycle
+      is superseded and forbidden otherwise.
+  supersedes:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: filename-stem
+        syntax: plain
+        id_marker: id
+        tooltip_shows_fields: [description]
+        preview_shows_fields: [description]
+    description: Generated IDs of the requirements this one replaces.
+  relates_to:
+    type: array
+    items:
+      type: string
+      x-okf-link:
+        resolution: filename-stem
+        syntax: plain
+        id_marker: id
+        tooltip_shows_fields: [description]
+        preview_shows_fields: [description]
+    description: Requirement IDs this one is laterally related to; carries no
+      derivation, supersession or coverage meaning.
   external_id:
     type: string
     minLength: 1
@@ -152,7 +187,6 @@ properties:
     description: Project team responsible for maintaining the contract.
 required: [type, id, uuid, title, description, project, scope, lifecycle, origin,
   tier]
-additionalProperties: true
 examples:
 - type: StRS
   id: StRS-MDOKFSTUDIO-CORE-001

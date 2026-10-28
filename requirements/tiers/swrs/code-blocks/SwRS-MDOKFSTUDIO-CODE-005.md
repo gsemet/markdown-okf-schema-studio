@@ -28,6 +28,9 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/renderReq.codeBlocks.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-006
+- SwRS-MDOKFSTUDIO-CODE-011
 ---
 
 ## Numbered, emphasized and diff blocks are wrapped into lines

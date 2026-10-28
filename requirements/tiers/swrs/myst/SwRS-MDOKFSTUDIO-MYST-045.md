@@ -32,6 +32,8 @@ tested_in_files:
 - test/core/mapping/labelRename.test.ts
 - test/integration/labelRename.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-046
 ---
 
 ## The host renames only the label text in one undo step

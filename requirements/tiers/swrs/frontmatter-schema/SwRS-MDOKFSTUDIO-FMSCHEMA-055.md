@@ -29,6 +29,11 @@ tested_in_files:
 - test/core/frontmatter/stemIndex.test.ts
 - test/session/eventFanOut.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-056
+- SwRS-MDOKFSTUDIO-FMSCHEMA-057
+- SwRS-MDOKFSTUDIO-FMSCHEMA-058
+- SwRS-MDOKFSTUDIO-FMSCHEMA-059
 ---
 ## A filename stem resolves when exactly one file matches
 

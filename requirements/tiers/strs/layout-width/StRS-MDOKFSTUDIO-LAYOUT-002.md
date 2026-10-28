@@ -11,14 +11,13 @@ scope: layout-width
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-001; no marker expected."
 derives_from: []
 user_need: As a reader, I reach every column of a wide table without the page
   moving, I can tell there is more to scroll to, and short identifiers stay
   readable.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-LAYOUT-001
+superseded_by:
+- StRS-MDOKFSTUDIO-LAYOUT-001
 default_owner_email: gaetan@xeberon.net
 ---
 

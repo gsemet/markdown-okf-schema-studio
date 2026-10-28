@@ -28,6 +28,8 @@ tested_in_files:
 - test/page/runtimePageControls.test.ts
 - test/visual/capture_layout_checks.py
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-040
 ---
 
 ## The Width button cycles Margin, Auto and Full and keeps the reading line

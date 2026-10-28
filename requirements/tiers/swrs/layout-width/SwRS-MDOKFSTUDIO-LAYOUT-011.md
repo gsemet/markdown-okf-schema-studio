@@ -25,6 +25,13 @@ tested_in_files:
 - test/page/modules/firstClearance.test.ts
 - test/visual/capture_comment_checks.py
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-012
+- SwRS-MDOKFSTUDIO-LAYOUT-014
+- SwRS-MDOKFSTUDIO-LAYOUT-015
+- SwRS-MDOKFSTUDIO-LAYOUT-016
+- SwRS-MDOKFSTUDIO-LAYOUT-037
+- SwRS-MDOKFSTUDIO-LAYOUT-042
 ---
 
 ## A control under the floating toolbar is moved or narrowed out of its way

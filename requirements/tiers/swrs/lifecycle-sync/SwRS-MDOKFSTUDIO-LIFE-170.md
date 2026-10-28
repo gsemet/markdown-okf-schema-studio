@@ -59,6 +59,8 @@ tested_in_files:
 - test/page/runtimeScroll.test.ts
 - test/visual/capture_layout_checks.py
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-038
 ---
 
 ## A new page starts each view choice from the panel, stored or default value

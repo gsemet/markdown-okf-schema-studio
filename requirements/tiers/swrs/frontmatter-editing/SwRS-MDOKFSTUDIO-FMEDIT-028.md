@@ -27,6 +27,12 @@ tested_in_files:
 - test/page/runtimeFrontmatterFields.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-033
+- SwRS-MDOKFSTUDIO-FMEDIT-034
+- SwRS-MDOKFSTUDIO-FMEDIT-035
+- SwRS-MDOKFSTUDIO-FMEDIT-036
+- SwRS-MDOKFSTUDIO-FMEDIT-084
 ---
 
 ## The field action menu offers the missing schema fields or a custom key

@@ -27,6 +27,8 @@ tested_in_files:
 - test/node-services/build/buildQueue.test.ts
 - test/page/runtimeContentPatch.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-024
 ---
 
 ## A failed render keeps the previous page and lists its diagnostics

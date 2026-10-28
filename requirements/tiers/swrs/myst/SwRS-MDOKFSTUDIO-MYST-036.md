@@ -25,6 +25,8 @@ tested_in_files:
 - test/core/render/mystPaletteRendering.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-037
 ---
 
 ## Labels show an anchor icon on the next block

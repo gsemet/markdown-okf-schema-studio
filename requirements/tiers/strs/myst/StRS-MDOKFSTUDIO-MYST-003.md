@@ -10,13 +10,12 @@ scope: myst
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-MYST-001; no marker expected."
 derives_from: []
 user_need: As a writer, I want these MyST text constructs typeset in the preview
   so that I can check them without building.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-MYST-001
+superseded_by:
+- StRS-MDOKFSTUDIO-MYST-001
 default_owner_email: gaetan@xeberon.net
 ---
 

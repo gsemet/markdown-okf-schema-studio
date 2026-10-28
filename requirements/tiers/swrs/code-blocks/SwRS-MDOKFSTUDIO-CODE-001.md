@@ -33,6 +33,13 @@ tested_in_files:
 - test/core/render/renderReq.codeBlocks.requirements.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-002
+- SwRS-MDOKFSTUDIO-CODE-003
+- SwRS-MDOKFSTUDIO-CODE-004
+- SwRS-MDOKFSTUDIO-CODE-030
+- SwRS-MDOKFSTUDIO-CODE-031
+- SwRS-MDOKFSTUDIO-CODE-037
 ---
 
 ## Fenced code in a supported language is highlighted, other code stays literal

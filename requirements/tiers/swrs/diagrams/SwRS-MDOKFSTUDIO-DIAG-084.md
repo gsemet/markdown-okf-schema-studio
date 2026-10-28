@@ -38,6 +38,13 @@ tested_in_files:
 - test/core/render/plantUmlJarIncludes.test.ts
 - test/core/render/plantUmlRenderer.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-085
+- SwRS-MDOKFSTUDIO-DIAG-086
+- SwRS-MDOKFSTUDIO-DIAG-087
+- SwRS-MDOKFSTUDIO-DIAG-088
+- SwRS-MDOKFSTUDIO-DIAG-104
+- SwRS-MDOKFSTUDIO-DIAG-120
 ---
 
 ## The JAR pipeline runs java or plantuml once per diagram on stdin

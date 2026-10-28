@@ -25,6 +25,10 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-MYST-014
+- SwRS-MDOKFSTUDIO-MYST-015
+- SwRS-MDOKFSTUDIO-MYST-016
 ---
 
 ## Context tags render as titled panels

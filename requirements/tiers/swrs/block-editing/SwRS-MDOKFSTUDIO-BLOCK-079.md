@@ -28,6 +28,8 @@ tested_in_files:
 - test/page/fmtableReqFrontmatter.requirements.test.ts
 - test/page/runtimeBlockEditor.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-062
 ---
 
 ## Arrow keys at the edges open the previous or next block

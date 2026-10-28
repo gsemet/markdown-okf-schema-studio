@@ -39,6 +39,8 @@ tested_in_files:
 - test/session/renderReq.codeCopy.requirements.test.ts
 - test/session/toolbarReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-025
 ---
 
 ## A read-only preview keeps every viewing action

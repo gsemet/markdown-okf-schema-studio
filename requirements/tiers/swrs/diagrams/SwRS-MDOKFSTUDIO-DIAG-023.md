@@ -31,6 +31,14 @@ tested_in_files:
 - test/session/diagReq.webview.requirements.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-028
+- SwRS-MDOKFSTUDIO-DIAG-029
+- SwRS-MDOKFSTUDIO-DIAG-030
+- SwRS-MDOKFSTUDIO-DIAG-081
+- SwRS-MDOKFSTUDIO-DIAG-083
+- SwRS-MDOKFSTUDIO-DIAG-115
+- SwRS-MDOKFSTUDIO-DIAG-119
 ---
 
 ## PlantUML fences become centred inert pictures drawn by the built-in engine

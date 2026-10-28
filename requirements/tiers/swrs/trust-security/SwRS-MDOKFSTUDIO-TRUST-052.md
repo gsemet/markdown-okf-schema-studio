@@ -28,6 +28,8 @@ tested_in_files:
 - test/core/protocol/pageStateMessages.test.ts
 - test/core/protocol/pageToHost.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-066
 ---
 
 ## Every page message has a registered type and a valid envelope before any handler runs

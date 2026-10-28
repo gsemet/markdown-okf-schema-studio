@@ -11,12 +11,11 @@ scope: code-blocks
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-CODE-001; no marker expected."
 derives_from: []
 user_need: Reviewers need to see what a change adds and removes at a glance.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-CODE-001
+superseded_by:
+- StRS-MDOKFSTUDIO-CODE-001
 default_owner_email: gaetan@xeberon.net
 ---
 

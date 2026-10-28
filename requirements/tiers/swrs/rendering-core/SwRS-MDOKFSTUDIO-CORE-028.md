@@ -32,6 +32,14 @@ tested_in_files:
 - test/visual/capture_page_checks.py
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CODE-038
+- SwRS-MDOKFSTUDIO-CORE-029
+- SwRS-MDOKFSTUDIO-CORE-030
+- SwRS-MDOKFSTUDIO-CORE-031
+- SwRS-MDOKFSTUDIO-CORE-032
+- SwRS-MDOKFSTUDIO-CORE-033
+- SwRS-MDOKFSTUDIO-CORE-037
 ---
 
 ## Body text, headings, lists and inline code are typeset readably

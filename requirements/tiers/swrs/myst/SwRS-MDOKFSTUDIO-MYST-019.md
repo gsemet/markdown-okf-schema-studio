@@ -26,6 +26,8 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/core/render/mystPaletteRendering.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-060
 ---
 
 ## Reference roles link to in-page targets

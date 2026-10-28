@@ -28,6 +28,11 @@ tested_in_files:
 - test/core/render/renderReq.gfm.requirements.test.ts
 - test/core/render/renderReq.renderingCore.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-044
+- SwRS-MDOKFSTUDIO-CORE-062
+- SwRS-MDOKFSTUDIO-GFM-030
+- SwRS-MDOKFSTUDIO-GFM-033
 ---
 
 ## A small raw HTML subset renders and the rest is dropped

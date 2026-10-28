@@ -25,6 +25,13 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/plantUmlIncludes.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-055
+- SwRS-MDOKFSTUDIO-DIAG-056
+- SwRS-MDOKFSTUDIO-DIAG-057
+- SwRS-MDOKFSTUDIO-DIAG-058
+- SwRS-MDOKFSTUDIO-DIAG-059
+- SwRS-MDOKFSTUDIO-DIAG-060
 ---
 
 ## The host reads an include only next to the including file in allowed folders

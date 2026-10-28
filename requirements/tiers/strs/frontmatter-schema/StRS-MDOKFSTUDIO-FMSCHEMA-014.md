@@ -59,6 +59,11 @@ derived_by:
 - SwRS-MDOKFSTUDIO-FMSCHEMA-087
 - SwRS-MDOKFSTUDIO-TOOLBAR-113
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-FMSCHEMA-015
+- StRS-MDOKFSTUDIO-FMSCHEMA-016
+- StRS-MDOKFSTUDIO-FMSCHEMA-017
+- StRS-MDOKFSTUDIO-FMSCHEMA-018
 ---
 
 ## Frontmatter link fields resolve, show their status and can be followed

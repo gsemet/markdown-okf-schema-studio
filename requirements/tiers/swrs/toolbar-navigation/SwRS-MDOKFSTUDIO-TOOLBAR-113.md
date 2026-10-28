@@ -28,6 +28,8 @@ tested_in_files:
 - test/session/diagReq.links.requirements.test.ts
 - test/session/toolbarReq.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-083
 ---
 
 ## A link message needs a request, else it is ignored or refused

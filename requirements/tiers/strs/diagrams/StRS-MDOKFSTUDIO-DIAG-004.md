@@ -11,13 +11,12 @@ scope: diagrams
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-001; no marker expected."
 derives_from: []
 user_need: As a writer, I see at once that my Mermaid diagram does not parse and
   why, without losing the source.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-DIAG-001
+superseded_by:
+- StRS-MDOKFSTUDIO-DIAG-001
 default_owner_email: gaetan@xeberon.net
 ---
 

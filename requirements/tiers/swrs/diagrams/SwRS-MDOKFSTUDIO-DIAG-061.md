@@ -23,6 +23,10 @@ implemented_in_files:
 tested_in_files:
 - test/page/modules/plantumlDiagram.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-062
+- SwRS-MDOKFSTUDIO-DIAG-063
+- SwRS-MDOKFSTUDIO-DIAG-064
 ---
 
 ## Includes nest at most 8 deep, 64 files and 1 MiB

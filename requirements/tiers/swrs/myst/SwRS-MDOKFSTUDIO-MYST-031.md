@@ -30,6 +30,13 @@ tested_in_files:
 - test/security/html-policy.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-059
+- SwRS-MDOKFSTUDIO-CORE-063
+- SwRS-MDOKFSTUDIO-MYST-032
+- SwRS-MDOKFSTUDIO-MYST-033
+- SwRS-MDOKFSTUDIO-MYST-035
+- SwRS-MDOKFSTUDIO-MYST-091
 ---
 
 ## Figures render with image, caption, label, width and alignment

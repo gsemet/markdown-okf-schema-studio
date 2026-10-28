@@ -53,6 +53,10 @@ tested_in_files:
 - test/session/reviewReqComments.requirements.test.ts
 - test/session/reviewReqThreads.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-051
+- SwRS-MDOKFSTUDIO-GFM-026
+- SwRS-MDOKFSTUDIO-MYST-042
 ---
 
 ## The host refuses every write request of a read-only preview with a reason

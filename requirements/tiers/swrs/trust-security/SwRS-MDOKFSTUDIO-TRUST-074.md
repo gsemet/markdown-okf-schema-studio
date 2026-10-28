@@ -25,6 +25,8 @@ implemented_in_files:
 tested_in_files:
 - test/security/package-contract.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-DIAG-080
 ---
 
 ## The package ships its icon and its bundle

@@ -24,6 +24,10 @@ tested_in_files:
 - test/core/preview/previewStyles.test.ts
 - test/visual/capture_comment_checks.py
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-LAYOUT-008
+- SwRS-MDOKFSTUDIO-LAYOUT-009
+- SwRS-MDOKFSTUDIO-LAYOUT-010
 ---
 
 ## The first element starts 40 px below the top

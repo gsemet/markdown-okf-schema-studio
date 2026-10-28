@@ -11,13 +11,12 @@ scope: frontmatter-schema
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-FMSCHEMA-001; no marker expected."
 derives_from: []
 user_need: As a writer, I read property values in the form I typed them and the
   table never pushes the page sideways.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-FMSCHEMA-001
+superseded_by:
+- StRS-MDOKFSTUDIO-FMSCHEMA-001
 default_owner_email: gaetan@xeberon.net
 ---
 

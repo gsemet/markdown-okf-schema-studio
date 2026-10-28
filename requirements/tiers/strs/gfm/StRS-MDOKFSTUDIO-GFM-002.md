@@ -49,6 +49,9 @@ derived_by:
 - SwRS-MDOKFSTUDIO-GFM-037
 - SwRS-MDOKFSTUDIO-GFM-038
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-GFM-001
+- StRS-MDOKFSTUDIO-GFM-004
 ---
 
 ## GitHub Flavored Markdown renders as on GitHub, safely

@@ -32,6 +32,10 @@ tested_in_files:
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-025
+- SwRS-MDOKFSTUDIO-FMEDIT-026
+- SwRS-MDOKFSTUDIO-FMEDIT-027
 ---
 
 ## A click on a field name renames the key

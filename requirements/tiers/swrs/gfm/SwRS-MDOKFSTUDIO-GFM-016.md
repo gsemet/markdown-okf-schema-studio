@@ -27,6 +27,11 @@ tested_in_files:
 - test/core/render/checkboxMarkers.test.ts
 - test/core/render/checkboxRendering.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-GFM-017
+- SwRS-MDOKFSTUDIO-GFM-018
+- SwRS-MDOKFSTUDIO-GFM-019
+- SwRS-MDOKFSTUDIO-GFM-020
 ---
 
 ## Task list markers render as checkboxes with their source position

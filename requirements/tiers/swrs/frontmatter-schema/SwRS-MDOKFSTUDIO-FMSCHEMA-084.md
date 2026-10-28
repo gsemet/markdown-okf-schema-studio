@@ -29,6 +29,14 @@ tested_in_files:
 - test/integration/previewEditing.test.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-086
+- SwRS-MDOKFSTUDIO-FMSCHEMA-035
+- SwRS-MDOKFSTUDIO-FMSCHEMA-036
+- SwRS-MDOKFSTUDIO-FMSCHEMA-037
+- SwRS-MDOKFSTUDIO-FMSCHEMA-041
+- SwRS-MDOKFSTUDIO-FMSCHEMA-042
+- SwRS-MDOKFSTUDIO-FMSCHEMA-089
 ---
 
 ## Every schema violation is reported on its field or in a row of its own

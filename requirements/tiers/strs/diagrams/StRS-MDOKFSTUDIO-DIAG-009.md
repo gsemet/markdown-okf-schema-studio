@@ -55,6 +55,8 @@ derived_by:
 - SwRS-MDOKFSTUDIO-TRUST-065
 - SwRS-MDOKFSTUDIO-TRUST-090
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- StRS-MDOKFSTUDIO-DIAG-011
 ---
 
 ## PlantUML diagrams use local include files and PUML files

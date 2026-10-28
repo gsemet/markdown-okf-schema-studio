@@ -17,7 +17,8 @@ exemption_reason: "Superseded by SwRS-MDOKFSTUDIO-MYST-024; no marker expected."
 derived_by: []
 implemented_in_files: []
 tested_in_files: []
-superseded_by: SwRS-MDOKFSTUDIO-MYST-024
+superseded_by:
+- SwRS-MDOKFSTUDIO-MYST-024
 default_owner_email: gaetan@xeberon.net
 ---
 

@@ -11,14 +11,13 @@ scope: layout-width
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-003; no marker expected."
 derives_from: []
 user_need: As a reader, I can rely on Margin to keep everything in a readable
   column, on Full width to use the whole pane, and on narrow tables and figures
   being centred in all modes.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-LAYOUT-003
+superseded_by:
+- StRS-MDOKFSTUDIO-LAYOUT-003
 default_owner_email: gaetan@xeberon.net
 ---
 

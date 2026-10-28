@@ -27,6 +27,11 @@ implemented_in_files:
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-004
+- SwRS-MDOKFSTUDIO-CORE-005
+- SwRS-MDOKFSTUDIO-CORE-006
+- SwRS-MDOKFSTUDIO-CORE-007
 ---
 
 ## Every rendered block maps to its absolute source lines

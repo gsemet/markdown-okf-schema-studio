@@ -32,6 +32,12 @@ tested_in_files:
 - test/core/preview/flushWait.test.ts
 - test/page/runtimeEditorFlush.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-068
+- SwRS-MDOKFSTUDIO-FMEDIT-069
+- SwRS-MDOKFSTUDIO-FMEDIT-070
+- SwRS-MDOKFSTUDIO-FMEDIT-071
+- SwRS-MDOKFSTUDIO-FMEDIT-085
 ---
 
 ## A navigation saves the open field editor as an unchecked flush

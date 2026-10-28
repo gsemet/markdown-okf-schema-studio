@@ -20,6 +20,7 @@ allOf:
         minLength: 1
         description: Preserved stakeholder outcome.
     required: [type, tier, user_need]
+unevaluatedProperties: false
 examples:
   - type: StRS
     id: StRS-MDOKFSTUDIO-CORE-001

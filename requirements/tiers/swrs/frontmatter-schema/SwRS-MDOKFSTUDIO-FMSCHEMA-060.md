@@ -30,6 +30,10 @@ tested_in_files:
 - test/core/frontmatter/fileLinks.test.ts
 - test/core/frontmatter/okfFrontmatter.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMSCHEMA-061
+- SwRS-MDOKFSTUDIO-FMSCHEMA-062
+- SwRS-MDOKFSTUDIO-FMSCHEMA-081
 ---
 ## The bundleRoot, projectRoot and allowOutsideWorkspaceLinks settings set the roots
 

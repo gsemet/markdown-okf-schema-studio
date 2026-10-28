@@ -25,6 +25,14 @@ tested_in_files:
 - test/core/render/gridToctree.test.ts
 - test/core/render/renderReq.myst.requirements.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-CORE-054
+- SwRS-MDOKFSTUDIO-CORE-055
+- SwRS-MDOKFSTUDIO-MYST-058
+- SwRS-MDOKFSTUDIO-MYST-059
+- SwRS-MDOKFSTUDIO-MYST-060
+- SwRS-MDOKFSTUDIO-MYST-061
+- SwRS-MDOKFSTUDIO-MYST-062
 ---
 
 ## Toctree lists linked documents and marks missing ones

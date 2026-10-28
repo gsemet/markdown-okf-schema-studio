@@ -10,13 +10,12 @@ scope: diagrams
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-DIAG-006; no marker expected."
 derives_from: []
 user_need: As a writer, I keep typing while the diagrams I did not touch stay
   drawn and the preview stays responsive.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-DIAG-006
+superseded_by:
+- StRS-MDOKFSTUDIO-DIAG-006
 default_owner_email: gaetan@xeberon.net
 ---
 

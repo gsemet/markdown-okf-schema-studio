@@ -32,6 +32,10 @@ tested_in_files:
 - test/page/runtimeFrontmatterEditor.test.ts
 - test/page/runtimeFrontmatterFields.test.ts
 default_owner_email: gaetan@xeberon.net
+supersedes:
+- SwRS-MDOKFSTUDIO-FMEDIT-030
+- SwRS-MDOKFSTUDIO-FMEDIT-031
+- SwRS-MDOKFSTUDIO-FMEDIT-032
 ---
 
 ## Remove field deletes exactly the lines of a non-required field

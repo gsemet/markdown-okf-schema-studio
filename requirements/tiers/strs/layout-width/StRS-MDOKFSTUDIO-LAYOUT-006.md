@@ -10,14 +10,13 @@ scope: layout-width
 lifecycle: superseded
 origin: native
 tier: StRS
-annotation_exemption: true
-exemption_reason: "Superseded by StRS-MDOKFSTUDIO-LAYOUT-003; no marker expected."
 derives_from: []
 user_need: As a reader, I switch between a narrow reading column, a column that
   lets wide content out, and the full pane with one button, and the choice is
   still there when I come back.
 derived_by: []
-superseded_by: StRS-MDOKFSTUDIO-LAYOUT-003
+superseded_by:
+- StRS-MDOKFSTUDIO-LAYOUT-003
 default_owner_email: gaetan@xeberon.net
 ---
 
