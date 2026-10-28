@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Clicking the shown panel of a `{tab-item}` in edit mode opens the whole tab item for editing, as
+  documented, instead of the single paragraph inside it.
 - A front matter field changed or added since the last commit now gets its own green change bar on its
   row of the properties table, like a changed block of the body. A removed field marks the whole table.
 - Pasting a web address (`http:`, `https:` or `mailto:`) into a block editor makes a Markdown link: `[text](url)`

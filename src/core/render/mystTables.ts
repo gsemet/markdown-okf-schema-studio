@@ -118,10 +118,11 @@ function tableAlignmentSpec(node: MystNode): TableAlignmentSpec {
   return {
     table: normalizeTableAlignment(node.align),
     columns: headerCells.map((cell) => normalizeTableAlignment(cell.align)),
-    ...(node.position?.start?.line === undefined
+    // A table under a tab item is edited with the item: no source line, so no row or column handles.
+    ...(node.position?.start?.line === undefined || node.data?.noSourceLine === true
       ? {}
       : { sourceLine: node.position.start.line }),
-    ...(node.position?.end?.line === undefined
+    ...(node.position?.end?.line === undefined || node.data?.noSourceLine === true
       ? {}
       : { sourceEndLine: node.position.end.line }),
     ...(node.data?.listTable === true

@@ -203,6 +203,10 @@ test("each tab item and the tab set carry their own source lines for editing", a
   assert.deepEqual(panels.map((panel) => [attribute(panel, "data-line"), attribute(panel, "data-end-line")]),
     [["4", "7"], ["8", "12"], ["13", "15"]]);
   assert.match(textContent(panels[1]), /Use npm\./u);
+  // A click in a panel edits the whole tab item: nothing inside it is a mapped block of its own.
+  for (const panel of panels) {
+    assert.deepEqual(findElements(panel, (element) => element !== panel && attribute(element, "data-line") !== undefined), []);
+  }
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-098
@@ -230,6 +234,92 @@ test("tab panels hold any block, a grid and a card among them, and tab sets nest
   assert.ok(findElement(dom, (element) => element.tagName === "pre"));
   assert.equal(findElements(dom, (element) => hasClass(element, "myst-tab-set")).length, 2);
   assert.match(textContent(dom), /Deeper\./u);
+});
+
+function lineOf(element: Parameters<typeof attribute>[0]): [string | undefined, string | undefined] {
+  return [attribute(element, "data-line"), attribute(element, "data-end-line")];
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-167
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-133
+test("a comment and a thread in a tab item keep their own source line range", async () => {
+  const { dom } = await render([
+    "::::{tab-set}",
+    ":::{tab-item} One",
+    "Text.",
+    "",
+    "<!-- review: inner -->",
+    "",
+    "<!-- THREAD",
+    "Ana (2026-01-01 10:00):",
+    "  first",
+    "Bob (2026-01-02 10:00):",
+    "  second",
+    "-->",
+    ":::",
+    "::::",
+  ].join("\n"));
+  const comments = findElements(dom, (element) => hasClass(element, "okf-comment"));
+  assert.deepEqual(comments.map(lineOf), [["5", "5"], ["7", "12"]]);
+  assert.deepEqual(comments.map((comment) => attribute(comment, "data-okf-comment-kind")), ["comment", "thread"]);
+  // The item itself is still one block, the paragraph beside the comments is not.
+  const panel = findElement(dom, (element) => attribute(element, "role") === "tabpanel")!;
+  assert.deepEqual(lineOf(panel), ["2", "13"]);
+  assert.deepEqual(findElements(panel, (element) => element.tagName === "p").map(lineOf), [[undefined, undefined]]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+test("a table, a code block, a card and a grid in a tab item are no blocks of their own", async () => {
+  const { dom } = await render([
+    "::::::{tab-set}",
+    ":::::{tab-item} One",
+    "| a | b |",
+    "| - | - |",
+    "| 1 | 2 |",
+    "",
+    "```text",
+    "code",
+    "```",
+    "",
+    ":::{card} Inner card",
+    "Card body.",
+    ":::",
+    "",
+    "::::{grid} 2",
+    ":::{grid-item-card} A",
+    "Body A.",
+    ":::",
+    "::::",
+    ":::::",
+    "::::::",
+  ].join("\n"));
+  const panel = findElement(dom, (element) => attribute(element, "role") === "tabpanel")!;
+  assert.deepEqual(lineOf(panel), ["2", "20"]);
+  assert.ok(findElement(panel, (element) => element.tagName === "table"));
+  assert.ok(findElement(panel, (element) => element.tagName === "pre"));
+  assert.ok(findElement(panel, (element) => hasClass(element, "myst-card")));
+  assert.ok(findElement(panel, (element) => hasClass(element, "myst-grid")));
+  assert.deepEqual(findElements(panel, (element) => element !== panel && attribute(element, "data-line") !== undefined), []);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-MYST-098
+test("a nested tab set in a tab item is no block of its own, only the outer item is edited", async () => {
+  const { dom } = await render([
+    "::::::{tab-set}",
+    ":::::{tab-item} Outer",
+    "::::{tab-set}",
+    ":::{tab-item} Deep",
+    "Deeper.",
+    ":::",
+    "::::",
+    ":::::",
+    "::::::",
+  ].join("\n"));
+  const panels = findElements(dom, (element) => attribute(element, "role") === "tabpanel");
+  assert.equal(panels.length, 2);
+  assert.deepEqual(lineOf(panels[0]), ["2", "8"]);
+  assert.deepEqual(findElements(panels[0], (element) => element !== panels[0] && attribute(element, "data-line") !== undefined), []);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-MYST-098

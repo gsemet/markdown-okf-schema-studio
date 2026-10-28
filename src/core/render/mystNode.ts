@@ -64,12 +64,17 @@ export function mergeProperties(node: MystNode, properties: Record<string, unkno
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-CORE-003
+// @implements_req SwRS-MDOKFSTUDIO-MYST-098
 /** The source line attributes (`data-line`, `data-end-line`) of a block that starts at `line`. */
 export function sourcePositionProperties(node: MystNode, line?: number): Record<string, number | string> {
   if (line === undefined) {
     return {};
   }
   const endLine = node.position?.end?.line;
+  // A block under a tab item is edited with the item, so it carries no source line of its own.
+  if (node.data?.noSourceLine === true) {
+    return node.data.included === true ? { "data-sphinx-preview-included": "true" } : {};
+  }
   return {
     "data-line": line,
     ...(node.data?.included === true ? { "data-sphinx-preview-included": "true" } : {}),
