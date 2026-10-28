@@ -2,6 +2,7 @@
  * The screenshot scenarios, second part, in campaign order (after `scenarioDefinitions1.ts`).
  */
 
+import { RELEASE_SHOWCASE_SCENARIOS } from "./releaseShowcaseScenarios";
 import {
   BACK_ENABLED_ASSERTIONS,
   BLOCK_SELECTION_ASSERTIONS,
@@ -542,6 +543,7 @@ export const SCENARIO_DEFINITIONS_2: ScenarioDefinition[] = [
     scroll: { kind: "selector" as const, value: "main h1", offset: -100 },
     description: "README hero capture, cream theme, 1200 px: the properties table, the title, the card grid, the nested admonition and the figure of the demo handbook.",
   },
+  ...RELEASE_SHOWCASE_SCENARIOS,
   {
     // @tests_req StRS-MDOKFSTUDIO-MYST-001
     id: "myst/v34-readme-showcase-edit-cream-1000",

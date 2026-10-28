@@ -151,7 +151,7 @@ test("README file names are unique across the visual scenarios and the real-wind
     ...CAPTURES.flatMap((entry) => (entry.readme ?? []).map((source) => source.file)),
   ];
   assert.equal(new Set(files).size, files.length, files.join(", "));
-  assert.equal(files.length, 23, "17 visual + 6 real-window README images");
+  assert.equal(files.length, 24, "18 visual + 6 real-window README images");
 });
 
 test("generate-readme-images.py takes the real-window sources from the registry, not from capture names", () => {
