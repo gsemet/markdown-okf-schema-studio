@@ -7,7 +7,7 @@ import { html as parse5Html } from "parse5";
 
 import { offsetNodeLines } from "./mystBlockTransforms";
 import { MYST_PARSE_OPTIONS, type MystEngine } from "./mystEngine";
-import { expandGithubAlerts } from "./mystGithubAlerts";
+import { expandGithubAlertsWithLines, mapAlertSourceLines } from "./mystGithubAlerts";
 import type { MystNode } from "./mystNode";
 
 interface ContextTagBoundary {
@@ -174,7 +174,10 @@ function splitGroupedContextTagHtml(
   const sourceLine = node.position?.start?.line;
   const endLine = node.position?.end?.line
     ?? (sourceLine === undefined ? undefined : sourceLine + lines.length - 1);
-  const body = mystParse(expandGithubAlerts(lines.slice(1, -1).join("\n")), MYST_PARSE_OPTIONS);
+  const expanded = expandGithubAlertsWithLines(lines.slice(1, -1).join("\n"));
+  const body = mystParse(expanded.text, MYST_PARSE_OPTIONS);
+  // The body's lines count from the line after the opening tag, as in the raw block.
+  mapAlertSourceLines(body, expanded);
   repairGroupedContextTagHtml(body, mystParse);
   if (sourceLine !== undefined) {
     offsetNodeLines(body, sourceLine);

@@ -25,6 +25,7 @@ implemented_in_files:
 - src/core/render/mystNormalize.ts
 - src/core/render/mystRenderer.ts
 tested_in_files:
+- test/core/render/alertSourceLines.test.ts
 - test/core/render/mystFeatures.test.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:
@@ -97,4 +98,5 @@ When a document is rendered, the extension SHALL give every paragraph, heading, 
 - Method: Unit test "multiline blocks retain their full mapped source range" in test/core/render/mystFeatures.test.ts (nominal end line, boundary one-line block)
 - Method: Unit test "block source ranges stay absolute when leading frontmatter is stripped" in test/core/render/mystFeatures.test.ts (nominal hide frontmatter, boundary leading block only, boundary absolute lines for the LF row, with a frontmatter of three lines; the CRLF and CR rows are untested)
 - Method: Unit test "a lone raw <img> block is a mapped block with a source line" in test/core/render/mystFeatures.test.ts (nominal image-only blocks, refusal raw image without source)
+- Method: Unit tests in test/core/render/alertSourceLines.test.ts (nominal source and end lines of the blocks of a document with GitHub alerts, which are rewritten into longer admonitions before parsing, with and without frontmatter)
 - Criteria: Every mapped block element carries a one-based source line attribute; multi-line blocks expose their full source range and single-line blocks do not exceed it. No frontmatter code block appears in the body and later `---` lines are unchanged. Body source lines equal the absolute file line for every line-break style. Image-only blocks carry source lines; a raw `<img>` without `src` is not rendered.

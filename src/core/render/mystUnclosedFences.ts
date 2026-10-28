@@ -25,6 +25,11 @@ export interface UnclosedFenceContext {
   readonly lineOffset: number;
   readonly parse: (text: string) => MystNode;
   readonly diagnostics: RenderDiagnostic[];
+  /**
+   * The line of the document a line of the tree stands for, when the source passes changed the
+   * number of lines (GitHub alerts); the tree's lines are mapped to the document's later.
+   */
+  readonly sourceLine?: (line: number) => number;
 }
 
 // @implements_req SwRS-MDOKFSTUDIO-MYST-096
@@ -51,7 +56,7 @@ function visit(parent: MystNode, context: UnclosedFenceContext): void {
     context.diagnostics.push({
       code: "unclosed-fence",
       severity: "warning",
-      line: span.start,
+      line: context.sourceLine?.(span.start) ?? span.start,
       message: "Unclosed fence: the closing fence is missing, so only this line is shown as written.",
     });
     const rest = reparse(span.start, span.end, context);
@@ -111,7 +116,7 @@ function shift(node: MystNode, offset: number): void {
 }
 
 function rawOpening(node: MystNode, line: number, context: UnclosedFenceContext): MystNode {
-  const text = context.sourceLines[line - 1] ?? parsedLine(context, line) ?? "";
+  const text = context.sourceLines[(context.sourceLine?.(line) ?? line) - 1] ?? parsedLine(context, line) ?? "";
   return {
     type: "code",
     lang: "",

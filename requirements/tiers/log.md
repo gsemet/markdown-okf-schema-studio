@@ -1,5 +1,19 @@
 # Update Log
 
+## 2026-10-28 (paragraph of a GitHub alert opens the editor on the wrong lines, CR 171)
+
+- SwRS-MDOKFSTUDIO-GFM-009: new boundary scenario "Every block keeps the lines of the document".
+  The alert pass rewrites `> [!NOTE]` into a longer MyST admonition before parsing and nothing
+  mapped the lines back, so the body of an alert was one line late and every block after an alert
+  one line later per alert (README: the paragraph of the second alert, lines 40-41, rendered as
+  42-43; a click opened, and Done would have overwritten, the blank line and the next heading). The
+  pass now returns the source line of every rewritten line and a tree pass maps the positions (and
+  the `data-line` attributes the grid pass already set) back to the document; an admonition ends on
+  its last quoted line. The existing claim "later source line numbers are unchanged" now holds.
+  Verification: test/core/render/alertSourceLines.test.ts, test/session/alertBlockEditOpen.test.ts.
+- SwRS-MDOKFSTUDIO-CORE-003, SwRS-MDOKFSTUDIO-MYST-096: verification notes name the new tests (an
+  unclosed fence after an alert now reports and shows its own line).
+
 ## 2026-10-28 (a late block editor leaves the focus in the find field, CR 169)
 
 - SwRS-MDOKFSTUDIO-BLOCK-255 (new, proposed): a block editor whose source reaches the page after
