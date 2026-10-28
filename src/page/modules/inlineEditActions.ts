@@ -113,9 +113,17 @@ export function toggleAsterisks(ctx: EditActionContext, width: number): TextEdit
 
 const TODO_OPEN = "<!-- TODO: ";
 
-const TODO_CLOSE = " -->";
+const COMMENT_CLOSE = " -->";
 
 const TODO_LINE = /^([ \t]*)<!--[ \t]*TODO:[ \t]?(.*?)[ \t]?-->[ \t]*$/u;
+
+const COMMENT_OPEN = "<!-- ";
+
+/**
+ * A line that is one plain comment. A TODO or THREAD comment is not plain: Ctrl+/ leaves it alone
+ * instead of stripping the comment marks and leaving the word behind.
+ */
+const COMMENT_LINE = /^([ \t]*)<!--(?![ \t]*(?:TODO|THREAD)\b)[ \t]?(.*?)[ \t]?-->[ \t]*$/iu;
 
 // @implements_req SwRS-MDOKFSTUDIO-REVIEW-160
 /**
@@ -124,6 +132,20 @@ const TODO_LINE = /^([ \t]*)<!--[ \t]*TODO:[ \t]?(.*?)[ \t]?-->[ \t]*$/u;
  * A blank line gets an empty comment with the caret inside.
  */
 export function toggleTodo(ctx: EditActionContext): TextEdit | undefined {
+  return toggleLineComments(ctx, TODO_OPEN, TODO_LINE);
+}
+
+// @implements_req SwRS-MDOKFSTUDIO-PALETTE-266
+/**
+ * Toggles a plain `<!-- … -->` around each non-blank line touched by the selection, like a code
+ * editor's Toggle Line Comment: when every such line is already a plain comment they are
+ * unwrapped, otherwise the other lines are wrapped. A TODO or THREAD comment line is left alone.
+ */
+export function toggleComment(ctx: EditActionContext): TextEdit | undefined {
+  return toggleLineComments(ctx, COMMENT_OPEN, COMMENT_LINE);
+}
+
+function toggleLineComments(ctx: EditActionContext, open: string, commentLine: RegExp): TextEdit | undefined {
   const { value, selectionStart, selectionEnd } = ctx;
   if (selectionStart < 0 || selectionEnd > value.length || selectionStart > selectionEnd) {
     return undefined;
@@ -140,27 +162,27 @@ export function toggleTodo(ctx: EditActionContext): TextEdit | undefined {
 
   if (lines.length === 1 && lines[0].trim() === "") {
     const indent = lines[0];
-    const caret = firstStart + indent.length + TODO_OPEN.length;
+    const caret = firstStart + indent.length + open.length;
     return {
       start: firstStart,
       end: lastEnd,
-      text: indent + TODO_OPEN + TODO_CLOSE,
+      text: indent + open + COMMENT_CLOSE,
       selectionStart: caret,
       selectionEnd: caret,
     };
   }
 
   // A line holding `-->` would end the comment early; such lines are never wrapped.
-  const wrappable = (line: string): boolean => TODO_LINE.test(line) || !line.includes("-->");
+  const wrappable = (line: string): boolean => commentLine.test(line) || !line.includes("-->");
   const filled = lines.filter((line) => line.trim() !== "");
-  const unwrap = filled.length > 0 && filled.every((line) => TODO_LINE.test(line));
+  const unwrap = filled.length > 0 && filled.every((line) => commentLine.test(line));
   const out = lines.map((line) => {
     if (line.trim() === "") return line;
-    const wrapped = TODO_LINE.exec(line);
+    const wrapped = commentLine.exec(line);
     if (unwrap) return wrapped![1] + wrapped![2];
     if (wrapped || !wrappable(line)) return line;
     const indent = /^[ \t]*/u.exec(line)![0];
-    return indent + TODO_OPEN + line.slice(indent.length).trimEnd() + TODO_CLOSE;
+    return indent + open + line.slice(indent.length).trimEnd() + COMMENT_CLOSE;
   });
   const text = out.join("\n");
   if (text === lines.join("\n")) return undefined;
@@ -168,7 +190,7 @@ export function toggleTodo(ctx: EditActionContext): TextEdit | undefined {
   if (selectionStart === selectionEnd && lines.length === 1) {
     const indentLength = /^[ \t]*/u.exec(lines[0])![0].length;
     const column = selectionStart - firstStart;
-    const shift = unwrap ? -TODO_OPEN.length : TODO_OPEN.length;
+    const shift = unwrap ? -open.length : open.length;
     const next = Math.max(indentLength, Math.min(column + shift, out[0].length));
     const caret = firstStart + (column < indentLength ? column : next);
     return { start: firstStart, end: lastEnd, text, selectionStart: caret, selectionEnd: caret };

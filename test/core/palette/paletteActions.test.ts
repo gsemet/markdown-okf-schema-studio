@@ -19,7 +19,7 @@ const descriptors = PALETTE_ACTION_IDS.map((id) => [id, PALETTE_ACTIONS[id] as P
 test("the registry lists every palette action once, in display order", () => {
   assert.deepEqual(PALETTE_ACTION_IDS, [
     "heading", "bold", "italic", "strikethrough", "color", "colorCode", "link", "image", "codeFence",
-    "bulletList", "numberedList", "quote", "rule", "toc", "table", "emoji", "todo", "thread",
+    "bulletList", "numberedList", "quote", "rule", "toc", "table", "emoji", "todo", "comment", "thread",
     "alert", "checkbox", "htmlTable", "details", "footnote", "mermaid", "columnAlign", "kbd",
     "admonition", "deflist", "math", "sub", "sup", "label", "ref", "doc", "cite", "dropdown",
     "tableCaption", "listTable", "pipeTable", "figure", "roleKbd", "vegaLite", "vega",

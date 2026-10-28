@@ -48,7 +48,9 @@ environments),
   selection or mouse hover; moving the mouse hides the keyboard selection ring.
   Alt+Up/Down moves the focused block; Cmd/Ctrl+Alt+Up/Down does it from the block text box.
   In a block text box, Cmd/Ctrl+B toggles bold, Cmd/Ctrl+I toggles italic, and Ctrl+/ (or Cmd+/)
-  toggles a `<!-- TODO: … -->` comment on the current or selected lines; each is one undo step.
+  toggles a plain `<!-- … -->` comment on the current or selected lines; each is one undo step.
+  A `<!-- TODO: … -->` line is left alone by Ctrl+/; the TODO button and `/todo` insert and remove
+  TODO comments.
   In edit mode an opened comment chip is titled with the syntax that produced it, in code font:
   `<!-- -->` for a comment and `<!-- TODO -->` for a comment whose text starts with TODO, in any case,
   with or without a colon, on one line or several. Read mode keeps the words Comment and TODO.

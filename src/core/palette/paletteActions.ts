@@ -78,6 +78,8 @@ export interface PaletteActionDescriptor {
   scopes: EditActionScope[];
   /** Keyboard binding. */
   shortcut?: EditActionShortcut;
+  /** Reached by its shortcut only: no palette button and no `/` menu entry. */
+  shortcutOnly?: boolean;
   /** Tooltip text without the shortcut; defaults to `label`. */
   title?: string;
   /** Name of the popover the palette opens to pick `ctx.arg`; absent for one-click actions. */
@@ -346,6 +348,16 @@ export const PALETTE_ACTIONS = {
     group: "annotation",
     modes: ["strict"],
     scopes: ["block"],
+  },
+  // @implements_req SwRS-MDOKFSTUDIO-PALETTE-266
+  comment: {
+    label: "Comment",
+    title: "Toggle comment",
+    icon: "thread",
+    group: "annotation",
+    modes: ["strict"],
+    scopes: ["block"],
+    shortcutOnly: true,
     shortcut: { codes: ["Slash"], keys: ["/"], anyShift: true, modifier: "any" },
   },
   thread: {

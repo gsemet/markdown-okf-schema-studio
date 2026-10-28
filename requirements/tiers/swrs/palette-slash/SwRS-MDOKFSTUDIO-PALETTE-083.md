@@ -76,11 +76,11 @@ When the writer presses Cmd+B, Cmd+I or Cmd+K on macOS, or Ctrl+B, Ctrl+I or Ctr
 
 ### Related requirements
 
-- SwRS-MDOKFSTUDIO-REVIEW-160: the Ctrl+/ shortcut of the TODO action.
+- SwRS-MDOKFSTUDIO-PALETTE-266: the Ctrl+/ shortcut, which toggles a plain comment and has no palette button.
 
 ### Verification notes
 
 - Method: test/page/modules/editActions.test.ts (shortcutFor uses Cmd on macOS and Ctrl elsewhere for B and I; Cmd+K on macOS and Ctrl+K elsewhere find the link action, matched on key before code; shortcutFor reads the typed key first and the physical code only for non-Latin keys; shortcutFor ignores plain keys, other modifiers, composition and AltGr; shortcutLabel shows Cmd on macOS and Ctrl elsewhere; scenarios platform key, typed letter first, wrong command key, keys that never match, tooltip)
 - Method: test/page/runtimeEditPalette.test.ts (T22: Cmd+K on macOS opens the panel and Ctrl+K there does not; T21: the palette buttons show the real shortcut in their tooltip; scenarios wrong command key, tooltip and accessible name, button without a shortcut)
 - Method: real-window scenario scenarioShortcuts in test/integration/realInput/textEditing.ts (scenario platform key)
-- Criteria: The primary modifier is metaKey without ctrlKey on macOS and ctrlKey without metaKey elsewhere; Shift makes B, I and K not match; a Latin letter key never falls back to the code and a key with no Latin letter does; shortcutFor returns undefined for each listed event; the label of a shortcut is the platform command key, a plus sign and the upper-cased first key of the action, and the TODO shortcut prints a slash.
+- Criteria: The primary modifier is metaKey without ctrlKey on macOS and ctrlKey without metaKey elsewhere; Shift makes B, I and K not match; a Latin letter key never falls back to the code and a key with no Latin letter does; shortcutFor returns undefined for each listed event; the label of a shortcut is the platform command key, a plus sign and the upper-cased first key of the action, and the comment shortcut prints a slash.

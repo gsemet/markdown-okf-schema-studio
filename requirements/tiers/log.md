@@ -8,6 +8,14 @@
   sits left of the controls in that case. Verification: test/page/figureEditButtonClearance.test.ts,
   visual scenario palette-slash/v29-edit-figure-button-narrow-cream-420.
 
+## 2026-10-28 (Ctrl+/ toggles a plain comment)
+
+- SwRS-MDOKFSTUDIO-PALETTE-266 (new), SwRS-MDOKFSTUDIO-REVIEW-160,
+  SwRS-MDOKFSTUDIO-PALETTE-083: Ctrl+/ (Cmd+/) toggles a plain `<!-- … -->` comment on the touched
+  lines instead of a TODO comment; the shortcut belongs to a new shortcut-only `comment` action,
+  and the TODO action and its tooltip have no shortcut. A TODO or THREAD comment line is left alone
+  by the shortcut. Verification: `just requirements-update`, `just check`.
+
 ## 2026-10-28 (find in preview: replace-all check waits for the host)
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-012: the real-window replace-all check now waits for the host's answer
