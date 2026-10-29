@@ -52,6 +52,10 @@ and the body uses normal Markdown parsing, including a fenced code block immedia
 tag. Attributes, self-closing tags, malformed boundaries, declarations, and complex XML are not
 interpreted; use a fenced `xml` block when the document contains real XML.
 
+In the VS Code Agents window, only local agent sessions are supported: the preview is editable for
+files of a session whose working folder is on this machine. Remote or cloud agent sessions, whose
+folders are not local `file` folders, are not supported.
+
 The stock Markdown preview and its `markdown.*` settings remain separate. Files under `src/` do not
 auto-activate the extension.
 

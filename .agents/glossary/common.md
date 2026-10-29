@@ -4,6 +4,7 @@ Shared vocabulary for the Studio's UI parts and code concepts, so people and age
 words. Add new terms here, alphabetical, one line each; keep code names in backticks. Terms marked
 "(planned)" do not exist in the code yet; drop the marker when one is built.
 
+- **Agents window**: the VS Code companion window for agent sessions; it mounts the working folder of the active session as the workspace folder (`updateWorkspaceFolders`) and replaces or removes it on each session switch. Studio declares its support (`capabilities.agentsWindow` in `package.json`); a folder change promotes or demotes previews (`onFoldersChanged` in `src/session/hostEvents.ts`).
 - **Alert**: GitHub `> [!TYPE]` callout; inserted by the Alert button of the GFM group, whose type list opens at the caret (`popoverAtCaret` in `src/page/modules/editActions.ts`).
 - **Anchor icon**: marker rendered for a MyST `(label)=` target (`span.okf-anchor`, tooltip "Anchor: name"; first child of the next paragraph or heading, else in a `div.okf-anchor-row`).
 - **Anchor button**: toolbar toggle that ties preview scrolling to the editor (`data-sphinx-preview-anchor`).

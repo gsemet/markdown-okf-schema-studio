@@ -370,3 +370,14 @@ test("the manifest declares limited support for untrusted workspaces", () => {
     ],
   );
 });
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-171
+test("the manifest declares support for the Agents window", () => {
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(path.resolve(__dirname, "../../.."), "package.json"), "utf8"),
+  ) as { main?: string; capabilities?: { agentsWindow?: { supported?: unknown } } };
+  // VS Code disables, in its Agents window, an extension with a main entry point unless this
+  // declaration says true (or the user lists it in extensions.supportAgentsWindow).
+  assert.ok(manifest.main, "the rule below applies to an extension with a main entry point");
+  assert.equal(manifest.capabilities?.agentsWindow?.supported, true);
+});

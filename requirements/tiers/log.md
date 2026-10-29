@@ -1,5 +1,25 @@
 # Update Log
 
+## 2026-10-29 (Studio in the VS Code Agents window)
+
+- SwRS-MDOKFSTUDIO-LIFE-171 (new, proposed): the manifest declares `capabilities.agentsWindow.supported`
+  true, so VS Code enables the installed extension in its Agents window without a user setting.
+  The declaration lives in package.json, which carries no marker: `annotation_exemption` with that
+  reason. Verification: test/security/trustReq.requirements.test.ts.
+- SwRS-MDOKFSTUDIO-TRUST-001: new rows under "Trust granted or a folder added while a preview is
+  open": a read-only preview becomes writable on the same panel, with its reading state, when a
+  workspace folder that holds its file is added; a preview of another file stays read-only; the
+  active preview stays active. Before, only a trust grant promoted a preview, so a preview opened
+  before the Agents window mounted the session folder stayed read-only.
+  Verification: test/host/lifeReq.requirements.test.ts.
+- SwRS-MDOKFSTUDIO-LIFE-143: removing a workspace folder no longer closes the previews of its files.
+  The old session and its render queue, watchers and Problems entries are still disposed; the same
+  panel shows the file in a read-only session (or in a session of another folder that holds it),
+  and becomes writable again when a folder that holds the file is added. Decided for the Agents
+  window, where each agent session switch removes the folder; it applies to the main window too.
+  Verification: test/host/lifeReq.requirements.test.ts, test/integration/workspaceDisposal.test.ts
+  (its assertion changed from "the preview is disposed" to "the tab stays, read-only").
+
 ## 2026-10-29 (a click in the body of a GitHub alert opens the whole alert)
 
 - SwRS-MDOKFSTUDIO-GFM-009: new nominal scenario "A click in the body of an alert opens the whole

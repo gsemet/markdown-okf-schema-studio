@@ -8,7 +8,8 @@ description: When a preview panel is closed, a document is closed, a workspace
   the render queue and dispose the pending render stages, file watchers,
   subscriptions and Problems entries of the preview concerned, so that no late
   result reaches the panel, keeping every shared resource that another live
-  preview still uses.
+  preview still uses. A preview whose workspace folder is removed keeps its
+  panel and shows its file read-only.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
 lifecycle: proposed
@@ -39,7 +40,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a preview panel is closed, a document is closed, a workspace folder is removed or the extension is deactivated, the extension SHALL cancel the render queue and dispose the pending render stages, file watchers, subscriptions and Problems entries of the preview concerned, so that no late result reaches the panel, keeping every shared resource that another live preview still uses.
+When a preview panel is closed, a document is closed, a workspace folder is removed or the extension is deactivated, the extension SHALL cancel the render queue and dispose the pending render stages, file watchers, subscriptions and Problems entries of the preview concerned, so that no late result reaches the panel, keeping every shared resource that another live preview still uses. A preview whose workspace folder is removed keeps its panel and shows its file read-only.
 
 ### Scenario (nominal): Closed while rendering
 
@@ -67,9 +68,10 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 
 ### Scenario (nominal): Folder removed
 
-- GIVEN a preview of a file in the second folder of a multi-root workspace
+- GIVEN a writable preview of a file in a workspace folder (in the Agents window, the folder of the active agent session, which a session switch removes)
 - WHEN the folder is removed from the workspace
-- THEN the preview and its panel are disposed and the folder's files still exist
+- THEN the preview's session, with its render queue, watchers and Problems entries, is disposed; the same panel stays open and shows the file in a new read-only session (resource root = the directory of the file, no session roots) that keeps the reading state; the folder's files still exist
+- AND when a folder that holds the file is added later, the preview becomes writable again on the same panel (see SwRS-MDOKFSTUDIO-TRUST-001)
 
 ### Scenario (nominal): Deactivation
 
@@ -83,7 +85,9 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 | --- | --- |
 | A second preview of the same or another root, and the first is closed | The second keeps its watcher |
 | A second live preview of a.md, and the first is closed or the document is closed | The Problems entries of a.md stay |
-| A preview of a file that is in no workspace folder, and a folder is removed | The preview stays open |
+| A preview of a file that is in no workspace folder, and a folder is removed | The preview stays open, unchanged |
+| A preview of a file in a removed folder that another workspace folder still holds | The preview moves to a session of that folder, on the same panel |
+| A preview of a removed folder that has no document to show | The preview and its panel are disposed |
 | A session that was already disposed, and it is disposed again without its panel | Nothing happens: the disposal is idempotent |
 
 ### Verification notes
@@ -91,5 +95,5 @@ When a preview panel is closed, a document is closed, a workspace folder is remo
 - Method: test/host/previewTiming.test.ts "a preview disposed while its render is debouncing, building or awaiting a patch acknowledgement stays silent" (closed while rendering).
 - Method: test/integration/lifecycle.test.ts (closed idle: the active preview is undefined after disposal).
 - Method: test/host/lifeReq.requirements.test.ts "previews of one root share one file watcher, which closing the last preview removes with its subscriptions" (watchers removed, second preview keeps the shared watcher), test/session/eventFanOut.test.ts (one dependency watcher for several previews of a root, released with the last; linked-target watches shared and released with the last preview), "closing a preview clears the Problems entries that no preview shows" (Problems entries cleared and kept), "deactivating the extension disposes the sessions and leaves the panels to VS Code" (deactivation, disposed twice).
-- Method: test/integration/workspaceDisposal.test.ts (folder removed; multi-root only, it asserts at least two folders). The standalone file row is untested.
-- Criteria: no post follows disposal and the live set no longer holds the session; the shared dependency watcher is disposed once, when the last preview of its root releases it; sink.delete is called only when no live session has the document; getActivePreviewForTests is undefined and the source directory exists after a folder removal; disposeAll(false) leaves the panels undisposed.
+- Method: test/host/lifeReq.requirements.test.ts "removing the folder of a preview keeps its panel read-only until the folder is added back" (folder removed: same panel, old session and its folder watcher disposed, read-only session rooted at the file's directory with the reading state, writable again when the folder is added back), and test/integration/workspaceDisposal.test.ts in a real VS Code (multi-root only, it asserts at least two folders: the tab stays, the active preview becomes read-only on the same panel). The standalone file row, the row of a file another folder still holds and the row of a preview with no document are deduced from the code (demoteSessionsOf in src/session/previewManager.ts), not tested.
+- Criteria: no post follows disposal and the live set no longer holds the session; the shared dependency watcher is disposed once, when the last preview of its root releases it; sink.delete is called only when no live session has the document; after a folder removal the panel is not disposed, the active preview is read-only on that panel and the source directory exists; disposeAll(false) leaves the panels undisposed.

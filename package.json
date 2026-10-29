@@ -30,6 +30,9 @@
   ],
   "main": "./out/bundle/extension.js",
   "capabilities": {
+    "agentsWindow": {
+      "supported": true
+    },
     "untrustedWorkspaces": {
       "supported": "limited",
       "description": "In Restricted Mode the preview is read-only: editing, comments and every write to the document are off, and the PlantUML Java engine is disabled (the built-in engine still draws diagrams). Trust the workspace to edit.",
