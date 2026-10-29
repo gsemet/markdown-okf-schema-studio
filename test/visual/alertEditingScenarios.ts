@@ -1,6 +1,6 @@
 /**
- * Editing a GitHub alert: a click in the body of an alert opens the whole alert, from its marker
- * line to its last quoted line, in one block editor.
+ * Editing a GitHub alert or a MyST admonition: a click in the body opens the whole alert or
+ * directive, from its first line to its last, in one block editor.
  */
 
 import { MAIN, WIDE } from "./scenarioAssertions";
@@ -37,6 +37,33 @@ export const ALERT_EDITING_SCENARIOS: ScenarioDefinition[] = [
       },
       { message: "the note alert is hidden while its editor is open", selector: `${MAIN} aside.admonition.note[data-sphinx-preview-editing="true"]`, count: 1 },
       { message: "the tip and the warning after the note stay rendered", selector: `${MAIN} aside.admonition.tip, ${MAIN} aside.admonition.warning`, count: 2, visible: true },
+    ],
+  },
+  {
+    // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+    id: "block-editing/v22-admonition-body-opens-whole-directive-dark-900",
+    fixture: "72-myst-admonition-editing",
+    theme: "dark",
+    ...WIDE,
+    scroll: { kind: "top" as const },
+    editMode: true,
+    pageActions: [{ click: `${MAIN} aside.admonition.note > p:last-child`, waitMs: 400 }],
+    description: "Edit mode, dark theme, 900 px: a click on the second paragraph of a two-paragraph note directive "
+      + "opens one editor on the whole directive, from the opening to the closing fence; the tip right after it "
+      + "stays rendered.",
+    contentAssertions: [
+      {
+        message: "the page asks the host for the lines of the whole note directive (5 to 9), and only once",
+        selector: MAIN,
+        expr: `(${OPENED_RANGES}) === '5-9'`,
+      },
+      {
+        message: "the editor holds the note directive from its opening fence to its closing fence",
+        selector: MAIN,
+        expr: `(${EDITOR_TEXT}) === '\`\`\`{note}\\nThe first paragraph of the note.\\n\\nThe second paragraph of the note.\\n\`\`\`'`,
+      },
+      { message: "the note directive is hidden while its editor is open", selector: `${MAIN} aside.admonition.note[data-sphinx-preview-editing="true"]`, count: 1 },
+      { message: "the tip after the note stays rendered", selector: `${MAIN} aside.admonition.tip`, count: 1, visible: true },
     ],
   },
 ];
