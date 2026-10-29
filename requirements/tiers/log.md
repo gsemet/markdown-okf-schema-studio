@@ -1,5 +1,18 @@
 # Update Log
 
+## 2026-10-29 (a version change is tagged only after a green heavy run)
+
+- SwRS-MDOKFSTUDIO-CORE-076: retitled and extended (still proposed). Nothing required a green heavy
+  run of the release commit before `tag-release` tagged it, so the Pages deploy of the tag fell back
+  to running the whole suite. A push to main that changes the version now runs `integration` and
+  `stress` in its own run (`release-check`, `scripts/version.py --bump-since`); `tag-release` needs
+  `checks` and both heavy jobs and tags only when all three succeeded; otherwise, on a version
+  change, it writes why (each result and the re-run command) to the job summary and fails, also when
+  an integration failure has failed `checks`.
+  Pages reuses the reports of that run, and `scripts/select_e2e_run.py` also accepts that push run.
+  Verification: test/build/test_workflows.py, test/build/test_release.py,
+  test/build/test_select_e2e_run.py.
+
 ## 2026-10-28 (CI skipped tagging and release on main, CR 172)
 
 - SwRS-MDOKFSTUDIO-CORE-076: new, proposed. On a push to main the manual heavy jobs are skipped, so

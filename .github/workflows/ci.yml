@@ -117,11 +117,36 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
-  # Heavy, manual: the real VS Code window tests. They do not run on push or pull request; start
-  # them with `gh workflow run ci.yml --ref <branch> -f heavy=true` (or "Run workflow" in Actions).
-  # Not part of `checks`.
+  # Does this push to main change the package version? The same test as tag-release (scripts/
+  # version.py), so a version change always gets the heavy jobs below, and tag-release requires
+  # them to be green before it tags.
+  release-check:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    outputs:
+      bump: ${{ steps.bump.outputs.bump }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+      - name: Detect a committed version change
+        id: bump
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: uv run --group release python scripts/version.py --bump-since "$BEFORE_SHA"
+
+  # Heavy: the real VS Code window tests. They do not run on a pull request, nor on a push to main
+  # unless the push changes the version (a release: release-check). Start them by hand with
+  # `gh workflow run ci.yml --ref <branch> -f heavy=true` (or "Run workflow" in Actions).
+  # Not part of `checks`. `!cancelled()`: release-check is skipped outside a push to main.
   integration:
-    if: github.event_name == 'workflow_dispatch' && inputs.heavy
+    needs: release-check
+    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.outputs.bump == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -154,17 +179,20 @@ jobs:
           path: out/reports/
           if-no-files-found: warn
 
-  # Heavy, manual (with integration): repeats the flake-prone and the new real-window scenarios (20
+  # Heavy (with integration): repeats the flake-prone and the new real-window scenarios (20
   # rounds, in the trusted window then in the Restricted Mode window); a race that a single run
   # passes by luck fails here. Its reports are not part of the e2e campaign.
-  # Advisory: a red stress run flags a flake to fix (CI rule 12) but does not block merges.
+  # Advisory: a red stress run flags a flake to fix (CI rule 12) but does not block merges. On a
+  # version change it blocks the release: continue-on-error is off, so the run turns red and
+  # needs.stress.result reports the failure to tag-release.
   stress:
-    if: github.event_name == 'workflow_dispatch' && inputs.heavy
+    needs: release-check
+    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.outputs.bump == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
     timeout-minutes: 30
-    continue-on-error: true
+    continue-on-error: ${{ needs.release-check.outputs.bump != 'true' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -194,7 +222,7 @@ jobs:
           if-no-files-found: warn
 
   report:
-    needs: [visual, integration]
+    needs: [release-check, visual, integration]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
@@ -225,7 +253,7 @@ jobs:
           path: out/reports/
           merge-multiple: true
       # Without the heavy jobs the real VS Code stage is reported as skipped (visual only).
-      - run: just ci-report ${{ (github.event_name == 'workflow_dispatch' && inputs.heavy) && 'all' || 'visual' }}
+      - run: just ci-report ${{ ((github.event_name == 'workflow_dispatch' && inputs.heavy) || needs.release-check.outputs.bump == 'true') && 'all' || 'visual' }}
       - name: Publish merged reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -275,7 +303,9 @@ jobs:
           if-no-files-found: warn
 
   # Stable aggregate name for branch protection: it depends on every required check job, the
-  # simulated ones (the real VS Code jobs are manual and optional).
+  # simulated ones. The real VS Code jobs are not among them: they are manual, except on a push
+  # that changes the version, where `report` merges the integration stage and tag-release requires
+  # both heavy jobs (CI rule 14).
   checks:
     needs: [static, visual, report]
     if: ${{ !cancelled() }}
@@ -294,10 +324,14 @@ jobs:
           done
 
   tag-release:
-    needs: checks
+    needs: [checks, release-check, integration, stress]
     # `checks` runs even though the heavy jobs above it are skipped; a plain `if` carries an
     # implicit success() that is false when any ancestor was skipped, so ask for the result.
-    if: ${{ !cancelled() && needs.checks.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    # The heavy jobs are skipped on a push without a version change: red checks skip this job, as
+    # before. On a version change the job also runs when checks failed (an integration failure
+    # fails report, then checks), so that every untagged version change says why in its summary;
+    # the tag step requires checks and both heavy jobs to be green.
+    if: ${{ !cancelled() && needs.release-check.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.checks.result == 'success' || needs.release-check.outputs.bump == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -310,8 +344,36 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+      - name: Refuse to tag a version change without a green heavy run
+        if: needs.release-check.outputs.bump == 'true' && !(needs.checks.result == 'success' && needs.integration.result == 'success' && needs.stress.result == 'success')
+        env:
+          CHECKS: ${{ needs.checks.result }}
+          INTEGRATION: ${{ needs.integration.result }}
+          STRESS: ${{ needs.stress.result }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          {
+            echo "## Release not tagged"
+            echo
+            echo "This push changes the version, but the checks or the heavy run of this commit"
+            echo "were not green, so tagging was skipped (no tag, no release, no Pages deploy)."
+            echo
+            echo "- checks: $CHECKS"
+            echo "- integration: $INTEGRATION"
+            echo "- stress: $STRESS"
+            echo
+            echo "Only this push can tag this version (a later push without a version change does"
+            echo "not). For a flake, re-run the failed jobs of this run (Re-run jobs > Re-run failed"
+            echo "jobs, or \`gh run rerun $RUN_ID --failed\`): this job re-runs with them and tags"
+            echo "when they pass. Re-running integration more than two hours after this run started"
+            echo "fails the report (its stages must start less than two hours apart): use Re-run all"
+            echo "jobs then. If the failure is a real bug, fix it and release a new version."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::Tagging skipped: checks or heavy run not green (checks: $CHECKS, integration: $INTEGRATION, stress: $STRESS)"
+          exit 1
       - name: Tag a committed version bump
         id: tag
+        if: needs.checks.result == 'success' && (needs.release-check.outputs.bump != 'true' || (needs.integration.result == 'success' && needs.stress.result == 'success'))
         env:
           BEFORE_SHA: ${{ github.event.before }}
         run: uv run --group release python scripts/version.py --tag-before "$BEFORE_SHA"
@@ -329,7 +391,8 @@ jobs:
 
   # Tags pushed with GITHUB_TOKEN do not trigger tag workflows, so deploy Pages from here.
   pages:
-    needs: tag-release
+    # integration and stress: to tell Pages that this run holds green heavy reports to reuse.
+    needs: [tag-release, integration, stress]
     # Same reason as tag-release: do not inherit success() from the skipped heavy ancestors.
     if: ${{ !cancelled() && needs.tag-release.result == 'success' && needs.tag-release.outputs.tag != '' }}
     permissions:
@@ -340,3 +403,5 @@ jobs:
     uses: ./.github/workflows/pages.yml
     with:
       tag: ${{ needs.tag-release.outputs.tag }}
+      # A tag means a version change whose heavy jobs were green (tag-release); checked again here.
+      reports_from_caller: ${{ needs.integration.result == 'success' && needs.stress.result == 'success' }}

@@ -1,9 +1,11 @@
 """Pick the CI run whose end-to-end reports the Pages site is built from.
 
-The run must be the newest heavy run (workflow ``ci.yml``, event ``workflow_dispatch``) of the exact
-commit that finished green, whose ``integration`` job succeeded and that still holds the three
-report artifacts. Prints the run id, or nothing when no run qualifies (the caller then runs the
-suite itself).
+The run must be the newest heavy run of the exact commit that finished green, whose ``integration``
+job succeeded and that still holds the three report artifacts. A heavy run is either a manual one
+(workflow ``ci.yml``, event ``workflow_dispatch``) or the release push: the ``push`` run on ``main``
+of a version change, where CI runs the heavy jobs itself; such a run qualifies only when both heavy
+jobs, ``integration`` and ``stress``, succeeded (not skipped). Prints the run id, or nothing when
+no run qualifies (the caller then runs the suite itself).
 
 Failure policy: a ``gh api`` error or malformed JSON during the automatic selection is logged as a warning and prints
 nothing, so the caller falls back to the suite. With ``--run-id`` the run is requested explicitly:
@@ -21,22 +23,46 @@ from typing import Any, Callable
 WORKFLOW = "ci.yml"
 WORKFLOW_PATH = f".github/workflows/{WORKFLOW}"
 EVENT = "workflow_dispatch"
+# @implements_req SwRS-MDOKFSTUDIO-CORE-076
+# The push run of a version change on main runs the heavy jobs itself (ci.yml release-check).
+PUSH_EVENT = "push"
+PUSH_BRANCH = "main"
+EVENTS = (EVENT, PUSH_EVENT)
 REQUIRED_ARTIFACTS = ("e2e-visual", "e2e-integration", "studio-reports")
 REQUIRED_JOB = "integration"
+# A push run of main is a heavy run only when both heavy jobs succeeded; without a version change
+# they are skipped and the run holds no real-window reports.
+PUSH_REQUIRED_JOBS = (REQUIRED_JOB, "stress")
+
+
+def event_problem(run: dict[str, Any]) -> str | None:
+    """Why the run's event cannot hold a heavy run, or None."""
+    event = run.get("event")
+    if event == EVENT:
+        return None
+    if event == PUSH_EVENT:
+        if run.get("head_branch") != PUSH_BRANCH:
+            return f"push run is on branch {run.get('head_branch')!r}, not {PUSH_BRANCH!r}"
+        return None
+    return f"run event is {event!r}, not one of {', '.join(map(repr, EVENTS))}"
 
 
 def is_candidate(run: dict[str, Any], sha: str) -> bool:
     """A finished green heavy-capable run of exactly this commit."""
     return (
         run.get("head_sha") == sha
-        and run.get("event") == EVENT
+        and event_problem(run) is None
         and run.get("status") == "completed"
         and run.get("conclusion") == "success"
     )
 
 
-def integration_succeeded(jobs: list[dict[str, Any]]) -> bool:
-    return any(j.get("name") == REQUIRED_JOB and j.get("conclusion") == "success" for j in jobs)
+def required_jobs(run: dict[str, Any]) -> tuple[str, ...]:
+    return PUSH_REQUIRED_JOBS if run.get("event") == PUSH_EVENT else (REQUIRED_JOB,)
+
+
+def jobs_succeeded(jobs: list[dict[str, Any]], names: tuple[str, ...]) -> bool:
+    return all(any(j.get("name") == name and j.get("conclusion") == "success" for j in jobs) for name in names)
 
 
 def has_artifacts(artifacts: list[dict[str, Any]]) -> bool:
@@ -55,13 +81,15 @@ def validate_run(
         return f"run belongs to {run.get('path')!r}, not {WORKFLOW_PATH!r}"
     if run.get("head_sha") != sha:
         return f"run is for commit {run.get('head_sha')!r}, not {sha!r}"
-    if run.get("event") != EVENT:
-        return f"run event is {run.get('event')!r}, not {EVENT!r}"
+    problem = event_problem(run)
+    if problem:
+        return problem
     if run.get("status") != "completed" or run.get("conclusion") != "success":
         return f"run did not finish green (status={run.get('status')!r}, conclusion={run.get('conclusion')!r})"
     run_id = int(run["id"])
-    if not integration_succeeded(jobs_of(run_id)):
-        return f"job {REQUIRED_JOB!r} did not succeed"
+    names = required_jobs(run)
+    if not jobs_succeeded(jobs_of(run_id), names):
+        return f"job {' and '.join(map(repr, names))} did not succeed"
     if not has_artifacts(artifacts_of(run_id)):
         return f"missing or expired artifacts (need {', '.join(REQUIRED_ARTIFACTS)})"
     return None
@@ -78,7 +106,7 @@ def select_run(
         if not is_candidate(run, sha):
             continue
         run_id = int(run["id"])
-        if integration_succeeded(jobs_of(run_id)) and has_artifacts(artifacts_of(run_id)):
+        if jobs_succeeded(jobs_of(run_id), required_jobs(run)) and has_artifacts(artifacts_of(run_id)):
             return run_id
     return None
 
@@ -130,10 +158,15 @@ def main(argv: list[str] | None = None) -> int:
         print(run["id"])
         return 0
     try:
-        runs = gh_api(
-            f"{base}/workflows/{WORKFLOW}/runs?head_sha={args.sha}&event={EVENT}&status=success&per_page=100",
-            "workflow_runs",
-        )
+        # One query per event: the API filters on a single event.
+        runs = [
+            run
+            for event in EVENTS
+            for run in gh_api(
+                f"{base}/workflows/{WORKFLOW}/runs?head_sha={args.sha}&event={event}&status=success&per_page=100",
+                "workflow_runs",
+            )
+        ]
         found = select_run(runs, args.sha, jobs_of, artifacts_of)
     except (subprocess.CalledProcessError, ValueError) as error:
         print(f"warning: GitHub API failed ({error}); the suite runs instead", file=sys.stderr)
