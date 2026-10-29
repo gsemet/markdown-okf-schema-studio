@@ -25,6 +25,8 @@ import { scenarioTableStructure } from "../tableStructureReal";
 import { scenarioToc } from "../tocWindow";
 import { scenarioPerformanceProbe } from "../performanceProbe";
 import { setWorkbenchPage } from "./common";
+import { scenarioAlertTypePickProbe } from "./alertPickProbe";
+import { installWorkbenchFocusTrace, workbenchFocusDump } from "../../shared/workbenchFocusDump";
 import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
 import { scenarioEnterCommitsTextField, scenarioEscapeCancels, scenarioFrontmatterStructuralMinimalPatch, scenarioFrontmatterValueMinimalPatch, scenarioLinkPanel, scenarioLinkPanelPrefill, scenarioPalette, scenarioShortcuts, scenarioSlashMenu, scenarioTypingUndoGrouping, scenarioUndoStaysInEditor } from "./textEditing";
 import { scenarioAlertDropdown, scenarioCaretAtClick, scenarioEditAffordances, scenarioEditModeNoReflow, scenarioEnterContinuesList, scenarioFigureEditor, scenarioPreviewKeepsMarkdown, scenarioSaveKeepsBlockInPlace, scenarioTabIndents, scenarioTableTab, scenarioTableToolbar } from "./editorWidgets";
@@ -59,6 +61,9 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
   },
   "find-in-preview": (page) => scenarioFindInPreview(page),
+  // Does a user's alert type pick (keyboard, real mouse press) reach the file? Logs
+  // ALERT-PICK-PROBE lines; stress only, never in the integration list.
+  "alert-type-pick-probe": (page) => scenarioAlertTypePickProbe(page),
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */
@@ -99,6 +104,8 @@ export async function run(): Promise<void> {
   let passed = false;
   let complete = false;
   setWorkbenchPage(page);
+  // Records the focus moves of the workbench, so a failure dump can name what took the focus.
+  await installWorkbenchFocusTrace(page);
   try {
     await page.setViewportSize({ width: 1400, height: 900 });
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
@@ -112,6 +119,7 @@ export async function run(): Promise<void> {
       "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
       "table-moves": () => scenarioTableMoves(page),
       "find-after-click": () => scenarioFindRightAfterClick(page),
+      "alert-type-pick-probe": () => scenarioAlertTypePickProbe(page),
     };
     const only = single[process.env.STUDIO_REAL_INPUT_SCENARIO ?? ""];
     if (only) {
@@ -190,6 +198,10 @@ export async function run(): Promise<void> {
     for (const gap of [scenarioImagePaste, scenarioFigureInsert]) await gap(page, evidence);
     passed = true;
     complete = true;
+  } catch (error) {
+    // Before the editors close and the browser detaches: where the workbench focus is now.
+    console.error(`Real-input failure: ${await workbenchFocusDump(page)}`);
+    throw error;
   } finally {
     evidence.finish(passed, complete);
     await browser.close();

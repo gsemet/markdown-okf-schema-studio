@@ -6,6 +6,7 @@ import { chromium, Frame, Page } from "playwright-core";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { captureByLegacy } from "../shared/captureRegistry";
 import { freePort } from "../shared/runIsolation";
+import { writeTestProfileSettings } from "../shared/testProfile";
 import { RealWindowEvidence } from "./evidence";
 import { activateMacProcess, frontmostPid, macFocusDiagnostics } from "./macWindow";
 
@@ -125,6 +126,7 @@ export async function runReloadCampaign(executable: string, extensionRoot: strin
   fs.writeFileSync(path.join(temporary, "index.md"), "# Reload fixture bundle\n");
   const workspaceFile = path.join(temporary, "reload.code-workspace");
   fs.writeFileSync(workspaceFile, JSON.stringify({ folders: [{ path: workspaceRoot }, { path: temporary }], settings: { "workbench.startupEditor": "none" } }));
+  writeTestProfileSettings(path.join(temporary, "profile")); // focus thieves off (testProfile.ts)
   const port = await freePort();
   const child = spawn(executable, ["--no-sandbox", "--disable-updates", "--skip-welcome", "--skip-release-notes", "--disable-workspace-trust", `--user-data-dir=${path.join(temporary, "profile")}`, `--extensions-dir=${path.join(temporary, "extensions")}`, `--extensionDevelopmentPath=${extensionRoot}`, `--remote-debugging-port=${port}`, "--remote-debugging-address=127.0.0.1", workspaceFile, "--goto", sourcePath], { stdio: "ignore" });
   onSpawn?.(child, path.join(temporary, "profile"), port);
