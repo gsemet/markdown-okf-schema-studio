@@ -67,8 +67,6 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "slash-menu",
     "save-position",
     "alert-dropdown",
-    // The alert type pick with the keyboard and a real mouse press, logged per pick.
-    "alert-type-pick-probe",
   ],
   untrusted: ["untrusted-read-only"],
 };

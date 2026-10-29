@@ -1,5 +1,5 @@
 /**
- * The alert type pick probe (real-input stress scenario `alert-type-pick-probe`): after the Alert
+ * The alert type pick probe (real-input scenario `alert-type-pick-probe`): after the Alert
  * button wrote `> [!NOTE]`, the type list is used the two ways a user can, with the keyboard
  * (ArrowDown, Enter in the text box) and with a real mouse press on an option. For each pick the
  * scenario records, on the page's clock from the pick on, the blur of the text box, the commits

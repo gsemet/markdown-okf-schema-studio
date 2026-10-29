@@ -44,6 +44,30 @@ export async function ensureTestWindowFocused(): Promise<void> {
   });
 }
 
+/**
+ * Waits until VS Code reports `document` as the active text editor, after the `showTextDocument`
+ * that gave it the focus (its group is then the active group). The real-window tests used to follow
+ * that call with `workbench.action.focusFirstEditorGroup`: a focus command by group position adds a
+ * focus move of its own and lands on whatever group sits first, while the next step (the Studio
+ * command, an undo) needs the state checked here. Fails after `timeoutMs` with the host report.
+ */
+export async function waitForActiveSourceEditor(document: vscode.TextDocument, timeoutMs = 10_000): Promise<void> {
+  const active = (): boolean => vscode.window.activeTextEditor?.document.uri.toString() === document.uri.toString();
+  if (active()) return;
+  await new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      subscription.dispose();
+      reject(new Error(`${document.uri.fsPath} never became the active text editor. ${hostFocusReport()}`));
+    }, timeoutMs);
+    const subscription = vscode.window.onDidChangeActiveTextEditor(() => {
+      if (!active()) return;
+      clearTimeout(timer);
+      subscription.dispose();
+      resolve();
+    });
+  });
+}
+
 /** What the extension host and macOS report about the test window (no page access needed). */
 function hostFocusReport(): string {
   const report: Record<string, unknown> = {
