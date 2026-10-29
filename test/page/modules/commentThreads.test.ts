@@ -622,6 +622,43 @@ test("CR 174: the trace names what closed an open popover, and a re-apply that k
   assert.deepEqual(traced.slice(4), [["comment popover closed", "toggled, thread t2"]], "a closed popover records nothing");
 });
 
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-081
+test("CR 186: the popover stays open through a reply and a resolve in the host's order, with no close traced", () => {
+  // The review-threads stress scenario: the host posts the threads, then its answer; a content
+  // update re-applies the threads in between. On the same page nothing here closes the popover.
+  const document = new FakeDocument();
+  provideGlobalElement(FakeElement);
+  const traced: Array<[string, string]> = [];
+  const calls: unknown[][] = [];
+  const window = { innerWidth: 800, innerHeight: 600, setTimeout: () => 1, clearTimeout: () => undefined };
+  const comments = installCommentThreads(document as never, window as never, {
+    reply: (threadId: string, body: string) => { calls.push(["reply", threadId, body]); },
+    resolve: (threadId: string, resolved: boolean) => { calls.push(["resolve", threadId, resolved]); },
+  } as never, (event, detail) => { traced.push([event, detail]); });
+  document.add("p", { "data-line": "1" }, document.content, "a needle b");
+  comments.setThreads([thread()]);
+  marks(document)[0].fire("click");
+  (popoverOf(document).querySelector("textarea") as any).value = "Added.";
+  press(document, "[data-okf-comment-reply-send]");
+  const second = { id: "c2", author: "Ada", createdAt: "2026-10-21T11:00:00Z", body: "Added." };
+  const replied = thread({ comments: [...thread().comments, second] });
+  comments.setThreads([replied]);
+  const resolveButton = () => popoverOf(document).querySelector("[data-okf-comment-resolve]")!;
+  assert.equal(resolveButton().getAttribute("disabled"), "true", "Resolve waits for the reply's answer");
+  comments.result({ kind: "reply", threadId: "t1", ok: true });
+  assert.equal(resolveButton().hasAttribute("disabled"), false);
+  press(document, "[data-okf-comment-resolve]");
+  comments.apply();
+  comments.setThreads([{ ...replied, resolved: true }]);
+  comments.apply();
+  comments.result({ kind: "resolve", threadId: "t1", ok: true });
+  assert.deepEqual(calls, [["reply", "t1", "Added."], ["resolve", "t1", true]]);
+  assert.equal(popoverOf(document).querySelectorAll("[data-okf-comment-entry]").length, 2);
+  assert.equal(resolveButton().textContent, "Reopen");
+  assert.equal(resolveButton().hasAttribute("disabled"), false);
+  assert.deepEqual(traced, [], "no close on the way");
+});
+
 test("T44: without resolve and delete hooks (read-only) the popover has neither button", () => {
   const { document, comments } = setup();
   document.add("p", { "data-line": "1" }, document.content, "a needle b");

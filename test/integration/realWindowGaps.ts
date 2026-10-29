@@ -14,7 +14,8 @@ import * as path from "node:path";
 import type { Page } from "playwright-core";
 import * as vscode from "vscode";
 import { describeFolder } from "./folderListing";
-import { explained } from "./realInput/flushBeforeNavigate";
+import { explained, selectAllInControl } from "./realInput/flushBeforeNavigate";
+import { interruptionSince, type PageWitness, type StepVerdict, type TraceEntry, type WindowState } from "../shared/stepInterruption";
 
 import {
   disposeActivePreviewForTests,
@@ -187,11 +188,23 @@ function threadCounters(): { pageLoads?: number; contentPatches?: number; commen
  * the threads the host posted last and its last answer, and the popover, marks, comment box and
  * focus of the page. Read with `evaluate`, which never waits for an element.
  */
-async function reviewThreadState(page: Page, sidecar: string, before: ReturnType<typeof threadCounters>): Promise<string> {
+async function reviewThreadState(
+  page: Page,
+  sidecar: string,
+  before: ReturnType<typeof threadCounters>,
+  start?: StepStart,
+  verdict?: StepVerdict,
+): Promise<string> {
   const preview = getActivePreviewForTests();
   const host = JSON.stringify({
     before,
     now: threadCounters(),
+    requestId: preview?.requestId,
+    windowState: { focused: vscode.window.state.focused, active: vscode.window.state.active },
+    stepStart: start === undefined ? undefined : {
+      page: start.page, pageLoads: start.pageLoads, at: start.at, windowStates: start.windowStates,
+    },
+    verdict,
     posted: preview?.comments.last?.map((thread) => ({
       id: thread.id, resolved: thread.resolved, comments: thread.comments.length, orphaned: thread.orphaned,
     })),
@@ -208,6 +221,9 @@ async function reviewThreadState(page: Page, sidecar: string, before: ReturnType
       const active = doc.activeElement;
       return {
         requestId: doc.documentElement.getAttribute("data-sphinx-preview-request-id"),
+        startedAt: (window as unknown as { __studioDiagnostics?: { startedAt?: () => number } }).__studioDiagnostics?.startedAt?.(),
+        pageFocus: doc.hasFocus(),
+        visibility: doc.visibilityState,
         popovers: popovers.map((popover) => ({
           attributes: attributes(popover),
           actions: popover.querySelector("[data-okf-comment-thread-actions]")?.outerHTML.slice(0, 600) ?? "none",
@@ -223,6 +239,133 @@ async function reviewThreadState(page: Page, sidecar: string, before: ReturnType
   }
   const threads = readThreads(sidecar).map((thread) => ({ resolved: thread.resolved, comments: thread.comments.length }));
   return `sidecar ${JSON.stringify(threads)}; host ${host}; page ${shown}`;
+}
+
+/** The trace event of commentThreads.ts that names why an open thread popover closed. */
+const POPOVER_CLOSED = "comment popover closed";
+
+/** What the page reports now and its trace (see stepInterruption.ts); undefined when no page is shown. */
+async function readPageWitness(page: Page): Promise<{ witness: PageWitness; trace: TraceEntry[] } | undefined> {
+  try {
+    const frame = await findCurrentFrame(page);
+    return frame === undefined ? undefined : await frame.evaluate(() => {
+      const diagnostics = (window as unknown as {
+        __studioDiagnostics?: { trace(): Array<{ at: number; event: string; detail?: string }>; startedAt?: () => number };
+      }).__studioDiagnostics;
+      const startedAt = diagnostics?.startedAt?.() ?? null;
+      return {
+        witness: {
+          startedAt,
+          clock: startedAt === null ? null : Date.now() - startedAt,
+          requestId: window.document.documentElement.getAttribute("data-sphinx-preview-request-id"),
+          pageFocus: window.document.hasFocus(),
+        },
+        trace: diagnostics ? diagnostics.trace() : [],
+      };
+    });
+  } catch {
+    return undefined; // a page going away while read: nothing is proved
+  }
+}
+
+/**
+ * What the page and the host held when a step started (`at`: host `Date.now()`), and the focus
+ * changes of the VS Code window since then (`onDidChangeWindowState`, host time). A step the page
+ * cannot witness can only fail.
+ */
+interface StepStart {
+  at: number;
+  page: PageWitness | undefined;
+  pageLoads: number | undefined;
+  windowStates: WindowState[];
+  dispose(): void;
+}
+
+/** Starts witnessing a step; `started` collects it so the scenario stops every window listener. */
+async function stepStart(page: Page, started: StepStart[]): Promise<StepStart> {
+  const at = Date.now();
+  const windowStates: WindowState[] = [];
+  const subscription = vscode.window.onDidChangeWindowState((state) => {
+    windowStates.push({ at: Date.now(), focused: state.focused });
+  });
+  const start: StepStart = {
+    at,
+    page: (await readPageWitness(page))?.witness,
+    pageLoads: threadCounters().pageLoads,
+    windowStates,
+    dispose: () => subscription.dispose(),
+  };
+  started.push(start);
+  return start;
+}
+
+/** The single thread popover of the page as it shows it, or null when there is not exactly one. */
+async function threadPopover(page: Page): Promise<{ entries: number; action?: string; actionEnabled: boolean; reply?: string } | null> {
+  return withCurrentFrame(page, (frame) => frame.evaluate(() => {
+    const popovers = window.document.querySelectorAll("[data-okf-comment-popover]");
+    if (popovers.length !== 1) return null;
+    const popover = popovers[0]!;
+    const action = popover.querySelector("[data-okf-comment-resolve]");
+    const reply = popover.querySelector<HTMLTextAreaElement>("[data-okf-comment-reply-input]");
+    return {
+      entries: popover.querySelectorAll("[data-okf-comment-entry]").length,
+      action: action?.textContent?.trim(),
+      actionEnabled: action !== null && !action.hasAttribute("disabled"),
+      reply: reply?.value,
+    };
+  }));
+}
+
+/** Opens the popover of the (single) highlighted quote with a click, unless one is open. */
+async function reopenThreadPopover(page: Page): Promise<void> {
+  await waitFor("the highlighted quote", () => withCurrentFrame(page, async (frame) =>
+    await frame.locator("mark[data-okf-comment-thread]").count() === 1));
+  // A click on the quote of an open popover would close it.
+  if (await withCurrentFrame(page, (frame) => frame.locator("[data-okf-comment-popover]").count()) > 0) return;
+  await withCurrentFrame(page, (frame) => frame.locator("mark[data-okf-comment-thread]").click());
+}
+
+/**
+ * Waits for the state a review-thread step must reach (CI rule 12). When it is not reached, the
+ * step is redone once with `redo` only if stepInterruption.ts finds an interruption from outside
+ * since `start`: a page the host did not load replaced it, or the VS Code window lost the focus and
+ * the page recorded the blur with no close of its own. The redo is logged with the full dump.
+ * Otherwise, and when the redo fails too, the error carries the verdict, the host and page
+ * diagnostics and the review-thread state.
+ */
+async function reachThreadState(
+  page: Page,
+  description: string,
+  start: StepStart,
+  reached: () => Promise<boolean>,
+  redo: () => Promise<void>,
+  dump: (start: StepStart, verdict: StepVerdict) => Promise<string>,
+): Promise<void> {
+  const attempt = (): Promise<void> => explained(page, () => waitFor(description, reached));
+  const message = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+  try {
+    await attempt();
+    return;
+  } catch (error) {
+    const now = await readPageWitness(page);
+    const verdict: StepVerdict = start.page === undefined
+      ? { redo: false, reason: "the page did not witness the step's start" }
+      : interruptionSince(start.page, now?.witness, now?.trace ?? [], {
+        pageLoadsBefore: start.pageLoads,
+        pageLoadsNow: threadCounters().pageLoads,
+        stepStartedAt: start.at,
+        windowStates: start.windowStates,
+      }, POPOVER_CLOSED);
+    if (!verdict.redo) throw new Error(`${message(error)} (no redo: ${verdict.reason}) ${await dump(start, verdict)}`);
+    console.log(`review-threads: ${description}: ${verdict.reason}; the step is redone once. `
+      + `${message(error)} ${await dump(start, verdict)}`);
+    try {
+      await redo();
+      await attempt();
+    } catch (second) {
+      throw new Error(`${message(second)} (redone after: ${verdict.reason}) ${await dump(start, verdict)}`);
+    }
+  }
 }
 
 /** review-annotations/r04-r06: create, reply and resolve a review thread with the mouse and keyboard. */
@@ -264,30 +407,57 @@ export async function scenarioReviewThreads(page: Page, evidence: Evidence): Pro
         "Reading mode; `quotable` was selected with a double-click, commented through the Comment button "
         + "and saved with Mod+Enter. The quote is highlighted and its popover shows the comment by Ada Reviewer.");
 
-      // Reply from the popover.
-      await withCurrentFrame(page, (frame) => frame.locator("[data-okf-comment-reply-input]").click());
-      await typeText(page, "Added in the next revision.");
-      await withCurrentFrame(page, (frame) => frame.locator("[data-okf-comment-reply-send]").click());
-      await waitFor("the reply in the sidecar", () => readThreads(sidecar)[0]?.comments.length === 2);
-      assert.equal(readThreads(sidecar)[0]!.comments[1]!.body, "Added in the next revision.");
-      await waitFor("the reply in the popover", () => withCurrentFrame(page, async (frame) =>
-        await frame.locator("[data-okf-comment-popover] [data-okf-comment-entry]").count() === 2));
-      await captureNow(evidence, page, "review-annotations/r05-thread-reply",
-        "The reply typed in the popover and sent with Reply is saved in the sidecar and listed after the first comment.");
+      // Reply from the popover. Each click is made on a state the page reported; a step whose state
+      // does not come is redone only when the page and the host prove an outside interruption.
+      const started: StepStart[] = [];
+      try {
+        const reply = "Added in the next revision.";
+        const beforeReply = threadCounters();
+        const dumpReply = (start: StepStart, verdict?: StepVerdict): Promise<string> =>
+          reviewThreadState(page, sidecar, beforeReply, start, verdict);
+        const replyStart = await stepStart(page, started);
+        await withCurrentFrame(page, (frame) => frame.locator("[data-okf-comment-reply-input]").click());
+        await typeText(page, reply);
+        await reachThreadState(page, "the typed reply in the open popover", replyStart, async () => {
+          const shown = await threadPopover(page);
+          return shown?.entries === 1 && shown.reply === reply;
+        }, async () => {
+          // The page never focuses the reply box itself: the click gives it the caret.
+          await reopenThreadPopover(page);
+          await withCurrentFrame(page, (frame) => frame.locator("[data-okf-comment-reply-input]").click());
+          await selectAllInControl(page, "[data-okf-comment-reply-input]", "the reply box");
+          await typeText(page, reply);
+        }, dumpReply);
+        const sendStart = await stepStart(page, started);
+        await withCurrentFrame(page, (frame) => frame.locator("[data-okf-comment-reply-send]").click());
+        await explained(page, () => waitFor("the reply in the sidecar", () => readThreads(sidecar)[0]?.comments.length === 2))
+          .catch(async (error: unknown) => { throw new Error(`${String(error)} ${await dumpReply(sendStart)}`); });
+        assert.equal(readThreads(sidecar)[0]!.comments[1]!.body, reply);
+        await reachThreadState(page, "the reply in the popover", sendStart,
+          async () => (await threadPopover(page))?.entries === 2, () => reopenThreadPopover(page), dumpReply);
+        await captureNow(evidence, page, "review-annotations/r05-thread-reply",
+          "The reply typed in the popover and sent with Reply is saved in the sidecar and listed after the first comment.");
 
-      // Resolve from the popover.
-      const beforeResolve = threadCounters();
-      await withCurrentFrame(page, (frame) => frame.locator("[data-okf-comment-resolve]").click());
-      await waitFor("the resolved thread in the sidecar", () => readThreads(sidecar)[0]?.resolved === true);
-      // CR 174: read without waiting for the element, and say what the page and the host held when
-      // the popover does not show Reopen (the page trace names what closed a popover).
-      await explained(page, () => waitFor("the resolved state in the popover", () => withCurrentFrame(page, (frame) =>
-        frame.evaluate(() => {
-          const buttons = window.document.querySelectorAll("[data-okf-comment-popover] [data-okf-comment-resolve]");
-          return buttons.length === 1 && buttons[0]!.textContent?.trim() === "Reopen";
-        }))).catch(async (error: unknown) => {
-        throw new Error(`${error instanceof Error ? error.message : String(error)} ${await reviewThreadState(page, sidecar, beforeResolve)}`);
-      }));
+        // Resolve from the popover, once the page shows it with both comments and Resolve enabled
+        // (no answer pending). CR 174: a failure says what the page and the host held (the page
+        // trace names what closed a popover).
+        const beforeResolve = threadCounters();
+        const dumpResolve = (start: StepStart, verdict?: StepVerdict): Promise<string> =>
+          reviewThreadState(page, sidecar, beforeResolve, start, verdict);
+        const readyStart = await stepStart(page, started);
+        await reachThreadState(page, "the popover with both comments and Resolve enabled", readyStart, async () => {
+          const shown = await threadPopover(page);
+          return shown?.entries === 2 && shown.action === "Resolve" && shown.actionEnabled;
+        }, () => reopenThreadPopover(page), dumpResolve);
+        const resolveStart = await stepStart(page, started);
+        await withCurrentFrame(page, (frame) => frame.locator("[data-okf-comment-popover] [data-okf-comment-resolve]").click());
+        await explained(page, () => waitFor("the resolved thread in the sidecar", () => readThreads(sidecar)[0]?.resolved === true))
+          .catch(async (error: unknown) => { throw new Error(`${String(error)} ${await dumpResolve(resolveStart)}`); });
+        await reachThreadState(page, "the resolved state in the popover", resolveStart,
+          async () => (await threadPopover(page))?.action === "Reopen", () => reopenThreadPopover(page), dumpResolve);
+      } finally {
+        started.forEach((start) => start.dispose());
+      }
       assert.equal(bufferText(document), text, "a review thread never edits the document");
       await captureNow(evidence, page, "review-annotations/r06-thread-resolved",
         "Resolve was clicked: the sidecar marks the thread resolved and the popover offers Reopen.");
