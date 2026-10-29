@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.1.0 - 2026-10-29
+
 - Studio runs in the VS Code Agents window: the extension declares its support, so VS Code no
   longer disables it there. Files of the active agent session open editable; other files open
   read-only.
@@ -11,6 +13,11 @@
 - Removing a workspace folder no longer closes the previews of its files: each tab stays open and
   shows its file read-only, until a folder that holds the file is added again. In the Agents
   window, switching agent sessions keeps the Studio tab.
+- A click in the body of a MyST admonition (`:::{note}` or the backtick fence form) in edit mode
+  opens the whole directive, like a GitHub alert, instead of the clicked paragraph only.
+  Context-tag panels such as `<instructions>` keep paragraph-level editing.
+- Saving comments replaces the comments file in one step: it no longer disappears for a moment, so
+  a tool or a reader that opens it at that time no longer fails to find it.
 
 ## 1.0.1 - 2026-10-29
 
