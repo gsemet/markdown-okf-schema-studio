@@ -18,6 +18,11 @@
  * pending content frames) blurs the preview's text box while the workbench still reports the
  * webview as focused. Its active element, `hasFocus` and focus moves name that hop.
  *
+ * The dump describes the moment it is read. A scenario's cleanup closes its editors (and the webview
+ * with them) before the error reaches the suite's handler, so a dump read there shows the empty
+ * editor group the close left and no webview host frame. `withFocusDumpOnFailure` reads it when the
+ * step fails, before that cleanup; a host frame list that is empty names the frames the page has.
+ *
  * VS Code focus context keys (`editorTextFocus`, `chatInputHasFocus`, ...) are not reachable from
  * the page: the context key service is internal, and the `getContextKeyInfo` command lists key
  * names, not values. The focused part derived from the DOM stands in for them.
@@ -199,14 +204,42 @@ export function describeWebviewFrameUrl(url: string): string {
   return "index.html" + (id ? ` id=${id}` : "") + (extension ? ` extension=${extension}` : "");
 }
 
+/** Short name of any frame of the workbench page, for the list of frames when no host frame is found. */
+function describePageFrameUrl(url: string): string {
+  if (isWebviewHostFrameUrl(url)) return describeWebviewFrameUrl(url);
+  const match = /^vscode-webview:\/\/[^/]+\/([^?#]*)(?:\?(?:[^#]*&)?id=([^&#]+))?/u.exec(url);
+  if (match !== null) return `webview ${match[1] || "/"}${match[2] ? ` id=${match[2]}` : ""}`;
+  const file = /([^/?#]+)(?:[?#].*)?$/u.exec(url)?.[1];
+  return file ?? (url.slice(0, 80) || "(no url)");
+}
+
+/**
+ * Why no webview host frame was read, from the URLs of every frame of the page: no webview is open
+ * (the frames listed are the workbench's own), or webview frames exist without their outer
+ * `index.html` (a host frame this dump does not recognise).
+ */
+export function explainMissingHostFrames(pageFrameUrls: readonly string[]): string {
+  const names = pageFrameUrls.map(describePageFrameUrl);
+  const listed = `${pageFrameUrls.length} frame(s) in the page: ${names.length === 0 ? "none" : names.join(", ")}`;
+  return pageFrameUrls.some((url) => url.startsWith("vscode-webview:"))
+    ? `webview frames without a recognised index.html host frame (${listed})`
+    : `no webview is open (${listed})`;
+}
+
 /**
  * The webview host frames as text, one fact per line: per frame its focus, active element path
- * and recent focus moves. No frame says so, an unanswered frame keeps the reason.
+ * and recent focus moves. No frame says so (and why, when the page's frame URLs are given); an
+ * unanswered frame keeps the reason.
  */
-export function formatWebviewHostFrames(frames: WebviewHostFrameResult[] | { unavailable: string }): string {
+export function formatWebviewHostFrames(
+  frames: WebviewHostFrameResult[] | { unavailable: string },
+  pageFrameUrls?: readonly string[],
+): string {
   const header = "Webview host frames (outer index.html around each webview content frame, read over CDP):";
   if (!Array.isArray(frames)) return `${header} unavailable: ${frames.unavailable}`;
-  if (frames.length === 0) return `${header} none attached`;
+  if (frames.length === 0) {
+    return `${header} none attached${pageFrameUrls === undefined ? "" : `: ${explainMissingHostFrames(pageFrameUrls)}`}`;
+  }
   const lines = [header];
   for (const frame of frames) {
     lines.push(`  ${describeWebviewFrameUrl(frame.url)}:`);
@@ -319,7 +352,34 @@ export async function workbenchFocusDump(page: EvaluatingPage | undefined, timeo
     collectWorkbenchFocusSnapshot(page, timeoutMs),
     collectWebviewHostFrames(page, timeoutMs),
   ]);
-  return `${formatWorkbenchFocusDump(main)}\n${formatWebviewHostFrames(frames)}`;
+  let pageFrameUrls: string[] | undefined;
+  if (Array.isArray(frames) && frames.length === 0) {
+    try {
+      pageFrameUrls = page?.frames?.().map((frame) => frame.url());
+    } catch {
+      // The list only explains the empty section; without it the section stays as it is.
+    }
+  }
+  return `${formatWorkbenchFocusDump(main)}\n${formatWebviewHostFrames(frames, pageFrameUrls)}`;
+}
+
+/**
+ * Runs `action`; when it throws, reads the dump at once (before the cleanup the caller runs after
+ * it, which closes the webview), hands it to `record`, and rethrows the same error. Without a page
+ * it only runs `action`. The dump is bounded and never throws (see `workbenchFocusDump`).
+ */
+export async function withFocusDumpOnFailure<T>(
+  page: EvaluatingPage | undefined,
+  action: () => Promise<T>,
+  record: (dump: string) => void,
+  timeoutMs?: number,
+): Promise<T> {
+  try {
+    return await action();
+  } catch (error) {
+    if (page !== undefined) record(await workbenchFocusDump(page, timeoutMs));
+    throw error;
+  }
 }
 
 /** Installs the focus trace in one window or frame, bounded; a failure only leaves it without one. */

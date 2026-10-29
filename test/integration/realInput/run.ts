@@ -24,7 +24,7 @@ import {
 import { scenarioTableStructure } from "../tableStructureReal";
 import { scenarioToc } from "../tocWindow";
 import { scenarioPerformanceProbe } from "../performanceProbe";
-import { setWorkbenchPage } from "./common";
+import { setWorkbenchPage, takeFailureFocusDump } from "./common";
 import { scenarioAlertTypePickProbe } from "./alertPickProbe";
 import { installWorkbenchFocusTrace, workbenchFocusDump } from "../../shared/workbenchFocusDump";
 import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
@@ -61,9 +61,6 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
   },
   "find-in-preview": (page) => scenarioFindInPreview(page),
-  // Does a user's alert type pick (keyboard, real mouse press) reach the file? Logs
-  // ALERT-PICK-PROBE lines; stress only, never in the integration list.
-  "alert-type-pick-probe": (page) => scenarioAlertTypePickProbe(page),
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */
@@ -151,6 +148,9 @@ export async function run(): Promise<void> {
     await scenarioLinkPanel(page, evidence);
     await scenarioLinkPanelPrefill(page, evidence);
     await scenarioAlertDropdown(page, evidence);
+    // Does a user's alert type pick (keyboard, real mouse press) reach the file? Logs
+    // ALERT-PICK-PROBE lines; runs once here, not in the stress rounds.
+    await scenarioAlertTypePickProbe(page);
     await scenarioFigureEditor(page, evidence);
     await scenarioPreviewKeepsMarkdown(page, evidence);
     await scenarioCaretAtClick(page, evidence);
@@ -199,8 +199,11 @@ export async function run(): Promise<void> {
     passed = true;
     complete = true;
   } catch (error) {
-    // Before the editors close and the browser detaches: where the workbench focus is now.
-    console.error(`Real-input failure: ${await workbenchFocusDump(page)}`);
+    // Where the workbench focus was when the step failed (read before the scenario closed its
+    // editors), then where it is now, after that cleanup and before the browser detaches.
+    const atFailure = takeFailureFocusDump();
+    if (atFailure !== undefined) console.error(`Real-input failure, at the failing step: ${atFailure}`);
+    console.error(`Real-input failure, after the scenario's cleanup: ${await workbenchFocusDump(page)}`);
     throw error;
   } finally {
     evidence.finish(passed, complete);

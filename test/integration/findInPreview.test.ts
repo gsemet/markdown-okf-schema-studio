@@ -13,7 +13,7 @@ import {
 } from "./extensionApi";
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
-import { ensureTestWindowFocused } from "./windowFocus";
+import { ensureTestWindowFocused, waitForActiveSourceEditor } from "./windowFocus";
 
 async function waitFor(
   description: string,
@@ -128,7 +128,7 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     await vscode.window.showTextDocument(notes, vscode.ViewColumn.One);
-    await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
+    await waitForActiveSourceEditor(notes);
     await vscode.commands.executeCommand(COMMAND_ID);
     await settle("the rendered preview", async () => {
       const preview = getActivePreviewForTests();
@@ -329,8 +329,8 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
       throw new Error(`${String(error)} (note: ${JSON.stringify(note)}, document: ${JSON.stringify(notes.getText())})`);
     });
     assert.match(note, /cannot be replaced from the preview/u);
-    await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
     await vscode.window.showTextDocument(notes, vscode.ViewColumn.One);
+    await waitForActiveSourceEditor(notes);
     await vscode.commands.executeCommand("undo");
     await settle("one undo step to restore the source", () => notes.getText() === SOURCE);
     await closePreview();

@@ -157,8 +157,9 @@ async function probeAlertPick(page: Page, mode: AlertPickMode): Promise<void> {
 }
 
 /**
- * Stress probe `alert-type-pick-probe`: does a user's pick in the alert type list reach the file,
- * with the keyboard and with a real mouse press? (See test/shared/alertPickProbe.ts.)
+ * Probe `alert-type-pick-probe` (once in the integration list): does a user's pick in the alert
+ * type list reach the file, with the keyboard and with a real mouse press? (See
+ * test/shared/alertPickProbe.ts.)
  */
 export async function scenarioAlertTypePickProbe(page: Page): Promise<void> {
   await probeAlertPick(page, "keyboard");

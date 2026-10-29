@@ -11,7 +11,7 @@ import {
 } from "./extensionApi";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { RealWindowEvidence } from "./evidence";
-import { traceDocumentChanges, windowFocusReport } from "./windowFocus";
+import { traceDocumentChanges, waitForActiveSourceEditor, windowFocusReport } from "./windowFocus";
 import { markProgress } from "../shared/hangWatchdog";
 import { bounded } from "./stepWatchdog";
 
@@ -180,7 +180,7 @@ export async function run(): Promise<void> {
       preserveFocus: false,
       preview: false,
     });
-    await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
+    await waitForActiveSourceEditor(document);
     const editorText = page.locator(".monaco-editor:visible .view-lines").first();
     await editorText.click();
     await page.keyboard.press(process.platform === "darwin" ? "Meta+z" : "Control+z");

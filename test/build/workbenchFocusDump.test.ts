@@ -6,11 +6,13 @@ import {
   collectWorkbenchFocusSnapshot,
   describeWebviewFrameUrl,
   type DumpFrame,
+  explainMissingHostFrames,
   focusedWorkbenchPart,
   formatWebviewHostFrames,
   formatWorkbenchFocusDump,
   installWorkbenchFocusTrace,
   isWebviewHostFrameUrl,
+  withFocusDumpOnFailure,
   workbenchFocusDump,
   type WebviewHostFrameSnapshot,
   type WorkbenchElement,
@@ -223,4 +225,51 @@ test("the host frames are read from the page's frames only, never throwing, and 
   navigated?.(frame("vscode-webview://new/index.html?id=new", async () => undefined));
   await new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual(evaluated, ["vscode-webview://new/index.html?id=new"]);
+});
+
+test("an empty host frame section says why: no webview open, or webview frames without a recognised host", () => {
+  assert.equal(explainMissingHostFrames([WORKBENCH_URL]), "no webview is open (1 frame(s) in the page: workbench.html)");
+  assert.equal(explainMissingHostFrames([]), "no webview is open (0 frame(s) in the page: none)");
+  assert.equal(explainMissingHostFrames([WORKBENCH_URL, CONTENT_URL]),
+    "webview frames without a recognised index.html host frame"
+    + " (2 frame(s) in the page: workbench.html, webview fake.html id=c8f4121a-1922)");
+  assert.equal(formatWebviewHostFrames([], [WORKBENCH_URL]),
+    "Webview host frames (outer index.html around each webview content frame, read over CDP):"
+    + " none attached: no webview is open (1 frame(s) in the page: workbench.html)");
+});
+
+/**
+ * The CI failure (stress, slash menu): the suite's handler read the dump after the scenario's
+ * cleanup had closed the preview, so it showed the empty editor group and "none attached". A dump
+ * read when the step fails, before that cleanup, still has the webview host frame.
+ */
+test("a dump read at the failing step keeps the webview host frame the later cleanup closes", async () => {
+  const workbench: DumpFrame = { url: () => WORKBENCH_URL, evaluate: (async () => CHAT_STOLE_FOCUS) as never };
+  const host: DumpFrame = { url: () => HOST_URL, evaluate: (async () => HOST_LOST_CONTENT) as never };
+  const content: DumpFrame = { url: () => CONTENT_URL, evaluate: (async () => ({})) as never };
+  let frames = [workbench, host, content];
+  const page = { evaluate: (async () => CHAT_STOLE_FOCUS) as never, frames: () => frames };
+  const closeEditors = (): void => { frames = [workbench]; };
+
+  const recorded: string[] = [];
+  const failure = new Error("Timed out waiting for the menu to open for /tab.");
+  await assert.rejects(async () => {
+    try {
+      await withFocusDumpOnFailure(page, async () => { throw failure; }, (dump) => recorded.push(dump), 30);
+    } finally {
+      closeEditors();
+    }
+  }, (error: unknown) => error === failure);
+  assert.equal(recorded.length, 1);
+  assert.match(recorded[0]!, /\nWebview host frames .*:\n {2}index\.html id=c8f4121a-1922 extension=GaetanSemet/u);
+
+  // Read after the cleanup, as the suite's handler did: the section explains its emptiness.
+  assert.match(await workbenchFocusDump(page, 30),
+    /\nWebview host frames .*: none attached: no webview is open \(1 frame\(s\) in the page: workbench\.html\)$/u);
+
+  // A passing step records nothing; without a page the step only runs.
+  assert.equal(await withFocusDumpOnFailure(page, async () => 42, (dump) => recorded.push(dump)), 42);
+  await assert.rejects(withFocusDumpOnFailure(undefined, async () => { throw failure; }, (dump) => recorded.push(dump)),
+    (error: unknown) => error === failure);
+  assert.equal(recorded.length, 1);
 });

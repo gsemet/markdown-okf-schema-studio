@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { type Page } from "playwright-core";
 
 import { captureByLegacy } from "../../shared/captureRegistry";
+import { withFocusDumpOnFailure } from "../../shared/workbenchFocusDump";
 import {
   closeAllEditors,
   createFixture,
@@ -82,6 +83,19 @@ export function setWorkbenchPage(page: Page | undefined): void {
   workbenchPage = page;
 }
 
+let failureDump: string | undefined;
+
+/**
+ * The workbench focus dump read when a scenario failed, before its cleanup closed the editors (see
+ * withDocument), then forgotten. The suite's own handler runs after that cleanup, when the webview
+ * is gone and an empty editor group holds the focus.
+ */
+export function takeFailureFocusDump(): string | undefined {
+  const dump = failureDump;
+  failureDump = undefined;
+  return dump;
+}
+
 /**
  * Edit mode persists per workspace, so a scenario that leaves it on would start the next one in
  * edit mode. Switches it off in the current webview, if there is one.
@@ -119,7 +133,9 @@ export async function withDocument(
     if (schemaYaml !== undefined) writeSchema(fixture.directory, "req", schemaYaml);
     const document = await vscode.workspace.openTextDocument(vscode.Uri.file(fixture.path("smoke.md")));
     try {
-      await scenario(document);
+      // The first failure keeps its dump: an outer withDocument sees the same error again.
+      await withFocusDumpOnFailure(workbenchPage, () => scenario(document),
+        (dump) => { failureDump ??= `scenario fixture ${prefix}\n${dump}`; });
     } finally {
       await leaveEditModeOff();
       await closeAllEditors();
