@@ -1,6 +1,7 @@
 import type { Page } from "playwright-core";
 import * as vscode from "vscode";
 import { activateMacProcess, macFocusDiagnostics } from "./macWindow";
+import { workbenchFocusDump } from "../shared/workbenchFocusDump";
 
 /**
  * The real-window suites drive VS Code through CDP. On macOS that only works once the test window
@@ -61,10 +62,13 @@ function hostFocusReport(): string {
 /**
  * What the host, the workbench page and the OS held when a focus-dependent step failed: the VS Code
  * build, the window focus VS Code reports, the active editor, the page's focus and which code editor
- * has the text focus (by model URI), any workbench toast or dialog, and on macOS the frontmost app.
+ * has the text focus (by model URI), any workbench toast or dialog, and on macOS the frontmost app,
+ * then the workbench focus dump (focused part, active element path, visible parts, toasts, recent
+ * focus moves: workbenchFocusDump.ts), read first so it is the closest to the failure.
  * Failure messages of undo and typing waits carry it (CI guidelines rule 12).
  */
 export async function windowFocusReport(page: Page): Promise<string> {
+  const workbench = await workbenchFocusDump(page);
   const frames = await Promise.all(page.frames().map(async (frame) => {
     try {
       return { url: frame.url(), state: await frame.evaluate(() => ({
@@ -99,7 +103,7 @@ export async function windowFocusReport(page: Page): Promise<string> {
   } catch (error) {
     pageState = `unavailable: ${String(error)}`;
   }
-  return `${hostFocusReport().slice(0, -1)},"page":${JSON.stringify(pageState)},"frames":${JSON.stringify(frames)}}`;
+  return `${hostFocusReport().slice(0, -1)},"page":${JSON.stringify(pageState)},"frames":${JSON.stringify(frames)}}\n${workbench}`;
 }
 
 /** One content change seen by a document trace, as `onDidChangeTextDocument` reported it. */

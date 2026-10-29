@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 
 import { disposeActivePreviewForTests, getActivePreviewForTests, getActivePreviewPanelForTests } from "./extensionApi";
 import { captureByLegacy, captureFile } from "../shared/captureRegistry";
+import { installWorkbenchFocusTrace, workbenchFocusDump } from "../shared/workbenchFocusDump";
 import { RealWindowEvidence } from "./evidence";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
 import { ensureTestWindowFocused } from "./windowFocus";
@@ -280,6 +281,7 @@ export async function run(): Promise<void> {
   const browser = await chromium.connectOverCDP(`http://127.0.0.1:${process.env.STUDIO_CDP_PORT}`);
   const page = browser.contexts()[0].pages().find((candidate) => candidate.url().includes("workbench"));
   assert.ok(page, "the VS Code workbench is attached");
+  await installWorkbenchFocusTrace(page); // for the failure dump (workbenchFocusDump.ts)
   await page.setViewportSize({ width: 1440, height: 900 });
   const directory = fs.mkdtempSync(path.join("/tmp", "studio-scroll-"));
   const filePath = path.join(directory, "long-scroll.md");
@@ -695,6 +697,7 @@ export async function run(): Promise<void> {
   } catch (error) {
     outcome = "fail";
     suiteError = error instanceof Error ? error.stack ?? error.message : String(error);
+    console.error(`Scroll-sync failure in ${scenario}: ${await workbenchFocusDump(page)}`);
     try {
       const image = `FAILED-${scenario}.png`;
       await page.screenshot({ path: path.join(artifacts, image) });

@@ -4,6 +4,7 @@ import * as path from "node:path";
 
 import { downloadAndUnzipVSCode, runTests } from "@vscode/test-electron";
 import { runReloadCampaign } from "./reload-suite";
+import { testProfileLaunchArgs, writeTestProfileSettings } from "../shared/testProfile";
 import { E2E_REPORT_ROOT, E2E_SCREENSHOT_ROOT } from "../reportPaths";
 import { createRunDirectories, freePort, instanceIdFromEnvironment, instanceTag } from "../shared/runIsolation";
 
@@ -40,15 +41,14 @@ async function runUntrustedScenario(suiteName: string): Promise<void> {
   const directories = createRunDirectories(instanceId);
   const { userDataDirectory, extensionsDirectory } = directories;
   const debugPort = await freePort();
-  fs.mkdirSync(path.join(userDataDirectory, "User"), { recursive: true });
-  fs.writeFileSync(path.join(userDataDirectory, "User", "settings.json"),
-    JSON.stringify({ "security.workspace.trust.startupPrompt": "never" }, null, 2));
+  writeTestProfileSettings(userDataDirectory); // focus thieves off, trust prompt off (testProfile.ts)
   const args = [
     "--no-sandbox",
     "--disable-gpu-sandbox",
     "--disable-updates",
     "--skip-welcome",
     "--skip-release-notes",
+    ...testProfileLaunchArgs(),
     `--user-data-dir=${userDataDirectory}`,
     `--extensions-dir=${extensionsDirectory}`,
     `--extensionTestsPath=${path.join(__dirname, suiteName)}`,
@@ -81,6 +81,7 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
   }
   const directories = createRunDirectories(instanceId);
   const { userDataDirectory, extensionsDirectory } = directories;
+  writeTestProfileSettings(userDataDirectory); // focus thieves off (testProfile.ts)
   const workspaceDirectory = fs.mkdtempSync(path.join("/tmp", `studio-${instanceTag(instanceId)}-w-`));
   const workspaceFile = path.join(workspaceDirectory, "liveview.code-workspace");
   fs.writeFileSync(
@@ -100,6 +101,7 @@ async function runScenario(suiteName: string, untrusted: boolean): Promise<void>
   const browserSuite = suiteName === "scroll-sync-suite.js" || suiteName === "trusted-suite.js";
   const debugPort = browserSuite ? await freePort() : undefined;
   const launchArgs = ["--user-data-dir", userDataDirectory, "--extensions-dir", extensionsDirectory, workspaceFile];
+  launchArgs.push(...testProfileLaunchArgs());
   if (debugPort !== undefined) {
     launchArgs.push(`--remote-debugging-port=${debugPort}`, "--remote-debugging-address=127.0.0.1");
   }
