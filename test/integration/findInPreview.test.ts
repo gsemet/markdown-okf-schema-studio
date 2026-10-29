@@ -74,15 +74,41 @@ const LIGHT_THEME = "Default Light Modern";
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-014
 export async function run(): Promise<void> {
   assert.ok(process.env.STUDIO_CDP_PORT, "the trusted suite must expose a loopback CDP port");
-  const before = process.env.STUDIO_FIND_PHASE === "before";
   await vscode.extensions.getExtension("GaetanSemet.markdown-okf-schema-studio")?.activate();
   await ensureTestWindowFocused();
   const browser: Browser = await chromium.connectOverCDP(`http://127.0.0.1:${process.env.STUDIO_CDP_PORT}`);
-  const page = browser.contexts()[0]?.pages().find((candidate) => candidate.url().includes("workbench"));
-  assert.ok(page, "the VS Code workbench is attached");
+  try {
+    const page = browser.contexts()[0]?.pages().find((candidate) => candidate.url().includes("workbench"));
+    assert.ok(page, "the VS Code workbench is attached");
+    await scenarioFindInPreview(page, {
+      before: process.env.STUDIO_FIND_PHASE === "before",
+      shotDirectory: process.env.STUDIO_FIND_SHOTS ?? path.join(E2E_REPORT_ROOT, "find-in-preview"),
+    });
+  } finally {
+    await browser.close();
+  }
+}
+
+export interface FindScenarioOptions {
+  /** Only the screenshots, on the code that has no find bar (no check). */
+  before?: boolean;
+  /** Where the screenshots go; none when undefined (the stress rounds). */
+  shotDirectory?: string;
+}
+
+/**
+ * The find scenario on the workbench `page`: cream then dark, with find, match case, a folded
+ * section and replace all. The stress plan repeats it (`find-in-preview`, CI rule 12), so it leaves
+ * the window as it found it: viewport, colour theme, stored choices and stored edit mode restored,
+ * no open editor, the temporary folder removed. Every wait is on a reported state.
+ */
+export async function scenarioFindInPreview(page: Page, options: FindScenarioOptions = {}): Promise<void> {
+  const before = options.before === true;
+  const shotDirectory = options.shotDirectory;
   const extensionRoot = path.resolve(__dirname, "../../..");
-  const shotDirectory = process.env.STUDIO_FIND_SHOTS ?? path.join(E2E_REPORT_ROOT, "find-in-preview");
-  fs.mkdirSync(shotDirectory, { recursive: true });
+  if (shotDirectory !== undefined) fs.mkdirSync(shotDirectory, { recursive: true });
+  const viewport = page.viewportSize();
+  const editModeBefore = storedEditModeForTests();
   const directory = fs.mkdtempSync(path.join(extensionRoot, "test", "integration", "fixtures", "find-e2e-"));
   const filePath = path.join(directory, "field-notes.md");
   fs.writeFileSync(filePath, SOURCE);
@@ -91,6 +117,7 @@ export async function run(): Promise<void> {
   const notes = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
   const find = process.platform === "darwin" ? "Meta+F" : "Control+F";
   const shoot = async (name: string): Promise<void> => {
+    if (shotDirectory === undefined) return;
     await page.mouse.move(5, 5);
     await page.screenshot({ path: path.join(shotDirectory, `${before ? "before" : "after"}-${name}.png`) });
   };
@@ -286,13 +313,25 @@ export async function run(): Promise<void> {
     await (await liveFrame(page)).locator("[data-find-toggle-replace]").click();
     await (await liveFrame(page)).locator("[data-find-replace-input]").fill("atelier");
     await shoot("dark-find");
+
+    // Leave the window as found: the bar closed (nothing replaced), and edit mode off again when it
+    // was not on before, the host remembering it, so the next stress scenario starts as usual.
+    await page.keyboard.press("Escape");
+    await settle("the bar to close", async () => !(await bar(await liveFrame(page)).isVisible()));
+    assert.equal(notes.getText(), SOURCE, "the replace typed in the dark preview was not applied");
+    if (editModeBefore !== true) {
+      await (await liveFrame(page)).locator("[data-sphinx-preview-edit-toggle]").click();
+      await settle("edit mode off", async () =>
+        await (await liveFrame(page)).locator("html").getAttribute("data-sphinx-preview-edit-mode") === "off");
+      await settle("the workspace to remember edit mode off", () => storedEditModeForTests() !== true);
+    }
   } finally {
     disposeActivePreviewForTests();
     await pinStoredWorkspaceChoices();
     await workbench.update("colorTheme", originalTheme, vscode.ConfigurationTarget.Workspace);
     await vscode.window.showTextDocument(notes, vscode.ViewColumn.One);
     await vscode.commands.executeCommand("workbench.action.revertAndCloseActiveEditor");
-    await browser.close();
+    if (viewport !== null) await page.setViewportSize(viewport);
     fs.rmSync(directory, { recursive: true, force: true });
   }
 }

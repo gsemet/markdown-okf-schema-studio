@@ -69,6 +69,8 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "alert-dropdown",
     // The edit toggle right after a host theme change: three clicks once did not switch it.
     "toc",
+    // Find in preview: a late block editor focus once failed it on a heavy run only.
+    "find-in-preview",
   ],
   untrusted: ["untrusted-read-only"],
 };

@@ -55,5 +55,5 @@ When the reader presses Cmd+F (macOS) or Ctrl+F (other systems) with the focus i
 ### Verification notes
 
 - Method: test/page/modules/findBar.test.ts (the key opens the bar with the field focused and prevents the default; a text area keeps the key; Escape closes the bar, clears the paint and restores the focus; F3 is free again once the bar is closed).
-- Method: test/integration/findInPreview.test.ts, real VS Code window (the bar opens on the key, the native webview find widget stays closed, the cream and dark shots).
+- Method: test/integration/findInPreview.test.ts, real VS Code window (the bar opens on the key, the native webview find widget stays closed, the cream and dark shots); the same scenario is repeated by the `stress` CI job as `find-in-preview` (test/shared/stressPlan.ts), cream and dark, so a late focus change shows up as a stress failure.
 - Criteria: the bar is visible and its field has the focus; no webview find widget is shown.

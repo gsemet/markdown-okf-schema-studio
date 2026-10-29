@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-10-29 (find in preview in the stress plan, CR 190)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-009, SwRS-MDOKFSTUDIO-TOOLBAR-012: verification notes only. The
+  real-window find scenario (cream and dark, with replace all) is now repeated by the `stress` CI
+  job as `find-in-preview`, so a timing race such as a late block editor focus shows up as a stress
+  failure. No behaviour, assertion or timeout changed.
+
 ## 2026-10-29 (re-run recovery used the artifacts of the first attempt)
 
 - SwRS-MDOKFSTUDIO-CORE-076: extended (still proposed). After "Re-run failed jobs", a download by a
