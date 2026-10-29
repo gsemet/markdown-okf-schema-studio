@@ -23,6 +23,7 @@ implemented_in_files:
 - src/core/render/mystContextTags.ts
 tested_in_files:
 - test/core/render/mystFeatures.test.ts
+- test/session/alertBlockEditOpen.test.ts
 - test/visual/scenarioDefinitions1.ts
 default_owner_email: gaetan@xeberon.net
 supersedes:

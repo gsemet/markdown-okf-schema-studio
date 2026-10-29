@@ -134,9 +134,16 @@ export function createMappedBlocks(document: Document, context: PreviewRuntimeCo
   }
 
   function editingElementFor(target: HTMLElement): ReturnType<MappedBlocks["editingElementFor"]> {
-    // A block in the body of a GitHub alert (a paragraph, a list) edits the whole alert, like a
-    // click on its title; an alert inside a list item edits that alert, not the list.
-    const alert = target.closest?.<HTMLElement>("[data-okf-github-alert]");
+    // A block in the body of a GitHub alert or of a MyST admonition (a paragraph, a list) edits the
+    // whole alert or directive, like a click on its title; the nearest one wins, and one inside a
+    // list item edits that block, not the list.
+    // A context-tag panel (SwRS-MDOKFSTUDIO-MYST-013) is not an admonition directive: a click in its
+    // body keeps opening the clicked block only.
+    const alertSelector = "[data-okf-github-alert], aside.admonition, details.admonition";
+    let alert = target.closest?.<HTMLElement>(alertSelector) ?? null;
+    while (alert && alert.getAttribute("class")?.split(/\s+/u).includes("myst-context-admonition")) {
+      alert = alert.parentElement?.closest?.<HTMLElement>(alertSelector) ?? null;
+    }
     if (alert) {
       const sourceRange = sourceRangeForAlert(alert, target);
       if (sourceRange) return { element: alert, sourceRange };

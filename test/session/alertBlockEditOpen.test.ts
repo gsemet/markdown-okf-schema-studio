@@ -243,7 +243,54 @@ const MYST_ADMONITION = [
 ].join("\n");
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
-test("a click on a paragraph in the body of a MyST admonition still opens that paragraph only", async () => {
+test("a click on a paragraph in the body of a MyST admonition opens the whole directive", async () => {
   const opened = await openByClick(MYST_ADMONITION, "The second paragraph of the admonition.");
-  assert.deepEqual([opened.line, opened.endLine], [4, 4]);
+  assert.deepEqual([opened.line, opened.endLine], [1, 5]);
+  assert.equal(opened.originalText, MYST_ADMONITION);
+});
+
+const COLON_ADMONITION = [
+  "Before.",
+  "",
+  ":::{warning}",
+  "The first paragraph of the warning.",
+  "",
+  "- a list item in the warning",
+  "- another list item",
+  ":::",
+  "",
+  "After.",
+  "",
+].join("\n");
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+test("a click in the body of a colon-fence admonition opens the whole directive, also from a list item", async () => {
+  for (const text of ["The first paragraph of the warning.", "another list item"]) {
+    const opened = await openByClick(COLON_ADMONITION, text);
+    assert.deepEqual([opened.line, opened.endLine], [3, 8], `click on "${text}"`);
+    assert.equal(opened.originalText, linesOf(COLON_ADMONITION, 3, 8));
+  }
+  const after = await openByClick(COLON_ADMONITION, "After.");
+  assert.deepEqual([after.line, after.endLine], [10, 10]);
+});
+
+const CONTEXT_TAG = [
+  "Before.",
+  "",
+  "<instructions>",
+  "",
+  "The first paragraph of the instructions.",
+  "",
+  "- a list item in the instructions",
+  "",
+  "</instructions>",
+  "",
+].join("\n");
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-014
+// @tests_req SwRS-MDOKFSTUDIO-MYST-013
+test("a click in the body of a context-tag panel still opens the clicked paragraph only", async () => {
+  const opened = await openByClick(CONTEXT_TAG, "The first paragraph of the instructions.");
+  assert.deepEqual([opened.line, opened.endLine], [5, 5]);
+  assert.equal(opened.originalText, linesOf(CONTEXT_TAG, 5, 5));
 });
