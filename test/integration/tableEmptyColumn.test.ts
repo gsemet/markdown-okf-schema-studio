@@ -12,7 +12,7 @@ import {
 } from "./extensionApi";
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
-import { ensureTestWindowFocused } from "./windowFocus";
+import { ensureTestWindowFocused, waitForActiveSourceEditor } from "./windowFocus";
 
 async function waitFor(description: string, predicate: () => boolean | Promise<boolean>, timeoutMs = 15_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -104,7 +104,7 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     await vscode.window.showTextDocument(roles, vscode.ViewColumn.One);
-    await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
+    await waitForActiveSourceEditor(roles);
     await vscode.commands.executeCommand(COMMAND_ID);
     let frame = await currentPreviewFrame(page, roles);
     await waitFor("the cream preview theme on the dark host", async () => {
