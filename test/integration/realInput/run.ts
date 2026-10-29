@@ -21,6 +21,7 @@ import {
   scenarioReviewThreads,
 } from "../realWindowGaps";
 import { scenarioTableStructure } from "../tableStructureReal";
+import { scenarioToc } from "../tocWindow";
 import { scenarioPerformanceProbe } from "../performanceProbe";
 import { setWorkbenchPage } from "./common";
 import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
@@ -50,6 +51,11 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
   "slash-menu": scenarioSlashMenu,
   "save-position": scenarioSaveKeepsBlockInPlace,
   "alert-dropdown": scenarioAlertDropdown,
+  // The scenario reopens the sidebar it closed; the other stress scenarios run without it.
+  toc: async (page) => {
+    await scenarioToc(page);
+    await vscode.commands.executeCommand("workbench.action.closeSidebar");
+  },
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */

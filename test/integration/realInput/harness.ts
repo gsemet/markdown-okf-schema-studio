@@ -222,30 +222,221 @@ export async function withCurrentFrame<T>(
   }
 }
 
+const EDIT_TOGGLE = "[data-sphinx-preview-edit-toggle]";
+
+/** What the page and its edit toggle held at one moment of {@link setEditMode}. */
+interface EditToggleState {
+  /** The render the frame shows (`requestId@version`). */
+  render: string;
+  /** `data-sphinx-preview-edit-mode` of `<html>`. */
+  mode: string | null;
+  toggle?: {
+    dataEditMode: string | null;
+    ariaPressed: string | null;
+    ariaDisabled: string | null;
+    visible: boolean;
+    pointerEvents: string;
+    box: string;
+    /** The element at the toggle's centre in the webview, and whether it is (inside) the toggle. */
+    hit: string;
+    hitIsToggle: boolean;
+  };
+  /** The element at the toggle's centre in the workbench: the webview iframe unless something covers it. */
+  workbenchHit?: string;
+  focus: string;
+  /** Clicks that reached the toggle in this frame since the probe was installed (counted at `document`, capture phase). */
+  clicks: number;
+  /** Uncaught errors of the frame since the probe was installed (the last five). */
+  errors: string[];
+}
+
 /**
- * Clicks the edit toggle until the webview reports the wanted mode. A click can be lost while the
- * webview is still settling after a render, so each click gets a short wait before the next try.
+ * Reads the edit toggle state of `frame`. The first read installs a probe in the frame: a
+ * capture-phase click counter on the toggle and an `error` listener. Both only record; neither
+ * stops or changes an event.
+ */
+async function editToggleState(page: Page, frame: Frame): Promise<EditToggleState> {
+  const state = await frame.evaluate((selector): EditToggleState => {
+    type Probe = { clicks: number; errors: string[] };
+    const scope = window as unknown as { studioEditToggleProbe?: Probe };
+    let probe = scope.studioEditToggleProbe;
+    if (probe === undefined) {
+      const created: Probe = { clicks: 0, errors: [] };
+      document.addEventListener("click", (event) => {
+        if (event.target instanceof Element && event.target.closest(selector)) created.clicks += 1;
+      }, true);
+      window.addEventListener("error", (event) => {
+        created.errors.push(String(event.message || event.error));
+      });
+      scope.studioEditToggleProbe = created;
+      probe = created;
+    }
+    const describe = (element: Element | null): string => {
+      if (element === null) return "none";
+      const marks = Array.from(element.attributes)
+        .filter((attribute) => attribute.name.startsWith("data-sphinx-preview") || attribute.name === "class")
+        .slice(0, 3)
+        .map((attribute) => `[${attribute.name}${attribute.value ? `=${attribute.value.slice(0, 40)}` : ""}]`);
+      return `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${marks.join("")}`;
+    };
+    const root = document.documentElement;
+    const button = document.querySelector<HTMLElement>(selector);
+    let toggle: EditToggleState["toggle"];
+    if (button !== null) {
+      const rect = button.getBoundingClientRect();
+      const style = getComputedStyle(button);
+      const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      toggle = {
+        dataEditMode: button.getAttribute("data-edit-mode"),
+        ariaPressed: button.getAttribute("aria-pressed"),
+        ariaDisabled: button.getAttribute("aria-disabled"),
+        visible: rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none",
+        pointerEvents: style.pointerEvents,
+        box: [rect.left, rect.top, rect.width, rect.height].map((value) => Math.round(value)).join(","),
+        hit: describe(hit),
+        hitIsToggle: hit !== null && button.contains(hit),
+      };
+    }
+    return {
+      render: `${root.getAttribute("data-sphinx-preview-request-id")}@${root.getAttribute("data-sphinx-preview-document-version")}`,
+      mode: root.getAttribute("data-sphinx-preview-edit-mode"),
+      toggle,
+      focus: describe(document.activeElement),
+      clicks: probe.clicks,
+      errors: probe.errors.slice(-5),
+    };
+  }, EDIT_TOGGLE);
+  if (state.toggle !== undefined) {
+    // Diagnostic only: a short, non-fatal read, so a toggle that disappears (a document load in the
+    // same frame) never turns this read into the failure and the state above is always recorded.
+    const box = await frame.locator(EDIT_TOGGLE).boundingBox({ timeout: 250 }).catch(() => null);
+    state.workbenchHit = box === null ? "unreadable" : await page.evaluate(([x, y]) => {
+      const element = document.elementFromPoint(x, y);
+      if (element === null) return "none";
+      const classes = typeof element.className === "string" ? element.className.trim().split(/\s+/u).filter(Boolean) : [];
+      return `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${classes.map((name) => `.${name}`).join("")}`;
+    }, [box.x + box.width / 2, box.y + box.height / 2] as const).catch(() => "unreadable");
+  }
+  return state;
+}
+
+/**
+ * Waits until the current frame's page runtime has booted: `data-sphinx-preview-edit-mode` is set
+ * at runtime by `initializeContent`, after the edit toggle's click handler is bound, and no server
+ * HTML carries it. Before that, a click on the toggle reaches no handler.
+ */
+async function waitForEditModeRuntime(page: Page): Promise<void> {
+  let last = "no current frame";
+  try {
+    await waitFor("the page runtime to set its edit mode", async () => {
+      const frame = await findCurrentFrame(page);
+      if (frame === undefined) {
+        last = "no current frame";
+        return false;
+      }
+      const mode = await frame.locator("html").getAttribute("data-sphinx-preview-edit-mode");
+      last = `mode ${String(mode)}, webviewReady ${String(getActivePreviewForTests()?.webviewReady)}`;
+      return mode !== null;
+    });
+  } catch (error) {
+    throw new Error(`${String(error)} Last read: ${last}`);
+  }
+}
+
+/**
+ * Clicks the edit toggle until the current render reports the wanted mode. It first waits until
+ * the page runtime has booted (the edit mode attribute is set), and never clicks a page that has
+ * not. Before each click the toggle must be present and enabled; its state (attributes, box, the
+ * element at its centre in the webview and in the workbench, focus) is recorded. After the click
+ * the outcome is read on the frame that was clicked:
+ * - the frame was replaced, or the click never reached the toggle in the page (the capture-phase
+ *   counter did not move): the click was lost, and only then the next attempt clicks again;
+ * - the click reached the toggle in the page but the page did not report the wanted mode, or the
+ *   next render brought the old mode back: the page misbehaved, and the helper fails at once. The
+ *   counter does not prove that the toggle's own listener ran (a listener between the document
+ *   and the toggle could stop the event); `errors` shows a throw in the page.
+ * Every failure message carries the recorded state of each attempt.
  */
 export async function setEditMode(page: Page, on: boolean): Promise<Frame> {
   const wanted = on ? "on" : "off";
   const maxClicks = 3;
-  for (let click = 0; ; click += 1) {
-    const mode = await withCurrentFrame(page, (frame) =>
-      frame.locator("html").getAttribute("data-sphinx-preview-edit-mode"));
-    if (mode === wanted) return currentPreviewFrame(page);
-    if (click === maxClicks) throw new Error(`Edit mode did not switch to ${wanted} after ${maxClicks} clicks.`);
-    await withCurrentFrame(page, (current) => current.locator("[data-sphinx-preview-edit-toggle]").click());
+  const maxBootWaits = 3;
+  const attempts: string[] = [];
+  const failure = (reason: string): Error => new Error(
+    `Edit mode did not switch to ${wanted}: ${reason}. Attempts: ${attempts.join(" | ") || "none"}`);
+  let bootWaits = 0;
+  for (let click = 1; click <= maxClicks; click += 1) {
+    await waitForEditModeRuntime(page);
+    // One action on one frame: read the state, then click. When the frame is replaced during the
+    // action, withCurrentFrame runs it again on the new frame, which reads the state first. A new
+    // frame whose runtime has not booted yet (mode null) is not clicked.
+    const before = await withCurrentFrame(page, async (frame) => {
+      const state = await editToggleState(page, frame);
+      const clickable = state.mode !== null && state.mode !== wanted
+        && state.toggle !== undefined && state.toggle.ariaDisabled !== "true";
+      if (clickable) await frame.locator(EDIT_TOGGLE).click();
+      return { frame, state };
+    });
+    if (before.state.mode === null) {
+      // Not clicked and not counted: a replacement frame has not booted yet. Wait for it again.
+      bootWaits += 1;
+      attempts.push(`#${click} not clicked, the page runtime has not booted: ${JSON.stringify(before.state)}`);
+      if (bootWaits > maxBootWaits) throw failure(`the current frame was replaced by an unbooted page ${bootWaits} times`);
+      click -= 1;
+      continue;
+    }
+    attempts.push(`#${click} before ${JSON.stringify(before.state)}`);
+    if (before.state.mode === wanted) return currentPreviewFrame(page);
+    if (before.state.toggle === undefined) throw failure("the page has no edit toggle");
+    if (before.state.toggle.ariaDisabled === "true") throw failure("the edit toggle is disabled (read-only preview)");
+    // The outcome, read on the clicked frame: the page handles the click in the same task as the
+    // probe's counter, so a counted click comes with the page's answer to it.
+    // Assigned in the poll below (`as` keeps TypeScript from narrowing them to their start values).
+    let after = undefined as EditToggleState | undefined;
+    let replaced = false as boolean;
     try {
-      await waitFor(`edit mode ${wanted}`, async () => {
+      await waitFor("the click to reach the edit toggle", async () => {
+        if (before.frame.isDetached()) {
+          replaced = true;
+          return true;
+        }
+        after = await editToggleState(page, before.frame);
+        return after.clicks > before.state.clicks;
+      }, 1_500);
+    } catch (error) {
+      // Not reached in time: recorded below as a lost click. Any other error is final.
+      if (!String(error).includes("Timed out waiting for the click to reach the edit toggle")) throw error;
+    }
+    if (replaced || after === undefined) {
+      attempts.push(`#${click} lost: the clicked frame was replaced`);
+      continue;
+    }
+    if (after.clicks === before.state.clicks) {
+      attempts.push(`#${click} lost: the click never reached the toggle in the page; after ${JSON.stringify(after)}`);
+      continue;
+    }
+    attempts.push(`#${click} reached the toggle; after ${JSON.stringify(after)}`);
+    if (after.mode !== wanted) {
+      throw failure(`click #${click} reached the toggle in the page and the page shows mode ${after.mode} `
+        + `(it showed ${before.state.mode} before the click)`);
+    }
+    try {
+      await waitFor(`the current render to keep edit mode ${wanted}`, async () => {
         const current = await findCurrentFrame(page);
         return current !== undefined
           && await current.locator("html").getAttribute("data-sphinx-preview-edit-mode") === wanted;
-      }, 1_500);
-      return currentPreviewFrame(page);
+      });
     } catch {
-      // The click was lost or not applied yet; re-check the mode and click again.
+      const current = await findCurrentFrame(page).catch(() => undefined);
+      const now = current === undefined
+        ? "no current frame"
+        : await editToggleState(page, current).then((state) => JSON.stringify(state), (error: unknown) => String(error));
+      throw failure(`the page switched to ${wanted} on click #${click}, then the current render shows ${now}`);
     }
+    if (click > 1) console.log(`setEditMode ${wanted}: switched on click #${click}. Attempts: ${attempts.join(" | ")}`);
+    return currentPreviewFrame(page);
   }
+  throw failure(`the toggle missed ${maxClicks} clicks`);
 }
 
 export async function blockEditor(frame: Frame): Promise<Locator> {

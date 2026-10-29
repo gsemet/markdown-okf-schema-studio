@@ -67,6 +67,8 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "slash-menu",
     "save-position",
     "alert-dropdown",
+    // The edit toggle right after a host theme change: three clicks once did not switch it.
+    "toc",
   ],
   untrusted: ["untrusted-read-only"],
 };
