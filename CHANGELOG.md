@@ -22,6 +22,11 @@
   it kills the VS Code processes and names the last step. Every timeout writes a dump (processes,
   VS Code log tails, window state and tabs, screenshots) under `out/reports/e2e/hang-dumps/`, and
   the CI integration step stops at 20 minutes, then `just ci-hang-dump` collects what is left.
+- Mermaid flowchart labels are no longer cut off in the VS Code preview ("Yes|", "Nc", "Hold and
+  inspe", "Swap with a spar"). The page's security policy blocked Mermaid's own style sheet while
+  Mermaid measured the labels, so they were measured in the page font and size and drawn wider in
+  the diagram picture. Labels are now measured in a page element styled like the picture, and
+  measured and drawn with the same pinned system font and size. Labels stay HTML labels.
 
 ## 1.0.0 - 2026-10-28
 

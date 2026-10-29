@@ -1,3 +1,4 @@
+import { MERMAID_FONT_FAMILY, MERMAID_FONT_SIZE, MERMAID_MEASURE_CLASS } from "../../core/render/mermaidFont";
 import { createMermaidCache, diagramKey } from "./mermaidCache";
 import { showMermaidError } from "./mermaidError";
 
@@ -62,6 +63,11 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
   ) as NonNullable<Parameters<typeof mermaid.initialize>[0]>;
 
   const renderDiagrams = async (pending: readonly HTMLElement[]): Promise<void> => {
+    // Mermaid measures label text while it draws, so wait for the page fonts: a label measured
+    // with a fallback font gets a box that is too narrow for the font shown later.
+    await document.fonts?.ready;
+    // The labels are measured in the page and drawn in an SVG image: both use the same pinned
+    // system font and size (mermaidFont.ts), not the page font, or the image cuts the labels.
     // @implements_req SwRS-MDOKFSTUDIO-DIAG-005
     const themeVariables = {
       background: "transparent",
@@ -71,7 +77,8 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
       lineColor: themeVariable("--studio-editor-foreground", "#1f1f1f"),
       secondaryColor: themeVariable("--studio-textBlockQuote-background", "#f0f0f0"),
       tertiaryColor: themeVariable("--studio-editor-background", "#ffffff"),
-      fontFamily: themeVariable("--sphinx-preview-font", "sans-serif"),
+      fontFamily: MERMAID_FONT_FAMILY,
+      fontSize: MERMAID_FONT_SIZE,
     };
     const themeKey = JSON.stringify(themeVariables);
     const ensureInitialized = (): void => {
@@ -82,6 +89,7 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
         startOnLoad: false,
         securityLevel: "strict",
         theme: "base",
+        fontFamily: MERMAID_FONT_FAMILY,
         themeVariables,
       });
     };
@@ -117,8 +125,13 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
       ensureInitialized();
       const id = `myst-mermaid-${diagramCounter}`;
       diagramCounter += 1;
+      // Mermaid measures and draws in this element, which the page style sheet gives the font
+      // and size of the image (`.myst-mermaid-measure`), then the element goes away.
+      const measure = document.createElement("div");
+      measure.className = MERMAID_MEASURE_CLASS;
+      document.body.appendChild(measure);
       try {
-        const rendered = await mermaid.render(id, source);
+        const rendered = await mermaid.render(id, source, measure);
         const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(normalizeSvgForDataImage(rendered.svg))}`;
         drawings.store(key, src);
         // A later pass (a newer theme) may have planned this node while Mermaid drew: the drawing
@@ -128,6 +141,8 @@ const mermaidReady = import("mermaid").then(({ default: mermaid }) => {
         if (drawnKeys.get(diagram) !== key) return;
         showMermaidError(diagram, err instanceof Error ? err.message : String(err));
         diagram.dataset.renderState = "error";
+      } finally {
+        measure.remove();
       }
     }));
   };

@@ -7,6 +7,7 @@ import {
   type Page,
 } from "playwright-core";
 
+import { cutLabels, measureMermaidImageLabels } from "../../shared/mermaidImageLabels";
 import {
   COMMAND_ID,
   deserializePreviewPanelForTests,
@@ -384,6 +385,15 @@ export async function scenarioToolbarState(page: Page, evidence: Evidence): Prom
         throw error;
       });
       assert.equal(await frame.locator(".myst-mermaid-error").count(), 0);
+      // A label box narrower than its text cuts the text's last characters. Each label is HTML in a
+      // foreignObject: its text must fit its foreignObject and, for a node, the node shape, as the
+      // shown SVG image draws it (no page style sheet, no page font), not as the page would.
+      const src = await frame.locator("img.myst-mermaid-image").getAttribute("src") ?? "";
+      const labels = await frame.evaluate(measureMermaidImageLabels, src);
+      assert.deepEqual(labels.map((label) => label.label).sort(),
+        ["Dispatch fleet", "Hold and inspect", "No", "Ready?", "Review telemetry", "Yes"],
+        `every flowchart label was found in the image: ${JSON.stringify(labels)}`);
+      assert.deepEqual(cutLabels(labels), [], `every label fits its box in the image: ${JSON.stringify(labels)}`);
       for (const selector of [".admonition.tip", "img.myst-mermaid-image",
         'img[alt="Fleet operating loop: plan, dispatch, observe, and correct."]']) {
         assert.equal(await frame.locator(selector).evaluate((element) => {
