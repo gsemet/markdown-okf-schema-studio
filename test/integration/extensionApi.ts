@@ -11,6 +11,7 @@ export const {
   getActivePreviewForTests,
   getActivePreviewPanelForTests,
   getLivePreviewRolesForTests,
+  holdEditSourcesForTests,
   listCitationKeysForTests,
   listDocumentTargetsForTests,
   noteKeystrokeForTests,

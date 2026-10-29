@@ -31,6 +31,7 @@ import { scenarioAlertDropdown, scenarioCaretAtClick, scenarioEditAffordances, s
 import { scenarioAddFieldPositionAndEscape, scenarioBooleanOneClick, scenarioCommentBlockEdit, scenarioCustomKeyAndOpenNewField, scenarioFrontmatterActionsLayout, scenarioListEditorClickAndKeys, scenarioListLinkCompletion, scenarioReadableLinkDiagnostics, scenarioRequiredAndPositionedAdd } from "./frontmatterFields";
 import { scenarioContentPatchedInPlace, scenarioImageEditing, scenarioInsertAfterFinalFigure, scenarioInsertBlocksFromPreview, scenarioLargeDocumentPatched, scenarioPendingOverlayWithoutReload, scenarioPropertiesTableWithoutReload, scenarioStatusPageTwoLines, withIncrementalUpdates } from "./renderPatching";
 import { scenarioFocusChangeKeepsPreviewStill, scenarioHiddenPreviewCatchesUp, scenarioPreviewGroupLock, scenarioTitleBarButton, scenarioToolbarState } from "./previewWindow";
+import { scenarioFindRightAfterClick } from "./findAfterClick";
 import { scenarioFlushBeforeBack, scenarioFlushBeforeLink, scenarioFlushBeforeTabSwitch, scenarioFlushCellAndFrontmatter, scenarioFlushFrontmatterKeptAsTyped } from "./flushBeforeNavigate";
 
 /**
@@ -110,6 +111,7 @@ export async function run(): Promise<void> {
       probe: () => scenarioPerformanceProbe(page),
       "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
       "table-moves": () => scenarioTableMoves(page),
+      "find-after-click": () => scenarioFindRightAfterClick(page),
     };
     const only = single[process.env.STUDIO_REAL_INPUT_SCENARIO ?? ""];
     if (only) {
@@ -171,6 +173,7 @@ export async function run(): Promise<void> {
     await scenarioFlushBeforeTabSwitch(page, evidence);
     await scenarioFlushCellAndFrontmatter(page, evidence);
     await scenarioFlushFrontmatterKeptAsTyped(page, evidence);
+    await scenarioFindRightAfterClick(page);
     await scenarioSaveKeepsBlockInPlace(page, evidence);
     await scenarioStatusPageTwoLines(page, evidence);
     await scenarioTitleBarButton(page, evidence);

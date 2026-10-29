@@ -22,7 +22,9 @@ implemented_in_files:
 - src/page/features/blockEditor.ts
 - src/page/features/blockSourceEditor.ts
 tested_in_files:
+- test/integration/realInput/markers.ts
 - test/page/runtimeBlockEditor.test.ts
+- test/session/heldEditSource.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
 
@@ -54,3 +56,6 @@ When the source of a block editor reaches the page after another text field outs
 
 - Method: test/page/runtimeBlockEditor.test.ts, unit tests `CR 169: ...` over the page script: the source delivered after the find bar opened leaves the focus in the find field; the source delivered with the focus still on the page focuses the text box.
 - Criteria: features/blockSourceEditor.ts focuses the text box only when no text field outside the frame took the focus since the editor opened (`focusAtOpen`, recorded by features/blockEditor.ts).
+- Method: test/integration/realInput/findAfterClick.ts, a real-window scenario (CR 188): in edit mode the click on a block, Cmd/Ctrl+F and the query are issued back to back without waiting for the editor. The host answers an open within milliseconds, usually before the key, so the scenario holds the block source back with a test hook (`holdEditSourcesForTests`) until the whole query is in the find field, then lets it through: the editor is built and stays open with its own text, the find field keeps the query and the focus, the match count shows, and the Markdown buffer and the file on disk are unchanged.
+- Method: test/session/heldEditSource.test.ts: the held source reaches the page only when released, unchanged.
+- Method: test/page/runtimeBlockEditor.test.ts, `CR 188: ...`: the same sequence over the page script, typing into whichever field holds the focus.

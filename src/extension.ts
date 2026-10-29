@@ -18,6 +18,7 @@ export {
   getActivePreviewForTests,
   getActivePreviewPanelForTests,
   getLivePreviewRolesForTests,
+  holdEditSourcesForTests,
   listCitationKeysForTests,
   listDocumentTargetsForTests,
   previewGroupFocusMovesForTests,
