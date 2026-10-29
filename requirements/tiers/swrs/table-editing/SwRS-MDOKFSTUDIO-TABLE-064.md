@@ -27,10 +27,12 @@ implemented_in_files:
 - src/page/features/editorChrome.ts
 - src/page/features/tableCellEditor.ts
 tested_in_files:
+- test/build/test_table_bar_flow.py
 - test/core/preview/previewStyles.test.ts
 - test/integration/tableStructureReal.ts
 - test/page/fmtableReqTable.requirements.test.ts
 - test/page/runtimeTableCellEditor.test.ts
+- test/visual/capture_support.py
 - test/visual/capture_table_menu.py
 default_owner_email: gaetan@xeberon.net
 ---

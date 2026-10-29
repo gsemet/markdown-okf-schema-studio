@@ -598,3 +598,25 @@ class CheckTrace:
       self.current = previous
 
 
+TABLE_BAR_STYLE_JS = """element => {
+  const style = getComputedStyle(element);
+  return { position: style.position, top: style.top, left: style.left, bottom: style.bottom,
+    right: style.right, zIndex: style.zIndex };
+}"""
+
+
+# @tests_req SwRS-MDOKFSTUDIO-TABLE-064
+def table_bar_flow_failure(style: dict) -> str | None:
+  """Return why the table action bar is not laid out as shipped, or None when it is.
+
+  Same rule as the real-window check (test/integration/realInput/editorWidgets.ts, r06):
+  position exactly "relative", no offset (auto or 0px on every side), z-index exactly 3.
+  """
+  if style.get("position") != "relative":
+    return f"table action bar computed position is {style.get('position')!r}, expected 'relative'"
+  for side in ("top", "left", "bottom", "right"):
+    if style.get(side) not in ("auto", "0px"):
+      return f"table action bar computed {side} is {style.get(side)!r}, expected 'auto' or '0px' (no offset)"
+  if style.get("zIndex") != "3":
+    return f"table action bar computed z-index is {style.get('zIndex')!r}, expected '3'"
+  return None
