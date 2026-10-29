@@ -145,8 +145,7 @@ export async function run(): Promise<void> {
     // The chat view sits in the auxiliary bar.
     await bounded("workbench.action.closeAuxiliaryBar", vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar"));
     await bounded("window.showTextDocument of tasks.md", vscode.window.showTextDocument(document, vscode.ViewColumn.One));
-    await bounded("workbench.action.focusFirstEditorGroup",
-      vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup"));
+    await bounded("waitForActiveSourceEditor of tasks.md", waitForActiveSourceEditor(document));
     await bounded(`${COMMAND_ID} on tasks.md`, vscode.commands.executeCommand(COMMAND_ID));
     markProgress("waiting for the first checkbox render");
     await waitForRender(document);
