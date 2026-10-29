@@ -14,10 +14,11 @@
   `[!CAUTION]`) in edit mode opens the whole alert, from the marker line to its last quoted line,
   instead of the clicked paragraph only. A list, diagram or code block inside an alert opens the
   alert too; an alert inside a list item opens that alert only.
-- A comment thread keeps its highlight and badge after edits. A new thread no longer stays invisible
-  when the preview updated the threads twice in a row (only a reload showed it), and after a reload
-  from disk, a revert or an undo to the saved text, or lines added or removed while the comments
-  file is saved, the threads are placed again against the current text.
+- Two causes of a comment thread losing its highlight and badge after an edit are fixed: a new
+  thread no longer stays invisible when the preview updated the threads twice in a row (only a
+  reload showed it), and after a reload from disk, a revert or an undo to the saved text, or lines
+  added or removed while the comments file is saved, the threads are placed again against the
+  current text.
 - Mermaid flowchart labels are no longer cut off in the VS Code preview ("Yes|", "Nc", "Hold and
   inspe", "Swap with a spar"). The page's security policy blocked Mermaid's own style sheet while
   Mermaid measured the labels, so they were measured in the page font and drawn wider in the
