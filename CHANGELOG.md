@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- A new review comment thread no longer risks staying invisible when the preview updated the threads
+  twice in a row: the second update could skip the new thread, and only a reload showed it. The
+  highlight of a comment thread no longer stays on old lines after the document changes under it: a
+  reload from disk, a revert or an undo to the saved text, or lines added or removed while the save
+  writes the comments file, now place the threads again against the current text, even when the
+  comments file itself did not change.
 - The editor refuses to open or save a block whose range, as sent by the preview, starts on a blank
   line: it answers that the preview and the document disagree about the block's lines (refresh and
   try again) and changes nothing, instead of editing the wrong text.
