@@ -41,6 +41,7 @@ implemented_in_files:
 - src/page/runtime.ts
 - src/session/features/viewState.ts
 - src/session/hostEvents.ts
+- src/session/previewManager.ts
 - src/session/sessionFactory.ts
 tested_in_files:
 - test/core/preview/previewStyles.test.ts
@@ -121,12 +122,16 @@ When a preview is read-only (created for a document that lies in no workspace fo
 
 The refusal of write requests is that of SwRS-MDOKFSTUDIO-TRUST-005.
 
-### Scenario (boundary): Trust granted while a preview is open
+### Scenario (boundary): Trust granted or a folder added while a preview is open
 
 | Input | Outcome |
 | --- | --- |
 | A preview created read-only in an untrusted workspace, then the reader trusts the workspace | The preview moves to a trusted session without being reopened: it renders once, keeps its reading state, and offers editing, the palette and checkboxes; its resource roots and navigation roots become the workspace folders |
 | A preview created in a trusted workspace, then trust is granted again | It stays writable |
+| A read-only preview of a file in no workspace folder of a trusted window, then a folder that holds the file is added (in the Agents window, the folder of the agent session becomes active) | The preview moves to a writable session of that folder on the same panel, renders once and keeps its reading state; the active preview stays the active one |
+| The same, for a preview of a file that the added folder does not hold | It stays read-only, on its own session |
+
+A preview whose folder is removed turns read-only on the same panel: see SwRS-MDOKFSTUDIO-LIFE-143.
 
 ### Scenario (boundary): The manifest declares limited support for untrusted workspaces
 
@@ -159,5 +164,6 @@ The refusal of write requests is that of SwRS-MDOKFSTUDIO-TRUST-005.
 - Method: Unit tests `T43: no reply box without a reply hook (read-only previews)` and `T44: without resolve and delete hooks (read-only) the popover has neither button` in test/page/modules/commentThreads.test.ts (thread popover rows).
 - Method: Visual scenarios trust-security/v01-read-only-page-dark-900 and trust-security/v02-read-only-page-light-460 in test/visual/scenarioDefinitions2.ts (READ_ONLY_ASSERTIONS: no edit cell, every row not editable), and trust-security/v03-read-only-no-hover-outline-light-900 (READ_ONLY_NO_HOVER_ASSERTIONS: no edit-target mark, no outline, cursor not a pointer; no block editor after the paragraph click). These scenarios build the page in test/visual/renderFixtures.ts with the read-only flag; the host page build (first load) is covered by the unit test "the first load of a read-only page has no edit cells in the properties table" in test/session/readOnlyFirstLoad.test.ts. The table cell click and the frontmatter click rows are untested; they are deduced from the code: the click handlers of src/page/features/pageInput.ts open editors only when edit mode is on, which a page without an Edit button never is.
 - Method: Unit test "granting trust turns an open Restricted Mode preview into a writable one" in test/host/lifeReq.requirements.test.ts (trust granted scenario: same panel, readOnly false, workspace roots, one render).
+- Method: Unit test "adding a workspace folder makes the read-only previews of its files writable on the same panel" in test/host/lifeReq.requirements.test.ts (folder added rows: same panel, readOnly false, the added folder as root, the reading state kept, the active preview kept, a preview outside the folder left read-only).
 - Method: Unit test "the manifest declares limited support for untrusted workspaces" in test/security/trustReq.requirements.test.ts, which asserts the declaration, its description and the five restricted settings in package.json (and that the list is the registry's), the inputs VS Code reads to decide (extensionManifestPropertiesService, VS Code 1.143.1 bundle: an extension with a main entry point and no declaration is disabled in Restricted Mode). The Restricted Mode integration suite test/integration/untrusted-suite.ts loads the extension from the development path, which is not disabled either way, so it asserts the declaration through the installed extension manifest instead; a packaged VSIX is not run in a Restricted Mode window.
-- Criteria: The readOnly flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; a read-only page has a greyed Edit button with its reason, no palette, no Comment button, no reply, Resolve or Delete control, no edit cell, no edit-target mark and no editor element after the clicks; after onTrustGranted an open preview of a workspace file is a new trusted session on the same panel (readOnly false, the workspace folders as roots) and the active preview stays the active one; package.json declares capabilities.untrustedWorkspaces.supported as limited.
+- Criteria: The readOnly flag of the preview is true exactly when the document has no workspace folder or the workspace is untrusted; a read-only page has a greyed Edit button with its reason, no palette, no Comment button, no reply, Resolve or Delete control, no edit cell, no edit-target mark and no editor element after the clicks; after onTrustGranted an open preview of a workspace file is a new trusted session on the same panel (readOnly false, the workspace folders as roots) and the active preview stays the active one; after a folder that holds its file is added, a read-only preview is a new writable session on the same panel with the folder as root, and a preview of another file is unchanged; package.json declares capabilities.untrustedWorkspaces.supported as limited.

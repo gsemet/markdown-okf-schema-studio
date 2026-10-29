@@ -462,6 +462,107 @@ test("a preview created in a trusted workspace stays writable when trust is gran
   assert.equal(session.readOnly, false);
 });
 
+type FakeFolder = { uri: Uri; name: string; index: number };
+const folderApi = fake.vscode.workspace as unknown as {
+  workspaceFolders: FakeFolder[];
+  getWorkspaceFolder: (uri: Uri) => FakeFolder | undefined;
+};
+
+/**
+ * Returns a function that sets the folders of the fake workspace and fires the folder change, as
+ * VS Code's `updateWorkspaceFolders` does (the Agents window mounts the folder of the active agent
+ * session that way). The test's end restores the single workspace folder.
+ */
+function folderControl(t: TestContext): (roots: readonly string[]) => void {
+  const original = { folders: folderApi.workspaceFolders, getWorkspaceFolder: folderApi.getWorkspaceFolder };
+  t.after(() => {
+    folderApi.workspaceFolders = original.folders;
+    folderApi.getWorkspaceFolder = original.getWorkspaceFolder;
+  });
+  return (roots) => {
+    const before = folderApi.workspaceFolders;
+    const folders = roots.map((root, index) => before.find((folder) => folder.uri.fsPath === root)
+      ?? original.folders.find((folder) => folder.uri.fsPath === root)
+      ?? { uri: Uri.file(root), name: path.basename(root), index });
+    folderApi.workspaceFolders = folders;
+    folderApi.getWorkspaceFolder = (uri) => folders.find((folder) =>
+      uri.fsPath === folder.uri.fsPath || uri.fsPath.startsWith(folder.uri.fsPath + path.sep));
+    fake.controls.events.changeWorkspaceFolders.fire({
+      added: folders.filter((folder) => !before.includes(folder)),
+      removed: before.filter((folder) => !folders.includes(folder)),
+    });
+  };
+}
+
+// @tests_req SwRS-MDOKFSTUDIO-TRUST-001
+test("adding a workspace folder makes the read-only previews of its files writable on the same panel", async (t) => {
+  const studio = start(t);
+  const setFolders = folderControl(t);
+  const mounted = path.join(outsideRoot, `mounted-${process.pid}`);
+  const inside = writeFile("# Mounted\n", mounted);
+  const outside = writeFile("# Elsewhere\n", path.join(outsideRoot, `elsewhere-${process.pid}`));
+  const { panel } = await studio.openSide(inside);
+  const readOnly = studio.manager.active!;
+  assert.equal(readOnly.readOnly, true, "no folder holds the file yet");
+  const readingState = { documentId: Uri.file(inside).toString(), sourceFile: inside, sourceLine: 1, scrollTop: 40 };
+  readOnly.state = readingState;
+  await openWith(studio, outside);
+  const other = studio.manager.active!;
+  assert.equal(other.readOnly, true);
+  setFolders([workspaceRoot, mounted]);
+  await studio.advance(300);
+  const promoted = sessionsOf(studio).find((session) => session.documentUri === Uri.file(inside).toString())!;
+  assert.equal(studio.manager.sessions().size, 2, "the preview is not duplicated");
+  assert.equal(readOnly.disposed, true);
+  assert.equal(promoted.panel, readOnly.panel, "the same panel is kept: nothing is reopened");
+  assert.equal(panel.disposed, false);
+  assert.equal(promoted.readOnly, false, "the preview is writable once its folder is added");
+  assert.equal(promoted.workspaceRoot, mounted);
+  assert.ok(promoted.sessionRoots.includes(mounted));
+  assert.deepEqual(promoted.state, readingState, "the reading state is kept");
+  assert.equal(other.disposed, false, "a preview of a file outside the added folder is left alone");
+  assert.equal(other.readOnly, true);
+  assert.equal(studio.manager.active, other, "the active preview stays the active one");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-LIFE-143
+test("removing the folder of a preview keeps its panel read-only until the folder is added back", async (t) => {
+  const studio = start(t);
+  const setFolders = folderControl(t);
+  const directory = path.join(workspaceRoot, `agent-session-${process.pid}`);
+  const file = writeFile("# Session\n", directory);
+  const { panel } = await studio.openSide(file);
+  const writable = studio.manager.active!;
+  assert.equal(writable.readOnly, false);
+  const readingState = { documentId: Uri.file(file).toString(), sourceFile: file, sourceLine: 1, scrollTop: 40 };
+  writable.state = readingState;
+  const folderWatcher = studio.dependencyWatcherOf(workspaceRoot);
+  const writableHtml = lastRendered(panel);
+
+  setFolders([]);
+  await studio.advance(300);
+  await studio.until(() => lastRendered(panel) !== writableHtml, "the read-only page");
+  assert.equal(panel.disposed, false, "the tab stays open");
+  assert.equal(writable.disposed, true, "the session of the removed folder is disposed");
+  assert.equal(folderWatcher.disposed, true, "with its watcher of the folder");
+  const readOnly = studio.manager.active!;
+  assert.equal(studio.manager.sessions().size, 1);
+  assert.equal(readOnly.panel, writable.panel, "the same panel shows the file");
+  assert.equal(readOnly.readOnly, true);
+  assert.equal(readOnly.workspaceRoot, directory, "the resource folder is the directory of the document");
+  assert.deepEqual(readOnly.sessionRoots, []);
+  assert.deepEqual(readOnly.state, readingState, "the reading state is kept");
+
+  setFolders([workspaceRoot]);
+  await studio.advance(300);
+  const again = studio.manager.active!;
+  assert.equal(readOnly.disposed, true);
+  assert.equal(again.panel, writable.panel);
+  assert.equal(again.readOnly, false, "the preview is writable again once the folder is back");
+  assert.equal(again.workspaceRoot, workspaceRoot);
+  assert.equal(panel.disposed, false);
+});
+
 // @tests_req SwRS-MDOKFSTUDIO-LIFE-127
 test("a restored side preview owns the group lock the workbench restored", async (t) => {
   const studio = start(t);

@@ -431,24 +431,68 @@ export class PreviewManager {
     return replacement;
   }
 
-  /**
-   * The user granted trust: a preview that was read-only only because the workspace was untrusted
-   * moves to a trusted session (editing, palette, workspace resource and navigation roots) and
-   * renders once, keeping its reading state. Previews that stay read-only are left alone.
-   */
+  /** The user granted trust: see {@link promoteReadOnlySessions}. */
   public refreshTrust(): void {
+    this.promoteReadOnlySessions();
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-TRUST-001
+  /**
+   * A read-only preview whose document now lies in a folder of a trusted workspace (trust was
+   * granted, or a folder that holds it was added) moves to a writable session on the same panel
+   * (editing, palette, workspace resource and navigation roots) and renders once, keeping its
+   * reading state. Previews that stay read-only are left alone, and the active preview stays the
+   * active one.
+   */
+  public promoteReadOnlySessions(): void {
     const { host } = this;
+    if (!host.workspace.trusted) return;
+    this.replaceEach((session, document) => {
+      if (!session.readOnly) return undefined;
+      return host.workspace.folderOf(this.pathOf(document));
+    });
+  }
+
+  // @implements_req SwRS-MDOKFSTUDIO-LIFE-143
+  /**
+   * The workspace folders `removedFolderIds` were removed: each preview of a file in one of them
+   * moves to a new session on the same panel, keeping its reading state: read-only (resource root
+   * = the directory of the document, no session roots) unless another folder still holds the file.
+   * The old session's render queue, watchers and Problems entries go with it. A preview with no
+   * document to show is closed.
+   */
+  public demoteSessionsOf(removedFolderIds: ReadonlySet<string>): void {
+    const affected = (session: PreviewSession): boolean =>
+      session.workspaceFolder !== undefined && removedFolderIds.has(session.workspaceFolder.id);
+    for (const session of [...this.live]) {
+      const document = session.document;
+      if (!session.disposed && affected(session) && (!document || !isDocumentEligible(document))) {
+        this.disposeSession(session, true);
+      }
+    }
+    this.replaceEach((session, document) => (affected(session)
+      ? this.host.workspace.folderOf(this.pathOf(document)) ?? null
+      : undefined));
+  }
+
+  /**
+   * Replaces each live session for which `target` returns a workspace folder (or `null` for no
+   * folder) by a new session on the same panel; `undefined` leaves the session alone. The reader's
+   * active preview stays the active one (replacing a preview would make it active).
+   */
+  private replaceEach(
+    target: (session: PreviewSession, document: HostDocument) => WorkspaceFolderInfo | null | undefined,
+  ): void {
     const active = this.activeSession;
     let activeAfter = active;
     for (const session of [...this.live]) {
       const document = session.document;
-      if (session.disposed || !session.readOnly || !document || !isDocumentEligible(document)) continue;
-      const workspaceFolder = host.workspace.folderOf(this.pathOf(document));
-      if (workspaceFolder === undefined || !host.workspace.trusted) continue;
-      const replacement = this.replaceSession(session, document, workspaceFolder, session.state);
+      if (session.disposed || !document || !isDocumentEligible(document)) continue;
+      const workspaceFolder = target(session, document);
+      if (workspaceFolder === undefined) continue;
+      const replacement = this.replaceSession(session, document, workspaceFolder ?? undefined, session.state);
       if (session === active) activeAfter = replacement;
     }
-    // Replacing a preview makes it the active one: the reader's active preview stays the same.
     if (activeAfter && this.live.has(activeAfter)) this.activeSession = activeAfter;
   }
 

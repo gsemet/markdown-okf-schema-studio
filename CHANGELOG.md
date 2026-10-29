@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Studio runs in the VS Code Agents window: the extension declares its support, so VS Code no
+  longer disables it there. Files of the active agent session open editable; other files open
+  read-only.
+- A read-only preview becomes editable on the same tab, keeping its reading position, when a
+  workspace folder that holds its file is added (in the Agents window, when its agent session
+  becomes active).
+- Removing a workspace folder no longer closes the previews of its files: each tab stays open and
+  shows its file read-only, until a folder that holds the file is added again. In the Agents
+  window, switching agent sessions keeps the Studio tab.
+
 ## 1.0.1 - 2026-10-29
 
 - Cmd/Ctrl+F with the focus in a block editor, a table cell editor or a front matter field opens the

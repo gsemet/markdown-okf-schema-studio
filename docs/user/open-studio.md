@@ -20,3 +20,22 @@ For a side-by-side source and preview, select the book icon in the editor title 
 | [![Open Preview to Side action in the VS Code editor title](../../images/readme/open-preview-to-side.png)](../../images/readme/open-preview-to-side.png) | [![Markdown source beside the Studio preview](../../images/readme/preview-beside-editor.png)](../../images/readme/preview-beside-editor.png) |
 
 Every image in this guide opens at full size when selected.
+
+## In the Agents window
+
+Studio also runs in the VS Code Agents window, the companion window for agent sessions. Open a
+Markdown file there, then use **Open With...** and select **Markdown OKF-Schema Studio**.
+
+- Files of the active agent session are editable: the Agents window adds the session's working
+  folder to the workspace.
+- Other files open read-only, with the Edit button greyed and its reason in the tooltip.
+- Switching to another agent session keeps the Studio tab open. It turns read-only until a session
+  that holds the file is active again, then becomes editable on the same tab.
+
+A VS Code build that ignores the extension's declaration of Agents window support leaves Studio
+disabled there. Enable it with this user setting, or under **Agent Customizations** >
+**Extensions**:
+
+```json
+"extensions.supportAgentsWindow": { "GaetanSemet.markdown-okf-schema-studio": true }
+```
