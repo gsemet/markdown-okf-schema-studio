@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 
-from capture_support import Failure, save_step
+from capture_support import Failure, TABLE_BAR_STYLE_JS, save_step, table_bar_flow_failure
 
 
 # @tests_req SwRS-MDOKFSTUDIO-PALETTE-021
@@ -1112,8 +1112,8 @@ def check_preview_edit_mode(page: Page, scenario: dict, failures: list[Failure])
       toolbar = page.locator("[data-sphinx-table-menu]")
       if toolbar.count() != 1 or not toolbar.is_visible():
         failures.append(Failure(page_name, "table action bar is missing or hidden"))
-      elif toolbar.evaluate("element => getComputedStyle(element).position") not in ("static", "relative"):  # CR 168
-        failures.append(Failure(page_name, "table action bar is not in the document flow"))
+      elif (bar_failure := table_bar_flow_failure(toolbar.evaluate(TABLE_BAR_STYLE_JS))) is not None:
+        failures.append(Failure(page_name, bar_failure))
       elif not toolbar.evaluate("""element => {
         const table = document.querySelector('[data-sphinx-preview-table-cell-selected="true"]').closest('table');
         const next = element.nextElementSibling;
