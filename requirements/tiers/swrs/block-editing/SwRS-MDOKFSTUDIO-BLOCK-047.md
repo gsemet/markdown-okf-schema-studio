@@ -92,6 +92,9 @@ When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or m
 | --- | --- |
 | Done, Ctrl+Enter or leaving the text box while the final save of the same editor is in flight | No second final save is posted; the editor waits for the render of the first |
 
+### Rationale
+- Owner decision (2026-10-29): when the whole window loses the focus (the writer switches to another application), the open editor commits and closes, by design. The row "The browser window loses the focus with no related target" is intended behavior, not a defect: the edit is saved, never lost, and the writer comes back to the rendered block.
+
 ### Related requirements
 - SwRS-MDOKFSTUDIO-BLOCK-191: the host holds the open block edit and ends it when the block changes.
 
