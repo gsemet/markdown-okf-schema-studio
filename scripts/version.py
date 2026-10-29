@@ -43,8 +43,8 @@ def git(*arguments: str) -> str:
     return subprocess.check_output(["git", *arguments], text=True).strip()
 
 
-def tag_release(before: str) -> str | None:
-    """Push a missing release tag only when the pushed npm version increased."""
+def pushed_versions(before: str) -> tuple[str | None, str]:
+    """The npm version before the push (None for a new branch) and the pushed one."""
     if not re.fullmatch(r"[0-9a-f]{40,64}", before):
         raise ValueError("Expected the previous push SHA")
     manifest = json.loads(Path("package.json").read_text())
@@ -55,6 +55,22 @@ def tag_release(before: str) -> str | None:
         if set(before) == {"0"}
         else json.loads(git("show", f"{before}:package.json"))["version"]
     )
+    return previous, version
+
+
+# @implements_req SwRS-MDOKFSTUDIO-CORE-076
+def version_changed(before: str) -> bool:
+    """Whether the push changes the npm version: the same test tag_release uses to tag.
+
+    CI runs the heavy jobs on such a push, and tag-release requires them to be green.
+    """
+    previous, version = pushed_versions(before)
+    return previous != version
+
+
+def tag_release(before: str) -> str | None:
+    """Push a missing release tag only when the pushed npm version increased."""
+    previous, version = pushed_versions(before)
     if previous == version:
         print("Package version unchanged; no release tag needed.")
         return None
@@ -87,8 +103,19 @@ def main() -> int:
     parser.add_argument(
         "--tag-before", help="CI only: tag a version change since this push SHA"
     )
+    parser.add_argument(
+        "--bump-since",
+        help="CI only: write bump=true|false, whether the version changed since this push SHA",
+    )
     arguments = parser.parse_args()
     try:
+        if arguments.bump_since:
+            bump = "true" if version_changed(arguments.bump_since) else "false"
+            print(f"Version change in this push: {bump}")
+            if os.environ.get("GITHUB_OUTPUT"):
+                with Path(os.environ["GITHUB_OUTPUT"]).open("a") as output:
+                    output.write(f"bump={bump}\n")
+            return 0
         if arguments.tag_before:
             tag = tag_release(arguments.tag_before)
             if tag and os.environ.get("GITHUB_OUTPUT"):

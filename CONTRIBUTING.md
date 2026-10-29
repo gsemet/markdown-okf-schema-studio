@@ -249,13 +249,17 @@ CI runs the same stages as parallel jobs, each calling one target after `just de
 `just ci-integration`, then `just ci-report` (merges the visual and integration outputs into the
 review index and `out/reports/e2e/e2e-manifest.json`; it fails when a stage manifest is missing or
 failed) and `just ci-gallery` (gallery and site from the existing outputs, no E2E re-run).
-On push and pull request, CI runs only the simulated tests, which make up the required `checks` job:
+On a pull request and an ordinary push (no version change), CI runs only the simulated tests, which
+make up the required `checks` job:
 `ci-static`, `ci-visual` (Playwright/Chromium against a mock host) and `just ci-report visual`, which
 reports the real VS Code stage as skipped. The real VS Code window jobs (`ci-integration` and the
 `stress` repetitions) are heavy and manual: start them with
 `gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery and site
 artifact), or with "Run workflow" in the Actions tab. Run them, or `npm run test:integration`
 locally, before merging a change to the extension host, the webview or the real-window tests.
+One push runs them on its own: a push to `main` that changes the package version (a release). Its
+`release-check` job detects the change, the heavy jobs run in that push run, and the release is
+tagged only when both succeed (see "Releases" below).
 `just preflight` calls these targets in sequence. Each stage records its own start time and they share
 a run id, so `just ci-visual`, `just ci-integration` and `just ci-report` also work one by one; `just
 clean` starts a fresh campaign. `just dev-ci` is for CI machines only: `npm ci` replaces
@@ -514,10 +518,18 @@ The Python project's version is tooling metadata and is not the extension releas
 	Keep release images and their Git LFS
 	objects committed and pushed, since Marketplace image URLs use the release tag.
 
-4. After successful main-branch CI, the tagging job checks whether the pushed version
-	changed and whether `vX.Y.Z` exists remotely. It verifies matching lockfile versions
-	and an increasing version, then tags the exact tested commit. Ordinary pushes and
-	existing tags are left unchanged. It never commits files back to `main`.
+4. The push of the version commit to `main` runs the heavy jobs (`integration` and
+	`stress`) in its own CI run: `release-check` sees that the pushed version changed
+	(`scripts/version.py --bump-since`). After successful main-branch CI, the tagging job
+	checks whether the pushed version changed and whether `vX.Y.Z` exists remotely. It
+	verifies matching lockfile versions and an increasing version, then tags the exact
+	tested commit, but only when `checks` and both heavy jobs of that run succeeded.
+	Otherwise it creates no tag, writes "Release not tagged" with the result of `checks`,
+	`integration` and `stress` to the job summary, and fails (an integration failure also
+	fails `report` and `checks`; the summary is written all the same). Only that push can
+	tag the version: see "Recovering from a red heavy job" below. Ordinary pushes (no version
+	change) skip the heavy jobs and leave the tags unchanged. It never commits files back to
+	`main`.
 
 5. CI calls **Release VSIX** explicitly with that tag. A tag pushed by `GITHUB_TOKEN`
 	does not trigger another push workflow, so this call is required. The release job
@@ -525,6 +537,40 @@ The Python project's version is tooling metadata and is not the extension releas
 	from the previous reachable release's Git diff through `gh copilot`, packages the
 	extension, publishes to Marketplace, and attaches the VSIX and notes to a GitHub release.
 	A first release uses all history. Note generation must succeed before publication.
+	CI also calls **Deploy GitHub Pages** with the tag: it builds the site from the
+	end-to-end reports of that same run (its heavy jobs are green) instead of running the
+	suite again. A later manual Pages dispatch of the tag finds that run as well
+	(`scripts/select_e2e_run.py` accepts a manual heavy run or the release push of the commit).
+
+### Recovering from a red heavy job
+
+A flake that fails `integration` or `stress` on the push of a version change is recovered in
+the same CI run, with no new commit and no manual tag:
+
+1. Open the run: Actions, workflow **CI**, the run of the version commit on `main`. Its
+	`tag-release` summary says "Release not tagged" and lists each result.
+2. Choose Re-run jobs > **Re-run failed jobs**, then **Re-run jobs**. With the GitHub CLI:
+
+	```bash
+	gh run rerun <run-id> --failed
+	gh run watch <run-id>
+	```
+
+3. GitHub re-runs the failed jobs and the jobs that depend on them, including skipped ones:
+	the heavy job, then `report` and `checks` after an integration failure, `tag-release`,
+	`release` and `pages`. Jobs that passed keep their results and outputs, so `release-check`
+	still reports the version change. The re-run uses the same commit and push event, and
+	`tag-release` tags that commit when everything is green.
+4. If integration failed and more than two hours have passed since the run started, use
+	Re-run jobs > **Re-run all jobs** (`gh run rerun <run-id>`) instead: `report` rejects a
+	visual and an integration stage that started two hours apart or more. Re-run all jobs only
+	while no tag exists, which is the case after "Release not tagged".
+5. Once the tag exists, only re-run the failed jobs. Re-running `tag-release` then finds the
+	existing tag, outputs no tag and skips `release` and `pages`.
+
+When the failure is a real bug, or the same job fails again after a re-run, fix the cause in a
+new pull request, then release a new version (`just version`). GitHub allows re-runs for 30 days
+and at most 50 attempts per run; after that, release a new version.
 
 ### GitHub Configuration
 

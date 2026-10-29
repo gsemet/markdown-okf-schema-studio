@@ -7,6 +7,11 @@ on:
         description: "Existing version tag to deploy"
         required: true
         type: string
+      reports_from_caller:
+        description: "The calling CI run holds a green heavy run of this commit: use its reports"
+        required: false
+        type: boolean
+        default: false
   push:
     tags:
       - "v*.*.*"
@@ -77,10 +82,11 @@ jobs:
             echo "Deployment tag $DEPLOYMENT_TAG does not match package version $expected_tag" >&2
             exit 1
           fi
-      # Reuse of CI reports: on the automatic release path (tag-release calls this workflow in the same
-      # push run) no heavy run of the release commit exists yet, so the selection finds nothing and
-      # the suite runs below. The reuse pays off for a later manual dispatch after a heavy run of the
-      # commit (backlog item require-green-heavy-before-tagging tracks the real fix).
+      # Reuse of CI reports. On the automatic release path, ci.yml calls this workflow from the push
+      # run of the version change, after its heavy jobs (integration and stress) succeeded: the
+      # caller says so with reports_from_caller, and the reports are taken from that same run (it
+      # is still in progress, so the selection below could not find it). Otherwise the selection
+      # looks for the newest green heavy run of the commit: a manual heavy run or that release push.
       # An explicit run_id goes through the same checks and fails closed on any mismatch; the
       # automatic selection falls back to the suite on any API or download problem.
       - name: Find the end-to-end reports of this commit
@@ -89,8 +95,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REQUESTED_RUN_ID: ${{ inputs.run_id }}
+          FROM_CALLER: ${{ inputs.reports_from_caller }}
         run: |
           set -euo pipefail
+          if [[ "$FROM_CALLER" == "true" ]]; then
+            echo "from_caller=true" >> "$GITHUB_OUTPUT"
+            echo "Reports from the calling run: $GITHUB_RUN_ID"
+            exit 0
+          fi
           args=(--repo "$GITHUB_REPOSITORY" --sha "$(git rev-parse HEAD)")
           if [[ -n "$REQUESTED_RUN_ID" ]]; then
             args+=(--run-id "$REQUESTED_RUN_ID")
@@ -99,6 +111,14 @@ jobs:
           echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
           echo "Reports from run: ${run_id:-none (the suite runs below)}"
       # studio-reports merges both stage artifacts (e2e-visual, e2e-integration): it alone is enough.
+      - name: Fetch the end-to-end reports of the calling run
+        id: download-caller
+        if: steps.reports.outputs.from_caller == 'true'
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: studio-reports
+          path: out/reports/
       - name: Download the end-to-end reports
         id: download
         if: steps.reports.outputs.run_id != ''
@@ -113,8 +133,8 @@ jobs:
         id: usable
         shell: bash
         env:
-          FOUND: ${{ steps.reports.outputs.run_id }}
-          DOWNLOAD: ${{ steps.download.outcome }}
+          FOUND: ${{ steps.reports.outputs.run_id || (steps.reports.outputs.from_caller == 'true' && github.run_id) || '' }}
+          DOWNLOAD: ${{ steps.reports.outputs.from_caller == 'true' && steps.download-caller.outcome || steps.download.outcome }}
           REQUESTED_RUN_ID: ${{ inputs.run_id }}
         run: |
           set -euo pipefail

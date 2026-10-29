@@ -461,3 +461,25 @@ def test_context_file_is_removed_when_generation_fails(
     with pytest.raises(subprocess.CalledProcessError):
         notes.main()
     assert not context_file.exists()
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_bump_since_reports_whether_the_push_changed_the_version(repository: Path, tmp_path: Path) -> None:
+    """CI runs the heavy jobs on the push that tag-release would tag, and only on it."""
+    before = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository, text=True).strip()
+    output = tmp_path / "outputs"
+    environment = {**os.environ, "GITHUB_OUTPUT": str(output)}
+    command = [sys.executable, str(ROOT / "scripts/version.py"), "--bump-since", before]
+    unchanged = subprocess.run(command, cwd=repository, env=environment, text=True, capture_output=True)
+    assert unchanged.returncode == 0, unchanged.stderr
+    assert output.read_text() == "bump=false\n"
+    output.unlink()
+    assert_version(repository, ["0.3.0"], "0.3.0")
+    changed = subprocess.run(command, cwd=repository, env=environment, text=True, capture_output=True)
+    assert changed.returncode == 0, changed.stderr
+    assert output.read_text() == "bump=true\n"
+    output.unlink()
+    first_push = subprocess.run([*command[:-1], "0" * 40], cwd=repository, env=environment, text=True, capture_output=True)
+    assert first_push.returncode == 0, first_push.stderr
+    assert output.read_text() == "bump=true\n"
+    assert subprocess.run([*command[:-1], "not-a-sha"], cwd=repository, capture_output=True).returncode != 0

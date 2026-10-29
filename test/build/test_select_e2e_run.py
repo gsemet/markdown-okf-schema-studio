@@ -6,6 +6,8 @@ import importlib.util
 import subprocess
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("select_e2e_run", ROOT / "scripts/select_e2e_run.py")
 assert spec and spec.loader
@@ -116,3 +118,63 @@ def test_main_automatic_selection_falls_back_on_malformed_json(monkeypatch, caps
     assert select.main(["--repo", "o/r", "--sha", SHA]) == 0
     captured = capsys.readouterr()
     assert captured.out == "" and "warning" in captured.err
+
+
+# A push run of main is the release run of a version change: its heavy jobs ran in it.
+HEAVY_JOBS = [*GOOD_JOBS, {"name": "stress", "conclusion": "success"}]
+
+
+def push(rid: int, created: str, **over: object) -> dict:
+    return run(rid, created, **{"event": "push", "head_branch": "main", **over})
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_release_push_run_with_green_heavy_jobs_is_used() -> None:
+    assert pick([push(1, "1")], jobs=HEAVY_JOBS) == 1
+    assert check(push(1, "1"), jobs=HEAVY_JOBS) is None
+    # The newest of a manual heavy run and the release push wins.
+    assert pick([run(1, "1"), push(2, "2")], jobs=HEAVY_JOBS) == 2
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+@pytest.mark.parametrize(
+    "jobs",
+    [
+        GOOD_JOBS,  # stress absent
+        [*GOOD_JOBS, {"name": "stress", "conclusion": "skipped"}],
+        [*GOOD_JOBS, {"name": "stress", "conclusion": "failure"}],
+        [{"name": "integration", "conclusion": "skipped"}, {"name": "stress", "conclusion": "skipped"}],
+        [{"name": "integration", "conclusion": "failure"}, {"name": "stress", "conclusion": "success"}],
+    ],
+)
+def test_push_run_without_both_green_heavy_jobs_is_rejected(jobs: list[dict]) -> None:
+    assert pick([push(1, "1")], jobs=jobs) is None
+    problem = check(push(1, "1"), jobs=jobs) or ""
+    assert "integration" in problem and "stress" in problem
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_push_run_of_another_commit_branch_or_state_is_rejected() -> None:
+    for bad in (push(1, "1", head_sha="b" * 40), push(1, "1", head_branch="feature"),
+                push(1, "1", head_branch=None), push(1, "1", conclusion="failure"),
+                push(1, "1", status="in_progress", conclusion=None)):
+        assert pick([bad], jobs=HEAVY_JOBS) is None
+        assert check(bad, jobs=HEAVY_JOBS)
+    assert "branch" in (check(push(1, "1", head_branch="feature"), jobs=HEAVY_JOBS) or "")
+    assert "artifacts" in (check(push(1, "1"), jobs=HEAVY_JOBS, artifacts=ALL[:2]) or "")
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_main_automatic_selection_queries_dispatch_and_push_runs(monkeypatch, capsys) -> None:
+    queried: list[str] = []
+
+    def api(path: str, key: str) -> list[dict]:
+        if key == "workflow_runs":
+            queried.append(path)
+            return [push(5, "5")] if "event=push" in path else []
+        return HEAVY_JOBS if key == "jobs" else ALL
+
+    monkeypatch.setattr(select, "gh_api", api)
+    assert select.main(["--repo", "o/r", "--sha", SHA]) == 0
+    assert capsys.readouterr().out.strip() == "5"
+    assert any("event=workflow_dispatch" in q for q in queried) and any("event=push" in q for q in queried)

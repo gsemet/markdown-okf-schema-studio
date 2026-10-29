@@ -374,3 +374,223 @@ def test_pages_fallback_clears_leftover_reports_before_the_suite() -> None:
     fallback = step.split("else\n", 2)[-1]
     assert "rm -rf out/reports" in fallback
     assert fallback.index("rm -rf out/reports") < fallback.index('echo "reports=false"')
+
+
+# A version change on main runs the heavy jobs in its own push run, and tag-release tags it only
+# when both heavy jobs succeeded; Pages then reuses that run's reports.
+def _expression(text: str) -> str:
+    """A GitHub expression (`${{ }}` optional) as Python over a ``ctx`` lookup."""
+    body = re.sub(r"^\$\{\{\s*|\s*\}\}$", "", str(text).strip())
+    body = body.replace("cancelled()", "False")
+    body = re.sub(r"\b((?:needs|github|inputs|steps)\.[\w.-]*\w)", r'ctx.get("\1", "")', body)
+    body = body.replace("&&", " and ").replace("||", " or ")
+    return re.sub(r"!(?!=)", " not ", body)
+
+
+def _context(event: str, *, bump: str = "", heavy: bool = False, **results: str) -> dict:
+    """Context of one run: release-check outputs '' when it was skipped (not a push to main)."""
+    values = {
+        "github.event_name": event,
+        "github.ref": "refs/heads/main",
+        "inputs.heavy": heavy,
+        "needs.release-check.outputs.bump": bump,
+        "needs.release-check.result": "success" if event == "push" else "skipped",
+    }
+    values.update({f"needs.{job}.result": result for job, result in results.items()})
+    return values
+
+
+def _run_if(condition: object, values: dict) -> object:
+    """Evaluate a workflow expression of this repository (missing values read as '')."""
+    return eval(_expression(str(condition)), {"ctx": values})  # noqa: S307
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_every_needs_reference_names_a_job_the_job_needs() -> None:
+    jobs = _ci_jobs()
+    for name, job in jobs.items():
+        for need in _needs(job):
+            assert need in jobs, f"{name}: needs undeclared job {need!r}"
+        for referenced in set(re.findall(r"needs\.([\w-]+)\.", str(job))):
+            assert referenced in _needs(job), f"{name}: reads needs.{referenced} without needing it"
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_release_check_detects_a_version_change_on_a_push_to_main() -> None:
+    job = _ci_jobs()["release-check"]
+    assert _run_if(job["if"], _context("push"))
+    assert not _run_if(job["if"], _context("pull_request"))
+    assert not _run_if(job["if"], _context("workflow_dispatch", heavy=True))
+    assert job["outputs"]["bump"] == "${{ steps.bump.outputs.bump }}"
+    step = next(s for s in job["steps"] if s.get("id") == "bump")
+    assert 'scripts/version.py --bump-since "$BEFORE_SHA"' in step["run"]
+    assert step["env"]["BEFORE_SHA"] == "${{ github.event.before }}"
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+@pytest.mark.parametrize("name", ["integration", "stress"])
+def test_heavy_jobs_run_on_a_version_change_push_and_on_a_heavy_dispatch(name: str) -> None:
+    job = _ci_jobs()[name]
+    assert "release-check" in _needs(job)
+    condition = job["if"]
+    assert _run_if(condition, _context("push", bump="true"))
+    assert _run_if(condition, _context("workflow_dispatch", heavy=True))
+    assert not _run_if(condition, _context("push", bump="false"))
+    assert not _run_if(condition, _context("pull_request"))
+    assert not _run_if(condition, _context("workflow_dispatch", heavy=False))
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_stress_blocks_only_a_version_change() -> None:
+    flag = _ci_jobs()["stress"]["continue-on-error"]
+    assert _run_if(flag, _context("push", bump="false"))
+    assert _run_if(flag, _context("workflow_dispatch", heavy=True))
+    assert not _run_if(flag, _context("push", bump="true"))
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_report_merges_the_real_window_stage_of_a_version_change() -> None:
+    job = _ci_jobs()["report"]
+    step = next(s for s in job["steps"] if "just ci-report" in str(s.get("run", "")))
+    mode = re.search(r"\$\{\{(.*)\}\}", step["run"]).group(1)
+    assert _run_if(mode, _context("push", bump="true")) == "all"
+    assert _run_if(mode, _context("workflow_dispatch", heavy=True)) == "all"
+    assert _run_if(mode, _context("push", bump="false")) == "visual"
+    assert _run_if(mode, _context("pull_request")) == "visual"
+
+
+def _tag_steps() -> tuple[dict, dict]:
+    steps = _ci_jobs()["tag-release"]["steps"]
+    refuse = next(s for s in steps if s.get("name") == "Refuse to tag a version change without a green heavy run")
+    tag = next(s for s in steps if s.get("id") == "tag")
+    assert steps.index(refuse) < steps.index(tag)
+    return refuse, tag
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_tag_release_needs_the_heavy_jobs_and_runs_on_every_push_to_main() -> None:
+    job = _ci_jobs()["tag-release"]
+    assert {"checks", "release-check", "integration", "stress"} <= set(_needs(job))
+    assert "needs.release-check.result == 'success'" in str(job["if"])
+    green = {"checks": "success", "integration": "success", "stress": "success"}
+    assert _run_if(job["if"], _context("push", bump="true", **green))
+    # Without a version change the heavy jobs are skipped and the job still runs (no tag).
+    assert _run_if(job["if"], _context("push", bump="false", checks="success", integration="skipped", stress="skipped"))
+    # ... but red checks skip it, as before this change.
+    assert not _run_if(job["if"], _context("push", bump="false", checks="failure", integration="skipped", stress="skipped"))
+    # On a version change a red heavy job or red checks do not skip the job: its first step
+    # explains why nothing is tagged. An integration failure fails report, hence checks.
+    assert _run_if(job["if"], _context("push", bump="true", checks="success", integration="success", stress="failure"))
+    assert _run_if(job["if"], _context("push", bump="true", checks="failure", integration="failure", stress="success"))
+    assert _run_if(job["if"], _context("push", bump="true", checks="failure", integration="success", stress="success"))
+    # A failed release-check, another event or a cancelled run skips it.
+    failed_check = {**_context("push", bump="", **green), "needs.release-check.result": "failure"}
+    assert not _run_if(job["if"], failed_check)
+    assert not _run_if(job["if"], _context("pull_request", **green))
+    assert not _run_if(job["if"], {**_context("push", bump="true", **green), "github.ref": "refs/heads/other"})
+    assert "!cancelled()" in str(job["if"])
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+@pytest.mark.parametrize(
+    ("bump", "checks", "integration", "stress", "tags"),
+    [
+        ("true", "success", "success", "success", True),
+        # Realistic: an integration failure (or hang) fails report, then checks.
+        ("true", "failure", "failure", "success", False),
+        ("true", "failure", "failure", "failure", False),
+        ("true", "failure", "cancelled", "success", False),
+        ("true", "success", "success", "failure", False),
+        ("true", "success", "success", "cancelled", False),
+        # A static or visual failure alone on a version change.
+        ("true", "failure", "success", "success", False),
+        ("true", "success", "skipped", "skipped", False),
+        ("false", "success", "skipped", "skipped", True),
+    ],
+)
+def test_tag_step_requires_checks_and_both_heavy_jobs_on_a_version_change(
+    bump: str, checks: str, integration: str, stress: str, tags: bool
+) -> None:
+    job = _ci_jobs()["tag-release"]
+    refuse, tag = _tag_steps()
+    values = _context("push", bump=bump, checks=checks, integration=integration, stress=stress)
+    assert _run_if(job["if"], values)
+    assert bool(_run_if(tag["if"], values)) is tags
+    assert bool(_run_if(refuse["if"], values)) is not tags
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_every_untagged_version_change_explains_why() -> None:
+    """Truth table over every result: on a version change that reaches tag-release, exactly one of
+    the two steps runs, and the tag step runs only when checks and both heavy jobs succeeded."""
+    import itertools
+
+    job = _ci_jobs()["tag-release"]
+    refuse, tag = _tag_steps()
+    results = ["success", "failure", "cancelled", "skipped"]
+    for checks, integration, stress in itertools.product(results, repeat=3):
+        for bump in ("true", "false"):
+            values = _context("push", bump=bump, checks=checks, integration=integration, stress=stress)
+            green = checks == "success" and (bump == "false" or integration == stress == "success")
+            if bump == "false" and checks != "success":
+                assert not _run_if(job["if"], values), values
+                continue
+            assert _run_if(job["if"], values), values
+            assert bool(_run_if(tag["if"], values)) is green, values
+            assert bool(_run_if(refuse["if"], values)) is (bump == "true" and not green), values
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_refused_tag_names_each_heavy_result_in_the_job_summary(tmp_path: Path) -> None:
+    import os
+    import subprocess
+
+    refuse, _ = _tag_steps()
+    assert refuse["env"] == {
+        "CHECKS": "${{ needs.checks.result }}",
+        "INTEGRATION": "${{ needs.integration.result }}",
+        "STRESS": "${{ needs.stress.result }}",
+        "RUN_ID": "${{ github.run_id }}",
+    }
+    summary = tmp_path / "summary.md"
+    result = subprocess.run(
+        ["bash", "-e", "-c", refuse["run"]],
+        env={**os.environ, "GITHUB_STEP_SUMMARY": str(summary), "CHECKS": "failure", "INTEGRATION": "failure",
+             "STRESS": "skipped", "RUN_ID": "4242"},
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    text = summary.read_text()
+    assert "Release not tagged" in text and "tagging was skipped" in text
+    assert "- checks: failure" in text and "- integration: failure" in text and "- stress: skipped" in text
+    # The recovery path: re-run the failed jobs of this same run.
+    assert "`gh run rerun 4242 --failed`" in text and "Re-run failed" in text
+    assert "checks: failure, integration: failure, stress: skipped" in result.stdout
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_pages_reuses_the_reports_of_the_release_run_when_its_heavy_jobs_are_green() -> None:
+    job = _ci_jobs()["pages"]
+    assert {"tag-release", "integration", "stress"} <= set(_needs(job))
+    flag = job["with"]["reports_from_caller"]
+    assert _run_if(flag, {"needs.integration.result": "success", "needs.stress.result": "success"})
+    assert not _run_if(flag, {"needs.integration.result": "success", "needs.stress.result": "skipped"})
+    call = _pages()[True]["workflow_call"]["inputs"]["reports_from_caller"]
+    assert call["type"] == "boolean" and call["default"] is False
+    find = _pages_step("Find the end-to-end reports")
+    assert find["env"]["FROM_CALLER"] == "${{ inputs.reports_from_caller }}"
+    fetch = _pages_step("Fetch the end-to-end reports of the calling run")
+    assert fetch["if"] == "steps.reports.outputs.from_caller == 'true'"
+    assert fetch["continue-on-error"] is True
+    assert fetch["with"] == {"name": "studio-reports", "path": "out/reports/"}  # this run: no run-id
+    decide = _pages_step("Decide whether the downloaded reports are used")
+    found, download = decide["env"]["FOUND"], decide["env"]["DOWNLOAD"]
+    caller = {"steps.reports.outputs.from_caller": "true", "steps.reports.outputs.run_id": "",
+              "github.run_id": "42", "steps.download-caller.outcome": "success", "steps.download.outcome": "skipped"}
+    assert _run_if(found, caller) == "42"
+    assert _run_if(download, caller) == "success"
+    selected = {"steps.reports.outputs.run_id": "7", "steps.download-caller.outcome": "skipped",
+                "steps.download.outcome": "failure"}
+    assert _run_if(found, selected) == "7"
+    assert _run_if(download, selected) == "failure"

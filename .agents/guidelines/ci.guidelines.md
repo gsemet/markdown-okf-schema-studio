@@ -57,10 +57,47 @@ The CI only runs what a developer can run locally. All logic lives in the task r
       repetitions, not steps (rule 7). It is advisory: it is not part of the required `checks` job,
       so a red stress run does not block a merge, but it is a flake to fix with the steps above,
       never to ignore.
-13. **Real VS Code jobs are manual.** The required path (`checks`) runs the simulated tests only:
+13. **Real VS Code jobs are manual, except on a version-change push (rule 14).**
+    The required path (`checks`) runs the simulated tests only:
     static checks and the Playwright/Chromium visual tests against a mock host, then `ci-report`
     with the real VS Code stage reported as skipped (`just ci-report visual`). The real VS Code
-    window jobs, `integration` and `stress`, run only on demand:
+    window jobs, `integration` and `stress`, run on demand:
     `gh workflow run ci.yml --ref <branch> -f heavy=true` (add `-f gallery=true` for the gallery
     and site). Run them before merging a change to the extension host, the webview or the
     real-window tests, and run `npm run test:integration` locally (one VS Code window at a time).
+14. **A release is tagged only after a green heavy run of its commit.** A push to `main` that
+    changes the package version runs the heavy jobs without a dispatch: the `release-check` job
+    detects the change (`scripts/version.py --bump-since`, the same test `tag-release` uses) and
+    `integration` and `stress` run in that push run, where `stress` blocks instead of being
+    advisory. `tag-release` needs `checks` and both heavy jobs, and tags only when all three
+    results are `success`. Otherwise it creates no tag, writes "Release not tagged" with the result
+    of `checks`, `integration` and `stress` to the job summary and fails (an integration failure
+    fails `report`, then `checks`; the summary is written all the same). If `release-check` itself
+    fails or the run is cancelled, nothing is tagged and no summary is written; the run is red or
+    cancelled. The Pages deploy of the tag reuses the reports of that run instead of running the
+    suite again. A red heavy job on that push is recovered in the same run (next section).
+
+## Recovering from a red heavy job on a release push
+
+Only the push that changes the version can tag it: a later push without a version change does
+not. When a flake fails `integration` or `stress` on that push, re-run the failed jobs of the
+same run; no new commit and no manual tag are needed.
+
+1. Open the run: Actions, workflow **CI**, the run of the version commit on `main` (its
+   `tag-release` summary says "Release not tagged").
+2. Re-run jobs > **Re-run failed jobs**, then **Re-run jobs**. With the CLI:
+   `gh run rerun <run-id> --failed` (the run id is in the summary and in the run URL).
+3. What to expect: GitHub re-runs the failed jobs and the jobs that depend on them, including the
+   ones that were skipped: the heavy job, then `report` and `checks` (after an integration
+   failure), `tag-release`, `release` and `pages`. The jobs that passed are not re-run and keep
+   their results and outputs (`release-check` keeps `bump=true`). The re-run uses the same commit
+   and the same push event, so `tag-release` tags that commit when everything is green.
+4. Integration re-run more than two hours after the run started: `report` rejects a visual and an
+   integration stage that started two hours apart or more, so use Re-run jobs > **Re-run all
+   jobs** (`gh run rerun <run-id>`) instead. This is safe only while no tag exists, which is the
+   case after "Release not tagged".
+5. Once the tag exists, re-run only the failed jobs (`release`, `pages`). Never re-run all jobs
+   then: `tag-release` would find the tag, output none, and skip `release` and `pages`.
+
+Fix and release a new version instead when the failure is a real bug, or when the same job fails
+again after a re-run: open a fix, merge it, then bump the version (`just version`) and push.
