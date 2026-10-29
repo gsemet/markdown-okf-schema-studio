@@ -7,6 +7,7 @@ import {
   hostStressPlan,
   STRESS_SCENARIOS_BY_HOST,
 } from "../../shared/stressPlan";
+import { scenarioFindInPreview } from "../findInPreview.test";
 import { scenarioLinkedTargetSave } from "../linkedTargetSave";
 import { scenarioTableMoves } from "../tableMoves";
 import {
@@ -56,6 +57,7 @@ const STRESS_SCENARIOS: Record<string, (page: Page, evidence: Evidence) => Promi
     await scenarioToc(page);
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
   },
+  "find-in-preview": (page) => scenarioFindInPreview(page),
 };
 
 /** Runs the stress plan: every round gets its own evidence folder, so captures never repeat. */

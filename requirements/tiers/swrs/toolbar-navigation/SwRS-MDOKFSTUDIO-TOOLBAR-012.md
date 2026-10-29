@@ -64,5 +64,5 @@ When the reader replaces matches from the find bar, the extension SHALL replace 
 - Method: test/core/find/findMatches.test.ts (expansion of "$1", "$&", the named group form and "$$").
 - Method: test/core/protocol/pageToHost.test.ts (the validator of the request) and test/session/reviewReqThreads.requirements.test.ts (the host applies the edits as one call and answers with the counts).
 - Method: test/page/modules/findBar.test.ts (items sent for replace and replace all, the note with the skipped count, the host's refusal shown).
-- Method: test/integration/findInPreview.test.ts, real VS Code window (replace all edits the document at the matched spans only, one undo restores the file).
+- Method: test/integration/findInPreview.test.ts, real VS Code window (replace all edits the document at the matched spans only, one undo restores the file); repeated by the `stress` CI job as `find-in-preview` (test/shared/stressPlan.ts).
 - Criteria: the document after the edits equals the source with exactly the matched spans replaced.

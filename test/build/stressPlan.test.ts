@@ -51,3 +51,9 @@ test("CR 048: the slash menu scenario runs in the trusted window's stress plan",
   assert.deepEqual(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "slash-menu" }, "trusted")?.scenarios, ["slash-menu"]);
   assert.equal(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "slash-menu" }, "untrusted"), undefined);
 });
+
+test("find in preview (cream and dark, with replace) runs in the trusted window's stress plan", () => {
+  assert.ok(STRESS_SCENARIOS_BY_HOST.trusted.includes("find-in-preview"));
+  assert.deepEqual(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "find-in-preview" }, "trusted")?.scenarios, ["find-in-preview"]);
+  assert.equal(hostStressPlan({ STUDIO_STRESS_SCENARIOS: "find-in-preview" }, "untrusted"), undefined);
+});
