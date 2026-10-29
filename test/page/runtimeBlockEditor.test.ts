@@ -1272,6 +1272,42 @@ test("CR 169: a block source that arrives after the find bar took the focus leav
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
+test("CR 188: text typed after click, find and a late source goes to the find field, not the Markdown", () => {
+  const harness = createRuntimeHarness({ trackFocus: true });
+  harness.editModeButton.dispatch("click");
+  harness.dispatchDocument("click", { target: harness.mappings[1], preventDefault: () => undefined });
+  const editId = harness.messages.at(-1)?.editId;
+  harness.dispatchMessage({ type: "previewFindCommand", documentId: "file:///active.md", revision: 7, requestId: 11, command: "open" });
+  const findInput = harness.createdElements.find((element) => element.getAttribute("data-find-input") !== null);
+  assert.ok(findInput, "the find bar is built");
+  // A real key goes to the focused element: it appends the character and fires `input` on it.
+  const type = (text: string): void => {
+    for (const character of text) {
+      const target = harness.document.activeElement as { value?: string; dispatch(type: string, event?: unknown): void } | null;
+      assert.ok(target, "a field holds the focus");
+      target.value = `${target.value ?? ""}${character}`;
+      target.dispatch("input", { target });
+    }
+  };
+  type("Ra");
+  harness.dispatchMessage({
+    type: "previewEditSource", documentId: "file:///active.md", revision: 7, requestId: 11, editId,
+    originalText: "Raw line one\nRaw line two\n",
+  });
+  type("w");
+  assert.equal(findInput.value, "Raw", "the whole query landed in the find field");
+  const textarea = harness.createdElements.find((element) => element.tagName === "TEXTAREA");
+  assert.ok(textarea, "the editor is built");
+  assert.equal(textarea.value, "Raw line one\nRaw line two", "the Markdown text box holds the source as it came");
+  const count = harness.createdElements.find((element) => element.getAttribute("data-find-count") !== null);
+  assert.ok(count, "the find bar has a match count");
+  // The fake document has no rendered text to match, so only the shape of the message is checked.
+  assert.match(count.textContent ?? "", /^(\d+ of \d+|No results)$/u, "the count message is shown");
+  assert.deepEqual(harness.messages.filter((message) => message.type === "previewEditSave"), [],
+    "nothing typed was saved to the Markdown");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-BLOCK-255
 test("CR 169: a block source that arrives with the focus still on the page takes the focus", () => {
   const harness = createRuntimeHarness({ trackFocus: true });
   harness.editModeButton.dispatch("click");

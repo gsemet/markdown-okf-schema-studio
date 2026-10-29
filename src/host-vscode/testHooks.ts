@@ -217,6 +217,25 @@ export function sendPreviewMessageForTests(message: unknown): PromiseLike<void> 
   return undefined;
 }
 
+/**
+ * Holds back the source of every block editor the active preview's page opens from now on, so a
+ * test can make it arrive late on purpose. `held()` counts the sources waiting; `release()` posts
+ * them in order and stops holding. The extension and a preview must be active.
+ */
+export function holdEditSourcesForTests(): { held(): number; release(): void } {
+  const preview = activePreview();
+  if (!preview) throw new Error("holdEditSourcesForTests needs an active preview.");
+  const queue: Array<() => void> = [];
+  preview.edits.heldSources = queue;
+  return {
+    held: () => queue.length,
+    release() {
+      if (preview.edits.heldSources === queue) preview.edits.heldSources = undefined;
+      for (const post of queue.splice(0)) post();
+    },
+  };
+}
+
 /** Moves the pages with the active editor, as a scroll of the editor would. */
 export function syncActiveEditorForTests(): void {
   if (!current) return;

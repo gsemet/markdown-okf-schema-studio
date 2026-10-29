@@ -58,6 +58,11 @@ export interface EditState {
   watchedPageEditorId?: string;
   /** An explicit refresh asked for the next render: it reaches the page even over an open editor. */
   forceNextResult?: boolean;
+  /**
+   * Test hook only (`holdEditSourcesForTests`): while set, the source of an opened block editor is
+   * queued here instead of being posted, so a real-window test can make it arrive late.
+   */
+  heldSources?: Array<() => void>;
 }
 
 /** A fresh {@link EditState}. */
@@ -149,7 +154,7 @@ export class BlockEditController {
         return;
       }
       this.openPageEditor(preview, message);
-      fireAndForget(this.manager.host.logger, preview.postToPage({
+      this.postSource(preview, () => fireAndForget(this.manager.host.logger, preview.postToPage({
         type: "previewEditSource",
         documentId: message.documentId,
         revision: message.revision,
@@ -159,7 +164,7 @@ export class BlockEditController {
         endLine: message.endLine,
         originalText: "",
         insertAfterLine: message.insertAfterLine,
-      }), "postToPage");
+      }), "postToPage"));
       return;
     }
     const source = this.currentSourceEdit(preview, message);
@@ -173,7 +178,7 @@ export class BlockEditController {
     }
     const originalText = source.document.getText().slice(source.start, source.end);
     this.openPageEditor(preview, message);
-    fireAndForget(this.manager.host.logger, preview.postToPage({
+    this.postSource(preview, () => fireAndForget(this.manager.host.logger, preview.postToPage({
       type: "previewEditSource",
       documentId: message.documentId,
       revision: message.revision,
@@ -182,7 +187,13 @@ export class BlockEditController {
       line: message.line,
       endLine: message.endLine,
       originalText,
-    }), "postToPage");
+    }), "postToPage"));
+  }
+
+  /** Posts the source of an opened editor, or queues it while a test holds the sources back. */
+  private postSource(preview: PreviewSession, post: () => void): void {
+    if (preview.edits.heldSources) preview.edits.heldSources.push(post);
+    else post();
   }
 
   /** The page shows an inline editor from now on: page updates wait for it to close (STAB-03). */
