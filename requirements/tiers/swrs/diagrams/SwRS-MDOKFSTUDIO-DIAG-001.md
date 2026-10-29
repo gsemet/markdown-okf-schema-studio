@@ -22,6 +22,7 @@ derived_by: []
 implemented_in_files:
 - src/core/preview/styles/contentBlockStyles.ts
 - src/core/preview/styles/editModeStyles.ts
+- src/core/render/mermaidFont.ts
 - src/core/render/mystNormalize.ts
 - src/page/modules/mermaidPreview.ts
 - src/session/webview.ts
@@ -32,6 +33,8 @@ tested_in_files:
 - test/core/render/mystFeatures.test.ts
 - test/integration/projectFeatures.test.ts
 - test/page/diagReq.diagramEdit.requirements.test.ts
+- test/page/mermaidLabelFit.test.ts
+- test/page/modules/mermaidPreviewEntry.test.ts
 - test/visual/scenarioDefinitions1.ts
 - test/visual/scenarioDefinitions2.ts
 default_owner_email: gaetan@xeberon.net
@@ -72,6 +75,14 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - GIVEN a valid Mermaid flowchart
 - WHEN the page draws the diagram
 - THEN the diagram element holds one image of class myst-mermaid-image with alt text "Mermaid diagram" and a src starting with data:image/svg+xml;charset=utf-8 (an SVG drawn at the strict security level), the diagram text is replaced, and data-render-state is rendered
+
+### Scenario (nominal): Labels fit their boxes in the picture
+
+- GIVEN a flowchart with node labels ("Review telemetry", "Hold and inspect") and edge labels ("Yes", "No"), drawn with Mermaid's HTML labels
+- WHEN the page draws the diagram and shows it as an SVG image
+- THEN Mermaid measures the labels inside an element of class myst-mermaid-measure that the page style sheet gives a pinned system font stack and a 16px size, with no inherited page style, and that is removed once the diagram is drawn
+- AND the Mermaid configuration and theme variables carry the same font family and size, so the image draws each label with the metrics it was measured with
+- AND in the image, the text of every label fits its label box and, for a node, its shape: no label loses its last characters
 
 ### Scenario (boundary): Line-break tags in the SVG
 
@@ -121,3 +132,6 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - Method: line-break tags and the drawn picture have no unit test of the browser entry point mermaidPreview.ts (untested apart from the visual scenarios)
 - Criteria: Both syntaxes give the same figure structure; an empty fence gives an empty diagram element; the script tag appears only with a Mermaid figure; a loaded image replaces the text and carries the rendered state; the stylesheet contains the containment rules and the picture is never larger than its natural size; the block is hidden only while its editor is open.
 - Method: test/build/bundleSplit.test.ts (the renderer entry is small and the rest is split into chunks)
+- Method: test/page/mermaidLabelFit.test.ts (headless Chromium: the shown SVG opened as a document of its own, every label's text inside its box; the in-page measure of the real-window check agrees with it)
+- Method: test/page/modules/mermaidPreviewEntry.test.ts (Mermaid measures in the styled measure element, removed after the drawing)
+- Method: test/integration/realInput/previewWindow.ts (real VS Code window: every label of the demo flowchart fits its box as the image draws it)

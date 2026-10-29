@@ -84,6 +84,17 @@ export interface ChartPage {
 
 /** Opens `document` in headless Chromium; undefined when no browser can start (the caller skips). */
 export async function openChartPage(markdown: string, files: Record<string, string>, themeId: string, mode?: string): Promise<ChartPage | undefined> {
+  return openPreviewPage(markdown, files, themeId, mode, "vega");
+}
+
+/**
+ * Opens `document` in headless Chromium with one diagram runtime bundled as the extension bundles
+ * it: the Vega chart runtime, or the Mermaid runtime (an ES module with chunks, which Chromium
+ * loads from file:// only with file access allowed). Undefined when no browser can start.
+ */
+export async function openPreviewPage(
+  markdown: string, files: Record<string, string>, themeId: string, mode: string | undefined, runtime: "vega" | "mermaid",
+): Promise<ChartPage | undefined> {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "chart-page-")));
   const workspace = path.join(root, "workspace");
   fs.mkdirSync(workspace, { recursive: true });
@@ -93,16 +104,30 @@ export async function openChartPage(markdown: string, files: Record<string, stri
   }
   const documentPath = path.join(workspace, "chart.md");
   fs.writeFileSync(documentPath, markdown);
-  await build({
-    entryPoints: [path.join(EXTENSION_ROOT, "src/page/modules/vegaPreview.ts")],
-    outfile: path.join(root, "out/bundle/vegaPreview.js"),
-    bundle: true,
-    platform: "browser",
-    target: "es2020",
-    format: "iife",
-    minify: true,
-    logLevel: "silent",
-  });
+  const runtimeFile = runtime === "vega" ? "vegaPreview.js" : "mermaidPreview.js";
+  await build(runtime === "vega"
+    ? {
+      entryPoints: [path.join(EXTENSION_ROOT, "src/page/modules/vegaPreview.ts")],
+      outfile: path.join(root, "out/bundle/vegaPreview.js"),
+      bundle: true,
+      platform: "browser",
+      target: "es2020",
+      format: "iife",
+      minify: true,
+      logLevel: "silent",
+    }
+    : {
+      entryPoints: [path.join(EXTENSION_ROOT, "src/page/modules/mermaidPreview.ts")],
+      outdir: path.join(root, "out/bundle"),
+      chunkNames: "mermaid-chunks/[name]-[hash]",
+      bundle: true,
+      splitting: true,
+      platform: "browser",
+      target: "es2022",
+      format: "esm",
+      minify: true,
+      logLevel: "silent",
+    });
   const rendered = await renderPreviewDocument({
     document: { uri: { scheme: "file", fsPath: documentPath }, languageId: "markdown", version: 1, getText: () => markdown },
     workspaceRoot: workspace,
@@ -111,8 +136,8 @@ export async function openChartPage(markdown: string, files: Record<string, stri
     plantUmlEngine: "builtin",
   });
   const bundle = fakeAssetResolver({ cspSource: "file:", url: (filePath) => pathToFileURL(filePath).href, extensionRoot: root });
-  // Only the chart runtime is bundled here: the page keeps its inline stylesheet and has no KaTeX.
-  const assets = { ...bundle, bundleUri: (...segments: string[]) => segments[0] === "vegaPreview.js" ? bundle.bundleUri(...segments) : undefined };
+  // Only the diagram runtime is bundled here: the page keeps its inline stylesheet and has no KaTeX.
+  const assets = { ...bundle, bundleUri: (...segments: string[]) => segments[0] === runtimeFile ? bundle.bundleUri(...segments) : undefined };
   const built = buildPreviewWebviewHtml(
     rendered.html, workspace, assets, undefined, workspace, undefined, undefined, true, true, [], "builtin",
   );
@@ -121,7 +146,7 @@ export async function openChartPage(markdown: string, files: Record<string, stri
 
   let browser: Browser;
   try {
-    browser = await chromium.launch();
+    browser = await chromium.launch(runtime === "mermaid" ? { args: ["--allow-file-access-from-files"] } : {});
   } catch {
     return undefined;
   }

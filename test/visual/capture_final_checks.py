@@ -622,9 +622,17 @@ def check_mermaid_theme_switch(page: Page, scenario: dict, failures: list[Failur
       host.appendChild(expected);
       const state = {
         expected: getComputedStyle(expected).backgroundColor,
-        fills: [...host.querySelectorAll('.node rect, .node polygon, .node circle, .node path')]
-          .filter(node => !node.style.fill).map(node => getComputedStyle(node).fill),
-        labels: [...host.querySelectorAll('.nodeLabel')].map(node => node.textContent),
+        // The theme reaches every node shape through the diagram's own style sheet: a probe node,
+        // with no inline fill of its own, shows the fill that style sheet gives a plain node
+        // (a classDef or style line sets an inline fill and would hide it).
+        fills: [...['rect', 'polygon', 'circle', 'path'].map(tag => {
+          const probe = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          probe.setAttribute('class', 'node');
+          probe.appendChild(document.createElementNS('http://www.w3.org/2000/svg', tag));
+          host.querySelector('svg').appendChild(probe);
+          return getComputedStyle(probe.firstChild).fill;
+        })],
+        labels: [...host.querySelectorAll('.nodeLabel, .node .label text')].map(node => node.textContent),
       };
       host.remove();
       return state;

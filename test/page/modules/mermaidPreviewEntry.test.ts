@@ -11,14 +11,16 @@ const MERMAID_STAND_IN = `
 const calls = globalThis.mermaidCalls;
 export default {
   mermaidAPI: { getConfig: () => ({ flowchart: { useMaxWidth: true } }) },
-  initialize: (config) => { void config; },
-  render: (id, source) => new Promise((resolve, reject) => { calls.push({ id, source, resolve, reject }); }),
+  initialize: () => {},
+  render: (id, source, container) => new Promise((resolve, reject) => { calls.push({ id, source, container, resolve, reject }); }),
 };
 `;
 
 interface MermaidCall {
   readonly id: string;
   readonly source: string;
+  /** The element Mermaid measures and draws in. */
+  readonly container: EntryElement | undefined;
   resolve(result: { svg: string }): void;
   reject(error: Error): void;
 }
@@ -48,6 +50,33 @@ function openPage(sources: readonly string[]): { page: Page; diagrams: EntryElem
 function shown(diagram: EntryElement): string | undefined {
   return (diagram.querySelector("img") as unknown as { src?: string } | null)?.src;
 }
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+test("Mermaid draws only once the page fonts are loaded", async () => {
+  const document = new EntryDocument();
+  document.diagram("myst-mermaid-diagram", "graph TD; A-->B");
+  let fontsLoaded!: () => void;
+  Object.assign(document, { fonts: { ready: new Promise<void>((resolve) => { fontsLoaded = resolve; }) } });
+  const calls: MermaidCall[] = [];
+  const run = runEntry(bundle, document, () => "", { mermaidCalls: calls });
+  await run.settle();
+  assert.equal(calls.length, 0, "nothing is measured while the fonts load");
+  fontsLoaded();
+  await run.settle();
+  assert.equal(calls.length, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-DIAG-001
+test("Mermaid measures in the page's styled measure element, which goes away once drawn", async () => {
+  const { page } = openPage(["graph TD; A-->B"]);
+  await page.run.settle();
+  const measure = page.calls[0]?.container;
+  assert.equal(measure?.className, "myst-mermaid-measure", "the element the page style sheet gives the image's font");
+  assert.equal(measure?.parentNode, page.document.body, "attached while Mermaid measures");
+  page.calls[0]!.resolve({ svg: "<svg>drawn</svg>" });
+  await page.run.settle();
+  assert.equal(measure?.parentNode, null, "removed once the diagram is drawn");
+});
 
 // @tests_req SwRS-MDOKFSTUDIO-DIAG-009
 test("Mermaid element ids never repeat, also for the diagrams of replaced content", async () => {

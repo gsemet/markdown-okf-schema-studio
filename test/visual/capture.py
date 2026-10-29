@@ -150,9 +150,15 @@ def run_scenario(page: Page, scenario: dict, failures: list[Failure], result: di
         const source = image.closest('.myst-mermaid-diagram')?.querySelector('.myst-mermaid-source')?.textContent || '';
         if (!labels.length && /\|[^|]+\|/.test(source)) errors.push('Mermaid SVG lost expected internal edge labels');
         for (const label of labels) {
-          const foreground = getComputedStyle(label).color;
+          const isSvgText = label.namespaceURI === 'http://www.w3.org/2000/svg';
+          const foreground = isSvgText ? getComputedStyle(label).fill : getComputedStyle(label).color;
           let background = 'rgba(0, 0, 0, 0)';
-          for (let ancestor = label; ancestor && ancestor !== host; ancestor = ancestor.parentElement) {
+          const labelRect = isSvgText ? label.closest('.edgeLabel')?.querySelector('rect') : null;
+          if (labelRect) {
+            const fill = getComputedStyle(labelRect).fill;
+            if (fill && fill !== 'none' && fill !== 'rgba(0, 0, 0, 0)') background = fill;
+          }
+          for (let ancestor = label; background === 'rgba(0, 0, 0, 0)' && ancestor && ancestor !== host; ancestor = ancestor.parentElement) {
             const candidate = getComputedStyle(ancestor).backgroundColor;
             if (candidate !== 'rgba(0, 0, 0, 0)' && candidate !== 'transparent') {
               background = candidate;

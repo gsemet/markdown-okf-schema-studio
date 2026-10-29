@@ -1,4 +1,5 @@
 import { directiveStyle } from "../../directives/registry";
+import { MERMAID_FONT_FAMILY, MERMAID_FONT_SIZE, MERMAID_MEASURE_CLASS } from "../../render/mermaidFont";
 import { gridColumnCss } from "../../render/mystGridToctree";
 
 // @implements_req SwRS-MDOKFSTUDIO-BLOCK-002
@@ -305,6 +306,22 @@ html[data-sphinx-preview-theme-mode="white"] #sphinx-myst-preview-content :not(p
   max-width: 100%;
   height: auto;
   margin-inline: auto;
+}
+
+/*
+ * Where Mermaid measures a diagram before the page shows it as an image (see mermaidFont.ts). The
+ * policy blocks Mermaid's own style sheet here, so this rule gives the labels the font and size
+ * the image draws them with, and nothing of the page (inherited size, line height, spacing).
+ * Hidden, out of the flow and off screen: it only lives while Mermaid draws.
+ */
+.${MERMAID_MEASURE_CLASS} {
+  all: initial;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: -100000px;
+  visibility: hidden;
+  font-family: ${MERMAID_FONT_FAMILY};
+  font-size: ${MERMAID_FONT_SIZE};
 }
 
 #sphinx-myst-preview-content details.myst-mermaid-source {
