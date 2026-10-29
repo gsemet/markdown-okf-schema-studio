@@ -2,7 +2,7 @@
  * A rendered document as the page sees it, for the page helpers that read mapped blocks
  * (`createMappedBlocks`): the Markdown is rendered, passed through the preview sanitizer with the
  * source mapping, parsed with parse5, and its elements are wrapped in the few DOM methods those
- * helpers call. Selectors are limited to compounds of a tag name and attribute tests
+ * helpers call. Selectors are limited to compounds of a tag name, classes and attribute tests
  * (`ul, ol`, `[a][b]`, `aside[a="v"]`); any other selector throws, so a test never passes on a
  * selector the wrapper does not understand.
  */
@@ -19,15 +19,16 @@ type Parse5Node = DefaultTreeAdapterTypes.Node;
 interface SimpleSelector {
   readonly tag: string | undefined;
   readonly attributes: ReadonlyArray<{ readonly name: string; readonly value: string | undefined }>;
+  readonly classes: readonly string[];
 }
 
 function parseSelector(selector: string): SimpleSelector[] {
   return selector.split(",").map((part) => {
-    const match = part.trim().match(/^([a-z][a-z0-9]*)?((?:\[[^\]]+\])*)$/u);
-    if (!match || (!match[1] && !match[2])) throw new Error(`unsupported selector in the test DOM: ${selector}`);
-    const attributes = [...match[2].matchAll(/\[([^\]=]+)(?:="([^"]*)")?\]/gu)]
+    const match = part.trim().match(/^([a-z][a-z0-9]*)?((?:\.[\w-]+)*)((?:\[[^\]]+\])*)$/u);
+    if (!match || (!match[1] && !match[2] && !match[3])) throw new Error(`unsupported selector in the test DOM: ${selector}`);
+    const attributes = [...match[3].matchAll(/\[([^\]=]+)(?:="([^"]*)")?\]/gu)]
       .map((entry) => ({ name: entry[1], value: entry[2] }));
-    return { tag: match[1], attributes };
+    return { tag: match[1], attributes, classes: match[2].split(".").filter(Boolean) };
   });
 }
 
@@ -73,6 +74,7 @@ export class MappedElement {
   public matches(selector: string): boolean {
     return parseSelector(selector).some((simple) =>
       (simple.tag === undefined || simple.tag.toUpperCase() === this.tagName)
+      && simple.classes.every((name) => (this.getAttribute("class") ?? "").split(/\s+/u).includes(name))
       && simple.attributes.every((test) => {
         const value = this.getAttribute(test.name);
         return value !== null && (test.value === undefined || value === test.value);
