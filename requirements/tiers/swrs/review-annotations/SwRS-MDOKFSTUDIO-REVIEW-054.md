@@ -28,10 +28,12 @@ derived_by: []
 implemented_in_files:
 - src/core/comments/commentModel.ts
 - src/core/comments/commentStore.ts
+- src/host-vscode/vscodeHost.ts
 - src/session/features/comments.ts
 tested_in_files:
 - test/core/comments/commentEditing.test.ts
 - test/core/comments/reviewReq.requirements.test.ts
+- test/host-vscode/fileRename.test.ts
 - test/integration/commentWrite.test.ts
 - test/node-services/nodeServices.test.ts
 - test/session/reviewReqComments.requirements.test.ts
