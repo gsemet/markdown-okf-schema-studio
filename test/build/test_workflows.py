@@ -327,7 +327,8 @@ def test_pages_build_downloads_reports_when_a_run_was_found_and_runs_the_suite_o
     assert download["if"] == "steps.reports.outputs.run_id != ''"
     assert download["continue-on-error"] is True
     assert download["with"]["run-id"] == "${{ steps.reports.outputs.run_id }}"
-    assert download["with"]["name"] == "studio-reports"
+    # The selection names the reports artifact of the newest attempt of that run.
+    assert download["with"]["name"] == "${{ steps.reports.outputs.artifact }}"
     assert "pattern" not in download["with"]
     decide = _pages_step("Decide whether the downloaded reports are used")
     assert "steps.download.outcome" in str(decide["env"])
@@ -583,7 +584,8 @@ def test_pages_reuses_the_reports_of_the_release_run_when_its_heavy_jobs_are_gre
     fetch = _pages_step("Fetch the end-to-end reports of the calling run")
     assert fetch["if"] == "steps.reports.outputs.from_caller == 'true'"
     assert fetch["continue-on-error"] is True
-    assert fetch["with"] == {"name": "studio-reports", "path": "out/reports/"}  # this run: no run-id
+    # This run (no run-id), under the name the caller's report job uploaded in its newest attempt.
+    assert fetch["with"] == {"name": "${{ steps.reports.outputs.artifact }}", "path": "out/reports/"}
     decide = _pages_step("Decide whether the downloaded reports are used")
     found, download = decide["env"]["FOUND"], decide["env"]["DOWNLOAD"]
     caller = {"steps.reports.outputs.from_caller": "true", "steps.reports.outputs.run_id": "",
@@ -594,3 +596,165 @@ def test_pages_reuses_the_reports_of_the_release_run_when_its_heavy_jobs_are_gre
                 "steps.download.outcome": "failure"}
     assert _run_if(found, selected) == "7"
     assert _run_if(download, selected) == "failure"
+
+
+# "Re-run failed jobs" keeps the run id: an artifact uploaded under a fixed name exists once per
+# attempt, and a download by that name returned the attempt-1 artifact. Every artifact name of
+# ci.yml therefore carries the attempt that uploaded it, and every consumer downloads the name the
+# producing job reports (a job that was not re-run keeps its attempt-1 outputs and artifact).
+ATTEMPT_SUFFIX = "-attempt-${{ github.run_attempt }}"
+UPLOAD = "actions/upload-artifact@"
+DOWNLOAD = "actions/download-artifact@"
+
+
+def _uploads(jobs: dict[str, dict]) -> dict[str, list[str]]:
+    return {name: [s["with"]["name"] for s in job.get("steps", []) if UPLOAD in str(s.get("uses", ""))]
+            for name, job in jobs.items()}
+
+
+def _downloads(steps: list[dict]) -> list[dict]:
+    return [s for s in steps if DOWNLOAD in str(s.get("uses", ""))]
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_every_ci_artifact_name_carries_the_attempt() -> None:
+    names = [name for names in _uploads(_ci_jobs()).values() for name in names]
+    assert names, "ci.yml uploads no artifact"
+    for name in names:
+        assert name.endswith(ATTEMPT_SUFFIX), f"artifact {name!r} does not end with {ATTEMPT_SUFFIX!r}"
+    assert len(set(names)) == len(names), f"two jobs upload the same name: {names}"
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+@pytest.mark.parametrize(("job", "base"), [("visual", "e2e-visual"), ("integration", "e2e-integration"),
+                                           ("report", "studio-reports")])
+def test_a_consumed_artifact_is_announced_by_its_job(job: str, base: str) -> None:
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("select_e2e_run", SELECT)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert base in module.REQUIRED_ARTIFACTS  # the Pages selection reads the same names
+    assert _uploads(_ci_jobs())[job] == [base + ATTEMPT_SUFFIX]
+    assert _ci_jobs()[job]["outputs"]["artifact"] == base + ATTEMPT_SUFFIX
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_every_ci_download_names_the_artifact_of_the_job_it_needs() -> None:
+    jobs = _ci_jobs()
+    uploads = _uploads(jobs)
+    seen = 0
+    for name, job in jobs.items():
+        for step in _downloads(job.get("steps", [])):
+            seen += 1
+            wanted = step["with"].get("name") or step["with"].get("pattern")
+            match = re.fullmatch(r"\$\{\{ needs\.([\w-]+)\.outputs\.artifact \}\}", str(wanted))
+            assert match, f"{name}: downloads {wanted!r}, not a producing job's artifact output"
+            producer = match.group(1)
+            assert producer in _needs(job), f"{name}: reads the artifact of {producer} without needing it"
+            assert jobs[producer]["outputs"]["artifact"] in uploads[producer]
+            assert "run-id" not in step["with"], f"{name}: downloads from another run"
+    assert seen >= 3  # report (visual, integration) and gallery
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_report_merges_each_stage_from_the_attempt_that_produced_it() -> None:
+    job = _ci_jobs()["report"]
+    steps = _downloads(job["steps"])
+    patterns = [s["with"]["pattern"] for s in steps]
+    assert patterns == ["${{ needs.visual.outputs.artifact }}", "${{ needs.integration.outputs.artifact }}"]
+    for step in steps:
+        # pattern (not name): a missing artifact (skipped or timed-out job) downloads nothing and
+        # ci-report says which stage is missing; merge-multiple writes into out/reports/ directly.
+        assert step["with"]["path"] == "out/reports/" and step["with"]["merge-multiple"] is True
+        assert "*" not in step["with"]["pattern"]
+    # Integration failed on attempt 1 and was re-run: visual keeps attempt 1, integration is attempt 2.
+    rerun = {"needs.visual.outputs.artifact": "e2e-visual-attempt-1",
+             "needs.integration.outputs.artifact": "e2e-integration-attempt-2"}
+    assert [_run_if(p, rerun) for p in patterns] == ["e2e-visual-attempt-1", "e2e-integration-attempt-2"]
+    # An empty pattern would download every artifact: a job without an output (integration
+    # skipped, a job that never started) downloads nothing.
+    for step, producer in zip(steps, ("visual", "integration")):
+        assert _run_if(step["if"], rerun)
+        assert not _run_if(step["if"], {**rerun, f"needs.{producer}.outputs.artifact": ""})
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_pages_gets_the_reports_artifact_of_the_newest_report_attempt() -> None:
+    job = _ci_jobs()["pages"]
+    assert "report" in _needs(job)
+    assert job["with"]["reports_artifact"] == "${{ needs.report.outputs.artifact }}"
+    call = _pages()[True]["workflow_call"]["inputs"]["reports_artifact"]
+    assert call["type"] == "string" and call["default"] == ""
+    assert _pages_step("Find the end-to-end reports")["env"]["CALLER_ARTIFACT"] == "${{ inputs.reports_artifact }}"
+    downloads = _downloads(_pages()["jobs"]["build-site"]["steps"])
+    assert [d["with"]["name"] for d in downloads] == ["${{ steps.reports.outputs.artifact }}"] * 2
+
+
+def _find_reports(tmp_path: Path, **env: str) -> tuple[int, dict[str, str], str]:
+    """Run the find step of pages.yml with a fake `uv` that stands for the selection script."""
+    import os
+    import subprocess
+
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir(exist_ok=True)
+    fake = bin_dir / "uv"
+    fake.write_text("#!/usr/bin/env bash\necho \"$*\" >> \"$UV_CALLS\"\nprintf '%s' \"$SELECTION\"\n")
+    fake.chmod(0o755)
+    output = tmp_path / "output"
+    output.write_text("")
+    calls = tmp_path / "uv-calls"
+    calls.write_text("")
+    step = _pages_step("Find the end-to-end reports")
+    result = subprocess.run(
+        ["bash", "-c", step["run"]],
+        env={**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}", "GITHUB_OUTPUT": str(output),
+             "GITHUB_RUN_ID": "42", "GITHUB_REPOSITORY": "o/r", "UV_CALLS": str(calls), "SELECTION": "",
+             "REQUESTED_RUN_ID": "", "FROM_CALLER": "false", "CALLER_ARTIFACT": "", **env},
+        capture_output=True, text=True, cwd=ROOT,
+    )
+    values = dict(line.split("=", 1) for line in output.read_text().splitlines() if "=" in line)
+    return result.returncode, values, calls.read_text()
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_pages_find_step_outputs_the_run_and_its_reports_artifact(tmp_path: Path) -> None:
+    status, values, calls = _find_reports(
+        tmp_path, FROM_CALLER="true", CALLER_ARTIFACT="studio-reports-attempt-2")
+    assert status == 0 and values == {"from_caller": "true", "artifact": "studio-reports-attempt-2"}
+    assert calls == ""
+    # The caller did not name its artifact: no guess (an empty name would download every artifact).
+    status, values, calls = _find_reports(tmp_path, FROM_CALLER="true", CALLER_ARTIFACT="")
+    assert status == 0 and values == {} and calls == ""
+    status, values, calls = _find_reports(
+        tmp_path, SELECTION="run_id=7\nartifact=studio-reports-attempt-3\n")
+    assert status == 0 and values == {"run_id": "7", "artifact": "studio-reports-attempt-3"}
+    assert "select_e2e_run.py" in calls
+    status, values, _ = _find_reports(tmp_path, SELECTION="")
+    assert status == 0 and values == {}
+
+
+# @tests_req SwRS-MDOKFSTUDIO-CORE-076
+def test_site_from_run_downloads_the_reports_of_the_newest_attempt() -> None:
+    justfile = (ROOT / "justfile").read_text()
+    recipe = re.search(r"(?m)^site-from-run RUN_ID:\n((?:    .*\n)+)", justfile)
+    assert recipe, "no site-from-run recipe"
+    body = recipe.group(1)
+    assert "--reports-artifact-of" in body
+    assert re.search(r'gh run download "\{\{ RUN_ID \}\}" --name "\$artifact"', body)
+    assert "--name studio-reports " not in body
+
+
+def test_no_workflow_downloads_a_fixed_artifact_name() -> None:
+    for path in WORKFLOWS:
+        for job in yaml_jobs(path).values():
+            for step in _downloads(job.get("steps", [])):
+                wanted = str(step["with"].get("name") or step["with"].get("pattern"))
+                assert wanted.startswith("${{"), f"{path.name}: downloads the fixed name {wanted!r}"
+
+
+def yaml_jobs(path: Path) -> dict[str, dict]:
+    import yaml
+
+    return yaml.safe_load(path.read_text())["jobs"]

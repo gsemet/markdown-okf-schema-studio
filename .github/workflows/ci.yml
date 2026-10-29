@@ -20,6 +20,10 @@ env:
   # One end-to-end campaign id per workflow run, shared by the visual and integration jobs;
   # each job records its own real start time. The attempt number is left out on purpose: re-running
   # only the failed jobs must keep the same id, or the report job would see two campaigns.
+  # Artifact names are the opposite: each ends with the attempt that uploaded it, because after
+  # "Re-run failed jobs" a download by a fixed name returned the attempt-1 artifact. A job whose
+  # artifact is consumed later announces the name in its `artifact` output; a job that is not
+  # re-run keeps its outputs, so a consumer always gets the newest attempt of each producer.
   STUDIO_E2E_RUN_ID: ${{ github.run_id }}
 
 permissions:
@@ -55,7 +59,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: reports-static
+          name: reports-static-attempt-${{ github.run_attempt }}
           path: out/reports/
           if-no-files-found: warn
 
@@ -64,6 +68,8 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 15
+    outputs:
+      artifact: e2e-visual-attempt-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -113,7 +119,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: e2e-visual
+          name: e2e-visual-attempt-${{ github.run_attempt }}
           path: out/reports/
           if-no-files-found: warn
 
@@ -151,6 +157,8 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 30
+    outputs:
+      artifact: e2e-integration-attempt-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -175,7 +183,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: e2e-integration
+          name: e2e-integration-attempt-${{ github.run_attempt }}
           path: out/reports/
           if-no-files-found: warn
 
@@ -217,7 +225,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: stress-integration
+          name: stress-integration-attempt-${{ github.run_attempt }}
           path: out/reports/
           if-no-files-found: warn
 
@@ -228,6 +236,8 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 10
+    outputs:
+      artifact: studio-reports-attempt-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -247,9 +257,23 @@ jobs:
         with:
           just-version: 1.58.0
       - run: just dev-ci
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      # Each stage from the attempt that produced it: after "Re-run failed jobs" on integration,
+      # visual (not re-run) keeps its attempt-1 artifact and integration has a new one. `pattern`
+      # with an exact name, not `name`: a missing artifact (skipped or timed-out job) downloads
+      # nothing, and ci-report then says which stage is missing. The `if`: an empty pattern would
+      # download every artifact of the run (a job that never started has no outputs).
+      - name: Download the visual stage reports
+        if: needs.visual.outputs.artifact != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          pattern: e2e-*
+          pattern: ${{ needs.visual.outputs.artifact }}
+          path: out/reports/
+          merge-multiple: true
+      - name: Download the integration stage reports
+        if: needs.integration.outputs.artifact != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: ${{ needs.integration.outputs.artifact }}
           path: out/reports/
           merge-multiple: true
       # Without the heavy jobs the real VS Code stage is reported as skipped (visual only).
@@ -258,7 +282,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: studio-reports
+          name: studio-reports-attempt-${{ github.run_attempt }}
           path: out/reports/
           if-no-files-found: warn
 
@@ -291,14 +315,14 @@ jobs:
       - run: just dev-ci
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: studio-reports
+          name: ${{ needs.report.outputs.artifact }}
           path: out/reports/
       - run: just ci-gallery
       - name: Publish gallery and site
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: studio-site
+          name: studio-site-attempt-${{ github.run_attempt }}
           path: out/site/
           if-no-files-found: warn
 
@@ -365,9 +389,8 @@ jobs:
             echo "Only this push can tag this version (a later push without a version change does"
             echo "not). For a flake, re-run the failed jobs of this run (Re-run jobs > Re-run failed"
             echo "jobs, or \`gh run rerun $RUN_ID --failed\`): this job re-runs with them and tags"
-            echo "when they pass. Re-running integration more than two hours after this run started"
-            echo "fails the report (its stages must start less than two hours apart): use Re-run all"
-            echo "jobs then. If the failure is a real bug, fix it and release a new version."
+            echo "when they pass, and Pages uses the reports of the newest attempt. If the failure is"
+            echo "a real bug, fix it and release a new version."
           } >> "$GITHUB_STEP_SUMMARY"
           echo "::error::Tagging skipped: checks or heavy run not green (checks: $CHECKS, integration: $INTEGRATION, stress: $STRESS)"
           exit 1
@@ -391,8 +414,9 @@ jobs:
 
   # Tags pushed with GITHUB_TOKEN do not trigger tag workflows, so deploy Pages from here.
   pages:
-    # integration and stress: to tell Pages that this run holds green heavy reports to reuse.
-    needs: [tag-release, integration, stress]
+    # integration and stress: to tell Pages that this run holds green heavy reports to reuse;
+    # report: the name of its merged reports artifact (newest attempt that ran report).
+    needs: [tag-release, integration, stress, report]
     # Same reason as tag-release: do not inherit success() from the skipped heavy ancestors.
     if: ${{ !cancelled() && needs.tag-release.result == 'success' && needs.tag-release.outputs.tag != '' }}
     permissions:
@@ -405,3 +429,4 @@ jobs:
       tag: ${{ needs.tag-release.outputs.tag }}
       # A tag means a version change whose heavy jobs were green (tag-release); checked again here.
       reports_from_caller: ${{ needs.integration.result == 'success' && needs.stress.result == 'success' }}
+      reports_artifact: ${{ needs.report.outputs.artifact }}
