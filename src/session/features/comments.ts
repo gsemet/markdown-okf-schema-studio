@@ -139,10 +139,11 @@ export class CommentsController {
     const sequence = ++state.seq;
     const text = await this.readSidecar(sidecar);
     if (preview.disposed || preview.stage !== stage || sequence !== state.seq) return;
-    // The same text again (the echo of our own write, a touch): nothing changed for the page.
+    // The same text again (the echo of our own write, a touch): nothing changed for the page. Not
+    // when the followed lines were dropped (a clean document changed, an edit during a save): the
+    // anchors must then be checked again against the current text even if the file did not change.
     const hash = text === undefined ? undefined : hashText(text);
-    if (hash !== undefined && hash === state.textHash && state.posted !== undefined) return;
-    state.textHash = hash;
+    if (hash !== undefined && hash === state.textHash && state.posted !== undefined && state.view !== undefined) return;
     let stored: CommentThread[] = [];
     if (text !== undefined) {
       const parsed = parseSidecar(text);
@@ -181,6 +182,9 @@ export class CommentsController {
       }
       state.view = { diskHash: hash, threads: live, orphaned };
     }
+    // Recorded only now, after the last staleness check: a post that a newer one overtook never
+    // makes that newer post skip the same text (the hash says "the page was told about this text").
+    state.textHash = hash;
     const threads = live.map((thread) => ({ ...thread, orphaned: orphaned.has(thread.id) }));
     if (threads.length === 0 && !state.shown) return;
     // The same threads again (every render asks): nothing to tell the page.
@@ -264,6 +268,7 @@ export class CommentsController {
         if (!hints.has(thread.id)) hints.set(thread.id, { line: thread.anchor.line, endLine: thread.anchor.endLine });
       }
     }
+    const revision = document.revision;
     const index = createDocumentIndex(document.getText());
     let orphaned = new Set<string>();
     const result = await this.store.update(sidecar, path.basename(documentPath), (threads) => {
@@ -286,8 +291,12 @@ export class CommentsController {
     if (result.ok) {
       this.lastAnchorWarning = undefined;
       const written = parseSidecar(result.text).threads;
+      // The document changed while the file was written (lines added or removed): the written lines
+      // belong to the saved text, not to the buffer. Drop the view so the next post checks every
+      // anchor against the current text instead of showing lines the edit has moved.
+      const current = document.revision === revision;
       for (const preview of previews) {
-        preview.comments.view = { diskHash: result.hash, threads: written, orphaned };
+        preview.comments.view = current ? { diskHash: result.hash, threads: written, orphaned } : undefined;
         this.schedule(preview);
       }
       return;

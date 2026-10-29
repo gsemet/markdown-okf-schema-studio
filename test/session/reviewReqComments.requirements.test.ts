@@ -43,7 +43,11 @@ interface Setup {
   readonly controller: CommentsController;
   /** Live sidecar watchers and live listener subscriptions the stub host handed out. */
   readonly watching: { watchers: number; subscriptions: number };
-  readonly hooks: { readFile?: (path: string) => Promise<Uint8Array> | undefined };
+  readonly hooks: {
+    readFile?: (path: string) => Promise<Uint8Array> | undefined;
+    /** Runs when a written file lands on its path (after the store read it, before the write returns). */
+    written?: (path: string) => void;
+  };
   preview(extra?: Record<string, unknown>): any;
 }
 
@@ -82,14 +86,14 @@ function setup(): Setup {
       },
       writeFile: async (path: string, data: Uint8Array) => {
         // The store writes a temporary file and renames it: the write counts when it lands on its path.
-        if (!path.endsWith(".tmp")) writes.push(path);
         files.set(path, new TextDecoder().decode(data));
+        if (!path.endsWith(".tmp")) { writes.push(path); hooks.written?.(path); }
       },
       rename: async (from: string, to: string) => {
-        if (from.endsWith(".tmp")) writes.push(to);
-        else renames.push([from, to]);
         files.set(to, files.get(from)!);
         files.delete(from);
+        if (from.endsWith(".tmp")) { writes.push(to); hooks.written?.(to); }
+        else renames.push([from, to]);
       },
       delete: async (path: string) => { files.delete(path); },
       isSymbolicLink: async () => false,
@@ -362,4 +366,92 @@ test("switching the sidecar and clearing a preview release the watcher and its t
   assert.deepEqual(s.watching, { watchers: 0, subscriptions: 0 });
   s.controller.clear(preview);
   assert.deepEqual(s.watching, { watchers: 0, subscriptions: 0 }, "clearing twice is harmless");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+test("a post overtaken while it checks the anchors leaves the newer post free to show the new thread", async () => {
+  const s = setup();
+  const text = "a needle here\n\nanother line\n\nthe added thread quotes this text\n";
+  s.files.set(DOCUMENT, text);
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t_old", 1)]));
+  const preview = s.preview();
+  const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
+  await post(preview);
+  assert.deepEqual(threadsOf(s.posted.at(-1)!).map((value) => value.id), ["t_old"]);
+
+  // A thread is added; the first post stops while it reads the document to check the anchors.
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t_old", 1), thread("t_new", 5, "added thread")]));
+  let release!: (data: Uint8Array) => void;
+  const held = new Promise<Uint8Array>((resolve) => { release = resolve; });
+  let first = true;
+  s.hooks.readFile = (path) => {
+    if (path !== DOCUMENT || !first) return undefined;
+    first = false;
+    return held;
+  };
+  const older = post(preview);
+  // Let the first post read the comments file and reach the document read.
+  for (let round = 0; round < 20 && first; round += 1) await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.equal(first, false, "the first post waits on the document read");
+  await post(preview);
+  release(new TextEncoder().encode(text));
+  await older;
+  assert.deepEqual(threadsOf(s.posted.at(-1)!).map((value) => [value.id, value.anchor.line, value.orphaned]),
+    [["t_old", 1, false], ["t_new", 5, false]], "the newer post shows the added thread");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+test("lines saved while the document gains lines are checked again against the text", async () => {
+  const s = setup();
+  let text = "first\n\nsee the needle\n";
+  let revision = 1;
+  const document: any = {
+    id: `file://${DOCUMENT}`, path: DOCUMENT,
+    get isDirty() { return revision > 1; }, get revision() { return revision; }, getText: () => text,
+  };
+  s.open.set(`file://${DOCUMENT}`, { path: DOCUMENT, get isDirty() { return revision > 1; }, getText: () => text } as never);
+  s.files.set(DOCUMENT, text);
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 1)]));
+  const preview = s.preview();
+  preview.comments.view = { diskHash: "h", threads: [thread("t1", 1)], orphaned: new Set<string>() };
+
+  // While the save writes the moved line (3), two lines are inserted at the top of the buffer: the
+  // edit lands after the store read the comments file and before the save sets the followed lines.
+  s.hooks.written = (path) => {
+    if (path !== SIDECAR || revision > 1) return;
+    text = `added\n\n${text}`;
+    revision += 1;
+    s.controller.shiftForEdits({
+      document,
+      changes: [{ start: 0, length: 0, startLine: 0, endLine: 0, text: "added\n\n" }],
+    } as never);
+  };
+  await s.controller.persistAnchors(document);
+  assert.match(s.files.get(SIDECAR)!, /"line": 3/u, "the saved text has the needle on line 3");
+  await (s.controller as any).post(preview);
+  assert.equal(threadsOf(s.posted.at(-1)!)[0]!.anchor.line, 5, "the page gets the line of the needle in the buffer");
+  s.controller.clear(preview);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-119
+test("a clean document that changes is checked again even when the comments file did not change", async () => {
+  const s = setup();
+  s.files.set(DOCUMENT, "first\n\nsee the needle\n");
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 3)]));
+  const preview = s.preview();
+  const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
+  await post(preview);
+  assert.equal(threadsOf(s.posted.at(-1)!)[0]!.anchor.line, 3);
+
+  // The document is reloaded from disk with two lines more at the top; the comments file stays the same.
+  s.files.set(DOCUMENT, "added\n\nfirst\n\nsee the needle\n");
+  s.controller.shiftForEdits({
+    document: { id: `file://${DOCUMENT}`, isDirty: false },
+    changes: [{ start: 0, length: 0, startLine: 0, endLine: 0, text: "added\n\n" }],
+  } as never);
+  assert.equal(preview.comments.view, undefined, "the followed lines are dropped");
+  await post(preview);
+  assert.equal(threadsOf(s.posted.at(-1)!)[0]!.anchor.line, 5, "the page gets the line of the needle in the new text");
+  assert.notEqual(preview.comments.view, undefined, "the followed lines are rebuilt, later edits shift them again");
+  s.controller.clear(preview);
 });
