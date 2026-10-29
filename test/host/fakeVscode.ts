@@ -340,6 +340,8 @@ export function createFakeVscode(options: FakeVscodeOptions) {
   const executedCommands: Array<{ id: string; args: unknown[] }> = [];
   const shownMessages: Array<{ kind: string; text: string }> = [];
   const outputLines: string[] = [];
+  /** The targets `workspace.fs.rename` deleted before renaming onto them (see its `overwrite`). */
+  const targetsDeletedByRename: string[] = [];
   const events = {
     changeTextDocument: new Emitter<unknown>(),
     saveTextDocument: new Emitter<unknown>(),
@@ -469,6 +471,19 @@ export function createFakeVscode(options: FakeVscodeOptions) {
         type: stat.isDirectory() ? 2 : 1, size: stat.size, mtime: stat.mtimeMs, ctime: stat.ctimeMs,
       })),
       readDirectory: () => Promise.resolve([]),
+      // Like VS Code's FileService.move: with `overwrite`, an existing target is DELETED first and
+      // the source renamed after, so the target is missing in between; without it, refused.
+      rename: async (from: Uri, to: Uri, renameOptions?: { overwrite?: boolean }) => {
+        const exists = await fs.promises.stat(to.fsPath).then(() => true, () => false);
+        if (exists && renameOptions?.overwrite !== true) {
+          throw Object.assign(new Error(`EntryExists: ${to.fsPath}`), { code: "FileExists" });
+        }
+        if (exists) {
+          await fs.promises.rm(to.fsPath, { recursive: true });
+          targetsDeletedByRename.push(to.fsPath);
+        }
+        await fs.promises.rename(from.fsPath, to.fsPath);
+      },
       delete: () => Promise.resolve(),
       createDirectory: (uri: Uri) => fs.promises.mkdir(uri.fsPath, { recursive: true }).then(() => undefined),
     }, "workspace.fs"),
@@ -591,6 +606,7 @@ export function createFakeVscode(options: FakeVscodeOptions) {
       executedCommands,
       shownMessages,
       outputLines,
+      targetsDeletedByRename,
       events,
       showDocument,
       /** Makes a custom editor tab of `filePath` the active tab (no text editor is active then). */
