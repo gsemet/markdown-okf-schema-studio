@@ -16,15 +16,28 @@ function workspace(): { root: string; e2e: string } {
 }
 
 function run(root: string, ...args: string[]): { status: number | null; stdout: string; stderr: string } {
-  const environment = { ...process.env };
+  return runWith(root, {}, ...args);
+}
+
+function runWith(root: string, extra: Record<string, string>, ...args: string[]): { status: number | null; stdout: string; stderr: string } {
+  const environment: NodeJS.ProcessEnv = { ...process.env };
   delete environment.STUDIO_E2E_RUN_ID;
   delete environment.STUDIO_E2E_COMMAND;
+  Object.assign(environment, extra);
   const result = spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: "utf8", env: environment });
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }
 
-function writeCampaign(e2e: string, stage: string, runId: string, startedAt: string): void {
-  fs.writeFileSync(path.join(e2e, `campaign-${stage}.json`), JSON.stringify({ runId, startedAt, command: `just ci-${stage}` }));
+function writeCampaign(e2e: string, stage: string, runId: string, startedAt: string, extra: Record<string, unknown> = {}): void {
+  fs.writeFileSync(path.join(e2e, `campaign-${stage}.json`), JSON.stringify({ runId, startedAt, command: `just ci-${stage}`, ...extra }));
+}
+
+function writePassedStages(e2e: string): void {
+  const now = hoursAgo(0.1);
+  const passed = JSON.stringify({ status: "passed", startedAt: now, completedAt: now });
+  fs.writeFileSync(path.join(e2e, "screenshots", "run-manifest.json"), passed);
+  fs.writeFileSync(path.join(e2e, "integration-manifest.json"), passed);
+  fs.writeFileSync(path.join(e2e, "review.json"), passed);
 }
 
 test("a stage does not adopt the run id of a stale sibling campaign", () => {
@@ -87,4 +100,49 @@ test("the visual-only report fails when the visual stage failed or did not run",
   fs.writeFileSync(path.join(e2e, "screenshots", "run-manifest.json"), JSON.stringify({ status: "failed" }));
   fs.writeFileSync(path.join(e2e, "review.json"), JSON.stringify({ status: "failed" }));
   assert.equal(run(root, "report", "--visual-only").status, 1);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076
+test("a stage records that its run id was pinned by the CI workflow", () => {
+  const { root, e2e } = workspace();
+  assert.equal(runWith(root, { STUDIO_E2E_RUN_ID: "4242" }, "begin", "visual").status, 0);
+  const pinned = JSON.parse(fs.readFileSync(path.join(e2e, "campaign-visual.json"), "utf8")) as Record<string, unknown>;
+  assert.equal(pinned.runId, "4242");
+  assert.equal(pinned.pinnedRunId, true);
+  assert.equal(run(root, "begin", "integration").status, 0);
+  const local = JSON.parse(fs.readFileSync(path.join(e2e, "campaign-integration.json"), "utf8")) as Record<string, unknown>;
+  assert.equal(local.runId, "4242");
+  assert.equal(local.pinnedRunId, undefined);
+});
+
+// "Re-run failed jobs" re-runs integration in the same CI run, possibly hours later, while visual
+// (not re-run) keeps its attempt-1 start: one run id pinned by the workflow is one campaign.
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076
+test("the report accepts stages started hours apart when both carry the same pinned CI run id", () => {
+  const { root, e2e } = workspace();
+  writeCampaign(e2e, "visual", "4242", hoursAgo(26), { pinnedRunId: true });
+  writeCampaign(e2e, "integration", "4242", hoursAgo(1), { pinnedRunId: true });
+  writePassedStages(e2e);
+  const result = run(root, "report");
+  assert.equal(result.status, 0, result.stderr);
+  const manifest = JSON.parse(fs.readFileSync(path.join(e2e, "e2e-manifest.json"), "utf8")) as { status: string; runId: string };
+  assert.equal(manifest.status, "passed");
+  assert.equal(manifest.runId, "4242");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-CORE-076
+test("the two-hour limit still applies unless both stages carry the same pinned run id", () => {
+  for (const [visual, integration] of [
+    [{ runId: "4242", pinned: true }, { runId: "4243", pinned: true }],
+    [{ runId: "4242", pinned: true }, { runId: "4242", pinned: false }],
+    [{ runId: "4242", pinned: false }, { runId: "4242", pinned: false }],
+  ]) {
+    const { root, e2e } = workspace();
+    writeCampaign(e2e, "visual", visual.runId, hoursAgo(5), visual.pinned ? { pinnedRunId: true } : {});
+    writeCampaign(e2e, "integration", integration.runId, hoursAgo(1), integration.pinned ? { pinnedRunId: true } : {});
+    writePassedStages(e2e);
+    const result = run(root, "report");
+    assert.equal(result.status, 1, JSON.stringify({ visual, integration }));
+    assert.match(result.stderr, /minutes apart/u);
+  }
 });

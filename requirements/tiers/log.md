@@ -1,5 +1,17 @@
 # Update Log
 
+## 2026-10-29 (re-run recovery used the artifacts of the first attempt)
+
+- SwRS-MDOKFSTUDIO-CORE-076: extended (still proposed). After "Re-run failed jobs", a download by a
+  fixed artifact name returned the attempt-1 artifact, so the merged report and the Pages site could
+  use stale reports. Every artifact name of `ci.yml` now ends with `-attempt-<n>`; `visual`,
+  `integration` and `report` output their artifact name and every consumer downloads that output
+  (Pages through `reports_artifact`); `scripts/select_e2e_run.py` and `just site-from-run` pick the
+  newest attempt of `studio-reports`. `scripts/e2e-campaign.mjs report` no longer applies the two-hour
+  stage gap when both stages carry the same run id pinned by the CI workflow.
+  Verification: test/build/test_workflows.py, test/build/test_select_e2e_run.py,
+  test/site/e2eCampaign.test.ts.
+
 ## 2026-10-29 (a version change is tagged only after a green heavy run)
 
 - SwRS-MDOKFSTUDIO-CORE-076: retitled and extended (still proposed). Nothing required a green heavy

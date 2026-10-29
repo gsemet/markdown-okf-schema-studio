@@ -200,7 +200,7 @@ site-assemble: requirements-report
 # Build the site after end-to-end tests and the requirements report.
 site: e2e site-assemble
 
-# Find the latest green heavy CI run of a commit (prints its id, nothing if none) for the Pages build.
+# Find the latest green heavy CI run of a commit for the Pages build: prints run_id=<id> and artifact=<its newest reports artifact>, nothing if none.
 site-run REPO SHA:
     uv run --no-sync python scripts/select_e2e_run.py --repo "{{ REPO }}" --sha "{{ SHA }}"
 
@@ -210,8 +210,10 @@ site-from-run RUN_ID:
     set -euo pipefail
     rm -rf out/reports out/reports-download
     mkdir -p out/reports
-    # studio-reports already merges both end-to-end stage artifacts.
-    gh run download "{{ RUN_ID }}" --name studio-reports --dir out/reports-download
+    # The merged reports artifact (both end-to-end stages) of the newest attempt that ran the
+    # report job: artifact names end with -attempt-<n>, as "Re-run failed jobs" keeps the run id.
+    artifact="$(uv run --no-sync python scripts/select_e2e_run.py --repo '{owner}/{repo}' --reports-artifact-of "{{ RUN_ID }}")"
+    gh run download "{{ RUN_ID }}" --name "$artifact" --dir out/reports-download
     cp -R out/reports-download/. out/reports/
     rm -rf out/reports-download
     just site-assemble

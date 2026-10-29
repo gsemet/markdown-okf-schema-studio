@@ -13,7 +13,10 @@
 // deletes its previous manifest, so old evidence is never validated. The run id is, in order of
 // precedence: STUDIO_E2E_RUN_ID (the CI workflow sets it once per run), the stage's own campaign
 // file or the other stage's, each only when it started less than two hours ago, then a new random
-// id. `ci-report` fails when the two stages started further apart than that. `just clean` resets all.
+// id. `ci-report` fails when the two stages started further apart than that, except when both
+// stages carry the same run id pinned by STUDIO_E2E_RUN_ID (recorded as `pinnedRunId`): the CI
+// workflow pins its run id, which "Re-run failed jobs" keeps, so integration re-run hours after
+// visual is still the same campaign. `just clean` resets all.
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -53,11 +56,13 @@ function begin(stage) {
   const now = Date.now();
   const own = recent(validCampaign(readJson(campaignPath(stage))), now);
   const other = recent(validCampaign(readJson(campaignPath(sibling))), now);
+  const pinned = Boolean(process.env.STUDIO_E2E_RUN_ID);
   const runId = process.env.STUDIO_E2E_RUN_ID || own?.runId || other?.runId || randomUUID();
   const campaign = {
     runId,
     startedAt: new Date(now).toISOString(),
     command: process.env.STUDIO_E2E_COMMAND || `just ci-${stage}`,
+    ...(pinned ? { pinnedRunId: true } : {}),
   };
   // A new start invalidates this stage's previous evidence and the merged outputs built from it.
   for (const stale of [stageManifest[stage], path.join(reportRoot, "review.json"), path.join(reportRoot, "e2e-manifest.json")]) {
@@ -138,7 +143,9 @@ function report() {
     return;
   }
   const gap = Math.abs(Date.parse(visualCampaign.startedAt) - Date.parse(integrationCampaign.startedAt));
-  if (!(gap < maxCampaignAgeMs)) {
+  const sameCiRun = visualCampaign.pinnedRunId === true && integrationCampaign.pinnedRunId === true
+    && visualCampaign.runId === integrationCampaign.runId;
+  if (Number.isNaN(gap) || (!sameCiRun && !(gap < maxCampaignAgeMs))) {
     console.error(`ci-report: the visual and integration stages started ${Math.round(gap / 60000)} minutes apart (limit ${maxCampaignAgeMs / 60000}); rerun both after \`just clean\``);
     process.exitCode = 1;
     return;

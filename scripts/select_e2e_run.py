@@ -4,8 +4,17 @@ The run must be the newest heavy run of the exact commit that finished green, wh
 job succeeded and that still holds the three report artifacts. A heavy run is either a manual one
 (workflow ``ci.yml``, event ``workflow_dispatch``) or the release push: the ``push`` run on ``main``
 of a version change, where CI runs the heavy jobs itself; such a run qualifies only when both heavy
-jobs, ``integration`` and ``stress``, succeeded (not skipped). Prints the run id, or nothing when
-no run qualifies (the caller then runs the suite itself).
+jobs, ``integration`` and ``stress``, succeeded (not skipped). Prints ``run_id=<id>`` and
+``artifact=<name>`` (the merged reports artifact to download, in the ``GITHUB_OUTPUT`` format), or
+nothing when no run qualifies (the caller then runs the suite itself).
+
+Attempts: every artifact name of ci.yml ends with ``-attempt-<n>``, the attempt that uploaded it.
+"Re-run failed jobs" keeps the run id and uploads the re-run jobs' artifacts again under the new
+attempt; a download by the old fixed name returned the attempt-1 artifact. The reports artifact is
+therefore the newest attempt of ``studio-reports``; it must still be live and not older than the
+newest attempt of a stage artifact (else it does not hold that stage). Names without the suffix
+(runs made before it) are not used. ``--reports-artifact-of RUN_ID`` prints only that name, for a
+run picked by hand (``just site-from-run``).
 
 Failure policy: a ``gh api`` error or malformed JSON during the automatic selection is logged as a warning and prints
 nothing, so the caller falls back to the suite. With ``--run-id`` the run is requested explicitly:
@@ -16,9 +25,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
-from typing import Any, Callable
+from typing import Any, Callable, NamedTuple
 
 WORKFLOW = "ci.yml"
 WORKFLOW_PATH = f".github/workflows/{WORKFLOW}"
@@ -28,7 +38,10 @@ EVENT = "workflow_dispatch"
 PUSH_EVENT = "push"
 PUSH_BRANCH = "main"
 EVENTS = (EVENT, PUSH_EVENT)
-REQUIRED_ARTIFACTS = ("e2e-visual", "e2e-integration", "studio-reports")
+REPORTS_ARTIFACT = "studio-reports"
+STAGE_ARTIFACTS = ("e2e-visual", "e2e-integration")
+REQUIRED_ARTIFACTS = (*STAGE_ARTIFACTS, REPORTS_ARTIFACT)
+ATTEMPT_NAME = re.compile(r"^(?P<base>.+)-attempt-(?P<attempt>[1-9][0-9]*)$")
 REQUIRED_JOB = "integration"
 # A push run of main is a heavy run only when both heavy jobs succeeded; without a version change
 # they are skipped and the run holds no real-window reports.
@@ -65,9 +78,37 @@ def jobs_succeeded(jobs: list[dict[str, Any]], names: tuple[str, ...]) -> bool:
     return all(any(j.get("name") == name and j.get("conclusion") == "success" for j in jobs) for name in names)
 
 
-def has_artifacts(artifacts: list[dict[str, Any]]) -> bool:
-    live = {a["name"] for a in artifacts if not a.get("expired")}
-    return all(name in live for name in REQUIRED_ARTIFACTS)
+class Selection(NamedTuple):
+    run_id: int
+    artifact: str
+
+
+def newest_attempts(artifacts: list[dict[str, Any]]) -> dict[str, tuple[int, dict[str, Any]]]:
+    """The newest attempt of each artifact base name, expired or not (names without a suffix are left out)."""
+    newest: dict[str, tuple[int, dict[str, Any]]] = {}
+    for artifact in artifacts:
+        match = ATTEMPT_NAME.match(str(artifact.get("name", "")))
+        if not match:
+            continue
+        attempt = int(match["attempt"])
+        if match["base"] not in newest or attempt > newest[match["base"]][0]:
+            newest[match["base"]] = (attempt, artifact)
+    return newest
+
+
+def reports_artifact(artifacts: list[dict[str, Any]]) -> tuple[str | None, str | None]:
+    """(problem, None), or (None, name of the reports artifact of the newest attempt)."""
+    newest = newest_attempts(artifacts)
+    for base in REQUIRED_ARTIFACTS:
+        if base not in newest:
+            return f"missing artifacts: no {base}-attempt-<n> (need {', '.join(REQUIRED_ARTIFACTS)})", None
+        if newest[base][1].get("expired"):
+            return f"missing or expired artifacts: {newest[base][1]['name']} expired", None
+    attempt, reports = newest[REPORTS_ARTIFACT]
+    for base in STAGE_ARTIFACTS:
+        if newest[base][0] > attempt:
+            return f"artifact {reports['name']} is older than {newest[base][1]['name']}", None
+    return None, str(reports["name"])
 
 
 def validate_run(
@@ -75,24 +116,22 @@ def validate_run(
     sha: str,
     jobs_of: Callable[[int], list[dict[str, Any]]],
     artifacts_of: Callable[[int], list[dict[str, Any]]],
-) -> str | None:
-    """Why an explicitly requested run cannot be used, or None when it qualifies."""
+) -> tuple[str | None, str | None]:
+    """(problem, None) when an explicitly requested run cannot be used, else (None, reports artifact)."""
     if run.get("path") != WORKFLOW_PATH:
-        return f"run belongs to {run.get('path')!r}, not {WORKFLOW_PATH!r}"
+        return f"run belongs to {run.get('path')!r}, not {WORKFLOW_PATH!r}", None
     if run.get("head_sha") != sha:
-        return f"run is for commit {run.get('head_sha')!r}, not {sha!r}"
+        return f"run is for commit {run.get('head_sha')!r}, not {sha!r}", None
     problem = event_problem(run)
     if problem:
-        return problem
+        return problem, None
     if run.get("status") != "completed" or run.get("conclusion") != "success":
-        return f"run did not finish green (status={run.get('status')!r}, conclusion={run.get('conclusion')!r})"
+        return f"run did not finish green (status={run.get('status')!r}, conclusion={run.get('conclusion')!r})", None
     run_id = int(run["id"])
     names = required_jobs(run)
     if not jobs_succeeded(jobs_of(run_id), names):
-        return f"job {' and '.join(map(repr, names))} did not succeed"
-    if not has_artifacts(artifacts_of(run_id)):
-        return f"missing or expired artifacts (need {', '.join(REQUIRED_ARTIFACTS)})"
-    return None
+        return f"job {' and '.join(map(repr, names))} did not succeed", None
+    return reports_artifact(artifacts_of(run_id))
 
 
 def select_run(
@@ -100,14 +139,17 @@ def select_run(
     sha: str,
     jobs_of: Callable[[int], list[dict[str, Any]]],
     artifacts_of: Callable[[int], list[dict[str, Any]]],
-) -> int | None:
-    """Newest qualifying run id, or None."""
+) -> Selection | None:
+    """Newest qualifying run and its reports artifact, or None."""
     for run in sorted(runs, key=lambda r: r.get("created_at", ""), reverse=True):
         if not is_candidate(run, sha):
             continue
         run_id = int(run["id"])
-        if jobs_succeeded(jobs_of(run_id), required_jobs(run)) and has_artifacts(artifacts_of(run_id)):
-            return run_id
+        if not jobs_succeeded(jobs_of(run_id), required_jobs(run)):
+            continue
+        problem, artifact = reports_artifact(artifacts_of(run_id))
+        if problem is None and artifact:
+            return Selection(run_id, artifact)
     return None
 
 
@@ -134,9 +176,17 @@ def gh_object(path: str) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", required=True, help="owner/name")
-    parser.add_argument("--sha", required=True, help="commit whose heavy run to find")
+    parser.add_argument("--sha", default="", help="commit whose heavy run to find")
     parser.add_argument("--run-id", default="", help="validate this run instead of searching")
+    parser.add_argument(
+        "--reports-artifact-of",
+        default="",
+        metavar="RUN_ID",
+        help="only print the reports artifact of the newest attempt of this run (no other check)",
+    )
     args = parser.parse_args(argv)
+    if not args.sha and not args.reports_artifact_of:
+        parser.error("--sha is required unless --reports-artifact-of is given")
     base = f"repos/{args.repo}/actions"
 
     def jobs_of(rid: int) -> list[dict[str, Any]]:
@@ -145,17 +195,29 @@ def main(argv: list[str] | None = None) -> int:
     def artifacts_of(rid: int) -> list[dict[str, Any]]:
         return gh_api(f"{base}/runs/{rid}/artifacts?per_page=100", "artifacts")
 
+    if args.reports_artifact_of:
+        try:
+            problem, artifact = reports_artifact(artifacts_of(int(args.reports_artifact_of)))
+        except (subprocess.CalledProcessError, ValueError, KeyError) as error:
+            print(f"error: cannot list the artifacts of run {args.reports_artifact_of}: {error}", file=sys.stderr)
+            return 1
+        if problem:
+            print(f"error: run {args.reports_artifact_of} has no usable reports: {problem}", file=sys.stderr)
+            return 1
+        print(artifact)
+        return 0
     if args.run_id:
         try:
             run = gh_object(f"{base}/runs/{args.run_id}")
-            problem = validate_run(run, args.sha, jobs_of, artifacts_of)
+            problem, artifact = validate_run(run, args.sha, jobs_of, artifacts_of)
         except (subprocess.CalledProcessError, ValueError, KeyError) as error:
             print(f"error: cannot validate run {args.run_id}: {error}", file=sys.stderr)
             return 1
         if problem:
             print(f"error: run {args.run_id} is not usable: {problem}", file=sys.stderr)
             return 1
-        print(run["id"])
+        print(f"run_id={run['id']}")
+        print(f"artifact={artifact}")
         return 0
     try:
         # One query per event: the API filters on a single event.
@@ -174,7 +236,8 @@ def main(argv: list[str] | None = None) -> int:
     if found is None:
         print(f"no green heavy run with report artifacts for {args.sha}", file=sys.stderr)
         return 0
-    print(found)
+    print(f"run_id={found.run_id}")
+    print(f"artifact={found.artifact}")
     return 0
 
 

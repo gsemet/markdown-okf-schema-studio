@@ -92,10 +92,16 @@ same run; no new commit and no manual tag are needed.
    failure), `tag-release`, `release` and `pages`. The jobs that passed are not re-run and keep
    their results and outputs (`release-check` keeps `bump=true`). The re-run uses the same commit
    and the same push event, so `tag-release` tags that commit when everything is green.
-4. Integration re-run more than two hours after the run started: `report` rejects a visual and an
-   integration stage that started two hours apart or more, so use Re-run jobs > **Re-run all
-   jobs** (`gh run rerun <run-id>`) instead. This is safe only while no tag exists, which is the
-   case after "Release not tagged".
+4. Artifacts per attempt: every artifact name of `ci.yml` ends with `-attempt-<n>`
+   (`github.run_attempt`), and a job whose artifact is consumed later reports that name in its
+   `artifact` output (`visual`, `integration`, `report`). Consumers download that output, never a
+   fixed name: after "Re-run failed jobs", a download by a fixed name returned the attempt-1
+   artifact. A job that is not re-run keeps its outputs, so `report` merges the attempt-1 visual
+   stage with the re-run integration stage, and Pages (`reports_artifact`, or
+   `scripts/select_e2e_run.py`, which picks the newest attempt of `studio-reports`) uses the newest
+   merged reports. Both stages carry the run id pinned by the workflow (`STUDIO_E2E_RUN_ID`), so
+   `report` accepts them however far apart they started; the two-hour limit applies only to local
+   campaigns. Keep each upload and its download consistent (test/build/test_workflows.py).
 5. Once the tag exists, re-run only the failed jobs (`release`, `pages`). Never re-run all jobs
    then: `tag-release` would find the tag, output none, and skip `release` and `pages`.
 

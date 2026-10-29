@@ -561,10 +561,14 @@ the same CI run, with no new commit and no manual tag:
 	`release` and `pages`. Jobs that passed keep their results and outputs, so `release-check`
 	still reports the version change. The re-run uses the same commit and push event, and
 	`tag-release` tags that commit when everything is green.
-4. If integration failed and more than two hours have passed since the run started, use
-	Re-run jobs > **Re-run all jobs** (`gh run rerun <run-id>`) instead: `report` rejects a
-	visual and an integration stage that started two hours apart or more. Re-run all jobs only
-	while no tag exists, which is the case after "Release not tagged".
+4. Each attempt uploads its own artifacts: every artifact name of the CI workflow ends with
+	`-attempt-<n>` (for example `studio-reports-attempt-2`), and each consumer downloads the name
+	that the producing job reports. `report` therefore merges the attempt-1 visual stage with the
+	re-run integration stage, and Pages uses the merged reports of the newest attempt that ran
+	`report`. A download by a fixed name would return the attempt-1 artifact. The visual and
+	integration stages of one CI run form one campaign however far apart they started, so a
+	re-run hours or days later still passes `report`. To fetch the reports of a run by hand, use
+	`just site-from-run <run-id>`, which picks the newest attempt.
 5. Once the tag exists, only re-run the failed jobs. Re-running `tag-release` then finds the
 	existing tag, outputs no tag and skips `release` and `pages`.
 
