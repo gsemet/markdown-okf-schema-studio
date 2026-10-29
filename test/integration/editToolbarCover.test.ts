@@ -13,7 +13,7 @@ import {
 import { escapeUntilClosed } from "./escapeClose";
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
-import { ensureTestWindowFocused } from "./windowFocus";
+import { ensureTestWindowFocused, waitForActiveSourceEditor } from "./windowFocus";
 
 let lastButtonState = "not sampled";
 
@@ -112,7 +112,7 @@ export async function run(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.closeSidebar");
     await vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
     await vscode.window.showTextDocument(wrapped, vscode.ViewColumn.One);
-    await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
+    await waitForActiveSourceEditor(wrapped);
     await vscode.commands.executeCommand(COMMAND_ID);
     await waitFor("the rendered preview", async () => {
       const preview = getActivePreviewForTests();

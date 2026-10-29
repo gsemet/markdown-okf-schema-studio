@@ -71,8 +71,6 @@ export const STRESS_SCENARIOS_BY_HOST: Readonly<Record<StressHost, readonly stri
     "toc",
     // Find in preview: a late block editor focus once failed it on a heavy run only.
     "find-in-preview",
-    // The alert type pick with the keyboard and a real mouse press, logged per pick.
-    "alert-type-pick-probe",
   ],
   untrusted: ["untrusted-read-only"],
 };

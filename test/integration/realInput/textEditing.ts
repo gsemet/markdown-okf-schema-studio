@@ -4,6 +4,7 @@ import { parse as parseYaml } from "yaml";
 import { type Page } from "playwright-core";
 
 import { lineDelta } from "../../shared/lineDelta";
+import { undoOneStep, undoUntil, type UndoStepDriver } from "../../shared/undoSteps";
 import {
   bufferText,
   type Evidence,
@@ -22,6 +23,7 @@ import {
 } from "./harness";
 import {
   traceDocumentChanges,
+  waitForActiveSourceEditor,
   windowFocusReport,
 } from "../windowFocus";
 import { captureAfter, escapeBlockEditor, realInputId, SMOKE, waitForCaretAtEnd, waitForNoBlockEditor, withDocument, withSmokeDocument } from "./common";
@@ -344,7 +346,7 @@ export async function scenarioTypingUndoGrouping(page: Page, evidence: Evidence)
       assert.equal(bufferText(document), expected, "closing the heading editor changes nothing");
       const undoTrace = traceDocumentChanges(document);
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
-      await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
+      await waitForActiveSourceEditor(document);
       await vscode.commands.executeCommand("undo");
       try {
         await waitFor("one undo to restore the paragraph", () => bufferText(document) === SMOKE);
@@ -519,6 +521,12 @@ export async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise
           + "; window focus: " + await windowFocusReport(page));
       }
     };
+    // Each undo is a round trip through VS Code (undoSteps.ts): every press is seen before the next key.
+    const undoKeys: UndoStepDriver = {
+      pressUndo: () => press(page, MOD + "+z"),
+      read: async () => (await readEditor()).value,
+      waitFor,
+    };
     const original = "Second paragraph.";
     await press(page, "End");
 
@@ -545,9 +553,7 @@ export async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise
     let previous = String((await readEditor()).value);
     let reachedPrefix = false;
     for (let step = 0; step < 12; step += 1) {
-      await press(page, MOD + "+z");
-      await new Promise<void>((resolve) => setTimeout(resolve, 120));
-      const value = String((await readEditor()).value);
+      const value = await undoOneStep(undoKeys, previous);
       if (previous === original + "\n## ") {
         assert.equal(value, original + "\n/h2", "one undo brings the /h2 back");
         reachedPrefix = true;
@@ -556,9 +562,9 @@ export async function scenarioSlashMenu(page: Page, evidence: Evidence): Promise
       previous = value;
     }
     assert.ok(reachedPrefix, "undo reached the bare heading prefix");
-    // Restore the paragraph for the next part: undo everything that is left.
-    for (let step = 0; step < 6; step += 1) await press(page, MOD + "+z");
-    await expectValue("undo back to the start", original);
+    // Restore the paragraph for the next part: undo what is left one seen step at a time, so no
+    // late undo lands on the keys typed next.
+    await undoUntil(undoKeys, original, 6);
 
     // /tab Enter: the menu closes and the table size grid opens, exactly like the Table button.
     await press(page, "End");

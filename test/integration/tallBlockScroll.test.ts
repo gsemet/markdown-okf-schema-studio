@@ -13,7 +13,7 @@ import {
 import { escapeUntilClosed } from "./escapeClose";
 import { E2E_REPORT_ROOT } from "../reportPaths";
 import { pinStoredWorkspaceChoices } from "./storedChoices";
-import { ensureTestWindowFocused } from "./windowFocus";
+import { ensureTestWindowFocused, waitForActiveSourceEditor } from "./windowFocus";
 
 async function waitFor(description: string, predicate: () => boolean | Promise<boolean>, timeoutMs = 15_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -161,7 +161,7 @@ export async function run(): Promise<void> {
     const document = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
     opened.push(document);
     await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
-    await vscode.commands.executeCommand("workbench.action.focusFirstEditorGroup");
+    await waitForActiveSourceEditor(document);
     await vscode.commands.executeCommand(COMMAND_ID);
     await waitFor("the rendered preview", async () => {
       const preview = getActivePreviewForTests();
