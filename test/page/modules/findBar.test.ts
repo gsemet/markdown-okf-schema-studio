@@ -16,6 +16,7 @@ class El extends FakeElement {
   get parentElement(): El | null { return this.parentNode as El | null; }
   get style() { return { setProperty: (name: string, value: string) => this.styles.set(name, value) }; }
   focus(): void { (this.ownerDocument as Page).activeElement = this; }
+  blur(): void { if ((this.ownerDocument as Page).activeElement === this) (this.ownerDocument as Page).activeElement = null; }
   select(): void { /* the field text is selected */ }
   scrollIntoView(): void { (this.ownerDocument as Page).scrolled.push(this); }
   getAttribute(name: string): string | null {
@@ -49,6 +50,7 @@ function setup(options: {
   blocked?: string;
   sourceOf?: (element: Element) => FindSourceBlock | undefined;
   rect?: { top: number; bottom: number; height: number };
+  canRestoreFocus?: (target: Element) => boolean;
 } = {}) {
   const page = new Page();
   const keyListeners: Array<(event: any) => void> = [];
@@ -76,6 +78,7 @@ function setup(options: {
     paint: (ranges, current) => { painted.push({ ranges: [...ranges], current }); },
     createRange: (match) => ({ match, getBoundingClientRect: () => options.rect ?? { top: 100, bottom: 120, height: 20 } }) as unknown as Range,
     selectedText: () => "",
+    ...(options.canRestoreFocus ? { canRestoreFocus: options.canRestoreFocus } : {}),
   } as FindHooks;
   const bar = installFindBar(page as never, window as never, hooks);
   const key = (init: Record<string, unknown>, target: unknown = page.body) => {
@@ -130,19 +133,110 @@ test("the field takes the focus back when the window focus returns to the page b
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
-test("Ctrl+F opens the bar with the field focused, and does nothing inside an editor field", () => {
+test("Ctrl+F opens the bar with the field focused", () => {
   const harness = setup();
   render(harness.page);
-  const inEditor = harness.page.createElement("textarea");
-  assert.deepEqual(harness.key({ code: "KeyF", ctrlKey: true }, inEditor), { prevented: 0, stopped: 0 });
-  assert.equal(harness.bar.isOpen(), false);
-
   const result = harness.key({ code: "KeyF", ctrlKey: true });
   assert.deepEqual(result, { prevented: 1, stopped: 1 }, "the key is taken before VS Code's webview find sees it");
   assert.equal(harness.bar.isOpen(), true);
   assert.equal(harness.query("[data-sphinx-preview-find]").hidden, false);
   assert.equal(harness.page.activeElement, harness.query("[data-find-input]"));
   assert.equal(harness.key({ code: "KeyF", metaKey: true }).prevented, 0, "Cmd+F is not the shortcut on Linux and Windows");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+// The page used to leave the key to an editor field (the bar then opened one host round trip later,
+// and the keys typed meanwhile went into the field): it now takes the key there too.
+test("Ctrl+F inside an editor field opens the bar at once; Escape gives the focus back to the field", () => {
+  const harness = setup();
+  render(harness.page);
+  const inEditor = harness.page.node("textarea", []);
+  inEditor.focus();
+  assert.deepEqual(harness.key({ code: "KeyF", ctrlKey: true }, inEditor), { prevented: 1, stopped: 1 },
+    "the key is taken from the field, before VS Code sees it");
+  assert.equal(harness.bar.isOpen(), true);
+  const field = harness.query("[data-find-input]");
+  assert.equal(harness.page.activeElement, field, "the next keys go to the query");
+  assert.equal(harness.key({ code: "F3" }, inEditor).prevented, 0, "F3 in an editor field stays with the field");
+  harness.key({ key: "Escape" }, field);
+  assert.equal(harness.bar.isOpen(), false);
+  assert.equal(harness.page.activeElement, inEditor, "the focus returns to the editor field");
+  for (const tag of ["input", "select"]) {
+    const other = harness.page.node(tag, []);
+    other.focus();
+    assert.equal(harness.key({ code: "KeyF", ctrlKey: true }, other).prevented, 1, tag);
+    assert.equal(harness.page.activeElement, field, tag);
+    harness.key({ key: "Escape" }, field);
+  }
+  const alt = harness.key({ code: "KeyF", ctrlKey: true, altKey: true }, inEditor);
+  const shift = harness.key({ code: "KeyF", ctrlKey: true, shiftKey: true }, inEditor);
+  assert.deepEqual([alt.prevented, shift.prevented, harness.bar.isOpen()], [0, 0, false], "Ctrl+Alt+F and Ctrl+Shift+F are not the shortcut");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+test("Escape does not give the focus back to a field the page refuses (an editor whose final save is on its way)", () => {
+  let refused = true;
+  const harness = setup({ canRestoreFocus: () => !refused });
+  render(harness.page);
+  const inEditor = harness.page.node("textarea", []);
+  inEditor.focus();
+  harness.key({ code: "KeyF", ctrlKey: true }, inEditor);
+  const field = harness.query("[data-find-input]");
+  harness.key({ key: "Escape" }, field);
+  assert.equal(harness.bar.isOpen(), false);
+  assert.equal(harness.page.activeElement, null, "the closed field let the focus go; the editor field did not get it");
+  refused = false;
+  inEditor.focus();
+  harness.key({ code: "KeyF", ctrlKey: true }, inEditor);
+  harness.key({ key: "Escape" }, field);
+  assert.equal(harness.page.activeElement, inEditor, "an accepted field gets the focus back");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+test("the query starts with the text selected in the editor field the bar opens from", () => {
+  const harness = setup();
+  render(harness.page);
+  const inEditor = harness.page.node("textarea", []);
+  inEditor.value = "The Studio preview";
+  Object.assign(inEditor, { selectionStart: 4, selectionEnd: 10 });
+  inEditor.focus();
+  harness.key({ code: "KeyF", ctrlKey: true }, inEditor);
+  assert.equal(harness.query("[data-find-input]").value, "Studio");
+  assert.equal(text(harness, COUNT), "1 of 4");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+test("an open request while the reader is in the bar changes nothing; Ctrl+F in the bar selects the query again", () => {
+  const harness = setup();
+  render(harness.page);
+  harness.key({ code: "KeyF", ctrlKey: true });
+  const field = harness.query("[data-find-input]");
+  let selected = 0;
+  field.select = () => { selected += 1; };
+  harness.type("[data-find-input]", "studio");
+  harness.key({ code: "Enter" , key: "Enter" }, field);
+  assert.equal(text(harness, COUNT), "2 of 4");
+  const paints = harness.painted.length;
+
+  // The host's find command, posted for the same key: no second bar, no new focus, no new search.
+  harness.bar.open();
+  assert.equal(harness.page.querySelectorAll("[data-find-input]").length, 1);
+  assert.equal(harness.page.activeElement, field);
+  assert.equal(selected, 0, "the query is not selected again: the next key does not replace it");
+  assert.equal(field.value, "studio");
+  assert.equal(text(harness, COUNT), "2 of 4", "the current match is kept");
+  assert.equal(harness.painted.length, paints, "nothing searched again");
+
+  // Ctrl+F pressed again in the bar selects the query, as in VS Code.
+  assert.deepEqual(harness.key({ code: "KeyF", ctrlKey: true }, field), { prevented: 1, stopped: 1 });
+  assert.equal(selected, 1);
+
+  // With the focus elsewhere, an open request takes the reader back to the query.
+  const other = harness.page.node("button", []);
+  other.focus();
+  harness.bar.open();
+  assert.equal(harness.page.activeElement, field);
+  assert.equal(selected, 2);
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-TOOLBAR-010

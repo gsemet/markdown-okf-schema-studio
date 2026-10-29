@@ -58,7 +58,7 @@ export class RuntimeElement {
 
   public constructor(
     attributes: Record<string, string>,
-    private readonly windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number; focused?: RuntimeElement },
+    private readonly windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number; focused?: RuntimeElement; blurOnFocusChange?: boolean },
     public top: number,
     public height = 40,
     tagName = "div",
@@ -326,8 +326,20 @@ export class RuntimeElement {
 
   public focus(options?: FocusOptions): void {
     this.focusOptions = options;
+    const previous = this.windowState.focused;
     this.windowState.focused = this;
+    // As a browser does: the element that loses the focus gets a blur naming the new one.
+    if (this.windowState.blurOnFocusChange && previous && previous !== this) {
+      previous.dispatch("blur", { target: previous, relatedTarget: this });
+    }
     if (!options?.preventScroll) this.windowState.scrollY = this.top;
+  }
+
+  /** The element lets the focus go to nothing (the body), as `HTMLElement.blur()` does. */
+  public blur(): void {
+    if (this.windowState.focused !== this) return;
+    this.windowState.focused = undefined;
+    if (this.windowState.blurOnFocusChange) this.dispatch("blur", { target: this, relatedTarget: null });
   }
 
   public selectionDirection = "none";
@@ -471,6 +483,11 @@ export function createRuntimeHarness(configuration: Partial<{
   /** True gives the page a `document.activeElement`: the last element focused (absent: undefined). */
   trackFocus: boolean;
   /**
+   * With `trackFocus`, true makes `focus()` dispatch a `blur` (with its `relatedTarget`) on the
+   * element that loses the focus, as a browser does (absent: no blur).
+   */
+  blurOnFocusChange: boolean;
+  /**
    * A runtime script to run instead of the test build of the page bundle (the shipped, minified
    * file). The page carries the context as the JSON element the runtime reads.
    */
@@ -496,9 +513,10 @@ export function createRuntimeHarness(configuration: Partial<{
     platform,
     virtualClock = false,
     runtimeScript,
+    blurOnFocusChange = false,
     ...runtimeConfiguration
   } = configuration;
-  const windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number; focused?: RuntimeElement } = { scrollY: 0 };
+  const windowState: { scrollY: number; paletteHeight?: number; panelHeight?: number; focused?: RuntimeElement; blurOnFocusChange?: boolean } = { scrollY: 0, blurOnFocusChange };
   const mappings = emptyBody ? [] : [
     ...(frontmatterHeight > 0 ? [new RuntimeElement(
       {

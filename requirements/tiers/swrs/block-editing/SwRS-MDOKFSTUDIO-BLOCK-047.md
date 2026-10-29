@@ -34,6 +34,7 @@ tested_in_files:
 - test/page/runtimeBlockEditor.test.ts
 - test/page/runtimeBlockMoves.test.ts
 - test/page/runtimeEditPalette.test.ts
+- test/page/runtimeFindFromBlockEditor.test.ts
 - test/page/runtimePaletteActions.test.ts
 default_owner_email: gaetan@xeberon.net
 ---
@@ -69,6 +70,7 @@ When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or m
 | --- | --- |
 | Click outside the frame, with typed text | One final save is posted and the autosave timer is cleared |
 | The browser window loses the focus with no related target | The final save is posted as well |
+| Cmd/Ctrl+F in the text box (the find field takes the focus, see SwRS-MDOKFSTUDIO-TOOLBAR-009) | The final save carries the text typed before the key; the keys typed afterwards go to the find query |
 
 ### Scenario (boundary): Moving the focus inside the editor or into a host dialog does not commit
 | Input | Outcome |
@@ -97,7 +99,8 @@ When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or m
 - Method: test/page/runtimeBlockEditor.test.ts (`Done posts a final save and both buttons keep the textarea focused on press`: Done with changes; `Cmd+Enter and Ctrl+Enter finish the block editor like Done`: Cmd or Ctrl with Enter; `blur after typing posts one final save and clears the autosave timer`: leaving the text box; `Escape in an unchanged Markdown block editor closes it without a message`: unchanged editor, Escape only).
 - Method: test/page/blockReq.requirements.test.ts (`the status line reads Saving Markdown… from the final save on, and shows an error that refuses it`: status line and refused save).
 - Method: test/page/blockReq.requirements.test.ts (`Done, Ctrl+Enter and the blur post one final save while the first is in flight`: second final save refused).
-- Method: test/page/runtimeBlockMoves.test.ts (`T28: Done on an untouched empty insertion closes without saving`: empty insertion). Done, blur and Ctrl+Enter on an unchanged existing block are untested.
+- Method: test/page/runtimeBlockMoves.test.ts (`T28: Done on an untouched empty insertion closes without saving`: empty insertion). Done and Ctrl+Enter on an unchanged existing block are untested.
+- Method: test/page/runtimeFindFromBlockEditor.test.ts (Cmd/Ctrl+F in the text box: the blur to the find field posts the final save of the text typed before the key; an unchanged editor closes on that blur without a save).
 - Method: test/integration/realInput/markers.ts (scenarioCtrlEnterCommit, screenshot block-editing/r02; scenarioParagraphBlurCommit, screenshot block-editing/r01).
 - Method: test/page/runtimePaletteActions.test.ts (`T30: the editor stays open while the host's file dialog has the focus, and the answer is inserted`: host dialog; `T31: Done saves while the file dialog is still open, so the editor is never stuck`: Done during a pending dialog); the moves into the palette and the panels have no test in this scope.
 - Method: test/page/modules/hostRequests.test.ts (a dialog request keeps the editor's blur suspended until it is answered, even on a timeout; a list request never suspends the blur: dialog state).

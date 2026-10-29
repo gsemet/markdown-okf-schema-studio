@@ -1,5 +1,21 @@
 # Update Log
 
+## 2026-10-29 (Cmd/Ctrl+F from an editor field opens the find bar at once, CR 196)
+
+- SwRS-MDOKFSTUDIO-TOOLBAR-009: the page now takes Cmd/Ctrl+F in a field of an open block, table
+  cell or frontmatter editor too, and opens the find bar at once with its field focused (the query
+  starts with the text selected in that field). Before, the page left the key to VS Code, whose key
+  binding opened the bar one host round trip later; the keys typed in that gap went into the field
+  and, through the blur commit, into the Markdown. The host's find command while the focus is in
+  the bar changes nothing (no new focus, the query is not selected again); Cmd/Ctrl+F in the bar
+  selects the query again. Any other field of the page (a comment box, a palette or panel control)
+  behaves the same. Escape after the blur committed a block or table cell editor whose final save is
+  on its way does not give the focus back to that editor's field. The boundary row "the key is left
+  to the field; the bar does not open" is replaced. Verification: test/page/modules/findBar.test.ts,
+  test/page/runtimeFindFromBlockEditor.test.ts, test/integration/findInPreview.test.ts.
+- SwRS-MDOKFSTUDIO-BLOCK-047: new row "Cmd/Ctrl+F in the text box" under "Leaving the text box"; the
+  blur on an unchanged existing block is now tested.
+
 ## 2026-10-29 (find in preview in the stress plan, CR 190)
 
 - SwRS-MDOKFSTUDIO-TOOLBAR-009, SwRS-MDOKFSTUDIO-TOOLBAR-012: verification notes only. The
