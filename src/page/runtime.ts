@@ -317,6 +317,13 @@ export function startPreviewRuntime(context: PreviewRuntimeContext, transport: H
     paint: (ranges, current) => paintMatches(window, ranges, current),
     createRange: (match) => matchRange(document, match),
     selectedText: () => window.getSelection?.()?.toString() ?? "",
+    // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
+    // Cmd/Ctrl+F from a block or table cell editor: the blur to the find field committed it, and
+    // while that final save is on its way the editor field takes no more keys (they would be lost).
+    canRestoreFocus: (target) => {
+      const edit = state.activeBlockEdit;
+      return !(edit?.finishing && (target === edit.textarea || target === edit.tableInput));
+    },
   });
   rt.refreshButton = document.querySelector?.<HTMLButtonElement>("[data-sphinx-preview-refresh]");
   const editButton = document.querySelector?.<HTMLElement>("[data-sphinx-preview-edit-toggle]");

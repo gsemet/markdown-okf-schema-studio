@@ -245,7 +245,8 @@ export class PreviewManager {
   // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
   /**
    * The key binding of Cmd/Ctrl+F opens the find bar of the preview that has the focus. The page
-   * also listens to the key itself; opening twice is harmless. False when no preview is focused.
+   * also takes the key itself, from its content and its editor fields: when the bar already holds
+   * the focus, this command changes nothing there. False when no preview is focused.
    */
   public runFindCommand(): boolean {
     const session = [...this.live].find((candidate) => !candidate.disposed && candidate.panel.active);

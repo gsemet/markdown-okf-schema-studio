@@ -37,6 +37,12 @@ export interface FindHooks {
   createRange(match: PageMatch): Range;
   /** The text the reader selected, to start a search with. */
   selectedText(): string;
+  /**
+   * False when the element that had the focus before the bar opened must not get it back on close:
+   * the text box of an editor whose final save is on its way (the keys typed there would be lost).
+   * Absent: the focus always goes back.
+   */
+  canRestoreFocus?(target: Element): boolean;
 }
 
 /** The host's answer to a replace request. */
@@ -72,6 +78,22 @@ const ICON_REPLACE_ONE = '<path d="M4 7h9a4 4 0 0 1 0 8H6m0 0 3-3m-3 3 3 3M16 5v
 const ICON_REPLACE_ALL = '<path d="M3 6h9M3 12h6M3 18h9m4-12 3 3-3 3m3-3h-6m0 9 3-3-3-3m3 3h-6"></path>';
 
 const isMac = (window: Window): boolean => /Mac|iPhone|iPad/u.test(window.navigator?.platform ?? "");
+
+/** A field that takes typed text: an editor's text box, a table cell, a frontmatter field. */
+const isEditingField = (target: Element | undefined): boolean => target !== undefined
+  && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || (target as HTMLElement).isContentEditable === true);
+
+/**
+ * The text selected inside a text field (`document.getSelection()` does not see into one), or
+ * undefined when `element` is not a text field or nothing is selected in it.
+ */
+const fieldSelection = (element: Element | null): string | undefined => {
+  const field = element as HTMLInputElement | null;
+  if (!field || (field.tagName !== "TEXTAREA" && field.tagName !== "INPUT")) return undefined;
+  const { selectionStart: start, selectionEnd: end, value } = field;
+  if (typeof start !== "number" || typeof end !== "number" || end <= start || typeof value !== "string") return undefined;
+  return value.slice(start, end);
+};
 
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-009
 // @implements_req SwRS-MDOKFSTUDIO-TOOLBAR-010
@@ -483,6 +505,14 @@ export function installFindBar(
       }
       return;
     }
+    // Cmd/Ctrl+F again from the bar: the query is selected again, as in VS Code's own find.
+    if (command && !event.altKey && !event.shiftKey && event.code === "KeyF") {
+      event.preventDefault();
+      event.stopPropagation();
+      findInput.focus();
+      findInput.select?.();
+      return;
+    }
     if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
       const toggles: Record<string, keyof FindOptions> = { KeyC: "matchCase", KeyW: "wholeWord", KeyR: "regex" };
       const name = toggles[event.code];
@@ -497,10 +527,18 @@ export function installFindBar(
   const api: FindBar = {
     open(request) {
       const wasOpen = opened;
+      // The host's find command can follow a Cmd/Ctrl+F the page already took (the key may reach
+      // VS Code too): with the reader already in the bar, it changes nothing, so the query typed
+      // since is neither selected again (the next key would replace it) nor searched again.
+      const active = document.activeElement;
+      if (wasOpen && bar && request?.replace !== true && active !== null && bar.contains(active)) return;
       if (!bar) build();
       if (!wasOpen) {
-        restoreFocus = document.activeElement;
-        const selected = hooks.selectedText().trim();
+        restoreFocus = active;
+        // The query starts with the selected text: the selection inside the focused text field when
+        // the bar opens from an editor (the page selection does not see into a field), else the
+        // page selection. Only a short single-line selection is taken.
+        const selected = (fieldSelection(active) ?? hooks.selectedText()).trim();
         if (selected !== "" && !/[\r\n]/u.test(selected) && selected.length <= 200) findInput.value = selected;
       }
       opened = true;
@@ -523,8 +561,12 @@ export function installFindBar(
       hooks.paint([], undefined);
       const target = restoreFocus;
       restoreFocus = null;
-      if (target && (target as HTMLElement).isConnected !== false && typeof (target as HTMLElement).focus === "function") {
+      if (target && (target as HTMLElement).isConnected !== false && typeof (target as HTMLElement).focus === "function"
+        && hooks.canRestoreFocus?.(target) !== false) {
         (target as HTMLElement).focus();
+      } else {
+        // The hidden field lets the focus go, as a browser does with a hidden focused control.
+        findInput.blur?.();
       }
     },
     isOpen: () => opened,
@@ -546,8 +588,10 @@ export function installFindBar(
   });
 
   // Cmd/Ctrl+F and F3, before VS Code's own handling of the key (it would open the webview find
-  // widget). The text editor keeps its own find: this listener lives in the webview only. A field
-  // of an open editor keeps the key.
+  // widget). The text editor keeps its own find: this listener lives in the webview only.
+  // Cmd/Ctrl+F in a field of an open editor opens the bar too, at once: left to VS Code, the bar
+  // opened one host round trip later and the keys typed meanwhile went into the field, then into
+  // the Markdown when the field lost the focus. F3 stays with the field.
   window.addEventListener("keydown", (event) => {
     const target = event.target instanceof Element ? event.target : undefined;
     const inBar = bar !== undefined && target !== undefined && bar.contains(target);
@@ -556,10 +600,8 @@ export function installFindBar(
       return;
     }
     const command = mac ? event.metaKey : event.ctrlKey;
-    const editing = target !== undefined
-      && (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || (target as HTMLElement).isContentEditable === true);
+    const editing = isEditingField(target);
     if (command && !event.altKey && !event.shiftKey && event.code === "KeyF") {
-      if (editing) return;
       event.preventDefault();
       event.stopPropagation();
       api.open();

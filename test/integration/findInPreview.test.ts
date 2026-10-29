@@ -204,6 +204,40 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
       document.hasFocus() && !document.documentElement.hasAttribute("data-sphinx-preview-block-editing")
       && document.querySelector("[data-sphinx-preview-block-editor]") === null));
   };
+  // CR 196: Cmd/Ctrl+F with the focus in a block editor's text box, the query typed at once. The
+  // page takes the key and opens the bar without waiting for the host: every typed key ends in the
+  // query, none in the text box, and the Markdown is unchanged (the unchanged editor closes when
+  // its text box loses the focus to the find field).
+  const findFromBlockEditor = async (live: Frame): Promise<void> => {
+    if (await live.locator("html").getAttribute("data-sphinx-preview-edit-mode") !== "on") {
+      await live.locator("[data-sphinx-preview-edit-toggle]").click();
+      await settle("edit mode", async () =>
+        await (await liveFrame(page)).locator("html").getAttribute("data-sphinx-preview-edit-mode") === "on");
+    }
+    await live.locator("h1").first().click();
+    await settle("the title's block editor to hold the focus", async () => await (await liveFrame(page)).evaluate(() =>
+      document.hasFocus() && document.activeElement?.tagName === "TEXTAREA"
+      && document.activeElement.closest("[data-sphinx-preview-block-editor]") !== null));
+    await page.keyboard.press(find);
+    await page.keyboard.type("studio");
+    await settle("the typed query in the find field", async () => await (await liveFrame(page)).evaluate(() =>
+      document.activeElement?.hasAttribute("data-find-input") === true
+      && (document.activeElement as HTMLInputElement).value === "studio"));
+    await settle("the unchanged block editor to close", async () => await (await liveFrame(page)).evaluate(() =>
+      document.querySelector("[data-sphinx-preview-block-editor]") === null));
+    // A late host find command for the same key changes nothing: the query is kept.
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    const after = await (await liveFrame(page)).evaluate(() => ({
+      query: document.querySelector<HTMLInputElement>("[data-find-input]")?.value,
+      focused: document.activeElement?.hasAttribute("data-find-input") === true,
+      bars: document.querySelectorAll("[data-sphinx-preview-find]").length,
+    }));
+    assert.deepEqual(after, { query: "studio", focused: true, bars: 1 }, `find bar after the key; state: ${await pageState()}`);
+    assert.equal(notes.getText(), SOURCE, "the Markdown is unchanged: no typed key reached it");
+    await page.keyboard.press("Escape");
+    await settle("the bar to close", async () =>
+      !(await (await liveFrame(page)).locator("[data-sphinx-preview-find]").isVisible()));
+  };
   const assertReplaceAllowed = async (): Promise<void> => {
     const toggle = (await liveFrame(page)).locator("[data-find-toggle-replace]");
     assert.equal(await toggle.getAttribute("aria-disabled"), null, `the replace toggle is enabled; state: ${await pageState()}`);
@@ -303,7 +337,8 @@ export async function scenarioFindInPreview(page: Page, options: FindScenarioOpt
 
     // Dark.
     frame = await openPreview("dark", DARK_THEME);
-    await focusPageWithoutEdit(frame);
+    await findFromBlockEditor(frame);
+    await focusPageWithoutEdit(await liveFrame(page));
     await page.keyboard.press(find);
     await settle("the find bar", async () => await bar(await liveFrame(page)).isVisible());
     await settle("the find field to hold the focus", findFieldFocused);
