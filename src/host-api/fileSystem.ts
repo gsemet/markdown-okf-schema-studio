@@ -26,7 +26,10 @@ export interface FileSystem {
   writeFile(path: string, data: Uint8Array): Promise<void>;
   /** The entries of a directory: name and kind. */
   readDirectory(path: string): Promise<Array<[string, FileKind]>>;
-  /** Renames `from` to `to`. Without `overwrite`, rejects when `to` exists. */
+  /**
+   * Renames `from` to `to`. Without `overwrite`, rejects when `to` exists. With it, replaces `to` in
+   * one step: a reader never finds `to` missing.
+   */
   rename(from: string, to: string, options?: { overwrite?: boolean }): Promise<void>;
   /** Deletes a file (not a directory); rejects with a not-found error when it does not exist. */
   delete(path: string): Promise<void>;

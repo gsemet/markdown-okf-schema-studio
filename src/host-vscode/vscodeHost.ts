@@ -58,7 +58,7 @@ function kindOf(type: vscode.FileType): FileKind {
 
 /**
  * Files through `workspace.fs`, which honours VS Code's file system providers. `realpath` has no
- * VS Code API: the extension host runs in Node, so it is Node's.
+ * VS Code API: the extension host runs in Node, so it is Node's; so is a replacing `rename` (see it).
  */
 function createVscodeFileSystem(): FileSystem {
   const node = createNodeFileSystem();
@@ -77,8 +77,19 @@ function createVscodeFileSystem(): FileSystem {
       const entries = await vscode.workspace.fs.readDirectory(vscode.Uri.file(path));
       return entries.map(([name, type]): [string, FileKind] => [name, kindOf(type)]);
     },
+    // @implements_req SwRS-MDOKFSTUDIO-REVIEW-054
+    /**
+     * A replacing rename goes through Node: VS Code's `workspace.fs.rename` with `overwrite` deletes
+     * the target first and renames after, so a reader (a watcher, another process) could find the
+     * file missing. Node's `fs.rename` replaces the target in one step, which the write through a
+     * temporary file relies on. A rename that must not replace keeps going through VS Code.
+     */
     async rename(from, to, options) {
-      await vscode.workspace.fs.rename(vscode.Uri.file(from), vscode.Uri.file(to), { overwrite: options?.overwrite === true });
+      if (options?.overwrite === true) {
+        await node.rename(from, to, { overwrite: true });
+        return;
+      }
+      await vscode.workspace.fs.rename(vscode.Uri.file(from), vscode.Uri.file(to), { overwrite: false });
     },
     async delete(path) {
       await vscode.workspace.fs.delete(vscode.Uri.file(path), { recursive: false, useTrash: false });
