@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-10-31
+
+### A block editor in a grid card
+
+- Added SwRS-MDOKFSTUDIO-BLOCK-257 (block-editing, `proposed`, derives from StRS-MDOKFSTUDIO-BLOCK-001):
+  while a block editor is open in a card, the card widens and pushes the other cards of its row
+  aside, the edition palette stays in the flow above the text box (wider than the card if needed,
+  with a maximum height and a vertical scroll) and the text box keeps a readable minimum width.
+  Verification: `okfreq validate --check-links`, `lint --check` and `update-coverage --check`
+  pass; the headless visual scenarios `block-editing/v23` to `v26` measure the layout.
+
 ## 2026-10-30
 
 ### The bundle is readable by any OKF v0.2 consumer

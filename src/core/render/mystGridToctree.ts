@@ -581,12 +581,17 @@ function expandToctreesOnce(node: GridNode, context: ToctreeContext): void {
   }
 }
 
-/** The stylesheet rules that choose the column count of each `{grid}` breakpoint. */
+// @implements_req SwRS-MDOKFSTUDIO-BLOCK-257
+/**
+ * The stylesheet rules that choose the column count of each `{grid}` breakpoint. The tracks read
+ * `--myst-grid-track-min` (0 by default; `auto` while a card of the row is edited) so the card
+ * being edited keeps its minimum width and pushes the others aside.
+ */
 export function gridColumnCss(): string {
   const track = (columns: string): string =>
     columns === "auto"
       ? "repeat(auto-fit, minmax(14em, 1fr))"
-      : `repeat(${columns}, minmax(0, 1fr))`;
+      : `repeat(${columns}, minmax(var(--myst-grid-track-min, 0px), 1fr))`;
   const counts = [...Array.from({ length: GRID_MAX_COLUMNS }, (_, index) => String(index + 1)), "auto"];
   return GRID_BREAKPOINTS.map((bp) => {
     const rules = counts.map((count) =>
