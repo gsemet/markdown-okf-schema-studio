@@ -18,6 +18,7 @@ import * as path from "node:path";
 import type { Page } from "playwright-core";
 import * as vscode from "vscode";
 
+import { injectToggleDelay } from "../shared/tocLoop";
 import { getActivePreviewForTests } from "./extensionApi";
 import {
   bufferText,
@@ -90,6 +91,10 @@ async function setHostTheme(page: Page, theme: string): Promise<void> {
     return current !== undefined
       && await current.locator("body").evaluate((body, wanted) => body.classList.contains(`vscode-${wanted}`), kind);
   });
+  // Repro loop only (STUDIO_TOGGLE_DELAY_MS): the theme has landed in the webview; the pause before
+  // the next toggle read and click is random, so the click can meet the render the theme change
+  // triggers (a render restoring the edit mode is a suspect of the toc flake).
+  await injectToggleDelay();
 }
 
 async function shoot(page: Page, file: string): Promise<void> {

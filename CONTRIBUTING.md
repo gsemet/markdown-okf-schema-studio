@@ -260,6 +260,13 @@ locally, before merging a change to the extension host, the webview or the real-
 One push runs them on its own: a push to `main` that changes the package version (a release). Its
 `release-check` job detects the change, the heavy jobs run in that push run, and the release is
 tagged only when both succeed (see "Releases" below).
+A flake that only shows in the real window can be hunted with the `toc-loop` job, a repro tool that
+never gates a merge and never runs on its own:
+`gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]` repeats the `toc`
+scenario in one trusted window (`just ci-toc-loop`, at most 40 rounds, launch deadline 30 minutes,
+step timeout 35). `toc_delay_ms` (0 to 2000) injects a random pause around the edit toggle and
+after a host theme change. Failed rounds are counted, not fatal, and the job is red if any failed;
+`out/reports/e2e/toc-loop-summary.json` is rewritten after each round.
 `just preflight` calls these targets in sequence. Each stage records its own start time and they share
 a run id, so `just ci-visual`, `just ci-integration` and `just ci-report` also work one by one; `just
 clean` starts a fresh campaign. `just dev-ci` is for CI machines only: `npm ci` replaces
@@ -433,11 +440,11 @@ Restricted Mode and standalone windows run as one step each, and the reload camp
 suite writes a heartbeat file (`out/reports/e2e/heartbeat-<instance>-<suite>.json`) every 5
 seconds; `run-tests` stops a launch whose heartbeat is silent for 90 seconds (frozen extension host
 or renderer) or that runs past its deadline (15 minutes, `STUDIO_LAUNCH_TIMEOUT_MS`; `just
-ci-stress` raises it to 26), kills its VS Code processes and names the last step. Thresholds live in
+ci-stress` raises it to 26 and `just ci-toc-loop` to 30), kills its VS Code processes and names the last step. Thresholds live in
 `test/shared/hangWatchdog.ts`. Each timeout writes `out/reports/e2e/hang-dumps/<time>-<step>/`:
 `ps` output, the tails of the VS Code logs, the window state and tabs, the heartbeat and screenshots
 (through CDP, and of the X display when `import` or `xwd` exists). In CI the integration step stops
-at 20 minutes and `just ci-hang-dump` adds the processes and logs left behind (`post-step/`).
+at 20 minutes (the `toc-loop` step at 35) and `just ci-hang-dump` adds the processes and logs left behind (`post-step/`).
 
 Run folders of the real-window suites pile up under `out/reports/e2e/screenshots/`.
 `npm run review:finish` keeps the latest 5 per kind (`STUDIO_E2E_KEEP_RUNS` changes it). Run

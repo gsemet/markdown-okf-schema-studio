@@ -75,7 +75,7 @@ export function launchDeadlineMs(environment: NodeJS.ProcessEnv = process.env): 
  * Restricted Mode captures N times in one step, so those steps are bounded by the launch deadline.
  */
 export function stepBudgetMs(step: string, environment: NodeJS.ProcessEnv = process.env): number {
-  if (STRESS_STEPS.includes(step) && environment.STUDIO_REAL_INPUT_SCENARIO === "stress") {
+  if (STRESS_STEPS.includes(step) && ["stress", "toc-loop"].includes(environment.STUDIO_REAL_INPUT_SCENARIO ?? "")) {
     return launchDeadlineMs(environment);
   }
   return STEP_BUDGETS_MS[step] ?? STEP_BUDGET_DEFAULT_MS;
