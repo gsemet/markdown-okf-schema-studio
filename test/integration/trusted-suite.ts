@@ -37,6 +37,7 @@ import { run as runMystPickers } from "./mystPickers.test";
 import { run as runPaletteMode } from "./paletteMode.test";
 import { run as runPreviewHistory } from "./previewHistory.test";
 import { run as runEditKeys } from "./editKeys.test";
+import { run as runGridCardEditorBlur } from "./gridCardEditorBlur.test";
 import { run as runPasteUrl } from "./pasteUrl.test";
 import { run as runWindowSwitchKeys } from "./windowSwitchKeys.test";
 import { run as runRealInput } from "./realInput/run";
@@ -199,6 +200,7 @@ async function runTrustedSuite(): Promise<void> {
   }
   const remainingSteps: ReadonlyArray<readonly [string, () => Promise<void>]> = [
     ["edit-keys", runEditKeys],
+    ["grid-card-editor-blur", runGridCardEditorBlur],
     ["paste-url", runPasteUrl],
     ["window-switch-keys", runWindowSwitchKeys],
     ["preview-history", runPreviewHistory],
