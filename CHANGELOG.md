@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Editing the body or the title of a card in a `{grid}` in edit mode no longer hides the text box
+  under the edition palette: the card widens and pushes the other cards of its row aside, the
+  palette sits above the text box (it may be wider than the card and scrolls vertically past a
+  maximum height) and the text box keeps a readable width.
+
 ## 1.1.0 - 2026-10-29
 
 - Studio runs in the VS Code Agents window: the extension declares its support, so VS Code no

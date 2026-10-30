@@ -9,6 +9,7 @@ import { CONTENT_BLOCK_CSS } from "./styles/contentBlockStyles";
 import { CONTENT_LAYOUT_CSS } from "./styles/contentLayoutStyles";
 import { EDIT_MODE_CSS } from "./styles/editModeStyles";
 import { EDIT_PALETTE_CSS } from "./styles/editPaletteStyles";
+import { GRID_CARD_EDIT_CSS } from "./styles/gridCardEditStyles";
 import { FIND_CSS } from "./styles/findStyles";
 import { HTML_BLOCK_CSS } from "./styles/htmlBlockStyles";
 import { TOC_CSS } from "./styles/tocStyles";
@@ -116,6 +117,7 @@ export const PREVIEW_THEME_CSS =
   + HTML_BLOCK_CSS
   + TOC_CSS
   + CONTENT_BLOCK_CSS
+  + GRID_CARD_EDIT_CSS
   + CODE_BLOCK_CSS
   + PROPERTIES_CSS
   + FIND_CSS;
