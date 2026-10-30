@@ -9,7 +9,8 @@ description: When the writer types *, _, a backtick or ~ with text selected in
   one native edit and keep the text selected.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,12 @@ When the writer types *, _, a backtick or ~ with text selected in the cell text 
 
 - Method: Unit test a table cell wraps its selection with the marker too in test/page/runtimeBlockEditor.test.ts.
 - Criteria: The text box value and selection after the key; the undo grouping comes from the native insertText command and is not asserted.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-006](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-006.md): Tab, arrows and editing keys work in a table cell
+<!-- okf:links:end -->

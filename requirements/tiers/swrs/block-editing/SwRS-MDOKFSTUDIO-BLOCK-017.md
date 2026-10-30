@@ -10,7 +10,8 @@ description: "While edit mode is on, the page SHALL outline with a dashed line t
   file and line."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -82,3 +83,14 @@ While edit mode is on, the page SHALL outline with a dashed line the element tha
 - Method: test/page/blockReq.requirements.test.ts (`the hover outline skips the properties table and an open editor, and an element in a link`: targets that are not outlined).
 - Method: test/core/preview/blockReq.requirements.test.ts (`mapped blocks show the text cursor in edit mode only`: text cursor table).
 - Criteria: At most one element carries the attribute; the outline is a 1 px dashed line in the focus colour; editHoverTarget returns nothing for the targets that are not outlined; the stylesheet holds the text cursor rule and only for edit mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+<!-- okf:links:end -->

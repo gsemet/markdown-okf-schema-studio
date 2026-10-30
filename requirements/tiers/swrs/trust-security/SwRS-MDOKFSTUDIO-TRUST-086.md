@@ -8,7 +8,8 @@ description: When the host receives previewWarningBannerClosed, it SHALL accept
   and digits, a hyphen and eight hexadecimal digits.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -55,3 +56,14 @@ A refused message is ignored without a visible change (see SwRS-MDOKFSTUDIO-TRUS
 
 - Method: Unit test test/core/protocol/pageToHost.test.ts (CR 050: the warning banner messages are registered with a bounded key) covers the valid key and the invalid keys.
 - Criteria: The key matches ^[0-9a-z]+-[0-9a-f]{8}$ and has at most 32 characters.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+<!-- okf:links:end -->

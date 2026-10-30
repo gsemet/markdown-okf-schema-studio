@@ -9,7 +9,8 @@ description: "When a reader clicks the anchor icon of a label in edit mode, the 
   show the answer of the host in the field."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -122,3 +123,23 @@ Only `{ref}` forms are counted. The field closes itself 5 s after the success me
 - Method: test/core/protocol/pageToHost.test.ts ("previewLabelRename validates the line and both label names": the validator repeats the name check)
 - Method: the pointer press outside the popover has no named test (untested)
 - Criteria: The icon shows a pointer cursor in edit mode only; no message is posted on a closed field, an invalid name or an unchanged name; page and host both reject invalid names; matching of the answer is by edit id; `{ref}`-only counting and the message texts match.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-039](SwRS-MDOKFSTUDIO-MYST-039.md): Enter sends the label rename and an unchanged name sends nothing
+  - [SwRS-MDOKFSTUDIO-MYST-040](SwRS-MDOKFSTUDIO-MYST-040.md): Escape or an outside press closes the rename field
+  - [SwRS-MDOKFSTUDIO-MYST-041](SwRS-MDOKFSTUDIO-MYST-041.md): Invalid label names are not sent
+  - [SwRS-MDOKFSTUDIO-MYST-047](SwRS-MDOKFSTUDIO-MYST-047.md): A successful rename reports the remaining uses
+  - [SwRS-MDOKFSTUDIO-MYST-048](SwRS-MDOKFSTUDIO-MYST-048.md): The rename field shows progress and refusals
+  - [SwRS-MDOKFSTUDIO-MYST-049](SwRS-MDOKFSTUDIO-MYST-049.md): The rename field times out after 6 seconds
+  - [SwRS-MDOKFSTUDIO-MYST-090](SwRS-MDOKFSTUDIO-MYST-090.md): The rename field closes itself after 5 seconds
+  - [SwRS-MDOKFSTUDIO-MYST-094](SwRS-MDOKFSTUDIO-MYST-094.md): A label starting with underscore, dot or hyphen cannot be renamed
+<!-- okf:links:end -->

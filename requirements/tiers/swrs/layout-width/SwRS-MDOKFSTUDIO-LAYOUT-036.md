@@ -7,7 +7,8 @@ description: When the setting maxContentWidth is negative or not a finite
   number, the extension SHALL use the default width of 960 pixels.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,14 @@ When the setting maxContentWidth is negative or not a finite number, the extensi
 
 - Method: Unit test of the configuration reader (NaN is asserted); the other inputs follow from the normalisation function.
 - Criteria: The normalised value is 960 for every input that is negative, not a number or not finite.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-002](SwRS-MDOKFSTUDIO-LAYOUT-002.md): The text column width follows the maxContentWidth setting
+<!-- okf:links:end -->

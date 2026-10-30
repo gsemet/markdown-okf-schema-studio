@@ -8,7 +8,8 @@ description: "When a writer edits a number or text field, the extension SHALL sh
   out-of-range values to the check at save time."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a writer edits a number or text field, the extension SHALL show the control
 
 - Method: Unit test the number input carries no schema limits and a value out of range is refused at save time in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: Only step any is set on number inputs.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-003](SwRS-MDOKFSTUDIO-FMEDIT-003.md): Enum, number, date, boolean and nullable fields use fitting controls
+<!-- okf:links:end -->

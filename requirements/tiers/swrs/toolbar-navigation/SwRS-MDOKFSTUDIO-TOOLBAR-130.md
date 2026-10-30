@@ -11,7 +11,8 @@ description: When the reader expands or collapses the toolbar, the extension
   with no motion when the user prefers reduced motion.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -63,3 +64,12 @@ When the reader expands or collapses the toolbar, the extension SHALL unroll or 
 - Method: test/page/runtimeToolbarHint.test.ts (the ready and scroll state snapshots keep the "hint shown" mark; a page started from the saved state shows no hint)
 - Method: test/core/preview/previewStyles.test.ts, tests "CR 162: the toolbar rows unroll as one block, only under the animating mark" and "CR 162: reduced motion turns off the tooltip slide-in and the toolbar rows unroll"
 - Criteria: the animating mark precedes the hidden change; the hint starts two frames after the page starts and lasts 700 ms; nothing is posted; the stylesheet animates height and opacity over the 160 ms time under the mark only
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+<!-- okf:links:end -->

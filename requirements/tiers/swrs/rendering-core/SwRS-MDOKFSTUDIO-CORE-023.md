@@ -8,7 +8,8 @@ description: When a directive is replaced by a placeholder, the extension SHALL
   in the status region while the render stays successful.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,15 @@ When a directive is replaced by a placeholder, the extension SHALL list "Directi
 
 - Method: Unit test "project-scoped roles and directives degrade to labelled placeholders" in test/core/render/mystFeatures.test.ts; Integration suite run() in test/integration/projectFeatures.test.ts
 - Criteria: One warning per placeholder with its line, and a ready status.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-022](SwRS-MDOKFSTUDIO-CORE-022.md): Build-dependent constructs show an inert placeholder with a warning
+<!-- okf:links:end -->

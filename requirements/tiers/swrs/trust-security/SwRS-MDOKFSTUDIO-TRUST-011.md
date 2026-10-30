@@ -8,7 +8,8 @@ description: "When the extension builds the page of a document, it SHALL have th
   in every preview mode, and never keep a nonce attribute written by the document."
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -53,3 +54,12 @@ When the extension builds the page of a document, it SHALL have the sanitizer re
 ### Verification notes
 - Method: test/security/html-policy.test.ts (reduced previews remove external scripts while retaining contained media; trusted previews also remove scripts and the nonce attribute of the document) checks the scenarios. The host wiring in src/session/features/rendering.ts still passes the negated read-only flag, which the sanitizer now ignores. The renderer already drops raw HTML scripts (SwRS-MDOKFSTUDIO-GFM-029), so this removal is a second wall.
 - Criteria: The page holds no script element written by the document, in any mode; the diagnostic blocked-script or blocked-inline-script is recorded; no nonce attribute written by the document remains.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-006](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-006.md): The preview runs no foreign code and unsafe HTML is made inert
+<!-- okf:links:end -->

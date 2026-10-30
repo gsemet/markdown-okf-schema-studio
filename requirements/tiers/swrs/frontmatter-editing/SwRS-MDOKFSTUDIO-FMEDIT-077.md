@@ -7,7 +7,8 @@ description: When a writer presses Backspace in an empty list item input, the
   extension SHALL remove the item and focus the previous one.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a writer presses Backspace in an empty list item input, the extension SHALL
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterFields.test.ts).
 - Criteria: In an empty first item the next input is focused, in the only item the Add item button.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-010](SwRS-MDOKFSTUDIO-FMEDIT-010.md): List fields and link lists are edited item by item
+<!-- okf:links:end -->

@@ -12,7 +12,8 @@ description: When a writer presses a key in the text box of an open editor, the
   key the editor handled from reaching VS Code.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -131,3 +132,13 @@ When a writer presses a key in the text box of an open editor, the page SHALL gi
 - Method: test/page/modules/editorKeys.test.ts (handled keys stop at the document, keys no editor handled keep reaching VS Code); the same containment serves the table cell and the field editors
 - Method: test/page/modules/selectAllKey.test.ts (select-all in a text control stops at the document, other shortcuts do not); the same rule serves the table cell editor and the field editors
 - Criteria: wrapSelection returns no edit for a caret, other keys and invalid ranges; applyTextEdit calls the native insertText or delete command first; the selection range is set to 0 or to the length without trailing line breaks; setSelectionRange is called with the anchor kept and the direction set; stopPropagation is called for the undo and redo keys and no default is prevented; the autosave text equals the typed text plus the trailing newline; isHandledEditorKey is true only for Tab, Enter, Escape and the arrow keys inside an editor frame with defaultPrevented true; isTextSelectAll is true for textarea, text-like input and editable elements only
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-008](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-008.md): A writer types and moves between blocks with text editor keys
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When a previewScroll or previewReveal does not name the document,
   NOT move the editor.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,12 @@ When a previewScroll or previewReveal does not name the document, the revision a
 ### Archived
 
 Covered by SwRS-MDOKFSTUDIO-TRUST-065 and SwRS-MDOKFSTUDIO-TRUST-069 (a page message must name the render the host holds).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+<!-- okf:links:end -->

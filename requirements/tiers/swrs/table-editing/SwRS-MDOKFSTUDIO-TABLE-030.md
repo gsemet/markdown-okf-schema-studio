@@ -8,7 +8,8 @@ description: When a cell editor holds typed text and the writer follows a link
   final save, flagged as a flush, before the navigation message.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When a cell editor holds typed text and the writer follows a link to another fil
 
 - Method: Unit tests CR 025: following a link right after typing posts the final save before the link and CR 025: Back right after typing posts the final save before previewHistoryGo in test/page/runtimeEditorFlush.test.ts (the tests drive a block editor; the cell path is the same function, flushOpenEditors, and CR 025: a host flush request saves the typed text of an open table cell covers the cell branch); real-window scenario scenarioFlushCellAndFrontmatter in test/integration/realInput/flushBeforeNavigate.ts.
 - Criteria: The flushed save precedes the navigation message. The anchor-in-page boundary is tested for a block editor only.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+<!-- okf:links:end -->

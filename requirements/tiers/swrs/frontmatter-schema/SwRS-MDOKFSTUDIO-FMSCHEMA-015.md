@@ -8,7 +8,8 @@ description: When a writer collapses or expands the Description column, the
   most recent documents and restore it after a refresh.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a writer collapses or expands the Description column, the extension SHALL r
 
 - Method: Unit test of the bounded map and the workspace choices; integration test.
 - Criteria: The map holds 200 entries (MAX_DOCUMENT_STATES), most recently used last, persisted under one workspace key.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-014](SwRS-MDOKFSTUDIO-FMSCHEMA-014.md): The Description column collapses and the choice is kept per document
+<!-- okf:links:end -->

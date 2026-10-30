@@ -10,7 +10,8 @@ description: When a reader follows links and anchors in the preview, the Studio
   navigates.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -50,3 +51,21 @@ As a reader, I follow a link to another document or a heading, and come back to 
 - A link to a place of the same page keeps the editor open.
 - An editor with nothing typed is closed without a save.
 - The page half (the final save before the move) is specified in the block-editing and table-editing scopes (SwRS-MDOKFSTUDIO-BLOCK-205).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-205](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-205.md): Open editors are saved before the page hides or leaves the document
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-054](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-054.md): Back and Next follow the host's history state
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-056](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-056.md): A history state of another render is ignored
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-058](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-058.md): The host accepts only back or forward
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-059](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-059.md): Followed links and anchor jumps are recorded per panel and replayed at their line
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-065](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-065.md): The history keeps the last 50 places without duplicates
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-070](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-070.md): Back and Next save an open editor first
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-071](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-071.md): A link to another file saves an open editor first
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-072](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-072.md): An anchor of the same page keeps the editor open
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+<!-- okf:links:end -->

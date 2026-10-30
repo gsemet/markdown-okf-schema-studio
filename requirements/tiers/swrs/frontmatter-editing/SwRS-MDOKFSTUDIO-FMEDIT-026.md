@@ -8,7 +8,8 @@ description: When a writer commits a key name that is empty or has leading or
   leading or trailing spaces." in the editor and post nothing.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a writer commits a key name that is empty or has leading or trailing spaces
 
 - Method: Unit test on the page runtime (test/page/runtimeEditorFlush.test.ts).
 - Criteria: A flush trims the key and an empty key keeps the old one instead, see the flush requirements.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-024](SwRS-MDOKFSTUDIO-FMEDIT-024.md): A click on a field name renames the key
+<!-- okf:links:end -->

@@ -12,7 +12,8 @@ description: When `markdownOkfSchemaStudio.frontmatter.bundleRoot` or
   whether a document-relative link may leave every workspace folder.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -90,3 +91,18 @@ When `markdownOkfSchemaStudio.frontmatter.bundleRoot` or `markdownOkfSchemaStudi
 
 - Method: test/core/configuration/frontmatterConfiguration.test.ts (accepted values and defaults of the settings, unusable root), test/core/frontmatter/okfFrontmatter.test.ts (configured bundle root, bundle root that does not exist), test/core/frontmatter/fileLinks.test.ts (configured project root, project root that does not exist, setting off, inside the workspace, setting on, other resolutions).
 - Criteria: Default empty string for the two roots and false for the boolean; the value of a root is trimmed; an absolute path is used as it is; any non-folder value is treated as unavailable. Navigation with allowOutsideWorkspaceLinks on is not tested end to end (untested).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the document, bundle or project root and stay inside it
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-061](SwRS-MDOKFSTUDIO-FMSCHEMA-061.md): The projectRoot setting sets the project root
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-062](SwRS-MDOKFSTUDIO-FMSCHEMA-062.md): The allowOutsideWorkspaceLinks setting default refuses outside links
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-081](SwRS-MDOKFSTUDIO-FMSCHEMA-081.md): The allowOutsideWorkspaceLinks setting set to true allows outside links
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When a top-level paragraph holds only one image and no text, the
   extension SHALL mark it with data-sphinx-preview-figure in every width mode.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -55,3 +56,14 @@ When a top-level paragraph holds only one image and no text, the extension SHALL
 
 - Method: Unit test T10b a paragraph holding only an image is marked as a figure in every width mode; the text case is verified by inspection of widthMode.ts.
 - Criteria: The attribute is present exactly on image-only top-level paragraphs.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-022](SwRS-MDOKFSTUDIO-LAYOUT-022.md): Margin keeps blocks in the column and Full removes the limit
+<!-- okf:links:end -->

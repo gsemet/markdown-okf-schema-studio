@@ -10,7 +10,8 @@ description: When the source of a block editor reaches the page after another
   source.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -60,3 +61,12 @@ When the source of a block editor reaches the page after another text field outs
 - Method: test/integration/realInput/findAfterClick.ts, a real-window scenario (CR 188): in edit mode the click on a block, Cmd/Ctrl+F and the query are issued back to back without waiting for the editor. The host answers an open within milliseconds, usually before the key, so the scenario holds the block source back with a test hook (`holdEditSourcesForTests`) until the whole query is in the find field, then lets it through: the editor is built and stays open with its own text, the find field keeps the query and the focus, the match count shows, and the Markdown buffer and the file on disk are unchanged.
 - Method: test/session/heldEditSource.test.ts: the held source reaches the page only when released, unchanged.
 - Method: test/page/runtimeBlockEditor.test.ts, `CR 188: ...`: the same sequence over the page script, typing into whichever field holds the focus.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+<!-- okf:links:end -->

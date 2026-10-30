@@ -8,7 +8,8 @@ description: "When a block edit (open, autosave or Done) names a range whose fir
   the document disagree about the block's lines, open no editor and change nothing."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -72,3 +73,17 @@ When a block edit (open, autosave or Done) names a range whose first line is bla
 
 - Method: test/core/mapping/blockRange.test.ts (`checkBlockLines`) and test/session/blockRangeGuard.test.ts (open and save through the real preview manager, and every mapped block of a document with all block kinds, with the ranges of the renderer).
 - Criteria: a range starting on a blank line is answered with the reason above, posts no original text and leaves the document unchanged; every renderer range of the kind document is accepted.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-094](SwRS-MDOKFSTUDIO-BLOCK-094.md): The host inserts a new block with clean blank lines
+  - [SwRS-MDOKFSTUDIO-BLOCK-124](SwRS-MDOKFSTUDIO-BLOCK-124.md): Moves and clipboard edits are refused for ranges that do not match the document
+  - [SwRS-MDOKFSTUDIO-BLOCK-216](SwRS-MDOKFSTUDIO-BLOCK-216.md): A refused open or save keeps the typed text and says why
+<!-- okf:links:end -->

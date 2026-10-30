@@ -10,7 +10,8 @@ description: When the host serves an include file, or refuses one that does not
   again.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -114,3 +115,21 @@ When the host serves an include file, or refuses one that does not exist inside 
 - Method: test/session/diagReq.plantuml.requirements.test.ts (`the include watch is emptied when the preview follows another document`: document switch row).
 - Method: test/session/diagReq.plantuml.requirements.test.ts (`an include request is refused for the Java engine and for a file id the host never issued`: refusal scenario).
 - Criteria: Only served and allowed-missing paths are watched; watched changes notify the page once the editor is closed; only diagrams that read files are redrawn; size never exceeds 1024; no stale watch survives a switch.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-045](SwRS-MDOKFSTUDIO-DIAG-045.md): A changed included file redraws the diagrams that read files
+  - [SwRS-MDOKFSTUDIO-DIAG-065](SwRS-MDOKFSTUDIO-DIAG-065.md): A changed include file tells the page
+  - [SwRS-MDOKFSTUDIO-DIAG-066](SwRS-MDOKFSTUDIO-DIAG-066.md): The include watch holds at most 1024 files
+  - [SwRS-MDOKFSTUDIO-DIAG-067](SwRS-MDOKFSTUDIO-DIAG-067.md): The include watch is cleared when the preview follows another document
+<!-- okf:links:end -->

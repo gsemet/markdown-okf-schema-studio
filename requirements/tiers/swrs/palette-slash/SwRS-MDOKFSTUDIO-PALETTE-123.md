@@ -9,7 +9,8 @@ description: When the writer presses Checkbox, the extension SHALL add [ ] after
   item.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -58,3 +59,12 @@ When the writer presses Checkbox, the extension SHALL add [ ] after the list mar
 - Method: test/page/modules/editActions.test.ts (T25: checkbox puts - [ ] on a plain line and [ ] after the marker of a list item; checkbox toggles a checkbox line off, checked or not, and leaves the list item; checkbox keeps the caret on its text; checkbox on several lines is one action: all checkboxes lose it, else all lines get one; checkbox on an empty line inserts the box with the caret after it; checkbox is its own inverse on a list item; scenarios add, remove, several lines)
 - Method: test/page/runtimeEditPalette.test.ts (T25: Checkbox and HTML table edit the text box as one undo step each; scenario several lines, undo row)
 - Criteria: The clickable rendering of the box belongs to the GFM requirements.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

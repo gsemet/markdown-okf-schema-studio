@@ -8,7 +8,8 @@ description: "When a toctree entry's document cannot be found, the extension SHA
   name and add no warning to the status region or Problems view."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a toctree entry's document cannot be found, the extension SHALL show its te
 
 - Method: Unit test "a missing target is shown with the warning style and no link" in test/core/render/gridToctree.test.ts
 - Criteria: No diagnostic either way.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-012](../../strs/myst/StRS-MDOKFSTUDIO-MYST-012.md): A toctree shows the linked documents and marks missing ones
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-057](SwRS-MDOKFSTUDIO-MYST-057.md): Toctree lists linked documents and marks missing ones
+<!-- okf:links:end -->

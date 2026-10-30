@@ -8,7 +8,8 @@ description: "When a PlantUML process exits before reading its input or its stan
   a normal message without raising an uncaught exception in the extension host."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a PlantUML process exits before reading its input or its standard input rep
 
 - Method: Unit tests: a child that exits before reading stdin does not raise an uncaught exception; a stdin error settles the render with a diagnostic.
 - Criteria: No uncaught exception and a diagnostic.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-097](SwRS-MDOKFSTUDIO-DIAG-097.md): A JAR render is bounded in input, output, time, process lifetime and concurrency
+<!-- okf:links:end -->

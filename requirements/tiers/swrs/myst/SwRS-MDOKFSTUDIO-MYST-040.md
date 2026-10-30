@@ -7,7 +7,8 @@ description: When the rename field is open, the extension SHALL close it on
   Escape or on a pointer press outside the popover and the icon.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the rename field is open, the extension SHALL close it on Escape or on a po
 
 - Method: Unit test "Enter posts one rename with the label line; Escape cancels" in test/page/modules/labelRename.test.ts
 - Criteria: No message is posted either way.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-038](SwRS-MDOKFSTUDIO-MYST-038.md): The anchor icon opens a rename field that sends valid names
+<!-- okf:links:end -->

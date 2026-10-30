@@ -9,7 +9,8 @@ description: "When the zoom is set, the extension SHALL set the content font siz
   the page again."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -81,3 +82,12 @@ When the zoom is set, the extension SHALL set the content font size to the base 
 - Method: test/visual/scenarioDefinitions2.ts, visual scenarios theme-zoom/v09, v10 and v11 (zoomAssertions in test/visual/scenarioAssertions.ts: font size, wide pane, narrow pane). The unchanged toolbar size is not asserted.
 - Method: test/core/preview/contentPatch.test.ts, unit test `T08: two renders with different zoom have the same shell key and the same context key` (shell keys and canPatch for the two-zooms scenario, the context keys for the second).
 - Criteria: The computed paragraph size equals the base size times the zoom. The measured column equals the smaller of the pane and the zoomed maximum width, within 40 px. shellKey and runtimeContextKey are equal for the two zooms and canPatch is true.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-011](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-011.md): A reader zooms the text and the column and keeps the zoom
+<!-- okf:links:end -->

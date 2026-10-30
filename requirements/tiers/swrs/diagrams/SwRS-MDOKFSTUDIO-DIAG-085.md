@@ -8,7 +8,8 @@ description: When useJar is true in a trusted workspace and jarPath is empty,
   command with the arguments -pipe and -tsvg.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When useJar is true in a trusted workspace and jarPath is empty, the extension S
 
 - Method: Unit test: uses the PATH executable when no JAR is configured and reports missing commands.
 - Criteria: The spawned command is plantuml.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-084](SwRS-MDOKFSTUDIO-DIAG-084.md): The JAR pipeline runs java or plantuml once per diagram on stdin
+<!-- okf:links:end -->

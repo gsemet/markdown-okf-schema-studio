@@ -7,7 +7,8 @@ description: When the host applies a frontmatter save, the extension SHALL apply
   it as one edit of the document so that one Undo reverts it.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the host applies a frontmatter save, the extension SHALL apply it as one ed
 
 - Method: Unit test a value save, an add, a rename and a remove are each one text edit of the document in test/host/fmtableReq.requirements.test.ts. Untested: the Undo step itself needs a real VS Code window.
 - Criteria: applyEdits receives a single-element list.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

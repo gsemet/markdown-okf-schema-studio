@@ -7,7 +7,8 @@ description: When `:widths:` is `auto`, `grid`, non numeric or does not match
   the column count, the extension SHALL ignore it and make no column group.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When `:widths:` is `auto`, `grid`, non numeric or does not match the column coun
 
 - Method: Unit test "CR038: list-table widths that do not match the columns or are not numbers are ignored" in test/core/render/mystFeatures.test.ts
 - Criteria: Valid widths are applied as percent.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-063](SwRS-MDOKFSTUDIO-MYST-063.md): Table directives render as ordinary tables
+<!-- okf:links:end -->

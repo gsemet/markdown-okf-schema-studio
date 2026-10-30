@@ -11,7 +11,8 @@ description: The extension SHALL contribute exactly the settings of its settings
   typed boot entry of the page, as its default.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -97,3 +98,14 @@ The extension SHALL contribute exactly the settings of its settings registry, wi
 - Method: test/page/bootContext.test.ts "the boot context reads a JSON object and falls back to an empty one for anything else" (a boot element that is not a JSON object).
 - Method: test/page/pageSettings.test.ts "page settings default to following both ways, and without selection marks" (boot context read).
 - Criteria: the configuration array equals the registry's categories; no two orders are equal and each group is ascending; each markdownDescription has at most 700 characters; the two JSON texts are equal; readSetting returns the schema default for an unset key; previewBootSettings returns only the settings that have a boot entry; readPreviewBootSettings applies the flag rule of each setting.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-021](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-021.md): The settings editor lists the Studio settings in clear groups
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+<!-- okf:links:end -->

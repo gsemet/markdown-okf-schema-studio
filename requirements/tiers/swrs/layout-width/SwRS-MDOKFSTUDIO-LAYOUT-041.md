@@ -7,7 +7,8 @@ description: When the reader changes the width mode, the extension SHALL measure
   the first-element clearance again.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the reader changes the width mode, the extension SHALL measure the first-el
 
 - Method: Unit test `a width mode change measures the first-element clearance again, even when nothing moved` in `test/page/diagReq.layout.requirements.test.ts`.
 - Criteria: The change callback calls the first-element clearance update.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-018](SwRS-MDOKFSTUDIO-LAYOUT-018.md): The clearance is measured again after layout events, in bounded bursts
+<!-- okf:links:end -->

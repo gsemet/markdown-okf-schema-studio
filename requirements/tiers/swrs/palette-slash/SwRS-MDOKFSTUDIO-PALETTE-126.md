@@ -9,7 +9,8 @@ description: When the writer presses Key, the extension SHALL wrap the selection
   nothing is selected.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -54,3 +55,12 @@ When the writer presses Key, the extension SHALL wrap the selection in a kbd ele
 - Method: test/page/modules/editActions.test.ts (T26: kbd wraps the selection, unwraps it, and inserts a sample on a caret; scenarios wrap and unwrap, sample)
 - Method: test/page/modules/editPalette.test.ts (T26: Details, Footnote, Mermaid and Key are one-click actions; scenario sample and table cell)
 - Criteria: Key works in a table cell too.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

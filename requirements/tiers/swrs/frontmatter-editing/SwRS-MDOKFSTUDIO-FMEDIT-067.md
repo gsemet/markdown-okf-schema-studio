@@ -9,7 +9,8 @@ description: When a navigation or a host flush request occurs while a field or
   checks.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -108,3 +109,22 @@ Other refusals (stale field, bad key, YAML that cannot be patched) still apply t
 - Method: test/core/edits/frontmatterEdit.test.ts (scenarios: the host writes a flush save as typed, a flush skips the type check).
 - Method: test/core/preview/flushWait.test.ts and inspection of postEditError (scenario: a refused flush warns that the typed text was dropped).
 - Criteria: the page is about to be replaced after a flush, so only a host warning is visible; the preview then shows the validation error of the written text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-068](SwRS-MDOKFSTUDIO-FMEDIT-068.md): A flush save is written without the type and schema check
+  - [SwRS-MDOKFSTUDIO-FMEDIT-069](SwRS-MDOKFSTUDIO-FMEDIT-069.md): A refused flush warns that the typed text was dropped
+  - [SwRS-MDOKFSTUDIO-FMEDIT-070](SwRS-MDOKFSTUDIO-FMEDIT-070.md): A normal frontmatter save carries no flush flag
+  - [SwRS-MDOKFSTUDIO-FMEDIT-071](SwRS-MDOKFSTUDIO-FMEDIT-071.md): A refused plain save is saved again as a flush before a navigation
+  - [SwRS-MDOKFSTUDIO-FMEDIT-085](SwRS-MDOKFSTUDIO-FMEDIT-085.md): Hiding or closing the page saves the open field editor as a flush
+<!-- okf:links:end -->

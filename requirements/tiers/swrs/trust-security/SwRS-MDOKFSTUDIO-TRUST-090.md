@@ -9,7 +9,8 @@ description: When the page sends a request to the host, the extension SHALL
   its timeout.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -175,3 +176,22 @@ When the page sends a request to the host, the extension SHALL answer it once wi
 - Method: test/integration/commentWrite.test.ts (previewCommentResult of reply to an unknown thread, delete of an unknown thread, create with an old version, read-only resolve and delete); the 15 second page timeout of the comment actions is untested
 - Method: test/core/protocol/hostToPage.test.ts (sample previewThreadReplyResult)
 - Criteria: the protocol validator rejects an edit id that is empty, longer than 100 characters or not a string (isHostRequest in src/core/protocol/pageToHost.ts); each request gets one answer that repeats its edit id with the request type followed by Result, or a failure result after its timeout; the 30 second and 10 second values are passed by the block editor and are not asserted by a test.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-052](SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+  - [SwRS-MDOKFSTUDIO-TRUST-065](SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-047](../diagrams/SwRS-MDOKFSTUDIO-DIAG-047.md): Include answers are matched by their edit id
+  - [SwRS-MDOKFSTUDIO-DIAG-052](../diagrams/SwRS-MDOKFSTUDIO-DIAG-052.md): The host answers an include request with the same edit id
+<!-- okf:links:end -->

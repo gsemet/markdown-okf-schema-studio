@@ -10,7 +10,8 @@ description: "When a writer edits the value of a text field, the extension SHALL
   line breaks."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -100,3 +101,20 @@ When a writer edits the value of a text field, the extension SHALL show a text b
 - Method: test/page/runtimeFrontmatterEditor.test.ts (Enter saves a one-line frontmatter text field, IME Enter, Shift+Enter and Alt+Enter post nothing; Enter in a multi-line value inserts a line and Cmd or Ctrl+Enter saves; trailing line breaks dropped and kept; schema-free values use a generic YAML editor with Enter inserting a line; empty string starts empty).
 - Method: test/core/frontmatter/okfFrontmatter.test.ts (a multi-line value on a plain field is written as a literal block; marker file test/core/frontmatter/okfFrontmatter.test.ts).
 - Criteria: Posted fieldValue compared in each case; the YAML text box has 1 to 20 rows.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-005](SwRS-MDOKFSTUDIO-FMEDIT-005.md): Trailing line breaks of a text value are dropped
+  - [SwRS-MDOKFSTUDIO-FMEDIT-006](SwRS-MDOKFSTUDIO-FMEDIT-006.md): A multi-line text value is written as a literal block
+  - [SwRS-MDOKFSTUDIO-FMEDIT-015](SwRS-MDOKFSTUDIO-FMEDIT-015.md): Fields without a schema type are edited as YAML text
+  - [SwRS-MDOKFSTUDIO-FMEDIT-075](SwRS-MDOKFSTUDIO-FMEDIT-075.md): Shift+Enter adds a line in a text field without saving
+  - [SwRS-MDOKFSTUDIO-FMEDIT-076](SwRS-MDOKFSTUDIO-FMEDIT-076.md): In a multi-line text value Enter adds a line and Cmd or Ctrl+Enter saves
+<!-- okf:links:end -->

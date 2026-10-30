@@ -10,9 +10,13 @@ description: When a writer or team sets the maximum width of the text column or
   the setting.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: approved
+req_lifecycle: approved
+status: stable
 approved_by: gaetan@xeberon.net
-approved_on: 2026-10-28
+approved_at: '2026-10-28T00:00:00Z'
+verified:
+  by: human:gaetan@xeberon.net
+  at: '2026-10-28T00:00:00Z'
 origin: native
 tier: StRS
 derives_from: []
@@ -87,3 +91,40 @@ As a writer or team, I choose how wide the text column is, from a narrow measure
 - Known issue: the code and docs/user/toolbar.md put the button on row 4, while the file header of the width mode module and an older bullet of the Unreleased change-log entry say row 2.
 - Known issue: the paths for %/em/rem figures, declared pixel widths, the Mermaid wrapper and the 1 px tolerance are not directly tested, and no visual scenario combines the open table-of-contents column with Auto.
 - Known issue: some visual scenario titles (`v05`, `v06` "full") do not match what they assert.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-DIAG-021](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-021.md): Diagrams can use the wider column in Auto width
+  - [SwRS-MDOKFSTUDIO-LAYOUT-002](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-002.md): The text column width follows the maxContentWidth setting
+  - [SwRS-MDOKFSTUDIO-LAYOUT-003](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-003.md): The maximum content width is rounded and capped at 2400
+  - [SwRS-MDOKFSTUDIO-LAYOUT-004](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-004.md): A width of zero lifts the column limit
+  - [SwRS-MDOKFSTUDIO-LAYOUT-005](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-005.md): Each rendered page carries the width rule
+  - [SwRS-MDOKFSTUDIO-LAYOUT-006](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-006.md): Open previews follow a change of the width setting
+  - [SwRS-MDOKFSTUDIO-LAYOUT-020](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-020.md): The Width button cycles Margin, Auto and Full and keeps the reading line
+  - [SwRS-MDOKFSTUDIO-LAYOUT-021](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-021.md): A width mode choice is saved for the workspace
+  - [SwRS-MDOKFSTUDIO-LAYOUT-022](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-022.md): Margin keeps blocks in the column and Full removes the limit
+  - [SwRS-MDOKFSTUDIO-LAYOUT-023](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-023.md): Auto width lets wide blocks break out of the column
+  - [SwRS-MDOKFSTUDIO-LAYOUT-024](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-024.md): Auto width excludes the open table-of-contents column
+  - [SwRS-MDOKFSTUDIO-LAYOUT-025](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-025.md): Auto measures a wide table uncapped and rounds up
+  - [SwRS-MDOKFSTUDIO-LAYOUT-026](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-026.md): Auto leaves edited and relatively sized elements in the column
+  - [SwRS-MDOKFSTUDIO-LAYOUT-027](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-027.md): Auto uses the author's pixel width for an image breakout
+  - [SwRS-MDOKFSTUDIO-LAYOUT-028](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-028.md): Full width removes the column limit
+  - [SwRS-MDOKFSTUDIO-LAYOUT-029](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-029.md): Narrow tables and figures are centred in every width mode
+  - [SwRS-MDOKFSTUDIO-LAYOUT-030](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-030.md): A paragraph holding only an image is marked as a figure
+  - [SwRS-MDOKFSTUDIO-LAYOUT-031](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-031.md): Auto measures wide elements again when the layout changes
+  - [SwRS-MDOKFSTUDIO-LAYOUT-036](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-036.md): A negative or non-numeric width falls back to 960
+  - [SwRS-MDOKFSTUDIO-LAYOUT-038](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-038.md): The saved width mode is restored when the page starts
+  - [SwRS-MDOKFSTUDIO-LAYOUT-039](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-039.md): Full width centres the content with gutters of at least 15 px
+  - [SwRS-MDOKFSTUDIO-LAYOUT-040](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-040.md): A width mode change keeps the reading line
+  - [SwRS-MDOKFSTUDIO-LAYOUT-041](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-041.md): A width mode change measures the first-element clearance again
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+- Supersedes:
+  - [StRS-MDOKFSTUDIO-LAYOUT-006](StRS-MDOKFSTUDIO-LAYOUT-006.md): One button switches the width mode
+  - [StRS-MDOKFSTUDIO-LAYOUT-007](StRS-MDOKFSTUDIO-LAYOUT-007.md): Auto width lets wide content break out of the column
+  - [StRS-MDOKFSTUDIO-LAYOUT-008](StRS-MDOKFSTUDIO-LAYOUT-008.md): Margin and Full width modes frame the content predictably
+<!-- okf:links:end -->

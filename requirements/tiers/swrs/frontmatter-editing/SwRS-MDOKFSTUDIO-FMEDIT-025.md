@@ -8,7 +8,8 @@ description: When a writer presses Enter in the key editor or leaves it with a
   and keeps the comments.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,15 @@ When a writer presses Enter in the key editor or leaves it with a changed name, 
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterEditor.test.ts) and test/core/frontmatter/frontmatterPreservation.test.ts.
 - Criteria: Tests Escape cancels an unsaved frontmatter key edit; structural F2 rename title to heading keeps the trailing comment.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-024](SwRS-MDOKFSTUDIO-FMEDIT-024.md): A click on a field name renames the key
+<!-- okf:links:end -->

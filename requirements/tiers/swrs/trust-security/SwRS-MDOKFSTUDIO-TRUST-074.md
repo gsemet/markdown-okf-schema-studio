@@ -9,7 +9,8 @@ description: The package SHALL declare images/logo.png, a PNG of 256 by 256
   maps, internal docs, agent files and pyproject.toml out of the VSIX.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,16 @@ The package SHALL declare images/logo.png, a PNG of 256 by 256 pixels, as its ex
 
 - Method: Unit test test/security/package-contract.test.ts (extension icon is a 256 pixel PNG and the Sphinx favicon matches the shared logo; the built-in PlantUML engine ships pinned and the JAR is an explicit opt-in setting) covers the icon key, the icon file, the .vscodeignore lines and the bundle entry point of esbuild.mjs. The same tests also compare the favicon file of the Sphinx fixtures with images/logo.svg; that is not product behaviour and is not specified. The other bundles (preview.js, preview.css, KaTeX, Mermaid) are not asserted.
 - Criteria: The icon key equals images/logo.png and the width and height fields of the PNG header are both 256. Without the bundle the preview page loads no runtime from the VSIX; the bundle entry and the licence copy are present in the build script (esbuild.mjs); no test asserts the licence copy.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-012](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-012.md): Visible text and the icon speak of the product
+  - [StRS-MDOKFSTUDIO-TRUST-014](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-014.md): The extension is built from pinned dependencies and ships what it loads
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-080](../diagrams/SwRS-MDOKFSTUDIO-DIAG-080.md): The built-in engine bundle and licence are packaged
+<!-- okf:links:end -->

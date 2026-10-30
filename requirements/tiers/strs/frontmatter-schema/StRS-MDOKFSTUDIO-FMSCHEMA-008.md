@@ -8,7 +8,8 @@ description: When a schema file cannot be read, parsed or compiled, the Studio
   message that names the problem.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,12 @@ As a schema author, I see immediately that my schema is broken and why, instead 
 
 - A JSON or JSON5 schema that cannot be read or parsed gives the generic table with the warning row "Schema could not be parsed: {error}". An empty or comment-only YAML schema file has no content yet: the type stays without schema, the table is generic and one informational row reads "schema file '{name}' is empty". Known issue: a YAML syntax error is not reported (the partly parsed schema is applied silently).
 - A schema that cannot be compiled shows a red row "Schema validation failed to run: {diagnostic}" spanning every visible column, counted as one error in the badge; the fields stay listed in schema order with their documentation.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+<!-- okf:links:end -->

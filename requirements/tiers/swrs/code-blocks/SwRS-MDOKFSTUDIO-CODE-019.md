@@ -10,7 +10,8 @@ description: When the reader clicks the copy button, the extension SHALL put the
   reason instead when it refuses, and keep the focus and the editors untouched.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -89,3 +90,18 @@ When the reader clicks the copy button, the extension SHALL put the block's code
 - Method: test/page/modules/codeCopy.test.ts (posted text, diff markers, Copied label and icon after the host answer, refusal reason, answer of an older click ignored, fake timers, second click, mousedown default-prevented and click not propagated, focus kept)
 - Method: test/session/renderReq.codeCopy.requirements.test.ts (host clipboard write of the posted text and its answer)
 - Criteria: clipboard text equals the source code plus one trailing newline; label and icon change when the host answers (ok: Copied; refused: its reason) and reset 1500 ms (3000 ms for a refusal) later; nothing changes before the answer; mousedown is default-prevented; click does not propagate
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-CODE-026](SwRS-MDOKFSTUDIO-CODE-026.md): An invalid or oversized copy request is refused
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CODE-020](SwRS-MDOKFSTUDIO-CODE-020.md): Confirm a copy with a Copied state for 1.5 seconds
+  - [SwRS-MDOKFSTUDIO-CODE-021](SwRS-MDOKFSTUDIO-CODE-021.md): Keep focus and editors untouched by the copy button
+<!-- okf:links:end -->

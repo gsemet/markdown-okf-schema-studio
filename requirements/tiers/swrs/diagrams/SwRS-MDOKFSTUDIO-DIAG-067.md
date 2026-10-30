@@ -7,7 +7,8 @@ description: When the preview follows another document, the host SHALL forget
   all remembered include files.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the preview follows another document, the host SHALL forget all remembered 
 
 - Method: Unit test `the include watch is emptied when the preview follows another document` in `test/session/diagReq.plantuml.requirements.test.ts`.
 - Criteria: No stale watch survives a switch.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-053](SwRS-MDOKFSTUDIO-DIAG-053.md): Served include files are watched and redraw their diagrams
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When the JAR pipeline cannot draw a PlantUML diagram, the extension
   document path in addition to the message on the diagram.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -111,3 +112,21 @@ When the JAR pipeline cannot draw a PlantUML diagram, the extension SHALL show o
 - Method: test/session/diagReq.plantuml.requirements.test.ts `each failing JAR diagram is also a plantuml-render warning with the document path` (warning per failure, no warning on success).
 - Method: test/visual/scenarioDefinitions1.ts, visual scenarios diagrams v06 and v07 (missing command on the PATH, absolute executable path).
 - Criteria: Exact message and state, no process for a refused path or a disabled workspace, one message per diagram, and one warning per failure.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-090](SwRS-MDOKFSTUDIO-DIAG-090.md): A jarPath that is a directory is reported
+  - [SwRS-MDOKFSTUDIO-DIAG-091](SwRS-MDOKFSTUDIO-DIAG-091.md): Restricted Mode disables JAR rendering
+  - [SwRS-MDOKFSTUDIO-DIAG-092](SwRS-MDOKFSTUDIO-DIAG-092.md): A missing plantuml command is reported
+  - [SwRS-MDOKFSTUDIO-DIAG-093](SwRS-MDOKFSTUDIO-DIAG-093.md): A missing Java is reported like a missing command
+  - [SwRS-MDOKFSTUDIO-DIAG-094](SwRS-MDOKFSTUDIO-DIAG-094.md): A failing PlantUML process shows its exit and error output
+  - [SwRS-MDOKFSTUDIO-DIAG-095](SwRS-MDOKFSTUDIO-DIAG-095.md): Output without an SVG is reported
+  - [SwRS-MDOKFSTUDIO-DIAG-096](SwRS-MDOKFSTUDIO-DIAG-096.md): A process that cannot be spawned is reported
+  - [SwRS-MDOKFSTUDIO-DIAG-107](SwRS-MDOKFSTUDIO-DIAG-107.md): Each JAR failure is also a status-line warning
+<!-- okf:links:end -->

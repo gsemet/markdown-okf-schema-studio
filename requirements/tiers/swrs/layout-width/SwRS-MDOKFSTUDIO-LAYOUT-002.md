@@ -11,7 +11,8 @@ description: When a preview page is built or the setting
   with no cap when the value is 0.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -111,3 +112,18 @@ When a preview page is built or the setting markdownOkfSchemaStudio.preview.maxC
 - Method: test/session/previewRuntimeFile.test.ts (configured width in the page style): the full-page test PERF-11 (a page built with maxContentWidth 720 carries 720 in its inline style, which holds the width rule only); the call site passes preview.configuration.maxContentWidth.
 - Method: test/session/diagReq.settings.requirements.test.ts (open preview follows a change, no last good render): the unit test `a preview setting change reads the width again and updates the preview from its last good render`.
 - Criteria: The column box measures the cap in a wider pane and never exceeds the pane; the normalised value is an integer between 0 and 2400, or 960 for every negative, non-numeric or non-finite input; the generated rule is none for 0 and a pixel value otherwise; the page style contains exactly one width rule; the settings handler re-reads the section and calls the preview update with the last good render, only when one exists.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-003](SwRS-MDOKFSTUDIO-LAYOUT-003.md): The maximum content width is rounded and capped at 2400
+  - [SwRS-MDOKFSTUDIO-LAYOUT-004](SwRS-MDOKFSTUDIO-LAYOUT-004.md): A width of zero lifts the column limit
+  - [SwRS-MDOKFSTUDIO-LAYOUT-005](SwRS-MDOKFSTUDIO-LAYOUT-005.md): Each rendered page carries the width rule
+  - [SwRS-MDOKFSTUDIO-LAYOUT-006](SwRS-MDOKFSTUDIO-LAYOUT-006.md): Open previews follow a change of the width setting
+  - [SwRS-MDOKFSTUDIO-LAYOUT-036](SwRS-MDOKFSTUDIO-LAYOUT-036.md): A negative or non-numeric width falls back to 960
+<!-- okf:links:end -->

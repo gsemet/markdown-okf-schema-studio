@@ -8,7 +8,8 @@ description: When the reader closes the banner, the extension SHALL remove it at
   document until VS Code restarts, handing it back on reload.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the reader closes the banner, the extension SHALL remove it at once without
 
 - Method: Unit test "CR 050: closing removes the banner, tells the host the key and keeps it closed until the set changes" in test/page/modules/warningBanner.test.ts
 - Criteria: A second preview of the file shares the dismissal.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-081](SwRS-MDOKFSTUDIO-MYST-081.md): A closable banner announces conf.py warnings
+<!-- okf:links:end -->

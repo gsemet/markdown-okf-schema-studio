@@ -9,7 +9,8 @@ description: When the extension reads a saved panel state, it SHALL keep the
   and descriptionsCollapsed only as a boolean, and drop any other value.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,12 @@ When the extension reads a saved panel state, it SHALL keep the focused block id
 ### Archived
 
 Folded into SwRS-MDOKFSTUDIO-LIFE-135.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+<!-- okf:links:end -->

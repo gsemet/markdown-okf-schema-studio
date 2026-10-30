@@ -7,7 +7,8 @@ description: When a writer selects or moves blocks, the extension SHALL exclude
   the properties table from the selection and from the move.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a writer selects or moves blocks, the extension SHALL exclude the propertie
 
 - Method: Unit test on the page runtime (test/page/runtimeBlockSelection.test.ts).
 - Criteria: Test T39 the properties table is never selected.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-148](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-148.md): A block selection survives saves and is cleared by patches
+<!-- okf:links:end -->

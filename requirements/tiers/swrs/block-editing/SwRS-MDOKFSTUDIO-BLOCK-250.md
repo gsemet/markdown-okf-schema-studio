@@ -7,7 +7,8 @@ description: When a trace event is recorded with a stack, callers SHALL name the
   nearest named functions of that stack, innermost first, joined by " < ".
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When a trace event is recorded with a stack, callers SHALL name the nearest name
 
 - Method: Unit test `CR 041: callers names the nearest named functions of a stack` in test/page/modules/editorTrace.test.ts.
 - Criteria: At most three names are returned.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-026](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-026.md): Diagnose an editor that closed by itself
+<!-- okf:links:end -->

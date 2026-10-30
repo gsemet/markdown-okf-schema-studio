@@ -9,7 +9,8 @@ description: When a document holds CommonMark content, the extension SHALL
   matching HTML elements.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a document holds CommonMark content, the extension SHALL render headings h1
 
 - Method: Unit test "the in-process renderer preserves the active-file MyST feature contract" in test/core/render/mystFeatures.test.ts
 - Criteria: The rendered HTML holds one matching element per CommonMark construct.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-001](SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer completely, in process
+<!-- okf:links:end -->

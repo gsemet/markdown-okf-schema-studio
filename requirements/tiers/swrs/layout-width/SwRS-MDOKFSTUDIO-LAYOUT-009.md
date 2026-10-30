@@ -8,7 +8,8 @@ description: When the first block of a document is open in its block editor, the
   below the top of the pane.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the first block of a document is open in its block editor, the extension SH
 
 - Method: Unit test of the first-block editor margin rule and the first-element gap visual checks of the frame (v10 to v20, v24 to v29, v50).
 - Criteria: The frame record measures 40 px within 4 px from the top in the visual checks.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-007](SwRS-MDOKFSTUDIO-LAYOUT-007.md): The first element starts 40 px below the top
+<!-- okf:links:end -->

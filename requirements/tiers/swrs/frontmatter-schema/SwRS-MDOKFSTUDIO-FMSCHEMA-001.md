@@ -11,7 +11,8 @@ description: "When a document starts with a `---` line, the extension SHALL take
   below the table or the error row in both cases."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -111,3 +112,19 @@ When a document starts with a `---` line, the extension SHALL take the lines up 
 - Method: `test/visual/scenarioDefinitions2.ts` (invalid YAML: row text, badge of 1 and heading rendered below; table off). The row text and the badge of 1 are asserted by the visual scenario only.
 - Criteria: The closing fence is recognised only alone on its line (trailing spaces and tabs allowed); a value ending in `...` or `---` never closes the block; the block length and the line ending are detected from the opening fence and a CRLF closing line is accepted in both forms; no closing fence gives present = false and no table.
 - Criteria: The error row has role alert and spans every column; the summary is 1 error, 0 warnings, 0 infos; the frontmatter block is left out of the body whether or not it parses.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-002](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-002.md): Invalid frontmatter is explained and the body still renders
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-002](SwRS-MDOKFSTUDIO-FMSCHEMA-002.md): A document without a closing fence has no frontmatter
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-003](SwRS-MDOKFSTUDIO-FMSCHEMA-003.md): Frontmatter fences accept Windows line endings
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-017](SwRS-MDOKFSTUDIO-FMSCHEMA-017.md): Invalid YAML gives one error row and an error badge
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-018](SwRS-MDOKFSTUDIO-FMSCHEMA-018.md): Frontmatter that is not a mapping gives an error row
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-076](SwRS-MDOKFSTUDIO-FMSCHEMA-076.md): Invalid YAML does not stop the body from rendering
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a document holds wide content, long words or long URLs, the
   width mode, theme and pane width.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -67,3 +68,14 @@ When a document holds wide content, long words or long URLs, the extension SHALL
 - Method: test/core/preview/previewStyles.test.ts (narrow table and long words): unit test K1, long words and bare URLs wrap inside text blocks, links and table cells.
 - Method: test/page/geometryChecks.test.ts (machine geometry checks): four ids, not applicable without a DOM, identifier-split cases, nested text node counted once.
 - Criteria: Horizontal overflow of the page is at most 1 px in every scenario, the wrapping rule covers the text blocks, links and table cells, and the geometry check ids and order are exact with every check passing when it is not applicable.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-001](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-001.md): The preview never scrolls sideways and wide content scrolls in its box
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-035](SwRS-MDOKFSTUDIO-LAYOUT-035.md): Machine geometry checks report four layout defects
+<!-- okf:links:end -->

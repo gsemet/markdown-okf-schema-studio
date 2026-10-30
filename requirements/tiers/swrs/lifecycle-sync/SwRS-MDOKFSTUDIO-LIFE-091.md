@@ -8,7 +8,8 @@ description: When a block holds a link, the page SHALL give it the same key on
   itself.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,12 @@ When a block holds a link, the page SHALL give it the same key on the first load
 ### Archived
 
 Folded into SwRS-MDOKFSTUDIO-LIFE-088.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+<!-- okf:links:end -->

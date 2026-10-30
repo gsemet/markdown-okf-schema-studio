@@ -9,7 +9,8 @@ description: When the writer presses Footnote, the extension SHALL add `[^n]`
   than the highest numeric label in use.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,12 @@ When the writer presses Footnote, the extension SHALL add `[^n]` after the selec
 
 - Method: test/page/modules/editActions.test.ts (T26: footnote takes the next free number and writes the definition at the end; footnote with named labels counts only numbers and inserts after a selection; scenarios next number, named labels)
 - Criteria: Trailing blanks of the text are kept after the definition.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

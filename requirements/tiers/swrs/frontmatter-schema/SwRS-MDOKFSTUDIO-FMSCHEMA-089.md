@@ -7,7 +7,8 @@ description: When the frontmatter violates the schema in several places, the
   extension SHALL report every violation, not only the first.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the frontmatter violates the schema in several places, the extension SHALL 
 
 - Method: Unit test of the analysis (probed against the analysis; moved from SwRS-MDOKFSTUDIO-FMSCHEMA-084).
 - Criteria: The validator collects all errors, so each violation gets its own row or underline.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-084](SwRS-MDOKFSTUDIO-FMSCHEMA-084.md): Every schema violation is reported on its field or in a row of its own
+<!-- okf:links:end -->

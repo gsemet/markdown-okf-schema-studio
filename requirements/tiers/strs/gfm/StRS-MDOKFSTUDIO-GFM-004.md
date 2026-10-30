@@ -8,7 +8,8 @@ description: When a document uses collapsible details, keyboard keys, HTML
   HTML and unsafe colours.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -35,3 +36,12 @@ As a writer, I use the raw HTML that GitHub documents rely on and nothing unsafe
 ### Rationale and constraints
 
 - Scripts, styles, frames and other active content are removed; only hex and rgb colours are kept on coloured text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-GFM-002](StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+<!-- okf:links:end -->

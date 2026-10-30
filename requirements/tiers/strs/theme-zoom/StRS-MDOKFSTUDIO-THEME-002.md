@@ -9,7 +9,8 @@ description: When the reader presses the Theme button, the Studio SHALL switch
   colours of that mode.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -60,3 +61,21 @@ As a reader, I click one Theme button to go through Current, Dark, White and Cre
 - Every page colour comes from one named list that the host can map to its own palette; each colour has a name that matches the host's own colour name, so the mapping is mechanical; SwRS-MDOKFSTUDIO-THEME-034 gives the names.
 - The forced modes set their colours directly and never read the host's.
 - A colour the host does not set leaves the fallback written in each rule in force.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-CORE-028](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and inline code are typeset readably
+  - [SwRS-MDOKFSTUDIO-CORE-050](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-050.md): Soft appearance and colour transitions honour reduced motion
+  - [SwRS-MDOKFSTUDIO-THEME-001](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-001.md): The Theme button cycles Current, Dark, White and Cream
+  - [SwRS-MDOKFSTUDIO-THEME-016](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-016.md): Current mode follows the VS Code theme and redraws on change
+  - [SwRS-MDOKFSTUDIO-THEME-018](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-018.md): A high-contrast VS Code theme is followed like any other
+  - [SwRS-MDOKFSTUDIO-THEME-024](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-024.md): A theme switch starts no colour transition under reduced motion
+  - [SwRS-MDOKFSTUDIO-THEME-025](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-025.md): Dark, White and Cream paint the whole page the same on any VS Code theme
+  - [SwRS-MDOKFSTUDIO-THEME-031](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-031.md): Cream text meets a 4.5 to 1 contrast and keeps the body colour after an admonition
+  - [SwRS-MDOKFSTUDIO-THEME-034](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-034.md): Page colours go through one token map of VS Code variables
+  - [SwRS-MDOKFSTUDIO-THEME-056](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-056.md): The toolbar takes the forced mode colours
+<!-- okf:links:end -->

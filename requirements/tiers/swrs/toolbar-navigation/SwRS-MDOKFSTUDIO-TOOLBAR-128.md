@@ -10,7 +10,8 @@ description: "When the setting markdownOkfSchemaStudio.preview.markEditorSelecti
   the editor."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -108,3 +109,14 @@ When the setting markdownOkfSchemaStudio.preview.markEditorSelection is true (of
 - Method: visual scenarios in test/visual/scenarioDefinitions2.ts, toolbar-navigation/v37-mark-containing-block-light-900 and v38-mark-containing-block-dark-900 (a selection line inside a long code block marks that block and not the paragraph below it)
 - Method: test/core/preview/toolbarReq.requirements.test.ts (forced-colors outline: in forced-colors mode the marked block is outlined in the highlight colour; it checks the stylesheet text, not a rendered forced-colors page)
 - Criteria: bootFlag(false): value === true; selectionLine = editor selection line + 1; one element carries aria-current location; scrollY unchanged when scrollPreviewWithEditor is false; outline: 2px solid with offset 2px, and 2px solid Highlight in @media (forced-colors: active).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-013](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-013.md): The reader decides how the panes scroll together and sees the cursor block
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

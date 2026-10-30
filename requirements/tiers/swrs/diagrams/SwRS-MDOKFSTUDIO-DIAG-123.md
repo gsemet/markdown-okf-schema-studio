@@ -10,7 +10,8 @@ description: When the page draws a Vega-Lite or Vega chart, it SHALL replace the
   chart when the specification is invalid.
 project: MDOKFSTUDIO
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,12 @@ When the page draws a Vega-Lite or Vega chart, it SHALL replace the specificatio
 - Method: test/page/chartCsp.test.ts (the pictures, the error in place and a theme change in a real page)
 - Method: test/page/modules/chartError.test.ts (one error with one details, plain text, the styles)
 - Criteria: Each chart is one SVG image in the colours of the page, drawn again on a theme change only, and an invalid chart shows its reason in place.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+<!-- okf:links:end -->

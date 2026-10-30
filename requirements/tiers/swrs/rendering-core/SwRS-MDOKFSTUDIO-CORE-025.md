@@ -10,7 +10,8 @@ description: When a render fails with an exception or yields diagnostics, the
   exists.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -62,3 +63,14 @@ When a render fails with an exception or yields diagnostics, the extension SHALL
 - Method: test/page/runtimeContentPatch.test.ts, test "T34: the patch rebuilds the status region from plain text" (diagnostics listed with file, line, message and severity; no diagnostics)
 - Method: test/node-services/build/buildQueue.test.ts, test "retains a successful result as stale after a failed newer build" (failure after a good render)
 - Criteria: Each listed item shows file, line, message and severity; a failed render never blanks a good page; with none it shows an error page. The failure of the first render is not asserted by a named test (untested).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-024](SwRS-MDOKFSTUDIO-CORE-024.md): List diagnostics with file, line and severity
+<!-- okf:links:end -->

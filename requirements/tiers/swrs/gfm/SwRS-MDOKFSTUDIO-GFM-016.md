@@ -10,7 +10,8 @@ description: When a task-list item, paragraph, table cell, directive body or
   its attributes in the sanitized webview HTML.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,17 @@ When a task-list item, paragraph, table cell, directive body or admonition title
 - Method: test/core/render/checkboxRendering.test.ts (markers, line and column counting, gutter classes, literal contexts, defined reference label: unit and integration tests on the render pipeline output and DOM classes; sanitizer scenario: unit test on the sanitizer output).
 - Method: test/core/render/checkboxMarkers.test.ts (literal contexts and defined reference label: unit tests on the render pipeline output).
 - Criteria: Checkbox count and positions equal the source markers, in LF and CRLF; class names are present only for task lists; checkbox elements appear only in the allowed contexts; checkbox inputs keep their state and source attributes after sanitizing.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-GFM-017](SwRS-MDOKFSTUDIO-GFM-017.md): Task-list checkboxes sit in the bullet gutter
+  - [SwRS-MDOKFSTUDIO-GFM-018](SwRS-MDOKFSTUDIO-GFM-018.md): Checkbox markers stay literal where they have another meaning
+  - [SwRS-MDOKFSTUDIO-GFM-019](SwRS-MDOKFSTUDIO-GFM-019.md): CRLF documents keep exact checkbox columns
+  - [SwRS-MDOKFSTUDIO-GFM-020](SwRS-MDOKFSTUDIO-GFM-020.md): The webview keeps checkbox inputs
+<!-- okf:links:end -->

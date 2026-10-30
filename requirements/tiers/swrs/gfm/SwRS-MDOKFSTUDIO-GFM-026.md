@@ -8,7 +8,8 @@ description: When the preview cannot edit the document, the extension SHALL
   and refuse a toggle message with the same text.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the preview cannot edit the document, the extension SHALL disable checkboxe
 
 - Method: Unit test "checkboxes are disabled when the preview cannot edit the document" in test/page/runtimePageControls.test.ts. Untested: the host refusal.
 - Criteria: Disabled state and refusal text match.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When the quote of a review thread is no longer in its old lines but
   the lines of that place.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -98,3 +99,13 @@ The searched text has block markers, link targets, emphasis marks, table pipes a
 
 - Method: test/core/comments/anchoring.test.ts, `T45: lines inserted above move the thread to the new line` (moved line), `T45: reanchorThreads updates moved threads, keeps orphans untouched and loses nothing` (unchanged threads), `T45: duplicate quotes are decided by prefix and suffix` (context), `T45: duplicate quotes without usable context use proximity only inside the window` (nearest copy; also the several-copies case of the long quote), `T45: a short quote is only found inside the +-50 line window` and `T45: a long unique quote that moved far away is found` (short and long quote), `T45: markdown markup does not hide the quote` and `T45r2: text that renders differently from its source stays anchored at the original line` (plain text and roles), `T45: text inside code fences and front matter is never a match` (fences; an unclosed front matter is treated as ordinary text and is untested), `T45: a quote that spans lines is found, and CRLF documents work` (multi-line, CRLF).
 - Criteria: The moved thread has the new lines and the others keep their identity; each thread lands on the line of the copy that matches its context; WINDOW_LINES = 50, MIN_FAR_QUOTE = 12 and a strict distance gap decide the move; the rendered quote matches the plain text of the source line; matches inside fences and a closed front matter are not candidates; the moved lines are 3 to 5 and a thread already on them is anchored.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-008](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-008.md): Review threads follow edits and renames of the document
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+<!-- okf:links:end -->

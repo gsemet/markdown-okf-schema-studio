@@ -10,7 +10,8 @@ description: When a table is parsed and written back after a cell edit, a row
   exactly the original text.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -109,3 +110,12 @@ When a table is parsed and written back after a cell edit, a row insertion, a ro
 - Method: test/page/modules/markdownTable.test.ts (unchanged table: pipe tables round-trip escaped cells and CRLF line endings; width: a shrinking value in a padded table keeps the original cell width and filling an empty cell keeps the table's padding; new row: inserting a row after the first body row of a padded table adds one padded line and inserting a row into a table without outer pipes adds one parseable row; deleting the first body row of a compact table removes exactly one line; edge cells: rows without outer pipes stay parseable when an edge cell is emptied and rows with only one outer pipe stay parseable). The header refusal is read from the model and has no dedicated test (untested).
 - Method: test/integration/realInput/blockKeys.ts, through the markers in test/integration/realInput/markers.ts (real window, scenarioTableMinimalDiff, ids table-editing/r02-padded-table-minimal-diff and table-editing/r03-compact-table-minimal-diff).
 - Criteria: String equality for every table of the corpus, one removed and one added line per cell edit, the added line text for a new row, a line delta of one removed and zero added lines for a deletion, and the reparsed rows for the pipe and edge cell cases.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+<!-- okf:links:end -->

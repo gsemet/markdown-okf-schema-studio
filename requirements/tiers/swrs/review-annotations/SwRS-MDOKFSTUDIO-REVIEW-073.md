@@ -7,7 +7,8 @@ description: When a comment message names the shown document and render, the
   extension SHALL handle it whatever revision of the document it names.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When a comment message names the shown document and render, the extension SHALL 
 
 - Method: The integration test test/integration/commentWrite.test.ts (assert "a create with an old documentVersion must still be written"). The dropped wrong document id is not asserted by a test.
 - Criteria: The comments file gains the thread for the old revision and is unchanged for the other document.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+<!-- okf:links:end -->

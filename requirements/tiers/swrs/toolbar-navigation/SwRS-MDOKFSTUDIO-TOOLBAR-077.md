@@ -10,7 +10,8 @@ description: "When the reader clicks, middle-clicks or presses Enter or Space on
   with the reason when it cannot."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -86,3 +87,15 @@ When the reader clicks, middle-clicks or presses Enter or Space on a link that c
 - Method: test/integration/previewHistory.test.ts (link to second.md#target opens the second document; external link with a stubbed openExternal, one call, history unchanged; javascript:alert(1) leaves the history unchanged, the warning text is not asserted; the second.md#missing case has no test).
 - Method: test/session/toolbarReq.requirements.test.ts (a file that cannot be opened shows a warning with the path and the reason; a link whose resolution fails shows a warning and records nothing).
 - Criteria: one previewLink per accepted event; auxclick counts only for button 1; keys Enter and the space character post one request; showDocument gets the target id and the selection range, if any; openExternal is called once with the URL; showWarning is called once with the reason, or with the path and the error message.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When a word, a URL, an inline code identifier or a Japanese,
   horizontal overflow of the page.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -61,3 +62,16 @@ When a word, a URL, an inline code identifier or a Japanese, Chinese or Korean p
 - Method: test/core/preview/previewStyles.test.ts, test "K1: long words and bare URLs wrap inside text blocks, links and table cells" (words, URLs, identifiers, identifier as wide as the viewport)
 - Method: test/core/render/renderReq.renderingCore.requirements.test.ts, test "the content stylesheet lets paragraphs, including CJK text, wrap inside the pane" (CJK text)
 - Criteria: No horizontal overflow from a long word, URL or identifier at 460 px; CJK paragraphs stay within the pane width; links are covered by the wrap rule.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-039](SwRS-MDOKFSTUDIO-CORE-039.md): Wrap CJK text in the pane
+  - [SwRS-MDOKFSTUDIO-CORE-040](SwRS-MDOKFSTUDIO-CORE-040.md): Wrap an unbroken word in the column
+  - [SwRS-MDOKFSTUDIO-CORE-042](SwRS-MDOKFSTUDIO-CORE-042.md): Wrap long URLs in the column
+<!-- okf:links:end -->

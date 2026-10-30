@@ -10,7 +10,8 @@ description: "When a writer opens the editor of a list field, the extension SHAL
   offered on a list of filename-stem links."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -112,3 +113,20 @@ When a writer opens the editor of a list field, the extension SHALL show one tex
 - Method: test/page/runtimeFrontmatterEditor.test.ts (one input per item with handle, remove and Add item buttons; leaving the editor saves an array of strings, the field menu focus and a drag do not save; ArrowDown reorder and renumbering; add, reorder, remove and direct array saves; drag shows the insertion boundary).
 - Method: test/page/runtimeFrontmatterFields.test.ts (Enter inserts an empty item and focuses it; Enter in an empty last item removes it and saves; Enter with Shift or Alt or while composing does not touch the list; Backspace in an empty item removes it and moves focus; Cmd or Ctrl+Enter saves the list; link list datalist on every input, none for a missing or invalid attribute, the warning, the save still posted).
 - Criteria: Items are shown and saved as strings.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-011](SwRS-MDOKFSTUDIO-FMEDIT-011.md): Enter in a list item inserts an empty item after it
+  - [SwRS-MDOKFSTUDIO-FMEDIT-012](SwRS-MDOKFSTUDIO-FMEDIT-012.md): List items reorder by keyboard and drag
+  - [SwRS-MDOKFSTUDIO-FMEDIT-014](SwRS-MDOKFSTUDIO-FMEDIT-014.md): Link lists suggest the known Markdown file stems
+  - [SwRS-MDOKFSTUDIO-FMEDIT-077](SwRS-MDOKFSTUDIO-FMEDIT-077.md): Backspace in an empty list item removes it
+  - [SwRS-MDOKFSTUDIO-FMEDIT-078](SwRS-MDOKFSTUDIO-FMEDIT-078.md): Cmd or Ctrl+Enter in a list item saves the list
+<!-- okf:links:end -->

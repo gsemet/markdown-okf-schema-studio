@@ -11,7 +11,8 @@ description: When the writer presses Bold or Italic, the extension SHALL wrap
   into a run of asterisks on one side only.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -120,3 +121,12 @@ A run holds bold when it has two or more asterisks and italic when its length is
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Untested: the Bold press on a selection that includes a whole run (`[*foo*]`) in the refusal scenario has no test row.
 - Criteria: The markers go around the trimmed content, markers inside or just outside the selection count as present, underscores are not recognised, a multi-line selection is wrapped as one span, a run holds bold when it has two or more asterisks and italic when its length is odd, and the refusal applies when exactly one side has markers that the selection does not cover.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When the writer presses Col left on the table bar, the extension
   the cell editor in the new column.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,12 @@ When the writer presses Col left on the table bar, the extension SHALL insert an
 
 - Method: test/page/runtimeTableCellEditor.test.ts (Col left inserts an empty column to the left and leaves the title of the selected column), and the real-window scenario in test/integration/tableStructureReal.ts.
 - Criteria: the cells of each saved line, the pending navigation row and column.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-008](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-008.md): A table bar locates the writer and edits rows and columns
+<!-- okf:links:end -->

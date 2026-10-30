@@ -9,7 +9,8 @@ description: When the built-in engine draws a diagram that uses a bundled theme,
   layout.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,14 @@ When the built-in engine draws a diagram that uses a bundled theme, an OpenIconi
 
 - Method: No test draws a themed or icon diagram; to be checked by a visual scenario.
 - Criteria: No request leaves the page and no Graphviz is used.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-024](SwRS-MDOKFSTUDIO-DIAG-024.md): The useJar and jarPath settings choose the PlantUML engine
+<!-- okf:links:end -->

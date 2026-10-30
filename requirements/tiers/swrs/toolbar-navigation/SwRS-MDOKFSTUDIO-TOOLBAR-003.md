@@ -10,7 +10,8 @@ description: When the reader presses the chevron of a heading of the content, or
   again when the chevron is pressed again.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: SwRS
 derives_from:
@@ -70,3 +71,12 @@ When the reader presses the chevron of a heading of the content, or the section 
 - Method: real-window screenshots of a folded document in the cream and a dark theme (CR 143, reports/shots).
 - Method: test/visual/capture_layout_checks.py (check_heading_fold, run on every toolbar scenario in Chromium: the Fold button folds the sections, the folded blocks are hidden until found, keep no height and leave the headings shown, the text is unchanged, and a chevron folds and unfolds one section).
 - Criteria: hidden blocks equal the blocks between the heading and the next heading of the same or a higher level; the heading stays shown; no document text changes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-002](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-002.md): The reader folds and unfolds the sections of the document
+<!-- okf:links:end -->

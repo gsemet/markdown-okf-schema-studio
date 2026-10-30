@@ -10,7 +10,8 @@ description: When the shown document is a file tracked by Git, in a trusted
   post an empty list of ranges only to take back marks the page shows.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -80,3 +81,12 @@ When the shown document is a file tracked by Git, in a trusted workspace, with p
 - Method: test/integration/incomingChanges.test.ts (an untracked file gets no incoming-change message: scenario an untracked file, another scheme, an untrusted workspace or an off choice); the other gates and the take-back are untested at host level.
 - Method: test/page/modules/incomingChanges.test.ts (page side only); real window review-annotations/r03-incoming-change-bars shows the bars. The host-side positive path (IncomingChangesController.post) has no integration test, so the scenario changed lines and unsaved edits is checked only through the real window.
 - Criteria: The posted ranges equal changedLineRanges(text at HEAD, shown text); the posted-message count stays 0 for the untracked file without marks and an empty list is posted when marks are showing; schedule() clears the pending timer and starts a new one of 300 ms, and each immediate trigger calls schedule with a delay of 0; the post count does not grow in the no-message case and an empty list follows in the take-back cases.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+<!-- okf:links:end -->

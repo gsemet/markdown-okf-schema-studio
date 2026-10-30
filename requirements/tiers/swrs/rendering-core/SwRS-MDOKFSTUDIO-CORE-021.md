@@ -8,7 +8,8 @@ description: When a document is rendered in an untrusted workspace and the
   "The MyST preview is disabled until the workspace is trusted."
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When a document is rendered in an untrusted workspace and the reduced mode is no
 - Criteria: The pipeline throws the trust message only without the reduced-mode allowance.
 
 Production always passes `allowUntrusted: true`, so this refusal is a guard; the test is at pipeline level. Trust behaviour belongs to a future trust-security StRS.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-001](SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer completely, in process
+<!-- okf:links:end -->

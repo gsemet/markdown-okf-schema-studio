@@ -9,7 +9,8 @@ description: When a link annotation lists `preview_shows_fields`, the extension
   the full text in its own tooltip.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a link annotation lists `preview_shows_fields`, the extension SHALL show be
 
 - Method: Unit test of the table renderer; visual scenario.
 - Criteria: The clipping is done by CSS; the excerpt element has the full text in its title.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-067](SwRS-MDOKFSTUDIO-FMSCHEMA-067.md): A link tooltip shows the fields and an excerpt of the linked file
+<!-- okf:links:end -->

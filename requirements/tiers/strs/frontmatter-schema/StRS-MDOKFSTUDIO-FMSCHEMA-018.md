@@ -8,7 +8,8 @@ description: When a writer activates a resolving frontmatter link, the Studio
   defines one, and refuse unusable links with a reason.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,12 @@ As a reviewer, I jump from a metadata reference to the file and line it names.
 
 - Click or Enter in read mode, Cmd/Ctrl+click in edit mode; the query and fragment are kept and the jump is recorded in the Back/Next history.
 - An invalid, unavailable or outside link is not followed and VS Code shows "Markdown OKF-Schema Studio could not follow the link: {reason}"; a malformed request shows "The frontmatter link request is invalid.". Filename-stem links are re-resolved at click time.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+<!-- okf:links:end -->

@@ -11,9 +11,13 @@ description: When a reviewer selects text in the preview and saves a comment, or
   typed text on screen and tell the reviewer why.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: approved
+req_lifecycle: approved
+status: stable
 approved_by: gaetan@xeberon.net
-approved_on: 2026-10-28
+approved_at: '2026-10-28T00:00:00Z'
+verified:
+  by: human:gaetan@xeberon.net
+  at: '2026-10-28T00:00:00Z'
 origin: native
 tier: StRS
 derives_from: []
@@ -66,3 +70,31 @@ As a reviewer, I attach a comment to the exact words I am talking about, answer 
 - When the editor gives no answer in time, the text is kept and the reviewer can try again.
 - Every change of the comments file reads the latest file first, so a change made by another tool in between is kept too.
 - The author is the name the reviewer configured in a setting or, without one, the name known to Git or to the operating system; when no name can be found at all, the comment is stored as Anonymous.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-001](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-001.md): The review comments file next to a document holds its threads as data
+  - [SwRS-MDOKFSTUDIO-REVIEW-002](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-002.md): Comment thread text stays readable on every theme
+  - [SwRS-MDOKFSTUDIO-REVIEW-004](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-004.md): A review comments file with any problem or over its limits is ignored with one warning
+  - [SwRS-MDOKFSTUDIO-REVIEW-012](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-012.md): The host posts the threads of the review comments file and follows its changes
+  - [SwRS-MDOKFSTUDIO-REVIEW-021](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-021.md): A highlight, badge or orphan entry opens the thread popover
+  - [SwRS-MDOKFSTUDIO-REVIEW-038](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-038.md): Selected body text offers a Comment button and a keyboard shortcut
+  - [SwRS-MDOKFSTUDIO-REVIEW-044](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-044.md): The comment box sends a comment and keeps its text until the host accepts it
+  - [SwRS-MDOKFSTUDIO-REVIEW-049](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-049.md): A new comment is anchored by its lines, quote and surroundings
+  - [SwRS-MDOKFSTUDIO-REVIEW-054](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-054.md): The host writes comment changes one after another within the file limits
+  - [SwRS-MDOKFSTUDIO-REVIEW-065](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-065.md): A comment carries the configured, Git or system author name
+  - [SwRS-MDOKFSTUDIO-REVIEW-069](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-069.md): A comment create message needs a valid anchor and a bounded body
+  - [SwRS-MDOKFSTUDIO-REVIEW-070](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-070.md): A comment reply message names a thread and carries a bounded body
+  - [SwRS-MDOKFSTUDIO-REVIEW-071](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-071.md): Resolve and delete messages name a thread; resolve carries a flag
+  - [SwRS-MDOKFSTUDIO-REVIEW-073](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-073.md): Comment messages are accepted for any revision of the document
+  - [SwRS-MDOKFSTUDIO-REVIEW-074](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-074.md): Reply, resolve, reopen and delete change the named thread only
+  - [SwRS-MDOKFSTUDIO-REVIEW-081](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-081.md): The thread popover of a writable preview sends a reply and keeps it until accepted
+  - [SwRS-MDOKFSTUDIO-REVIEW-086](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-086.md): Resolve, Reopen and a confirmed Delete wait for the host, one action at a time
+  - [SwRS-MDOKFSTUDIO-REVIEW-119](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-119.md): Moved thread lines are written with the document save only
+  - [SwRS-MDOKFSTUDIO-REVIEW-143](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-143.md): A click or Enter on a chip toggles its comment box
+  - [SwRS-MDOKFSTUDIO-REVIEW-186](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-186.md): The host appends a reply inside the thread comment under the author
+<!-- okf:links:end -->

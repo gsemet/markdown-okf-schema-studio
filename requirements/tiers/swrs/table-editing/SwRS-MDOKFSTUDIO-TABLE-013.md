@@ -10,7 +10,8 @@ description: When the writer types in a cell text box, the extension SHALL
   same edit session when the editor moves to another cell of the table.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -82,3 +83,15 @@ When the writer types in a cell text box, the extension SHALL remember each chan
 - Method: test/page/runtimeTableCellEditor.test.ts ("table cell editing exposes row and column operations and saves the edited table" and "table editing switches cells without losing changes and finalizes before leaving the table" for typing in one cell, two cells edited, neighbouring cell switch and the selected mark of the left cell being null; "switching table cells posts the pending change immediately" for the switch right after typing).
 - Method: visual scenarios table-editing/v02 to v05 (autosave of edits, one editor and one edit session).
 - Criteria: editedText of the last save equals the serialised model with all typed changes. No new previewEditOpen after the switch and an unchanged editId across the session. The message of a switch is non-final, carries the typed text, and flushing the timers afterwards posts nothing more. Mark and content wrapper presence is checked for both cells after the move. The missing-cell boundary is read from switchTableCell and has no dedicated test.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-042](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-042.md): Typing is autosaved as the smallest single replacement
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

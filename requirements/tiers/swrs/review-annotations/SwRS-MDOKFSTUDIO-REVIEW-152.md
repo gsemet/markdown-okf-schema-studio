@@ -10,7 +10,8 @@ description: When the setting markdownOkfSchemaStudio.preview.showComments is
   chips while it is on.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,15 @@ When the setting markdownOkfSchemaStudio.preview.showComments is read, the exten
 - Method: test/page/modules/commentsToggle.test.ts (`comments are shown by default and the button says how to hide them`, `the saved preference and the webview state decide the initial state`, `a click hides the comment chips, posts the preference, keeps the state and re-lays out`).
 - Method: visual scenarios review-annotations/v20-comment-chips-hidden-light-900 and v02-comment-todo-chips-light-900 (setting off, then on), v07-comment-list-chips-visible-light-900 to v10-comment-list-chips-hidden-dark-900 (button, preview and edit mode), v22-comments-button-hides-thread-light-900 (the button hides the thread chip, the TODO chip stays).
 - Criteria: package.json declares the setting as boolean with default true and the boot flag is on for every value but false; the page attribute data-okf-show-comments is false and the stylesheet hides the two kinds and the button; postShowComments runs in onSettingsChanged and after a page load; the pressed state and the three texts match the state; the page attribute data-sphinx-preview-comments is off after the button, the post carries preference comments with value false, the layout callback runs so that the reading position is kept, and the stylesheet hides the comment and the thread kinds only.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-012](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-012.md): A writer sees HTML comments and TODO notes as chips and toggles them
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+<!-- okf:links:end -->

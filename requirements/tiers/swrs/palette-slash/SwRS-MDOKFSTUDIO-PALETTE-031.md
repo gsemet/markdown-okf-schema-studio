@@ -11,7 +11,8 @@ description: When the writer opens, leaves or dismisses a popover of the
   text box and keeping the editor open.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -115,3 +116,14 @@ A button whose action has a popover has aria-haspopup menu and an aria-expanded 
 - Method: test/page/runtimePaletteActions.test.ts (T32: Escape and Cancel in the figure form; typing in the text box closes the form)
 - Method: test/integration/realInput/editorWidgets.ts (scenarioFigureEditor, via test/integration/realInput/markers.ts: Escape in the figure form)
 - Criteria: The left offset of a popover is the smaller of the button offset and the room left in the bar (the frame width for the alert list), and never negative. After a mousedown or input event of the text box no popover element remains, unless the insertion flag of the popover is set; the link panel closes with restore false. The first Escape closes the popover and posts no cancel; the next one cancels the editor. After closing, the text box is the active element and the leave callback was not called. The mouse press and typing cases of the cell emoji picker, the colour picker and the heading list are not tested separately.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When the palette mode is Full, the extension SHALL list the
   selection, and no other mode SHALL list them.
 project: MDOKFSTUDIO
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -68,3 +69,12 @@ When the palette mode is Full, the extension SHALL list the Vega-Lite chart and 
 - Method: test/page/modules/editPalette.test.ts (the select offers four modes, Full adds the two buttons after MyST, no other mode lists them); test/page/runtimeEditPalette.test.ts (the Full mode is stored, saved and reported to the host); test/core/protocol/pageToHost.test.ts and test/core/configuration/editingConfiguration.test.ts (full is a valid mode)
 - Method: test/page/modules/slashMenu.test.ts (/vega and /vega-lite find the commands in Full, none in MyST)
 - Criteria: The Full mode adds exactly the two chart commands to the MyST buttons, each inserting a rendering starter chart, and no other mode lists them.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

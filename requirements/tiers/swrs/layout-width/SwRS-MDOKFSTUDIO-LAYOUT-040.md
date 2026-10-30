@@ -7,7 +7,8 @@ description: When the reader changes the width mode, the extension SHALL keep
   the line at the reading position of the page.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the reader changes the width mode, the extension SHALL keep the line at the
 
 - Method: Unit test `a width mode change keeps the line at the reading position, with or without an anchor yet` in `test/page/diagReq.layout.requirements.test.ts`.
 - Criteria: The change callback calls keepReadingLine. The clearance re-measure of the same callback is SwRS-MDOKFSTUDIO-LAYOUT-041.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-020](SwRS-MDOKFSTUDIO-LAYOUT-020.md): The Width button cycles Margin, Auto and Full and keeps the reading line
+<!-- okf:links:end -->

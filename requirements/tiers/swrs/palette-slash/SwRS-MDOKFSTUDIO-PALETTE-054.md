@@ -11,7 +11,8 @@ description: When the writer presses Code block, the extension SHALL open a menu
   names no language when none or an invalid name is given.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -103,3 +104,16 @@ The fence width equals the maximum of three and the longest run plus one.
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Method: the invalid-name case of the refusal scenario is deduced from the code (the language pattern in insertCodeFence), not tested
 - Criteria: The values equal text then the sorted set of grammar names and aliases that highlightLanguageNames returns, so every listed language is highlighted by the preview; on a blank line the fence replaces the line; a selection starting or ending inside a line extends to the whole lines; the fence width equals the maximum of three and the longest run plus one; the language is written only when it matches [\w+#.-]+ in full.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+  - [SwRS-MDOKFSTUDIO-PALETTE-036](SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
+<!-- okf:links:end -->

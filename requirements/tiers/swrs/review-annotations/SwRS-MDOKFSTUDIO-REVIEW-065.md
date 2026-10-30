@@ -10,7 +10,8 @@ description: When the host stores a comment or a reply, the extension SHALL use
   characters.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -94,3 +95,12 @@ When the host stores a comment or a reply, the extension SHALL use as author the
 - Method: test/host-vscode/headBaselineUserName.test.ts, unit tests `T43: userName reads user.name through the Git API and trims it` (The Git user name is read through the built-in Git extension), `T43: userName is undefined without Git, a repository, getConfig or a value` (No Git user name).
 - Method: test/core/configuration/commentsConfiguration.test.ts, unit tests `T43: reads the author name of the comments section` and `T43: a non-string author name falls back to the empty default` (The comments.authorName setting), and test/security/package-contract.test.ts (the setting is listed).
 - Criteria: The author follows the four-step order. The stored name has no control character and at most 100 characters. userName returns the trimmed value or undefined. The setting exists in the Comments category with type string, default empty and resource scope; the host reads it for the resource of the document.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+<!-- okf:links:end -->

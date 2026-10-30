@@ -8,7 +8,8 @@ description: When the writer chooses a label, the extension SHALL write {ref}
   selection as the link text when there is one.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -59,3 +60,12 @@ When the writer chooses a label, the extension SHALL write {ref} with the label 
 
 - Method: test/page/modules/editActions.test.ts, through test/page/modules/editActions.test.ts (unit test "ref inserts {ref} with the chosen label and keeps a selection as the link text": scenarios No selection, Selected text and the refusal rows for a backtick or angle bracket in the label, no label and a selection with a line break; the 200 character limit and the selection with a backtick are untested)
 - Criteria: A label with a backtick or an angle bracket, an empty label, or a selection with a line break or a backtick gives no edit; the label is at most 200 characters.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+<!-- okf:links:end -->

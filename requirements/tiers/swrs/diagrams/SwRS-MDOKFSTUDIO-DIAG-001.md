@@ -10,7 +10,8 @@ description: "When a document contains a mermaid fence or a {mermaid} directive,
   column."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -135,3 +136,18 @@ When a document contains a mermaid fence or a {mermaid} directive, the extension
 - Method: test/page/mermaidLabelFit.test.ts (headless Chromium: the shown SVG opened as a document of its own, every label's text inside its box; the in-page measure of the real-window check agrees with it)
 - Method: test/page/modules/mermaidPreviewEntry.test.ts (Mermaid measures in the styled measure element, removed after the drawing)
 - Method: test/integration/realInput/previewWindow.ts (real VS Code window: every label of the demo flowchart fits its box as the image draws it)
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-002](SwRS-MDOKFSTUDIO-DIAG-002.md): The Mermaid renderer loads only when a Mermaid figure exists
+  - [SwRS-MDOKFSTUDIO-DIAG-003](SwRS-MDOKFSTUDIO-DIAG-003.md): Mermaid diagrams are drawn as inert pictures
+  - [SwRS-MDOKFSTUDIO-DIAG-004](SwRS-MDOKFSTUDIO-DIAG-004.md): Mermaid pictures keep their natural size within the content width
+  - [SwRS-MDOKFSTUDIO-DIAG-022](SwRS-MDOKFSTUDIO-DIAG-022.md): A diagram under edit is hidden
+<!-- okf:links:end -->

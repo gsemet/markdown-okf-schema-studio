@@ -7,7 +7,8 @@ description: When JAR results belong to a render stage that is no longer the
   current one, the extension SHALL drop them.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When JAR results belong to a render stage that is no longer the current one, the
 
 - Method: Unit test `JAR results of a render that is no longer the current one are dropped` in `test/session/diagReq.plantuml.requirements.test.ts`.
 - Criteria: Only the current stage is updated.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-105](SwRS-MDOKFSTUDIO-DIAG-105.md): JAR results replace the diagrams of the current render in order
+<!-- okf:links:end -->

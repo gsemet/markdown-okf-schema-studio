@@ -9,7 +9,8 @@ description: "When the page draws a Mermaid diagram, it SHALL replace the diagra
   to rendered."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,14 @@ When the page draws a Mermaid diagram, it SHALL replace the diagram text with on
 
 - Method: Visual scenarios diagrams v01 to v03 (loaded picture); no unit test of the browser entry point.
 - Criteria: A loaded image replaces the text and carries the rendered state.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-001](SwRS-MDOKFSTUDIO-DIAG-001.md): Mermaid fences become inert diagram pictures
+<!-- okf:links:end -->

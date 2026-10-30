@@ -7,7 +7,8 @@ description: When the extension reads a saved panel state, it SHALL keep at most
   100 open-section indexes, each an integer from 0 to 9999, and drop the others.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,12 @@ When the extension reads a saved panel state, it SHALL keep at most 100 open-sec
 ### Archived
 
 Folded into SwRS-MDOKFSTUDIO-LIFE-135.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: While edit mode is on and the body of a rendered document has no
   first-block editor from it on a click or on Enter.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -107,3 +108,15 @@ While edit mode is on and the body of a rendered document has no block, the page
 - Method: test/page/runtimeBlockEditor.test.ts: `top spacing: the editor opened from Start writing carries the first-block class` (scenarios 3 and 7), `empty document: Enter in edit mode opens the new-block editor like Start writing` (scenario 4), `empty document: Enter with a modifier, in a field, outside edit mode or on a filled document does nothing` (scenario 5), `empty document: Cmd/Ctrl+Enter saves the new block and Escape cancels back to Start writing` (scenario 6), and the six `top spacing: ...` cases (scenario 7).
 - Method: visual scenario block-editing/v11 (scenario 4; the lock asks for at least 20 px below the top, the real gap is SwRS-MDOKFSTUDIO-LAYOUT-007, and SwRS-MDOKFSTUDIO-LAYOUT-011 pushes the button only under the toolbar).
 - Criteria: The button needs a render status of success or recovery. The open message names line 1 and insertAfterLine 0. The keydown listener opens an editor only for an unmodified Enter outside controls. The first-block class is present exactly in the cases of scenario 7.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-011](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-011.md): A writer adds blocks and starts an empty document from the preview
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+<!-- okf:links:end -->

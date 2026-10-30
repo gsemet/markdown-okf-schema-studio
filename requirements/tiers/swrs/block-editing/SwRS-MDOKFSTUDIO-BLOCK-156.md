@@ -8,7 +8,8 @@ description: "When a writer presses Alt+ArrowUp or Alt+ArrowDown with blocks sel
   previewBlockMove with the line span of the selection and the neighbouring block."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -113,3 +114,17 @@ When a writer presses Alt+ArrowUp or Alt+ArrowDown with blocks selected and the 
 - Method: test/core/mapping/blockMove.test.ts, unit tests `a span of blocks moves past one block, inner separators untouched` and `a span keeps CRLF line breaks inside and around it` (host swap); `a span at the end of the document, or past it, is refused` and `a span next to the frontmatter cannot cross it` (host refusals); test/integration/blockMove.test.ts (selection span, one undo).
 - Method: test/page/runtimeBlockSelection.test.ts (`T41: a key repeat does not move the span twice; a refusal keeps the selection and can be retried`, changed: the reason shows under the last selected block).
 - Criteria: One message with the span as the moving range. applyMoveSelection compares the block count. MOVE_SELECTION_MAX_AGE is 5000 ms. requestSelectionMove returns false without a neighbour and while a flight exists. The pending selection state is cleared on refusal. selectionEndsAt picks the bar. selectionMoveOwns is true only for selected blocks or the page. updateMoveLabels runs on every render of the selection. The result equals the expected text of each case.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a file that the built-in engine read, or asked for in vain
   previewPlantUmlIncludesChanged to the page, after an open block editor closes.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a file that the built-in engine read, or asked for in vain inside the allow
 
 - Method: Unit test of the include watch and of the page message; the host event path has no session test.
 - Criteria: Watched changes notify the page once the editor is closed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-053](SwRS-MDOKFSTUDIO-DIAG-053.md): Served include files are watched and redraw their diagrams
+<!-- okf:links:end -->

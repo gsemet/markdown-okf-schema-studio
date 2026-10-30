@@ -11,7 +11,8 @@ description: "When the page starts, the page receives a history state for its re
   document cannot be opened."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -83,3 +84,15 @@ When the page starts, the page receives a history state for its render or the re
 - Method: test/visual/scenarioDefinitions2.ts (State enables: scenario toolbar-navigation/v30-back-enabled-after-anchor-light-900, Back enabled and Next disabled).
 - Method: test/session/toolbarReq.requirements.test.ts (Nowhere to go: Back with nowhere to go only posts the history state again; Document cannot be opened: a Back or Next that cannot open its document shows a warning).
 - Criteria: both buttons are disabled before the first previewHistoryState; disabled = (value !== true); exactly one message per press with the right direction; postHistoryState is called and no document is opened; host.ui.showWarning is called with the text and the error message.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When more than 10 extension warnings are detected, the extension
   SHALL keep at most 10.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When more than 10 extension warnings are detected, the extension SHALL keep at m
 
 - Method: Unit test "at most 10 extension warnings are kept and 10 or fewer are all kept" in test/core/render/renderReq.myst.requirements.test.ts
 - Criteria: MAX_EXTENSION_WARNINGS is 10; eleven missing extensions keep ten warnings.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-072](SwRS-MDOKFSTUDIO-MYST-072.md): MyST syntax of a disabled extension is reported with its line
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When the writer presses Cmd+/ or Ctrl+/, with or without Shift, in
   already a plain comment, as one undo step.
 project: MDOKFSTUDIO
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,12 @@ The TODO palette button and the slash menu entry keep inserting `<!-- TODO: … 
 - Method: test/page/modules/editActions.test.ts (`shortcutFor accepts Ctrl+/ and Cmd+/ on every platform`; `shortcutFor ignores plain keys, other modifiers, composition and AltGr`; the registry test for the shortcut-only comment action)
 - Method: test/page/runtimeBlockEditor.test.ts (Ctrl+/ in the real block editor text box)
 - Criteria: The produced text equals the expected text for each case, shortcutFor returns the comment action for either modifier with or without Shift and nothing with Alt, and the comment action has no palette button and no slash entry.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

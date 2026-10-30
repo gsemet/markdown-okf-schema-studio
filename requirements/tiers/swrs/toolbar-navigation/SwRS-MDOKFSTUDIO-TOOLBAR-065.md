@@ -8,7 +8,8 @@ description: "When a place is pushed to the history of a panel, the extension SH
   the places after the current one."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -68,3 +69,12 @@ When a place is pushed to the history of a panel, the extension SHALL keep at mo
 
 - Method: test/core/state/navigationHistory.test.ts (51st distinct place keeps the newest 50; a push after going back drops the forward entries; a duplicate of the current entry is ignored; depart updates the line of the same document, keeps the line when none is known and pushes another document at line 1).
 - Criteria: entries.length <= 50 after any push; canForward is false after a push; no change when uri and line are equal; for an equal uri the line is updated if known, else a push with line ?? 1.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+<!-- okf:links:end -->

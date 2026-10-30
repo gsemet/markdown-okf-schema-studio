@@ -8,7 +8,8 @@ description: When the writer presses Blockquote, the extension SHALL put > and a
   quote level when every non-blank touched line is already quoted.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,12 @@ In this table `[ ]` marks the selection and `|` marks the caret.
 - Method: test/page/modules/editActions.test.ts (data-driven rows named editActions quote: all scenarios)
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Criteria: Pressing the button twice on a quoted selection restores the text; a selection ending at a line start does not touch that line.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

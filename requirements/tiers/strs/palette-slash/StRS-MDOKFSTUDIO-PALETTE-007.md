@@ -11,7 +11,8 @@ description: When a writer asks for a link, an image, a figure, a table, a
   untouched.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -61,3 +62,27 @@ As a writer, I create or fix a link by filling two fields, add pictures from the
 - Colours are written as markup the preview keeps; nothing is written that the sanitizer would strip.
 - A colour code in the text can be changed in place from a swatch.
 - The table picker lets the writer choose the number of rows and columns on a grid; the table that is written, and the other table actions, are specified with the table editing requirements.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+  - [SwRS-MDOKFSTUDIO-PALETTE-036](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
+  - [SwRS-MDOKFSTUDIO-PALETTE-058](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-058.md): The Colour picker wraps the selection in a safe colour span
+  - [SwRS-MDOKFSTUDIO-PALETTE-069](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-069.md): The Colour code button edits a colour code at the caret
+  - [SwRS-MDOKFSTUDIO-PALETTE-072](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-072.md): The Emoji picker filters and inserts one pictograph
+  - [SwRS-MDOKFSTUDIO-PALETTE-078](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-078.md): The Table button opens a 9 by 9 size grid and inserts a table of the chosen size
+  - [SwRS-MDOKFSTUDIO-PALETTE-089](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-089.md): The Link button opens a labelled link panel prefilled from the selection
+  - [SwRS-MDOKFSTUDIO-PALETTE-092](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-092.md): The link panel writes a safe inline Markdown link
+  - [SwRS-MDOKFSTUDIO-PALETTE-109](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-109.md): The Image button inserts or replaces an image reference
+  - [SwRS-MDOKFSTUDIO-PALETTE-150](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-150.md): Figure writes a figure directive for a picked image
+  - [SwRS-MDOKFSTUDIO-PALETTE-153](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-153.md): The figure form edits the options of a figure and checks them
+  - [SwRS-MDOKFSTUDIO-PALETTE-160](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-160.md): Apply rewrites the figure directive in one minimal edit
+  - [SwRS-MDOKFSTUDIO-PALETTE-192](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-192.md): The host image picker answers a path relative to the document
+  - [SwRS-MDOKFSTUDIO-PALETTE-263](../../swrs/palette-slash/SwRS-MDOKFSTUDIO-PALETTE-263.md): Slash commands have short alternative names
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

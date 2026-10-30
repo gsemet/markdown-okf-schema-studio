@@ -7,7 +7,8 @@ description: When a writer uses definition lists, subscript, superscript,
   abbreviations or keys, the Studio SHALL show them typeset.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -32,3 +33,12 @@ As a writer, I want these MyST text constructs typeset in the preview so that I 
 ### Rationale and constraints
 
 - Typeset in the preview without a Sphinx build.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-MYST-001](StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+<!-- okf:links:end -->

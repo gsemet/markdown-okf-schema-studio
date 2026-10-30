@@ -9,7 +9,8 @@ description: When a copy request carries text that is not a string or is longer
   copied.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,16 @@ A request is answered by `editId` (see SwRS-MDOKFSTUDIO-TRUST-090). The shape ch
 - Method: test/core/protocol/pageToHost.test.ts (nominal, refusal and the shape table)
 - Method: test/session/renderReq.codeCopy.requirements.test.ts (gestureless request refused, stale and read-only page, size refusal, failing clipboard, answers)
 - Criteria: 1 000 000 copied, 1 000 001 accepted by the shape check and answered "Too large to copy.", 20 000 001 and non-strings rejected; a stale message leaves the clipboard unchanged; a read-only preview writes the requested code and processes no edit request
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+<!-- okf:links:end -->

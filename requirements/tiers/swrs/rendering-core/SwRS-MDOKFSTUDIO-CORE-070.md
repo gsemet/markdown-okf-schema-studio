@@ -11,7 +11,8 @@ description: When a document is parsed, the MyST parser SHALL split the source
   and after it) SHALL stay unchanged.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -59,3 +60,12 @@ When a document is parsed, the MyST parser SHALL split the source text into line
 
 - Method: Unit tests in test/build/mystSourcePatches.test.ts build a scratch install under os.tmpdir() with pristine copies of the three patched packages, bundle a probe with the esbuild plugin and run it with the Node load hook, then count the line splits of a parse; a changed version or content must fail the build.
 - Criteria: Without the plugin the package splits the source once per directive fence (5) and cannot resolve markdown-it/lib/common/utils.js; with it the source is split once, the tightness values are identical, the imports resolve to utils.mjs, and neither the scratch copy nor the real node_modules is written. The parse time at 55k lines (bench-render.mjs) fell from 2.5 s to 0.46 s.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

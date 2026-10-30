@@ -7,7 +7,8 @@ description: "When a review thread anchor falls inside a Mermaid or PlantUML fig
   the page SHALL NOT wrap text of that figure in a comment quote."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,15 @@ When a review thread anchor falls inside a Mermaid or PlantUML figure, the page 
 
 - Method: Unit test of the comment threads.
 - Criteria: Figure text is unchanged and no mark or badge is placed inside a figure.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-REVIEW-017](../review-annotations/SwRS-MDOKFSTUDIO-REVIEW-017.md): The quote of a thread is highlighted once in its block
+<!-- okf:links:end -->

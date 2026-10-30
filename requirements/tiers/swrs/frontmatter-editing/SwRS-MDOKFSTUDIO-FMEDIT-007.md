@@ -8,7 +8,8 @@ description: "When a writer opens the editor of a number, date or time field, th
   input."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a writer opens the editor of a number, date or time field, the extension SH
 
 - Method: Unit test number, date and time fields get native inputs; a date-time field stays a text input in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: Input type per field type: number, date, time, otherwise text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-003](SwRS-MDOKFSTUDIO-FMEDIT-003.md): Enum, number, date, boolean and nullable fields use fitting controls
+<!-- okf:links:end -->

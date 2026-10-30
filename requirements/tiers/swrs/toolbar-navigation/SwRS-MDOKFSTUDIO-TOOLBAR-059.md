@@ -11,7 +11,8 @@ description: "When the reader follows a link to another Markdown document in a p
   line selected or scroll the preview to the stored line."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -96,3 +97,12 @@ When the reader follows a link to another Markdown document in a preview that fo
 - Method: test/core/state/navigationHistory.test.ts (Unknown line: depart without a known line).
 - Method: test/session/toolbarReq.requirements.test.ts (Moves that are not recorded: a locked preview records anchor jumps only, a link to a file that is not Markdown opens without a history entry; One history per panel: each preview panel has its own history that outlives a session).
 - Criteria: entries = [place left, target] and the current index is the target; preview.scroll.lastSourceScrollLine and the anchor equal the stored line; recordNavigation is not called for a file link when followsActiveEditor is false and requires path.extname(...).toLowerCase() === .md; historyOf returns one NavigationHistory per panel.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+<!-- okf:links:end -->

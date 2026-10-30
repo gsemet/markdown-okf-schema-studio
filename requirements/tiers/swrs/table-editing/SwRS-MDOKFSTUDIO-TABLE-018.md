@@ -10,7 +10,8 @@ description: When the writer presses Enter in the cell text box, with or without
   text equals the text the host sent and no autosave reached the document.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -105,3 +106,15 @@ When the writer presses Enter in the cell text box, with or without Cmd, Ctrl or
 - Method: test/page/runtimePaletteActions.test.ts (T35 "a popover opened from the cell bar keeps the editor open, outside focus still commits" and T35 "the link panel opened from the cell keeps the editor open and clicking outside commits").
 - Method: visual scenarios table-editing/v01 to v05 (Done under the field).
 - Criteria: A final previewEditSave follows the key, the Done click, an outside blur, an outside leave of the formatting group and a click outside, and none follows a blur into the editor or the bar, an inside move, or a recent pointer press. The mousedown default is prevented on both buttons, read from createEditorButtons. The order of the messages is final previewEditSave before the open of the other block; with an unchanged cell no pending navigation remains. Untested: Shift+Enter and the other chords for cells (the keydown handler accepts any Enter), a blur because the whole window lost the focus, and the host-dialog branch (hostRequests.isDialogOpen in the onLeave handler of tableCellEditor.ts) for cells.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

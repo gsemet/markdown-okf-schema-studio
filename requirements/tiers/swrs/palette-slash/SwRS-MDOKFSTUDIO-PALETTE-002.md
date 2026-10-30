@@ -10,7 +10,8 @@ description: While a block editor is open, the extension SHALL give every button
   floating toolbar, and SHALL draw the Horizontal rule button as three dashes.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,12 @@ While a block editor is open, the extension SHALL give every button of its edit 
 
 - Method: test/page/runtimeEditPalette.test.ts (T21b: every palette button carries a data-tooltip equal to its title; the rule icon is dashes); test/core/preview/previewStyles.test.ts (the edit bar tooltip rules); visual scenarios palette-slash/v23-edit-bar-tooltip-rule-cream-900 and v24-edit-bar-tooltip-rule-dark-900 (hovered rule button shows its bubble)
 - Criteria: Every direct button of the edit bar has a non-empty data-tooltip equal to its title; the computed ::after of the hovered button is visible, opaque and contains the button's name; the rule icon path has no segment other than three short horizontal dashes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

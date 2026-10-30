@@ -10,7 +10,8 @@ description: When prose contains a bare http://, https:// or www. URL, the
   that has another meaning or another scheme.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -95,3 +96,19 @@ When prose contains a bare http://, https:// or www. URL, the extension SHALL re
 
 - Method: test/core/render/bareUrlAutolink.test.ts (all scenarios: unit tests on the render pipeline output, the sanitized output and the block editor source; the pathological inputs with a timing bound of 1 s).
 - Criteria: Link elements exist for every bare URL in prose contexts and none in directive options, code, links, math, raw HTML, images, references, e-mail addresses or unsafe schemes; the link text equals the URL without trailing punctuation; autolink and Markdown link outputs are identical after sanitizing; the editor source text is byte-identical to the document source; both pathological inputs render in under 1 s.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-GFM-002](SwRS-MDOKFSTUDIO-GFM-002.md): Trailing punctuation stays outside bare URLs
+  - [SwRS-MDOKFSTUDIO-GFM-003](SwRS-MDOKFSTUDIO-GFM-003.md): Text with a meaning is not autolinked
+  - [SwRS-MDOKFSTUDIO-GFM-004](SwRS-MDOKFSTUDIO-GFM-004.md): Only http, https and www hosts are autolinked
+  - [SwRS-MDOKFSTUDIO-GFM-005](SwRS-MDOKFSTUDIO-GFM-005.md): Autolinks follow the Markdown link policy
+  - [SwRS-MDOKFSTUDIO-GFM-006](SwRS-MDOKFSTUDIO-GFM-006.md): Editing an autolink shows the raw URL
+  - [SwRS-MDOKFSTUDIO-GFM-007](SwRS-MDOKFSTUDIO-GFM-007.md): Pathological URLs render in linear time
+<!-- okf:links:end -->

@@ -11,7 +11,8 @@ description: When a live preview shows a document with extension warnings in a
   the open previews a created, edited or deleted conf.py governs.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -92,3 +93,18 @@ Message type previewShowProblems (page to host): the envelope fields only (docum
 - Method: test/session/trustReq.requirements.test.ts (previewShowProblems handled for the shown document and dropped for another one)
 - Method: test/page/modules/warningBanner.test.ts (the banner posts previewShowProblems with the envelope)
 - Criteria: Entries are tied to a live preview. The event order of a conf.py change before or after the open does not matter. The controller has no unit test of its own (integration only).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-079](SwRS-MDOKFSTUDIO-MYST-079.md): Problems entries are replaced and removed
+  - [SwRS-MDOKFSTUDIO-MYST-080](SwRS-MDOKFSTUDIO-MYST-080.md): conf.py changes update the previews they govern
+<!-- okf:links:end -->

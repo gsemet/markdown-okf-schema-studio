@@ -9,7 +9,8 @@ description: When the floating toolbar covers an open first-block editor and
   SHALL push the frame down just far enough to clear the toolbar.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,14 @@ When the floating toolbar covers an open first-block editor and giving up the to
 
 - Method: Unit tests P3 first-block editor in a pane too narrow to be narrowed and the content top measured in document coordinates; visual first-element gap checks in panes of 480 px or less (down to 360 px).
 - Criteria: Clearance equals toolbar bottom plus 8 minus content top minus 40, and never below 0.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-011](SwRS-MDOKFSTUDIO-LAYOUT-011.md): A control under the floating toolbar is moved or narrowed out of its way
+<!-- okf:links:end -->

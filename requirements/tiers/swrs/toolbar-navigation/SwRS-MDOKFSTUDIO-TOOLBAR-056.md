@@ -7,7 +7,8 @@ description: "When previewHistoryState names another document, document version 
   request than the page's render, the extension SHALL ignore it."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,14 @@ When previewHistoryState names another document, document version or request tha
 
 - Method: test/page/runtimePageControls.test.ts (the refusal with another revision: T11 a previewHistoryState of another document version is ignored; the current render is checked with the Back and Next test T11; the other document and request rows are by code only)
 - Criteria: No button changes for a stale identifier.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

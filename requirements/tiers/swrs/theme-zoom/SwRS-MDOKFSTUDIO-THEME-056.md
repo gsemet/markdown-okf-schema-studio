@@ -8,7 +8,8 @@ description: When a forced theme mode is shown, the extension SHALL draw the
   with the VS Code ones.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When a forced theme mode is shown, the extension SHALL draw the floating toolbar
 
 - Method: None; archived duplicate of SwRS-MDOKFSTUDIO-THEME-029.
 - Criteria: Not applicable.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
+<!-- okf:links:end -->

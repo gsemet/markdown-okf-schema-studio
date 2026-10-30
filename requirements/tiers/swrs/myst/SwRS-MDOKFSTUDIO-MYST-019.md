@@ -9,7 +9,8 @@ description: When a document uses `{ref}` to a heading, figure, table, equation
   readable link, not an empty one.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -59,3 +60,15 @@ When a document uses `{ref}` to a heading, figure, table, equation or `(name)=` 
 - Method: test/core/render/mystPaletteRendering.test.ts (nominal and explicit text and paragraph labels: "a label before a paragraph renders an anchor icon span that is the link target")
 - Method: test/core/render/mystFeatures.test.ts (captions decide the link text: "figure references render figures whose body supplies the caption" and "references to captionless figures and tables stay readable", which checks `{ref}` only; the `{numref}` case is untested)
 - Criteria: A captionless figure or table shows the key for `{ref}` and its number for `{numref}`; no reference link is empty; a missing label raises no warning.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-060](../rendering-core/SwRS-MDOKFSTUDIO-CORE-060.md): Keep references to captionless targets readable
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: "When the host writes an edit of the source document for the previe
   could not apply\" or with the text of the error."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -124,3 +125,25 @@ When the host writes an edit of the source document for the preview, it SHALL ma
 - Method: test/session/blockReq.requirements.test.ts (failure table rows for block save, move, cut, paste and copy: `an edit that VS Code does not apply or rejects is reported and the final request is reset`, `a move that VS Code does not apply or rejects is answered with ok false`, `a cut or paste that VS Code does not apply, and a failing clipboard, are answered with ok false`; the block that changed under the host: `a block that changed in the document under the host is reported and the lock is released`)
 - Method: the cancelled-session, checkbox failure, label rename failure and label rename undo cases are untested
 - Criteria: applyEdits is called without ownUndoStep for block text edits and with ownUndoStep true for a move, a cut, a paste, a checkbox toggle, a label rename and a thread change (editor.edit with undo stops before and after); completeActiveBlockEdit refreshes only when hasAppliedEdit is true and the document revision differs from the stage; every failure branch posts the reason of the table, finalRequested is false after a failed block save and releaseHostEditKeepingEditor runs after the changed-under-host error
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+  - [StRS-MDOKFSTUDIO-REVIEW-015](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-015.md): A writer keeps a discussion in the Markdown source and answers it from the preview
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-053](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-053.md): A save VS Code rejects is reported
+  - [SwRS-MDOKFSTUDIO-FMEDIT-055](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-055.md): Each frontmatter save is one document edit
+  - [SwRS-MDOKFSTUDIO-GFM-022](../gfm/SwRS-MDOKFSTUDIO-GFM-022.md): A checkbox toggle is one undo step
+<!-- okf:links:end -->

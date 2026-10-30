@@ -11,7 +11,8 @@ description: When a reader presses the Anchor button, the Studio SHALL switch,
   cursor line.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -46,3 +47,17 @@ As a reader, I choose per preview panel whether scrolling the text editor scroll
 - The cursor mark is controlled by the setting `markdownOkfSchemaStudio.preview.markEditorSelection`, off by default.
 - The mark goes to the block that contains the cursor line.
 - The mark is refreshed when the editor scrolls or the preview is rendered again, not on every cursor move.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-120](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-120.md): The Anchor button switches whether the preview follows the editor
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-122](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-122.md): A pairing message for another document is ignored
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-126](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-126.md): The host accepts only a boolean anchor mode
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-128](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-128.md): The block at the editor cursor is outlined when the setting is on
+<!-- okf:links:end -->

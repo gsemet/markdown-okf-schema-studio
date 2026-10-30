@@ -7,7 +7,8 @@ description: When a document is shown, the extension SHALL keep a bottom padding
   so that its last block ends at least 30 px above the frame bottom.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a document is shown, the extension SHALL keep a bottom padding so that its 
 
 - Method: Visual scenario handbook-dark-bottom in test/visual/scenarioDefinitions1.ts
 - Criteria: The last block bottom is at least 30 px from the frame bottom.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-028](SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and inline code are typeset readably
+<!-- okf:links:end -->

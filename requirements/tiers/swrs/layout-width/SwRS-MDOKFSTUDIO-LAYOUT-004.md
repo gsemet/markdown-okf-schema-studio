@@ -8,7 +8,8 @@ description: When the setting maxContentWidth is 0, the extension SHALL write
   width.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,14 @@ When the setting maxContentWidth is 0, the extension SHALL write the width rule 
 
 - Method: Unit test of the width rule builder for 0 and 1200; the column behaviour follows from the CSS.
 - Criteria: The generated rule is none for 0 and a pixel value otherwise.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-002](SwRS-MDOKFSTUDIO-LAYOUT-002.md): The text column width follows the maxContentWidth setting
+<!-- okf:links:end -->

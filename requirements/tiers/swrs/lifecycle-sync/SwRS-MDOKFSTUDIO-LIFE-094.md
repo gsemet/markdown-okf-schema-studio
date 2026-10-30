@@ -9,7 +9,8 @@ description: When the text of a previewed document changes by an undo, a redo or
   text readable and nothing moved.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -118,3 +119,16 @@ When the text of a previewed document changes by an undo, a redo or an edit that
 - Method: test/page/modules/motion.test.ts (Glow of the updated blocks, Skip the glow when it would mislead): "CR 046: an update glows on the innermost blocks whose lines meet a range, and only there", "CR 046: included blocks, open editors and the block being edited never glow".
 - Method: visual scenarios lifecycle-sync/v01-update-glow-light-900, v02-update-glow-dark-900 and v03-update-glow-cream-900 (test/visual/capture_layout_checks.py check_update_glow, test/visual/scenarioDefinitions2.ts) (The glow is readable in three themes, The glow moves nothing).
 - Criteria: isOutsideChange follows the three conditions and isTypingChange needs a key in 500 ms and a cursor on the change; updatedRangesForPatch returns [] outside the version window or above MAX_UPDATED_RANGES; the glow attribute is set then removed after about 600 ms; no glow is applied in the excluded cases; check_update_glow reports no failure.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-048](../rendering-core/SwRS-MDOKFSTUDIO-CORE-048.md): Glow blocks changed outside the preview
+  - [SwRS-MDOKFSTUDIO-CORE-049](../rendering-core/SwRS-MDOKFSTUDIO-CORE-049.md): Skip the glow when it would mislead
+<!-- okf:links:end -->

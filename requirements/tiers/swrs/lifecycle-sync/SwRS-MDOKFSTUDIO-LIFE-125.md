@@ -10,7 +10,8 @@ description: When the page reports its reading state while the reader scrolls,
   recent documents.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -93,3 +94,17 @@ When the page reports its reading state while the reader scrolls, the extension 
 - Method: test/host/lifeReq.requirements.test.ts (scenario 5: "switching back to a document brings back its remembered state", the session path A to line 80 with a focused block and an open section, B, back to A)
 - Method: test/core/state/boundedState.test.ts (scenario 6: "evicts the least recently set entry once the cap is exceeded", "reading an entry protects it from eviction, peek does not", "default capacity is 200 and rejects invalid capacities", "overwriting a key refreshes it and never grows the map")
 - Criteria: STATE_THROTTLE_MS is 100 and the last state always reaches the host; preview.state equals the parsed state of the message; session.state is the remembered state of the returned-to document when its render builds its context, and initialAnchor is the stored anchor when it names that document; size never exceeds 200 and the order is least to most recent.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

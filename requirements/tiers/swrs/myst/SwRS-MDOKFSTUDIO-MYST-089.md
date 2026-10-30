@@ -8,7 +8,8 @@ description: When a conf.py changes `extensions` or `myst_enable_extensions`
   apply the changes in written order.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a conf.py changes `extensions` or `myst_enable_extensions` with `=`, `+=`, 
 
 - Method: Unit test "+=, append, extend and later assignments are applied in order" in test/core/myst/confParser.test.ts
 - Criteria: Each mutation form is applied in order.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-066](SwRS-MDOKFSTUDIO-MYST-066.md): The governing conf.py is found and read as text
+<!-- okf:links:end -->

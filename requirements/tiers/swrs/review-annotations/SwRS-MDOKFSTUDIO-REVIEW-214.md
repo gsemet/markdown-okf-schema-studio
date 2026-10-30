@@ -12,7 +12,8 @@ description: When the page applies the Diff state, the page SHALL set the Diff
   markdownOkfSchemaStudio.preview.showIncomingChanges is false.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -84,3 +85,15 @@ When the page applies the Diff state, the page SHALL set the Diff button to pres
 - Method: test/security/package-contract.test.ts (the setting is listed: scenario the setting). The default value is not asserted by a test.
 - Method: visual scenarios review-annotations/v16-incoming-diff-off-light-900 and v05-change-bar-light-900 (scenario pressing the button).
 - Criteria: The pressed state and the three texts match the state; data-sphinx-preview-incoming is off and the stylesheet hides the bar layer; schedule(preview, 0) runs only for the incomingChanges preference; package.json declares a boolean with default true and data-okf-incoming-changes false hides the button.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+<!-- okf:links:end -->

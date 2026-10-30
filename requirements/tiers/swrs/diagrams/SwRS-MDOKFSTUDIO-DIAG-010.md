@@ -7,7 +7,8 @@ description: When more than 64 distinct Mermaid drawings have been stored, the
   page SHALL discard the least recently used drawing.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -42,3 +43,12 @@ When more than 64 distinct Mermaid drawings have been stored, the page SHALL dis
 
 - Method: Unit test of the drawing cache.
 - Criteria: Size never exceeds 64 and eviction order is least recently used.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+<!-- okf:links:end -->

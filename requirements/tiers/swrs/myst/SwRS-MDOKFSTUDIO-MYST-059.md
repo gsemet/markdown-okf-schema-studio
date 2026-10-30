@@ -7,7 +7,8 @@ description: When a toctree has `:glob:` entries with wildcards, the extension
   SHALL list the matching documents in sorted order.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a toctree has `:glob:` entries with wildcards, the extension SHALL list the
 
 - Method: Unit test "a glob entry lists the matching documents sorted" in test/core/render/gridToctree.test.ts
 - Criteria: Scan limits are rendering-core's.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-012](../../strs/myst/StRS-MDOKFSTUDIO-MYST-012.md): A toctree shows the linked documents and marks missing ones
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-057](SwRS-MDOKFSTUDIO-MYST-057.md): Toctree lists linked documents and marks missing ones
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When the schema folder holds files named `{type}.schema.yaml`,
   `.json5`.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the schema folder holds files named `{type}.schema.yaml`, `.yml`, `.json` o
 
 - Method: Unit test of the schema file matcher.
 - Criteria: Both the stem and the `.schema` suffix are compared in lower case (Note.SCHEMA.YAML matches the type note); files that do not end in `.schema` plus an accepted extension never match.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-019](SwRS-MDOKFSTUDIO-FMSCHEMA-019.md): A typed document finds its schema in the nearest schema folder
+<!-- okf:links:end -->

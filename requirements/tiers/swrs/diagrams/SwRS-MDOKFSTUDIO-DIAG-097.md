@@ -17,7 +17,8 @@ description: When a JAR render meets a bound on the diagram text, the output,
   or the environment is never reused.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -122,3 +123,20 @@ The extension SHALL run at most 2 PlantUML processes at once and queue the other
 - Method: test/core/render/diagReq.jar.requirements.test.ts `a diagram text over 1 MiB is refused without a process, a text of exactly 1 MiB is rendered` and `an output over 8 MiB stops the process; an output of exactly 8 MiB is accepted` (1 MiB and 8 MiB boundaries).
 - Method: test/core/render/plantUmlCache.test.ts `a second render of the same source starts no process` and `at most two PlantUML processes run at once`.
 - Criteria: The limits are strictly greater than 1 MiB and 8 MiB, the timeout constant is 30000 ms, the group is killed with a fallback, exited children are untouched, and a render has one result.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-098](SwRS-MDOKFSTUDIO-DIAG-098.md): The JAR pipeline refuses a source over 1 MiB
+  - [SwRS-MDOKFSTUDIO-DIAG-099](SwRS-MDOKFSTUDIO-DIAG-099.md): The JAR pipeline stops an output over 8 MiB
+  - [SwRS-MDOKFSTUDIO-DIAG-100](SwRS-MDOKFSTUDIO-DIAG-100.md): A JAR render stops after 30 seconds
+  - [SwRS-MDOKFSTUDIO-DIAG-101](SwRS-MDOKFSTUDIO-DIAG-101.md): Cancelling a render stops the PlantUML process group
+  - [SwRS-MDOKFSTUDIO-DIAG-102](SwRS-MDOKFSTUDIO-DIAG-102.md): A process that ignores its input becomes a message
+  - [SwRS-MDOKFSTUDIO-DIAG-103](SwRS-MDOKFSTUDIO-DIAG-103.md): A render settles exactly once
+  - [SwRS-MDOKFSTUDIO-DIAG-118](SwRS-MDOKFSTUDIO-DIAG-118.md): A cancelled JAR render reports the cancellation
+<!-- okf:links:end -->

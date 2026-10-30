@@ -10,7 +10,8 @@ description: "When the page needs a Mermaid diagram, the extension SHALL draw on
   the node no longer has."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -96,3 +97,17 @@ The page draws the diagrams that have no render state and leaves the diagrams th
 - Method: test/integration/realInput/markers.ts (real VS Code scenario RI-T34 in test/integration/realInput/renderPatching.ts: a Mermaid diagram is drawn again in the same frame)
 - Method: draw passes one at a time, late picture and late error have no test (browser entry point mermaidPreview.ts; to be covered by a unit test of the queue)
 - Criteria: Same source and theme give no second run; a different source or theme gives a new run; only diagrams without a render state are drawn after a patch; passes never overlap; only the current key's result reaches the node.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-011](SwRS-MDOKFSTUDIO-DIAG-011.md): A content patch draws only Mermaid diagrams not yet drawn
+  - [SwRS-MDOKFSTUDIO-DIAG-012](SwRS-MDOKFSTUDIO-DIAG-012.md): Mermaid draw passes run one at a time
+  - [SwRS-MDOKFSTUDIO-DIAG-014](SwRS-MDOKFSTUDIO-DIAG-014.md): A late Mermaid result for a replaced theme is not shown
+  - [SwRS-MDOKFSTUDIO-DIAG-116](SwRS-MDOKFSTUDIO-DIAG-116.md): A late Mermaid error for a replaced key is not shown
+<!-- okf:links:end -->

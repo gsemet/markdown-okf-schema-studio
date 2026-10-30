@@ -12,7 +12,8 @@ description: When a built-in diagram contains !include, !include_many,
   an answer that is not well formed.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -91,3 +92,19 @@ When a built-in diagram contains !include, !include_many, !include_once or !incl
 - Method: test/visual/scenarioDefinitions2.ts, visual scenarios diagrams v15 and v16 (nested participant drawn)
 - Method: test/page/modules/plantumlFileRequests.test.ts (from field, host refusal, repeated answer, silence and malformed answers, malformed requests)
 - Criteria: Each file is requested once per render and drawn; each request ends in one reason or one file; from is a string or null; nothing malformed reaches the host.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-048](SwRS-MDOKFSTUDIO-DIAG-048.md): A host refusal of an include reaches the diagram as its reason
+  - [SwRS-MDOKFSTUDIO-DIAG-049](SwRS-MDOKFSTUDIO-DIAG-049.md): Malformed include requests are ignored
+  - [SwRS-MDOKFSTUDIO-DIAG-113](SwRS-MDOKFSTUDIO-DIAG-113.md): Include silence and malformed answers reach the diagram as reasons
+  - [SwRS-MDOKFSTUDIO-DIAG-114](SwRS-MDOKFSTUDIO-DIAG-114.md): A non-string from is sent as null
+<!-- okf:links:end -->

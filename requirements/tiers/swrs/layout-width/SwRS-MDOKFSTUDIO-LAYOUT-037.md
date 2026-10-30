@@ -8,7 +8,8 @@ description: When a left-aligned badge or link of a leading properties table
   far enough to clear the toolbar.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a left-aligned badge or link of a leading properties table sits under the f
 
 - Method: Unit tests P3 a left-aligned badge under the toolbar in a narrow pane is pushed below it, and P3 a properties table with no control under the toolbar keeps its 40px gap.
 - Criteria: Clearance 47 px for the badge, 0 when no control is covered.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-011](SwRS-MDOKFSTUDIO-LAYOUT-011.md): A control under the floating toolbar is moved or narrowed out of its way
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When the preview page sends a message, the extension SHALL validate
   user-visible change.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When the preview page sends a message, the extension SHALL validate it against t
 - Criteria: Only validated messages reach handlers.
 
 Gap: message validation is a trust and security behaviour; no trust-security StRS exists yet, so this SwRS derives from the faithful rendering StRS for now and should be re-linked when that StRS is created.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+<!-- okf:links:end -->

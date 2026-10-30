@@ -10,7 +10,8 @@ description: When the host handles a reply, resolve or delete message for a
   not exist or already holds 200 comments.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -92,3 +93,15 @@ The refusals of the host that apply to every comment change (a read-only preview
 - Method: test/integration/commentWrite.test.ts (reply to the named thread; unknown thread refused with the file unchanged; resolve, reopen, resolve a second thread; delete a second thread with the others staying; deleting the last thread keeps the file and the page gets the empty list; delete of an unknown thread refused with the file unchanged). The 200-comment limit through addReply is covered by no test, and the resolve refusal through the host is untested.
 - Method: real window review-annotations/r05-thread-reply (Reply) and review-annotations/r06-thread-resolved (Resolve and reopen).
 - Criteria: The thread holds the comments in order and the other thread is identical. The resolved flag changes for the named thread only. The remaining ids match and the file exists with threads [] after the last delete. addReply returns undefined for a missing or full thread, setResolved and deleteThread return undefined for a missing thread, and the page gets the reason.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

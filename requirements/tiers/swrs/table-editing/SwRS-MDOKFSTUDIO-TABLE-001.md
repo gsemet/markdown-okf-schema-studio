@@ -11,7 +11,8 @@ description: When edit mode is on and the writer clicks a cell of a rendered
   editor.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -119,3 +120,15 @@ A table is editable when it has a header row, a delimiter row whose cells are at
 - Method: test/page/modules/markdownTable.test.ts (well-formed and malformed tables, "non-table blocks and malformed separator rows cannot be edited as pipe tables"; parse and splitRow for the trimmed text).
 - Method: visual scenarios table-editing/v02 to v05 (click, selected cell, caret at the end in step open; v05 only repeats the assertions of v02 to v04) and table-editing/v01 to v05 (no status hint).
 - Criteria: The region exists in the cell with the label "Markdown table cell editor" and exactly one previewEditOpen is posted for the click. The wrapper element carries data-sphinx-table-cell-content and aria-hidden, and the style makes it display block, height 0 and visibility hidden. The text box value equals the model cell, with rendered row 0 mapped to model row 0 and rendered row n to model row n+1. document.activeElement is the text box and selectionStart equals selectionEnd equals the text length. No element with the status attribute is a descendant of the cell editor region once the text box is rendered. parse returns a model for the well-formed inputs and undefined for the malformed ones. After the fallback answer the cell has no selected mark and the region holds a text box with the label "Raw Markdown block". The edit-mode-off refusal is read from the click handler in src/page/features/pageInput.ts and has no dedicated test; the empty-cell caret boundary has no dedicated test.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+  - [StRS-MDOKFSTUDIO-TABLE-008](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-008.md): A table bar locates the writer and edits rows and columns
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-014](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-014.md): A click or Enter on a mapped block opens its editor
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When a writer presses the toggle in a column header of a schema
   it.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -111,3 +112,16 @@ When a writer presses the toggle in a column header of a schema table, the exten
 - Method: `test/host/lifeReq.requirements.test.ts`, unit test `the Description column choice of a document is stored for the workspace and read at creation` (stored choice; saved panel state wins).
 - Method: `test/core/state/boundedState.test.ts` (200-entry cap and recency: `migration respects the cap`, `reading an entry protects it from eviction, peek does not`; legacy keys: `migration folds legacy keys into the map, preserves values and deletes the old keys`, `migration is a no-op without legacy keys and keeps newer map entries over legacy ones`; malformed value: `loading ignores a malformed stored value`).
 - Criteria: The colspan of info rows is 3 with docs and 2 otherwise. The map holds 200 entries (MAX_DOCUMENT_STATES), most recently used last, persisted under one workspace key; loadCollapsedMap and saveCollapsedMap hold at most 200 entries and return only valid pairs; no legacy key remains and the map values of existing entries are unchanged.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+  - [StRS-MDOKFSTUDIO-LIFE-014](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-014.md): Previews come back after a reload, remember recent documents and leave nothing behind
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-015](SwRS-MDOKFSTUDIO-FMSCHEMA-015.md): The Description choice is remembered per document
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-016](SwRS-MDOKFSTUDIO-FMSCHEMA-016.md): Narrow previews start with the Description column collapsed
+<!-- okf:links:end -->

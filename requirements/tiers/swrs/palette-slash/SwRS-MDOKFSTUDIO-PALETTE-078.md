@@ -11,7 +11,8 @@ description: When the writer presses Table, the extension SHALL open a popover
   the focus to the text box.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -86,3 +87,14 @@ When the writer presses Table, the extension SHALL open a popover with a 9 by 9 
 - Method: test/page/runtimeEditPalette.test.ts (T24: the Table button opens the grid and hovering lights rows x columns and shows the size; one click on a grid cell inserts the table as one undo step and keeps the editor open; Escape closes the grid first, arrows and Enter drive it from the text box; scenarios opening, hovering, cell click, arrows and Enter)
 - Method: visual scenarios palette-slash/v01-palette-popups-light-900 and palette-slash/v17-palette-wraps-narrow-dark-360 (3 by 4 lights 12 of 81 cells; scenario hovering lights the rectangle)
 - Criteria: Each cell has the role menuitem and the accessible name rows times columns; the label has aria-live polite; a cell is lit when its row and column are both at or below the hovered ones; a hover over a non-cell element leaves the state unchanged; the action receives the argument rows x columns, for example 3x4; a click that is on no cell inserts nothing and leaves the grid open.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+<!-- okf:links:end -->

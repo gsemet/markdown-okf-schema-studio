@@ -8,7 +8,8 @@ description: When a figure or image has a requested width, the extension SHALL
   content update.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When a figure or image has a requested width, the extension SHALL apply it from 
 
 - Method: Visual scenario `figure-anchors-${theme}-${mode ?? "theme"}` in test/visual/scenarioDefinitions2.ts
 - Criteria: The value is re-validated with the page's own pattern.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+<!-- okf:links:end -->

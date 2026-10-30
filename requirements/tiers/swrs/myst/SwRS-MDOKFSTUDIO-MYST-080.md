@@ -8,7 +8,8 @@ description: When a conf.py is created, edited or deleted, the extension SHALL
   deferred while a block edit is open.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a conf.py is created, edited or deleted, the extension SHALL re-render exac
 
 - Method: Integration suite run() in test/integration/mystDiagnostics.test.ts
 - Criteria: Event order before or after the open does not matter.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-078](SwRS-MDOKFSTUDIO-MYST-078.md): Extension warnings appear in the Problems view and follow conf.py
+<!-- okf:links:end -->

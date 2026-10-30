@@ -9,7 +9,8 @@ description: When a reader previews a document and it refers to a local image,
   every workspace folder is its own folder and nothing else.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -40,3 +41,15 @@ As a reader, I preview a Markdown file from anywhere on my disk and see the imag
 - A document of an untrusted workspace follows the same rule: the folder of the document and nothing wider.
 - The frontmatter schema is not searched for such a file (frontmatter-schema scope).
 - A missing file is a different outcome from a refused one: it is shown as a missing image or a warning by the rendering scopes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-062](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-062.md): A preview without a source says why and recovers when it returns
+  - [SwRS-MDOKFSTUDIO-TRUST-002](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-002.md): A read-only preview reads no home folder and no dot-directory
+  - [SwRS-MDOKFSTUDIO-TRUST-007](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-007.md): A page loads local files only from its resource roots
+  - [SwRS-MDOKFSTUDIO-TRUST-025](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-025.md): A resource reference resolves only to an existing file inside a root
+<!-- okf:links:end -->

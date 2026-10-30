@@ -11,9 +11,13 @@ description: When a writer previews a document with a Mermaid fence or
   flowchart fence that renders at once.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: approved
+req_lifecycle: approved
+status: stable
 approved_by: gaetan@xeberon.net
-approved_on: 2026-10-28
+approved_at: '2026-10-28T00:00:00Z'
+verified:
+  by: human:gaetan@xeberon.net
+  at: '2026-10-28T00:00:00Z'
 origin: native
 tier: StRS
 derives_from: []
@@ -86,3 +90,45 @@ Writers expect a Mermaid diagram written in a fence or a directive to appear as 
 - Known issue: a failed Mermaid diagram posts no diagnostic to the status line or the Problems list, because the drawing happens in the page.
 - Insert: the "Mermaid" button (GitHub group of the edition palette, tooltip "Mermaid diagram") and the "/Mermaid" slash entry (aliases diagram, chart, graph, flowchart) insert a fenced `mermaid` flowchart set apart after the selection, with its first label "Start" selected.
 - Only the GFM palette mode offers it: not Strict, not MyST, and no `{mermaid}` directive button exists.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-DIAG-001](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-001.md): Mermaid fences become inert diagram pictures
+  - [SwRS-MDOKFSTUDIO-DIAG-002](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-002.md): The Mermaid renderer loads only when a Mermaid figure exists
+  - [SwRS-MDOKFSTUDIO-DIAG-003](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-003.md): Mermaid diagrams are drawn as inert pictures
+  - [SwRS-MDOKFSTUDIO-DIAG-004](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-004.md): Mermaid pictures keep their natural size within the content width
+  - [SwRS-MDOKFSTUDIO-DIAG-005](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-005.md): Mermaid colours follow the preview theme
+  - [SwRS-MDOKFSTUDIO-DIAG-006](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-006.md): Mermaid diagrams are drawn again when the theme changes
+  - [SwRS-MDOKFSTUDIO-DIAG-007](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-007.md): Mermaid falls back to built-in colours
+  - [SwRS-MDOKFSTUDIO-DIAG-008](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-008.md): Mermaid edge labels stay readable
+  - [SwRS-MDOKFSTUDIO-DIAG-009](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-009.md): Mermaid diagrams are drawn once and late results are dropped
+  - [SwRS-MDOKFSTUDIO-DIAG-010](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-010.md): The Mermaid drawing cache keeps 64 drawings
+  - [SwRS-MDOKFSTUDIO-DIAG-011](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-011.md): A content patch draws only Mermaid diagrams not yet drawn
+  - [SwRS-MDOKFSTUDIO-DIAG-012](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-012.md): Mermaid draw passes run one at a time
+  - [SwRS-MDOKFSTUDIO-DIAG-013](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-013.md): Mermaid element ids stay unique for the page life
+  - [SwRS-MDOKFSTUDIO-DIAG-014](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-014.md): A late Mermaid result for a replaced theme is not shown
+  - [SwRS-MDOKFSTUDIO-DIAG-015](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-015.md): Invalid Mermaid shows one message with the parser reason
+  - [SwRS-MDOKFSTUDIO-DIAG-016](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-016.md): An invalid Mermaid diagram keeps exactly one error
+  - [SwRS-MDOKFSTUDIO-DIAG-017](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-017.md): The Mermaid action inserts a starter flowchart in GFM mode
+  - [SwRS-MDOKFSTUDIO-DIAG-018](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-018.md): Mermaid is offered in the GFM palette mode only
+  - [SwRS-MDOKFSTUDIO-DIAG-019](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-019.md): Comment quotes are never wrapped inside diagrams
+  - [SwRS-MDOKFSTUDIO-DIAG-020](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-020.md): Selecting text inside a diagram offers no comment
+  - [SwRS-MDOKFSTUDIO-DIAG-021](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-021.md): Diagrams can use the wider column in Auto width
+  - [SwRS-MDOKFSTUDIO-DIAG-022](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-022.md): A diagram under edit is hidden
+  - [SwRS-MDOKFSTUDIO-DIAG-116](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-116.md): A late Mermaid error for a replaced key is not shown
+  - [SwRS-MDOKFSTUDIO-DIAG-121](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-121.md): Vega-Lite and Vega fences become chart figures
+  - [SwRS-MDOKFSTUDIO-DIAG-122](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-122.md): Chart data files are read through the resource policy
+  - [SwRS-MDOKFSTUDIO-DIAG-123](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-123.md): Charts are drawn as themed SVG pictures with errors in place
+  - [SwRS-MDOKFSTUDIO-DIAG-124](../../swrs/diagrams/SwRS-MDOKFSTUDIO-DIAG-124.md): The chart runtime loads only with a chart and needs no eval
+  - [SwRS-MDOKFSTUDIO-REVIEW-017](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-017.md): The quote of a thread is highlighted once in its block
+  - [SwRS-MDOKFSTUDIO-REVIEW-038](../../swrs/review-annotations/SwRS-MDOKFSTUDIO-REVIEW-038.md): Selected body text offers a Comment button and a keyboard shortcut
+- Supersedes:
+  - [StRS-MDOKFSTUDIO-DIAG-002](StRS-MDOKFSTUDIO-DIAG-002.md): Mermaid diagrams follow the preview theme
+  - [StRS-MDOKFSTUDIO-DIAG-003](StRS-MDOKFSTUDIO-DIAG-003.md): Mermaid diagrams stay in place while typing
+  - [StRS-MDOKFSTUDIO-DIAG-004](StRS-MDOKFSTUDIO-DIAG-004.md): Understand why a Mermaid diagram failed
+  - [StRS-MDOKFSTUDIO-DIAG-005](StRS-MDOKFSTUDIO-DIAG-005.md): Insert a Mermaid diagram from the edit tools
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: "When the column is built, the extension SHALL list the headings h1
   contents landmark and a twisty on each entry that has deeper entries."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,12 @@ When the column is built, the extension SHALL list the headings h1 to h4 of the 
 - Method: test/page/runtimePageControls.test.ts (Folded sections are remembered: T13, a state snapshot keeps the TOC visibility and the folded sections).
 - Method: test/visual/capture_layout_checks.py (check_toc_column: levels 1 to 4 and no h5; a twisty hides and shows sub-entries).
 - Criteria: levels listed are 1..4; entries equal the headings that match no excluded selector; the empty paragraph carries the text No headings; nav[data-sphinx-preview-toc] has aria-label Table of contents; hidden entries are those below a folded parent; tocCollapsed in the webview state lists the keys.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
+<!-- okf:links:end -->

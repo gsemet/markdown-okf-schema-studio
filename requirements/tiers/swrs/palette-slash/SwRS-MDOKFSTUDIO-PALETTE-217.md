@@ -10,7 +10,8 @@ description: When the clipboard HTML of a paste is converted, the extension
   element, and give an empty text when nothing readable is left.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -147,3 +148,14 @@ The refusal of an unsafe address is in SwRS-MDOKFSTUDIO-PALETTE-229.
 - Method: test/core/paste/htmlToMarkdown.test.ts, data-driven unit test T1 htmlToMarkdown, rows "Google Docs: wrapper bold at normal weight, styled spans, heading, nested lists in the parent list" (headings and emphasis, nested list), "web page: link, inline code, image as link, blockquote, script and onclick dropped" (links and images, inline code, block quote), "ordered list, task item and horizontal rule" (lists), "Word: comments and o:p dropped, list paragraphs through mso-list" (Word lists), "web page: code block with the language from its class" (fenced code), "VS Code copy: several lines stay raw text, never wrapped in a fence", "VS Code copy of a document with code fences and blank lines is returned as copied" and "VS Code copy: one line stays plain text" (VS Code copy), "web page: simple table becomes a GFM table, a pipe in a cell is escaped" and "web page: a table with a colspan is not a table, only its text stays" (tables), "text that looks like Markdown is escaped" (escaping), "nothing readable" (empty result); no row checks the page fallback of an empty result, the empty heading, the empty link, the empty block quote, the rowspan or nested table, or the language classes other than language-.
 - Method: test/core/paste/paletteReq.requirements.test.ts, unit test "elements that are not converted contribute their text only; converted ones keep their conversion" (other elements)
 - Criteria: A weight of 600 or more, or the words bold and bolder, counts as bold. An unchecked checkbox becomes [ ]. Each level of a Word list indents by three blanks; the marker o is a bullet; every numbered item is written with 1. The language classes recognised are language-, lang-, highlight-source- and highlight-text-. The monospace rule needs a pre white-space and a monospace, consolas, menlo or courier font. The first row of a table is the header even when it uses td cells. Underscores inside words are left alone. The blocks inside a quote are converted with the same rules. Block elements separate paragraphs; inline elements join their text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-213](SwRS-MDOKFSTUDIO-PALETTE-213.md): Pasted rich text is converted by the host and replaces the selection in one step
+<!-- okf:links:end -->

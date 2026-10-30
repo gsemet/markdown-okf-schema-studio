@@ -7,7 +7,8 @@ description: When a writer links to a heading, figure, table, equation or label
   with a reference role, the Studio SHALL show a link whose target is visible.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -32,3 +33,12 @@ As a writer, I want to see where each cross-reference points so that I can spot 
 ### Rationale and constraints
 
 - Targets that cannot be resolved without a project build are shown as written rather than hidden.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-MYST-009](StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+<!-- okf:links:end -->

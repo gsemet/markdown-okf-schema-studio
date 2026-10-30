@@ -10,7 +10,8 @@ description: "When a wikilink is followed, the extension SHALL search every work
   does."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -91,3 +92,12 @@ When a wikilink is followed, the extension SHALL search every workspace root for
 - Method: test/session/previewNavigator.test.ts (one match, sibling fallback and search first: discovers bare wikilinks before accepting an active-root sibling and searches every workspace root and blocks cross-root wikilink ambiguity; ambiguous, match outside the workspace, unavailable and the folder part found without a new search: discovers wikilinks on demand and refuses ambiguous or escaping targets; the dotted-name rows and the blocked folder-part row are untested)
 - Method: test/session/toolbarReq.requirements.test.ts (one search per name at a time: one search per wikilink name runs at a time)
 - Criteria: One candidate after validation opens; more than one candidate is blocked; no candidate falls back to the file next to the document; the running searches are kept in a map by name.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+<!-- okf:links:end -->

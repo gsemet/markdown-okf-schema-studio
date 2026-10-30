@@ -11,7 +11,8 @@ description: "When the reader presses the collapse button, the extension SHALL t
   to collapsed or expanded."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -61,3 +62,12 @@ The root never carries a data-sphinx-preview-toolbar attribute.
 - Method: test/page/runtimePageControls.test.ts (unit test P8: the collapse button hides rows 2 to 5, label and aria-expanded after a click, the root attribute and the assertion that the root never matches the toolbar selector; scenarios Collapse then expand, Button and root attribute per state, At start and after each press).
 - Method: test/visual/capture_layout_checks.py (check_toolbar_collapse on toolbar-navigation/v07, v09, v11, v13, v15, v17, v19 and v21: Tab order, height shrinks, the toolbar does not move, expanding restores it, aria-expanded true or false; scenarios Collapse then expand, Keyboard order when collapsed, Button and root attribute per state).
 - Criteria: rows.hidden follows the state; the collapsed Tab order is the main row plus Show view controls; the toolbar top and right do not change; aria-expanded and the three texts follow the collapsed flag; the root attribute equals collapsed or expanded and the root has no data-sphinx-preview-toolbar attribute.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-001](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar groups its controls, collapses and remembers view choices
+<!-- okf:links:end -->

@@ -12,7 +12,8 @@ description: When the writer types a query after the slash, the extension SHALL
   the highlight was not moved.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -99,3 +100,12 @@ When the writer types a query after the slash, the extension SHALL narrow the li
 - Method: test/page/modules/slashMenu.test.ts, unit tests "P11: ranking puts a prefix before a word start before a subsequence" (ranking, scattered letters), "P11: the empty query groups by category, a query lists best match first with the category" (ranked list), "P11 r2: in MyST the MyST entry ranks before its GFM equivalent; GFM and exact labels are unchanged" (MyST preference, admonition and exact label), "P11 r3: the MyST preference needs 3+ letters: /h and /h1 still find Heading first" (short queries), "P11: the arrows move through the list and wrap; typing filters and resets the highlight" (typing narrows), "P11 r2: the best match being only fuzzy leaves Enter and Tab to the text unless the user moved" (loose best match).
 - Method: the wiring of the preferred group in the editors (src/page/features/blockSourceEditor.ts and tableCellEditor.ts) is not asserted by a page test: the slash harness of the unit tests does not pass it.
 - Criteria: Ties keep the order of the palette; a query of one or two letters never matches by subsequence. The bonus is 5 points for a score of 1000 or more (an exact label scores 1010 because a label gets 10 more than an alias) and 8 points for a score from 400 to 999, applied only to a query of three or more letters. The input event re-reads the text between the slash and the caret. A score below 600 means letters inside a word or scattered letters; Shift+Enter always stays text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+<!-- okf:links:end -->

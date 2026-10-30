@@ -9,7 +9,8 @@ description: When a tab of a tab set is clicked, or has the focus and receives
   same sync key in the other tab sets of the same sync group.
 project: MDOKFSTUDIO
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -60,3 +61,12 @@ When a tab of a tab set is clicked, or has the focus and receives an arrow, Home
 
 - Method: test/page/modules/tabs.test.ts (keys, wrap, modifiers, click, nesting, sync groups, re-apply after a patch) the screenshot scenario myst/v43-tabs-keyboard-light-900 (a real click, Home, ArrowRight and End in the page bundle) and the real-window scenario test/integration/mystBlocksWindow.ts (a real click, ArrowRight, ArrowLeft, Home and End in the window)
 - Criteria: the attributes and the shown panel after each key match the table above, and the focused element is the selected tab.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+<!-- okf:links:end -->

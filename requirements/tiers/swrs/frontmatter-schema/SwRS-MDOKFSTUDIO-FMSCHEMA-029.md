@@ -10,7 +10,8 @@ description: When a document's type has a schema, the extension SHALL show a
   and the properties of composed schemas merged into one field list.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -100,3 +101,18 @@ When a document's type has a schema, the extension SHALL show a table with the c
 - Method: test/core/frontmatter/propertiesTable.test.ts (type icon and label, row tooltip, rendering of the displayed type).
 - Method: test/visual/scenarioDefinitions1.ts, visual scenario (schema order, required but absent field, icon size check of at most 1.5 em).
 - Criteria: Declared present fields come in effective-schema order; undeclared keys in YAML order; absent required fields last. Icon titles: Text, Number, List, Checkbox, Options (enum), Date, Time, Date and time, Unknown type. Without a schema the type follows the value: boolean, number or list, else unknown. The tooltip is empty when the row has no title, description, enum or issue. Later branches extend earlier declarations of the same name; nullable is recorded per field. Properties live in a null-prototype map and are tested with Object.hasOwn.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-030](SwRS-MDOKFSTUDIO-FMSCHEMA-030.md): Field names show a type icon and a type label
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-031](SwRS-MDOKFSTUDIO-FMSCHEMA-031.md): The row tooltip lists title, description, allowed values and issues
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-032](SwRS-MDOKFSTUDIO-FMSCHEMA-032.md): Composed schemas are merged into one field list
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-033](SwRS-MDOKFSTUDIO-FMSCHEMA-033.md): The displayed field type follows the schema declaration
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-034](SwRS-MDOKFSTUDIO-FMSCHEMA-034.md): Field names equal to object members are not treated as present
+<!-- okf:links:end -->

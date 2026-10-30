@@ -11,7 +11,8 @@ description: When a document is shown or its review comments file is created,
   read that a newer read overtook.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -116,3 +117,15 @@ The page accepts the message only when it is addressed to its render, see SwRS-M
 - Method: test/session/reviewReqComments.requirements.test.ts: switching the sidecar and clearing a preview release the watcher and its three subscriptions (the watch of the comments file is released).
 - Method: test/page/modules/commentThreads.test.ts: `T42: hostile ids and malformed threads are tolerated` (shape of the threads message the page accepts).
 - Criteria: The last posted threads equal the file content, plus an orphaned flag for each thread; the post count stays 0 without a file and the last post is an empty list after a deletion; the threads shown by the page equal the file after each create, change and delete; the post count does not grow after an echo (comparison by the hash of the text, only while the lines followed in memory exist, and by the serialized threads); a read whose sequence number is no longer the latest returns before posting and before recording its text hash; post() returns before reading when the document uri does not start with file:.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

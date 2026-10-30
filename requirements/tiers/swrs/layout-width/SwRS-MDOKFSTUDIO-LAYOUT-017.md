@@ -8,7 +8,8 @@ description: "When the floating toolbar shares horizontal space with the text co
   and 0 otherwise."
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the floating toolbar shares horizontal space with the text column, the exte
 
 - Method: Unit tests P4 the toolbar's bottom edge is published for the sticky palette only where it overlaps the column, and P3 an open first-block editor keeps its 40px gap and gives up the width the toolbar covers.
 - Criteria: Published values equal the bottom edge plus 8 on overlap, 0 otherwise.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-018](SwRS-MDOKFSTUDIO-LAYOUT-018.md): The clearance is measured again after layout events, in bounded bursts
+<!-- okf:links:end -->

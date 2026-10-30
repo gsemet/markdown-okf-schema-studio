@@ -9,7 +9,8 @@ description: When the reader presses the Width button, the extension SHALL
   position of the page.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -71,3 +72,17 @@ When the reader presses the Width button, the extension SHALL switch the width m
 - Method: test/visual/capture_layout_checks.py (three clicks, label of every mode): visual checks of the three modes in light, dark and cream at 900 and 1600 px.
 - Method: test/page/diagReq.layout.requirements.test.ts (scrolled document, no anchor yet): unit test `a width mode change keeps the line at the reading position, with or without an anchor yet`.
 - Criteria: Mode order and label texts are exactly as listed; the change callback calls keepReadingLine.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-040](SwRS-MDOKFSTUDIO-LAYOUT-040.md): A width mode change keeps the reading line
+<!-- okf:links:end -->

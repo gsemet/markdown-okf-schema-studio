@@ -11,7 +11,8 @@ description: When the host answers previewListTargets, the extension SHALL list
   entries, and set the truncated flag when the list is cut.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -83,3 +84,16 @@ When the host answers previewListTargets, the extension SHALL list the lines (na
 - Method: test/core/mapping/mystTargets.test.ts (documentTargets lists (label)= names with the heading or text that follows; ignores labels in code fences and malformed names; caps the list and says so; checks the labels, fences and bad names, detail and size scenarios)
 - Method: test/integration/mystPickers.test.ts (the labels first and second are listed with their detail; checks the labels scenario and the shape of the answer)
 - Criteria: A label line may have blanks around it and nothing else; the popover shows More entries exist. Type to narrow the list. when the flag is set.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

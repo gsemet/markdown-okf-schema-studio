@@ -8,7 +8,8 @@ description: When a writer previews a diagram the bundled engine cannot draw,
   keep the source readable.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -39,3 +40,12 @@ As a writer, I learn why my diagram has no picture and what to change, instead o
 - When the engine fails (syntax error or exception) the diagram reads "The built-in PlantUML engine could not render this diagram: followed by the reason", the reason as plain text without a Java-style class prefix, with the `useJar` hint, no picture, and the source kept. Known issue: no diagnostic reaches the status line; only the picture area shows the message.
 - A source longer than 1 MiB is refused before the engine runs with "The PlantUML source exceeds the 1 MiB preview limit."
 - Known issue: a diagram with empty source is skipped and left blank.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-DIAG-006](StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+<!-- okf:links:end -->

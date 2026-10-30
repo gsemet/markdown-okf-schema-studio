@@ -9,7 +9,8 @@ description: When a reader saves a comment on a selection, the page SHALL anchor
   characters and up to 32 characters of text before and after it.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -66,3 +67,12 @@ When a reader saves a comment on a selection, the page SHALL anchor it from the 
 
 - Method: test/page/modules/commentCompose.test.ts, unit tests `T43: a selection across blocks anchors first block line to last block end line` (Selection across blocks), `T43: a triple-click selection that ends at offset 0 of the next block stays in its own block` (Triple click), `T43: the quote is whitespace-collapsed and capped at 500, prefix and suffix at 32` (Normal selection, Long selection).
 - Criteria: The anchor lines equal the data-line of the first block and the data-end-line of the last block. The lengths are 500, 32 and 32 at most.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+<!-- okf:links:end -->

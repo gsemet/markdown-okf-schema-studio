@@ -8,7 +8,8 @@ description: "When a previewThemeModeChanged message carries a mode other than c
   or answering."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -61,3 +62,16 @@ When a previewThemeModeChanged message carries a mode other than current, dark, 
 
 - Method: test/core/protocol/pageStateMessages.test.ts, unit test `the page-state validators accept exactly what the frozen validator accepted` (all three scenarios): its corpus holds the modes cream and neon and an absent mode, and exercises the live validator PAGE_TO_HOST_VALIDATORS.previewThemeModeChanged (src/core/protocol/pageToHost.ts). The unit test `accepts only complete theme-mode change messages` (test/core/state/previewTheme.test.ts) exercises a helper the host does not use. The guard in src/session/features/viewState.ts repeats the check and is not tested separately.
 - Criteria: Only the four modes pass the validator; the others and an absent field do not.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-004](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-004.md): The theme choice holds for the workspace and survives slow loads and bad values
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+<!-- okf:links:end -->

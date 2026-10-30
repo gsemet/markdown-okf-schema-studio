@@ -7,7 +7,8 @@ description: The package SHALL limit the markdownDescription of every
   contributed setting to 700 characters and give it no plain description.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,12 @@ The package SHALL limit the markdownDescription of every contributed setting to 
 
 - Method: Unit test test/security/package-contract.test.ts (every contributed setting is explained with a markdownDescription and a unique order).
 - Criteria: The count of 18 is that of the test, which also lists the exact setting keys. That every setting has a description and a unique order is SwRS-MDOKFSTUDIO-LIFE-157.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-021](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-021.md): The settings editor lists the Studio settings in clear groups
+<!-- okf:links:end -->

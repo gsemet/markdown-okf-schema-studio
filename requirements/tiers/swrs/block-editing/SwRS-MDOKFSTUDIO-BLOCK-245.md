@@ -7,7 +7,8 @@ description: "The host SHALL accept previewEditFlushed only with a non-empty flu
   of at most 100 characters and a boolean flushed."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,15 @@ The host SHALL accept previewEditFlushed only with a non-empty flushId of at mos
 
 - Method: Unit test `CR 025: previewEditFlushed validates the flush id and the flag` in test/core/protocol/pageToHost.test.ts (both scenarios; the 100-character bound of the flush id is named in the criteria and not in the test title).
 - Criteria: MAX_EDIT_ID_LENGTH is 100.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+<!-- okf:links:end -->

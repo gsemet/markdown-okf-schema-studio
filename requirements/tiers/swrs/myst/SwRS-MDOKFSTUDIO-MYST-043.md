@@ -8,7 +8,8 @@ description: When a rename arrives while a block edit is open, the extension
   renaming a label.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ The host holds no state for a frontmatter edit: the page itself refuses to start
 
 - Method: Unit test "a rename while a block edit is open changes nothing and answers Save or cancel the open Markdown edit" in test/session/renderReq.labelRename.requirements.test.ts
 - Criteria: The document is unchanged.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+<!-- okf:links:end -->

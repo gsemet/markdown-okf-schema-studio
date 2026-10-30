@@ -8,7 +8,8 @@ description: When the extension activates, the extension SHALL load the MyST
   swallowing a failure of that load without showing an error.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When the extension activates, the extension SHALL load the MyST engine once so t
 
 - Method: Unit test "the warm-up loads the engine once, shares it with the render and a warm-up call never throws" in test/core/render/renderReq.renderingCore.requirements.test.ts
 - Criteria: One engine load is shared; a warm-up failure is swallowed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

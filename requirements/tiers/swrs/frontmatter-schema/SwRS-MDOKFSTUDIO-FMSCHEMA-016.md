@@ -8,7 +8,8 @@ description: When a document has no remembered Description choice and the
   the Description column collapsed.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a document has no remembered Description choice and the preview is 640 px w
 - Method: Unit test of the page start state; visual scenarios at 460 px.
 - Criteria: The width is measured once, at page start (window.innerWidth <= 640).
 - Known issue: resizing the preview afterwards does not change the choice.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-014](SwRS-MDOKFSTUDIO-FMSCHEMA-014.md): The Description column collapses and the choice is kept per document
+<!-- okf:links:end -->

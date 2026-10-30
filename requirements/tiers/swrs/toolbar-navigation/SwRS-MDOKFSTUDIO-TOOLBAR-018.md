@@ -10,7 +10,8 @@ description: "When a heading of level h1 to h6 of the running text lies at or ab
   when no heading lies at or above the reading line."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -79,3 +80,12 @@ When a heading of level h1 to h6 of the running text lies at or above the readin
 - Method: test/visual/scenarioDefinitions2.ts, toolbar-navigation/v39-sticky-running-text-light-900 and v40-sticky-running-text-dark-900 (a heading inside a note never appears in the band)
 - Method: test/visual/capture_final_checks.py (check_sticky_headings on toolbar-navigation/v01 (depth 1), v02 (depth 2), v03 and v04 (depth 3): exact text and line count; Depth 3).
 - Criteria: Lines equal the ancestor chain, at most depth lines, each prefixed by # repeated level times and a space; hidden is true and the text empty when no heading is active; measureHeadings selects h1 to h6 and keeps the headings with a height that are not inside an admonition or the properties table; the label has no text of the .okf-comment elements.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-004](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-004.md): The reader always sees the section being read
+<!-- okf:links:end -->

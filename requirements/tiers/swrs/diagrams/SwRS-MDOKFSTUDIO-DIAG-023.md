@@ -10,7 +10,8 @@ description: "When a document contains a plantuml fence, or a {plantuml} or {uml
   draws as one inert centred picture in the light or dark variant of the preview."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -113,3 +114,20 @@ When a document contains a plantuml fence, or a {plantuml} or {uml} directive wi
 - Method: test/visual/scenarioDefinitions2.ts (visual scenarios diagrams v10 and v11: picture drawn, SVG with a script, the variant change redraws all diagrams)
 - Method: test/core/preview/diagReq.styles.requirements.test.ts (a PlantUML picture is scaled down to the column and never set to a fixed width; a PlantUML picture is a block centred with automatic inline margins; the PlantUML source disclosure has the rules of the Mermaid one)
 - Criteria: Every form gives the same figure structure and the text is unchanged; the script tag follows the engine and the figure; a data-URI image with the rendered state replaces the text; luminance below 0.18 selects dark; max-width 100 percent, height auto, centred, and the disclosure rules equal the Mermaid ones. The dark-to-light theme observer has no unit test.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-028](SwRS-MDOKFSTUDIO-DIAG-028.md): The built-in PlantUML script loads only when needed
+  - [SwRS-MDOKFSTUDIO-DIAG-029](SwRS-MDOKFSTUDIO-DIAG-029.md): Built-in PlantUML diagrams are drawn as inert pictures
+  - [SwRS-MDOKFSTUDIO-DIAG-030](SwRS-MDOKFSTUDIO-DIAG-030.md): Built-in diagrams follow the light or dark preview
+  - [SwRS-MDOKFSTUDIO-DIAG-081](SwRS-MDOKFSTUDIO-DIAG-081.md): PlantUML pictures are contained in the content width
+  - [SwRS-MDOKFSTUDIO-DIAG-083](SwRS-MDOKFSTUDIO-DIAG-083.md): The PlantUML source disclosure is styled like Mermaid's
+  - [SwRS-MDOKFSTUDIO-DIAG-115](SwRS-MDOKFSTUDIO-DIAG-115.md): A theme switch between light and dark redraws built-in diagrams
+  - [SwRS-MDOKFSTUDIO-DIAG-119](SwRS-MDOKFSTUDIO-DIAG-119.md): PlantUML pictures are centred
+<!-- okf:links:end -->

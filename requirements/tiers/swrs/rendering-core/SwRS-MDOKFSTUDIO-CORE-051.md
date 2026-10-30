@@ -7,7 +7,8 @@ description: When the user presses a pointer button or a key for the first time,
   the extension SHALL turn on the soft appearance of editors, bars and menus.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the user presses a pointer button or a key for the first time, the extensio
 
 - Method: Unit test "CR 046: editors and menus appear softly only after a pointer or key press, never after a patch" in test/page/modules/motion.test.ts
 - Criteria: Soft appearance is on only after the first pointer or key press.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-050](SwRS-MDOKFSTUDIO-CORE-050.md): Soft appearance and colour transitions honour reduced motion
+<!-- okf:links:end -->

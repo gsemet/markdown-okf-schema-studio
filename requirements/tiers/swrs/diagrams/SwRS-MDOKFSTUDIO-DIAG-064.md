@@ -8,7 +8,8 @@ description: When an included file includes one of its ancestors, including the
   includes itself (an include cycle) instead of looping.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When an included file includes one of its ancestors, including the diagram's own
 
 - Method: Unit test: an include cycle is stopped with a message, also back to the diagram's own file.
 - Criteria: No unbounded recursion.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-061](SwRS-MDOKFSTUDIO-DIAG-061.md): Includes nest at most 8 deep, 64 files and 1 MiB
+<!-- okf:links:end -->

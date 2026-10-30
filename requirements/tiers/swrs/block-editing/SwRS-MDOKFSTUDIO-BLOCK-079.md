@@ -9,7 +9,8 @@ description: When a writer presses an arrow key with the caret at an edge of the
   caret at its end or at its start, and otherwise leave the key to the text box.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -91,3 +92,16 @@ When a writer presses an arrow key with the caret at an edge of the text box of 
 - Method: test/page/blockReq.requirements.test.ts (modifiers or a selection stay in the text box; navigation stops at the first and at the last block)
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (ArrowUp at the start of the first body block does not step onto the properties table)
 - Criteria: boundaryNavigation answers step -1 with caret position end only on the first visual line and step 1 with caret position start only on the last visual line, and returns undefined when a modifier is held or the selection is not collapsed; adjacentMappedBlock returns undefined at the ends and ignores elements marked data-okf-properties; state.pendingBlockNavigation and the saved webview state hold the same entry until resumePendingBlockNavigation clears it. The remembering is exercised by the arrow unit tests; the survival of a real reload is untested.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-008](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-008.md): A writer types and moves between blocks with text editor keys
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-062](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-062.md): Boundary navigation does not step into the properties table
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a newer edit arrives during a render, the extension SHALL
   render was canceled because a newer edit arrived."
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a newer edit arrives during a render, the extension SHALL cancel that rende
 
 - Method: Unit test "cancellation while rendering rejects a late successful result" in test/core/render/renderPipeline.test.ts
 - Criteria: A late result of a superseded render is never applied.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-001](SwRS-MDOKFSTUDIO-CORE-001.md): The preview renders the unsaved buffer completely, in process
+<!-- okf:links:end -->

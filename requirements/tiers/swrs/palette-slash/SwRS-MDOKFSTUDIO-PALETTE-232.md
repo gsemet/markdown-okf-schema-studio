@@ -11,7 +11,8 @@ description: When the writer types a slash with no selection at the start of a
   command holds a space or a second slash, leaving the text as typed.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -107,3 +108,12 @@ When the writer types a slash with no selection at the start of a line or after 
 - Method: test/page/modules/slashMenu.test.ts, unit tests "P11: a slash at a line start or after whitespace may open the menu, other slashes may not" (line start, word or address) and "P11: typing a slash opens the menu; a slash in a word, URL or code does not" (line start, word or address, code), "P11: a slash typed while text is selected does not open the menu" (selection), "P11: no menu inside inline code, a fenced block or a fence info string" (code), "P11: // and / followed by a space close the menu; a paste or composition does not open it" (paste, composition, composition while open, second slash or space).
 - Method: visual scenarios palette-slash/v11-slash-strict-light-900, palette-slash/v12-slash-gfm-light-900, palette-slash/v13-slash-myst-light-900, palette-slash/v14-slash-myst-filtered-dark-900 (an open menu after a typed slash); real-window scenario scenarioSlashMenu in test/integration/realInput/textEditing.ts (line start).
 - Criteria: Only an insert event of the character / opens the menu; the menu is not built for the frontmatter editors (SwRS-MDOKFSTUDIO-FMEDIT-001). canOpenAt returns false when the character before the slash is not whitespace. A fence is a line that starts with three backticks or three tildes; a blank line ends the paragraph of a code span; a double-backtick span needs a double-backtick closer. Only the input types insertText, or no type, can open the menu. The input event with isComposing true closes the menu. Any whitespace character counts as a space.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+<!-- okf:links:end -->

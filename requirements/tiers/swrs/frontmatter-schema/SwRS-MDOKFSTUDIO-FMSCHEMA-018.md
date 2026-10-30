@@ -8,7 +8,8 @@ description: 'When the frontmatter block parses to a list, a scalar or nothing, 
   a mapping.".'
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When the frontmatter block parses to a list, a scalar or nothing, the extension 
 - Criteria: The extraction returns present = true, no mapping and the message Frontmatter is not a mapping.
 - Known issue: a YAML alias that expands more than 100 times fails the parse and is reported as invalid YAML, not as a mapping problem.
 - Known issue: an empty block is a valid fence but still gets this error row.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-002](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-002.md): Invalid frontmatter is explained and the body still renders
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-001](SwRS-MDOKFSTUDIO-FMSCHEMA-001.md): The frontmatter block is found by its fences and parsed as a YAML mapping
+<!-- okf:links:end -->

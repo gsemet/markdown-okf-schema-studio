@@ -8,7 +8,8 @@ description: "When a schema is found and the saved value is not of the field's t
   field is stale or its value does not match the schema.\""
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a schema is found and the saved value is not of the field's type or not one
 
 - Method: Unit test on the save plan (test/core/edits/frontmatterEdit.test.ts) and integration test (test/integration/previewEditing.test.ts).
 - Criteria: Texts, dates and times must be strings, booleans booleans, numbers finite, lists arrays.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-016](SwRS-MDOKFSTUDIO-FMEDIT-016.md): The host refuses a value that breaks YAML, the field type or the schema
+<!-- okf:links:end -->

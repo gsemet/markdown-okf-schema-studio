@@ -12,7 +12,8 @@ description: When a paragraph holds only [TOC] or [[_TOC_]] (any case), or a
   literal marker instead of the list.
 project: MDOKFSTUDIO
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -73,3 +74,12 @@ When a paragraph holds only `[TOC]` or `[[_TOC_]]` (case-insensitive), or a MyST
 - Method: test/core/render/mystToc.test.ts (the three syntaxes, depth, local, duplicate slugs, exclusions, source lines, read and edit-mode style rules), test/core/render/blockTagTitle.test.ts (the title)
 - Method: real-window scenario test/integration/tocWindow.ts (the painted list in read mode, the titled block in edit mode, a click on an entry that reaches its heading)
 - Criteria: the rendered tree and CSS match the scenarios above and the painted page shows a clickable list in read mode and the titled box in edit mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+<!-- okf:links:end -->

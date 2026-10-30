@@ -10,7 +10,8 @@ description: When the floating toolbar overlaps an open first-block editor, the
   otherwise.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,14 @@ When the floating toolbar overlaps an open first-block editor, the extension SHA
 
 - Method: Unit tests P3 an open first-block editor keeps its 40px gap and gives up the width the toolbar covers, and P3 a first-block editor in a pane too narrow to be narrowed is pushed below the toolbar (test/page/modules/firstClearance.test.ts).
 - Criteria: The variable is 0px when the inset is above 0, otherwise it equals the toolbar bottom edge plus 8 px (92px for a toolbar ending at 84 px).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-011](SwRS-MDOKFSTUDIO-LAYOUT-011.md): A control under the floating toolbar is moved or narrowed out of its way
+<!-- okf:links:end -->

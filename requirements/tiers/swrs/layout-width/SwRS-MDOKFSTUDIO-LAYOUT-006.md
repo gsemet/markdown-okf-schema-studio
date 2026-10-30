@@ -8,7 +8,8 @@ description: When the setting maxContentWidth changes, the extension SHALL read
   reloading the editor.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,14 @@ When the setting maxContentWidth changes, the extension SHALL read it again and 
 
 - Method: Unit test `a preview setting change reads the width again and updates the preview from its last good render` in `test/session/diagReq.settings.requirements.test.ts`.
 - Criteria: The handler re-reads the section and calls the preview update with the last good render, only when one exists.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-002](SwRS-MDOKFSTUDIO-LAYOUT-002.md): The text column width follows the maxContentWidth setting
+<!-- okf:links:end -->

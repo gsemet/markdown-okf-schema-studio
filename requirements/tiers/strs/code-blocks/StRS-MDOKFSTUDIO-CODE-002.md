@@ -8,7 +8,8 @@ description: When a writer previews a diff or patch code block, the Studio SHALL
   literal markers.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -34,3 +35,12 @@ Reviewers need to see what a change adds and removes at a glance.
 ### Rationale and constraints
 
 - A diff is a visualization only: no comparison and no per-line navigation.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-CODE-001](StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+<!-- okf:links:end -->

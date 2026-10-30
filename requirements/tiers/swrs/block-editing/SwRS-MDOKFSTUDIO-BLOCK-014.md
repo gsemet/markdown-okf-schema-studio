@@ -10,7 +10,8 @@ description: "When a writer clicks a rendered block in edit mode, or presses Ent
   in previewEditSource."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -136,3 +137,16 @@ When a writer clicks a rendered block in edit mode, or presses Enter or Space on
 - Method: test/core/render/includeMapping.test.ts and test/integration/previewEditing.test.ts (an included block maps to the directive lines and carries data-sphinx-preview-included; a changed include target renders only after the edit: include row).
 - Method: the previewEditSource scenarios (nominal answer, error and malformed rows) are not asserted by a dedicated test; the page receives the answer in the unit tests of test/page/runtimeBlockEditor.test.ts and in the integration flow of test/integration/previewEditing.test.ts.
 - Criteria: One previewEditOpen per click, carrying the mapped line range of the clicked block; the keydown listener opens the editor only for a mapped block outside the listed controls; the line range of a list is the span of the mapped elements of the nearest list that belong to the same source file and document; the line range of a block inside a mapped element carrying data-okf-github-alert, or an aside or details element of class admonition other than a context-tag panel (class myst-context-admonition, SwRS-MDOKFSTUDIO-MYST-013, which keeps the range of the clicked block), of the same source file and document is the range of the nearest such element, before any list; the frame is never inside the pre and the rendered text of the fence is the raw source; the capture listener of bindEditModeCaptureClicks acts only for an IMG inside an anchor outside the properties table and the editors; the click handler returns before openMappedEditor for the excluded targets and openMappedEditor returns at once when the event target is inside [data-okf-properties]; the editor range equals the directive lines and the included file is never opened; the click target of Diagram source resolves to the figure through the mapped-block selector and event.preventDefault is called in edit mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

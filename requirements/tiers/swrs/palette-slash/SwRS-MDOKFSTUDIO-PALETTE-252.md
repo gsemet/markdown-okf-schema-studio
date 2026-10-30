@@ -9,7 +9,8 @@ description: While the slash menu is open, the extension SHALL expose it as a
   when the system forces colours.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -69,3 +70,12 @@ While the slash menu is open, the extension SHALL expose it as a listbox named C
 - Method: test/core/paste/paletteReq.requirements.test.ts (scenario "Forced colours": the slash menu uses Canvas and the lit command Highlight; the usual-mode row is untested)
 - Method: visual scenarios palette-slash/v11-slash-strict-light-900, palette-slash/v12-slash-gfm-light-900, palette-slash/v13-slash-myst-light-900, palette-slash/v14-slash-myst-filtered-dark-900 ("Open menu": the menu exposes its ARIA state)
 - Criteria: Each row has an id and aria-selected; the groups have the role group and are labelled by their heading. The live region has role status and aria-live polite. No user text reaches innerHTML. The lit option has a 2 px Highlight outline in forced-colours mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+<!-- okf:links:end -->

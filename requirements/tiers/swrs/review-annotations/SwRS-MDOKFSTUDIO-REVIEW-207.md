@@ -10,7 +10,8 @@ description: When the page receives line ranges, the extension SHALL mark the
   left margin of the page, without moving any block or text edge.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,12 @@ When the page receives line ranges, the extension SHALL mark the innermost mappe
 - Method: test/page/modules/reviewReq.requirements.test.ts (unit test: the change bars are placed again on a window resize and after a content change: scenario laid out again).
 - Method: visual scenarios review-annotations/v05-change-bar-light-900, v06-change-bar-dark-900, v14-incoming-bars-light-900 and v15-incoming-bars-dark-900 (scenarios size of one bar, one column and no layout shift in the light and dark themes); real window review-annotations/r03-incoming-change-bars. The cream theme is not asserted.
 - Criteria: Only innermost elements carry the attribute and it follows the last ranges; no mark appears under an editor or under an included element; the bar style has width 3px and no radius, and the layout sets its top and height from the block box; the layer is absolutely positioned with pointer events off and no block geometry changes; layout() runs on window resize, after apply and in stabilizeLayout of the scroll core (window, visual viewport and content resize, image load).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-017](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-017.md): A writer sees which blocks changed since the last commit
+<!-- okf:links:end -->

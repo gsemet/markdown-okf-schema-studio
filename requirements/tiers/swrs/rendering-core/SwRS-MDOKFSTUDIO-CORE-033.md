@@ -7,7 +7,8 @@ description: When inline code sits in a table cell, the extension SHALL keep it
   compact, without splitting a short identifier in a sideways-scrolling table.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When inline code sits in a table cell, the extension SHALL keep it compact, with
 
 - Method: Unit test "overflowing content tables keep short cells whole and show scroll shadows" in test/core/preview/previewStyles.test.ts; Unit test "inline code stays compact in table cells" in test/core/preview/inlineCode.test.ts
 - Criteria: Short identifiers are never split in a scrolling table.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-028](SwRS-MDOKFSTUDIO-CORE-028.md): Body text, headings, lists and inline code are typeset readably
+<!-- okf:links:end -->

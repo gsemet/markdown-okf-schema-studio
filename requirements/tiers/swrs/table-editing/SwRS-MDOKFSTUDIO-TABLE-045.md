@@ -8,7 +8,8 @@ description: When the writer presses Cmd or Ctrl with Z or Y in the cell text
   and leave the undo or redo to the text box.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the writer presses Cmd or Ctrl with Z or Y in the cell text box, the extens
 
 - Method: Unit tests undo and redo keys stop at the table cell editor and reach no window listener and the editing shortcuts do not touch the table cell editor in test/page/runtimeBlockEditor.test.ts.
 - Criteria: No window listener call for the undo and redo chords; the document text is not touched.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-006](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-006.md): Tab, arrows and editing keys work in a table cell
+<!-- okf:links:end -->

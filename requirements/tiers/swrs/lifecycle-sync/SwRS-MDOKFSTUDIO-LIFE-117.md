@@ -7,7 +7,8 @@ description: When the page receives a sourceScroll that names another document,
   revision or request than its own, the page SHALL ignore it.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,12 @@ When the page receives a sourceScroll that names another document, revision or r
 ### Archived
 
 Covered by SwRS-MDOKFSTUDIO-TRUST-060 (the page accepts a host message only if it is addressed to the page).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+<!-- okf:links:end -->

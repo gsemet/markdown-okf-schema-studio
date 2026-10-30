@@ -11,7 +11,8 @@ description: When the page needs built-in diagrams, it SHALL show the kept
   element.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -98,3 +99,18 @@ When the page needs built-in diagrams, it SHALL show the kept result without run
 - Method: test/page/rendererBridge.test.ts (a content patch draws only new diagrams: page events reach the diagram renderers)
 - Method: test/visual/scenarioDefinitions2.ts, visual scenarios diagrams v15 and v16 (a content patch draws only new diagrams)
 - Criteria: Ten rapid renders of one element run the engine at most twice; A repeated key causes no engine run; the same source in the same theme renders once and a theme change renders again from the kept source; include failures are not cached and plain engine errors are; engine runs never overlap; the element holds the newest render only; only diagrams without a render state are drawn.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-041](SwRS-MDOKFSTUDIO-DIAG-041.md): Results with refused includes are not kept
+  - [SwRS-MDOKFSTUDIO-DIAG-042](SwRS-MDOKFSTUDIO-DIAG-042.md): The built-in engine draws one diagram at a time
+  - [SwRS-MDOKFSTUDIO-DIAG-043](SwRS-MDOKFSTUDIO-DIAG-043.md): A superseded built-in render does not overwrite a newer one
+  - [SwRS-MDOKFSTUDIO-DIAG-044](SwRS-MDOKFSTUDIO-DIAG-044.md): A content patch draws only new built-in diagrams
+<!-- okf:links:end -->

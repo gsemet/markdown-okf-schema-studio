@@ -8,7 +8,8 @@ description: When the host receives a reply that is blank or longer than 10 000
   reply could not be added to this thread." and change nothing.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the host receives a reply that is blank or longer than 10 000 characters, o
 
 - Method: Unit test `a reply cannot close the comment early, and an empty reply or a non-thread is refused` in test/core/comments/inlineThread.test.ts covers the planner; the host answer text is untested.
 - Criteria: threadReplyEdit returns undefined and planThreadReply refuses with THREAD_REPLY_REFUSED.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-015](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-015.md): A writer keeps a discussion in the Markdown source and answers it from the preview
+<!-- okf:links:end -->

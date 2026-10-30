@@ -8,7 +8,8 @@ description: When a warning is reported, the extension SHALL give the line of
   with CRLF or CR breaks.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a warning is reported, the extension SHALL give the line of the syntax itse
 
 - Method: Unit test "the line is the line of the syntax inside a long paragraph and counts the frontmatter" in test/core/render/mystSyntaxDetect.test.ts
 - Criteria: Frontmatter lines are counted.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-072](SwRS-MDOKFSTUDIO-MYST-072.md): MyST syntax of a disabled extension is reported with its line
+<!-- okf:links:end -->

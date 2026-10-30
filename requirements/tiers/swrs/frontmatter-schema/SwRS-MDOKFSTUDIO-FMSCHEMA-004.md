@@ -8,7 +8,8 @@ description: When `markdownOkfSchemaStudio.frontmatter.propertiesTable` is
   frontmatter text and still render the body of the document.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,15 @@ When `markdownOkfSchemaStudio.frontmatter.propertiesTable` is false, the extensi
 - Method: `test/visual/scenarioDefinitions2.ts` (setting off: no table and no frontmatter text, heading at the top).
 - Method: `test/session/diagReq.settings.requirements.test.ts`, unit test `a frontmatter setting change reads the settings again and analyses the table of the active document only` (setting change re-analyses; section filter).
 - Criteria: Default true; the value is a boolean taken as stored; the change event is filtered by section.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-045](SwRS-MDOKFSTUDIO-FMSCHEMA-045.md): A frontmatter setting change re-analyses the open previews
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-075](SwRS-MDOKFSTUDIO-FMSCHEMA-075.md): The body still renders when the table is off
+<!-- okf:links:end -->

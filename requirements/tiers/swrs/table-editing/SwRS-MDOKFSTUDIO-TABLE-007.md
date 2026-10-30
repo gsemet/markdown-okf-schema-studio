@@ -9,7 +9,8 @@ description: When the writer drags the handle above a column of a pipe table or
   position in every row as one source edit.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -106,3 +107,12 @@ When the writer drags the handle above a column of a pipe table or a list-table 
 - Method: test/page/runtimeTableRowMove.test.ts (column handles above the columns of a pipe table and a list-table, outside the cells, none for a captioned table or a one-column table; a drag moves with one save and no cell editor; a drop in place requests nothing; Alt+Left and Alt+Right; refused or unreadable source; a click on a handle; a move while a cell editor is open).
 - Method: test/integration/tableMoves.ts (real VS Code window: real mouse drag and Alt+Left of a column of a pipe table and of a list-table, the handles above their header cells, and a column dragged while a cell editor is open).
 - Criteria: the saved text equals the source with the cells of every line reordered; one `previewEditSave` per move; each handle rectangle lies above the header row and its centre is within 2 px of the column's centre.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-002](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-002.md): A table row or column moves by its handle in edit mode
+<!-- okf:links:end -->

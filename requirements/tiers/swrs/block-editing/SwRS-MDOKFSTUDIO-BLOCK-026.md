@@ -9,7 +9,8 @@ description: "When a writer clicks rendered text in edit mode, the page SHALL pl
   of the block text without trailing line breaks when no unique place is found."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,12 @@ When a writer clicks rendered text in edit mode, the page SHALL place the caret 
 - Method: test/page/runtimeBlockEditor.test.ts (`without caretRangeFromPoint a click opens the editor with the caret at the end of the block`: no caret API).
 - Method: test/integration/realInput/editorWidgets.ts (scenarioCaretAtClick, screenshot block-editing/r11: emphasis and link markup); visual scenarios block-editing/v04 and block-editing/v05. A click in a table cell carries no caret context.
 - Criteria: The mapped offset equals the offset expected by the table of cases; mapRenderedCaret returns undefined when no unique place is found and focusTextControlAtLastContent uses the trimmed length.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+<!-- okf:links:end -->

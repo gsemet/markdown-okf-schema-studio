@@ -11,7 +11,8 @@ description: When the JAR pipeline finishes the diagrams of the current render,
   and the state error or unavailable.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -109,3 +110,21 @@ When the JAR pipeline finishes the diagrams of the current render, the extension
 - Method: test/core/state/editLock.test.ts (deferred plantuml work, latest wins; open editor and editor closed).
 - Method: test/visual/scenarioDefinitions1.ts, visual scenarios diagrams v04 and v05 (light and dark loaded picture).
 - Criteria: Document order is preserved, failures are isolated, only the current stage is updated, an image or a message plus state is shown, and work is deferred while editing.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-106](SwRS-MDOKFSTUDIO-DIAG-106.md): JAR results replace the diagrams in the open preview
+  - [SwRS-MDOKFSTUDIO-DIAG-108](SwRS-MDOKFSTUDIO-DIAG-108.md): JAR results reach a ready page in place
+  - [SwRS-MDOKFSTUDIO-DIAG-109](SwRS-MDOKFSTUDIO-DIAG-109.md): Results of an older render stage are dropped
+  - [SwRS-MDOKFSTUDIO-DIAG-110](SwRS-MDOKFSTUDIO-DIAG-110.md): JAR results wait for an open block edit
+  - [SwRS-MDOKFSTUDIO-DIAG-111](SwRS-MDOKFSTUDIO-DIAG-111.md): A working JAR draws a diagram as a loaded picture
+  - [SwRS-MDOKFSTUDIO-DIAG-117](SwRS-MDOKFSTUDIO-DIAG-117.md): One failing JAR diagram does not affect the others
+<!-- okf:links:end -->

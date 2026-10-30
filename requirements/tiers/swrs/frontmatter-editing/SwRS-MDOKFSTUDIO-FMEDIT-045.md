@@ -8,7 +8,8 @@ description: When a frontmatter edit would leave a block that does not parse or
   with "The frontmatter YAML could not be updated."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a frontmatter edit would leave a block that does not parse or whose keys ar
 
 - Method: Unit test on the patch guard (test/core/frontmatter/frontmatterFence.test.ts).
 - Criteria: Test patch guard refuses patches that lose, duplicate or corrupt a key.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-043](SwRS-MDOKFSTUDIO-FMEDIT-043.md): A frontmatter edit changes only the lines of its field
+<!-- okf:links:end -->

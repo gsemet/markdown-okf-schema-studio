@@ -12,7 +12,8 @@ description: "When a writer activates a frontmatter link (click or Enter in read
   follow the link: {reason}\" with the problem message as the reason."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -80,3 +81,17 @@ When a writer activates a frontmatter link (click or Enter in read mode, Cmd or 
 
 - Method: test/integration/previewEditing.test.ts (follow with a marker, edit mode, broken link, outside link, warning with its reason, no message), test/session/links.test.ts (the marker line is found with the identity of the text the link was analysed from).
 - Criteria: Filename-stem links are re-resolved at click time. When no line carries the marker, the target still opens, at the top. The refusal opens nothing: no editor is opened and the history is unchanged. The warning is shown once per activation.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-063](SwRS-MDOKFSTUDIO-FMSCHEMA-063.md): Each link value shows whether it resolves
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-074](SwRS-MDOKFSTUDIO-FMSCHEMA-074.md): An unusable frontmatter link is not followed
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-082](SwRS-MDOKFSTUDIO-FMSCHEMA-082.md): A refused frontmatter link shows a warning with its reason
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When a review thread quote has no exact copy, the extension SHALL
   and orphan the thread when there is no such place or the places are ambiguous.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -91,3 +92,13 @@ The negation words are not, no, never, without, cannot, nor, none, ne, pas, non 
 
 - Method: test/core/comments/anchoring.test.ts: `T45: a small edit of the quote is followed by the fuzzy search` (small edit); `T45: a quote that changed by more than 20 percent is orphaned, not guessed` (large edit); `T45: fuzzy search needs a candidate containing the rarest word` (the first row of the gives-up table); `T45r2: fuzzy matches must agree on numbers and negations` (numbers and negation words); `T45: two fuzzy matches far apart are ambiguous and orphan the thread` (ambiguous; the single match is the complementary case of the same decision); `T45: the cost stays bounded for a large document and many fuzzy threads` (large document). The 20 occurrences cap, the 12 characters floor, the 2 million characters limit and the orphaning after the budget are untested.
 - Criteria: FUZZY_RATIO = 0.2 bounds the edit distance; MAX_RARE_OCCURRENCES = 20, MIN_FAR_QUOTE = 12, MAX_FUZZY_TEXT = 2000000 characters and FUZZY_BUDGET = 20000000 cells per check gate the search; fuzzy candidates go through the same decision as exact ones.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-001](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-001.md): A reviewer reads review threads on the text, and unplaceable ones are kept
+  - [StRS-MDOKFSTUDIO-REVIEW-008](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-008.md): Review threads follow edits and renames of the document
+<!-- okf:links:end -->

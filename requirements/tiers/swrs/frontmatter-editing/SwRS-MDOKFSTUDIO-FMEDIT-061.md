@@ -7,7 +7,8 @@ description: "When a content patch of the page arrives while a field editor is o
   the extension SHALL close the editor and drop the waiting properties update."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,14 @@ When a content patch of the page arrives while a field editor is open, the exten
 
 - Method: Unit test a content patch closes an open field editor without a save and drops the waiting properties update in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: closeFrontmatterEditor is called with the reason content patch.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-193](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-193.md): Page updates wait while an inline editor is open
+<!-- okf:links:end -->

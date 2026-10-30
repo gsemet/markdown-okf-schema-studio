@@ -7,7 +7,8 @@ description: When a content patch names the wrong current identifiers or carries
   malformed fields, the page SHALL ignore it.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,12 @@ When a content patch names the wrong current identifiers or carries malformed fi
 ### Archived
 
 Covered by SwRS-MDOKFSTUDIO-TRUST-060 and SwRS-MDOKFSTUDIO-TRUST-061 (a patch must be addressed to the page and stay within its bounds).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+<!-- okf:links:end -->

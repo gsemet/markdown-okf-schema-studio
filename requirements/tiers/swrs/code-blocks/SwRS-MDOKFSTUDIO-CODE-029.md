@@ -7,7 +7,8 @@ description: When the pointer leaves a code block, the extension SHALL hide the
   copy button.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the pointer leaves a code block, the extension SHALL hide the copy button.
 
 - Method: Unit test of mouseout.
 - Criteria: Hidden on leaving the block, kept when moving onto the button.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-004](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-004.md): A reader copies the exact code of a block
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-017](SwRS-MDOKFSTUDIO-CODE-017.md): A Copy code button appears on a hovered or focused code block
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: 'When a document holds a {card} directive outside a grid, the exten
   add the safe names of :class-card: to the card.'
 project: MDOKFSTUDIO
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -61,3 +62,12 @@ When a document holds a {card} directive outside a grid, the extension SHALL ren
 
 - Method: test/core/render/cardsTabs.test.ts (parts and their order, separators, link, class names, nesting, no mapped option line, style rules) the screenshot scenarios myst/v41-cards-tabs-version-cream-900 and myst/v42-cards-tabs-version-dark-900 (test/visual/cardsTabsScenarios.ts: parts, order, theme colours) and the real-window scenario test/integration/mystBlocksWindow.ts (the painted card in the cream and a dark theme)
 - Criteria: the rendered tree has the parts in the order header, title, body, footer, and the painted card shows them.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+<!-- okf:links:end -->

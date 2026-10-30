@@ -10,7 +10,8 @@ description: When a preview panel is created, restored, switched to another
   shows.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,12 @@ When a preview panel is created, restored, switched to another document or finis
 - Method: test/integration/lifecycle.test.ts (Side preview: title Studio · preview.md; Render finished: asserts the title after the first render; the title after a switch (Switch) is untested).
 - Method: test/integration/serializer.test.ts (Fixed preview and panel without a document: the older restored panel is not titled Studio; the other rows are by reading previewTitle).
 - Criteria: panel.title equals the expected string for each role, and equals previewTitle for the shown path after each switch and render.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
+<!-- okf:links:end -->

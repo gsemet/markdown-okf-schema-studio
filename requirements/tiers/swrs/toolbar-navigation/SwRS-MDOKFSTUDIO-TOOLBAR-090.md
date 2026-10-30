@@ -11,7 +11,8 @@ description: "When a link request is followed or looked up, the extension SHALL 
   opening it."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -86,3 +87,12 @@ A blocked request causes no file access.
 - Method: test/core/preview/toolbarReq.requirements.test.ts (a query-only link is blocked and a file with a query is relative).
 - Method: test/core/navigation/previewNavigation.test.ts, test/security/resource-policy.test.ts, test/host-vscode/openExternal.test.ts (the host refuses any parsed scheme but http, https and mailto) and test/integration/previewHistory.test.ts (a percent-encoded scheme never reaches openExternal).
 - Criteria: ANCHOR_PATTERN is ^#[^\s#?]+$; schemes are compared in lower case against http:, https:, mailto:; no file access for a blocked request; decoded paths starting with / are blocked; a request starting with ? and an empty path part is blocked; decodePath decodes once and returns undefined for a malformed escape, and a decoded NUL or backslash blocks the request.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+<!-- okf:links:end -->

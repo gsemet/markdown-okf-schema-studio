@@ -12,7 +12,8 @@ description: When a document's frontmatter has a string `type`, the extension
   workspace folder.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -107,3 +108,17 @@ When a document's frontmatter has a string `type`, the extension SHALL look for 
 - Method: test/node-services/schemaFiles.test.ts (the folder is read once while unchanged, again after a file is added, and lists nothing once removed)
 - Criteria: The folder name in the message is the base name of the schema folder; the summary counts one info, also for a typed document in Restricted Mode.
 - Criteria: Schema resolution is off when the preview is read-only (no workspace folder, or an untrusted workspace).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-020](SwRS-MDOKFSTUDIO-FMSCHEMA-020.md): The schema file is chosen by the type name
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-021](SwRS-MDOKFSTUDIO-FMSCHEMA-021.md): A missing schema file is reported as an info row
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-022](SwRS-MDOKFSTUDIO-FMSCHEMA-022.md): Schema lookup is off in Restricted Mode and for standalone files
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-077](SwRS-MDOKFSTUDIO-FMSCHEMA-077.md): The no-lookup info row appears only for typed documents
+<!-- okf:links:end -->

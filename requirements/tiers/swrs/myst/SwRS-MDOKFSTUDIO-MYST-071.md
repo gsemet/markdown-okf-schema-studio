@@ -9,7 +9,8 @@ description: When the extension looks up a conf.py, the extension SHALL trust a
   deleted.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the extension looks up a conf.py, the extension SHALL trust a folder's resu
 
 - Method: Unit test "typing does not touch the disk: results are cached until the interval or an invalidation" in test/core/myst/confLocator.test.ts
 - Criteria: Typing never reads the disk.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+<!-- okf:links:end -->

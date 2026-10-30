@@ -8,7 +8,8 @@ description: While a page runs, it SHALL keep its last 40 editor events in a
   optional detail and caller stack.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ While a page runs, it SHALL keep its last 40 editor events in a trace, each with
 
 - Method: Unit test `CR 041: the editor trace keeps the last entries with their time since the page started` in test/page/modules/editorTrace.test.ts. The page uses a limit of 40 (src/page/pageDiagnostics.ts) and exposes the trace as window.__studioDiagnostics.trace.
 - Criteria: entries() returns copies in order, at most the limit.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-026](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-026.md): Diagnose an editor that closed by itself
+<!-- okf:links:end -->

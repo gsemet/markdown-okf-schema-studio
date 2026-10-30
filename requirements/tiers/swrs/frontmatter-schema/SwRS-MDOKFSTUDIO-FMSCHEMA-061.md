@@ -8,7 +8,8 @@ description: When `markdownOkfSchemaStudio.frontmatter.projectRoot` is a
   relative path being taken from the first workspace folder.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When `markdownOkfSchemaStudio.frontmatter.projectRoot` is a non-empty string, th
 - Method: Unit test of the root resolution.
 - Criteria: Default empty string; the value is trimmed; an absolute path is used as it is; any non-folder value is treated as unavailable.
 - Known issue: one value serves the whole workspace, so nested bundles cannot each have their own root, and the message does not name the root that was tried.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-060](SwRS-MDOKFSTUDIO-FMSCHEMA-060.md): The bundleRoot, projectRoot and allowOutsideWorkspaceLinks settings set the roots
+<!-- okf:links:end -->

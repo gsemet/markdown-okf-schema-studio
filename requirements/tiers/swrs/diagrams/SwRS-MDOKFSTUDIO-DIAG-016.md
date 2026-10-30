@@ -8,7 +8,8 @@ description: When a Mermaid diagram that cannot be drawn is drawn again, the
   holds exactly one error message and one parser details section.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a Mermaid diagram that cannot be drawn is drawn again, the page SHALL repla
 
 - Method: Unit test of the error element; visual scenarios diagrams v08 and v09 (theme switch check).
 - Criteria: Never more than one error element and one details section per diagram.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-015](SwRS-MDOKFSTUDIO-DIAG-015.md): Invalid Mermaid shows one message with the parser reason
+<!-- okf:links:end -->

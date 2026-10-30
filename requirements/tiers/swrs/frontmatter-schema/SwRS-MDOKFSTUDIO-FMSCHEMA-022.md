@@ -7,7 +7,8 @@ description: 'When the workspace is not trusted or the document is not inside a 
   folder, the extension SHALL not look up a schema for the document.'
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the workspace is not trusted or the document is not inside a workspace fold
 - Criteria: The generic table shown in that case is specified in SwRS-MDOKFSTUDIO-FMSCHEMA-088. Schema resolution is off when the preview is read-only (no workspace folder, or an untrusted workspace).
 - Known issue: a file outside every workspace folder in a trusted workspace is also told that schema validation requires a trusted workspace, which is misleading.
 - Known issue: the untrusted integration suite does not assert the info row.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-019](SwRS-MDOKFSTUDIO-FMSCHEMA-019.md): A typed document finds its schema in the nearest schema folder
+<!-- okf:links:end -->

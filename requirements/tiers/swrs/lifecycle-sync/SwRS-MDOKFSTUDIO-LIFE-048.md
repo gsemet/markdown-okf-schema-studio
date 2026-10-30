@@ -9,7 +9,8 @@ description: When scrollPreviewWithEditor, scrollEditorWithPreview,
   new page document instead of patching the loaded one.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -50,3 +51,13 @@ When scrollPreviewWithEditor, scrollEditorWithPreview, markEditorSelection or st
 ### Archived
 
 Merged into SwRS-MDOKFSTUDIO-LIFE-076, which lists the startup settings.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+<!-- okf:links:end -->

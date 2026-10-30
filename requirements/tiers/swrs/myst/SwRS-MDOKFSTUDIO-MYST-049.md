@@ -7,7 +7,8 @@ description: When the host does not answer a rename within 6 s, the extension
   SHALL enable the field again with The editor did not answer. Try again.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the host does not answer a rename within 6 s, the extension SHALL enable th
 
 - Method: Unit test "without an answer after 6 s the field is editable again with a message; an answer clears the timer" in test/page/modules/renderReq.labelRename.requirements.test.ts
 - Criteria: The timer is cleared by the answer.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-038](SwRS-MDOKFSTUDIO-MYST-038.md): The anchor icon opens a rename field that sends valid names
+<!-- okf:links:end -->

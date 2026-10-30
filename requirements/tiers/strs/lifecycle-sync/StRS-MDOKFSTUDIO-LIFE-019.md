@@ -7,7 +7,8 @@ description: When a reader opens a preview of a file in an untrusted workspace
   or outside any workspace folder, the Studio SHALL show it read-only.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []

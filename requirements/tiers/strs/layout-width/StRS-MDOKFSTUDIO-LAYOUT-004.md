@@ -9,7 +9,8 @@ description: When a document opens, in read or edit mode, the Studio SHALL start
   would cover it, by giving up width or moving it down only as far as needed.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -62,3 +63,28 @@ As a reader or writer, I see every document start at the same comfortable distan
 - The page publishes the toolbar's bottom edge so that the edition palette sticks below the toolbar only where the toolbar shares space with the column.
 - Known issue: CHANGELOG entry 0.2.1 still quotes the superseded margins.
 - Known issue: the 480 px limit between wide and narrow is a rule of the visual tests only; the code decides by overlap with the toolbar and a 320 px minimum frame width, so a 481 px pane with a long toolbar could also push content down.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-007](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-007.md): The first element starts 40 px below the top
+  - [SwRS-MDOKFSTUDIO-LAYOUT-008](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-008.md): The first element starts 40 px below the top in edit mode
+  - [SwRS-MDOKFSTUDIO-LAYOUT-009](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-009.md): The open first-block editor keeps the 40 px gap
+  - [SwRS-MDOKFSTUDIO-LAYOUT-010](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-010.md): The Start writing button starts 40 px below the top
+  - [SwRS-MDOKFSTUDIO-LAYOUT-011](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-011.md): A control under the floating toolbar is moved or narrowed out of its way
+  - [SwRS-MDOKFSTUDIO-LAYOUT-012](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-012.md): A first-block editor too narrow to be narrowed is pushed below the toolbar
+  - [SwRS-MDOKFSTUDIO-LAYOUT-013](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-013.md): Collapsing the toolbar measures the clearance again
+  - [SwRS-MDOKFSTUDIO-LAYOUT-014](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-014.md): A first-block editor gives up the width the toolbar covers
+  - [SwRS-MDOKFSTUDIO-LAYOUT-015](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-015.md): The Start writing button is pushed only when it sits under the toolbar
+  - [SwRS-MDOKFSTUDIO-LAYOUT-016](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-016.md): A leading properties table gives up the toolbar width for its Description toggle
+  - [SwRS-MDOKFSTUDIO-LAYOUT-017](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-017.md): The toolbar bottom edge is published for the sticky palette
+  - [SwRS-MDOKFSTUDIO-LAYOUT-018](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-018.md): The clearance is measured again after layout events, in bounded bursts
+  - [SwRS-MDOKFSTUDIO-LAYOUT-019](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-019.md): Bursts of clearance updates are limited
+  - [SwRS-MDOKFSTUDIO-LAYOUT-037](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-037.md): A leading properties table is pushed down for a control under the toolbar
+  - [SwRS-MDOKFSTUDIO-LAYOUT-042](../../swrs/layout-width/SwRS-MDOKFSTUDIO-LAYOUT-042.md): A first-block editor's palette keeps its place unless the frame is under the toolbar
+- Supersedes:
+  - [StRS-MDOKFSTUDIO-LAYOUT-005](StRS-MDOKFSTUDIO-LAYOUT-005.md): Nothing clickable hides under the floating toolbar
+<!-- okf:links:end -->

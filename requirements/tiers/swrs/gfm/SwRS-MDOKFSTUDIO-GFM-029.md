@@ -10,7 +10,8 @@ description: When a document contains raw HTML, the extension SHALL render a raw
   cap, and omit raw HTML outside the supported subset from the rendering.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -87,3 +88,18 @@ The supported subset also holds raw HTML tables (see SwRS-MDOKFSTUDIO-GFM-031), 
 - Method: test/core/render/renderReq.gfm.requirements.test.ts (unsupported raw HTML is dropped: unit test "a div block and an inline marquee element are absent from the HTML, while kbd stays").
 - Method: test/core/render/renderReq.renderingCore.requirements.test.ts (raw iframe block dropped and raw kbd kept: unit test "raw HTML outside the supported subset is dropped and a kbd element is kept"). Untested: kbd with attributes (the onclick case has no test named in the old notes), a lone img and context tags.
 - Criteria: Details structure matches the source; only plain kbd elements are kept; only the supported subset survives rendering.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+  - [StRS-MDOKFSTUDIO-CORE-001](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-001.md): A reader reads a faithful rendering of any document
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-044](../rendering-core/SwRS-MDOKFSTUDIO-CORE-044.md): Drop unsupported raw HTML
+  - [SwRS-MDOKFSTUDIO-CORE-062](../rendering-core/SwRS-MDOKFSTUDIO-CORE-062.md): Render details and kbd blocks
+  - [SwRS-MDOKFSTUDIO-GFM-030](SwRS-MDOKFSTUDIO-GFM-030.md): Raw kbd renders as a key cap
+  - [SwRS-MDOKFSTUDIO-GFM-033](SwRS-MDOKFSTUDIO-GFM-033.md): Unsupported raw HTML is dropped
+<!-- okf:links:end -->

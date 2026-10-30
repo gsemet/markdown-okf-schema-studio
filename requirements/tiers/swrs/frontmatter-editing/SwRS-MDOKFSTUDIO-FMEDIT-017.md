@@ -7,7 +7,8 @@ description: When a writer edits a field whose schema allows null, the extension
   SHALL offer a Set to null button that saves the value null.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a writer edits a field whose schema allows null, the extension SHALL offer 
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterEditor.test.ts).
 - Criteria: Tests nullable scalar editor can set its value to null; nullable list editor can set its value as null.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-003](SwRS-MDOKFSTUDIO-FMEDIT-003.md): Enum, number, date, boolean and nullable fields use fitting controls
+<!-- okf:links:end -->

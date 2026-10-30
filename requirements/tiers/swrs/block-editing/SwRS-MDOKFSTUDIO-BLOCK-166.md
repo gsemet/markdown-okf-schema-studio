@@ -9,7 +9,8 @@ description: "When a writer presses the platform copy chord with blocks selected
   the host puts the exact Markdown of those lines on the clipboard."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -96,3 +97,16 @@ When a writer presses the platform copy chord with blocks selected in edit mode 
 - Method: test/core/mapping/blockRange.test.ts, unit test `spanText returns the exact lines without the final line break` (host clipboard text, CR LF); test/core/edits/sourceEdits.test.ts, unit test `copy gives the exact Markdown of the blocks, cut also removes them with one separator` (host copy leaves the document unchanged).
 - Method: test/integration/blockClipboard.test.ts (copy), and real-input scenario scenarioBlockSelection.
 - Criteria: The posted lines are the first line of the first block and the last line of the last block. spanText returns the lines of the span. showSelectionNotice uses a 4000 ms timer. clipboardKey and ownsKeys return nothing for the inputs of the browser scenario. blocksFlight is cleared by the answer or by its timer.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

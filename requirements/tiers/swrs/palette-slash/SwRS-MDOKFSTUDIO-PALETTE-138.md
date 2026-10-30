@@ -9,7 +9,8 @@ description: When the writer presses Key (MyST), the extension SHALL wrap the
   backtick.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -60,3 +61,12 @@ When the writer presses Key (MyST), the extension SHALL wrap the selection in th
 
 - Method: test/page/modules/editActions.test.ts, through test/page/modules/editActions.test.ts (unit test "roleKbd wraps the selection in {kbd}, or inserts a sample key": scenarios Wrap, Sample and Backtick in the selection); the same file, unit test "ref, doc, cite, dropdown, tableCaption and roleKbd are myst-only without shortcut" (the block and cell scopes of roleKbd: the cell row of Cell and existing markup; the row on existing markup is untested)
 - Criteria: The action works in a table cell and, unlike Key, never removes existing markup.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

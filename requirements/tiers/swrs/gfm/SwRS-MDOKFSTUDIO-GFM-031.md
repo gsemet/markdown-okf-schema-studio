@@ -10,7 +10,8 @@ description: When a document contains a raw HTML table, the extension SHALL
   and object elements with their content and dropping comments.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -81,3 +82,17 @@ When a document contains a raw HTML table, the extension SHALL rebuild it from a
 
 - Method: test/core/render/mystFeatures.test.ts (spans, span limits, safe colours, unsafe style, active content, unknown tag and comment: unit tests on the render pipeline output, including the unit test "raw HTML tables preserve complex cell spans without active content").
 - Criteria: Spans 1 to 999 kept and others refused; only allow-listed tags, attributes and whitelisted style declarations remain; no active element or comment in the output.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-056](../rendering-core/SwRS-MDOKFSTUDIO-CORE-056.md): Rebuild raw HTML tables from an allow-list
+  - [SwRS-MDOKFSTUDIO-GFM-032](SwRS-MDOKFSTUDIO-GFM-032.md): Raw table styles keep a sanitized subset
+  - [SwRS-MDOKFSTUDIO-GFM-038](SwRS-MDOKFSTUDIO-GFM-038.md): Raw HTML tables remove active content
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When the writer presses the mouse on a palette control or the focus
   when the focus goes outside the editor frame.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -110,3 +111,16 @@ The link panel follows the same rule: a press on its padding or on the Insert bu
 - Method: test/page/runtimePaletteActions.test.ts (T32: figure form moves inside the frame keep the editor open, leaving saves; file dialog open ignored)
 - Method: visual scenario palette-slash/v01-palette-popups-light-900 (a click on the palette edge keeps the editor open)
 - Criteria: The leave callback is called once for a target outside the frame and never for a target inside; the save counter is 1 after leaving and 0 after moving inside; the final save is posted once for the modified Enter key and not for plain Enter; every button, the root and the non-input popover items prevent the default of mousedown while the input fields do not; a blur with no target is a departure, a blur whose related target is inside the frame is not.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-002](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-002.md): A writer chooses which palette buttons are offered
+  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+<!-- okf:links:end -->

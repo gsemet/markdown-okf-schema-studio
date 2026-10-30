@@ -9,7 +9,8 @@ description: When the slash menu is open, the extension SHALL take ArrowDown,
   to the text box.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -97,3 +98,15 @@ When the slash menu is open, the extension SHALL take ArrowDown, ArrowUp, Enter,
 - Method: test/page/modules/slashMenu.test.ts (scenarios "The arrows move the highlight and wrap", "Enter or Tab runs the lit command in one edit", "A click runs a command and a hover lights it", "A command with a picker removes the query and then opens like its button", "Escape closes the menu and keeps the typed text", "Backspace narrows the query or closes the menu", the caret-move row of "Leaving the query closes the menu and keeps the text", "Chords, compositions and other keys are not taken by the menu"); the blur and destroy rows are deduced from the code (the blur listener in src/page/features/blockSourceEditor.ts) and no page test checks them (untested)
 - Method: test/integration/realInput/textEditing.ts (real-window scenario scenarioSlashMenu, markers in test/integration/realInput/markers.ts)
 - Criteria: The arrow keys are consumed and the lit entry is scrolled into view. The edit of Enter is computed on the text without the query and written as one replacement of the original text. The menu cancels mousedown on itself. The first Escape is consumed by the menu. The menu closes when the caret is at or before the slash or the slash is gone. The menu is destroyed with the editor and replaced when the source editor is rebuilt. The popover, panel or dialog of a picker command is opened after the query is removed, from the button of the same action.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+<!-- okf:links:end -->

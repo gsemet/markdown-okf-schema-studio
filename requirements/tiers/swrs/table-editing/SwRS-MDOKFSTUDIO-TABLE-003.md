@@ -9,7 +9,8 @@ description: When the writer presses Row above on the table bar with the cell
   the cell editor in the new row, with Row above disabled in the header row.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,12 @@ When the writer presses Row above on the table bar with the cell editor in a bod
 
 - Method: test/page/runtimeTableCellEditor.test.ts (Row above inserts an empty row above the selected one and keeps its text; Row above is off in the header row), and the real-window scenario in test/integration/tableStructureReal.ts.
 - Criteria: the saved text, the pending navigation row and column, the disabled attribute of the button.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-008](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-008.md): A table bar locates the writer and edits rows and columns
+<!-- okf:links:end -->

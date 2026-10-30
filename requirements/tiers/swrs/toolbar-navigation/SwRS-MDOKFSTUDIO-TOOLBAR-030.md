@@ -11,7 +11,8 @@ description: "When the band changes its height or the page updates it after a la
   input."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -70,3 +71,12 @@ When the band changes its height or the page updates it after a layout change, t
 - Method: test/page/runtimeScroll.test.ts (Layout changes with the band and Same heading: caps sticky heading convergence at three passes).
 - Method: test/visual/capture_page_checks.py (Random scrolling stress run through stress_sticky_heading_scroll on scenario toolbar-navigation/v03-sticky-depth-3-oscillation-dark-900; Scroll to the end is not measured separately).
 - Criteria: readingOffset = max(policy offset for the depth, largest band height at this width, visible band bottom); no more than three measure passes per update; lateCorrections <= 2 and |after - before| <= 2.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-004](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-004.md): The reader always sees the section being read
+<!-- okf:links:end -->

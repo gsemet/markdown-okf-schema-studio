@@ -10,7 +10,8 @@ description: When a document holds a `<!-- THREAD` comment as its own block, the
   text, and write any other THREAD comment as an ordinary comment chip.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -73,3 +74,12 @@ When a document holds a `<!-- THREAD` comment as its own block, the renderer SHA
 - Method: test/core/preview/previewStyles.test.ts (`an inline thread is a green chip with a bubble, a green titled box, and goes with the gray chips`).
 - Method: visual scenarios review-annotations/v11-inline-thread-light-900, v12-inline-thread-dark-900 and v13-inline-thread-cream-900 (v13 asserts only).
 - Criteria: The wrapper carries data-okf-comment-kind thread and the chip label follows the number of messages; the hidden body holds one entry per message with author, date and text elements; the parsed messages equal the expected author, date and text; parseThreadBody returns undefined and the chip kind is comment for what is not a thread.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-015](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-015.md): A writer keeps a discussion in the Markdown source and answers it from the preview
+<!-- okf:links:end -->

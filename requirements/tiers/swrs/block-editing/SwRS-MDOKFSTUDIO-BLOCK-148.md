@@ -9,7 +9,8 @@ description: "When the page applies a content patch, it SHALL clear the block se
   while the properties table is never part of a block selection."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -80,3 +81,17 @@ When the page applies a content patch, it SHALL clear the block selection unless
 
 - Method: test/page/runtimeBlockSelection.test.ts, unit tests `T39: a content patch and leaving edit mode clear the selection` (patch clears; waiting selection survives the patch); `T39: an open editor with changes is saved first; the blocks are selected once the patch is in` and `T39 r2: Shift+click while the property editor is open selects nothing` (waiting for the save; field editor open); `T39 r2: blocks are named by position, so an edit that adds lines selects the right blocks` and `T39 r2: a save that changes the number of blocks selects nothing instead of another block` (position table); `T39 r2: a pending selection does not survive its editor closing without the patch` (dropped without its patch); `T39: included blocks stop the range and the properties table is never selected` (properties table, both rows).
 - Criteria: clearBlockSelection(true) keeps the pending selection. pendingBlockSelection holds anchor, target index and block count. The block count is compared before selectBlocksNow. closeBlockEdit clears pendingBlockSelection unless a patch is being applied. selectableBlocks excludes elements marked data-okf-properties.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-063](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-063.md): The properties table is never part of a block selection or move
+<!-- okf:links:end -->

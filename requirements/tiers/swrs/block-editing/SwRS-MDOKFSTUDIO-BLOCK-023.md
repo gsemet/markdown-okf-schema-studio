@@ -7,7 +7,8 @@ description: When a writer clicks a plain image, or a raw img block, in edit
   mode, the page SHALL open the editor of that block.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When a writer clicks a plain image, or a raw img block, in edit mode, the page S
 
 - Method: Real-input scenario scenarioImageEditing in test/integration/realInput/renderPatching.ts. No unit test.
 - Criteria: Both blocks are mapped and open through the generic click path.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+<!-- okf:links:end -->

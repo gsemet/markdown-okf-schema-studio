@@ -9,7 +9,8 @@ description: When a field editor is open, the extension SHALL show in its field
   disabled and refused by the host for a field the schema requires.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -86,3 +87,20 @@ When a field editor is open, the extension SHALL show in its field action menu a
 - Method: test/core/frontmatter/frontmatterPreservation.test.ts, test/core/frontmatter/okfFrontmatter.test.ts and test/core/frontmatter/okfFrontmatter.test.ts (scenarios: removal keeps the comment lines above the removed key, removing the only field leaves a valid empty mapping, remove of tags deletes exactly the sequence lines).
 - Method: test/core/edits/frontmatterEdit.test.ts (scenarios: the host refuses to remove a required field, only a newly missing required field blocks a remove).
 - Criteria: the disabled state is a page-side affordance; the host refusal holds for any remove request.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-030](SwRS-MDOKFSTUDIO-FMEDIT-030.md): Remove field deletes exactly the lines of the field
+  - [SwRS-MDOKFSTUDIO-FMEDIT-031](SwRS-MDOKFSTUDIO-FMEDIT-031.md): Remove field is disabled for a schema-required field
+  - [SwRS-MDOKFSTUDIO-FMEDIT-032](SwRS-MDOKFSTUDIO-FMEDIT-032.md): The host refuses to remove a required field
+<!-- okf:links:end -->

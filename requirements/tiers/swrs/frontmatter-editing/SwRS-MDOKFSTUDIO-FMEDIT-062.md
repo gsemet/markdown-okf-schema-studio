@@ -7,7 +7,8 @@ description: When a writer presses ArrowUp at the start of the first body block
   editor, the extension SHALL NOT move the editor onto the properties table.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a writer presses ArrowUp at the start of the first body block editor, the e
 
 - Method: Unit test ArrowUp at the start of the first body block does not step onto the properties table in test/page/fmtableReqFrontmatter.requirements.test.ts.
 - Criteria: The table is skipped when walking mapped blocks.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-079](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-079.md): Arrow keys at the edges open the previous or next block
+<!-- okf:links:end -->

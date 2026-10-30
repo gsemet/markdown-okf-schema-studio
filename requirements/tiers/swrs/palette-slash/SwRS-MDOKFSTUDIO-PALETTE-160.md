@@ -8,7 +8,8 @@ description: When the writer applies the figure form with a change, the
   keeps every untouched part byte for byte, and keep the editor open.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -91,3 +92,15 @@ When the writer applies the figure form with a change, the extension SHALL repla
 - Method: test/page/runtimePaletteActions.test.ts (T32: Apply rewrites the directive in one edit and keeps untouched options byte for byte; a Markdown image alone in its paragraph converts to a figure; Apply without a change writes nothing; checks the change, conversion and no change scenarios)
 - Method: test/page/modules/figureDirective.test.ts (T32: a book-style figure round-trips byte for byte; backtick and tilde fences keep their style; unusual spacing is read and written back unchanged when nothing changes; changing the width rewrites only that line and keeps unknown options in order; empty known options are dropped and new ones are appended after the unknown ones; adding the first option to a figure without options keeps a blank line before the caption; caption and legend are edited as separate paragraphs; a fence inside the legend makes the outer fence longer; checks the untouched parts, options and caption, legend and outer fence scenarios)
 - Criteria: Serialising an unmodified model gives the original text; unknown options are never dropped, even with an empty value; an edited caption or legend replaces the original body, otherwise the original body is kept.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-039](SwRS-MDOKFSTUDIO-PALETTE-039.md): A palette action edits in one undo step or leaves the text unchanged and says why
+<!-- okf:links:end -->

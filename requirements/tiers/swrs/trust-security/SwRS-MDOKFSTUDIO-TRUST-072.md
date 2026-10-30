@@ -7,7 +7,8 @@ description: When VS Code reads the manifest of the package, it SHALL find no
   contribution of a language, a grammar or an editors entry.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,12 @@ When VS Code reads the manifest of the package, it SHALL find no contribution of
 
 - Method: Unit test test/security/package-contract.test.ts (contributes only opt-in Markdown OKF-Schema Studio commands).
 - Criteria: The built-in Markdown preview, its commands and its settings stay as VS Code ships them.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+<!-- okf:links:end -->

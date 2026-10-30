@@ -7,7 +7,8 @@ description: When the host refuses a checkbox toggle, the extension SHALL revert
   the checkbox and put the reason in its tooltip.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -56,3 +57,14 @@ When the host refuses a checkbox toggle, the extension SHALL revert the checkbox
 
 - Method: Unit test "a rejected checkbox toggle reverts the box and explains why" in test/page/runtimePageControls.test.ts. Untested: the host refusal paths.
 - Criteria: Box reverted and the matching reason shown for every refusal.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-021](SwRS-MDOKFSTUDIO-GFM-021.md): Clicking a checkbox toggles one source character
+<!-- okf:links:end -->

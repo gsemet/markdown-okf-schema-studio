@@ -9,7 +9,8 @@ description: "When the Cream theme mode is shown, the extension SHALL give the f
   surfaces, and draw the paragraph after an admonition in the body text colour."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -69,3 +70,14 @@ When the Cream theme mode is shown, the extension SHALL give the foreground, des
 - Method: test/visual/capture_page_checks.py, visual scenarios theme-zoom/v02 to v06 (contrast computed in check_forced_cream_theme: rendered pages). Only Cream has a contrast check; the Dark and White palettes have none.
 - Method: test/visual/scenarioDefinitions1.ts, visual scenario theme-zoom/v03 (gallery on Cream, and the other themes): the check on the paragraph after an admonition is part of the page-wide gallery checks (test/visual/capture_support.py), which run on every scenario with admonitions, not only on Cream.
 - Criteria: Every computed ratio is at least 4.5. The computed colour of the paragraph after each admonition equals that of the first plain paragraph.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-THEME-025](SwRS-MDOKFSTUDIO-THEME-025.md): Dark, White and Cream paint the whole page the same on any VS Code theme
+<!-- okf:links:end -->

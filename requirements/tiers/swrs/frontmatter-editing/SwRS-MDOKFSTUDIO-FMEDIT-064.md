@@ -8,7 +8,8 @@ description: When the insert point after the properties table, or the Start
   show no move buttons on it.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the insert point after the properties table, or the Start writing point of 
 
 - Method: Unit test on the page runtime (test/page/runtimeBlockMoves.test.ts).
 - Criteria: Test T36 the properties point and the Start writing point have no move buttons.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-109](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-109.md): The up and down arrows of an insert point move its block
+<!-- okf:links:end -->

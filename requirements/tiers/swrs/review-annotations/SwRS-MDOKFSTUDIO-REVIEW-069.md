@@ -9,7 +9,8 @@ description: When a previewCommentCreate message reaches the host, the extension
   at most 32 characters, and its body has 1 to 10 000 characters.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -67,3 +68,16 @@ When a previewCommentCreate message reaches the host, the extension SHALL drop i
 - Method: test/core/comments/commentEditing.test.ts (unit test `T43: isValidAnchor enforces lines and the 500 / 32 / 32 limits`: scenarios invalid messages, accepted limits).
 - Method: test/integration/commentWrite.test.ts (invalid messages write nothing: scenario invalid messages).
 - Criteria: The validator accepts the boundary values and refuses one more.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-003](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-003.md): A reviewer comments, replies, resolves and deletes, and no comment is lost
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+<!-- okf:links:end -->

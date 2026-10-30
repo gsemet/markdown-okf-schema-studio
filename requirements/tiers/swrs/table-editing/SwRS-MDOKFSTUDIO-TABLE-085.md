@@ -9,7 +9,8 @@ description: When a cell editor is open, the extension SHALL add to the table
   their shortcuts and the cell slash menu to the cell text.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -89,3 +90,13 @@ When a cell editor is open, the extension SHALL add to the table bar, after a se
 - Method: test/integration/realInput/blockKeys.ts, real-window scenario scenarioTableCellBold (id table-editing/r08-cell-bold-shortcut; markers in test/integration/realInput/markers.ts) ("A button applies to the cell text", "Cmd or Ctrl with B, I or K").
 - Method: test/visual/capture_edit_checks.py, visual check check_cell_bar_formatting ("Cell group", "A button applies to the cell text").
 - Criteria: The ids of the buttons in the group and the absence of block-only ones; value, focus and open state of the editor after the press; text after the key and the prevented and stopped flags; unchanged value and no message for a block-only shortcut; the entries of the cell palette; group identity across the render; no cell group element after the close.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+<!-- okf:links:end -->

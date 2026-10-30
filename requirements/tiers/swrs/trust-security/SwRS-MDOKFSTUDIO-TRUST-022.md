@@ -12,7 +12,8 @@ description: When the extension builds a page, it SHALL draw a nonce of 18
   it loads the record as a new document.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -83,3 +84,12 @@ When the extension builds a page, it SHALL draw a nonce of 18 random bytes encod
 - Method: test/page/runtimeScroll.test.ts (the boot context cannot terminate its containing script element) checks the hostile path row of the Boot context as inert JSON scenario; the round trip row is deduced from the code, not run.
 - Method: test/core/preview/contentPatch.test.ts (T34: the record of a patched page carries the nonce of the loaded page and keeps its shell; T34: two renders of one document type have equal shell keys despite other text, nonces and identifiers; T34: reuseNonce swaps every occurrence, in the policy tokens and in the attributes) checks the Content patch keeps the nonce scenario. The call sites of freshNonceRecord in src/session/features/rendering.ts and src/session/pageMessages.ts, which the Patched record scenario relies on, are untested.
 - Criteria: createNonce returns the base64url text of randomBytes(18). Every executable script and every style element of a rendered page has a nonce attribute equal to the page nonce. serializeRuntimeContext output holds no raw less-than sign. reuseNonce replaces the nonce of the new render by the loaded one in the record. A document loaded from a patched record never reuses the nonce of an earlier document.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-006](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-006.md): The preview runs no foreign code and unsafe HTML is made inert
+<!-- okf:links:end -->

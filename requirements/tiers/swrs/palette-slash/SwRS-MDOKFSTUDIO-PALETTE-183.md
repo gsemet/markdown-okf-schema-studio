@@ -12,7 +12,8 @@ description: When the host answers previewListCitations, the extension SHALL
   error when the scan fails.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -103,3 +104,17 @@ Each answer repeats the editId and holds ok true with the items (value and label
 - Method: test/session/paletteReq.requirements.test.ts (the scan skips files that do not fit in 2 MiB, marks the list truncated and skips an unreadable file; a scan still running after 5 seconds stops reading and marks the list truncated; a fast scan clears the timer; a citation scan that throws is answered with ok false and the message of the error; exactly 20 bibliography files are a complete list, a 21st marks it truncated; checks the bounds and failed scan scenarios)
 - Method: test/core/mapping/mystTargets.test.ts (bibKeys reads entry keys and titles, and skips comment, string and preamble entries; collectBibKeys merges files, removes duplicates, sorts and caps; checks the entries and duplicates scenarios)
 - Criteria: MAX_BIB_BYTES is 2 MiB and the text of each file is decoded as UTF-8; SCAN_TIMEOUT_MS is 5000; the read-only and out-of-date answers are deduced from the code (handleListCitations), not tested.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

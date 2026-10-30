@@ -8,7 +8,8 @@ description: When the page receives a pending notice whose visible field is not
   extension SHALL ignore it.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -61,3 +62,14 @@ When the page receives a pending notice whose visible field is not a boolean or 
 
 - Method: test/page/lifeReq.requirements.test.ts "the page ignores a pending notice with an oversized or malformed field" (all scenarios: a message of 501 characters shows no notice, a message of 500 characters is accepted, a valid hide removes the notice). Checked by reading applyPendingOverlay in src/page/features/statusRegion.ts.
 - Criteria: applyPendingOverlay returns before changing the DOM for an invalid state.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-007](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-007.md): The reader knows the render state and why a preview has no source
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

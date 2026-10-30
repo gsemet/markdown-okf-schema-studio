@@ -9,7 +9,8 @@ description: When the writer drags the handle of a body row of a pipe table or a
   source edit and keep the header rows in place.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -127,3 +128,12 @@ The chord is not also read as the move of the whole table block.
 - Method: test/integration/tableMoves.ts (real VS Code window: a real mouse drag and Alt+Up of a body row of a pipe table and of a list-table, a drag while a cell editor is open, and a drag held over the handle strip and the middle of a row: marker on the nearest gap, none outside the table, a release outside leaves the document as it was, a release in the strip moves the row).
 - Method: visual scenarios table-editing/v06 to v08 (handles outside the tables, centred on their rows, and full-width table geometry in light, dark and cream), v15 to v20 (360 px pane: pushed tables) and v21 to v23 (a fourteen-column table scrolled sideways keeps its handles outside the scrolling box), v12 to v14 (list-table handles) and v09 to v11 (a real mouse drag held down: dimmed row, drop line, no editor).
 - Criteria: the saved text equals the source with the lines reordered; the number of `previewEditSave` messages is one; the handle rectangle lies left of its table, inside the pane and centred on its row within 2 px; no cell breaks a word. The drop in the browser harness is not exercised (the visual harness has no host that answers a save); the real window suite drags with the mouse.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-002](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-002.md): A table row or column moves by its handle in edit mode
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: 'When an admonition has `:class: dropdown` or an `:open:` option, t
   `:open: true`.'
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When an admonition has `:class: dropdown` or an `:open:` option, the extension S
 
 - Method: Unit test "dropdown admonitions render as openable details with a summary" in test/core/render/mystFeatures.test.ts
 - Criteria: The toggle is the native details element.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-006](SwRS-MDOKFSTUDIO-MYST-006.md): Admonitions nest, collapse and map as one block
+<!-- okf:links:end -->

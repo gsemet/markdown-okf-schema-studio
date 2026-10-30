@@ -9,7 +9,8 @@ description: "When a document holds a `{grid}` with `{grid-item-card}` items, th
   and show each card with its title, header, body, footer and link."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -84,3 +85,16 @@ The columns are picked by the container width (480, 640 and 800 px), not by the 
 - Method: test/core/render/gridToctree.test.ts ("a grid renders its items in a column container with one class per breakpoint": columns and arguments; "the grid stylesheet collapses to one column in a narrow pane": pane width; "a grid-item-card renders header, body, footer and a stretched link": card parts and links; "a grid also works with backtick fences, and grids nest inside items with colon fences": nesting; the placeholder beyond 8 levels has no named test (untested))
 - Method: test/visual/scenarioDefinitions2.ts (`myst/v${22 + index}-grid-cards-full-${theme}-${width}`: pane width, one visual family across themes and widths)
 - Criteria: Column values are bounded; one visual family across themes and widths; the cards stay inside the pane.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-054](SwRS-MDOKFSTUDIO-MYST-054.md): Grid columns follow the pane width
+  - [SwRS-MDOKFSTUDIO-MYST-055](SwRS-MDOKFSTUDIO-MYST-055.md): Grid item cards show title, header, body, footer and link
+  - [SwRS-MDOKFSTUDIO-MYST-056](SwRS-MDOKFSTUDIO-MYST-056.md): Grids nest and keep absolute source lines
+<!-- okf:links:end -->

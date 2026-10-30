@@ -8,7 +8,8 @@ description: When an anchor icon renders, the extension SHALL leave it out of
   absolute source line of its label.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When an anchor icon renders, the extension SHALL leave it out of the mapped bloc
 
 - Method: Unit test "a label before a paragraph renders an anchor icon span that is the link target" in test/core/render/mystPaletteRendering.test.ts
 - Criteria: The icon has role img and aria-label Anchor: name.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-036](SwRS-MDOKFSTUDIO-MYST-036.md): Labels show an anchor icon on the next block
+<!-- okf:links:end -->

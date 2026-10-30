@@ -7,7 +7,8 @@ description: While a block editor is used, the Studio SHALL keep a short trace
   of editor events for diagnostics.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -34,3 +35,13 @@ As a maintainer, I can read the last editor events of a page when a report says 
 ### Rationale and constraints
 
 - The trace changes nothing visible and is only read for diagnostics.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-249](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-249.md): The editor events are kept in a short trace
+  - [SwRS-MDOKFSTUDIO-BLOCK-250](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-250.md): The trace names the nearest callers of an event
+<!-- okf:links:end -->

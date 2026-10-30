@@ -7,7 +7,8 @@ description: "When the preview content is patched in place, the page SHALL draw 
   built-in diagrams that have no render state and leave the others untouched."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,14 @@ When the preview content is patched in place, the page SHALL draw the built-in d
 
 - Method: Unit tests that page events reach the diagram renderers; visual scenarios diagrams v15 and v16.
 - Criteria: Only diagrams without a render state are drawn.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-039](SwRS-MDOKFSTUDIO-DIAG-039.md): Built-in pictures are kept by source and drawn one at a time
+<!-- okf:links:end -->

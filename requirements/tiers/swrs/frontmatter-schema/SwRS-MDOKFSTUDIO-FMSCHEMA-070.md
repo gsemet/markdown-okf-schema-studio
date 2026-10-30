@@ -8,7 +8,8 @@ description: When a displayed linked target is saved, created or deleted on
   displayed target backed by the preview-wide file watcher.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a displayed linked target is saved, created or deleted on disk, the extensi
 - Method: Integration test of the linked target watcher; unit test of the direct watch.
 - Criteria: The folder of the target is watched without recursion and events naming the target (or no name) count.
 - Known issue: a link whose annotation lists no tooltip field and no preview field and sets no show_line_number gets no watcher of its own and relies on the preview-wide watcher.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-067](SwRS-MDOKFSTUDIO-FMSCHEMA-067.md): A link tooltip shows the fields and an excerpt of the linked file
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: When a writer presses Done, presses Enter with Ctrl or Cmd in the
   original and nothing was autosaved.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -108,3 +109,17 @@ When a writer presses Done, presses Enter with Ctrl or Cmd in the text box, or m
 - Method: test/page/runtimePaletteActions.test.ts (`T30: the editor stays open while the host's file dialog has the focus, and the answer is inserted`: host dialog; `T31: Done saves while the file dialog is still open, so the editor is never stuck`: Done during a pending dialog); the moves into the palette and the panels have no test in this scope.
 - Method: test/page/modules/hostRequests.test.ts (a dialog request keeps the editor's blur suspended until it is answered, even on a timeout; a list request never suspends the blur: dialog state).
 - Criteria: Done calls postBlockEditSave(true); both modifiers finish the editor and a plain Enter does not; exactly one final save per blur; frameContains(edit, relatedTarget) or an open dialog stops the commit; isDialogOpen is true while at least one pending request carries the dialog mark; edit.status.textContent is set before the message is posted; no previewEditSave and no previewEditCancel is posted for an unchanged editor.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+  - [SwRS-MDOKFSTUDIO-PALETTE-036](../palette-slash/SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
+<!-- okf:links:end -->

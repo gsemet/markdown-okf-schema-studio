@@ -7,7 +7,8 @@ description: When a writer lays out content with grid cards, the Studio SHALL
   show the cards in a layout that adapts to the pane width.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -32,3 +33,12 @@ As a writer, I want card layouts that stay usable in narrow panes so that I can 
 ### Rationale and constraints
 
 - Cards reflow rather than overflow sideways.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-MYST-001](StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+<!-- okf:links:end -->

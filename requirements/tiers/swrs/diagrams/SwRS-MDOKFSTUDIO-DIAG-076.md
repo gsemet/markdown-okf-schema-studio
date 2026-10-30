@@ -8,7 +8,8 @@ description: When the extension is installed, it SHALL contribute the boolean
   and a Markdown description of the engine choice.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the extension is installed, it SHALL contribute the boolean setting markdow
 
 - Method: Unit tests: every contributed setting is explained with a unique order; the built-in engine ships pinned and the JAR is an explicit opt-in.
 - Criteria: Type, default, order and description limit hold.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-024](SwRS-MDOKFSTUDIO-DIAG-024.md): The useJar and jarPath settings choose the PlantUML engine
+<!-- okf:links:end -->

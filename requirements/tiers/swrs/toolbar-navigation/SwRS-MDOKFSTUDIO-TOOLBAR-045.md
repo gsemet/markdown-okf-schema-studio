@@ -10,7 +10,8 @@ description: "When the reading line passes a heading, the extension SHALL mark t
   the sticky band without navigating."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,12 @@ When the reading line passes a heading, the extension SHALL mark the entry of th
 - Method: test/core/preview/previewStyles.test.ts (The current entry is readable: T16b, only the current TOC entry loses its rounded corners, asserting border-radius 0 and the 3 px bar).
 - Method: test/visual/capture_layout_checks.py (check_toc_column: exactly one current entry and its contrast on toolbar-navigation/v22 to v27; the current entry is inside the column; the page scrolls after the click).
 - Criteria: one entry carries aria-current location and data-sphinx-preview-toc-current; nav.scrollTop changes by the overflow of the entry and the window scroll is untouched; contrast >= 4.5 and border-radius 0; scrollToHeading is called with the heading and no previewLink is posted; the live heading by key, else the heading captured at build time.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
+<!-- okf:links:end -->

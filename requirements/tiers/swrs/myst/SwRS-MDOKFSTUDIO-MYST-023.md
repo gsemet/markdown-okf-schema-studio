@@ -8,7 +8,8 @@ description: When a document holds a notebook output reference such as `#tbl:`
   warning.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a document holds a notebook output reference such as `#tbl:` or an unexecut
 
 - Method: Unit test "MyST code-cell directives render numbered input without claiming execution" in test/core/render/mystFeatures.test.ts
 - Criteria: Both cases are warned.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-005](../../strs/myst/StRS-MDOKFSTUDIO-MYST-005.md): Build-dependent constructs appear as labelled placeholders
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CORE-022](../rendering-core/SwRS-MDOKFSTUDIO-CORE-022.md): Build-dependent constructs show an inert placeholder with a warning
+<!-- okf:links:end -->

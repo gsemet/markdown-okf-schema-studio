@@ -14,7 +14,8 @@ description: When the window is resized, the column, toolbar or leading
   trailing update.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -90,3 +91,17 @@ When the window is resized, the column, toolbar or leading properties table chan
 - Method: test/visual/capture_comment_checks.py and test/visual/scenarioAssertions.ts (collapsing the toolbar): visual scenarios v55 and v56 (collapsed toolbar at 360 px); the callback wiring in the page runtime is checked by inspection (the callback list is complete).
 - Method: test/page/diagReq.layout.requirements.test.ts (width mode change): the unit test `a width mode change measures the first-element clearance again, even when nothing moved`.
 - Criteria: After each event the published values equal a fresh measurement; the measured top of the first element is 40 px within 4 px in the visual cases; published toolbar values equal the bottom edge plus 8 on overlap and 0 otherwise; exactly one timer is pending after a burst and the final measurement is published after it fires; the change callback calls the first-element clearance update.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-013](SwRS-MDOKFSTUDIO-LAYOUT-013.md): Collapsing the toolbar measures the clearance again
+  - [SwRS-MDOKFSTUDIO-LAYOUT-017](SwRS-MDOKFSTUDIO-LAYOUT-017.md): The toolbar bottom edge is published for the sticky palette
+  - [SwRS-MDOKFSTUDIO-LAYOUT-019](SwRS-MDOKFSTUDIO-LAYOUT-019.md): Bursts of clearance updates are limited
+  - [SwRS-MDOKFSTUDIO-LAYOUT-041](SwRS-MDOKFSTUDIO-LAYOUT-041.md): A width mode change measures the first-element clearance again
+<!-- okf:links:end -->

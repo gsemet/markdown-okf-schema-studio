@@ -11,7 +11,8 @@ description: "When a properties table with annotated link values is rendered, th
   the full \"[E10]\" or \"[W15]\" message in a keyboard-focusable tooltip."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -114,3 +115,20 @@ When a properties table with annotated link values is rendered, the extension SH
 
 - Method: test/core/frontmatter/propertiesTable.test.ts (valid link, list of links, not found, root unavailable, labels, first paint), test/integration/previewEditing.test.ts (valid link, problem tooltip), test/integration/realInput/markers.ts (keyboard focus and tooltip of a problem), test/page/runtimeScroll.test.ts (tooltip of a problem), test/visual/scenarioDefinitions1.ts (first paint, pending link, resolved after render, document changed meanwhile; the timer is also covered by a unit test of the frontmatter controller).
 - Criteria: The link carries the navigation request okf-link and the status valid. The tooltip of a problem is shown by the Studio link tooltip on hover and focus. The first render and the 300 ms table refresh do not touch the file system for links. A new request restarts the 150 ms timer.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the document, bundle or project root and stay inside it
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-055](SwRS-MDOKFSTUDIO-FMSCHEMA-055.md): A filename stem resolves when exactly one file matches
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-064](SwRS-MDOKFSTUDIO-FMSCHEMA-064.md): A link that does not resolve shows its problem
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-065](SwRS-MDOKFSTUDIO-FMSCHEMA-065.md): Links are shown as pending on the first paint
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-066](SwRS-MDOKFSTUDIO-FMSCHEMA-066.md): Links are resolved about 150 ms after the render
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-086](SwRS-MDOKFSTUDIO-FMSCHEMA-086.md): A link problem is keyboard-focusable and explained in its tooltip
+<!-- okf:links:end -->

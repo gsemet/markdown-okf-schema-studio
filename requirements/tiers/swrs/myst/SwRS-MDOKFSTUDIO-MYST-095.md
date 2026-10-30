@@ -7,7 +7,8 @@ description: When a document uses the doc or download role, the extension SHALL
   render it as a plain link to the written target.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -53,3 +54,14 @@ When a document uses the doc or download role, the extension SHALL render it as 
 
 - Method: Unit test on the rendered HTML for these roles (`test/core/render/renderReq.myst.requirements.test.ts`).
 - Criteria: Plain links with the written target; the `numref` placeholder holds the role name and the written key.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-017](SwRS-MDOKFSTUDIO-MYST-017.md): Definition lists and inline roles are typeset
+<!-- okf:links:end -->

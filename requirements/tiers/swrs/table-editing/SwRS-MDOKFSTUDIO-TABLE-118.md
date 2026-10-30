@@ -11,7 +11,8 @@ description: When the source of a table cell editor reaches the page after
   Markdown table.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -55,3 +56,12 @@ When the source of a table cell editor reaches the page after another text field
 
 - Method: test/page/runtimeTableCellEditor.test.ts, unit tests over the page script: the source delivered after the find bar opened leaves the focus in the find field; the source delivered with the focus still on the page focuses the cell text box.
 - Criteria: features/tableCellEditor.ts focuses the cell text box only when no text field outside the frame took the focus since the editor opened (`focusAtOpen`, recorded by features/blockEditor.ts), through the check shared with BLOCK-255 (`focusMovedToAnotherField` in features/textControls.ts).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-008](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-008.md): A table bar locates the writer and edits rows and columns
+<!-- okf:links:end -->

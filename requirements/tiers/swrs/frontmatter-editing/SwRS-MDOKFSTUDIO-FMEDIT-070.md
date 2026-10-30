@@ -7,7 +7,8 @@ description: When a writer commits a field editor with Enter or by leaving it,
   the extension SHALL post the save without the flush flag.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a writer commits a field editor with Enter or by leaving it, the extension 
 
 - Method: Unit test on the page runtime (test/page/runtimeEditorFlush.test.ts).
 - Criteria: Test CR 025 a normal frontmatter save does not carry the flush flag.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-067](SwRS-MDOKFSTUDIO-FMEDIT-067.md): A navigation saves the open field editor as an unchecked flush
+<!-- okf:links:end -->

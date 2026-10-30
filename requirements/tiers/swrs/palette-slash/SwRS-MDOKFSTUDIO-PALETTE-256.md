@@ -10,7 +10,8 @@ description: When the slash menu opens, the extension SHALL place it under the
   resizes.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -69,3 +70,12 @@ When the slash menu opens, the extension SHALL place it under the caret line ins
 - Method: test/page/modules/slashMenu.test.ts (scenarios "Room below", "No room below", "The left edge stays while the query grows", "The menu follows the caret", "The caret scrolls out of the viewport")
 - Method: visual scenarios palette-slash/v11-slash-strict-light-900, palette-slash/v12-slash-gfm-light-900, palette-slash/v13-slash-myst-light-900, palette-slash/v14-slash-myst-filtered-dark-900 ("Room below": inside the viewport, uncovered, clear of the toolbar), palette-slash/v21-slash-gfm-light-360 ("The left edge stays while the query grows")
 - Criteria: The menu is a fixed element of the page; its data-slash-placement is above or below. The left edge is at least 8 px from the viewport edge. The listeners for scroll and resize are removed when the menu closes. The caret test is the caret rectangle against the viewport height.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+<!-- okf:links:end -->

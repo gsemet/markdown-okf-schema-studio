@@ -10,7 +10,8 @@ description: When a writable preview shows an inline thread, the page SHALL add
   delete of the thread to the host with its source lines.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -83,3 +84,16 @@ The answer is matched to the request, see SwRS-MDOKFSTUDIO-TRUST-090.
 - Method: test/integration/inlineThread.test.ts (Delete thread, assert "one undo should restore the thread").
 - Method: visual scenario review-annotations/v11-inline-thread-light-900 (controls and reply).
 - Criteria: The body holds exactly one element with data-okf-thread-actions in a writable page and none in a read-only page; one request carries the lines and the trimmed text and the controls are re-enabled by the answer; one delete request with the lines and no text is posted; no request is posted and the status line holds the message in the refusal cases; the status line holds the reason and the text area keeps its value.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-015](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-015.md): A writer keeps a discussion in the Markdown source and answers it from the preview
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+<!-- okf:links:end -->

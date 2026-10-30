@@ -11,7 +11,8 @@ description: When the writer presses Admonition and chooses a type from the menu
   unknown type.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,14 @@ Only the ten types and custom are accepted.
 
 - Method: test/page/modules/editActions.test.ts, through test/page/modules/editActions.test.ts (unit tests "the MyST actions are myst-only with no shortcut; sub and sup also work in a cell": scenarios "The menu of eleven types" and "Other modes"; "admonition wraps the touched lines in a colon fence and selects the body", "admonition without a selection inserts an empty body with the caret in it", "a selection ending at a line start does not pull that line into the admonition", "admonition keeps list items together and ignores an unknown type", "admonition uses one more colon than the longest fence inside": the wrap, fence and refusal scenarios)
 - Criteria: The option values are note, tip, important, warning, caution, danger, attention, error, hint, seealso and custom; list item lines of the selection stay together inside the fence; the colon count is the longest fence inside plus one and at least three; only the ten types and custom are accepted.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+<!-- okf:links:end -->

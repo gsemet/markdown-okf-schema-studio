@@ -11,7 +11,8 @@ description: When a paragraph holds the word TODO not glued to letters, digits
   link text, a URL and math.
 project: markdown-okf-schema-studio
 scope: review-annotations
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -72,3 +73,12 @@ When a paragraph holds the word TODO not glued to letters, digits or an undersco
 - Method: test/core/render/commentMarkers.test.ts: `the word TODO in prose becomes a green chip and the rest of the sentence is unchanged` (word in a sentence; glued or lower case); `TODO in code, inline code, link text and URLs is left alone` (TODO in code, links, URLs and math); `a TODO comment is a green expandable chip` (TODO comment; the glued comment case is untested).
 - Method: test/integration/realInput/frontmatterFields.ts (one TODO chip is counted in a paragraph).
 - Criteria: One chip with the class okf-chip--todo exists and the paragraph text is unchanged; the document holds no chip for TODO in code, links and URLs; the wrapper has data-okf-comment-kind todo and the chip has the class okf-chip--todo.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-REVIEW-012](../../strs/review-annotations/StRS-MDOKFSTUDIO-REVIEW-012.md): A writer sees HTML comments and TODO notes as chips and toggles them
+<!-- okf:links:end -->

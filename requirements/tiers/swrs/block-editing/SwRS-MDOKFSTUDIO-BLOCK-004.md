@@ -10,7 +10,8 @@ description: When edit mode is on and no editor is open, the page SHALL move a
   focus, and a window or tab that comes back SHALL restore the selection.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -81,3 +82,12 @@ Table-cell editors keep their own Escape and Cmd/Ctrl+Enter and do not select a 
 ### Known issues
 
 - Known issue (CR 152): in the real-window test, a preview that has just opened holds no keyboard focus (the workbench body has it, `document.hasFocus()` is false in the page), so the arrow keys act only once the page, the margin or a toolbar button was clicked or the tab was focused again.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+<!-- okf:links:end -->

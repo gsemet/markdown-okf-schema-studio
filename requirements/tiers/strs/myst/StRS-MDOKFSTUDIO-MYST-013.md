@@ -7,7 +7,8 @@ description: When a document uses list, caption or CSV table directives, the
   Studio SHALL show them as ordinary tables.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -32,3 +33,12 @@ As a writer, I want all table directive forms to look like tables so that I can 
 ### Rationale and constraints
 
 - Content stays as authored in the source.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-MYST-001](StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+<!-- okf:links:end -->

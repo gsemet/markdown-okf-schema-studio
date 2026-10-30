@@ -10,7 +10,8 @@ description: When a document holds a lower-case context tag alone on its line
   unpaired or non-context tag visible as literal text.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,16 @@ When a document holds a lower-case context tag alone on its line with a matching
 - Method: test/core/render/mystFeatures.test.ts (standalone, tag pattern and inline tag: "standalone hyphenated context tags render as mapped Markdown admonitions"; nested and nested unpaired inner tag: "nested context tags preserve each wrapper range"; unpaired and non-context tags: "unsupported context boundaries stay literal and fenced XML stays code")
 - Method: test/visual/scenarioDefinitions1.ts (grouping inside containers and split raw HTML block: visual scenario `context-tags-${theme}-wide`)
 - Criteria: Only the pattern `[a-z][a-z0-9_-]*` with a matching closing tag becomes a panel; each pair maps to its own lines; grouping works in all listed containers.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-014](SwRS-MDOKFSTUDIO-MYST-014.md): Nested context tags render as nested panels
+  - [SwRS-MDOKFSTUDIO-MYST-015](SwRS-MDOKFSTUDIO-MYST-015.md): Unpaired or non-context tags stay visible as text
+  - [SwRS-MDOKFSTUDIO-MYST-016](SwRS-MDOKFSTUDIO-MYST-016.md): Context tags group inside containers and split raw HTML blocks
+<!-- okf:links:end -->

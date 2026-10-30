@@ -8,7 +8,8 @@ description: When a code line is wider than its block outside Auto width mode,
   without widening the page, also at a 460 px panel width.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a code line is wider than its block outside Auto width mode, the extension 
 
 - Method: Visual scenario with geometry check.
 - Criteria: Block scrollWidth exceeds clientWidth for the long line, equals it for the exact-fit line, and the document never overflows.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-007](SwRS-MDOKFSTUDIO-CODE-007.md): Code blocks use one font scale, the theme colours and scroll long lines
+<!-- okf:links:end -->

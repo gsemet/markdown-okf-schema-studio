@@ -8,7 +8,8 @@ description: When the floating toolbar overlaps an open first-block editor and
   width the toolbar covers through an inline-end inset, keeping the 40 px gap.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the floating toolbar overlaps an open first-block editor and at least 320 p
 
 - Method: Unit tests P3 an open first-block editor keeps its 40px gap and gives up the width the toolbar covers, and P3 a hidden Start writing button counts as an open first-block editor; visual first-element gap checks at 900 and 1600 px.
 - Criteria: Inset equals the content right edge minus the toolbar left edge plus 8, and the clearance stays 0.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-011](SwRS-MDOKFSTUDIO-LAYOUT-011.md): A control under the floating toolbar is moved or narrowed out of its way
+<!-- okf:links:end -->

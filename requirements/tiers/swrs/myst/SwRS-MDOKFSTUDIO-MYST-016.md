@@ -8,7 +8,8 @@ description: When a context tag pair sits inside a block quote, list item,
   by the parser, the extension SHALL group it as a panel and parse its Markdown.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a context tag pair sits inside a block quote, list item, definition list or
 
 - Method: Visual scenario `context-tags-${theme}-wide` in test/visual/scenarioDefinitions1.ts
 - Criteria: Grouping works in all listed containers.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-013](SwRS-MDOKFSTUDIO-MYST-013.md): Context tags render as titled panels
+<!-- okf:links:end -->

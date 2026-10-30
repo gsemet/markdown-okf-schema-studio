@@ -11,7 +11,8 @@ description: When a code block is shown and the setting
   tokens in the Light+ colours.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -76,3 +77,12 @@ When a code block is shown and the setting preview.codeBlocks.darkBackground is 
 - Method: test/core/render/codeBlockComfort.requirements.test.ts (no WebAssembly, no inline style, strict policy), test/page/pageSettings.test.ts (setting attribute) and test/security/package-contract.test.ts (setting schema)
 - Method: visual capture of the code blocks in the cream, white and dark themes (reports of CR 131)
 - Criteria: the rules use the Dark+ surface colours; every colour class has a rule; each contrast ratio is at least 4.5:1
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+<!-- okf:links:end -->

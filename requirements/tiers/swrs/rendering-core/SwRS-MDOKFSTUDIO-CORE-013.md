@@ -13,7 +13,8 @@ description: When a chain of includes reaches the 8th level, an include repeats
   budget, list a warning naming the request without reading a refused file.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -120,3 +121,21 @@ When a chain of includes reaches the 8th level, an include repeats a file alread
 - Method: Integration suite run() in test/integration/projectFeatures.test.ts (refusal missing file, boundary warning ends)
 - Method: test/core/render/contentCaches.test.ts (five references to an existing and a missing file: one stat per path, one real-path lookup, five refusals reported)
 - Criteria: Depth 8 and cycles leave the directive unexpanded. One "Include budget exhausted" warning appears at the limit and none below it. The 5 MiB limit is inclusive of the file size; larger files stay placeholders. A refusal of the shared reader gives the renderer no text. Each refusal code lists a warning item and reads no file. The warning appears while the file is missing and not after.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CORE-002](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-002.md): A writer composes a document from included files
+  - [StRS-MDOKFSTUDIO-CORE-003](../../strs/rendering-core/StRS-MDOKFSTUDIO-CORE-003.md): A reader sees what cannot be rendered and keeps a usable preview
+  - [StRS-MDOKFSTUDIO-TRUST-006](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-006.md): The preview runs no foreign code and unsafe HTML is made inert
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-CORE-012](SwRS-MDOKFSTUDIO-CORE-012.md): An include is expanded in place and mapped to its directive
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-016](SwRS-MDOKFSTUDIO-CORE-016.md): Limit the include budget per render
+  - [SwRS-MDOKFSTUDIO-CORE-018](SwRS-MDOKFSTUDIO-CORE-018.md): Refuse includes outside the allowed roots
+  - [SwRS-MDOKFSTUDIO-CORE-019](SwRS-MDOKFSTUDIO-CORE-019.md): Warn about a missing included file
+  - [SwRS-MDOKFSTUDIO-CORE-067](SwRS-MDOKFSTUDIO-CORE-067.md): Refuse oversize included files
+<!-- okf:links:end -->

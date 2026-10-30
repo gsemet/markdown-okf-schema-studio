@@ -12,7 +12,8 @@ description: When a palette button, a slash command or a shortcut runs an
   reason in the status line when the action has one.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -99,3 +100,13 @@ When a palette button, a slash command or a shortcut runs an action, the extensi
 - Method: test/page/runtimeEditPalette.test.ts (Bold and undo: clicking Bold edits the text in one native step and keeps the editor open; Enter in the URL field inserts [text](url) as one undo step and returns to the text box); test/page/runtimePaletteActions.test.ts (Bold and undo: the picker edits the text box as one undo step and keeps the editor open; a matched shortcut: the bold shortcut works in a cell and stays out of the browser); test/page/modules/editPalette.test.ts (an action that makes no edit, a refusal that has a reason: a refused conversion changes nothing and tells why through notify, also from the slash menu where the query is removed); test/page/modules/editActions.test.ts (invalid selection: heading without a change or with an unknown level returns no edit)
 - Method: the manual splice fallback is deduced from the code (applyTextEdit in src/page/features/textControls.ts), not tested; the actions compute on text that uses the line feed only and the editor strips and restores the trailing line ending of the block, and no palette test covers a carriage return inside a block; the guard itself (validSelection in src/page/modules/editActionHelpers.ts) is exercised only indirectly by the action tests; the no-edit case of a matched shortcut is deduced from the code (paletteShortcut in src/page/features/textControls.ts), not tested; the slash menu case without a reason is untested
 - Criteria: One execCommand call per edit, the text equals the planned result, the selection equals the one the action returned, and an autosave follows. For a refusal the text and the selection are the same before and after, the active element is the text box, the notify hook receives the explain text of the action and the editor status shows it only while the editor is open and not finishing (the refusal reasons themselves are specified in SwRS-MDOKFSTUDIO-TABLE-076). Every action starts with the same selection check and returns undefined when it fails. paletteShortcut returns true for every matched action of the current scope (the cell scope is specified in SwRS-MDOKFSTUDIO-TABLE-085).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-015](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-015.md): A writer runs any palette command from an accessible slash menu
+<!-- okf:links:end -->

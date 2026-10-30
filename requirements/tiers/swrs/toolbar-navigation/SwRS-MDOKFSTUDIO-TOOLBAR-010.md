@@ -9,7 +9,8 @@ description: While the find bar holds a query, the extension SHALL paint every
   it.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: draft
+req_lifecycle: draft
+status: draft
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,12 @@ While the find bar holds a query, the extension SHALL paint every match in the r
 - Method: test/core/preview/previewStyles.test.ts (the match paint reads the theme tokens and has a forced-colours rule).
 - Method: test/integration/findInPreview.test.ts, real VS Code window (matches in a table, an admonition and a link; a folded section unfolds; cream and dark shots).
 - Criteria: the count and the painted ranges equal the number of matches in the visible and folded rendered text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-003](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-003.md): The reader finds and replaces text in the preview
+<!-- okf:links:end -->

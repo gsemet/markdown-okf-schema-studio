@@ -10,7 +10,8 @@ description: 'When the caret or selection lies inside a #rgb, #rrggbb or rgb() c
   replace the code under the caret in place and close when the caret leaves the code.'
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -125,3 +126,15 @@ updateAvailability hides the button and calls closePopover when the open button 
 - Method: test/page/modules/editActions.test.ts (marker holder of editActions.test.ts for this requirement)
 - Method: visual scenarios palette-slash/v01-palette-popups-light-900 (the swatch is shown only while the caret is in a colour code)
 - Criteria: The code must be accepted by the colour grammar of the sanitizer and delimited as described; the popover has no tab and no Remove button and the field starts with the code; updateAvailability hides the button and closes the popover when the open button is the hidden one.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+  - [SwRS-MDOKFSTUDIO-PALETTE-036](SwRS-MDOKFSTUDIO-PALETTE-036.md): Leaving the frame from a palette control saves once and a press keeps the text box focus
+<!-- okf:links:end -->

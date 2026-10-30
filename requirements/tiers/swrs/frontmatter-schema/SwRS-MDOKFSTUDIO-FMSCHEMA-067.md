@@ -12,7 +12,8 @@ description: "When a link annotation lists `tooltip_shows_fields`, `preview_show
   until it closes."
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -131,3 +132,21 @@ When a link annotation lists `tooltip_shows_fields`, `preview_shows_fields` or `
 - Method: test/core/frontmatter/fileLinks.test.ts (tooltip fields, marker line, no matching line, identity rules), test/core/frontmatter/frontmatterFence.test.ts (byte-order mark), test/core/frontmatter/propertiesTable.test.ts (excerpt, no value), test/core/navigation/previewNavigation.test.ts (line of the marker), test/integration/previewEditing.test.ts (tooltip fields, marker line, target saved and deleted), test/node-services/linkedTargetWatch.test.ts (target watcher, direct watch), test/page/runtimeScroll.test.ts (hover, no room below, Escape, scroll and the other closing triggers), test/visual/scenarioDefinitions2.ts (excerpt).
 - Method: test/session/eventFanOut.test.ts (previews linking one target share its host and direct watches; at most 256 targets are watched, a target past the cap gets none and relies on the preview-wide watcher and the save handler).
 - Criteria: The clipping of the excerpt is done by CSS. The identity is the string value of the id_marker field of the document; the file name without extension is used only when the annotation has no id_marker. The folder of the target is watched without recursion and events naming the target (or no name) count; the watcher is backed by the preview-wide file watcher. While a tooltip is open, the link's title is removed and aria-describedby points to the tooltip; closing restores both. Invalid and unavailable spans are focusable and have the same tooltip.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-063](SwRS-MDOKFSTUDIO-FMSCHEMA-063.md): Each link value shows whether it resolves
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-046](SwRS-MDOKFSTUDIO-FMSCHEMA-046.md): x-okf-link annotations declare link fields and their syntax
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-068](SwRS-MDOKFSTUDIO-FMSCHEMA-068.md): A link shows an excerpt of the linked file
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-069](SwRS-MDOKFSTUDIO-FMSCHEMA-069.md): A link can show the line of its marker
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-070](SwRS-MDOKFSTUDIO-FMSCHEMA-070.md): Linked file details refresh when the target changes on disk
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-071](SwRS-MDOKFSTUDIO-FMSCHEMA-071.md): A link tooltip appears on hover and focus
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-072](SwRS-MDOKFSTUDIO-FMSCHEMA-072.md): A link tooltip closes on leaving, Escape, scroll, resize and outside click
+<!-- okf:links:end -->

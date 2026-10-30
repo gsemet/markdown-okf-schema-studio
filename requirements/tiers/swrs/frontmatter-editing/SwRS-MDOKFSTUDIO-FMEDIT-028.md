@@ -9,7 +9,8 @@ description: When a field editor is open, the extension SHALL show inside the
   fields still missing or typed as a custom key.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -109,3 +110,21 @@ When a field editor is open, the extension SHALL show inside the edited row, aft
 - Method: test/page/runtimeFrontmatterFields.test.ts (scenarios: T24 choosing a field in the picker adds it right after the open row, default values, T24 the text-input picker adds on Enter with afterField, disabled Add button, T25 the picker offers Custom key only when additional properties are allowed, T25 choosing Custom key and Enter, T25 an invalid custom key shows an error and posts nothing).
 - Method: visual scenario frontmatter-editing/v02-edit-enum-value-dark-900 in test/visual/scenarioDefinitions2.ts and the real-input scenario of the field menu (scenario: layout inside the row at a normal width and at about 520 px).
 - Criteria: the layout check needs a real browser; the unit test only checks that the menu is present.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-033](SwRS-MDOKFSTUDIO-FMEDIT-033.md): The Add field picker lists the schema fields still missing
+  - [SwRS-MDOKFSTUDIO-FMEDIT-034](SwRS-MDOKFSTUDIO-FMEDIT-034.md): Without schema fields to add, a typed field name is added
+  - [SwRS-MDOKFSTUDIO-FMEDIT-035](SwRS-MDOKFSTUDIO-FMEDIT-035.md): The picker offers a Custom key when extra properties are allowed
+  - [SwRS-MDOKFSTUDIO-FMEDIT-036](SwRS-MDOKFSTUDIO-FMEDIT-036.md): An invalid custom key name is refused in the picker
+  - [SwRS-MDOKFSTUDIO-FMEDIT-084](SwRS-MDOKFSTUDIO-FMEDIT-084.md): The field action menu stays inside its row in a narrow preview
+<!-- okf:links:end -->

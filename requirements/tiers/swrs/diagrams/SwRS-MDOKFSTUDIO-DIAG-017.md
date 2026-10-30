@@ -10,7 +10,8 @@ description: "When a writer picks the Mermaid action of the edition palette or t
   the selection, with the label Start selected."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,17 @@ When a writer picks the Mermaid action of the edition palette or the Mermaid sla
 - Method: test/page/modules/editPalette.test.ts (GFM mode offers Mermaid, other modes do not: the palette)
 - Method: test/page/modules/slashMenu.test.ts (the aliases diagram, chart, graph and flowchart resolve to Mermaid)
 - Criteria: The inserted text renders as a Mermaid diagram figure; the registry entry lists mode gfm only and the aliases resolve to it.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-018](SwRS-MDOKFSTUDIO-DIAG-018.md): Mermaid is offered in the GFM palette mode only
+<!-- okf:links:end -->

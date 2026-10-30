@@ -10,7 +10,8 @@ description: "When Mermaid cannot draw a diagram, the page SHALL show at the top
   error."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -70,3 +71,14 @@ When Mermaid cannot draw a diagram, the page SHALL show at the top of the diagra
 - Method: test/page/modules/mermaidError.test.ts (syntax error, reason with markup, changing reason: error element, closed details, plain-text reason, one error element and one details section)
 - Method: test/visual/scenarioDefinitions2.ts (visual scenarios diagrams v08 and v09: error assertions and the theme switch check)
 - Criteria: Message, closed details and plain-text reason are present; no markup is created from the reason; never more than one error element and one details section per diagram.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-001](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-001.md): A writer reads and inserts Mermaid diagrams that follow the theme
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-016](SwRS-MDOKFSTUDIO-DIAG-016.md): An invalid Mermaid diagram keeps exactly one error
+<!-- okf:links:end -->

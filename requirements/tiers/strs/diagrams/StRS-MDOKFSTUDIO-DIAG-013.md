@@ -8,7 +8,8 @@ description: When a writer previews a PlantUML diagram whose JAR rendering is
   diagram, and never start a process in an untrusted workspace.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -38,3 +39,12 @@ As a writer, I know whether Restricted Mode, a wrong path, a missing command or 
 - A `jarPath` that does not exist shows "The PlantUML JAR could not be found: followed by the path"; a directory shows "The PlantUML JAR path is not a file: followed by the path"; no process starts. The diagram state is `error`.
 - A missing `plantuml` command shows `PlantUML executable "plantuml" was not found on PATH. Set markdownOkfSchemaStudio.plantuml.jarPath to a valid JAR path.` with the source kept and the state `unavailable`. Known issue: a missing Java gives the same wording about the executable "java", which does not name Java or Graphviz and misleads when `jarPath` is already set; a missing Graphviz is neither checked nor reported.
 - A process exiting with an error shows `PlantUML exited with code N: followed by the error output` (or `signal S`, or "PlantUML returned no diagnostic."); output without `<svg` shows "PlantUML did not return SVG output."; a spawn that throws is reported the same way. A process that exits before reading its input, or a stdin error, becomes a normal message instead of crashing the extension host.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-DIAG-007](StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+<!-- okf:links:end -->

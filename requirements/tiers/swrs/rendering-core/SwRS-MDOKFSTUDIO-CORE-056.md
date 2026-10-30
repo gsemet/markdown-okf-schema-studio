@@ -9,7 +9,8 @@ description: When a document holds a raw HTML table, the extension SHALL rebuild
   and `svg` inside it.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,15 @@ When a document holds a raw HTML table, the extension SHALL rebuild it from an a
 
 - Method: Unit test "raw HTML tables preserve complex cell spans without active content" in test/core/render/mystFeatures.test.ts
 - Criteria: Only allow-listed tags and attributes remain.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-031](../gfm/SwRS-MDOKFSTUDIO-GFM-031.md): Raw HTML tables are rebuilt from an allow-list
+<!-- okf:links:end -->

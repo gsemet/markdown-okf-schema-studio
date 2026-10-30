@@ -9,7 +9,8 @@ description: When the reader presses Zoom in or Zoom out, the Studio SHALL scale
   for the panel.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -48,3 +49,18 @@ As a reader, I enlarge or shrink the text with two buttons, the column grows or 
 - Precedence at start: the zoom saved with the panel, then the zoom stored for the workspace, then 100 %.
 - A zoom change does not draw the document again.
 - A zoom that VS Code cannot save still holds until the window closes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-THEME-038](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-038.md): Zoom in and out change the zoom by 10 points within limits
+  - [SwRS-MDOKFSTUDIO-THEME-043](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-043.md): Zoom scales the text and the column without a redraw
+  - [SwRS-MDOKFSTUDIO-THEME-055](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-055.md): A zoom that cannot be saved still holds for the session
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-013](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-013.md): The host accepts only a known view preference with a valid value
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+<!-- okf:links:end -->

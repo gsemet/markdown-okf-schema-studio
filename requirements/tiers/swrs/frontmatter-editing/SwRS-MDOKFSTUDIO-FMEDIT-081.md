@@ -9,7 +9,8 @@ description: When a writer has chosen a value in the select of an enum field,
   pressed in it.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,12 @@ When a writer has chosen a value in the select of an enum field, the extension S
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterEditor.test.ts).
 - Criteria: There is no change listener on the select; an unchanged value closes the editor without a post.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+<!-- okf:links:end -->

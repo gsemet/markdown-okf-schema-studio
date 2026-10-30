@@ -9,7 +9,8 @@ description: When a writer presses Cancel or Escape in a block editor, the page
   the block back in one edit.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -75,3 +76,15 @@ When a writer presses Cancel or Escape in a block editor, the page SHALL close t
 - Method: test/page/blockReq.requirements.test.ts (`Cancel and Escape are ignored while the final save is in flight`: cancel while saving and before saving).
 - Method: test/integration/previewEditing.test.ts (cancel of an inserted block removes it; a cancel with a mismatched id is refused: host restore). The unit-level path of handleEditCancel has no test.
 - Criteria: previewEditCancel is posted exactly when hasAutosavedChange is true; cancelBlockEdit returns without a message when finishing is true; the Escape branch of the keydown listener requires isComposing to be false; pendingText is set to the original text and drained as one edit.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

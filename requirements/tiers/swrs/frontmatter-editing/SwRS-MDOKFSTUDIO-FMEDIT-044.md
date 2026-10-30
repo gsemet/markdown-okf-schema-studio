@@ -8,7 +8,8 @@ description: When the edited value carries a YAML anchor or alias, the extension
   data.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the edited value carries a YAML anchor or alias, the extension SHALL fall b
 
 - Method: Unit test on the frontmatter patch (test/core/frontmatter/okfFrontmatter.test.ts).
 - Criteria: Tests value patch for an anchored value still writes correct data; a nested map written as an object yields the same data.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-043](SwRS-MDOKFSTUDIO-FMEDIT-043.md): A frontmatter edit changes only the lines of its field
+<!-- okf:links:end -->

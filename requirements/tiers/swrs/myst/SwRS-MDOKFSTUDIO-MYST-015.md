@@ -7,7 +7,8 @@ description: When a tag cannot be paired or is not a context tag, the extension
   SHALL keep it visible as literal text with its body.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a tag cannot be paired or is not a context tag, the extension SHALL keep it
 
 - Method: Unit test "unsupported context boundaries stay literal and fenced XML stays code" in test/core/render/mystFeatures.test.ts
 - Criteria: Only the pattern [a-z][a-z0-9_-]* with a matching closing tag becomes a panel.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-013](SwRS-MDOKFSTUDIO-MYST-013.md): Context tags render as titled panels
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When the page learns that an included file changed, it SHALL forget
   data-plantuml-includes true and those still drawing.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,15 @@ When the page learns that an included file changed, it SHALL forget the kept res
 
 - Method: Unit test: after an included file changed, the diagrams that read files are drawn again from the host.
 - Criteria: Only diagrams that read files are redrawn.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-053](SwRS-MDOKFSTUDIO-DIAG-053.md): Served include files are watched and redraw their diagrams
+<!-- okf:links:end -->

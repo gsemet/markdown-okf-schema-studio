@@ -8,7 +8,8 @@ description: When the host receives a rename to a name that another field
   "{name}" already exists.'
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the host receives a rename to a name that another field already has, the ex
 
 - Method: Unit test on the save plan (test/core/edits/frontmatterEdit.test.ts).
 - Criteria: The page-side check is a separate requirement; this is the host check.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-024](SwRS-MDOKFSTUDIO-FMEDIT-024.md): A click on a field name renames the key
+<!-- okf:links:end -->

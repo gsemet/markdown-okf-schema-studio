@@ -8,7 +8,8 @@ description: When the writer presses List table in the table bar, the extension
   {list-table} directive in one final save.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -63,3 +64,14 @@ When the writer presses List table in the table bar, the extension SHALL post th
 - Method: test/page/runtimeTableCellEditor.test.ts, unit tests CR038: the table toolbar converts the pipe table to a list-table in one final save ("Convert after typing") and CR038: the conversion button is off for a table inside a captioned figure ("Table in a captioned figure").
 - Method: test/page/fmtableReqTable.requirements.test.ts, unit tests a cell change after a refused conversion drops the prepared list-table and saves the pipe table ("A cell change drops a conversion that was not saved") and the List table button converts the table after a line break was pasted into the cell ("Line break pasted into the cell").
 - Criteria: A single final message with the list-table text; the disabled button in a figure; editedText of the next save equal to the serialised pipe table; the pasted line break written as a space in the list-table.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

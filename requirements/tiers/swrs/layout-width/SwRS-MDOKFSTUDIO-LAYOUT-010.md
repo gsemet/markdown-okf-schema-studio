@@ -7,7 +7,8 @@ description: When an empty document is shown in edit mode, the extension SHALL
   start the Start writing button 40 px below the top of the pane.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,14 @@ When an empty document is shown in edit mode, the extension SHALL start the Star
 
 - Method: Visual scenarios v39 to v41, v54, v59 and v62 (first-element gap, empty state).
 - Criteria: The measured top of the button is 40 px within 4 px in every case.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-004](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-004.md): The first element starts clear of the top and of the floating toolbar
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-007](SwRS-MDOKFSTUDIO-LAYOUT-007.md): The first element starts 40 px below the top
+<!-- okf:links:end -->

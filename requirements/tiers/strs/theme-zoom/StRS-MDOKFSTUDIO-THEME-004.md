@@ -11,7 +11,8 @@ description: When the reader picks a theme mode, the Studio SHALL remember it
   value that is not a known theme mode.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -51,3 +52,16 @@ As a reader, I pick a theme once and every preview of this workspace opens in it
 - VS Code can deliver the theme announcement before the page script listens; the page therefore reports that it is ready and the host answers with the live theme.
 - The same answer carries the editor pairing, which belongs to the lifecycle-sync requirements.
 - A value that is not one of Current, Dark, White and Cream is dropped without any message; the workspace then counts as having no stored choice.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-THEME-001](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-001.md): The Theme button cycles Current, Dark, White and Cream
+  - [SwRS-MDOKFSTUDIO-THEME-013](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-013.md): The host drops a theme-mode message with an unknown mode
+  - [SwRS-MDOKFSTUDIO-THEME-016](../../swrs/theme-zoom/SwRS-MDOKFSTUDIO-THEME-016.md): Current mode follows the VS Code theme and redraws on change
+<!-- okf:links:end -->

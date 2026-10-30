@@ -9,7 +9,8 @@ description: When the built-in engine asks the host for an include file, the
   and refuse every other request with a reason.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -98,3 +99,22 @@ The folders an include may read follow the trust of the workspace.
 
 - Method: test/core/render/plantUmlIncludes.test.ts (a top-level include resolves next to the document, a nested one next to the including file: nominal; a trusted workspace serves the workspace and Restricted Mode serves only the document's folder and below: trust boundary; blank names, URLs, library names, absolute paths and a relative from are refused: both name and from refusals; a missing file is refused and watched, a too large file and a symlink escape are refused: missing and rejected-file refusals). The served small file and the symlink that stays inside the folders are checked only through these tests, with no test of their own.
 - Criteria: No disk access for blank, URL and library names; only a null or absolute from proceeds; the base folder follows from; folder scope follows trust; links are judged by their real path; the size limit applies to every include.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-050](SwRS-MDOKFSTUDIO-DIAG-050.md): The host accepts only well-formed include requests
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-055](SwRS-MDOKFSTUDIO-DIAG-055.md): A forged relative from is refused
+  - [SwRS-MDOKFSTUDIO-DIAG-056](SwRS-MDOKFSTUDIO-DIAG-056.md): Includes resolve next to the including file
+  - [SwRS-MDOKFSTUDIO-DIAG-057](SwRS-MDOKFSTUDIO-DIAG-057.md): The trust state sets the folders an include may read
+  - [SwRS-MDOKFSTUDIO-DIAG-058](SwRS-MDOKFSTUDIO-DIAG-058.md): A missing include file is refused and watched
+  - [SwRS-MDOKFSTUDIO-DIAG-059](SwRS-MDOKFSTUDIO-DIAG-059.md): An include file over 5 MiB is refused
+  - [SwRS-MDOKFSTUDIO-DIAG-060](SwRS-MDOKFSTUDIO-DIAG-060.md): A symlink leaving the allowed folders is refused
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When a frontmatter value is an empty list or null, the extension
   SHALL show `[]` for the empty list and `null` for the null value.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a frontmatter value is an empty list or null, the extension SHALL show `[]`
 - Method: Unit test of the table renderer.
 - Criteria: Both tokens are literal text in the Value cell.
 - Known issue: the helper formatValue of the table renderer is never called and would show an em dash for null; today null shows the word null.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-006](SwRS-MDOKFSTUDIO-FMSCHEMA-006.md): Property values read like YAML in a lean table
+<!-- okf:links:end -->

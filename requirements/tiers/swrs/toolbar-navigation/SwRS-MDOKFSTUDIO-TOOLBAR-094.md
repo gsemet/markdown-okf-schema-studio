@@ -9,7 +9,8 @@ description: "When a relative Markdown link is followed, the extension SHALL ope
   that failed."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -72,3 +73,12 @@ When a relative Markdown link is followed, the extension SHALL open its target o
 - Method: test/session/toolbarReq.requirements.test.ts (nominal symlink inside, refusal symbolic link out: a symbolic link out of the workspace is blocked; refusal missing or not a regular file: a target that is missing or not a regular file is blocked)
 - Method: the integration test test/integration/previewEditing.test.ts (bundle_target symlink) covers the frontmatter path, which answers outside the workspace
 - Criteria: The check compares the lexical path with each root, then the real path of the target with the real path of the root; the kind of the target must be file.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+<!-- okf:links:end -->

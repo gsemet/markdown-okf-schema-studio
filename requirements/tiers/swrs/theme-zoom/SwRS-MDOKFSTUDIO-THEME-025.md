@@ -11,7 +11,8 @@ description: "When a forced theme mode (Dark, White or Cream) is shown, the exte
   Code theme."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -123,3 +124,12 @@ the same rule with their own palette; Current mode continues to follow the host.
 - Method: test/integration/realInput/markers.ts, real-input check `38-toolbar-{host}-{mode}` of test/integration/realInput/previewWindow.ts (captures theme-zoom/r01 to r08): runs the four modes on both hosts and compares the toolbar, text and pressed button colours and the borders with a fixed map for Dark, White and Cream; capture r03 is asserted but not captured.
 - Method: test/core/preview/diagReq.styles.requirements.test.ts, unit test `the sticky heading band takes the page colours of the forced mode` (the two band rows).
 - Criteria: Computed page colours equal the listed values and the note panel is light. Computed body colours, colour scheme, admonition panel and heading brightness equal the listed values. The toolbar computed colours equal the palette of the mode. Every border colour equals the map value of the mode. The page and toolbar colours of each forced mode are identical on the two hosts. The sorted variable lists of the three blocks are equal and each block holds the background token as a hex value and no VS Code variable.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
+<!-- okf:links:end -->

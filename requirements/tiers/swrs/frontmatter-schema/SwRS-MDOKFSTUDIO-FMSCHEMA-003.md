@@ -7,7 +7,8 @@ description: When the fence lines of a document end with CRLF, the extension
   SHALL read the frontmatter block exactly as it reads one with LF endings.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the fence lines of a document end with CRLF, the extension SHALL read the f
 
 - Method: Unit test of the fence matcher with CRLF sources.
 - Criteria: The block length and the line ending are detected from the opening fence; a CRLF closing line is accepted in both forms.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-001](SwRS-MDOKFSTUDIO-FMSCHEMA-001.md): The frontmatter block is found by its fences and parsed as a YAML mapping
+<!-- okf:links:end -->

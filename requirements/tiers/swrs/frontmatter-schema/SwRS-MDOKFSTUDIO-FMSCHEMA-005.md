@@ -11,7 +11,8 @@ description: When the frontmatter has no string `type`, or no schema lookup is
   one line in a key column as wide as its longest key, up to 40% of the table.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -103,3 +104,17 @@ When the frontmatter has no string `type`, or no schema lookup is made for the d
 - Criteria: The generic table lists the fields without schema, error or enum information.
 - Method: `test/core/preview/previewStyles.test.ts` (key column rules: no wrap, ellipsis, 40% cap), `test/core/frontmatter/propertiesTable.test.ts` (full key as tooltip of a long key) and the scenarios `frontmatter-schema/v24-frontmatter-long-keys-cream-900` and `v25-frontmatter-long-keys-dark-900` of `test/visual/scenarioDefinitions1.ts` (every key on one line, key column within 40%, longest key ellipsized with its tooltip), plus `v26-frontmatter-skill-metadata-cream-900` and `v27-frontmatter-short-keys-dark-900` (a long description and a code block in the value, short keys: key cells as wide as their text, the Names label on one line) and the header rule test in `previewStyles.test.ts`.
 - Criteria: The key column never breaks a key inside a word, takes the width of the longest key up to 40% of the table (the section is the size container, `40cqw`), and the value column takes the rest.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-012](SwRS-MDOKFSTUDIO-FMSCHEMA-012.md): Every table value is HTML-escaped
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-013](SwRS-MDOKFSTUDIO-FMSCHEMA-013.md): The properties section maps to source line 1
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-088](SwRS-MDOKFSTUDIO-FMSCHEMA-088.md): The generic table is shown when no schema lookup is made
+<!-- okf:links:end -->

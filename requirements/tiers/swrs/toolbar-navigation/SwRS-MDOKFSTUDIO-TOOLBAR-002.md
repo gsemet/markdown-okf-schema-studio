@@ -10,7 +10,8 @@ description: When the preview is scrolled so that text passes under the sticky
   top, without moving the content or the toolbar.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -53,3 +54,12 @@ When the preview is scrolled so that text passes under the sticky heading band, 
 - Method: test/page/runtimeScroll.test.ts (Page at the top and Back to the top: the sticky band is marked as having content scrolled under it only below the top).
 - Method: visual scenarios toolbar-navigation/v32 to v34 in test/visual/scenarioDefinitions2.ts (Text scrolls under the band: the computed box-shadow, the fixed position at top 0 and the toolbar z-index over the band in the light, dark and cream themes).
 - Criteria: marker present if and only if scrollY > 1; computed box-shadow not none with a positive vertical offset and blur; band top 0; toolbar z-index above the band.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-004](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-004.md): The reader always sees the section being read
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: "When a {uml} directive or a {plantuml} directive without a body na
   reason it cannot be read in place of the diagram."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -119,3 +120,21 @@ A diagram that comes from an included document or from a {uml} file resolves its
 - Method: test/page/modules/plantumlDiagram.test.ts (the top-level includes of a {uml} diagram file resolve next to that file: include base scenario).
 - Method: test/visual/scenarioDefinitions2.ts (visual scenarios diagrams v13 and v14: two pictures, no network, file diagram scenario).
 - Criteria: File text appears as diagram and source (with useJar the JAR receives the file text); an inline body keeps its own text; dependencies list exactly the files read; message, warning and no diagram figure for a refusal; the message uses the PlantUML error style and the missing path is watched; only {uml} gets the empty-directive message; the base attribute names the right file.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-DIAG-054](SwRS-MDOKFSTUDIO-DIAG-054.md): The host reads an include only next to the including file in allowed folders
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-DIAG-069](SwRS-MDOKFSTUDIO-DIAG-069.md): A diagram file is a dependency of the render
+  - [SwRS-MDOKFSTUDIO-DIAG-070](SwRS-MDOKFSTUDIO-DIAG-070.md): An unreadable diagram file shows its refusal
+  - [SwRS-MDOKFSTUDIO-DIAG-071](SwRS-MDOKFSTUDIO-DIAG-071.md): A missing diagram file is reported and watched
+  - [SwRS-MDOKFSTUDIO-DIAG-072](SwRS-MDOKFSTUDIO-DIAG-072.md): An exhausted include budget stops diagram files
+  - [SwRS-MDOKFSTUDIO-DIAG-073](SwRS-MDOKFSTUDIO-DIAG-073.md): A {uml} directive without file or body says so
+  - [SwRS-MDOKFSTUDIO-DIAG-074](SwRS-MDOKFSTUDIO-DIAG-074.md): Nested diagrams resolve includes next to their own file
+<!-- okf:links:end -->

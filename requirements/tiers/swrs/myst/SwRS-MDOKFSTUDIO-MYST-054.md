@@ -7,7 +7,8 @@ description: When the preview pane width changes, the extension SHALL pick grid
   columns by container width (480, 640, 800 px), not the window width.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the preview pane width changes, the extension SHALL pick grid columns by co
 
 - Method: Unit test "the grid stylesheet collapses to one column in a narrow pane" in test/core/render/gridToctree.test.ts; Visual scenario `myst/v${22 + index}-grid-cards-full-${theme}-${width}` in test/visual/scenarioDefinitions2.ts
 - Criteria: One visual family across themes and widths.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-053](SwRS-MDOKFSTUDIO-MYST-053.md): Grids lay out cards in responsive columns
+<!-- okf:links:end -->

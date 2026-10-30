@@ -13,7 +13,8 @@ description: When the page receives previewContentPatch, it SHALL accept it only
   when present, a code of at most 100 characters.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -70,3 +71,14 @@ A refused patch is not applied (see SwRS-MDOKFSTUDIO-TRUST-059).
 - Method: Unit test test/core/protocol/hostToPage.test.ts (the payload checks refuse what the page used to refuse) covers the out of bounds cases.
 - Method: Unit test test/page/runtimeContentPatch.test.ts (CR 050: a patch keeps the code of each status line and refuses a malformed one) covers the valid patch and a malformed one.
 - Criteria: Known statuses: pending, success, stale, error, missing-source, recovery.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TRUST-009](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-009.md): What the page and the host exchange is checked and never applied to another version
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

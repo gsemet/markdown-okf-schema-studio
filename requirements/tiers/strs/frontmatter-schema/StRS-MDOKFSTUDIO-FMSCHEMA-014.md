@@ -10,7 +10,8 @@ description: When a schema annotates a field with x-okf-link, the Studio SHALL
   unusable links with a reason.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -99,3 +100,54 @@ As a schema author, I declare that a field points to files so that writers get c
 - Hovering or focusing a link (not while pending) shows a tooltip below or above it, never under the toolbar, of limited width, closing on Escape, scroll, resize, outside click or when pointer and focus leave.
 - Click or Enter in read mode, Cmd/Ctrl+click in edit mode follows the link; the query and fragment are kept and the jump is recorded in the Back/Next history.
 - An invalid, unavailable or outside link is not followed and VS Code shows "Markdown OKF-Schema Studio could not follow the link: {reason}"; a malformed request shows "The frontmatter link request is invalid.". Filename-stem links are re-resolved at click time.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-039](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-039.md): The title badge counts the issues and jumps to the first one
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-046](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-046.md): x-okf-link annotations declare link fields and their syntax
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-047](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-047.md): An invalid x-okf-link annotation marks the field
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-048](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-048.md): Link values are checked for type and syntax
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-049](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-049.md): Query and fragment are split off a link target
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-050](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-050.md): Links resolve from the document, bundle or project root and stay inside it
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-051](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-051.md): Bundle-relative links resolve from the bundle root
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-052](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-052.md): Project-relative links resolve from the project root
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-053](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-053.md): Absolute link targets are refused
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-054](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-054.md): Bundle and project targets cannot leave their root
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-055](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-055.md): A filename stem resolves when exactly one file matches
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-056](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-056.md): An ambiguous or unknown stem is an error
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-057](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-057.md): An unreadable stem candidate gives a warning
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-058](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-058.md): The stem index skips build and hidden folders
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-059](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-059.md): The stem index is rebuilt when a Markdown file changes
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-060](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-060.md): The bundleRoot, projectRoot and allowOutsideWorkspaceLinks settings set the roots
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-061](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-061.md): The projectRoot setting sets the project root
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-062](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-062.md): The allowOutsideWorkspaceLinks setting default refuses outside links
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-063](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-063.md): Each link value shows whether it resolves
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-064](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-064.md): A link that does not resolve shows its problem
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-065](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-065.md): Links are shown as pending on the first paint
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-066](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-066.md): Links are resolved about 150 ms after the render
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-067](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-067.md): A link tooltip shows the fields and an excerpt of the linked file
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-068](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-068.md): A link shows an excerpt of the linked file
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-069](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-069.md): A link can show the line of its marker
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-070](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-070.md): Linked file details refresh when the target changes on disk
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-071](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-071.md): A link tooltip appears on hover and focus
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-072](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-072.md): A link tooltip closes on leaving, Escape, scroll, resize and outside click
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-073](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-073.md): A resolving frontmatter link opens its target, others are refused with a warning
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-074](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-074.md): An unusable frontmatter link is not followed
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-079](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-079.md): The bundle root defaults to the schema folder's parent
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-080](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-080.md): The project root defaults to the nearest git root
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-081](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-081.md): The allowOutsideWorkspaceLinks setting set to true allows outside links
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-082](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-082.md): A refused frontmatter link shows a warning with its reason
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-083](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-083.md): A malformed frontmatter link request is refused
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-086](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-086.md): A link problem is keyboard-focusable and explained in its tooltip
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-087](../../swrs/frontmatter-schema/SwRS-MDOKFSTUDIO-FMSCHEMA-087.md): A link problem counts in the badge
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-113](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-113.md): A link message needs a request, else it is ignored or refused
+- Supersedes:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-015](StRS-MDOKFSTUDIO-FMSCHEMA-015.md): Links resolve against the right root
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-016](StRS-MDOKFSTUDIO-FMSCHEMA-016.md): Link status is visible on each value
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-017](StRS-MDOKFSTUDIO-FMSCHEMA-017.md): Linked files show their evidence
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-018](StRS-MDOKFSTUDIO-FMSCHEMA-018.md): Frontmatter links can be followed
+<!-- okf:links:end -->

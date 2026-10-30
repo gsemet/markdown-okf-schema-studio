@@ -8,7 +8,8 @@ description: When the preview is 640 px wide or less, the extension SHALL lay
   type labels wrap anywhere so that nothing pushes the page sideways.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the preview is 640 px wide or less, the extension SHALL lay the properties 
 - Method: Visual scenarios v10, v17 and v19 (no-overflow checks).
 - Criteria: The narrow rules apply under the media query max-width 640px.
 - Known issue: a word can still break in the middle of a name in a narrow preview; there is no stacked layout.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-006](SwRS-MDOKFSTUDIO-FMSCHEMA-006.md): Property values read like YAML in a lean table
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When a writer scrolls the text editor or a reader scrolls or clicks
   on the same text when it updates, resizes or the text above it changes.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -54,3 +55,24 @@ As a writer, I scroll the source and the preview shows the same passage; as a re
 - The reader chooses in the settings whether the preview follows the editor and whether the editor follows the preview.
 - The Anchor button of the toolbar overrides the first choice for one panel.
 - A change of these settings reloads the preview page.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-026](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-026.md): The side preview follows the active Markdown editor
+  - [SwRS-MDOKFSTUDIO-LIFE-048](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-048.md): A changed setting that the page reads only at startup loads a new page document
+  - [SwRS-MDOKFSTUDIO-LIFE-069](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-069.md): A render of the loaded document updates the page in place
+  - [SwRS-MDOKFSTUDIO-LIFE-071](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-071.md): A render that cannot patch loads a new page document
+  - [SwRS-MDOKFSTUDIO-LIFE-097](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-097.md): Two settings decide how the panes follow each other
+  - [SwRS-MDOKFSTUDIO-LIFE-100](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-100.md): Scrolling the text editor scrolls the preview to the same line
+  - [SwRS-MDOKFSTUDIO-LIFE-108](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-108.md): Scrolling or clicking the preview reveals the source line
+  - [SwRS-MDOKFSTUDIO-LIFE-112](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-112.md): A double click reveals the source line only when the double-click setting is on
+  - [SwRS-MDOKFSTUDIO-LIFE-116](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-116.md): A scroll or reveal report that does not name the current render moves nothing
+  - [SwRS-MDOKFSTUDIO-LIFE-117](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-117.md): The page ignores a source scroll for another render
+  - [SwRS-MDOKFSTUDIO-LIFE-119](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-119.md): Both panes share one reading anchor that survives updates
+  - [SwRS-MDOKFSTUDIO-LIFE-125](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-125.md): The reading state of recent documents is saved within bounds
+  - [SwRS-MDOKFSTUDIO-LIFE-156](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-156.md): The settings editor lists the Studio settings in titled groups
+<!-- okf:links:end -->

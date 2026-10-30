@@ -8,7 +8,8 @@ description: When a document holds a `{csv-table}` directive, the extension
   keeping quoted multi-line cells whole.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a document holds a `{csv-table}` directive, the extension SHALL render a ta
 
 - Method: Unit test "MyST GFM and directive tables preserve captions, headers, and alignment" in test/core/render/mystFeatures.test.ts
 - Criteria: Header, quoted multi-line cell, caption and alignment render.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-063](SwRS-MDOKFSTUDIO-MYST-063.md): Table directives render as ordinary tables
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: "When the bundle dispatches a file request without a respond functi
   a request object or a string path, the page SHALL ignore it."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the bundle dispatches a file request without a respond function, a request 
 
 - Method: Unit test: a malformed request is left alone and a non-string from is sent as null.
 - Criteria: Nothing malformed reaches the host.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-046](SwRS-MDOKFSTUDIO-DIAG-046.md): PlantUML includes are read through the extension and refusals reach the diagram
+<!-- okf:links:end -->

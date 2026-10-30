@@ -8,7 +8,8 @@ description: When the rendered page holds `\(x^2\)` in a math span or `\[...\]`
   nodes and code alone, and change nothing when typesetting twice.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the rendered page holds `\(x^2\)` in a math span or `\[...\]` in a math blo
 
 - Method: Unit test "supports Sphinx math delimiters and leaves ordinary text and code alone" in test/core/render/mathRenderer.test.ts
 - Criteria: Typesetting is idempotent.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-006](../../strs/myst/StRS-MDOKFSTUDIO-MYST-006.md): Maths is typeset offline and bad formulas stay readable
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-024](SwRS-MDOKFSTUDIO-MYST-024.md): Maths is typeset offline by KaTeX and bad formulas stay readable
+<!-- okf:links:end -->

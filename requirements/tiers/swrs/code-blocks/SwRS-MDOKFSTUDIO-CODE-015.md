@@ -8,7 +8,8 @@ description: When a MyST code directive sets `:caption:` and `:label:`, the
   as a `{ref}` target.
 project: markdown-okf-schema-studio
 scope: code-blocks
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a MyST code directive sets `:caption:` and `:label:`, the extension SHALL r
 
 - Method: Unit test on MyST rendering.
 - Criteria: Figure id equals the label; caption text present.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-CODE-001](../../strs/code-blocks/StRS-MDOKFSTUDIO-CODE-001.md): A reader reads highlighted, numbered and diff code
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-CODE-014](SwRS-MDOKFSTUDIO-CODE-014.md): A code directive shows its file name or caption above the code
+<!-- okf:links:end -->

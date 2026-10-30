@@ -7,7 +7,8 @@ description: When the host loads the record of a patched page as a new document,
   the extension SHALL replace the nonce of the record by a fresh one first.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,12 @@ When the host loads the record of a patched page as a new document, the extensio
 ### Archived
 
 Covered by SwRS-MDOKFSTUDIO-TRUST-022, SwRS-MDOKFSTUDIO-TRUST-023 and SwRS-MDOKFSTUDIO-TRUST-024 (nonce of every page and of a patched page).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+<!-- okf:links:end -->

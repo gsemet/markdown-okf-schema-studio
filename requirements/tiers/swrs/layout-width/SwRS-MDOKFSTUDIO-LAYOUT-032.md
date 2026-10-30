@@ -14,7 +14,8 @@ description: When a table is wider than the pane outside Auto breakout, the
   behaviour.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -92,3 +93,16 @@ When a table is wider than the pane outside Auto breakout, the extension SHALL l
 - Method: test/core/preview/previewStyles.test.ts (table that fits, overflow mark, short identifiers): unit test "overflowing content tables keep short cells whole and show scroll shadows"; the CSS tests for the shadows and the nowrap rule.
 - Method: test/page/runtimeScroll.test.ts (overflow mark, short identifiers): unit tests markWideTables marks short cells and the overflow of a wide table, never the properties table; markWideTables sets the overflow attribute only past a one pixel tolerance and is idempotent.
 - Criteria: The page overflow is at most 1 px, the last column becomes visible, and the page scroll width equals its client width with a wide table; the attribute is true only when scroll width exceeds client width by more than 1 px; a cell matches only when its trimmed text is one to 24 non-space characters.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-001](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-001.md): The preview never scrolls sideways and wide content scrolls in its box
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-035](../rendering-core/SwRS-MDOKFSTUDIO-CORE-035.md): Scroll wide tables inside their box
+  - [SwRS-MDOKFSTUDIO-LAYOUT-033](SwRS-MDOKFSTUDIO-LAYOUT-033.md): A scrolling table shades its overflowing edges
+  - [SwRS-MDOKFSTUDIO-LAYOUT-034](SwRS-MDOKFSTUDIO-LAYOUT-034.md): Short identifiers stay on one line in a scrolling table
+<!-- okf:links:end -->

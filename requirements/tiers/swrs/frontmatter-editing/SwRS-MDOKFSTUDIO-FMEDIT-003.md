@@ -9,7 +9,8 @@ description: "When a writer opens the editor of a schema enum, number, date, tim
   a one-click toggle for a boolean and a Set to null button for a nullable field."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -129,3 +130,21 @@ When a writer opens the editor of a schema enum, number, date, time, boolean or 
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (number, date and time fields get native inputs and a date-time field stays a text input; the number input carries no schema limits and a value out of range is refused at save time).
 - Method: test/page/runtimeEditorFlush.test.ts (an empty or non-finite number is refused with "Enter a valid number." and nothing is posted; a valid number is posted as a number).
 - Criteria: The input type follows the field type (number, date, time, otherwise text); only step any is set on number inputs.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-007](SwRS-MDOKFSTUDIO-FMEDIT-007.md): Number, date and time fields use native inputs
+  - [SwRS-MDOKFSTUDIO-FMEDIT-008](SwRS-MDOKFSTUDIO-FMEDIT-008.md): An invalid number is refused in the editor
+  - [SwRS-MDOKFSTUDIO-FMEDIT-009](SwRS-MDOKFSTUDIO-FMEDIT-009.md): A boolean field toggles with one click
+  - [SwRS-MDOKFSTUDIO-FMEDIT-017](SwRS-MDOKFSTUDIO-FMEDIT-017.md): Nullable fields offer Set to null
+  - [SwRS-MDOKFSTUDIO-FMEDIT-050](SwRS-MDOKFSTUDIO-FMEDIT-050.md): Editor controls do not apply the schema hints
+  - [SwRS-MDOKFSTUDIO-FMEDIT-074](SwRS-MDOKFSTUDIO-FMEDIT-074.md): A chosen enum value is posted when the select loses focus or Enter is pressed
+<!-- okf:links:end -->

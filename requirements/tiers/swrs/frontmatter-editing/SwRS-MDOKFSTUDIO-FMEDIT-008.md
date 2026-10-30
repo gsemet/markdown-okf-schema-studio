@@ -8,7 +8,8 @@ description: When a writer saves a number field whose input is empty or not a
   and post nothing.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a writer saves a number field whose input is empty or not a finite number, 
 
 - Method: Unit test on the page runtime (test/page/runtimeEditorFlush.test.ts).
 - Criteria: A flush (navigation) sends the typed text instead, see the flush requirement.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-003](SwRS-MDOKFSTUDIO-FMEDIT-003.md): Enum, number, date, boolean and nullable fields use fitting controls
+<!-- okf:links:end -->

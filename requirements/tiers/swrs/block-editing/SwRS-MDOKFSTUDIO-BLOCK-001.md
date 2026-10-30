@@ -10,7 +10,8 @@ description: "When a writer clicks the Edit button of a writable preview, the pa
   block selection and the hover outline and close the label rename field."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -109,3 +110,17 @@ When a writer clicks the Edit button of a writable preview, the page SHALL switc
 - Method: test/page/blockReq.requirements.test.ts (`turning edit mode off closes the label rename field and posts no rename`: rename field row).
 - Method: visual scenarios block-editing/v04 and block-editing/v17 click the Edit button; block-editing/v04 also checks that rendered paragraphs hide their source line breaks.
 - Criteria: The edit mode attributes and the button state follow every click; the tooltip text is the one set in applyEditMode; the message carries documentId, revision, requestId and a boolean editMode and precedes any block save caused by leaving edit mode; a loaded editor produces exactly one final save and an editor without a loaded source produces no message; the selection model is inactive, no element is marked selected, data-sphinx-preview-edit-hover is absent and applyEditMode calls labelRename.close() before it applies the new state; the line count of a rendered paragraph is the same in both modes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+<!-- okf:links:end -->

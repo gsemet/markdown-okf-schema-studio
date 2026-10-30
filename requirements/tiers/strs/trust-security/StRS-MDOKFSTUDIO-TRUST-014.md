@@ -8,7 +8,8 @@ description: When a maintainer installs, builds and packages the Studio, the
   package the bundles the preview loads.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,14 @@ As a maintainer, I install on the pinned Node.js version from the official regis
 
 - The built-in PlantUML engine is an exact dependency version because earlier versions carry a copyleft licence.
 - The built-in PlantUML engine and the page runtime are files of the bundle folder, not inline code.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-CORE-069](../../swrs/rendering-core/SwRS-MDOKFSTUDIO-CORE-069.md): The site Requirements page shows the requirements chain and the report figures
+  - [SwRS-MDOKFSTUDIO-TRUST-074](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package ships its icon and its bundle
+  - [SwRS-MDOKFSTUDIO-TRUST-075](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-075.md): The extension is built from pinned, official dependencies
+<!-- okf:links:end -->

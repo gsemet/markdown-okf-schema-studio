@@ -9,7 +9,8 @@ description: When the host writes a new block after a line, it SHALL put one
   empty or whitespace-only text or for a line that is not in the document.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -92,3 +93,15 @@ When the host writes a new block after a line, it SHALL put one blank line befor
 - Method: test/integration/previewEditing.test.ts (insertion protocol: autosave, final save, cancel, empty text)
 - Method: real-input scenario scenarioInsertAfterFinalFigure and visual scenarios block-editing/v09 and block-editing/v10 (end of document after a figure or an image)
 - Criteria: prefix is two line endings and suffix one line ending only when the next line holds text; the offset equals the end of the closing fence line after frontmatter; offset 0 with an empty prefix for a first block without frontmatter; the plan's lineEnding is CR LF when the text contains a CR LF pair, else LF when it contains an LF, else CR when it contains a CR; insertionText returns an empty string for whitespace; a final line break is not counted as a following line; no double separator follows the inserted text; planInsertion returns undefined for an out of range line and the host posts the error
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-011](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-011.md): A writer adds blocks and starts an empty document from the preview
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

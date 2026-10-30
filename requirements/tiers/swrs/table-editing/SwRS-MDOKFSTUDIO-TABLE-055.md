@@ -16,7 +16,8 @@ description: When the writer presses a row or column button of the table bar,
   slash menu of the cell it leaves.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -114,3 +115,12 @@ When the writer presses a row or column button of the table bar, the extension S
 - Method: test/page/modules/markdownTable.test.ts (a column operation keeps the padding, indentation and outer pipes of every line; inserting and deleting table rows and columns preserves the remaining cells; deleting the first body row of a compact table removes exactly one line; inserting a column re-serializes the table with one more column; table tools cannot delete the header, final body row, or final column; scenarios Row +, Row −, columns, model refusals, canonical style). The disabled state of Col − is read from tableCellEditor.ts and has no test.
 - Method: test/page/fmtableReqTable.requirements.test.ts (rendering the cell editor again closes the emoji picker, the link panel and the slash menu; scenario open panels closed).
 - Criteria: The row count and the selected row index after the press, the cell counts per row and the selected column index, the remaining rows and the selected index returned by deleteRow and deleteColumn; the disabled attribute of the button and an unchanged model; the saved table contains the typed text and the new row or column; the lines of the saved text keep their padding, indentation and outer pipes after a column operation (serialize in src/page/modules/markdownTable.ts, columnOrigins); no popover, panel or slash menu is open after the render.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-008](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-008.md): A table bar locates the writer and edits rows and columns
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When several text edits planned on the same text are applied,
   in.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When several text edits planned on the same text are applied, applyTextEdits SHA
 
 - Method: Unit test `text edits apply in offset order, whatever order they come in` in test/core/edits/textEdit.test.ts.
 - Criteria: The sort is by start then end.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+<!-- okf:links:end -->

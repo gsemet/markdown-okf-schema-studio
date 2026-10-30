@@ -7,7 +7,8 @@ description: "When the extension reads markdownOkfSchemaStudio.plantuml.jarPath,
   SHALL trim the value and read a value that is not a string as empty."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the extension reads markdownOkfSchemaStudio.plantuml.jarPath, it SHALL trim
 
 - Method: Unit tests: reads and trims the configured PlantUML JAR path; uses an empty path for non-string configuration values.
 - Criteria: Trim and empty fallback hold.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-084](SwRS-MDOKFSTUDIO-DIAG-084.md): The JAR pipeline runs java or plantuml once per diagram on stdin
+<!-- okf:links:end -->

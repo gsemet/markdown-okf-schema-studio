@@ -7,7 +7,8 @@ description: "When the host refuses an include, the page SHALL give the engine t
   host's reason exactly once."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the host refuses an include, the page SHALL give the engine the host's reas
 
 - Method: Unit test: refusals, stale answers and timeouts reach the bundle as reasons, once.
 - Criteria: Each request ends in one reason or one file.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-046](SwRS-MDOKFSTUDIO-DIAG-046.md): PlantUML includes are read through the extension and refusals reach the diagram
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When the preview is read-only because the workspace is untrusted or
   save with the read-only reason (SwRS-MDOKFSTUDIO-TRUST-005)
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When the preview is read-only because the workspace is untrusted or the file is 
 
 - Method: Unit test a frontmatter save in an untrusted workspace is refused with the trust message and changes nothing in test/host/fmtableReq.requirements.test.ts. Untested: the file outside the workspace (standalone) branch.
 - Criteria: Standalone files get the same wording.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+<!-- okf:links:end -->

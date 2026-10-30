@@ -9,7 +9,8 @@ description: When the writer presses Reference or Citation, the extension SHALL
   typed in the filter.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,15 @@ The note is appended after the entries only when result.truncated is true.
 - Method: test/integration/mystPickers.test.ts (the labels first and second and the keys smith2024 and zed with the title Smith title: Reference and Citation lists)
 - Method: the arrow navigation through the entries is deduced from the code (buildChoices) and not tested
 - Criteria: The popover holds an input with data-choice-filter and a list; an entry button shows the label, an em dash and the detail when there is one; Cmd or Ctrl with Enter closes the list and finishes the edit instead; Escape closes the popover and returns the focus to the text box.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: "When a writer opens, saves or closes an editor, the extension SHAL
   host puts back at the same viewport top on the next render."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -103,3 +104,16 @@ When a writer opens, saves or closes an editor, the extension SHALL keep the edi
 - Method: test/page/blockReq.requirements.test.ts (closing an editor scrolls the page back, close without a shift) with `closing an editor scrolls the page back by the shift applied on opening`.
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (properties field save carries the pin) with `a field save carries the source line and viewport top of the properties section`.
 - Criteria: pinFields returns an empty object outside the bounds; storePendingPin ignores messages without both fields; keepTextInPlaceBelowPalette returns the shift and stores it in paletteShift; the target scroll on close is clamped between 0 and the maximum scroll; the hidden-element fallback of the table row is read from pinFields and has no table-specific test; the page at the top case has no test of its own.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-057](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-057.md): The properties section keeps its place across the save
+<!-- okf:links:end -->

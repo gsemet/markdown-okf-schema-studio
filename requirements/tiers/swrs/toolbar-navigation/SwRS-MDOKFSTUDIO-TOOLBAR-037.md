@@ -10,7 +10,8 @@ description: "When the column is open, the extension SHALL place it eight pixels
   the choice stays."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -73,3 +74,12 @@ When the column is open, the extension SHALL place it eight pixels below the too
 - Method: test/core/preview/previewStyles.test.ts (Wide pane and Pane width: the TOC column is hidden by default, reserves 256px when open and hides on narrow panes; the 760 px media block, 256 px, position fixed, inset-block-end 16px, width 240px, display none under 760 px). The exact 760 px boundary and the widening of the pane are untested.
 - Method: test/visual/capture_layout_checks.py (check_toc_column: the column starts at least 7 px under the toolbar bottom; check_toc_column and check_toc_shot on scenarios toolbar-navigation/v22 to v27 for the wide pane, Margin, Full width and zoom 200, light 900 px and dark 1600 px; v28 and v29 for the hidden column with the same content width and the button still pressed).
 - Criteria: --sphinx-preview-toc-top = toolbar bottom + 8, or 8; --sphinx-preview-toc-reserve is 256px at 760 px or more; nav width 240 px, inset-inline-end 16 px; display none under 760 px and padding on the body only from 760 px; columnRight <= nav.left + 1 and overflowX <= 1 for margin, full and zoom 200.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-006](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-006.md): The reader uses a table of contents beside the document
+<!-- okf:links:end -->

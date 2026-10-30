@@ -9,7 +9,8 @@ description: When a writer clicks the Edit button of a writable preview, or
   preview in edit mode unless it cannot edit the file.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -47,3 +48,17 @@ As a writer, I turn edit mode on to change my document in the preview and off to
 - Turning edit mode on does not reflow the reading layout: paragraphs keep their wrapping and the text does not move.
 - The choice is remembered per workspace; a preview that was already open and reloaded keeps its own state first.
 - A preview of an untrusted workspace, or of a file outside every workspace folder, has no Edit button and never starts in edit mode.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-BLOCK-001](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-001.md): The Edit button turns edit mode on and off and tidies up on exit
+  - [SwRS-MDOKFSTUDIO-BLOCK-012](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-012.md): A read-only preview has no Edit button
+  - [SwRS-MDOKFSTUDIO-BLOCK-236](../../swrs/block-editing/SwRS-MDOKFSTUDIO-BLOCK-236.md): previewEditModeChanged carries a boolean edit mode
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+<!-- okf:links:end -->

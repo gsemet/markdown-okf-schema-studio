@@ -8,7 +8,8 @@ description: When a writer presses an arrow key with Cmd+Alt on macOS, or with
   as the move chord.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When a writer presses an arrow key with Cmd+Alt on macOS, or with Ctrl+Alt elsew
 
 - Method: Unit test `T37: on macOS the chord is Cmd+Alt, and Ctrl+Alt does nothing special` in test/page/runtimeBlockMoves.test.ts.
 - Criteria: moveChordDirection depends on isApplePlatform.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-014](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-014.md): A writer reorders blocks with arrows, keys and selections
+<!-- okf:links:end -->

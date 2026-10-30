@@ -9,7 +9,8 @@ description: When a pipe table, a {list-table} or a simple HTML table is
   carry the alignment only where the target form has it.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -75,3 +76,12 @@ When a pipe table, a {list-table} or a simple HTML table is converted to another
 ### Verification notes
 - Method: test/page/modules/listTable.test.ts, unit tests a pipe table becomes a list-table with one header row and the fence is longer than any backtick run in a cell ("Pipe table to list-table"), an escaped pipe is a plain pipe in the list item and escaped again in the pipe table and a list-table cell with a pipe is escaped in the pipe table ("Escaped pipes"), column alignment colons are dropped going to a list-table and a simple HTML table converts to a pipe table keeping alignment, and to a list-table ("Alignment"; the no-attribute boundary is the plain column of that test), a list-table with several fence styles and options is read, a list-table without header rows gets an empty header in the pipe table and a list-table becomes a canonical pipe table ("List-table read in every fence style"), and pipe -> list-table -> pipe is lossless for simple tables plus the HTML round trip of the table written by toHtmlTable ("Canonical round trip", canonical sources only). "Other styles lose their style" is read from gridToPipe in src/page/modules/markdownTable.ts and has no test.
 - Criteria: The exact converted text for the simple table and the fence length for the code cell; the cell text in each direction; no colon or alignment in the list-table result and the delimiter row of the pipe table result; the converted text for each fence style and the empty header row; string equality after the round trip for canonical tables.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+<!-- okf:links:end -->

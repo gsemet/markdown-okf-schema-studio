@@ -11,7 +11,8 @@ description: When the writer presses Tab, Shift+Tab or an arrow key at the edge
   can take it.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -118,3 +119,14 @@ Home moves the caret to the start of the text, and Shift extends the selection.
 - Method: test/page/runtimeEditorFlush.test.ts (Ctrl+Tab pass-through; Shift+Tab and held modifiers, Ctrl+Tab row).
 - Method: visual scenario table-editing/v02 (step arrowdown, ArrowDown only) and check_cell_end_key in test/visual/capture_edit_checks.py on scenario table-editing/v01 (Home and End); the scroll assertions bite on macOS only, because headless Chromium on Linux moves the caret natively.
 - Criteria: The text box parent, value and selection range after each key, one previewEditOpen only for the moves inside the table; not prevented and no message posted for every native case; one extra row in editedText and the editor reopened in column 0 of the new row. The cleared pending navigation is read from tabThroughTableCells and has no dedicated test; Shift+Ctrl+Tab has no test; the other block-navigation directions follow the same branch and are not asserted separately.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-006](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-006.md): Tab, arrows and editing keys work in a table cell
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: "When the host refuses a field save, the extension SHALL show the h
   editor open."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the host refuses a field save, the extension SHALL show the host message in
 
 - Method: Unit test on the page runtime (test/page/runtimeFrontmatterEditor.test.ts).
 - Criteria: Tests frontmatter validation errors show an explicit error state; visual scenario frontmatter-editing/v02-edit-enum-value-dark-900.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-019](SwRS-MDOKFSTUDIO-FMEDIT-019.md): A field editor saves a changed value and Escape cancels it
+<!-- okf:links:end -->

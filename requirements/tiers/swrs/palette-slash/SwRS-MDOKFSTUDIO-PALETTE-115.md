@@ -10,7 +10,8 @@ description: When the writer presses Alert, the extension SHALL quote the
   replaces the type word of the head of the alert at the caret.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -98,3 +99,15 @@ A list opened by the insertion itself is not closed by the input event of that i
 - Method: test/integration/realInput/editorWidgets.ts (real-window scenario scenarioAlertDropdown: Alert outside an alert, choosing a type)
 - Method: visual scenario palette-slash/v01-palette-popups-light-900 (choosing Warning rewrites the alert head)
 - Criteria: The button runs the action without an argument and then opens the popover; the five options carry the values NOTE, TIP, IMPORTANT, WARNING and CAUTION; the alert head is the first line of the run of quoted lines around the caret and must match `> [!TYPE]` with one of the five types; with the caret in an alert and no argument the action returns no edit; the vertical offset of the list is the caret bottom minus the bar top plus 2 px; arrow keys with Alt, Cmd or Ctrl and Shift+Enter are not taken.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+  - [StRS-MDOKFSTUDIO-PALETTE-005](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-005.md): The palette stays in reach, appears softly and never closes the editor by accident
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-PALETTE-031](SwRS-MDOKFSTUDIO-PALETTE-031.md): Palette popovers open in the frame, one at a time, and Escape or typing closes them
+<!-- okf:links:end -->

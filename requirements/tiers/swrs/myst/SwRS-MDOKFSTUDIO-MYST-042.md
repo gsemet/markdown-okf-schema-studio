@@ -8,7 +8,8 @@ description: When a rename arrives for an untrusted or read-only preview, the
   (SwRS-MDOKFSTUDIO-TRUST-005).
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a rename arrives for an untrusted or read-only preview, the extension SHALL
 
 - Method: Unit test "a rename in an untrusted or read-only preview changes nothing and answers with the read-only reason" in test/session/renderReq.labelRename.requirements.test.ts
 - Criteria: Refusal carries the reason.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-TRUST-005](../trust-security/SwRS-MDOKFSTUDIO-TRUST-005.md): The host refuses every write request of a read-only preview with a reason
+<!-- okf:links:end -->

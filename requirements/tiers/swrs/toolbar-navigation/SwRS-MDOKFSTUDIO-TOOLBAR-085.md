@@ -10,7 +10,8 @@ description: "When the page receives previewLinkTargets, the extension SHALL set
   the original navigation request and the look of the link unchanged."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -85,3 +86,14 @@ When the page receives previewLinkTargets, the extension SHALL set on every link
 - Method: visual scenarios toolbar-navigation/v35-link-warning-light-900 and toolbar-navigation/v36-link-warning-dark-900.
 - Method: test/page/runtimeContentPatch.test.ts (links of the new content keep known target hints and discover new targets).
 - Criteria: state = kind, title = path ?? reason ?? request; data-sphinx-preview-navigation is unchanged by applyTargets; no CSS selector uses data-sphinx-preview-link-state; no second discovery for a known request, new requests are discovered.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-011](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-011.md): Links open the right target, show where they lead, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

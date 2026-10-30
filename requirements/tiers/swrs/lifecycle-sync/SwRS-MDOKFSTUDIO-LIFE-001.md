@@ -11,7 +11,8 @@ description: When VS Code loads the extension manifest, the extension SHALL
   Markdown support is neither activated nor replaced.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -65,3 +66,12 @@ When VS Code loads the extension manifest, the extension SHALL declare VS Code 1
 - Method: test/security/package-contract.test.ts, unit test "contributes only opt-in Markdown OKF-Schema Studio commands" (Manifest contract: no markdown. identifier, no languages and no grammars key).
 - Method: test/integration/stockCoexistence.test.ts (Manifest contract: the Studio command id is not among the built-in Markdown commands).
 - Criteria: package.json activationEvents holds exactly four entries; engines.vscode equals ^1.95.0; no contributed command id starts with markdown.; contributes.languages and contributes.grammars are undefined.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+<!-- okf:links:end -->

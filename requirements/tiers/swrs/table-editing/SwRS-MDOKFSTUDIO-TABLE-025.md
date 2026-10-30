@@ -9,7 +9,8 @@ description: When the writer presses Escape in a cell editor outside an IME
   input-method composition, leave the editor open and post nothing.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -71,3 +72,14 @@ When the writer presses Escape in a cell editor outside an IME composition and n
 - Method: test/integration/realInput/textEditing.ts, markers in test/integration/realInput/markers.ts (real-window scenario scenarioEscapeCancels, id table-editing/r04-escape-cancels-cell: Escape after typing).
 - Method: visual scenarios table-editing/v02 to v05 (Escape cancelling).
 - Criteria: No message with final true after Escape and an unchanged source in the real-window scenario. Exactly one cancel per key press in the two focus scenarios. No message and an open editor in the composition scenario.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-053](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-053.md): Cancel and Escape restore the saved text
+<!-- okf:links:end -->

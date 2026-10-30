@@ -9,7 +9,8 @@ description: When the frontmatter is validated against its schema, the extension
   its own otherwise.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -111,3 +112,21 @@ When the frontmatter is validated against its schema, the extension SHALL apply 
 - Method: test/integration/previewEditing.test.ts (closed schema).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario (strict setting).
 - Criteria: Messages are the English texts of the validator; unknown schema keywords are ignored silently. The validator collects all errors, so each violation gets its own row or underline. The empty required row has value null and is flagged required. The whole-document row is an info-style row with the error severity and spans every visible column. The strict setting has no effect on the closed-schema error; one row is reported per undeclared key, including type when the schema does not declare it. The strict warning applies only when a schema matched, is independent of the schema's own additionalProperties, and a generic table never warns. The whole-document scenario (minProperties) has no test (probed against the analysis).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-005](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-005.md): A writer adds, renames and removes metadata fields
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-086](../frontmatter-editing/SwRS-MDOKFSTUDIO-FMEDIT-086.md): A closed schema flags the properties section
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-035](SwRS-MDOKFSTUDIO-FMSCHEMA-035.md): A schema error marks the row of its field
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-036](SwRS-MDOKFSTUDIO-FMSCHEMA-036.md): A missing required field gets an empty row with its error
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-037](SwRS-MDOKFSTUDIO-FMSCHEMA-037.md): An error that names no field becomes a red row of its own
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-041](SwRS-MDOKFSTUDIO-FMSCHEMA-041.md): A closed schema reports every undeclared field
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-042](SwRS-MDOKFSTUDIO-FMSCHEMA-042.md): The strict setting warns on undeclared fields
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-089](SwRS-MDOKFSTUDIO-FMSCHEMA-089.md): Every violation of the schema is reported
+<!-- okf:links:end -->

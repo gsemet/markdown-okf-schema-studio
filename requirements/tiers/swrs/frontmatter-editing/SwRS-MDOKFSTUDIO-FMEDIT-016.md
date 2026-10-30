@@ -9,7 +9,8 @@ description: 'When the host receives a frontmatter save whose YAML value does no
   value and with the matching message otherwise, and change nothing.'
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -102,3 +103,23 @@ A save with the flush flag skips the parse refusal and keeps the typed text (see
 - Method: test/integration/previewEditing.test.ts (scenarios: schema error on the edited field, a conditional rule forbids null and the save is refused; the candidate document is analysed again with its conditional rules).
 - Method: inspection of currentPreviewDocument (scenario: a stale document revision gets the stale-field message).
 - Criteria: the host re-checks every save whatever the page sent; a refusal changes nothing and is shown in the field editor.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-018](SwRS-MDOKFSTUDIO-FMEDIT-018.md): A null value is refused for a field that is not nullable
+  - [SwRS-MDOKFSTUDIO-FMEDIT-047](SwRS-MDOKFSTUDIO-FMEDIT-047.md): A value that does not fit the field type is refused
+  - [SwRS-MDOKFSTUDIO-FMEDIT-048](SwRS-MDOKFSTUDIO-FMEDIT-048.md): A schema error on the edited field refuses the save
+  - [SwRS-MDOKFSTUDIO-FMEDIT-049](SwRS-MDOKFSTUDIO-FMEDIT-049.md): Only errors of the edited field block a save
+  - [SwRS-MDOKFSTUDIO-FMEDIT-079](SwRS-MDOKFSTUDIO-FMEDIT-079.md): A null value is refused when a conditional rule forbids it
+  - [SwRS-MDOKFSTUDIO-FMEDIT-083](SwRS-MDOKFSTUDIO-FMEDIT-083.md): A save for a missing field or revision is refused as stale
+<!-- okf:links:end -->

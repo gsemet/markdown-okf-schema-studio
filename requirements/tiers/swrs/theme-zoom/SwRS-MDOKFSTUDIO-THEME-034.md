@@ -9,7 +9,8 @@ description: "When the stylesheet is built, the extension SHALL declare each neu
   token the stylesheet or the Mermaid theme reads is in it."
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -75,3 +76,12 @@ When the stylesheet is built, the extension SHALL declare each neutral --studio-
 
 - Method: test/core/preview/themeTokens.test.ts, unit tests `every theme token maps to the VS Code variable of the same name, on the root and on body` (token map; the fallback behaviour follows from CSS and is not asserted), `the page stylesheet reads VS Code variables only through the token map` (stylesheet without the map, map first) and `every token the stylesheet or the Mermaid theme reads is in the token map` (both rows of the table; the list of Mermaid tokens is written in the test, not derived from src/page/modules/mermaidPreview.ts).
 - Criteria: Each token has its declaration on the root and on body and the names are unique. No occurrence of --vscode- outside the map. The set of used names is a subset of the token list.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
+<!-- okf:links:end -->

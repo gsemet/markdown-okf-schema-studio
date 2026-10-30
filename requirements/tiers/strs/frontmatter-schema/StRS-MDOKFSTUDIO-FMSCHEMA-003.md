@@ -8,7 +8,8 @@ description: When a writer reads a properties table, the Studio SHALL show
   the preview width.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -38,3 +39,12 @@ As a writer, I read property values in the form I typed them and the table never
 - The table has a lean frame (no outer border, transparent cells, grey header cells) and in a preview of 640 px or less uses a fixed layout in which names, values, links and type labels wrap anywhere.
 - Known issue: in a narrow preview a word can still break in the middle of a name; there is no stacked layout.
 - Known issue: the helper `formatValue` of the table renderer is unused and would show an em dash for null; today null shows `null`.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-001](StRS-MDOKFSTUDIO-FMSCHEMA-001.md): Frontmatter appears as a readable, configurable properties table
+<!-- okf:links:end -->

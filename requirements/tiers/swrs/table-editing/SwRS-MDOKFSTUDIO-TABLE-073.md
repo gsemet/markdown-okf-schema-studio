@@ -9,7 +9,8 @@ description: When the caret is on any line of a pipe table or a simple HTML
   after it, and offer it nowhere else.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -61,3 +62,12 @@ When the caret is on any line of a pipe table or a simple HTML table in MyST mod
 - Method: test/page/modules/editActions.test.ts, unit tests CR038: listTable converts the pipe table under the caret in place, CR038: the conversion round-trips and keeps the neighbouring tables and lines and CR038: a simple HTML table converts to either form ("Pipe table", "HTML table"); CR038: availability follows the form of the table at the caret, CR038: no edit and no table: the buttons are not available outside a table and CR038: the conversion actions without table tools never throw ("Caret in a pipe table", "Caret elsewhere"). The markers of these tests are in test/page/modules/editActions.test.ts.
 - Method: test/page/modules/editPalette.test.ts, unit tests CR038: List table shows with the caret in a pipe table, Pipe table with it in a list-table and CR038: the slash menu offers the conversion only inside a table of the other form ("Caret in a pipe table", "Caret elsewhere").
 - Criteria: The edit range equals the table range and the text equals the converted text; the available flag per table form, the form being named by detectTable (pipe, list-table, html).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+<!-- okf:links:end -->

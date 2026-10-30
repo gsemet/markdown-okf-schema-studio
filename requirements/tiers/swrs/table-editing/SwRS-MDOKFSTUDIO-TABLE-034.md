@@ -10,7 +10,8 @@ description: When the host answers an open or a save of a cell editor with an
   text.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -64,3 +65,14 @@ When the host answers an open or a save of a cell editor with an error, the exte
 - Method: test/page/runtimeTableCellEditor.test.ts ("table editing switches cells without losing changes and finalizes before leaving the table": the cleared navigation, the switch to another cell, the kept text and the new final save: refused save before leaving the table, Enter after the refusal).
 - Method: test/page/fmtableReqTable.requirements.test.ts (`a host refusal of a cell save shows in the table bar; a refused open replaces the loading status`, changed: the refused region now holds the reason and a Close button, which closes it).
 - Criteria: The status text equals the host message. No pending navigation in the webview state after the error and the typed text in the next save.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-216](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-216.md): A refused open or save keeps the typed text and says why
+<!-- okf:links:end -->

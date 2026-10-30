@@ -145,7 +145,7 @@ requirements-lint:
     {{ okfreq }} lint requirements --check --check-links --project-root .
     {{ okfreq }} update-coverage requirements --check
 
-# Refresh generated coverage fields and navigation after adding requirements or markers.
+# Refresh generated coverage fields, OKF fields (status, verified, Links) and navigation after adding requirements or markers.
 requirements-update:
     {{ okfreq }} update-coverage requirements
     {{ okfreq }} lint requirements --prose --check-links --project-root .

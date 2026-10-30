@@ -8,7 +8,8 @@ description: 'When a document holds `{versionadded}`, `{versionchanged}` or `{de
   X or Deprecated since version X followed by the body.'
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a document holds `{versionadded}`, `{versionchanged}` or `{deprecated}`, th
 
 - Method: Unit test "Sphinx version admonitions render generated titles and Markdown bodies" in test/core/render/mystFeatures.test.ts
 - Criteria: Three directives, three titles.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-001](SwRS-MDOKFSTUDIO-MYST-001.md): Admonitions render as coloured callouts with a title
+<!-- okf:links:end -->

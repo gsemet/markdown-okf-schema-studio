@@ -8,7 +8,8 @@ description: When a reader scrolls a document, the Studio SHALL keep the current
   moving the text, as many levels as the reader set, between one and six.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -41,3 +42,16 @@ As a reader, I always know which section I am in while I scroll a long document,
 - The band follows every heading level from h1 to h6 of the running text (not the headings inside admonitions and the properties table), wraps in a narrow pane and leaves room for the toolbar.
 - The depth is set by the setting `markdownOkfSchemaStudio.preview.stickyHeadingDepth`; its default is three levels.
 - A depth outside one to six is brought back into range, and a value that is not a number means the default.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-002](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-002.md): A soft shadow under the sticky heading band shows only while text scrolls under it
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-018](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-018.md): The sticky band shows the current heading path
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-022](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-022.md): The sticky heading depth setting decides how many levels stay pinned
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-025](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-025.md): The sticky band is fixed, aligned with the column and clear of the toolbar
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-030](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-030.md): The reading offset below the band settles without oscillation
+<!-- okf:links:end -->

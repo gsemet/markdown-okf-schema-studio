@@ -8,7 +8,8 @@ description: When a writer references a PlantUML file with the uml or plantuml
   explain why a file cannot be read.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -36,3 +37,12 @@ As a writer, I keep diagrams in separate puml files, reference them from the doc
 
 - `{uml} path.puml` and a body-less `{plantuml} path.puml` draw the diagram stored in that file; its text is the diagram and the expandable source. The file is a render dependency: editing it re-renders the preview. With `useJar` the JAR receives the file text.
 - A file that cannot be read is replaced by a message and one warning in the status line: not found (and watched, so the diagram appears once the file is created), outside the workspace (or the document's folder in Restricted Mode), an absolute path or URL ("must be a relative path"), or too large. An include cycle is an engine-side include message and posts no status-line warning. Known issue: the "too large" and "budget exhausted" messages are not triggered by any test in this scope.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-DIAG-009](StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When the Studio shows a text to the reader or appears in the
   internal build tool and showing its own icon.
 project: markdown-okf-schema-studio
 scope: trust-security
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -34,3 +35,13 @@ As a reader, I see messages that speak of the preview, not of the tools that bui
 ### Rationale and constraints
 
 - The opt-in behaviour of the Studio, which leaves the built-in Markdown preview untouched, is specified in the lifecycle-sync scope.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-TRUST-070](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-070.md): Visible text speaks of the product, not of its build tool
+  - [SwRS-MDOKFSTUDIO-TRUST-074](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-074.md): The package ships its icon and its bundle
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a navigation waits for a plain save that the host refuses, the
   before navigating.
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a navigation waits for a plain save that the host refuses, the extension SH
 
 - Method: Unit test on the page runtime (test/page/runtimeEditorFlush.test.ts).
 - Criteria: Tests CR 025 a blur save refused before a host flush is saved again as a flush; accepted is not saved twice; no result still answers after a bounded wait.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-008](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-008.md): Metadata edits keep the source intact, follow the schema and never lose text
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-067](SwRS-MDOKFSTUDIO-FMEDIT-067.md): A navigation saves the open field editor as an unchecked flush
+<!-- okf:links:end -->

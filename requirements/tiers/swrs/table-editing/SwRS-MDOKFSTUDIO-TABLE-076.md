@@ -9,7 +9,8 @@ description: When a conversion between a pipe table, a {list-table} and a simple
   no table gets neither a conversion nor a reason.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,12 @@ When a conversion between a pipe table, a {list-table} and a simple HTML table w
 - Method: test/page/modules/fmtableReqTable.requirements.test.ts, unit test a list-table with several header rows is refused as a pipe table with the header-row count ("Several header rows").
 - Method: test/page/modules/editActions.test.ts holds the markers of the editActions.test.ts checks above.
 - Criteria: A refusal reason with the suffix "Nothing was changed." for each lossy form and a successful conversion for the plain form; the reason text with the header-row count; the refusal sentences of the already-in-form case (in the palette the actions are not offered for these cases, see SwRS-MDOKFSTUDIO-TABLE-073 and SwRS-MDOKFSTUDIO-TABLE-074); an undefined result for text that is no table.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+<!-- okf:links:end -->

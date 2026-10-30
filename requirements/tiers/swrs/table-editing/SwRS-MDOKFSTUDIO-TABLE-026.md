@@ -8,7 +8,8 @@ description: When the writer cancels a cell edit after an autosave has reached
   restores the original table, and SHALL post nothing when no autosave happened.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the writer cancels a cell edit after an autosave has reached the document, 
 
 - Method: Unit test Escape in a table cell after an autosave restores the table with previewEditCancel in test/page/runtimeTableCellEditor.test.ts.
 - Criteria: The cancel message appears only in the first scenario. The host restoring the text is specified in the block-editing scope.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When the rendered HTML is sanitized for the webview, the extension
   SHALL keep checkbox inputs and their source line, column and state attributes.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the rendered HTML is sanitized for the webview, the extension SHALL keep ch
 
 - Method: Unit test on the sanitizer output.
 - Criteria: Checkbox inputs keep their state and source attributes.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-003](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-003.md): A writer toggles task checkboxes from the preview
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-016](SwRS-MDOKFSTUDIO-GFM-016.md): Task list markers render as checkboxes with their source position
+<!-- okf:links:end -->

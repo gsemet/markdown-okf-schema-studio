@@ -10,7 +10,8 @@ description: "When an extension is missing, the extension SHALL list one warning
   conf.py. Add \"EXTENSION\" to `myst_enable_extensions`. Rendering stays unchanged."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When an extension is missing, the extension SHALL list one warning in the status
 
 - Method: Unit test "CR 050: the status region marks the conf.py warnings with their code" in test/page/modules/warningBanner.test.ts; Unit test "MyST syntax missing from the nearest conf.py warns once per extension, rendering unchanged" in test/core/render/renderPipeline.test.ts
 - Criteria: The wording is fixed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-072](SwRS-MDOKFSTUDIO-MYST-072.md): MyST syntax of a disabled extension is reported with its line
+<!-- okf:links:end -->

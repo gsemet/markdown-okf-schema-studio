@@ -7,7 +7,8 @@ description: When an alert marker appears inside a fenced code block, the
   extension SHALL keep it as literal code.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When an alert marker appears inside a fenced code block, the extension SHALL kee
 
 - Method: Unit test on the render pipeline output.
 - Criteria: No admonition inside a fence; alerts outside are unaffected.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-009](SwRS-MDOKFSTUDIO-GFM-009.md): GitHub alerts render as admonitions
+<!-- okf:links:end -->

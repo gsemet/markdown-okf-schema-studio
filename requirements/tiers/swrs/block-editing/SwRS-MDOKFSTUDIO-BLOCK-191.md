@@ -9,7 +9,8 @@ description: "When a block editor saves for the first time, the host SHALL hold 
   a reload, or the block changes in the document."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -118,3 +119,17 @@ A first save that does not match the document is refused, see SwRS-MDOKFSTUDIO-B
 - Method: test/page/runtimeBlockEditor.test.ts (`STAB-03: an editor the host watches reports its close; without a watch the close stays silent`, `STAB-03: a watch for an editor that is already closed is answered at once`, `STAB-03: a watch sent while the host already follows another document is still answered`).
 - Method: test/core/state/blockRange.test.ts (`STAB-06: a change before the open block shifts it by the inserted or removed length`, `STAB-06: a change at or after the end of the open block leaves it in place`, `STAB-06: several changes of one event add up; offsets refer to the text before the event`, `STAB-06: a change inside or across the open block is a conflict`, `STAB-06: an empty block (an insertion editor) conflicts only with a change at its offset`); the controller path trackOutsideChange through the host events has no test.
 - Criteria: sourceStartOffset and lastSavedText describe the block in the document; releaseActiveBlockEdit runs the queued work once; watchedPageEditorId remembers the editor; the close message is addressed by the editor id only and closePageEditor compares the editor id; onPreviewReady releases only in the cases above; rebaseBlockRange returns the new start or the conflict and the host posts the error.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-TRUST-052](../trust-security/SwRS-MDOKFSTUDIO-TRUST-052.md): Every page message has a registered type and a valid envelope before any handler runs
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

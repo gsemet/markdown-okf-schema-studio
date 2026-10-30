@@ -9,7 +9,8 @@ description: "When the host refuses to open a block editor or to save its text, 
   typed."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -90,3 +91,16 @@ When the host refuses to open a block editor or to save its text, the extension 
 - Method: test/session/blockReq.requirements.test.ts (accepted requests, stale open, stale lines) with `an open for a document that changed since the render is refused and registers no editor` and `a first save for lines or an insertion point that do not exist is refused as stale`.
 - Method: test/integration/previewEditing.test.ts (a mismatched originalText leaves the document unchanged; saves and cancels of mismatching edits); the message texts of these two rows have no assertion.
 - Criteria: the status text equals the host message and the frame of a refused open stays the open editor until the writer leaves it; the error is posted by postEditSourceError; currentSourceEdit returns nothing for the stale case; handleEditSave compares originalText with the document slice and every field of the held edit is compared; lastPostedText is cleared so that the next text is posted.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->

@@ -9,7 +9,8 @@ description: When a reader presses the Table of contents button, the Studio
   keep the text, the tables and the pinned headings clear of the column.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -49,3 +50,18 @@ As a reader, I open a table of contents next to a long document when I want an o
 - The text stays clear of the column in Margin, Auto and Full width mode and at the highest zoom, with no sideways scrolling of the page.
 - The column starts below the toolbar and stays inside the pane.
 - The pane width at which the column appears is specified in the software requirements.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-025](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-025.md): The sticky band is fixed, aligned with the column and clear of the toolbar
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-033](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-033.md): The Table of contents button shows and hides the column
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-037](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-037.md): The column sits below the toolbar on the right and never covers the text
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-040](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-040.md): The column lists the h1 to h4 headings with folding
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-045](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-045.md): The column marks the section being read and jumps on click
+<!-- okf:links:end -->

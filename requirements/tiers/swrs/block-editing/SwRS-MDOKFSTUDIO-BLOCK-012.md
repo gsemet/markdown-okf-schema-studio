@@ -7,7 +7,8 @@ description: "When a preview is read-only (untrusted workspace, file outside the
   or standalone file), the extension SHALL render its toolbar without the Edit button."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When a preview is read-only (untrusted workspace, file outside the workspace or 
 
 - Method: Integration suites test/integration/untrusted-suite.ts and test/integration/standalone-suite.ts assert that the Edit button is missing. Trust itself is specified in the trust and security scope.
 - Criteria: renderPreviewToolbar is called with editing disabled and the page holds no data-sphinx-preview-edit-toggle element.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-001](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-001.md): A writer switches edit mode and finds it as left
+<!-- okf:links:end -->

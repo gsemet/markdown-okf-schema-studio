@@ -8,7 +8,8 @@ description: When a list, pick or paste message reaches the host, the extension
   of the render that the host holds.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When a list, pick or paste message reaches the host, the extension SHALL handle 
 
 - Method: untested for these six messages; the gate table is PAGE_MESSAGE_GATES in src/session/pageMessages.ts, where all six use the render gate
 - Criteria: The six types previewListTargets, previewListCitations, previewPickDocument, previewPickImage, previewPasteImage and previewPasteHtml map to the render gate.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-013](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-013.md): A writer picks labels, documents, citations and code languages from host lists, with feedback
+<!-- okf:links:end -->

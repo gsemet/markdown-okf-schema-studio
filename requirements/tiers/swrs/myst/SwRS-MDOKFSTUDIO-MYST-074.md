@@ -8,7 +8,8 @@ description: When syntax appears in fenced or indented code, inline code,
   SHALL report nothing.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When syntax appears in fenced or indented code, inline code, comments or roles, 
 
 - Method: Unit test "nothing is detected inside code fences or inline code" in test/core/render/mystSyntaxDetect.test.ts
 - Criteria: Undocumented guards.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-072](SwRS-MDOKFSTUDIO-MYST-072.md): MyST syntax of a disabled extension is reported with its line
+<!-- okf:links:end -->

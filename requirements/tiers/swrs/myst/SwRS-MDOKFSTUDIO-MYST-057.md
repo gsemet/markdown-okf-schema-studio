@@ -9,7 +9,8 @@ description: "When a document holds a `{toctree}`, the extension SHALL list its 
   that cannot be found as warned text without a link."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -100,3 +101,20 @@ No warning is added to the status region or the Problems view either way, and no
 - Method: test/core/render/renderReq.myst.requirements.test.ts ("a toctree with :reversed: flips the entry order and keeps the written order otherwise": reversed; "a toctree shows at most 500 entries and all of them when there are 500": 500 entries)
 - Method: test/core/render/contentCaches.test.ts (a target listed in two toctrees is read once; the first heading is found, absent and repeated)
 - Criteria: Reads follow the resource policy and the standalone preview reads its own folder; matches are Markdown documents, sorted; scan limits and skipped folders hold; no diagnostic either way.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-012](../../strs/myst/StRS-MDOKFSTUDIO-MYST-012.md): A toctree shows the linked documents and marks missing ones
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-054](../rendering-core/SwRS-MDOKFSTUDIO-CORE-054.md): List documents matching a toctree glob
+  - [SwRS-MDOKFSTUDIO-CORE-055](../rendering-core/SwRS-MDOKFSTUDIO-CORE-055.md): Bound the toctree glob scan
+  - [SwRS-MDOKFSTUDIO-MYST-058](SwRS-MDOKFSTUDIO-MYST-058.md): Toctree caption and hidden options
+  - [SwRS-MDOKFSTUDIO-MYST-059](SwRS-MDOKFSTUDIO-MYST-059.md): Toctree glob entries list matching documents sorted
+  - [SwRS-MDOKFSTUDIO-MYST-060](SwRS-MDOKFSTUDIO-MYST-060.md): Toctree reversed option flips the order
+  - [SwRS-MDOKFSTUDIO-MYST-061](SwRS-MDOKFSTUDIO-MYST-061.md): Toctree shows at most 500 entries
+  - [SwRS-MDOKFSTUDIO-MYST-062](SwRS-MDOKFSTUDIO-MYST-062.md): Missing toctree documents show as warned text
+<!-- okf:links:end -->

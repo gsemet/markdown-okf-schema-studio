@@ -7,7 +7,8 @@ description: When the frontmatter block is not valid YAML, the extension SHALL
   still render the Markdown body below the properties table.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When the frontmatter block is not valid YAML, the extension SHALL still render t
 
 - Method: Visual scenario.
 - Criteria: The frontmatter block is left out of the body whether or not it parses.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-002](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-002.md): Invalid frontmatter is explained and the body still renders
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-001](SwRS-MDOKFSTUDIO-FMSCHEMA-001.md): The frontmatter block is found by its fences and parsed as a YAML mapping
+<!-- okf:links:end -->

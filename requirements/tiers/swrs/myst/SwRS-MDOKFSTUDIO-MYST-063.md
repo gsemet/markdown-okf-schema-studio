@@ -9,7 +9,8 @@ description: "When a document holds a `{list-table}`, `{csv-table}` or `{table}`
   offer the table palette action."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -93,3 +94,19 @@ When a document holds a `{list-table}`, `{csv-table}` or `{table}` directive, th
 - Method: test/core/directives/registry.test.ts ("every plug-in renders, styles the preview and names MyST palette actions that exist": family styles and palette action)
 - Method: test/visual/scenarioDefinitions2.ts (`myst/v${27 + index}-list-table-full-${theme}-900`: list-table nominal, no overflow, pipe-table styles)
 - Criteria: Caption, id, alignment, GFM column alignment, header, quoted multi-line cell and valid widths render; invalid widths are ignored.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-001](../../strs/myst/StRS-MDOKFSTUDIO-MYST-001.md): MyST directives and roles render as readable blocks
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-CORE-057](../rendering-core/SwRS-MDOKFSTUDIO-CORE-057.md): Render list-table headers, widths and alignment
+  - [SwRS-MDOKFSTUDIO-CORE-058](../rendering-core/SwRS-MDOKFSTUDIO-CORE-058.md): Edit a list-table as one block
+  - [SwRS-MDOKFSTUDIO-MYST-064](SwRS-MDOKFSTUDIO-MYST-064.md): Invalid list-table widths are ignored
+  - [SwRS-MDOKFSTUDIO-MYST-065](SwRS-MDOKFSTUDIO-MYST-065.md): The table directive renders a table with caption, id and alignment
+  - [SwRS-MDOKFSTUDIO-MYST-088](SwRS-MDOKFSTUDIO-MYST-088.md): The csv-table directive renders a table
+  - [SwRS-MDOKFSTUDIO-MYST-092](SwRS-MDOKFSTUDIO-MYST-092.md): The table directive family renders with its own styles and actions
+<!-- okf:links:end -->

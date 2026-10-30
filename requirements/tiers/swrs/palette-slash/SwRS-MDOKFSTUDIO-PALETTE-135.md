@@ -9,7 +9,8 @@ description: When the writer presses Subscript or Superscript, the extension
   contains a backtick or a line break.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -53,3 +54,12 @@ When the writer presses Subscript or Superscript, the extension SHALL wrap the s
 
 - Method: test/page/modules/editActions.test.ts, through test/page/modules/editActions.test.ts (unit tests "sub and sup wrap the selection in a role; empty puts the caret inside": scenarios Wrap and Refusal; "the MyST actions are myst-only with no shortcut; sub and sup also work in a cell": scenario In a table cell)
 - Criteria: Both buttons also work in a table cell.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

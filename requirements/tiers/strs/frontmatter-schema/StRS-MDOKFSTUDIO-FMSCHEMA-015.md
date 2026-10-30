@@ -8,7 +8,8 @@ description: When a frontmatter link value is checked, the Studio SHALL resolve
   targets outside the allowed folders.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: StRS
 derives_from: []
@@ -39,3 +40,12 @@ As a writer, I can trust that a link which shows as valid points to the intended
 - `frontmatter.bundleRoot` (string, empty by default) sets the bundle root, relative to the first workspace folder; empty uses the schema folder's parent when it contains the document and an `index.md` or `log.md`; otherwise links show "Link root unavailable" (W15). Known issue: a configured root that does not exist is reported the same way, without naming the setting.
 - `frontmatter.projectRoot` (string, empty by default) sets the project root; empty uses the nearest folder with a `.git` entry above the document inside a workspace folder; otherwise "Link root unavailable". Known issue: one value for the whole workspace, and the message does not name the root tried.
 - `frontmatter.allowOutsideWorkspaceLinks` (boolean, off by default): off, a document-relative link outside every workspace folder is the error "Outside the allowed folder"; on, it resolves and can be followed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Superseded by:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+<!-- okf:links:end -->

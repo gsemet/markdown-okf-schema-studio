@@ -8,7 +8,8 @@ description: When the frontmatter violates its schema, the extension SHALL
   the validator message in the row tooltip.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the frontmatter violates its schema, the extension SHALL attach each error 
 - Method: Unit test of the analysis (field issues); visual scenario.
 - Criteria: Messages are the English texts of the validator; unknown schema keywords are ignored silently.
 - Known issue: messages are not translated and unknown schema keywords are ignored without notice.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-084](SwRS-MDOKFSTUDIO-FMSCHEMA-084.md): Every schema violation is reported on its field or in a row of its own
+<!-- okf:links:end -->

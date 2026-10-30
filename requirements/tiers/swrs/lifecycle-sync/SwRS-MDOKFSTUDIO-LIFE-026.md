@@ -11,7 +11,8 @@ description: When another saved Markdown file becomes the active editor, the
   other editor change.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -105,3 +106,15 @@ When another saved Markdown file becomes the active editor, the extension SHALL 
 - Method: test/host/lifeReq.requirements.test.ts, unit tests "only the newest following preview switches with the active editor" (Only the newest following preview switches: reads onActiveEditorChanged, manager.latest(followsActiveEditor)), "a document outside the workspace folder gets a new session on the same panel" (Another workspace folder or trust state and Same folder and trust state, or no folder: reads switchDocument in src/session/previewManager.ts) and "a hidden preview that becomes visible catches up with the editor" (A hidden preview that becomes visible: reads createSession becameVisible and ScrollSyncController.restorePreviewState).
 - Method: test/core/preview/flushWait.test.ts, "CR 025: LatestRequest applies only the latest request, so A to B to A ends on A" (Quick switching between documents, first row); the came-back branch (watchPageEditor) is untested.
 - Criteria: documentUri equals the new document and the old document's HTML is gone; documentUri, status and requestId are equal before and after an unrelated change; exactly one session changes documentUri; settle() returns the latest value only for the last queued run; a new session replaces the old one only when resourceRoot or readOnly differs; restorePreviewState runs only on the hidden-to-visible transition and only with scrollPreviewWithEditor on.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+  - [StRS-MDOKFSTUDIO-LIFE-003](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-003.md): The side preview follows the active file and refreshes on demand
+  - [StRS-MDOKFSTUDIO-LIFE-010](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-010.md): The panes scroll together and the reading position survives updates
+  - [StRS-MDOKFSTUDIO-TRUST-001](../../strs/trust-security/StRS-MDOKFSTUDIO-TRUST-001.md): A document outside a trusted folder opens read-only and keeps the viewing actions
+<!-- okf:links:end -->

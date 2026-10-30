@@ -8,7 +8,8 @@ description: When the reader presses Back or Next while a block or properties
   the history move.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the reader presses Back or Next while a block or properties editor is open,
 
 - Method: Unit tests CR 025: Back right after typing posts the final save before previewHistoryGo; Back with an untouched editor open posts only the navigation; Back right after a refused blur save posts the flush save before previewHistoryGo; integration previewHistory (Back while a block editor is open, the typed text is kept).
 - Criteria: Save message index < history message index.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+<!-- okf:links:end -->

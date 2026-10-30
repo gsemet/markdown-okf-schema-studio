@@ -7,7 +7,8 @@ description: "When previewPairing names another document, document version or re
   than the page's, the extension SHALL not change the Anchor button."
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,14 @@ When previewPairing names another document, document version or request than the
 
 - Method: test/page/runtimePageControls.test.ts (T38 a paired preview keeps the anchor button enabled, and a foreign previewPairing is ignored; the own-document case is T38 an unpaired preview disables the anchor button and a previewPairing message re-enables it; the other version and request rows are by code only)
 - Criteria: The host-message filter drops messages whose identifiers differ.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TOOLBAR-013](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-013.md): The reader decides how the panes scroll together and sees the cursor block
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-059](../trust-security/SwRS-MDOKFSTUDIO-TRUST-059.md): The page accepts only registered host messages addressed to its render
+<!-- okf:links:end -->

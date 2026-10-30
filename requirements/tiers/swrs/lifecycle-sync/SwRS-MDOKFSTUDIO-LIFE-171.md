@@ -8,7 +8,8 @@ description: The extension SHALL declare in its manifest that it supports the VS
   setting.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,12 @@ The extension SHALL declare in its manifest that it supports the VS Code Agents 
 - Method: Unit test "the manifest declares support for the Agents window" in test/security/trustReq.requirements.test.ts, which asserts the declaration in package.json for an extension with a main entry point.
 - Method: Manual demonstration on VS Code 1.144: a VSIX without the declaration is absent from the Agents window, the same VSIX with it is enabled and opens a Markdown file through Open With. Not automated: a test host loads the extension from its development path, which skips the gate.
 - Criteria: package.json declares capabilities.agentsWindow.supported as true.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-001](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-001.md): A writer opens previews beside the editor or as tabs, beside the built-in preview
+<!-- okf:links:end -->

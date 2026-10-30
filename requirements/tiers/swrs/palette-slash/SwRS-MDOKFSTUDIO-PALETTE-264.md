@@ -13,7 +13,8 @@ description: When the writer pastes into the block text box a clipboard whose
   .webp, in one undo step, leaving the rest of the source unchanged.
 project: MDOKFSTUDIO
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -78,3 +79,13 @@ When the writer pastes into the block text box a clipboard whose plain text is a
 - Method: test/page/runtimePaletteActions.test.ts (a URL pasted into the text box of a block editor makes a link, an autolink or an image; Cmd+Shift+V, rich text and other schemes stay untouched)
 - Method: test/integration/pasteUrl.test.ts (real VS Code window: real clipboard paste, the autosave writes only the pasted spans; the scenario turns edit mode off again and waits until the workspace remembers it, CR 152, checked by test/build/integrationEditModeRestore.test.ts)
 - Criteria: the text outside `[start, end)` of the text box is identical before and after the paste.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-018](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-018.md): A writer pastes screenshots and rich text safely as Markdown
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

@@ -10,7 +10,8 @@ description: "When a render succeeds with conf.py warnings, the extension SHALL 
   document until the set of warning texts changes."
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -105,3 +106,18 @@ The warnings stay in the status region in every case.
 - Method: test/integration/mystDiagnostics.test.ts (run(): Restricted Mode publishes no warning to the Problems view)
 - Method: test/visual/scenarioDefinitions2.ts (`myst/v${number}-conf-warning-banner-${mode ?? theme}-900`: nominal and layout in light, dark, cream and 460 px)
 - Criteria: The visual family covers the layout checks only visually; the standalone variant has no assertion; other statuses showing the full list have no named test (untested).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-MYST-082](SwRS-MDOKFSTUDIO-MYST-082.md): The banner takes no layout room
+  - [SwRS-MDOKFSTUDIO-MYST-083](SwRS-MDOKFSTUDIO-MYST-083.md): Open Problems opens the Problems view
+  - [SwRS-MDOKFSTUDIO-MYST-084](SwRS-MDOKFSTUDIO-MYST-084.md): Closing the banner dismisses it for that document
+  - [SwRS-MDOKFSTUDIO-MYST-085](SwRS-MDOKFSTUDIO-MYST-085.md): The banner returns when the warning set changes
+  - [SwRS-MDOKFSTUDIO-MYST-086](SwRS-MDOKFSTUDIO-MYST-086.md): In Restricted Mode the banner lists warnings in its tooltip
+<!-- okf:links:end -->

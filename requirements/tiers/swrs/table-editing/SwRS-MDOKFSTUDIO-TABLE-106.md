@@ -12,7 +12,8 @@ description: When the writer runs the Table action with a size of R x C, 1 to 9
   out-of-range size.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -94,3 +95,12 @@ When the writer runs the Table action with a size of R x C, 1 to 9 each, in a bl
 - Method: test/page/modules/markdownTable.test.ts (T24: the table inserted by the palette parses back with its header and empty rows).
 - Method: test/page/runtimeEditPalette.test.ts (T24: one click on a grid cell inserts the table as one undo step and keeps the editor open).
 - Criteria: The inserted text, the edit start and end with the expected blank lines, the selection range, an undefined edit for every refused size, and the scopes of the action. The grid popover is specified by the palette-slash scope.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-012](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-012.md): Tables and cell text are formatted, inserted, aligned and captioned
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a colour span style contains a removed declaration, the
   attribute.'.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a colour span style contains a removed declaration, the extension SHALL rec
 
 - Method: Unit test "span style keeps only hex and rgb colour and background-color as data attributes" in test/security/html-policy.test.ts.
 - Criteria: Diagnostic present only when something is removed.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-034](SwRS-MDOKFSTUDIO-GFM-034.md): Colour spans keep safe colours only
+<!-- okf:links:end -->

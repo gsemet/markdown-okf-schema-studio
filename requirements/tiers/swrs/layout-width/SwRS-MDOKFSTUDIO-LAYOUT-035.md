@@ -9,7 +9,8 @@ description: When a maintainer runs the geometry checks on a rendered preview,
   exists.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -51,3 +52,14 @@ When a maintainer runs the geometry checks on a rendered preview, the extension 
 
 - Method: Unit tests in geometryChecks.test.ts (four ids, not applicable without DOM, identifier-split cases, nested text node counted once).
 - Criteria: Result ids and order are exact and every check passes when it is not applicable.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-001](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-001.md): The preview never scrolls sideways and wide content scrolls in its box
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-001](SwRS-MDOKFSTUDIO-LAYOUT-001.md): The preview page never scrolls sideways
+<!-- okf:links:end -->

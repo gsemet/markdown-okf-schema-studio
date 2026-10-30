@@ -9,7 +9,8 @@ description: "When a writer commits a field editor with Enter, with a checkbox c
   progress and the outcome of the save in the editor."
 project: markdown-okf-schema-studio
 scope: frontmatter-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -120,3 +121,22 @@ When a writer commits a field editor with Enter, with a checkbox change or by mo
 - Method: test/page/fmtableReqFrontmatter.requirements.test.ts (turning edit mode off closes a field editor without a save but saves a changed block editor; undo and redo keys stop at the control in the value and the key editor).
 - Method: visual scenario frontmatter-editing/v02-edit-enum-value-dark-900 in test/visual/scenarioDefinitions2.ts (refused save shown in the editor).
 - Criteria: closeFrontmatterEditor is called without a save on edit mode off while the block editor path posts a final save; keepUndoInControl calls stopPropagation for Z and Y with Cmd or Ctrl.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMEDIT-001](../../strs/frontmatter-editing/StRS-MDOKFSTUDIO-FMEDIT-001.md): A writer edits metadata values in place with fitting controls
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](../block-editing/SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMEDIT-020](SwRS-MDOKFSTUDIO-FMEDIT-020.md): Escape cancels a field editor
+  - [SwRS-MDOKFSTUDIO-FMEDIT-021](SwRS-MDOKFSTUDIO-FMEDIT-021.md): Turning edit mode off closes a field editor without saving
+  - [SwRS-MDOKFSTUDIO-FMEDIT-022](SwRS-MDOKFSTUDIO-FMEDIT-022.md): A save in flight disables the editor and shows Saving
+  - [SwRS-MDOKFSTUDIO-FMEDIT-023](SwRS-MDOKFSTUDIO-FMEDIT-023.md): A refused field save stays visible in the editor
+  - [SwRS-MDOKFSTUDIO-FMEDIT-056](SwRS-MDOKFSTUDIO-FMEDIT-056.md): Undo and redo keys in a field editor act on the field text
+  - [SwRS-MDOKFSTUDIO-FMEDIT-082](SwRS-MDOKFSTUDIO-FMEDIT-082.md): An accepted field save shows that the preview is refreshing
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a writer hovers or focuses a link value that is not pending,
   when there is no room, never under the toolbar and at most 480 px wide.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a writer hovers or focuses a link value that is not pending, the extension 
 
 - Method: Page unit tests; real-input and integration tests.
 - Criteria: Invalid and unavailable spans are focusable and have the same tooltip.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-014](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-014.md): Frontmatter link fields resolve, show their status and can be followed
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-067](SwRS-MDOKFSTUDIO-FMSCHEMA-067.md): A link tooltip shows the fields and an excerpt of the linked file
+<!-- okf:links:end -->

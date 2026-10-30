@@ -10,7 +10,8 @@ description: While edit mode is on, the page SHALL place an insert point holding
   insertion editor at that place.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -94,3 +95,12 @@ While edit mode is on, the page SHALL place an insert point holding a plus butto
 - Method: test/core/preview/blockReq.requirements.test.ts (plus button transparent, opaque on hover of a block, of the button and on focus)
 - Method: test/integration/realInput/markers.ts and test/visual/scenarioDefinitions1.ts (visual scenarios block-editing/v09, the message carries line 9, and block-editing/v10, line 5; real-input scenario scenarioInsertAfterFinalFigure, screenshots r17 and r18 in test/integration/realInput/renderPatching.ts); the pre case has no assertion of its own
 - Criteria: one bar per body block in edit mode and none outside it; refreshInsertPoints leaves exactly one bar per body block, keeping the bar of a block with unchanged neighbours and removing the others (the keep is asserted by the unit test `P-07: edit mode keeps the insertion point of a block that did not change and moves its line`); the properties bar carries line 0 and only the plus button; the open message names the line the bar sits after; the placeholder attribute exists only for an editor with insertAfterLine; the bar is placed with insertAdjacentElement after the pre when there is one, else after the block
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-011](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-011.md): A writer adds blocks and starts an empty document from the preview
+<!-- okf:links:end -->

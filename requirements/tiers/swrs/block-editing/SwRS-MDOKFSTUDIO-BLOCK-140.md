@@ -9,7 +9,8 @@ description: "When a writer Shift+clicks a body block, or presses Shift+ArrowUp 
   to the free end of the selection, and open no editor."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -109,3 +110,14 @@ A first Shift+Arrow from a focused block selects two blocks (the block and its n
 - Method: test/page/modules/blockSelection.test.ts, model tests `T39: extendTo selects from the anchor in both directions`, `T39: extendBy grows the free end and shrinks it back, keeping the anchor` and `T39: the selection stops at the first and the last block` (run between anchor and target in document order; Shift+Arrow, end of the document).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario block-editing/v17 (outlines both blocks as selected, status "2 blocks selected"); real-input scenario scenarioBlockSelection (screenshot block-editing/r20) for the Shift+click gesture. The 2 px width is only in src/core/preview/styles/editModeStyles.ts and is not asserted.
 - Criteria: The selection model covers the blocks between anchor and target in document order. The anchor is stored by position with the block count it was read at. The selection handler requires Shift without Alt, Ctrl and Cmd. The attribute marks exactly the selected blocks. The status region is visually hidden and created once.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-016](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-016.md): A writer selects blocks and copies, cuts and pastes them as Markdown
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-041](SwRS-MDOKFSTUDIO-BLOCK-041.md): One edit at a time: an open editor blocks other edits, opens and refreshes
+<!-- okf:links:end -->

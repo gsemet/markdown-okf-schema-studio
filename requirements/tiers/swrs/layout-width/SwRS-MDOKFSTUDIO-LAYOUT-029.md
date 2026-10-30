@@ -8,7 +8,8 @@ description: When a table or figure is narrower than the text column, the
   blocks left.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When a table or figure is narrower than the text column, the extension SHALL cen
 
 - Method: Visual width-mode checks (narrow table and figure) and inspection of the content layout rules; no unit test of the centring rule.
 - Criteria: Left and right free space of the table and figure are equal; the code block starts at the column edge.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-022](SwRS-MDOKFSTUDIO-LAYOUT-022.md): Margin keeps blocks in the column and Full removes the limit
+<!-- okf:links:end -->

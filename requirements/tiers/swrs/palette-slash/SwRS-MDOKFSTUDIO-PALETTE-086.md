@@ -8,7 +8,8 @@ description: When the writer presses Cmd+/ or Ctrl+/, with or without Shift, in
   a block text box, the extension SHALL match the shortcut of the TODO action.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the writer presses Cmd+/ or Ctrl+/, with or without Shift, in a block text 
 
 - Method: Unit test shortcutFor accepts Ctrl+/ and Cmd+/ on every platform in test/page/modules/editActions.test.ts; the TODO edit itself belongs to the review annotation requirements
 - Criteria: The shortcut declares the modifier any and accepts Shift; the physical code is Slash and the typed key /.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

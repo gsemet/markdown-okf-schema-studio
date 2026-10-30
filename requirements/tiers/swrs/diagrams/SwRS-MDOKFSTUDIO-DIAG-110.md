@@ -7,7 +7,8 @@ description: When a block editor is open, the extension SHALL hold the JAR
   results and apply them after the edit ends instead of closing the editor.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a block editor is open, the extension SHALL hold the JAR results and apply 
 
 - Method: Unit test of the edit lock (deferred plantuml work, latest wins).
 - Criteria: Work is deferred while editing.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-007](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-007.md): A writer renders PlantUML with an own JAR or command, safely bounded
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-105](SwRS-MDOKFSTUDIO-DIAG-105.md): JAR results replace the diagrams of the current render in order
+<!-- okf:links:end -->

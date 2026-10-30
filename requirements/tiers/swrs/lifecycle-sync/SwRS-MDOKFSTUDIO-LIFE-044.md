@@ -10,7 +10,8 @@ description: When a file that the shown render depends on is changed, created,
   below build and tool folders of that root.
 project: markdown-okf-schema-studio
 scope: lifecycle-sync
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -88,3 +89,12 @@ When a file that the shown render depends on is changed, created, deleted or ren
 - Method: test/core/configuration/previewConfiguration.test.ts "incremental updates can be turned off and default to on" covers the reading of the preview setting; the settings scenarios are untested at the integration level and checked by reading onSettingsChanged.
 - Method: test/session/eventFanOut.test.ts (a change of a document no preview depends on costs no `realpathSync` per preview; a dependency still refreshes only its preview).
 - Criteria: a change of a path that is neither the shown file, a linked target, a PlantUML include nor in the canonical dependency set of the last render returns before any other work (the canonical forms are computed once per render and per path, not per event and preview); requestId grows and the HTML holds the updated marker; refreshPreviewDocument runs only when queue.dependsOn names the old or new path; refreshReferencedPath returns before any dependency, enrichment or include handling when any segment of the path below the session's root is in the list; session.configuration equals readPreviewConfiguration after the event.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LIFE-005](../../strs/lifecycle-sync/StRS-MDOKFSTUDIO-LIFE-005.md): The preview updates in place as the text and its dependencies change
+<!-- okf:links:end -->

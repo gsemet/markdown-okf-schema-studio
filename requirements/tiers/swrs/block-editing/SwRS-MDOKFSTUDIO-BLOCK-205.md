@@ -10,7 +10,8 @@ description: "When the page hides, closes or leaves the document (a followed lin
   to reach the document."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -121,3 +122,15 @@ When the page hides, closes or leaves the document (a followed link, Back, anoth
 - Method: test/session/toolbarReq.requirements.test.ts (following a link applies the pending saves before the link is resolved).
 - Method: test/page/fmtableReqTable.requirements.test.ts (turning edit mode off saves a changed open cell and closes an unchanged or loading one without a save).
 - Criteria: flushPageEdits posts the message only for a live, writable, ready page; the answer follows the saves on the same channel; state.flushingEditors is set only around the flush save; flushPendingAutosave runs for both hide events; the saved table contains the typed text of the cell; the cell test checks that one previewEditSave whose editedText contains the typed text is posted but does not assert the non-final flag, which is read from flushPendingAutosave; flushRefusalMessage builds the warning; settleHostEdits runs before the link is resolved and before the history move; FLUSH_WAIT_MS is 1500; a final save for a changed cell and no message for an unchanged or still loading one.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+  - [StRS-MDOKFSTUDIO-TABLE-001](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-001.md): A writer edits a table cell in place and never loses the text
+  - [StRS-MDOKFSTUDIO-TOOLBAR-009](../../strs/toolbar-navigation/StRS-MDOKFSTUDIO-TOOLBAR-009.md): The reader goes Back and Next through followed links without losing typed text
+<!-- okf:links:end -->

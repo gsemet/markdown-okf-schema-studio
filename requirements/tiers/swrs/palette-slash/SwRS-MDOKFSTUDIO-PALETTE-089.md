@@ -9,7 +9,8 @@ description: When the writer presses the Link button or Cmd+K or Ctrl+K, the
   from the selection, and make no edit until the panel is submitted.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -103,3 +104,13 @@ When the writer presses the Link button or Cmd+K or Ctrl+K, the extension SHALL 
 - Method: test/page/runtimePaletteActions.test.ts (T35: the link panel opened from the cell keeps the editor open and clicking outside commits; scenario structure, table cell case)
 - Method: real-window scenario scenarioLinkPanel in test/integration/realInput/textEditing.ts (scenarios structure, prefill and focus)
 - Criteria: The action has the panel link, and the editor holds at most one panel; the tab stops are Text, URL, Insert, Cancel in this order; the focused field has its content selected; the keydown handler returns early when isComposing is true; the handler for Cmd/Ctrl+K checks the letter k, a command key and neither Alt nor Shift; the panel element is detached and its listeners ignore later events; the offsets recorded at opening are never applied to a different text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+<!-- okf:links:end -->

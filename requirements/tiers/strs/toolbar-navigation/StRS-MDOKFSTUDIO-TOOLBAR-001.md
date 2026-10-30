@@ -9,7 +9,8 @@ description: When a reader opens a preview, the Studio SHALL show its controls
   in read-only previews too.
 project: markdown-okf-schema-studio
 scope: toolbar-navigation
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: StRS
 derives_from: []
@@ -58,3 +59,20 @@ As a reader, I find the preview controls in five clear rows, fold the toolbar do
 - The meaning of zoom and width is described in the theme-zoom and layout-width scopes.
 - Known issue: the toolbar floats over the page, so text that scrolls under it is covered; only the first element of a document gets room under it (see the first-element gap of the layout-width scope).
 - When the workspace storage cannot be written, the choice is kept for the session and the reader gets one short warning that it will not survive a restart.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derived by:
+  - [SwRS-MDOKFSTUDIO-LIFE-169](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-169.md): A view choice made on the page is stored for the workspace
+  - [SwRS-MDOKFSTUDIO-LIFE-170](../../swrs/lifecycle-sync/SwRS-MDOKFSTUDIO-LIFE-170.md): A new page starts each view choice from the panel, stored or default value
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-001](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-001.md): The toolbar has five rows of titled buttons that float over the page
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-007](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-007.md): The chevron collapses the toolbar to its first row
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-013](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-013.md): The host accepts only a known view preference with a valid value
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-129](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-129.md): Toolbar, edit bar and table menu tooltips slide in from the left
+  - [SwRS-MDOKFSTUDIO-TOOLBAR-130](../../swrs/toolbar-navigation/SwRS-MDOKFSTUDIO-TOOLBAR-130.md): The toolbar rows unroll as one block and a load hint shows them
+  - [SwRS-MDOKFSTUDIO-TRUST-001](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-001.md): A read-only preview offers no editing affordance
+  - [SwRS-MDOKFSTUDIO-TRUST-006](../../swrs/trust-security/SwRS-MDOKFSTUDIO-TRUST-006.md): A read-only preview keeps every viewing action
+<!-- okf:links:end -->

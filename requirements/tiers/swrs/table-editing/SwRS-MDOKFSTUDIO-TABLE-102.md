@@ -9,7 +9,8 @@ description: When a table row is split into cells for editing, the extension
   pipe, also one inside a code span, as the preview does.
 project: markdown-okf-schema-studio
 scope: table-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -60,3 +61,12 @@ When a table row is split into cells for editing, the extension SHALL accept row
 - Method: test/page/modules/markdownTable.test.ts (rows without outer pipes: rows without outer pipes stay parseable when an edge cell is emptied and rows with only one outer pipe stay parseable; escaped pipe and its round trip: pipe tables round-trip escaped cells and CRLF line endings; pipe in backticks: cellSegments returns the text between the delimiting pipes, offsets in the untrimmed line; an unescaped pipe inside a code span splits the cell as the preview does). The odd-backslash boundary is read from splitRow and has no dedicated test (untested). The preview rule was checked with markdown-it 14.3.3 and the project's myst-parser.
 - Method: test/page/modules/markdownTablePreservation.test.ts (escaped pipe round trip: corpus entry escaped-and-code).
 - Criteria: The cells produced by parse for each row form, and string equality after serialising.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-TABLE-011](../../strs/table-editing/StRS-MDOKFSTUDIO-TABLE-011.md): A table converts between forms and a cell edit is a one-line change
+<!-- okf:links:end -->

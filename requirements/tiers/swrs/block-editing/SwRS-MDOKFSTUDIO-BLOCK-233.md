@@ -7,7 +7,8 @@ description: When text edits overlap each other or lie outside the text,
   applyTextEdits SHALL throw a RangeError and change nothing.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -43,3 +44,12 @@ When text edits overlap each other or lie outside the text, applyTextEdits SHALL
 
 - Method: Unit test `overlapping or out-of-range text edits are refused` in test/core/edits/textEdit.test.ts.
 - Criteria: The check covers non-integer, negative and reversed offsets as well.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+<!-- okf:links:end -->

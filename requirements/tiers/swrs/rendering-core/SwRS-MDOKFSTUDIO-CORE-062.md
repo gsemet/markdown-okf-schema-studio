@@ -8,7 +8,8 @@ description: When a document holds a raw details block (with an optional open
   key element with its content parsed as Markdown.
 project: markdown-okf-schema-studio
 scope: rendering-core
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When a document holds a raw details block (with an optional open state and a sum
 - Method: Unit test "a collapsible section inserted by the edition palette renders as details with a summary" in test/core/render/mystPaletteRendering.test.ts
 - Criteria: Both blocks are converted and their content parsed.
 - Evidence: the details form is covered through the gfm and myst tests under `test/core/render/`; the kbd form has its own unit test.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-029](../gfm/SwRS-MDOKFSTUDIO-GFM-029.md): A small raw HTML subset renders and the rest is dropped
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When a rename succeeds, the extension SHALL close the rename field
   5 s after the success message.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a rename succeeds, the extension SHALL close the rename field 5 s after the
 
 - Method: Unit test "a successful rename closes the field 5 s later and a new action cancels the stale close" in test/page/modules/renderReq.labelRename.requirements.test.ts
 - Criteria: The 5 s close timer is armed by the success and cleared by a new action.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-009](../../strs/myst/StRS-MDOKFSTUDIO-MYST-009.md): A writer sees, links and renames labels safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-038](SwRS-MDOKFSTUDIO-MYST-038.md): The anchor icon opens a rename field that sends valid names
+<!-- okf:links:end -->

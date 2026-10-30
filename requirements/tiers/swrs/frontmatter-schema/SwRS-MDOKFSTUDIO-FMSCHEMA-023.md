@@ -11,7 +11,8 @@ description: When a schema file is written in YAML, JSON or JSON5, the extension
   compile.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -119,3 +120,16 @@ When a schema file is written in YAML, JSON or JSON5, the extension SHALL load i
 - Method: test/core/frontmatter/schemaRegistry.test.ts (schema that cannot be compiled: the same error is reported at every analysis).
 - Method: test/visual/scenarioDefinitions2.ts, visual scenario in dark and light, 900 px and 460 px (schema that cannot be compiled, compile failure in a narrow preview).
 - Criteria: Only comment stripping is supported: trailing commas, unquoted keys and single-quote conversions are not. Only a node made of a single `$ref` key is inlined; a missing target leaves a reference to the schema root. The summary is 0 errors, 1 warning, 0 infos for a JSON or JSON5 failure, and the fields are listed in source order without documentation. The standard JSON-pointer scenario has no test (probed against the resolver).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-006](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-006.md): A document finds its schema and schema problems are reported
+- Supersedes:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-024](SwRS-MDOKFSTUDIO-FMSCHEMA-024.md): Relative schema references are inlined from the schema folder
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-025](SwRS-MDOKFSTUDIO-FMSCHEMA-025.md): A schema that cannot be parsed gives a warning row
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-026](SwRS-MDOKFSTUDIO-FMSCHEMA-026.md): A schema that cannot be compiled gives a red row
+<!-- okf:links:end -->

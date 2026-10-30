@@ -8,7 +8,8 @@ description: When the setting markdownOkfSchemaStudio.preview.maxContentWidth is
   at most 2400.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -49,3 +50,14 @@ When the setting markdownOkfSchemaStudio.preview.maxContentWidth is read, the ex
 
 - Method: Unit test of the configuration reader (2500 gives 2400 and 0 gives 0 are asserted); the rule is the normalisation function.
 - Criteria: The normalised value is an integer between 0 and 2400.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-002](SwRS-MDOKFSTUDIO-LAYOUT-002.md): The text column width follows the maxContentWidth setting
+<!-- okf:links:end -->

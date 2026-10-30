@@ -9,7 +9,8 @@ description: "When the include budget of a render is exhausted, the extension SH
   warning for the render."
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -46,3 +47,14 @@ When the include budget of a render is exhausted, the extension SHALL show that 
 
 - Method: Unit test `after the include budget is exhausted every remaining diagram file shows the budget message, with one warning` in `test/core/render/diagReq.pipeline.requirements.test.ts`.
 - Criteria: The budget message replaces the diagram.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-009](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-009.md): PlantUML diagrams use local include files and PUML files
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-068](SwRS-MDOKFSTUDIO-DIAG-068.md): A {uml} directive renders a PUML file as a render dependency
+<!-- okf:links:end -->

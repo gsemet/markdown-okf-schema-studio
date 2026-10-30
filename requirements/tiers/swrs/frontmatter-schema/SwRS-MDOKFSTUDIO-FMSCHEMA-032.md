@@ -9,7 +9,8 @@ description: When a schema uses allOf, anyOf, oneOf or if/then/else, the
   select, and apply the required lists of the visited branches.
 project: markdown-okf-schema-studio
 scope: frontmatter-schema
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -47,3 +48,14 @@ When a schema uses allOf, anyOf, oneOf or if/then/else, the extension SHALL merg
 - Method: Unit test of the effective properties.
 - Criteria: Later branches extend earlier declarations of the same name; nullable is recorded per field.
 - Known issue: anyOf and oneOf branches are merged even when they do not match the values (display only; validation is the validator's).
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-FMSCHEMA-010](../../strs/frontmatter-schema/StRS-MDOKFSTUDIO-FMSCHEMA-010.md): Fields follow the schema and problems show on the field concerned
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-FMSCHEMA-029](SwRS-MDOKFSTUDIO-FMSCHEMA-029.md): A schema table lists the declared fields with their type
+<!-- okf:links:end -->

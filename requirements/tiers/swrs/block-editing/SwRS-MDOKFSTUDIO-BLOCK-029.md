@@ -11,7 +11,8 @@ description: "When a block editor is open, the page SHALL expose its frame as a 
   block it replaces."
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -97,3 +98,12 @@ When a block editor is open, the page SHALL expose its frame as a region named "
 - Method: test/page/runtimeBlockEditor.test.ts (`active Markdown editors leave repeated spaces and Enter to native text input`: autocorrect, autocapitalize and autocomplete of the text box attributes, spellcheck false is asserted nowhere; `fenced Markdown editors sit outside the rendered pre and preserve source when saving`: the data-sphinx-preview-editing attribute; `an opened block editor shows its line range, Done and Cancel on one row` and `the status line shares one row with the Done and Cancel buttons`: 900 px row; `block textareas resize on input and preview layout changes`: the text box grows). The CSS rule [data-sphinx-preview-editing="true"] with display none is in src/core/preview/styles/editModeStyles.ts.
 - Method: visual scenarios block-editing/v01 and v02 (text box attributes), block-editing/v04, v06, v07 and v08 (frame, border, font and tab size; v06 and v07 also the status row and the 75 percent ratio, with a lock text shared with v08; v07 at 460 px, buttons wrap), in test/visual/scenarioDefinitions1.ts and test/visual/scenarioIds.ts.
 - Criteria: The two aria-label strings are exactly the ones above; the four attributes are present on every block text box; the attribute is set on open and removed on close, and the stylesheet hides marked elements; border width 1 px, font family monospace, tab-size 4 on the text box; the action row is a wrapping flex container with the buttons at the end and no overlap; the stylesheet sets font-size 0.75em on the status line; textarea.rows is 1 at creation and height equals scrollHeight after each input or layout change.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-003](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-003.md): A writer edits the raw Markdown of a block in a framed editor
+<!-- okf:links:end -->

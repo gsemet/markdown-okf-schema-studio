@@ -7,7 +7,8 @@ description: When a PlantUML picture is shown, the extension SHALL centre it in
   the content column.
 project: markdown-okf-schema-studio
 scope: diagrams
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,14 @@ When a PlantUML picture is shown, the extension SHALL centre it in the content c
 
 - Method: Unit test `a PlantUML picture is a block centred with automatic inline margins` in `test/core/preview/diagReq.styles.requirements.test.ts`.
 - Criteria: margin-inline auto on a block image.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-DIAG-006](../../strs/diagrams/StRS-MDOKFSTUDIO-DIAG-006.md): A writer reads PlantUML diagrams without any setup
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-DIAG-023](SwRS-MDOKFSTUDIO-DIAG-023.md): PlantUML fences become centred inert pictures drawn by the built-in engine
+<!-- okf:links:end -->

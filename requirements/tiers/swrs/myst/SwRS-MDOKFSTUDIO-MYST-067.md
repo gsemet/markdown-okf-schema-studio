@@ -8,7 +8,8 @@ description: When no conf.py is found above a document, the extension SHALL use
   workspace root, and none when two or more exist.
 project: markdown-okf-schema-studio
 scope: myst
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When no conf.py is found above a document, the extension SHALL use the single co
 
 - Method: Unit test "D29: a single conf.py in a common folder of the root is the fallback" in test/core/myst/confLocator.test.ts
 - Criteria: Decision D29.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-MYST-007](../../strs/myst/StRS-MDOKFSTUDIO-MYST-007.md): Sphinx configuration gaps are reported before building
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-MYST-066](SwRS-MDOKFSTUDIO-MYST-066.md): The governing conf.py is found and read as text
+<!-- okf:links:end -->

@@ -8,7 +8,8 @@ description: When a block quote line contains only **Note**, **Important** or
   admonition of that type.
 project: markdown-okf-schema-studio
 scope: gfm
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -45,3 +46,14 @@ When a block quote line contains only **Note**, **Important** or **Warning** in 
 
 - Method: Unit test on the render pipeline output.
 - Criteria: Simple admonitions only for lone bold markers.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-GFM-002](../../strs/gfm/StRS-MDOKFSTUDIO-GFM-002.md): GitHub Flavored Markdown renders as on GitHub, safely
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-GFM-009](SwRS-MDOKFSTUDIO-GFM-009.md): GitHub alerts render as admonitions
+<!-- okf:links:end -->

@@ -7,7 +7,8 @@ description: When the width mode is Full width, the extension SHALL lift the
   column limit and set the page side gutter to 16 px.
 project: markdown-okf-schema-studio
 scope: layout-width
-lifecycle: superseded
+req_lifecycle: superseded
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -48,3 +49,14 @@ When the width mode is Full width, the extension SHALL lift the column limit and
 
 - Method: Unit tests P7 full width uses the 16 px gutter a broken-out table keeps in auto and T10 full width lifts the column limit; visual width-mode checks.
 - Criteria: The Full width rule sets column width 100000px and gutter 16px.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-LAYOUT-003](../../strs/layout-width/StRS-MDOKFSTUDIO-LAYOUT-003.md): A reader chooses how wide the text column is
+- Superseded by:
+  - [SwRS-MDOKFSTUDIO-LAYOUT-022](SwRS-MDOKFSTUDIO-LAYOUT-022.md): Margin keeps blocks in the column and Full removes the limit
+<!-- okf:links:end -->

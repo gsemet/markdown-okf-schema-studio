@@ -8,7 +8,8 @@ description: When the writer presses Image, the extension SHALL ask the host for
   and insert or replace an image reference only when a valid path comes back.
 project: markdown-okf-schema-studio
 scope: palette-slash
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -84,3 +85,16 @@ When the writer presses Image, the extension SHALL ask the host for a native ima
 - Method: test/page/runtimePaletteActions.test.ts (T31: Image keeps the editor open while the file dialog has the focus, then inserts the reference; a stale image answer, a refusal and a cancel insert nothing; scenarios picked file, dialog without a path)
 - Method: test/page/modules/editActions.test.ts (T31: image inserts ![name](path) with the name selected; image wraps a path with spaces or parentheses in angle brackets; image refuses a missing or unwritable path and keeps brackets out of the name; CR035: the image action replaces the image around the caret and keeps alt and title; CR035: imageDraft reads alt, path and title of the image around the caret; scenarios picked file, image under the caret, name and path forms, path refused)
 - Criteria: The request is previewPickImage marked dialog; the name is the stem of the last path segment without the characters [, ] and backslash, trimmed; the wrapping test applies to whitespace, opening and closing parentheses; the replaced range is the whole image reference.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-PALETTE-007](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-007.md): A writer inserts links, images, figures, tables, colours and emoji through pickers
+  - [StRS-MDOKFSTUDIO-PALETTE-001](../../strs/palette-slash/StRS-MDOKFSTUDIO-PALETTE-001.md): A writer formats and inserts Markdown, GFM and MyST constructs from the palette
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-TRUST-065](../trust-security/SwRS-MDOKFSTUDIO-TRUST-065.md): A page message is matched to the shown render or document by the gate of its type
+  - [SwRS-MDOKFSTUDIO-TRUST-090](../trust-security/SwRS-MDOKFSTUDIO-TRUST-090.md): Every page request is answered once by its id and result type, or ends with a readable error
+<!-- okf:links:end -->

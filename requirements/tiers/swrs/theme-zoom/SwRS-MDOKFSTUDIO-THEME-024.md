@@ -8,7 +8,8 @@ description: When the system prefers reduced motion and the reader presses the
   as switching.
 project: markdown-okf-schema-studio
 scope: theme-zoom
-lifecycle: deprecated
+req_lifecycle: deprecated
+status: deprecated
 origin: native
 tier: SwRS
 derives_from:
@@ -44,3 +45,12 @@ When the system prefers reduced motion and the reader presses the Theme button, 
 
 - Method: Unit test `CR 046: with prefers-reduced-motion: reduce nothing is marked to move` (test/page/modules/motion.test.ts) calls themeSwitch with reduced motion on and asserts no marker and no timer; the normal case is `CR 046: a theme switch transitions the colours once, until the body background has changed`.
 - Criteria: No marker and no timer under reduced motion; the marker and one timer otherwise.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-THEME-002](../../strs/theme-zoom/StRS-MDOKFSTUDIO-THEME-002.md): A reader chooses a preview theme that paints the whole page readably
+<!-- okf:links:end -->

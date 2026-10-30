@@ -9,7 +9,8 @@ description: When a writer types in a block editor, the extension SHALL autosave
   host writes as the smallest single replacement of the text last written.
 project: markdown-okf-schema-studio
 scope: block-editing
-lifecycle: proposed
+req_lifecycle: proposed
+status: stable
 origin: native
 tier: SwRS
 derives_from:
@@ -77,3 +78,15 @@ When a writer types in a block editor, the extension SHALL autosave the last tex
 - Method: test/core/edits/sourceEdits.test.ts (`a block text edit is the smallest replacement, offset by the block start`: smallest replacement, offset by the block start); real-input scenario scenarioTypingUndoGrouping (twenty characters reach the document as at most two small changes).
 - Method: test/session/blockReq.requirements.test.ts (`the host applies one edit at a time and keeps only the newest text received meanwhile`: one save at a time).
 - Criteria: The delay is 400 ms and the message sequence is as above; postBlockEditSave returns without posting when editedText equals lastPostedText; the replacement reproduces the new text when applied to the old text and no boundary of the replacement lies inside a pair; at most one applyEdits call is in flight per edit and pendingText holds the newest text.
+
+<!-- okf:links:start -->
+### Links
+
+<!-- Generated from the frontmatter relations; edit them instead. -->
+
+- Derives from:
+  - [StRS-MDOKFSTUDIO-BLOCK-006](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-006.md): Typed text is saved, survives updates and is never lost on leaving
+  - [StRS-MDOKFSTUDIO-BLOCK-025](../../strs/block-editing/StRS-MDOKFSTUDIO-BLOCK-025.md): Preview edits land exactly, in one undo step, keep line endings, or are refused with a reason
+- Depends on:
+  - [SwRS-MDOKFSTUDIO-BLOCK-058](SwRS-MDOKFSTUDIO-BLOCK-058.md): Every host source edit is one undo step, renders once and reports a failed apply
+<!-- okf:links:end -->
