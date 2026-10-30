@@ -79,6 +79,10 @@ The CI only runs what a developer can run locally. All logic lives in the task r
     `-f heavy=true -f stress_repeat=60 -f stress_scenarios=alert-dropdown` (narrow the scenarios
     above about 20 rounds; the timeouts stay as they are). Run them before merging a change to the extension host, the webview or the
     real-window tests, and run `npm run test:integration` locally (one VS Code window at a time).
+    A third on-demand job, `toc-loop`, is a repro tool for the `toc` edit-toggle flake:
+    `gh workflow run ci.yml --ref <branch> -f toc_loop=30 [-f toc_delay_ms=300]` (1 to 40 rounds,
+    delay 0 to 2000 ms, launch deadline 30 minutes inside a 35-minute step). It does not gate merges
+    and is not part of `checks`; failed rounds are counted and the job is red if any failed.
 14. **A release is tagged only after a green heavy run of its commit.** A push to `main` that
     changes the package version runs the heavy jobs without a dispatch: the `release-check` job
     detects the change (`scripts/version.py --bump-since`, the same test `tag-release` uses) and

@@ -24,9 +24,12 @@ import {
 import { scenarioTableStructure } from "../tableStructureReal";
 import { scenarioToc } from "../tocWindow";
 import { scenarioPerformanceProbe } from "../performanceProbe";
+import * as fs from "node:fs";
+import { E2E_REPORT_ROOT } from "../../reportPaths";
+import { tocLoopRounds, tocLoopSummary, toggleDelayMaxMs, type TocLoopTally } from "../../shared/tocLoop";
 import { setWorkbenchPage, takeFailureFocusDump } from "./common";
 import { scenarioAlertTypePickProbe } from "./alertPickProbe";
-import { installWorkbenchFocusTrace, workbenchFocusDump } from "../../shared/workbenchFocusDump";
+import { installWorkbenchFocusTrace, withFocusDumpOnFailure, workbenchFocusDump } from "../../shared/workbenchFocusDump";
 import { scenarioArrowNavigation, scenarioBlockMoveKeys, scenarioBlockMoveSelection, scenarioBlockSelection, scenarioCtrlEnterCommit, scenarioOpenWithEditor, scenarioParagraphBlurCommit, scenarioReviewComments, scenarioTableCellBold, scenarioTableCellEnter, scenarioTableMinimalDiff } from "./blockKeys";
 import { scenarioEnterCommitsTextField, scenarioEscapeCancels, scenarioFrontmatterStructuralMinimalPatch, scenarioFrontmatterValueMinimalPatch, scenarioLinkPanel, scenarioLinkPanelPrefill, scenarioPalette, scenarioShortcuts, scenarioSlashMenu, scenarioTypingUndoGrouping, scenarioUndoStaysInEditor } from "./textEditing";
 import { scenarioAlertDropdown, scenarioCaretAtClick, scenarioEditAffordances, scenarioEditModeNoReflow, scenarioEnterContinuesList, scenarioFigureEditor, scenarioPreviewKeepsMarkdown, scenarioSaveKeepsBlockInPlace, scenarioTabIndents, scenarioTableTab, scenarioTableToolbar } from "./editorWidgets";
@@ -95,6 +98,47 @@ async function runStress(page: Page): Promise<void> {
   console.log(`stress: ${plan.repeat} round(s) passed`);
 }
 
+/**
+ * `STUDIO_REAL_INPUT_SCENARIO=toc-loop`: the `toc` scenario `STUDIO_TOC_LOOP` times (default 1),
+ * optionally with `STUDIO_TOGGLE_DELAY_MS` delays around the edit toggle. A failed round is
+ * logged with its message (it carries the toggle state #205 records) and the loop goes on, so one
+ * dispatch counts the clean and the failed rounds; the step fails at the end if any round failed.
+ */
+async function runTocLoop(page: Page): Promise<void> {
+  // Validate both knobs before round 1: a bad value is a configuration error, not N failed rounds.
+  const rounds = tocLoopRounds(process.env);
+  const delayMax = toggleDelayMaxMs(process.env);
+  const tally: TocLoopTally = { rounds, passed: 0, failed: 0, failures: [] };
+  const summaryFile = path.join(E2E_REPORT_ROOT, "toc-loop-summary.json");
+  const writeSummary = (): void => {
+    fs.mkdirSync(E2E_REPORT_ROOT, { recursive: true });
+    fs.writeFileSync(summaryFile, `${JSON.stringify(tally, null, 2)}\n`);
+  };
+  console.log(`toc-loop: ${rounds} round(s), toggle delay up to ${delayMax} ms`);
+  for (let round = 1; round <= rounds; round += 1) {
+    const started = Date.now();
+    let atFailure: string | undefined;
+    try {
+      // The dump is read where the scenario failed, before its cleanup closes the editors.
+      await withFocusDumpOnFailure(page, () => scenarioToc(page), (dump) => { atFailure = dump; });
+      await vscode.commands.executeCommand("workbench.action.closeSidebar");
+      tally.passed += 1;
+      console.log(`PASS toc-loop ${round}/${rounds} (${Date.now() - started} ms)`);
+    } catch (error) {
+      tally.failed += 1;
+      const message = error instanceof Error ? error.message : String(error);
+      tally.failures.push(`round ${round}: ${message}`);
+      console.error(`FAIL toc-loop ${round}/${rounds} (${Date.now() - started} ms): ${message}`);
+      if (atFailure !== undefined) console.error(`toc-loop round ${round}, workbench focus at the failing step: ${atFailure}`);
+      console.error(`toc-loop round ${round}, workbench focus after the scenario's cleanup: ${await workbenchFocusDump(page)}`);
+    }
+    // After every round, so a deadline kill keeps the tally so far.
+    writeSummary();
+  }
+  console.log(tocLoopSummary(tally));
+  if (tally.failed > 0) throw new Error(`${tocLoopSummary(tally)}. ${tally.failures.join(" || ")}`);
+}
+
 export async function run(): Promise<void> {
   const { browser, page } = await connectWorkbench();
   const evidence = createEvidence("real-input");
@@ -112,6 +156,7 @@ export async function run(): Promise<void> {
     const single: Record<string, () => Promise<void>> = {
       toolbar: () => scenarioToolbarState(page, evidence),
       stress: () => runStress(page),
+      "toc-loop": () => runTocLoop(page),
       probe: () => scenarioPerformanceProbe(page),
       "link-prefill": () => scenarioLinkPanelPrefill(page, evidence),
       "table-moves": () => scenarioTableMoves(page),

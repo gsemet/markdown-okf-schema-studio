@@ -305,6 +305,22 @@ ci-stress REPEAT=env("STUDIO_STRESS_REPEAT", "20"):
         exit 1
     fi
 
+# CI job "toc-loop" (workflow_dispatch input toc_loop): repeats the `toc` scenario ROUNDS times in the
+# trusted window to force the edit-toggle flake. DELAY_MS > 0 injects a random 0..DELAY_MS pause
+# around the toggle's clicks and the host theme change. Failed rounds are counted, not fatal.
+# The parameters are exported variables (never spliced into the script). CI only: it opens a VS Code window.
+ci-toc-loop $STUDIO_TOC_LOOP="30" $STUDIO_TOGGLE_DELAY_MS="0":
+    #!/usr/bin/env bash
+    set -uo pipefail
+    export STUDIO_REAL_INPUT_SCENARIO=toc-loop
+    export STUDIO_LAUNCH_TIMEOUT_MS="${STUDIO_LAUNCH_TIMEOUT_MS:-1800000}"
+    if {{ npm }} run test:integration -- --trusted-only; then
+        echo "ci-toc-loop: finished ($STUDIO_TOC_LOOP rounds, delay up to $STUDIO_TOGGLE_DELAY_MS ms)"
+    else
+        echo "ci-toc-loop: FAILED" >&2
+        exit 1
+    fi
+
 # CI job "report": merge the visual and integration outputs into the review index and e2e manifest.
 # STAGES=visual: the real VS Code stage did not run (the pull request path of CI); it is reported as
 # skipped and only the visual stage counts.

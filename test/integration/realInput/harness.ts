@@ -12,6 +12,7 @@ import {
   previewGroupUnlocksSettledForTests,
 } from "../extensionApi";
 import { E2E_SCREENSHOT_ROOT } from "../../reportPaths";
+import { injectToggleDelay } from "../../shared/tocLoop";
 import { RealWindowEvidence } from "../evidence";
 
 export const MOD: "Meta" | "Control" = process.platform === "darwin" ? "Meta" : "Control";
@@ -376,11 +377,31 @@ export async function setEditMode(page: Page, on: boolean): Promise<Frame> {
     // action, withCurrentFrame runs it again on the new frame, which reads the state first. A new
     // frame whose runtime has not booted yet (mode null) is not clicked.
     const before = await withCurrentFrame(page, async (frame) => {
-      const state = await editToggleState(page, frame);
-      const clickable = state.mode !== null && state.mode !== wanted
-        && state.toggle !== undefined && state.toggle.ariaDisabled !== "true";
-      if (clickable) await frame.locator(EDIT_TOGGLE).click();
-      return { frame, state };
+      let state = await editToggleState(page, frame);
+      const canClick = (candidate: EditToggleState): boolean => candidate.mode !== null && candidate.mode !== wanted
+        && candidate.toggle !== undefined && candidate.toggle.ariaDisabled !== "true";
+      let unclicked: string | undefined;
+      let injectedBefore = 0;
+      let injectedAfter = 0;
+      if (canClick(state)) {
+        // Repro loop only (STUDIO_TOGGLE_DELAY_MS): a pause between the state read and the click.
+        injectedBefore = await injectToggleDelay();
+        if (injectedBefore > 0) {
+          // The page may have changed during the pause. A render restoring the mode with no click
+          // is the evidence the repro looks for: read the state again, right before the click, and
+          // record the change apart from anything the click does.
+          const reread = await editToggleState(page, frame);
+          if (reread.mode !== state.mode || reread.render !== state.render) {
+            unclicked = `mode ${String(state.mode)} -> ${String(reread.mode)}, render ${state.render} -> ${reread.render}`;
+          }
+          state = reread;
+        }
+        if (canClick(state)) {
+          await frame.locator(EDIT_TOGGLE).click();
+          injectedAfter = await injectToggleDelay();
+        }
+      }
+      return { frame, state, unclicked, injectedBefore, injectedAfter };
     });
     if (before.state.mode === null) {
       // Not clicked and not counted: a replacement frame has not booted yet. Wait for it again.
@@ -390,8 +411,17 @@ export async function setEditMode(page: Page, on: boolean): Promise<Frame> {
       click -= 1;
       continue;
     }
+    // In order: the state the click was made on, then what the injected pauses did around it.
     attempts.push(`#${click} before ${JSON.stringify(before.state)}`);
-    if (before.state.mode === wanted) return currentPreviewFrame(page);
+    if (before.injectedBefore > 0) attempts.push(`#${click} injected ${before.injectedBefore} ms before the click`);
+    if (before.unclicked !== undefined) {
+      attempts.push(`#${click} CHANGED WITH NO CLICK during the injected pause: ${before.unclicked}`);
+    }
+    if (before.injectedAfter > 0) attempts.push(`#${click} injected ${before.injectedAfter} ms after the click`);
+    if (before.state.mode === wanted) {
+      if (before.unclicked !== undefined) console.log(`setEditMode ${wanted}: reached with no click. Attempts: ${attempts.join(" | ")}`);
+      return currentPreviewFrame(page);
+    }
     if (before.state.toggle === undefined) throw failure("the page has no edit toggle");
     if (before.state.toggle.ariaDisabled === "true") throw failure("the edit toggle is disabled (read-only preview)");
     // The outcome, read on the clicked frame: the page handles the click in the same task as the
@@ -422,7 +452,9 @@ export async function setEditMode(page: Page, on: boolean): Promise<Frame> {
     }
     attempts.push(`#${click} reached the toggle; after ${JSON.stringify(after)}`);
     if (after.mode !== wanted) {
-      throw failure(`click #${click} reached the toggle in the page and the page shows mode ${after.mode} `
+      const earlier = before.unclicked === undefined ? ""
+        : `the page changed with no click during the injected pause (${before.unclicked}), then `;
+      throw failure(`${earlier}click #${click} reached the toggle in the page and the page shows mode ${after.mode} `
         + `(it showed ${before.state.mode} before the click)`);
     }
     try {

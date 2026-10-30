@@ -109,6 +109,7 @@ test("CR 173: budgets and the launch deadline come from one place and the enviro
   assert.equal(stepBudgetMs("checkbox-toggle", {}), STEP_BUDGET_DEFAULT_MS);
   assert.ok(stepBudgetMs("real-input", {}) > STEP_BUDGET_DEFAULT_MS);
   assert.equal(stepBudgetMs("real-input", { STUDIO_REAL_INPUT_SCENARIO: "stress", STUDIO_LAUNCH_TIMEOUT_MS: "5000" }), 5_000);
+  assert.equal(stepBudgetMs("real-input", { STUDIO_REAL_INPUT_SCENARIO: "toc-loop", STUDIO_LAUNCH_TIMEOUT_MS: "6000" }), 6_000);
   assert.ok(LAUNCH_DEADLINE_MS < 30 * 60_000, "the launch deadline fires before the job timeout");
 });
 
