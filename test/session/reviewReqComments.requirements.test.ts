@@ -369,6 +369,49 @@ test("switching the sidecar and clearing a preview release the watcher and its t
 });
 
 // @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+test("a busy or denied read of the comments file posts no empty list", async () => {
+  const s = setup();
+  s.files.set(DOCUMENT, "a needle here\n");
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 1)]));
+  const preview = s.preview();
+  const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
+  const lists = (): Array<Record<string, any>> => s.posted.filter((message) => message.type === "previewComments");
+  const lastList = (): Record<string, any> => lists().at(-1)!;
+  await post(preview);
+  assert.deepEqual(threadsOf(lastList()).map((value) => [value.id, value.resolved]), [["t1", false]]);
+
+  // The reader presses Resolve: the write lands and the controller posts the resolved thread.
+  await (s.controller as any).handleResolve(preview, { threadId: "t1", resolved: true });
+  assert.deepEqual(threadsOf(lastList()).map((value) => [value.id, value.resolved]), [["t1", true]]);
+
+  // The next post (the watcher event) cannot read the file this once: busy, not missing. A failed read could close the popover; the host must not post it as an empty list.
+  s.hooks.readFile = (path) => {
+    if (path !== SIDECAR) return undefined;
+    s.hooks.readFile = undefined;
+    return Promise.reject(Object.assign(new Error("resource busy"), { code: "EBUSY" }));
+  };
+  await post(preview);
+  await post(preview);
+
+  // The page closes an open popover when a post lists no thread: no post may.
+  assert.ok(lists().every((message) => threadsOf(message).length > 0), "no post lists zero threads");
+  assert.deepEqual(threadsOf(lastList()).map((value) => [value.id, value.resolved]), [["t1", true]]);
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
+test("a comments file that is really gone still clears the threads of the page", async () => {
+  const s = setup();
+  s.files.set(DOCUMENT, "a needle here\n");
+  s.files.set(SIDECAR, sidecarOf("a.md", [thread("t1", 1)]));
+  const preview = s.preview();
+  const post = (s.controller as any).post.bind(s.controller) as (value: unknown) => Promise<void>;
+  await post(preview);
+  s.files.delete(SIDECAR);
+  await post(preview);
+  assert.deepEqual(threadsOf(s.posted.at(-1)!), [], "the page is told the threads are gone");
+});
+
+// @tests_req SwRS-MDOKFSTUDIO-REVIEW-012
 test("a post overtaken while it checks the anchors leaves the newer post free to show the new thread", async () => {
   const s = setup();
   const text = "a needle here\n\nanother line\n\nthe added thread quotes this text\n";

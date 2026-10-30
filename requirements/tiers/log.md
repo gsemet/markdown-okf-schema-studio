@@ -11,6 +11,16 @@
   Verification: `okfreq validate --check-links`, `lint --check` and `update-coverage --check`
   pass; the headless visual scenarios `block-editing/v23` to `v26` measure the layout.
 
+### The host does not post an empty list from a failed read (hardening)
+
+- SwRS-MDOKFSTUDIO-REVIEW-012 (proposed): new refusal scenario and statement clause. A read of
+  an existing comments file that fails (busy, denied, interrupted) posts nothing, so the page keeps
+  its threads and an open popover; only a missing file posts the empty list. Before, any read error
+  counted as "no comments file", so a failed read could close an open popover. This hardens that
+  path; it is not the proven cause of the review-threads stress flake, which most likely came from
+  the delete-then-move gap of the file rename, fixed separately (test/host-vscode/fileRename.test.ts).
+- Verification: test/session/reviewReqComments.requirements.test.ts (two new tests); `just check`.
+
 ## 2026-10-30
 
 ### The bundle is readable by any OKF v0.2 consumer

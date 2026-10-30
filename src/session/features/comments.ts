@@ -67,6 +67,8 @@ export function createCommentsState(): CommentsState {
 
 const COMMENTS_DEBOUNCE_MS = 150;
 const ANCHORS_UNCHANGED = "no anchor moved";
+/** The sidecar exists (or may) but could not be read; not the same as "there is none". */
+const UNREADABLE: unique symbol = Symbol("unreadable sidecar");
 
 type CommentKind = "create" | "reply" | "resolve" | "delete";
 
@@ -108,8 +110,12 @@ export class CommentsController {
   }
 
   // @implements_req SwRS-MDOKFSTUDIO-REVIEW-004
-  /** Reads the sidecar of a document; undefined when there is none. */
-  private async readSidecar(sidecar: string): Promise<string | undefined> {
+  /**
+   * Reads the sidecar of a document; undefined when there is none. A read that fails for any other
+   * reason (busy, denied, interrupted) is {@link UNREADABLE}: the file may well exist, so it must not
+   * be taken for "no comments".
+   */
+  private async readSidecar(sidecar: string): Promise<string | typeof UNREADABLE | undefined> {
     const { files } = this.manager.host;
     try {
       const stat = await files.stat(sidecar);
@@ -118,8 +124,8 @@ export class CommentsController {
         return " ".repeat(MAX_SIDECAR_BYTES + 1);
       }
       return new TextDecoder().decode(await files.readFile(sidecar));
-    } catch {
-      return undefined;
+    } catch (error) {
+      return isFileNotFound(error) ? undefined : UNREADABLE;
     }
   }
 
@@ -139,6 +145,9 @@ export class CommentsController {
     const sequence = ++state.seq;
     const text = await this.readSidecar(sidecar);
     if (preview.disposed || preview.stage !== stage || sequence !== state.seq) return;
+    // A failed read says nothing about the threads: the page keeps what it shows (an open popover
+    // included) until a read succeeds. Only a missing file clears them.
+    if (text === UNREADABLE) return;
     // The same text again (the echo of our own write, a touch): nothing changed for the page. Not
     // when the followed lines were dropped (a clean document changed, an edit during a save): the
     // anchors must then be checked again against the current text even if the file did not change.

@@ -7,8 +7,8 @@ title: The host posts the threads of the review comments file and follows its
 description: When a document is shown or its review comments file is created,
   changed, deleted or written by the Studio, the extension SHALL post the
   current threads of the file to the page with their comments, anchors, resolved
-  flags and orphaned verdicts, once for each distinct content and never from a
-  read that a newer read overtook.
+  flags and orphaned verdicts, once for each distinct content, never from a read
+  that a newer read overtook and never from a read that failed.
 project: markdown-okf-schema-studio
 scope: review-annotations
 req_lifecycle: proposed
@@ -37,7 +37,7 @@ default_owner_email: gaetan@xeberon.net
 
 ### Normative behavior
 
-When a document is shown or its review comments file is created, changed, deleted or written by the Studio, the extension SHALL post the current threads of the file to the page with their comments, anchors, resolved flags and orphaned verdicts, once for each distinct content and never from a read that a newer read overtook.
+When a document is shown or its review comments file is created, changed, deleted or written by the Studio, the extension SHALL post the current threads of the file to the page with their comments, anchors, resolved flags and orphaned verdicts, once for each distinct content, never from a read that a newer read overtook and never from a read that failed.
 
 ### Scenario (nominal): Valid file
 - GIVEN a comments file with one thread quoting "second paragraph" whose comment body is `<b>Why?</b>`
@@ -81,6 +81,12 @@ When a document is shown or its review comments file is created, changed, delete
 | One change of the file, the read ends | Its result is posted |
 | A post overtaken by a newer post while it checks the anchors against the document, both reading the same new text | The newer post shows the new threads; the overtaken one posts nothing and does not mark the text as shown |
 
+### Scenario (refusal): A read of the comments file that fails
+| Input | Outcome |
+| --- | --- |
+| A preview that shows a resolved thread whose open popover the reader uses, the next read of the existing comments file fails (busy, denied, interrupted) | Nothing is posted: the page keeps its threads and the popover stays open; the next successful read is posted as usual |
+| A preview that showed threads and a read that finds the file missing | An empty list is posted so the page removes the threads (see the boundary "Document without a comments file") |
+
 ### Scenario (boundary): The watch of the comments file is released
 | Input | Outcome |
 | --- | --- |
@@ -114,9 +120,11 @@ The page accepts the message only when it is addressed to its render, see SwRS-M
 - Method: test/integration/commentAnchors.test.ts (orphan verdict: orphaned flags posted).
 - Method: test/integration/commentWrite.test.ts (the echo of our own write is skipped; the last posted threads have two entries after two creates and zero after the last delete). The unchanged-threads render and the refusal case of a write are untested.
 - Method: test/session/reviewReqComments.requirements.test.ts: a read of the comments file that a newer read overtook posts nothing (read overtaken by a newer read); `a post overtaken while it checks the anchors leaves the newer post free to show the new thread` (read overtaken by a newer read, same text).
+- Method: test/session/reviewReqComments.requirements.test.ts: `a busy or denied read of the comments file posts no empty list` (a read that fails posts nothing, so a failed read cannot close the open popover of a resolved thread) and `a comments file that is really gone still clears the threads of the page`.
+- Method: test/host-vscode/fileRename.test.ts guards the other way a reader could find the file missing: a rename with overwrite replaces the file in one step and never deletes it first (see SwRS-MDOKFSTUDIO-REVIEW-054).
 - Method: test/session/reviewReqComments.requirements.test.ts: switching the sidecar and clearing a preview release the watcher and its three subscriptions (the watch of the comments file is released).
 - Method: test/page/modules/commentThreads.test.ts: `T42: hostile ids and malformed threads are tolerated` (shape of the threads message the page accepts).
-- Criteria: The last posted threads equal the file content, plus an orphaned flag for each thread; the post count stays 0 without a file and the last post is an empty list after a deletion; the threads shown by the page equal the file after each create, change and delete; the post count does not grow after an echo (comparison by the hash of the text, only while the lines followed in memory exist, and by the serialized threads); a read whose sequence number is no longer the latest returns before posting and before recording its text hash; post() returns before reading when the document uri does not start with file:.
+- Criteria: The last posted threads equal the file content, plus an orphaned flag for each thread; the post count stays 0 without a file and the last post is an empty list after a deletion; the threads shown by the page equal the file after each create, change and delete; the post count does not grow after an echo (comparison by the hash of the text, only while the lines followed in memory exist, and by the serialized threads); a read whose sequence number is no longer the latest returns before posting and before recording its text hash; a read that fails for a reason other than a missing file returns before posting and before recording its text hash; post() returns before reading when the document uri does not start with file:.
 
 <!-- okf:links:start -->
 ### Links
