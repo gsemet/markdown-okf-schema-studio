@@ -29,6 +29,7 @@ implemented_in_files:
 - src/page/features/blockSourceEditor.ts
 - src/page/modules/hostRequests.ts
 tested_in_files:
+- test/integration/gridCardEditorBlur.test.ts
 - test/integration/realInput/markers.ts
 - test/page/blockReq.requirements.test.ts
 - test/page/modules/hostRequests.test.ts
@@ -36,6 +37,7 @@ tested_in_files:
 - test/page/runtimeBlockMoves.test.ts
 - test/page/runtimeEditPalette.test.ts
 - test/page/runtimeFindFromBlockEditor.test.ts
+- test/page/runtimeGridCardEditorBlur.test.ts
 - test/page/runtimePaletteActions.test.ts
 default_owner_email: gaetan@xeberon.net
 ---

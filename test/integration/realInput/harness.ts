@@ -154,6 +154,11 @@ export async function caretToEnd(page: Page): Promise<void> {
   await page.keyboard.press(process.platform === "darwin" ? "Meta+ArrowDown" : "Control+End");
 }
 
+/** Moves the caret of the focused text box to the start of its text (the mirror of `caretToEnd`). */
+export async function caretToStart(page: Page): Promise<void> {
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+ArrowUp" : "Control+Home");
+}
+
 /**
  * The selection of the focused textarea or input inside `frame`, or undefined when focus is
  * elsewhere. Read-only: it only inspects `document.activeElement`.
